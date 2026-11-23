@@ -11,8 +11,14 @@ import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { toOptionalKiStatus, type KiStatus } from '../../common/ki_lifecycle_status';
 import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../common/ki_list_sort';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import { MAX_KI_TYPE_FILTER_LENGTH } from '../../common/constants';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
-import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
+import type {
+  KiGroup,
+  KiListItem,
+  ListKiGroupsResponse,
+  ListKisResponse,
+} from '../../common/http_api/knowledge_indicators';
 
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
 /** Normalized lifecycle column: unset stored values become `active`. */
@@ -41,9 +47,57 @@ export interface GetKisOptions {
   /** When omitted, non-deleted KIs only (unset status counts as active). */
   statuses?: KiStatus[];
   sort?: KiListSort;
+  /** Leaves out KIs of these types. KIs without a type stay in. */
+  excludeTypes?: string[];
+}
+
+export interface GetKiGroupsOptions {
+  dest: AiIndexDest;
+  maxGroups: number;
+  /**
+   * When set, exactly these types are the groups (a type with no match is left out) and
+   * `maxGroups` is ignored. Lets a client keep the same groups while the search changes.
+   */
+  types?: string[];
+  /** Leaves out KIs of these types before grouping. KIs without a type stay in. */
+  excludeTypes?: string[];
+  previewSize: number;
+  query?: string;
+  statuses?: KiStatus[];
+  sort?: KiListSort;
 }
 
 const EMPTY: ListKisResponse = { kis: [], total: 0, summary: { total: 0, counts_by_type: [] } };
+const EMPTY_GROUPS: ListKiGroupsResponse = { total: 0, total_other: 0, groups: [] };
+
+const KEEP_FIELDS = [
+  '_index',
+  'id',
+  'type',
+  'title',
+  'updated_at',
+  'expires_at',
+  KI_STATUS_ALIAS,
+].join(', ');
+
+/**
+ * A type that can be a group. A longer type can't be sent back as a `type` or
+ * `exclude_types` filter, so it stays in "Other". UTF-8 bytes are never fewer than the
+ * UTF-16 units the request schema counts, so every groupable type passes that schema.
+ */
+const GROUPABLE_TYPE_CONDITION = `type IS NOT NULL AND BYTE_LENGTH(type) <= ${MAX_KI_TYPE_FILTER_LENGTH}`;
+
+const excludeTypeParam = (i: number): string => `excludeType${i}`;
+const groupTypeParam = (i: number): string => `groupType${i}`;
+
+/**
+ * KIs outside the given types. `IS NULL` keeps KIs without a type: `NOT IN` on null is null.
+ * Types longer than the filter limit are never in `excludeTypes`, so they always match.
+ */
+const otherTypesCondition = (excludeTypes: string[]): string =>
+  `(type IS NULL OR type NOT IN (${excludeTypes
+    .map((_, i) => `?${excludeTypeParam(i)}`)
+    .join(', ')}))`;
 
 const toRecords = (response: ESQLSearchResponse): Array<Record<string, unknown>> =>
   response.values.map((row) =>
@@ -58,10 +112,11 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
   const updatedAtValue = toOptionalString(updatedAt);
   const expiresAtValue = toOptionalString(expiresAt);
   const status = toOptionalKiStatus(row[KI_STATUS_ALIAS]) ?? 'active';
+  const typeValue = toOptionalString(type);
   return {
     id: String(id),
     index: String(index),
-    ...(typeof type === 'string' ? { type } : {}),
+    ...(typeValue !== undefined ? { type: typeValue } : {}),
     ...(typeof title === 'string' ? { title } : {}),
     ...(updatedAtValue !== undefined ? { updated_at: updatedAtValue } : {}),
     ...(expiresAtValue !== undefined ? { expires_at: expiresAtValue } : {}),
@@ -107,15 +162,34 @@ const searchFilterClause = (has: (field: KiListField) => boolean, query?: string
   return [`WHERE (${matches.join(' OR ')})`];
 };
 
-const listQueryParams = (type?: string, query?: string) => {
-  const params: Array<{ type: string } | { searchQuery: string }> = [];
+/** User input goes into ES|QL only as named params. */
+const listQueryParams = ({
+  type,
+  query,
+  excludeTypes = [],
+}: {
+  type?: string;
+  query?: string;
+  excludeTypes?: string[];
+}): { params?: Array<Record<string, string>> } => {
+  const params: Array<Record<string, string>> = [];
   if (type !== undefined) {
     params.push({ type });
   }
   if (query !== undefined) {
     params.push({ searchQuery: query });
   }
+  excludeTypes.forEach((excludeType, i) => params.push({ [excludeTypeParam(i)]: excludeType }));
   return params.length > 0 ? { params } : {};
+};
+
+/** The row filter of a list request, or undefined when there is none. */
+const listFilterCondition = (type?: string, excludeTypes: string[] = []): string | undefined => {
+  const conditions = [
+    ...(type !== undefined ? ['type == ?type'] : []),
+    ...(excludeTypes.length > 0 ? [otherTypesCondition(excludeTypes)] : []),
+  ];
+  return conditions.length > 0 ? conditions.join(' AND ') : undefined;
 };
 
 /** A dest value may be a comma-separated list of index expressions. */
@@ -149,12 +223,34 @@ export const probeColumns = async (
 };
 
 /**
+ * "Recently updated" order: `updated_at` (the date the UI shows), else the revision `@timestamp`.
+ * In-place edits, deletes and restores on an index dest change only `updated_at`.
+ */
+const getUpdatedSort = (
+  has: (field: KiListField) => boolean
+): { evalClauses: string[]; sortKeys: string[] } => {
+  if (has('updated_at') && has('@timestamp')) {
+    return {
+      evalClauses: ['EVAL updated_sort = COALESCE(TO_DATETIME(updated_at), revision_time)'],
+      sortKeys: ['updated_sort DESC'],
+    };
+  }
+  if (has('updated_at')) {
+    return {
+      evalClauses: ['EVAL updated_sort = TO_DATETIME(updated_at)'],
+      sortKeys: ['updated_sort DESC NULLS LAST'],
+    };
+  }
+  return { evalClauses: [], sortKeys: has('@timestamp') ? ['revision_time DESC'] : [] };
+};
+
+/**
  * A search ranks by best match first; the chosen sort only breaks score ties.
  * ES|QL sorts `text` case-sensitively, and an empty title sorts first unless nulled.
  */
 const getRowsSort = (
   sort: KiListSort,
-  hasTimestampColumn: boolean,
+  has: (field: KiListField) => boolean,
   query: string | undefined
 ): string[] => {
   const scoreKeys = query !== undefined ? ['_score DESC'] : [];
@@ -164,8 +260,8 @@ const getRowsSort = (
       `SORT ${[...scoreKeys, 'title_sort ASC NULLS LAST', 'id ASC'].join(', ')}`,
     ];
   }
-  const sortKeys = hasTimestampColumn ? ['revision_time DESC', 'id ASC'] : ['id ASC'];
-  return [`SORT ${[...scoreKeys, ...sortKeys].join(', ')}`];
+  const { evalClauses, sortKeys } = getUpdatedSort(has);
+  return [...evalClauses, `SORT ${[...scoreKeys, ...sortKeys, 'id ASC'].join(', ')}`];
 };
 
 /**
@@ -192,6 +288,15 @@ export const latestRevisionPipeline = (
   ];
 };
 
+/**
+ * One `type` per KI, so groups, type filters and "Other" agree: a multi-value type keeps its
+ * lowest value, and an empty type means no type.
+ */
+const normalizedTypeClauses = (has: (field: KiListField) => boolean): string[] =>
+  has('type')
+    ? ['EVAL type = MV_MIN(type)', 'EVAL type = CASE(type == "", NULL, type)']
+    : ['EVAL type = TO_STRING(NULL)'];
+
 /** One row per KI, filtered by status. */
 const currentKisQuery = (
   dest: AiIndexDest,
@@ -209,16 +314,28 @@ const currentKisQuery = (
     kiStatusEvalClause(has),
     ...statusFilterClause(statuses),
     ...searchFilterClause(has, query),
-    ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
+    ...normalizedTypeClauses(has),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
     ...(has('updated_at') ? [] : ['EVAL updated_at = TO_STRING(NULL)']),
     ...(has('expires_at') ? [] : ['EVAL expires_at = TO_STRING(NULL)']),
   ].join('\n| ');
 
-export const getKis = async (
+interface CurrentKisContext {
+  /** The `currentKisQuery` pipeline, ready for more commands. */
+  base: string;
+  has: (field: KiListField) => boolean;
+}
+
+/**
+ * Probes the dest columns and builds the shared base query.
+ * Undefined when no expression of the dest resolves to an index.
+ */
+const prepareCurrentKis = async (
   esClient: ElasticsearchClient,
-  { dest, size, type, query, statuses, sort = DEFAULT_KI_LIST_SORT }: GetKisOptions
-): Promise<ListKisResponse> => {
+  dest: AiIndexDest,
+  statuses?: KiStatus[],
+  query?: string
+): Promise<CurrentKisContext | undefined> => {
   // Zero-row probes resolve the mapped columns under the caller's own read privilege; an
   // expression that resolves to nothing is left out so the rest of the dest still lists.
   const expressions = destExpressions(dest.value);
@@ -230,7 +347,7 @@ export const getKis = async (
   );
   const sources = probes.filter(({ columns }) => columns !== undefined);
   if (sources.length === 0) {
-    return EMPTY;
+    return undefined;
   }
   const columns = new Set(sources.flatMap(({ columns: names }) => names ?? []));
   const has = (field: KiListField) => columns.has(field);
@@ -241,41 +358,57 @@ export const getKis = async (
     statuses,
     query
   );
-  const filterParams = listQueryParams(type, query);
-  const keepFields = [
-    '_index',
-    'id',
-    'type',
-    'title',
-    'updated_at',
-    'expires_at',
-    KI_STATUS_ALIAS,
-  ].join(', ');
+  return { base, has };
+};
 
-  const rowsSort = getRowsSort(sort, has('@timestamp'), query);
-
-  const rowsQuery = [
+const rowsQueryText = (
+  { base, has }: CurrentKisContext,
+  {
+    filter,
+    sort,
+    query,
+    size,
+  }: { filter: string | undefined; sort: KiListSort; query: string | undefined; size: number }
+): string =>
+  [
     base,
-    ...(type !== undefined ? ['WHERE type == ?type'] : []),
-    ...rowsSort,
-    `KEEP ${keepFields}`,
+    ...(filter !== undefined ? [`WHERE ${filter}`] : []),
+    ...getRowsSort(sort, has, query),
+    `KEEP ${KEEP_FIELDS}`,
     `LIMIT ${size}`,
   ].join('\n| ');
+
+const toKiListItems = (response: unknown): KiListItem[] =>
+  toRecords(response as ESQLSearchResponse).map(toKiListItem);
+
+export const getKis = async (
+  esClient: ElasticsearchClient,
+  { dest, size, type, query, statuses, sort = DEFAULT_KI_LIST_SORT, excludeTypes }: GetKisOptions
+): Promise<ListKisResponse> => {
+  const context = await prepareCurrentKis(esClient, dest, statuses, query);
+  if (context === undefined) {
+    return EMPTY;
+  }
+  const { base } = context;
+  const filter = listFilterCondition(type, excludeTypes);
+  const filterParams = listQueryParams({ type, query, excludeTypes });
+
+  const rowsQuery = rowsQueryText(context, { filter, sort, query, size });
   // Exact counts, independent of how many type buckets exist.
   const totalsQuery = [
     base,
-    type !== undefined
-      ? 'STATS total = COUNT(*), filtered = COUNT(*) WHERE type == ?type'
+    filter !== undefined
+      ? `STATS total = COUNT(*), filtered = COUNT(*) WHERE ${filter}`
       : 'STATS total = COUNT(*)',
   ].join('\n| ');
   const bucketsQuery = [
     base,
-    'WHERE type IS NOT NULL',
+    `WHERE ${GROUPABLE_TYPE_CONDITION}`,
     'STATS count = COUNT(*) BY type',
     'SORT count DESC, type ASC',
     `LIMIT ${MAX_KI_TYPE_FILTER_COUNT}`,
   ].join('\n| ');
-  const bucketsParams = listQueryParams(undefined, query);
+  const bucketsParams = listQueryParams({ query });
 
   const [rows, totals, buckets] = await Promise.all([
     size > 0 ? esClient.esql.query({ query: rowsQuery, ...filterParams }) : undefined,
@@ -285,7 +418,7 @@ export const getKis = async (
 
   const [totalRow] = toRecords(totals as unknown as ESQLSearchResponse);
   const totalAll = Number(totalRow?.total ?? 0);
-  const total = type === undefined ? totalAll : Number(totalRow?.filtered ?? 0);
+  const total = filter === undefined ? totalAll : Number(totalRow?.filtered ?? 0);
   const countsByType = takeTopKiTypeCounts(
     toRecords(buckets as unknown as ESQLSearchResponse).map((row) => ({
       type: String(row.type),
@@ -294,8 +427,88 @@ export const getKis = async (
   );
 
   return {
-    kis: rows ? toRecords(rows as unknown as ESQLSearchResponse).map(toKiListItem) : [],
+    kis: rows ? toKiListItems(rows) : [],
     total,
     summary: { total: totalAll, counts_by_type: countsByType },
   };
+};
+
+/**
+ * The biggest KI types, each with its count and its first KIs, plus the count of all other KIs.
+ * Counts come from one query, so `total` is always the sum of the group counts and
+ * `total_other`. Rows come after, so writes in between can make them differ by a few KIs.
+ */
+export const getKiGroups = async (
+  esClient: ElasticsearchClient,
+  {
+    dest,
+    maxGroups,
+    types,
+    excludeTypes = [],
+    previewSize,
+    query,
+    statuses,
+    sort = DEFAULT_KI_LIST_SORT,
+  }: GetKiGroupsOptions
+): Promise<ListKiGroupsResponse> => {
+  const context = await prepareCurrentKis(esClient, dest, statuses, query);
+  if (context === undefined) {
+    return EMPTY_GROUPS;
+  }
+  const { base } = context;
+  const fixedTypes = types !== undefined && types.length > 0 ? types : undefined;
+
+  // With fixed types only they can be a group; the rest joins the null bucket ("Other").
+  const groupCondition = fixedTypes
+    ? `${GROUPABLE_TYPE_CONDITION} AND type IN (${fixedTypes
+        .map((_, i) => `?${groupTypeParam(i)}`)
+        .join(', ')})`
+    : GROUPABLE_TYPE_CONDITION;
+  // Total and top buckets in one query. KIs that can't be a group share the null bucket,
+  // sorted last, so the total survives even when no KI has a groupable type.
+  // The excluded types are not part of this answer at all: not in the total, not in "Other".
+  // The group rows below need no such filter: an excluded type can't be a group.
+  const bucketsQuery = [
+    base,
+    ...(excludeTypes.length > 0 ? [`WHERE ${otherTypesCondition(excludeTypes)}`] : []),
+    `EVAL group_type = CASE(${groupCondition}, type, NULL)`,
+    'STATS count = COUNT(*) BY group_type',
+    'INLINE STATS total = SUM(count)',
+    'EVAL is_other = group_type IS NULL',
+    'SORT is_other ASC, count DESC, group_type ASC',
+    `LIMIT ${fixedTypes ? fixedTypes.length : maxGroups}`,
+  ].join('\n| ');
+  const bucketsParams = [
+    ...(listQueryParams({ query, excludeTypes }).params ?? []),
+    ...(fixedTypes ?? []).map((type, i) => ({ [groupTypeParam(i)]: type })),
+  ];
+  const buckets = toRecords(
+    (await esClient.esql.query({
+      query: bucketsQuery,
+      ...(bucketsParams.length > 0 ? { params: bucketsParams } : {}),
+    })) as unknown as ESQLSearchResponse
+  );
+  const total = Number(buckets[0]?.total ?? 0);
+  const groupCounts = buckets.flatMap(({ group_type: type, count }) =>
+    typeof type === 'string' ? [{ type, count: Number(count) }] : []
+  );
+  // The other KIs are the null bucket plus the types past `maxGroups`: the same KIs that
+  // `exclude_types` with the group types lists.
+  const totalOther = total - groupCounts.reduce((sum, { count }) => sum + count, 0);
+
+  const groupRows = await Promise.all(
+    groupCounts.map(({ type }) =>
+      esClient.esql.query({
+        query: rowsQueryText(context, { filter: 'type == ?type', sort, query, size: previewSize }),
+        ...listQueryParams({ type, query }),
+      })
+    )
+  );
+
+  const groups: KiGroup[] = groupCounts.map(({ type, count }, i) => ({
+    type,
+    count,
+    kis: toKiListItems(groupRows[i]),
+  }));
+  return { total, total_other: totalOther, groups };
 };

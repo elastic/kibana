@@ -13,6 +13,8 @@ import {
   getPolicyVarSettings,
   getPolicyVarSettingsUpdate,
   getReroutePermissions,
+  parseCustomFields,
+  serializeCustomFields,
   supportsPolicySetting,
 } from './policy_settings';
 
@@ -321,6 +323,132 @@ describe('policy settings', () => {
       ).toBe(false);
       expect(detectPolicySettingsDrift({ [key]: [] }, {}, 'agent_based')).toBe(false);
       expect(detectPolicySettingsDrift({ [key]: ['logs-a-default'] }, {}, 'ecf')).toBe(false);
+    });
+  });
+
+  describe('global_data_tags (custom fields, stored as JSON text)', () => {
+    const key = 'global_data_tags';
+    const fields = [
+      { name: 'team', value: 'platform' },
+      { name: 'env', value: 'prod' },
+    ];
+    const stored = serializeCustomFields(fields);
+
+    it('applies to managed integration deploys only', () => {
+      expect(supportsPolicySetting(key, 'managed_integration')).toBe(true);
+      expect(supportsPolicySetting(key, 'agent_based')).toBe(false);
+      expect(supportsPolicySetting(key, 'ecf')).toBe(false);
+    });
+
+    it('is sent to a new managed integration policy as the list Fleet takes', () => {
+      expect(getPolicySettings({ [key]: stored }, 'managed_integration')).toEqual({
+        [key]: fields,
+      });
+      expect(getPolicyVarSettings({ [key]: stored }, 'managed_integration')).toEqual({});
+    });
+
+    it('sends a value of digits only as a number, like Fleet, and keeps the stored text', () => {
+      const numeric = serializeCustomFields([
+        { name: 'priority', value: '1' },
+        { name: 'code', value: '007' },
+        { name: 'build', value: '1a' },
+        { name: 'version', value: '1.5' },
+        { name: 'neg', value: '-1' },
+      ]);
+      expect(getPolicySettings({ [key]: numeric }, 'managed_integration')).toEqual({
+        [key]: [
+          { name: 'priority', value: 1 },
+          { name: 'code', value: 7 },
+          { name: 'build', value: '1a' },
+          { name: 'version', value: '1.5' },
+          { name: 'neg', value: '-1' },
+        ],
+      });
+      expect(getPolicySettingsUpdate({ [key]: numeric }, 'managed_integration')[key]).toEqual(
+        (getPolicySettings({ [key]: numeric }, 'managed_integration') as Record<string, unknown>)[
+          key
+        ]
+      );
+      expect(compactPolicySettings({ [key]: numeric })).toEqual({ [key]: numeric });
+    });
+
+    it('keeps a number too large to hold exactly as text instead of losing digits', () => {
+      const big = '12345678901234567890';
+      expect(
+        getPolicySettings(
+          { [key]: serializeCustomFields([{ name: 'id', value: big }]) },
+          'managed_integration'
+        )
+      ).toEqual({ [key]: [{ name: 'id', value: big }] });
+    });
+
+    it('is not sent to agent-based or ECF, which would reject or ignore it', () => {
+      expect(getPolicySettings({ [key]: stored }, 'agent_based')).toEqual({});
+      expect(getPolicySettings({ [key]: stored }, 'ecf')).toEqual({});
+    });
+
+    it('trims names and values and drops blank rows', () => {
+      const messy = serializeCustomFields([
+        { name: ' team ', value: ' platform ' },
+        { name: '', value: '' },
+      ]);
+      expect(compactPolicySettings({ [key]: messy })).toEqual({
+        [key]: serializeCustomFields([{ name: 'team', value: 'platform' }]),
+      });
+    });
+
+    it('treats an empty list and only blank rows as empty', () => {
+      expect(compactPolicySettings({ [key]: '[]' })).toEqual({});
+      expect(
+        compactPolicySettings({ [key]: serializeCustomFields([{ name: ' ', value: '' }]) })
+      ).toEqual({});
+      expect(getPolicySettings({ [key]: '[]' }, 'managed_integration')).toEqual({});
+    });
+
+    it('leaves out a value that is not a list of fields, read back from the saved object', () => {
+      expect(getPolicySettings({ [key]: 'not json' }, 'managed_integration')).toEqual({});
+      expect(getPolicySettings({ [key]: '{"name":"a"}' }, 'managed_integration')).toEqual({});
+      expect(getPolicySettings({ [key]: '[{"name":"a"}]' }, 'managed_integration')).toEqual({});
+      expect(getPolicySettings({ [key]: ['a=b'] }, 'managed_integration')).toEqual({});
+    });
+
+    it('reads the fields for Step 2, and anything else as none', () => {
+      expect(parseCustomFields(stored)).toEqual(fields);
+      expect(parseCustomFields(undefined)).toEqual([]);
+      expect(parseCustomFields('not json')).toEqual([]);
+      expect(parseCustomFields('[1]')).toEqual([]);
+    });
+
+    it('clears the fields on update with an empty list', () => {
+      expect(getPolicySettingsUpdate({ [key]: '[]' }, 'managed_integration')).toEqual({
+        [key]: [],
+      });
+    });
+
+    it('sends the chosen fields on update, and leaves them alone when never set', () => {
+      expect(getPolicySettingsUpdate({ [key]: stored }, 'managed_integration')).toEqual({
+        [key]: fields,
+      });
+      expect(getPolicySettingsUpdate({}, 'managed_integration')).toEqual({});
+      expect(getPolicySettingsUpdate({ [key]: stored }, 'agent_based')).toEqual({});
+    });
+
+    it('marks the deployment dirty when only the fields changed', () => {
+      expect(detectPolicySettingsDrift({ [key]: stored }, {}, 'managed_integration')).toBe(true);
+      expect(
+        detectPolicySettingsDrift({ [key]: '[]' }, { [key]: stored }, 'managed_integration')
+      ).toBe(true);
+    });
+
+    it('does not mark it dirty for a blank row or untrimmed text, or for another method', () => {
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: serializeCustomFields([...fields, { name: '', value: '' }]) },
+          { [key]: stored },
+          'managed_integration'
+        )
+      ).toBe(false);
+      expect(detectPolicySettingsDrift({ [key]: stored }, {}, 'agent_based')).toBe(false);
     });
   });
 });

@@ -109,14 +109,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
  * alerts tagged `az:ad_correlated` or `az:ad_fp_chain`. Passes
  * `generation_source` so these attacks do not dedupe against a manual run by
  * the same user. Tags the run step's generation model calls for token-usage
- * attribution under the AlertZero parent feature.
+ * attribution under the AlertZero parent feature. Checks that the space's
+ * alerts index exists first, so a fresh space with no alerts yet is a quiet
+ * zero-batch run instead of a failed one.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 14,
+  version: 15,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'attack_discovery_batched_generation.yaml');
   },

@@ -126,4 +126,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
     defaultMessage: 'Expired and can no longer be applied',
   }),
+  readOnlyDisabledReason: i18n.translate('xpack.proposals.approvalModal.readOnlyDisabledReason', {
+    defaultMessage: "You don't have the required privileges to apply or decline proposals.",
+  }),
 });

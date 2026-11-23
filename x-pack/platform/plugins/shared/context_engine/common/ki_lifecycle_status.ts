@@ -11,6 +11,9 @@ import { KI_LIFECYCLE_STATUSES, type KiLifecycleStatus } from './step_types/ki';
 export const KI_STATUSES = [...KI_LIFECYCLE_STATUSES, 'expired'] as const;
 export type KiStatus = (typeof KI_STATUSES)[number];
 
+/** Statuses of KIs that still count as existing: everything except deleted and failed. */
+export const KI_NOT_DELETED_STATUSES: readonly KiStatus[] = ['active', 'expired'];
+
 export const isKiJsonRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 

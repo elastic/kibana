@@ -2,28 +2,15 @@
   "type": "plugin",
   "id": "@kbn/timelines-plugin",
   "owner": [
-    "@elastic/security-threat-hunting"
+    "@elastic/security-investigations"
   ],
   "group": "security",
   "visibility": "private",
   "plugin": {
     "id": "timelines",
     "browser": true,
-    "server": true,
-    "configPath": [
-      "xpack",
-      "timelines"
-    ],
-    "requiredPlugins": [
-      "alerting",
-      "cases",
-      "data",
-      "kibanaReact",
-      "kibanaUtils"
-    ],
-    "optionalPlugins": [],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "server": false,
+    "requiredPlugins": [],
+    "optionalPlugins": []
   }
 }

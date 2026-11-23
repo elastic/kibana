@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { HostWorkingDir } from './host_working_dir';
 import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
@@ -37,23 +36,23 @@ describe('HostWorkingDir', () => {
   beforeEach(() => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
-  const mount = useMountAppended();
-
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <HostWorkingDir
-        eventId={mockTimelineData[0].ecs._id}
-        scopeId="some_scope"
-        contextId="test"
-        hostName="[hostname-123]"
-        workingDirectory="[working-directory-123]"
-      />
+  test('renders both the hostname and the working directory', () => {
+    const { container } = render(
+      <TestProviders>
+        <HostWorkingDir
+          eventId={mockTimelineData[0].ecs._id}
+          scopeId="some_scope"
+          contextId="test"
+          hostName="[hostname-123]"
+          workingDirectory="[working-directory-123]"
+        />
+      </TestProviders>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toEqual('[hostname-123]in[working-directory-123]');
   });
 
   test('it renders a hostname without a workingDirectory', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <div>
           <HostWorkingDir
@@ -67,11 +66,11 @@ describe('HostWorkingDir', () => {
       </TestProviders>
     );
 
-    expect(wrapper.text()).toEqual('[hostname-123]');
+    expect(container.textContent).toEqual('[hostname-123]');
   });
 
   test('it renders a hostname with a workingDirectory set to null', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <div>
           <HostWorkingDir
@@ -85,11 +84,11 @@ describe('HostWorkingDir', () => {
       </TestProviders>
     );
 
-    expect(wrapper.text()).toEqual('[hostname-123]');
+    expect(container.textContent).toEqual('[hostname-123]');
   });
 
   test('it renders a a workingDirectory without a hostname with words "in" at the beginning', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <div>
           <HostWorkingDir
@@ -103,11 +102,11 @@ describe('HostWorkingDir', () => {
       </TestProviders>
     );
 
-    expect(wrapper.text()).toEqual('in[working-directory-123]');
+    expect(container.textContent).toEqual('in[working-directory-123]');
   });
 
   test('it renders a a workingDirectory with hostname set to null with words "in" at the beginning', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <div>
           <HostWorkingDir
@@ -121,11 +120,11 @@ describe('HostWorkingDir', () => {
       </TestProviders>
     );
 
-    expect(wrapper.text()).toEqual('in[working-directory-123]');
+    expect(container.textContent).toEqual('in[working-directory-123]');
   });
 
   test('should passing correct scopeId to cell actions', () => {
-    mount(
+    render(
       <TestProviders>
         <div>
           <HostWorkingDir

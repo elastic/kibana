@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { buildSlackThreadUrl } from '@kbn/connector-specs';
 import {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
   INVESTIGATION_SUBJECT_TYPES,
@@ -69,6 +70,13 @@ export const workflowSubjectInputsSchema = z
 const truncateSummary = (summary: string | undefined): string | undefined =>
   summary ? summary.slice(0, MAX_EVIDENCE_TEXT_LENGTH) : undefined;
 
+export const toSlackThreadPermalink = (
+  thread: Parameters<typeof buildSlackThreadUrl>[0]
+): string | undefined => {
+  const permalink = buildSlackThreadUrl(thread);
+  return permalink.length <= MAX_SLACK_PERMALINK_LENGTH ? permalink : undefined;
+};
+
 /** True for the placeholder a manual investigation carries when the caller names no subject id. */
 const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'type' | 'id'>) =>
   type === 'manual' && id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
@@ -86,7 +94,9 @@ const withSlackThread = ({
     return { primary, thread: [] };
   }
   const id = toSlackThreadSubjectId(slackThread);
-  const slack = { channel: slackThread.channel, thread_ts: slackThread.thread_ts };
+  const { workspace, channel, thread_ts: threadTs } = slackThread;
+  const permalink = toSlackThreadPermalink({ workspace, channel, threadTs });
+  const slack = { channel, thread_ts: threadTs, ...(permalink && { permalink }) };
   if (primary.type === 'slack_thread' && primary.id === id) {
     return { primary: { ...primary, slack }, thread: [] };
   }

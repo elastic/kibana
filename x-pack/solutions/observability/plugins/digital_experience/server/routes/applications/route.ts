@@ -16,8 +16,11 @@ import type { ApmIndices } from './classic/create_apm_event_client';
 import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
 import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
+import { getMobileApplications } from './mobile/get_mobile_applications';
+import { getHistogramInterval } from '../../lib/helpers/time_series';
+import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import { timeRangeQuery } from '../params';
+import { START_AFTER_END_ISSUE, isStartBeforeEnd, timeRangeShape, timeZoneShape } from '../params';
 
 export const APPLICATIONS_ENDPOINT = 'GET /internal/digital_experience/applications';
 
@@ -28,7 +31,13 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
   security: {
     authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read, APM_API_PRIVILEGE] },
   },
-  params: lazySchema(() => z.object({ query: timeRangeQuery() })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({ ...timeRangeShape(), ...timeZoneShape() })
+        .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
+    })
+  ),
   handler: async ({
     params,
     context,
@@ -36,11 +45,15 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     plugins,
     isServerless,
     isUxEnabled,
+    sessionsSettings,
+    getSessionsServices,
     logger,
   }): Promise<ApplicationsResponse> => {
-    const { environment } = params.query;
+    const { environment, timeZone } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
+    // The same buckets for every source and the response, which the chart reads them from.
+    const histogram = { interval: getHistogramInterval(start, end), timeZone };
 
     const { elasticsearch, savedObjects, uiSettings } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
@@ -73,6 +86,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
             start,
             end,
             environment,
+            histogram,
           })
       : undefined;
 
@@ -92,26 +106,49 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
           })
       : undefined;
 
+    let otelAccessPromise: Promise<boolean> | undefined;
+    const hasPartialOtelIndicesAccess = () => {
+      otelAccessPromise ??= hasPartialReadAccess({
+        esClient,
+        internalEsClient,
+        getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+        signal,
+        logger,
+      });
+      return otelAccessPromise;
+    };
+
+    const { taskManager, sessionsReadable } = await getSessionsServices();
     return getApplications({
+      histogram: { interval: histogram.interval, start, end },
       getOtelApplications: () =>
         getOtelApplicationsFromBestSource({
           esClient,
-          internalEsClient,
+          taskManager,
+          sessionsSettings,
+          sessionsReadable,
           start,
           end,
           environment,
+          histogram,
           signal,
           logger,
         }),
       getClassicApplications: getClassic,
-      hasPartialOtelAccess: () =>
-        hasPartialReadAccess({
-          esClient,
-          internalEsClient,
-          getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
-          signal,
-          logger,
+      getMobileApplications: () =>
+        getMobileApplications({
+          esClient: createDigitalExperienceTracedEsClient({
+            client: esClient,
+            logger,
+            abortSignal: signal,
+          }),
+          start,
+          end,
+          environment,
         }),
+      hasPartialOtelAccess: hasPartialOtelIndicesAccess,
+      // Mobile reads the same OTel indices, so it shares their one check.
+      hasPartialMobileAccess: hasPartialOtelIndicesAccess,
       hasPartialClassicAccess,
       logger,
     });

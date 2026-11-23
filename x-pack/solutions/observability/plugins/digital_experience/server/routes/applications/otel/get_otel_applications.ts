@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { toTimeSeries } from '../../../lib/helpers/time_series';
 import { pickerEnvironments } from '../../../lib/otel/environments';
 import { SEARCH_SPAN_NAMES } from '../constants';
-import type { SourceApplications } from '../types';
+import type { WebSourceApplications } from '../types';
 import type { SearchParams, SpansSearchParams } from './search_requests';
 import { logsSearch, spansSearch } from './search_requests';
 import type { LogsAggregations, SpansAggregations } from './search_responses';
@@ -39,7 +39,7 @@ const searchOtelApplications = async ({
   esClient,
   signal,
   ...searchParams
-}: GetOtelApplicationsParams): Promise<SourceApplications> => {
+}: GetOtelApplicationsParams): Promise<WebSourceApplications> => {
   // Not in parallel: each search caps its applications, so the spans search reads only the ones the
   // logs search kept, or an application past the spans' cap would show no HTTP requests.
   const logsResponse = await esClient.search(logsSearch(searchParams), { signal });
@@ -70,6 +70,6 @@ const searchOtelApplications = async ({
 /** EDOT Browser applications (`telemetry.sdk.language: webjs`) with their metrics. */
 export const getOtelApplications = (
   params: GetOtelApplicationsParams
-): Promise<SourceApplications> =>
+): Promise<WebSourceApplications> =>
   // Traced like the Classic searches, which APMEventClient wraps in a span.
   withSpan(SEARCH_SPAN_NAMES.otel, () => searchOtelApplications(params));

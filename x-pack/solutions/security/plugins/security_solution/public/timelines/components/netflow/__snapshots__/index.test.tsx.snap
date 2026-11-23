@@ -2,25 +2,7 @@
 
 exports[`Netflow renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c3 {
-  margin-right: 5px;
-}
-
-.c2 {
-  margin-right: 5px;
-}
-
-.c1 {
-  margin-right: 3px;
-  position: relative;
-  top: -1px;
-}
-
-.c0 {
-  margin-right: 10px;
-}
-
-<div
+  <div
     class="euiFlexGroup emotion-euiFlexGroup-wrap-none-center-center-column"
     data-test-subj="netflow-rows"
   >
@@ -32,7 +14,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
         data-test-subj="netflow-columns"
       >
         <div
-          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+          class="euiFlexItem exrv9020 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -123,7 +105,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+          class="euiFlexItem exrv9020 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -146,7 +128,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c1"
+                        class="css-8e460u-TimeIcon e1w3gexs0"
                         data-euiicon-type="clock"
                       />
                       <span
@@ -181,7 +163,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c1"
+                        class="css-8e460u-TimeIcon e1w3gexs0"
                         data-euiicon-type="clock"
                       />
                       <span
@@ -212,7 +194,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c1"
+                        class="css-8e460u-TimeIcon e1w3gexs0"
                         data-euiicon-type="clock"
                       />
                       <span
@@ -1269,7 +1251,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c2"
+                          class="css-3esyjx-Ja3FingerprintLabel e15wdmre0"
                         >
                           ja3
                         </span>
@@ -1333,7 +1315,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c3"
+                          class="css-zjolvq-FingerprintLabel e18pxs070"
                         >
                           client cert
                         </span>
@@ -1397,7 +1379,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c3"
+                          class="css-zjolvq-FingerprintLabel e18pxs070"
                         >
                           server cert
                         </span>

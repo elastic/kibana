@@ -39,6 +39,7 @@ import { cloneActionIcon, deleteActionIcon } from '../action_menu_icons';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { NIGHTSHIFT_APP_ROUTE } from '../../../../common/constants';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useAllRelayAppBindings } from '../../../data/relay_apps/use_relay_app_bindings';
 import { useRuleCatalog } from '../../../data/rules/use_rule_catalog';
 import { AutomationFormBody } from '../flyouts/form/automation_form_body';
 import {
@@ -61,6 +62,7 @@ import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
   useAutomationRunsInRange,
+  useAutomationsRunCounts,
   useAutomationDetail,
   useAutomationRunActivity,
   useToggleAutomation,
@@ -73,9 +75,11 @@ import { useGlobalLimit } from '../hooks/use_global_limit';
 import { AutomationUsageCell } from '../list/cells/usage_cell';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
 import { AutomationWorkflowWarning, getWorkflowRepairDisabledReason } from '../workflow_recovery';
+import { getUnconnectedSlackChannels } from '../utils/unconnected_slack_channels';
 import { InfoStrip } from './info_strip';
 import { RunHistory, STATUSES, type Run } from './run_history';
 import { RunDetail } from './run_detail';
+import { UnconnectedSlackChannelsCallout } from './unconnected_slack_channels_callout';
 
 const labels = {
   title: i18n.translate('xpack.nightshift.automations.detail.title', {
@@ -228,41 +232,47 @@ export const AutomationDetailFlyout = ({
     runRange.startedAfter,
     runRange.startedBefore
   );
-  const runs = (runsQuery.data?.runs ?? []) as Run[];
-  const skippedRuns = runs.filter(({ status }) => status === 'skipped').length;
-  const startedRuns = (runsQuery.data?.total ?? 0) - skippedRuns;
+  const runs = runsQuery.runs as Run[];
+  const runCounts = useAutomationsRunCounts(
+    [automation.id],
+    runRange.startedAfter,
+    runRange.startedBefore
+  )?.[automation.id];
+  const startedRuns = runCounts && runCounts.succeeded + runCounts.running + runCounts.failed;
   const dailyLimit = automation.runtime.dailyDispatchLimit;
   const currentIndex = automations.findIndex(({ id: rowId }) => rowId === automation.id);
   const isInList = currentIndex !== -1;
   const previous = isInList ? automations[currentIndex - 1] : undefined;
   const next = isInList ? automations[currentIndex + 1] : undefined;
-  const runCount = (status: Run['status']) => runs.filter((run) => run.status === status).length;
-  const runsTooltip = i18n.translate('xpack.nightshift.automations.detail.runsTooltip', {
-    defaultMessage: '{counts} in {range}',
-    values: {
-      counts:
-        [
-          runCount('succeeded') > 0 &&
-            i18n.translate('xpack.nightshift.automations.detail.successfulCount', {
-              defaultMessage: '{count} successful',
-              values: { count: runCount('succeeded') },
-            }),
-          runCount('running') > 0 &&
-            i18n.translate('xpack.nightshift.automations.detail.runningCount', {
-              defaultMessage: '{count} running',
-              values: { count: runCount('running') },
-            }),
-          runCount('failed') > 0 &&
-            i18n.translate('xpack.nightshift.automations.detail.failedCount', {
-              defaultMessage: '{count} failed',
-              values: { count: runCount('failed') },
-            }),
-        ]
-          .filter(Boolean)
-          .join(' · ') || '0',
-      range: rangeLabel,
-    },
-  });
+  const runCount = (status: Run['status']) => runCounts?.[status] ?? 0;
+  const runsTooltip = !runCounts
+    ? undefined
+    : i18n.translate('xpack.nightshift.automations.detail.runsTooltip', {
+        defaultMessage: '{counts} in {range}',
+        values: {
+          counts:
+            [
+              runCount('succeeded') > 0 &&
+                i18n.translate('xpack.nightshift.automations.detail.successfulCount', {
+                  defaultMessage: '{count} successful',
+                  values: { count: runCount('succeeded') },
+                }),
+              runCount('running') > 0 &&
+                i18n.translate('xpack.nightshift.automations.detail.runningCount', {
+                  defaultMessage: '{count} running',
+                  values: { count: runCount('running') },
+                }),
+              runCount('failed') > 0 &&
+                i18n.translate('xpack.nightshift.automations.detail.failedCount', {
+                  defaultMessage: '{count} failed',
+                  values: { count: runCount('failed') },
+                }),
+            ]
+              .filter(Boolean)
+              .join(' · ') || '0',
+          range: rangeLabel,
+        },
+      });
 
   const navigate = (path: string) => {
     if (embedded) {
@@ -364,6 +374,12 @@ export const AutomationDetailFlyout = ({
       { onSuccess: () => setIsEditing(false) }
     );
   };
+
+  const connectedChannels = useAllRelayAppBindings();
+  const unconnectedSlackChannels = getUnconnectedSlackChannels(
+    automation.trigger.rows,
+    connectedChannels
+  );
 
   const workflowWarning = (
     <AutomationWorkflowWarning
@@ -536,7 +552,7 @@ export const AutomationDetailFlyout = ({
                         value: (
                           <div css={{ inlineSize: '100%' }}>
                             {startedRuns}
-                            {startedRuns > 0 && (
+                            {startedRuns !== undefined && startedRuns > 0 && (
                               <RunsSparkline
                                 runs={runs}
                                 startedAfter={runRange.startedAfter}
@@ -605,7 +621,10 @@ export const AutomationDetailFlyout = ({
                     key={initialRunFilter}
                     initialFilter={initialRunFilter}
                     runs={runs}
+                    runCounts={runCounts}
                     isLoading={runsQuery.isLoading}
+                    isError={runsQuery.isError}
+                    onRetry={runsQuery.retry}
                     startedAfter={runRange.startedAfter}
                     startedBefore={runRange.startedBefore}
                     rangeLabel={rangeLabel}
@@ -614,6 +633,9 @@ export const AutomationDetailFlyout = ({
                   />
                 ) : (
                   <>
+                    {unconnectedSlackChannels.length > 0 && (
+                      <UnconnectedSlackChannelsCallout channels={unconnectedSlackChannels} />
+                    )}
                     {automation.description?.trim() && (
                       <FormSection>
                         <SectionHeader title={labels.description} />

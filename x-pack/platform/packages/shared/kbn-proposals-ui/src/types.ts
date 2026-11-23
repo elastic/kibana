@@ -21,6 +21,7 @@ export interface ApprovalAction {
   fill?: boolean;
   isDisabled?: boolean;
   isLoading?: boolean;
+  disabledReason?: string;
   'data-test-subj'?: string;
 }
 

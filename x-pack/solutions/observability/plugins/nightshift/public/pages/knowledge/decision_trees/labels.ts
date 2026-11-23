@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DecisionNodeType, LearningKind } from '@kbn/nightshift-decision-trees';
+import type {
+  DecisionNodeType,
+  LearningKind,
+  SystemLearningCategory,
+  ToolLearningCategory,
+} from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeStatus } from './types';
 
 const STATUS_LABELS: Record<DecisionTreeStatus, string> = {
@@ -57,3 +62,79 @@ const LEARNING_KIND_LABELS: Record<LearningKind, string> = {
 
 export const getLearningKindLabel = (kind: LearningKind): string =>
   LEARNING_KIND_LABELS[kind] ?? kind;
+
+const LEARNING_CATEGORY_LABELS: Record<SystemLearningCategory | ToolLearningCategory, string> = {
+  architecture: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.learningCategory.architecture',
+    {
+      defaultMessage: 'Architecture',
+    }
+  ),
+  dependency: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.learningCategory.dependency',
+    {
+      defaultMessage: 'Dependency',
+    }
+  ),
+  relationship: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.learningCategory.relationship',
+    {
+      defaultMessage: 'Relationship',
+    }
+  ),
+  runtime_behavior: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.learningCategory.runtimeBehavior',
+    {
+      defaultMessage: 'Runtime behavior',
+    }
+  ),
+  data_flow: i18n.translate('xpack.nightshift.knowledge.decisionTrees.learningCategory.dataFlow', {
+    defaultMessage: 'Data flow',
+  }),
+  ownership: i18n.translate('xpack.nightshift.knowledge.decisionTrees.learningCategory.ownership', {
+    defaultMessage: 'Ownership',
+  }),
+  invariant: i18n.translate('xpack.nightshift.knowledge.decisionTrees.learningCategory.invariant', {
+    defaultMessage: 'Invariant',
+  }),
+  error: i18n.translate('xpack.nightshift.knowledge.decisionTrees.learningCategory.error', {
+    defaultMessage: 'Error',
+  }),
+  capability: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.learningCategory.capability',
+    {
+      defaultMessage: 'Capability',
+    }
+  ),
+  limitation: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.learningCategory.limitation',
+    {
+      defaultMessage: 'Limitation',
+    }
+  ),
+  usage_pattern: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.learningCategory.usagePattern',
+    {
+      defaultMessage: 'Usage pattern',
+    }
+  ),
+  tool_selection: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.learningCategory.toolSelection',
+    {
+      defaultMessage: 'Tool selection',
+    }
+  ),
+  query_pattern: i18n.translate(
+    'xpack.nightshift.knowledge.decisionTrees.learningCategory.queryPattern',
+    {
+      defaultMessage: 'Query pattern',
+    }
+  ),
+  docs_gap: i18n.translate('xpack.nightshift.knowledge.decisionTrees.learningCategory.docsGap', {
+    defaultMessage: 'Docs gap',
+  }),
+};
+
+export const getLearningCategoryLabel = (
+  category: SystemLearningCategory | ToolLearningCategory
+): string => LEARNING_CATEGORY_LABELS[category] ?? category;

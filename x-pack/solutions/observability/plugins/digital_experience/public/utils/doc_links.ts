@@ -5,5 +5,10 @@
  * 2.0.
  */
 
+export const EDOT_ANDROID_DOCS_URL =
+  'https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/android';
+export const EDOT_IOS_DOCS_URL =
+  'https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/ios';
+
 export const EDOT_BROWSER_DOCS_URL =
   'https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/browser';

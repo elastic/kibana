@@ -22,7 +22,7 @@ export const ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW = {
   id: ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'action_install_prebuilt_rule.yaml');
   },

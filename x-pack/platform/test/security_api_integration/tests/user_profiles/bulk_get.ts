@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set('Cookie', usersSessions.get(`user_${userPrefix}`)!.cookie.cookieString())
             .send({
               avatar: {
-                initials: `some-initials-${userPrefix}`,
+                initials: userPrefix.slice(0, 2),
                 color: `#f3f3f3`,
               },
               userSettings: { darkMode: `dark`, contrastMode: `high` },
@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
               "avatar": Object {
                 "color": "#f3f3f3",
                 "imageUrl": null,
-                "initials": "some-initials-one",
+                "initials": "on",
               },
             },
             "user": Object {
@@ -180,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
               "avatar": Object {
                 "color": "#f3f3f3",
                 "imageUrl": null,
-                "initials": "some-initials-two",
+                "initials": "tw",
               },
             },
             "user": Object {
