@@ -9,11 +9,9 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemo } from 'react';
 
-const KI_GRAPH_NARROW_BREAKPOINT = '1100px';
-const narrowMedia = `@media (max-width: ${KI_GRAPH_NARROW_BREAKPOINT})`;
-
-const KI_GRAPH_CANVAS_HEIGHT = 'calc(100vh - 300px)';
-const KI_GRAPH_CANVAS_MIN_HEIGHT = '420px';
+/** Viewport minus fixed chrome (nav, subpage header, tabs), framed app gap and section padding. */
+const KI_GRAPH_PANEL_HEIGHT = 'calc(100vh - var(--euiFixedHeadersOffset, 0px) - 14.25rem)';
+const KI_GRAPH_CANVAS_MIN_HEIGHT = 'min(480px, 55vh)';
 
 export const useKiGraphStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -23,24 +21,17 @@ export const useKiGraphStyles = () => {
       panel: css({
         borderRadius: euiTheme.border.radius.panel,
       }),
-      split: css({
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) minmax(300px, 380px)',
-        gap: euiTheme.size.base,
-        alignItems: 'start',
-        marginTop: euiTheme.size.m,
-        [narrowMedia]: {
-          gridTemplateColumns: 'minmax(0, 1fr)',
-        },
-      }),
-      canvasColumn: css({
-        minWidth: 0,
+      panelFill: css({
+        display: 'flex',
+        flexDirection: 'column',
+        height: KI_GRAPH_PANEL_HEIGHT,
+        minHeight: KI_GRAPH_CANVAS_MIN_HEIGHT,
       }),
       canvasShell: css({
         position: 'relative',
+        flex: 1,
+        minHeight: 0,
         width: '100%',
-        height: KI_GRAPH_CANVAS_HEIGHT,
-        minHeight: KI_GRAPH_CANVAS_MIN_HEIGHT,
         background: euiTheme.colors.backgroundBaseSubdued,
         border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
         borderRadius: euiTheme.border.radius.panel,
@@ -55,22 +46,15 @@ export const useKiGraphStyles = () => {
         width: '100%',
         height: '100%',
       }),
-      viewerColumn: css({
-        position: 'sticky',
-        top: `calc(var(--euiFixedHeadersOffset, 0px) + ${euiTheme.size.base})`,
-        minWidth: 0,
-        [narrowMedia]: {
-          position: 'static',
-          order: -1,
-        },
-      }),
       skeleton: css({
         width: '100%',
-        height: KI_GRAPH_CANVAS_HEIGHT,
-        minHeight: KI_GRAPH_CANVAS_MIN_HEIGHT,
+        flex: 1,
+        minHeight: 0,
       }),
       truncatedCallout: css({
-        marginBottom: euiTheme.size.m,
+        flexShrink: 0,
+        padding: euiTheme.size.m,
+        paddingBottom: 0,
       }),
     }),
     [euiTheme]

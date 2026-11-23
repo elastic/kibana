@@ -8,19 +8,19 @@
 import type { ForceLayoutEdge, ForceLayoutNode } from './force_layout';
 import { forceLayout } from './force_layout';
 
-const NODE_W = 200;
-const NODE_H = 56;
+const GLYPH_R = 14;
+const HUB_R = 22;
 
-const buildStarGraph = (): { nodes: ForceLayoutNode[]; edges: ForceLayoutEdge[] } => {
+const buildMultiHubStarGraph = (): { nodes: ForceLayoutNode[]; edges: ForceLayoutEdge[] } => {
   const nodes: ForceLayoutNode[] = [];
   const edges: ForceLayoutEdge[] = [];
 
   for (let h = 0; h < 5; h++) {
     const hubId = `hub-${h}`;
-    nodes.push({ id: hubId, width: NODE_W, height: NODE_H });
+    nodes.push({ id: hubId, radius: HUB_R });
     for (let l = 0; l < 11; l++) {
       const leafId = `${hubId}-leaf-${l}`;
-      nodes.push({ id: leafId, width: NODE_W, height: NODE_H });
+      nodes.push({ id: leafId, radius: GLYPH_R });
       edges.push({ source: hubId, target: leafId });
     }
   }
@@ -31,7 +31,22 @@ const buildStarGraph = (): { nodes: ForceLayoutNode[]; edges: ForceLayoutEdge[] 
   return { nodes, edges };
 };
 
-const boxesOverlap = (
+const buildSingleStar = (
+  leafCount: number
+): { nodes: ForceLayoutNode[]; edges: ForceLayoutEdge[] } => {
+  const nodes: ForceLayoutNode[] = [{ id: 'hub', radius: HUB_R }];
+  const edges: ForceLayoutEdge[] = [];
+  for (let i = 0; i < leafCount; i++) {
+    const leafId = `leaf-${i}`;
+    nodes.push({ id: leafId, radius: GLYPH_R });
+    edges.push({ source: 'hub', target: leafId });
+  }
+  return { nodes, edges };
+};
+
+const OVERLAP_TOLERANCE = 1;
+
+const circlesOverlap = (
   positions: ReadonlyMap<string, { x: number; y: number }>,
   nodes: readonly ForceLayoutNode[]
 ): boolean => {
@@ -47,40 +62,14 @@ const boxesOverlap = (
       if (posB === undefined) {
         return true;
       }
-      const overlapX =
-        posA.x < posB.x + b.width &&
-        posA.x + a.width > posB.x &&
-        posA.y < posB.y + b.height &&
-        posA.y + a.height > posB.y;
-      if (overlapX) {
+      const dist = Math.hypot(posA.x - posB.x, posA.y - posB.y);
+      const minDist = a.radius + b.radius - OVERLAP_TOLERANCE;
+      if (dist < minDist) {
         return true;
       }
     }
   }
   return false;
-};
-
-const layoutExtents = (
-  positions: ReadonlyMap<string, { x: number; y: number }>,
-  nodes: readonly ForceLayoutNode[]
-): { width: number; height: number } => {
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-
-  for (const node of nodes) {
-    const pos = positions.get(node.id);
-    if (pos === undefined) {
-      continue;
-    }
-    minX = Math.min(minX, pos.x);
-    minY = Math.min(minY, pos.y);
-    maxX = Math.max(maxX, pos.x + node.width);
-    maxY = Math.max(maxY, pos.y + node.height);
-  }
-
-  return { width: maxX - minX, height: maxY - minY };
 };
 
 const allFinite = (positions: ReadonlyMap<string, { x: number; y: number }>): boolean => {
@@ -101,11 +90,36 @@ const createLcg = (seed: number): (() => number) => {
   };
 };
 
+const buildRandomGraph = (
+  nodeCount: number,
+  seed: number
+): { nodes: ForceLayoutNode[]; edges: ForceLayoutEdge[] } => {
+  const rand = createLcg(seed);
+  const nodes: ForceLayoutNode[] = [];
+  const edges: ForceLayoutEdge[] = [];
+
+  for (let i = 0; i < nodeCount; i++) {
+    const isHub = rand() < 0.12;
+    nodes.push({ id: `n-${i}`, radius: isHub ? HUB_R : GLYPH_R });
+  }
+
+  for (let i = 0; i < nodeCount; i++) {
+    const hub = Math.floor(rand() * Math.min(20, nodeCount));
+    edges.push({ source: `n-${hub}`, target: `n-${i}` });
+    if (i > 0) {
+      const other = Math.floor(rand() * i);
+      edges.push({ source: `n-${other}`, target: `n-${i}` });
+    }
+  }
+
+  return { nodes, edges };
+};
+
 describe('forceLayout', () => {
   it('returns empty for no nodes and places a single node finitely', () => {
     expect(forceLayout([], [])).toEqual(new Map());
 
-    const single = forceLayout([{ id: 'only', width: NODE_W, height: NODE_H }], []);
+    const single = forceLayout([{ id: 'only', radius: GLYPH_R }], []);
     expect(single.size).toBe(1);
     const pos = single.get('only');
     expect(pos).toBeDefined();
@@ -114,22 +128,90 @@ describe('forceLayout', () => {
   });
 
   it('is deterministic for identical input', () => {
-    const { nodes, edges } = buildStarGraph();
+    const { nodes, edges } = buildMultiHubStarGraph();
     const first = forceLayout(nodes, edges);
     const second = forceLayout(nodes, edges);
     expect(second).toEqual(first);
   });
 
-  it('avoids overlap and forms a wide blob for the star graph', () => {
-    const { nodes, edges } = buildStarGraph();
+  it('ignores self loops and edges to unknown nodes', () => {
+    const nodes: ForceLayoutNode[] = [
+      { id: 'a', radius: GLYPH_R },
+      { id: 'b', radius: GLYPH_R },
+    ];
+    const edges: ForceLayoutEdge[] = [
+      { source: 'a', target: 'a' },
+      { source: 'a', target: 'missing' },
+      { source: 'a', target: 'b' },
+    ];
+    const positions = forceLayout(nodes, edges);
+    expect(positions.size).toBe(2);
+    expect(allFinite(positions)).toBe(true);
+    expect(circlesOverlap(positions, nodes)).toBe(false);
+  });
+
+  it('avoids circle overlap on the multi-hub star graph', () => {
+    const { nodes, edges } = buildMultiHubStarGraph();
     const positions = forceLayout(nodes, edges);
 
     expect(positions.size).toBe(60);
     expect(allFinite(positions)).toBe(true);
-    expect(boxesOverlap(positions, nodes)).toBe(false);
+    expect(circlesOverlap(positions, nodes)).toBe(false);
+  });
 
-    const { width, height } = layoutExtents(positions, nodes);
-    expect(width).toBeGreaterThan(height);
+  it('avoids circle overlap on a 20-leaf star', () => {
+    const { nodes, edges } = buildSingleStar(20);
+    const positions = forceLayout(nodes, edges);
+
+    expect(positions.size).toBe(21);
+    expect(circlesOverlap(positions, nodes)).toBe(false);
+  });
+
+  it('avoids circle overlap on a 60-node random graph', () => {
+    const { nodes, edges } = buildRandomGraph(60, 7);
+    const positions = forceLayout(nodes, edges);
+
+    expect(positions.size).toBe(60);
+    expect(circlesOverlap(positions, nodes)).toBe(false);
+  });
+
+  it('places the hub near the centroid of its leaves', () => {
+    const { nodes, edges } = buildSingleStar(18);
+    const positions = forceLayout(nodes, edges);
+
+    const hubPos = positions.get('hub');
+    expect(hubPos).toBeDefined();
+    if (hubPos === undefined) {
+      return;
+    }
+
+    let leafCx = 0;
+    let leafCy = 0;
+    let leafCount = 0;
+    let sumLeafToHub = 0;
+
+    for (const node of nodes) {
+      if (node.id === 'hub') {
+        continue;
+      }
+      const pos = positions.get(node.id);
+      if (pos === undefined) {
+        continue;
+      }
+      leafCx += pos.x;
+      leafCy += pos.y;
+      leafCount += 1;
+      sumLeafToHub += Math.hypot(pos.x - hubPos.x, pos.y - hubPos.y);
+    }
+
+    expect(leafCount).toBe(18);
+    leafCx /= leafCount;
+    leafCy /= leafCount;
+
+    const hubToCentroid = Math.hypot(hubPos.x - leafCx, hubPos.y - leafCy);
+    const avgLeafToHub = sumLeafToHub / leafCount;
+
+    expect(hubToCentroid).toBeLessThan(avgLeafToHub);
   });
 
   it('lays out 1000 nodes within time budget with finite coordinates', () => {
@@ -138,7 +220,7 @@ describe('forceLayout', () => {
     const edges: ForceLayoutEdge[] = [];
 
     for (let i = 0; i < 1000; i++) {
-      nodes.push({ id: `n-${i}`, width: NODE_W, height: NODE_H });
+      nodes.push({ id: `n-${i}`, radius: GLYPH_R });
     }
 
     for (let i = 0; i < 1000; i++) {

@@ -7,8 +7,7 @@
 
 export interface ForceLayoutNode {
   id: string;
-  width: number;
-  height: number;
+  radius: number;
 }
 
 export interface ForceLayoutEdge {
@@ -22,21 +21,18 @@ export interface ForcePosition {
 }
 
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
-const REPULSE_STRENGTH = 22_000;
-const REPULSE_MAX_DIST = 420;
+const REPULSE_STRENGTH = 2400;
+const REPULSE_MAX_DIST = 220;
 const MIN_DIST = 4;
 const SPRING_STRENGTH = 0.08;
-const REST_LENGTH_FACTOR = 1.5;
-const GRAVITY_X = 0.01;
-const GRAVITY_Y = 0.02;
-const BLOB_X_SCALE = 1.34;
-const BLOB_Y_SCALE = 0.74;
+const REST_BASE = 58;
+const REST_PER_DEGREE = 5;
+const GRAVITY = 0.012;
 const DAMPING = 0.85;
 const ALPHA_START = 1;
 const ALPHA_MIN = 0.002;
-const OVERLAP_ITERATIONS = 50;
-const ROUNDED_OVERLAP_ITERATIONS = 120;
-const OVERLAP_GAP = 16;
+const COLLISION_GAP = 6;
+const COLLISION_ITERATIONS = 50;
 const GRID_BUCKET_THRESHOLD = 400;
 const GRID_CELL_SIZE = REPULSE_MAX_DIST;
 
@@ -46,16 +42,15 @@ const clamp = (value: number, min: number, max: number): number =>
 const simulationIterations = (nodeCount: number): number =>
   clamp(300 - Math.floor(nodeCount / 4), 80, 300);
 
-const diagonal = (width: number, height: number): number => Math.hypot(width, height);
-
-const restLength = (widthA: number, heightA: number, widthB: number, heightB: number): number => {
-  const diagRest =
-    ((diagonal(widthA, heightA) + diagonal(widthB, heightB)) / 2) * REST_LENGTH_FACTOR;
-  const clearance = Math.max(
-    (widthA + widthB) / 2 + OVERLAP_GAP,
-    (heightA + heightB) / 2 + OVERLAP_GAP
-  );
-  return Math.max(diagRest, clearance * 1.8);
+const edgeRestLength = (
+  radiusA: number,
+  radiusB: number,
+  degreeA: number,
+  degreeB: number
+): number => {
+  const degreeRest = REST_BASE + Math.min(degreeA, degreeB) * REST_PER_DEGREE;
+  const clearance = radiusA + radiusB + COLLISION_GAP;
+  return Math.max(degreeRest, clearance);
 };
 
 const cellKey = (cellX: number, cellY: number): string => `${cellX},${cellY}`;
@@ -63,8 +58,7 @@ const cellKey = (cellX: number, cellY: number): string => `${cellX},${cellY}`;
 interface IndexedGraph {
   readonly ids: readonly string[];
   readonly indexById: ReadonlyMap<string, number>;
-  readonly widths: Float64Array;
-  readonly heights: Float64Array;
+  readonly radii: Float64Array;
   readonly edges: ReadonlyArray<{ readonly source: number; readonly target: number }>;
   readonly degrees: Uint32Array;
 }
@@ -75,15 +69,13 @@ const buildGraph = (
 ): IndexedGraph => {
   const indexById = new Map<string, number>();
   const ids: string[] = [];
-  const widths = new Float64Array(nodes.length);
-  const heights = new Float64Array(nodes.length);
+  const radii = new Float64Array(nodes.length);
 
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     indexById.set(node.id, i);
     ids.push(node.id);
-    widths[i] = node.width;
-    heights[i] = node.height;
+    radii[i] = node.radius;
   }
 
   const degrees = new Uint32Array(nodes.length);
@@ -111,14 +103,13 @@ const buildGraph = (
     degrees[target] += 1;
   }
 
-  return { ids, indexById, widths, heights, edges: indexedEdges, degrees };
+  return { ids, indexById, radii, edges: indexedEdges, degrees };
 };
 
 const seedPositions = (
   count: number,
   degrees: Uint32Array,
-  widths: Float64Array,
-  heights: Float64Array,
+  radii: Float64Array,
   cx: Float64Array,
   cy: Float64Array
 ): void => {
@@ -134,12 +125,12 @@ const seedPositions = (
     return a - b;
   });
 
-  let sizeSum = 0;
+  let radiusSum = 0;
   for (let i = 0; i < count; i++) {
-    sizeSum += (widths[i] + heights[i]) / 2;
+    radiusSum += radii[i];
   }
-  const avgSize = count > 0 ? sizeSum / count : 200;
-  const radialScale = Math.sqrt(count) * avgSize * 0.22;
+  const avgRadius = count > 0 ? radiusSum / count : 20;
+  const radialScale = Math.sqrt(count) * avgRadius * 0.22;
 
   for (let rank = 0; rank < count; rank++) {
     const idx = order[rank];
@@ -250,7 +241,7 @@ const runSimulation = (graph: IndexedGraph): { cx: Float64Array; cy: Float64Arra
   const fx = new Float64Array(count);
   const fy = new Float64Array(count);
 
-  seedPositions(count, graph.degrees, graph.widths, graph.heights, cx, cy);
+  seedPositions(count, graph.degrees, graph.radii, cx, cy);
 
   const iterations = simulationIterations(count);
   let alpha = ALPHA_START;
@@ -260,8 +251,8 @@ const runSimulation = (graph: IndexedGraph): { cx: Float64Array; cy: Float64Arra
     fy.fill(0);
 
     for (let i = 0; i < count; i++) {
-      fx[i] -= GRAVITY_X * cx[i];
-      fy[i] -= GRAVITY_Y * cy[i];
+      fx[i] -= GRAVITY * cx[i];
+      fy[i] -= GRAVITY * cy[i];
     }
 
     for (const edge of graph.edges) {
@@ -269,11 +260,11 @@ const runSimulation = (graph: IndexedGraph): { cx: Float64Array; cy: Float64Arra
       const dx = cx[target] - cx[source];
       const dy = cy[target] - cy[source];
       const dist = Math.max(MIN_DIST, Math.hypot(dx, dy));
-      const desired = restLength(
-        graph.widths[source],
-        graph.heights[source],
-        graph.widths[target],
-        graph.heights[target]
+      const desired = edgeRestLength(
+        graph.radii[source],
+        graph.radii[target],
+        graph.degrees[source],
+        graph.degrees[target]
       );
       const displacement = dist - desired;
       const force = (SPRING_STRENGTH * displacement * alpha) / dist;
@@ -309,57 +300,53 @@ const runSimulation = (graph: IndexedGraph): { cx: Float64Array; cy: Float64Arra
   return { cx, cy };
 };
 
-const separateOverlappingPair = (
+const separateCircularPair = (
   i: number,
   j: number,
   cx: Float64Array,
   cy: Float64Array,
-  widths: Float64Array,
-  heights: Float64Array
+  radii: Float64Array
 ): boolean => {
   const dx = cx[j] - cx[i];
   const dy = cy[j] - cy[i];
-  const halfGapX = (widths[i] + widths[j]) / 2 + OVERLAP_GAP;
-  const halfGapY = (heights[i] + heights[j]) / 2 + OVERLAP_GAP;
-  const overlapX = halfGapX - Math.abs(dx);
-  const overlapY = halfGapY - Math.abs(dy);
+  const dist = Math.hypot(dx, dy);
+  const minDist = radii[i] + radii[j] + COLLISION_GAP;
 
-  if (overlapX <= 0 || overlapY <= 0) {
+  if (dist >= minDist) {
     return false;
   }
 
-  if (dx === 0 && dy === 0) {
-    const nudge = (i % 2 === 0 ? 1 : -1) * (overlapX / 2);
+  const effectiveDist = dist === 0 ? MIN_DIST : dist;
+  const push = (minDist - dist) / 2;
+
+  if (dist === 0) {
+    const nudge = (i % 2 === 0 ? 1 : -1) * push;
     cx[i] -= nudge;
     cx[j] += nudge;
     return true;
   }
 
-  if (overlapX < overlapY) {
-    const push = (overlapX / 2) * (dx >= 0 ? 1 : -1);
-    cx[i] -= push;
-    cx[j] += push;
-  } else {
-    const push = (overlapY / 2) * (dy >= 0 ? 1 : -1);
-    cy[i] -= push;
-    cy[j] += push;
-  }
+  const nx = dx / effectiveDist;
+  const ny = dy / effectiveDist;
+  cx[i] -= nx * push;
+  cy[i] -= ny * push;
+  cx[j] += nx * push;
+  cy[j] += ny * push;
   return true;
 };
 
-const removeBoxOverlaps = (
+const removeCircleOverlaps = (
   count: number,
   cx: Float64Array,
   cy: Float64Array,
-  widths: Float64Array,
-  heights: Float64Array
+  radii: Float64Array
 ): void => {
   if (count <= GRID_BUCKET_THRESHOLD) {
-    for (let pass = 0; pass < OVERLAP_ITERATIONS; pass++) {
+    for (let pass = 0; pass < COLLISION_ITERATIONS; pass++) {
       let moved = false;
       for (let i = 0; i < count; i++) {
         for (let j = i + 1; j < count; j++) {
-          if (separateOverlappingPair(i, j, cx, cy, widths, heights)) {
+          if (separateCircularPair(i, j, cx, cy, radii)) {
             moved = true;
           }
         }
@@ -371,19 +358,16 @@ const removeBoxOverlaps = (
     return;
   }
 
-  for (let pass = 0; pass < OVERLAP_ITERATIONS; pass++) {
-    const buckets = new Map<string, number[]>();
-    let maxDim = 1;
+  for (let pass = 0; pass < COLLISION_ITERATIONS; pass++) {
+    let maxRadius = 1;
     for (let k = 0; k < count; k++) {
-      if (widths[k] > maxDim) {
-        maxDim = widths[k];
-      }
-      if (heights[k] > maxDim) {
-        maxDim = heights[k];
+      if (radii[k] > maxRadius) {
+        maxRadius = radii[k];
       }
     }
-    const cell = maxDim + OVERLAP_GAP;
+    const cell = 2 * maxRadius + COLLISION_GAP;
 
+    const buckets = new Map<string, number[]>();
     for (let i = 0; i < count; i++) {
       const cellX = Math.floor(cx[i] / cell);
       const cellY = Math.floor(cy[i] / cell);
@@ -410,7 +394,7 @@ const removeBoxOverlaps = (
             if (j <= i) {
               continue;
             }
-            if (separateOverlappingPair(i, j, cx, cy, widths, heights)) {
+            if (separateCircularPair(i, j, cx, cy, radii)) {
               moved = true;
             }
           }
@@ -423,102 +407,17 @@ const removeBoxOverlaps = (
   }
 };
 
-const separateRoundedPair = (
-  i: number,
-  j: number,
-  tx: Int32Array,
-  ty: Int32Array,
-  widths: Float64Array,
-  heights: Float64Array
-): boolean => {
-  const ax = tx[i];
-  const ay = ty[i];
-  const bx = tx[j];
-  const by = ty[j];
-  const aw = widths[i];
-  const ah = heights[i];
-  const bw = widths[j];
-  const bh = heights[j];
-  const overlapX = Math.min(ax + aw, bx + bw) - Math.max(ax, bx);
-  const overlapY = Math.min(ay + ah, by + bh) - Math.max(ay, by);
-
-  if (overlapX <= 0 || overlapY <= 0) {
-    return false;
-  }
-
-  if (overlapX <= overlapY) {
-    const push = Math.ceil(overlapX / 2);
-    if (ax <= bx) {
-      tx[i] -= push;
-      tx[j] += push;
-    } else {
-      tx[i] += push;
-      tx[j] -= push;
-    }
-  } else {
-    const push = Math.ceil(overlapY / 2);
-    if (ay <= by) {
-      ty[i] -= push;
-      ty[j] += push;
-    } else {
-      ty[i] += push;
-      ty[j] -= push;
-    }
-  }
-  return true;
-};
-
-const removeRoundedOverlaps = (
-  count: number,
-  tx: Int32Array,
-  ty: Int32Array,
-  widths: Float64Array,
-  heights: Float64Array
-): void => {
-  for (let pass = 0; pass < ROUNDED_OVERLAP_ITERATIONS; pass++) {
-    let moved = false;
-    for (let i = 0; i < count; i++) {
-      for (let j = i + 1; j < count; j++) {
-        if (separateRoundedPair(i, j, tx, ty, widths, heights)) {
-          moved = true;
-        }
-      }
-    }
-    if (!moved) {
-      break;
-    }
-  }
-};
-
-const applyBlobScaling = (cx: Float64Array, cy: Float64Array): void => {
-  for (let i = 0; i < cx.length; i++) {
-    cx[i] *= BLOB_X_SCALE;
-    cy[i] *= BLOB_Y_SCALE;
-  }
-};
-
-const toTopLeftPositions = (
+const toCenterPositions = (
   graph: IndexedGraph,
   cx: Float64Array,
   cy: Float64Array
 ): Map<string, ForcePosition> => {
-  const count = graph.ids.length;
-  const tx = new Int32Array(count);
-  const ty = new Int32Array(count);
-  for (let i = 0; i < count; i++) {
-    const halfW = graph.widths[i] / 2;
-    const halfH = graph.heights[i] / 2;
-    tx[i] = Math.round(cx[i] - halfW);
-    ty[i] = Math.round(cy[i] - halfH);
-  }
-
-  if (count <= GRID_BUCKET_THRESHOLD) {
-    removeRoundedOverlaps(count, tx, ty, graph.widths, graph.heights);
-  }
-
   const result = new Map<string, ForcePosition>();
-  for (let i = 0; i < count; i++) {
-    result.set(graph.ids[i], { x: tx[i], y: ty[i] });
+  for (let i = 0; i < graph.ids.length; i++) {
+    result.set(graph.ids[i], {
+      x: Math.round(cx[i]),
+      y: Math.round(cy[i]),
+    });
   }
   return result;
 };
@@ -533,9 +432,6 @@ export const forceLayout = (
 
   const graph = buildGraph(nodes, edges);
   const { cx, cy } = runSimulation(graph);
-  applyBlobScaling(cx, cy);
-  removeBoxOverlaps(graph.ids.length, cx, cy, graph.widths, graph.heights);
-  applyBlobScaling(cx, cy);
-  removeBoxOverlaps(graph.ids.length, cx, cy, graph.widths, graph.heights);
-  return toTopLeftPositions(graph, cx, cy);
+  removeCircleOverlaps(graph.ids.length, cx, cy, graph.radii);
+  return toCenterPositions(graph, cx, cy);
 };

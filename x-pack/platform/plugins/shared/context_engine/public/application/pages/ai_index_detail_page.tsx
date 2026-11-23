@@ -412,7 +412,7 @@ export const AiIndexDetailPage = () => {
         badges={headerBadges}
         tabs={headerTabs}
       />
-      <ContextEnginePageSection>{pageContent}</ContextEnginePageSection>
+      <ContextEnginePageSection restrictWidth={!isGraphTab}>{pageContent}</ContextEnginePageSection>
     </ContextEnginePageTemplate>
   );
 };

@@ -8,6 +8,7 @@
 import {
   ENTITY_TYPE_PREFIX,
   FACT_TYPE_PREFIX,
+  LAST_SEEN_AT_ATTRIBUTE,
   OCCURRENCES_ATTRIBUTE,
   parseRelationshipKey,
   RELATIONSHIP_KEY_ATTRIBUTE,
@@ -69,6 +70,7 @@ export const buildKiGraph = (records: readonly EsqlCellRecord[], limit: number):
     }
     const title = getString(record.title) ?? kiId;
     const occurrences = getNumber(getAttribute(record.attributes, OCCURRENCES_ATTRIBUTE));
+    const lastSeenAt = getString(getAttribute(record.attributes, LAST_SEEN_AT_ATTRIBUTE));
     nodesById.set(kiId, {
       kiId,
       index,
@@ -76,6 +78,7 @@ export const buildKiGraph = (records: readonly EsqlCellRecord[], limit: number):
       subtype: kindInfo.subtype,
       title,
       ...(occurrences !== undefined ? { occurrences } : {}),
+      ...(lastSeenAt !== undefined ? { lastSeenAt } : {}),
     });
   }
 

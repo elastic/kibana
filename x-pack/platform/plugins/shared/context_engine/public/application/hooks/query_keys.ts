@@ -79,6 +79,8 @@ export const contextEngineQueryKeys = {
         kiId,
         lifecycleStatus.join(','),
       ] as const,
+    kiGraphSources: (aiIndexId: string, index: string, kiId: string) =>
+      ['context_engine', 'ai_index', aiIndexId, 'ki_graph_sources', index, kiId] as const,
   },
   dreamingTemplates: {
     list: () => ['context_engine', 'dreaming_templates', 'list'] as const,

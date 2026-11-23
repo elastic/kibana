@@ -15,6 +15,7 @@ export interface KiGraphNodeData {
   subtype: string;
   title: string;
   occurrences?: number;
+  lastSeenAt?: string;
 }
 
 export interface KiGraphEdgeData {
