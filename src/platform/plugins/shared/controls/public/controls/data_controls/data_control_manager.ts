@@ -199,14 +199,13 @@ export const initializeDataControlManager = async <EditorState extends object = 
     .pipe(
       switchMap((valuesSource) =>
         valuesSource === ControlValuesSource.ESQL
-          ? combineLatest([
-              dataControlStateManager.api.esqlQuery$,
-              // Re-derive the column when the set of available variables changes
-              parentEsqlVariables$.pipe(distinctUntilChanged(haveSameVariableKeys)),
-            ]).pipe(
-              // the column of the previous query is not looked up while the next one runs
-              switchMap(([query, esqlVariables]) =>
-                from(getEsqlColumnName(query, esqlVariables)).pipe(
+          ? dataControlStateManager.api.esqlQuery$.pipe(
+              switchMap((query) =>
+                parentEsqlVariables$.pipe(
+                  // Re-derive the column when the set of available variables changes
+                  distinctUntilChanged(haveSameVariableKeys),
+                  switchMap((esqlVariables) => from(getEsqlColumnName(query, esqlVariables))),
+                  // only a new query clears the column, so variable changes keep the filter
                   startWith({ fieldName: undefined, error: undefined })
                 )
               )

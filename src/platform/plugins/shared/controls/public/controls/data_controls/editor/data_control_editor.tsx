@@ -280,7 +280,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
 
   const valuesSourceValid = useMemo(() => {
     if (isESQLValuesSource) return esqlQueryValidation;
-    return Boolean(editorState.field_name) && Boolean(filterableSource);
+    return Boolean(
+      editorState.field_name && filterableSource?.getFieldByName(editorState.field_name)
+    );
   }, [isESQLValuesSource, editorState.field_name, filterableSource, esqlQueryValidation]);
 
   const onChangeValuesSource = useCallback(

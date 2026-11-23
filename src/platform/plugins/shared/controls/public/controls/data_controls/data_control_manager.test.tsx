@@ -314,6 +314,34 @@ describe('initializeDataControlManager', () => {
       );
     });
 
+    it('keeps the field while the column is re-derived for a new variable key', async () => {
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: ['US'],
+        column: { name: 'myFieldName', type: 'keyword' },
+      });
+      const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+      const dataControlManager = await initializeDataControlManager({
+        controlId: 'esqlControl',
+        controlType: 'esql',
+        state: esqlState,
+        editorStateManager: initializeStateManager({}, {}),
+        parentApi: { esqlVariables$ },
+        typeDisplayName: 'ES|QL Control',
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const fieldNames: Array<string | undefined> = [];
+      const subscription = dataControlManager.api.fieldName$.subscribe((fieldName) =>
+        fieldNames.push(fieldName)
+      );
+      esqlVariables$.next([variable]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      subscription.unsubscribe();
+
+      expect(fieldNames).not.toContain(undefined);
+      expect(dataControlManager.api.fieldName$.value).toBe('myFieldName');
+    });
+
     it('skips re-derivation when only variable values change (same key set)', async () => {
       mockGetESQLSingleColumnValues.mockResolvedValue({
         values: ['US'],

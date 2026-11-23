@@ -172,6 +172,37 @@ describe('RangeSliderControlApi', () => {
       );
     });
 
+    test('should restore the saved range of an ES|QL control', async () => {
+      mockGetESQLResults.mockResolvedValue({
+        response: {
+          columns: [{ name: 'myFieldName', type: 'long' }],
+          values: [[42], [256], [1024]],
+        },
+      });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
+          values_source: ControlValuesSource.ESQL,
+          esql_query: 'FROM bytes-* | KEEP myFieldName',
+          value: ['100', '200'],
+        } as RangeSliderControlState,
+        finalizeApi,
+        uuid,
+        parentApi,
+      });
+
+      await waitFor(() =>
+        expect(api.appliedFilters$.value).toEqual([
+          expect.objectContaining({
+            query: { range: { myFieldName: { gte: 100, lte: 200 } } },
+          }),
+        ])
+      );
+      expect(api.serializeState().value).toEqual(['100', '200']);
+    });
+
     test('should set blocking error when data view is not found', async () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),

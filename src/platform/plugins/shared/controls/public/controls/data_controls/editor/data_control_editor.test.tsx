@@ -359,6 +359,18 @@ describe('Data control editor', () => {
       expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('true');
       expect(getPressedAttribute(controlEditor, 'create__search')).toBe('false');
     });
+
+    test('cannot save a field that is not in the data view', async () => {
+      const controlEditor = await mountComponent({
+        initialState: {
+          field_name: 'columnOfAnotherIndex',
+        },
+        controlType: 'optionsList',
+        controlId: 'testId',
+      });
+
+      expect(controlEditor.getByTestId('control-editor-save')).toBeDisabled();
+    });
   });
 
   describe('control editor config', () => {
