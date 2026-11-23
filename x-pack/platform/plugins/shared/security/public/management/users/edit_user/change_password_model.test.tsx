@@ -278,37 +278,49 @@ describe('ChangePasswordModal', () => {
     it('disables submit button when passwords do not match', async () => {
       renderChangePasswordModal('testuser');
 
-      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
-
       const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
       const confirmPasswordInput = screen.getByTestId('editUserChangePasswordConfirmPasswordInput');
 
       fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
+      fireEvent.change(confirmPasswordInput, { target: { value: 'passwd' } });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();
+      });
+
       fireEvent.change(confirmPasswordInput, { target: { value: 'other1' } });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+      });
 
       fireEvent.blur(confirmPasswordInput);
 
       expect(await screen.findByText('Passwords do not match.')).toBeInTheDocument();
-
-      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
     });
 
     it('disables submit button when password is too short', async () => {
       renderChangePasswordModal('testuser');
 
-      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
-
       const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
       const confirmPasswordInput = screen.getByTestId('editUserChangePasswordConfirmPasswordInput');
 
+      fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
+      fireEvent.change(confirmPasswordInput, { target: { value: 'passwd' } });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();
+      });
+
       fireEvent.change(newPasswordInput, { target: { value: 'short' } });
-      fireEvent.change(confirmPasswordInput, { target: { value: 'short' } });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+      });
 
       fireEvent.blur(newPasswordInput);
 
       expect(await screen.findByText('Enter at least 6 characters.')).toBeInTheDocument();
-
-      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
     });
 
     it('enables submit button when valid matching passwords are entered', async () => {
@@ -420,13 +432,21 @@ describe('ChangePasswordModal', () => {
 
         fireEvent.change(currentPasswordInput, { target: { value: 'curpwd' } });
         fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
+        fireEvent.change(confirmPasswordInput, { target: { value: 'passwd' } });
+
+        await waitFor(() => {
+          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();
+        });
+
         fireEvent.change(confirmPasswordInput, { target: { value: 'other1' } });
+
+        await waitFor(() => {
+          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+        });
 
         fireEvent.blur(confirmPasswordInput);
 
         expect(await screen.findByText('Passwords do not match.')).toBeInTheDocument();
-
-        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
       });
 
       it('disables submit button when password is too short', async () => {
@@ -441,14 +461,22 @@ describe('ChangePasswordModal', () => {
         );
 
         fireEvent.change(currentPasswordInput, { target: { value: 'curpwd' } });
+        fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
+        fireEvent.change(confirmPasswordInput, { target: { value: 'passwd' } });
+
+        await waitFor(() => {
+          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();
+        });
+
         fireEvent.change(newPasswordInput, { target: { value: 'short' } });
-        fireEvent.change(confirmPasswordInput, { target: { value: 'short' } });
+
+        await waitFor(() => {
+          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+        });
 
         fireEvent.blur(newPasswordInput);
 
         expect(await screen.findByText('Enter at least 6 characters.')).toBeInTheDocument();
-
-        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
       });
 
       it('enables submit button when all password fields are valid for current user', async () => {
