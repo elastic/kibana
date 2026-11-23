@@ -18,7 +18,8 @@
 import type { SpecChange } from './detect_drift';
 
 const MAX_NAME_LENGTH = 80;
-const MAX_NAMES_PER_SECTION = 3;
+/** How many names of a list a cell shows to begin with; the refresh PR may show more. */
+export const DEFAULT_NAMES_SHOWN = 10;
 
 type Section = 'removed' | 'added' | 'changed';
 
@@ -198,8 +199,37 @@ const scopeEntries = (changes: readonly SpecChange[]): Entry[] => {
 
 const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
-/** The lines of one section: its name, its first names, then how many more there are. */
-const sectionLines = (area: Area, section: Section, sign: string, entries: readonly Entry[]) => {
+/** Lines of a diff that are always shown whole. */
+interface FixedPart {
+  readonly kind: 'fixed';
+  readonly lines: readonly string[];
+}
+
+/** A list of names under its section's name, of which `shown` are written out. */
+export interface ListPart {
+  readonly kind: 'list';
+  readonly title: string;
+  readonly sign: string;
+  readonly names: readonly string[];
+  /** What the names are, for the line that counts the ones left out. */
+  readonly moreLabel: string;
+  shown: number;
+}
+
+export type ChangePart = FixedPart | ListPart;
+
+/** The changes in one place (response fields, …): a heading and the parts of its diff block. */
+export interface ChangeArea {
+  readonly heading: string;
+  readonly parts: readonly ChangePart[];
+}
+
+const listPart = (
+  area: Area,
+  section: Section,
+  sign: string,
+  entries: readonly Entry[]
+): ListPart => {
   const details = new Map<string, string[]>();
   for (const { line, detail } of entries) {
     const known = details.get(line) ?? [];
@@ -211,27 +241,40 @@ const sectionLines = (area: Area, section: Section, sign: string, entries: reado
         `${line}${found.length > 0 ? ` (${[...found].sort(byText).join(', ')})` : ''}`
     )
     .sort(byText);
-  const shown = names.slice(0, MAX_NAMES_PER_SECTION);
-  const more = names.length - shown.length;
+  return {
+    kind: 'list',
+    title: section,
+    sign,
+    names,
+    moreLabel: section === 'changed' ? 'changed' : area.toLowerCase(),
+    shown: Math.min(names.length, DEFAULT_NAMES_SHOWN),
+  };
+};
+
+/** The lines of a part of a diff block. */
+export const partLines = (part: ChangePart): string[] => {
+  if (part.kind === 'fixed') {
+    return [...part.lines];
+  }
+  const more = part.names.length - part.shown;
   return [
-    section,
-    ...shown.map((line) => `${sign} ${line}`),
-    ...(more > 0
-      ? [`  … and ${more} more ${section === 'changed' ? 'changed' : area.toLowerCase()}`]
-      : []),
+    part.title,
+    ...part.names.slice(0, part.shown).map((name) => `${part.sign} ${name}`),
+    ...(more > 0 ? [`  … and ${more} more ${part.moreLabel}`] : []),
   ];
 };
 
-// The diff block of an area: its sections, a blank line apart.
-const fenced = (...sections: ReadonlyArray<readonly string[]>): string[] => [
+/** The lines of an area: its bold heading, then one diff block with its parts a blank line apart. */
+export const areaLines = ({ heading, parts }: ChangeArea): string[] => [
+  heading,
   '```diff',
-  ...sections.flatMap((lines, index) => (index === 0 ? lines : ['', ...lines])),
+  ...parts.flatMap((part, index) => (index === 0 ? partLines(part) : ['', ...partLines(part)])),
   '```',
   '',
 ];
 
-/** The markdown describing the changes to one endpoint: a bold heading per area, and one diff block under it. */
-export const describeChanges = (changes: readonly SpecChange[]): string[] => {
+/** The changes to one endpoint, by area, with what was removed, added and changed in each. */
+export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
   const entries: Entry[] = [];
   const otherRules = new Map<string, number>();
   for (const change of changes) {
@@ -246,43 +289,55 @@ export const describeChanges = (changes: readonly SpecChange[]): string[] => {
   const scopes = scopeEntries(securityChanges);
   entries.push(...scopes);
   const regrouped = securityChanges.length > 0 && scopes.length === 0;
+  const fixed = (...lines: string[]): FixedPart => ({ kind: 'fixed', lines });
 
-  const blocks = AREAS.flatMap((area) => {
+  return AREAS.flatMap((area): ChangeArea[] => {
     const heading = `**${area}**`;
     if (area === 'Other') {
       return otherRules.size === 0
         ? []
         : [
-            heading,
-            ...fenced([
-              'changed',
-              ...[...otherRules.entries()].map(
-                ([id, count]) => `! ${id}${count > 1 ? ` ×${count}` : ''}`
-              ),
-            ]),
+            {
+              heading,
+              parts: [
+                fixed(
+                  'changed',
+                  ...[...otherRules.entries()].map(
+                    ([id, count]) => `! ${id}${count > 1 ? ` ×${count}` : ''}`
+                  )
+                ),
+              ],
+            },
           ];
     }
     const ofArea = entries.filter((entry) => entry.area === area);
     if (area === 'Auth scopes' && regrouped) {
-      return [heading, ...fenced(['regrouped, same scopes'])];
+      return [{ heading, parts: [fixed('regrouped, same scopes')] }];
     }
     if (ofArea.length === 0) {
       return [];
     }
     if (area === 'Schema variants') {
       const count = new Set(ofArea.map(({ line }) => line)).size;
-      return [heading, ...fenced(['changed', `! ${count} ${count === 1 ? 'change' : 'changes'}`])];
+      return [
+        { heading, parts: [fixed('changed', `! ${count} ${count === 1 ? 'change' : 'changes'}`)] },
+      ];
     }
     return [
-      heading,
-      ...fenced(
-        ...SECTIONS.flatMap(({ section, sign }) => {
+      {
+        heading,
+        parts: SECTIONS.flatMap(({ section, sign }) => {
           const inSection = ofArea.filter((entry) => entry.section === section);
-          return inSection.length === 0 ? [] : [sectionLines(area, section, sign, inSection)];
-        })
-      ),
+          return inSection.length === 0 ? [] : [listPart(area, section, sign, inSection)];
+        }),
+      },
     ];
   });
-  // A blank line closes the cell's content; the table adds its own around it.
-  return blocks.slice(0, blocks.length > 0 && blocks[blocks.length - 1] === '' ? -1 : undefined);
+};
+
+/** The markdown describing the changes to one endpoint, with the default number of names. */
+export const describeChanges = (changes: readonly SpecChange[]): string[] => {
+  const lines = changeAreas(changes).flatMap(areaLines);
+  // A blank line ends the last block; the cell around it adds its own.
+  return lines[lines.length - 1] === '' ? lines.slice(0, -1) : lines;
 };

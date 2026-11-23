@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorDrift, DriftReportEntry, FailedDrift, SpecChange } from './detect_drift';
+import type { ConnectorDrift, DriftReportEntry, FailedDrift } from './detect_drift';
 import { connectorOf, DRIFT_ISSUE_LABEL, markerOf } from './issue_marker';
 import { findingsOf, renderDriftIssue } from './issue';
-import { code, listed, plural } from './issue/issue_markdown';
-import { describeChanges } from './refresh_changes';
+import { renderRefreshPr } from './refresh_pr';
 import type { VendorApiLog } from '../record/update_vendor_api';
 import { errorMessage } from '../values';
 
@@ -81,120 +80,6 @@ export interface SurfaceDriftOptions {
 }
 
 const isFailed = (entry: DriftReportEntry): entry is FailedDrift => 'error' in entry;
-
-// GitHub rejects a pull request body over 65,536 characters. A Microsoft Graph connector alone
-// can report thousands of changes, each naming a schema path of up to 2.7 KB.
-const MAX_REFRESH_PR_BODY_LENGTH = 63_000;
-const MAX_ENDPOINTS_PER_CONNECTOR = 20;
-const NO_ENDPOINT = '—';
-
-const byName = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
-
-/**
- * A table of the endpoints that changed, what changed on each and the actions that call it.
- * It is HTML because a diff block can't sit in a markdown table's cell, and GitHub reads markdown
- * inside an HTML cell only when blank lines surround it.
- */
-const changesTable = (drift: ConnectorDrift): string[] => {
-  const changes = Object.values(drift.sources).flatMap((source) => source.changes ?? []);
-  if (changes.length === 0) {
-    return [];
-  }
-  const actionsOf = (endpoint: string): string[] =>
-    (drift.actions ?? [])
-      .filter(({ operations }) => operations.some(({ operation }) => operation === endpoint))
-      .map(({ action }) => action)
-      .sort(byName);
-  const endpoints = new Map<string, SpecChange[]>();
-  for (const change of changes) {
-    const endpoint = change.operation ?? NO_ENDPOINT;
-    endpoints.set(endpoint, [...(endpoints.get(endpoint) ?? []), change]);
-  }
-  const sorted = [...endpoints.entries()].sort(([a], [b]) =>
-    a === NO_ENDPOINT ? 1 : b === NO_ENDPOINT ? -1 : byName(a, b)
-  );
-  const hidden = sorted.length - MAX_ENDPOINTS_PER_CONNECTOR;
-  return [
-    '<table>',
-    '<tr><th>Endpoint</th><th>What changed</th><th>Used in action</th></tr>',
-    ...sorted.slice(0, MAX_ENDPOINTS_PER_CONNECTOR).flatMap(([endpoint, group]) => {
-      const actions = actionsOf(endpoint);
-      return [
-        '<tr>',
-        ...[
-          [endpoint === NO_ENDPOINT ? NO_ENDPOINT : code(endpoint)],
-          describeChanges(group),
-          [actions.length > 0 ? listed(actions.map(code)) : NO_ENDPOINT],
-        ].flatMap((cellLines) => ['<td>', '', ...cellLines, '', '</td>']),
-        '</tr>',
-      ];
-    }),
-    '</table>',
-    ...(hidden > 0
-      ? ['', `…and ${plural(hidden, 'more endpoint')}; the drift report lists them.`]
-      : []),
-  ];
-};
-
-/**
- * The body of the bot PR refreshing the artifacts of connectors with non-breaking drift: a table
- * per connector, in alphabetical order. A connector's table is cut after 20 endpoints, and a
- * connector that still doesn't fit under GitHub's limit is only named.
- */
-export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
-  const intro = [
-    'Refreshes the `vendor_api` artifacts of connectors whose vendor specs changed without breaking them, as found by the weekly vendor API drift check (`node scripts/connector_vendor_api --drift`). The actions pass against the latest specs.',
-    '',
-    'Each table lists the endpoints that changed, what changed on each, as diffs of what was removed, added or changed, and the actions that call them. The drift report attached to the build lists every change.',
-    '',
-  ].join('\n');
-
-  const sections = [...drifts]
-    .sort((a, b) => byName(a.connector, b.connector))
-    .map((drift) => {
-      const table = changesTable(drift);
-      return {
-        connector: drift.connector,
-        text: [
-          `### ${code(drift.connector)}`,
-          '',
-          ...(drift.operationsChanged ? ['- The actions call other operations.', ''] : []),
-          ...table,
-          ...(table.length === 0 && !drift.operationsChanged
-            ? ['- The specs changed outside what `oasdiff` reports.']
-            : []),
-          '',
-        ].join('\n'),
-      };
-    });
-
-  const shown: string[] = [];
-  const omitted: string[] = [];
-  let length = intro.length;
-  for (const { connector, text } of sections) {
-    if (length + text.length + 1 <= MAX_REFRESH_PR_BODY_LENGTH) {
-      shown.push(text);
-      length += text.length + 1;
-    } else {
-      omitted.push(connector);
-    }
-  }
-
-  return [
-    intro,
-    ...shown,
-    ...(omitted.length > 0
-      ? [
-          `### ${plural(omitted.length, 'more connector')}`,
-          '',
-          `The changes of ${omitted
-            .map(code)
-            .join(', ')} don't fit in a pull request description; they are in the drift report.`,
-          '',
-        ]
-      : []),
-  ].join('\n');
-};
 
 /**
  * Turns a drift report into GitHub issues: one per connector that needs one, found again by the

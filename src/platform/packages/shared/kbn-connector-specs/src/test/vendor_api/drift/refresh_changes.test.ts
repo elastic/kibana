@@ -80,9 +80,9 @@ describe('describeChanges', () => {
     );
   });
 
-  it('shows the first three names of a section and counts the rest', () => {
+  it('shows the first ten names of a section and counts the rest', () => {
     const lines = describeChanges(
-      ['e', 'a', 'd', 'b', 'c'].map((name) =>
+      ['l', 'a', 'k', 'b', 'j', 'c', 'i', 'd', 'h', 'e', 'g', 'f'].map((name) =>
         change('response-optional-property-added', `added the optional property \`${name}\``)
       )
     );
@@ -90,14 +90,18 @@ describe('describeChanges', () => {
     expect(lines).toEqual(
       cellOf(
         ['**Response fields**'],
-        block(['added', '+ a', '+ b', '+ c', '  … and 2 more response fields'])
+        block([
+          'added',
+          ...['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'].map((name) => `+ ${name}`),
+          '  … and 2 more response fields',
+        ])
       )
     );
   });
 
   it('counts the rest of the changed fields as changed', () => {
     const lines = describeChanges(
-      ['a', 'b', 'c', 'd'].map((name) =>
+      ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'].map((name) =>
         change(
           'response-property-became-required',
           `the response property \`${name}\` became required`
@@ -105,7 +109,7 @@ describe('describeChanges', () => {
       )
     );
 
-    expect(lines.join('\n')).toContain('! c (now required)\n  … and 1 more changed');
+    expect(lines.join('\n')).toContain('! j (now required)\n  … and 2 more changed');
   });
 
   it('puts every change of a field on one line', () => {
