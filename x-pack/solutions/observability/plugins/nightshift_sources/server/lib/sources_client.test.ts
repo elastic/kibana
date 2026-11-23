@@ -387,6 +387,19 @@ describe('SourcesClient', () => {
       ).resolves.toEqual({ type: 'logs', indexExists: false });
     });
 
+    it('accepts a @timestamp that ES|QL reports as date_nanos over mixed date mappings', async () => {
+      const { client, dataEsClient } = setup();
+      dataEsClient.esql.query.mockResponseOnce({
+        columns: [{ name: '@timestamp', type: 'date_nanos' }],
+        values: [],
+      });
+
+      await expect(client.validateQuery({ esql: 'FROM logs*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: true,
+      });
+    });
+
     it('rejects with 400 a query whose output has no date @timestamp column', async () => {
       const { client, dataEsClient } = setup();
 
