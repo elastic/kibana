@@ -17,7 +17,6 @@ import {
   loadWriteupDataset,
 } from './datasets';
 import { goldensByCase, goldensDirFor, readGoldens } from './goldens';
-import { fillPrompt } from './replay';
 import { createWriteupEvaluators } from './evaluators';
 import {
   formatReport,
@@ -29,6 +28,7 @@ import {
 import {
   WRITEUP_DATA_DIR,
   baselinePromptSpec,
+  chooseBaseline,
   createGenerationCache,
   createWriteupTask,
   loadPromptArm,
@@ -73,15 +73,10 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       // The checkout's prompt unless NIGHTSHIFT_WRITEUP_PROMPT names another (a git ref or a file).
       const arm = loadPromptArm(process.env.NIGHTSHIFT_WRITEUP_PROMPT);
       const baselineSpec = baselinePromptSpec();
-      const loaded = baselineSpec ? loadPromptArm(baselineSpec) : undefined;
-      // The same prompt on both sides is a comparison with itself: noise at twice the cost, and
-      // both arms would share one cache key. So an unchanged prompt runs one arm. Compared as the
-      // model gets it, after the replay's own placeholder fills.
-      const unchanged = loaded && fillPrompt(loaded.prompt) === fillPrompt(arm.prompt);
-      const baseline = unchanged ? undefined : loaded;
-      const noBaseline = unchanged
-        ? `Baseline ${loaded.label} has the same prompt (${loaded.hash}), so the head to head was skipped.`
-        : undefined;
+      const { baseline, noBaseline } = chooseBaseline(
+        arm,
+        baselineSpec ? loadPromptArm(baselineSpec) : undefined
+      );
       if (noBaseline) log.info(noBaseline);
       log.info(
         `Rewriting the final reply of ${dataset.examples.length} rounds of ${dataset.name} with prompt ${arm.label} (${arm.hash})` +

@@ -19,7 +19,7 @@ import {
   type Message,
   type ToolCall,
 } from '@kbn/inference-common';
-import { RECORDING_TOOL, buildReplay, safeToolName, type Replay } from './replay';
+import { RECORDING_TOOL, buildReplay, fillPrompt, safeToolName, type Replay } from './replay';
 import {
   defaultReplyType,
   type ExtraTurn,
@@ -106,6 +106,24 @@ export const baselinePromptSpec = (
   const explicit = env.NIGHTSHIFT_WRITEUP_BASELINE_PROMPT;
   if (explicit !== undefined) return explicit.trim() || undefined;
   return env.GITHUB_PR_NUMBER && env.PR_MERGE_BASE ? env.PR_MERGE_BASE.trim() : undefined;
+};
+
+/**
+ * The baseline to compare against, or why there is none. The same prompt on both sides compares a
+ * prompt with itself: noise at twice the cost, with both arms on one cache key. So a baseline that
+ * renders to the same replay prompt as the arm under test is skipped. The rendered prompts are
+ * compared, not the arms' hashes, since prompts that differ only in placeholders the replay strips
+ * reach the model identical.
+ */
+export const chooseBaseline = (
+  arm: PromptArm,
+  loaded: PromptArm | undefined
+): { baseline?: PromptArm; noBaseline?: string } => {
+  if (!loaded) return {};
+  if (fillPrompt(loaded.prompt) !== fillPrompt(arm.prompt)) return { baseline: loaded };
+  return {
+    noBaseline: `Baseline ${loaded.label} renders to the same replay prompt as ${arm.label}, so the head to head was skipped.`,
+  };
 };
 
 /**

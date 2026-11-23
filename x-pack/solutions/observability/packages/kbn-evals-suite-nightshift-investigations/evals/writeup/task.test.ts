@@ -21,6 +21,7 @@ import {
   loadPromptArm,
   RESPONSE_STYLE_PATH,
   baselinePromptSpec,
+  chooseBaseline,
   resolvePromptCommit,
   replayReply,
 } from './task';
@@ -356,6 +357,24 @@ describe('loadPromptArm', () => {
     expect(resolvePromptCommit(missing, clone)).toBe(missing);
     expect(gitIn(clone, 'rev-parse', '--is-shallow-repository')).toBe('false');
     rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('skips a baseline that reaches the model as the same prompt, even with a different hash', () => {
+    const current = { label: 'current', prompt: 'Investigate.\nReply briefly.', hash: 'h1' };
+    // Differs only in a placeholder the replay strips, so the arms' hashes differ but the model
+    // would see the same prompt twice.
+    const sameForModel = {
+      label: 'merge-base@abc',
+      prompt: 'Investigate.{{decision_trees_load_step}}\nReply briefly.',
+      hash: 'h2',
+    };
+    expect(chooseBaseline(current, sameForModel)).toEqual({
+      noBaseline:
+        'Baseline merge-base@abc renders to the same replay prompt as current, so the head to head was skipped.',
+    });
+    const changed = { ...sameForModel, prompt: 'Investigate.\nReply at length.' };
+    expect(chooseBaseline(current, changed)).toEqual({ baseline: changed });
+    expect(chooseBaseline(current, undefined)).toEqual({});
   });
 
   it('compares a PR build against its merge base unless a baseline is set', () => {
