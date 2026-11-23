@@ -124,6 +124,41 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(resolve.with).not.toHaveProperty('space_id');
     });
 
+    it('stamps only the valid batch UUID when the agent reports an unknown UUID', () => {
+      const resolve = requireStep('resolve_written_detections');
+      const stampRuleUuids = requireStep('compute_stamp_rule_uuids').with?.stamp_rule_uuids;
+      const context = {
+        steps: {
+          classify_detections: {
+            output: {
+              batch: [{ detection_id: 'detection-A', rule_uuid: 'rule-A' }],
+            },
+          },
+          compute_written_rule_uuids: {
+            output: { written_rule_uuids: ['rule-A', 'unknown-rule'] },
+          },
+        },
+      };
+
+      expect(evaluate(resolve.with?.batch, context)).toEqual([
+        { detection_id: 'detection-A', rule_uuid: 'rule-A' },
+      ]);
+      expect(evaluate(resolve.with?.reported_rule_uuids, context)).toEqual([
+        'rule-A',
+        'unknown-rule',
+      ]);
+      expect(
+        evaluate(stampRuleUuids, {
+          steps: {
+            compute_resolved_stamp_rule_uuids: {
+              output: { stamp_rule_uuids: ['rule-A'] },
+            },
+            compute_fallback_stamp_rule_uuids: { output: { stamp_rule_uuids: [] } },
+          },
+        })
+      ).toEqual(['rule-A']);
+    });
+
     describe('stamp rule uuids', () => {
       const resolved = requireStep('compute_resolved_stamp_rule_uuids');
       const fallback = requireStep('compute_fallback_stamp_rule_uuids');
