@@ -216,18 +216,21 @@ describe('SearchInferenceEndpointsPlugin', () => {
         await expect(resolver('my_feature', request)).resolves.toBeUndefined();
       });
 
-      it('returns undefined when only the connector catalog is available', async () => {
-        getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
-        getForFeature.mockResolvedValue({
-          endpoints: [{ connectorId: 'first-in-catalog' }, { connectorId: 'other' }],
-          soEntryFound: false,
-        });
-        getUiSetting.mockResolvedValue('NO_DEFAULT_CONNECTOR');
-        const resolver = await setupAndGetResolver();
+      it.each(['NO_DEFAULT_CONNECTOR', 'NO_DEFAULT_MODEL'])(
+        'returns undefined without a connector lookup when the default is %s and only the connector catalog is available',
+        async (noDefault) => {
+          getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
+          getForFeature.mockResolvedValue({
+            endpoints: [{ connectorId: 'first-in-catalog' }, { connectorId: 'other' }],
+            soEntryFound: false,
+          });
+          getUiSetting.mockResolvedValue(noDefault);
+          const resolver = await setupAndGetResolver();
 
-        await expect(resolver('my_feature', request)).resolves.toBeUndefined();
-        expect(getConnectorById).not.toHaveBeenCalled();
-      });
+          await expect(resolver('my_feature', request)).resolves.toBeUndefined();
+          expect(getConnectorById).not.toHaveBeenCalled();
+        }
+      );
 
       it('returns undefined when the feature has no endpoints', async () => {
         getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });

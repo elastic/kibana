@@ -23,7 +23,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
-import { NO_DEFAULT_CONNECTOR, resolveModelsForFeature } from './lib/resolve_models_for_feature';
+import { isDefaultSet, resolveModelsForFeature } from './lib/resolve_models_for_feature';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   GetForFeatureOptions,
@@ -139,7 +139,7 @@ export class SearchInferenceEndpointsPlugin
         const defaultConnectorId = await coreStart.uiSettings
           .asScopedToClient(coreStart.savedObjects.getScopedClient(request))
           .get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-        if (!defaultConnectorId || defaultConnectorId === NO_DEFAULT_CONNECTOR) {
+        if (!isDefaultSet(defaultConnectorId)) {
           return undefined;
         }
         const defaultConnector = await getConnectorById(defaultConnectorId, request).catch(

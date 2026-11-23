@@ -19,7 +19,9 @@ export const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 // The Models settings page stores `NO_DEFAULT_MODEL` for "No default model", while `NO_DEFAULT_CONNECTOR`
 // is the value the default AI connector setting has historically held for no default.
-const isDefaultSet = (defaultConnectorId: string | undefined): defaultConnectorId is string =>
+export const isDefaultSet = (
+  defaultConnectorId: string | undefined
+): defaultConnectorId is string =>
   !!defaultConnectorId &&
   defaultConnectorId !== NO_DEFAULT_CONNECTOR &&
   defaultConnectorId !== NO_DEFAULT_MODEL;
