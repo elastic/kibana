@@ -65,7 +65,7 @@ describe('renderRefreshPr', () => {
       [
         '### `.other`',
         '',
-        'New vendor spec captured. It contained 2 changes. All connector actions still work as before.',
+        'New vendor spec captured. It changed 2 things on 2 endpoints the connector calls. All connector actions still work as before.',
         '',
         '<details>',
         '<summary>2 changed endpoints</summary>',
@@ -100,9 +100,56 @@ describe('renderRefreshPr', () => {
     expect(body).toMatch(/<\/table>\n\n<\/details>/);
   });
 
-  it('says "1 change" for a single change', () => {
+  it('says "1 thing on 1 endpoint" for a single change', () => {
     expect(renderRefreshPr([changed('.other', [field('GET /a', 'x')])])).toContain(
-      'It contained 1 change. All connector actions'
+      'It changed 1 thing on 1 endpoint the connector calls. All connector actions'
+    );
+  });
+
+  it('counts a field once, however many times oasdiff reported it', () => {
+    const body = renderRefreshPr([
+      changed(
+        '.other',
+        ['application/json', 'application/cbor', 'application/yaml'].map((type) =>
+          added(
+            'GET /a',
+            `added the optional property \`x\` to the response with the \`200\` status (media type: ${type})`
+          )
+        )
+      ),
+    ]);
+
+    expect(body).toContain('It changed 1 thing on 1 endpoint the connector calls.');
+  });
+
+  it('counts the changes of every endpoint, also those the table leaves out', () => {
+    const body = renderRefreshPr([
+      changed(
+        '.other',
+        Array.from({ length: 23 }, (_, index) =>
+          field(`GET /e${String(index).padStart(2, '0')}`, 'x')
+        )
+      ),
+    ]);
+
+    expect(body).toContain('It changed 23 things on 23 endpoints the connector calls.');
+  });
+
+  it('says so when the new spec only regrouped the auth scopes', () => {
+    const scheme = (id: string, scope: string): SpecChange =>
+      added(
+        'GET /a',
+        `the endpoint scheme security \`Oauth2: [https://x/auth/${scope}]\` was ${
+          id.endsWith('-added') ? 'added to' : 'removed from'
+        } the API`,
+        id
+      );
+    const body = renderRefreshPr([
+      changed('.other', [scheme('api-security-removed', 'a'), scheme('api-security-added', 'a')]),
+    ]);
+
+    expect(body).toContain(
+      'It only regrouped the auth scopes of 1 endpoint the connector calls. All connector actions'
     );
   });
 

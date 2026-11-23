@@ -203,6 +203,8 @@ const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 interface FixedPart {
   readonly kind: 'fixed';
   readonly lines: readonly string[];
+  /** How many changes the lines stand for. */
+  readonly count: number;
 }
 
 /** A list of names under its section's name, of which `shown` are written out. */
@@ -289,7 +291,11 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
   const scopes = scopeEntries(securityChanges);
   entries.push(...scopes);
   const regrouped = securityChanges.length > 0 && scopes.length === 0;
-  const fixed = (...lines: string[]): FixedPart => ({ kind: 'fixed', lines });
+  const fixed = (count: number, ...lines: string[]): FixedPart => ({
+    kind: 'fixed',
+    count,
+    lines,
+  });
 
   return AREAS.flatMap((area): ChangeArea[] => {
     const heading = `**${area}**`;
@@ -301,6 +307,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
               heading,
               parts: [
                 fixed(
+                  [...otherRules.values()].reduce((total, count) => total + count, 0),
                   'changed',
                   ...[...otherRules.entries()].map(
                     ([id, count]) => `! ${id}${count > 1 ? ` ×${count}` : ''}`
@@ -312,7 +319,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
     }
     const ofArea = entries.filter((entry) => entry.area === area);
     if (area === 'Auth scopes' && regrouped) {
-      return [{ heading, parts: [fixed('regrouped, same scopes')] }];
+      return [{ heading, parts: [fixed(0, 'regrouped, same scopes')] }];
     }
     if (ofArea.length === 0) {
       return [];
@@ -320,7 +327,10 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
     if (area === 'Schema variants') {
       const count = new Set(ofArea.map(({ line }) => line)).size;
       return [
-        { heading, parts: [fixed('changed', `! ${count} ${count === 1 ? 'change' : 'changes'}`)] },
+        {
+          heading,
+          parts: [fixed(count, 'changed', `! ${count} ${count === 1 ? 'change' : 'changes'}`)],
+        },
       ];
     }
     return [
@@ -334,6 +344,13 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
     ];
   });
 };
+
+/**
+ * How many distinct changes an area lists, whatever the names shown: a field is one change, however
+ * many media types or paths through a shared schema `oasdiff` reported it for.
+ */
+export const countChanges = ({ parts }: ChangeArea): number =>
+  parts.reduce((total, part) => total + (part.kind === 'list' ? part.names.length : part.count), 0);
 
 /** The markdown describing the changes to one endpoint, with the default number of names. */
 export const describeChanges = (changes: readonly SpecChange[]): string[] => {

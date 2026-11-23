@@ -16,7 +16,13 @@
 import type { ConnectorDrift } from './detect_drift';
 import { code, listed, plural } from './issue/issue_markdown';
 import type { ChangeArea, ChangePart, ListPart } from './refresh_changes';
-import { areaLines, changeAreas, DEFAULT_NAMES_SHOWN, partLines } from './refresh_changes';
+import {
+  areaLines,
+  changeAreas,
+  countChanges,
+  DEFAULT_NAMES_SHOWN,
+  partLines,
+} from './refresh_changes';
 
 // GitHub rejects a pull request description over 65,536 characters. A Microsoft Graph connector
 // alone can report thousands of changes, each naming a schema path of up to 2.7 KB.
@@ -34,8 +40,10 @@ interface EndpointRow {
 
 interface ConnectorSection {
   readonly connector: string;
-  /** Every change the new spec brought to what the connector calls. */
+  /** The distinct changes the tables list: what the new spec changed in what the connector calls. */
   readonly changeCount: number;
+  /** Whether the new spec only regrouped the auth scopes of what the connector calls. */
+  readonly onlyRegrouped: boolean;
   readonly operationsChanged: boolean;
   /** The endpoints that changed, of which the table shows the first ones. */
   readonly endpointCount: number;
@@ -57,23 +65,35 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
       .filter(({ operations }) => operations.some(({ operation }) => operation === endpoint))
       .map(({ action }) => action)
       .sort(byName);
+  const all = endpoints.map(([endpoint, group]) => ({
+    endpoint,
+    actions: actionsOf(endpoint),
+    areas: changeAreas(group),
+  }));
+  const changeCount = all.reduce(
+    (total, { areas }) => total + areas.reduce((sum, area) => sum + countChanges(area), 0),
+    0
+  );
   return {
     connector: drift.connector,
-    changeCount: changes.length,
+    changeCount,
+    onlyRegrouped: changes.length > 0 && changeCount === 0,
     operationsChanged: drift.operationsChanged,
     endpointCount: endpoints.length,
-    rows: endpoints.slice(0, MAX_ENDPOINTS_PER_CONNECTOR).map(([endpoint, group]) => ({
-      endpoint,
-      actions: actionsOf(endpoint),
-      areas: changeAreas(group),
-    })),
+    rows: all.slice(0, MAX_ENDPOINTS_PER_CONNECTOR),
   };
 };
 
-const summaryOf = ({ changeCount }: ConnectorSection): string =>
-  `New vendor spec captured. It contained ${
-    changeCount > 0 ? plural(changeCount, 'change') : 'changes that `oasdiff` does not report'
-  }. All connector actions still work as before.`;
+const summaryOf = ({ changeCount, endpointCount, onlyRegrouped }: ConnectorSection): string => {
+  const calls = `${plural(endpointCount, 'endpoint')} the connector calls`;
+  let what = 'contained changes that `oasdiff` does not report';
+  if (onlyRegrouped) {
+    what = `only regrouped the auth scopes of ${calls}`;
+  } else if (changeCount > 0) {
+    what = `changed ${plural(changeCount, 'thing')} on ${calls}`;
+  }
+  return `New vendor spec captured. It ${what}. All connector actions still work as before.`;
+};
 
 /** The cell of an endpoint's changes: its areas, a blank line apart. */
 const cellLines = (areas: readonly ChangeArea[]): string[] => {
@@ -175,7 +195,7 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
   const intro = [
     'Refreshes the `vendor_api` artifacts of connectors whose vendor specs changed without breaking them, as found by the weekly vendor API drift check (`node scripts/connector_vendor_api --drift`). The actions pass against the latest specs.',
     '',
-    `Each connector says how many changes its new spec brought. Open its table for the endpoints that changed, what changed on each, as diffs of what was removed, added or changed, and the actions that call them. Each list shows its first names: ${DEFAULT_NAMES_SHOWN}, or fewer or more depending on how much room this description has. The drift report attached to the build lists every change.`,
+    `Each connector says what its new spec changed. Open its table for the endpoints that changed, what changed on each, as diffs of what was removed, added or changed, and the actions that call them. Each list shows its first names: ${DEFAULT_NAMES_SHOWN}, or fewer or more depending on how much room this description has. The drift report attached to the build lists every change.`,
     '',
   ].join('\n');
 
