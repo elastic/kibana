@@ -35,11 +35,6 @@ const getRandomCall = () =>
 
 const TIMESTAMP_COLUMN = { name: '@timestamp', type: 'date' };
 
-const COUNT_RESPONSE = (total: number) => ({
-  columns: [{ name: 'total', type: 'long' }],
-  values: [[total]],
-});
-
 const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
   _index: '',
   _id: id,
@@ -111,10 +106,12 @@ describe('fetchSampleDocuments', () => {
   });
 
   it('rejects with a 400 that explains the missing @timestamp and samples nothing', async () => {
-    // The narrowed probe drops a column no index maps; documents exist, so the source is at fault.
-    getEsqlColumnSchemaMock.mockResolvedValueOnce([]);
+    // The narrowed probe drops a column no index maps; the full schema still resolves, so the
+    // source is at fault, whatever its WHERE matches.
+    getEsqlColumnSchemaMock
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ name: 'message', type: 'text' }]);
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResponse(COUNT_RESPONSE(3));
 
     await expect(
       fetchSampleDocuments({
@@ -141,9 +138,9 @@ describe('fetchSampleDocuments', () => {
   });
 
   it('returns an empty sample without sampling when a wildcard matches no index yet', async () => {
-    getEsqlColumnSchemaMock.mockResolvedValueOnce([]);
+    // Nothing resolves behind the wildcard: not even the full schema has a column.
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResponse(COUNT_RESPONSE(0));
 
     const result = await fetchSampleDocuments({
       esClient,
@@ -584,6 +581,42 @@ describe('fetchSampleDocuments', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       'Entity-filtered sampling query failed: verification_exception'
     );
+    expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
+    expect(result.hasFilteredDocuments).toBe(false);
+  });
+
+  it('keeps sampling without the entity arm when the column probe fails', async () => {
+    const features = [
+      createFeature({
+        id: 'feature-1',
+        updatedAt: '2026-01-02T00:00:00.000Z',
+        field: 'service.name',
+        value: 'checkout',
+      }),
+    ];
+
+    getEsqlColumnSchemaMock.mockRejectedValueOnce(new Error('Request timed out'));
+    getSampleDocumentsEsqlMock.mockResolvedValue({ hits: [createHit('random-1')], total: 1 });
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features,
+      logger,
+      size: 5,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Column probe failed, sampling without it:')
+    );
+    expect(getEntityFilteredCall()).toBeUndefined();
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
     expect(result.hasFilteredDocuments).toBe(false);
   });

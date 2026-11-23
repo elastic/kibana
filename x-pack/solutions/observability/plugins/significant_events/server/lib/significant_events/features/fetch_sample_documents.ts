@@ -119,31 +119,48 @@ export async function fetchSampleDocuments({
         signal: samplingSignal,
       }),
       { index, samplingTimeoutMs, query: 'Column probe' }
-    );
-    // Every arm filters on @timestamp. A narrowed probe drops unmapped columns, so a missing one
-    // looks the same for a source with data but no @timestamp (saved before the source API
-    // required it) and for a wildcard with no index yet. Only the first is the source's fault.
-    const timestampProblem = getTimestampColumnProblem(columns);
-    if (timestampProblem) {
-      const isTimestampUnmapped = !columns.some(({ name }) => name === SOURCE_TIMESTAMP_FIELD);
-      if (
-        isTimestampUnmapped &&
-        !(await withSamplingErrorContext(
-          hasAnyDocument({ esClient, index, signal: samplingSignal }),
-          { index, samplingTimeoutMs, query: 'Column probe' }
-        ))
-      ) {
-        // A source with no data yet, which create accepts: an empty sample lets the workflow
-        // end on its "no documents" skip instead of failing the run.
-        logger.debug(() => `No documents behind [${index}] yet; nothing to sample.`);
-        return {
-          documents: [],
-          totalFilters: features.length,
-          filtersCapped: omitted > 0,
-          hasFilteredDocuments: false,
-        };
+    ).catch((error) => {
+      if (error instanceof StatusError) {
+        throw error;
       }
-      throw new StatusError(`Cannot sample [${index}]: ${timestampProblem}`, 400);
+      // A probe that cannot answer must not take sampling down with it: the arms run as they did
+      // before the probe existed, the entity arm without its filters.
+      logger.warn(`Column probe failed, sampling without it: ${parseError(error).message}`);
+      return undefined;
+    });
+
+    if (columns) {
+      // Every arm filters on @timestamp. A narrowed probe drops unmapped columns, so a missing one
+      // looks the same for a source with data but no @timestamp (saved before the source API
+      // required it) and for a wildcard with no index yet. Only the first is the source's fault.
+      const timestampProblem = getTimestampColumnProblem(columns);
+      if (timestampProblem) {
+        const isTimestampUnmapped = !columns.some(({ name }) => name === SOURCE_TIMESTAMP_FIELD);
+        // The full schema is the one thing that tells them apart: nothing resolves behind a
+        // wildcard with no index, while an index without @timestamp still reports its columns,
+        // whatever the source's WHERE matches. It is wide, but only runs on a source that is
+        // already wrong.
+        if (
+          isTimestampUnmapped &&
+          (
+            await withSamplingErrorContext(
+              getEsqlColumnSchema({ esClient, index, signal: samplingSignal }),
+              { index, samplingTimeoutMs, query: 'Column probe' }
+            )
+          ).length === 0
+        ) {
+          // A source with no index yet, which create accepts: an empty sample lets the workflow
+          // end on its "no documents" skip instead of failing the run.
+          logger.debug(() => `Nothing resolves behind [${index}] yet; nothing to sample.`);
+          return {
+            documents: [],
+            totalFilters: features.length,
+            filtersCapped: omitted > 0,
+            hasFilteredDocuments: false,
+          };
+        }
+        throw new StatusError(`Cannot sample [${index}]: ${timestampProblem}`, 400);
+      }
     }
 
     const tracedEsClient = createSignificantEventsTracedEsClient({
@@ -359,10 +376,14 @@ async function fetchEntityFilteredDocuments({
   end: number;
   sampleSize: number;
   entityFilters: EntityFilter[];
-  columns: EsqlColumnSchema[];
+  /** Absent when the column probe failed: no filter can be checked, so the arm has nothing to run. */
+  columns: EsqlColumnSchema[] | undefined;
   logger: Logger;
   abortSignal: AbortSignal;
 }): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
+  if (!columns) {
+    return EMPTY_SAMPLE;
+  }
   // A type conflict across backing indices surfaces as `unsupported`, which no comparison accepts.
   const queryableFields = new Set(
     columns.filter(({ type }) => type !== 'unsupported').map(({ name }) => name)
@@ -397,24 +418,6 @@ async function fetchEntityFilteredDocuments({
     abortSignal,
   });
 }
-
-/** One cheap `LIMIT 1` count: tells a source with no data yet apart from one with unmapped columns. */
-const hasAnyDocument = async ({
-  esClient,
-  index,
-  signal,
-}: {
-  esClient: ElasticsearchClient;
-  index: string;
-  signal: AbortSignal;
-}): Promise<boolean> => {
-  const response = (await esClient.esql.query(
-    { query: esql.from([index]).limit(1).pipe`STATS total = COUNT(*)`.print('basic') },
-    { signal }
-  )) as unknown as { values: unknown[][] };
-  const total = response.values[0]?.[0];
-  return typeof total === 'number' && total > 0;
-};
 
 const getFilterFields = (filter: EntityFilter): string[] =>
   isEntityValuesFilter(filter)
