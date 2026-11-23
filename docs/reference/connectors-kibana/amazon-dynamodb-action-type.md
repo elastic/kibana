@@ -1,6 +1,6 @@
 ---
 navigation_title: "Amazon DynamoDB"
-description: Use the Amazon DynamoDB connector to list tables, query, scan, and manage items in Amazon DynamoDB from Kibana workflows and AI agents.
+description: Use the Amazon DynamoDB connector to list tables, query, and scan with AI agents, or write and delete items through Kibana workflows.
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -8,7 +8,9 @@ applies_to:
 
 # Amazon DynamoDB connector [amazon-dynamodb-action-type]
 
-The Amazon DynamoDB connector enables querying, scanning, and managing items in Amazon DynamoDB tables directly from Kibana workflows and AI agents.
+The Amazon DynamoDB connector enables querying, scanning, and managing items in Amazon DynamoDB tables from Kibana workflows and AI agents.
+
+Writing and deleting items (`putItem`, `deleteItem`) are deliberately available as workflow steps only, not as autonomous agent tools, because an agent-driven write can silently overwrite or delete existing data. Read actions (`listTables`, `describeTable`, `getItem`, `query`, `scan`) are available to both.
 
 ## Create connectors in {{kib}} [define-amazon-dynamodb-ui]
 

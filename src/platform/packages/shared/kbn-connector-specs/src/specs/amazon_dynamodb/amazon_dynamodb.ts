@@ -329,7 +329,7 @@ export const AmazonDynamoDB: ConnectorSpec = {
 
     putItem: {
       isTool: false,
-      scope: 'write',
+      scope: 'destroy',
       description:
         'Write a single item to a DynamoDB table. ' +
         'If an item with the same primary key already exists, it is fully replaced. ' +
