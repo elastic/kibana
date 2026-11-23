@@ -77,6 +77,7 @@
 **Identity management**
 
 - [1Password](/reference/connectors-kibana/one-password-action-type.md): Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users.
+- [Idira Privilege Cloud](/reference/connectors-kibana/idira-action-type.md): Contain compromised privileged credentials — find and enrich vault accounts, review safe access, and rotate, reconcile, or verify credentials.
 - [Okta](/reference/connectors-kibana/okta-action-type.md): Contain compromised identities — suspend users, revoke sessions, reset MFA, manage group membership, and query System Log events.
 - [Google Cloud IAM](/reference/connectors-kibana/gcp-iam-action-type.md): Disable service accounts, revoke leaked keys, and grant or revoke IAM role bindings.
 - [Google Cloud Secret Manager](/reference/connectors-kibana/gcp-secret-manager-action-type.md): Inspect secrets, add and disable secret versions, and read access policy.

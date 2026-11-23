@@ -454,4 +454,5 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  ['.idira', lazy(() => import(/* webpackChunkName: "connectorIconIdira" */ './specs/idira/icon'))],
 ]);
