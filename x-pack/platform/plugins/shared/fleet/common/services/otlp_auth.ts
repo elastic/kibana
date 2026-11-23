@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { OTLP_AUTHORIZATION_HEADER, otlpAuthType } from '../constants/output';
-import type { OtlpOutputAuth } from '../types/models/output';
+import { OTLP_AUTHORIZATION_HEADER, otlpAuthType, otlpProtocol } from '../constants/output';
+import type { OtlpExporterConfig, OtlpOutputAuth } from '../types/models/output';
 
 // RFC 9110 field name (token): the header is sent as an HTTP header or as gRPC metadata
 const OTLP_HEADER_NAME_REGEX = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
@@ -16,6 +16,24 @@ export const OTLP_HEADER_NAME_MAX_LENGTH = 256;
 /** Whether a name can be the name of a header of the OTLP exporter. */
 export const isValidOtlpHeaderName = (name: string): boolean =>
   name.length <= OTLP_HEADER_NAME_MAX_LENGTH && OTLP_HEADER_NAME_REGEX.test(name);
+
+// gRPC metadata keys only have letters, digits, `-`, `_` and `.`: the letters are sent in lower
+// case, `-bin` keys carry binary values and `grpc-` keys are reserved
+const OTLP_GRPC_METADATA_KEY_REGEX = /^[0-9a-z_.-]+$/i;
+
+/** Whether a name can be the name of a header that the gRPC exporter sends as metadata. */
+export const isValidOtlpGrpcMetadataKey = (name: string): boolean => {
+  const key = name.toLowerCase();
+  return (
+    isValidOtlpHeaderName(name) &&
+    OTLP_GRPC_METADATA_KEY_REGEX.test(name) &&
+    !key.endsWith('-bin') &&
+    !key.startsWith('grpc-')
+  );
+};
+
+/** The credential is sent in a single header, which servers limit to a few kilobytes. */
+export const OTLP_AUTH_CREDENTIAL_MAX_LENGTH = 8192;
 
 // a control character, such as the line break of a pasted value, makes the header invalid
 // eslint-disable-next-line no-control-regex
@@ -36,4 +54,49 @@ export const findOtlpAuthHeaderConflict = (
 ): string | undefined => {
   const name = authHeaderName.toLowerCase();
   return headerNames.find((headerName) => headerName.toLowerCase() === name);
+};
+
+/**
+ * The URLs the OTLP exporter sends data to: the endpoint, and for HTTP the endpoints of the
+ * signals, which replace it for that signal.
+ */
+export const getOtlpExporterEndpoints = (
+  exporter: Partial<OtlpExporterConfig> | null | undefined
+): string[] => {
+  if (!exporter) {
+    return [];
+  }
+  const endpoints: Array<string | null | undefined> = [exporter.endpoint];
+  if (exporter.protocol === otlpProtocol.HttpProtobuf) {
+    endpoints.push(
+      exporter.traces_endpoint,
+      exporter.metrics_endpoint,
+      exporter.logs_endpoint,
+      exporter.profiles_endpoint
+    );
+  }
+  return endpoints.filter((endpoint): endpoint is string => !!endpoint);
+};
+
+const getHostname = (url: string): string | undefined => {
+  try {
+    return new URL(url.includes('://') ? url : `https://${url}`).hostname.toLowerCase();
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Whether the exporter sends data to the host of the managed OTLP endpoint, for any signal. The
+ * host is compared, not the path: the endpoints of the signals have their own paths.
+ */
+export const sendsToManagedOtlpHost = (
+  endpoints: string[],
+  managedOtlpUrl: string | undefined
+): boolean => {
+  const managedHost = managedOtlpUrl ? getHostname(managedOtlpUrl) : undefined;
+  return (
+    !!managedHost &&
+    endpoints.some((endpoint) => !!endpoint.trim() && getHostname(endpoint.trim()) === managedHost)
+  );
 };

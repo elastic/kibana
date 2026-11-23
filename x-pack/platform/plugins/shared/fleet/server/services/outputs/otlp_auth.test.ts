@@ -28,31 +28,34 @@ describe('OTLP output authentication', () => {
   });
 
   describe('getOtlpAuthHeaders', () => {
-    const endpoint = 'https://collector.example.com:4318';
+    const exporter = {
+      endpoint: 'https://collector.example.com:4318',
+      protocol: 'http/protobuf' as const,
+    };
 
     it.each([
       ['api_key' as const, 'ApiKey $co.elastic.secret{id1}'],
       ['bearer_token' as const, 'Bearer $co.elastic.secret{id1}'],
     ])('returns the Authorization header for the %s scheme', (scheme, expected) => {
-      expect(getOtlpAuthHeaders({ type: 'auth_header', scheme }, { id: 'id1' }, endpoint)).toEqual({
+      expect(getOtlpAuthHeaders({ type: 'auth_header', scheme }, { id: 'id1' }, exporter)).toEqual({
         Authorization: expected,
       });
     });
 
     it('returns the custom header with the secret reference as value', () => {
       expect(
-        getOtlpAuthHeaders({ type: 'custom_header', name: 'x-api-key' }, { id: 'id1' }, endpoint)
+        getOtlpAuthHeaders({ type: 'custom_header', name: 'x-api-key' }, { id: 'id1' }, exporter)
       ).toEqual({ 'x-api-key': '$co.elastic.secret{id1}' });
     });
 
     it('returns nothing without authentication or without a stored credential', () => {
-      expect(getOtlpAuthHeaders(undefined, { id: 'id1' }, endpoint)).toBeUndefined();
+      expect(getOtlpAuthHeaders(undefined, { id: 'id1' }, exporter)).toBeUndefined();
       expect(
-        getOtlpAuthHeaders({ type: 'auth_header', scheme: 'api_key' }, undefined, endpoint)
+        getOtlpAuthHeaders({ type: 'auth_header', scheme: 'api_key' }, undefined, exporter)
       ).toBeUndefined();
       // a plain text value is never put in the policy
       expect(
-        getOtlpAuthHeaders({ type: 'auth_header', scheme: 'api_key' }, 'plain' as any, endpoint)
+        getOtlpAuthHeaders({ type: 'auth_header', scheme: 'api_key' }, 'plain' as any, exporter)
       ).toBeUndefined();
     });
 
@@ -61,7 +64,20 @@ describe('OTLP output authentication', () => {
         getOtlpAuthHeaders(
           { type: 'auth_header', scheme: 'api_key' },
           { id: 'id1' },
-          'managed.ingest.elastic.cloud:443'
+          { endpoint: 'managed.ingest.elastic.cloud:443', protocol: 'grpc' }
+        )
+      ).toBeUndefined();
+    });
+
+    it('returns nothing when a signal is sent to the managed OTLP endpoint', () => {
+      expect(
+        getOtlpAuthHeaders(
+          { type: 'auth_header', scheme: 'api_key' },
+          { id: 'id1' },
+          {
+            ...exporter,
+            logs_endpoint: 'https://managed.ingest.elastic.cloud/v1/logs',
+          }
         )
       ).toBeUndefined();
     });
@@ -104,29 +120,29 @@ describe('OTLP output authentication', () => {
   });
 
   describe('validateOtlpAuth', () => {
-    const endpoint = 'https://collector.example.com:4318';
+    const exporter = {
+      endpoint: 'https://collector.example.com:4318',
+      protocol: 'http/protobuf' as const,
+    };
 
     it('accepts an authentication with a credential', () => {
       expect(() =>
         validateOtlpAuth({
           auth: { type: 'custom_header', name: 'x-api-key' },
           hasCredential: true,
-          endpoint,
-          headers: { 'x-tenant': 'acme' },
+          exporter: { ...exporter, headers: { 'x-tenant': 'acme' } },
         })
       ).not.toThrow();
     });
 
     it('accepts no authentication and no credential', () => {
-      expect(() =>
-        validateOtlpAuth({ auth: null, hasCredential: false, endpoint, headers: undefined })
-      ).not.toThrow();
+      expect(() => validateOtlpAuth({ auth: null, hasCredential: false, exporter })).not.toThrow();
     });
 
     it('rejects a credential without authentication', () => {
-      expect(() =>
-        validateOtlpAuth({ auth: undefined, hasCredential: true, endpoint, headers: undefined })
-      ).toThrow('secrets.auth.credential can only be set together with auth');
+      expect(() => validateOtlpAuth({ auth: undefined, hasCredential: true, exporter })).toThrow(
+        'secrets.auth.credential can only be set together with auth'
+      );
     });
 
     it('rejects an authentication without a credential', () => {
@@ -134,8 +150,7 @@ describe('OTLP output authentication', () => {
         validateOtlpAuth({
           auth: { type: 'auth_header', scheme: 'api_key' },
           hasCredential: false,
-          endpoint,
-          headers: undefined,
+          exporter,
         })
       ).toThrow('secrets.auth.credential is required when auth is set');
     });
@@ -145,10 +160,36 @@ describe('OTLP output authentication', () => {
         validateOtlpAuth({
           auth: { type: 'auth_header', scheme: 'api_key' },
           hasCredential: true,
-          endpoint: 'managed.ingest.elastic.cloud:443',
-          headers: undefined,
+          exporter: { endpoint: 'managed.ingest.elastic.cloud:443', protocol: 'grpc' },
         })
       ).toThrow('auth cannot be set for an output that sends data to the managed OTLP endpoint');
+      expect(() =>
+        validateOtlpAuth({
+          auth: { type: 'auth_header', scheme: 'api_key' },
+          hasCredential: true,
+          exporter: {
+            ...exporter,
+            traces_endpoint: 'https://managed.ingest.elastic.cloud/v1/traces',
+          },
+        })
+      ).toThrow('auth cannot be set for an output that sends data to the managed OTLP endpoint');
+    });
+
+    it('rejects a custom header that gRPC cannot send as metadata', () => {
+      expect(() =>
+        validateOtlpAuth({
+          auth: { type: 'custom_header', name: 'x-api+key' },
+          hasCredential: true,
+          exporter: { endpoint: 'collector.example.com:4317', protocol: 'grpc' },
+        })
+      ).toThrow('auth.name "x-api+key" cannot be sent as gRPC metadata');
+      expect(() =>
+        validateOtlpAuth({
+          auth: { type: 'custom_header', name: 'x-api+key' },
+          hasCredential: true,
+          exporter,
+        })
+      ).not.toThrow();
     });
 
     it('rejects a header that the authentication sets, whatever its case', () => {
@@ -156,8 +197,7 @@ describe('OTLP output authentication', () => {
         validateOtlpAuth({
           auth: { type: 'auth_header', scheme: 'bearer_token' },
           hasCredential: true,
-          endpoint,
-          headers: { authorization: 'Basic abc' },
+          exporter: { ...exporter, headers: { authorization: 'Basic abc' } },
         })
       ).toThrow(
         'otlp_exporter.headers cannot contain the "authorization" header, it is set by auth'
@@ -166,8 +206,7 @@ describe('OTLP output authentication', () => {
         validateOtlpAuth({
           auth: { type: 'custom_header', name: 'X-Api-Key' },
           hasCredential: true,
-          endpoint,
-          headers: { 'x-api-key': 'value' },
+          exporter: { ...exporter, headers: { 'x-api-key': 'value' } },
         })
       ).toThrow('otlp_exporter.headers cannot contain the "x-api-key" header, it is set by auth');
     });

@@ -9,7 +9,6 @@ import { mergeWith } from 'lodash';
 
 import { MANAGED_OTLP_EXPORTER_DEFAULTS } from '../../../common/constants/output';
 import type { OtlpExporterConfig } from '../../../common/types';
-import { isManagedOtlpEndpointUrl } from '../../../common/services/managed_otlp_endpoint';
 
 import { appContextService } from '..';
 
@@ -17,8 +16,22 @@ export const getManagedOtlpEndpoint = (): string | undefined => {
   return appContextService.getCloud()?.managedOtlp?.url;
 };
 
-export const isManagedOtlpEndpoint = (endpoint: string): boolean =>
-  isManagedOtlpEndpointUrl(endpoint, getManagedOtlpEndpoint());
+const normalizeEndpoint = (endpoint: string): string => {
+  const withScheme = endpoint.includes('://') ? endpoint : `https://${endpoint}`;
+  try {
+    const url = new URL(withScheme);
+    const path = url.pathname === '/' ? '' : url.pathname;
+    return `${url.hostname}${path}`;
+  } catch {
+    return endpoint.toLowerCase();
+  }
+};
+
+export const isManagedOtlpEndpoint = (endpoint: string): boolean => {
+  const managedUrl = getManagedOtlpEndpoint();
+  if (!managedUrl) return false;
+  return normalizeEndpoint(endpoint) === normalizeEndpoint(managedUrl);
+};
 
 /**
  * Deep-merges managed-OTLP sending_queue defaults into the exporter config when the endpoint

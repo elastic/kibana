@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
+
 import type {
   NewOtlpOutput,
   OtlpAuthScheme,
@@ -14,14 +16,16 @@ import {
   OTLP_AUTHORIZATION_HEADER,
   otlpAuthScheme,
   otlpAuthType,
+  otlpProtocol,
 } from '../../../../../../../common/constants';
 
-import { isManagedOtlpEndpointUrl } from '../../../../../../../common/services/managed_otlp_endpoint';
+import { sendsToManagedOtlpHost } from '../../../../../../../common/services/otlp_auth';
 
 import { useInput, useSecretInput } from '../../../../hooks';
 
 import {
   validateOtlpAuthCredentialSecret,
+  validateOtlpAuthGrpcHeaderName,
   validateOtlpAuthHeaderName,
 } from './output_form_validators';
 
@@ -55,6 +59,15 @@ export function useOtlpAuthInputs(
     disabled
   );
 
+  // the credential row is removed while no authentication is selected, and shows the saved
+  // credential when it is back: a replacement entered before must not be saved unseen
+  const { cancelEdit: cancelCredentialEdit } = otlpAuthCredentialInput;
+  useEffect(() => {
+    if (otlpAuthTypeInput.value === OTLP_AUTH_TYPE_NONE) {
+      cancelCredentialEdit();
+    }
+  }, [otlpAuthTypeInput.value, cancelCredentialEdit]);
+
   return {
     otlpAuthTypeInput,
     otlpAuthSchemeInput,
@@ -65,9 +78,12 @@ export function useOtlpAuthInputs(
 
 export type OtlpAuthInputs = ReturnType<typeof useOtlpAuthInputs>;
 
-/** The managed OTLP endpoint is authenticated by Fleet: an output that uses it has no authentication. */
-export const isOtlpAuthAvailable = (endpoint: string, managedOtlpUrl: string | undefined) =>
-  !isManagedOtlpEndpointUrl(endpoint.trim(), managedOtlpUrl);
+/**
+ * The managed OTLP endpoint is authenticated by Fleet: an output that sends data to it, for any
+ * signal, has no authentication.
+ */
+export const isOtlpAuthAvailable = (endpoints: string[], managedOtlpUrl: string | undefined) =>
+  !sendsToManagedOtlpHost(endpoints, managedOtlpUrl);
 
 export const isOtlpAuthSelected = (inputs: OtlpAuthInputs) =>
   inputs.otlpAuthTypeInput.value !== OTLP_AUTH_TYPE_NONE;
@@ -82,12 +98,26 @@ export const getSelectedOtlpAuthHeaderName = (inputs: OtlpAuthInputs): string | 
     : OTLP_AUTHORIZATION_HEADER;
 };
 
-/** Validates every input, so all the errors are shown. Returns whether they are all valid. */
-export const validateOtlpAuthInputs = (inputs: OtlpAuthInputs): boolean =>
-  !isOtlpAuthSelected(inputs) ||
-  [inputs.otlpAuthHeaderNameInput.validate(), inputs.otlpAuthCredentialInput.validate()].every(
-    Boolean
-  );
+/**
+ * Validates every input, so all the errors are shown. Returns whether they are all valid. The
+ * gRPC exporter sends the custom header as metadata, which allows fewer characters.
+ */
+export const validateOtlpAuthInputs = (inputs: OtlpAuthInputs, protocol: string): boolean => {
+  if (!isOtlpAuthSelected(inputs)) {
+    return true;
+  }
+  let headerNameValid = inputs.otlpAuthHeaderNameInput.validate();
+  if (
+    headerNameValid &&
+    protocol === otlpProtocol.Grpc &&
+    inputs.otlpAuthTypeInput.value === otlpAuthType.CustomHeader
+  ) {
+    const errors = validateOtlpAuthGrpcHeaderName(inputs.otlpAuthHeaderNameInput.value);
+    inputs.otlpAuthHeaderNameInput.setErrors(errors);
+    headerNameValid = !errors;
+  }
+  return [headerNameValid, inputs.otlpAuthCredentialInput.validate()].every(Boolean);
+};
 
 /**
  * Builds the authentication of the payload: `auth: null` removes a stored one with its credential.

@@ -49,6 +49,7 @@ import type {
   KafkaOutput,
   NewBeatsOutput,
   NewOtlpOutput,
+  OtlpExporterConfig,
   OtlpGrpcExporterConfig,
   OtlpHttpExporterConfig,
   UpdateOutput,
@@ -187,6 +188,28 @@ export function withRemovedOtlpHeaders(
   return removedHeaders.length
     ? { ...Object.fromEntries(removedHeaders.map((key) => [key, null])), ...headers }
     : headers;
+}
+
+/**
+ * The exporter an output has once an update is saved. The update is merged into the saved
+ * exporter, unless it changes the protocol: the settings of the previous protocol are removed.
+ */
+function getMergedOtlpExporter(
+  update: OtlpExporterConfig | undefined,
+  stored: OtlpExporterConfig | undefined
+): Partial<OtlpExporterConfig> | undefined {
+  if (!update) {
+    return stored;
+  }
+  if (!stored || update.protocol !== stored.protocol) {
+    return update;
+  }
+  return {
+    ...stored,
+    ...update,
+    // headers replace the stored ones
+    headers: update.headers !== undefined ? update.headers : stored.headers,
+  } as Partial<OtlpExporterConfig>;
 }
 
 /** Drops the headers that an update removed, which the saved object keeps as `null`. */
@@ -823,8 +846,7 @@ class OutputService {
       validateOtlpAuth({
         auth: output.auth,
         hasCredential: !!output.secrets?.auth?.credential,
-        endpoint: output.otlp_exporter.endpoint,
-        headers: output.otlp_exporter.headers,
+        exporter: output.otlp_exporter,
       });
     }
 
@@ -1328,6 +1350,14 @@ class OutputService {
     const isTypeChanged = mergedType !== originalOutput.type;
 
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
+
+    if (mergedType !== outputType.Otlp) {
+      // the update schemas are not tied to the type: an update can carry the OTLP settings
+      const { auth, secrets } = data as Partial<NewOtlpOutput>;
+      if ((auth !== undefined && auth !== null) || secrets?.auth !== undefined) {
+        throw new OutputInvalidError('auth can only be set on an OTLP output');
+      }
+    }
 
     if (mergedType === outputType.Otlp) {
       data = withTrimmedOtlpAuthCredential(data);
@@ -2054,11 +2084,7 @@ class OutputService {
     validateOtlpAuth({
       auth,
       hasCredential: !!credential,
-      endpoint: data.otlp_exporter?.endpoint ?? original?.otlp_exporter?.endpoint,
-      headers:
-        data.otlp_exporter?.headers !== undefined
-          ? data.otlp_exporter.headers
-          : original?.otlp_exporter?.headers,
+      exporter: getMergedOtlpExporter(data.otlp_exporter, original?.otlp_exporter),
     });
   }
 

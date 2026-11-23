@@ -13,7 +13,7 @@ import { otlpCompressionType, otlpProtocol } from '../../../../../../../common/c
 import { useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
-import { changeOtlpProtocol, isOtlpGrpc } from './use_otlp_inputs';
+import { changeOtlpProtocol, getOtlpInputEndpoints, isOtlpGrpc } from './use_otlp_inputs';
 import { OtlpDefaultHint, OtlpSpecLinks } from './otlp_spec';
 import { OtlpSelectSetting, OtlpTextSetting } from './otlp_setting_fields';
 import { OtlpHeaders } from './output_form_otlp_headers';
@@ -87,7 +87,7 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
 }) => {
   const isGrpc = isOtlpGrpc(inputs);
   const { cloud } = useStartServices();
-  const showAuth = isOtlpAuthAvailable(inputs.otlpEndpointInput.value, cloud?.managedOtlp?.url);
+  const showAuth = isOtlpAuthAvailable(getOtlpInputEndpoints(inputs), cloud?.managedOtlp?.url);
 
   return (
     <>

@@ -107,7 +107,12 @@ import {
   validateKafkaOAuth2Inputs,
 } from './use_kafka_oauth2_inputs';
 import type { OtlpInputs } from './use_otlp_inputs';
-import { buildOtlpExporterConfig, useOtlpInputs, validateOtlpInputs } from './use_otlp_inputs';
+import {
+  buildOtlpExporterConfig,
+  getOtlpInputEndpoints,
+  useOtlpInputs,
+  validateOtlpInputs,
+} from './use_otlp_inputs';
 import type { OtlpAuthInputs } from './use_otlp_auth_inputs';
 import {
   buildOtlpAuth,
@@ -803,7 +808,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     }
   );
   const isOtlpAuthEnabled = isOtlpAuthAvailable(
-    otlpInputs.otlpEndpointInput.value,
+    getOtlpInputEndpoints(otlpInputs),
     cloud?.managedOtlp?.url
   );
 
@@ -927,7 +932,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return [
         nameInputValid,
         validateOtlpInputs(otlpInputs),
-        !isOtlpAuthEnabled || validateOtlpAuthInputs(otlpAuthInputs),
+        !isOtlpAuthEnabled ||
+          validateOtlpAuthInputs(otlpAuthInputs, otlpInputs.otlpProtocolInput.value),
       ].every(Boolean);
     }
     if (isLogstash) {

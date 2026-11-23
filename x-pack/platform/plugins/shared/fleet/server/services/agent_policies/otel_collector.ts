@@ -851,7 +851,7 @@ function generateOtelcolExporter(
       const authHeaders = getOtlpAuthHeaders(
         dataOutput.auth,
         dataOutput.secrets?.auth?.credential,
-        dataOutput.otlp_exporter.endpoint
+        dataOutput.otlp_exporter
       );
       return {
         extensions: {},

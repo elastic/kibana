@@ -5,31 +5,39 @@
  * 2.0.
  */
 
-import { OTLP_AUTH_SCHEME_PREFIX, otlpAuthType } from '../../../common/constants';
+import { OTLP_AUTH_SCHEME_PREFIX, otlpAuthType, otlpProtocol } from '../../../common/constants';
 import {
   findOtlpAuthHeaderConflict,
   getOtlpAuthHeaderName,
+  getOtlpExporterEndpoints,
   isValidOtlpAuthCredential,
+  isValidOtlpGrpcMetadataKey,
+  sendsToManagedOtlpHost,
 } from '../../../common/services/otlp_auth';
-import type { OtlpOutputAuth, SOSecret } from '../../../common/types';
+import type { OtlpExporterConfig, OtlpOutputAuth, SOSecret } from '../../../common/types';
 import { OutputInvalidError } from '../../errors';
 import { toCompiledSecretRef } from '../secrets/common';
-import { isManagedOtlpEndpoint } from '../utils/managed_otlp';
+import { getManagedOtlpEndpoint } from '../utils/managed_otlp';
+
+/** Whether the exporter sends data to the managed OTLP endpoint, for any of its signals. */
+const sendsToManagedOtlpEndpoint = (exporter: Partial<OtlpExporterConfig> | null | undefined) =>
+  sendsToManagedOtlpHost(getOtlpExporterEndpoints(exporter), getManagedOtlpEndpoint());
 
 /**
  * The header that the OTLP exporter sends to authenticate: the credential is a reference to a
  * secret, that Fleet Server replaces with its value. The credential is sent verbatim, Fleet does
- * not encode it. There is none for the managed OTLP endpoint, which Fleet authenticates itself.
+ * not encode it. There is none when the exporter sends data to the managed OTLP endpoint, which
+ * Fleet authenticates itself.
  */
 export function getOtlpAuthHeaders(
   auth: OtlpOutputAuth | null | undefined,
   credential: SOSecret | null | undefined,
-  endpoint: string
+  exporter: Partial<OtlpExporterConfig>
 ): Record<string, string> | undefined {
   if (!auth || typeof credential !== 'object' || !credential?.id) {
     return undefined;
   }
-  if (isManagedOtlpEndpoint(endpoint)) {
+  if (sendsToManagedOtlpEndpoint(exporter)) {
     return undefined;
   }
   const secretRef = toCompiledSecretRef(credential.id);
@@ -91,13 +99,11 @@ export function validateOtlpAuthCredential(
 export function validateOtlpAuth({
   auth,
   hasCredential,
-  endpoint,
-  headers,
+  exporter,
 }: {
   auth: OtlpOutputAuth | null | undefined;
   hasCredential: boolean;
-  endpoint: string | undefined;
-  headers: Record<string, string> | null | undefined;
+  exporter: Partial<OtlpExporterConfig> | null | undefined;
 }): void {
   if (!auth) {
     if (hasCredential) {
@@ -107,7 +113,7 @@ export function validateOtlpAuth({
   }
 
   // the managed OTLP endpoint is authenticated with an API key that Fleet Server creates
-  if (endpoint && isManagedOtlpEndpoint(endpoint)) {
+  if (sendsToManagedOtlpEndpoint(exporter)) {
     throw new OutputInvalidError(
       'auth cannot be set for an output that sends data to the managed OTLP endpoint'
     );
@@ -117,8 +123,18 @@ export function validateOtlpAuth({
     throw new OutputInvalidError('secrets.auth.credential is required when auth is set');
   }
 
+  if (
+    auth.type === otlpAuthType.CustomHeader &&
+    exporter?.protocol === otlpProtocol.Grpc &&
+    !isValidOtlpGrpcMetadataKey(auth.name)
+  ) {
+    throw new OutputInvalidError(
+      `auth.name "${auth.name}" cannot be sent as gRPC metadata, it can only contain letters, digits, "-", "_" and "."`
+    );
+  }
+
   const conflictingHeader = findOtlpAuthHeaderConflict(
-    Object.keys(headers ?? {}),
+    Object.keys(exporter?.headers ?? {}),
     getOtlpAuthHeaderName(auth)
   );
   if (conflictingHeader) {

@@ -11,7 +11,9 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   findOtlpAuthHeaderConflict,
   isValidOtlpAuthCredential,
+  isValidOtlpGrpcMetadataKey,
   isValidOtlpHeaderName,
+  OTLP_AUTH_CREDENTIAL_MAX_LENGTH,
   OTLP_HEADER_NAME_MAX_LENGTH,
 } from '../../../../../../../common/services/otlp_auth';
 
@@ -929,6 +931,18 @@ export function validateOtlpAuthHeaderName(value: string) {
   }
 }
 
+/** The gRPC exporter sends the custom header as metadata, which allows fewer characters. */
+export function validateOtlpAuthGrpcHeaderName(value: string) {
+  if (!isValidOtlpGrpcMetadataKey(value.trim())) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthGrpcHeaderNameInvalid', {
+        defaultMessage:
+          'With gRPC, the header name can only contain letters, digits, "-", "_" and ".", cannot start with "grpc-" or end with "-bin"',
+      }),
+    ];
+  }
+}
+
 export function validateOtlpAuthCredential(value: string) {
   // the credential is sent trimmed
   const credential = value?.trim() ?? '';
@@ -936,6 +950,14 @@ export function validateOtlpAuthCredential(value: string) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialRequired', {
         defaultMessage: 'Credential is required',
+      }),
+    ];
+  }
+  if (credential.length > OTLP_AUTH_CREDENTIAL_MAX_LENGTH) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialTooLong', {
+        defaultMessage: 'Credential must be at most {max} characters',
+        values: { max: OTLP_AUTH_CREDENTIAL_MAX_LENGTH },
       }),
     ];
   }

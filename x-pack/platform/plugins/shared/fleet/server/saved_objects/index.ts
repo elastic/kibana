@@ -871,7 +871,6 @@ export const getSavedObjectTypes = (
             type: 'object',
             dynamic: false,
           },
-          auth: { type: 'object', dynamic: false },
           is_default_otel: { type: 'boolean' },
         },
       },
@@ -1065,21 +1064,6 @@ export const getSavedObjectTypes = (
           ],
           schemas: {
             // `kerberos` is known to this version: it is kept when reading a newer document
-            forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
-            create: schema.object({}, { unknowns: 'allow' }),
-          },
-        },
-        '14': {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                auth: { type: 'object', dynamic: false },
-              },
-            },
-          ],
-          schemas: {
-            // `auth` (OTLP output authentication) is known to this version: it is kept when reading a newer document
             forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
             create: schema.object({}, { unknowns: 'allow' }),
           },

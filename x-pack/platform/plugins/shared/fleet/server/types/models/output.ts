@@ -26,6 +26,7 @@ import {
 } from '../../../common/constants';
 import {
   isValidOtlpHeaderName,
+  OTLP_AUTH_CREDENTIAL_MAX_LENGTH,
   OTLP_HEADER_NAME_MAX_LENGTH,
 } from '../../../common/services/otlp_auth';
 
@@ -820,9 +821,18 @@ const OtlpAuthResponseSchema = schema.discriminatedUnion('type', [
   OtlpCustomAuthHeaderSchema.extends({}, { meta: { id: 'otlp_response_custom_auth_header' } }),
 ]);
 
+// the credential is sent in a single header: it is bounded to what servers accept for a header
+const OtlpAuthCredentialSchema = schema.oneOf([
+  schema.object({
+    id: schema.string(),
+    hash: schema.maybe(schema.string()),
+  }),
+  schema.string({ minLength: 1, maxLength: OTLP_AUTH_CREDENTIAL_MAX_LENGTH }),
+]);
+
 const OtlpSecretsSchema = schema.maybe(
   schema.object({
-    auth: schema.maybe(schema.object({ credential: schema.maybe(secretRefSchema) })),
+    auth: schema.maybe(schema.object({ credential: schema.maybe(OtlpAuthCredentialSchema) })),
     otlp_exporter: schema.maybe(
       schema.object({
         tls: schema.maybe(
@@ -843,7 +853,11 @@ const OtlpSecretsSchema = schema.maybe(
 
 const OtlpUpdateSecretsSchema = schema.maybe(
   schema.object({
-    auth: schema.maybe(schema.object({ credential: schema.maybe(nullableSecretRefSchema) })),
+    auth: schema.maybe(
+      schema.object({
+        credential: schema.maybe(schema.oneOf([schema.literal(null), OtlpAuthCredentialSchema])),
+      })
+    ),
     otlp_exporter: schema.maybe(
       schema.object({
         tls: schema.maybe(

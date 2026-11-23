@@ -2450,6 +2450,46 @@ describe('EditOutputFlyout', () => {
         expect(payload.secrets).toBeUndefined();
       });
 
+      it('should drop a replacement credential when the authentication is turned off and on', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.click(utils.getByText('Replace Credential'));
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthCredentialInput'), {
+          target: { value: 'unseen-credential' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'none' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'auth_header' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.auth).toEqual({ type: 'auth_header', scheme: 'bearer_token' });
+        expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should reject a custom header that gRPC cannot send as metadata', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'custom_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthHeaderNameInput'), {
+          target: { value: 'x-api+key' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText(/With gRPC, the header name can only contain letters/)
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+
       it('should remove the stored authentication when None is selected', async () => {
         const { utils } = renderFlyout(otlpOutputWithAuth);
         fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {

@@ -5402,6 +5402,52 @@ describe('Output Service', () => {
           );
         });
 
+        it('rejects an authentication on an output that is not an OTLP output', async () => {
+          await expect(
+            outputService.update(getMockedSoClient({}), esClientMock, 'existing-es-output', {
+              auth: { type: 'auth_header', scheme: 'api_key' },
+              secrets: { auth: { credential: 'my-key' } },
+            } as any)
+          ).rejects.toThrow('auth can only be set on an OTLP output');
+        });
+
+        it('rejects a custom header that gRPC cannot send as metadata', async () => {
+          await expect(
+            outputService.update(
+              getMockedSoClient({}),
+              esClientMock,
+              'existing-otlp-output-with-auth',
+              {
+                auth: { type: 'custom_header', name: 'x-api+key' },
+              }
+            )
+          ).rejects.toThrow('cannot be sent as gRPC metadata');
+        });
+
+        it('rejects an authentication when a signal is sent to the managed OTLP endpoint', async () => {
+          mockedAppContextService.getCloud.mockReturnValue({
+            managedOtlp: { url: 'managed-otlp.ingest.elastic.cloud' },
+          } as any);
+          try {
+            await expect(
+              outputService.update(
+                getMockedSoClient({}),
+                esClientMock,
+                'existing-otlp-output-with-auth',
+                {
+                  otlp_exporter: {
+                    endpoint: 'https://otel.example.com:4318',
+                    protocol: 'http/protobuf',
+                    logs_endpoint: 'https://managed-otlp.ingest.elastic.cloud/v1/logs',
+                  },
+                }
+              )
+            ).rejects.toThrow('auth cannot be set for an output that sends data to the managed');
+          } finally {
+            mockedAppContextService.getCloud.mockReturnValue({} as any);
+          }
+        });
+
         it('rejects an authentication added without a credential', async () => {
           await expect(
             outputService.update(getMockedSoClient({}), esClientMock, 'existing-otlp-output', {
