@@ -22,6 +22,7 @@ import type {
   SourceError,
   UnavailableColumn,
 } from '../../common';
+import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
 import { InventoryTypeNotFoundError } from '../inventory/errors/inventory_type_not_found_error';
 import {
   applyLimit,
@@ -32,6 +33,7 @@ import {
   mergeRows,
   orderRows,
   planRowLimit,
+  probeSources,
   summarizeResults,
   toEsqlRequestBody,
   toSourceError,
@@ -42,13 +44,13 @@ import {
   ENTITY_ID_COLUMN,
   generateListQueries,
   getDynamicBlock,
+  planSources,
   resolveIdentityPlan,
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
 import type { ListAttributeValuesRequest, ListRequest } from '../inventory/types';
 import { partialRowsReason } from '../inventory/reasons';
 import { listAttributeValues } from './list_attribute_values';
-import { probeAndPlanSources, toTypeDefinitionError } from './planning';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
@@ -350,24 +352,51 @@ export class InventoryService {
     signal: AbortSignal | undefined
   ): Promise<ListPlan> => {
     try {
-      const { probes, allPlans } = await probeAndPlanSources(this.esClient, definition, signal);
+      const { sources } = getDynamicBlock(definition);
+      const probesStartedAtMs = performance.now();
+      const probes = await probeSources(
+        this.esClient,
+        sources.map(({ indexPattern }) => indexPattern),
+        { signal }
+      );
+      const probesMs = performance.now() - probesStartedAtMs;
+      const probeErrors: SourceError[] = [];
+      probes.forEach((probe, indexPattern) => {
+        if (probe.failed) {
+          probeErrors.push({ indexPattern, status: probe.status, reason: probe.reason });
+        }
+      });
+      const failedPatterns = new Set(probeErrors.map(({ indexPattern }) => indexPattern));
+
+      const allPlans = planSources(
+        definition,
+        sources.map(({ indexPattern }) => {
+          const probe = probes.get(indexPattern);
+          return { hasTimeSeries: probe !== undefined && !probe.failed && probe.hasTimeSeries };
+        })
+      );
       const identity = resolveIdentityPlan(definition);
       const columns = buildColumns(definition, allPlans, identity);
       const allQueries = generateListQueries(definition, allPlans, window, planRowLimit(limit));
       const runnable = allPlans.flatMap((plan, position) =>
-        probes.failedPatterns.has(plan.indexPattern) ? [] : [{ plan, query: allQueries[position] }]
+        failedPatterns.has(plan.indexPattern) ? [] : [{ plan, query: allQueries[position] }]
       );
       return {
-        probes: probes.results,
+        probes,
         plans: runnable.map(({ plan }) => plan),
         identity,
         columns,
         queries: runnable.map(({ query }) => query),
-        probeErrors: probes.errors,
-        probesMs: probes.durationMs,
+        probeErrors,
+        probesMs,
       };
     } catch (error) {
-      throw toTypeDefinitionError(this.logger, definition, error);
+      if (error.name !== 'InventoryDefinitionError') {
+        throw error;
+      }
+      const definitionError = new InventoryTypeDefinitionError(definition.type, error.message);
+      this.logger.error(definitionError.message);
+      throw definitionError;
     }
   };
 

@@ -113,14 +113,21 @@ apiTest.describe(
     });
 
     apiTest('narrows an attribute by an identity selection', async ({ apiClient }) => {
-      const response = await postValues(apiClient, {
+      const matching = await postValues(apiClient, {
         ...BASE,
         attribute: CLUSTER,
         filters: { [NAMESPACE]: ['platform'] },
       });
+      const nonMatching = await postValues(apiClient, {
+        ...BASE,
+        attribute: CLUSTER,
+        filters: { [NAMESPACE]: ['no-such-namespace'] },
+      });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.values).toStrictEqual(['scout-cluster']);
+      expect(matching).toHaveStatusCode(200);
+      expect(matching.body.values).toStrictEqual(['scout-cluster']);
+      expect(nonMatching).toHaveStatusCode(200);
+      expect(nonMatching.body.values).toStrictEqual([]);
     });
 
     apiTest('reports a selected value that is no longer offered', async ({ apiClient }) => {

@@ -125,7 +125,7 @@ export const dynamicBlockSchema = lazySchema(() =>
       sources: z.array(dynamicSourceSchema).min(1).max(MAX_SOURCES),
       // Names of the columns the inventory offers as dropdown filters, in display order. Each is an
       // attribute or an identity field, which the whole-definition rules check.
-      suggestedFilters: z.array(attributeNameSchema).max(MAX_SUGGESTED_FILTERS).optional(),
+      suggestedFilters: z.array(literalFieldPathSchema).max(MAX_SUGGESTED_FILTERS).optional(),
     })
     .superRefine(({ suggestedFilters = [] }, ctx) => {
       const seen = new Set<string>();

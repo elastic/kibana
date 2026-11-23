@@ -45,13 +45,17 @@ describe(ENDPOINT, () => {
   describe('attribute and types', () => {
     it.each([
       ['an empty attribute', { attribute: '' }],
-      ['an over-long attribute', { attribute: 'a'.repeat(257) }],
+      ['an over-long attribute', { attribute: 'a'.repeat(513) }],
       ['no attribute', { attribute: undefined }],
       ['no types', { types: [] }],
       ['more than 32 types', { types: Array.from({ length: 33 }, (_, index) => `type.t${index}`) }],
       ['an invalid type name', { types: ['K8s.Deployment'] }],
     ])('rejects %s', (_label, overrides) => {
       expect(parseRequest({ ...VALID, ...overrides })?.success).toBe(false);
+    });
+
+    it('accepts an attribute as long as a field path', () => {
+      expect(parseRequest({ ...VALID, attribute: 'a'.repeat(512) })?.success).toBe(true);
     });
 
     it('accepts 32 types', () => {

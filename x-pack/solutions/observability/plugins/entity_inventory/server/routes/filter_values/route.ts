@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_FIELD_PATH_LENGTH } from '@kbn/entity-store/common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_FILTER_VALUE_LENGTH } from '../../../common';
 import type { AttributeValuesResponse } from '../../../common';
@@ -25,6 +26,8 @@ const MAX_FILTERS = 16;
 const MAX_VALUES = 100;
 
 const textParam = lazySchema(() => z.string().min(1).max(MAX_FILTER_VALUE_LENGTH));
+// An attribute is a column name: an identity field or attribute, as long as a field path.
+const attributeParam = lazySchema(() => z.string().min(1).max(MAX_FIELD_PATH_LENGTH));
 
 export const filterValuesRoute = createEntityInventoryServerRoute({
   endpoint: 'POST /internal/entity_inventory/filters/_values',
@@ -32,10 +35,10 @@ export const filterValuesRoute = createEntityInventoryServerRoute({
     z.object({
       body: z
         .object({
-          attribute: textParam,
+          attribute: attributeParam,
           types: z.array(typeNameSchema).min(1).max(MAX_TYPES),
           filters: z
-            .record(textParam, z.array(textParam).max(MAX_VALUES))
+            .record(attributeParam, z.array(textParam).max(MAX_VALUES))
             .refine((filters) => Object.keys(filters).length <= MAX_FILTERS, {
               message: `at most ${MAX_FILTERS} filters are allowed`,
             })

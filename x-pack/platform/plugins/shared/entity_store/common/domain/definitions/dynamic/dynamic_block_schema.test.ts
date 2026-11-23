@@ -129,6 +129,14 @@ describe('dynamicBlockSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it(`accepts a name of ${MAX_FIELD_PATH_LENGTH} characters and rejects one more`, () => {
+      const suggested = (name: string) =>
+        dynamicBlockSchema.safeParse({ sources: [source()], suggestedFilters: [name] }).success;
+
+      expect(suggested('a'.repeat(MAX_FIELD_PATH_LENGTH))).toBe(true);
+      expect(suggested('a'.repeat(MAX_FIELD_PATH_LENGTH + 1))).toBe(false);
+    });
+
     it(`accepts ${MAX_SUGGESTED_FILTERS} names`, () => {
       const declared = attributes(MAX_SUGGESTED_FILTERS);
       const result = dynamicBlockSchema.safeParse({

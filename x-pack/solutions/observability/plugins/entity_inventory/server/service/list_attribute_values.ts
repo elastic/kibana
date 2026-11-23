@@ -8,18 +8,21 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import { InventoryRequestError } from '../inventory/errors/inventory_request_error';
-import { executeEsql, planRowLimit, toSourceError } from '../inventory/executor';
+import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
+import { executeEsql, planRowLimit, probeSources, toSourceError } from '../inventory/executor';
 import type { EsqlQueryResult } from '../inventory/executor';
 import {
   ATTRIBUTE_VALUE_COLUMN,
   generateAttributeValuesQueries,
+  getDynamicBlock,
   LAST_SEEN_COLUMN,
+  planSources,
+  resolveIdentityPlan,
 } from '../inventory/generator';
 import type { GeneratedQuery, QueryPlan } from '../inventory/generator';
 import { noReadableIndexReason, partialValuesReason } from '../inventory/reasons';
 import type { ListAttributeValuesRequest } from '../inventory/types';
 import type { AttributeValuesResponse, SourceError } from '../../common';
-import { probeAndPlanSources, toTypeDefinitionError } from './planning';
 
 /** What listing the values of an attribute reads from the plugin. */
 export interface AttributeValuesDependencies {
@@ -69,7 +72,34 @@ const planAttributeValues = async (
   return Promise.all(
     suggesting.map(async (definition): Promise<AttributeValuesPlan> => {
       try {
-        const { probes, allPlans } = await probeAndPlanSources(esClient, definition, signal);
+        const { sources } = getDynamicBlock(definition);
+        // Only a source that declares the attribute can give values, so no other source is probed.
+        const identityFields = new Set(resolveIdentityPlan(definition).groupingFields);
+        const probes = await probeSources(
+          esClient,
+          sources
+            .filter(
+              ({ attributes = [] }) =>
+                identityFields.has(attribute) || attributes.some(({ name }) => name === attribute)
+            )
+            .map(({ indexPattern }) => indexPattern),
+          { signal }
+        );
+        const probeErrors: SourceError[] = [];
+        probes.forEach((probe, indexPattern) => {
+          if (probe.failed) {
+            probeErrors.push({ indexPattern, status: probe.status, reason: probe.reason });
+          }
+        });
+        const failedPatterns = new Set(probeErrors.map(({ indexPattern }) => indexPattern));
+
+        const allPlans = planSources(
+          definition,
+          sources.map(({ indexPattern }) => {
+            const probe = probes.get(indexPattern);
+            return { hasTimeSeries: probe !== undefined && !probe.failed && probe.hasTimeSeries };
+          })
+        );
         const allQueries = generateAttributeValuesQueries(definition, allPlans, {
           attribute,
           selections,
@@ -78,7 +108,7 @@ const planAttributeValues = async (
         });
         const runnable = allPlans.flatMap((plan, position) => {
           const query = allQueries[position];
-          return query === undefined || probes.failedPatterns.has(plan.indexPattern)
+          return query === undefined || failedPatterns.has(plan.indexPattern)
             ? []
             : [{ plan, query }];
         });
@@ -86,10 +116,15 @@ const planAttributeValues = async (
           type: definition.type,
           plans: runnable.map(({ plan }) => plan),
           queries: runnable.map(({ query }) => query),
-          probeErrors: probes.errors,
+          probeErrors,
         };
       } catch (error) {
-        throw toTypeDefinitionError(logger, definition, error);
+        if (error.name !== 'InventoryDefinitionError') {
+          throw error;
+        }
+        const definitionError = new InventoryTypeDefinitionError(definition.type, error.message);
+        logger.error(definitionError.message);
+        throw definitionError;
       }
     })
   );
@@ -100,8 +135,8 @@ const planAttributeValues = async (
  * plan that can contribute, run concurrently, the value labels applied by the query itself, merged
  * into sorted distinct values. Throws what `planAttributeValues` throws. A source whose probe or query
  * failed, or whose answer is partial, is reported in `errors[]` and does not fail the request.
- * `truncated` is true only when the limit left values out; then a selected value beyond the cut
- * may come back in `invalidSelections`.
+ * `truncated` is true only when the limit left values out. Every selected value is in `values` or
+ * in `invalidSelections`, so a selected value beyond the cut comes back in `invalidSelections`.
  */
 export const listAttributeValues = async (
   dependencies: AttributeValuesDependencies,
@@ -167,11 +202,13 @@ export const listAttributeValues = async (
     });
   });
 
-  const values = [...offered].sort();
+  const sorted = [...offered].sort();
+  const values = sorted.slice(0, limit);
+  const returned = new Set(values);
   return {
-    values: values.slice(0, limit),
-    invalidSelections: selected.filter((value) => !offered.has(value)),
-    truncated: values.length > limit,
+    values,
+    invalidSelections: selected.filter((value) => !returned.has(value)),
+    truncated: sorted.length > limit,
     errors: uniqueErrors(errors),
   };
 };

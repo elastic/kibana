@@ -237,6 +237,31 @@ describe('listAttributeValues', () => {
       expect(valuesQueries(esClient)[0].query).toContain(STATE);
     });
 
+    it('probes only the sources that declare the attribute', async () => {
+      const { dependencies, esClient } = createDependencies([deployment(['paused'])]);
+      answerByPattern(esClient, { [STATE]: { values: ['true'] } });
+
+      await listAttributeValues(dependencies, request({ attribute: 'paused' }));
+
+      const probes = esClient.esql.query.mock.calls
+        .map(([body]) => body)
+        .filter(({ query }) => isProbe(query));
+      expect(probes).toHaveLength(1);
+      expect(probes[0].query).toContain(STATE);
+    });
+
+    it('probes every source for an identity field', async () => {
+      const { dependencies, esClient } = createDependencies([deployment(['kubernetes.namespace'])]);
+      answerByPattern(esClient, {});
+
+      await listAttributeValues(dependencies, request({ attribute: 'kubernetes.namespace' }));
+
+      const probes = esClient.esql.query.mock.calls
+        .map(([body]) => body)
+        .filter(({ query }) => isProbe(query));
+      expect(probes).toHaveLength(2);
+    });
+
     it('reports the selected values that are no longer offered', async () => {
       const { dependencies, esClient } = createDependencies([deployment(['cluster'])]);
       answerByPattern(esClient, { [KUBELET]: { values: ['eu'] } });
@@ -251,6 +276,20 @@ describe('listAttributeValues', () => {
   });
 
   describe('the limit', () => {
+    it('reports a selected value that the limit cut, so every selected value is in one of the two lists', async () => {
+      const { dependencies, esClient } = createDependencies([deployment(['cluster'])]);
+      answerByPattern(esClient, { [KUBELET]: { values: ['a', 'b'] } });
+
+      const response = await listAttributeValues(
+        dependencies,
+        request({ limit: 1, selected: ['b'] })
+      );
+
+      expect(response.values).toEqual(['a']);
+      expect(response.invalidSelections).toEqual(['b']);
+      expect(response.truncated).toBe(true);
+    });
+
     it('keeps the first values and says that the limit left others out', async () => {
       const { dependencies, esClient } = createDependencies([deployment(['cluster'])]);
       answerByPattern(esClient, {
