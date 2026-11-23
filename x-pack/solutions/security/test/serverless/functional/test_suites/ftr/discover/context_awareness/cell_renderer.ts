@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIALIZE_SECURITY_SOLUTION_URL } from '@kbn/security-solution-plugin/common/api/initialization';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { getDiscoverESQLState } from './utils';
 import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
@@ -14,13 +16,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
+  const roleScopedSupertest = getService('roleScopedSupertest');
 
   describe('cell renderer', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
-      await PageObjects.common.navigateToApp('security', {
-        path: 'alerts',
+
+      // Loading the Security app only creates the "Security solution default" data view as an
+      // unawaited side effect, which the ES|QL test cut short by navigating to Discover.
+      const adminSupertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        useCookieHeader: true,
+        withInternalHeaders: true,
       });
+      await adminSupertest
+        .post(INITIALIZE_SECURITY_SOLUTION_URL)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .send({ flows: ['security-data-views'] })
+        .expect(200);
     });
 
     describe('ES|QL mode', () => {
