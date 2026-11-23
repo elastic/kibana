@@ -117,7 +117,7 @@ groups:
   - group: Preconfiguration settings (for advanced use cases)
     id: _preconfiguration_settings_for_advanced_use_cases
     description: |
-      Use these settings to pre-define integrations, agent policies, and {{fleet-server}} hosts or proxies that you want {{fleet}} to load up by default.
+      Use these settings to pre-define integrations, agent policies, outputs, {{fleet-server}} hosts, proxies, or agent binary download sources that you want {{fleet}} to load up by default.
     note: "These settings are not supported to pre-configure the Endpoint and Cloud Security integration."
     settings:
 
@@ -444,9 +444,9 @@ groups:
               Optional. Unique ID of the proxy to access the {{fleet-server}} host.
             datatype: string
 
-      - setting: xpack.fleet.proxy
+      - setting: xpack.fleet.proxies
         description: |
-          List of proxies to access {{fleet-server}} that are configured when the {{fleet}} app starts.
+          List of proxies that are configured when the {{fleet}} app starts. {{fleet-server}} hosts, outputs, and agent binary download sources use a proxy by referencing its `id` in their `proxy_id` setting.
         datatype: string
         applies_to:
           stack: ga
@@ -455,33 +455,32 @@ groups:
         settings:
           - setting: "[n].id"
             description: |
-              Required. Unique ID of the proxy to access the {{fleet-server}} host.
+              Required. Unique ID of the proxy.
             datatype: string
 
           - setting: "[n].name"
             description: |
-              Required. Name of the proxy to access the {{fleet-server}} host.
+              Required. Name of the proxy.
             datatype: string
 
           - setting: "[n].url"
             description: |
-              Required. URL that {{agents}} use to connect to the proxy to access {{fleet-server}}.
+              Required. URL of the proxy.
             datatype: string
 
           - setting: "[n].proxy_headers"
             description: |
-              Optional. Map of headers to use with the proxy.
+              Optional. Headers to send to the proxy, as a map of header names to values. A value can be a string, a number, or a boolean.
             datatype: string
-            settings:
-              - setting: key
-                description: |
-                  Key to use for the proxy header.
-                datatype: string
-
-              - setting: value
-                description: |
-                  Value to use for the proxy header.
-                datatype: string
+            example: |
+              ```yaml
+              xpack.fleet.proxies:
+                - id: my-proxy
+                  name: My proxy
+                  url: http://proxy.example.com:3128
+                  proxy_headers:
+                    X-Custom-Header: my-value
+              ```
 
           - setting: "[n].certificate_authorities"
             description: |
@@ -497,6 +496,101 @@ groups:
             description: |
               Optional. The certificate key used to authenticate the proxy.
             datatype: string
+
+      - setting: xpack.fleet.binaryDownloadSource
+        description: |
+          List of agent binary download sources that {{fleet}} configures when {{kib}} starts. {{agents}} download the binaries for upgrades from these sources. For more information, refer to [Agent binary download settings](docs-content://reference/fleet/fleet-settings.md#fleet-agent-binary-download-settings).
+
+          The {{fleet}} UI marks preconfigured download sources as managed, and you can't delete them in the UI or through the API. Each time {{kib}} starts, {{fleet}} applies the values from `kibana.yml`, replacing any changes made to them in the UI or through the API.
+
+          If you remove a source from `kibana.yml`, {{fleet}} deletes it, unless it's the default source or an agent policy uses it. In that case, {{fleet}} keeps the source, and you can manage it in the UI.
+
+          When an agent policy uses several download sources, the `proxy_id`, `ssl`, and `reserve_diskspace` settings of its first source apply to all of them.
+
+          You can't configure authentication for a download source in `kibana.yml`. Use the {{fleet}} UI or API instead.
+        datatype: string
+        applies_to:
+          stack: ga 9.6+
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+        example: |
+          ```yaml
+          xpack.fleet.proxies:
+            - id: my-proxy
+              name: My proxy
+              url: http://proxy.example.com:3128
+
+          xpack.fleet.binaryDownloadSource:
+            - id: my-artifact-registry
+              name: My artifact registry
+              host: https://artifacts.example.com/downloads/
+              is_default: true
+              proxy_id: my-proxy
+              reserve_diskspace: false
+            - id: my-tls-registry
+              name: My TLS registry
+              host: https://artifacts-tls.example.com/downloads/
+              ssl:
+                certificate_authorities:
+                  - /etc/pki/ca.pem
+                certificate: /etc/pki/client.pem
+                key: /etc/pki/client.key
+          ```
+        settings:
+          - setting: "[n].id"
+            description: |
+              Required. Unique ID for the download source.
+            datatype: string
+
+          - setting: "[n].name"
+            description: |
+              Required. Name of the download source.
+            datatype: string
+
+          - setting: "[n].host"
+            description: |
+              Required. URL of the artifact registry that {{agents}} download binaries from, for example `https://artifacts.example.com/downloads/`.
+            datatype: string
+
+          - setting: "[n].is_default"
+            description: |
+              Optional. If `true`, agent policies that don't select a download source use this one.
+            datatype: bool
+            default: false
+
+          - setting: "[n].proxy_id"
+            description: |
+              Optional. ID of a proxy defined in `xpack.fleet.proxies` that {{agents}} use to connect to the download source.
+            datatype: string
+
+          - setting: "[n].reserve_diskspace"
+            description: |
+              Optional. If `true`, {{agents}} reserve disk space for the new agent package before an upgrade, so the upgrade fails early if there isn't enough space. Set to `false` to turn off the reservation, for example if it causes upgrades to fail.
+            datatype: bool
+            default: true
+
+          - setting: "[n].ssl"
+            description: |
+              Optional. TLS settings that {{agents}} use to connect to the download source. If you set `proxy_id`, {{agents}} use the TLS settings of the proxy instead. Each certificate or key value can be a path to a PEM file on the {{agent}} host or the PEM-encoded contents.
+            datatype: string
+            settings:
+              - setting: certificate_authorities
+                description: |
+                  List of certificate authorities (CAs) that {{agents}} trust when verifying the server certificate of the download source.
+                datatype: string
+
+              - setting: certificate
+                description: |
+                  Client certificate that {{agents}} use for mutual TLS (mTLS) authentication with the download source.
+                datatype: string
+
+              - setting: key
+                description: |
+                  Private key of the client certificate.
+                datatype: string
 
       - setting: xpack.fleet.enableExperimental
         description: |
