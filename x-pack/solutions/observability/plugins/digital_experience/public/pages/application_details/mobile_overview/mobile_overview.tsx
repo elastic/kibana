@@ -7,6 +7,8 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiButton,
+  EuiEmptyPrompt,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,6 +37,8 @@ import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
+import { MOBILE_ERROR_RATE_DESCRIPTION } from '../../../labels';
 import { toTimeRangeQuery } from '../../../utils/time_range_query';
 import { PlatformBadges } from '../../../components/platform_badges';
 import { MobilePanel } from './mobile_panel';
@@ -167,9 +171,7 @@ const MOBILE_KPIS: ReadonlyArray<
     title: i18n.translate('xpack.digitalExperience.mobile.kpi.errorRate', {
       defaultMessage: 'Error rate',
     }),
-    tooltip: i18n.translate('xpack.digitalExperience.mobile.kpi.errorRateTooltip', {
-      defaultMessage: 'Exceptions per session in the time range.',
-    }),
+    tooltip: MOBILE_ERROR_RATE_DESCRIPTION,
     format: 'number',
     changeUnit: 'relative',
     higherIsBetter: false,
@@ -200,6 +202,30 @@ const NO_DATA_BODY = i18n.translate('xpack.digitalExperience.mobile.empty.body',
   defaultMessage:
     'There is no data from EDOT Android or EDOT iOS for this application in the selected time range and filters. Try a wider time range, or instrument the application.',
 });
+
+const NO_MATCHES_TITLE = i18n.translate('xpack.digitalExperience.mobile.noMatches.title', {
+  defaultMessage: 'No mobile data matches the filters',
+});
+
+const NO_MATCHES_BODY = i18n.translate('xpack.digitalExperience.mobile.noMatches.body', {
+  defaultMessage:
+    'This application has mobile data, but none for the selected environment, OS and release. Clear the filters, or try a wider time range.',
+});
+
+const ClearFiltersButton = ({ onClear }: { onClear: () => void }) => (
+  <EuiButton
+    data-test-subj="digitalExperienceMobileClearFilters"
+    {...getEbtProps({
+      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CLEAR_FILTERS,
+      element: MOBILE_APPLICATION_EBT_ELEMENTS.CLEAR_FILTERS,
+    })}
+    onClick={onClear}
+  >
+    {i18n.translate('xpack.digitalExperience.mobile.clearFilters', {
+      defaultMessage: 'Clear filters',
+    })}
+  </EuiButton>
+);
 
 /**
  * The mobile application page, all its platforms: filters, the KPI row and the sections the
@@ -253,6 +279,12 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
   );
 
   const hasNoData = currentKpis !== undefined && !currentKpis.hasData;
+  const isFiltered = environment !== undefined || osName !== undefined || release !== undefined;
+  const updateUrlQuery = useUpdateUrlQuery();
+  // One history entry, so Back restores every filter at once.
+  const clearFilters = () =>
+    updateUrlQuery({ environment: undefined, osName: undefined, release: undefined });
+  const clearFiltersButton = isFiltered ? <ClearFiltersButton onClear={clearFilters} /> : undefined;
   const errorPrompt =
     error && !loading ? (
       <LoadErrorPrompt
@@ -342,9 +374,18 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
             <MobileUnreadableDataPrompt
               data-test-subj="digitalExperienceMobileUnreadableData"
               title={UNREADABLE_DATA_TITLE}
-              isFiltered={
-                environment !== undefined || osName !== undefined || release !== undefined
-              }
+              isFiltered={isFiltered}
+              actions={clearFiltersButton}
+            />
+          ) : // With full access, nothing matching the filters isn't a reason to instrument the app.
+          isFiltered ? (
+            <EuiEmptyPrompt
+              data-test-subj="digitalExperienceMobileNoMatches"
+              iconType="magnify"
+              titleSize="s"
+              title={<h2>{NO_MATCHES_TITLE}</h2>}
+              body={<p>{NO_MATCHES_BODY}</p>}
+              actions={clearFiltersButton}
             />
           ) : (
             <MobileOnboardingPrompt

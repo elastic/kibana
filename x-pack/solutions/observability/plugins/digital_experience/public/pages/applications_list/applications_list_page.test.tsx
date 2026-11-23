@@ -241,6 +241,20 @@ describe('ApplicationsListPage mobile applications', () => {
     );
   });
 
+  it('explains the error rate, a ratio per session, in its column header', async () => {
+    respondWith([mobileApp()]);
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceMobileApplicationsTable');
+    const header = screen.getByRole('columnheader', { name: /Error rate/ });
+    // A sortable column shows its tooltip on the sort button.
+    fireEvent.mouseOver(within(header).getByTestId('tableHeaderSortButton'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Exceptions per session in the time range.'
+    );
+  });
+
   it('shows the web tab first when there are both, with the count of each', async () => {
     respondWith([webApp(), mobileApp(), mobileApp('news-mobile')]);
     renderPage();
@@ -277,7 +291,18 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.queryByText('trailmap-android')).toBeNull();
   });
 
-  it('links to the mobile setup docs, not EDOT Browser, on the mobile tab without data', async () => {
+  it('keeps the mobile applications alone, without an empty Web tab, back from a mobile application', async () => {
+    // The way back from a mobile application keeps its type in the URL.
+    mockApplicationType('mobile');
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceApplicationTypeTabs')).toBeNull();
+    expect(screen.queryByTestId('digitalExperienceApplicationTypeTab-web')).toBeNull();
+  });
+
+  it('links to the mobile setup docs, not EDOT Browser, with a tab back, on the mobile tab without data', async () => {
     mockApplicationType('mobile');
     respondWith([webApp()]);
     renderPage();
@@ -285,6 +310,41 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsEmpty')).toBeVisible();
     expect(screen.getByTestId('digitalExperienceMobileAndroidDocsLink')).toBeVisible();
     expect(screen.queryByTestId('digitalExperienceApplicationsDocsLink')).toBeNull();
+    expect(screen.getByTestId('digitalExperienceApplicationTypeTab-web')).toHaveTextContent('Web1');
+    expect(
+      screen.getByTestId('digitalExperienceApplicationTypeTab-mobile').getAttribute('aria-selected')
+    ).toBe('true');
+  });
+
+  it('shows the type in the URL while the applications load, so going back never flashes the other', () => {
+    mockApplicationType('mobile');
+    mockFetch.mockReturnValue(new Promise(() => {}));
+    renderPage();
+
+    expect(screen.getByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
+  });
+
+  it('keeps the type in the URL when there are tabs', async () => {
+    mockApplicationType('mobile');
+    respondWith([webApp(), mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceApplicationTypeTabs')).toBeVisible();
+    expect(
+      screen.getByTestId('digitalExperienceApplicationTypeTab-mobile').getAttribute('aria-selected')
+    ).toBe('true');
+    expect(screen.getByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+  });
+
+  it('shows the Mobile tab, on the web one, when no readable mobile data matched with partial access', async () => {
+    respondWith([webApp()], [], [], null, [], 'partial');
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceApplicationsTable')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceApplicationTypeTab-mobile')).toHaveTextContent(
+      'Mobile0'
+    );
   });
 
   it('keeps the tabs, and offers a retry, when only the mobile search failed', async () => {

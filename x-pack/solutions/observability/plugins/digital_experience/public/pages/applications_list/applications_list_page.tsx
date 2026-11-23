@@ -272,22 +272,25 @@ export function ApplicationsListPage() {
   const hasMobileApplications = response?.applications.some(isMobileApplication) ?? false;
   const unavailableSources = response?.unavailableSources ?? [];
   const hasWebFailures = unavailableSources.length > 0;
-  // Web and mobile applications have their own tab, shown when both have data, when the URL picks
-  // one, or when the mobile search failed, whatever the web rows, so its retry stays reachable.
-  const showsTabs =
-    applicationType !== undefined ||
-    mobileAvailability === 'unavailable' ||
-    ((hasWebApplications || hasWebFailures) && hasMobileApplications);
-  const selectedType =
-    applicationType ??
-    (!hasWebApplications && !hasWebFailures && hasMobileApplications
-      ? APPLICATION_TYPE.mobile
-      : APPLICATION_TYPE.web);
-  const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
   // Nothing matched in the indices the user can read, without full access: the prompt says so in
   // place of the setup docs or the environment's empty state, and of the partial access warning.
   const showsMobileUnreadableDataPrompt =
     mobileAvailability === 'partial' && !hasMobileApplications;
+  const typeWithData =
+    !hasWebApplications && !hasWebFailures && hasMobileApplications
+      ? APPLICATION_TYPE.mobile
+      : APPLICATION_TYPE.web;
+  // Web and mobile applications have their own tab when both have something to show (web rows or a
+  // web retry, and mobile rows), for the mobile retry or unreadable data prompt whatever the web, and
+  // when the URL picks the type without data, e.g. for the mobile setup docs, with a tab back. The
+  // type that alone has data shows no empty tab, e.g. back from a mobile application.
+  const showsTabs =
+    mobileAvailability === 'unavailable' ||
+    showsMobileUnreadableDataPrompt ||
+    ((hasWebApplications || hasWebFailures) && hasMobileApplications) ||
+    (response !== undefined && applicationType !== undefined && applicationType !== typeWithData);
+  const selectedType = applicationType ?? typeWithData;
+  const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
 
   const mobileItems = useMemo(
     () =>

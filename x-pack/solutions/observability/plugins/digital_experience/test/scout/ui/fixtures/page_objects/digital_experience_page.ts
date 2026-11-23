@@ -88,11 +88,13 @@ export class DigitalExperiencePage {
   public readonly classicRumPageLoadMetric: Locator;
   public readonly classicRumServiceSelect: Locator;
   public readonly mobileTab: Locator;
-  public readonly mobileApplicationsTable: Locator;
+  public readonly mobileApplicationsTable: EuiBasicTableObject;
   public readonly mobileKpis: Locator;
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
+  public readonly mobileOsList: EuiSelectableObject;
   public readonly platformFilter: Locator;
+  public readonly platformList: EuiSelectableObject;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
@@ -159,25 +161,29 @@ export class DigitalExperiencePage {
     this.classicRumPageLoadMetric = page.getByTestId('uxClientMetrics-totalPageLoad');
     this.classicRumServiceSelect = page.getByTestId('uxServiceNameFilterSelect');
     this.mobileTab = page.getByTestId('digitalExperienceApplicationTypeTab-mobile');
-    this.mobileApplicationsTable = page.getByTestId('digitalExperienceMobileApplicationsTable');
+    this.mobileApplicationsTable = page.components.basicTable(
+      'digitalExperienceMobileApplicationsTable'
+    );
     this.mobileKpis = page.getByTestId('digitalExperienceMobileKpis');
     this.mobilePagePlatforms = page
       .getByTestId('digitalExperienceMobilePagePlatforms')
       .getByTestId('digitalExperiencePlatformBadge');
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
+    this.mobileOsList = page.components.selectable('digitalExperienceMobileOsFilterList');
     this.platformFilter = page.getByTestId('digitalExperiencePlatformFilter');
+    this.platformList = page.components.selectable('digitalExperiencePlatformFilterList');
   }
 
-  /** The row of a mobile application in the Mobile tab's table. */
-  mobileApplicationRow(serviceName: string): Locator {
-    return this.mobileApplicationsTable.getByRole('row').filter({ hasText: serviceName });
-  }
-
-  /** The link that opens a mobile application's page. */
+  /** The link that opens a mobile application's page, by its exact name. */
   mobileApplicationLink(serviceName: string): Locator {
-    return this.mobileApplicationsTable
-      .getByTestId('digitalExperienceMobileApplicationLink')
-      .filter({ hasText: serviceName });
+    return this.mobileApplicationsTable.rows.getByRole('link', { name: serviceName, exact: true });
+  }
+
+  /** The row of a mobile application in the Mobile tab's table, by its exact name. */
+  mobileApplicationRow(serviceName: string): Locator {
+    return this.mobileApplicationsTable.rows.filter({
+      has: this.page.getByRole('link', { name: serviceName, exact: true }),
+    });
   }
 
   /** The value of a KPI of the mobile page, e.g. `Sessions`. */
@@ -185,16 +191,16 @@ export class DigitalExperiencePage {
     return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Value`);
   }
 
-  /** Narrows the mobile page to one OS, e.g. `iPadOS`. */
+  /** Narrows the mobile page to one OS by its label, e.g. `iPadOS`. */
   async selectMobileOs(osName: string): Promise<void> {
     await this.mobileOsFilter.click();
-    await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
+    await this.mobileOsList.selectOption(osName);
   }
 
-  /** Narrows the Mobile tab to one platform, `android` or `ios`. */
-  async selectPlatform(platform: 'android' | 'ios'): Promise<void> {
+  /** Narrows the Mobile tab to one platform by its label, `Android` or `iOS`. */
+  async selectPlatform(label: 'Android' | 'iOS'): Promise<void> {
     await this.platformFilter.click();
-    await this.page.getByTestId(`digitalExperiencePlatformFilterOption-${platform}`).click();
+    await this.platformList.selectOption(label);
   }
 
   /** Opens the list with the given URL query, by default only the time range. */

@@ -181,6 +181,7 @@ describe('MobileOverview', () => {
     expect(screen.getByTestId('digitalExperienceMobileUnreadableData')).not.toHaveTextContent(
       'Nothing matched the filters'
     );
+    expect(screen.queryByTestId('digitalExperienceMobileClearFilters')).toBeNull();
   });
 
   it('names both the filters and the access when nothing readable matched the filters', async () => {
@@ -347,5 +348,50 @@ describe('MobileOverview', () => {
     expect(screen.getByTestId('digitalExperienceMobileIosDocsLink')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceMobileKpis')).toBeNull();
     expect(screen.queryByTestId('digitalExperienceMobileUnreadableData')).toBeNull();
+    expect(screen.queryByTestId('digitalExperienceMobileNoMatches')).toBeNull();
+    expect(screen.queryByTestId('digitalExperienceMobileClearFilters')).toBeNull();
+  });
+
+  it.each([
+    ['an OS and a release', { osName: 'iOS', release: '2.0.0' }, undefined],
+    ['an environment', {}, 'production'],
+  ])(
+    'says nothing matched, with a way to clear the filters, not the setup docs, for %s',
+    async (_, params, environment) => {
+      mockParams(params);
+      jest.mocked(useEnvironment).mockReturnValue({ environment, setEnvironment: jest.fn() });
+      fetch.mockResolvedValue({ ...KPIS, hasData: false });
+      renderPage();
+
+      expect(await screen.findByTestId('digitalExperienceMobileNoMatches')).toHaveTextContent(
+        'No mobile data matches the filters'
+      );
+      expect(screen.queryByTestId('digitalExperienceMobileEmpty')).toBeNull();
+      expect(screen.queryByTestId('digitalExperienceMobileAndroidDocsLink')).toBeNull();
+
+      fireEvent.click(screen.getByTestId('digitalExperienceMobileClearFilters'));
+      // Every filter in one history entry.
+      expect(updateUrlQuery).toHaveBeenCalledTimes(1);
+      expect(updateUrlQuery).toHaveBeenCalledWith({
+        environment: undefined,
+        osName: undefined,
+        release: undefined,
+      });
+    }
+  );
+
+  it('offers to clear the filters when nothing readable matched them', async () => {
+    mockParams({ release: '9.9.9' });
+    fetch.mockResolvedValue({ ...KPIS, hasData: false, isPartial: true });
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceMobileUnreadableData');
+    expect(screen.queryByTestId('digitalExperienceMobileNoMatches')).toBeNull();
+    fireEvent.click(screen.getByTestId('digitalExperienceMobileClearFilters'));
+    expect(updateUrlQuery).toHaveBeenCalledWith({
+      environment: undefined,
+      osName: undefined,
+      release: undefined,
+    });
   });
 });

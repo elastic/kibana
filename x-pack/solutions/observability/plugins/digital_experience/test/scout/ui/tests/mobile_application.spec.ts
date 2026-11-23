@@ -35,7 +35,7 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       await digitalExperience.mobileTab.click();
       await expect(page).toHaveURL(/applicationType=mobile/);
 
-      await expect(digitalExperience.mobileApplicationsTable).toBeVisible();
+      await expect(digitalExperience.mobileApplicationsTable.locator).toBeVisible();
       await expect(digitalExperience.applicationsTable.rows).toHaveCount(0);
       const row = digitalExperience.mobileApplicationRow(MOBILE_APPS.reactNative);
       await expect(row).toHaveCount(1);
@@ -54,7 +54,7 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       const androidOnly = digitalExperience.mobileApplicationLink(MOBILE_APPS.android);
       await expect(androidOnly).toBeVisible();
 
-      await digitalExperience.selectPlatform('ios');
+      await digitalExperience.selectPlatform('iOS');
 
       await expect(page).toHaveURL(/platformFilter=ios/);
       await expect(digitalExperience.mobileApplicationLink(MOBILE_APPS.reactNative)).toBeVisible();

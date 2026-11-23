@@ -28,6 +28,7 @@ import { useFormatters } from '../../../hooks/use_formatters';
 import type { Formatters } from '../../../hooks/use_formatters';
 import {
   LAST_SEEN_LABEL,
+  MOBILE_ERROR_RATE_DESCRIPTION,
   NOT_ENOUGH_DATA_LABEL,
   SESSIONS_LABEL,
   valueWithChangeLabel,
@@ -176,6 +177,7 @@ export function MobileApplicationsTable({
       {
         field: 'errorRate',
         name: columnNames.errorRate,
+        nameTooltip: { content: MOBILE_ERROR_RATE_DESCRIPTION },
         sortable: true,
         ...metricColumnPreset<MobileApplicationSummary>(),
         render: (rate: number | null) => (rate === null ? <EmptyCellValue /> : formatNumber(rate)),

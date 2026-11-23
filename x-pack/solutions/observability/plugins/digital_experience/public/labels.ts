@@ -95,6 +95,12 @@ export const PLATFORM_LABELS: Record<MobilePlatform, string> = {
   ios: i18n.translate('xpack.digitalExperience.mobile.platform.ios', { defaultMessage: 'iOS' }),
 };
 
+/** What a mobile error rate counts: a ratio, so it can exceed 1, unlike the crash-free share. */
+export const MOBILE_ERROR_RATE_DESCRIPTION = i18n.translate(
+  'xpack.digitalExperience.mobile.errorRateDescription',
+  { defaultMessage: 'Exceptions per session in the time range.' }
+);
+
 /** A mobile value that can't be computed yet, e.g. crash-free sessions until a crash is defined. */
 export const NOT_ENOUGH_DATA_LABEL = i18n.translate(
   'xpack.digitalExperience.mobile.notEnoughData',

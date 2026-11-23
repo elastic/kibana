@@ -79,6 +79,7 @@ export const MOBILE_APPLICATION_EBT_ELEMENTS = {
   OS_FILTER: 'mobileOsFilter',
   KPIS_DISCOVER_LINK: 'mobileKpisDiscoverLink',
   RETRY: 'mobileRetry',
+  CLEAR_FILTERS: 'mobileClearFilters',
 } as const;
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
