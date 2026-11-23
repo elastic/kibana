@@ -146,4 +146,26 @@ describe('filters manager: awaiting required filters', () => {
     awaiting$.next(false);
     expect(loadingStates.at(-1)).toBe(false);
   });
+
+  test('publishes child filters while awaiting required filters, and when a selection is cleared', async () => {
+    const { filtersManager, setChildren } = buildSetup(['control1']);
+    const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+    setChildren([
+      {
+        uuid: 'control1',
+        awaitingRequiredFilters$: new BehaviorSubject<boolean>(true), // still awaiting a required selection
+        filtersLoading$: new BehaviorSubject<boolean>(false),
+        appliedFilters$,
+      },
+    ]);
+
+    const region = { meta: { key: 'region' }, query: { match_phrase: { region: 'EU' } } } as Filter;
+    appliedFilters$.next([region]);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([region]);
+
+    appliedFilters$.next(undefined);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
+  });
 });

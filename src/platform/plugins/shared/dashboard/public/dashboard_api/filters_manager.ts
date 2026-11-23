@@ -72,24 +72,23 @@ export const initializeFiltersManager = (
     awaitingRequiredFilters$.next(a);
   });
 
-  const childFiltersLoading$ = awaitingRequiredFilters$
-    .pipe(
-      combineLatestWith(
-        combineCompatibleChildrenApis<AppliesFilters, boolean>(
-          { children$: layoutManager.api.children$ },
-          'filtersLoading$',
-          apiAppliesFilters,
-          false,
-          (values) => {
-            return values.some((loading) => loading);
-          }
-        )
-      )
-    )
-    .pipe(
-      map(([awaitingRequiredFilters, filtersLoading]) => awaitingRequiredFilters || filtersLoading),
-      distinctUntilChanged()
-    );
+  /** `true` while any child is still computing its filters */
+  const childrenComputingFilters$ = combineCompatibleChildrenApis<AppliesFilters, boolean>(
+    { children$: layoutManager.api.children$ },
+    'filtersLoading$',
+    apiAppliesFilters,
+    false,
+    (values) => {
+      return values.some((loading) => loading);
+    }
+  );
+
+  /** also `true` while awaiting required filters, so that panels do not fetch without them */
+  const childFiltersLoading$ = awaitingRequiredFilters$.pipe(
+    combineLatestWith(childrenComputingFilters$),
+    map(([awaitingRequiredFilters, filtersLoading]) => awaitingRequiredFilters || filtersLoading),
+    distinctUntilChanged()
+  );
 
   const childFilters$ = combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
     { children$: layoutManager.api.children$ },
@@ -104,8 +103,12 @@ export const initializeFiltersManager = (
     }
   ).pipe(distinctUntilChanged(deepEqual));
 
-  /** don't push filters to `unpublishedFilters$` until all children have their filters ready */
-  const filterManagerSubscription = combineLatest([childFiltersLoading$, childFilters$])
+  /**
+   * Don't push filters to `unpublishedFilters$` until all children have their filters ready. Awaiting
+   * required filters must not gate this: required controls need to publish their filters while the
+   * grid waits, so that other controls can be narrowed by them and the grid can be released.
+   */
+  const filterManagerSubscription = combineLatest([childrenComputingFilters$, childFilters$])
     .pipe(
       skip(1),
       debounceTime(0),
