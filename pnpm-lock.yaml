@@ -3976,11 +3976,11 @@ importers:
         specifier: 4.10.4
         version: 4.10.4
       '@launchdarkly/node-server-sdk':
-        specifier: 9.16.0
-        version: 9.16.0(supports-color@10.2.2)
+        specifier: 9.16.4
+        version: 9.16.4(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.1.3
-        version: 2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@10.2.2))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
+        specifier: 2.1.7
+        version: 2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -11929,8 +11929,8 @@ packages:
     peerDependencies:
       '@langchain/core': 1.2.3
 
-  '@launchdarkly/eventsource@0.2.2':
-    resolution: {integrity: sha512-HeM/SWPrgHwdLytYXhRMNvDB7XKWYY3xSFeo9nAZB3Ep8GhDKOC7uefKuAAKjlxRHyvtQpnm/UHgw3EBBRxNnA==}
+  '@launchdarkly/eventsource@0.2.4':
+    resolution: {integrity: sha512-fc5DFkpYwhgVKYK2mE446qcKxGRhnggdAWGTEXwVBehsJGXqpKmkxSyLC0RBbBt8SZn+WxpQLnw2BYu6tMD7Mw==}
 
   '@launchdarkly/js-client-sdk-common@1.32.2':
     resolution: {integrity: sha512-1m5cI3lVbuXmrP74Nz+1+ZUV8qEPGZzvUYpvoynowdweWX5EEuUK3vHtqC9umhSe2Z/Ujxy/vcmPgH3Q+5BHQA==}
@@ -11941,22 +11941,22 @@ packages:
   '@launchdarkly/js-sdk-common@2.27.0':
     resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
 
-  '@launchdarkly/js-sdk-common@2.32.0':
-    resolution: {integrity: sha512-V2sd9W1ocskNtZNx2gmgym+j4YsmsawZE4kwUj631dO9SE6029SLCNY9wl3csS/8/Pe8qTxZv7pvbxh4mIWJqw==}
+  '@launchdarkly/js-sdk-common@2.32.2':
+    resolution: {integrity: sha512-LnJUCx9FZocgSVYN50lpXrxWt2CpxB7SZEd/fHf+im5hf+cGEaxQIylhXYBzN1tmse3n/vkODBgsZJNZ3pAcxA==}
 
-  '@launchdarkly/js-server-sdk-common@2.26.0':
-    resolution: {integrity: sha512-FqvrDgy2/dibITqjXz4mY9y6Jksj2ZQ6IoL98VOd7a5WPI2RW51iH39Ra6jVGENR8Vs1Tv0klCBiC3LwJIm9mQ==}
+  '@launchdarkly/js-server-sdk-common@2.26.4':
+    resolution: {integrity: sha512-DF6G7xVeK7FNEY8+88YF/oQVPwBeQEjyU3tY/SuMdbvehBDsY5Mit8JXWtZUu41SyYX9EjaogTy93TJcynhM/w==}
 
-  '@launchdarkly/node-server-sdk@9.16.0':
-    resolution: {integrity: sha512-djgpihWJy/WqZjEKqTvZq8agi+ed6uBbKo18Z8RYDswuSKobweX4q7NVe1PjB6wjbxmsxGbi/wlsPhnrrZi0GQ==}
+  '@launchdarkly/node-server-sdk@9.16.4':
+    resolution: {integrity: sha512-1bOYuh1pEEVLNiHy1mynJlpzeriUnokFGMYAk+6lpWgahnyG2oHacC3LkMJd9dOJR0Ud5P4swl3DTti51RLOOQ==}
 
-  '@launchdarkly/openfeature-js-server-common@2.2.1':
-    resolution: {integrity: sha512-pdxqJbZi6Q2iKX4NbvQJ5hWGqXt0amr2525AMplvWbgX+v8TLH3DHdCLWQYyeWtjQib4WsYREa706ehVWhxxdg==}
+  '@launchdarkly/openfeature-js-server-common@2.2.3':
+    resolution: {integrity: sha512-3etyrFp+C1OzrpjBnaGzXP2BN/OUAIWjhSVG2sJggdx4cnGwD0PHl9z8Y1YSTyhE7aTh7t4D3VgBP75aJ1KlaQ==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.1.3':
-    resolution: {integrity: sha512-kCxs86pZXZsqErzq0jrrIlxG0ZsC2FufMU59YdXcY3f9XbwksHI97uRcqtoOeRJYK4AA5sJ2oJ2MO7c0+noqsw==}
+  '@launchdarkly/openfeature-node-server@2.1.7':
+    resolution: {integrity: sha512-PtXI3e0XbkJa6/Yhl8g8ktshBMfn4OoieFJTPrTYdiPY/iiPvrNw2tn2GEtobuu8DN/LWgkBA4aE6OUo4kgb1g==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -28652,7 +28652,7 @@ snapshots:
       '@langchain/core': 1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.1(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.4.3))(ws@8.21.3)
       js-tiktoken: 1.0.21
 
-  '@launchdarkly/eventsource@0.2.2': {}
+  '@launchdarkly/eventsource@0.2.4': {}
 
   '@launchdarkly/js-client-sdk-common@1.32.2':
     dependencies:
@@ -28664,30 +28664,30 @@ snapshots:
 
   '@launchdarkly/js-sdk-common@2.27.0': {}
 
-  '@launchdarkly/js-sdk-common@2.32.0': {}
+  '@launchdarkly/js-sdk-common@2.32.2': {}
 
-  '@launchdarkly/js-server-sdk-common@2.26.0':
+  '@launchdarkly/js-server-sdk-common@2.26.4':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.32.0
+      '@launchdarkly/js-sdk-common': 2.32.2
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.16.0(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/eventsource': 0.2.2
-      '@launchdarkly/js-server-sdk-common': 2.26.0
+      '@launchdarkly/eventsource': 0.2.4
+      '@launchdarkly/js-server-sdk-common': 2.26.4
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.2.1(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
+  '@launchdarkly/openfeature-js-server-common@2.2.3(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.32.0
+      '@launchdarkly/js-sdk-common': 2.32.2
       '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
 
-  '@launchdarkly/openfeature-node-server@2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@10.2.2))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
+  '@launchdarkly/openfeature-node-server@2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.16.0(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 2.2.1(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
+      '@launchdarkly/node-server-sdk': 9.16.4(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.2.3(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
 
   '@ljharb/resumer@0.1.3':
