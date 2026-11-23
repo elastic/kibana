@@ -38,11 +38,13 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 const conversationId = 'conv-1';
+const streamId = 'stream-1';
 const vars = {
   prompts: {},
   conversationId,
   agentId: 'agent-1',
   promptRequestedEventId: 'round-1::execution_terminated',
+  streamId,
 };
 const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::execution::1' });
 
@@ -122,7 +124,7 @@ describe('useResumeRoundMutation', () => {
         conversationStreamService.getSnapshot(conversationId).map(({ id, type }) => ({ id, type }))
       ).toEqual([{ id: 'pending::prompt_response', type: 'prompt_response' }])
     );
-    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId);
   });
 
   it('keeps the live events when nobody is looking at the conversation before the resume starts', async () => {
@@ -182,7 +184,9 @@ describe('useResumeRoundMutation', () => {
       source.error(Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' }));
     });
 
-    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    await waitFor(() =>
+      expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId)
+    );
     expect(mockGet).not.toHaveBeenCalled();
     expect(mockAbort).not.toHaveBeenCalled();
   });
@@ -196,6 +200,6 @@ describe('useResumeRoundMutation', () => {
     act(() => source.error(new Error('boom')));
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1));
-    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId);
   });
 });

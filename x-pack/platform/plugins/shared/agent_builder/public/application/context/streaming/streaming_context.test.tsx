@@ -39,8 +39,11 @@ const setup = () => {
     </StreamingProvider>
   );
   const hook = renderHook(() => useStreamingContext(), { wrapper: Wrapper });
-  return { send, resume, attach, ...hook };
+  const { clearActiveStream } = jest.mocked(useSendMessageMutation).mock.calls[0][0];
+  return { send, resume, attach, clearActiveStream, ...hook };
 };
+
+const streamIdOf = (mutate: jest.Mock, call: number): string => mutate.mock.calls[call][0].streamId;
 
 describe('StreamingProvider', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -50,8 +53,15 @@ describe('StreamingProvider', () => {
 
     act(() => result.current.mutateAttach({ conversationId: 'conv-1', executionId: 'exec-1' }));
 
-    expect(result.current.activeStreams.get('conv-1')).toEqual({ type: 'attach' });
-    expect(attach.mutate).toHaveBeenCalledWith({ conversationId: 'conv-1', executionId: 'exec-1' });
+    expect(result.current.activeStreams.get('conv-1')).toEqual({
+      type: 'attach',
+      streamId: expect.any(String),
+    });
+    expect(attach.mutate).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      executionId: 'exec-1',
+      streamId: expect.any(String),
+    });
   });
 
   it('cancelStream asks every mutation to stop and remembers the stopped execution', () => {
@@ -66,6 +76,7 @@ describe('StreamingProvider', () => {
     expect(attach.cancel).toHaveBeenCalledWith('conv-1');
     expect(result.current.activeStreams.get('conv-1')).toEqual({
       type: 'attach',
+      streamId: expect.any(String),
       cancelling: true,
     });
   });
@@ -88,7 +99,30 @@ describe('StreamingProvider', () => {
     act(() => result.current.mutateAttach({ conversationId: 'conv-1', executionId: 'exec-1' }));
 
     expect(attach.mutate).not.toHaveBeenCalled();
-    expect(result.current.activeStreams.get('conv-1')).toEqual({ type: 'send', cancelling: true });
+    expect(result.current.activeStreams.get('conv-1')).toEqual({
+      type: 'send',
+      streamId: expect.any(String),
+      cancelling: true,
+    });
+  });
+
+  it('keeps the newer stream registered when an earlier one for the conversation settles', () => {
+    const { send, clearActiveStream, result } = setup();
+
+    act(() => result.current.mutateSendMessage({ conversationId: 'conv-1' } as never));
+    act(() => result.current.mutateSendMessage({ conversationId: 'conv-1' } as never));
+    const [first, second] = [streamIdOf(send.mutate, 0), streamIdOf(send.mutate, 1)];
+
+    act(() => clearActiveStream('conv-1', first));
+
+    expect(result.current.activeStreams.get('conv-1')).toEqual({
+      type: 'send',
+      streamId: second,
+    });
+
+    act(() => clearActiveStream('conv-1', second));
+
+    expect(result.current.activeStreams.has('conv-1')).toBe(false);
   });
 
   it('closes every connection locally when the provider unmounts', () => {
