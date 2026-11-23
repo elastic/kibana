@@ -9,7 +9,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -29,7 +30,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -49,7 +51,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 11
     retry:
@@ -69,7 +72,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -89,7 +93,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -109,7 +114,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -129,7 +135,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -149,7 +156,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -168,7 +176,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -187,7 +196,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -206,7 +216,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -225,7 +236,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -244,7 +256,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -264,7 +277,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 7
     retry:
@@ -284,7 +298,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -303,7 +318,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -322,7 +338,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -342,7 +359,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -361,7 +379,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -380,7 +399,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -399,7 +419,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -418,7 +439,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 9
     retry:
@@ -437,7 +459,8 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -457,7 +480,8 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -479,7 +503,8 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 24
     retry:
@@ -502,7 +527,8 @@ steps:
       machineType: n2-highmem-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 16
     retry:

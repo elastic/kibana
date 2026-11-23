@@ -74,7 +74,7 @@
     "@kbn/std",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/field-types",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/core-elasticsearch-server",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
@@ -175,7 +175,8 @@
     "@kbn/apm-common",
     "@kbn/storybook",
     "@kbn/lens-embeddable-utils",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/core-http-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

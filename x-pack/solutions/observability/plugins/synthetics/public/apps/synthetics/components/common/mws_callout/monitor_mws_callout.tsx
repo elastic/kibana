@@ -22,7 +22,7 @@ export const MonitorMWsCallout = () => {
     monitor && !isRemoteSyntheticsMonitor(monitor)
       ? monitor[ConfigKey.MAINTENANCE_WINDOWS] ?? []
       : [];
-  const { activeMWs, hasPendingChanges, syncInterval } = useHasPendingMwChanges(monitorMWIds);
+  const { activeMWs, hasPendingChanges, isSyncOverdue } = useHasPendingMwChanges(monitorMWIds);
 
   if (!monitor || isRemoteSyntheticsMonitor(monitor)) {
     return null;
@@ -33,12 +33,18 @@ export const MonitorMWsCallout = () => {
     (monitor.locations ?? []).some((location) => outdatedLocationIds.has(location.id));
 
   if (activeMWs.length) {
-    return <MwsCalloutContent activeMWs={activeMWs} hasOutdatedAgent={hasOutdatedAgent} />;
+    return (
+      <MwsCalloutContent
+        activeMWs={activeMWs}
+        hasOutdatedAgent={hasOutdatedAgent}
+        isSyncOverdue={isSyncOverdue}
+      />
+    );
   }
 
   if (hasPendingChanges) {
     return (
-      <MwsPendingSyncCallout syncInterval={syncInterval} hasOutdatedAgent={hasOutdatedAgent} />
+      <MwsPendingSyncCallout hasOutdatedAgent={hasOutdatedAgent} isSyncOverdue={isSyncOverdue} />
     );
   }
 

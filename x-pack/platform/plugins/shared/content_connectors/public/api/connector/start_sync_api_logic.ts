@@ -16,7 +16,9 @@ export interface StartSyncArgs {
 }
 
 export const startSync = async ({ connectorId, http }: StartSyncArgs) => {
-  const route = `/internal/content_connectors/connectors/${connectorId}/start_sync`;
+  const route = `/internal/content_connectors/connectors/${encodeURIComponent(
+    connectorId
+  )}/start_sync`;
   return await http?.post(route);
 };
 

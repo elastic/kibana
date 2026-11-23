@@ -129,6 +129,16 @@
     }
   },
   {
+    "id": "siem-beacon",
+    "name": "SIEM Beacon",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/siem-beacon"
+    }
+  },
+  {
     "id": "security-core-analysis",
     "name": "Core Analysis",
     "areas": [
@@ -436,7 +446,7 @@
     "github": {
       "team": "elastic/kibana-telemetry",
       "label": "Team:Core"
-      
+
     }
   },
   {
@@ -837,7 +847,8 @@
       "security"
     ],
     "github": {
-      "team": "elastic/security-detection-engineering"
+      "team": "elastic/security-detection-engineering",
+      "label": "Team:Detection Engineering"
     }
   },
   {
@@ -1140,6 +1151,22 @@
     "github": {
       "team": "elastic/platform-analytics",
       "label": "Team:Platform Analytics"
+    }
+  },
+  {
+    "id": "trade",
+    "name": "Threat Research and Detection Engineering Team",
+    "github": {
+      "team": "elastic/threat-research-and-detection-engineering",
+      "label": "Team:TRaDE"
+    }
+  },
+  {
+    "id": "security-investigations",
+    "name": "Security Investigations",
+    "github": {
+      "team": "elastic/security-investigations",
+      "label": "Team:Security Investigations"
     }
   }
 ]

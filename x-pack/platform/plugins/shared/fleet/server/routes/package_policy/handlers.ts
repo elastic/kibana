@@ -50,6 +50,7 @@ import {
   PackagePolicyRequestError,
 } from '../../errors';
 import {
+  assertPackagePoliciesUpgradeAcknowledged,
   getInstallation,
   getInstallations,
   getPackageInfo,
@@ -694,6 +695,15 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   await throwIfTargetsAgentlessPolicies(soClient, packagePolicyIds);
+
+  if (!request.body.acknowledge_breaking_changes) {
+    // Reject the whole request before upgrading anything, so a rejected request leaves all the
+    // package policies unchanged.
+    const packagePolicies =
+      (await packagePolicyService.getByIDs(soClient, packagePolicyIds, { ignoreMissing: true })) ??
+      [];
+    await assertPackagePoliciesUpgradeAcknowledged(packagePolicies);
+  }
 
   const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,

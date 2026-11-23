@@ -207,9 +207,11 @@ export class InferencePlugin
         anonymizationEnabled,
         policyService,
       });
+      const anonymizationRulesPromise = createAnonymizationRulesPromise(request);
+      void anonymizationRulesPromise.catch(() => {});
       return {
         namespace,
-        anonymizationRulesPromise: createAnonymizationRulesPromise(request),
+        anonymizationRulesPromise,
         regexWorker: (() => {
           if (!this.regexWorker) {
             this.logger.error(
@@ -266,6 +268,21 @@ export class InferencePlugin
       };
     };
 
+    // uses the internal ES client, like the default connector lookup, so that aliases resolve
+    // the same way regardless of whether the user can list inference endpoints
+    const createConnectorIdResolver = (request: KibanaRequest) => {
+      return async (connectorId: string) => {
+        const connector = await getConnectorById({
+          connectorId,
+          actions: pluginsStart.actions,
+          request,
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+        });
+        return connector.connectorId;
+      };
+    };
+
     const createTokenUsageTrackingEnabledCheck = (request: KibanaRequest) => {
       return async () => {
         try {
@@ -291,6 +308,7 @@ export class InferencePlugin
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
+          resolveConnectorId: createConnectorIdResolver(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -302,7 +320,6 @@ export class InferencePlugin
           callbacks: options.callbacks,
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
-          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           endpointIdCache: this.endpointIdCache,
@@ -311,6 +328,7 @@ export class InferencePlugin
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
+          resolveConnectorId: createConnectorIdResolver(options.request),
         });
       },
 

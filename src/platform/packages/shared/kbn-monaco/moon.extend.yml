@@ -2,7 +2,7 @@ tags:
   - is-webpack-built
 tasks:
   build-webpack:
-    command: yarn
+    command: pnpm
     args:
       - build
     # Bundled node_modules versions feed the hash; see src/dev/shared_deps_fingerprint
@@ -25,7 +25,7 @@ tasks:
     type: run
     options:
       persistent: true
-    command: yarn
+    command: pnpm
     args:
       - build
       - '--watch'

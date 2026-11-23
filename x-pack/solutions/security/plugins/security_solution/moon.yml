@@ -239,8 +239,6 @@ dependsOn:
   - '@kbn/security-ai-prompts'
   - '@kbn/inference-common'
   - '@kbn/inference-langchain'
-  - '@kbn/scout-security'
-  - '@kbn/ftr-llm-proxy'
   - '@kbn/custom-icons'
   - '@kbn/security-plugin-types-common'
   - '@kbn/management-settings-ids'
@@ -277,7 +275,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
   - '@kbn/kql'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-security-common'
   - '@kbn/entity-store'
   - '@kbn/as-code-filters-transforms'
@@ -311,21 +309,21 @@ tags:
   - prod
   - group-security
   - private
+  - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - scripts/**/*
-    - test/scout/**/*
-    - test/scout_ai_value_report/**/*
-    - test/scout_cps_local/**/*
-    - test/scout_security_attacks_alignment/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json
     - public/**/*.json
     - '!target/**/*'
+    - '!test/**/*'
     - '!**/cypress/**'
     - '!public/management/cypress.config.ts'
 tasks: {}

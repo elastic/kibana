@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { lazySchema } from '@kbn/zod/v4';
 import { sort } from '../hosts/model/sort';
 import { pagination } from './pagination';
 import { requestBasicOptionsSchema } from './request_basic_options';
 
-export const requestOptionsPaginatedSchema = requestBasicOptionsSchema.extend({
-  pagination,
-  sort,
-});
+export const requestOptionsPaginatedSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    pagination,
+    sort,
+  })
+);

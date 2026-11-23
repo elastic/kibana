@@ -27,7 +27,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
-import type { PackagePolicyAssetsMap } from '../../common/types';
+import type { AgentPolicyPackagePoliciesSummary, PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
@@ -115,6 +115,11 @@ export interface PackagePolicyClient {
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+    /**
+     * Pass to `agentPolicyService.bumpRevision` when bumping separately (`bumpRevision: false`).
+     * Treat a missing value as `false`.
+     */
+    agentVersionConditionsUnchanged?: boolean;
   }>;
 
   bulkUpdate(
@@ -129,13 +134,18 @@ export interface PackagePolicyClient {
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
     }>;
+    /**
+     * Pass to `agentPolicyService.bumpRevision` when bumping separately (`bumpRevision: false`).
+     * Treat a missing value as `false`.
+     */
+    agentVersionConditionsUnchanged?: boolean;
   }>;
 
   bulkUpgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
@@ -150,6 +160,11 @@ export interface PackagePolicyClient {
     agentPolicyId: string,
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
+
+  getSummaryForAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicyIds: string[]
+  ): Promise<Map<string, AgentPolicyPackagePoliciesSummary>>;
 
   compilePackagePolicyForVersions(
     soClient: SavedObjectsClientContract,
@@ -263,6 +278,11 @@ export interface PackagePolicyClient {
     options?: { force?: boolean }
   ): Promise<void>;
 
+  getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }>;
+
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs
    * @param soClient
@@ -358,6 +378,8 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
 export interface PackagePolicyClientBulkUpdateOptions {
   user?: AuthenticatedUser;
   force?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];

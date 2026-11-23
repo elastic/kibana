@@ -30,7 +30,11 @@ import {
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  createRetryableError,
+  createTaskRunError,
+  getErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running';
 import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
@@ -1628,6 +1632,30 @@ describe('Action Executor', () => {
         },
         tags: ['action-run-failed', 'user-error'],
       });
+    });
+
+    test(`${label} returns retry false when executor throws a non-retryable error`, async () => {
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(createRetryableError(new Error('boom'), false));
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      const executorResult = executeUnsecure
+        ? await actionExecutor.executeUnsecured(executeUnsecuredParams)
+        : await actionExecutor.execute(executeParams);
+
+      expect(executorResult).toEqual(
+        expect.objectContaining({
+          status: 'error',
+          retry: false,
+          errorSource: TaskErrorSource.FRAMEWORK,
+          message: 'an error occurred while running the action',
+          serviceMessage: 'boom',
+        })
+      );
     });
 
     test(`${label} returns structured error result when executor throws ConnectorAuthorizationError`, async () => {

@@ -156,6 +156,39 @@ describe('FieldInput', () => {
     expect(screen.getByTestId('indexPattern-dimension-field')).toBeInTheDocument();
   });
 
+  it('exposes the committed field label separately from the combobox input', () => {
+    const { unmount } = renderFieldInput({
+      selectedColumn: getStringBasedOperationColumn(),
+    });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'source'
+    );
+    unmount();
+
+    renderFieldInput({ incompleteField: 'dest' });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'dest'
+    );
+  });
+
+  it('exposes the display name when it differs from the field name', () => {
+    renderFieldInput({
+      selectedColumn: {
+        label: 'timestamp',
+        dataType: 'date',
+        isBucketed: false,
+        operationType: 'min',
+        sourceField: 'timestamp',
+      },
+    });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'timestampLabel'
+    );
+  });
+
   it('should render an error message when incomplete operation is on', () => {
     const { container } = renderFieldInput({
       incompleteOperation: 'terms',

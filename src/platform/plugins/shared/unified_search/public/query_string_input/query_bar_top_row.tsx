@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -57,6 +57,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type { FirstDayOfWeek } from '@kbn/date-range-picker';
 import {
   DateRangePicker,
   type DateRangePickerSettings,
@@ -64,6 +65,7 @@ import {
   type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
+import moment from 'moment';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -451,8 +453,10 @@ export const QueryBarTopRow = React.memo(
 
     const backgroundSearchState = useObservable(
       data.search.session.state$.pipe(
-        mergeMap((state) => {
-          // We want to delay enabling the button to avoid flickering when searches are quick
+        switchMap((state) => {
+          // We want to delay enabling the button to avoid flickering when searches are quick.
+          // switchMap (not mergeMap) cancels any in-flight delayed Loading emission when the
+          // state transitions to Completed, preventing a stale re-enable of the button.
           if (state === SearchSessionState.Loading) return of(state).pipe(delay(500));
           return of(state);
         })
@@ -677,6 +681,15 @@ export const QueryBarTopRow = React.memo(
 
       return () => subscription.unsubscribe();
     }, [shouldUseLegacyTimePicker, propsOnRefreshChange, data.query.timefilter.timefilter]);
+
+    const dayOfWeekSetting: string = uiSettings.get('dateFormat:dow');
+
+    const calendarOptions = useMemo(
+      () => ({
+        firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+      }),
+      [dayOfWeekSetting]
+    );
 
     // Visualize-style consumers request auto-refresh-only mode via
     // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with
@@ -932,6 +945,7 @@ export const QueryBarTopRow = React.memo(
               refreshEpoch={autoRefreshEpoch}
               inputDateFormats={inputDateFormats}
               timeZone={uiSettings.get('dateFormat:tz')}
+              calendarOptions={calendarOptions}
               prependBasePath={http?.basePath.prepend}
               canAccessAdvancedSettings={
                 (application?.capabilities.advancedSettings?.save as boolean | undefined) ?? false

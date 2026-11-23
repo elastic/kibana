@@ -1,5 +1,5 @@
 KIBANA_REPO       = $(shell git rev-parse --show-toplevel)
-NODE_VERSION      = $(shell cat ${KIBANA_REPO}/.node-version)
+NODE_VERSION      = $(shell cat ${KIBANA_REPO}/.nvmrc)
 
 KIBANA_VERSION   ?= latest
 NETWORK          ?= apm-integration-testing

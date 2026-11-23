@@ -229,6 +229,9 @@ test.describe(
 
       // Set time on Data Quality tab
       await pageObjects.datePicker.setAbsoluteRange(timeRange);
+      // The tabs snapshot `rangeFrom`/`rangeTo` into their `href` at render time, so a click
+      // landing before the applied range reaches the URL navigates with the previous range.
+      await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
 
       // Verify on Retention tab
       await pageObjects.streams.clickRetentionTab();

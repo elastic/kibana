@@ -6,7 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 echo "--- Setup Node"
 
-NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
+NODE_VERSION="$(cat "$KIBANA_DIR/.nvmrc")"
 export NODE_VERSION
 NODE_VARIANT=""
 mkdir -p "$NODE_CACHE_DIR"
@@ -70,3 +70,12 @@ else
 fi
 
 export PATH="$NODE_BIN_DIR:$PATH"
+
+echo " -- node: version=$(node --version)"
+
+echo " -- enabling corepack-managed pnpm"
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+PNPM_VERSION="$(node -p "require('${KIBANA_DIR}/package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+corepack enable
+corepack prepare "pnpm@${PNPM_VERSION}" --activate
+echo " -- pnpm: version=$(pnpm --version)"

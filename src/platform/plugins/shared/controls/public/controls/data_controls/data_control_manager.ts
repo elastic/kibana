@@ -359,7 +359,17 @@ export const initializeDataControlManager = async <EditorState extends object = 
       } as WithAllKeys<DataControlState>;
     },
     reinitializeState: (newState) => {
-      dataControlStateManager.reinitializeState(newState);
+      const { values_source, esql_query, data_view_id, field_name } =
+        dataControlStateManager.getLatestState();
+      // ES|QL controls do not serialize their derived data view and field, and the query
+      // subscription only re-derives them when the query changes, so keep them when it doesn't
+      const keepDerivedDataSource =
+        newState?.values_source === ControlValuesSource.ESQL &&
+        values_source === ControlValuesSource.ESQL &&
+        newState.esql_query === esql_query;
+      dataControlStateManager.reinitializeState(
+        keepDerivedDataSource ? { ...newState, data_view_id, field_name } : newState
+      );
       labelManager.reinitializeState(newState);
     },
   };

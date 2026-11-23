@@ -1,5 +1,5 @@
 {
-  "sha1": "7d026c0d96fde6c4e3d8a59326812b13bbc3aeb3",
+  "sha1": "893046369911ea653bfaaadcb2d02534c43ec402",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 36,
+        "column": 13
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 79,
+        "column": 16
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
-        "line": 125,
-        "column": 12
+        "line": 126,
+        "column": 7
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
-        "line": 157,
-        "column": 12
+        "line": 158,
+        "column": 7
       }
     },
     {
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/alerts_embeddable.spec.ts",
-        "line": 188,
-        "column": 12
+        "line": 193,
+        "column": 17
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 69,
+        "column": 66
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 171,
-        "column": 12
+        "line": 165,
+        "column": 14
       }
     },
     {
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 198,
-        "column": 12
+        "line": 196,
+        "column": 6
       }
     },
     {
@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 224,
-        "column": 12
+        "line": 218,
+        "column": 25
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 250,
-        "column": 12
+        "line": 246,
+        "column": 29
       }
     },
     {
@@ -176,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 276,
-        "column": 12
+        "line": 269,
+        "column": 27
       }
     },
     {
@@ -192,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 302,
-        "column": 12
+        "line": 290,
+        "column": 21
       }
     },
     {
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_create.spec.ts",
-        "line": 331,
-        "column": 12
+        "line": 317,
+        "column": 15
       }
     },
     {
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_delete.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 41,
+        "column": 64
       }
     },
     {
@@ -240,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_delete.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 102,
+        "column": 13
       }
     },
     {
@@ -256,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_find.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 27,
+        "column": 84
       }
     },
     {
@@ -272,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_get.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 20,
+        "column": 31
       }
     },
     {
@@ -288,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_update.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 29,
+        "column": 22
       }
     },
     {
@@ -304,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_update.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 60,
+        "column": 14
       }
     },
     {
@@ -320,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud/slo_update.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 88,
+        "column": 15
       }
     },
     {
@@ -336,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 66,
-        "column": 12
+        "line": 53,
+        "column": 9
       }
     },
     {
@@ -352,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 93,
+        "column": 6
       }
     },
     {
@@ -368,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 125,
-        "column": 12
+        "line": 133,
+        "column": 26
       }
     },
     {
@@ -384,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 152,
-        "column": 12
+        "line": 163,
+        "column": 49
       }
     },
     {
@@ -400,8 +400,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 188,
-        "column": 12
+        "line": 204,
+        "column": 19
       }
     },
     {
@@ -416,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 211,
-        "column": 12
+        "line": 229,
+        "column": 20
       }
     },
     {
@@ -432,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 243,
-        "column": 12
+        "line": 275,
+        "column": 22
       }
     },
     {
@@ -448,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 266,
-        "column": 12
+        "line": 299,
+        "column": 13
       }
     },
     {
@@ -464,8 +464,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 290,
-        "column": 12
+        "line": 334,
+        "column": 20
       }
     },
     {
@@ -480,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 314,
-        "column": 12
+        "line": 359,
+        "column": 18
       }
     },
     {
@@ -496,8 +496,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 341,
-        "column": 12
+        "line": 424,
+        "column": 9
       }
     },
     {
@@ -512,8 +512,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 365,
-        "column": 12
+        "line": 454,
+        "column": 48
       }
     },
     {
@@ -528,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 422,
-        "column": 12
+        "line": 591,
+        "column": 27
       }
     },
     {
@@ -544,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_diverse_examples.spec.ts",
-        "line": 443,
-        "column": 12
+        "line": 613,
+        "column": 27
       }
     },
     {
@@ -560,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 40,
+        "column": 13
       }
     },
     {
@@ -576,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 68,
+        "column": 16
       }
     },
     {
@@ -592,8 +592,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 133,
-        "column": 12
+        "line": 122,
+        "column": 16
       }
     },
     {
@@ -608,8 +608,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 166,
-        "column": 12
+        "line": 160,
+        "column": 21
       }
     },
     {
@@ -624,8 +624,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 201,
-        "column": 12
+        "line": 204,
+        "column": 28
       }
     },
     {
@@ -640,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 236,
-        "column": 12
+        "line": 238,
+        "column": 16
       }
     },
     {
@@ -656,8 +656,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 267,
-        "column": 12
+        "line": 270,
+        "column": 27
       }
     },
     {
@@ -672,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 301,
-        "column": 12
+        "line": 303,
+        "column": 16
       }
     },
     {
@@ -688,8 +688,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 328,
-        "column": 12
+        "line": 331,
+        "column": 15
       }
     },
     {
@@ -704,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_get_summary.spec.ts",
-        "line": 360,
-        "column": 12
+        "line": 366,
+        "column": 16
       }
     },
     {
@@ -720,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 36,
+        "column": 49
       }
     },
     {
@@ -736,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 119,
-        "column": 12
+        "line": 126,
+        "column": 19
       }
     },
     {
@@ -752,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 163,
-        "column": 12
+        "line": 169,
+        "column": 11
       }
     },
     {
@@ -768,8 +768,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 205,
-        "column": 12
+        "line": 224,
+        "column": 11
       }
     },
     {
@@ -784,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 250,
-        "column": 12
+        "line": 264,
+        "column": 9
       }
     },
     {
@@ -800,8 +800,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 294,
-        "column": 12
+        "line": 311,
+        "column": 28
       }
     },
     {
@@ -816,8 +816,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 351,
-        "column": 12
+        "line": 369,
+        "column": 32
       }
     },
     {
@@ -832,8 +832,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 391,
-        "column": 12
+        "line": 419,
+        "column": 20
       }
     },
     {
@@ -848,8 +848,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 434,
-        "column": 12
+        "line": 464,
+        "column": 25
       }
     },
     {
@@ -864,8 +864,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/composite_slo_lifecycle.spec.ts",
-        "line": 486,
-        "column": 12
+        "line": 529,
+        "column": 25
       }
     },
     {
@@ -880,8 +880,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 28,
+        "column": 25
       }
     },
     {
@@ -896,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 60,
-        "column": 12
+        "line": 52,
+        "column": 19
       }
     },
     {
@@ -912,8 +912,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 64,
+        "column": 15
       }
     },
     {
@@ -928,8 +928,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 74,
+        "column": 15
       }
     },
     {
@@ -944,8 +944,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 84,
+        "column": 65
       }
     },
     {
@@ -960,8 +960,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 115,
-        "column": 12
+        "line": 101,
+        "column": 43
       }
     },
     {
@@ -976,8 +976,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 135,
-        "column": 12
+        "line": 122,
+        "column": 16
       }
     },
     {
@@ -992,8 +992,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 162,
-        "column": 12
+        "line": 143,
+        "column": 50
       }
     },
     {
@@ -1008,8 +1008,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 185,
-        "column": 12
+        "line": 170,
+        "column": 51
       }
     },
     {
@@ -1024,8 +1024,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 204,
-        "column": 12
+        "line": 196,
+        "column": 15
       }
     },
     {
@@ -1040,8 +1040,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 219,
-        "column": 12
+        "line": 213,
+        "column": 17
       }
     },
     {
@@ -1056,8 +1056,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 231,
-        "column": 12
+        "line": 224,
+        "column": 9
       }
     },
     {
@@ -1072,8 +1072,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 246,
-        "column": 12
+        "line": 239,
+        "column": 9
       }
     },
     {
@@ -1088,8 +1088,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 261,
-        "column": 12
+        "line": 252,
+        "column": 10
       }
     },
     {
@@ -1104,8 +1104,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 278,
-        "column": 12
+        "line": 268,
+        "column": 19
       }
     },
     {
@@ -1120,8 +1120,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 290,
-        "column": 12
+        "line": 280,
+        "column": 16
       }
     },
     {
@@ -1136,8 +1136,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 299,
-        "column": 12
+        "line": 288,
+        "column": 7
       }
     },
     {
@@ -1152,8 +1152,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 313,
-        "column": 12
+        "line": 300,
+        "column": 27
       }
     },
     {
@@ -1168,8 +1168,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 328,
-        "column": 12
+        "line": 315,
+        "column": 16
       }
     },
     {
@@ -1184,8 +1184,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 343,
-        "column": 12
+        "line": 331,
+        "column": 15
       }
     },
     {
@@ -1200,8 +1200,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 358,
-        "column": 12
+        "line": 347,
+        "column": 14
       }
     },
     {
@@ -1216,8 +1216,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 373,
-        "column": 12
+        "line": 358,
+        "column": 13
       }
     },
     {
@@ -1232,8 +1232,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 387,
-        "column": 12
+        "line": 363,
+        "column": 23
       }
     },
     {
@@ -1248,8 +1248,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 397,
-        "column": 12
+        "line": 373,
+        "column": 69
       }
     },
     {
@@ -1264,8 +1264,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_create.spec.ts",
-        "line": 415,
-        "column": 12
+        "line": 387,
+        "column": 55
       }
     },
     {
@@ -1280,8 +1280,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 36,
+        "column": 13
       }
     },
     {
@@ -1296,8 +1296,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
-        "line": 64,
-        "column": 12
+        "line": 51,
+        "column": 25
       }
     },
     {
@@ -1312,8 +1312,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 59,
+        "column": 23
       }
     },
     {
@@ -1328,8 +1328,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
-        "line": 110,
-        "column": 12
+        "line": 92,
+        "column": 9
       }
     },
     {
@@ -1344,8 +1344,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 112,
+        "column": 16
       }
     },
     {
@@ -1360,8 +1360,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
-        "line": 169,
-        "column": 12
+        "line": 147,
+        "column": 49
       }
     },
     {
@@ -1376,8 +1376,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_delete.spec.ts",
-        "line": 196,
-        "column": 12
+        "line": 178,
+        "column": 28
       }
     },
     {
@@ -1392,8 +1392,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 74,
-        "column": 12
+        "line": 77,
+        "column": 23
       }
     },
     {
@@ -1408,8 +1408,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 89,
+        "column": 27
       }
     },
     {
@@ -1425,7 +1425,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
         "line": 123,
-        "column": 12
+        "column": 49
       }
     },
     {
@@ -1440,8 +1440,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 137,
-        "column": 12
+        "line": 135,
+        "column": 7
       }
     },
     {
@@ -1456,8 +1456,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 156,
-        "column": 12
+        "line": 152,
+        "column": 16
       }
     },
     {
@@ -1472,8 +1472,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 161,
+        "column": 14
       }
     },
     {
@@ -1488,8 +1488,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 179,
-        "column": 12
+        "line": 171,
+        "column": 18
       }
     },
     {
@@ -1504,8 +1504,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 197,
-        "column": 12
+        "line": 186,
+        "column": 8
       }
     },
     {
@@ -1520,8 +1520,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 215,
-        "column": 12
+        "line": 201,
+        "column": 26
       }
     },
     {
@@ -1536,8 +1536,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 232,
-        "column": 12
+        "line": 212,
+        "column": 14
       }
     },
     {
@@ -1552,8 +1552,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 252,
-        "column": 12
+        "line": 228,
+        "column": 16
       }
     },
     {
@@ -1568,8 +1568,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 271,
-        "column": 12
+        "line": 242,
+        "column": 13
       }
     },
     {
@@ -1584,8 +1584,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 295,
-        "column": 12
+        "line": 258,
+        "column": 34
       }
     },
     {
@@ -1600,8 +1600,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 307,
-        "column": 12
+        "line": 274,
+        "column": 18
       }
     },
     {
@@ -1616,8 +1616,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 319,
-        "column": 12
+        "line": 291,
+        "column": 19
       }
     },
     {
@@ -1632,8 +1632,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 332,
-        "column": 12
+        "line": 303,
+        "column": 19
       }
     },
     {
@@ -1648,8 +1648,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_find.spec.ts",
-        "line": 365,
-        "column": 12
+        "line": 324,
+        "column": 14
       }
     },
     {
@@ -1664,8 +1664,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 28,
+        "column": 25
       }
     },
     {
@@ -1680,8 +1680,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 55,
+        "column": 19
       }
     },
     {
@@ -1696,8 +1696,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
-        "line": 69,
-        "column": 12
+        "line": 61,
+        "column": 13
       }
     },
     {
@@ -1712,8 +1712,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
-        "line": 102,
-        "column": 12
+        "line": 89,
+        "column": 16
       }
     },
     {
@@ -1728,8 +1728,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 120,
+        "column": 9
       }
     },
     {
@@ -1744,8 +1744,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
-        "line": 159,
-        "column": 12
+        "line": 144,
+        "column": 18
       }
     },
     {
@@ -1760,8 +1760,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
-        "line": 182,
-        "column": 12
+        "line": 164,
+        "column": 17
       }
     },
     {
@@ -1776,8 +1776,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_get.spec.ts",
-        "line": 222,
-        "column": 12
+        "line": 210,
+        "column": 19
       }
     },
     {
@@ -1792,8 +1792,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 37,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -1808,8 +1808,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 60,
-        "column": 12
+        "line": 48,
+        "column": 23
       }
     },
     {
@@ -1824,8 +1824,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 81,
-        "column": 12
+        "line": 67,
+        "column": 26
       }
     },
     {
@@ -1840,8 +1840,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 98,
+        "column": 23
       }
     },
     {
@@ -1856,8 +1856,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 133,
-        "column": 12
+        "line": 123,
+        "column": 65
       }
     },
     {
@@ -1872,8 +1872,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 152,
-        "column": 12
+        "line": 140,
+        "column": 26
       }
     },
     {
@@ -1888,8 +1888,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 172,
-        "column": 12
+        "line": 163,
+        "column": 29
       }
     },
     {
@@ -1904,8 +1904,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 212,
-        "column": 12
+        "line": 209,
+        "column": 18
       }
     },
     {
@@ -1920,8 +1920,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 235,
-        "column": 12
+        "line": 224,
+        "column": 42
       }
     },
     {
@@ -1936,8 +1936,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 254,
-        "column": 12
+        "line": 246,
+        "column": 16
       }
     },
     {
@@ -1952,8 +1952,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 283,
-        "column": 12
+        "line": 270,
+        "column": 10
       }
     },
     {
@@ -1968,8 +1968,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 306,
-        "column": 12
+        "line": 297,
+        "column": 25
       }
     },
     {
@@ -1984,8 +1984,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 332,
-        "column": 12
+        "line": 322,
+        "column": 16
       }
     },
     {
@@ -2000,8 +2000,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 341,
-        "column": 12
+        "line": 332,
+        "column": 96
       }
     },
     {
@@ -2016,8 +2016,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 358,
-        "column": 12
+        "line": 352,
+        "column": 15
       }
     },
     {
@@ -2032,8 +2032,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 380,
-        "column": 12
+        "line": 368,
+        "column": 29
       }
     },
     {
@@ -2048,8 +2048,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 402,
-        "column": 12
+        "line": 393,
+        "column": 29
       }
     },
     {
@@ -2064,8 +2064,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 424,
-        "column": 12
+        "line": 415,
+        "column": 40
       }
     },
     {
@@ -2080,8 +2080,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/crud_composite/slo_update.spec.ts",
-        "line": 446,
-        "column": 12
+        "line": 438,
+        "column": 13
       }
     },
     {
@@ -2096,8 +2096,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/burn_rate.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 35,
+        "column": 13
       }
     },
     {
@@ -2112,8 +2112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/burn_rate.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 78,
+        "column": 16
       }
     },
     {
@@ -2128,8 +2128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/error_budget.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 30,
+        "column": 13
       }
     },
     {
@@ -2144,8 +2144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/error_budget.spec.ts",
-        "line": 78,
-        "column": 12
+        "line": 71,
+        "column": 16
       }
     },
     {
@@ -2160,8 +2160,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 35,
+        "column": 13
       }
     },
     {
@@ -2176,8 +2176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 78,
+        "column": 16
       }
     },
     {
@@ -2192,8 +2192,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 119,
-        "column": 12
+        "line": 111,
+        "column": 11
       }
     },
     {
@@ -2208,8 +2208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 170,
+        "column": 16
       }
     },
     {
@@ -2224,8 +2224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 200,
-        "column": 12
+        "line": 202,
+        "column": 16
       }
     },
     {
@@ -2240,8 +2240,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
-        "line": 233,
-        "column": 12
+        "line": 236,
+        "column": 29
       }
     },
     {
@@ -2254,8 +2254,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/settings/slo_settings_serverless.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 27,
+        "column": 9
       }
     },
     {
@@ -2268,8 +2268,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/settings/slo_settings_stateful.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 13,
+        "column": 92
       }
     },
     {
@@ -2284,8 +2284,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/settings/slo_settings.spec.ts",
-        "line": 17,
-        "column": 12
+        "line": 18,
+        "column": 7
       }
     },
     {
@@ -2300,8 +2300,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_bulk_delete.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 21,
+        "column": 84
       }
     },
     {
@@ -2316,8 +2316,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_bulk_delete.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 66,
+        "column": 92
       }
     },
     {
@@ -2332,8 +2332,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_definitions.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 27,
+        "column": 84
       }
     },
     {
@@ -2349,7 +2349,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_definitions.spec.ts",
         "line": 72,
-        "column": 12
+        "column": 45
       }
     },
     {
@@ -2364,8 +2364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_definitions.spec.ts",
-        "line": 131,
-        "column": 12
+        "line": 129,
+        "column": 7
       }
     },
     {
@@ -2380,8 +2380,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 39,
+        "column": 47
       }
     },
     {
@@ -2396,8 +2396,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 75,
+        "column": 63
       }
     },
     {
@@ -2412,8 +2412,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 111,
+        "column": 9
       }
     },
     {
@@ -2428,8 +2428,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 108,
-        "column": 12
+        "line": 121,
+        "column": 18
       }
     },
     {
@@ -2444,8 +2444,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 129,
-        "column": 12
+        "line": 159,
+        "column": 29
       }
     },
     {
@@ -2460,8 +2460,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_instances.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 227,
+        "column": 27
       }
     },
     {
@@ -2476,8 +2476,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_template_tags.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 22,
+        "column": 22
       }
     },
     {
@@ -2492,8 +2492,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_template_tags.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 77,
+        "column": 11
       }
     },
     {
@@ -2508,8 +2508,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_templates.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 22,
+        "column": 22
       }
     },
     {
@@ -2524,8 +2524,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_find_templates.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 50,
+        "column": 53
       }
     },
     {
@@ -2540,8 +2540,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_get_template.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 22,
+        "column": 22
       }
     },
     {
@@ -2557,7 +2557,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_get_template.spec.ts",
         "line": 77,
-        "column": 12
+        "column": 82
       }
     },
     {
@@ -2572,8 +2572,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 27,
+        "column": 7
       }
     },
     {
@@ -2588,8 +2588,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 36,
+        "column": 15
       }
     },
     {
@@ -2604,8 +2604,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 78,
+        "column": 16
       }
     },
     {
@@ -2620,8 +2620,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 110,
-        "column": 12
+        "line": 108,
+        "column": 7
       }
     },
     {
@@ -2636,8 +2636,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_grouped_stats.spec.ts",
-        "line": 122,
-        "column": 12
+        "line": 116,
+        "column": 14
       }
     },
     {
@@ -2652,8 +2652,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_health_scan.spec.ts",
-        "line": 21,
-        "column": 12
+        "line": 19,
+        "column": 18
       }
     },
     {
@@ -2668,8 +2668,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_overview_cluster_filter.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 33,
+        "column": 7
       }
     },
     {
@@ -2684,8 +2684,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 37,
-        "column": 12
+        "line": 31,
+        "column": 7
       }
     },
     {
@@ -2700,8 +2700,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 86,
+        "column": 7
       }
     },
     {
@@ -2716,8 +2716,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 146,
-        "column": 12
+        "line": 159,
+        "column": 26
       }
     },
     {
@@ -2732,8 +2732,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 203,
-        "column": 12
+        "line": 216,
+        "column": 26
       }
     },
     {
@@ -2748,8 +2748,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_purge_instances.spec.ts",
-        "line": 246,
-        "column": 12
+        "line": 284,
+        "column": 27
       }
     },
     {
@@ -2764,8 +2764,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 30,
+        "column": 22
       }
     },
     {
@@ -2780,8 +2780,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 62,
+        "column": 31
       }
     },
     {
@@ -2796,8 +2796,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 95,
+        "column": 11
       }
     },
     {
@@ -2812,8 +2812,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 128,
+        "column": 30
       }
     },
     {
@@ -2828,8 +2828,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 175,
-        "column": 12
+        "line": 160,
+        "column": 25
       }
     },
     {
@@ -2844,8 +2844,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 215,
-        "column": 12
+        "line": 198,
+        "column": 24
       }
     },
     {
@@ -2860,8 +2860,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_repair.spec.ts",
-        "line": 264,
-        "column": 12
+        "line": 255,
+        "column": 14
       }
     },
     {
@@ -2876,8 +2876,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_reset.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 21,
+        "column": 31
       }
     },
     {
@@ -2892,8 +2892,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -2908,8 +2908,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 58,
+        "column": 14
       }
     },
     {
@@ -2924,8 +2924,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 79,
+        "column": 16
       }
     },
     {
@@ -2940,8 +2940,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 101,
-        "column": 12
+        "line": 95,
+        "column": 8
       }
     },
     {
@@ -2956,8 +2956,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 134,
-        "column": 12
+        "line": 126,
+        "column": 18
       }
     },
     {
@@ -2972,8 +2972,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 161,
-        "column": 12
+        "line": 154,
+        "column": 22
       }
     },
     {
@@ -2988,8 +2988,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 187,
-        "column": 12
+        "line": 177,
+        "column": 29
       }
     },
     {
@@ -3004,8 +3004,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/slo_search_definitions.spec.ts",
-        "line": 199,
-        "column": 12
+        "line": 190,
+        "column": 24
       }
     }
   ]

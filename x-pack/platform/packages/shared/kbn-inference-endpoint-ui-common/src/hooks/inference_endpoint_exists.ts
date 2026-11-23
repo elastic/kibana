@@ -15,7 +15,7 @@ export const isInferenceEndpointExists = async (
   try {
     return (
       await http.get<{ isEndpointExists: boolean }>(
-        `/internal/_inference/_exists/${inferenceEndpointId}`,
+        `/internal/_inference/_exists/${encodeURIComponent(inferenceEndpointId)}`,
         {
           version: INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
         }

@@ -12,7 +12,7 @@ import type { MetricVisualizationState, TermsIndexPatternColumn } from '@kbn/len
 
 import { validator } from '../utils/validator';
 import { DEFAULT_LAYER_ID } from '../../constants';
-import type { MetricConfig } from '../../schema/charts/metric';
+import { metricConfigSchema, type MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -164,6 +164,43 @@ describe('Metric', () => {
           ?.fieldName
       ).toBe('custom_time_bucket');
     });
+
+    it('derives the trendline from the FORK branch producing the metric column', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const query =
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | FORK (STATS `Total Flights` = COUNT(*)) (STATS `Flight Count` = COUNT(*) BY `Time Bucket` = BUCKET(timestamp, 75, ?_tstart, ?_tend))';
+      const lensState = builder.fromAPIFormat({
+        type: 'metric',
+        title: 'FORK metric with trendline',
+        data_source: { type: 'esql', query },
+        ignore_global_filters: false,
+        sampling: 1,
+        metrics: [
+          {
+            type: 'primary',
+            column: 'Total Flights',
+            background_chart: { type: 'trend' },
+          },
+        ],
+      } satisfies MetricConfig);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+      const trendlineLayerId = visualization.trendlineLayerId;
+      const trendlineTimeAccessor = visualization.trendlineTimeAccessor;
+
+      if (!trendlineLayerId || !trendlineTimeAccessor) {
+        throw new Error('Expected trendline accessors in metric visualization state');
+      }
+
+      const trendlineLayer = lensState.state.datasourceStates.textBased?.layers[trendlineLayerId];
+      expect(trendlineLayer?.query?.esql).toBe(
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | STATS `Total Flights` = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      );
+      expect(trendlineLayer?.query?.esql).not.toContain('FORK');
+      expect(
+        trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
+          ?.fieldName
+      ).toBe('BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+    });
   });
 
   describe('form-based trendline breakdown ordering', () => {
@@ -304,6 +341,47 @@ describe('Metric', () => {
 
       expect(visualization.density).toBe('default');
       expect(apiOutput.styling?.density).toBe('default');
+    });
+  });
+
+  describe('secondary metric label placement', () => {
+    const getConfigWithSecondaryLabel = (
+      label: NonNullable<NonNullable<MetricConfig['styling']>['secondary']>['label']
+    ) =>
+      ({
+        ...baseMetric,
+        metrics: [
+          ...baseMetric.metrics,
+          {
+            type: 'secondary',
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        styling: { secondary: { label } },
+      } satisfies MetricConfig);
+
+    const convert = (config: MetricConfig) => {
+      const builder = new LensConfigBuilder();
+      return builder.toAPIFormat(builder.fromAPIFormat(config)) as MetricConfig;
+    };
+
+    it('should keep the default placement of a visible label after schema validation', () => {
+      const apiOutput = convert(getConfigWithSecondaryLabel({ visible: true }));
+      const validated = metricConfigSchema.validate(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+      expect(validated.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+    });
+
+    it('should not add a placement after schema validation when the label is hidden', () => {
+      const apiOutput = convert(
+        getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
+      );
+      const validated = metricConfigSchema.validate(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+      expect(validated.styling?.secondary?.label).toEqual({ visible: false });
     });
   });
 
