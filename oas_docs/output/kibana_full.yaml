@@ -201184,6 +201184,7 @@ components:
           anyOf:
             - type: string
             - type: number
+          nullable: true
         ranges:
           items:
             additionalProperties: false
@@ -201193,12 +201194,14 @@ components:
                 anyOf:
                   - type: string
                   - type: number
+                nullable: true
               label:
                 type: string
               to:
                 anyOf:
                   - type: string
                   - type: number
+                nullable: true
             required:
               - label
           maxItems: 100
@@ -201207,6 +201210,7 @@ components:
           anyOf:
             - type: string
             - type: number
+          nullable: true
         type:
           enum:
             - range_key
