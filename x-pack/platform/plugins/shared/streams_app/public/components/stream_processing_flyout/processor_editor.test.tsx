@@ -323,7 +323,7 @@ describe('ProcessorEditor', () => {
       catalogue: {
         ...catalogue,
         definitions: catalogue.definitions.map((definition) =>
-          definition.type === 'add_fields'
+          definition.type === 'set'
             ? {
                 ...definition,
                 fields: [{ name: 'payload', type: 'literal', literal_kinds: ['object'] }],
