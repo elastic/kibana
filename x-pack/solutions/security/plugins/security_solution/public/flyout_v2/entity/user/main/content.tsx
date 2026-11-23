@@ -28,7 +28,7 @@ import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import type { EntityRiskScore, UserItem } from '../../../../../common/search_strategy';
-import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
+import { VisualizationsSection } from '../../shared/components/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import {

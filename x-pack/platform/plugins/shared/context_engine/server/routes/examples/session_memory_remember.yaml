@@ -1,0 +1,108 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        rememberRequestExample:
+          summary: "Remember a session memory"
+          description: "Example request that stores a session memory for the caller and targets an AI index for dreaming"
+          value:
+            session_id: 8f3c2a1e
+            ai_index_ids:
+              - ops-memory
+            content: checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.
+            attributes:
+              incident: INC-4211
+        reviseRequestExample:
+          summary: "Revise an existing session memory"
+          description: "Example request that replaces an existing session memory by passing its `id`"
+          value:
+            id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+            session_id: 8f3c2a1e
+            ai_index_ids:
+              - ops-memory
+            content: checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy; mitigated by raising max_connections to 200.
+            attributes:
+              incident: INC-4211
+responses:
+  202:
+    content:
+      application/json:
+        examples:
+          rememberResponseExample:
+            summary: "Memory accepted"
+            description: "The route accepted the memory and is writing it in the background. It becomes searchable after the write completes"
+            value:
+              id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+  403:
+    content:
+      application/json:
+        examples:
+          noUserProfileExample:
+            summary: "No user profile"
+            description: "`user_id` is missing and the caller has no user profile"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.
+          manageMemoryRequiredExample:
+            summary: "Missing manage memory privilege"
+            description: "`user_id` names another user and the caller lacks `contextEngine:manage_memory`"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "Acting on the memory of another user requires the [contextEngine:manage_memory] privilege."
+          aiIndexNotWritableExample:
+            summary: "AI index not writable"
+            description: "The caller lacks the Elasticsearch `write` privilege on an AI index's backing index"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "AI index 'ops-memory' is not writable. Writing to it needs the Elasticsearch 'write' privilege on its backing index."
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+          memoryDisabledExample:
+            summary: "Memory turned off"
+            description: "Context Engine memory is turned off"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Context Engine memory is turned off.
+          aiIndexNotFoundExample:
+            summary: "AI index not found"
+            description: "An AI index in `ai_index_ids` does not exist in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: "AI index 'ops-memory' not found"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "https://${KIBANA_URL}/api/context_engine/memory/_remember" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -H "kbn-xsrf: true" \
+        -d '{
+          "session_id": "8f3c2a1e",
+          "ai_index_ids": ["ops-memory"],
+          "content": "checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.",
+          "attributes": { "incident": "INC-4211" }
+        }'
+  - lang: Console
+    source: |
+      POST kbn:/api/context_engine/memory/_remember
+      {
+        "session_id": "8f3c2a1e",
+        "ai_index_ids": ["ops-memory"],
+        "content": "checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.",
+        "attributes": { "incident": "INC-4211" }
+      }
