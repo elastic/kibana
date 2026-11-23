@@ -377,7 +377,7 @@ NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.j
 
 For connectivity acceptance, inspect the persisted agent trace's command and actual Elasticsearch
 response: confirm it queried the intended connector and returned data from the intended
-remote/index and time range without query or remote failures. A `connector_id`, exit code zero,
+remote/index and time range without query or remote failures. A `connector_ids` selection, exit code zero,
 completed investigation or placeholder score alone does not prove connectivity.
 
 Leave the Elasticsearch settings unset for the bundled synthetic examples; they need no connector. The
@@ -547,7 +547,7 @@ a subset its own `dataset` name so it does not replace the stored full set.
 
 | Evaluator             | Kind | Scores                                                                     |
 | --------------------- | ---- | -------------------------------------------------------------------------- |
-| `connector_used`      | CODE | At least one `nightshift_sandbox_bash` call passed a `connector_id`.       |
+| `connector_used`      | CODE | At least one `nightshift_sandbox_bash` call passed a nonempty string array in `connector_ids` and succeeded with exit code zero. |
 | `within_time_budget`  | CODE | The `converse` call finished within `NIGHTSHIFT_PROBE_TIME_BUDGET_S` (30). |
 | `reference_behaviour` | LLM  | The reply and tool calls match the example's `output.reference_answer`.    |
 

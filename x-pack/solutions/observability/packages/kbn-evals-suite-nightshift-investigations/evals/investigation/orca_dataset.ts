@@ -276,7 +276,10 @@ export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'ste
     .some(
       ({ tool_id: toolId, params, results }) =>
         toolId === 'nightshift_sandbox_bash' &&
-        isOrcaConnectorId(params.connector_id) &&
+        Array.isArray(params.connector_ids) &&
+        params.connector_ids.length > 0 &&
+        params.connector_ids.every((id) => typeof id === 'string' && id.length > 0) &&
+        params.connector_ids.some(isOrcaConnectorId) &&
         results.some(
           ({ type, data }) =>
             type === ToolResultType.other &&

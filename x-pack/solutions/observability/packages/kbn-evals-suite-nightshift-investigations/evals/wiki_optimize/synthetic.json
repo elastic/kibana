@@ -115,7 +115,8 @@
               {
                 "tool_id": "nightshift_sandbox_bash",
                 "params": {
-                  "command": "curl -s \"$CONNECTOR_CONFIG_URL/_resolve/index/logging-eu-west:logs-checkout*,logging-eu-west:logs-session*,logging-eu-west:logs-payments*\" | jq -c '.data_streams[].name'"
+                  "connector_ids": ["search-1"],
+                  "command": "curl -s \"$CONNECTOR_SEARCH_1_CONFIG_URL/_resolve/index/logging-eu-west:logs-checkout*,logging-eu-west:logs-session*,logging-eu-west:logs-payments*\" | jq -c '.data_streams[].name'"
                 },
                 "result": "\"logs-checkout-api.log-default\"\n\"logs-checkout-gateway.log-default\"\n\"logs-payments-adapter.log-default\"\n\"logs-session-cache.log-default\""
               },
@@ -431,7 +432,8 @@
               {
                 "tool_id": "nightshift_sandbox_bash",
                 "params": {
-                  "command": "curl --fail-with-body -sS -H \"Authorization: $CONNECTOR_HEADER_AUTHORIZATION\" https://api.github.com/repos/acme/widgets/issues/4821"
+                  "connector_ids": ["github-1"],
+                  "command": "curl --fail-with-body -sS -H \"Authorization: $CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION\" https://api.github.com/repos/acme/widgets/issues/4821"
                 },
                 "result": "error: curl: (22) The requested URL returned error: 403"
               }

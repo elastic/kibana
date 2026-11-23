@@ -6,13 +6,16 @@ alert issues and incidents. Not for: modifying data or alert configuration.
 ## Authentication and routing
 
 New Relic needs a New Relic connector from `/workspace/connectors.md`; without one it is not
-reachable. Pass its id as `connector_id`. For that single command only, the environment contains:
+reachable. Pass its id in `connector_ids`, even for one connector. Each connector's exact environment
+prefix is listed in `/workspace/connectors.md`. The examples below assume
+`connector_ids: ["newrelic-1"]`, with prefix `CONNECTOR_NEWRELIC_1_`; replace that prefix with your
+connector's listed prefix. For that single command only, the environment contains:
 
 | Env var | Meaning |
 |---------|---------|
-| `CONNECTOR_HEADER_API_KEY` | User API key, sent as the `API-Key` header |
-| `CONNECTOR_CONFIG_ACCOUNTID` | The numeric account this connector is scoped to |
-| `CONNECTOR_CONFIG_REGION` | `us` → `api.newrelic.com` · `eu` → `api.eu.newrelic.com` · `jp` → `api.jp.newrelic.com` |
+| `CONNECTOR_NEWRELIC_1_HEADER_API_KEY` | User API key, sent as the `API-Key` header |
+| `CONNECTOR_NEWRELIC_1_CONFIG_ACCOUNTID` | The numeric account this connector is scoped to |
+| `CONNECTOR_NEWRELIC_1_CONFIG_REGION` | `us` → `api.newrelic.com` · `eu` → `api.eu.newrelic.com` · `jp` → `api.jp.newrelic.com` |
 
 One connector covers one account. Another account needs its own connector; never guess account ids.
 The API key is scoped to its region, so calls to another region's endpoint return `401`.
@@ -23,15 +26,15 @@ There is no `newrelic` CLI in the sandbox. Send NRQL through the NerdGraph Graph
 the query as a variable so it needs no escaping:
 
 ```bash
-case "$CONNECTOR_CONFIG_REGION" in
+case "$CONNECTOR_NEWRELIC_1_CONFIG_REGION" in
   eu) NR=https://api.eu.newrelic.com/graphql ;;
   jp) NR=https://api.jp.newrelic.com/graphql ;;
   *) NR=https://api.newrelic.com/graphql ;;
 esac
 jq -n --arg q "SELECT count(*) FROM Span FACET service.name SINCE '2026-01-01 13:30:00+00:00' UNTIL '2026-01-01 15:00:00+00:00' LIMIT 20" \
-  --argjson a "$CONNECTOR_CONFIG_ACCOUNTID" \
+  --argjson a "$CONNECTOR_NEWRELIC_1_CONFIG_ACCOUNTID" \
   '{query: "query($a: Int!, $q: Nrql!) { actor { account(id: $a) { nrql(query: $q) { results } } } }", variables: {a: $a, q: $q}}' \
-  | curl --fail-with-body -sS --max-time 120 -H "API-Key: $CONNECTOR_HEADER_API_KEY" \
+  | curl --fail-with-body -sS --max-time 120 -H "API-Key: $CONNECTOR_NEWRELIC_1_HEADER_API_KEY" \
       -H "Content-Type: application/json" "$NR" -d @- > /workspace/nr.json
 jq '.errors // .data.actor.account.nrql.results' /workspace/nr.json
 ```

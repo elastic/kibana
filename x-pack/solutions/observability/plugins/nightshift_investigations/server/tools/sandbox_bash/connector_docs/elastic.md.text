@@ -2,19 +2,22 @@
 
 Use for: querying cluster telemetry (logs, metrics, traces) with ES|QL or the REST API.
 
-Query Elasticsearch by passing an Elasticsearch connector's `connector_id` to
-`nightshift_sandbox_bash`. Take it from `/workspace/connectors.md`: an External
+Query Elasticsearch by passing an Elasticsearch connector's id in `connector_ids` to
+`nightshift_sandbox_bash`, even for one connector. Take it from `/workspace/connectors.md`: an External
 Elasticsearch (`.elasticsearch`) connector, or an HTTP (`.http`) connector whose URL is an
 Elasticsearch cluster. If several fit, pick the one for the cluster the question is about. If
 none is listed, Elasticsearch is not reachable: say so instead of guessing credentials.
 
-Credentials are not stored here: for that single command only, the environment contains
+Each connector's exact environment prefix is listed in `/workspace/connectors.md`. The examples
+below assume `connector_ids: ["search-1"]`, with prefix `CONNECTOR_SEARCH_1_`; replace that prefix
+with your connector's listed prefix. Credentials are not stored here: for that single command
+only, the environment contains
 
-- `CONNECTOR_CONFIG_URL` — Elasticsearch URL
-- `CONNECTOR_HEADER_AUTHORIZATION` — full Authorization header value (`ApiKey <key>`)
+- `CONNECTOR_SEARCH_1_CONFIG_URL` — Elasticsearch URL
+- `CONNECTOR_SEARCH_1_HEADER_AUTHORIZATION` — full Authorization header value (`ApiKey <key>`)
 
 Reference those variables directly and never hard-code their values. A command that omits
-`connector_id` gets no credentials and cannot reach Elasticsearch.
+`connector_ids` or passes `[]` gets no credentials and cannot reach Elasticsearch.
 
 Telemetry usually lives in `logs-*`, `metrics-*` and `traces-*`, locally or on remote clusters, but
 what a cluster holds depends on how it was set up. Start there and check what is available, as
@@ -66,30 +69,30 @@ shown below, before querying.
   totals and a small `LIMIT` for raw documents.
 
 ```bash
-# connector_id must be set on every one of these commands
-curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
-  "$CONNECTOR_CONFIG_URL/_remote/info"
+# Set connector_ids: ["search-1"] on every one of these commands; use your connector's prefix.
+curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_SEARCH_1_HEADER_AUTHORIZATION" \
+  "$CONNECTOR_SEARCH_1_CONFIG_URL/_remote/info"
 
-curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
+curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_SEARCH_1_HEADER_AUTHORIZATION" \
   -H "Content-Type: application/json" \
-  "$CONNECTOR_CONFIG_URL/_query?format=txt" \
+  "$CONNECTOR_SEARCH_1_CONFIG_URL/_query?format=txt" \
   -d '{"query":"FROM logs-* | WHERE @timestamp >= \"2026-01-01T00:00:00Z\" AND @timestamp < \"2026-01-01T01:00:00Z\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20"}'
 
 # Find the data streams that match a keyword on one remote
-curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
-  "$CONNECTOR_CONFIG_URL/_resolve/index/<remote>:logs-*nginx*"
+curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_SEARCH_1_HEADER_AUTHORIZATION" \
+  "$CONNECTOR_SEARCH_1_CONFIG_URL/_resolve/index/<remote>:logs-*nginx*"
 
 # Count one data stream on every remote whose name starts with <prefix>, 8 at a time, each line
 # prefixed with its remote; failed requests print their error
 q() {
-  curl --fail-with-body -sS --max-time 30 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
-    -H "Content-Type: application/json" "$CONNECTOR_CONFIG_URL/_query?format=txt" \
+  curl --fail-with-body -sS --max-time 30 -H "Authorization: $CONNECTOR_SEARCH_1_HEADER_AUTHORIZATION" \
+    -H "Content-Type: application/json" "$CONNECTOR_SEARCH_1_CONFIG_URL/_query?format=txt" \
     -d "{\"query\":\"FROM $1:logs-nginx.error-* | WHERE @timestamp >= \\\"2026-01-01T00:00:00Z\\\" AND @timestamp < \\\"2026-01-01T06:00:00Z\\\" | STATS count = COUNT(*)\"}" \
     2>&1 | sed "s/^/$1\t/"
 }
 export -f q
-curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
-  "$CONNECTOR_CONFIG_URL/_remote/info" | jq -r 'keys[] | select(startswith("<prefix>"))' \
+curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_SEARCH_1_HEADER_AUTHORIZATION" \
+  "$CONNECTOR_SEARCH_1_CONFIG_URL/_remote/info" | jq -r 'keys[] | select(startswith("<prefix>"))' \
   | xargs -P 8 -n 1 bash -c 'q "$0"'
 ```
 

@@ -210,7 +210,7 @@ const call = {
   type: ConversationRoundStepType.toolCall,
   tool_call_id: 'call',
   tool_id: 'nightshift_sandbox_bash',
-  params: { connector_id: 'orcabench-es', command: 'curl ...' },
+  params: { connector_ids: ['orcabench-es'], command: 'curl ...' },
   results: [
     {
       tool_result_id: 'result',
@@ -221,6 +221,17 @@ const call = {
 } satisfies ToolCallStep;
 
 describe('ORCA telemetry evidence', () => {
+  it('recognizes an ORCA connector after another connector in the array', () => {
+    expect(
+      hasOrcaTelemetryQuery([
+        {
+          steps: [
+            { ...call, params: { ...call.params, connector_ids: ['github', 'orcabench-es'] } },
+          ],
+        },
+      ])
+    ).toBe(true);
+  });
   it.each([
     '{"values":[[14268]]}',
     '[[14268,"checkout"]]',
@@ -239,8 +250,14 @@ describe('ORCA telemetry evidence', () => {
   });
   it.each([
     { ...call, tool_id: 'execute_api' },
-    { ...call, params: { ...call.params, connector_id: 'another-cluster' } },
-    { ...call, params: { ...call.params, connector_id: 'orcabench-es-0123456789ab' } },
+    { ...call, params: { ...call.params, connector_ids: ['another-cluster'] } },
+    { ...call, params: { ...call.params, connector_ids: ['orcabench-es-0123456789ab'] } },
+    { ...call, params: { command: 'curl ...' } },
+    { ...call, params: { ...call.params, connector_ids: [] } },
+    { ...call, params: { ...call.params, connector_ids: 'orcabench-es' } },
+    { ...call, params: { ...call.params, connector_ids: ['orcabench-es', 42] } },
+    { ...call, params: { ...call.params, connector_ids: [''] } },
+    { ...call, params: { command: 'curl ...', connector_id: 'orcabench-es' } },
     {
       ...call,
       results: [{ ...call.results[0], data: { stdout: '{"values":[[0]]}', exit_code: 0 } }],

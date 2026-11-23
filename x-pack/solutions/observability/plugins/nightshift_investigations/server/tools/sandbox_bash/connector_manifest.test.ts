@@ -120,9 +120,9 @@ describe('writeConnectorManifest', () => {
         '/workspace/.connector-docs/newrelic.md',
       ]);
       expect(files[1].content.toString('utf8')).toContain('# Elasticsearch');
-      expect(files[1].content.toString('utf8')).toContain('CONNECTOR_CONFIG_URL');
+      expect(files[1].content.toString('utf8')).toContain('CONNECTOR_SEARCH_1_CONFIG_URL');
       expect(files[2].content.toString('utf8')).toContain('# GitHub');
-      expect(files[3].content.toString('utf8')).toContain('CONNECTOR_HEADER_API_KEY');
+      expect(files[3].content.toString('utf8')).toContain('CONNECTOR_NEWRELIC_1_HEADER_API_KEY');
     });
 
     it('throws when a guide fails to write, so the workspace is not cached as ready', async () => {
@@ -158,12 +158,15 @@ describe('writeConnectorManifest', () => {
       const { content } = await renderManifest();
 
       expect(content).toContain('# Sandbox Connectors');
-      expect(content).toContain('`connector_id` parameter of the bash tool');
-      expect(content).toContain('CONNECTOR_CONFIG_<KEY>');
-      expect(content).toContain('CONNECTOR_HEADER_<NAME>');
-      expect(content).toContain('CONNECTOR_HEADER_AUTHORIZATION');
+      expect(content).toContain('`connector_ids: ["github-1", "search-1"]`');
+      expect(content).toContain('at most 5 array entries; exact duplicates removed');
+      expect(content).toContain('`connector_ids: []` runs without credentials');
+      expect(content).toContain('even when selecting just one connector');
+      expect(content).toContain('CONNECTOR_<NORMALIZED_ID>_CONFIG_<KEY>');
+      expect(content).toContain('CONNECTOR_<NORMALIZED_ID>_HEADER_<NAME>');
       expect(content).toContain('env | grep ^CONNECTOR_ | cut -d= -f1');
-      expect(content).toContain('Authorization: $CONNECTOR_HEADER_AUTHORIZATION');
+      expect(content).toContain('Authorization: $CONNECTOR_SEARCH_1_HEADER_AUTHORIZATION');
+      expect(content).toContain('replace each non-alphanumeric run with `_`, and trim edge `_`');
     });
 
     it('does not advertise an in-sandbox connector callback CLI', async () => {
@@ -192,7 +195,9 @@ describe('writeConnectorManifest', () => {
       });
 
       expect(content).toContain('## My GitHub (connector-id: connector-1');
+      expect(content).toContain('Environment prefix: `CONNECTOR_CONNECTOR_1_`');
       expect(content).toContain('## Second GitHub (connector-id: connector-2');
+      expect(content).toContain('Environment prefix: `CONNECTOR_CONNECTOR_2_`');
     });
 
     it('notes when the allow-list is empty', async () => {

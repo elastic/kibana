@@ -9,11 +9,14 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuditedSandboxSession } from '../../sandbox_audit';
 import type { AgentConnector, ActionsClient } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
+import { CONNECTOR_ENV_PREFIX, toEnvKey } from './connector_credentials';
 import type { SandboxCallContext } from './tool_utils';
 import { CONNECTOR_DOCS, CONNECTOR_DOCS_ROOT, CONNECTOR_MANIFEST_PATH } from './connector_docs';
 
 const renderConnectorSection = (connector: AgentConnector): string =>
-  `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
+  `## ${connector.name} (connector-id: ${connector.id}, type: ${
+    connector.actionTypeId
+  })\n\nEnvironment prefix: \`${CONNECTOR_ENV_PREFIX}${toEnvKey(connector.id)}_\``;
 
 const renderGuidesSection = (): string[] => [
   '',
@@ -43,20 +46,31 @@ export const writeConnectorManifest = async ({
   const sections: string[] = [
     '# Sandbox Connectors',
     '',
-    'Connector credentials are never stored in this sandbox. To use a connector, pass its id as the',
-    '`connector_id` parameter of the bash tool. For that single command only, the environment contains:',
+    'Connector credentials are never stored in this sandbox. Pass ids to the bash tool as',
+    '`connector_ids: ["github-1", "search-1"]` (at most 5 array entries; exact duplicates removed).',
+    'Omitted or `connector_ids: []` runs without credentials. For that single command only,',
+    'ALL selected variables are namespaced, even when selecting just one connector:',
     '',
-    '- `CONNECTOR_ID`, `CONNECTOR_TYPE`',
-    '- `CONNECTOR_CONFIG_<KEY>` for each connector setting (e.g. `CONNECTOR_CONFIG_APIURL`)',
-    '- `CONNECTOR_HEADER_<NAME>` for each normalized authentication header (e.g. `CONNECTOR_HEADER_AUTHORIZATION`)',
+    '- `CONNECTOR_<NORMALIZED_ID>_ID`, `CONNECTOR_<NORMALIZED_ID>_TYPE`',
+    '- `CONNECTOR_<NORMALIZED_ID>_CONFIG_<KEY>`',
+    '- `CONNECTOR_<NORMALIZED_ID>_HEADER_<NAME>`',
     '',
-    'Keys are upper-cased with non-alphanumerics replaced by `_`. Discover the names available for a connector with:',
+    'Normalize ids and keys to uppercase, replace each non-alphanumeric run with `_`, and trim edge `_`.',
+    'For example, `github-1` uses `CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION` and `CONNECTOR_GITHUB_1_CONFIG_SERVERURL`.',
+    'Empty normalized ids, colliding normalized ids, and colliding final environment keys fail the whole call.',
+    'Every selected connector must resolve successfully before the command runs. Command network access',
+    'combines the space rules and selected connector hosts, preserving existing scoped space rules;',
+    'each secret remains bound only to its own connector hosts.',
+    '',
+    'Discover the names available for a connector with:',
     '```bash',
     'env | grep ^CONNECTOR_ | cut -d= -f1',
     '```',
-    'Then call the service directly, e.g.:',
+    'Each connector below lists its exact environment prefix. Append CONFIG_<KEY>, HEADER_<NAME>,',
+    'ID or TYPE to that prefix. This Elasticsearch example assumes connector_ids: ["search-1"];',
+    'replace CONNECTOR_SEARCH_1_ with the listed prefix of the selected connector:',
     '```bash',
-    'curl -sS -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_APIURL/..."',
+    'curl -sS -H "Authorization: $CONNECTOR_SEARCH_1_HEADER_AUTHORIZATION" "$CONNECTOR_SEARCH_1_CONFIG_URL/_cluster/health"',
     '```',
     'Never print, log, or write credential values to files; they are redacted from command output.',
     'Only the connectors listed below can be requested.',

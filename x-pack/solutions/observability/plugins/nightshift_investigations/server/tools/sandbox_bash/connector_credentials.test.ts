@@ -80,14 +80,14 @@ describe('buildConnectorEnv', () => {
     });
 
     expect(env).toEqual({
-      CONNECTOR_ID,
-      CONNECTOR_TYPE: '.github',
-      CONNECTOR_CONFIG_APIURL: 'https://api.github.com',
-      CONNECTOR_CONFIG_NESTED_OPT: '{"a":1}',
-      CONNECTOR_CONFIG_PORT: '443',
-      CONNECTOR_CONFIG_TLS: 'true',
-      CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
-      CONNECTOR_HEADER_X_API_KEY: 'abc',
+      CONNECTOR_GITHUB_1_ID: CONNECTOR_ID,
+      CONNECTOR_GITHUB_1_TYPE: '.github',
+      CONNECTOR_GITHUB_1_CONFIG_APIURL: 'https://api.github.com',
+      CONNECTOR_GITHUB_1_CONFIG_NESTED_OPT: '{"a":1}',
+      CONNECTOR_GITHUB_1_CONFIG_PORT: '443',
+      CONNECTOR_GITHUB_1_CONFIG_TLS: 'true',
+      CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
+      CONNECTOR_GITHUB_1_HEADER_X_API_KEY: 'abc',
     });
     expect(secretValues).toEqual([BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue']);
   });
@@ -102,10 +102,10 @@ describe('buildConnectorEnv', () => {
     });
 
     expect(env).toEqual({
-      CONNECTOR_ID,
-      CONNECTOR_TYPE: '.elasticsearch',
-      CONNECTOR_CONFIG_URL: 'http://localhost:9200',
-      CONNECTOR_CONFIG_AUTHTYPE: 'basic',
+      CONNECTOR_GITHUB_1_ID: CONNECTOR_ID,
+      CONNECTOR_GITHUB_1_TYPE: '.elasticsearch',
+      CONNECTOR_GITHUB_1_CONFIG_URL: 'http://localhost:9200',
+      CONNECTOR_GITHUB_1_CONFIG_AUTHTYPE: 'basic',
     });
   });
 
@@ -134,11 +134,11 @@ describe('buildConnectorEnv', () => {
     expect(allowedHosts).toEqual(['api.github.com', 'api.githubcopilot.com']);
     expect(secretEnvKeys).toEqual([
       {
-        key: 'CONNECTOR_HEADER_AUTHORIZATION',
+        key: 'CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION',
         allowed_hosts: ['api.github.com', 'api.githubcopilot.com'],
       },
       {
-        key: 'CONNECTOR_HEADER_X_API_KEY',
+        key: 'CONNECTOR_GITHUB_1_HEADER_X_API_KEY',
         allowed_hosts: ['api.github.com', 'api.githubcopilot.com'],
       },
     ]);
@@ -172,7 +172,7 @@ describe('buildConnectorEnv', () => {
         hosts: ['api.example.com'],
       });
 
-      expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe(authorization);
+      expect(env.CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION).toBe(authorization);
       expect(secretValues).toEqual(
         expect.arrayContaining([
           encodedCredentials,
@@ -196,7 +196,7 @@ describe('buildConnectorEnv', () => {
       hosts: ['api.example.com'],
     });
 
-    expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe('ApiKey override-api-key-1');
+    expect(env.CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION).toBe('ApiKey override-api-key-1');
     expect(secretValues).toEqual(
       expect.arrayContaining(['ghp_topsecrettokenvalue', 'override-api-key-1'])
     );
@@ -254,14 +254,16 @@ describe('createConnectorCredentialResolver', () => {
 
     expect(result).toEqual({
       env: {
-        CONNECTOR_ID,
-        CONNECTOR_TYPE: '.github',
-        CONNECTOR_CONFIG_APIURL: 'https://api.github.com',
-        CONNECTOR_CONFIG_OWNER: 'elastic',
-        CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
+        CONNECTOR_GITHUB_1_ID: CONNECTOR_ID,
+        CONNECTOR_GITHUB_1_TYPE: '.github',
+        CONNECTOR_GITHUB_1_CONFIG_APIURL: 'https://api.github.com',
+        CONNECTOR_GITHUB_1_CONFIG_OWNER: 'elastic',
+        CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
       },
       secretValues: [BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue'],
-      secretEnvKeys: [{ key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] }],
+      secretEnvKeys: [
+        { key: 'CONNECTOR_GITHUB_1_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] },
+      ],
       allowedHosts: ['api.github.com'],
     });
     expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: CONNECTOR_ID });
@@ -283,8 +285,8 @@ describe('createConnectorCredentialResolver', () => {
     expect(result).toEqual(
       expect.objectContaining({
         env: expect.not.objectContaining({
-          CONNECTOR_SECRET_TOKEN: 'should-not-leak',
-          CONNECTOR_SECRET_CLIENTSECRET: 'oauth-client-secret',
+          CONNECTOR_GITHUB_1_SECRET_TOKEN: 'should-not-leak',
+          CONNECTOR_GITHUB_1_SECRET_CLIENTSECRET: 'oauth-client-secret',
         }),
       })
     );
@@ -322,14 +324,17 @@ describe('createConnectorCredentialResolver', () => {
 
     expect(result).toEqual({
       env: {
-        CONNECTOR_ID: 'saved-object-1',
-        CONNECTOR_TYPE: '.http',
-        CONNECTOR_CONFIG_URL: 'https://api.example.com',
-        CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
+        CONNECTOR_SAVED_OBJECT_1_ID: 'saved-object-1',
+        CONNECTOR_SAVED_OBJECT_1_TYPE: '.http',
+        CONNECTOR_SAVED_OBJECT_1_CONFIG_URL: 'https://api.example.com',
+        CONNECTOR_SAVED_OBJECT_1_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
       },
       secretValues: [BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue'],
       secretEnvKeys: [
-        { key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.example.com'] },
+        {
+          key: 'CONNECTOR_SAVED_OBJECT_1_HEADER_AUTHORIZATION',
+          allowed_hosts: ['api.example.com'],
+        },
       ],
       allowedHosts: ['api.example.com'],
     });

@@ -26,14 +26,16 @@ export const getTimeBudgetSeconds = (
 };
 
 /**
- * Sandbox commands that carried a connector_id and finished with exit code zero. A call that
+ * Sandbox commands that carried nonempty connector_ids and finished with exit code zero. A call that
  * errored (for example `DEADLINE_EXCEEDED` from an unavailable sandbox) never reached the data.
  */
 export const getSuccessfulConnectorCalls = (trajectory: TrajectoryStep[]): TrajectoryStep[] =>
   trajectory.filter(
     ({ tool_id: toolId, params, result }) =>
       toolId === SANDBOX_BASH_TOOL_ID &&
-      typeof params.connector_id === 'string' &&
+      Array.isArray(params.connector_ids) &&
+      params.connector_ids.length > 0 &&
+      params.connector_ids.every((id) => typeof id === 'string' && id.length > 0) &&
       result.startsWith('exit_code: 0')
   );
 
@@ -52,8 +54,8 @@ export const connectorUsedEvaluator: ConnectorProbeEvaluator = {
       score: connectorCalls.length > 0 ? 1 : 0,
       explanation:
         connectorCalls.length > 0
-          ? `${connectorCalls.length} of ${trajectory.length} tool call(s) passed a connector_id and succeeded.`
-          : `None of the ${trajectory.length} tool call(s) passed a connector_id and succeeded.`,
+          ? `${connectorCalls.length} of ${trajectory.length} tool call(s) passed nonempty connector_ids and succeeded.`
+          : `None of the ${trajectory.length} tool call(s) passed nonempty connector_ids and succeeded.`,
       metadata: {
         connector_calls: connectorCalls.length,
         tool_calls: trajectory.length,
@@ -105,7 +107,7 @@ export const createReferenceBehaviourEvaluator = (
       return {
         score: 0,
         explanation:
-          'No sandbox command carrying a connector_id succeeded, so the reply is not grounded in connector data.',
+          'No sandbox command carrying nonempty connector_ids succeeded, so the reply is not grounded in connector data.',
       };
     }
     return evaluators
@@ -114,9 +116,9 @@ export const createReferenceBehaviourEvaluator = (
           'Every number, name and list item in the reference must appear in the response with the same value ' +
           '(formatting and ordering may differ); a different, missing or extra value, a hedge or a refusal fails. ' +
           'In addition, each value in the response must be supported by the output of a successful sandbox ' +
-          'command (exit_code: 0, with a connector_id) in tool_call_trajectory. A value taken from memory, ' +
-          'from the question text, from a tool call that errored, from an empty result, or from a cluster ' +
-          'other than the one the connector queries fails.',
+          'command (exit_code: 0, with a nonempty string array connector_ids) in tool_call_trajectory. ' +
+          'A value taken from memory, from the question text, from a tool call that errored, ' +
+          'from an empty result, or from a cluster other than the one the connector queries fails.',
       ])
       .evaluate(params);
   },
