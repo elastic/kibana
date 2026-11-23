@@ -2965,6 +2965,27 @@ describe('ManagedWorkflowsService', () => {
         `Managed workflows: plugin '${PLUGIN_ID}' called ready() more than once. Ignoring.`
       );
     });
+
+    it('stays not ready when reconciliation fails, so ready() can run it again', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, logger, service } = createService();
+      const readFailure = new Error('There are no living connections');
+      crudService.getManagedWorkflowDocumentsAllSpaces
+        .mockRejectedValueOnce(readFailure)
+        .mockResolvedValueOnce([]);
+
+      await expect(service.pluginReady(PLUGIN_ID)).rejects.toBe(readFailure);
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(false);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(true);
+      expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledTimes(2);
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        `Managed workflows: plugin '${PLUGIN_ID}' called ready() more than once. Ignoring.`
+      );
+    });
   });
 
   describe('cleanupUnregisteredOrphans', () => {

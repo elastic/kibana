@@ -824,47 +824,47 @@ export class WorkflowsService {
     return this.validationService.getWorkflowZodSchema(options, spaceId, request);
   }
 
+  /** A plugin's startup pass: no request, before the plugin calls ready(). */
+  private isStartupOperation(pluginId: string, request?: KibanaRequest): boolean {
+    return !request && !this.managedWorkflowsService.isPluginReady(pluginId);
+  }
+
   /**
-   * Runs a managed install once the readiness gate passes. At startup (no request, and the plugin
-   * has not called ready() yet) it runs again with backoff while it fails on a transient
-   * Elasticsearch error, for about 15 s; other installs run once, so a request does not hang. A
-   * transient error that is not retried throws {@link WorkflowsElasticsearchUnavailableError}.
-   * Resolves to `skipped` when the gate skips it, such as when Kibana is stopping, and marks the
-   * plugin install pass incomplete so ready() will not orphan-delete.
+   * Runs a managed install, ready() or orphan cleanup once the readiness gate passes. With
+   * `retryTransientErrors`, meant for the startup pass, it runs again with backoff while it fails on
+   * a transient Elasticsearch error, for about 15 s; otherwise it runs once, so a request does not
+   * hang. A transient error that is not retried throws {@link WorkflowsElasticsearchUnavailableError}.
+   * Resolves to `onSkipped()` when the gate skips it, such as when Kibana is stopping.
    */
-  private async runManagedInstall<T>({
+  private async runManagedOperation<T>({
     operation,
-    pluginId,
-    request,
-    install,
-    skipped,
+    retryTransientErrors,
+    run,
+    onSkipped,
     getTransientError,
   }: {
     operation: string;
-    pluginId: string;
-    request?: KibanaRequest;
-    install: () => Promise<T>;
-    skipped: T;
+    retryTransientErrors: boolean;
+    run: () => Promise<T>;
+    onSkipped: () => T;
     /** A transient error inside a result that resolved, such as a workflow of a batch that failed. */
     getTransientError?: (result: T) => Error | undefined;
   }): Promise<T> {
-    const isStartupInstall = !request && !this.managedWorkflowsService.isPluginReady(pluginId);
-    const maxRetries = isStartupInstall ? MANAGED_INSTALL_MAX_RETRIES : 0;
+    const maxRetries = retryTransientErrors ? MANAGED_INSTALL_MAX_RETRIES : 0;
     for (let retry = 0; ; retry++) {
       const readiness = await this.ensureManagedInstallReady(operation);
       if (!readiness.ready) {
-        this.managedWorkflowsService.markInstallIncomplete(pluginId);
-        return skipped;
+        return onSkipped();
       }
 
       let transientError: Error | undefined;
       try {
-        const result = await install();
+        const result = await run();
         transientError = getTransientError?.(result);
         if (!transientError || retry >= maxRetries) {
           if (!transientError && retry > 0) {
             this.logger.info(
-              `Workflows Management: managed ${operation} succeeded after ${retry + 1} attempts`
+              `Workflows Management: managed ${operation} completed after ${retry + 1} attempts`
             );
           }
           return result;
@@ -892,8 +892,9 @@ export class WorkflowsService {
 
   /**
    * Install or update a managed workflow after ES readiness gating, retrying transient
-   * Elasticsearch errors at startup (see {@link runManagedInstall}).
+   * Elasticsearch errors at startup (see {@link runManagedOperation}).
    * Best-effort: may no-op when Kibana is stopping or ES is not ready (resolve ≠ persisted).
+   * A gated install marks the plugin install pass incomplete so ready() will not orphan-delete.
    */
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
@@ -902,25 +903,26 @@ export class WorkflowsService {
     request?: KibanaRequest
   ): Promise<void> {
     await this.ensureInitialized();
-    return this.runManagedInstall({
+    return this.runManagedOperation({
       operation: `install '${id}'`,
-      pluginId: registeredPluginId,
-      request,
-      install: () =>
+      retryTransientErrors: this.isStartupOperation(registeredPluginId, request),
+      run: () =>
         this.managedWorkflowsService.installManagedWorkflow(
           id,
           options,
           registeredPluginId,
           request
         ),
-      skipped: undefined,
+      onSkipped: () => {
+        this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
+      },
     });
   }
 
   /**
    * Install or update static managed workflows with `_bulk`, after an ES readiness check for the
    * whole batch. At startup, when the batch fails or any of its workflows fails on a transient
-   * Elasticsearch error, the whole batch runs again (see {@link runManagedInstall}); unchanged
+   * Elasticsearch error, the whole batch runs again (see {@link runManagedOperation}); unchanged
    * workflows cost only its first read. Best-effort like {@link installManagedWorkflow}: a gated
    * batch resolves with no failures.
    */
@@ -929,12 +931,15 @@ export class WorkflowsService {
     registeredPluginId: string
   ): Promise<ManagedWorkflowInstallManyResult> {
     await this.ensureInitialized();
-    return this.runManagedInstall({
+    return this.runManagedOperation({
       operation: `install of ${items.length} workflow(s) for plugin '${registeredPluginId}'`,
-      pluginId: registeredPluginId,
-      install: () =>
+      retryTransientErrors: this.isStartupOperation(registeredPluginId),
+      run: () =>
         this.managedWorkflowsService.bulkInstallManagedWorkflows(items, registeredPluginId),
-      skipped: { failed: [] },
+      onSkipped: () => {
+        this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
+        return { failed: [] };
+      },
       getTransientError: ({ failed }) =>
         failed.find(({ error }) => isTransientEsError(error))?.error,
     });
@@ -992,23 +997,27 @@ export class WorkflowsService {
    * Owner signal that static managed installs for this plugin are finished.
    * Best-effort: may no-op when Kibana is stopping or ES is not ready. When installs
    * were incomplete this boot, destructive orphan cleanup is skipped; dynamic auto
-   * upgrades still run once this call has passed Elasticsearch readiness.
+   * upgrades still run once this call has passed Elasticsearch readiness. Reconciliation runs
+   * again on transient Elasticsearch errors like startup installs (see {@link runManagedOperation}).
    */
   public async pluginReady(pluginId: string): Promise<void> {
     await this.ensureInitialized();
-    const readiness = await this.ensureManagedInstallReady(`ready() for plugin '${pluginId}'`);
-    if (!readiness.ready) {
-      return;
-    }
-    return this.managedWorkflowsService.pluginReady(pluginId);
+    return this.runManagedOperation({
+      operation: `ready() for plugin '${pluginId}'`,
+      retryTransientErrors: this.isStartupOperation(pluginId),
+      run: () => this.managedWorkflowsService.pluginReady(pluginId),
+      onSkipped: () => undefined,
+    });
   }
 
+  /** Startup-only cleanup of orphans of unregistered owners, retried like startup installs. */
   public async cleanupUnregisteredOrphans(registeredOwnerPluginIds: string[]): Promise<void> {
     await this.ensureInitialized();
-    const readiness = await this.ensureManagedInstallReady('global orphan cleanup');
-    if (!readiness.ready) {
-      return;
-    }
-    return this.managedWorkflowsService.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
+    return this.runManagedOperation({
+      operation: 'global orphan cleanup',
+      retryTransientErrors: true,
+      run: () => this.managedWorkflowsService.cleanupUnregisteredOrphans(registeredOwnerPluginIds),
+      onSkipped: () => undefined,
+    });
   }
 }

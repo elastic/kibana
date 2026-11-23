@@ -790,6 +790,42 @@ describe('WorkflowsService (facade)', () => {
       expect(managedSpies.installManagedWorkflow).toHaveBeenCalledTimes(1);
       expect(managedSpies.markInstallIncomplete).toHaveBeenCalledWith('owner');
     });
+
+    it('runs ready() reconciliation again after a transient Elasticsearch error', async () => {
+      const service = await buildService();
+      (managedSpies.pluginReady as jest.SpyInstance)
+        .mockRejectedValueOnce(serviceUnavailable())
+        .mockResolvedValueOnce(undefined);
+
+      const result = settle(service.pluginReady('owner'));
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(await result).toEqual({ value: undefined });
+      expect(managedSpies.pluginReady).toHaveBeenCalledTimes(2);
+      expect(managedSpies.markInstallIncomplete).not.toHaveBeenCalled();
+    });
+
+    it('does not run ready() reconciliation again after a permanent error', async () => {
+      const service = await buildService();
+      const permanent = new Error('Managed workflow definition is invalid');
+      (managedSpies.pluginReady as jest.SpyInstance).mockRejectedValueOnce(permanent);
+
+      await expect(service.pluginReady('owner')).rejects.toBe(permanent);
+      expect(managedSpies.pluginReady).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs the global orphan cleanup again after a transient Elasticsearch error', async () => {
+      const service = await buildService();
+      (managedSpies.cleanupUnregisteredOrphans as jest.SpyInstance)
+        .mockRejectedValueOnce(noLivingConnections())
+        .mockResolvedValueOnce(undefined);
+
+      const result = settle(service.cleanupUnregisteredOrphans(['owner']));
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(await result).toEqual({ value: undefined });
+      expect(managedSpies.cleanupUnregisteredOrphans).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('managed install request forwarding', () => {
