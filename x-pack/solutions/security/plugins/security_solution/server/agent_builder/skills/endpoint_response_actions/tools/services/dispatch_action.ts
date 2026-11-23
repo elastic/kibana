@@ -10,6 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import { escapeQuotes } from '@kbn/es-query';
 import { FLEET_ENDPOINT_PACKAGE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type {
   ToolHandlerContext,
   ToolHandlerReturn,
@@ -476,11 +477,22 @@ const isHostIsolationDisabled = async (
   const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${FLEET_ENDPOINT_PACKAGE} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_ids: "${escapeQuotes(
     policyId
   )}"`;
-  const { items } = await fleet.packagePolicy.list(fleet.getSoClient(), {
-    kuery,
-    perPage: 1,
-    spaceId: request.context.spaceId,
-  });
+  // No `spaceId` option: the internal client is already bound to the space, and
+  // an explicit namespace list makes the spaces extension run a privilege check
+  // against the client's credential-less internal request, which fails.
+  let items: PackagePolicy[];
+  try {
+    ({ items } = await fleet.packagePolicy.list(fleet.getSoClient(), { kuery, perPage: 1 }));
+  } catch (error) {
+    // The endpoint enforces the setting itself, so an unreadable policy only
+    // loses the early warning; it must not fail the whole tool call.
+    request.context.logger.warn(
+      `Could not read the Defend policy for agent policy [${policyId}]: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return false;
+  }
   const policyValue = items[0]?.inputs?.[0]?.config?.policy?.value as
     | { linux?: { advanced?: { host_isolation?: { allowed?: boolean | string } } } }
     | undefined;

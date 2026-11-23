@@ -266,6 +266,47 @@ describe('isolateHostTool', () => {
       expect(data.message).toContain('disabled by the endpoint policy');
       expect(isolate).not.toHaveBeenCalled();
       expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
+      // An explicit `spaceId` makes the spaces extension run a privilege check
+      // against the internal client's credential-less request, which fails.
+      expect(Object.keys(listPackagePolicies.mock.calls[0][1])).not.toContain('spaceId');
+    });
+
+    it('still shows the card when the endpoint policy cannot be read', async () => {
+      // The endpoint enforces the setting itself; an unreadable policy only
+      // loses the early refusal and must not fail the tool call.
+      const listPackagePolicies = jest
+        .fn()
+        .mockRejectedValue(new Error('missing authentication credentials'));
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: {
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [
+              {
+                id: 'agent-123',
+                status: 'online',
+                packages: ['endpoint'],
+                policy_id: 'agent-policy-1',
+                local_metadata: { os: { family: 'debian', platform: 'ubuntu', name: 'Linux' } },
+              },
+            ],
+          }),
+        },
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        getSoClient: jest.fn().mockReturnValue({}),
+        packagePolicy: { list: listPackagePolicies },
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+
+      confirmationStatus.value = 'unprompted';
+      const prompted = await isolateHostTool(mockEndpointAppContextService).handler(
+        { hostName: 'my-host' },
+        mockContext
+      );
+
+      expect(listPackagePolicies).toHaveBeenCalled();
+      expect(isToolHandlerInterruptReturn(prompted)).toBe(true);
+      expect(mockContext.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Could not read the Defend policy')
+      );
     });
 
     it('refuses the same way when the policy stores the setting as the string "false"', async () => {
