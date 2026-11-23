@@ -11,9 +11,9 @@ import type { Logger } from '@kbn/logging';
 import { Builder, esql } from '@elastic/esql';
 import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
-import { getEsqlColumnSchema, getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { getEsqlColumnSchema, getSampleDocumentsEsql, type EsqlColumnSchema } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
-import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
+import { conditionToESQLFilterAst, getTimestampColumnProblem } from '@kbn/nightshift-shared';
 import { getConditionFields } from '@kbn/streamlang';
 import { partition } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
@@ -29,16 +29,20 @@ const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits
 type SamplingStrategy = 'entity-filtered' | 'diverse' | 'random';
 
 /**
- * The random arm is intentionally not caught (see call sites): unlike
- * diverse/entity-filtered, it's a simple query that is not expected to fail,
- * and it's the backfill bucket the other arms fall back to, so a failure
- * here should hard-fail the call rather than degrade silently. Wrap it so
- * whatever does fail is reported with the sampling context instead of a
- * bare "Request timed out".
+ * The column probe and the random arm are intentionally not caught (see call
+ * sites): unlike diverse/entity-filtered, they are simple queries that are not
+ * expected to fail, and the random arm is the backfill bucket the other arms
+ * fall back to, so a failure here should hard-fail the call rather than
+ * degrade silently. Wrap them so whatever does fail is reported with the
+ * sampling context instead of a bare "Request timed out".
  */
-const withRandomSamplingErrorContext = async <T>(
+const withSamplingErrorContext = async <T>(
   promise: Promise<T>,
-  { index, samplingTimeoutMs }: { index: string; samplingTimeoutMs: number }
+  {
+    index,
+    samplingTimeoutMs,
+    query,
+  }: { index: string; samplingTimeoutMs: number; query: 'Column probe' | 'Random sampling query' }
 ): Promise<T> => {
   try {
     return await promise;
@@ -51,9 +55,7 @@ const withRandomSamplingErrorContext = async <T>(
       );
     }
     throw new Error(
-      `Random sampling query failed (samplingTimeoutMs=${samplingTimeoutMs}ms): ${
-        parseError(err).message
-      }`
+      `${query} failed (samplingTimeoutMs=${samplingTimeoutMs}ms): ${parseError(err).message}`
     );
   }
 };
@@ -99,6 +101,19 @@ export async function fetchSampleDocuments({
   const { filters: entityFilters, omitted } = getEntityFilters(features, maxEntityFilters);
   const samplingSignal = timeoutSignal(samplingTimeoutMs);
   try {
+    // No time range here: a request-level range narrows the lookup to indices with data in the
+    // window, while the sampling query's WHERE does not, so the two could disagree on a column's type.
+    const columns = await withSamplingErrorContext(
+      getEsqlColumnSchema({ esClient, index, signal: samplingSignal }),
+      { index, samplingTimeoutMs, query: 'Column probe' }
+    );
+    // Every arm filters on @timestamp. Sources saved before the source API required it can still
+    // lack one; tell the user why instead of failing each arm on "Unknown column".
+    const timestampProblem = getTimestampColumnProblem(columns);
+    if (timestampProblem) {
+      throw new StatusError(`Cannot sample [${index}]: ${timestampProblem}`, 400);
+    }
+
     const tracedEsClient = createSignificantEventsTracedEsClient({
       client: esClient,
       logger,
@@ -131,7 +146,7 @@ export async function fetchSampleDocuments({
               return EMPTY_SAMPLE;
             })
           : Promise.resolve(EMPTY_SAMPLE),
-        withRandomSamplingErrorContext(
+        withSamplingErrorContext(
           withSpan(
             {
               name: 'sample_documents_random',
@@ -147,7 +162,7 @@ export async function fetchSampleDocuments({
                 abortSignal: samplingSignal,
               })
           ),
-          { index, samplingTimeoutMs }
+          { index, samplingTimeoutMs, query: 'Random sampling query' }
         ),
       ]);
 
@@ -200,6 +215,7 @@ export async function fetchSampleDocuments({
               end,
               sampleSize: entityFilteredSize,
               entityFilters,
+              columns,
               logger,
               abortSignal: samplingSignal,
             })
@@ -233,7 +249,7 @@ export async function fetchSampleDocuments({
               return EMPTY_SAMPLE;
             })
           : Promise.resolve(EMPTY_SAMPLE),
-        withRandomSamplingErrorContext(
+        withSamplingErrorContext(
           withSpan(
             {
               name: 'sample_documents_random',
@@ -249,7 +265,7 @@ export async function fetchSampleDocuments({
                 abortSignal: samplingSignal,
               })
           ),
-          { index, samplingTimeoutMs }
+          { index, samplingTimeoutMs, query: 'Random sampling query' }
         ),
       ]);
 
@@ -301,6 +317,7 @@ async function fetchEntityFilteredDocuments({
   end,
   sampleSize,
   entityFilters,
+  columns,
   logger,
   abortSignal,
 }: {
@@ -310,12 +327,10 @@ async function fetchEntityFilteredDocuments({
   end: number;
   sampleSize: number;
   entityFilters: EntityFilter[];
+  columns: EsqlColumnSchema[];
   logger: Logger;
   abortSignal: AbortSignal;
 }): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
-  // No time range here: a request-level range narrows the lookup to indices with data in the
-  // window, while the sampling query's WHERE does not, so the two could disagree on a column's type.
-  const columns = await getEsqlColumnSchema({ esClient, index, signal: abortSignal });
   // A type conflict across backing indices surfaces as `unsupported`, which no comparison accepts.
   const queryableFields = new Set(
     columns.filter(({ type }) => type !== 'unsupported').map(({ name }) => name)

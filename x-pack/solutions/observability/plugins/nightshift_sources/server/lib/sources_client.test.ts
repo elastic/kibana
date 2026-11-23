@@ -38,7 +38,13 @@ const unknownColumnError = () =>
     'Found 1 problem\nline 1:46: Unknown column [status]'
   );
 
-const withColumns = { columns: [{ name: 'status', type: 'integer' }], values: [] };
+const withColumns = {
+  columns: [
+    { name: '@timestamp', type: 'date' },
+    { name: 'status', type: 'integer' },
+  ],
+  values: [],
+};
 // What ES returns for a wildcard that matches no index: one placeholder column.
 const withoutColumns = { columns: [{ name: '<no-fields>', type: 'null' }], values: [] };
 
@@ -379,6 +385,38 @@ describe('SourcesClient', () => {
       await expect(
         client.validateQuery({ esql: 'FROM logs-none-* | WHERE status >= 500' })
       ).resolves.toEqual({ type: 'logs', indexExists: false });
+    });
+
+    it('rejects with 400 a query whose output has no date @timestamp column', async () => {
+      const { client, dataEsClient } = setup();
+
+      dataEsClient.esql.query.mockResponseOnce({
+        columns: [{ name: 'message', type: 'text' }],
+        values: [],
+      });
+      await expect(client.validateQuery({ esql: 'FROM logs-custom' })).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: {
+            message:
+              'The query must return a [@timestamp] column. Nightshift reads every source over time windows on it.',
+          },
+        },
+      });
+
+      dataEsClient.esql.query.mockResponseOnce({
+        columns: [{ name: '@timestamp', type: 'unsupported' }],
+        values: [],
+      });
+      await expect(client.validateQuery({ esql: 'FROM logs-nginx-*' })).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: {
+            message:
+              'The [@timestamp] column must be a date or date_nanos, but the query returns it as [unsupported].',
+          },
+        },
+      });
     });
   });
 

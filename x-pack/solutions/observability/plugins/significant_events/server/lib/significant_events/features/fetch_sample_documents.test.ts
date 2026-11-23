@@ -33,6 +33,8 @@ const getEntityFilteredCall = () =>
 const getRandomCall = () =>
   getSampleDocumentsEsqlMock.mock.calls.find(([params]) => !params.whereCondition)?.[0];
 
+const TIMESTAMP_COLUMN = { name: '@timestamp', type: 'date' };
+
 const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
   _index: '',
   _id: id,
@@ -69,6 +71,7 @@ const logger = {
 describe('fetchSampleDocuments', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    getEsqlColumnSchemaMock.mockResolvedValue([TIMESTAMP_COLUMN]);
   });
 
   it('rejects invalid sampling ratios', async () => {
@@ -102,8 +105,35 @@ describe('fetchSampleDocuments', () => {
     ).rejects.toThrow('must be <= 1');
   });
 
+  it('rejects with a 400 that explains the missing @timestamp and samples nothing', async () => {
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([{ name: 'message', type: 'text' }]);
+
+    await expect(
+      fetchSampleDocuments({
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        index: 'logs.test-default',
+        start: 100,
+        end: 200,
+        features: [],
+        logger,
+        size: 5,
+        entityFilteredRatio: 0,
+        diverseRatio: 0.5,
+        maxEntityFilters: 10,
+        samplingTimeoutMs: 30_000,
+        iteration: 1,
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message:
+        'Cannot sample [logs.test-default]: The query must return a [@timestamp] column. Nightshift reads every source over time windows on it.',
+    });
+    expect(getSampleDocumentsEsqlMock).not.toHaveBeenCalled();
+    expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
+  });
+
   it('rejects with a 400 that explains the missing index when nothing exists to sample', async () => {
-    getSampleDocumentsEsqlMock.mockRejectedValueOnce(
+    getEsqlColumnSchemaMock.mockRejectedValueOnce(
       new Error(
         'verification_exception\n\tRoot causes:\n\t\tverification_exception: Unknown index [test]'
       )
@@ -222,6 +252,7 @@ describe('fetchSampleDocuments', () => {
     ];
 
     getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
       { name: 'host.name', type: 'keyword' },
       { name: 'service.name', type: 'keyword' },
     ]);
@@ -284,6 +315,7 @@ describe('fetchSampleDocuments', () => {
     ]);
     expect(result.filtersCapped).toBe(true);
     expect(result.hasFilteredDocuments).toBe(true);
+    expect(getEsqlColumnSchemaMock).toHaveBeenCalledTimes(1);
   });
 
   it('excludes grouped values with NOT IN and joins slots with AND', async () => {
@@ -309,6 +341,7 @@ describe('fetchSampleDocuments', () => {
     ];
 
     getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
       { name: 'service.name', type: 'keyword' },
       { name: 'host.name', type: 'keyword' },
     ]);
@@ -362,6 +395,7 @@ describe('fetchSampleDocuments', () => {
     ];
 
     getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
       { name: 'http.status', type: 'unsupported' },
       { name: 'service.name', type: 'keyword' },
     ]);
@@ -391,7 +425,10 @@ describe('fetchSampleDocuments', () => {
   });
 
   it('backfills unused entity-filtered slots with diverse documents before random ones', async () => {
-    getEsqlColumnSchemaMock.mockResolvedValueOnce([{ name: 'service.name', type: 'keyword' }]);
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
+      { name: 'service.name', type: 'keyword' },
+    ]);
     getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => ({
       hits: whereCondition
         ? [createHit('entity-1')]
@@ -482,7 +519,10 @@ describe('fetchSampleDocuments', () => {
       }),
     ];
 
-    getEsqlColumnSchemaMock.mockResolvedValueOnce([{ name: 'service.name', type: 'keyword' }]);
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([
+      TIMESTAMP_COLUMN,
+      { name: 'service.name', type: 'keyword' },
+    ]);
     getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => {
       if (whereCondition) {
         throw new Error('verification_exception');
