@@ -19,6 +19,9 @@ export interface InferenceEndpoint {
       name?: string;
       creator?: string;
     };
+    heuristics?: {
+      properties?: string[];
+    };
   };
 }
 

@@ -11,10 +11,18 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';
+import { checkSuperuser } from '../../services/security';
 import type { FleetRequestHandlerContext } from '../../types';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
 import { rotateKeyPairHandler } from './handlers';
+
+jest.mock('../../services/security', () => ({
+  ...jest.requireActual('../../services/security'),
+  checkSuperuser: jest.fn(),
+}));
+
+const mockCheckSuperuser = checkSuperuser as jest.MockedFunction<typeof checkSuperuser>;
 
 const rotateKeyPairHandlerWithErrorHandler = withDefaultErrorHandler(rotateKeyPairHandler);
 
@@ -40,11 +48,27 @@ describe('FleetMessageSigningServiceHandler', () => {
     response = httpServerMock.createResponseFactory();
     // prevents `Logger not set.` and other appContext errors
     appContextService.start(createAppContextStartContractMock());
+    mockCheckSuperuser.mockReturnValue(true);
   });
 
   afterEach(async () => {
     jest.clearAllMocks();
     appContextService.stop();
+  });
+
+  it('POST /message_signing_service/rotate_key_pair returns 403 when caller is not superuser', async () => {
+    mockCheckSuperuser.mockReturnValue(false);
+
+    await rotateKeyPairHandlerWithErrorHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
+
+    expect(response.forbidden).toHaveBeenCalledWith({
+      body: { message: 'Rotating the key pair requires superuser privileges.' },
+    });
+    expect(response.ok).not.toHaveBeenCalled();
   });
 
   it(`POST /message_signing_service/rotate_key_pair?acknowledge=true fails with an 500 with "acknowledge=true" when no messaging service`, async () => {

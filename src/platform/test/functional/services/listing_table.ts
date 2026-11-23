@@ -190,8 +190,41 @@ export class ListingTableService extends FtrService {
   }
 
   public async clickActionButton(actionSelector: string, index: number = 0) {
-    const buttons = await this.testSubjects.findAll(actionSelector);
-    await buttons[index].click();
+    await this.retry.tryForTime(10000, async () => {
+      // The retry provides the wait; look up the buttons without an implicit wait.
+      const buttons = await this.testSubjects.findAll(actionSelector, 0);
+      const button = buttons[index];
+      if (!button) {
+        throw new Error(`Action ${actionSelector} is not available at index ${index}`);
+      }
+      await button.click();
+    });
+  }
+
+  /**
+   * Clicks a row action on the row whose title matches `name` exactly. Addressing the
+   * row by title keeps the click on the intended item when a search leaves sibling rows
+   * mounted, which the index-based {@link clickActionButton} cannot.
+   */
+  public async clickRowActionButton(actionSelector: string, name: string) {
+    await this.retry.tryForTime(10000, async () => {
+      // The retry provides the wait; look up the rows without an implicit wait.
+      const rows = await this.find.allByCssSelector('.euiTableRow', 0);
+      for (const row of rows) {
+        // The title column is first, so the row's leading link carries its name.
+        const [titleLink] = await row.findAllByCssSelector('.euiLink', 0);
+        if (!titleLink || (await titleLink.getVisibleText()).trim() !== name) {
+          continue;
+        }
+        const [button] = await row.findAllByTestSubject(actionSelector, 0);
+        if (!button) {
+          throw new Error(`Action ${actionSelector} is not available on row "${name}".`);
+        }
+        await button.click();
+        return;
+      }
+      throw new Error(`No listing row found with name "${name}".`);
+    });
   }
 
   /**
@@ -345,7 +378,18 @@ export class ListingTableService extends FtrService {
    * Clicks NewItem button on Landing page
    */
   public async clickNewButton(): Promise<void> {
-    await this.testSubjects.click('newItemButton');
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists('newItemButton')) {
+        await this.testSubjects.click('newItemButton');
+        return;
+      }
+      if (await this.testSubjects.exists('app-menu-overflow-button')) {
+        await this.testSubjects.click('app-menu-overflow-button');
+        await this.testSubjects.click('newItemButton');
+        return;
+      }
+      throw new Error('newItemButton not found');
+    });
   }
 
   public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
@@ -353,7 +397,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async onListingPage(appName: AppName) {
-    return await this.testSubjects.exists(`${appName}LandingPage`, {
+    return await this.testSubjects.waitForExists(`${appName}LandingPage`, {
       timeout: 5000,
     });
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -17,9 +17,11 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
  * Request body schema for bulk agent details endpoint.
  * Fetches agent metadata (names, IDs) for multiple agents in a single request.
  */
-const GetBulkAgentDetailsRequestBody = z.object({
-  agentIds: z.array(z.string()).min(1).max(1000), // Limit to 1000 agents per request (supports up to 10 pages of 100)
-});
+const GetBulkAgentDetailsRequestBody = lazySchema(() =>
+  z.object({
+    agentIds: z.array(z.string()).min(1).max(1000), // Limit to 1000 agents per request (supports up to 10 pages of 100)
+  })
+);
 
 export const getBulkAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

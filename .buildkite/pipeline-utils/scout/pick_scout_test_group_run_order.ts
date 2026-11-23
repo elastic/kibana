@@ -9,9 +9,9 @@
 
 import Fs from 'fs';
 import path from 'path';
-import { expandAgentQueue } from '../agent_images';
-import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
-import { collectEnvFromLabels } from '../pr_labels';
+import { expandAgentQueue } from '../agent_images.ts';
+import { BuildkiteClient, type BuildkiteStep } from '../buildkite/index.ts';
+import { collectEnvFromLabels } from '../pr_labels.ts';
 import { getKibanaDir, getRequiredEnv } from '#pipeline-utils';
 
 export interface ModuleDiscoveryInfo {

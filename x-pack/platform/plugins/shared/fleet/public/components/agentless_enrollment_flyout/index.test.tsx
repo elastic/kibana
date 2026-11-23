@@ -10,6 +10,7 @@ import { waitFor } from '@testing-library/react';
 import { sendGetAgents, useGetPackageInfoByKeyQuery } from '../../hooks';
 import { usePollingIncomingData } from '../agent_enrollment_flyout/use_get_agent_incoming_data';
 import { createIntegrationsTestRendererMock } from '../../mock';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AGENTS_PREFIX } from '../../constants';
 
@@ -73,6 +74,32 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
       ).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 is disabled')).toBeInTheDocument();
+    });
+  });
+
+  it('resolves enrollment when agent is enrolled via a version-specific policy variant', async () => {
+    // Agents on version-specific policies carry a policy_id like "test-policy-id#9.2".
+    // sendGetAgents must use buildPolicyBaseIdWithFallbackKuery so these agents are matched.
+    mockSendGetAgents.mockResolvedValueOnce({
+      data: { items: [{ status: 'online', policy_id: 'test-policy-id#9.2' }] },
+    });
+    mockUsePollingIncomingData.mockReturnValue({ incomingData: [], hasReachedTimeout: false });
+
+    const renderer = createIntegrationsTestRendererMock();
+    const { getByText } = renderer.render(
+      <AgentlessEnrollmentFlyout onClose={onClose} packagePolicy={packagePolicy} />
+    );
+
+    await waitFor(() => {
+      expect(mockSendGetAgents).toHaveBeenCalledWith({
+        kuery: buildPolicyBaseIdWithFallbackKuery(
+          'test-policy-id',
+          `${AGENTS_PREFIX}.policy_base_id`,
+          `${AGENTS_PREFIX}.policy_id`
+        ),
+      });
+      expect(getByText('Step 1 is complete')).toBeInTheDocument();
+      expect(getByText('Agentless deployment was successful')).toBeInTheDocument();
     });
   });
 

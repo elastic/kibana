@@ -537,6 +537,7 @@ describe('Create Lifecycle', () => {
         'alerting:test': {
           title: 'Test',
           priority: TaskPriority.NormalLongRunning,
+          taskTypeGroup: 'alerting',
         },
       });
     });
@@ -650,6 +651,7 @@ describe('Create Lifecycle', () => {
         'alerting:test': {
           timeout: '20m',
           title: 'Test',
+          taskTypeGroup: 'alerting',
         },
       });
     });
@@ -684,6 +686,7 @@ describe('Create Lifecycle', () => {
           timeout: '20m',
           title: 'Test',
           cost: 10,
+          taskTypeGroup: 'alerting',
         },
       });
     });

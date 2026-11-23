@@ -88,6 +88,9 @@ export interface InstallContext extends StateContext<StateNames> {
   esReferences?: EsAssetReference[];
   kibanaAssetPromise?: Promise<KibanaAssetReference[]>;
   skipDependencyCheck?: boolean;
+  // When set (upload path only), caps multispace propagation to the Spaces authorized
+  // by preflight, preventing gated assets from reaching Spaces added after preflight ran.
+  authorizedSpaces?: string[];
 }
 /**
  * This data structure defines the sequence of the states and the transitions
