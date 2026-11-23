@@ -195,7 +195,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     };
   }
 
-  // Picks the rounding from the documents per day of the latest complete dated indices. Returns the monthly
+  // Picks the rounding from the documents per day of the latest complete daily indices (indices dated on the
+  // first of a month are skipped: they may cover a whole month). Returns the monthly
   // rounding when there is nothing to measure or the measure fails: an operator can still set the rounding
   // before the next UTC month start, when it takes effect on a cluster with daily history.
   private async chooseRoundingFromIndices(
@@ -204,7 +205,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   ): Promise<Rounding> {
     const today = this.now().toISOString().slice(0, 10);
     const sample = datedIndices
-      .filter((index) => index.slice(-10) < today)
+      .filter((index) => index.slice(-10) < today && !index.endsWith('-01'))
       .slice(-VOLUME_SAMPLE_INDICES);
     if (sample.length === 0) {
       return 'M';
