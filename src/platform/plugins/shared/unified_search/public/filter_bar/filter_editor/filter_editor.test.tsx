@@ -14,6 +14,8 @@ import type { TestBed } from '@kbn/test-jest-helpers';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
 import { dataViewMockList } from '../../dataview_picker/mocks/dataview';
@@ -165,6 +167,96 @@ describe('<FilterEditor />', () => {
         dataViewMockList[1].getName()
       );
     });
+
+    describe('with a nested field', () => {
+      const nestedDataView = {
+        ...dataViewMockList[0],
+        id: 'nested-data-view-id',
+        fields: [
+          {
+            name: 'user.name',
+            type: 'string',
+            esTypes: ['keyword'],
+            aggregatable: true,
+            filterable: true,
+            searchable: true,
+            subType: { nested: { path: 'user' } },
+          },
+        ],
+        getName: () => 'nested',
+      } as DataView;
+      const filter = {
+        meta: {
+          type: 'phrase',
+          index: nestedDataView.id,
+          key: 'user.name',
+          params: { query: 'alice' },
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        query: { match_phrase: { 'user.name': 'alice' } },
+        $state: { store: FilterStateStore.APP_STATE },
+      };
+      const nestedQueryDslFilter = {
+        queryDsl: JSON.stringify(
+          { nested: { path: 'user', query: { match_phrase: { 'user.name': 'alice' } } } },
+          null,
+          2
+        ),
+        customLabel: '',
+        dataViewId: nestedDataView.id,
+      };
+      let onSubmit: jest.Mock;
+      let onLocalFilterCreate: jest.Mock;
+      let onLocalFilterUpdate: jest.Mock;
+      let nestedTestBed: TestBed;
+
+      beforeEach(async () => {
+        dataMock.dataViews.get = jest.fn().mockResolvedValue(nestedDataView);
+        onSubmit = jest.fn();
+        onLocalFilterCreate = jest.fn();
+        onLocalFilterUpdate = jest.fn();
+        const defaultProps: Omit<FilterEditorProps, 'intl'> = {
+          theme: {
+            euiTheme: {} as unknown as EuiThemeComputed<{}>,
+            colorMode: 'DARK',
+            modifications: [],
+            highContrastMode: false,
+          } as UseEuiTheme<{}>,
+          filter,
+          indexPatterns: [dataViewMockList[0]],
+          onCancel: jest.fn(),
+          onSubmit,
+          onLocalFilterCreate,
+          onLocalFilterUpdate,
+          docLinks: coreMock.createStart().docLinks,
+          dataViews: dataMock.dataViews,
+        };
+        nestedTestBed = await registerTestBed(FilterEditor, { defaultProps })();
+        await act(async () => {});
+        nestedTestBed.component.update();
+      });
+
+      it('generates the Query DSL for the loaded data view and keeps the filter when unchanged', () => {
+        const { find } = nestedTestBed;
+        expect(onLocalFilterCreate).toHaveBeenLastCalledWith(
+          expect.objectContaining({ queryDslFilter: nestedQueryDslFilter })
+        );
+
+        find('editQueryDSL').simulate('click');
+
+        // Matches the baseline, so closing the editor doesn't report unsaved changes.
+        expect(onLocalFilterUpdate).toHaveBeenLastCalledWith(nestedQueryDslFilter);
+
+        find('saveFilter').simulate('click');
+
+        // Unchanged Query DSL keeps the phrase filter instead of converting it to a custom filter.
+        expect(onSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({ meta: expect.objectContaining({ type: 'phrase' }) })
+        );
+      });
+    });
   });
   describe('UI renders when data view fallback promise is rejected', () => {
     let testBed: TestBed;
@@ -218,7 +310,11 @@ describe('<FilterEditor />', () => {
     let testBed: TestBed;
 
     beforeEach(async () => {
-      dataMock.dataViews.get = jest.fn().mockReturnValue(Promise.reject());
+      dataMock.dataViews.get = jest
+        .fn()
+        .mockRejectedValue(
+          new SavedObjectNotFound({ type: 'index-pattern', id: 'missing-data-view-id' })
+        );
       onSubmit = jest.fn();
       const defaultProps: Omit<FilterEditorProps, 'intl'> = {
         theme: {

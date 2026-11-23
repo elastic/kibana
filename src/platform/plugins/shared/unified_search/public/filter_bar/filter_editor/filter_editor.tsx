@@ -182,6 +182,8 @@ interface State {
   selectedDataView?: FilterableSource;
   customLabel: string | null;
   queryDsl: string;
+  /** The Query DSL generated for the filter, to detect whether the user changed it. */
+  initialQueryDsl: string;
   isCustomEditorOpen: boolean;
   localFilter: Filter;
   isLoadingDataView?: boolean;
@@ -199,11 +201,13 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
     super(props);
     const dataView = getIndexPatternFromFilter(props.filter, props.indexPatterns);
+    const queryDsl = this.parseFilterToQueryDsl(props.filter, props.indexPatterns);
     this.state = {
       indexPatterns: props.indexPatterns,
       selectedDataView: dataView,
       customLabel: props.filter.meta.alias || '',
-      queryDsl: this.parseFilterToQueryDsl(props.filter, props.indexPatterns),
+      queryDsl,
+      initialQueryDsl: queryDsl,
       isCustomEditorOpen: this.isUnknownFilterType() || !!this.props.filter?.meta.isMultiIndex,
       localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
       isLoadingDataView: !Boolean(dataView),
@@ -249,12 +253,20 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     try {
       const dataView = await dataViews.get(dataViewId, false);
       if (signal.aborted) return;
+      const indexPatterns = [dataView, ...this.props.indexPatterns];
+      const queryDsl = this.parseFilterToQueryDsl(this.props.filter, indexPatterns);
+      // The loaded data view can change the Query DSL (e.g. nested fields), so it's the new baseline.
+      this.props.onLocalFilterCreate?.({
+        filter: this.props.filter,
+        queryDslFilter: this.getQueryDslFilter({ queryDsl }),
+      });
       this.setState({
         selectedDataView: dataView,
         isLoadingDataView: false,
-        indexPatterns: [dataView, ...this.props.indexPatterns],
+        indexPatterns,
         localFilter: merge({}, this.props.filter),
-        queryDsl: this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns),
+        queryDsl,
+        initialQueryDsl: queryDsl,
       });
     } catch (e) {
       if (signal.aborted) return;
@@ -297,16 +309,20 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
 
     const localFilter = merge({}, rebindFilterDataView(filter, filter.meta.index, dataView.id));
+    // Regenerated so that e.g. nested fields are resolved against the selected data view.
+    const queryDsl = this.parseFilterToQueryDsl(localFilter, indexPatterns);
     // The recovered filter is the baseline for the discard-changes check, not a user edit.
     onLocalFilterCreate?.({
       filter: localFilter,
-      queryDslFilter: this.getQueryDslFilter({ dataViewId: dataView.id }),
+      queryDslFilter: this.getQueryDslFilter({ dataViewId: dataView.id, queryDsl }),
     });
     onLocalFilterUpdate?.(localFilter);
     this.setState({
       selectedDataView: dataView,
       isLoadingDataView: false,
       localFilter,
+      queryDsl,
+      initialQueryDsl: queryDsl,
       useSelectedDataViewOnSubmit: true,
       dataViewSelectedByFields: dataView,
     });
@@ -748,7 +764,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   private onSubmit = () => {
-    const { isCustomEditorOpen, queryDsl, customLabel } = this.state;
+    const { isCustomEditorOpen, queryDsl, initialQueryDsl, customLabel } = this.state;
     const { $state } = this.props.filter;
 
     if (!$state || !$state.store) {
@@ -760,7 +776,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       const filter =
         this.props.filter?.meta.type === FILTERS.CUSTOM ||
         // only convert non-custom filters to custom when DSL changes
-        queryDsl !== this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns)
+        queryDsl !== initialQueryDsl
           ? this.getFilterFromQueryDsl(queryDsl)
           : { ...originalFilter, meta: { ...originalFilter.meta, alias: customLabel || null } };
       if (!filter) {

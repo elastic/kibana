@@ -827,6 +827,54 @@ describe('Filter whose data view cannot be found', () => {
     expect(onSubmit.mock.calls[0][0].meta.index).toBe(mockedDataView.id);
   });
 
+  describe('with a nested field', () => {
+    const nestedDataView = {
+      ...mockedDataView,
+      id: 'nested-data-view-id',
+      fields: [
+        {
+          name: 'user.name',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          filterable: true,
+          searchable: true,
+          subType: { nested: { path: 'user' } },
+        },
+      ],
+      getName: () => 'nested',
+    } as DataView;
+    const nestedFilter = withMissingDataView(filterPhrase('user.name', 'alice'));
+    const nestedQueryDsl = JSON.stringify(
+      { nested: { path: 'user', query: { match_phrase: { 'user.name': 'alice' } } } },
+      null,
+      2
+    );
+
+    it('generates the Query DSL for the data view selected by the filter fields', async () => {
+      const { onSubmit } = await renderWithMissingDataView(nestedFilter, {
+        indexPatterns: [mockedDataView, nestedDataView],
+      });
+      await waitFor(() => {
+        expect(onLocalFilterCreate).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            queryDslFilter: expect.objectContaining({ queryDsl: nestedQueryDsl }),
+          })
+        );
+      });
+
+      fireEvent.click(screen.getByTestId('editQueryDSL'));
+      fireEvent.click(screen.getByTestId('saveFilter'));
+
+      // Unchanged Query DSL is saved as the recovered phrase filter, not as a custom filter.
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          meta: expect.objectContaining({ type: 'phrase', index: nestedDataView.id }),
+        })
+      );
+    });
+  });
+
   it('registers the recovered filter as the unchanged baseline', async () => {
     await renderWithMissingDataView(withMissingDataView(filterPhrase('bytes', '1024')));
 
