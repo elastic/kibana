@@ -93,7 +93,8 @@ export const countDelta = (
   const counts: CaseDeltaCounts = { alerts: 0, comments: 0, changes: 0, evidence: 0 };
 
   for (const userAction of userActions) {
-    if (!isSameUser(userAction.created_by, currentUser)) {
+    const isCaseCreation = userAction.type === UserActionTypes.create_case;
+    if (!isCaseCreation && !isSameUser(userAction.created_by, currentUser)) {
       counts[categorizeUserAction(userAction)] += 1;
     }
   }

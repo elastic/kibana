@@ -47,6 +47,7 @@ export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
 export const CASE_FIELD_DEFINITION_SAVED_OBJECT = 'cases-field-definition' as const;
+export const CASE_LAST_VIEWED_SAVED_OBJECT = 'cases-last-viewed' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -135,6 +136,9 @@ export const INTERNAL_CASE_WORKFLOW_RUN_URL =
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_DELTA_URL = `${CASES_INTERNAL_URL}/{case_id}/delta` as const;
+export const INTERNAL_CASE_DELTA_VIEWED_URL = `${INTERNAL_CASE_DELTA_URL}/_viewed` as const;
+export const MAX_LAST_VIEWED_ENTRIES = 200 as const;
+export const MAX_LAST_VIEWED_KEY_LENGTH = 300 as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
   `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
 

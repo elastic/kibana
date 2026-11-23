@@ -31,6 +31,7 @@ import { bulkDeleteObservablesRoute } from './observables/bulk_delete_observable
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
 import { getCaseDeltaRoute } from './internal/get_case_delta';
+import { recordCaseViewRoute } from './internal/record_case_view';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
@@ -68,6 +69,7 @@ export const getInternalRoutes = (
     similarCaseRoute,
     findUserActionsRoute,
     getCaseDeltaRoute,
+    recordCaseViewRoute,
     findCasesContainingAllDocumentsRoute,
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),

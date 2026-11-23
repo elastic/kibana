@@ -14,14 +14,6 @@ export const DeltaCategories = {
   evidence: 'evidence',
 } as const;
 
-export const MAX_DELTA_SINCE_LENGTH = 64 as const;
-
-export const CaseDeltaRequestSchema = lazySchema(() =>
-  z.object({
-    since: z.iso.datetime().max(MAX_DELTA_SINCE_LENGTH),
-  })
-);
-
 export const CaseDeltaCountsSchema = lazySchema(() =>
   z.object({
     alerts: z.number(),
@@ -33,11 +25,18 @@ export const CaseDeltaCountsSchema = lazySchema(() =>
 
 export const CaseDeltaResponseSchema = lazySchema(() =>
   z.object({
-    since: z.string(),
+    since: z.string().nullable(),
     counts: CaseDeltaCountsSchema,
+  })
+);
+
+export const CaseViewedResponseSchema = lazySchema(() =>
+  z.object({
+    since: z.string().nullable(),
   })
 );
 
 export type DeltaCategory = (typeof DeltaCategories)[keyof typeof DeltaCategories];
 export type CaseDeltaCounts = z.infer<typeof CaseDeltaCountsSchema>;
 export type CaseDeltaResponse = z.infer<typeof CaseDeltaResponseSchema>;
+export type CaseViewedResponse = z.infer<typeof CaseViewedResponseSchema>;

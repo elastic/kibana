@@ -38,7 +38,7 @@ import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespac
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
+import { CASE_LAST_VIEWED_SAVED_OBJECT, KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -49,6 +49,7 @@ import {
   AlertService,
   TemplatesService,
   FieldDefinitionsService,
+  LastViewedService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -264,7 +265,12 @@ export class CasesClientFactory {
   ): SavedObjectsClientContract {
     this.validateInitialization();
     return savedObjectsService.getScopedClient(request, {
-      includedHiddenTypes: getSavedObjectsTypes(this.options.config),
+      // The last-viewed type is internal state: it stays out of the shared type list so it gets
+      // no feature privilege and is not exported.
+      includedHiddenTypes: [
+        ...getSavedObjectsTypes(this.options.config),
+        CASE_LAST_VIEWED_SAVED_OBJECT,
+      ],
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
       excludedExtensions: [SECURITY_EXTENSION_ID],
@@ -376,6 +382,10 @@ export class CasesClientFactory {
 
     return {
       templatesService,
+      lastViewedService: new LastViewedService({
+        log: this.logger,
+        unsecuredSavedObjectsClient,
+      }),
       fieldDefinitionsService,
       alertsService: new AlertService(
         esClient,

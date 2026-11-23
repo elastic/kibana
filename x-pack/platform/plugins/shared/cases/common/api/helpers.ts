@@ -14,6 +14,7 @@ import {
   CASE_ATTACHMENT_DETAILS_URL,
   INTERNAL_CASE_FIND_USER_ACTIONS_URL,
   INTERNAL_CASE_DELTA_URL,
+  INTERNAL_CASE_DELTA_VIEWED_URL,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_BULK_GET_ATTACHMENTS_URL,
   INTERNAL_BULK_DELETE_ATTACHMENTS_URL,
@@ -56,6 +57,10 @@ export const getCaseUserActionStatsUrl = (id: string): string => {
 
 export const getCaseDeltaUrl = (id: string): string => {
   return INTERNAL_CASE_DELTA_URL.replace('{case_id}', id);
+};
+
+export const getCaseDeltaViewedUrl = (id: string): string => {
+  return INTERNAL_CASE_DELTA_VIEWED_URL.replace('{case_id}', id);
 };
 
 export const getCaseFindUserActionsUrl = (id: string): string => {

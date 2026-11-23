@@ -55,6 +55,7 @@ import {
   createUserActionServiceMock,
   createNotificationServiceMock,
   createTemplatesServiceMock,
+  createLastViewedServiceMock,
   createFieldDefinitionsServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
@@ -157,6 +158,7 @@ const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
     stats: jest.fn(),
     getUsers: jest.fn(),
     getDelta: jest.fn(),
+    recordView: jest.fn(),
   });
 };
 
@@ -280,6 +282,7 @@ export const createCasesClientMockArgs = () => {
       licensingService: createLicensingServiceMock(),
       notificationService: createNotificationServiceMock(),
       templatesService: createTemplatesServiceMock(),
+      lastViewedService: createLastViewedServiceMock(),
       fieldDefinitionsService: createFieldDefinitionsServiceMock(),
     },
     authorization: createAuthorizationMock(),

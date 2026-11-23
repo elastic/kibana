@@ -57,6 +57,10 @@ describe('countDelta', () => {
     expect(counts).toEqual({ alerts: 0, comments: 0, changes: 2, evidence: 0 });
   });
 
+  it('ignores the case creation', () => {
+    expect(countDelta([userAction({ type: 'create_case', action: 'create' })], me).changes).toBe(0);
+  });
+
   it('ignores actions by the current user matched by profile uid', () => {
     expect(countDelta([userAction({ created_by: me })], me).changes).toBe(0);
   });
