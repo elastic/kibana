@@ -154,14 +154,16 @@ The response that the tool gets shows what happened to a request:
 | 202 | {{kib}} accepted the request. If no workflow runs, refer to [No workflow runs after a 202 response](#inbound-webhook-no-workflow). |
 | 400 | The request is invalid, such as a body that isn't valid JSON, a connector ID that's too long, or an empty `token` query parameter. The response message says which part to fix. |
 | 404 | {{kib}} rejected the URL or the token. For possible causes, refer to [Requests return 404](#inbound-webhook-404). |
-| 413 | The body is larger than the maximum size, which is 1 MB by default. |
-| 415 | The connector doesn't accept the request's content type. For the accepted types, refer to [Request body](#inbound-webhook-request-body). |
+| 413 | The body is larger than the maximum size, which is 1 MB by default. Configure the tool to send a smaller body. |
+| 415 | The connector doesn't accept the request's content type. Set the `Content-Type` header to one of the types in [Request body](#inbound-webhook-request-body). |
 | 429 | The tool sent too many requests. Refer to [Requests return 429](#inbound-webhook-429). |
-| 500 | {{kib}} couldn't process the request. |
+| 500 | {{kib}} couldn't process the request. Send the request again. If it keeps failing, check the {{kib}} logs for an error that starts with `Inbound events outcome=` and includes the connector ID. The line's `detail` field shows the cause. |
 
 ### Requests don't reach {{kib}} [inbound-webhook-unreachable]
 
 If the sample request works but the tool's requests fail with a connection error or a timeout, the tool can't reach your {{kib}} URL. For example, a tool hosted on the internet can't send requests to `localhost` or to an address that works only inside your network.
+
+To fix it, configure the tool with a {{kib}} URL that it can reach from where it runs. If {{kib}} is reachable only inside your network, make it reachable from the tool's network, for example through a reverse proxy.
 
 ### No workflow runs after a 202 response [inbound-webhook-no-workflow]
 
@@ -178,10 +180,11 @@ If the workflow passes these checks, {{kib}} might not have a user to run it as.
 
 A 404 response has one of these causes:
 
-- The ingest token is missing or incorrect, or someone rotated it.
-- The URL has the wrong connector ID or space.
-- The address that sends the requests made too many failed authentication attempts. {{kib}} returns 404 for that connector until the [failed-authentication window](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-ratelimit-remoteaddress-window) passes, even when the token is correct.
-- [`xpack.actions.inboundEvents.enabled`](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-enabled) is `false`. In this case, every webhook URL returns 404.
+- The ingest token is missing or incorrect, or someone rotated it. Copy the current token into the tool again. If you no longer have it, [rotate the token](#inbound-webhook-rotate-token).
+- The tool sends its own `Authorization` header, such as for basic authentication, and the token in a `?token=` query parameter. {{kib}} ignores the query parameter when the request has an `Authorization` header. Remove the tool's `Authorization` header, or send the token as `Authorization: Bearer <ingest-token>` instead.
+- The URL has the wrong connector ID or space. Copy the **Webhook URL** from the connector again.
+- The address that sends the requests made too many failed authentication attempts, which is 10 within 1 minute by default. {{kib}} returns 404 for that connector until the [failed-authentication window](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-ratelimit-remoteaddress-window) passes, even when the token is correct. Fix the token in the tool, then wait for the window to pass.
+- [`xpack.actions.inboundEvents.enabled`](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-enabled) is `false`. In this case, every webhook URL returns 404. Set it to `true` in `kibana.yml` and restart {{kib}}.
 
 ### Requests return 429 [inbound-webhook-429]
 
@@ -192,3 +195,5 @@ Wait for the number of seconds in the `Retry-After` response header, then send t
 - [Authenticated requests per minute for one connector](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-ratelimit-connector-limit)
 - [Requests in progress at once for one connector](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-admission-maxinflightperconnector)
 - [Requests in progress at once across all connectors](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-admission-maxinflight)
+
+If the tool keeps exceeding a limit, configure it to spread out its requests or, on {{stack}}, raise the matching setting.
