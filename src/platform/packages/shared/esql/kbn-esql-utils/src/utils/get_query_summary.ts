@@ -20,6 +20,7 @@ import {
   type IAdditionalFields,
   type NamedSubquery,
 } from '@kbn/esql-language';
+import { LRUCache } from 'lru-cache';
 import { parseEsqlCached } from './parse_esql_cached';
 
 function processCommand(
@@ -241,16 +242,34 @@ export function isComputedColumn(fieldName: string, summary: ESQLCommandSummary)
   return summary.newColumns.has(fieldName) || Boolean(summary.metadataColumns?.has(fieldName));
 }
 
+// The columns depend only on the query, so they are reused while the query is the same.
+// Like the parsed queries, the cache is bounded by the characters of the queries.
+const computedColumnsCache = new LRUCache<string, ReadonlySet<string>>({
+  max: 50,
+  maxSize: 50_000,
+  sizeCalculation: (_columns, query) => Math.max(1, query.length),
+});
+
 /**
  * Returns the columns that the query creates (EVAL, STATS, DISSECT, ...) and that are part of its output.
  * Each command knows the columns that it leaves (`columnsAfter`), so STATS, KEEP, DROP or RENAME are considered.
  * The fields of the sources are not asked for, so there are no requests and the index fields are not included,
  * except the ones that STATS groups by.
+ * A query with syntax errors has no columns, Elasticsearch reports its errors when it runs.
  * @param query The ES|QL query.
  * @returns The names of the columns.
  */
-export async function getComputedColumnsInOutput(query: string): Promise<Set<string>> {
-  const { root } = parseEsqlCached(query);
+export async function getComputedColumnsInOutput(query: string): Promise<ReadonlySet<string>> {
+  const cached = computedColumnsCache.get(query);
+  if (cached) {
+    return cached;
+  }
+
+  const { root, errors } = parseEsqlCached(query);
+  if (errors.length > 0) {
+    return new Set();
+  }
+
   const noFields = async () => [];
   const additionalFields: IAdditionalFields = {
     fromJoin: noFields,
@@ -275,5 +294,7 @@ export async function getComputedColumnsInOutput(query: string): Promise<Set<str
     }
   }
 
-  return new Set(columns.map(({ name }) => name));
+  const computedColumns: ReadonlySet<string> = new Set(columns.map(({ name }) => name));
+  computedColumnsCache.set(query, computedColumns);
+  return computedColumns;
 }

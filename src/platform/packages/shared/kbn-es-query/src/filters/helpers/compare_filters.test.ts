@@ -9,6 +9,7 @@
 
 import { FilterStateStore } from '@kbn/es-query-constants';
 import { COMPARE_ALL_OPTIONS, compareFilters } from './compare_filters';
+import type { Filter } from '..';
 import { BooleanRelation, buildCombinedFilter, buildEmptyFilter, buildQueryFilter } from '..';
 import type { DataViewBase } from '../../..';
 
@@ -26,6 +27,19 @@ describe('filter manager utilities', () => {
       const f2 = buildQueryFilter({ query_string: { query: 'apache' } }, 'index', '');
 
       expect(compareFilters(f1, f2)).toBeTruthy();
+    });
+
+    test('should not take a filter on an ES|QL column as the filter of a field with the same name', () => {
+      const fieldFilter: Filter = {
+        meta: { index: 'index', type: 'phrase', key: 'size', params: { query: 'big' } },
+        query: { match_phrase: { size: 'big' } },
+      };
+      const esqlFilter: Filter = { ...fieldFilter, meta: { ...fieldFilter.meta, kind: 'esql' } };
+
+      expect(compareFilters(fieldFilter, esqlFilter)).toBeFalsy();
+      expect(compareFilters(fieldFilter, esqlFilter, COMPARE_ALL_OPTIONS)).toBeFalsy();
+      expect(compareFilters(esqlFilter, { ...esqlFilter })).toBeTruthy();
+      expect(compareFilters(fieldFilter, { ...fieldFilter })).toBeTruthy();
     });
 
     test('should compare filters, where one filter is null', () => {

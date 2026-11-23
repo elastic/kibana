@@ -471,6 +471,58 @@ describe('SearchMethodsService', () => {
         });
       });
 
+      describe('filters on columns created by the query', () => {
+        const computedColumnFilter: Filter = {
+          meta: { kind: 'esql', key: 'size', type: 'phrase', params: { query: 'big' } },
+          query: { match_phrase: { size: 'big' } },
+        };
+        const esqlQuery =
+          'FROM logs | EVAL size = CASE(bytes > 100, "big", "small") | STATS c = COUNT(*) BY size | LIMIT 10';
+
+        it('adds them to the query and keeps the regular filters in the filter of the request', async () => {
+          await service.esql({
+            query: esqlQuery,
+            kibanaQueryContext: { kibanaFilters: [phraseFilter, computedColumnFilter] },
+          });
+
+          const { query, filter } = getRequestParams();
+          // before the LIMIT, so it keeps the rows that match
+          expect(query).toBe(
+            'FROM logs | EVAL size = CASE(bytes > 100, "big", "small") | STATS c = COUNT(*) BY size\n| WHERE `size` == "big" | LIMIT 10'
+          );
+          const filterJson = JSON.stringify(filter);
+          expect(filterJson).toContain('fromFilterPill');
+          expect(filterJson).not.toContain('size');
+        });
+
+        it('does not add them to a query that does not output the column, nor to the filter of the request', async () => {
+          const queryWithoutColumn = 'FROM logs | STATS c = COUNT(*) BY host';
+
+          await service.esql({
+            query: queryWithoutColumn,
+            kibanaQueryContext: { kibanaFilters: [phraseFilter, computedColumnFilter] },
+          });
+
+          const { query, filter } = getRequestParams();
+          expect(query).toBe(queryWithoutColumn);
+          expect(JSON.stringify(filter)).toContain('fromFilterPill');
+          expect(JSON.stringify(filter)).not.toContain('size');
+        });
+
+        it('does not add disabled ones', async () => {
+          await service.esql({
+            query: esqlQuery,
+            kibanaQueryContext: {
+              kibanaFilters: [
+                { ...computedColumnFilter, meta: { ...computedColumnFilter.meta, disabled: true } },
+              ],
+            },
+          });
+
+          expect(getRequestParams().query).toBe(esqlQuery);
+        });
+      });
+
       it('only applies the timeRange through named params without a timeField', async () => {
         await service.esql({
           query: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend',

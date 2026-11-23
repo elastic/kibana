@@ -79,4 +79,34 @@ describe('ES|QL filters', () => {
     expect(asCode).not.toHaveProperty('kind');
     expect(asCodeFilterSchema.safeParse(asCode).success).toBe(true);
   });
+
+  describe('schema', () => {
+    const getCondition = (condition: Record<string, unknown>, kind?: 'esql') => ({
+      type: 'condition',
+      condition,
+      ...(kind ? { kind } : {}),
+    });
+
+    it.each([
+      ['is', { field: 'size', operator: 'is', value: 'big' }],
+      ['is_one_of', { field: 'size', operator: 'is_one_of', value: ['a', 'b'] }],
+      ['exists', { field: 'size', operator: 'exists' }],
+    ])('accepts the ES|QL kind with the %s operator', (_, condition) => {
+      expect(asCodeFilterSchema.safeParse(getCondition(condition, 'esql')).success).toBe(true);
+    });
+
+    it('rejects the ES|QL kind with the range operator, as it is never applied', () => {
+      const range = { field: 'size', operator: 'range', value: { gte: 1 } };
+
+      expect(asCodeFilterSchema.safeParse(getCondition(range, 'esql')).success).toBe(false);
+      // a range filter on a field is still accepted
+      expect(asCodeFilterSchema.safeParse(getCondition(range)).success).toBe(true);
+    });
+
+    it('does not accept the ES|QL kind in the filters that are not conditions', () => {
+      expect(
+        asCodeFilterSchema.safeParse({ type: 'dsl', dsl: { match_all: {} }, kind: 'esql' }).success
+      ).toBe(false);
+    });
+  });
 });

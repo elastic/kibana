@@ -8,6 +8,7 @@
  */
 
 import { Parser } from '@elastic/esql';
+import { esqlCommandRegistry } from '@kbn/esql-language';
 import {
   getComputedColumnsInOutput,
   createQuerySummaryContext,
@@ -336,11 +337,44 @@ describe('getComputedColumnsInOutput', () => {
     expect(await getColumns('ROW a = 1 | EVAL b = a + 1')).toEqual(['a', 'b']);
   });
 
-  it('considers the queries that set how to handle the unmapped fields', async () => {
-    expect(
-      await getColumns(
-        'SET unmapped_fields = "LOAD"; FROM logs | EVAL a = not_mapped | STATS c = COUNT(*) BY a'
-      )
-    ).toEqual(['a', 'c']);
+  it('does not return columns for a query with syntax errors', async () => {
+    expect(await getColumns('FROM logs | EVAL a = | STATS')).toEqual([]);
+  });
+
+  describe('unmapped fields', () => {
+    it('passes the strategy that the query sets to the commands', async () => {
+      const evalCommand = esqlCommandRegistry.getCommandByName('eval');
+      const columnsAfter = jest.spyOn(evalCommand!.methods, 'columnsAfter');
+
+      // unique queries, as the columns of a query that was analyzed before are not analyzed again
+      await getComputedColumnsInOutput(
+        'SET unmapped_fields = "LOAD"; FROM logs | EVAL strategy_load = 1'
+      );
+      await getComputedColumnsInOutput('FROM logs | EVAL strategy_default = 1');
+
+      expect(columnsAfter.mock.calls.map((args) => args[4])).toEqual(['LOAD', 'DEFAULT']);
+      columnsAfter.mockRestore();
+    });
+
+    it('returns the columns of a query that sets how to handle the unmapped fields', async () => {
+      expect(
+        await getColumns(
+          'SET unmapped_fields = "LOAD"; FROM logs | EVAL a = not_mapped | STATS c = COUNT(*) BY a'
+        )
+      ).toEqual(['a', 'c']);
+    });
+  });
+
+  it('does not analyze the same query twice', async () => {
+    const evalCommand = esqlCommandRegistry.getCommandByName('eval');
+    const columnsAfter = jest.spyOn(evalCommand!.methods, 'columnsAfter');
+    const query = 'FROM logs | EVAL cached_column = 1';
+
+    const first = await getComputedColumnsInOutput(query);
+    const second = await getComputedColumnsInOutput(query);
+
+    expect(columnsAfter).toHaveBeenCalledTimes(1);
+    expect(second).toBe(first);
+    columnsAfter.mockRestore();
   });
 });

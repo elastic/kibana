@@ -205,7 +205,9 @@ describe('open in discover action', () => {
           query: { match_phrase: { size: 1 } },
         },
       ],
-      query: { esql: 'FROM logs | EVAL size = 1 | STATS c = COUNT(*) BY size' },
+      query: {
+        esql: 'FROM logs | EVAL size = 1 | STATS c = COUNT(*) BY size | SORT c DESC | LIMIT 10',
+      },
       esqlControls: undefined,
       columns: [],
     };
@@ -235,13 +237,15 @@ describe('open in discover action', () => {
       embeddable,
     } as ActionExecutionContext<EmbeddableApiContext>);
 
-    const { query } = (locator.getRedirectUrl as jest.Mock).mock.calls[0][0];
-    // the regular filter goes after the source command, where the index fields exist
-    expect(query.esql).toContain('FROM logs\n| WHERE `host.name` : "web-1"');
-    // the filter on the column that the query creates, only at the end of it
-    expect(query.esql.endsWith('BY size\n| WHERE `size` == 1')).toBe(true);
-    expect(query.esql.indexOf('size')).toBeLessThan(query.esql.indexOf('WHERE `size`'));
-    expect(query.esql.match(/WHERE `size`/g)).toHaveLength(1);
+    // the regular filter goes after the source command, where the index fields exist. The filter on
+    // the column that the query creates goes after the command that outputs it, before the SORT and LIMIT
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          esql: 'FROM logs\n| WHERE `host.name` : "web-1" | EVAL size = 1 | STATS c = COUNT(*) BY size\n| WHERE `size` == 1 | SORT c DESC | LIMIT 10',
+        },
+      })
+    );
   });
 
   it('navigates to discover for an ES|QL chart and translates the dashboard KQL into a KQL(...) clause', async () => {

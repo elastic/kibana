@@ -431,14 +431,14 @@ function convertToDSLFilter(
   };
 }
 
-/**
- * Extract base properties from stored filter
- */
 /** Only condition filters can be ES|QL filters, the other types are DSL ones */
 function getKindProperty(storedFilter: StoredFilter): Pick<AsCodeConditionFilter, 'kind'> {
   return storedFilter.meta?.kind === 'esql' ? { kind: 'esql' } : {};
 }
 
+/**
+ * Extract base properties from stored filter
+ */
 function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter> {
   const meta = storedFilter.meta;
 

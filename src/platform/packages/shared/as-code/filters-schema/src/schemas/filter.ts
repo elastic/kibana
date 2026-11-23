@@ -219,6 +219,15 @@ export const asCodeConditionFilterSchema = lazySchema(() =>
           'What the filter is evaluated against. Not set for the filters on the fields of a data view, which are applied as a DSL query. `esql` is for a filter on a column created by an ES|QL query, which cannot be expressed as a DSL query: it is applied as a `WHERE` clause to the ES|QL queries that have the column, and it is ignored by the other queries.',
       }),
     })
+    .refine(
+      ({ kind, condition }) =>
+        kind !== 'esql' || condition.operator !== ASCODE_FILTER_OPERATOR.RANGE,
+      {
+        path: ['kind'],
+        message:
+          'A filter on a column created by an ES|QL query supports the `is`, `is_one_of` and `exists` operators, not `range`.',
+      }
+    )
     .meta({
       description:
         'A filter that evaluates a single field condition such as equality, range, or existence.',

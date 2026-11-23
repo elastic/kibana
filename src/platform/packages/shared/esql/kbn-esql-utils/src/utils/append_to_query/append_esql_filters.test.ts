@@ -32,7 +32,7 @@ describe('appendEsqlFiltersToESQLQuery', () => {
 
   it('negates the filter', async () => {
     expect(await appendEsqlFiltersToESQLQuery(query, [getFilter({ negate: true })])).toBe(
-      `${query}\n| WHERE NOT (\`size\` == "big")`
+      `${query}\n| WHERE (\`size\` IS NULL OR NOT (\`size\` == "big"))`
     );
   });
 
@@ -46,12 +46,26 @@ describe('appendEsqlFiltersToESQLQuery', () => {
     expect(await appendEsqlFiltersToESQLQuery(query, [bool])).toMatch(/WHERE `requests` == true$/);
   });
 
-  it('supports several values with IN', async () => {
+  it('supports several values of a multivalued column', async () => {
     const filter = getFilter({ type: FILTERS.PHRASES, params: ['big', 'small'] });
 
     expect(await appendEsqlFiltersToESQLQuery(query, [filter])).toMatch(
-      /WHERE `size` IN \("big", "small"\)$/
+      /WHERE MV_CONTAINS\(`size`, \["big", "small"\]\)$/
     );
+  });
+
+  it('adds the WHERE before the SORT and LIMIT that end the query, so the LIMIT keeps the rows that match', async () => {
+    const withTrailingCommands = `${query} | SORT requests DESC | LIMIT 10`;
+
+    expect(await appendEsqlFiltersToESQLQuery(withTrailingCommands, [getFilter()])).toBe(
+      `${query}\n| WHERE \`size\` == "big" | SORT requests DESC | LIMIT 10`
+    );
+  });
+
+  it('does not change a query with syntax errors, Elasticsearch reports them', async () => {
+    const invalid = 'FROM logs | EVAL size = | STATS';
+
+    expect(await appendEsqlFiltersToESQLQuery(invalid, [getFilter()])).toBe(invalid);
   });
 
   it('supports exists filters', async () => {

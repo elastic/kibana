@@ -193,19 +193,22 @@ const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: Ra
   // filterable field, so the field check isn't enough: fieldName would resolve to that
   // unrelated field, but the value shown is the computed one, not the raw field's value.
   // It can't be a DSL filter, so it is an ES|QL one that is applied to the queries that have the column.
-  if (isUnfilterableComputedColumn(column)) {
-    // the date columns can't be filtered with a value, brushing updates the time range instead
-    if (column.meta?.type === 'date') {
-      return [];
-    }
-    const dataView = await getEsqlDataView(indexPattern);
+  const isComputedColumn = isUnfilterableComputedColumn(column);
+
+  // the date columns can't be filtered with a value, brushing updates the time range instead
+  if (isComputedColumn && column.meta?.type === 'date') {
+    return [];
+  }
+
+  const dataView = await getEsqlDataView(indexPattern);
+
+  if (isComputedColumn) {
     return buildRawColumnFilter(fieldName, value, column, dataView).map((filter) => ({
       ...filter,
       meta: { ...filter.meta, kind: 'esql' as const },
     }));
   }
 
-  const dataView = await getEsqlDataView(indexPattern);
   const field = dataView.getFieldByName(fieldName);
 
   // The field should be present in the data view and filterable.

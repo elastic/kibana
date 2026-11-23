@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { injectWhereClauseAfterSourceCommand } from './inject_where_after_source';
+import {
+  injectWhereClauseAfterSourceCommand,
+  injectWhereClauseBeforeTrailingSortAndLimit,
+} from './inject_where_after_source';
 
 describe('injectWhereClauseAfterSourceCommand', () => {
   it('injects a WHERE clause right after a FROM command', () => {
@@ -60,6 +63,58 @@ describe('injectWhereClauseAfterSourceCommand', () => {
   it('returns the query unchanged when the first command is not a source command', () => {
     expect(injectWhereClauseAfterSourceCommand('| WHERE x > 0', 'host : "web-1"')).toBe(
       '| WHERE x > 0'
+    );
+  });
+});
+
+describe('injectWhereClauseBeforeTrailingSortAndLimit', () => {
+  it('injects the WHERE at the end of a query that does not end with SORT or LIMIT', () => {
+    expect(
+      injectWhereClauseBeforeTrailingSortAndLimit(
+        'FROM logs | STATS c = COUNT(*) BY size',
+        'size == "big"'
+      )
+    ).toBe('FROM logs | STATS c = COUNT(*) BY size\n| WHERE size == "big"');
+  });
+
+  it('injects before the SORT and LIMIT that end the query, so they apply to the filtered rows', () => {
+    expect(
+      injectWhereClauseBeforeTrailingSortAndLimit(
+        'FROM logs | STATS c = COUNT(*) BY size | SORT c DESC | LIMIT 10',
+        'size == "big"'
+      )
+    ).toBe(
+      'FROM logs | STATS c = COUNT(*) BY size\n| WHERE size == "big" | SORT c DESC | LIMIT 10'
+    );
+    expect(
+      injectWhereClauseBeforeTrailingSortAndLimit(
+        'FROM logs | EVAL size = 1 | LIMIT 100',
+        'size == 1'
+      )
+    ).toBe('FROM logs | EVAL size = 1\n| WHERE size == 1 | LIMIT 100');
+  });
+
+  it('does not skip a LIMIT that is followed by other commands', () => {
+    expect(
+      injectWhereClauseBeforeTrailingSortAndLimit(
+        'FROM logs | LIMIT 10 | EVAL size = 1 | SORT size',
+        'size == 1'
+      )
+    ).toBe('FROM logs | LIMIT 10 | EVAL size = 1\n| WHERE size == 1 | SORT size');
+  });
+
+  it('keeps the query valid when the last command line ends with a comment', () => {
+    expect(
+      injectWhereClauseBeforeTrailingSortAndLimit(
+        'FROM logs | EVAL a = 1 // a comment\n| LIMIT 5',
+        'a == 1'
+      )
+    ).toBe('FROM logs | EVAL a = 1\n| WHERE a == 1 // a comment\n| LIMIT 5');
+  });
+
+  it('returns the query unchanged for an empty WHERE expression', () => {
+    expect(injectWhereClauseBeforeTrailingSortAndLimit('FROM logs | LIMIT 5', ' ')).toBe(
+      'FROM logs | LIMIT 5'
     );
   });
 });

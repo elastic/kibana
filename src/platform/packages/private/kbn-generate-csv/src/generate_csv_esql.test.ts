@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Filter } from '@kbn/es-query';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 
@@ -505,6 +506,44 @@ describe('CsvESQLGenerator', () => {
           },
           abortSignal: expect.any(AbortSignal),
         }
+      );
+    });
+
+    it('applies the filters on columns created by the query to the query, and not to the filter', async () => {
+      const query = {
+        esql: 'from kibana_sample_data_logs | eval size = 1 | stats c = count(*) by size',
+      };
+      const filters: Filter[] = [
+        {
+          meta: { kind: 'esql', key: 'size', type: 'phrase', params: { query: 1 } },
+          query: { match_phrase: { size: 1 } },
+        },
+      ];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, filters }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        {
+          params: expect.objectContaining({
+            query: `${query.esql}\n| WHERE \`size\` == 1\n| LIMIT 500`,
+            filter: { bool: { filter: [], must: [], must_not: [], should: [] } },
+          }),
+        },
+        expect.anything()
       );
     });
 

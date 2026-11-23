@@ -10,11 +10,12 @@
 import { isEsqlFilter, type Filter } from '@kbn/es-query';
 import { convertEsqlFiltersToESQLExpression } from '../convert_filters_to_esql';
 import { getComputedColumnsInOutput } from '../get_query_summary';
-import { appendToESQLQuery } from './utils';
+import { injectWhereClauseBeforeTrailingSortAndLimit } from '../inject_where_after_source';
 
 /**
- * Appends the filters on columns created by an ES|QL query (`kind: 'esql'`) as a WHERE at the end of the
- * query. Only the filters of columns that the query outputs are applied, the others are for other queries.
+ * Adds the filters on columns created by an ES|QL query (`kind: 'esql'`) as a WHERE at the end of the query,
+ * before the SORT and LIMIT that end it. Only the filters of columns that the query outputs are applied,
+ * the others are for other queries.
  * @param query The ES|QL query.
  * @param filters The filters, the ones that are not ES|QL ones are ignored.
  * @returns The query with the WHERE, or the same query when there is nothing to apply.
@@ -26,11 +27,10 @@ export const appendEsqlFiltersToESQLQuery = async (
   const esqlFilters = filters.filter(isEsqlFilter);
   if (!esqlFilters.length) return query;
 
-  // a query whose columns can't be known can't use the filters, but it doesn't have to fail
-  const columns = await getComputedColumnsInOutput(query).catch(() => new Set<string>());
+  const columns = await getComputedColumnsInOutput(query);
   const expression = convertEsqlFiltersToESQLExpression(
     esqlFilters.filter(({ meta }) => meta.key && columns.has(meta.key))
   );
 
-  return expression ? appendToESQLQuery(query, `| WHERE ${expression}`) : query;
+  return injectWhereClauseBeforeTrailingSortAndLimit(query, expression);
 };
