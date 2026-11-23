@@ -40,7 +40,7 @@ The connector can't be routed through an HTTP proxy. If `xpack.actions.proxyUrl`
 
 ## Create connectors in {{kib}} [define-postgresql-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
+You can create connectors in **{{stack-manage-app}} → {{connectors-ui}}**.
 
 ### Connector configuration [postgresql-connector-configuration]
 
