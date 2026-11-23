@@ -274,7 +274,12 @@ describe('nightshift.sendNotifications step', () => {
   describe('Slack thread claim for a root post', () => {
     const rootResponse = {
       status: 'ok',
-      data: { ts: '1.2', channel: 'C123', externalConversationId: 'slack:T1:C123:1.2' },
+      data: {
+        ts: '1.2',
+        channel: 'C123',
+        externalConversationId: 'slack:T1:C123:1.2',
+        workspace: 'T1',
+      },
     } as never;
 
     it('claims the thread the root post started', async () => {
@@ -289,6 +294,8 @@ describe('nightshift.sendNotifications step', () => {
         externalConversationId: 'slack:T1:C123:1.2',
         channel: 'C123',
         threadTs: '1.2',
+        workspace: 'T1',
+        summary: 'Latency',
       });
     });
 
