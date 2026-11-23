@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { applyBackoffJitter } from '@kbn/workflows';
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { PollStepDefaults } from '@kbn/workflows-extensions/server';
@@ -17,7 +18,6 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import { createBaseHandlerContext } from './create_base_handler_context';
 import { DURABLE_STEP_STATE_KEY, type DurableStepState } from './durable_step_state';
-import { applyBackoffJitter } from '../../../utils/backoff_jitter/backoff_jitter';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { toExecutionError } from '../../errors';

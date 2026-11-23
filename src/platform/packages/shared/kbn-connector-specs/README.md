@@ -366,22 +366,15 @@ The hub accepts JSON and `application/x-www-form-urlencoded`. A form webhook may
 
 ### Declaring events
 
-Put definitions and `handleEvents` in `src/specs/<connector>/events.ts` and assign the export to `events` on the spec, next to `actions`. Each definition key becomes a public event id through `buildEventId(metadata.id, key)`: `.github` + `issues` → `github.issues`. The definition's `eventId` must equal that value. `title` and `description` go through `i18n.translate`. `eventSchema` is a `z.object` wrapped in `lazySchema()`.
+Define the event in `@kbn/connector-topics` first (`src/events/<connector>.ts`, exported from the package index). The export is `{ name, eventSchema }`. `name` is the public event id and equals `buildEventId(metadata.id, definitionKey)`: `.github` + `issues` → `github.issues`. `eventSchema` is the spoke payload, a `z.object` wrapped in `lazySchema()`, with `.describe()` on each field. Leave `title`, `description`, and the hub fields off it.
+
+In `src/specs/<connector>/events.ts`, build the spec event with `toConnectorSpecEvent` from that export. `title` and `description` stay on the spec and go through `i18n.translate`. Assign the export to `events` on the spec, next to `actions`. `handleEvents` emits `name`. Do not keep a second schema or a second event id on the spec.
 
 Keep the payload flat. The hub rejects more than 32 keys, an `eventId` or `correlationKey` over 128 characters, more than 25 events per request by default (cap 250), or payloads over `xpack.actions.inboundEvents.maxBodyBytes` (default 1mb). The hub also adds `connectorId`, `connectorTypeId`, `spaceId`, and `correlationKey` onto the workflow trigger schema, so leave those off `eventSchema`.
 
 ```typescript
-import { i18n } from '@kbn/i18n';
-import { z, lazySchema } from '@kbn/zod/v4';
-import type {
-  ConnectorIngressContext,
-  ConnectorSpecEvents,
-  HandleEventsResult,
-} from '../../connector_spec_events';
-import { buildEventId } from '../../event_type_id';
-
-const ITEM_CREATED_KEY = 'item_created' as const;
-const ITEM_CREATED_EVENT_ID = buildEventId('.my_connector', ITEM_CREATED_KEY);
+// @kbn/connector-topics src/events/my_connector.ts
+import { lazySchema, z } from '@kbn/zod/v4';
 
 const ItemCreatedEventSchema = lazySchema(() =>
   z.object({
@@ -390,21 +383,36 @@ const ItemCreatedEventSchema = lazySchema(() =>
   })
 );
 
+export const myConnectorItemCreated = {
+  name: 'my_connector.item_created' as const,
+  eventSchema: ItemCreatedEventSchema,
+};
+```
+
+```typescript
+// src/specs/my_connector/events.ts
+import { i18n } from '@kbn/i18n';
+import { myConnectorItemCreated } from '@kbn/connector-topics';
+import {
+  toConnectorSpecEvent,
+  type ConnectorIngressContext,
+  type ConnectorSpecEvents,
+  type HandleEventsResult,
+} from '../../connector_spec_events';
+
 export const myConnectorEvents: ConnectorSpecEvents = {
   definitions: {
-    [ITEM_CREATED_KEY]: {
-      eventId: ITEM_CREATED_EVENT_ID,
+    item_created: toConnectorSpecEvent(myConnectorItemCreated, {
       title: i18n.translate('connectorSpecs.myConnector.events.itemCreated.title', {
         defaultMessage: 'Item created',
       }),
       description: i18n.translate('connectorSpecs.myConnector.events.itemCreated.description', {
         defaultMessage: 'An item was created.',
       }),
-      eventSchema: ItemCreatedEventSchema,
-    },
+    }),
   },
   handleEvents: async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => {
-    const parsed = ItemCreatedEventSchema.safeParse(ctx.rawBody);
+    const parsed = myConnectorItemCreated.eventSchema.safeParse(ctx.rawBody);
     if (!parsed.success) {
       return { type: 'emit', events: [] };
     }
@@ -412,7 +420,7 @@ export const myConnectorEvents: ConnectorSpecEvents = {
       type: 'emit',
       events: [
         {
-          eventId: ITEM_CREATED_EVENT_ID,
+          eventId: myConnectorItemCreated.name,
           correlationKey: parsed.data.id,
           payload: parsed.data,
         },
@@ -442,7 +450,7 @@ An emit may also set `httpResponse` when the vendor requires a specific response
 `events.test.ts` should cover:
 
 - the connector id is in `SPECS_ALLOWED_EVENTS`
-- every `eventId` equals `buildEventId(metadata.id, key)`
+- every `eventId` is the `@kbn/connector-topics` `name`, which equals `buildEventId(metadata.id, key)`
 - a recognized body emits that id and `validateEmittedEvents` accepts it
 - an unrecognized body emits no events
 - a handshake, when you have one, returns `type: 'http'` and does not emit
