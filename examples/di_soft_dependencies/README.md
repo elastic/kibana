@@ -35,26 +35,19 @@ Each owner also exposes a built-in entry to its own token, which the registry co
 
 ```ts
 // owner
-collect(RegistryBEntry, Registry, (context, entry, registry) => registry.register(entry));
+collect(RegistryAEntry, Registry, (context, entry, registry) => registry.register(entry));
 
 // contributor
-expose(RegistryBEntry).toConstantValue({ id: 'diSoftDepsRegistryA', label: '...' });
+expose(RegistryAEntry).toConstantValue({ id: 'diSoftDepsRegistryB', label: '...' });
 ```
 
-The `registry_a` server half uses `collectAtSetup` instead, so its registry is full right after every plugin finished setup, before core services such as saved objects start.
-That is the shape a registry read by saved objects migrations needs.
-Its entries are constants, so they depend on no start-only service.
-The `registry_b` server half and both browser halves use `collect`.
-
-```ts
-// registry_a server
-collectAtSetup(RegistryAEntry, Registry, (context, entry, registry) => registry.register(entry));
-```
+The registry stays empty until every plugin has started.
+A registry that something reads before that, such as saved objects migrations on the server, does not fit this pattern, and its contributors keep `requiredPlugins`.
 
 ## Find the hidden edges
 
 Soft dependencies add no manifest edge, so the plugin tooling cannot show that one plugin uses another.
-`scripts/report_edges.js` scans the source and lists, per token, which plugins call `expose`, `collectAtSetup`, `collect`, and `softDependencies.get` or `softDependencies.getAll`:
+`scripts/report_edges.js` scans the source and lists, per token, which plugins call `expose`, `collect`, and `softDependencies.get` or `softDependencies.getAll`:
 
 ```sh
 node examples/di_soft_dependencies/scripts/report_edges.js

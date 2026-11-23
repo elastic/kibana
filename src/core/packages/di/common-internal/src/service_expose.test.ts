@@ -40,34 +40,6 @@ describe('CoreInjectionService', () => {
     expect(consumer.get(SoftDependencies).get(Greeter)).toBe('hello');
   });
 
-  it('should run collectAtSetup handlers when the service starts, before ready', () => {
-    const handler = jest.fn();
-    const owner = getContainer(Symbol.for('owner'));
-    const contributor1 = getContainer(Symbol.for('contributor1'));
-    const contributor2 = getContainer(Symbol.for('contributor2'));
-    owner.load(
-      new KibanaContainerModule(({ collectAtSetup }) => {
-        collectAtSetup(Greeter, handler);
-      })
-    );
-    contributor1.load(
-      new KibanaContainerModule(({ expose }) => {
-        expose(Greeter).toConstantValue('hello');
-      })
-    );
-    contributor2.load(
-      new KibanaContainerModule(({ expose }) => {
-        expose(Greeter).toConstantValue('hi');
-      })
-    );
-
-    [owner, contributor1, contributor2].forEach((plugin) => plugin.get(Setup));
-    expect(handler).not.toHaveBeenCalled();
-
-    service.start();
-    expect(handler.mock.calls.map(([, greeting]) => greeting)).toEqual(['hello', 'hi']);
-  });
-
   it('should run collect handlers when the service is ready', () => {
     const handler = jest.fn();
     const owner = getContainer(Symbol.for('owner'));

@@ -42,11 +42,6 @@ const Context = Symbol('Context') as ServiceIdentifier<Container>;
 export const Global = createToken<ServiceIdentifier>('Global');
 
 /**
- * The plugin's `collectAtSetup` hooks, run once right after every plugin finished setup.
- */
-export const CollectAtSetup = createToken<(container: Container) => void>('core.di.CollectAtSetup');
-
-/**
  * The plugin's `collect` hooks, run once after every plugin started and before any `OnReady` hook.
  */
 export const Collect = createToken<(container: Container) => void>('core.di.Collect');
@@ -68,10 +63,9 @@ export const Contributions =
   );
 
 /**
- * `setup`: plugins run setup. `collectingAtSetup`: `collectAtSetup` hooks run.
- * `starting`: core services and plugins start. `ready`: every plugin started.
+ * `pending`: plugins run setup and start. `ready`: every plugin started.
  */
-type Phase = 'setup' | 'collectingAtSetup' | 'starting' | 'ready';
+type Phase = 'pending' | 'ready';
 
 /**
  * Current plugin scope identifier.
@@ -111,7 +105,7 @@ export class PluginModule extends ContainerModule {
   };
   private bound = new WeakSet<Container>();
   private scopes = new Set<Container>();
-  private phase: Phase = 'setup';
+  private phase: Phase = 'pending';
 
   constructor(
     private readonly root: Container,
@@ -138,22 +132,6 @@ export class PluginModule extends ContainerModule {
   }
 
   /**
-   * Runs each plugin's `collectAtSetup` hooks once, after every plugin finished setup.
-   */
-  public start(): void {
-    if (this.phase !== 'setup') {
-      return;
-    }
-
-    this.phase = 'collectingAtSetup';
-    try {
-      this.runHooks(CollectAtSetup);
-    } finally {
-      this.phase = 'starting';
-    }
-  }
-
-  /**
    * Marks every plugin as started, so `SoftDependencies` can resolve services exposed by any of them,
    * then runs each plugin's `collect` hooks once, then each plugin's `OnReady` hooks once.
    */
@@ -172,8 +150,8 @@ export class PluginModule extends ContainerModule {
   }
 
   protected getContributions<T>(serviceIdentifier: ServiceIdentifier<T>): Array<Contribution<T>> {
-    if (this.phase !== 'collectingAtSetup' && this.phase !== 'ready') {
-      throw new Error(`Cannot collect "${String(serviceIdentifier)}" in the ${this.phase} phase.`);
+    if (this.phase !== 'ready') {
+      throw new Error(`Cannot collect "${String(serviceIdentifier)}" before all plugins started.`);
     }
 
     return [...this.scopes].flatMap((scope): Array<Contribution<T>> => {

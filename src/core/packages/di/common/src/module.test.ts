@@ -23,7 +23,6 @@ describe('KibanaContainerModule', () => {
   const asyncDependencyToken = Symbol.for('async');
   const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
   const Collect = Symbol.for('core.di.Collect') as Hook;
-  const CollectAtSetup = Symbol.for('core.di.CollectAtSetup') as Hook;
   const Contributions = Symbol.for('core.di.Contributions') as ServiceIdentifier<
     (serviceIdentifier: ServiceIdentifier) => Array<{
       plugin: string;
@@ -231,10 +230,7 @@ describe('KibanaContainerModule', () => {
     });
   });
 
-  describe.each([
-    { name: 'collect' as const, hook: Collect },
-    { name: 'collectAtSetup' as const, hook: CollectAtSetup },
-  ])('$name', ({ hook, name }) => {
+  describe('collect', () => {
     let exposed: string[];
 
     beforeEach(() => {
@@ -251,7 +247,7 @@ describe('KibanaContainerModule', () => {
 
     it('should call the handler with every exposed service only when its hook runs', () => {
       const handler = jest.fn();
-      options[name](token, dependencyToken, handler);
+      options.collect(token, dependencyToken, handler);
       exposed.push('value1', 'value2');
 
       trigger(OnSetup, container);
@@ -259,7 +255,7 @@ describe('KibanaContainerModule', () => {
       trigger(OnReady, container);
       expect(handler).not.toHaveBeenCalled();
 
-      trigger(hook, container);
+      trigger(Collect, container);
       expect(handler).toHaveBeenCalledTimes(2);
       expect(handler).toHaveBeenNthCalledWith(1, expect.anything(), 'value1', 'something');
       expect(handler).toHaveBeenNthCalledWith(2, expect.anything(), 'value2', 'something');
@@ -267,20 +263,20 @@ describe('KibanaContainerModule', () => {
 
     it('should collect the exposed services rather than the local bindings', () => {
       const handler = jest.fn();
-      options[name](token, handler);
+      options.collect(token, handler);
       exposed.push('value');
       container.bind(token).toConstantValue('local');
 
-      trigger(hook, container);
+      trigger(Collect, container);
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledWith(expect.anything(), 'value');
     });
 
     it('should not call the handler when nothing is exposed', () => {
       const handler = jest.fn();
-      options[name](token, handler);
+      options.collect(token, handler);
 
-      expect(() => trigger(hook, container)).not.toThrow();
+      expect(() => trigger(Collect, container)).not.toThrow();
       expect(handler).not.toHaveBeenCalled();
     });
   });

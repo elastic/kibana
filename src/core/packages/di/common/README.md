@@ -210,22 +210,8 @@ If a contribution fails to build, `collect` skips it and logs an error through t
 The message names the token and the plugin that exposed the contribution.
 The other contributions still reach the handler.
 
-Some registries are read before any plugin starts. For example, saved objects migrations run when core starts the saved objects service, before plugins start.
-For those registries, use `collectAtSetup`, which has the same signature as `collect`.
-It runs right after every plugin has finished setup, before core services such as saved objects start:
-```ts
-const pluginModule = new KibanaContainerModule(({ bind, collectAtSetup }) => {
-  bind(MigrationRegistry).toSelf().inSingletonScope();
-  collectAtSetup(Migration, MigrationRegistry, (context, migration, registry) =>
-    registry.register(migration)
-  );
-});
-```
-
-Values collected at setup and the handler's dependencies can depend only on setup-time services.
-If a contribution fails to build at that point, for example because it injects `CoreStart('http')`, Kibana stops with an error.
-The error names the token and the plugin that exposed the contribution, and keeps the original error as its `cause`.
-`SoftDependencies` stays locked while `collectAtSetup` handlers run.
+Soft dependencies resolve only after every plugin has started.
+If something reads your registry before plugins start, for example saved objects migrations on the server, soft dependencies do not fit it, and its contributors keep `requiredPlugins`.
 
 Plugins are not ordered relative to each other without a manifest edge, and an exposed service can depend on start-only services such as `CoreStart('http')` of the plugin that exposes it.
 So `SoftDependencies` throws when it is used before every plugin has started.

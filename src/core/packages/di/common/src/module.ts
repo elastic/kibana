@@ -39,7 +39,6 @@ type Contribution<T> = { plugin: string } & (
  * Must stay the same symbols and shapes as the internal tokens in `@kbn/core-di-internal`.
  */
 const Global = createToken<ServiceIdentifier>('Global');
-const CollectAtSetup = createToken<(container: Container) => void>('core.di.CollectAtSetup');
 const Collect = createToken<(container: Container) => void>('core.di.Collect');
 const Contributions =
   createToken<<T>(serviceIdentifier: ServiceIdentifier<T>) => Array<Contribution<T>>>(
@@ -113,23 +112,6 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
    * @param handler The handler to perform an action with every exposed service instance.
    */
   collect<T, A extends unknown[] = any[]>(
-    serviceIdentifier: ServiceIdentifier<T>,
-    ...args: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
-  ): void;
-
-  /**
-   * Registers a handler that will be called once right after all plugins finished setup, before core services such as saved objects start, against every binding of the service exposed by any enabled plugin, the current one included.
-   * Collected values and the handler's dependencies may only depend on setup-time services.
-   * A contribution that fails to build stops Kibana with an error naming the token and the plugin that exposed it.
-   * @example
-   * ```ts
-   * collectAtSetup(Widget, WidgetRegistry, (context, widget, registry) => registry.register(widget));
-   * ```
-   * @param serviceIdentifier The exposed service identifier to collect.
-   * @param dependencies Dependencies to resolve before calling the handler.
-   * @param handler The handler to perform an action with every exposed service instance.
-   */
-  collectAtSetup<T, A extends unknown[] = any[]>(
     serviceIdentifier: ServiceIdentifier<T>,
     ...args: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
   ): void;
@@ -407,28 +389,6 @@ function toKibanaContainerModuleLoadOptions(
       });
   }
 
-  function getExposedAtSetup<T>(
-    container: Container,
-    serviceIdentifier: ServiceIdentifier<T>
-  ): T[] {
-    return container
-      .get(Contributions)(serviceIdentifier)
-      .flatMap((contribution) => {
-        if (contribution.status === 'fulfilled') {
-          return contribution.value;
-        }
-
-        throw new Error(
-          `Cannot collect "${String(serviceIdentifier)}" from plugin "${
-            contribution.plugin
-          }" at setup. Values collected at setup may only depend on setup-time services: ${getMessage(
-            contribution.reason
-          )}`,
-          { cause: contribution.reason }
-        );
-      });
-  }
-
   function createHook(
     hook: ServiceIdentifier<(container: Container) => void>,
     getInjectables: typeof getCurrentBound
@@ -458,7 +418,6 @@ function toKibanaContainerModuleLoadOptions(
     ...options,
     bind,
     collect: createHook(Collect, getExposed),
-    collectAtSetup: createHook(CollectAtSetup, getExposedAtSetup),
     expose,
     inject,
     onActivation,

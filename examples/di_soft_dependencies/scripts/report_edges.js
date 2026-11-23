@@ -25,18 +25,17 @@ const DI_IMPORT = /from '@kbn\/core-di'/;
 
 const KINDS = [
   { key: 'expose', label: 'exposed by' },
-  { key: 'collectAtSetup', label: 'collected at setup by' },
   { key: 'collect', label: 'collected by' },
   { key: 'lookup', label: 'looked up by' },
 ];
 const PATTERNS = [
-  { regex: /(?<![\w$.])(expose|collect|collectAtSetup)\(\s*([A-Za-z_$][\w$]*)/g },
+  { regex: /(?<![\w$.])(expose|collect)\(\s*([A-Za-z_$][\w$]*)/g },
   {
     regex: /\bsoftDependencies\s*\.\s*(?:get|getAll)\(\s*([A-Za-z_$][\w$]*)\s*\)/g,
     kind: 'lookup',
   },
 ];
-const PREFILTER = 'expose\\(|collect\\(|collectAtSetup\\(|softDependencies';
+const PREFILTER = 'expose\\(|collect\\(|softDependencies';
 
 function listCandidatesWithRipgrep(roots) {
   const result = spawnSync(

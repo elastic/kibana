@@ -9,7 +9,7 @@
 
 import type { Container, ServiceIdentifier } from 'inversify';
 import { OnReady, OnSetup, OnStart } from '@kbn/core-di';
-import { Collect, CollectAtSetup } from '@kbn/core-di-internal';
+import { Collect } from '@kbn/core-di-internal';
 
 function run(hook: ServiceIdentifier<(container: Container) => void>, container: Container): void {
   return container.getAll(hook, { chained: true, optional: true }).forEach((fn) => fn(container));
@@ -20,9 +20,8 @@ export function setup(container: Container): void {
   run(OnSetup, container);
 }
 
-/** Runs the container's `collectAtSetup` handlers, then its start hooks. */
+/** Runs the container's start hooks. */
 export function start(container: Container): void {
-  run(CollectAtSetup, container);
   run(OnStart, container);
 }
 

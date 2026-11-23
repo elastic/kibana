@@ -47,16 +47,12 @@ export class CoreInjectionService {
     return contract;
   }
 
-  /**
-   * Runs once every plugin has finished setup, running the plugins' `collectAtSetup` hooks.
-   */
   public start(): InternalCoreDiServiceStart {
     const contract = {
       fork: this.fork,
       getContainer: this.getContainer,
       ready: this.ready,
     };
-    this.module.start();
 
     return contract;
   }

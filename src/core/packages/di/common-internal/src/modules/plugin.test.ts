@@ -21,7 +21,7 @@ import {
   SoftDependencies,
   Start,
 } from '@kbn/core-di';
-import { Fork, Global, Plugin, PluginModule } from './plugin';
+import { Contributions, Fork, Global, Plugin, PluginModule } from './plugin';
 
 describe('PluginModule', () => {
   const token1 = Symbol.for('token1');
@@ -236,7 +236,6 @@ describe('PluginModule', () => {
 
     function setupAndStart(...plugins: Container[]): void {
       plugins.forEach((plugin) => plugin.get(Setup));
-      pluginModule.start();
       plugins.forEach((plugin) => {
         plugin.load(
           new ContainerModule(({ bind }) => {
@@ -442,6 +441,15 @@ describe('PluginModule', () => {
         expect(handler).not.toHaveBeenCalled();
       });
 
+      it('should not resolve contributions before all plugins started', () => {
+        const contributor = createPlugin(token1, ({ expose }) => {
+          expose(Widget).toConstantValue('contributor');
+        });
+        setupAndStart(contributor);
+
+        expect(() => root.get(Contributions)(Widget)).toThrow(/before all plugins started/);
+      });
+
       it('should run every collect handler before any OnReady hook', () => {
         const Registry = Symbol.for('Registry') as ServiceIdentifier<string[]>;
         const seen: string[][] = [];
@@ -486,71 +494,6 @@ describe('PluginModule', () => {
         expect(logger.error).toHaveBeenCalledWith(
           expect.stringMatching(/"Symbol\(Widget\)".*"token2".*boom/)
         );
-      });
-    });
-
-    describe('collectAtSetup', () => {
-      it('should collect contributions before any plugin starts', () => {
-        const handler = jest.fn();
-        const owner = createPlugin(token1, ({ collectAtSetup }) => {
-          collectAtSetup(Widget, handler);
-        });
-        const contributor = createPlugin(token2, ({ expose }) => {
-          expose(Widget).toConstantValue('contributor');
-        });
-        [owner, contributor].forEach((plugin) => plugin.get(Setup));
-        pluginModule.start();
-
-        expect(handler).toHaveBeenCalledTimes(1);
-        expect(handler).toHaveBeenCalledWith(expect.anything(), 'contributor');
-      });
-
-      it('should fail naming the token and the plugin when a contribution needs start bindings', () => {
-        const owner = createPlugin(token1, ({ collectAtSetup }) => {
-          collectAtSetup(Widget, jest.fn());
-        });
-        const contributor = createPlugin(token2, ({ expose }) => {
-          expose(Widget).toResolvedValue((value) => `contributor ${value}`, [StartOnly]);
-        });
-        [owner, contributor].forEach((plugin) => plugin.get(Setup));
-
-        expect(() => pluginModule.start()).toThrow(
-          expect.objectContaining({
-            message: expect.stringMatching(
-              /"Symbol\(Widget\)".*"token2".*may only depend on setup-time services/
-            ),
-            cause: expect.any(Error),
-          })
-        );
-      });
-
-      it('should keep SoftDependencies locked while collecting at setup', () => {
-        const errors: unknown[] = [];
-        const owner = createPlugin(token1, ({ collectAtSetup, expose }) => {
-          collectAtSetup(Widget, SoftDependencies, (_context, _widget, softDependencies) => {
-            for (const lookup of [
-              () => softDependencies.get(Greeter),
-              () => softDependencies.getAll(Greeter),
-            ]) {
-              try {
-                lookup();
-              } catch (error) {
-                errors.push(error);
-              }
-            }
-          });
-          expose(Widget).toConstantValue('owner');
-        });
-        const provider = createPlugin(token2, ({ expose }) => {
-          expose(Greeter).toConstantValue('hello');
-        });
-        [owner, provider].forEach((plugin) => plugin.get(Setup));
-        pluginModule.start();
-
-        expect(errors).toEqual([
-          expect.objectContaining({ message: expect.stringMatching(/before all plugins started/) }),
-          expect.objectContaining({ message: expect.stringMatching(/before all plugins started/) }),
-        ]);
       });
     });
   });
