@@ -15,6 +15,12 @@ import { readTarEntries } from './tar';
 import type { FeedParseResult } from './types';
 import { parseUbuntuOval } from './ubuntu_oval';
 import { parseRhelOval } from './rhel_oval';
+import {
+  CANONICAL_OVAL_BASE_URL,
+  REDHAT_CSAF_BASE_URL,
+  REDHAT_OVAL_BASE_URL,
+} from './feed_sources';
+import { resolveFeedUrl } from './mirror';
 
 export type FeedOs = FeedParseResult['os'];
 
@@ -32,8 +38,6 @@ export const RHEL_CSAF_MIN_MAJOR = 10;
 
 const UBUNTU_CODENAME = /^[a-z]+$/;
 const RHEL_MAJOR = /^[1-9]\d*$/;
-
-const REDHAT_CSAF_BASE_URL = 'https://security.access.redhat.com/data/csaf/v2/advisories/';
 
 /**
  * Names the current bulk archive ('csaf_advisories_YYYY-MM-DD.tar.zst', one download instead of
@@ -112,13 +116,13 @@ export const feedUrl = (
   { includeUnfixed }: FeedUrlOptions = {}
 ): string => {
   if (family === 'ubuntu' && UBUNTU_CODENAME.test(version)) {
-    return `https://security-metadata.canonical.com/oval/com.ubuntu.${version}.cve.oval.xml.bz2`;
+    return `${CANONICAL_OVAL_BASE_URL}com.ubuntu.${version}.cve.oval.xml.bz2`;
   }
   if (isCsafRelease({ family, version })) return REDHAT_CSAF_ARCHIVE_LATEST_URL;
   if (family === 'rhel' && RHEL_MAJOR.test(version)) {
     return includeUnfixed
-      ? `https://security.access.redhat.com/data/oval/v2/RHEL${version}/rhel-${version}-including-unpatched.oval.xml.bz2`
-      : `https://security.access.redhat.com/data/oval/v2/RHEL${version}/rhel-${version}.oval.xml.bz2`;
+      ? `${REDHAT_OVAL_BASE_URL}RHEL${version}/rhel-${version}-including-unpatched.oval.xml.bz2`
+      : `${REDHAT_OVAL_BASE_URL}RHEL${version}/rhel-${version}.oval.xml.bz2`;
   }
   throw new Error(`No advisory feed for ${family} ${version}`);
 };
@@ -157,6 +161,8 @@ export interface DownloadFeedOptions {
   includeUnfixed?: boolean;
   /** Receives CSAF degradations that do not fail the download (delta over cap, skipped docs). */
   logger?: { warn: (message: string) => void };
+  /** Air-gap mirror base; required so a caller that forgets to pass it down fails the type check. */
+  feedMirrorUrl: string | undefined;
 }
 
 export interface DownloadFeedTiming {
@@ -173,6 +179,8 @@ export interface LoadFeedOptions {
   maxDecompressedBytes?: number;
   /** RHEL: parse the feed that also carries unpatched (unfixed CVE) definitions. */
   includeUnfixed?: boolean;
+  /** Air-gap mirror base; required like on `DownloadFeedOptions`. */
+  feedMirrorUrl: string | undefined;
 }
 
 const tooLarge = (url: string, bytes: number): Error =>
@@ -233,17 +241,24 @@ const guardBlocks = function* (
 /** Downloads the compressed advisory feed for one OS release without parsing it. */
 export const downloadFeed = async (
   os: FeedOs,
-  { signal, fetchImpl = fetch, etag: knownEtag, includeUnfixed, logger }: DownloadFeedOptions = {}
+  {
+    signal,
+    fetchImpl = fetch,
+    etag: knownEtag,
+    includeUnfixed,
+    logger,
+    feedMirrorUrl,
+  }: DownloadFeedOptions
 ): Promise<DownloadFeedResult> => {
   if (isCsafRelease(os)) {
-    return downloadCsafCorpus(os.version, knownEtag, signal, fetchImpl, logger);
+    return downloadCsafCorpus(os.version, knownEtag, signal, fetchImpl, logger, feedMirrorUrl);
   }
   const startedAt = Date.now();
   const timing = (): DownloadFeedTiming => ({
     durationMs: Math.max(1, Math.round(Date.now() - startedAt)),
     downloadedBytes: 0,
   });
-  const url = feedUrl(os, { includeUnfixed });
+  const url = resolveFeedUrl(feedUrl(os, { includeUnfixed }), feedMirrorUrl);
   // Fetch and body read share one deadline and the caller's signal: a body that stalls after
   // the headers must fail the download instead of hanging it.
   return withTimeout(signal, FEED_DOWNLOAD_TIMEOUT_MS, async (requestSignal) => {
@@ -290,7 +305,8 @@ export const parseFeedBody = async (
     signal,
     maxDecompressedBytes,
     includeUnfixed,
-  }: Pick<LoadFeedOptions, 'signal' | 'maxDecompressedBytes' | 'includeUnfixed'> = {}
+    feedMirrorUrl,
+  }: Pick<LoadFeedOptions, 'signal' | 'maxDecompressedBytes' | 'includeUnfixed' | 'feedMirrorUrl'>
 ): Promise<FeedParseResult> => {
   if (isCsafRelease(os)) {
     // The cached "body" of a CSAF release is the JSON-array corpus that downloadCsafCorpus
@@ -299,7 +315,7 @@ export const parseFeedBody = async (
   }
   const blocks = guardBlocks(
     bunzip2Blocks(body),
-    feedUrl(os, { includeUnfixed }),
+    resolveFeedUrl(feedUrl(os, { includeUnfixed }), feedMirrorUrl),
     signal,
     maxDecompressedBytes ??
       (os.family === 'rhel' && includeUnfixed
@@ -318,18 +334,26 @@ export const parseFeedBody = async (
  */
 export const loadFeed = async (
   os: FeedOs,
-  { signal, fetchImpl, maxDecompressedBytes, includeUnfixed }: LoadFeedOptions = {}
+  { signal, fetchImpl, maxDecompressedBytes, includeUnfixed, feedMirrorUrl }: LoadFeedOptions
 ): Promise<LoadFeedResult> => {
-  const downloaded = await downloadFeed(os, { signal, fetchImpl, includeUnfixed });
+  const downloaded = await downloadFeed(os, { signal, fetchImpl, includeUnfixed, feedMirrorUrl });
   if (downloaded.status === 'unavailable') return downloaded;
   // No etag is sent here, so a 304 can only come from a misbehaving server.
   if (downloaded.status === 'not_modified') {
     throw new Error(
-      `Advisory feed ${feedUrl(os, { includeUnfixed })} answered 304 to an unconditional request`
+      `Advisory feed ${resolveFeedUrl(
+        feedUrl(os, { includeUnfixed }),
+        feedMirrorUrl
+      )} answered 304 to an unconditional request`
     );
   }
   const { body, etag, lastModified } = downloaded;
-  const feed = await parseFeedBody(os, body, { signal, maxDecompressedBytes, includeUnfixed });
+  const feed = await parseFeedBody(os, body, {
+    signal,
+    maxDecompressedBytes,
+    includeUnfixed,
+    feedMirrorUrl,
+  });
   return {
     status: 'ok',
     feed,
@@ -510,29 +534,33 @@ const downloadCsafCorpus = async (
   knownEtag: string | undefined,
   signal: AbortSignal | undefined,
   fetchImpl: typeof fetch,
-  logger: DownloadFeedOptions['logger']
+  logger: DownloadFeedOptions['logger'],
+  feedMirrorUrl: string | undefined
 ): Promise<DownloadFeedResult> => {
+  const at = (url: string): string => resolveFeedUrl(url, feedMirrorUrl);
+  const latestUrl = at(REDHAT_CSAF_ARCHIVE_LATEST_URL);
+  const changesUrl = at(REDHAT_CSAF_CHANGES_URL);
   const startedAt = Date.now();
   const timing = (downloadedBytes: number): DownloadFeedTiming => ({
     durationMs: Math.max(1, Math.round(Date.now() - startedAt)),
     downloadedBytes,
   });
   const latestResponse = await withTimeout(signal, CSAF_REQUEST_TIMEOUT_MS, (requestSignal) =>
-    fetchImpl(REDHAT_CSAF_ARCHIVE_LATEST_URL, { signal: requestSignal })
+    fetchImpl(latestUrl, { signal: requestSignal })
   );
   if (latestResponse.status === 404) {
     await latestResponse.body?.cancel();
-    return { status: 'unavailable', url: REDHAT_CSAF_ARCHIVE_LATEST_URL, ...timing(0) };
+    return { status: 'unavailable', url: latestUrl, ...timing(0) };
   }
-  await expectOk(latestResponse, `CSAF ${REDHAT_CSAF_ARCHIVE_LATEST_URL}`);
+  await expectOk(latestResponse, `CSAF ${latestUrl}`);
   const nameBody = await withTimeout(signal, CSAF_REQUEST_TIMEOUT_MS, (requestSignal) =>
     readCappedTo(latestResponse, MAX_CSAF_ARCHIVE_NAME_BYTES, requestSignal)
   );
   const archiveName = nameBody?.toString('utf8').trim() ?? '';
   if (!CSAF_ARCHIVE_NAME.test(archiveName)) {
-    throw new Error(`CSAF ${REDHAT_CSAF_ARCHIVE_LATEST_URL} does not name an archive`);
+    throw new Error(`CSAF ${latestUrl} does not name an archive`);
   }
-  const archiveUrl = `${REDHAT_CSAF_BASE_URL}${archiveName}`;
+  const archiveUrl = at(`${REDHAT_CSAF_BASE_URL}${archiveName}`);
 
   // The archive's own build time splits "in the archive" from "changed since".
   const headResponse = await withTimeout(signal, CSAF_REQUEST_TIMEOUT_MS, (requestSignal) =>
@@ -542,20 +570,29 @@ const downloadCsafCorpus = async (
   const lastModified = headResponse.headers.get('last-modified') ?? undefined;
   const nameDate = CSAF_ARCHIVE_NAME_DATE.exec(archiveName)?.[1];
   // No Last-Modified: fall back to the start of the day in the name, a superset of the delta.
-  const builtAt = Date.parse(lastModified ?? (nameDate ? `${nameDate}T00:00:00Z` : ''));
+  const nameDateMs = nameDate ? Date.parse(`${nameDate}T00:00:00Z`) : NaN;
+  const headerMs = lastModified ? Date.parse(lastModified) : NaN;
+  // A mirror made with a plain copy stamps the copy time. The name's date can only be early, so
+  // the earlier of the two keeps advisories changed between the build and the copy in the delta.
+  const builtAt =
+    feedMirrorUrl !== undefined && Number.isFinite(headerMs) && Number.isFinite(nameDateMs)
+      ? Math.min(headerMs, nameDateMs)
+      : Number.isFinite(headerMs)
+      ? headerMs
+      : nameDateMs;
   if (!Number.isFinite(builtAt)) {
     throw new Error(`CSAF archive ${archiveUrl} has no usable build time`);
   }
 
   const changesResponse = await withTimeout(signal, CSAF_REQUEST_TIMEOUT_MS, (requestSignal) =>
-    fetchImpl(REDHAT_CSAF_CHANGES_URL, { signal: requestSignal })
+    fetchImpl(changesUrl, { signal: requestSignal })
   );
-  await expectOk(changesResponse, `CSAF ${REDHAT_CSAF_CHANGES_URL}`);
+  await expectOk(changesResponse, `CSAF ${changesUrl}`);
   const changesBody = await withTimeout(signal, CSAF_REQUEST_TIMEOUT_MS, (requestSignal) =>
     readCappedTo(changesResponse, MAX_CSAF_CHANGES_BYTES, requestSignal)
   );
   if (changesBody === null) {
-    throw new Error(`CSAF ${REDHAT_CSAF_CHANGES_URL} is over ${MAX_CSAF_CHANGES_BYTES} bytes`);
+    throw new Error(`CSAF ${changesUrl} is over ${MAX_CSAF_CHANGES_BYTES} bytes`);
   }
   const changedPaths = new Set<string>();
   for (const line of changesBody.toString('utf8').split('\n')) {
@@ -644,7 +681,7 @@ const downloadCsafCorpus = async (
       const i = next++;
       if (i >= deltaToFetch.length) return;
       workerSignal.throwIfAborted();
-      const url = `${REDHAT_CSAF_BASE_URL}${deltaToFetch[i]}`;
+      const url = at(`${REDHAT_CSAF_BASE_URL}${deltaToFetch[i]}`);
       const response = await withTimeout(workerSignal, CSAF_REQUEST_TIMEOUT_MS, (requestSignal) =>
         fetchImpl(url, { signal: requestSignal })
       );

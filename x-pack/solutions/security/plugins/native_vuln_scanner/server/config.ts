@@ -7,6 +7,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { feedMirrorUrlProblem } from './lib/feeds/mirror';
 
 export const configSchema = schema.object({
   /**
@@ -20,6 +21,13 @@ export const configSchema = schema.object({
    * affected"). Off: only CVEs with a fixed version.
    */
   includeUnfixed: schema.boolean({ defaultValue: false }),
+  /** Air-gap mirror serving every feed at `<base>/<vendor host>/<vendor path>`. Unset: vendors. */
+  feedMirrorUrl: schema.maybe(
+    schema.uri({
+      scheme: ['http', 'https'],
+      validate: (value) => feedMirrorUrlProblem(value),
+    })
+  ),
 });
 
 export type NativeVulnScannerConfig = TypeOf<typeof configSchema>;

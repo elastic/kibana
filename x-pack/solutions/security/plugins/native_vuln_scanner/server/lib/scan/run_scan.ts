@@ -11,6 +11,7 @@ import type { KevEntries, LoadKevResult } from '../enrichment/kev';
 import { loadKev } from '../enrichment/kev';
 import type { FeedOs, LoadFeedResult } from '../feeds/fetch';
 import { feedUrl, loadFeed } from '../feeds/fetch';
+import { resolveFeedUrl } from '../feeds/mirror';
 import type { AgentInventoryRows, NormalizedHost } from '../inventory';
 import { findInventoryScheduleIds, normalizeInventories, readAgentInventories } from '../inventory';
 import type { Finding, MatchStats } from '../matcher';
@@ -39,6 +40,8 @@ export interface ScanDeps {
   loadKev?: (signal: AbortSignal) => Promise<LoadKevResult>;
   /** From kibana.yml: whether this run's feeds and findings include vendor-unfixed CVEs. */
   includeUnfixed?: boolean;
+  /** From kibana.yml: air-gap feed mirror base; the run summary records the URL fetched from it. */
+  feedMirrorUrl: string | undefined;
   /** Called after each release's knowledge write with every id now stored cleanly, or none after a failure. */
   onKnowledgeStored?: (os: FeedOs, storedIds?: ReadonlySet<string>) => void;
   /**
@@ -281,9 +284,10 @@ export const runScan = async (
     es,
     packRepository,
     logger,
-    loadFeed: load = loadFeed,
-    loadKev: loadKevCatalog = (abort) => loadKev(abort, { logger }),
     includeUnfixed,
+    feedMirrorUrl,
+    loadFeed: load = (os, options) => loadFeed(os, { ...options, feedMirrorUrl }),
+    loadKev: loadKevCatalog = (abort) => loadKev(abort, { logger, feedMirrorUrl }),
     scope = 'full',
     readCheckpoints = defaultReadCheckpoints(es),
     writeCheckpoint = defaultWriteCheckpoint(es, logger),
@@ -360,7 +364,7 @@ export const runScan = async (
     try {
       const result = await load(os, { signal });
       summary.feedInfo[key] = {
-        sourceUrl: feedUrl(os, { includeUnfixed }),
+        sourceUrl: resolveFeedUrl(feedUrl(os, { includeUnfixed }), feedMirrorUrl),
         ...(result.status === 'ok' && result.feed.snapshotTime
           ? {
               snapshotTime: result.feed.snapshotTime,
@@ -477,7 +481,9 @@ export const runScan = async (
       failures[key] = error instanceof Error ? error.message : String(error);
       logger.warn(
         `Vulnerability scan of ${key} failed: ${failures[key]}. If this is a feed download error, ` +
-          'check that Kibana can reach the vendor advisory host; the scan is retried on its next run.'
+          `check that Kibana can reach ${
+            feedMirrorUrl ? `the feed mirror (${feedMirrorUrl})` : 'the vendor advisory host'
+          }; the scan is retried on its next run.`
       );
     }
   }

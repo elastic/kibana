@@ -11,6 +11,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { parseRhelOval } from '../feeds/rhel_oval';
 import type { KevEntries, LoadKevResult } from '../enrichment/kev';
+import { clearKevCache } from '../enrichment/kev';
 import type { FeedOs, LoadFeedResult } from '../feeds/fetch';
 import type { KnowledgeEntry } from '../feeds/types';
 import type { AgentInventoryRows } from '../inventory';
@@ -102,6 +103,7 @@ const setup = (
     logger: loggingSystemMock.createLogger(),
     loadFeed,
     loadKev: jest.fn(loadKev),
+    feedMirrorUrl: undefined,
     now: () => new Date('2026-11-13T00:00:00.000Z'),
   };
   return { deps, loadFeed };
@@ -169,6 +171,86 @@ describe('runScan', () => {
     expect(info?.snapshotTime).toBe('2026-11-12T19:21:30Z');
     // now() is 2026-11-13T00:00:00Z; the snapshot is from 2026-11-12T19:21:30Z.
     expect(info?.ageSeconds).toBe(16710);
+  });
+
+  it('reports the mirror URL it fetched as the feed source', async () => {
+    const feedMirrorUrl = 'https://mirror.corp.example/feeds';
+    const { deps } = setup([rhelAgent('a1', '9')]);
+    const summary = await runScan(
+      { ...deps, feedMirrorUrl },
+      { signal: new AbortController().signal, runId: 'r1' }
+    );
+    expect(summary.feedInfo['rhel:9']?.sourceUrl).toBe(
+      'https://mirror.corp.example/feeds/security.access.redhat.com/data/oval/v2/RHEL9/rhel-9.oval.xml.bz2'
+    );
+  });
+
+  describe('default loaders (no loadFeed / loadKev in deps)', () => {
+    const feedMirrorUrl = 'https://mirror.corp.example/feeds';
+    const originalFetch = global.fetch;
+    const rhelBz2 = readFileSync(
+      join(__dirname, '..', 'feeds', '__fixtures__', 'rhel_9_trimmed.oval.xml.bz2')
+    );
+    const kevFixture = readFileSync(
+      join(__dirname, '..', 'enrichment', '__fixtures__', 'kev_catalog_trimmed.json')
+    );
+    const response = (body: Uint8Array) =>
+      ({
+        status: 200,
+        ok: true,
+        headers: { get: () => null },
+        body: new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(body);
+            controller.close();
+          },
+        }),
+      } as unknown as Response);
+
+    const scanWithDefaultLoaders = async (mirror: string | undefined) => {
+      const { deps } = setup([rhelAgent('a1', '9')]);
+      const fetchMock = jest.fn(async (url: string) =>
+        response(url.includes('known_exploited') ? kevFixture : rhelBz2)
+      );
+      global.fetch = fetchMock as unknown as typeof fetch;
+      const { es, packRepository, logger, now } = deps;
+      await runScan(
+        { es, packRepository, logger, now, feedMirrorUrl: mirror },
+        { signal: new AbortController().signal, runId: 'r1' }
+      );
+      return fetchMock.mock.calls.map(([url]) => url);
+    };
+
+    // The Jest environment predates AbortSignal.any, which the KEV download uses in production.
+    const originalAny = AbortSignal.any;
+    beforeAll(() => {
+      if (typeof originalAny !== 'function') {
+        AbortSignal.any = (signals: AbortSignal[]) => signals[0];
+      }
+    });
+    afterAll(() => {
+      AbortSignal.any = originalAny;
+    });
+    beforeEach(() => clearKevCache());
+    afterEach(() => {
+      global.fetch = originalFetch;
+    });
+
+    it('downloads the feed and KEV from the mirror when one is set', async () => {
+      const urls = await scanWithDefaultLoaders(feedMirrorUrl);
+      expect([...urls].sort()).toEqual([
+        `${feedMirrorUrl}/security.access.redhat.com/data/oval/v2/RHEL9/rhel-9.oval.xml.bz2`,
+        `${feedMirrorUrl}/www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json`,
+      ]);
+    });
+
+    it('downloads from the vendors when no mirror is set', async () => {
+      const urls = await scanWithDefaultLoaders(undefined);
+      expect([...urls].sort()).toEqual([
+        'https://security.access.redhat.com/data/oval/v2/RHEL9/rhel-9.oval.xml.bz2',
+        'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
+      ]);
+    });
   });
 
   describe('knowledge index', () => {

@@ -30,6 +30,7 @@ export const buildFetchFeedStepDefinition = ({
   getScanDeps,
   getLicense,
   includeUnfixed,
+  feedMirrorUrl,
 }: StepDeps) =>
   createServerStepDefinition({
     ...fetchFeedStepCommonDefinition,
@@ -51,6 +52,7 @@ export const buildFetchFeedStepDefinition = ({
             signal,
             etag: known?.etag,
             includeUnfixed,
+            feedMirrorUrl,
             logger: { warn: (message) => logger.warn(message) },
           });
           if (result.status === 'unavailable') {
@@ -108,7 +110,9 @@ export const buildFetchFeedStepDefinition = ({
           if (signal.aborted) return { output: output(), error: new Error(ABORTED) };
           const message = truncate(error instanceof Error ? error.message : String(error));
           logger.warn(
-            `Could not download the advisory feed for ${release}: ${message}. Check that Kibana can reach the vendor advisory host.`
+            `Could not download the advisory feed for ${release}: ${message}. Check that Kibana can reach ${
+              feedMirrorUrl ? `the feed mirror (${feedMirrorUrl})` : 'the vendor advisory host'
+            }.`
           );
           feeds.push({ release, status: 'failed', hosts: hosts.length, error: message });
         }

@@ -16,5 +16,7 @@ export interface StepDeps {
   getLicense: () => Promise<ILicense>;
   /** From kibana.yml: include vendor-unfixed CVEs in feeds and findings. */
   includeUnfixed: boolean;
+  /** From kibana.yml: air-gap mirror that every feed download goes through. */
+  feedMirrorUrl: string | undefined;
   now?: () => Date;
 }

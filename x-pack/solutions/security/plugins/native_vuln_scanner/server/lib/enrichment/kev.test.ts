@@ -76,7 +76,10 @@ const LAST_MODIFIED = 'Wed, 18 Nov 2026 19:17:40 GMT';
 describe('downloadKevCatalog', () => {
   it('parses the catalog into a map keyed by CVE id', async () => {
     const fetchImpl = respond(fixture, { headers: { 'last-modified': LAST_MODIFIED } });
-    const result = await downloadKevCatalog(undefined, undefined, { fetchImpl });
+    const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+    });
 
     expect(fetchImpl).toHaveBeenCalledWith(KEV_URL, {
       signal: expect.any(AbortSignal),
@@ -96,7 +99,10 @@ describe('downloadKevCatalog', () => {
 
   it('sends If-Modified-Since and reports not_modified on 304', async () => {
     const fetchImpl = respond('', { status: 304 });
-    const result = await downloadKevCatalog(undefined, LAST_MODIFIED, { fetchImpl });
+    const result = await downloadKevCatalog(undefined, LAST_MODIFIED, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+    });
 
     expect(fetchImpl).toHaveBeenCalledWith(KEV_URL, {
       signal: expect.any(AbortSignal),
@@ -110,6 +116,7 @@ describe('downloadKevCatalog', () => {
     catalog.count = catalog.vulnerabilities.length + 1;
     const logger = { warn: jest.fn() };
     const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
       fetchImpl: respond(JSON.stringify(catalog)),
       logger,
     });
@@ -123,6 +130,7 @@ describe('downloadKevCatalog', () => {
 
   it('treats a body that is not JSON as unavailable', async () => {
     const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
       fetchImpl: respond('<html>blocked</html>'),
     });
     expect(result).toEqual({
@@ -133,7 +141,10 @@ describe('downloadKevCatalog', () => {
 
   it('rejects a catalog whose entry lacks a cveID', async () => {
     const body = JSON.stringify({ count: 1, vulnerabilities: [{ dateAdded: '2026-01-01' }] });
-    const result = await downloadKevCatalog(undefined, undefined, { fetchImpl: respond(body) });
+    const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
+      fetchImpl: respond(body),
+    });
     expect(result.status).toBe('unavailable');
   });
 
@@ -143,6 +154,7 @@ describe('downloadKevCatalog', () => {
     });
     const cancel = jest.spyOn(response.body as ReadableStream, 'cancel');
     const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
       fetchImpl: jest.fn(async () => response) as unknown as typeof fetch,
     });
 
@@ -160,7 +172,10 @@ describe('downloadKevCatalog', () => {
         else controller.enqueue(new Uint8Array(MAX_KEV_BYTES / 4));
       },
     });
-    const result = await downloadKevCatalog(undefined, undefined, { fetchImpl: respond(stream) });
+    const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
+      fetchImpl: respond(stream),
+    });
 
     expect(result).toEqual({ status: 'unavailable', reason: expect.stringContaining('is over') });
     // The 5th chunk crosses the cap; reading stops long before the 100 offered.
@@ -185,7 +200,10 @@ describe('downloadKevCatalog', () => {
         { cveID: 'CVE-2026-0002', ...dates, knownRansomwareCampaignUse: 'Unknown' },
       ],
     });
-    const result = await downloadKevCatalog(undefined, undefined, { fetchImpl: respond(body) });
+    const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
+      fetchImpl: respond(body),
+    });
     expect(result).toEqual({
       status: 'unavailable',
       reason: expect.stringContaining('CVE-2026-0002'),
@@ -195,7 +213,7 @@ describe('downloadKevCatalog', () => {
   it('combines the workflow signal with its own timeout', async () => {
     const fetchImpl = respond(fixture);
     const controller = new AbortController();
-    await downloadKevCatalog(controller.signal, undefined, { fetchImpl });
+    await downloadKevCatalog(controller.signal, undefined, { feedMirrorUrl: undefined, fetchImpl });
 
     const { signal } = (fetchImpl as jest.Mock).mock.calls[0][1] as { signal: AbortSignal };
     expect(signal).not.toBe(controller.signal);
@@ -213,12 +231,17 @@ describe('downloadKevCatalog', () => {
         })
     ) as unknown as typeof fetch;
 
-    const result = await downloadKevCatalog(undefined, undefined, { fetchImpl, timeoutMs: 20 });
+    const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+      timeoutMs: 20,
+    });
     expect(result.status).toBe('unavailable');
   });
 
   it('returns unavailable on an HTTP error', async () => {
     const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
       fetchImpl: respond('', { status: 503 }),
     });
     expect(result).toEqual({ status: 'unavailable', reason: 'KEV catalog returned HTTP 503' });
@@ -228,7 +251,10 @@ describe('downloadKevCatalog', () => {
     const fetchImpl = jest.fn(async () => {
       throw new Error('getaddrinfo ENOTFOUND www.cisa.gov');
     }) as unknown as typeof fetch;
-    const result = await downloadKevCatalog(undefined, undefined, { fetchImpl });
+    const result = await downloadKevCatalog(undefined, undefined, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+    });
     expect(result).toEqual({
       status: 'unavailable',
       reason: 'getaddrinfo ENOTFOUND www.cisa.gov',
@@ -242,7 +268,7 @@ describe('loadKev', () => {
   it('serves the cached catalog within the TTL without another request', async () => {
     const fetchImpl = respond(fixture, { headers: { 'last-modified': LAST_MODIFIED } });
     let nowMs = 1_000;
-    const options = { fetchImpl, now: () => nowMs };
+    const options = { fetchImpl, now: () => nowMs, feedMirrorUrl: undefined };
 
     const first = await loadKev(undefined, options);
     nowMs += KEV_TTL_MS - 1;
@@ -259,7 +285,7 @@ describe('loadKev', () => {
       .mockResolvedValueOnce(fakeResponse(fixture, { headers: { 'last-modified': LAST_MODIFIED } }))
       .mockResolvedValueOnce(fakeResponse('', { status: 304 })) as unknown as typeof fetch;
     let nowMs = 1_000;
-    const options = { fetchImpl, now: () => nowMs };
+    const options = { fetchImpl, now: () => nowMs, feedMirrorUrl: undefined };
 
     const first = await loadKev(undefined, options);
     nowMs += KEV_TTL_MS;
@@ -295,7 +321,7 @@ describe('loadKev', () => {
         )
       ) as unknown as typeof fetch;
     let nowMs = 0;
-    const options = { fetchImpl, now: () => nowMs };
+    const options = { fetchImpl, now: () => nowMs, feedMirrorUrl: undefined };
 
     await loadKev(undefined, options);
     nowMs += KEV_TTL_MS;
@@ -311,8 +337,10 @@ describe('loadKev', () => {
       .mockResolvedValueOnce(fakeResponse('', { status: 500 }))
       .mockResolvedValueOnce(fakeResponse(fixture)) as unknown as typeof fetch;
 
-    expect((await loadKev(undefined, { fetchImpl })).status).toBe('unavailable');
-    expect((await loadKev(undefined, { fetchImpl })).status).toBe('ok');
+    expect((await loadKev(undefined, { feedMirrorUrl: undefined, fetchImpl })).status).toBe(
+      'unavailable'
+    );
+    expect((await loadKev(undefined, { feedMirrorUrl: undefined, fetchImpl })).status).toBe('ok');
   });
 
   it('serves the expired entries as stale when the refresh fails', async () => {
@@ -323,7 +351,7 @@ describe('loadKev', () => {
         new Error('getaddrinfo ENOTFOUND www.cisa.gov')
       ) as unknown as typeof fetch;
     let nowMs = 1_000;
-    const options = { fetchImpl, now: () => nowMs };
+    const options = { fetchImpl, now: () => nowMs, feedMirrorUrl: undefined };
 
     const first = await loadKev(undefined, options);
     nowMs += KEV_TTL_MS;
@@ -344,7 +372,7 @@ describe('loadKev', () => {
       .mockResolvedValueOnce(fakeResponse('', { status: 503 }))
       .mockResolvedValueOnce(fakeResponse(fixture)) as unknown as typeof fetch;
     let nowMs = 0;
-    const options = { fetchImpl, now: () => nowMs };
+    const options = { fetchImpl, now: () => nowMs, feedMirrorUrl: undefined };
 
     await loadKev(undefined, options);
     nowMs += KEV_TTL_MS;

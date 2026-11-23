@@ -37,6 +37,7 @@ export const buildDeps = (overrides: Partial<StepDeps> = {}) => {
       licenseMock.createLicense({ license: { type: 'enterprise', mode: 'enterprise' } })
     ),
     includeUnfixed: false,
+    feedMirrorUrl: undefined,
     now: () => new Date('2026-11-13T01:00:00.000Z'),
     ...overrides,
   };

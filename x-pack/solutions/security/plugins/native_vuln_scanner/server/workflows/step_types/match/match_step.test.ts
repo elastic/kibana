@@ -329,9 +329,33 @@ describe('buildFeedLoader against a real feed cache', () => {
     clearFeedCache();
     setCachedFeed('ubuntu:noble', { etag: '"e"', body, includeUnfixed: false, knowledgeStoredIds });
     parseMock.mockResolvedValue({ records: [] } as never);
-    const loader = buildFeedLoader([{ release: 'ubuntu:noble', status: 'downloaded' }], false);
+    const loader = buildFeedLoader(
+      [{ release: 'ubuntu:noble', status: 'downloaded' }],
+      false,
+      undefined
+    );
     return loader(noble, { signal: new AbortController().signal });
   };
+
+  it('hands the mirror to a cold-path download and to parsing a cached body', async () => {
+    const feedMirrorUrl = 'https://mirror.corp.example/feeds';
+    const signal = new AbortController().signal;
+    clearFeedCache();
+    loadFeedMock.mockResolvedValue({ status: 'unavailable', url: 'https://x' } as never);
+    const feeds = [{ release: 'ubuntu:noble', status: 'downloaded' as const }];
+
+    await buildFeedLoader(feeds, false, feedMirrorUrl)(noble, { signal });
+    expect(loadFeedMock).toHaveBeenCalledWith(noble, {
+      signal,
+      includeUnfixed: false,
+      feedMirrorUrl,
+    });
+
+    setCachedFeed('ubuntu:noble', { etag: '"e"', body, includeUnfixed: false });
+    parseMock.mockResolvedValue({ records: [] } as never);
+    await buildFeedLoader(feeds, false, feedMirrorUrl)(noble, { signal });
+    expect(parseMock).toHaveBeenCalledWith(noble, body, expect.objectContaining({ feedMirrorUrl }));
+  });
 
   it('carries the cached body sha256 (backfilled by setCachedFeed), so the refresh skip works on a warm node', async () => {
     const result = (await loaderWithCache()) as { bodySha256?: string };

@@ -55,6 +55,7 @@ export class NativeVulnScannerPlugin
     registerNativeVulnScannerSteps(workflowsExtensions, {
       logger: this.logger.get('scan'),
       includeUnfixed: this.config.includeUnfixed,
+      feedMirrorUrl: this.config.feedMirrorUrl,
       getLicense: async () => {
         const [, { licensing }] = await core.getStartServices();
         return licensing.getLicense();

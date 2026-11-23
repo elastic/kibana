@@ -7,9 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import { timeoutSignal } from '@kbn/std';
+import { KEV_URL } from '../feeds/feed_sources';
+import { resolveFeedUrl } from '../feeds/mirror';
 
-export const KEV_URL =
-  'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
+export { KEV_URL };
 
 /** The catalog is about 1.8 MB today; the cap leaves headroom and still bounds memory. */
 export const MAX_KEV_BYTES = 16 * 1024 * 1024;
@@ -44,6 +45,8 @@ export interface DownloadKevOptions {
   fetchImpl?: typeof fetch;
   logger?: Pick<Logger, 'warn'>;
   timeoutMs?: number;
+  /** Air-gap mirror base; required like on `DownloadFeedOptions`. */
+  feedMirrorUrl: string | undefined;
 }
 
 interface RawKevVulnerability {
@@ -132,13 +135,13 @@ const parseCatalog = (body: Buffer): KevEntries | string => {
  * size or format problem comes back as `unavailable` and the scan carries on unenriched.
  */
 export const downloadKevCatalog = async (
-  signal?: AbortSignal,
-  lastModified?: string,
-  { fetchImpl = fetch, logger, timeoutMs = KEV_FETCH_TIMEOUT_MS }: DownloadKevOptions = {}
+  signal: AbortSignal | undefined,
+  lastModified: string | undefined,
+  { fetchImpl = fetch, logger, timeoutMs = KEV_FETCH_TIMEOUT_MS, feedMirrorUrl }: DownloadKevOptions
 ): Promise<DownloadKevResult> => {
   const timeout = timeoutSignal(timeoutMs);
   try {
-    const response = await fetchImpl(KEV_URL, {
+    const response = await fetchImpl(resolveFeedUrl(KEV_URL, feedMirrorUrl), {
       signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
       headers: lastModified ? { 'if-modified-since': lastModified } : undefined,
     });
@@ -203,8 +206,8 @@ export interface LoadKevOptions extends DownloadKevOptions {
  * an expired copy exists, the expired entries come back with `status: 'stale'`.
  */
 export const loadKev = async (
-  signal?: AbortSignal,
-  { now = Date.now, ...options }: LoadKevOptions = {}
+  signal: AbortSignal | undefined,
+  { now = Date.now, ...options }: LoadKevOptions
 ): Promise<LoadKevResult> => {
   const nowMs = now();
   const fresh = getCachedKev(nowMs);

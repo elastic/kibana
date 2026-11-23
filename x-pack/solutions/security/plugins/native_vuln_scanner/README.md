@@ -132,6 +132,109 @@ and resets `event.created`, so rules alert from then on.
 The fix pass only closes unfixed findings when the run's feed included unfixed rows
 (`includeUnfixed: true`); a run without them leaves unfixed findings open.
 
+## Air-gapped deployments
+
+A Kibana without internet access can run the scanner against an internal HTTP(S) mirror. Set one
+optional setting:
+
+```yaml
+xpack.nativeVulnScanner.feedMirrorUrl: https://mirror.corp.example/feeds
+```
+
+Unset (the default), every download goes to the vendor exactly as before. Set, every feed
+download (Canonical and Red Hat OVAL, Red Hat CSAF, CISA KEV) is requested from the mirror
+instead, and nothing else is fetched from the internet. The value must be an `http` or `https`
+URL without credentials, query string or fragment. Kibana's Docker image has no
+`xpack.nativeVulnScanner.*` entries in its environment-variable allowlist (neither `enabled` nor
+`includeUnfixed` is listed), so set it in `kibana.yml`.
+
+### Mirror layout
+
+The mirror serves each file at `<feedMirrorUrl>/<vendor host>/<vendor path>`, the layout
+`wget --force-directories` produces. A trailing slash on the setting is ignored. For example, with
+the base above Kibana requests
+`https://mirror.corp.example/feeds/security.access.redhat.com/data/oval/v2/RHEL9/rhel-9.oval.xml.bz2`.
+
+The scanner needs these files (the list is `FEED_SOURCES` in `server/lib/feeds/feed_sources.ts`):
+
+| File | Vendor URL |
+| --- | --- |
+| Ubuntu OVAL | `https://security-metadata.canonical.com/oval/com.ubuntu.<codename>.cve.oval.xml.bz2` |
+| RHEL 8 and 9 OVAL | `https://security.access.redhat.com/data/oval/v2/RHEL<major>/rhel-<major>.oval.xml.bz2` |
+| RHEL 8 and 9 OVAL with unpatched CVEs (only with `includeUnfixed: true`) | `https://security.access.redhat.com/data/oval/v2/RHEL<major>/rhel-<major>-including-unpatched.oval.xml.bz2` |
+| RHEL 10+ CSAF | `https://security.access.redhat.com/data/csaf/v2/advisories/archive_latest.txt`, the archive it names, `changes.csv`, and each advisory `changes.csv` lists |
+| CISA KEV | `https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json` |
+
+### Filling the mirror
+
+Run this on a host that can reach the vendors, then publish `$MIRROR_ROOT` on the internal web
+server at the `feedMirrorUrl` path. Set `CODENAMES` and `RHEL_MAJORS` to the releases you scan
+(`noble`, `jammy`... and `8`, `9`; RHEL 10 and later use the CSAF block):
+
+```sh
+MIRROR_ROOT=/srv/feeds
+CODENAMES="jammy noble"
+RHEL_MAJORS="8 9"
+RHEL_CSAF=yes           # RHEL 10 and later
+INCLUDE_UNFIXED=no      # yes when includeUnfixed is on
+
+cd "$MIRROR_ROOT"
+for c in $CODENAMES; do
+  wget --force-directories --timestamping \
+    "https://security-metadata.canonical.com/oval/com.ubuntu.$c.cve.oval.xml.bz2"
+done
+for m in $RHEL_MAJORS; do
+  wget --force-directories --timestamping \
+    "https://security.access.redhat.com/data/oval/v2/RHEL$m/rhel-$m.oval.xml.bz2"
+  [ "$INCLUDE_UNFIXED" = yes ] && wget --force-directories --timestamping \
+    "https://security.access.redhat.com/data/oval/v2/RHEL$m/rhel-$m-including-unpatched.oval.xml.bz2"
+done
+if [ "$RHEL_CSAF" = yes ]; then
+  CSAF=https://security.access.redhat.com/data/csaf/v2/advisories
+  D=security.access.redhat.com/data/csaf/v2/advisories
+  wget --force-directories --timestamping "$CSAF/archive_latest.txt"
+  wget --force-directories --timestamping "$CSAF/$(cat "$D/archive_latest.txt")"
+  wget --force-directories --timestamping "$CSAF/changes.csv"
+  # Advisories newer than the archive (its date is in the file name): the scanner fetches the
+  # changes.csv paths it does not find in the archive, so mirror rows from that day on.
+  SINCE=$(sed -E 's/.*([0-9]{4}-[0-9]{2}-[0-9]{2}).*/\1/' "$D/archive_latest.txt")
+  tr -d '"' < "$D/changes.csv" | awk -F, -v since="$SINCE" '$2 >= since {print $1}' |
+    while read -r path; do path=${path#./}; wget --force-directories --timestamping "$CSAF/$path"; done
+fi
+wget --force-directories --timestamping \
+  https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+```
+
+Refresh it on a schedule (daily is enough; the vendors publish at most daily). With `curl`,
+`curl -R --create-dirs -o "$host/$path" "https://$host/$path"` writes the same layout.
+
+The mirror must keep the vendor's `Last-Modified` on the CSAF archive: the scanner uses the
+archive's `Last-Modified` as its build time to decide which `changes.csv` advisories are newer
+than the archive. `wget --timestamping`, `curl -R` and `rsync -t` preserve it; a plain `cp` or an
+upload tool that stamps the copy time does not. As a safeguard, with a mirror set the scanner
+takes the earlier of `Last-Modified` and the date in the archive name as the build time.
+
+### Internal TLS certificates
+
+If the mirror uses a certificate from an internal CA, Kibana must trust it. Use the standard
+Kibana mechanism: start Kibana with `NODE_EXTRA_CA_CERTS=/path/to/internal-ca.pem` (the CA's PEM
+bundle) in its environment. The scanner has no TLS option of its own.
+
+### Conditional requests
+
+The scanner sends `If-None-Match` and `If-Modified-Since` for the feeds it has cached, so the mirror
+should serve a correct `ETag` (and `Last-Modified`) for each file. Without them every scan
+downloads the full file again. Most static web servers (nginx, Apache) do this by default.
+
+### What the scan reports
+
+`feedInfo[*].sourceUrl` in the run summary, and the URL in feed-unavailable messages, name the
+URL actually fetched, so with a mirror they show the mirror URL. The vendor links in findings and
+the knowledge index are references for the analyst and are not rewritten.
+
+Not covered yet: importing the feeds as an uploaded offline bundle instead of serving them from a
+mirror. MSRC and EPSS feeds are not used by the scanner today, so they need no mirror entries.
+
 ## Agent runtime requirement
 
 Elastic Agents 9.7+ route agent inputs through the OTel collector runtime by default, and that

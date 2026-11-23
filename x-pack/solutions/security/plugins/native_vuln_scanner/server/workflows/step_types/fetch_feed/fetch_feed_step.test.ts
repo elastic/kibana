@@ -79,6 +79,38 @@ describe('native_vuln.fetch_feed handler', () => {
     expect(JSON.stringify(result.output)).not.toContain('records');
   });
 
+  it('passes the configured mirror to the downloader and names it in the failure hint', async () => {
+    const feedMirrorUrl = 'https://mirror.corp.example/feeds';
+    inventoryMock.mockResolvedValue(snapshot([ubuntuHost]));
+    downloadMock.mockRejectedValue(new Error('connect ECONNREFUSED'));
+    const { deps } = buildDeps({ feedMirrorUrl });
+
+    await buildFetchFeedStepDefinition(deps).handler(buildContext({}));
+
+    expect(downloadMock).toHaveBeenCalledWith(
+      ubuntuHost.inventory.os,
+      expect.objectContaining({ feedMirrorUrl })
+    );
+    expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining(feedMirrorUrl));
+  });
+
+  it('passes no mirror to the downloader when none is configured', async () => {
+    inventoryMock.mockResolvedValue(snapshot([ubuntuHost]));
+    downloadMock.mockResolvedValue({
+      status: 'unavailable',
+      url: 'https://x',
+      durationMs: 1,
+      downloadedBytes: 0,
+    });
+
+    await run();
+
+    expect(downloadMock).toHaveBeenCalledWith(
+      ubuntuHost.inventory.os,
+      expect.objectContaining({ feedMirrorUrl: undefined })
+    );
+  });
+
   it('treats a 200 with identical bytes as unchanged, keeping the cache and the new etag', async () => {
     const body = new Uint8Array([1, 2, 3]);
     setCachedFeed('ubuntu:noble', {

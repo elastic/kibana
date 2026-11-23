@@ -56,7 +56,11 @@ const toOutput = (summary: ScanSummary): MatchOutput => ({
  * already reported as failed or unavailable is not retried.
  */
 export const buildFeedLoader =
-  (feeds: NonNullable<MatchInput['feeds']>, includeUnfixed: boolean) =>
+  (
+    feeds: NonNullable<MatchInput['feeds']>,
+    includeUnfixed: boolean,
+    feedMirrorUrl: string | undefined
+  ) =>
   async (os: FeedOs, { signal }: { signal: AbortSignal }): Promise<LoadFeedResult> => {
     const release = releaseKey(os);
     const reported = feeds.find((feed) => feed.release === release);
@@ -67,8 +71,8 @@ export const buildFeedLoader =
       return { status: 'unavailable', url: reported.url };
     }
     const cached = getCachedFeed(release, includeUnfixed);
-    if (!cached) return loadFeed(os, { signal, includeUnfixed });
-    const feed = await parseFeedBody(os, cached.body, { signal, includeUnfixed });
+    if (!cached) return loadFeed(os, { signal, includeUnfixed, feedMirrorUrl });
+    const feed = await parseFeedBody(os, cached.body, { signal, includeUnfixed, feedMirrorUrl });
     return {
       status: 'ok',
       feed,
@@ -87,6 +91,7 @@ export const buildMatchStepDefinition = ({
   getScanDeps,
   getLicense,
   includeUnfixed,
+  feedMirrorUrl,
   now,
 }: StepDeps) =>
   createServerStepDefinition({
@@ -107,8 +112,9 @@ export const buildMatchStepDefinition = ({
             es,
             packRepository,
             logger,
-            loadFeed: buildFeedLoader(feeds, includeUnfixed),
+            loadFeed: buildFeedLoader(feeds, includeUnfixed, feedMirrorUrl),
             includeUnfixed,
+            feedMirrorUrl,
             scope,
             onKnowledgeStored: (os, storedIds) =>
               markKnowledgeStored(releaseKey(os), includeUnfixed, storedIds),

@@ -113,7 +113,7 @@ describe('loadFeed', () => {
   it('downloads, decompresses and parses the feed, passing the abort signal', async () => {
     const fetchImpl = respond(rhelBz2);
     const { signal } = new AbortController();
-    const result = await loadFeed(rhel9, { signal, fetchImpl });
+    const result = await loadFeed(rhel9, { feedMirrorUrl: undefined, signal, fetchImpl });
     expect(fetchImpl).toHaveBeenCalledWith(feedUrl(rhel9), { signal, headers: undefined });
     if (result.status !== 'ok') throw new Error(`unexpected ${result.status}`);
     expect(result.feed.os).toEqual({ family: 'rhel', version: '9' });
@@ -124,7 +124,7 @@ describe('loadFeed', () => {
   it('reports a release with no published feed as unavailable', async () => {
     const result = await loadFeed(
       { family: 'rhel', version: '10' },
-      { fetchImpl: respond('Not Found', { status: 404 }) }
+      { feedMirrorUrl: undefined, fetchImpl: respond('Not Found', { status: 404 }) }
     );
     expect(result).toEqual(
       expect.objectContaining({
@@ -135,9 +135,9 @@ describe('loadFeed', () => {
   });
 
   it('throws on other HTTP errors', async () => {
-    await expect(loadFeed(rhel9, { fetchImpl: respond('busy', { status: 503 }) })).rejects.toThrow(
-      'returned HTTP 503'
-    );
+    await expect(
+      loadFeed(rhel9, { feedMirrorUrl: undefined, fetchImpl: respond('busy', { status: 503 }) })
+    ).rejects.toThrow('returned HTTP 503');
   });
 
   it('refuses a declared size over the cap without reading the body', async () => {
@@ -145,16 +145,18 @@ describe('loadFeed', () => {
     const fetchImpl = respond(stream, {
       headers: { 'content-length': String(MAX_FEED_BYTES + 1) },
     });
-    await expect(loadFeed(rhel9, { fetchImpl })).rejects.toThrow(`over ${MAX_FEED_BYTES} bytes`);
+    await expect(loadFeed(rhel9, { feedMirrorUrl: undefined, fetchImpl })).rejects.toThrow(
+      `over ${MAX_FEED_BYTES} bytes`
+    );
     expect(pulled.count).toBeLessThanOrEqual(1);
   });
 
   it('stops reading an undeclared body once it passes the cap', async () => {
     const chunk = 1024 * 1024;
     const { stream, pulled } = streamOf(MAX_FEED_BYTES / chunk + 10, chunk);
-    await expect(loadFeed(rhel9, { fetchImpl: respond(stream) })).rejects.toThrow(
-      `over ${MAX_FEED_BYTES} bytes`
-    );
+    await expect(
+      loadFeed(rhel9, { feedMirrorUrl: undefined, fetchImpl: respond(stream) })
+    ).rejects.toThrow(`over ${MAX_FEED_BYTES} bytes`);
     expect(pulled.count).toBeLessThan(MAX_FEED_BYTES / chunk + 5);
   });
 
@@ -165,7 +167,9 @@ describe('loadFeed', () => {
       init?.signal?.throwIfAborted();
       return fakeResponse(rhelBz2);
     }) as unknown as typeof fetch;
-    await expect(loadFeed(rhel9, { signal: controller.signal, fetchImpl })).rejects.toThrow();
+    await expect(
+      loadFeed(rhel9, { feedMirrorUrl: undefined, signal: controller.signal, fetchImpl })
+    ).rejects.toThrow();
   });
 
   describe('a body that stalls after the headers', () => {
@@ -200,7 +204,11 @@ describe('loadFeed', () => {
       const { fetchImpl, wasCancelled } = stalledBody();
       const controller = new AbortController();
       const reason = new Error('caller gave up');
-      const result = downloadFeed(rhel9, { fetchImpl, signal: controller.signal });
+      const result = downloadFeed(rhel9, {
+        feedMirrorUrl: undefined,
+        fetchImpl,
+        signal: controller.signal,
+      });
       const settled = expect(result).rejects.toBe(reason);
       await jest.advanceTimersByTimeAsync(1000);
       controller.abort(reason);
@@ -210,7 +218,7 @@ describe('loadFeed', () => {
 
     it('rejects with a TimeoutError when the deadline fires, cancelling the reader', async () => {
       const { fetchImpl, wasCancelled } = stalledBody();
-      const result = downloadFeed(rhel9, { fetchImpl });
+      const result = downloadFeed(rhel9, { feedMirrorUrl: undefined, fetchImpl });
       const settled = expect(result).rejects.toMatchObject({ name: 'TimeoutError' });
       await jest.advanceTimersByTimeAsync(FEED_DOWNLOAD_TIMEOUT_MS + 1000);
       await settled;
@@ -220,9 +228,9 @@ describe('loadFeed', () => {
 
   it('refuses a feed that decompresses past the decompressed cap', async () => {
     const fetchImpl = respond(rhelBz2);
-    await expect(loadFeed(rhel9, { fetchImpl, maxDecompressedBytes: 8 })).rejects.toThrow(
-      'decompresses past 8 bytes'
-    );
+    await expect(
+      loadFeed(rhel9, { feedMirrorUrl: undefined, fetchImpl, maxDecompressedBytes: 8 })
+    ).rejects.toThrow('decompresses past 8 bytes');
   });
 
   it('stops decompressing when the signal aborts mid-parse', async () => {
@@ -239,7 +247,11 @@ describe('loadFeed', () => {
       }
     });
     await expect(
-      loadFeed(rhel9, { signal: controller.signal, fetchImpl: respond(rhelBz2) })
+      loadFeed(rhel9, {
+        feedMirrorUrl: undefined,
+        signal: controller.signal,
+        fetchImpl: respond(rhelBz2),
+      })
     ).rejects.toMatchObject({ name: 'AbortError' });
     expect(decoded).toEqual([0, 1]);
   });
@@ -250,7 +262,9 @@ describe('loadFeed', () => {
       controller.abort();
       return fakeResponse(rhelBz2);
     }) as unknown as typeof fetch;
-    await expect(loadFeed(rhel9, { signal: controller.signal, fetchImpl })).rejects.toThrow();
+    await expect(
+      loadFeed(rhel9, { feedMirrorUrl: undefined, signal: controller.signal, fetchImpl })
+    ).rejects.toThrow();
   });
 });
 
@@ -259,6 +273,7 @@ describe('downloadFeed', () => {
 
   it('reports the validators the vendor sent', async () => {
     const result = await downloadFeed(rhel9, {
+      feedMirrorUrl: undefined,
       fetchImpl: respond(rhelBz2, {
         headers: { etag: '"abc"', 'last-modified': 'Fri, 13 Nov 2026 10:00:00 GMT' },
       }),
@@ -272,7 +287,11 @@ describe('downloadFeed', () => {
 
   it('sends a known etag as If-None-Match and reports a 304 without reading a body', async () => {
     const fetchImpl = respond('', { status: 304, headers: { etag: '"abc"' } });
-    const result = await downloadFeed(rhel9, { fetchImpl, etag: '"abc"' });
+    const result = await downloadFeed(rhel9, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+      etag: '"abc"',
+    });
     expect(fetchImpl).toHaveBeenCalledWith(feedUrl(rhel9), {
       signal: expect.any(AbortSignal),
       headers: { 'if-none-match': '"abc"' },
@@ -282,6 +301,7 @@ describe('downloadFeed', () => {
 
   it('keeps the known etag when a 304 omits it', async () => {
     const result = await downloadFeed(rhel9, {
+      feedMirrorUrl: undefined,
       fetchImpl: respond('', { status: 304 }),
       etag: '"known"',
     });
@@ -290,6 +310,7 @@ describe('downloadFeed', () => {
 
   it('reports how long the download took and how many bytes the vendor transferred', async () => {
     const result = await downloadFeed(rhel9, {
+      feedMirrorUrl: undefined,
       fetchImpl: respond(rhelBz2),
     });
     expect(result).toMatchObject({
@@ -302,6 +323,7 @@ describe('downloadFeed', () => {
 
   it('reports zero transferred bytes on a 304', async () => {
     const result = await downloadFeed(rhel9, {
+      feedMirrorUrl: undefined,
       fetchImpl: respond('', { status: 304 }),
       etag: '"abc"',
     });
@@ -314,21 +336,24 @@ describe('loadFeed validators', () => {
 
   it('returns the etag alongside the parsed feed', async () => {
     const result = await loadFeed(rhel9, {
+      feedMirrorUrl: undefined,
       fetchImpl: respond(rhelBz2, { headers: { etag: '"v1"' } }),
     });
     expect(result).toMatchObject({ status: 'ok', etag: '"v1"' });
   });
 
   it('refuses a 304 to an unconditional request', async () => {
-    await expect(loadFeed(rhel9, { fetchImpl: respond('', { status: 304 }) })).rejects.toThrow(
-      'answered 304 to an unconditional request'
-    );
+    await expect(
+      loadFeed(rhel9, { feedMirrorUrl: undefined, fetchImpl: respond('', { status: 304 }) })
+    ).rejects.toThrow('answered 304 to an unconditional request');
   });
 });
 
 describe('parseFeedBody', () => {
   it('parses a downloaded body', async () => {
-    const feed = await parseFeedBody({ family: 'rhel', version: '9' }, rhelBz2);
+    const feed = await parseFeedBody({ family: 'rhel', version: '9' }, rhelBz2, {
+      feedMirrorUrl: undefined,
+    });
     expect(feed.definitions).toBe(5);
   });
 
@@ -339,12 +364,16 @@ describe('parseFeedBody', () => {
     // The effective cap is observable through the guard's refusal message.
     await expect(
       parseFeedBody({ family: 'rhel', version: '9' }, rhelBz2, {
+        feedMirrorUrl: undefined,
         maxDecompressedBytes: 8,
         includeUnfixed: true,
       })
     ).rejects.toThrow('decompresses past 8 bytes');
     await expect(
-      parseFeedBody({ family: 'rhel', version: '9' }, rhelBz2, { maxDecompressedBytes: 8 })
+      parseFeedBody({ family: 'rhel', version: '9' }, rhelBz2, {
+        feedMirrorUrl: undefined,
+        maxDecompressedBytes: 8,
+      })
     ).rejects.toThrow('decompresses past 8 bytes');
   });
 });
@@ -428,7 +457,7 @@ describe('RHEL 10+ via CSAF', () => {
       { path: '2026/rhsa-2026_1.json', data: otherMajor },
       { path: '2026/rhba-2026_21388.json', data: csafFixture },
     ]);
-    const result = await loadFeed(rhel10, { fetchImpl });
+    const result = await loadFeed(rhel10, { feedMirrorUrl: undefined, fetchImpl });
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.feed.os).toEqual({ family: 'rhel', version: '10' });
@@ -457,7 +486,7 @@ describe('RHEL 10+ via CSAF', () => {
         '2023/old.json': el10Doc,
       },
     });
-    const result = await downloadFeed(rhel10, { fetchImpl });
+    const result = await downloadFeed(rhel10, { feedMirrorUrl: undefined, fetchImpl });
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(
@@ -493,7 +522,11 @@ describe('RHEL 10+ via CSAF', () => {
       ]),
     });
     const warn = jest.fn();
-    const result = await downloadFeed(rhel10, { fetchImpl, logger: { warn } });
+    const result = await downloadFeed(rhel10, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+      logger: { warn },
+    });
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('over 1500'));
@@ -517,7 +550,7 @@ describe('RHEL 10+ via CSAF', () => {
     const fetchImpl = csafServer([{ path: '2026/in-archive.json', data: el10Doc }], {
       changes: over,
     });
-    const first = await downloadFeed(rhel10, { fetchImpl });
+    const first = await downloadFeed(rhel10, { feedMirrorUrl: undefined, fetchImpl });
     expect(first.status).toBe('ok');
     if (first.status !== 'ok') return;
     // Churn: 200 more changed paths, same archive.
@@ -533,7 +566,11 @@ describe('RHEL 10+ via CSAF', () => {
         ]),
       ]),
     });
-    const second = await downloadFeed(rhel10, { fetchImpl: churned, etag: first.etag });
+    const second = await downloadFeed(rhel10, {
+      feedMirrorUrl: undefined,
+      fetchImpl: churned,
+      etag: first.etag,
+    });
     // Archive-only identity does not depend on the churn set; deltas are never fetched.
     expect(
       churned.mock.calls.filter(([u]) => String(u).startsWith(base) && String(u).endsWith('.json'))
@@ -584,7 +621,7 @@ describe('RHEL 10+ via CSAF', () => {
 
     it('rejects with a TimeoutError when the archive body stalls past the deadline', async () => {
       const { fetchImpl, wasCancelled } = stalledServer();
-      const result = downloadFeed(rhel10, { fetchImpl });
+      const result = downloadFeed(rhel10, { feedMirrorUrl: undefined, fetchImpl });
       const settled = expect(result).rejects.toMatchObject({ name: 'TimeoutError' });
       await jest.advanceTimersByTimeAsync(CSAF_ARCHIVE_TIMEOUT_MS + 1000);
       await settled;
@@ -594,7 +631,11 @@ describe('RHEL 10+ via CSAF', () => {
     it('rejects promptly when the caller aborts mid-walk', async () => {
       const { fetchImpl, wasCancelled } = stalledServer();
       const controller = new AbortController();
-      const result = downloadFeed(rhel10, { fetchImpl, signal: controller.signal });
+      const result = downloadFeed(rhel10, {
+        feedMirrorUrl: undefined,
+        fetchImpl,
+        signal: controller.signal,
+      });
       const reason = new Error('caller gave up');
       const settled = expect(result).rejects.toBe(reason);
       await jest.advanceTimersByTimeAsync(1000);
@@ -611,7 +652,11 @@ describe('RHEL 10+ via CSAF', () => {
       { path: '2026/oversized.json', data: oversized },
       { path: '2026/ok.json', data: el10Doc },
     ]);
-    const result = await downloadFeed(rhel10, { fetchImpl, logger: { warn } });
+    const result = await downloadFeed(rhel10, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+      logger: { warn },
+    });
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(jsonDocs(result.body).map((d) => d.id)).toEqual(['in-archive']);
@@ -623,7 +668,11 @@ describe('RHEL 10+ via CSAF', () => {
       changes: changesCsv([['2026/gone.json', '2026-11-18T10:00:00Z']]),
     });
     const warn = jest.fn();
-    const result = await downloadFeed(rhel10, { fetchImpl, logger: { warn } });
+    const result = await downloadFeed(rhel10, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+      logger: { warn },
+    });
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(jsonDocs(result.body).map((d) => d.id)).toEqual(['in-archive']);
@@ -664,7 +713,9 @@ describe('RHEL 10+ via CSAF', () => {
       return site(url, init);
     }) as unknown as jest.MockedFunction<typeof fetch>;
 
-    const error = await downloadFeed(rhel10, { fetchImpl }).catch((e: Error) => e);
+    const error = await downloadFeed(rhel10, { feedMirrorUrl: undefined, fetchImpl }).catch(
+      (e: Error) => e
+    );
 
     expect(error).toBeInstanceOf(Error);
     expect((error as Error).message).toContain('returned HTTP 500');
@@ -675,6 +726,7 @@ describe('RHEL 10+ via CSAF', () => {
 
   it('reports a missing archive_latest.txt as unavailable', async () => {
     const result = await downloadFeed(rhel10, {
+      feedMirrorUrl: undefined,
       fetchImpl: respond('Not Found', { status: 404 }),
     });
     expect(result).toEqual(
@@ -693,18 +745,24 @@ describe('RHEL 10+ via CSAF', () => {
         ? fakeResponse('busy', { status: 503 })
         : fakeResponse('')
     ) as unknown as jest.MockedFunction<typeof fetch>;
-    await expect(downloadFeed(rhel10, { fetchImpl })).rejects.toThrow('returned HTTP 503');
+    await expect(downloadFeed(rhel10, { feedMirrorUrl: undefined, fetchImpl })).rejects.toThrow(
+      'returned HTTP 503'
+    );
   });
 
   it('answers not_modified when the true delta is unchanged, without fetching delta docs', async () => {
     const newerDoc = Buffer.from('{"cpe":"cpe:/o:redhat:enterprise_linux:10","id":"newer"}');
     const changes = changesCsv([['2026/newer.json', '2026-11-18T10:00:00Z']]);
     const fetchImpl = csafServer([], { changes, docs: { '2026/newer.json': newerDoc } });
-    const first = await downloadFeed(rhel10, { fetchImpl });
+    const first = await downloadFeed(rhel10, { feedMirrorUrl: undefined, fetchImpl });
     expect(first.status).toBe('ok');
     if (first.status !== 'ok') return;
     expect(jsonDocs(first.body).map((d) => d.id)).toEqual(['newer']);
-    const second = await downloadFeed(rhel10, { fetchImpl, etag: first.etag });
+    const second = await downloadFeed(rhel10, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+      etag: first.etag,
+    });
     expect(second).toMatchObject({ status: 'not_modified', etag: first.etag });
     // The delta advisory is fetched exactly once (first run only).
     expect(fetchImpl.mock.calls.filter(([u]) => u === `${base}2026/newer.json`)).toHaveLength(1);
@@ -712,7 +770,11 @@ describe('RHEL 10+ via CSAF', () => {
 
   it('passes a timeout-bounded abort signal to every request', async () => {
     const fetchImpl = csafServer([{ path: '2026/in-archive.json', data: el10Doc }]);
-    await downloadFeed(rhel10, { fetchImpl, signal: new AbortController().signal });
+    await downloadFeed(rhel10, {
+      feedMirrorUrl: undefined,
+      fetchImpl,
+      signal: new AbortController().signal,
+    });
     for (const [url, init] of fetchImpl.mock.calls) {
       expect(init?.signal).toBeInstanceOf(AbortSignal);
       expect((init?.signal as AbortSignal).aborted).toBe(false);
@@ -731,7 +793,11 @@ describe('RHEL 10+ via CSAF', () => {
       const never = jest.fn(
         () => new Promise<Response>(() => undefined)
       ) as unknown as jest.MockedFunction<typeof fetch>;
-      const pending = downloadFeed(rhel10, { fetchImpl: never, signal: controller.signal });
+      const pending = downloadFeed(rhel10, {
+        feedMirrorUrl: undefined,
+        fetchImpl: never,
+        signal: controller.signal,
+      });
       const rejection = expect(pending).rejects.toMatchObject({ name: 'TimeoutError' });
       await jest.advanceTimersByTimeAsync(CSAF_REQUEST_TIMEOUT_MS);
       await rejection;
@@ -794,7 +860,8 @@ describe('RHEL 10+ via CSAF', () => {
   it('parses a cached corpus body through parseFeedBody', async () => {
     const feed = await parseFeedBody(
       rhel10,
-      Buffer.concat([Buffer.from('['), csafFixture, Buffer.from(']')])
+      Buffer.concat([Buffer.from('['), csafFixture, Buffer.from(']')]),
+      { feedMirrorUrl: undefined }
     );
     expect(feed.definitions).toBe(1);
     expect(feed.records).toHaveLength(3);

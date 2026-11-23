@@ -89,6 +89,7 @@ describe('knowledge index', () => {
           feed: await parseRhelOval([rhelFixture], { major: '9' }),
         }),
         loadKev: async () => ({ status: 'unavailable', reason: 'offline' }),
+        feedMirrorUrl: undefined,
         now: () => new Date('2026-11-13T10:00:00.000Z'),
       },
       { signal: new AbortController().signal, runId }
