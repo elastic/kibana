@@ -404,7 +404,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       summary: 'Upgrade a package policy',
       description:
-        "Upgrade a package policy to a newer package version. When some package policies are upgraded and the others are only blocked because some active agents don't satisfy the package's agent version condition, the response is a 200 with a result per package policy: check each item's `success` field. When any other upgrade fails, or none succeeds, the response is the first error.",
+        "Upgrade a package policy to a newer package version. When some package policies are upgraded and the others are only blocked because some active agents don't satisfy the package's agent version condition, the response is a 200 with a result per package policy: check each item's `success` field. When any other upgrade fails, the response is the first such failure. When none succeeds and every failure is an agent version block, the response is the first block.",
       options: {
         tags: ['oas-tag:Fleet package policies'],
       },
