@@ -156,6 +156,12 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     return applications;
   }, [application.capabilities]);
 
+  // `fileUpload.show` is resolved from the user's privileges to create data views, which file upload
+  // and sample data both need.
+  const canIngestData =
+    application.capabilities.navLinks.integrations === true ||
+    application.capabilities.fileUpload?.show === true;
+
   const onDataViewCreated = () => {
     setNewKibanaInstance(false);
   };
@@ -319,9 +325,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                     : {}),
                 })}
               >
-                <EuiFlexItem>
-                  <AddData addBasePath={addBasePath} features={addDataFeatures} />
-                </EuiFlexItem>
+                {canIngestData ? (
+                  <EuiFlexItem>
+                    <AddData addBasePath={addBasePath} features={addDataFeatures} />
+                  </EuiFlexItem>
+                ) : null}
 
                 <EuiFlexItem>
                   <ManageData addBasePath={addBasePath} features={manageDataFeatures} />

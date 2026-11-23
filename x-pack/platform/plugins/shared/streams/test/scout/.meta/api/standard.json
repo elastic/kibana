@@ -1,5 +1,5 @@
 {
-  "sha1": "882dd321f403b0619488911f9f19b4d029cb5840",
+  "sha1": "a807f0d79c8f2af95c3851c4ee659bdce5261ec7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -492,6 +492,22 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 652,
+        "column": 12
+      }
+    },
+    {
+      "id": "d48a21b689f8eaa-c0229e3223ac218",
+      "title": "Onboarding and query generation routes enforce per-stream access GET onboarding/_status and significant_events/_status return 403 for an existing stream the caller cannot read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/onboarding_stream_access.spec.ts",
+        "line": 52,
         "column": 12
       }
     },

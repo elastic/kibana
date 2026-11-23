@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { TimelineEventsQueries } from '../model/timeline_events_queries';
 import { timelineRequestBasicOptionsSchema } from './request_basic';
 
@@ -18,28 +18,30 @@ export enum LastEventIndexKey {
   network = 'network',
 }
 
-export const timelineEventsLastEventTimeRequestSchema = timelineRequestBasicOptionsSchema
-  .omit({
-    runtimeMappings: true,
-    filterQuery: true,
-    timerange: true,
-  })
-  .extend({
-    indexKey: z.enum([
-      LastEventIndexKey.hostDetails,
-      LastEventIndexKey.hosts,
-      LastEventIndexKey.users,
-      LastEventIndexKey.userDetails,
-      LastEventIndexKey.ipDetails,
-      LastEventIndexKey.network,
-    ]),
-    details: z.object({
-      hostName: z.string().nullable().optional(),
-      userName: z.string().nullable().optional(),
-      ip: z.string().nullable().optional(),
-    }),
-    factoryQueryType: z.literal(TimelineEventsQueries.lastEventTime),
-  });
+export const timelineEventsLastEventTimeRequestSchema = lazySchema(() =>
+  timelineRequestBasicOptionsSchema
+    .omit({
+      runtimeMappings: true,
+      filterQuery: true,
+      timerange: true,
+    })
+    .extend({
+      indexKey: z.enum([
+        LastEventIndexKey.hostDetails,
+        LastEventIndexKey.hosts,
+        LastEventIndexKey.users,
+        LastEventIndexKey.userDetails,
+        LastEventIndexKey.ipDetails,
+        LastEventIndexKey.network,
+      ]),
+      details: z.object({
+        hostName: z.string().nullable().optional(),
+        userName: z.string().nullable().optional(),
+        ip: z.string().nullable().optional(),
+      }),
+      factoryQueryType: z.literal(TimelineEventsQueries.lastEventTime),
+    })
+);
 
 export type TimelineEventsLastEventTimeRequestOptionsInput = z.input<
   typeof timelineEventsLastEventTimeRequestSchema

@@ -9,10 +9,19 @@ import { SERVERLESS_DEFAULT_OUTPUT_ID } from '../../constants';
 import { agentPolicyService, appContextService, outputService } from '../../services';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
-import { postOutputHandler, putOutputHandler } from './handler';
+import {
+  getOneOutputHandler,
+  getOutputsHandler,
+  postOutputHandler,
+  putOutputHandler,
+  getOutputAgentPolicyCountHandler,
+} from './handler';
 
 const putOutputHandlerWithErrorHandler = withDefaultErrorHandler(putOutputHandler);
 const postOutputHandlerWithErrorHandler = withDefaultErrorHandler(postOutputHandler);
+const getOutputAgentPolicyCountHandlerWithErrorHandler = withDefaultErrorHandler(
+  getOutputAgentPolicyCountHandler
+);
 
 describe('Outputs handler', () => {
   const mockContext = {
@@ -26,6 +35,8 @@ describe('Outputs handler', () => {
   const mockResponse = {
     customError: jest.fn().mockImplementation((options) => options),
     ok: jest.fn().mockImplementation((options) => options),
+    badRequest: jest.fn().mockImplementation((options) => options),
+    notFound: jest.fn().mockImplementation((options) => options),
   };
 
   beforeEach(() => {
@@ -40,6 +51,9 @@ describe('Outputs handler', () => {
       }
     });
     jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
+    jest
+      .spyOn(outputService, 'getAgentAndPolicyCountForOutput')
+      .mockResolvedValue({ agentPolicyCount: 3, agentCount: 7 });
   });
 
   it('should return ok on post output using remote_elasticsearch in stateful', async () => {
@@ -390,6 +404,237 @@ describe('Outputs handler', () => {
     expect(res).toEqual({
       body: { message: 'Cannot specify both ssl.key and secrets.ssl.key' },
       statusCode: 400,
+    });
+  });
+
+  describe('putOutputHandler ID immutability', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
+      jest.spyOn(outputService, 'get').mockResolvedValue({ id: 'output1' } as any);
+      jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
+    });
+
+    it('should return badRequest when body id does not match path outputId', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      await putOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { id: '../../../some-other-output', type: 'elasticsearch' },
+          params: { outputId: 'output1' },
+        } as any,
+        mockResponse as any
+      );
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('Cannot change output ID'),
+          }),
+        })
+      );
+      expect(outputService.update).not.toHaveBeenCalled();
+    });
+
+    it('should return ok when body id matches path outputId', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      const res = await putOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { id: 'output1', type: 'elasticsearch' },
+          params: { outputId: 'output1' },
+        } as any,
+        mockResponse as any
+      );
+
+      expect(res).toEqual({ body: { item: { id: 'output1' } } });
+    });
+
+    it('should return ok when body has no id field', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      const res = await putOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { type: 'elasticsearch', name: 'Updated name' },
+          params: { outputId: 'output1' },
+        } as any,
+        mockResponse as any
+      );
+
+      expect(res).toEqual({ body: { item: { id: 'output1' } } });
+    });
+
+    it('should not pass id to outputService.update', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false } as any);
+
+      await putOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { id: 'output1', type: 'elasticsearch', name: 'test' },
+          params: { outputId: 'output1' },
+        } as any,
+        mockResponse as any
+      );
+
+      const updateCallArgs = (outputService.update as jest.Mock).mock.calls[0];
+      expect(updateCallArgs[2]).toBe('output1');
+      expect(updateCallArgs[3]).not.toHaveProperty('id');
+    });
+  });
+
+  describe('getOutputAgentPolicyCountHandler', () => {
+    it('returns agentPolicyCount and agentCount on success', async () => {
+      const res = await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'output1' }, query: {} } as any,
+        mockResponse as any
+      );
+
+      expect(outputService.get).toHaveBeenCalledWith('output1');
+      expect(outputService.getAgentAndPolicyCountForOutput).toHaveBeenCalled();
+      expect(res).toEqual({ body: { agentPolicyCount: 3, agentCount: 7 } });
+    });
+
+    it('applies pending isDefault query param over persisted value', async () => {
+      jest
+        .spyOn(outputService, 'get')
+        .mockResolvedValueOnce({ id: 'output1', is_default: false } as any);
+
+      await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'output1' }, query: { isDefault: true } } as any,
+        mockResponse as any
+      );
+
+      const passedOutput = (outputService.getAgentAndPolicyCountForOutput as jest.Mock).mock
+        .lastCall![1];
+      expect(passedOutput.is_default).toBe(true);
+    });
+
+    it('applies pending isDefaultMonitoring query param over persisted value', async () => {
+      jest
+        .spyOn(outputService, 'get')
+        .mockResolvedValueOnce({ id: 'output1', is_default_monitoring: false } as any);
+
+      await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'output1' }, query: { isDefaultMonitoring: true } } as any,
+        mockResponse as any
+      );
+
+      const passedOutput = (outputService.getAgentAndPolicyCountForOutput as jest.Mock).mock
+        .lastCall![1];
+      expect(passedOutput.is_default_monitoring).toBe(true);
+    });
+
+    it('returns 404 when output does not exist', async () => {
+      const boomNotFound = { isBoom: true, output: { statusCode: 404 } };
+      jest.spyOn(outputService, 'get').mockRejectedValueOnce(boomNotFound);
+
+      await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'missing-output' }, query: {} } as any,
+        mockResponse as any
+      );
+
+      expect(mockResponse.notFound).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ message: expect.stringContaining('missing-output') }),
+        })
+      );
+    });
+
+    it('surfaces non-404 errors as 500', async () => {
+      const unexpectedError = new Error('ES cluster down');
+      jest
+        .spyOn(outputService, 'getAgentAndPolicyCountForOutput')
+        .mockRejectedValueOnce(unexpectedError);
+
+      const res = await getOutputAgentPolicyCountHandlerWithErrorHandler(
+        mockContext,
+        { params: { outputId: 'output1' }, query: {} } as any,
+        mockResponse as any
+      );
+
+      expect((res as any).statusCode).toBe(500);
+    });
+  });
+
+  describe('get output handlers', () => {
+    const remoteOutput = {
+      id: 'remote',
+      name: 'Remote',
+      type: 'remote_elasticsearch',
+      hosts: ['https://remote:9200'],
+      service_token: 'service-token',
+      kibana_api_key: 'kibana-api-key',
+      ssl: { certificate: 'cert', key: 'ssl-key' },
+    };
+    const sanitizedRemoteOutput = {
+      id: 'remote',
+      name: 'Remote',
+      type: 'remote_elasticsearch',
+      hosts: ['https://remote:9200'],
+      ssl: { certificate: 'cert' },
+    };
+
+    const contextWithAuthz = (readSettings: boolean) =>
+      ({
+        ...mockContext,
+        fleet: Promise.resolve({ authz: { fleet: { readSettings } } }),
+      } as any);
+
+    beforeEach(() => {
+      jest.spyOn(outputService, 'list').mockResolvedValue({
+        items: [remoteOutput],
+        page: 1,
+        perPage: 1,
+        total: 1,
+      } as any);
+      jest.spyOn(outputService, 'get').mockResolvedValue(remoteOutput as any);
+    });
+
+    it('returns full outputs to users who can read settings', async () => {
+      const listRes = await getOutputsHandler(
+        contextWithAuthz(true),
+        {} as any,
+        mockResponse as any
+      );
+      const getRes = await getOneOutputHandler(
+        contextWithAuthz(true),
+        { params: { outputId: 'remote' } } as any,
+        mockResponse as any
+      );
+
+      expect((listRes as any).body.items).toEqual([remoteOutput]);
+      expect((getRes as any).body.item).toEqual(remoteOutput);
+    });
+
+    it('returns sanitized outputs to users who cannot read settings', async () => {
+      const listRes = await getOutputsHandler(
+        contextWithAuthz(false),
+        {} as any,
+        mockResponse as any
+      );
+      const getRes = await getOneOutputHandler(
+        contextWithAuthz(false),
+        { params: { outputId: 'remote' } } as any,
+        mockResponse as any
+      );
+
+      expect((listRes as any).body.items).toEqual([sanitizedRemoteOutput]);
+      expect((getRes as any).body.item).toEqual(sanitizedRemoteOutput);
     });
   });
 });

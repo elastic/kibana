@@ -29,6 +29,7 @@ import {
   getFieldDiffsForThreshold,
   getFieldDiffsForEsqlQuery,
   getFieldDiffsForThreatQuery,
+  getFieldDiffsForRequiredFields,
 } from './get_field_diffs_for_grouped_fields';
 
 export const getFormattedFieldDiffGroups = (
@@ -117,6 +118,14 @@ export const getFormattedFieldDiffGroups = (
       return {
         shouldShowSubtitles: true,
         fieldDiffs: getFieldDiffsForThreshold(thresholdThreeWayDiff),
+      };
+    case 'required_fields':
+      const requiredFieldsThreeWayDiff = fields[
+        fieldName
+      ] as AllThreeWayFieldsDiff['required_fields'];
+      return {
+        shouldShowSubtitles: false,
+        fieldDiffs: getFieldDiffsForRequiredFields(requiredFieldsThreeWayDiff),
       };
     default:
       const fieldThreeWayDiff = (fields as AllThreeWayFieldsDiff)[fieldName];

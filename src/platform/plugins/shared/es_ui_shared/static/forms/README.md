@@ -32,7 +32,7 @@ In order to run the documentation locally
 ```
 
 4. Follow the "Getting started" instructions (https://github.com/elastic/docs.elastic.dev#getting-started)
-5. `yarn dev` to launch the docs server
+5. `pnpm dev` to launch the docs server
 
 ## Field value change sequence diagram
 

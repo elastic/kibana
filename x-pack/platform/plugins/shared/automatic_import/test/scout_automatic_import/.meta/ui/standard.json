@@ -1,5 +1,5 @@
 {
-  "sha1": "b01680ff0b86d52432cc18170510af3de8dc01ce",
+  "sha1": "41c6a00cf59c750ef28492b1af00e0ed09f52852",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_data_stream_flyout.spec.ts",
-        "line": 76,
+        "line": 85,
         "column": 9
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_data_stream_flyout.spec.ts",
-        "line": 83,
+        "line": 92,
         "column": 9
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_integration_page.spec.ts",
-        "line": 57,
+        "line": 66,
         "column": 9
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/accessibility_create_integration_page.spec.ts",
-        "line": 62,
+        "line": 71,
         "column": 9
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 59,
+        "line": 68,
         "column": 9
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 65,
+        "line": 74,
         "column": 9
       }
     },
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 73,
+        "line": 82,
         "column": 9
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 88,
+        "line": 97,
         "column": 9
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 106,
+        "line": 115,
         "column": 9
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 113,
+        "line": 122,
         "column": 9
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 128,
+        "line": 137,
         "column": 9
       }
     },
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/connector_and_form.spec.ts",
-        "line": 134,
+        "line": 143,
         "column": 9
       }
     },
@@ -210,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 76,
+        "line": 85,
         "column": 9
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 82,
+        "line": 91,
         "column": 9
       }
     },
@@ -238,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 87,
+        "line": 96,
         "column": 9
       }
     },
@@ -252,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 91,
+        "line": 100,
         "column": 9
       }
     },
@@ -266,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 99,
+        "line": 108,
         "column": 9
       }
     },
@@ -280,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 108,
+        "line": 117,
         "column": 9
       }
     },
@@ -294,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 122,
+        "line": 131,
         "column": 9
       }
     },
@@ -308,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 151,
+        "line": 160,
         "column": 9
       }
     },
@@ -322,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 183,
+        "line": 192,
         "column": 9
       }
     },
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 205,
+        "line": 214,
         "column": 9
       }
     },
@@ -350,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 232,
+        "line": 241,
         "column": 9
       }
     },
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/ui/tests/create_data_stream_flyout.spec.ts",
-        "line": 284,
+        "line": 293,
         "column": 9
       }
     }

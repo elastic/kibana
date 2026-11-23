@@ -15,7 +15,8 @@ const userEuid = (name: string) => `user:${name}@unknown`;
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
-  describe('@ess @serverless @skipInServerlessMKI Watchlist Lifecycle', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/269341
+  describe.skip('@ess @serverless @skipInServerlessMKI Watchlist Lifecycle', () => {
     const sourceIndexName = 'watchlist-lifecycle-test-users';
     const utils = WatchlistSyncUtils(getService, [sourceIndexName]);
     const entityStore = EntityStoreUtils(getService);

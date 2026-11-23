@@ -59,9 +59,8 @@ steps:
     key: build_scout_tests
     timeout_in_minutes: 15
     env:
-      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
       SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
@@ -164,7 +163,7 @@ steps:
     key: epr-image-cache-update
     build:
       env:
-        EPR_IMAGE: "$PACKAGE_REGISTRY_TEMP_IMAGE"
+        EPR_IMAGE: '$PACKAGE_REGISTRY_TEMP_IMAGE'
         IMAGES_CONFIG: 'kibana/image_cache.tpl.yml'
         BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
         RETRY: '1'

@@ -189,8 +189,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not show static value tab for data layers', async () => {
       await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       // Quick functions and Formula tabs should be visible
-      expect(await testSubjects.exists('lens-dimensionTabs-quickFunctions')).to.eql(true);
-      expect(await testSubjects.exists('lens-dimensionTabs-formula')).to.eql(true);
+      await testSubjects.existOrFail('lens-dimensionTabs-quickFunctions', { timeout: 5000 });
+      await testSubjects.existOrFail('lens-dimensionTabs-formula', { timeout: 5000 });
       // Static value tab should not be visible
       expect(await testSubjects.exists('lens-dimensionTabs-static_value')).to.eql(false);
 
@@ -543,16 +543,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
       });
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(1);
+      await PageObjects.lens.assertWorkspaceErrorCount(1);
 
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(2);
+      await PageObjects.lens.assertWorkspaceErrorCount(2);
 
       await PageObjects.lens.dragFieldToDimensionTrigger(
         '@timestamp',
         'lnsXY_xDimensionPanel > lns-empty-dimension'
       );
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(1);
+      await PageObjects.lens.assertWorkspaceErrorCount(1);
 
       expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');
@@ -710,8 +710,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.filterLegend('jpg');
-      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
-      expect(hasExtensionFilter).to.be(true);
+      await filterBar.expectFilter('extension.raw', 'jpg');
 
       await filterBar.removeFilter('extension.raw');
     });
@@ -741,8 +740,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.filterLegend('jpg');
-      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
-      expect(hasExtensionFilter).to.be(true);
+      await filterBar.expectFilter('extension.raw', 'jpg');
 
       await filterBar.removeFilter('extension.raw');
     });

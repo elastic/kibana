@@ -91,6 +91,8 @@ describe('entity risk score V2 calculation route', () => {
     (clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>).listEntities =
       jest.fn().mockResolvedValue({ entities: [entityDocMock] });
 
+    context.core.elasticsearch.client.asCurrentUser.indices.exists.mockResolvedValue(true);
+
     (getConfiguration as jest.Mock).mockResolvedValue(defaultEngineConfig);
     (getRiskInputsIndex as jest.Mock).mockResolvedValue({ index: 'default-alerts-index' });
     (buildAlertFilters as jest.Mock).mockReturnValue([]);
@@ -240,6 +242,22 @@ describe('entity risk score V2 calculation route', () => {
     expect(response.status).toEqual(400);
     expect(response.body.message).toEqual('Entity not found');
     expect(scoreBaseEntities).not.toHaveBeenCalled();
+  });
+
+  it('skips scoring when the alerts index does not exist', async () => {
+    context.core.elasticsearch.client.asCurrentUser.indices.exists.mockResolvedValue(false);
+
+    const response = await server.inject(
+      buildRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(context.core.elasticsearch.client.asCurrentUser.indices.exists).toHaveBeenCalledWith({
+      index: 'default-alerts-index',
+    });
+    expect(response.status).toEqual(200);
+    expect(scoreBaseEntities).not.toHaveBeenCalled();
+    expect(runResolutionScoringStep).not.toHaveBeenCalled();
   });
 
   it('throws an error on unhandled exceptions', async () => {

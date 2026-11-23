@@ -310,7 +310,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Deleted 1 connector');
 
-      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName, {
+        expectNoResults: true,
+      });
       await retry.try(async () => {
         const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
         expect(searchResultsAfterDelete.length).to.eql(0);
@@ -342,7 +344,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Deleted 1 connector');
 
-      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName, {
+        expectNoResults: true,
+      });
       await retry.try(async () => {
         const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
         expect(searchResultsAfterDelete.length).to.eql(0);
