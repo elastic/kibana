@@ -146,6 +146,7 @@ export const AmazonDynamoDB: ConnectorSpec = {
   actions: {
     listTables: {
       isTool: true,
+      scope: 'read',
       description:
         'List the names of DynamoDB tables in the configured region. ' +
         'Use this to discover available tables before describing or querying them. ' +
@@ -171,6 +172,7 @@ export const AmazonDynamoDB: ConnectorSpec = {
 
     describeTable: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the full schema and metadata of a specific DynamoDB table, including its primary key definition (partition key and optional sort key), Global Secondary Indexes (GSIs), Local Secondary Indexes (LSIs), billing mode, and item count. ' +
         'Use this before querying to understand what keys and indexes are available.',
@@ -197,6 +199,7 @@ export const AmazonDynamoDB: ConnectorSpec = {
 
     getItem: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve a single item from a DynamoDB table by its exact primary key. ' +
         'Returns the full item (or specified attributes if projectionExpression is set). ' +
@@ -223,6 +226,7 @@ export const AmazonDynamoDB: ConnectorSpec = {
 
     query: {
       isTool: true,
+      scope: 'read',
       description:
         'Query a DynamoDB table or index using a key condition expression. ' +
         'The partition key must be specified with "=" comparison; the sort key is optional. ' +
@@ -275,6 +279,7 @@ export const AmazonDynamoDB: ConnectorSpec = {
 
     scan: {
       isTool: true,
+      scope: 'read',
       description:
         'Scan an entire DynamoDB table or index, optionally filtering results. ' +
         'WARNING: Scan reads every item in the table and consumes significant read capacity on large tables. ' +
@@ -323,7 +328,8 @@ export const AmazonDynamoDB: ConnectorSpec = {
     },
 
     putItem: {
-      isTool: true,
+      isTool: false,
+      scope: 'write',
       description:
         'Write a single item to a DynamoDB table. ' +
         'If an item with the same primary key already exists, it is fully replaced. ' +
@@ -353,7 +359,8 @@ export const AmazonDynamoDB: ConnectorSpec = {
     },
 
     deleteItem: {
-      isTool: true,
+      isTool: false,
+      scope: 'destroy',
       description:
         'Delete a single item from a DynamoDB table by its primary key. ' +
         'Use conditionExpression to make this a conditional delete — for example, ' +
@@ -386,19 +393,10 @@ export const AmazonDynamoDB: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.amazonDynamoDB.test.description', {
       defaultMessage: 'Verifies the AWS DynamoDB connection by listing tables',
     }),
+    enabled: true,
     handler: async (ctx) => {
-      try {
-        await callDynamoDbApi(ctx, 'ListTables', { Limit: 1 });
-        return {
-          ok: true,
-          message: 'Successfully connected to Amazon DynamoDB',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error instanceof Error ? error.message : String(error)}`,
-        };
-      }
+      await callDynamoDbApi(ctx, 'ListTables', { Limit: 1 });
+      return { message: 'Successfully connected to Amazon DynamoDB' };
     },
   },
 

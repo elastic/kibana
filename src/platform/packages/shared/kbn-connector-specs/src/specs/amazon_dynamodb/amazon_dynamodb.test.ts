@@ -384,22 +384,18 @@ describe('AmazonDynamoDB', () => {
   // ===========================================================================
 
   describe('test handler', () => {
-    it('should return ok when connection succeeds', async () => {
+    it('should return success message when connection succeeds', async () => {
       mockPost.mockResolvedValue({ data: { TableNames: [] } });
 
-      const result = await AmazonDynamoDB.test.handler(mockContext);
+      const result = await AmazonDynamoDB.test?.handler(mockContext);
 
-      expect(result.ok).toBe(true);
-      expect(result.message).toContain('Successfully');
+      expect(result?.message).toContain('Successfully');
     });
 
-    it('should return error when connection fails', async () => {
+    it('should throw when connection fails', async () => {
       mockPost.mockRejectedValue(new Error('Connection refused'));
 
-      const result = await AmazonDynamoDB.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Connection refused');
+      await expect(AmazonDynamoDB.test?.handler(mockContext)).rejects.toThrow('Connection refused');
     });
   });
 
@@ -431,11 +427,13 @@ describe('AmazonDynamoDB', () => {
     ];
 
     it.each(validRegions)('accepts valid region: %s', (region) => {
+      if (!AmazonDynamoDB.schema) throw new Error('Config schema not defined');
       const result = AmazonDynamoDB.schema.safeParse({ region });
       expect(result.success).toBe(true);
     });
 
     it.each(invalidRegions)('rejects invalid region: %s', (region) => {
+      if (!AmazonDynamoDB.schema) throw new Error('Config schema not defined');
       const result = AmazonDynamoDB.schema.safeParse({ region });
       expect(result.success).toBe(false);
     });
