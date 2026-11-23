@@ -75,7 +75,7 @@ describe('describeChanges', () => {
           '+ MIGRATE_TO_ADVANCED_DATAPATH (clusters/networkConfig/datapathProvider)',
         ]),
         ['**Auth scopes**'],
-        block(['regrouped, same scopes'])
+        block(['! same scopes, reordered'])
       )
     );
   });

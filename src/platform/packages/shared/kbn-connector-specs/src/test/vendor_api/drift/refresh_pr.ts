@@ -92,7 +92,7 @@ const summaryOf = ({ changeCount, endpointCount, onlyRegrouped }: ConnectorSecti
   } else if (changeCount > 0) {
     what = `changed ${plural(changeCount, 'thing')} on ${calls}`;
   }
-  return `New vendor spec captured. It ${what}. All connector actions still work as before.`;
+  return `New vendor spec captured. It ${what}.`;
 };
 
 /** The cell of an endpoint's changes: its areas, a blank line apart. */

@@ -65,7 +65,7 @@ describe('renderRefreshPr', () => {
       [
         '### `.other`',
         '',
-        'New vendor spec captured. It changed 2 things on 2 endpoints the connector calls. All connector actions still work as before.',
+        'New vendor spec captured. It changed 2 things on 2 endpoints the connector calls.',
         '',
         '<details>',
         '<summary>2 changed endpoints</summary>',
@@ -102,7 +102,7 @@ describe('renderRefreshPr', () => {
 
   it('says "1 thing on 1 endpoint" for a single change', () => {
     expect(renderRefreshPr([changed('.other', [field('GET /a', 'x')])])).toContain(
-      'It changed 1 thing on 1 endpoint the connector calls. All connector actions'
+      'It changed 1 thing on 1 endpoint the connector calls.\n'
     );
   });
 
@@ -149,7 +149,7 @@ describe('renderRefreshPr', () => {
     ]);
 
     expect(body).toContain(
-      'It only regrouped the auth scopes of 1 endpoint the connector calls. All connector actions'
+      'It only regrouped the auth scopes of 1 endpoint the connector calls.\n'
     );
   });
 
@@ -160,7 +160,7 @@ describe('renderRefreshPr', () => {
     ]);
 
     expect(body).toContain(
-      '### `.moved`\n\nNew vendor spec captured. It contained changes that `oasdiff` does not report. All connector actions still work as before.\n\n- The actions call other operations.'
+      '### `.moved`\n\nNew vendor spec captured. It contained changes that `oasdiff` does not report.\n\n- The actions call other operations.'
     );
     expect(body).toContain('### `.quiet`\n\nNew vendor spec captured. It contained changes');
     expect(body).not.toContain('<details>');

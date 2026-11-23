@@ -319,7 +319,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
     }
     const ofArea = entries.filter((entry) => entry.area === area);
     if (area === 'Auth scopes' && regrouped) {
-      return [{ heading, parts: [fixed(0, 'regrouped, same scopes')] }];
+      return [{ heading, parts: [fixed(0, '! same scopes, reordered')] }];
     }
     if (ofArea.length === 0) {
       return [];
