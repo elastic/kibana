@@ -19,7 +19,7 @@ function escapeCssAttributeValue(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-// The flask has no fill of its own, so as a background image it is black in both color modes.
+// The flask has no fill, so it shows black even in dark mode.
 function getTintedFlaskUrl(color: string): string {
   const svg = decodeSvgDataUrl(HardcodedIcons.flask);
   return svg

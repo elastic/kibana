@@ -15,7 +15,7 @@ export const decodeSvgDataUrl = (dataUrl: string): string | undefined => {
   try {
     return dataUrl.slice(0, commaIndex).endsWith(';base64') ? atob(data) : decodeURIComponent(data);
   } catch {
-    // Malformed data URLs (FALLBACK_BOLT_DATA_URL is one) must not stop the whole CSS injection.
+    // Some data URLs are malformed (e.g. FALLBACK_BOLT_DATA_URL has invalid base64).
     return undefined;
   }
 };
