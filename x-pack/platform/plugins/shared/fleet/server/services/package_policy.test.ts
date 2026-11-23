@@ -364,11 +364,31 @@ jest.mock('./utils/version_specific_policies', () => ({
   getAgentVersionsForVersionSpecificPolicies: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./package_policies/agent_version_guard', () => ({
-  ...jest.requireActual('./package_policies/agent_version_guard'),
-  getAgentVersionBlocks: jest.fn().mockResolvedValue(new Map()),
-  assertAgentVersionCompatible: jest.fn().mockResolvedValue(undefined),
-}));
+jest.mock('./package_policies/agent_version_guard', () => {
+  const mockGetAgentVersionBlocks = jest.fn().mockResolvedValue(new Map());
+  return {
+    ...jest.requireActual('./package_policies/agent_version_guard'),
+    getAgentVersionBlocks: mockGetAgentVersionBlocks,
+    // Same as the actual function, on top of the mocked `getAgentVersionBlocks`
+    getAgentVersionBlocksOrErrors: async (
+      items: Array<{ key: string; pkgInfo: { conditions?: { agent?: { version?: string } } } }>
+    ) => {
+      try {
+        return { blocks: await mockGetAgentVersionBlocks(items), errors: new Map() };
+      } catch (error) {
+        return {
+          blocks: new Map(),
+          errors: new Map(
+            items
+              .filter(({ pkgInfo }) => pkgInfo.conditions?.agent?.version)
+              .map(({ key }) => [key, error])
+          ),
+        };
+      }
+    },
+    assertAgentVersionCompatible: jest.fn().mockResolvedValue(undefined),
+  };
+});
 
 jest.mock('./agent_policies/package_policies_to_agent_inputs', () => ({
   ...jest.requireActual('./agent_policies/package_policies_to_agent_inputs'),
@@ -17432,6 +17452,42 @@ describe('Package policy service agent version guard', () => {
       expect(mockedGetAgentVersionBlocks).toHaveBeenCalledWith([
         expect.objectContaining({ key: 'blocked-id', agentPolicyIds: ['test'] }),
       ]);
+    });
+
+    it('only fails the package policies that needed the agents when they cannot be queried', async () => {
+      const soClient = createSavedObjectClientMock();
+      const agentQueryError = new Error('boom');
+      mockedGetAgentVersionBlocks.mockRejectedValue(agentQueryError);
+      // Only apache 1.3.2 has an agent version condition
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => ({
+        ...(await mockedGetPackageInfo(params)),
+        version: params.pkgVersion,
+        conditions: params.pkgVersion === '1.3.2' ? { agent: { version: '^9.4.0' } } : undefined,
+      }));
+      mockAgentPolicyService.getByIds.mockResolvedValue([]);
+      soClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
+      const newPackagePolicy = (id: string, pkg: { name: string; version: string }) => ({
+        id,
+        name: `Test Package Policy ${id}`,
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test',
+        policy_ids: ['test'],
+        inputs: [],
+        package: { ...pkg, title: pkg.name },
+      });
+
+      const result = await packagePolicyService.bulkCreate(soClient, esClient(), [
+        newPackagePolicy('with-condition', { name: 'apache', version: '1.3.2' }),
+        newPackagePolicy('without-condition', { name: 'apache', version: '1.3.1' }),
+      ]);
+
+      // The rest of the create is not under test
+      expect(
+        result.failed
+          .filter(({ error }) => error === agentQueryError)
+          .map(({ packagePolicy }) => packagePolicy.id)
+      ).toEqual(['with-condition']);
     });
   });
 });

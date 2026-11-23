@@ -10,14 +10,16 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { PackagePolicyAgentVersionIncompatibleError } from '../../errors';
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
+import { getVariantPolicyIdsForParents } from '../utils/version_specific_policies';
 
 import {
-  AGENT_VERSION_CONDITION_AGENTS_KUERY,
   assertAgentVersionCompatible,
+  buildAgentVersionConditionAgentsFilter,
   buildActiveAgentsOfPolicyFilter,
   createAgentVersionIncompatibleError,
   getAgentVersionBlockMessage,
   getAgentVersionBlocks,
+  getAgentVersionBlocksOrErrors,
   getAgentVersionGuardScope,
   redactAgentVersionBlock,
   redactAgentVersionIncompatibleError,
@@ -25,6 +27,7 @@ import {
 
 jest.mock('../app_context');
 jest.mock('../agent_policy');
+jest.mock('../utils/version_specific_policies');
 
 const mockedAppContextService = jest.mocked(appContextService);
 const mockedGetByIds = jest.mocked(agentPolicyService.getByIds);
@@ -64,6 +67,7 @@ describe('agent_version_guard', () => {
       enableVersionSpecificPolicies: true,
     } as ReturnType<typeof appContextService.getExperimentalFeatures>);
     mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+    jest.mocked(getVariantPolicyIdsForParents).mockResolvedValue(new Map());
     mockedGetByIds.mockImplementation(
       async (_soClient, ids) =>
         ids.map((id) => ({
@@ -128,16 +132,17 @@ describe('agent_version_guard', () => {
     });
 
     it('only counts the active non-OpAMP agents of the agent policy and its variants', () => {
-      expect(buildActiveAgentsOfPolicyFilter('policy-1', 3600)).toEqual({
+      expect(buildActiveAgentsOfPolicyFilter('policy-1', 3600, ['policy-1#9.3'])).toEqual({
         bool: {
           filter: [
             {
               bool: {
                 should: [
-                  { terms: { policy_base_id: ['policy-1'] } },
+                  { term: { policy_base_id: 'policy-1' } },
+                  // An older Fleet Server may not set `policy_base_id`, even on a variant
                   {
                     bool: {
-                      filter: [{ terms: { policy_id: ['policy-1'] } }],
+                      filter: [{ terms: { policy_id: ['policy-1', 'policy-1#9.3'] } }],
                       must_not: [{ exists: { field: 'policy_base_id' } }],
                     },
                   },
@@ -169,12 +174,26 @@ describe('agent_version_guard', () => {
       );
     });
 
-    it('describes the active agents counted in the UI', () => {
-      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).toContain('not type:OPAMP');
-      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).toContain('status:offline');
-      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).toContain('status:orphaned');
-      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).not.toContain('status:inactive');
-      expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).not.toContain('status:unenrolled');
+    it('applies the same rules as the agent counts shown in the UI', () => {
+      const { filter, must_not: mustNot } = buildAgentVersionConditionAgentsFilter(3600);
+
+      expect(buildActiveAgentsOfPolicyFilter('policy-1', 3600)).toMatchObject({
+        bool: { filter: expect.arrayContaining(filter), must_not: mustNot },
+      });
+    });
+
+    it('matches the known version-specific variants of the agent policies', async () => {
+      mockAgentVersions({});
+      jest
+        .mocked(getVariantPolicyIdsForParents)
+        .mockResolvedValue(new Map([['policy-1', ['policy-1#9.3']]]));
+
+      await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(getVariantPolicyIdsForParents).toHaveBeenCalledWith(esClient, ['policy-1']);
+      expect(JSON.stringify(esClient.search.mock.calls[0][0])).toContain('policy-1#9.3');
     });
 
     it('does not block when every agent satisfies the condition', async () => {
@@ -270,6 +289,32 @@ describe('agent_version_guard', () => {
       ]);
 
       expect(blocks.get('pp-1')).toEqual(expect.objectContaining({ blocked_count: 3 }));
+    });
+  });
+
+  describe('getAgentVersionBlocksOrErrors', () => {
+    it('returns the blocks', async () => {
+      mockAgentVersions({ 'policy-1': { '9.3.1': 2 } });
+
+      const { blocks, errors } = await getAgentVersionBlocksOrErrors([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.has('pp-1')).toBe(true);
+      expect(errors.size).toBe(0);
+    });
+
+    it('returns the error for the items that needed the agents when they cannot be queried', async () => {
+      const error = new Error('boom');
+      esClient.search.mockRejectedValue(error);
+
+      const { blocks, errors } = await getAgentVersionBlocksOrErrors([
+        { key: 'with-condition', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+        { key: 'without-condition', pkgInfo: pkgInfo(), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      expect(blocks.size).toBe(0);
+      expect(errors).toEqual(new Map([['with-condition', error]]));
     });
   });
 

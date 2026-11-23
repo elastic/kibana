@@ -247,7 +247,7 @@ import {
 import {
   assertAgentVersionCompatible,
   createAgentVersionIncompatibleError,
-  getAgentVersionBlocks,
+  getAgentVersionBlocksOrErrors,
   getAgentVersionGuardScope,
 } from './package_policies/agent_version_guard';
 
@@ -1127,20 +1127,26 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       isSecretStorageEnabled(esClient, soClient),
     ]);
 
-    const agentVersionBlocks = options?.acknowledgeAgentVersionIncompatibility
-      ? new Map<string, AgentVersionBlock>()
-      : await getAgentVersionBlocks(
-          packagePoliciesWithIds.flatMap(({ id, package: pkg, policy_ids: policyIds }) => {
-            const pkgInfo = pkg && packageInfos.get(`${pkg.name}-${pkg.version}`);
-            return id && pkgInfo ? [{ key: id, pkgInfo, agentPolicyIds: policyIds }] : [];
-          })
-        );
+    // When the agents can't be queried, only the package policies that needed them fail
+    const { blocks: agentVersionBlocks, errors: agentVersionCheckErrors } =
+      options?.acknowledgeAgentVersionIncompatibility
+        ? { blocks: new Map<string, AgentVersionBlock>(), errors: new Map<string, Error>() }
+        : await getAgentVersionBlocksOrErrors(
+            packagePoliciesWithIds.flatMap(({ id, package: pkg, policy_ids: policyIds }) => {
+              const pkgInfo = pkg && packageInfos.get(`${pkg.name}-${pkg.version}`);
+              return id && pkgInfo ? [{ key: id, pkgInfo, agentPolicyIds: policyIds }] : [];
+            })
+          );
 
     await pMap(packagePoliciesWithIds, async (packagePolicy) => {
       try {
         const packagePolicyId = packagePolicy.id ?? uuidv4();
         const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
 
+        const agentVersionCheckError = agentVersionCheckErrors.get(packagePolicyId);
+        if (agentVersionCheckError) {
+          throw agentVersionCheckError;
+        }
         const agentVersionBlock = agentVersionBlocks.get(packagePolicyId);
         if (agentVersionBlock) {
           throw createAgentVersionIncompatibleError(agentVersionBlock, 'add');
@@ -2338,13 +2344,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       }
     }
-    const agentVersionBlocks = await getAgentVersionBlocks(
-      packagePolicyUpdates.flatMap(({ id, package: pkg }) => {
-        const scope = agentVersionGuardScopes.get(id);
-        const pkgInfo = pkg && packageInfos.get(`${pkg.name}-${pkg.version}`);
-        return scope && pkgInfo ? [{ key: id, pkgInfo, agentPolicyIds: scope.agentPolicyIds }] : [];
-      })
-    );
+    // When the agents can't be queried, only the package policies that needed them fail
+    const { blocks: agentVersionBlocks, errors: agentVersionCheckErrors } =
+      await getAgentVersionBlocksOrErrors(
+        packagePolicyUpdates.flatMap(({ id, package: pkg }) => {
+          const scope = agentVersionGuardScopes.get(id);
+          const pkgInfo = pkg && packageInfos.get(`${pkg.name}-${pkg.version}`);
+          return scope && pkgInfo
+            ? [{ key: id, pkgInfo, agentPolicyIds: scope.agentPolicyIds }]
+            : [];
+        })
+      );
 
     const oldPackageInfos = await getPackageInfoForPackagePolicies(
       oldPackagePolicies,
@@ -2390,6 +2400,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
       try {
         const id = packagePolicyUpdate.id;
+        const agentVersionCheckError = agentVersionCheckErrors.get(id);
+        if (agentVersionCheckError) {
+          throw agentVersionCheckError;
+        }
         const agentVersionBlock = agentVersionBlocks.get(id);
         const agentVersionGuardScope = agentVersionGuardScopes.get(id);
         if (agentVersionBlock && agentVersionGuardScope) {

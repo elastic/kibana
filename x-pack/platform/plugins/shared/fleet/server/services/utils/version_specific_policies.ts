@@ -91,6 +91,48 @@ export async function getVariantPolicyIdsForParent(
 }
 
 /**
+ * Same as {@link getVariantPolicyIdsForParent} for several parents, with a single query: the full
+ * variant policy ids (e.g. `"<parentId>#9.4"`) present in `.fleet-policies`, by parent.
+ */
+export async function getVariantPolicyIdsForParents(
+  esClient: ElasticsearchClient,
+  parentPolicyIds: string[]
+): Promise<Map<string, string[]>> {
+  const byParent = new Map<string, string[]>();
+  if (parentPolicyIds.length === 0) {
+    return byParent;
+  }
+  const response = await esClient.search<
+    unknown,
+    { variant_policy_ids: { buckets: Array<{ key: string }> } }
+  >({
+    index: AGENT_POLICY_INDEX,
+    ignore_unavailable: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [{ terms: { [POLICY_BASE_ID_FIELD]: parentPolicyIds } }],
+        must_not: [{ terms: { policy_id: parentPolicyIds } }],
+      },
+    },
+    aggs: {
+      variant_policy_ids: {
+        terms: {
+          field: 'policy_id',
+          size: parentPolicyIds.length * MAX_VARIANT_POLICY_IDS_PER_PARENT,
+        },
+      },
+    },
+  });
+  for (const { key: policyId } of response.aggregations?.variant_policy_ids?.buckets ?? []) {
+    const { baseId, version } = splitVersionSuffixFromPolicyId(policyId);
+    if (version === null) continue;
+    byParent.set(baseId, [...(byParent.get(baseId) ?? []), policyId]);
+  }
+  return byParent;
+}
+
+/**
  * Same as {@link buildVariantAgentsKuery}, with the variant ids looked up from `.fleet-policies`
  * and merged with `extraVariantPolicyIds` (e.g. ids only known from agents whose variant document
  * is already gone).

@@ -8,20 +8,13 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { chunk } from 'lodash';
 
-import { AGENT_TYPE_OPAMP, AGENTS_INDEX, NOT_OPAMP_AGENT_KUERY } from '../../../common/constants';
-import { AgentStatusKueryHelper, getAgentVersionBlockers } from '../../../common/services';
-import { buildPolicyBaseIdsWithFallbackEsFilter } from '../../../common/services/version_specific_policies_utils';
+import { AGENT_TYPE_OPAMP, AGENTS_INDEX } from '../../../common/constants';
+import { getAgentVersionBlockers } from '../../../common/services';
 import type { AgentVersionBlock, PackageInfo } from '../../../common/types';
 import { PackagePolicyAgentVersionIncompatibleError } from '../../errors';
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
-
-/**
- * The agents a package-level agent version condition applies to: active agents, including
- * offline-but-active ones, excluding OpAMP agents, which are never moved to version-specific
- * policies and so keep every input.
- */
-export const AGENT_VERSION_CONDITION_AGENTS_KUERY = `${AgentStatusKueryHelper.buildKueryForActiveAgents()} and ${NOT_OPAMP_AGENT_KUERY}`;
+import { getVariantPolicyIdsForParents } from '../utils/version_specific_policies';
 
 const MAX_AGENT_VERSIONS = 1000;
 const AGENT_POLICIES_PER_QUERY = 50;
@@ -43,43 +36,86 @@ interface AgentVersionAggregation {
 }
 
 /**
- * The active agents of an agent policy and its version-specific variants, excluding OpAMP agents,
- * as in {@link AGENT_VERSION_CONDITION_AGENTS_KUERY}. Uses term and range queries on stored fields
- * instead of the agent status runtime field and a policy id wildcard, so that it works with
- * `search.allow_expensive_queries: false`:
+ * The agents a package-level agent version condition applies to: active agents, including
+ * offline-but-active ones, excluding OpAMP agents, which are never moved to version-specific
+ * policies and so keep every input. Shared by the guard and the agent counts shown in the UI.
+ *
+ * Uses term and range queries on stored fields instead of the agent status runtime field, so that
+ * it works with `search.allow_expensive_queries: false`:
  * - unenrolled: `active` is false
  * - uninstalled: `audit_unenrolled_reason` is `uninstall`
  * - unenrolling: `unenrollment_started_at` is set
  * - inactive: the last check-in, or the enrollment without one, is older than the agent policy's
  *   inactivity timeout
  */
-export const buildActiveAgentsOfPolicyFilter = (
-  agentPolicyId: string,
+export const buildAgentVersionConditionAgentsFilter = (
   inactivityTimeout?: number
-): estypes.QueryDslQueryContainer => {
+): { filter: estypes.QueryDslQueryContainer[]; must_not: estypes.QueryDslQueryContainer[] } => {
   const inactiveSince = `now-${inactivityTimeout}s`;
   return {
-    bool: {
-      filter: [buildPolicyBaseIdsWithFallbackEsFilter([agentPolicyId]), { term: { active: true } }],
-      must_not: [
-        { term: { type: AGENT_TYPE_OPAMP } },
-        { term: { audit_unenrolled_reason: 'uninstall' } },
-        { exists: { field: 'unenrollment_started_at' } },
-        ...(inactivityTimeout
-          ? [
-              { range: { last_checkin: { lt: inactiveSince } } },
-              {
-                bool: {
-                  filter: [{ range: { enrolled_at: { lt: inactiveSince } } }],
-                  must_not: [{ exists: { field: 'last_checkin' } }],
-                },
+    filter: [{ term: { active: true } }],
+    must_not: [
+      { term: { type: AGENT_TYPE_OPAMP } },
+      { term: { audit_unenrolled_reason: 'uninstall' } },
+      { exists: { field: 'unenrollment_started_at' } },
+      ...(inactivityTimeout
+        ? [
+            { range: { last_checkin: { lt: inactiveSince } } },
+            {
+              bool: {
+                filter: [{ range: { enrolled_at: { lt: inactiveSince } } }],
+                must_not: [{ exists: { field: 'last_checkin' } }],
               },
-            ]
-          : []),
-      ],
+            },
+          ]
+        : []),
+    ],
+  };
+};
+
+/**
+ * The agents of an agent policy and its version-specific variants, without a wildcard: agents
+ * carrying the policy's `policy_base_id`, and, as an older Fleet Server may not set that field,
+ * agents without it on the policy or one of its known variants.
+ */
+const buildAgentsOfPolicyFilter = (
+  agentPolicyId: string,
+  variantPolicyIds: readonly string[]
+): estypes.QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { term: { policy_base_id: agentPolicyId } },
+      {
+        bool: {
+          filter: [{ terms: { policy_id: [agentPolicyId, ...variantPolicyIds] } }],
+          must_not: [{ exists: { field: 'policy_base_id' } }],
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+/** The agents of an agent policy that a package-level agent version condition applies to. */
+export const buildActiveAgentsOfPolicyFilter = (
+  agentPolicyId: string,
+  inactivityTimeout?: number,
+  variantPolicyIds: readonly string[] = []
+): estypes.QueryDslQueryContainer => {
+  const { filter, must_not: mustNot } = buildAgentVersionConditionAgentsFilter(inactivityTimeout);
+  return {
+    bool: {
+      filter: [buildAgentsOfPolicyFilter(agentPolicyId, variantPolicyIds), ...filter],
+      must_not: mustNot,
     },
   };
 };
+
+/** Whether the guard needs the agents of `item`'s agent policies to check it. */
+const needsAgentVersionCheck = ({ pkgInfo, agentPolicyIds }: AgentVersionGuardItem): boolean =>
+  !!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
+  !!pkgInfo.conditions?.agent?.version &&
+  agentPolicyIds.length > 0;
 
 /**
  * The package policies, among `items`, whose package-level `conditions.agent.version` some active
@@ -92,13 +128,9 @@ export async function getAgentVersionBlocks(
   const blocks = new Map<string, AgentVersionBlock>();
 
   // Without version-specific policies, every agent receives every input.
-  if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-    return blocks;
-  }
-
   const itemsWithCondition = items.flatMap((item) => {
     const versionCondition = item.pkgInfo.conditions?.agent?.version;
-    return versionCondition && item.agentPolicyIds.length ? [{ ...item, versionCondition }] : [];
+    return versionCondition && needsAgentVersionCheck(item) ? [{ ...item, versionCondition }] : [];
   });
   if (!itemsWithCondition.length) {
     return blocks;
@@ -130,10 +162,18 @@ export async function getAgentVersionBlocks(
   const buckets: AgentVersionAggregation['buckets'] = {};
   // Bounded chunks keep each query within Elasticsearch's clause and bucket limits
   for (const agentPolicyIdsChunk of chunk(guardedAgentPolicyIds, AGENT_POLICIES_PER_QUERY)) {
+    const variantPolicyIdsByParent = await getVariantPolicyIdsForParents(
+      esClient,
+      agentPolicyIdsChunk
+    );
     const filters = Object.fromEntries(
       agentPolicyIdsChunk.map((id) => [
         id,
-        buildActiveAgentsOfPolicyFilter(id, inactivityTimeoutById.get(id)),
+        buildActiveAgentsOfPolicyFilter(
+          id,
+          inactivityTimeoutById.get(id),
+          variantPolicyIdsByParent.get(id)
+        ),
       ])
     );
     const { aggregations } = await esClient.search<unknown, { policies: AgentVersionAggregation }>({
@@ -183,6 +223,27 @@ export async function getAgentVersionBlocks(
   }
 
   return blocks;
+}
+
+/**
+ * Same as {@link getAgentVersionBlocks}, but when the agents can't be queried, returns the error
+ * for the items that needed them instead of throwing, so that callers handling several items can
+ * fail only those.
+ */
+export async function getAgentVersionBlocksOrErrors(
+  items: readonly AgentVersionGuardItem[]
+): Promise<{
+  blocks: Map<string, AgentVersionBlock>;
+  errors: Map<string, Error>;
+}> {
+  try {
+    return { blocks: await getAgentVersionBlocks(items), errors: new Map() };
+  } catch (error) {
+    return {
+      blocks: new Map(),
+      errors: new Map(items.filter(needsAgentVersionCheck).map(({ key }) => [key, error])),
+    };
+  }
 }
 
 /**

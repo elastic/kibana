@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 
 import type {
-  AgentVersionBlock,
   ExperimentalDataStreamFeature,
   PackagePolicyAssetsMap,
   PackagePolicyInput,
@@ -62,7 +61,7 @@ import {
 } from '../upgrade_sender';
 
 import type { AgentVersionGuardItem } from './agent_version_guard';
-import { getAgentVersionBlocks, getAgentVersionGuardScope } from './agent_version_guard';
+import { getAgentVersionBlocksOrErrors, getAgentVersionGuardScope } from './agent_version_guard';
 
 export async function _getUpgradePackagePolicyInfo({
   packagePolicyService,
@@ -557,18 +556,15 @@ interface DryRunDiffWithGuardItem {
 async function withAgentVersionBlocks(
   entries: DryRunDiffWithGuardItem[]
 ): Promise<UpgradePackagePolicyDryRunResponseItem[]> {
-  let blocks: Map<string, AgentVersionBlock>;
-  try {
-    blocks = await getAgentVersionBlocks(
-      entries.flatMap(({ guardItem }) => (guardItem ? [guardItem] : []))
-    );
-  } catch (error) {
-    // Without the agents, the upgrades the guard applies to can't be shown as eligible
-    return entries.map(({ result, guardItem }) =>
-      guardItem ? { hasErrors: true, ...fleetErrorToResponseOptions(error) } : result
-    );
-  }
+  const { blocks, errors } = await getAgentVersionBlocksOrErrors(
+    entries.flatMap(({ guardItem }) => (guardItem ? [guardItem] : []))
+  );
   return entries.map(({ result, guardItem }) => {
+    const error = guardItem && errors.get(guardItem.key);
+    // Without the agents, the upgrade can't be shown as eligible
+    if (error) {
+      return { hasErrors: true, ...fleetErrorToResponseOptions(error) };
+    }
     const agentVersionBlock = guardItem && blocks.get(guardItem.key);
     return agentVersionBlock ? { ...result, agent_version_block: agentVersionBlock } : result;
   });

@@ -18,6 +18,7 @@ import type { AgentPolicy } from '../../types';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
+import { buildAgentVersionConditionAgentsFilter } from '../../services/package_policies/agent_version_guard';
 
 import {
   bulkGetAgentPoliciesHandler,
@@ -924,7 +925,6 @@ describe('Agent policy API handlers', () => {
                     { key: '8.1.0', doc_count: 2 },
                   ],
                 },
-                active: { versions: { buckets: [{ key: '8.1.0', doc_count: 2 }] } },
               },
               // policy-2 has no matching agents
               'policy-2': {
@@ -935,11 +935,20 @@ describe('Agent policy API handlers', () => {
               },
             },
           },
+          active_policies: {
+            buckets: {
+              'policy-1': { versions: { buckets: [{ key: '8.1.0', doc_count: 2 }] } },
+              'policy-2': { versions: { buckets: [] } },
+            },
+          },
         },
       });
       const { agentClient } = makeAgentClient(listAgents);
 
-      const agentPolicies = [{ id: 'policy-1' }, { id: 'policy-2' }] as AgentPolicy[];
+      const agentPolicies = [
+        { id: 'policy-1', inactivity_timeout: 3600 },
+        { id: 'policy-2' },
+      ] as AgentPolicy[];
 
       await populateAssignedAgentsCount(agentClient, agentPolicies);
 
@@ -952,8 +961,15 @@ describe('Agent policy API handlers', () => {
         'policy-1',
         'policy-2',
       ]);
-      // Active agents per version only count the agents agent version conditions apply to
-      expect(listAgentsArgs.aggregations.policies.aggs.active.filter).toBeDefined();
+      // Active agents per version count the agents agent version conditions apply to, with the
+      // same rules as Fleet's check, including each policy's inactivity timeout
+      const activeFilters = listAgentsArgs.aggregations.active_policies.filters.filters;
+      expect(activeFilters['policy-1'].bool.must_not).toEqual(
+        buildAgentVersionConditionAgentsFilter(3600).must_not
+      );
+      expect(activeFilters['policy-2'].bool.must_not).toEqual(
+        buildAgentVersionConditionAgentsFilter().must_not
+      );
 
       expect(agentPolicies[0]).toEqual(
         expect.objectContaining({

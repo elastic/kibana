@@ -37,7 +37,7 @@ import {
 import { type AgentClient } from '../../services/agents';
 import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
 import { UNPRIVILEGED_AGENT_KUERY } from '../../constants';
-import { AGENT_VERSION_CONDITION_AGENTS_KUERY } from '../../services/package_policies/agent_version_guard';
+import { buildAgentVersionConditionAgentsFilter } from '../../services/package_policies/agent_version_guard';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -106,9 +106,12 @@ interface AssignedAgentsCountAggregation {
       unprivileged?: { doc_count: number };
       fips?: { doc_count: number };
       versions?: { buckets: Array<{ key: string; doc_count: number }> };
-      active?: { versions?: { buckets: Array<{ key: string; doc_count: number }> } };
     }
   >;
+}
+
+interface ActiveAgentsCountAggregation {
+  buckets: Record<string, { versions?: { buckets: Array<{ key: string; doc_count: number }> } }>;
 }
 
 export async function populateAssignedAgentsCount(
@@ -151,17 +154,40 @@ export async function populateAssignedAgentsCount(
           },
           fips: { filter: toElasticsearchQuery(fromKueryExpression(FIPS_AGENT_KUERY)) },
           versions: { terms: { field: 'agent.version', size: 1000 } },
-          active: {
-            filter: toElasticsearchQuery(fromKueryExpression(AGENT_VERSION_CONDITION_AGENTS_KUERY)),
-            aggs: { versions: { terms: { field: 'agent.version', size: 1000 } } },
-          },
         },
+      },
+      // The agents a package-level agent version condition applies to, counted with the same rules
+      // as Fleet's check, which depend on each policy's inactivity timeout
+      active_policies: {
+        filters: {
+          filters: Object.fromEntries(
+            agentPolicies.map(({ id, inactivity_timeout: inactivityTimeout }) => {
+              const { filter, must_not: mustNot } =
+                buildAgentVersionConditionAgentsFilter(inactivityTimeout);
+              return [
+                id,
+                {
+                  bool: {
+                    filter: [
+                      toElasticsearchQuery(fromKueryExpression(buildPolicyIdOrVariantsKuery(id))),
+                      ...filter,
+                    ],
+                    must_not: mustNot,
+                  },
+                },
+              ];
+            })
+          ),
+        },
+        aggs: { versions: { terms: { field: 'agent.version', size: 1000 } } },
       },
     },
   });
 
   const buckets =
     (aggregations?.policies as AssignedAgentsCountAggregation | undefined)?.buckets ?? {};
+  const activeBuckets =
+    (aggregations?.active_policies as ActiveAgentsCountAggregation | undefined)?.buckets ?? {};
 
   for (const agentPolicy of agentPolicies as GetAgentPoliciesResponseItem[]) {
     const bucket = buckets[agentPolicy.id];
@@ -172,9 +198,9 @@ export async function populateAssignedAgentsCount(
       version: version.key,
       count: version.doc_count,
     }));
-    agentPolicy.active_agents_per_version = (bucket?.active?.versions?.buckets ?? []).map(
-      (version) => ({ version: version.key, count: version.doc_count })
-    );
+    agentPolicy.active_agents_per_version = (
+      activeBuckets[agentPolicy.id]?.versions?.buckets ?? []
+    ).map((version) => ({ version: version.key, count: version.doc_count }));
   }
 }
 
