@@ -43,6 +43,9 @@ import { updateByQueryAndWait } from './update_by_query_task';
  */
 const UPDATE_BY_QUERY_MAX_ATTEMPTS = 2;
 
+/** The node of a wildcard in a kuery, which `@kbn/es-query` does not export the type of. */
+type WildcardNode = Parameters<typeof nodeTypes.wildcard.test>[0];
+
 /** The tag a clause of a kuery is about, when it is `tags:<tag>` for one whole tag. */
 const tagOfClause = (node: KueryNode): string | undefined => {
   const [field, value] = node.arguments ?? [];
@@ -128,7 +131,9 @@ const clauseUpdatedAgentsMeet = (
         // matches it: adding `prod*` makes the agent match `tags:prod*`, which is what a tag with
         // a wildcard in it does to the clause `updateAgentTags` adds. For a tag the update removes
         // it settles nothing, as the agent can have another tag that matches.
-        return [...tagsToAdd].some((tag) => nodeTypes.wildcard.test(value, tag)) ? node : undefined;
+        return [...tagsToAdd].some((tag) => nodeTypes.wildcard.test(value as WildcardNode, tag))
+          ? node
+          : undefined;
       }
       const tag = tagOfClause(node);
       return tag !== undefined && tagsToAdd.has(tag) ? node : undefined;
