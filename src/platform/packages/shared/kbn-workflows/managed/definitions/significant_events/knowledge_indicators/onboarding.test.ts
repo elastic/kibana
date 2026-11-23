@@ -29,7 +29,10 @@ interface WorkflowStep {
   };
 }
 
-const workflow = parse(ONBOARDING_YAML) as { steps: WorkflowStep[] };
+const workflow = parse(ONBOARDING_YAML) as {
+  steps: WorkflowStep[];
+  triggers: Array<{ inputs?: Array<{ name: string; default?: unknown }> }>;
+};
 const metricsBranch = workflow.steps.find(({ name }) => name === 'run_metrics_source_onboarding');
 const sourceBranch = workflow.steps.find(({ name }) => name === 'run_source_onboarding');
 
@@ -139,5 +142,15 @@ describe('KI onboarding workflow metrics branch', () => {
         metricsEntitiesSkipReason: 'request_failed',
       },
     });
+  });
+});
+
+describe('KI onboarding workflow recency guard', () => {
+  it('is off by default', () => {
+    const input = workflow.triggers
+      .flatMap(({ inputs }) => inputs ?? [])
+      .find(({ name }) => name === 'featuresRecencyThresholdHours');
+
+    expect(input?.default).toBe(0);
   });
 });

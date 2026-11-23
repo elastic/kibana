@@ -14,4 +14,13 @@ export const registerAlertZeroPublicStepDefinitions = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./report_worker_outcome_step').then((m) => m.reportWorkerOutcomePublicStepDefinition)
   );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./triage_decision_steps').then((m) => m.triageStoreFpDecisionsPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./triage_decision_steps').then((m) => m.triageMatchFpDecisionsPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./triage_decision_steps').then((m) => m.triageRevokeFpDecisionPublicStepDefinition)
+  );
 };
