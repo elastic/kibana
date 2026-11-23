@@ -19,6 +19,7 @@
 
 import type { SpecChange } from './detect_drift';
 import { isRecord } from '../values';
+import { requestParameterOf } from './oasdiff_text';
 
 type Json = Record<string, unknown>;
 
@@ -180,10 +181,15 @@ const typeOf = (document: Json, node: unknown, depth = 0): string => {
   return isRecord(node.properties) ? `object${nullable}` : 'any';
 };
 
+// "(media type: application/xml)", or "to media type `application/xml` of response `200`".
+const MEDIA_TYPE = /\(media type: ([^)]+)\)|media type `([^`]+)`/;
+
 const mediaTypeOf = (text: string, content: Json): string | undefined => {
-  const named = /\(media type: ([^)]+)\)/.exec(text)?.[1];
-  if (named !== undefined && named in content) {
-    return named;
+  const match = MEDIA_TYPE.exec(text);
+  const named = match?.[1] ?? match?.[2];
+  if (named !== undefined) {
+    // A field of another media type may differ, so none is better than the wrong one.
+    return named in content ? named : undefined;
   }
   return Object.keys(content).find((type) => type.includes('json')) ?? Object.keys(content)[0];
 };
@@ -254,24 +260,30 @@ const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string 
   const names = quoted(text);
 
   if (/parameter/.test(id)) {
-    const at = names.findIndex((name) => /^(query|header|path|cookie)$/.test(name));
-    if (at < 0 || names[at + 1] === undefined) {
+    const parameter = requestParameterOf(text);
+    if (parameter === undefined) {
       return undefined;
     }
     // The operation's own parameters override those of its path.
     const parameters = [
       ...(Array.isArray(spec.parameters) ? spec.parameters : []),
       ...(isRecord(pathItem) && Array.isArray(pathItem.parameters) ? pathItem.parameters : []),
-    ].map((parameter) => deref(document, parameter));
+    ].map((declared) => deref(document, declared));
     const found = parameters.find(
-      (parameter) =>
-        isRecord(parameter) && parameter.in === names[at] && parameter.name === names[at + 1]
+      (candidate) =>
+        isRecord(candidate) &&
+        candidate.in === parameter.location &&
+        candidate.name === parameter.name
     );
     return isRecord(found) && found.schema !== undefined
       ? lengthened(typeOf(document, found.schema))
       : undefined;
   }
 
+  // A response header is not in the body, where a property of the same name may be.
+  if (/^response-.*header/.test(id)) {
+    return undefined;
+  }
   const root = id.startsWith('response-')
     ? schemaOfContent(document, responseOf(spec.responses, text), text)
     : id.startsWith('request-') || id.startsWith('new-')

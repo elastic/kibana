@@ -537,6 +537,17 @@ describe('describeChanges', () => {
     );
   });
 
+  it('names the parameter when its new enum value looks like a location', () => {
+    expect(
+      describeChanges([
+        change(
+          'request-parameter-enum-value-added',
+          'added the new enum value `header` to the `query` request parameter `status`'
+        ),
+      ])
+    ).toEqual(object('Request', '! status (query parameter, + header)'));
+  });
+
   it('says that an enum value of the request body is in the request body', () => {
     expect(
       describeChanges([

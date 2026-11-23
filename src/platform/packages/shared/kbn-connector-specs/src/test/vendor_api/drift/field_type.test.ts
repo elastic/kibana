@@ -220,9 +220,77 @@ describe('fieldTypeOf', () => {
           'response-property-enum-value-added',
           'added the new `default` enum value to the `mode` response property for the response status `200`'
         ),
-        { current: documentOf({ properties: { mode: { type: 'string', enum: ['a', 'default'] } } }) }
+        {
+          current: documentOf({ properties: { mode: { type: 'string', enum: ['a', 'default'] } } }),
+        }
       )
     ).toBe('a | default');
+  });
+
+  it('reads the media type a change names, and gives no type when that media type is not there', () => {
+    const document = {
+      paths: {
+        '/files': {
+          get: {
+            responses: {
+              '200': {
+                content: {
+                  'application/json': { schema: { properties: { size: { type: 'integer' } } } },
+                  'application/xml': { schema: { properties: { size: { type: 'string' } } } },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const widened = (mediaType: string) =>
+      change(
+        'response-property-list-of-types-widened',
+        `response property \`size\` list-of-types was widened by adding types \`null\` to media type \`${mediaType}\` of response \`200\``,
+        'GET /files'
+      );
+
+    expect(fieldTypeOf(widened('application/xml'), { current: document })).toBe('string');
+    expect(fieldTypeOf(widened('text/csv'), { current: document })).toBeUndefined();
+  });
+
+  it('finds a parameter whose new enum value looks like a location', () => {
+    const document = {
+      paths: {
+        '/files': {
+          get: {
+            parameters: [
+              { name: 'status', in: 'query', schema: { type: 'string', enum: ['open', 'header'] } },
+            ],
+            responses: {},
+          },
+        },
+      },
+    };
+
+    expect(
+      fieldTypeOf(
+        change(
+          'request-parameter-enum-value-added',
+          'added the new enum value `header` to the `query` request parameter `status`',
+          'GET /files'
+        ),
+        { current: document }
+      )
+    ).toBe('open | header');
+  });
+
+  it('gives a response header no type from a body property of the same name', () => {
+    expect(
+      fieldTypeOf(
+        change(
+          'response-required-header-added',
+          'added the required response header `named` for the status `200`'
+        ),
+        { current }
+      )
+    ).toBeUndefined();
   });
 
   it.each([

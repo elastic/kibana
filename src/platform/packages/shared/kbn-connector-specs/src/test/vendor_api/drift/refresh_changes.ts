@@ -21,6 +21,7 @@
  */
 
 import type { SpecChange } from './detect_drift';
+import { requestParameterOf } from './oasdiff_text';
 
 const MAX_NAME_LENGTH = 80;
 /** How many names of a list a cell shows to begin with; the refresh PR may show more. */
@@ -69,7 +70,6 @@ const quoted = (text: string): string[] => [...text.matchAll(/`([^`]+)`/g)].map(
 
 const isParameter = (id: string): boolean => /parameter/.test(id);
 
-const LOCATION = /^(query|header|path|cookie)$/;
 // How a parameter's location is written, so that it is not mistaken for a part of a body.
 const PARAMETER_LOCATION = /^(query|header|path|cookie) parameter$/;
 
@@ -79,11 +79,15 @@ const subjectOf = ({
   text,
 }: SpecChange): { name?: string; rest: string[]; location?: string } => {
   const names = quoted(text);
-  if (isParameter(id)) {
-    const at = names.findIndex((name) => LOCATION.test(name));
-    if (at >= 0) {
-      return { name: names[at + 1], rest: names.slice(at + 2), location: `${names[at]} parameter` };
-    }
+  const parameter = isParameter(id) ? requestParameterOf(text) : undefined;
+  if (parameter !== undefined) {
+    // What the text says after the parameter, such as the bound it set.
+    const after = quoted(text.slice(text.indexOf(`request parameter \`${parameter.name}\``)));
+    return {
+      name: parameter.name,
+      rest: after.slice(1),
+      location: `${parameter.location} parameter`,
+    };
   }
   return { name: names[0], rest: names.slice(1) };
 };

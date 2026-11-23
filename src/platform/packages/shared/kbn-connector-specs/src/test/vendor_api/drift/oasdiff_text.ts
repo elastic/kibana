@@ -82,6 +82,17 @@ export const isRequestChange = (id: string): boolean => REQUEST_CHANGE.test(id);
 export const isResponseChange = (id: string): boolean => RESPONSE_CHANGE.test(id);
 
 // `allOf[#/components/schemas/Options]/waitFor`: oasdiff names the subschema a property is in.
+// "the `query` request parameter `status`": the location comes first, then the parameter's name.
+const REQUEST_PARAMETER = /`(query|header|path|cookie)` request parameter `([^`]+)`/;
+
+/** The location and name of the request parameter a change is about. */
+export const requestParameterOf = (
+  text: string
+): { readonly location: string; readonly name: string } | undefined => {
+  const match = REQUEST_PARAMETER.exec(text);
+  return match === null ? undefined : { location: match[1], name: match[2] };
+};
+
 const COMPOSITION = /(?:allOf|anyOf|oneOf)\[[^\]]*\]\/?/g;
 
 /** A property path oasdiff names, as field use paths are: without the subschemas it is in. */
