@@ -25,6 +25,13 @@ const DEFAULT_MAX_QUERY_RESPONSE_SIZE = '50mb';
 /** Minimum that can still hold a single ES|QL row with metadata. */
 const MIN_MAX_QUERY_RESPONSE_SIZE = '1kb';
 const MAX_MAX_QUERY_RESPONSE_SIZE = '200mb';
+const DEFAULT_MAX_HYDRATION_RESPONSE_SIZE = '50mb';
+/**
+ * Alerts whose `data` exceeds the cap are dispatched without it, and a tick hydrates at most
+ * twice the cap, so a small value drops `data` and throttles dispatch to a few alerts per tick.
+ */
+const MIN_MAX_HYDRATION_RESPONSE_SIZE = '1mb';
+const MAX_MAX_HYDRATION_RESPONSE_SIZE = '100mb';
 
 const rulesRunSchema = schema.object({
   alerts: schema.object({
@@ -207,6 +214,29 @@ const dispatcherSchema = schema.object({
         max: MAX_DISPATCHER_ALERTS_PER_TICK,
         validate: (value: number): string | undefined =>
           Number.isInteger(value) ? undefined : 'value must be an integer',
+      }),
+    }),
+    hydration: schema.object({
+      /**
+       * Maximum ES response body size for one alert `data` hydration query. A
+       * response over it splits the batch and retries; an alert whose `data`
+       * alone exceeds it is dispatched without `data`. The `data` one tick
+       * holds is capped at twice this value (measured as `data_json` length),
+       * and the rest is deferred to the next tick, so size it for the heap the
+       * dispatcher may use: roughly `heap budget / 8` for wide data.
+       *
+       * The per-request value overrides `elasticsearch.maxResponseSize`, so it
+       * must not exceed it. Keep it at or above `rules.run.query.maxResponseSize`:
+       * `data_json` repeats every column name and is returned as an escaped
+       * string, so it is larger than the rule response row it came from, and a
+       * single-row alert near the rule cap can be dispatched without `data`
+       * even when both caps are equal. Accepted range is 1mb–100mb; defaults to
+       * 50mb, and `config/serverless.yml` lowers it to 10mb for Serverless.
+       */
+      maxResponseSize: schema.byteSize({
+        defaultValue: DEFAULT_MAX_HYDRATION_RESPONSE_SIZE,
+        min: MIN_MAX_HYDRATION_RESPONSE_SIZE,
+        max: MAX_MAX_HYDRATION_RESPONSE_SIZE,
       }),
     }),
   }),
