@@ -49,17 +49,23 @@ export const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }
 
   const styles = useMemo(() => getFullscreenStyles(euiTheme), [euiTheme]);
 
-  const toggleFullScreen = () => {
-    setIsFullScreen(!isFullScreen);
-  };
+  const toggleFullScreen = useCallback(() => {
+    setIsFullScreen((prev) => {
+      if (!allowFullScreen) return prev;
+      return !prev;
+    });
+  }, [allowFullScreen]);
 
-  const onKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === keys.ESCAPE) {
-      event.preventDefault();
-      event.stopPropagation();
-      setIsFullScreen(false);
-    }
-  }, []);
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (event.key === keys.ESCAPE && isFullScreen) {
+        event.preventDefault();
+        event.stopPropagation();
+        setIsFullScreen(false);
+      }
+    },
+    [isFullScreen]
+  );
 
   const FullScreenButton: React.FC = () => {
     if (!allowFullScreen) return null;
