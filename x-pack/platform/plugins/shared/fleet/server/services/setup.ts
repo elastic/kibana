@@ -44,6 +44,7 @@ import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_packag
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
+import { removeDeniedAgentPolicyOverrides } from './setup/remove_denied_agent_policy_overrides';
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
 import {
   ensurePreconfiguredFleetServerHosts,
@@ -248,6 +249,20 @@ async function createSetupSideEffects(
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
 
+  // After preconfiguration, which already strips the denied overrides of preconfigured policies.
+  // Non-fatal: the keys are still stripped whenever a policy is deployed, so a failure here must not
+  // fail Fleet setup.
+  let removeDeniedAgentPolicyOverridesError;
+  stepSpan = apm.startSpan('Remove denied agent policy overrides', 'preconfiguration');
+  try {
+    logger.debug('Removing denied overrides from stored agent policies');
+    await removeDeniedAgentPolicyOverrides(esClient);
+  } catch (error) {
+    logger.warn(`Failed to remove denied overrides from stored agent policies: ${error.message}`);
+    removeDeniedAgentPolicyOverridesError = { error };
+  }
+  stepSpan?.end();
+
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
   logger.debug(
     'Setting up Fleet enrollment keys and verifying fleet server policies are not out-of-sync'
@@ -264,6 +279,7 @@ async function createSetupSideEffects(
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+    ...(removeDeniedAgentPolicyOverridesError ? [removeDeniedAgentPolicyOverridesError] : []),
   ];
 
   if (nonFatalErrors.length > 0) {

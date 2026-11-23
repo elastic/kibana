@@ -20,6 +20,10 @@ import {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
 } from './src/helpers';
 
@@ -86,9 +90,20 @@ export {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
 } from './src/helpers';
-export type { SchemaHelper, StringWarnOptions, UnboundedStringOptions } from './src/helpers';
+export type {
+  SchemaHelper,
+  StringWarnOptions,
+  UnboundedStringOptions,
+  BoundedStringHelper,
+  BoundedStringOptions,
+  BoundedStringWarnOptions,
+} from './src/helpers';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);
@@ -463,6 +478,10 @@ export const schema = {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
   string,
   uri,
@@ -477,7 +496,11 @@ import {
   META_FIELD_X_OAS_DEPRECATED,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MAX_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  X_KIBANA_PLANNED_MAX_LENGTH,
+  X_KIBANA_PLANNED_MIN_LENGTH,
 } from './src/oas_meta_fields';
 
 export const metaFields = Object.freeze({
@@ -487,5 +510,9 @@ export const metaFields = Object.freeze({
   META_FIELD_X_OAS_DEPRECATED,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MAX_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  X_KIBANA_PLANNED_MAX_LENGTH,
+  X_KIBANA_PLANNED_MIN_LENGTH,
 });
