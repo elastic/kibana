@@ -19,19 +19,19 @@ const createReader = () => {
 };
 
 describe('createKnowledgeIndicatorReader', () => {
-  describe('listQueryLinks', () => {
-    it('reads the rule-backed and unbacked links of the given sources', async () => {
+  describe('listQueries', () => {
+    it('reads the rule-backed and unbacked queries of the given sources', async () => {
       const { reader, getQueryLinks } = createReader();
 
-      await reader.listQueryLinks({ sourceIds: ['logs-app'] });
+      await reader.listQueries({ sourceIds: ['logs-app'] });
 
       expect(getQueryLinks).toHaveBeenCalledWith(['logs-app'], { ruleUnbacked: 'include' });
     });
 
-    it('returns no links without reading when no sources are given', async () => {
+    it('returns no queries without reading when no sources are given', async () => {
       const { reader, getQueryLinks } = createReader();
 
-      await expect(reader.listQueryLinks({ sourceIds: [] })).resolves.toEqual([]);
+      await expect(reader.listQueries({ sourceIds: [] })).resolves.toEqual([]);
       expect(getQueryLinks).not.toHaveBeenCalled();
     });
 
@@ -39,7 +39,7 @@ describe('createKnowledgeIndicatorReader', () => {
       const { reader, getQueryLinks } = createReader();
       getQueryLinks.mockResolvedValue(new Array<QueryLink>(REVISION_SIZE_LIMIT));
 
-      await expect(reader.listQueryLinks({ sourceIds: ['logs-app'] })).rejects.toThrow(
+      await expect(reader.listQueries({ sourceIds: ['logs-app'] })).rejects.toThrow(
         `${REVISION_SIZE_LIMIT} or more`
       );
     });
