@@ -275,6 +275,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onGroupChange,
     onOptionsChange,
     tracker: track,
+    settings: props.settings,
 
     //  Setting maxRowCount to 10k because of elasticsearch limitations
     //  More info here: https://github.com/elastic/kibana/issues/151913
