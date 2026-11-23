@@ -159,7 +159,8 @@ export class SiemWorkflowMigrationsService extends SiemMigrationsServiceBase<Wor
 
     await this.migrationTaskPollingUntil(
       migrationId,
-      ({ status }) => status === SiemMigrationTaskStatus.RUNNING,
+      // the stats are empty (204) while the migration has no workflows
+      (stats) => stats?.status === SiemMigrationTaskStatus.RUNNING,
       { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 }
     );
 
@@ -189,7 +190,7 @@ export class SiemWorkflowMigrationsService extends SiemMigrationsServiceBase<Wor
 
     await this.migrationTaskPollingUntil(
       migrationId,
-      ({ status }) => status !== SiemMigrationTaskStatus.RUNNING,
+      (stats) => stats?.status !== SiemMigrationTaskStatus.RUNNING,
       { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 }
     );
 
