@@ -6,6 +6,7 @@
  */
 
 import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
+import type { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
 import type { SeriesHead } from '../../../lib/significant_events/events/rule_events_client';
 
@@ -87,6 +88,26 @@ export interface EventsWriteHeldResult {
   deactivated_at: string;
 }
 
+/** One rule an item holds that another live event already confirms, with that event. */
+export interface HeldRule {
+  rule_uuid: string;
+  event_id: string;
+}
+
+/** An item that would make a rule a confirmed member of a second live event: nothing was written. */
+export interface EventsWriteRuleHeldResult {
+  index: number;
+  event_id: string;
+  /** Status of the event the item targeted; absent when the item would create a new event. */
+  status?: SignificantEvent['status'];
+  written: false;
+  skipped: true;
+  reason: 'rule_held_by_event';
+  existing_event_id: string;
+  /** Every rule of the item that a live event confirms, with its holder. */
+  held_rules: HeldRule[];
+}
+
 export interface EventsWriteNoOpResult {
   index: number;
   event_id: string;
@@ -143,12 +164,17 @@ export type LoadedCandidate = WriteCandidate & {
 };
 
 /** A loaded candidate whose status is decided: by the lifecycle, or the caller's own. */
-export type ResolvedWriteCandidate = LoadedCandidate & { status: SignificantEvent['status'] };
+export type ResolvedWriteCandidate = LoadedCandidate & {
+  status: SignificantEvent['status'];
+  /** The lifecycle change that decided `status`; absent when the caller owns it. */
+  change?: StatusChange;
+};
 
 export type EventsWriteBulkResult =
   | EventsWriteResult
   | EventsWriteDuplicateResult
   | EventsWriteHeldResult
+  | EventsWriteRuleHeldResult
   | EventsWriteNoOpResult
   | EventsWriteFailureResult;
 

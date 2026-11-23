@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { ProposalConfidence, ProposalImpact, ProposalStatus } from '@kbn/proposals-common';
 import type { InvestigationEvidence } from '../evidence/evidence';
 import type { Hypothesis } from '../hypotheses/hypotheses';
@@ -57,28 +57,34 @@ export const investigationIdSchema = z.string().min(1).max(MAX_ID_LENGTH);
 export const investigationIdParamsSchema = z.object({ id: investigationIdSchema });
 
 /** Filters shared by the list and the severity counts. All of them are ANDed. */
-export const investigationFiltersSchema = z.object({
-  /** Investigation (conversation) ids, for reading a known set such as the cards on screen. */
-  id: multiValued(investigationIdSchema, MAX_INVESTIGATION_ID_FILTER_VALUES),
-  status: multiValued(z.enum(INVESTIGATION_METADATA_STATUSES)),
-  /** `none` matches investigations whose severity has not been set. */
-  severity: multiValued(z.enum([...INVESTIGATION_SEVERITIES, INVESTIGATION_SEVERITY_NONE])),
-  /**
-   * True: only investigations a worker is running for now (see `in_progress`). False: the rest.
-   * `true`/`false` from a query string, or a boolean from an in-process caller.
-   */
-  in_progress: z
-    .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
-    .optional(),
-  subject_type: multiValued(z.enum(INVESTIGATION_SUBJECT_TYPES)),
-  subject_id: multiValued(z.string().min(1).max(MAX_SUBJECT_ID_LENGTH)),
-  /** Impacted entity id or name, matched exactly. */
-  entity: z.string().min(1).max(MAX_FILTER_TEXT_LENGTH).optional(),
-  /** Case-insensitive text matched against the title, summary, and verdict. */
-  query: z.string().trim().min(1).max(MAX_FILTER_TEXT_LENGTH).optional(),
-  created_after: isoDateTime({ offset: true }).optional(),
-  created_before: isoDateTime({ offset: true }).optional(),
-});
+export const investigationFiltersSchema = lazySchema(() =>
+  z.object({
+    /** Investigation (conversation) ids, for reading a known set such as the cards on screen. */
+    id: multiValued(investigationIdSchema, MAX_INVESTIGATION_ID_FILTER_VALUES),
+    status: multiValued(z.enum(INVESTIGATION_METADATA_STATUSES)),
+    /** `none` matches investigations whose severity has not been set. */
+    severity: multiValued(z.enum([...INVESTIGATION_SEVERITIES, INVESTIGATION_SEVERITY_NONE])),
+    /**
+     * True: only investigations a worker is running for now (see `in_progress`). False: the rest.
+     * `true`/`false` from a query string, or a boolean from an in-process caller.
+     */
+    in_progress: z
+      .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
+      .optional(),
+    subject_type: multiValued(z.enum(INVESTIGATION_SUBJECT_TYPES)),
+    subject_id: multiValued(z.string().min(1).max(MAX_SUBJECT_ID_LENGTH)),
+    /** Impacted entity id or name, matched exactly. */
+    entity: z.string().min(1).max(MAX_FILTER_TEXT_LENGTH).optional(),
+    /** Case-insensitive text matched against the title, summary, and verdict. */
+    query: z.string().trim().min(1).max(MAX_FILTER_TEXT_LENGTH).optional(),
+    created_after: isoDateTime({ offset: true }).optional(),
+    created_before: isoDateTime({ offset: true }).optional(),
+    /** Last modified (`updated_at`) at or after this time. */
+    updated_after: isoDateTime({ offset: true }).optional(),
+    /** Last modified (`updated_at`) at or before this time. */
+    updated_before: isoDateTime({ offset: true }).optional(),
+  })
+);
 export type InvestigationFiltersInput = z.input<typeof investigationFiltersSchema>;
 export type InvestigationFilters = z.output<typeof investigationFiltersSchema>;
 

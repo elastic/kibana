@@ -95,7 +95,29 @@ const eventStatsAggregations = {
     doc_count: 2,
     by_reason: { buckets: [{ key: 'workflow_disabled', doc_count: 2 }] },
   },
+  throttled: {
+    doc_count: 2,
+    by_strategy: {
+      buckets: [
+        { key: 'time_interval', doc_count: 1, action_groups: { value: 2 } },
+        { key: 'every_time', doc_count: 1, action_groups: { value: 1 } },
+        { key: 'on_status_change', doc_count: 3, action_groups: { value: 3 } },
+      ],
+    },
+  },
 };
+
+const groupingModeBucket = (key: string, p50: number, p99: number, avg: number) => ({
+  key,
+  doc_count: 1,
+  policy_refs: {
+    policies: {
+      by_policy: { buckets: [] },
+      action_groups_percentiles: { values: { '50.0': p50, '99.0': p99 } },
+      action_groups_avg: { value: avg },
+    },
+  },
+});
 
 const policyStatsAggregations = {
   policy_refs: {
@@ -138,6 +160,12 @@ const policyStatsAggregations = {
         workflow_executions_avg: { value: 1 },
       },
     },
+    by_grouping_mode: {
+      buckets: [
+        groupingModeBucket('per_alert', 1, 1, 1),
+        groupingModeBucket('per_field', 2, 4, 2.5),
+      ],
+    },
   },
   unmatched_events: {
     doc_count: 2,
@@ -167,6 +195,7 @@ const emptyPolicyStatsAggregations = {
         workflow_executions_avg: { value: null },
       },
     },
+    by_grouping_mode: { buckets: [] },
   },
   unmatched_events: { doc_count: 0, rule_refs: { rules: { uncovered_rules: { value: 0 } } } },
 };
@@ -181,6 +210,7 @@ const emptyEventStatsAggregations = {
     spaces: { value: 0 },
   },
   dispatch_failed: { doc_count: 0, by_reason: { buckets: [] } },
+  throttled: { doc_count: 0, by_strategy: { buckets: [] } },
 };
 
 const nullDistribution = { p50: null, p99: null, avg: null };
@@ -204,6 +234,8 @@ const emptyStats = {
   dispatcher_workflow_executions_per_policy_24hr: nullDistribution,
   dispatcher_throttle_ratio_per_policy_24hr: nullDistribution,
   dispatcher_uncovered_rules_count_24hr: 0,
+  dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr: {},
+  dispatcher_action_groups_throttled_count_by_strategy_24hr: {},
 };
 
 // The getter issues the event stats search first and the per-policy search second.
@@ -238,6 +270,15 @@ describe('getDispatcherStats', () => {
       dispatcher_workflow_executions_per_policy_24hr: { p50: 1, p99: 1, avg: 1 },
       dispatcher_throttle_ratio_per_policy_24hr: { p50: 0.5, p99: 1, avg: 0.5 },
       dispatcher_uncovered_rules_count_24hr: 1,
+      dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr: {
+        per_alert: { p50: 1, p99: 1, avg: 1 },
+        per_field: { p50: 2, p99: 4, avg: 2.5 },
+      },
+      dispatcher_action_groups_throttled_count_by_strategy_24hr: {
+        time_interval: 2,
+        every_time: 1,
+        on_status_change: 3,
+      },
     });
   });
 
@@ -297,6 +338,43 @@ describe('getDispatcherStats', () => {
     expect(result.dispatcher_action_groups_count_by_outcome_24hr).toEqual({});
   });
 
+  it('ignores strategy and grouping mode values outside the known vocabularies', async () => {
+    // Events written by other versions can carry values the schema no longer accepts; letting
+    // them through would make Task Manager reject the whole state.
+    mockSearches(
+      {
+        ...emptyEventStatsAggregations,
+        throttled: {
+          doc_count: 2,
+          by_strategy: {
+            buckets: [
+              { key: 'none', doc_count: 1, action_groups: { value: 4 } },
+              { key: 'every_time', doc_count: 1, action_groups: { value: 1 } },
+            ],
+          },
+        },
+      },
+      {
+        ...emptyPolicyStatsAggregations,
+        dispatched_events: {
+          ...emptyPolicyStatsAggregations.dispatched_events,
+          by_grouping_mode: {
+            buckets: [groupingModeBucket('per_rule', 9, 9, 9), groupingModeBucket('all', 1, 1, 1)],
+          },
+        },
+      }
+    );
+
+    const result = await getDispatcherStats(esClient);
+
+    expect(result.dispatcher_action_groups_throttled_count_by_strategy_24hr).toEqual({
+      every_time: 1,
+    });
+    expect(result.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr).toEqual({
+      all: { p50: 1, p99: 1, avg: 1 },
+    });
+  });
+
   it('returns empty results when there are no dispatcher events', async () => {
     mockSearches(emptyEventStatsAggregations, emptyPolicyStatsAggregations);
 
@@ -346,6 +424,21 @@ describe('getDispatcherStats', () => {
         policies.aggs.unmatched_events.aggs.rule_refs.aggs.rules.aggs.uncovered_rules.cardinality
           .precision_threshold
       ).toBe(3000);
+    });
+
+    it('splits throttled groups by strategy and dispatched groups per policy by grouping mode', async () => {
+      await getDispatcherStats(esClient);
+
+      const [events, policies] = getRequests();
+      expect(events.aggs.throttled.aggs.by_strategy.terms.field).toBe(
+        'kibana.alerting_v2.dispatcher.throttle_strategy'
+      );
+      const byGroupingMode = policies.aggs.dispatched_events.aggs.by_grouping_mode;
+      expect(byGroupingMode.terms.field).toBe('kibana.alerting_v2.dispatcher.grouping_mode');
+      expect(
+        byGroupingMode.aggs.policy_refs.aggs.policies.aggs.action_groups_percentiles
+          .percentiles_bucket.buckets_path
+      ).toBe('by_policy>events>action_groups');
     });
 
     it('bounds the per-policy terms and derives the throttle ratio at the terms level', async () => {

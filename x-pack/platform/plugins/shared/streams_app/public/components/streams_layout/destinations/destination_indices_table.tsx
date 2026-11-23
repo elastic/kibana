@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  euiTextTruncate,
   formatNumber,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -50,6 +51,7 @@ import {
   STORAGE_COLUMN_HEADER,
 } from '../../stream_list_view/translations';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUnitId } from '../../../hooks/use_unit_id';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
@@ -68,8 +70,15 @@ import type {
 } from './state_machines/destinations_state_machine';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-// The index name takes the spare width; stat columns keep a fixed width and never wrap.
+// The index name takes the spare width and grows to fit the name, with a tooltip showing the full
+// name; when the table is wider than its container it scrolls sideways. Stat columns keep a fixed
+// width and never wrap.
+const NAME_COLUMN_MIN_WIDTH = '100px';
+const NAME_COLUMN_MAX_WIDTH = '250px';
 const STAT_COLUMN_WIDTH = '120px';
+const truncateStyles = css`
+  ${euiTextTruncate()}
+`;
 const noWrapStyles = css`
   white-space: nowrap;
 `;
@@ -147,6 +156,8 @@ interface DestinationIndicesTableProps {
   indices: ResolvedDestinationIndex[];
   indicesStatus: ResolvedIndicesStatus;
   indicesError?: ResolvedIndicesError;
+  hasConnectedSource: boolean;
+  showMapLink?: boolean;
   destinationDetailRef?: DestinationDetailActorRef;
   /** Called on mount; the details then follow the page time range and the indices. */
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
@@ -158,12 +169,78 @@ interface DestinationIndicesTableProps {
   showToolbar?: boolean;
 }
 
+const MapLink = ({ children }: { children: React.ReactNode }) => {
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const unitId = useUnitId();
+  const mapParams = { path: { unitId, tab: 'map' }, query: { rangeFrom, rangeTo } } as const;
+
+  return (
+    <EuiLink
+      href={router.link('/v2/unit/{unitId}/{tab}', mapParams)}
+      onClick={(event: React.MouseEvent) => {
+        if (isModifiedClick(event)) {
+          return;
+        }
+        event.preventDefault();
+        router.push('/v2/unit/{unitId}/{tab}', mapParams);
+      }}
+      data-test-subj="streamsDestinationIndicesMapLink"
+    >
+      {children}
+    </EuiLink>
+  );
+};
+
+const EmptyIndicesMessage = ({
+  hasConnectedSource,
+  showMapLink,
+}: Pick<DestinationIndicesTableProps, 'hasConnectedSource' | 'showMapLink'>) => {
+  const {
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
+
+  if (hasConnectedSource) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.destinations.indices.emptyDescription"
+        defaultMessage="No indices match this destination's write scope yet."
+      />
+    );
+  }
+  if (!canManage) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.destinations.indices.noConnectedSourcesReadOnlyDescription"
+        defaultMessage="No sources are connected to this destination yet."
+      />
+    );
+  }
+  if (showMapLink) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.destinations.indices.noConnectedSourcesWithMapLinkDescription"
+        defaultMessage="No sources are connected to this destination yet. Connect one on <mapLink>the Map</mapLink> to start sending data."
+        values={{ mapLink: (...chunks: React.ReactNode[]) => <MapLink>{chunks}</MapLink> }}
+      />
+    );
+  }
+  return (
+    <FormattedMessage
+      id="xpack.streams.destinations.indices.noConnectedSourcesDescription"
+      defaultMessage="No sources are connected to this destination yet. Connect one to start sending data."
+    />
+  );
+};
+
 /** Paginated, sortable list of a destination's indices with their stats. */
 export const DestinationIndicesTable = ({
   destinationId,
   indices,
   indicesStatus,
   indicesError,
+  hasConnectedSource,
+  showMapLink,
   destinationDetailRef,
   onShowDestinationDetail,
   onHideDestinationDetail,
@@ -258,13 +335,22 @@ export const DestinationIndicesTable = ({
         }),
         sortable: true,
         truncateText: true,
+        minWidth: NAME_COLUMN_MIN_WIDTH,
+        maxWidth: NAME_COLUMN_MAX_WIDTH,
         render: (name: string) => (
-          <EuiLink
-            data-test-subj="streamsDestinationIndexLink"
-            {...indexLinkProps(name, 'overview')}
+          <EuiToolTip
+            content={name}
+            display="block"
+            anchorProps={{ css: truncateStyles }}
+            disableScreenReaderOutput
           >
-            {name}
-          </EuiLink>
+            <EuiLink
+              data-test-subj="streamsDestinationIndexLink"
+              {...indexLinkProps(name, 'overview')}
+            >
+              {name}
+            </EuiLink>
+          </EuiToolTip>
         ),
       },
       {
@@ -470,10 +556,7 @@ export const DestinationIndicesTable = ({
     return (
       <EuiText size="s" color="subdued" data-test-subj="streamsDestinationIndicesEmpty">
         <p>
-          <FormattedMessage
-            id="xpack.streams.destinations.indices.emptyDescription"
-            defaultMessage="No indices match this destination's write scope yet."
-          />
+          <EmptyIndicesMessage hasConnectedSource={hasConnectedSource} showMapLink={showMapLink} />
         </p>
       </EuiText>
     );
@@ -523,7 +606,8 @@ export const DestinationIndicesTable = ({
       <EuiBasicTable
         compressed
         responsiveBreakpoint={false}
-        tableLayout="fixed"
+        tableLayout="auto"
+        scrollableInline
         tableCaption={i18n.translate('xpack.streams.destinations.indices.tableCaption', {
           defaultMessage: 'Indices targeted by this destination',
         })}

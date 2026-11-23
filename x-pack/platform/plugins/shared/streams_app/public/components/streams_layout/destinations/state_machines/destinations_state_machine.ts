@@ -40,6 +40,7 @@ import {
   getConfiguredDestinations,
   getDestinationCreateSpec,
   getUnitDestinations,
+  localElasticsearchCredentialName,
   toDestinationViewModel,
   toRemoteElasticsearchDestinationViewModel,
   toS3DestinationViewModel,
@@ -102,6 +103,8 @@ export interface DestinationCreationContext {
   pendingDestination?: PendingDestination;
   /** Id of the key minted for the pending destination, revoked if the save fails. */
   pendingApiKeyId?: string;
+  /** Encoded API key sent as a unit secret, never embedded in the unit. */
+  pendingApiKey?: string;
   createdDestination?: DestinationViewModel;
 }
 
@@ -161,9 +164,10 @@ export type DestinationsStateEvent =
 
 /** Values for the unit PUT `secrets`. The created node references them by credential name. */
 const getCreateSecrets = (
-  formData: DestinationCreationFormData,
+  creationContext: DestinationCreationContext,
   destinationId: string
 ): StreamsUnit.Secrets | undefined => {
+  const { formData } = creationContext;
   switch (formData.storageKind) {
     case 'external_storage': {
       const names = s3CredentialNames(destinationId);
@@ -178,7 +182,11 @@ const getCreateSecrets = (
           formData.remoteElasticsearch.apiKey.trim(),
       };
     case 'local_elasticsearch':
-      return undefined;
+      return creationContext.pendingApiKey
+        ? {
+            [localElasticsearchCredentialName(destinationId)]: creationContext.pendingApiKey,
+          }
+        : undefined;
   }
 };
 
@@ -493,7 +501,7 @@ export const destinationsStateMachine = setup({
         signals,
         indexBySignal,
         writePatternsBySignal,
-        apiKey: event.output.encoded,
+        apiKeyCredential: localElasticsearchCredentialName(id),
       });
       const createdDestination = toDestinationViewModel(unitDestination);
       if (!createdDestination) {
@@ -509,6 +517,7 @@ export const destinationsStateMachine = setup({
         creationContext: {
           ...context.creationContext,
           pendingApiKeyId: event.output.id,
+          pendingApiKey: event.output.encoded,
           createdDestination,
         },
         unitDefinition,
@@ -533,7 +542,7 @@ export const destinationsStateMachine = setup({
           unitDefinition: context.unitDefinition,
           destinationIds: [createdDestination.id],
           intent: 'create',
-          secrets: getCreateSecrets(context.creationContext.formData, createdDestination.id),
+          secrets: getCreateSecrets(context.creationContext, createdDestination.id),
         };
       }
     ),
@@ -594,6 +603,7 @@ export const destinationsStateMachine = setup({
             creationContext: context.creationContext
               ? {
                   ...context.creationContext,
+                  pendingApiKey: undefined,
                   formData: {
                     ...context.creationContext.formData,
                     s3: {
@@ -928,8 +938,8 @@ type Toasts = CoreStart['notifications']['toasts'];
 function createNotifyDestinationCreatedAction({ toasts }: { toasts: Toasts }) {
   return () => {
     toasts.addSuccess({
-      title: i18n.translate('xpack.streams.destinations.destinationCreatedSuccessTitle', {
-        defaultMessage: 'New destination configured',
+      title: i18n.translate('xpack.streams.destinations.destinationCreatedToastTitle', {
+        defaultMessage: 'New destination created',
       }),
     });
   };

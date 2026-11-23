@@ -8,7 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
 import { softDeleteKi } from '../ai_indices/ki_write';
-import type { KiStepDependencies } from './helpers';
+import type { DreamingKiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
@@ -21,10 +21,11 @@ import { toStepError } from './to_step_error';
 export const getDeleteKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
+  isDreamingAvailable,
   checkWritePrivilege,
   analyticsService,
   logger,
-}: KiStepDependencies) =>
+}: DreamingKiStepDependencies) =>
   createServerStepDefinition({
     ...deleteKiStepCommonDefinition,
     handler: async (context) => {
@@ -47,16 +48,17 @@ export const getDeleteKiStepDefinition = ({
             const esClient = context.contextManager.getScopedEsClient();
             const writer = kiWriterFromContext(context.contextManager.getContext());
 
-            const result = await softDeleteKi(esClient, {
+            const { id } = await softDeleteKi(esClient, {
               aiIndexId,
               dest,
               kiId,
               writer,
+              deleteLinkedRelationships: await isDreamingAvailable(spaceId),
               refresh,
               abortSignal: context.abortSignal,
             });
 
-            return { output: result };
+            return { output: { id } };
           },
         });
       } catch (error) {

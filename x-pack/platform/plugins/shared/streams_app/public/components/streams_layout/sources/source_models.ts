@@ -165,23 +165,70 @@ export const toConfiguredSource = (source: UnitSource): ConfiguredSource | undef
   }
 };
 
-/** Destination names each configured source currently forwards to. */
-export const connectedDestinationLabels = (unit: Unit): Record<string, string[]> => {
+export interface ConnectedDestination {
+  id: string;
+  label: string;
+}
+
+const connectedDestinationsByUnit = new WeakMap<Unit, Record<string, ConnectedDestination[]>>();
+
+/**
+ * The destinations each configured source currently forwards to, through processing and route
+ * delegation. The result is kept per unit object, so the nodes of one canvas share one build.
+ */
+export const connectedDestinations = (unit: Unit): Record<string, ConnectedDestination[]> => {
+  const cached = connectedDestinationsByUnit.get(unit);
+  if (cached) {
+    return cached;
+  }
   const sources = getConfiguredSources(unit);
   const destinations = unit.unit.destinations ?? [];
   const nameById = new Map(
     destinations.map((destination) => [destination.id, destination.name?.trim() || destination.id])
   );
-  const labels: Record<string, string[]> = {};
-  for (const connection of getUnitConnections(
+  const connected: Record<string, ConnectedDestination[]> = {};
+  for (const { sourceId, destinationId } of getUnitConnections(
     unit,
     new Set(sources.map(({ id }) => id)),
     new Set(destinations.map(({ id }) => id))
   )) {
-    const label = nameById.get(connection.destinationId) ?? connection.destinationId;
-    labels[connection.sourceId] = [...(labels[connection.sourceId] ?? []), label];
+    connected[sourceId] = [
+      ...(connected[sourceId] ?? []),
+      { id: destinationId, label: nameById.get(destinationId) ?? destinationId },
+    ];
   }
-  return labels;
+  connectedDestinationsByUnit.set(unit, connected);
+
+  return connected;
+};
+
+/** Destination names each configured source currently forwards to. */
+export const connectedDestinationLabels = (unit: Unit): Record<string, string[]> =>
+  Object.fromEntries(
+    Object.entries(connectedDestinations(unit)).map(([sourceId, items]) => [
+      sourceId,
+      items.map(({ label }) => label),
+    ])
+  );
+
+const sourceConnectedDestinationIdsByUnit = new WeakMap<Unit, ReadonlySet<string>>();
+
+/** Ids of destinations reached by any unit source, including unmanaged types. Cached per unit. */
+export const sourceConnectedDestinationIds = (unit: Unit): ReadonlySet<string> => {
+  const cached = sourceConnectedDestinationIdsByUnit.get(unit);
+  if (cached) {
+    return cached;
+  }
+  const ids = new Set(
+    getUnitConnections(
+      unit,
+      new Set(getUnitSources(unit).map(({ id }) => id)),
+      new Set((unit.unit.destinations ?? []).map(({ id }) => id))
+    ).map(({ destinationId }) => destinationId)
+  );
+  sourceConnectedDestinationIdsByUnit.set(unit, ids);
+
+  return ids;
 };
 
 export const createRuntimeMetadata = (

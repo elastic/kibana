@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
@@ -39,29 +39,28 @@ describe('UserName', () => {
     fieldName: 'user.name',
     fieldType: 'keyword',
     isAggregatable: true,
-    contextId: 'test-context-id',
     eventId: 'test-event-id',
     value: 'Mock User',
   };
 
   test('should render user name', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <UserName {...props} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="users-link-anchor"]').last().text()).toEqual(props.value);
+    expect(screen.getByTestId('users-link-anchor')).toHaveTextContent(props.value);
   });
 
   test('should not open any flyout or panels if context in not defined', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <UserName {...props} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('users-link-anchor'));
     await waitFor(() => {
       expect(flyoutApi.openUserFlyout).not.toHaveBeenCalled();
     });
@@ -75,7 +74,7 @@ describe('UserName', () => {
       tabType: TimelineTabs.query,
     };
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <UserName {...props} />
@@ -83,7 +82,7 @@ describe('UserName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('users-link-anchor'));
     await waitFor(() => {
       expect(flyoutApi.openUserFlyout).not.toHaveBeenCalled();
     });
@@ -96,7 +95,7 @@ describe('UserName', () => {
       timelineID: TableId.alertsOnAlertsPage,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <UserName {...props} />
@@ -104,7 +103,7 @@ describe('UserName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('users-link-anchor'));
     await waitFor(() => {
       expect(flyoutApi.openUserFlyout).toHaveBeenCalledWith({
         userName: props.value,
@@ -120,7 +119,7 @@ describe('UserName', () => {
       timelineID: TimelineId.active,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <UserName {...props} />
@@ -128,7 +127,7 @@ describe('UserName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('users-link-anchor'));
     await waitFor(() => {
       expect(flyoutApi.openUserFlyout).toHaveBeenCalledWith({
         userName: props.value,

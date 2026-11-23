@@ -12,6 +12,7 @@ import type {
   AgentTypeDefinition,
 } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
+import type { AgentCapabilities } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/core/server';
 import {
   SET_HYPOTHESES_TOOL_ID,
@@ -44,13 +45,22 @@ export const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ] as const;
 
+/**
+ * Built-in Agent Builder features every Nightshift agent type turns off. The agents reach data
+ * through the sandbox and their own tools, so the API tools (`describe_api`, `describe_api_type`,
+ * `execute_api` and `discover_apis`) only add tool definitions.
+ */
+export const NIGHTSHIFT_AGENT_CAPABILITIES: AgentCapabilities = {
+  api_tools: { enabled: false },
+};
+
 /** The agentic investigations tools earlier versions of the agent recorded findings with. */
 export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_ID] as const;
 
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
 export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
-  'inside a sandbox and, when Wiki is enabled, records what it learns in the Nightshift Wiki.';
+  'inside a sandbox and, when Wiki is enabled, records what it learns in the nightshift Wiki.';
 
 const SEMANTIC_MEMORY_SECTION = `
 **USING MEMORIES**
@@ -174,13 +184,15 @@ export type NightshiftAgentTypeOptions = Omit<
  * Memory hooks and the space's custom context. Only the instructions differ between types.
  * With `standalone`, the agent lists only its own tools, the significant event search tool and
  * the Slack read tool.
- * Agent Builder's own prompt and internal tools still apply to it.
+ * Agent Builder's own prompt and internal tools still apply to it, except the API tools, which
+ * `NIGHTSHIFT_AGENT_CAPABILITIES` turns off.
  */
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
   sandboxEnabled,
   wikiEnabled,
   memoryEnabled = false,
+  decisionTreesEnabled = false,
   learningEnabled = true,
   investigationToolsEnabled,
   proposalsEnabled,
@@ -191,7 +203,11 @@ export const buildNightshiftAgentConfiguration = ({
 }: NightshiftAgentTypeOptions & {
   instructions: string;
   standalone?: boolean;
+  /** Only the investigator passes this; the other agent types never hydrate or reinforce trees. */
+  decisionTreesEnabled?: boolean;
 }): AgentTypeDefinition['baseConfiguration'] => {
+  // Trees do not require Wiki or Memory, so any one of the three attaches the combined workflows.
+  const contextWorkflows = wikiEnabled || memoryEnabled || decisionTreesEnabled;
   const configurationFor = ({
     materializeWorkflowId,
     optimizeWorkflowId,
@@ -220,21 +236,21 @@ export const buildNightshiftAgentConfiguration = ({
         },
       ],
       enable_elastic_capabilities: false,
+      capabilities: NIGHTSHIFT_AGENT_CAPABILITIES,
       connector_ids: [],
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
         // sandbox_id they need. The reinforcement agent keeps its own hydrate workflow because
-        // it runs in a different conversation. `decisionTreesEnabled` implies `wikiEnabled`,
-        // so it adds nothing to either gate below.
+        // it runs in a different conversation.
         const beforeAgentWorkflowIds =
-          sandboxEnabled && (wikiEnabled || memoryEnabled) ? [materializeWorkflowId] : [];
+          sandboxEnabled && contextWorkflows ? [materializeWorkflowId] : [];
         return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
       })(),
       // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
       // workflow, so listing the reinforce workflow here as well would reinforce every round
       // twice — two ai.agent runs, up to 900s each, writing the same trees.
-      ...((wikiEnabled || memoryEnabled) && learningEnabled
+      ...(contextWorkflows && learningEnabled
         ? { post_execution_workflow_ids: [optimizeWorkflowId] }
         : {}),
     } satisfies AgentBaseConfiguration);
@@ -284,6 +300,7 @@ export const getInvestigationAgentType = ({
   avatar_icon: 'logoElastic',
   baseConfiguration: buildNightshiftAgentConfiguration({
     ...options,
+    decisionTreesEnabled,
     standalone: true,
     instructions: fillContextInstructions({
       includeWiki: options.sandboxEnabled && options.wikiEnabled,

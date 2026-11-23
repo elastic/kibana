@@ -89,7 +89,10 @@ export {
   buildInboundEventsUrl,
   INBOUND_EVENTS_TOKEN_MAX_LENGTH,
 } from './inbound_events';
-export { ACTIONS_INBOUND_EVENTS_ENABLED_FLAG } from './feature_flags';
+export {
+  ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
+  ACTIONS_INBOUND_EVENTS_ENABLED_FLAG,
+} from './feature_flags';
 export {
   buildConnectorPublicKeyUrls,
   CONNECTOR_PUBLIC_KEYS_API_PATH,
@@ -110,6 +113,7 @@ export const MAX_EMAIL_BODY_LENGTH = 25 * 1000 * 1000; // 25MB
 export const CONNECTOR_ID_MAX_LENGTH = 36;
 export const CONNECTOR_NAME_MAX_LENGTH = 1024;
 export const CONNECTOR_CONFIG_KEY_MAX_LENGTH = 1024;
+export const CONNECTOR_SPEC_VERSION_MAX_LENGTH = 16;
 export const ISO_DATE_MAX_LENGTH = 100;
 export const MAX_EXECUTION_FILTER_LENGTH = 8192;
 export const MAX_FEATURE_ID_LENGTH = 100;

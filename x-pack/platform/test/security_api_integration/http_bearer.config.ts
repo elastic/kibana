@@ -15,7 +15,10 @@ import { services } from './services';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_functional/plugins/test_endpoints'
+  );
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
   return {

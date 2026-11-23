@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -32,6 +32,7 @@ import { statusSignal } from './status_signal';
 import { useSettleDeclinedProposals } from './use_settle_declined_proposals';
 import { getCloseErrorCode, isKnownCloseError, isPartialCloseError } from './close_error_codes';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';
+import { useSkipCloseConfirmation } from '../close_confirmation/use_skip_close_confirmation';
 import { CloseEscalationModal } from '../close_confirmation/close_escalation_modal';
 import * as i18n from '../close_confirmation/translations';
 
@@ -50,17 +51,26 @@ interface InvestigationCloseContainerProps {
     rationale?: string;
     preview: InvestigationClosePreviewResponse;
   }) => Promise<void> | void;
+  /**
+   * Called when a close that asked the user nothing failed anyway. The callouts the modal would
+   * have shown have nowhere to appear, so the host reports the failure and ends the attempt —
+   * leaving it silent would also leave the trigger stuck mid-close.
+   */
+  onSkippedCloseFailed: () => void;
 }
 
 /**
  * Mounts the close preview hook and renders the investigation modal.
- * Rendered only when the modal is open, so every open starts a fresh fetch.
+ * Rendered only when the close is triggered, so every trigger starts a fresh fetch. The modal
+ * itself only appears when the close needs something from the user — see
+ * `useSkipCloseConfirmation`.
  */
 const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = ({
   conversationId,
   isMutating,
   onClose,
   onConfirm,
+  onSkippedCloseFailed,
 }) => {
   const [targetsChanged, setTargetsChanged] = useState(false);
   const [closeError, setCloseError] = useState<{
@@ -77,6 +87,9 @@ const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = 
     enabled: true,
   });
 
+  // Set by `confirmWithoutReason` so the catch below knows no modal is on screen to report into.
+  const wasSkipped = useRef(false);
+
   const handleConfirm = useCallback(
     async (params: { dismissReason?: DismissReason; rationale?: string }) => {
       if (!previewData) return;
@@ -84,6 +97,10 @@ const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = 
       try {
         await onConfirm({ ...params, preview: previewData });
       } catch (err) {
+        if (wasSkipped.current) {
+          onSkippedCloseFailed();
+          return;
+        }
         const code = getCloseErrorCode(err);
         if (code === 'close_targets_changed') {
           setTargetsChanged(true);
@@ -100,8 +117,20 @@ const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = 
         // the outer onError in executeCloseInvestigation can handle them.
       }
     },
-    [onConfirm, previewData, refetch]
+    [onConfirm, onSkippedCloseFailed, previewData, refetch]
   );
+
+  const confirmWithoutReason = useCallback(() => {
+    wasSkipped.current = true;
+    void handleConfirm({});
+  }, [handleConfirm]);
+  const { isSkipped } = useSkipCloseConfirmation({
+    preview: previewData,
+    loadError: isError && !previewData,
+    confirm: confirmWithoutReason,
+  });
+
+  if (isSkipped) return null;
 
   return (
     <CloseInvestigationModal
@@ -461,6 +490,10 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
           isMutating={isMutating}
           onClose={() => setShowCloseModal(false)}
           onConfirm={executeCloseInvestigation}
+          onSkippedCloseFailed={() => {
+            setShowCloseModal(false);
+            handleError();
+          }}
         />
       )}
 

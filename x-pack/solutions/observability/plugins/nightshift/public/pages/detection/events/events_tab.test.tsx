@@ -34,15 +34,9 @@ jest.mock('../../../components/ui/time_range_picker', () => ({
 }));
 jest.mock('../../../data/significant_events/use_fetch_event_by_id');
 jest.mock('../../../data/significant_events/use_significant_events_list');
+let mockFacets: Record<string, unknown> = {};
 jest.mock('../../../data/significant_events/use_significant_events_facets', () => ({
-  useSignificantEventsFacets: () => ({
-    data: {
-      severity: { critical: 0, high: 1, medium: 0, low: 0 },
-      status: { active: 1, recovering: 0, inactive: 0 },
-      investigation: { not_started: 1, in_progress: 0, completed: 0 },
-    },
-    refetch: jest.fn(),
-  }),
+  useSignificantEventsFacets: () => ({ data: mockFacets, refetch: jest.fn() }),
 }));
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -55,6 +49,12 @@ jest.mock('../../../hooks/use_kibana', () => ({
     },
   }),
 }));
+
+const defaultFacets = {
+  severity: { critical: 0, high: 1, medium: 0, low: 0 },
+  status: { active: 1, recovering: 0, inactive: 0 },
+  investigation: { not_started: 1, in_progress: 0, completed: 0 },
+};
 
 const mockUseFetchEventById = useFetchEventById as jest.Mock;
 const mockUseSignificantEventsList = useSignificantEventsList as jest.Mock;
@@ -93,6 +93,7 @@ const renderTab = (initialPath = '/detections/events') => {
 
 describe('EventsTab', () => {
   beforeEach(() => {
+    mockFacets = defaultFacets;
     jest.clearAllMocks();
     mockUseSignificantEventsList.mockReturnValue({
       data: { hits: [event], page: 1, perPage: 25, total: 1 },
@@ -112,7 +113,7 @@ describe('EventsTab', () => {
       ...event,
       event_id: 'event-2',
       title: 'Payment errors',
-      investigations: [{ workflow_execution_id: 'run-1', started_at: '2026-10-20T10:31:00.000Z' }],
+      investigation_state: 'in_progress',
     } as SignificantEventResponse;
     mockUseSignificantEventsList.mockReturnValue({
       data: { hits: [event, investigatedEvent], page: 1, perPage: 25, total: 2 },
@@ -195,7 +196,7 @@ describe('EventsTab', () => {
         expect.objectContaining({
           page: 1,
           search: 'checkout',
-          status: ['active'],
+          status: ['recovering'],
           severity: ['high'],
           investigation: ['not_started'],
         })
@@ -204,9 +205,111 @@ describe('EventsTab', () => {
     const params = new URLSearchParams(history.location.search);
     expect(params.has('page')).toBe(false);
     expect(params.get('search')).toBe('checkout');
-    expect(params.getAll('status')).toEqual(['active']);
+    expect(params.getAll('status')).toEqual(['recovering']);
     expect(params.getAll('severity')).toEqual(['high']);
     expect(params.getAll('investigation')).toEqual(['not_started']);
+  });
+
+  it('hides inactive events by default and keeps the URL clean', () => {
+    const history = renderTab();
+
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: ['active', 'recovering'] })
+    );
+    expect(new URLSearchParams(history.location.search).has('status')).toBe(false);
+  });
+
+  it('lets the user select inactive to see those events too', async () => {
+    const history = renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsStatusFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-inactive')
+    );
+
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: ['active', 'recovering', 'inactive'] })
+      )
+    );
+    expect(new URLSearchParams(history.location.search).getAll('status')).toEqual([
+      'active',
+      'recovering',
+      'inactive',
+    ]);
+  });
+
+  it('writes status=all when the last selected status is cleared', async () => {
+    const history = renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsStatusFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-active')
+    );
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: ['recovering'] })
+      )
+    );
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-recovering')
+    );
+
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: [] })
+      )
+    );
+    // The sentinel is what keeps an empty selection from restoring the default.
+    expect(new URLSearchParams(history.location.search).getAll('status')).toEqual(['all']);
+  });
+
+  it('treats status=all as no status filter', () => {
+    renderTab('/detections/events?status=all');
+
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: [] })
+    );
+  });
+
+  it('labels an event whose investigation state could not be read as unknown', () => {
+    mockUseSignificantEventsList.mockReturnValue({
+      data: {
+        hits: [{ ...event, investigation_state: 'unknown' }],
+        page: 1,
+        perPage: 25,
+        total: 1,
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+
+    renderTab();
+
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
+  });
+
+  it('notes in the investigation filter that older investigations may be missing when the window is full', async () => {
+    mockFacets = { ...defaultFacets, investigation_window_truncated: true };
+    renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsInvestigationFilterButton'));
+
+    expect(
+      await screen.findByTestId('nightshiftDetectionEventsInvestigationFilterNote')
+    ).toBeInTheDocument();
+  });
+
+  it('shows no filter note when the investigation window was not full', async () => {
+    renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsInvestigationFilterButton'));
+    await screen.findByTestId('nightshiftDetectionEventsInvestigationFilterOption-not_started');
+
+    expect(
+      screen.queryByTestId('nightshiftDetectionEventsInvestigationFilterNote')
+    ).not.toBeInTheDocument();
   });
 
   it('shows an error with a retry when the list fails to load', () => {
@@ -224,6 +327,44 @@ describe('EventsTab', () => {
     expect(screen.queryByTestId('nightshiftDetectionEventsTable')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftDetectionEventsRetryButton'));
     expect(mockRefreshEvents).toHaveBeenCalled();
+  });
+
+  it.each([
+    [503, /Events can't be filtered by investigation/],
+    [500, /The significant events list couldn't be loaded/],
+  ])('with an investigation filter, a %s list error shows the matching message', (status, text) => {
+    mockUseSignificantEventsList.mockReturnValue({
+      data: undefined,
+      error: Object.assign(new Error('failed'), {
+        name: 'HttpFetchError',
+        request: {},
+        response: { status },
+      }),
+      isError: true,
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+
+    renderTab('/detections/events?investigation=completed');
+
+    expect(screen.getByTestId('nightshiftDetectionEventsError')).toHaveTextContent(text);
+  });
+
+  it('shows the error, not the previous rows, when a new filter fails to load', () => {
+    mockUseSignificantEventsList.mockReturnValue({
+      data: { hits: [event], page: 1, perPage: 25, total: 1 },
+      isError: true,
+      isPreviousData: true,
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+
+    renderTab();
+
+    expect(screen.getByTestId('nightshiftDetectionEventsError')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionEventsTable')).not.toBeInTheDocument();
   });
 
   it('fetches a deep-linked event that is not on the current page', () => {

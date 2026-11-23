@@ -187,6 +187,7 @@ export class DispatchStep implements DispatcherStep {
         unmatched: ledger.releasedAlerts(plan.unmatched),
         outcome: outcome(),
         rules,
+        policies,
         timestamp: input.startedAt.toISOString(),
         executionUuid: input.executionUuid,
       });

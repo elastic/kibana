@@ -46,6 +46,7 @@ import {
   policyHasEndpointSecurity,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
+  sanitizeAgentPolicyOverrides,
   validateFleetSavedObjectId,
 } from '../../common/services';
 
@@ -76,6 +77,7 @@ import type {
 import type { AgentPolicyAgentVersionCondition } from '../../common/types/models/agent_policy';
 import {
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
+  AGENTLESS_UNENROLLED_REASON,
   AGENT_POLICY_INDEX,
   agentPolicyStatuses,
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -1209,31 +1211,41 @@ class AgentPolicyService {
       }
     }
 
+    const copiedAttributes = pick(baseAgentPolicy, [
+      'namespace',
+      'monitoring_enabled',
+      'inactivity_timeout',
+      'unenroll_timeout',
+      'agent_features',
+      'overrides',
+      'data_output_id',
+      'monitoring_output_id',
+      'download_source_id',
+      'download_source_ids',
+      'fleet_server_host_id',
+      'supports_agentless',
+      'global_data_tags',
+      'agentless',
+      'monitoring_pprof_enabled',
+      'monitoring_http',
+      'monitoring_diagnostics',
+    ]);
+    // Policies saved before the OpenTelemetry collector keys were denied may still hold them in
+    // `overrides`: do not carry them into the new policy.
+    if (copiedAttributes.overrides) {
+      const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(copiedAttributes.overrides);
+      if (removedKeys.length > 0) {
+        logger.warn(
+          `Not copying disallowed overrides [${removedKeys.join(', ')}] of agent policy [${id}]`
+        );
+      }
+      copiedAttributes.overrides = overrides;
+    }
+
     const newAgentPolicy = await this.create(
       soClient,
       esClient,
-      {
-        ...pick(baseAgentPolicy, [
-          'namespace',
-          'monitoring_enabled',
-          'inactivity_timeout',
-          'unenroll_timeout',
-          'agent_features',
-          'overrides',
-          'data_output_id',
-          'monitoring_output_id',
-          'download_source_id',
-          'download_source_ids',
-          'fleet_server_host_id',
-          'supports_agentless',
-          'global_data_tags',
-          'agentless',
-          'monitoring_pprof_enabled',
-          'monitoring_http',
-          'monitoring_diagnostics',
-        ]),
-        ...newAgentPolicyProps,
-      },
+      { ...copiedAttributes, ...newAgentPolicyProps },
       options
     );
 
@@ -1703,7 +1715,12 @@ class AgentPolicyService {
 
     if (agentPolicy?.supports_agentless) {
       logger.debug(`Starting  unenrolling agent from agentless policy ${id}`);
-      await unenrollForAgentPolicyId(soClient, esClient, id, { revoke: true });
+      // The unenrolled agent documents are kept, since in-flight Fleet Server checkins must still
+      // find them inactive. The reason hides them from the agents list once the policy is gone.
+      await unenrollForAgentPolicyId(soClient, esClient, id, {
+        revoke: true,
+        unenrolledReason: AGENTLESS_UNENROLLED_REASON,
+      });
       // unenroll  offline agents for agentless policies first to avoid 404 Save Object error
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
         spaceId: soClient.getCurrentNamespace(),

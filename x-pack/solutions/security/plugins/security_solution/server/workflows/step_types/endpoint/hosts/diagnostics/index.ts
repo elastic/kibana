@@ -6,6 +6,7 @@
  */
 
 import { UnhealthyReason } from '@kbn/fleet-plugin/common/types';
+import type { z } from '@kbn/zod/v4';
 import { sortBy } from 'lodash';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
@@ -15,6 +16,8 @@ import {
   MAX_DIAGNOSTIC_COMPONENTS,
   MAX_DIAGNOSTIC_UNITS,
   MAX_POLICY_ACTIONS,
+  MAX_USER_ARTIFACT_IDENTIFIERS,
+  type hostPolicyResponseSchema,
   getEndpointHostDiagnosticsInputSchema,
   getEndpointHostDiagnosticsStepCommonDefinition,
   isElasticDefendComponent,
@@ -83,6 +86,7 @@ interface HostPolicyResponse {
         version?: unknown;
         endpoint_policy_version?: unknown;
         actions?: unknown;
+        artifacts?: { user?: { identifiers?: Array<{ name: unknown; sha256: unknown }> } };
       };
     };
   };
@@ -228,23 +232,7 @@ const projectAgent = (
 const projectPolicyResponse = (
   value: HostPolicyResponse,
   includeHealthy: boolean
-): {
-  '@timestamp'?: string;
-  agent: { id: string; version: string };
-  Endpoint: {
-    policy: {
-      applied: {
-        id: string;
-        name: string;
-        status: string;
-        version: number;
-        endpoint_policy_version: number;
-        actions: Array<{ name: string; status: string; message: string }>;
-        actions_total?: number;
-      };
-    };
-  };
-} => {
+): z.infer<typeof hostPolicyResponseSchema> => {
   const applied = value.Endpoint?.policy?.applied ?? {};
   const rawActions = Array.isArray(applied.actions) ? (applied.actions as PolicyAction[]) : [];
   const kept = rawActions.filter((action) =>
@@ -253,6 +241,8 @@ const projectPolicyResponse = (
   const total = kept.length;
   const ordered = sortBy(kept, (action) => (asString(action.status) === SUCCESS ? 1 : 0));
   const timestamp = toIsoTimestamp(value['@timestamp']);
+  const rawIdentifiers = applied.artifacts?.user?.identifiers;
+  const identifiers = Array.isArray(rawIdentifiers) ? rawIdentifiers : undefined;
 
   return {
     ...(timestamp !== undefined ? { '@timestamp': timestamp } : {}),
@@ -274,6 +264,29 @@ const projectPolicyResponse = (
             message: boundText(asString(action.message), EXCERPT_MAX_CHARS),
           })),
           ...(total > MAX_POLICY_ACTIONS ? { actions_total: total } : {}),
+          ...(identifiers !== undefined
+            ? {
+                artifacts: {
+                  user: {
+                    identifiers: identifiers
+                      .slice(0, MAX_USER_ARTIFACT_IDENTIFIERS)
+                      .map((identifier) => {
+                        const name = asString(identifier?.name);
+                        const sha256 = asString(identifier?.sha256);
+                        const boundedName = boundText(name, MAX_INPUT_STRING_CHARS);
+                        return {
+                          name: boundedName,
+                          ...(boundedName !== name ? { name_truncated: true as const } : {}),
+                          sha256: boundId(sha256, MAX_INPUT_STRING_CHARS),
+                        };
+                      }),
+                    ...(identifiers.length > MAX_USER_ARTIFACT_IDENTIFIERS
+                      ? { identifiers_total: identifiers.length }
+                      : {}),
+                  },
+                },
+              }
+            : {}),
         },
       },
     },

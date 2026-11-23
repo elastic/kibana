@@ -55,8 +55,10 @@ export const PAN_MARGIN = 500;
 /** Fixed card widths (px) for each node kind; the single source of truth used
  * by both the node components and the pan-bound estimate below. */
 export const SOURCE_NODE_WIDTH = 246;
-// Wide enough for the stats footer: a status, a rate and an index count on one row.
-export const DESTINATION_NODE_WIDTH = 260;
+// Wide enough for the stats footer in the worst case, all on one row: a rate such as `12.5k/s`, a
+// latency such as `999ms`, the `Failures` badge, and a two-digit index count such as `99 indices`.
+// The columns of the layout are `COLUMN_GAP` apart, center to center, so this does not move them.
+export const DESTINATION_NODE_WIDTH = 300;
 export const ROUTING_NODE_WIDTH = 172;
 export const PROCESSING_NODE_WIDTH = 130;
 
@@ -94,3 +96,9 @@ export const MINIMAP_WIDTH = 150;
 export const MINIMAP_HEIGHT = 90;
 
 export const MINIMAP_MASK_COLOR = 'rgba(105, 112, 125, 0.14)';
+
+/** Opacity of nodes and edges outside the flow of the hovered node. */
+export const FLOW_DIMMED_OPACITY = 0.2;
+
+/** Fade duration (ms) when the flow highlight is applied or cleared. */
+export const FLOW_HIGHLIGHT_TRANSITION_MS = 120;

@@ -39,19 +39,30 @@ import {
   ConversationAccessControlMode,
   isConversationAccessControlRole,
   isPublicConversation,
+  isSteerMessageEvent,
   normalizeConversationAccessControl,
+  createBackgroundExecutionAlreadyReportedError,
   createBadRequestError,
   createConversationAlreadyExistsError,
+  createConversationAwaitingPromptError,
   createConversationBusyError,
   createConversationNotFoundError,
+  createConversationNotSteerableError,
   createConversationWriteConflictError,
   createInternalError,
+  createNoActiveExecutionError,
+  createTooManyPendingSteersError,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isAttachmentEvent,
   isConversationNotFoundError,
   isExecutionTerminalEvent,
+  pendingSteersFor,
+  STEERS_PER_RUN_MAX,
+  TimelineEventType,
+  type UserMessageEvent,
 } from '@kbn/agent-builder-common';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type {
   ConversationSearchOptions,
   SerializedMetadataValue,
@@ -76,6 +87,9 @@ import {
 } from '../access_control';
 import type {
   AppendEventsRequest,
+  AppendSteerRequest,
+  AppendSteerResult,
+  ConversationWithVersion,
   ActiveExecutionUpdate,
   ConversationCreateRequest,
   ConversationUpdatableFields,
@@ -87,13 +101,17 @@ import type {
   ConversationListResult,
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
+import { SteerSignal } from './steer_signals';
 import {
   ConversationBusySignal,
   applyActiveExecutionUpdate,
+  isAcquireActiveExecution,
   isActiveExecutionUpdateNoop,
+  isExecutionStale,
   readHeldExecution,
   toActiveExecution,
 } from './active_execution';
+import { getPendingResumeRound } from '../../execution/utils/pending_round';
 import type { AgentExecutionClient } from '../../execution/persistence';
 import {
   MAX_CONVERSATIONS_PER_PAGE,
@@ -120,7 +138,7 @@ export type { ActivityContext } from './activity_events';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
-import { reconcileAttachments } from './round_writes';
+import { keepStoredAgentMessages, reconcileAttachments } from './round_writes';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
 import { buildSearchSort, compileConversationFilter } from '../search';
@@ -163,6 +181,13 @@ type ConversationWriteEmission =
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
+  getWithVersion(conversationId: string): Promise<ConversationWithVersion>;
+  peekVersion(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }>;
+  /** Atomically validates the active execution and appends an idempotent steer. */
+  appendSteer(
+    request: AppendSteerRequest,
+    options: ConversationWriteOptions
+  ): Promise<AppendSteerResult>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(
@@ -242,7 +267,11 @@ export interface ConversationClient {
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+    options: ConversationWriteOptions & {
+      access?: ConversationAccess;
+      activity?: ActivityContext;
+      refresh?: Refresh;
+    }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   getUser(): CurrentUser;
   getAuthor(
@@ -368,6 +397,41 @@ const skipWrite = (current: NormalizedConversation): WriteSkipped => ({
 });
 const isWriteSkipped = (value: unknown): value is WriteSkipped =>
   typeof value === 'object' && value !== null && WRITE_SKIPPED in value;
+
+// Thrown from inside an OCC `fields` callback; the 409 error it becomes would be retried as a conflict.
+const BACKGROUND_EXECUTION_NOT_PENDING = Symbol('background execution not pending');
+interface BackgroundExecutionNotPending {
+  [BACKGROUND_EXECUTION_NOT_PENDING]: true;
+  executionId: string;
+}
+const backgroundExecutionNotPending = (executionId: string): BackgroundExecutionNotPending => ({
+  [BACKGROUND_EXECUTION_NOT_PENDING]: true,
+  executionId,
+});
+const isBackgroundExecutionNotPending = (value: unknown): value is BackgroundExecutionNotPending =>
+  typeof value === 'object' && value !== null && BACKGROUND_EXECUTION_NOT_PENDING in value;
+
+const consumeBackgroundExecution = (
+  current: NormalizedConversation,
+  executionId: string,
+  acquiring: boolean
+): ConversationInternalState | undefined => {
+  const { state: stored, active_execution: held, execution } = current;
+  // A live holder may report this child itself and writes its in-memory state back when it ends,
+  // so it answers busy, through the acquire when there is one.
+  if (held && !acquiring && !isExecutionStale(execution)) {
+    throw new ConversationBusySignal(held.execution_id);
+  }
+  if (!stored?.background_executions?.[executionId]) {
+    // A held conversation has not stored its state yet; a dead holder's state is never coming.
+    if (held) {
+      return undefined;
+    }
+    throw backgroundExecutionNotPending(executionId);
+  }
+  const { [executionId]: consumed, ...remaining } = stored.background_executions;
+  return { ...stored, background_executions: remaining };
+};
 
 /** True when the stored events already end `executionId` with a terminal lifecycle event. */
 const hasTerminalEventFor = (current: NormalizedConversation, executionId: string): boolean =>
@@ -771,6 +835,139 @@ class ConversationClientImpl implements ConversationClient {
     return conversation;
   }
 
+  async getWithVersion(conversationId: string): Promise<ConversationWithVersion> {
+    const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
+    return {
+      conversation: toConversationResponseFromDocument({
+        document,
+        user: this.getUser(),
+        resolveTemplate: getTemplate,
+      }),
+      seqNo: document._seq_no,
+      primaryTerm: document._primary_term,
+    };
+  }
+
+  async peekVersion(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }> {
+    let response: GetResponse<Pick<ConversationProperties, 'space'>>;
+    try {
+      response = await this.esClient.get<Pick<ConversationProperties, 'space'>>({
+        index: conversationIndexName,
+        id: conversationId,
+        _source_includes: ['space'],
+      });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404 || err?.statusCode === 404) {
+        throw createConversationNotFoundError({ conversationId });
+      }
+      throw err;
+    }
+    const docSpace = response._source?.space;
+    const spaceMatches = isDefaultSpace(this.space)
+      ? docSpace === undefined || docSpace === this.space
+      : docSpace === this.space;
+    if (
+      !response.found ||
+      !spaceMatches ||
+      response._seq_no === undefined ||
+      response._primary_term === undefined
+    ) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+    return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+  }
+
+  async appendSteer(
+    { id: conversationId, message, eventId, actor }: AppendSteerRequest,
+    { source }: ConversationWriteOptions
+  ): Promise<AppendSteerResult> {
+    let written: UserMessageEvent | undefined;
+
+    try {
+      await this.writeConversation({
+        conversationId,
+        access: 'converse',
+        source,
+        peekHeld: true,
+        fields: (current) => {
+          if (isPublicConversation(current.access_control)) {
+            throw new SteerSignal({ kind: 'not_steerable' });
+          }
+          // A retry is answered first, whatever the run has done since: paused on a prompt or ended.
+          const currentEvents = current.events ?? [];
+          const stored = currentEvents.find((event) => event.id === eventId);
+          if (stored) {
+            if (!isSteerMessageEvent(stored) || stored.actor.id !== actor.id) {
+              throw new SteerSignal({ kind: 'event_id_taken' });
+            }
+            throw new SteerSignal({ kind: 'already_stored', event: stored });
+          }
+          // A live holder is checked first: a resume holds the lock while the stored events still
+          // end in the pause it answers. The lock is free only while a round waits on a prompt.
+          // The stamp is the holder's timeline id, the one its events carry, so settlement can
+          // join the two.
+          const held = current.active_execution?.timeline_execution_id;
+          if (!held || isExecutionStale(current.execution)) {
+            throw new SteerSignal({
+              kind:
+                getPendingResumeRound(current) !== undefined
+                  ? 'awaiting_prompt'
+                  : 'no_active_execution',
+            });
+          }
+          // Five per run in total, read or not: what the run has read is in the execution document.
+          if (pendingSteersFor(currentEvents, held).length >= STEERS_PER_RUN_MAX) {
+            throw new SteerSignal({ kind: 'too_many_pending' });
+          }
+          written = {
+            id: eventId,
+            type: TimelineEventType.userMessage,
+            created_at: new Date().toISOString(),
+            actor,
+            data: { message, steer: { execution_id: held } },
+          };
+          const appended = [...currentEvents, written];
+          return {
+            events: appended,
+            rounds: eventsToRounds(appended),
+            schema_version: CONVERSATION_SCHEMA_VERSION,
+            // The author has read their own message; everyone else sees the conversation as unread.
+            read_by: (current.read_by ?? []).filter(({ userId }) => userId === actor.id),
+            read: false,
+          };
+        },
+      });
+    } catch (error) {
+      if (!(error instanceof SteerSignal)) {
+        throw error;
+      }
+      const { outcome } = error;
+      switch (outcome.kind) {
+        case 'already_stored':
+          return { event: outcome.event, alreadyStored: true };
+        case 'not_steerable':
+          throw createConversationNotSteerableError({ conversationId });
+        case 'awaiting_prompt':
+          throw createConversationAwaitingPromptError({ conversationId });
+        case 'no_active_execution':
+          throw createNoActiveExecutionError({ conversationId });
+        case 'too_many_pending':
+          throw createTooManyPendingSteersError({ conversationId });
+        case 'event_id_taken':
+          throw createBadRequestError(
+            `event_id "${eventId}" already names an event that is not a message of yours.`
+          );
+      }
+    }
+
+    if (!written) {
+      throw createInternalError(
+        `Steer ${eventId} on conversation ${conversationId} was not written`
+      );
+    }
+    return { event: written, alreadyStored: false };
+  }
+
   async updateRoundFeedback(
     conversationId: string,
     executionId: string,
@@ -1098,6 +1295,7 @@ class ConversationClientImpl implements ConversationClient {
       workspaceId,
       skipIfTerminalExistsFor,
       activeExecution,
+      consumeBackgroundExecution: backgroundExecutionToConsume,
     } = request;
     const createdAt = new Date().toISOString();
 
@@ -1110,10 +1308,20 @@ class ConversationClientImpl implements ConversationClient {
       source,
       refresh,
       activeExecution,
+      peekHeld: Boolean(backgroundExecutionToConsume),
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
         }
+        const nextState =
+          state ??
+          (backgroundExecutionToConsume
+            ? consumeBackgroundExecution(
+                current,
+                backgroundExecutionToConsume,
+                isAcquireActiveExecution(activeExecution)
+              )
+            : undefined);
         const currentEvents = current.events ?? [];
         const existingIds = new Set(currentEvents.map((event) => event.id));
         const newEvents = events.filter((event) => !existingIds.has(event.id));
@@ -1135,7 +1343,7 @@ class ConversationClientImpl implements ConversationClient {
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
-          ...(state ? { state } : {}),
+          ...(nextState ? { state: nextState } : {}),
           ...(attachments
             ? {
                 attachments: reconcileAttachments({
@@ -1192,7 +1400,10 @@ class ConversationClientImpl implements ConversationClient {
         const existingIds = new Set(nonRoundEvents.map((event) => event.id));
         // Round-derived events for this round were just wiped, so they always pass; additive ids
         // collide only when a caller re-inserts an existing uuid, which we drop.
-        const eventsToWrite = events.filter((event) => !existingIds.has(event.id));
+        const eventsToWrite = keepStoredAgentMessages(
+          currentEvents.filter((event) => event.id.startsWith(roundPrefix)),
+          events.filter((event) => !existingIds.has(event.id))
+        );
         writtenEvents = eventsToWrite;
         const firstRoundIndex = currentEvents.findIndex((event) =>
           event.id.startsWith(roundPrefix)
@@ -1554,7 +1765,12 @@ class ConversationClientImpl implements ConversationClient {
       access = 'converse',
       source,
       activity,
-    }: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+      refresh,
+    }: ConversationWriteOptions & {
+      access?: ConversationAccess;
+      activity?: ActivityContext;
+      refresh?: Refresh;
+    }
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
     const envelope = this.activityEnvelope(activity);
@@ -1563,6 +1779,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       source,
+      refresh,
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(
@@ -1785,6 +2002,25 @@ class ConversationClientImpl implements ConversationClient {
     return document;
   }
 
+  /** Writes that only change per-user fields (read, pinned, feedback) keep `updated_at`. */
+  private resolveUpdateDate({
+    current,
+    changes,
+  }: {
+    current: NormalizedConversation;
+    changes: Omit<ConversationUpdatableFields, 'id'>;
+  }): Date {
+    const perUserFields: ReadonlySet<string> = new Set<keyof ConversationUpdatableFields>([
+      'read',
+      'read_by',
+      'pinned',
+      'pinned_by',
+      'feedback',
+    ]);
+    const changesContent = Object.keys(changes).some((key) => !perUserFields.has(key));
+    return changesContent ? new Date() : new Date(current.updated_at);
+  }
+
   /**
    * Read-modify-write against the stored conversation, retrying on conflict.
    * `fields` is replayed per attempt against the freshly read conversation, so it must be free of side effects.
@@ -1796,6 +2032,7 @@ class ConversationClientImpl implements ConversationClient {
     maxRetries = 5,
     refresh,
     activeExecution,
+    peekHeld,
     ...emission
   }: {
     conversationId: string;
@@ -1804,8 +2041,9 @@ class ConversationClientImpl implements ConversationClient {
     maxRetries?: number;
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
+    peekHeld?: boolean;
   } & ConversationWriteEmission): Promise<Conversation> {
-    const writer = this.createWriter({ access, maxRetries, refresh, activeExecution });
+    const writer = this.createWriter({ access, maxRetries, refresh, activeExecution, peekHeld });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
     // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
     let before = undefined as NormalizedConversation | undefined;
@@ -1815,14 +2053,15 @@ class ConversationClientImpl implements ConversationClient {
         id: conversationId,
         mutate: (current) => {
           before = current;
+          const changes = fields(current);
           return updateConversation({
             conversation: current,
             update: {
               id: conversationId,
-              ...fields(current),
+              ...changes,
               ...(activeExecution && applyActiveExecutionUpdate(current, activeExecution)),
             },
-            updateDate: new Date(),
+            updateDate: this.resolveUpdateDate({ current, changes }),
             space: this.space,
           });
         },
@@ -1856,6 +2095,12 @@ class ConversationClientImpl implements ConversationClient {
 
         throw createConversationBusyError({ conversationId, activeExecutionId });
       }
+      if (isBackgroundExecutionNotPending(error)) {
+        throw createBackgroundExecutionAlreadyReportedError({
+          conversationId,
+          executionId: error.executionId,
+        });
+      }
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
         this.logger.warn(
@@ -1874,11 +2119,13 @@ class ConversationClientImpl implements ConversationClient {
     maxRetries,
     refresh,
     activeExecution,
+    peekHeld,
   }: {
     access: ConversationAccess;
     maxRetries: number;
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
+    peekHeld?: boolean;
   }): OccWriter<NormalizedConversation> {
     return new OccWriter<NormalizedConversation>({
       get: async (id) => {
@@ -1887,6 +2134,7 @@ class ConversationClientImpl implements ConversationClient {
           document,
           update: activeExecution,
           executionClient: this.executionClient,
+          peekHeld,
         });
 
         return {

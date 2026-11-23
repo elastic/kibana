@@ -73,18 +73,17 @@ triggers:
         # actually finds; a shortfall reports run_incomplete instead of packaging.
         #
         # Not required: this workflow is a plain `yaml` definition, so its own content hash
-        # propagates to every space on the next reconciliation regardless of version, but the
-        # Worker calling it is a `yamlTemplate` definition whose hash does not cover the
-        # imported YAML it renders -- an already-installed Worker only starts sending this
-        # field once its own `version` bumps. Requiring it here would fail every such Worker's
-        # packaging call in that gap; the step itself treats a missing value as skip-the-check,
-        # not as an error.
+        # propagates to every space on the next reconciliation regardless of version, but the Worker
+        # calling it is a `yamlTemplate` definition -- an already-installed Worker only starts
+        # sending this field once it is re-rendered. Requiring it here would fail every such
+        # Worker's packaging call in that gap; the step itself treats a missing value as
+        # skip-the-check, not as an error.
         expectedSseCount:
           type: number
           description: Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). Omit to skip the shortfall check.
         # The coordinator result a clean run cannot leave on an attachment (an SSE exists only
         # for a confirmed hit). Not required, for the same reason as `expectedSseCount`: an
-        # already-installed Worker does not send them until its own `version` bumps, and the
+        # already-installed Worker does not send them until it is re-rendered, and the
         # step treats absent values as "no dataset hint / no query", never as an error.
         reportIntentTargets:
           type: array
@@ -99,7 +98,7 @@ triggers:
           description: The coordinator's `tier2.behaviors` (the hunt child's `behaviors` output).
         # What a `retired_incomplete` run could not search (hunt.yaml's `coverage_gaps` output).
         # Not required, for the same reason as `expectedSseCount`: an already-installed Worker
-        # does not send it until its own `version` bumps, and the step packages a retired run
+        # does not send it until it is re-rendered, and the step packages a retired run
         # with count-less prose when it is absent.
         coverageGaps:
           type: array
@@ -365,7 +364,8 @@ steps:
         {% elsif packaged.dismissHold == 'check_failed' -%}
         No confirmed hits this run, but packaging could not verify whether the Investigation has an open Proposal, so it left the Investigation open rather than risk closing it over one{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.dismiss == true -%}
-        No confirmed hits, so packaging closed this Investigation as {% if inputs.huntStatus == 'retired_incomplete' %}other rather than benign, because part of the report could not be searched and the report is retired without a full search{% else %}benign{% endif %}{% if inputs.huntStatus == 'retired_incomplete' %}{% if inputs.coverageGaps != nil and inputs.coverageGaps != empty %}; the Investigation summary names what was not searched{% endif %}{% endif %}{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}{% if inputs.huntStatus == 'retired_incomplete' %}; recorded{% else %} and recorded{% endif %} {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        {% assign nothing_searched = inputs.coverageGaps | where: 'reason', 'nothing_searched' | size -%}
+        No confirmed hits, so packaging closed this Investigation as {% if inputs.huntStatus == 'retired_incomplete' and nothing_searched > 0 %}other rather than benign, because no search ran and the report is retired without one{% elsif inputs.huntStatus == 'retired_incomplete' %}other rather than benign, because part of the report could not be searched and the report is retired without a full search{% else %}benign{% endif %}{% if inputs.huntStatus == 'retired_incomplete' and nothing_searched == 0 %}{% if inputs.coverageGaps != nil and inputs.coverageGaps != empty %}; the Investigation summary names what was not searched{% endif %}{% endif %}{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}{% if inputs.huntStatus == 'retired_incomplete' %}; recorded{% else %} and recorded{% endif %} {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.mintSuppression == 'check_failed' -%}
         This run found something mint-worthy, but packaging could not verify which Proposals already exist, so no new one was created this time{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}. The next scheduled sweep will not retry this report on its own -- this run's hunt already marked it hunted -- so a manual run targeting this reportId is what actually retries it.
         {% elsif packaged.proposals == empty and coveredCount > 0 -%}
