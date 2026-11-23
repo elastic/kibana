@@ -159,7 +159,7 @@ describe('RuleFlyout', () => {
         'placeholder',
         'Example: products-* or products'
       );
-      expect(screen.getByTestId('searchBoostRuleFlyoutPriority')).toHaveValue('0');
+      expect(screen.getByTestId('searchBoostRuleFlyoutPriority')).toHaveValue(0);
       expect(screen.queryByTestId('searchBoostRuleTargets')).not.toBeInTheDocument();
       expect(screen.getByTestId('searchBoostRuleFlyoutSave')).toHaveTextContent('Create rule');
 
@@ -368,17 +368,42 @@ describe('RuleFlyout', () => {
       expect(await screen.findByText('There are no hidden data streams.')).toBeInTheDocument();
     });
 
-    it('takes only digits as the priority, and turns an empty one into 0', async () => {
+    it.each([
+      ['empty', ''],
+      ['pasted negative', '-3'],
+      ['pasted decimal', '1.5'],
+    ])('turns a %s priority into 0 when leaving the field', async (_description, value) => {
       renderFlyout();
       const priority = screen.getByTestId('searchBoostRuleFlyoutPriority');
 
       await userEvent.clear(priority);
-      await userEvent.type(priority, '1a2-');
-      expect(priority).toHaveValue('12');
+      if (value) {
+        await userEvent.paste(value);
+      }
+      await userEvent.tab();
+
+      expect(priority).toHaveValue(0);
+    });
+
+    it('ignores keys that cannot be part of a non-negative integer priority', async () => {
+      renderFlyout();
+      const priority = screen.getByTestId('searchBoostRuleFlyoutPriority');
 
       await userEvent.clear(priority);
+      await userEvent.type(priority, '-1e.2+');
+
+      expect(priority).toHaveValue(12);
+    });
+
+    it('keeps a non-negative integer priority when leaving the field', async () => {
+      renderFlyout();
+      const priority = screen.getByTestId('searchBoostRuleFlyoutPriority');
+
+      await userEvent.clear(priority);
+      await userEvent.type(priority, '12');
       await userEvent.tab();
-      expect(priority).toHaveValue('0');
+
+      expect(priority).toHaveValue(12);
     });
 
     it('reports a priority tie with another rule, and clears it when the priority changes', async () => {
@@ -458,7 +483,7 @@ describe('RuleFlyout', () => {
       ).toBeInTheDocument();
       expect(getProfileInput()).toHaveValue('storefront-search');
       expect(screen.getByTestId('searchBoostRuleFlyoutIndexPattern')).toHaveValue('archive-*');
-      expect(screen.getByTestId('searchBoostRuleFlyoutPriority')).toHaveValue('5');
+      expect(screen.getByTestId('searchBoostRuleFlyoutPriority')).toHaveValue(5);
       expect(screen.getByTestId('searchBoostRuleFlyoutSave')).toHaveTextContent('Save changes');
 
       await userEvent.click(getProfileInput());

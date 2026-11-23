@@ -18,10 +18,9 @@ export interface IndexPatternFieldProps {
   inputRef: (element: HTMLInputElement | null) => void;
   onChange: (value: string) => void;
   onBlur?: FocusEventHandler<HTMLInputElement>;
-  // Passed in by `EuiFormRow`.
+  // `id` and `aria-describedby` are passed in by `EuiFormRow`.
   id?: string;
   'aria-describedby'?: string;
-  onFocus?: FocusEventHandler<HTMLInputElement>;
 }
 
 /** A text field for one index pattern or name, with a button that clears it. */
@@ -36,7 +35,6 @@ export const IndexPatternField = ({
   onBlur,
   id,
   'aria-describedby': ariaDescribedBy,
-  onFocus,
 }: IndexPatternFieldProps) => {
   const inputElement = useRef<HTMLInputElement | null>(null);
 
@@ -71,7 +69,6 @@ export const IndexPatternField = ({
           inputRef(element);
         }}
         onChange={(event) => onChange(event.target.value)}
-        onFocus={onFocus}
         onBlur={onBlur}
         data-test-subj="searchBoostRuleFlyoutIndexPattern"
       />

@@ -41,7 +41,7 @@ import { validateIndexPattern, validateName } from '../../../common/validation';
 import { CANCEL_BUTTON_LABEL, SAVE_CHANGES_BUTTON_LABEL } from '../../translations';
 import { AppliesToFooter } from '../applies_to_footer/applies_to_footer';
 import { IndexPatternField } from './index_pattern_field';
-import { parsePriority } from './priority';
+import { PriorityField, parsePriority } from './priority_field';
 import { getProfileOptions, getSelectedProfileOptions } from './profile_options';
 import { findTiedRule } from './rule_ties';
 import { TargetList } from './target_list';
@@ -94,11 +94,12 @@ interface RuleFormValues {
   name: string;
   profileName: string;
   indexPattern: string;
-  /** As typed, so the field can be empty while the user edits it. */
+  /**
+   * The text in the field, so it can be empty while the user retypes it. Becomes a number on blur
+   * and on save.
+   */
   priority: string;
 }
-
-const NON_DIGITS = /\D/g;
 
 const getPriorityStyles = ({ base }: EuiThemeComputed) => css`
   width: ${base * 9}px;
@@ -326,20 +327,13 @@ export const RuleFlyout = ({
               isInvalid={Boolean(priorityState.error)}
               error={priorityState.error?.message}
             >
-              <EuiFieldText
-                inputMode="numeric"
+              <PriorityField
                 value={priorityField.value}
+                isDisabled={isSaving}
                 isInvalid={Boolean(priorityState.error)}
-                disabled={isSaving}
                 inputRef={priorityField.ref}
-                onChange={(event) =>
-                  priorityField.onChange(event.target.value.replace(NON_DIGITS, ''))
-                }
-                onBlur={() => {
-                  priorityField.onChange(String(parsePriority(priorityField.value)));
-                  priorityField.onBlur();
-                }}
-                data-test-subj="searchBoostRuleFlyoutPriority"
+                onChange={priorityField.onChange}
+                onBlur={priorityField.onBlur}
               />
             </EuiFormRow>
           </EuiFlexItem>
