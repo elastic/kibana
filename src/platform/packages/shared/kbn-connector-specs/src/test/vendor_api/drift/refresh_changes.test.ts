@@ -640,6 +640,32 @@ describe('describeChanges', () => {
     expect(lines).toEqual(object('Response', '+ note: a\\n```\\nb'));
   });
 
+  it("shows an MCP tool's input and output as the request and the response", () => {
+    expect(
+      describeChanges([
+        change('mcp-input-property-added', 'search: input.limit was added', 'integer'),
+        change('mcp-output-type-changed', 'search: output.items[] type changed'),
+      ])
+    ).toEqual(
+      areas(object('Response', '! items (type changed)'), object('Request', '+ limit: integer'))
+    );
+  });
+
+  it('keeps the text of a GraphQL or MCP change it has no words for', () => {
+    expect(
+      describeChanges([
+        change('mcp-read-only-changed', 'search: its readOnlyHint changed'),
+        change('FIELD_ADDED', 'Field "Board.url" was added to object type "Board".'),
+      ])
+    ).toEqual(
+      object(
+        'Other',
+        '! search: its readOnlyHint changed',
+        '! Field "Board.url" was added to object type "Board".'
+      )
+    );
+  });
+
   it('keeps the rule of a change it has no words for', () => {
     expect(
       describeChanges([

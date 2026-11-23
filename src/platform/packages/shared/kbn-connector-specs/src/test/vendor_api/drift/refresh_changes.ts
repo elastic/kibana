@@ -343,6 +343,27 @@ const withSubtypeChanges = (entries: readonly Entry[]): Entry[] => {
   return [...others, ...merged];
 };
 
+// An MCP tool's change: `search: input.limit was added`, `search: output.items[] type changed`.
+const MCP_CHANGE = /^[^:]+: ((?:input|output)\S*) (.+)$/;
+
+/** A change to an MCP tool's input or output, as a line of the request or the response. */
+const mcpEntriesOf = ({ id, text, type }: SpecChange): Entry[] | undefined => {
+  const match = MCP_CHANGE.exec(text);
+  const direction = /^mcp-(input|output)-/.exec(id)?.[1];
+  if (match === null || direction === undefined) return undefined;
+  const [, at, what] = match;
+  const path = at.replace(/\[\]/g, '').split('.');
+  const name = path.length > 1 ? path[path.length - 1] : `(${direction})`;
+  const area = direction === 'input' ? 'Request' : 'Response';
+  if (/-property-(added|removed)$/.test(id)) {
+    return [{ area, sign: id.endsWith('-added') ? '+' : '-', name, type, details: [] }];
+  }
+  return [{ area, sign: '!', name, type, details: [what] }];
+};
+
+/** A rule of a GraphQL or MCP source, whose text is short enough to show as it is. */
+const isProtocolRule = (id: string): boolean => /^mcp-|^[A-Z][A-Z_]+$/.test(id);
+
 const entriesOf = (change: SpecChange): Entry[] | undefined => {
   const { id, text, type } = change;
   const names = quoted(text);
@@ -350,6 +371,9 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
 
   if (isGrantChange(change)) {
     return []; // Netted out over every security change of the endpoint, in `scopeEntries`.
+  }
+  if (id.startsWith('mcp-')) {
+    return mcpEntriesOf(change);
   }
   if (id === 'response-non-success-status-added' || id === 'response-non-success-status-removed') {
     return names[0] === undefined
@@ -608,7 +632,9 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
   for (const change of changes) {
     const found = entriesOf(change);
     if (found === undefined) {
-      otherRules.set(change.id, (otherRules.get(change.id) ?? 0) + 1);
+      // An `oasdiff` text can carry a long schema path, a GraphQL or MCP one is a short sentence.
+      const label = isProtocolRule(change.id) ? change.text : change.id;
+      otherRules.set(label, (otherRules.get(label) ?? 0) + 1);
     } else {
       entries.push(...found);
     }

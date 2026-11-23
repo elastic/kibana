@@ -62,7 +62,12 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
   );
   const actionsOf = (endpoint: string): string[] =>
     (drift.actions ?? [])
-      .filter(({ operations }) => operations.some(({ operation }) => operation === endpoint))
+      // The manifest names an MCP tool's call `tools/call <tool>`, its changes the tool alone.
+      .filter(({ operations }) =>
+        operations.some(
+          ({ operation }) => operation === endpoint || operation === `tools/call ${endpoint}`
+        )
+      )
       .map(({ action }) => action)
       .sort(byName);
   const all = endpoints.map(([endpoint, group]) => ({

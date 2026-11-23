@@ -52,6 +52,18 @@ const listedNames = (body: string, connector: string): number => {
 };
 
 describe('renderRefreshPr', () => {
+  it('finds the actions that call an MCP tool, which the manifest names `tools/call <tool>`', () => {
+    const body = renderRefreshPr([
+      changed(
+        '.mcp',
+        [added('search', 'search: input.limit was added', 'mcp-input-property-added')],
+        [calling('searchItems', 'tools/call search')]
+      ),
+    ]);
+
+    expect(body).toContain('`searchItems`');
+  });
+
   it('says how many changes the spec brought and folds the table away', () => {
     const body = renderRefreshPr([
       changed(
