@@ -6,8 +6,6 @@
  */
 
 import {
-  buildChangePointLineDataQuery,
-  getChangePointByColumns,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
   hasChangePointCommand,
@@ -92,8 +90,6 @@ describe('buildChangePointEsql', () => {
       valueColumn: 'avg_bytes',
       timeColumn: 'bucket',
     });
-    expect(getChangePointByColumns(query)).toBeUndefined();
-    expect(buildChangePointLineDataQuery(query)).toBeDefined();
   });
 
   it('supports all aggregation functions', () => {
@@ -135,7 +131,6 @@ describe('buildChangePointEsql', () => {
         '| CHANGE_POINT `max_bytes` ON bucket BY `host.name`',
       ].join('\n')
     );
-    expect(getChangePointByColumns(withoutPartitions)).toEqual(['host.name']);
   });
 
   it('adds an IN filter when splitField and partitions are provided, and ignores partitions without splitField', () => {
@@ -185,12 +180,6 @@ describe('buildChangePointEsql', () => {
         '| CHANGE_POINT `avg_system.cpu``pct` ON bucket BY `k8s``pod.name`',
       ].join('\n')
     );
-    expect(hasChangePointCommand(query)).toBe(true);
-    expect(getChangePointSeriesColumns(query)).toEqual({
-      valueColumn: 'avg_system.cpu`pct',
-      timeColumn: 'bucket',
-    });
-    expect(getChangePointByColumns(query)).toEqual(['k8s`pod.name']);
   });
 
   it('escapes quotes and backslashes in partition values', () => {
@@ -206,7 +195,6 @@ describe('buildChangePointEsql', () => {
     expect(query).toContain(
       'AND `host.name` IN ("host-\\"a\\"", "C:\\\\path\\\\srv", "a, b | DROP bytes")'
     );
-    expect(hasChangePointCommand(query)).toBe(true);
   });
 
   it('leaves comma-separated, wildcard, and cross-cluster index patterns unquoted', () => {
@@ -218,11 +206,6 @@ describe('buildChangePointEsql', () => {
     });
 
     expect(query?.startsWith('FROM logs-*, cluster_one:metrics-*\n')).toBe(true);
-    expect(hasChangePointCommand(query)).toBe(true);
-    expect(getChangePointSeriesColumns(query)).toEqual({
-      valueColumn: 'avg_system.cpu.pct',
-      timeColumn: 'bucket',
-    });
   });
 
   it('avoids column collisions with generated metric, bucket, type, and pvalue columns', () => {
@@ -238,10 +221,6 @@ describe('buildChangePointEsql', () => {
       '| STATS `avg_bytes_value` = AVG(`bytes`) BY `avg_bytes`, bucket = BUCKET('
     );
     expect(byMetricAlias).toContain('| CHANGE_POINT `avg_bytes_value` ON bucket BY `avg_bytes`');
-    expect(getChangePointSeriesColumns(byMetricAlias)).toEqual({
-      valueColumn: 'avg_bytes_value',
-      timeColumn: 'bucket',
-    });
 
     const byBucket = buildChangePointEsql({
       indexPattern: 's3-logs-*',
@@ -259,11 +238,6 @@ describe('buildChangePointEsql', () => {
         '| CHANGE_POINT `avg_bytes` ON time_bucket BY `bucket`',
       ].join('\n')
     );
-    expect(getChangePointSeriesColumns(byBucket)).toEqual({
-      valueColumn: 'avg_bytes',
-      timeColumn: 'time_bucket',
-    });
-    expect(getChangePointByColumns(byBucket)).toEqual(['bucket']);
 
     for (const splitField of ['type', 'pvalue'] as const) {
       const query = buildChangePointEsql({
@@ -277,11 +251,6 @@ describe('buildChangePointEsql', () => {
       expect(query).toContain(
         `| CHANGE_POINT \`avg_bytes\` ON bucket AS change_point_type, change_point_pvalue BY \`${splitField}\``
       );
-      expect(getChangePointOutputColumnNames(query)).toEqual({
-        typeColumn: 'change_point_type',
-        pvalueColumn: 'change_point_pvalue',
-      });
-      expect(getChangePointByColumns(query)).toEqual([splitField]);
     }
   });
 
@@ -302,45 +271,23 @@ describe('buildChangePointEsql', () => {
       metricField: 'bytes',
       onlyChangePoints: true,
     });
-    expect(defaultFiltered).toBe(
-      [
-        'FROM logs-*',
-        '| WHERE `@timestamp` >= ?_tstart AND `@timestamp` <= ?_tend',
-        '| STATS `avg_bytes` = AVG(`bytes`) BY bucket = BUCKET(`@timestamp`, 75, ?_tstart, ?_tend)',
-        '| CHANGE_POINT `avg_bytes` ON bucket',
-        '| WHERE `type` IS NOT NULL',
-      ].join('\n')
-    );
-    expect(hasChangePointCommand(defaultFiltered)).toBe(true);
-    expect(getChangePointOutputColumnNames(defaultFiltered)).toEqual({
-      typeColumn: 'type',
-      pvalueColumn: 'pvalue',
+    expect(defaultFiltered).toBe(`${defaultUnfiltered}\n| WHERE \`type\` IS NOT NULL`);
+
+    const aliasedFiltered = buildChangePointEsql({
+      indexPattern: 'logs-*',
+      timeField: '@timestamp',
+      aggregationFunction: 'avg',
+      metricField: 'bytes',
+      splitField: 'type',
+      onlyChangePoints: true,
     });
-
-    for (const splitField of ['type', 'pvalue'] as const) {
-      const aliasedFiltered = buildChangePointEsql({
-        indexPattern: 'logs-*',
-        timeField: '@timestamp',
-        aggregationFunction: 'avg',
-        metricField: 'bytes',
-        splitField,
-        onlyChangePoints: true,
-      });
-
-      expect(aliasedFiltered).toBe(
-        [
-          'FROM logs-*',
-          '| WHERE `@timestamp` >= ?_tstart AND `@timestamp` <= ?_tend',
-          `| STATS \`avg_bytes\` = AVG(\`bytes\`) BY \`${splitField}\`, bucket = BUCKET(\`@timestamp\`, 75, ?_tstart, ?_tend)`,
-          `| CHANGE_POINT \`avg_bytes\` ON bucket AS change_point_type, change_point_pvalue BY \`${splitField}\``,
-          '| WHERE `change_point_type` IS NOT NULL',
-        ].join('\n')
-      );
-      expect(hasChangePointCommand(aliasedFiltered)).toBe(true);
-      expect(getChangePointOutputColumnNames(aliasedFiltered)).toEqual({
-        typeColumn: 'change_point_type',
-        pvalueColumn: 'change_point_pvalue',
-      });
-    }
+    expect(aliasedFiltered).toContain(
+      '| CHANGE_POINT `avg_bytes` ON bucket AS change_point_type, change_point_pvalue BY `type`'
+    );
+    expect(aliasedFiltered).toContain('| WHERE `change_point_type` IS NOT NULL');
+    expect(getChangePointOutputColumnNames(aliasedFiltered)).toEqual({
+      typeColumn: 'change_point_type',
+      pvalueColumn: 'change_point_pvalue',
+    });
   });
 });

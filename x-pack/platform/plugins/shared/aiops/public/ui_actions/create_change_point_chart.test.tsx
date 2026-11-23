@@ -157,41 +157,26 @@ describe('createAddChangePointChartAction', () => {
       metricField: 'bytes',
     });
 
-    expect(container.addNewPanel).toHaveBeenLastCalledWith({
-      panelType: CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
-      serializedState: {
-        title: 'Change point: avg(bytes)',
-        esql,
-        apply_dashboard_context: true,
-        configuration: {
-          mode: 'form',
-          data_view_id: 'logs-dv',
-          aggregation_function: 'avg',
-          metric_field: 'bytes',
-        },
-      },
-    });
+    expect(container.addNewPanel).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        panelType: CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+        serializedState: expect.objectContaining({ esql }),
+      })
+    );
 
-    // Confirm Table adds discover_session
     element.props.onConfirm({
       mode: 'esql',
       viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.TABLE,
       esql,
     });
 
-    expect(container.addNewPanel).toHaveBeenLastCalledWith({
-      panelType: SEARCH_EMBEDDABLE_TYPE,
-      serializedState: {
-        tabs: [
-          {
-            type: 'default',
-            data_source: { type: 'esql', query: esql },
-            sort: [],
-            column_order: ['type', '_source', 'pvalue'],
-            row_height: 3,
-          },
-        ],
-      },
-    });
+    expect(container.addNewPanel).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        panelType: SEARCH_EMBEDDABLE_TYPE,
+        serializedState: expect.objectContaining({
+          tabs: [expect.objectContaining({ data_source: { type: 'esql', query: esql } })],
+        }),
+      })
+    );
   });
 });

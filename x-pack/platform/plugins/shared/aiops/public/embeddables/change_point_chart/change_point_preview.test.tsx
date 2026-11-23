@@ -291,7 +291,7 @@ describe('ChangePointPanelPreview', () => {
     });
     expect(statuses.at(-1)).toEqual({ key: 'charts:::q1', status: 'ready' });
 
-    // Toggling direct edit ON changes serializedState.configuration without changing previewKey
+    // A new panel package with the same preview key does not remount the preview.
     rerender(
       <EuiProvider>
         <ChangePointPanelPreview

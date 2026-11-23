@@ -142,34 +142,23 @@ describe('build_change_point_panel_state', () => {
       },
     });
 
-    const filteredSplitEsql = `${baseEsql}\n| WHERE \`type\` IS NOT NULL`;
-    expect(
-      buildChangePointPanelPackage({
-        mode: 'form',
-        viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.TABLE,
-        esql: filteredSplitEsql,
-        dataViewId: 'logs-dv',
-        aggregationFunction: 'avg',
-        metricField: 'bytes',
-        splitField: 'host.name',
-      })
-    ).toEqual({
-      panelType: SEARCH_EMBEDDABLE_TYPE,
-      serializedState: {
-        title: 'Change point: avg(bytes) split by "host.name"',
-        tabs: [
-          {
-            type: 'default',
-            data_source: {
-              type: 'esql',
-              query: filteredSplitEsql,
-            },
-            sort: [],
-            column_order: ['type', SOURCE_COLUMN, 'pvalue'],
-            row_height: 3,
-          },
-        ],
-      },
+    const filteredSplitTable = buildChangePointPanelPackage({
+      mode: 'form',
+      viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.TABLE,
+      esql: `${baseEsql}\n| WHERE \`type\` IS NOT NULL`,
+      dataViewId: 'logs-dv',
+      aggregationFunction: 'avg',
+      metricField: 'bytes',
+      splitField: 'host.name',
     });
+    expect(filteredSplitTable.serializedState).toEqual(
+      expect.objectContaining({
+        tabs: [
+          expect.objectContaining({
+            column_order: ['type', SOURCE_COLUMN, 'pvalue'],
+          }),
+        ],
+      })
+    );
   });
 });

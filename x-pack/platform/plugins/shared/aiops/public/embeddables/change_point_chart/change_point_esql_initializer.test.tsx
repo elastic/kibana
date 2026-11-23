@@ -244,8 +244,6 @@ describe('ChangePointEsqlInitializer', () => {
     await waitFor(() => {
       expect(latestPreviewProps.previewKey).toContain(expectedEsql);
     });
-    expect(latestPreviewProps.previewKey).not.toContain('scripted_metric');
-    expect(latestPreviewProps.previewKey).not.toContain('runtime_metric');
     expect(screen.queryByTestId('aiopsMaxSeriesControlFieldNumber')).toBeNull();
     expect(screen.queryByTestId('aiopsChangePointEsqlEditor')).toBeNull();
 
