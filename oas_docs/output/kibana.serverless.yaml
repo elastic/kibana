@@ -176473,6 +176473,40 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          anyOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                scheme:
+                  description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+                  enum:
+                    - api_key
+                    - bearer_token
+                  type: string
+                type:
+                  enum:
+                    - auth_header
+                  type: string
+              required:
+                - type
+                - scheme
+            - additionalProperties: false
+              type: object
+              properties:
+                name:
+                  description: The name of the header that is sent with the credential as value.
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - custom_header
+                  type: string
+              required:
+                - type
+                - name
+          nullable: true
         id:
           type: string
         is_default:
@@ -176500,6 +176534,22 @@ components:
           additionalProperties: false
           type: object
           properties:
+            auth:
+              additionalProperties: false
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             otlp_exporter:
               additionalProperties: false
               type: object
@@ -178963,6 +179013,40 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          anyOf:
+            - additionalProperties: true
+              type: object
+              properties:
+                scheme:
+                  description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+                  enum:
+                    - api_key
+                    - bearer_token
+                  type: string
+                type:
+                  enum:
+                    - auth_header
+                  type: string
+              required:
+                - type
+                - scheme
+            - additionalProperties: true
+              type: object
+              properties:
+                name:
+                  description: The name of the header that is sent with the credential as value.
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - custom_header
+                  type: string
+              required:
+                - type
+                - name
+          nullable: true
         id:
           type: string
         is_default:
@@ -178990,6 +179074,22 @@ components:
           additionalProperties: true
           type: object
           properties:
+            auth:
+              additionalProperties: true
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             otlp_exporter:
               additionalProperties: true
               type: object
@@ -186783,6 +186883,40 @@ components:
             type: string
           maxItems: 1000
           type: array
+        auth:
+          anyOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                scheme:
+                  description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+                  enum:
+                    - api_key
+                    - bearer_token
+                  type: string
+                type:
+                  enum:
+                    - auth_header
+                  type: string
+              required:
+                - type
+                - scheme
+            - additionalProperties: false
+              type: object
+              properties:
+                name:
+                  description: The name of the header that is sent with the credential as value.
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - custom_header
+                  type: string
+              required:
+                - type
+                - name
+          nullable: true
         id:
           type: string
         is_default:
@@ -186808,6 +186942,23 @@ components:
           additionalProperties: false
           type: object
           properties:
+            auth:
+              additionalProperties: false
+              type: object
+              properties:
+                credential:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                  nullable: true
             otlp_exporter:
               additionalProperties: false
               type: object
