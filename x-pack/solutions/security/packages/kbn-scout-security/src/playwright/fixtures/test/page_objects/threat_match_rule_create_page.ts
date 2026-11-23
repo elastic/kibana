@@ -8,6 +8,7 @@
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
+import { dismissProjectPickerTour } from './helpers/dismiss_project_picker_tour';
 
 /**
  * Rule creation flow for Indicator match (threat match) rules — threat index
@@ -69,12 +70,6 @@ export class ThreatMatchRuleCreatePage {
     this.scheduleLookbackUnit = scheduleLookback.locator('[data-test-subj="timeType"]');
   }
 
-  private async dismissProjectPickerTour(): Promise<void> {
-    await this.page.addInitScript(() => {
-      window.localStorage.setItem('cps:projectPicker:tourShown', 'true');
-    });
-  }
-
   /**
    * Opens rule creation in the given space, selects Indicator match, enters the
    * threat index, and waits for the threat-field autocomplete combobox.
@@ -86,7 +81,7 @@ export class ThreatMatchRuleCreatePage {
   }): Promise<void> {
     const { kbnUrl, spaceId, testIndex } = params;
 
-    await this.dismissProjectPickerTour();
+    await dismissProjectPickerTour(this.page);
     await this.page.goto(kbnUrl.app('security/rules/create', { space: spaceId }));
 
     // Rule type cards may take a while to render in CI
@@ -131,7 +126,7 @@ export class ThreatMatchRuleCreatePage {
   }): Promise<void> {
     const { kbnUrl, spaceId } = params;
 
-    await this.dismissProjectPickerTour();
+    await dismissProjectPickerTour(this.page);
     await this.page.goto(kbnUrl.app('security/rules/create', { space: spaceId }));
     await this.waitForFormReady(this.customQueryInput);
     await this.page.testSubj.locator('threatMatchRuleType').click();

@@ -10,6 +10,7 @@ import { EsqlEditor } from '@kbn/scout';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
+import { dismissProjectPickerTour } from './helpers/dismiss_project_picker_tour';
 
 /** One attempt to pick options before the selection is retried. */
 const OPTION_ATTEMPT_TIMEOUT_MS = 5_000;
@@ -84,9 +85,7 @@ export class EsqlRuleFormPage {
   async gotoCreateEsqlRule(params: { kbnUrl: KibanaUrl; spaceId: string }): Promise<void> {
     const { kbnUrl, spaceId } = params;
 
-    await this.page.addInitScript(() => {
-      window.localStorage.setItem('cps:projectPicker:tourShown', 'true');
-    });
+    await dismissProjectPickerTour(this.page);
     await this.page.goto(kbnUrl.app('security/rules/create', { space: spaceId }));
     await this.ruleTypeCard.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
     await this.ruleTypeCard.click();
