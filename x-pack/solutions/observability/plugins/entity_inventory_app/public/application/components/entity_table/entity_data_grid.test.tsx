@@ -95,6 +95,7 @@ const WIDGET_TYPE: InventoryType = {
   name: 'Widget',
   identityFields: ['widget.name'],
   columns: WIDGET_COLUMNS,
+  suggestedFilters: [],
   sources: [{ indexPattern: 'metrics-widget-*' }],
 };
 

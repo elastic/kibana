@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { Case } from '../../../common/types/domain';
 import {
@@ -37,6 +38,15 @@ export const toCaseAttachmentData = (theCase: Case, url?: string | null): CaseAt
   total_observables: theCase.total_observables ?? null,
   url: url ?? null,
   connector_name: theCase.connector?.name ?? null,
+  // Same count the UI sets on "Add to chat". `flattenCaseSavedObject` defaults `comments` to []
+  // for cases loaded without them, so only a non-empty list (attachment write steps) is a real
+  // count; otherwise `emitCaseAttachment` keeps the stored value. The write response carries at
+  // most one comments page, so the count caps at MAX_DOCS_PER_PAGE (the ES result window), the
+  // same ceiling as the UI's own fetch.
+  ...(theCase.comments &&
+    theCase.comments.length > 0 && {
+      totalAttachments: theCase.comments.length,
+    }),
 });
 
 /**
@@ -69,17 +79,101 @@ export const injectAttachmentIds = <T extends { results: Array<{ data?: unknown 
   };
 };
 
+const findCaseAttachments = (
+  attachments: ToolHandlerContext['attachments'],
+  caseId: string
+): VersionedAttachment[] =>
+  attachments.getActive().filter((attachment) => {
+    if (attachment.type !== CASE_ATTACHMENT_TYPE) {
+      return false;
+    }
+    const latestData = getLatestVersion(attachment)?.data as
+      | Partial<CaseAttachmentData>
+      | undefined;
+    return latestData?.id === caseId;
+  });
+
+// `update` awaits validation before it pushes the new version, so two tool calls updating the same
+// attachment through different `forToolCall` views would each carry forward the same stale
+// `previous` and the later write would drop the earlier one's fresh `totalAttachments`. Attachment
+// ids are uuids unique per conversation store, so one module-level queue per id is enough; the
+// entry is deleted once its tail settles.
+const attachmentUpdateQueues = new Map<string, Promise<unknown>>();
+
+/** Test-only: number of held per-attachment update locks. Do not use in production code. */
+export const pendingAttachmentUpdateLocks = (): number => attachmentUpdateQueues.size;
+
+const withAttachmentUpdateLock = async <T>(id: string, run: () => Promise<T>): Promise<T> => {
+  const previous = attachmentUpdateQueues.get(id) ?? Promise.resolve();
+  const current = previous.then(run);
+  const tail = current.then(
+    () => undefined,
+    () => undefined
+  );
+  attachmentUpdateQueues.set(id, tail);
+  try {
+    return await current;
+  } finally {
+    if (attachmentUpdateQueues.get(id) === tail) {
+      attachmentUpdateQueues.delete(id);
+    }
+  }
+};
+
+const updateCaseAttachment = (
+  attachments: ToolHandlerContext['attachments'],
+  id: string,
+  data: CaseAttachmentData,
+  description: string
+): Promise<string> =>
+  withAttachmentUpdateLock(id, async () => {
+    // `update` replaces the whole version's data. The UI ("Add to chat") supplies
+    // `totalAttachments` and `url`, which server-side emits don't know: carry them forward from
+    // the latest state read inside the lock, not from a snapshot taken before waiting for it.
+    const current = attachments.getActive().find((attachment) => attachment.id === id);
+    const previous = current && (getLatestVersion(current)?.data as Partial<CaseAttachmentData>);
+    const totalAttachments = data.totalAttachments ?? previous?.totalAttachments;
+    await attachments.update(id, {
+      data: {
+        ...data,
+        url: data.url ?? previous?.url ?? null,
+        ...(totalAttachments !== undefined && { totalAttachments }),
+      },
+      description,
+    });
+    return id;
+  });
+
 export const emitCaseAttachment = async (
   attachments: ToolHandlerContext['attachments'],
   data: CaseAttachmentData,
   description?: string
 ): Promise<string> => {
+  const resolvedDescription = description ?? `Case: ${data.title}`;
+  const [existing] = findCaseAttachments(attachments, data.id);
+  if (existing) {
+    return updateCaseAttachment(attachments, existing.id, data, resolvedDescription);
+  }
+
   const added = await attachments.add({
     type: CASE_ATTACHMENT_TYPE,
     data,
-    description: description ?? `Case: ${data.title}`,
+    description: resolvedDescription,
   });
-  return added.id;
+
+  // Tool calls from one model message run in parallel, each with its own `forToolCall` view over
+  // one shared state, and `add` awaits validation before storing: concurrent emits for the same
+  // new case can all miss the check above and each add. Per-view locking can't see across views,
+  // so reconcile on the shared state instead: the earliest attachment for the case wins and a
+  // later one folds its data into it and removes itself, so every racer ends up with one id.
+  const [winner] = findCaseAttachments(attachments, data.id);
+  if (!winner || winner.id === added.id) {
+    return added.id;
+  }
+  attachments.permanentDelete(added.id);
+  // Drop the loser's add/delete changes so the transient duplicate is never surfaced as events.
+  attachments.drainChanges(({ attachment_id: changedId }) => changedId === added.id);
+  return updateCaseAttachment(attachments, winner.id, data, resolvedDescription);
 };
 
 export const emitCasesAttachment = async (
