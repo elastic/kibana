@@ -12,10 +12,11 @@ import type {
   InferenceInferenceEndpointInfo,
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { InferenceEndpointRequestBody } from '@kbn/inference-common';
+import type { InferenceEndpointRequestBody, InferenceProvider } from '@kbn/inference-common';
 
 import type { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
+import { getUpdatableServiceSettings } from '../lib/get_updatable_service_settings';
 import { inferenceEndpointExists } from '../lib/inference_endpoint_exists';
 import { unflattenObject } from '../utils/unflatten_object';
 
@@ -217,7 +218,8 @@ export const getInferenceServicesRoute = (
         response
       ): Promise<IKibanaResponse<InferenceInferenceEndpointInfo>> => {
         try {
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const { asCurrentUser: esClient, asInternalUser: internalEsClient } = (await context.core)
+            .elasticsearch.client;
 
           const { config, secrets } = request.body;
 
@@ -228,7 +230,6 @@ export const getInferenceServicesRoute = (
 
           const adaptiveAllocations = config?.providerConfig?.adaptive_allocations;
           const numAllocations = config?.providerConfig?.num_allocations;
-          const apiKey = secrets?.providerSecrets?.api_key;
 
           let allocationSettings = {};
           if (adaptiveAllocations) {
@@ -237,9 +238,27 @@ export const getInferenceServicesRoute = (
             allocationSettings = { num_allocations: numAllocations };
           }
 
+          const services = await internalEsClient.transport.request<InferenceProvider[]>({
+            method: 'GET',
+            path: '/_inference/_services',
+          });
+          const provider = Array.isArray(services)
+            ? services.find(({ service }) => service === config.provider)
+            : undefined;
+
+          if (!provider) {
+            return response.badRequest({
+              body: { message: `Unable to find the configuration for service ${config.provider}` },
+            });
+          }
+
           const body = {
             service_settings: {
-              ...(apiKey ? { api_key: apiKey } : {}),
+              ...getUpdatableServiceSettings(
+                provider.configurations,
+                config.providerConfig,
+                secrets.providerSecrets
+              ),
               ...allocationSettings,
             },
             ...(Object.keys(taskSettingsWithHeaders).length
