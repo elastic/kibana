@@ -12,7 +12,12 @@ import { ControlValuesSource } from '@kbn/controls-constants';
 import { EsqlSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { coreServices, dataViewsService } from '../../services/kibana_services';
-import { resolveControlSource, toControlSourceDescriptor } from './control_source';
+import {
+  isSameValuesSourceSelection,
+  resolveControlSource,
+  toControlSourceDescriptor,
+  toValuesSourceSelection,
+} from './control_source';
 
 describe('control source', () => {
   const dataView = { id: 'myDataViewId' } as DataView;
@@ -40,6 +45,41 @@ describe('control source', () => {
         esql_query: 'FROM logs | STATS BY os',
       })
     ).toEqual({ kind: 'esql', query: 'FROM logs | STATS BY os' });
+  });
+
+  it('selects the values of a field control by its field, and of a query control by its query only', () => {
+    const fieldSelection = toValuesSourceSelection({
+      values_source: ControlValuesSource.FIELD,
+      data_view_id: 'myDataViewId',
+      field_name: 'host.name',
+    });
+    expect(
+      isSameValuesSourceSelection(
+        fieldSelection,
+        toValuesSourceSelection({
+          values_source: ControlValuesSource.FIELD,
+          data_view_id: 'myDataViewId',
+          field_name: 'os',
+        })
+      )
+    ).toBe(false);
+
+    const querySelection = toValuesSourceSelection({
+      values_source: ControlValuesSource.ESQL,
+      esql_query: 'FROM logs | STATS BY os',
+    });
+    // the field of a query control is derived from the query, so it does not change the selection
+    expect(
+      isSameValuesSourceSelection(
+        querySelection,
+        toValuesSourceSelection({
+          values_source: ControlValuesSource.ESQL,
+          esql_query: 'FROM logs | STATS BY os',
+          field_name: 'os',
+          data_view_id: 'derivedDataViewId',
+        })
+      )
+    ).toBe(true);
   });
 
   it('resolves a data view by its id, without reading any query', async () => {

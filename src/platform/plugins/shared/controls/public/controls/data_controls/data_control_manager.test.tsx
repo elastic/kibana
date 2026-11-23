@@ -394,36 +394,6 @@ describe('initializeDataControlManager', () => {
       expect(dataControlManager.api.fieldName$.value).toBeUndefined();
       expect(dataControlManager.api.blockingError$.value?.message).toBe('Unknown column');
     });
-
-    it('does not report a change of the selection when the field is derived from the query', async () => {
-      mockGetESQLSingleColumnValues.mockResolvedValue({
-        values: ['US'],
-        column: { name: 'myFieldName', type: 'keyword' },
-      });
-      const { data_view_id: _dataViewId, field_name: _fieldName, ...savedState } = esqlState;
-      const dataControlManager = await initializeDataControlManager({
-        controlId: 'esqlControl',
-        controlType: 'esql',
-        state: savedState,
-        editorStateManager: initializeStateManager({}, {}),
-        parentApi: {},
-        typeDisplayName: 'ES|QL Control',
-      });
-      const selections: unknown[] = [];
-      dataControlManager.internalApi.valuesSourceSelection$.subscribe((selection) =>
-        selections.push(selection)
-      );
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(dataControlManager.api.fieldName$.value).toBe('myFieldName');
-      expect(selections).toHaveLength(1);
-
-      dataControlManager.api.setEsqlQuery('FROM logs | KEEP otherField');
-      expect(selections).toEqual([
-        { source: { kind: 'esql', query: esqlState.esql_query } },
-        { source: { kind: 'esql', query: 'FROM logs | KEEP otherField' } },
-      ]);
-    });
   });
 
   describe('valuesSourceFetchPlan$', () => {
