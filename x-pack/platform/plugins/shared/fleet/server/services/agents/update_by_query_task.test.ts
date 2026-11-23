@@ -392,8 +392,48 @@ describe('updateByQueryAndWait', () => {
       esClient.tasks.cancel.mockRejectedValue(new Error('cancel failed'));
 
       await expect(
-        updateByQueryAndWait(esClient, request, { pollIntervalMs: 1, maxDurationMs: 0 })
-      ).rejects.toThrow(/did not finish within 0ms, status: .*"updated":2/);
+        updateByQueryAndWait(esClient, request, {
+          pollIntervalMs: 1,
+          maxDurationMs: 0,
+          cancelWaitMs: 30,
+        })
+      ).rejects.toThrow(
+        /did not stop within 30ms of being cancelled, status: .*"updated":2.*cancellation failed: cancel failed/
+      );
+    });
+
+    it('should keep following a task whose cancellation is unconfirmed until it finishes', async () => {
+      esClient.tasks.get
+        .mockResolvedValueOnce({ completed: false, task: {} } as any)
+        // still running when it is read again, and done a moment later
+        .mockResolvedValueOnce({
+          completed: false,
+          task: { status: { total: 5, updated: 2 } },
+        } as any)
+        .mockResolvedValueOnce({
+          completed: false,
+          task: { status: { total: 5, updated: 2 } },
+        } as any)
+        .mockResolvedValueOnce({
+          completed: true,
+          task: {},
+          response: { total: 5, updated: 2, version_conflicts: 0, failures: [] },
+        } as any);
+      esClient.tasks.cancel.mockResolvedValue({
+        nodes: {},
+        node_failures: [{ type: 'failed_node_exception', reason: 'not cancelled' }],
+      } as any);
+
+      const res = await updateByQueryAndWait(esClient, request, {
+        pollIntervalMs: 1,
+        maxDurationMs: 0,
+        cancelWaitMs: 5000,
+      });
+
+      expect(esClient.tasks.get).toHaveBeenCalledTimes(4);
+      expect(res.updated).toEqual(2);
+      // it stopped before going through every agent, so the rest is retried
+      expect(res.canceled).toEqual(expect.any(String));
     });
 
     it('should throw the error of a task that finished with one', async () => {
@@ -436,8 +476,14 @@ describe('updateByQueryAndWait', () => {
     esClient.tasks.cancel.mockRejectedValue(new Error('cancel failed'));
 
     await expect(
-      updateByQueryAndWait(esClient, request, { pollIntervalMs: 1, maxDurationMs: 20 })
-    ).rejects.toThrow(/did not finish within 20ms/);
+      updateByQueryAndWait(esClient, request, {
+        pollIntervalMs: 1,
+        maxDurationMs: 20,
+        cancelWaitMs: 20,
+      })
+    ).rejects.toThrow(
+      /did not stop within 20ms of being cancelled.*cancellation failed: cancel failed/
+    );
   });
 
   it('should throw if starting the update by query fails', async () => {

@@ -127,6 +127,7 @@ export async function updateByQueryAndWait(
   let cancelRequestedAt: number | undefined;
   let lastStatus = '{}';
   let lastPollError: string | undefined;
+  let cancelFailure: string | undefined;
 
   // The outcome of a task that has finished.
   const outcomeOf = (task: TasksGetResponse): UpdateByQueryTaskResponse => {
@@ -155,8 +156,8 @@ export async function updateByQueryAndWait(
       // The outcome of this task is unknown, so there is nothing to hand to the caller to record.
       throw new FleetError(
         `Update by query task ${taskId} did not stop within ${cancelWaitMs}ms of being cancelled, status: ${lastStatus}${
-          lastPollError ? `, last error: ${lastPollError}` : ''
-        }`
+          cancelFailure ? `, cancellation failed: ${cancelFailure}` : ''
+        }${lastPollError ? `, last error: ${lastPollError}` : ''}`
       );
     }
 
@@ -194,7 +195,6 @@ export async function updateByQueryAndWait(
       logger.warn(
         `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, cancelling it`
       );
-      let cancelFailure: string | undefined;
       try {
         const cancelled = await esClient.tasks.cancel({ task_id: taskId });
         // The request can succeed without cancelling anything: the task already finished, or its
@@ -206,33 +206,15 @@ export async function updateByQueryAndWait(
         cancelFailure = error.message;
       }
 
-      // A cancellation that failed may still have taken effect, so what the task ends with is read
-      // as the outcome of a cancelled one: a partial result is marked as such, and retried.
+      // A cancellation that failed may still have taken effect, and one that failed because the
+      // task was just finishing still leaves its result to record. So the task is followed for the
+      // same bounded time as one that was cancelled, and what it ends with is read as the outcome
+      // of a cancelled one: a partial result is marked as such, and retried.
       cancelRequestedAt = Date.now();
 
       if (cancelFailure !== undefined) {
-        logger.warn(`Could not cancel update by query task ${taskId}: ${cancelFailure}`);
-        // A cancellation that fails because the task just finished must not discard its result,
-        // so the task is read once more before giving up on it.
-        let last: TasksGetResponse | undefined;
-        try {
-          last = await esClient.tasks.get(
-            { task_id: taskId, wait_for_completion: false },
-            { requestTimeout: cancelWaitMs }
-          );
-        } catch (error) {
-          logger.warn(
-            `Could not read update by query task ${taskId} after failing to cancel it: ${error.message}`
-          );
-        }
-        if (last?.completed) {
-          return outcomeOf(last);
-        }
-        if (last) {
-          lastStatus = JSON.stringify(last.task.status ?? {}).slice(0, 500);
-        }
-        throw new FleetError(
-          `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, status: ${lastStatus}`
+        logger.warn(
+          `Could not cancel update by query task ${taskId}: ${cancelFailure}. Following it for up to ${cancelWaitMs}ms`
         );
       }
     }
