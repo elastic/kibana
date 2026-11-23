@@ -497,6 +497,23 @@ describe('GenAiSettingsApp', () => {
       });
     });
 
+    it('hides Documentation section when the setting definitions fail to load', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+      coreStart.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
+
+      renderComponent(
+        {},
+        {},
+        new QueryClient({
+          logger: { log: () => {}, warn: () => {}, error: () => {} },
+          defaultOptions: { queries: { retry: false } },
+        })
+      );
+
+      expect(await screen.findByTestId('genAiSettingsLoadError')).toBeInTheDocument();
+      expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+    });
+
     it('shows Documentation section when chat experience is Agent', async () => {
       mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
 

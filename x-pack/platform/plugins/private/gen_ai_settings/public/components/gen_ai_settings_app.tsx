@@ -361,6 +361,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
           {hasAgentBuilderPrivileges && <AgentBuilderTracingSection />}
 
           {!isLoading &&
+            !loadError &&
             isAgentExperience &&
             (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
               <>
