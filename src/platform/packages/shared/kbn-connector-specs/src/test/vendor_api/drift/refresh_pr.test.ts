@@ -287,12 +287,33 @@ describe('renderRefreshPr', () => {
     expect(body).toMatch(/The changes of `\.big\d+`/);
   });
 
+  it('leaves room for the note on the connectors left out, however the others fit', () => {
+    const tooLong: Array<{ width: number; length: number }> = [];
+    for (let width = 40; width <= 70; width++) {
+      const { length } = renderRefreshPr(
+        Array.from({ length: 40 }, (_, index) =>
+          changed(
+            `.big${String(index).padStart(2, '0')}`,
+            Array.from({ length: 20 }, (__, endpoint) =>
+              field(`GET /${endpoint}`, `${'y'.repeat(width)}${endpoint}`)
+            )
+          )
+        )
+      );
+      if (length > 63_000) {
+        tooLong.push({ width, length });
+      }
+    }
+
+    expect(tooLong).toEqual([]);
+  });
+
   it('stays under the limit GitHub puts on a description, naming the connectors left out', () => {
     const body = renderRefreshPr(
       Array.from({ length: 60 }, (_, index) => wide(`.connector${index}`))
     );
 
-    expect(body.length).toBeLessThan(65_536);
+    expect(body.length).toBeLessThanOrEqual(63_000);
     expect(body).toContain('### `.connector0`');
     expect(body).toMatch(/### \d+ more connectors\n\nThe changes of `\.connector\d+`/);
     expect(body).toContain("don't fit in a pull request description");

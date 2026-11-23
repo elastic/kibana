@@ -218,20 +218,7 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
     }
   }
 
-  const included: ConnectorSection[] = [];
-  const omitted: string[] = [];
-  let length = intro.length;
-  for (const section of sections) {
-    const size = textOf(section).length + 1;
-    if (length + size <= MAX_DESCRIPTION_LENGTH) {
-      included.push(section);
-      length += size;
-    } else {
-      omitted.push(section.connector);
-    }
-  }
-
-  const note =
+  const noteOf = (omitted: readonly string[]): string[] =>
     omitted.length > 0
       ? [
           `### ${plural(omitted.length, 'more connector')}`,
@@ -242,7 +229,34 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
           '',
         ]
       : [];
-  const noteLength = note.length > 0 ? note.join('\n').length + 1 : 0;
+  const noteLengthOf = (note: readonly string[]): number =>
+    note.length > 0 ? note.join('\n').length + 1 : 0;
+  // The connectors that fit next to a note of `reserved` characters, and those left out.
+  const fit = (reserved: number) => {
+    const fitting: ConnectorSection[] = [];
+    const left: string[] = [];
+    let size = intro.length;
+    for (const section of sections) {
+      const added = textOf(section).length + 1;
+      if (size + added <= MAX_DESCRIPTION_LENGTH - reserved) {
+        fitting.push(section);
+        size += added;
+      } else {
+        left.push(section.connector);
+      }
+    }
+    return { included: fitting, omitted: left, length: size };
+  };
+
+  // Leaving a connector out makes the note naming it longer, so room is made until it fits.
+  let reserved = 0;
+  let { included, omitted, length } = fit(reserved);
+  while (noteLengthOf(noteOf(omitted)) > reserved) {
+    reserved = noteLengthOf(noteOf(omitted));
+    ({ included, omitted, length } = fit(reserved));
+  }
+  const note = noteOf(omitted);
+  const noteLength = noteLengthOf(note);
 
   showMoreNames(listsOf(included), MAX_DESCRIPTION_LENGTH - length - noteLength);
 
