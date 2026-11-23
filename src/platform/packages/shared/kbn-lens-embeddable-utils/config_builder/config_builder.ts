@@ -56,7 +56,12 @@ import {
   fromLensStateToAPI as fromDatatableLensStateToAPI,
 } from './transforms/charts/datatable';
 import type { LensApiConfig, LensApiConfigChartType } from './schema';
-import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
+import {
+  filtersAndQueryToApiFormat,
+  filtersAndQueryToLensState,
+  toApiUseEsql,
+  fromApiUseEsql,
+} from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
 
 const compatibilityMap: Record<string, LensApiConfigChartType> = {
@@ -314,6 +319,7 @@ export class LensConfigBuilder {
       references: [...(attributes.references ?? []), ...references],
       state: {
         ...attributes.state,
+        datasourceStates: fromApiUseEsql(config, attributes.state.datasourceStates),
         ...querySlot,
         filters,
       },
@@ -337,6 +343,7 @@ export class LensConfigBuilder {
     return {
       ...chartConfig,
       ...panelFiltersAndQuery,
+      ...toApiUseEsql(config),
     };
   }
 }

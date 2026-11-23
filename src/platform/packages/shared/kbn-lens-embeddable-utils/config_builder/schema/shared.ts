@@ -72,6 +72,19 @@ export const dslOnlyPanelInfoSchema = lazySchema(() =>
     .object({
       // ES|QL chart should not have the ability to define a KQL/Lucene query
       query: filterSchema.optional(),
+      /**
+       * Whether to fetch the data with ES|QL instead of DSL aggregations.
+       *
+       * Only applies to data view charts. The chart configuration stays the same;
+       * only the query engine behind the scenes changes. ES|QL charts always use ES|QL.
+       *
+       * Default: false
+       * Possible values: boolean (true or false)
+       */
+      use_esql: z.boolean().optional().meta({
+        description:
+          'When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.',
+      }),
     })
     .strict()
 );

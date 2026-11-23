@@ -820,6 +820,25 @@ export const filtersAndQueryToLensState = (
   };
 };
 
+/**
+ * `use_esql` is a chart-level API field backed by the form-based datasource state,
+ * so it is written only when `true` (a missing value means DSL).
+ */
+export const toApiUseEsql = (state: LensAttributes): { use_esql?: true } =>
+  state.state.datasourceStates.formBased?.useEsql ? { use_esql: true } : {};
+
+export const fromApiUseEsql = (
+  config: LensApiConfig,
+  datasourceStates: LensAttributes['state']['datasourceStates']
+): LensAttributes['state']['datasourceStates'] => {
+  const { formBased } = datasourceStates;
+  if (!formBased || !('use_esql' in config) || config.use_esql !== true) {
+    return datasourceStates;
+  }
+
+  return { ...datasourceStates, formBased: { ...formBased, useEsql: true } };
+};
+
 export type DeepMutable<T> = T extends (...args: never[]) => unknown
   ? T // don't mutate functions
   : T extends ReadonlyArray<infer U>
