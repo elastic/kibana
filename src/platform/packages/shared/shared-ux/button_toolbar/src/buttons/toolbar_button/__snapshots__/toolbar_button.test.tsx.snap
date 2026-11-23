@@ -31,6 +31,7 @@ exports[`<ToolbarButton /> standard is rendered - default 1`] = `
       Create chart
     </span>
     <span
+      aria-hidden="true"
       color="inherit"
       data-euiicon-type="chevronSingleDown"
     />
@@ -53,6 +54,7 @@ exports[`<ToolbarButton /> standard is rendered - primary 1`] = `
       Create chart
     </span>
     <span
+      aria-hidden="true"
       color="inherit"
       data-euiicon-type="chevronSingleDown"
     />
@@ -70,6 +72,7 @@ exports[`<ToolbarButton /> standard is rendered - text wth icon 1`] = `
     class="emotion-euiButtonDisplayContent"
   >
     <span
+      aria-hidden="true"
       color="inherit"
       data-euiicon-type="plusCircle"
     />

@@ -11,6 +11,7 @@ exports[`ExplorerNoResultsFound snapshot 1`] = `
       class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
     >
       <span
+        aria-hidden="true"
         color="subdued"
         data-euiicon-type="info"
       />

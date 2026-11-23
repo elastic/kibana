@@ -372,6 +372,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
               Rows per page: 10
             </span>
             <span
+              aria-hidden="true"
               color="inherit"
               data-euiicon-type="chevronSingleDown"
             />
