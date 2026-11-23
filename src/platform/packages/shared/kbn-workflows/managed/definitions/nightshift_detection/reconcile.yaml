@@ -17,9 +17,11 @@ settings:
   run_as: __SERVICE_ACCOUNT_ID__
   timeout: "5m"
   # A burst of changes gives one reconciliation: each new run cancels the one still waiting, and
-  # the last one reads the knowledge as it is once the burst is over.
+  # the last one reads the knowledge as it is once the burst is over. A run the first step refuses
+  # gets a group of its own, since the group is applied before any step: in the shared one it would
+  # cancel the reconciliation in flight.
   concurrency:
-    key: "nightshift-detection-reconcile"
+    key: 'nightshift-detection-reconcile{% unless execution.triggeredBy == "scheduled" or execution.triggeredBy == "significant-events.knowledgeIndicatorsChanged" %}-refused{% endunless %}'
     strategy: cancel-in-progress
     max: 1
 triggers:
