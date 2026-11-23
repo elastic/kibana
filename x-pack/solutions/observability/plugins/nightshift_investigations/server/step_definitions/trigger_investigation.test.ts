@@ -240,6 +240,25 @@ describe('triggerInvestigationStepDefinition', () => {
     }
   );
 
+  it('passes the automation name to the start, so the investigation records what started it', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.get.mockResolvedValue({
+      id: 'a1',
+      type: 'nightshift-automation',
+      references: [],
+      attributes: { name: 'Payments alerts', workflowId: 'wf-1', isEnabled: true, runtime: {} },
+    });
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
+    const { definition } = createDefinition(start, soClient);
+    await definition.handler(
+      createContext({ automation_id: 'a1', subject_type: 'manual', message: 'Review errors.' })
+    );
+    expect(start).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ automationId: 'a1', automationName: 'Payments alerts' })
+    );
+  });
+
   it('rejects oversized instructions before starting an investigation', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);
