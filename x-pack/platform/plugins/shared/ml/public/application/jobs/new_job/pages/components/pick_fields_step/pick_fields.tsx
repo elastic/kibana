@@ -24,7 +24,7 @@ import { GeoView } from './components/geo_view';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import {
   isSingleMetricJobCreator,
-  isMultiMetricJobCreator,
+  isMultiMetricLikeJobCreator,
   isEsqlJobCreator,
   isPopulationJobCreator,
   isCategorizationJobCreator,
@@ -58,7 +58,7 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           {isSingleMetricJobCreator(jobCreator) && (
             <SingleMetricView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
-          {isMultiMetricJobCreator(jobCreator) && (
+          {isMultiMetricLikeJobCreator(jobCreator) && (
             <MultiMetricView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           {isPopulationJobCreator(jobCreator) && (

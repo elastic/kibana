@@ -23,7 +23,9 @@ export const DetectorChart: FC = () => {
   return (
     <Fragment>
       {jobCreator.type === JOB_TYPE.SINGLE_METRIC && <SingleMetricView isActive={false} />}
-      {jobCreator.type === JOB_TYPE.MULTI_METRIC && <MultiMetricView isActive={false} />}
+      {(jobCreator.type === JOB_TYPE.MULTI_METRIC || jobCreator.type === JOB_TYPE.ESQL) && (
+        <MultiMetricView isActive={false} />
+      )}
       {jobCreator.type === JOB_TYPE.POPULATION && <PopulationView isActive={false} />}
       {jobCreator.type === JOB_TYPE.ADVANCED && <AdvancedView isActive={false} />}
       {jobCreator.type === JOB_TYPE.CATEGORIZATION && <CategorizationView isActive={false} />}

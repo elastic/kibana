@@ -12,7 +12,7 @@ import type { AggFieldPair, Aggregation, Field } from '@kbn/ml-anomaly-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
-import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import type { MultiMetricLikeJobCreator } from '../../../../../common/job_creator';
 import type { LineChartData } from '../../../../../common/chart_loader';
 import type { DropDownLabel, DropDownProps } from '../agg_select';
 import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
@@ -35,7 +35,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     chartLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-  const jobCreator = jc as MultiMetricJobCreator;
+  const jobCreator = jc as MultiMetricLikeJobCreator;
   const toastNotificationService = useToastNotificationService();
   const newJobCapsService = useNewJobCapsService();
 

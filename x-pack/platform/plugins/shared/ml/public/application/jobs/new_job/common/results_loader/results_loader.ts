@@ -21,7 +21,7 @@ import {
 } from '../../../../services/results_service';
 
 import type { JobCreatorType } from '../job_creator';
-import { isMultiMetricJobCreator } from '../job_creator';
+import { isMultiMetricLikeJobCreator } from '../job_creator';
 import type { ChartLoader } from '../chart_loader';
 
 import { getScoresByRecord } from './searches';
@@ -262,7 +262,7 @@ export class ResultsLoader {
     // for population jobs, the swimlane will not be 100% accurate as it's not
     // filtering for the front card. this is a trade off to save loading
     // lots of data.
-    if (isMultiMetricJobCreator(this._jobCreator)) {
+    if (isMultiMetricLikeJobCreator(this._jobCreator)) {
       if (this._jobCreator.splitField !== null) {
         const fieldValues = await this._chartLoader.loadFieldExampleValues(
           this._jobCreator.splitField,

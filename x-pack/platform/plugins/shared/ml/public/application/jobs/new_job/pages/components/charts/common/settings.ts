@@ -10,7 +10,10 @@ import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import type { AreaSeriesStyle, LineSeriesStyle, RecursivePartial } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import type { JobCreatorType } from '../../../../common/job_creator';
-import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../common/job_creator';
+import {
+  isMultiMetricLikeJobCreator,
+  isPopulationJobCreator,
+} from '../../../../common/job_creator';
 import { getTimeBucketsFromCache } from '../../../../../../util/get_time_buckets_from_cache';
 
 export function useChartColors() {
@@ -87,8 +90,8 @@ export function getChartSettings(
     cs.intervalMs = jobCreator.bucketSpanMs;
   }
 
-  if (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) {
-    if (jobCreator.aggFieldPairs.length > 2 && isMultiMetricJobCreator(jobCreator)) {
+  if (isMultiMetricLikeJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) {
+    if (jobCreator.aggFieldPairs.length > 2 && isMultiMetricLikeJobCreator(jobCreator)) {
       cs.cols = 3;
       cs.height = '150px';
       cs.intervalMs = cs.intervalMs * 3;

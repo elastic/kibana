@@ -14,7 +14,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
-  isMultiMetricJobCreator,
+  isMultiMetricLikeJobCreator,
   isPopulationJobCreator,
   isAdvancedJobCreator,
 } from '../../../../../common/job_creator';
@@ -92,13 +92,13 @@ export const JobDetails: FC = () => {
     },
   ];
 
-  if (isMultiMetricJobCreator(jobCreator)) {
+  if (isMultiMetricLikeJobCreator(jobCreator)) {
     detectorDetails.push({
       title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.splitField.title', {
         defaultMessage: 'Split field',
       }),
       description:
-        isMultiMetricJobCreator(jobCreator) && jobCreator.splitField !== null ? (
+        isMultiMetricLikeJobCreator(jobCreator) && jobCreator.splitField !== null ? (
           jobCreator.splitField.name
         ) : (
           <Italic>

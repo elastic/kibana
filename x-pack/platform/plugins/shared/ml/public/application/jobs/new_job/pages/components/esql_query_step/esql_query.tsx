@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -17,8 +17,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import {
+  FROZEN_TIER_PREFERENCE,
+  FullTimeRangeSelector,
+  useTimefilter,
+  type GetTimeFieldRangeResponse,
+} from '@kbn/ml-date-picker';
+import { useStorage } from '@kbn/ml-local-storage';
+import {
+  ML_FROZEN_TIER_PREFERENCE,
+  type MlStorageKey,
+  type TMlStorageMapped,
+} from '@kbn/ml-common-types/storage';
+import { getESQLAdHocDataview, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app';
 import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
@@ -27,14 +41,22 @@ import { isEsqlJobCreator } from '../../../common/job_creator';
 import type { TimeRange } from '../../../common/components';
 import { TimeRangePicker } from '../../../common/components';
 import { useEsqlTimeField } from './use_esql_time_field';
+import { extractSourceQuery } from './extract_source_query';
 import { useEsqlQueryExecution } from './use_esql_query_execution';
 import { EsqlResultsTable } from './esql_results_table';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 
 export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const {
+    services: { data, http },
+  } = useMlKibana();
+  const { displayErrorToast } = useToastNotificationService();
+  const { jobCreator, jobCreatorUpdate, chartLoader } = useContext(JobCreatorContext);
+  const [isCreatingDataView, setIsCreatingDataView] = useState(false);
 
   const [query, setQuery] = useState<AggregateQuery>({
     esql: isEsqlJobCreator(jobCreator) ? jobCreator.esqlQuery : '',
@@ -85,6 +107,57 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   });
   const currentTimeFieldIsOption = timeFieldOptions.some(({ value }) => value === timeField);
 
+  const timefilter = useTimefilter();
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_FROZEN_TIER_PREFERENCE>
+  >(
+    ML_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
+  );
+
+  // The "Use full data" button needs a data view, so build a temporary one from the
+  // query's source command and the selected time field as soon as both are known.
+  const sourceQuery = useMemo(() => extractSourceQuery(query.esql), [query.esql]);
+  const [sourceDataView, setSourceDataView] = useState<DataView | null>(null);
+  useEffect(() => {
+    if (sourceQuery === '' || !currentTimeFieldIsOption) {
+      setSourceDataView(null);
+      return;
+    }
+    let cancelled = false;
+    getESQLAdHocDataview({
+      dataViewsService: data.dataViews,
+      query: sourceQuery,
+      http,
+      projectRouting,
+    })
+      .then((dataView) => {
+        if (!cancelled) {
+          dataView.timeFieldName = timeField;
+          setSourceDataView(dataView);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSourceDataView(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sourceQuery, timeField, currentTimeFieldIsOption, data.dataViews, http, projectRouting]);
+
+  const fullTimeRangeCallback = useCallback(
+    (range: GetTimeFieldRangeResponse) => {
+      if (range.start !== null && range.end !== null) {
+        onTimeRangeChange({ start: range.start.epoch, end: range.end.epoch });
+      }
+    },
+    [onTimeRangeChange]
+  );
+
   const execution = useEsqlQueryExecution();
   const { run, isLoading } = execution;
 
@@ -100,6 +173,55 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     });
   }, [run, query.esql, timeField, timeRange, projectRouting]);
 
+  const onNext = useCallback(async () => {
+    if (!isEsqlJobCreator(jobCreator)) {
+      return;
+    }
+    setIsCreatingDataView(true);
+    try {
+      jobCreator.esqlQuery = query.esql;
+      const dataView = await getESQLAdHocDataview({
+        dataViewsService: data.dataViews,
+        query: query.esql,
+        http,
+        projectRouting,
+      });
+      if (timeField !== '') {
+        dataView.timeFieldName = timeField;
+      }
+      jobCreator.indexPattern = dataView;
+      chartLoader.setDataView(dataView);
+      // The field and aggregation lists in the Choose fields step come from this service.
+      await jobCreator.newJobCapsService.initializeFromDataVIew(
+        dataView,
+        true,
+        true,
+        projectRouting
+      );
+      jobCreatorUpdate();
+      setCurrentStep(WIZARD_STEPS.PICK_FIELDS);
+    } catch (error) {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.newJob.wizard.esqlQueryStep.createDataViewError', {
+          defaultMessage: 'Unable to create a data view for the ES|QL query',
+        })
+      );
+    }
+    setIsCreatingDataView(false);
+  }, [
+    jobCreator,
+    jobCreatorUpdate,
+    chartLoader,
+    query.esql,
+    data.dataViews,
+    http,
+    projectRouting,
+    timeField,
+    setCurrentStep,
+    displayErrorToast,
+  ]);
+
   if (!isCurrentStep) {
     return null;
   }
@@ -109,6 +231,18 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <TimeRangePicker timeRange={timeRange} setTimeRange={onTimeRangeChange} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FullTimeRangeSelector
+            frozenDataPreference={frozenDataPreference}
+            setFrozenDataPreference={setFrozenDataPreference}
+            dataView={sourceDataView ?? undefined}
+            disabled={false}
+            callback={fullTimeRangeCallback}
+            timefilter={timefilter}
+            apiPath={`${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`}
+            projectRouting={projectRouting}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
@@ -136,7 +270,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
           >
             <EuiButton
               size="s"
-              iconType="search"
+              iconType="magnify"
               onClick={runQuery}
               isLoading={isLoading}
               isDisabled={query.esql.trim() === ''}
@@ -162,10 +296,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       <EuiSpacer />
       <EsqlResultsTable execution={execution} runShortcutLabel={RUN_SHORTCUT_LABEL} />
       <EuiSpacer />
-      <WizardNav
-        next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)}
-        nextActive={query.esql.trim() !== ''}
-      />
+      <WizardNav next={onNext} nextActive={query.esql.trim() !== '' && !isCreatingDataView} />
     </>
   );
 };

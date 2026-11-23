@@ -91,6 +91,11 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
     return '';
   }
 
+  // ES|QL jobs have no data source context; their data view is created from the query.
+  const pickFieldsDataView = isEsqlJobCreator(jobCreator)
+    ? jobCreator.dataView
+    : dataSourceContext.selectedDataView;
+
   const pickFieldsStep = (
     <>
       <EuiFlexGroup gutterSize="s">
@@ -156,11 +161,11 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
       )}
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
-          {isEsqlJobCreator(jobCreator) ? (
+          {pickFieldsDataView === null ? (
             pickFieldsStep
           ) : (
             <FieldStatsFlyoutProvider
-              dataView={dataSourceContext.selectedDataView}
+              dataView={pickFieldsDataView}
               fieldStatsServices={fieldStatsServices}
               timeRangeMs={timeRangeMs}
               dslQuery={jobCreator.query}

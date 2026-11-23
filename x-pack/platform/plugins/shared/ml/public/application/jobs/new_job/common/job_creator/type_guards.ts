@@ -27,6 +27,9 @@ export type JobCreatorType =
 
 export type ClassicJobCreatorType = Exclude<JobCreatorType, EsqlJobCreator>;
 
+/** Job creators whose fields are picked with the multi-metric view. */
+export type MultiMetricLikeJobCreator = MultiMetricJobCreator | EsqlJobCreator;
+
 export function isSingleMetricJobCreator(
   jobCreator: JobCreatorType
 ): jobCreator is SingleMetricJobCreator {
@@ -37,6 +40,12 @@ export function isMultiMetricJobCreator(
   jobCreator: JobCreatorType
 ): jobCreator is MultiMetricJobCreator {
   return jobCreator.type === JOB_TYPE.MULTI_METRIC;
+}
+
+export function isMultiMetricLikeJobCreator( // needs a better name.!!!!!!!!!!!!!!!!!!!!!!!!!!
+  jobCreator: JobCreatorType
+): jobCreator is MultiMetricLikeJobCreator {
+  return jobCreator.type === JOB_TYPE.MULTI_METRIC || jobCreator.type === JOB_TYPE.ESQL;
 }
 
 export function isPopulationJobCreator(

@@ -53,6 +53,12 @@ export class ChartLoader {
     }
   }
 
+  /** Sets the data view to load chart data from, for wizards that only have one after they start. */
+  public setDataView(dataView: DataView) {
+    this._dataView = dataView;
+    this._timeFieldName = typeof dataView.timeFieldName === 'string' ? dataView.timeFieldName : '';
+  }
+
   private _getIndexPattern(): string {
     if (this._dataView === null) {
       throw new Error('A data view is required to load chart data');

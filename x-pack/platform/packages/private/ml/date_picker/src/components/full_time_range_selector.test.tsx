@@ -128,6 +128,26 @@ describe('FullTimeRangeSelector', () => {
     });
   });
 
+  it('disables the button and does not set the range when there is no data view', async () => {
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <DatePickerContextProvider {...mockDependencies}>
+          <FullTimeRangeSelector {...props} dataView={undefined} />
+        </DatePickerContextProvider>
+      </IntlProvider>
+    );
+
+    const button = getByTestId('mlDatePickerButtonUseFullData');
+    expect(button).toBeDisabled();
+
+    await act(async () => {
+      fireEvent.click(button);
+    });
+
+    expect(setFullTimeRange).not.toHaveBeenCalled();
+    expect(props.callback).not.toHaveBeenCalled();
+  });
+
   it('passes the explicit project routing to setFullTimeRange', async () => {
     const projectRouting = '_id:linked-project';
     const getProjectRouting = jest.fn(() => '_id:global-project');

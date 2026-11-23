@@ -15,10 +15,15 @@ export { CategorizationJobCreator } from './categorization_job_creator';
 export { RareJobCreator } from './rare_job_creator';
 export { GeoJobCreator } from './geo_job_creator';
 export { EsqlJobCreator } from './esql_job_creator';
-export type { JobCreatorType, ClassicJobCreatorType } from './type_guards';
+export type {
+  JobCreatorType,
+  ClassicJobCreatorType,
+  MultiMetricLikeJobCreator,
+} from './type_guards';
 export {
   isSingleMetricJobCreator,
   isMultiMetricJobCreator,
+  isMultiMetricLikeJobCreator,
   isPopulationJobCreator,
   isAdvancedJobCreator,
   isCategorizationJobCreator,
