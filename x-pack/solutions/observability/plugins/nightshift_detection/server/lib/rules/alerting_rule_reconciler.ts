@@ -145,6 +145,9 @@ const toSourceKey = ({ strategy, source_id: sourceId }: SkippedSource) =>
  * - A wanted rule that is missing is created, enabled only when wanted enabled and not paused.
  * - A rule whose `enabled` differs is toggled; `paused` turns every rule off.
  * - A query is never edited: a changed query has a new id, so the old rule goes and a new one comes.
+ * - A rule someone edits by hand in Alerting keeps its id, so it is kept as edited and its rows are
+ *   read as the strategy's until the strategy wants a different rule. Only the id is compared:
+ *   hashing what Alerting returns would flag every rule whose defaults Alerting filled in.
  */
 const planRuleChanges = ({
   existing,
