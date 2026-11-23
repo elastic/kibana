@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
@@ -23,7 +23,7 @@ describe('unknown_column_renderer', () => {
     mockDatum = cloneDeep(mockTimelineData[0].data);
   });
 
-  test('renders correctly against snapshot', () => {
+  test('renders an empty value for a known column', () => {
     const emptyColumn = unknownColumnRenderer.renderColumn({
       columnName: '@timestamp',
       eventId: _id,
@@ -31,8 +31,8 @@ describe('unknown_column_renderer', () => {
       field: defaultHeaders.find((h) => h.id === '@timestamp')!,
       scopeId: TimelineId.test,
     });
-    const wrapper = shallow(<span>{emptyColumn}</span>);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(<span>{emptyColumn}</span>);
+    expect(container.textContent).toEqual(getEmptyValue());
   });
 
   test('should return isInstance true with a made up column name', () => {
@@ -47,8 +47,8 @@ describe('unknown_column_renderer', () => {
       field: defaultHeaders.find((h) => h.id === 'a made up column name')!,
       scopeId: TimelineId.test,
     });
-    const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(getEmptyValue());
+    const { container } = render(<span>{emptyColumn}</span>);
+    expect(container.textContent).toEqual(getEmptyValue());
   });
 
   test('should return an empty value with a column name that has valid id value', () => {
@@ -59,7 +59,7 @@ describe('unknown_column_renderer', () => {
       field: defaultHeaders.find((h) => h.id === '@timestamp')!,
       scopeId: TimelineId.test,
     });
-    const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(getEmptyValue());
+    const { container } = render(<span>{emptyColumn}</span>);
+    expect(container.textContent).toEqual(getEmptyValue());
   });
 });

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import type { RowRenderer } from '../../../../../../../common/types';
 import { TimelineId } from '../../../../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import {
   createGenericAuditRowRenderer,
   createGenericFileRowRenderer,
@@ -39,8 +38,6 @@ jest.mock('../netflow', () => ({
 }));
 
 describe('GenericRowRenderer', () => {
-  const mount = useMountAppended();
-
   describe('#createGenericAuditRowRenderer', () => {
     let nonAuditd: Ecs;
     let auditd: Ecs;
@@ -53,16 +50,6 @@ describe('GenericRowRenderer', () => {
         text: 'connected using',
       });
     });
-    test('renders correctly against snapshot', () => {
-      const children = connectedToRenderer.renderRow({
-        data: auditd,
-        scopeId: TimelineId.test,
-      });
-
-      const wrapper = shallow(<span>{children}</span>);
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('should return false if not a auditd datum', () => {
       expect(connectedToRenderer.isInstance(nonAuditd)).toBe(false);
     });
@@ -86,12 +73,12 @@ describe('GenericRowRenderer', () => {
         data: auditd,
         scopeId: TimelineId.test,
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{children}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toContain(
+      expect(container.textContent).toContain(
         'Session246alice@zeek-londonconnected usingwget(1490)wget www.example.comwith resultsuccess'
       );
     });
@@ -109,16 +96,6 @@ describe('GenericRowRenderer', () => {
         actionName: 'opened-file',
         text: 'opened file using',
       });
-    });
-
-    test('renders correctly against snapshot', () => {
-      const children = fileToRenderer.renderRow({
-        data: auditdFile,
-        scopeId: TimelineId.test,
-      });
-
-      const wrapper = shallow(<span>{children}</span>);
-      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a auditd datum', () => {
@@ -144,12 +121,12 @@ describe('GenericRowRenderer', () => {
         data: auditdFile,
         scopeId: TimelineId.test,
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{children}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toContain(
+      expect(container.textContent).toContain(
         'Session242root@zeek-londonin/opened file using/proc/15990/attr/currentusingsystemd-journal(27244)/lib/systemd/systemd-journaldwith resultsuccess'
       );
     });
