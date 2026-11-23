@@ -660,7 +660,9 @@ describe('createTransport', () => {
           authorization: 'per-call',
         });
         await transport.request(requestParams);
-        expect(transportRequestMock.mock.calls[2][1]?.headers).toEqual({ authorization: 'renewed' });
+        expect(transportRequestMock.mock.calls[2][1]?.headers).toEqual({
+          authorization: 'renewed',
+        });
       }
     );
 
@@ -670,7 +672,8 @@ describe('createTransport', () => {
       getUnauthorizedErrorHandler.mockReturnValue(handler);
       const error = createUnauthorizedError();
       transportRequestMock.mockRejectedValue(error);
-      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn((_ctx, _params, opts) => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      onRequest.mockImplementation((_ctx, _params, opts) => {
         opts.headers = { ...opts.headers, Authorization: 'from-hook' };
       });
       const transportClass = createTransport({
