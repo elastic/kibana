@@ -6,7 +6,7 @@
  */
 
 import type { ServiceMapEdge, ServiceMapGrouping, ServiceMapNode, ServiceNodeData } from './types';
-import { isServiceGroupNodeData, isServiceNodeData } from './types';
+import { isServiceGroupBoxNodeData, isServiceGroupNodeData, isServiceNodeData } from './types';
 import { groupServiceNodes } from './group_service_nodes';
 import { createEdgeMarker, getEdgeId } from './utils';
 import { DEFAULT_EDGE_STYLE } from './constants';
@@ -405,5 +405,147 @@ describe('groupServiceNodes', () => {
       memberCount: 2,
     });
     expect(byPrefix.nodes.some((n) => n.id === 'c' && isServiceNodeData(n.data))).toBe(true);
+  });
+
+  describe('open groups', () => {
+    const SHOP = 'service.namespace:shop';
+    const FINANCE = 'service.namespace:finance';
+
+    const openNodes = () => [...illustrationNodes(), dependencyNode('postgres')];
+    const open = (...ids: string[]) => new Set(ids);
+
+    it('is the same as closing every group when no group is open', () => {
+      const nodes = openNodes();
+      const edges = [edge('frontend', 'cart'), edge('checkout', 'billing')];
+
+      const closed = groupServiceNodes(nodes, edges, ILLUSTRATION_GROUPING);
+
+      expect(groupServiceNodes(nodes, edges, ILLUSTRATION_GROUPING, undefined, open())).toEqual(
+        closed
+      );
+    });
+
+    it('draws an open group as a box followed by its members, and leaves the others closed', () => {
+      const { nodes: nextNodes } = groupServiceNodes(
+        openNodes(),
+        [],
+        ILLUSTRATION_GROUPING,
+        undefined,
+        open(SHOP)
+      );
+
+      const boxIndex = nextNodes.findIndex((n) => n.id === SHOP);
+      const box = nextNodes[boxIndex];
+      expect(box).toMatchObject({
+        type: 'serviceGroupBox',
+        data: {
+          label: 'shop',
+          memberCount: 3,
+          memberServiceIds: ['cart', 'checkout', 'frontend'],
+          groupKind: 'attribute',
+        },
+      });
+      expect(isServiceGroupBoxNodeData(box.data)).toBe(true);
+      expect(isServiceGroupNodeData(box.data)).toBe(false);
+
+      // the parent comes before its children, which keep being service nodes
+      const members = nextNodes.filter((n) => n.parentId === SHOP);
+      expect(members.map((n) => n.id).sort()).toEqual(['cart', 'checkout', 'frontend']);
+      expect(members.every((n) => isServiceNodeData(n.data))).toBe(true);
+      expect(members.every((n) => nextNodes.indexOf(n) > boxIndex)).toBe(true);
+
+      // the other groups stay closed, so each service is on the map exactly once
+      expect(
+        nextNodes
+          .filter((n) => isServiceGroupNodeData(n.data))
+          .map((n) => n.id)
+          .sort()
+      ).toEqual([FINANCE, 'calls:search'].sort());
+      expect(nextNodes.filter((n) => n.id === 'cart')).toHaveLength(1);
+    });
+
+    it('keeps the members of an open group on their own edges, and flags the calls between them', () => {
+      const nodes = openNodes();
+      const edges = [
+        edge('frontend', 'cart'), // inside shop
+        edge('cart', 'checkout'), // inside shop
+        edge('checkout', 'billing'), // shop → finance
+        edge('checkout', 'postgres'), // shop → dependency
+        edge('frontend', 'auth'), // shop → ordinary service
+      ];
+
+      const { edges: nextEdges } = groupServiceNodes(
+        nodes,
+        edges,
+        ILLUSTRATION_GROUPING,
+        undefined,
+        open(SHOP)
+      );
+
+      const byKey = new Map(nextEdges.map((e) => [`${e.source}>${e.target}`, e]));
+      expect([...byKey.keys()].sort()).toEqual(
+        [
+          'frontend>cart',
+          'cart>checkout',
+          // the closed group is the far end, the open member keeps its own end
+          `checkout>${FINANCE}`,
+          'checkout>postgres',
+          'frontend>auth',
+        ].sort()
+      );
+      expect(byKey.get('frontend>cart')?.data?.isIntraGroup).toBe(true);
+      expect(byKey.get('cart>checkout')?.data?.isIntraGroup).toBe(true);
+      expect(byKey.get('checkout>postgres')?.data?.isIntraGroup).toBeUndefined();
+      expect(byKey.get('frontend>auth')?.data?.isIntraGroup).toBeUndefined();
+    });
+
+    it('keeps calls between two open groups on their members, without flagging them', () => {
+      const edges = [edge('checkout', 'billing'), edge('billing', 'ledger')];
+
+      const { edges: nextEdges } = groupServiceNodes(
+        openNodes(),
+        edges,
+        ILLUSTRATION_GROUPING,
+        undefined,
+        open(SHOP, FINANCE)
+      );
+
+      const byKey = new Map(nextEdges.map((e) => [`${e.source}>${e.target}`, e]));
+      expect([...byKey.keys()].sort()).toEqual(['billing>ledger', 'checkout>billing']);
+      expect(byKey.get('checkout>billing')?.data?.isIntraGroup).toBeUndefined();
+      expect(byKey.get('billing>ledger')?.data?.isIntraGroup).toBe(true);
+    });
+
+    it('still merges the edges of the closed groups around an open one', () => {
+      // checkout→billing and ledger→billing both end on the closed finance group's side
+      const edges = [edge('checkout', 'billing'), edge('checkout', 'ledger')];
+
+      const { edges: nextEdges } = groupServiceNodes(
+        openNodes(),
+        edges,
+        ILLUSTRATION_GROUPING,
+        undefined,
+        open(SHOP)
+      );
+
+      expect(nextEdges.map((e) => `${e.source}>${e.target}`)).toEqual([`checkout>${FINANCE}`]);
+    });
+
+    it('ignores ids of groups that do not exist or are a single service', () => {
+      const nodes = openNodes();
+      const edges = [edge('frontend', 'cart'), edge('checkout', 'billing')];
+
+      const closed = groupServiceNodes(nodes, edges, ILLUSTRATION_GROUPING);
+      const withStale = groupServiceNodes(
+        nodes,
+        edges,
+        ILLUSTRATION_GROUPING,
+        undefined,
+        // `shared` has one service, so it is not a group on the map
+        open('shared', 'service.namespace:gone')
+      );
+
+      expect(withStale).toEqual(closed);
+    });
   });
 });
