@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import SimpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -18,7 +18,7 @@ import { extname } from 'path';
 
 import { getFilesForCommit, runFileCasingCheck } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
-import { parse as yamlParse } from 'yaml';
+import { parseAllDocuments as yamlParseAllDocuments } from 'yaml';
 import { readFile } from 'fs/promises';
 
 class CheckResult {
@@ -94,8 +94,8 @@ class LinterCheck extends PrecommitCheck {
       }
 
       if (options.fix && options.stage) {
-        const simpleGit = new SimpleGit(REPO_ROOT);
-        await simpleGit.add(filesToLint);
+        const git = simpleGit(REPO_ROOT);
+        await git.add(filesToLint);
       }
     }
   }
@@ -125,7 +125,11 @@ class YamlLintCheck extends PrecommitCheck {
     for (const file of yamlFiles) {
       try {
         const content = await readFile(file.getAbsolutePath(), 'utf8');
-        yamlParse(content);
+        const docs = yamlParseAllDocuments(content);
+        const parseErrors = docs.flatMap((doc) => doc.errors);
+        if (parseErrors.length > 0) {
+          throw new Error(parseErrors.map((e) => e.message).join('\n'));
+        }
       } catch (error) {
         errors.push(`Error in ${file.getRelativePath()}:\n${error.message}`);
       }

@@ -73,9 +73,9 @@ The custom UIAM service entrypoint shell script (`run_java_with_custom_ca.sh`) i
 
 ## Overriding resources
 
-The files found in this directory can be overwritten with customized versions by using the `--resources` option of the `yarn es serverless` command.
+The files found in this directory can be overwritten with customized versions by using the `--resources` option of the `pnpm es serverless` command.
 Assuming a customized `users` and `users_roles` are located in `/tmp/my_es/` directory and executing the below command from the root of Kibana, here is an example:
 
 ```shell
-yarn es serverless --resources=/tmp/my_es/users --resources=/tmp/my_es/users_roles
+pnpm es serverless --resources=/tmp/my_es/users --resources=/tmp/my_es/users_roles
 ```

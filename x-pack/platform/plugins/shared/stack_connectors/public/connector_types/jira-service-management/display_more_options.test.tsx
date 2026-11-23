@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen, render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen, render } from '@testing-library/react';
 import { DisplayMoreOptions } from './display_more_options';
 
 describe('DisplayMoreOptions', () => {
@@ -33,10 +32,10 @@ describe('DisplayMoreOptions', () => {
     expect(button).toHaveAttribute('aria-label', 'Hide options');
   });
 
-  it('calls toggleShowingMoreOptions when clicked', async () => {
+  it('calls toggleShowingMoreOptions when clicked', () => {
     render(<DisplayMoreOptions {...options} />);
 
-    await userEvent.click(screen.getByTestId('jsm-display-more-options'));
+    fireEvent.click(screen.getByTestId('jsm-display-more-options'));
 
     expect(toggleShowingMoreOptions).toHaveBeenCalledTimes(1);
   });

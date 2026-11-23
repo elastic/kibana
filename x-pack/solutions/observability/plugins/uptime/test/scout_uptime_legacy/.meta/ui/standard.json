@@ -1,5 +1,8 @@
 {
-  "sha1": "8dbc9ca817a9fb095ca490909953a9c66d012cfd",
+  "sha1": "eca12b1a0ab7e53ffa52995308d108f59f47a23b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "b84b07d0bf27e66-b0ce2da86af09e0",
@@ -36,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/tests/default_email_settings.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 7
       }
     },

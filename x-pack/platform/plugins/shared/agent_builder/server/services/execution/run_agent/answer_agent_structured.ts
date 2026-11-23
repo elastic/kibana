@@ -12,7 +12,7 @@ import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { Logger } from '@kbn/logging';
 import { convertError, isRecoverableError } from './utils/errors';
-import { errorAction } from './actions';
+import { errorAction, isAgentErrorAction } from './actions';
 import type { PromptFactory } from './prompts';
 import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
@@ -88,7 +88,9 @@ export const createAnswerAgentStructured = ({
 
       return {
         answerActions: [action],
-        errorCount: 0,
+        // Successful inference calls can still produce recoverable error actions,
+        // which must count toward the retry limit.
+        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
       };
     } catch (error) {
       const executionError = convertError(error);

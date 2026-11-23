@@ -206,6 +206,137 @@ steps:
       message: '{% for row in steps.fetch.output %}{{ row }}{% endfor %}'
 `;
 
+/**
+ * ES|QL result cells are typed by a union without an array branch, so their real
+ * (possibly multivalued) type is only known at runtime.
+ */
+export const FOR_LOOP_ESQL_CELL_YAML = `name: ES|QL cell for-loop
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: run_query
+    type: elasticsearch.esql.query
+    with:
+      query: 'FROM logs-* | KEEP tags | LIMIT 1'
+  - name: summarize
+    type: console
+    with:
+      message: '{% for tag in steps.run_query.output.values[0][0] %}{{ tag }}{% endfor %}'
+`;
+
+export const forLoopEsqlCellWorkflowDefinition = {
+  version: '1',
+  name: 'ES|QL cell for-loop',
+  enabled: false,
+  triggers: [{ type: 'manual' }],
+  steps: [
+    {
+      name: 'run_query',
+      type: 'elasticsearch.esql.query',
+      with: { query: 'FROM logs-* | KEEP tags | LIMIT 1' },
+    },
+    {
+      name: 'summarize',
+      type: 'console',
+      with: {
+        message: '{% for tag in steps.run_query.output.values[0][0] %}{{ tag }}{% endfor %}',
+      },
+    },
+  ],
+} as WorkflowYaml;
+
+/**
+ * `{% assign acc = "" | split: "" %}` is the canonical Liquid idiom for an empty
+ * accumulator array, so a loop over `acc` resolves through the assign chain to a
+ * string literal rather than a schema path.
+ */
+export const FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML = `name: Empty array idiom for-loop
+enabled: false
+triggers:
+  - type: manual
+consts:
+  items:
+    - name: Alice
+steps:
+  - name: summarize
+    type: console
+    with:
+      message: |
+        {% assign acc = "" | split: "" %}
+        {% for item in consts.items %}{% assign acc = acc | push: item.name %}{% endfor %}
+        {% for entry in acc %}- {{ entry }}{% endfor %}
+`;
+
+export const forLoopEmptyArrayIdiomWorkflowDefinition = {
+  version: '1',
+  name: 'Empty array idiom for-loop',
+  enabled: false,
+  triggers: [{ type: 'manual' }],
+  consts: {
+    items: [{ name: 'Alice' }],
+  },
+  steps: [
+    {
+      name: 'summarize',
+      type: 'console',
+      with: {
+        message: [
+          '{% assign acc = "" | split: "" %}',
+          '{% for item in consts.items %}{% assign acc = acc | push: item.name %}{% endfor %}',
+          '{% for entry in acc %}- {{ entry }}{% endfor %}',
+        ].join('\n'),
+      },
+    },
+  ],
+} as WorkflowYaml;
+
+/** `foreach` step (not a liquid `{% for %}`) iterating an ES|QL result cell. */
+export const FOREACH_STEP_ESQL_CELL_YAML = `name: Foreach step over ES|QL cell
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: run_query
+    type: elasticsearch.esql.query
+    with:
+      query: 'FROM logs-* | KEEP tags | LIMIT 1'
+  - name: iterate_cell
+    type: foreach
+    foreach: '{{ steps.run_query.output.values[0][0] }}'
+    steps:
+      - name: log_cell
+        type: console
+        with:
+          message: '{{ foreach.item }}'
+`;
+
+export const foreachStepEsqlCellWorkflowDefinition = {
+  version: '1',
+  name: 'Foreach step over ES|QL cell',
+  enabled: false,
+  triggers: [{ type: 'manual' }],
+  steps: [
+    {
+      name: 'run_query',
+      type: 'elasticsearch.esql.query',
+      with: { query: 'FROM logs-* | KEEP tags | LIMIT 1' },
+    },
+    {
+      name: 'iterate_cell',
+      type: 'foreach',
+      foreach: '{{ steps.run_query.output.values[0][0] }}',
+      steps: [
+        {
+          name: 'log_cell',
+          type: 'console',
+          with: { message: '{{ foreach.item }}' },
+        },
+      ],
+    },
+  ],
+} as WorkflowYaml;
+
 export const forLoopRuntimeJsonWorkflowDefinition = {
   version: '1',
   name: 'Runtime JSON for-loop',

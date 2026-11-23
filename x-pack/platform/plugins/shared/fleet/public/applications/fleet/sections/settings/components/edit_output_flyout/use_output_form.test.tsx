@@ -47,7 +47,7 @@ describe('use_output_form', () => {
       expect(res).toEqual([
         {
           label: 'default.dataset',
-          value: 'default.dataset',
+          value: '%{[default.dataset]}',
         },
       ]);
     });
@@ -64,7 +64,7 @@ describe('use_output_form', () => {
       expect(res).toEqual([
         {
           label: '@timestamp',
-          value: '@timestamp',
+          value: '%{[@timestamp]}',
         },
       ]);
     });
@@ -81,7 +81,24 @@ describe('use_output_form', () => {
       expect(res).toEqual([
         {
           label: 'something',
-          value: 'something',
+          value: '%{[something]}',
+        },
+      ]);
+    });
+
+    it('should return the full expression as label and value for multi-token topics', () => {
+      const res = extractDefaultDynamicKafkaTopics({
+        type: 'kafka',
+        name: 'new',
+        is_default: false,
+        is_default_monitoring: false,
+        topic: '%{[data_stream.type]}-%{[data_stream.namespace]}',
+      });
+
+      expect(res).toEqual([
+        {
+          label: '%{[data_stream.type]}-%{[data_stream.namespace]}',
+          value: '%{[data_stream.type]}-%{[data_stream.namespace]}',
         },
       ]);
     });

@@ -13,6 +13,7 @@ import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -68,6 +69,8 @@ import {
   FleetError,
 } from '../errors';
 
+import { OUTPUT_ENCRYPTED_FIELDS } from '../saved_objects';
+
 import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
@@ -84,17 +87,23 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
+import { buildAgentStatusRuntimeField } from './agents/build_status_runtime_field';
 
 import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './setup/fleet_synced_integrations';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
+
+// ES filters aggregation creates one bucket per ID; stay well under search.max_buckets (default 65536).
+const AGENT_COUNT_POLICY_ID_CHUNK_SIZE = 1000;
 
 // differentiate
 function isUUID(val: string) {
@@ -123,11 +132,12 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
   } catch (e) {
     logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
   }
+  // canonical id placed last so attributes.id cannot shadow it
   return {
-    id: outputId ?? so.id,
     ...attributes,
     ...(parsedSsl ? { ssl: parsedSsl } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
+    id: outputId ?? so.id,
   };
 }
 
@@ -706,6 +716,8 @@ class OutputService {
         // required_acks can be 0
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
+      // Kafka does not support proxies — clear any proxy_id silently (#267281)
+      data.proxy_id = null;
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -831,6 +843,43 @@ class OutputService {
     };
   }
 
+  public async listPreconfigured() {
+    // Use the plain (non-decrypting) soClient to avoid the cost of decrypting every output.
+    // is_preconfigured is mapped with index:false so it cannot be used in a KQL filter;
+    // filter client-side instead.
+    const outputs = await this.soClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+    });
+
+    const preconfigured = outputs.saved_objects.filter(
+      (so) => so.attributes.is_preconfigured === true
+    );
+
+    for (const output of preconfigured) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        name: output.attributes.name,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    const encryptedFieldKeys = [...OUTPUT_ENCRYPTED_FIELDS].map((f) => f.key);
+
+    return {
+      items: preconfigured.map<Output>((so) =>
+        outputSavedObjectToOutput({
+          ...so,
+          attributes: omit(so.attributes, encryptedFieldKeys) as OutputSOAttributes,
+        })
+      ),
+      total: preconfigured.length,
+      page: 1,
+      perPage: preconfigured.length,
+    };
+  }
+
   public async listAllForProxyId(proxyId: string) {
     const outputs = await this.soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
@@ -879,9 +928,10 @@ class OutputService {
 
   public async delete(
     id: string,
-    { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
-      fromPreconfiguration: false,
-    }
+    {
+      fromPreconfiguration = false,
+      request,
+    }: { fromPreconfiguration?: boolean; request?: KibanaRequest } = {}
   ) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting output ${id}`);
@@ -900,6 +950,41 @@ class OutputService {
 
     if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
+    }
+
+    if (request) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(request)) {
+        // Collect agent-policy and package-policy spaces before any mutation.
+        // Fail closed if SO_SEARCH_LIMIT is hit.
+        const [agentPolicySpaces, packagePolicySpaces] = await Promise.all([
+          agentPolicyService.getSpacesForPoliciesUsingOutput(id),
+          packagePolicyService.getSpacesForPoliciesUsingOutput(id),
+        ]);
+        if (agentPolicySpaces.truncated || packagePolicySpaces.truncated) {
+          throw new OutputUnauthorizedError(
+            `Unable to verify delete authorization for output ${id}: too many agent policies to enumerate`
+          );
+        }
+        const errorMessage = `Insufficient privileges to delete output ${id}: it is used by agent policies in spaces you are not authorized to access`;
+        // Agent-policy spaces only need fleet-agent-policies-all.
+        // Package-policy spaces also need integrations-all because removeOutputFromAll
+        // rewrites package policies too. Check them separately so a user with
+        // integrations-all only in the spaces that actually have package policies
+        // is not incorrectly blocked in agent-only spaces.
+        await assertPrivilegesInSpaces({
+          request,
+          spaceIds: agentPolicySpaces.spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage,
+        });
+        await assertPrivilegesInSpaces({
+          request,
+          spaceIds: packagePolicySpaces.spaceIds,
+          apiPrivileges: ['integrations-all', 'fleet-agent-policies-all'],
+          errorMessage,
+        });
+      }
     }
 
     await packagePolicyService.removeOutputFromAll(
@@ -959,7 +1044,10 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
+    // id is stripped to prevent poisoning the saved object's identity field.
+    const updateData: Nullable<Partial<OutputSOAttributes>> = {
+      ...omit(data, ['ssl', 'secrets', 'id']),
+    };
 
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
@@ -1147,6 +1235,11 @@ class OutputService {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
+    // Kafka does not support proxies — clear any proxy_id silently (#267281)
+    if (mergedType === outputType.Kafka) {
+      updateData.proxy_id = null;
+    }
+
     if (
       data.type === outputType.RemoteElasticsearch &&
       updateData.type === outputType.RemoteElasticsearch
@@ -1284,6 +1377,72 @@ class OutputService {
         concurrency: MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
       }
     );
+  }
+
+  async getAgentAndPolicyCountForOutput(
+    esClient: ElasticsearchClient,
+    output: Output
+  ): Promise<{ agentPolicyCount: number; agentCount: number }> {
+    const internalSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const escaped = escapeQuotes(output.id);
+
+    // Include both data_output_id and monitoring_output_id so monitoring-only outputs
+    // are counted correctly. Also cover the is_default fallback (no explicit data_output_id).
+    let agentPoliciesKuery =
+      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escaped}" or ` +
+      `${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${escaped}"`;
+
+    if (output.is_default) {
+      agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
+    }
+    if (output.is_default_monitoring) {
+      agentPoliciesKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:*)`;
+    }
+    const packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escaped}"`;
+
+    // Iterate all pages so counts are correct beyond SO_SEARCH_LIMIT.
+    const directPolicyIds: string[] = [];
+    for await (const ids of await agentPolicyService.fetchAllAgentPolicyIds(internalSoClient, {
+      kuery: agentPoliciesKuery,
+      spaceId: '*',
+    })) {
+      directPolicyIds.push(...ids);
+    }
+
+    const directPolicyIdSet = new Set(directPolicyIds);
+    const pkgDerivedIdSet = new Set<string>();
+    for await (const pkgPolicies of await packagePolicyService.fetchAllItems(internalSoClient, {
+      kuery: packagePoliciesKuery,
+      spaceIds: ['*'],
+    })) {
+      for (const pp of pkgPolicies) {
+        for (const id of pp.policy_ids) {
+          if (!directPolicyIdSet.has(id)) {
+            pkgDerivedIdSet.add(id);
+          }
+        }
+      }
+    }
+
+    const uniqueIds = [...directPolicyIdSet, ...pkgDerivedIdSet];
+    const agentPolicyCount = uniqueIds.length;
+
+    let agentCount = 0;
+    if (agentPolicyCount > 0) {
+      // Build once — getInactivityTimeouts() does an SO find, so avoid per-chunk calls.
+      const runtimeMappings = await buildAgentStatusRuntimeField();
+      const chunks = _.chunk(uniqueIds, AGENT_COUNT_POLICY_ID_CHUNK_SIZE);
+      const chunkResults = await pMap(
+        chunks,
+        (chunk) => getAgentCountForAgentPolicies(esClient, chunk, { runtimeMappings }),
+        { concurrency: 5 }
+      );
+      agentCount = chunkResults
+        .flatMap((counts) => Object.values(counts))
+        .reduce((sum, n) => sum + n, 0);
+    }
+
+    return { agentPolicyCount, agentCount };
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {

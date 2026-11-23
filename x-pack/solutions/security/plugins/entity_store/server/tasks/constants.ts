@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export type EntityStoreTaskType = z.infer<typeof EntityStoreTaskType>;
-export const EntityStoreTaskType = z.enum([
-  'extractEntity',
-  'entityMaintainer',
-  'historySnapshot',
-  'statusReport',
-]);
+export const EntityStoreTaskType = lazySchema(() =>
+  z.enum(['extractEntity', 'entityMaintainer', 'historySnapshot', 'statusReport'])
+);

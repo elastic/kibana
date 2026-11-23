@@ -13,7 +13,7 @@ echo "--- Security Osquery Serverless Cypress"
 cd x-pack/platform/plugins/shared/osquery
 
 set +e
-yarn cypress:serverless:run; status=$?; yarn junit:merge || :
+pnpm cypress:serverless:run; status=$?; pnpm junit:merge || :
 
 # Scout reporter
 upload_scout_cypress_events "Cypress tests"

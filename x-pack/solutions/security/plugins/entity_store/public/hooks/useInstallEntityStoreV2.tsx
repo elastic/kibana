@@ -20,9 +20,8 @@ export interface Services {
   spaces: SpacesPluginStart;
 }
 
-interface EntityStoreV1StatusResponse {
-  status: EntityStoreStatus;
-}
+const LEGACY_ENTITY_ENGINE_SO_TYPE = 'entity-engine-status';
+const SAVED_OBJECTS_FIND_PATH = '/api/saved_objects/_find';
 
 const statusRequestQuery = {
   include_components: false,
@@ -31,11 +30,6 @@ const statusRequestQuery = {
 const getStatusRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.public.STATUS,
   query: statusRequestQuery,
-};
-
-const getStatusV1Request: HttpFetchOptionsWithPath = {
-  path: '/internal/entity_store/status',
-  version: '1',
 };
 
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
@@ -49,6 +43,36 @@ const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {
   query: { apiVersion: '2' },
 };
 
+const getPrivilegesRequest: HttpFetchOptionsWithPath = {
+  path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES,
+  query: { apiVersion: '2' },
+};
+
+// Detects whether the legacy v1 Entity Store was installed and running in this
+// space by looking up the legacy `entity-engine-status` saved object. Excludes
+// engines with status `stopped` — a user who explicitly stopped v1 should not
+// be treated as a migration candidate for v2 auto-install.
+export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean> => {
+  const response = await http.fetch<{ total: number }>(SAVED_OBJECTS_FIND_PATH, {
+    method: 'GET',
+    query: {
+      type: LEGACY_ENTITY_ENGINE_SO_TYPE,
+      per_page: 0,
+      filter: `NOT ${LEGACY_ENTITY_ENGINE_SO_TYPE}.attributes.status:stopped`,
+    },
+  });
+  return response.total > 0;
+};
+
+// Gate auto-install / maintainers-init on the same privilege set the install and
+// entity_maintainers/init routes enforce server-side (read + manage on the target
+// alias, manage_index_templates cluster, saved-object create, and read/
+// view_index_metadata on source indices) — surfaced as `has_install_permissions`.
+const hasEntityStoreInstallPrivileges = async (http: HttpSetup): Promise<boolean> => {
+  const privileges = await http.get<{ has_install_permissions?: boolean }>(getPrivilegesRequest);
+  return privileges.has_install_permissions === true;
+};
+
 /**
  * Hook to install Entity Store V2. Should be called from the root Security Solution app component.
  * @param services - Kibana services required to install Entity Store V2
@@ -60,23 +84,26 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         const isEntityStoreV2Enabled = services.uiSettings.get(FF_ENABLE_ENTITY_STORE_V2);
         if (!isEntityStoreV2Enabled) return;
 
-        const space = await services.spaces.getActiveSpace();
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
         const isEntityStoreV2Installed = isEntityStoreInstalled(statusResponse.status);
-        // In non-default spaces, only auto-install v2 where v1 existed. If v2 is already there,
-        // skip the v1 check and still run (e.g. init entity maintainers for this space).
-        if (space.id !== 'default' && !isEntityStoreV2Installed) {
-          if (!(await isEntityStoreV1Installed(services.http))) {
-            return;
-          }
-        }
+
         // Entity store already installed → init entity maintainers only.
         if (isEntityStoreV2Installed) {
+          if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
           await services.http.post(initEntityMaintainersRequest);
           return;
         }
+
+        const hadV1 = await isEntityStoreV1Installed(services.http);
+
+        // Only auto-install for users migrating from v1. Fresh users must opt in explicitly.
+        // Check before privileges to avoid an unnecessary API call for the common case.
+        if (!hadV1) return;
+
+        if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
+
         // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
         await services.http.post(installAllEntitiesRequest);
       } catch (e) {
@@ -85,14 +112,8 @@ export const useInstallEntityStoreV2 = (services: Services) => {
       }
     }
     install();
-  }, [services.http, services.uiSettings, services.logger, services.spaces]);
+  }, [services.http, services.uiSettings, services.logger]);
 };
 
 const isEntityStoreInstalled = (status: EntityStoreStatus): boolean =>
   status !== EntityStoreStatus.enum.not_installed;
-
-export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean> => {
-  const response = await http.get<EntityStoreV1StatusResponse>(getStatusV1Request);
-
-  return isEntityStoreInstalled(response.status);
-};

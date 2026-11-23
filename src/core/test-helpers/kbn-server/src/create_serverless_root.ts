@@ -61,7 +61,7 @@ export function createTestServerlessInstances({
    *  - `remote_cluster_server.enabled=true`
    *
    * Equivalent to running:
-   *  `yarn es serverless --projectType observability --uiam --kill --clean \
+   *  `pnpm es serverless --projectType observability --uiam --kill --clean \
    *    --kibanaUrl http://localhost:5601/ \
    *    -E serverless.cross_project.enabled=true -E remote_cluster_server.enabled=true`
    *
@@ -79,7 +79,7 @@ export function createTestServerlessInstances({
    */
   esArgs?: string[];
   /**
-   * The serverless project type to run (`yarn es serverless --projectType`).
+   * The serverless project type to run (`pnpm es serverless --projectType`).
    *
    * Defaults to `es` for existing tests.
    */
@@ -110,7 +110,7 @@ export function createTestServerlessInstances({
     if (!hasCpsKey) {
       set(kibana.settings, 'cps.cpsEnabled', enableCPS);
     }
-    // Match the default `yarn es serverless --uiam` setup, but allow tests to override
+    // Match the default `pnpm es serverless --uiam` setup, but allow tests to override
     // auth by pre-setting `elasticsearch.username/password` (e.g. use `system_indices_superuser`).
     const existingEsSettings = (kibana.settings as any).elasticsearch ?? {};
     set(kibana.settings, 'elasticsearch.hosts', [`https://localhost:${esTestConfig.getPort()}`]);

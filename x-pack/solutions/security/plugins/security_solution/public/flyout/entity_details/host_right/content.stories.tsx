@@ -45,6 +45,7 @@ export const Default = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 
@@ -66,6 +67,7 @@ export const WithGraphVisualization = {
       isPreviewMode={false}
       entityRecord={mockEntityRecord}
       entityStoreEntityId={mockEntityRecord.entity.id}
+      entityStoreV2Enabled={true}
     />
   ),
 
@@ -96,6 +98,7 @@ export const NoObservedData = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 
@@ -126,6 +129,7 @@ export const Loading = {
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
       isPreviewMode={false}
+      entityStoreV2Enabled={false}
     />
   ),
 
