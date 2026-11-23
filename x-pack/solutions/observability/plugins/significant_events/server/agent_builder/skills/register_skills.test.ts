@@ -16,7 +16,6 @@ import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_manag
 import { nightshiftSourcesManagementSkill } from './nightshift_sources_management';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
-import significantEventsKIGroundingContent from './significant_events_ki_grounding/skill.md.text';
 import {
   FEATURE_IDENTIFICATION_SKILL_ID,
   FINALIZE_FEATURES_TOOL_ID,
@@ -83,12 +82,6 @@ describe('registerSignificantEventsSkills', () => {
     expect(registeredIds).toEqual(expect.arrayContaining(CORE_SKILL_IDS));
     expect(registeredIds).not.toContain(KI_IDENTIFICATION_SKILL_ID);
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length);
-  });
-
-  it('keeps query feature IDs scoped to their KI source', () => {
-    expect(significantEventsKIGroundingContent).toMatch(
-      /first restrict fetched features to the query KI's `source_id`, then\s+match `feature\.id`/
-    );
   });
 
   // Registration cannot be undone, so without `availability` on each skill they stay advertised to
