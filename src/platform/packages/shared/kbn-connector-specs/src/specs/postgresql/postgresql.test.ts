@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EventEmitter } from 'events';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { setResponseLimit } from '../../lib/clients/mssql_response_limit';
+import { setResponseLimit } from '../../lib/clients/postgresql_response_limit';
 
 type Row = Record<string, unknown>;
 
@@ -26,7 +27,7 @@ const makePool = (results: ScriptedResult[] = [{}], { rollbackFails = false } = 
   // Consumes the next scripted result; the last one repeats.
   const nextResult = (): ScriptedResult => (queue.length > 1 ? queue.shift() ?? {} : queue[0]);
   const statements: Array<{ text: string; values?: unknown[] }> = [];
-  const client = {
+  const client = Object.assign(new EventEmitter(), {
     query: jest.fn(async (arg: string | { text: string; values?: unknown[] }) => {
       const statement = typeof arg === 'string' ? { text: arg } : arg;
       statements.push(statement);
@@ -40,7 +41,7 @@ const makePool = (results: ScriptedResult[] = [{}], { rollbackFails = false } = 
       return { rows: next.rows ?? [], rowCount: next.rowCount ?? next.rows?.length ?? 0 };
     }),
     release: jest.fn(),
-  };
+  });
   const pool = {
     connect: jest.fn().mockResolvedValue(client),
     // Used by executeSql, which does not go through a read-only transaction.
@@ -70,7 +71,7 @@ const makeConfig = (overrides: Record<string, unknown> = {}) => ({
 const makeContext = (pool: unknown): ActionContext =>
   ({
     config: makeConfig(),
-    log: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
+    log: { info: jest.fn(), debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
     getClient: jest.fn().mockResolvedValue(pool),
   } as unknown as ActionContext);
 
@@ -221,6 +222,25 @@ describe('PostgresqlConnector', () => {
       expect(client.release).toHaveBeenCalledTimes(1);
     });
 
+    it('handles a connection error on the checked-out client and destroys the connection', async () => {
+      const { pool, client } = makePool([{ rows: [] }]);
+      const ctx = makeContext(pool);
+      client.query.mockImplementationOnce(async () => ({})); // BEGIN READ ONLY
+      client.query.mockImplementationOnce(async () => {
+        // An EventEmitter with no 'error' listener throws here, which would crash the process.
+        client.emit('error', new Error('connection terminated'));
+        throw new Error('connection terminated');
+      });
+
+      await expect(
+        PostgresqlConnector.actions.query.handler(ctx, { sql: 'SELECT 1' })
+      ).rejects.toThrow('connection terminated');
+
+      expect(ctx.log.warn).toHaveBeenCalledWith(expect.stringContaining('connection terminated'));
+      expect(client.release).toHaveBeenCalledWith(true);
+      expect(client.listenerCount('error')).toBe(0);
+    });
+
     it('destroys the connection instead of pooling it when the rollback fails', async () => {
       const { pool, client } = makePool([{ rows: [] }], { rollbackFails: true });
 
@@ -275,6 +295,21 @@ describe('PostgresqlConnector', () => {
       expect(result.rowCount).toBe(10);
       expect(result.truncated).toBe(true);
     });
+
+    it.each(['SELECT 1', 'WITH x AS (SELECT 1 AS n) SELECT n FROM x', 'SELECT 1 AS a; -- done'])(
+      'always sends %s as one wrapped statement with a bound row limit',
+      async (sql) => {
+        const { pool, sent } = makePool([{ rows: [] }]);
+
+        await PostgresqlConnector.actions.query.handler(makeContext(pool), { sql });
+
+        expect(sent()).toHaveLength(1);
+        expect(sent()[0].text).toMatch(
+          /^SELECT \* FROM \(\n[\s\S]+\n\) AS kibana_query LIMIT \$1$/
+        );
+        expect(sent()[0].values).toEqual([101]);
+      }
+    );
 
     it('accepts WITH queries', async () => {
       const { pool } = makePool([{ rows: [] }]);
@@ -495,6 +530,14 @@ describe('PostgresqlConnector', () => {
       });
     });
 
+    it('explains how to recover when the schema has no readable tables', async () => {
+      const { pool } = makePool([{ rows: [] }]);
+
+      await expect(
+        PostgresqlConnector.actions.getSchema.handler(makeContext(pool), { schema: 'Sales' })
+      ).rejects.toThrow('Schema Sales was not found or has no readable tables. Use listTables');
+    });
+
     it('flags truncation when the schema has more columns than the cap', async () => {
       const rows = Array.from({ length: 2001 }, (_, i) => ({
         table: `t${i}`,
@@ -513,7 +556,8 @@ describe('PostgresqlConnector', () => {
       })) as { tables: unknown[]; truncated: boolean };
 
       expect(result.truncated).toBe(true);
-      expect(result.tables).toHaveLength(2000);
+      // The last table may have been cut mid-way, so it is left out.
+      expect(result.tables).toHaveLength(1999);
     });
   });
 

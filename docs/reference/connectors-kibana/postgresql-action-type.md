@@ -90,7 +90,7 @@ Describe Table
     - **schema** (optional): The schema containing the table (default: `public`).
 
 Get Schema
-:   Get every table and view in a schema together with their columns, in a single call. Use it to understand an unfamiliar database or to plan joins.
+:   Get every table and view in a schema together with their columns, in a single call. For very large schemas the result is marked as truncated and the last table is left out. Use it to understand an unfamiliar database or to plan joins.
     - **schema** (optional): The schema to describe (default: `public`).
 
 Search Rows
@@ -122,7 +122,7 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO kibana_reader;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO kibana_reader;
 ```
 
-The read actions run inside a read-only transaction, so PostgreSQL itself refuses statements that change data. The **Query** action also accepts only `SELECT` and `WITH` statements and rejects multiple statements and common write forms before they reach the server. **List Tables** and **Get Schema** only show objects that the role can read.
+The read actions run inside a read-only transaction, so PostgreSQL itself refuses statements that change data. The transaction doesn't stop functions with other side effects, such as `pg_sleep` or advisory locks, so those can still tie up connections until the statement times out. The **Query** action also accepts only `SELECT` and `WITH` statements and rejects multiple statements and common write forms before they reach the server. **List Tables** and **Get Schema** only show objects that the role can read.
 
 ::::{warning}
 These checks are not a security guarantee. Prompt injection and similar techniques can try to work around them, and a function that the role is allowed to call can have side effects of its own. The only reliable protection is granting the database role read-only permissions. Treat the checks as defense in depth, not a substitute for least-privilege credentials.

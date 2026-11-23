@@ -10,7 +10,7 @@
 import type { Pool } from 'pg';
 import type { BuildContext, ClientTypeSpec } from './client_type_spec';
 import { ensureNoProxyRequired } from './ensure_no_proxy_required';
-import { setResponseLimit } from './mssql_response_limit';
+import { setResponseLimit } from './postgresql_response_limit';
 import { parseBasicAuthHeader } from './parse_basic_auth_header';
 
 // Error codes that indicate the user supplied bad configuration (not a transient network error).
@@ -32,6 +32,9 @@ const USER_ERROR_CODES = new Set([
 
 // node-postgres raises this plain Error (no code) when TLS is required but the server refuses it.
 const SSL_NOT_SUPPORTED_MESSAGE = 'The server does not support SSL connections';
+
+// SQLSTATE classes 42 (syntax or access rule violation) and 22 (data exception) are mistakes in the caller's SQL.
+const SQL_USER_ERROR_CLASS = /^(42|22)[0-9A-Z]{3}$/;
 
 export const PROXY_NOT_SUPPORTED_MESSAGE =
   'PostgreSQL connections cannot be routed through the configured xpack.actions.proxyUrl: ' +
@@ -111,6 +114,6 @@ export const postgresqlClientType: ClientTypeSpec<Pool> = {
       return true;
     }
     const { code = '' } = err as NodeJS.ErrnoException;
-    return USER_ERROR_CODES.has(code);
+    return USER_ERROR_CODES.has(code) || SQL_USER_ERROR_CLASS.test(code);
   },
 };

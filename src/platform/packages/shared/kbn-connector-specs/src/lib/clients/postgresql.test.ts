@@ -8,7 +8,7 @@
  */
 
 import type { BuildContext } from './client_type_spec';
-import { getResponseLimit } from './mssql_response_limit';
+import { getResponseLimit } from './postgresql_response_limit';
 import { postgresqlClientType, PROXY_NOT_SUPPORTED_MESSAGE } from './postgresql';
 
 const mockRelease = jest.fn();
@@ -290,6 +290,13 @@ describe('postgresqlClientType', () => {
     it('returns true when TLS is required but the server does not support it', () => {
       expect(isUserError(new Error('The server does not support SSL connections'))).toBe(true);
     });
+
+    it.each(['42601', '42P01', '42703', '22P02'])(
+      'returns true for SQL mistakes in the caller query (%s)',
+      (code) => {
+        expect(isUserError(Object.assign(new Error('sql error'), { code }))).toBe(true);
+      }
+    );
 
     it('returns false for transient / unknown error codes', () => {
       expect(isUserError(Object.assign(new Error('timeout'), { code: 'ETIMEDOUT' }))).toBe(false);

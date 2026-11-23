@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { QueryResult } from 'pg';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { getResponseLimit } from '../../lib/clients/mssql_response_limit';
+import { getResponseLimit } from '../../lib/clients/postgresql_response_limit';
 import {
   assertReadOnly,
   escapeLikePattern,
@@ -55,11 +55,11 @@ import {
 
 const DEFAULT_MAX_ROWS = 100;
 const MAX_MAX_ROWS = 1000;
-// getSchema returns one row per column, so it needs a larger cap than the row-oriented actions.
+// getSchema returns one row per column, so it needs a larger cap.
 const MAX_SCHEMA_COLUMNS = 2000;
 const DEFAULT_SCHEMA = 'public';
 
-// Matches the Actions default for xpack.actions.maxResponseContentLength when the client did not record one.
+// Fallback for xpack.actions.maxResponseContentLength when the client did not record one.
 const DEFAULT_MAX_CONTENT_LENGTH = 1024 * 1024;
 
 type Row = Record<string, unknown>;
@@ -75,11 +75,7 @@ const isIdentifierChar = (char: string | undefined): boolean =>
 
 const DOLLAR_QUOTE_TAG = /^\$(?:[A-Za-z_\u0080-￿][A-Za-z0-9_\u0080-￿]*)?\$/;
 
-// Replaces comments, string literals, quoted identifiers, and dollar-quoted strings with spaces (keeping newlines
-// and overall length) so the read-only scan only sees SQL tokens. A keyword or semicolon inside a literal is not a
-// statement, and a comment is whitespace to PostgreSQL (`DROP/**/TABLE` is `DROP TABLE`). Only the check sees this
-// text; the original SQL is what runs. Block comments nest in PostgreSQL, as they do here. Because lengths match,
-// an index found in the blanked text is also valid in the original.
+// Blanks comments, literals and quoted identifiers (keeping length) so the read-only scan sees only SQL tokens.
 const blankNonCode = (sql: string): string => {
   const out: string[] = [];
   const blank = (from: number, to: number) => {
@@ -148,9 +144,7 @@ const blankNonCode = (sql: string): string => {
   return out.join('');
 };
 
-// Bounds the result: rows beyond maxRows, or beyond the Actions maximum response size, are dropped and the result
-// is flagged as truncated. A single row is fully buffered by the driver before it is seen here, so one very large
-// value cannot be prevented from being read, only from being returned.
+// Drops rows beyond maxRows or the maximum response size and flags the result as truncated.
 const capRows = <T extends Row>(
   rows: T[],
   maxRows: number,
@@ -171,11 +165,7 @@ const capRows = <T extends Row>(
   return { rows: kept, truncated };
 };
 
-/**
- * Runs a single statement inside a `BEGIN READ ONLY` transaction that is always rolled back, so PostgreSQL
- * itself rejects any write the statement attempts. The SQL must select `maxRows + 1` rows at most (the extra row
- * is how truncation is detected).
- */
+/** Runs one statement in a `BEGIN READ ONLY` transaction that is always rolled back. */
 const runReadOnly = async <T extends Row = Row>(
   ctx: ActionContext,
   text: string,
@@ -186,6 +176,12 @@ const runReadOnly = async <T extends Row = Row>(
   const maxContentLength = getResponseLimit(pool) ?? DEFAULT_MAX_CONTENT_LENGTH;
   const client = await pool.connect();
   let discard = false;
+  // pg-pool drops its own error listener while a client is checked out; without one a connection error is thrown.
+  const onClientError = (err: Error) => {
+    discard = true;
+    ctx.log.warn(`[postgresql] Connection error during query: ${err.message}`);
+  };
+  client.on('error', onClientError);
   try {
     await client.query('BEGIN READ ONLY');
     const result = await client.query<T>({ text, values });
@@ -196,6 +192,7 @@ const runReadOnly = async <T extends Row = Row>(
     await client.query('ROLLBACK').catch(() => {
       discard = true;
     });
+    client.removeListener('error', onClientError);
     client.release(discard);
   }
 };
@@ -211,9 +208,7 @@ const RELKIND_LABEL = `CASE c.relkind
   WHEN 'r' THEN 'TABLE' WHEN 'p' THEN 'PARTITIONED TABLE' WHEN 'v' THEN 'VIEW'
   WHEN 'm' THEN 'MATERIALIZED VIEW' WHEN 'f' THEN 'FOREIGN TABLE' END`;
 
-// `query` is wrapped so the row limit is a bound parameter: the extended protocol makes the server reject
-// multi-statement input, and LIMIT lets PostgreSQL stop reading early. The wrapped text ends in a newline so a
-// trailing line comment cannot swallow the closing parenthesis.
+// Wraps `query` so the row limit is a bound parameter, which makes the server reject multi-statement input.
 const wrapQuery = (sql: string, code: string): string => {
   // assertReadOnly already guaranteed that only whitespace or comments follow the first semicolon.
   const semicolon = code.indexOf(';');
@@ -330,7 +325,7 @@ export const PostgresqlConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Execute a read-only SQL SELECT query against the PostgreSQL database. Only SELECT and WITH statements are permitted; INSERT, UPDATE, DELETE, SELECT INTO, COPY, and DDL are blocked, and the query runs in a read-only transaction. Results are capped at maxRows (default 100, max 1000) and at the maximum response size, and flagged as truncated when more rows exist, so a LIMIT clause is optional. Do not include a trailing semicolon. Use listTables first to discover tables, and describeTable to inspect column names before writing queries. Quote mixed-case identifiers with double quotes (e.g. "Orders") and qualify tables outside the public schema (e.g. sales.orders).',
+        'Execute a read-only SQL SELECT query against the PostgreSQL database. Only SELECT and WITH statements are permitted; INSERT, UPDATE, DELETE, SELECT INTO, COPY, and DDL are blocked, and the query runs in a read-only transaction, which blocks data changes only, not functions with other side effects such as pg_sleep or advisory locks. Results are capped at maxRows (default 100, max 1000) and at the maximum response size, and flagged as truncated when more rows exist, so a LIMIT clause is optional. Do not include a trailing semicolon. Use listTables first to discover tables, and describeTable to inspect column names before writing queries. Quote mixed-case identifiers with double quotes (e.g. "Orders") and qualify tables outside the public schema (e.g. sales.orders).',
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) => {
         const code = blankNonCode(input.sql);
@@ -472,7 +467,7 @@ export const PostgresqlConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Get an overview of a PostgreSQL schema in one call: every table and view readable by the authenticated user, with each one\'s columns (name, data type, nullability, whether it is part of the primary key). Defaults to the "public" schema. Use this to orient yourself in an unfamiliar database or to plan joins; use describeTable for one table\'s constraints and indexes.',
+        'Get an overview of a PostgreSQL schema in one call: every table and view readable by the authenticated user, with each one\'s columns (name, data type, nullability, whether it is part of the primary key). Defaults to the "public" schema. When the schema is too large the result is flagged truncated and the last table is left out, so it may be incomplete; use describeTable for the missing tables. Use this to orient yourself in an unfamiliar database or to plan joins; use describeTable for one table\'s constraints and indexes.',
       input: GetSchemaInputSchema,
       handler: async (ctx, input: GetSchemaInput) => {
         const schema = input.schema ?? DEFAULT_SCHEMA;
@@ -523,7 +518,14 @@ export const PostgresqlConnector: ConnectorSpec = {
           entry.columns.push({ name: column, dataType, isNullable, isPrimaryKey });
           tables.set(table, entry);
         }
-        return { schema, tables: Array.from(tables.values()), truncated: result.truncated };
+        if (result.rowCount === 0) {
+          throw new Error(
+            `Schema ${schema} was not found or has no readable tables. Use listTables to see available schemas.`
+          );
+        }
+        const schemaTables = Array.from(tables.values());
+        if (result.truncated) schemaTables.pop();
+        return { schema, tables: schemaTables, truncated: result.truncated };
       },
     },
 
