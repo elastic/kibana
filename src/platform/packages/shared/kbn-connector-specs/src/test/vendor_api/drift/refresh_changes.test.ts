@@ -10,11 +10,12 @@
 import type { SpecChange } from './detect_drift';
 import { describeChanges } from './refresh_changes';
 
-const change = (id: string, text: string, type?: string): SpecChange => ({
+const change = (id: string, text: string, type?: string, typeBefore?: string): SpecChange => ({
   kind: 'non-breaking',
   id,
   text,
   ...(type === undefined ? {} : { type }),
+  ...(typeBefore === undefined ? {} : { typeBefore }),
 });
 const scheme = (id: string, scopes: string[]) =>
   change(
@@ -131,6 +132,109 @@ describe('describeChanges', () => {
         '! datapathProvider: UNSPECIFIED | LEGACY_DATAPATH | ADVANCED_DATAPATH | MIGRATE_T… (+ MIGRATE_TO_ADVANCED_DATAPATH)'
       )
     );
+  });
+
+  it('shows what a changed field was and what it is, as a line removed and a line added', () => {
+    const lines = describeChanges([
+      change(
+        'response-optional-property-added',
+        'added the optional property `fontVariantPosition` to the response with the `200` status',
+        'NORMAL | SUPER | SUB'
+      ),
+      change(
+        'response-property-one-of-added',
+        'added `#/components/schemas/SlotContentId` to the `a/defaultValue` response property `oneOf` list for the response status `200`',
+        'boolean | string | SlotContentId',
+        'boolean | string'
+      ),
+      change(
+        'response-property-one-of-added',
+        'added `#/components/schemas/SlotContentId` to the `b/value` response property `oneOf` list for the response status `200`',
+        'boolean | string | SlotContentId',
+        'boolean | string'
+      ),
+      change(
+        'response-property-enum-value-added',
+        'added the new `SLOT` enum value to the `a/type` response property for the response status `200`',
+        'BOOLEAN | TEXT | SLOT',
+        'BOOLEAN | TEXT'
+      ),
+    ]);
+
+    expect(lines).toEqual(
+      object(
+        'Response',
+        '+ fontVariantPosition: NORMAL | SUPER | SUB',
+        '- defaultValue: boolean | string',
+        '+ defaultValue: boolean | string | SlotContentId',
+        '- type: BOOLEAN | TEXT',
+        '+ type: BOOLEAN | TEXT | SLOT',
+        '- value: boolean | string',
+        '+ value: boolean | string | SlotContentId'
+      )
+    );
+  });
+
+  it('counts a changed field, which takes two lines, as one when it cuts the list', () => {
+    const lines = describeChanges(
+      ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'].map((name) =>
+        change(
+          'response-property-type-changed',
+          `the \`${name}\` response's property \`type\` changed from \`string\` to \`integer\` for status \`200\``,
+          'integer',
+          'string'
+        )
+      )
+    );
+
+    expect(lines.filter((line) => line.startsWith('- '))).toHaveLength(10);
+    expect(lines[lines.length - 1]).toBe('```');
+    expect(lines[lines.length - 2]).toBe('  … and 2 more changed');
+  });
+
+  it('keeps one line for a change that leaves the type as it was, with what changed in brackets', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-property-became-required',
+          'the response property `tags` became required for the status `200`',
+          'string[]',
+          'string[]'
+        ),
+      ])
+    ).toEqual(object('Response', '! tags: string[] (now required)'));
+  });
+
+  it('shows nullability in the two lines and not again in brackets', () => {
+    expect(
+      describeChanges([
+        change(
+          'request-parameter-became-not-nullable',
+          'the `query` request parameter `branch` became not nullable',
+          'string',
+          'string | null'
+        ),
+      ])
+    ).toEqual(object('Request', '- branch: string | null', '+ branch: string (query)'));
+  });
+
+  it('does not say in brackets what the two lines already say', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-property-type-changed',
+          "the `x` response's property `type` changed from `object` to `string` for status `200`",
+          'string',
+          'object'
+        ),
+        change(
+          'response-property-became-required',
+          'the response property `x` became required for the status `200`',
+          'string',
+          'object'
+        ),
+      ])
+    ).toEqual(object('Response', '- x: object', '+ x: string (now required)'));
   });
 
   it('shows the type of a field that gained a variant, or the variants when the type is unknown', () => {

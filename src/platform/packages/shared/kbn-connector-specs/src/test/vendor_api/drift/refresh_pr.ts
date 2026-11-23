@@ -164,12 +164,12 @@ const listsOf = (sections: readonly ConnectorSection[]): ListPart[] =>
  */
 const showMoreNames = (lists: readonly ListPart[], room: number): void => {
   let left = room;
-  const cut = lists.filter((part) => part.names.length > part.shown);
-  cut.sort((a, b) => a.names.length - a.shown - (b.names.length - b.shown));
+  const cut = lists.filter((part) => part.items.length > part.shown);
+  cut.sort((a, b) => a.items.length - a.shown - (b.items.length - b.shown));
   for (const part of cut) {
     const before = sizeOf(partLines(part));
     const initial = part.shown;
-    for (let shown = part.names.length; shown > initial; shown--) {
+    for (let shown = part.items.length; shown > initial; shown--) {
       part.shown = shown;
       const added = sizeOf(partLines(part)) - before;
       if (added <= left) {
@@ -212,7 +212,7 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
 
   let cap = DEFAULT_NAMES_SHOWN;
   for (; cap >= 1; cap--) {
-    lists.forEach((part) => (part.shown = Math.min(part.names.length, cap)));
+    lists.forEach((part) => (part.shown = Math.min(part.items.length, cap)));
     if (lengthOf(sections) <= MAX_DESCRIPTION_LENGTH) {
       break;
     }

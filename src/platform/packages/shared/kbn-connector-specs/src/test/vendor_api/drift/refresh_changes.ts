@@ -55,6 +55,8 @@ interface Entry {
   /** The field, scope or schema the line is about. */
   readonly name: string;
   readonly type?: string;
+  /** What the type was before, for a field that changed. */
+  readonly typeBefore?: string;
   /** What changed about it, shown in brackets; a field with several changes shows them all. */
   readonly details: readonly string[];
 }
@@ -231,6 +233,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
         sign: '!',
         name: body ? RESPONSE_BODY : fieldOf(second),
         type,
+        typeBefore: change.typeBefore,
         // A type that was cut may have lost the value or variant that changed.
         details: type === undefined || type.includes('…') ? [`${added ? '+' : '-'} ${what}`] : [],
       },
@@ -247,6 +250,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
       sign,
       name: fieldOf(name),
       type,
+      typeBefore: change.typeBefore,
       details: [location, ...details].filter((detail): detail is string => detail !== undefined),
     },
   ];
@@ -279,13 +283,17 @@ interface FixedPart {
   readonly count: number;
 }
 
-/** A list of names, of which `shown` are written out, under a title unless the area is an object. */
+/**
+ * A list of fields, of which `shown` are written out, under a title unless the area is an object.
+ * Each is the lines of the diff for one field: a line, or for a field that changed its type the
+ * line it had and the line it has.
+ */
 export interface ListPart {
   readonly kind: 'list';
   readonly title?: string;
   readonly sign: Sign;
-  readonly names: readonly string[];
-  /** What the names are, for the line that counts the ones left out. */
+  readonly items: ReadonlyArray<readonly string[]>;
+  /** What the fields are, for the line that counts the ones left out. */
   readonly moreLabel: string;
   shown: number;
 }
@@ -302,34 +310,51 @@ export interface ChangeArea {
 interface Field {
   readonly name: string;
   readonly type?: string;
+  readonly typeBefore?: string;
   readonly details: Set<string>;
 }
 
-/** One line per field of a name and type: then in brackets what changed about it. */
+/** A field's name and type, then in brackets what changed about it. */
 const lineOf = ({ name, type, details }: Field): string =>
   `${name}${type === undefined ? '' : `: ${type}`}${
     details.size > 0 ? ` (${[...details].sort(byLocationFirst).join(', ')})` : ''
   }`;
 
+// What is told by the two lines of a field that changed its type: not said again in brackets.
+const isTypeChange = (detail: string): boolean =>
+  /^(was |[+-] |now nullable$|no longer nullable$)/.test(detail);
+
+/** The lines of a field: what it was and what it is when its type changed, else one line. */
+const linesOf = (sign: Sign, field: Field): string[] => {
+  const { name, type, typeBefore } = field;
+  if (sign === '!' && type !== undefined && typeBefore !== undefined && type !== typeBefore) {
+    const details = new Set([...field.details].filter((detail) => !isTypeChange(detail)));
+    return [`- ${name}: ${typeBefore}`, `+ ${lineOf({ name, type, details })}`];
+  }
+  return [`${sign} ${lineOf(field)}`];
+};
+
 const listPart = (area: Area, sign: Sign, entries: readonly Entry[]): ListPart => {
-  // A field that several changes are about is one line, with all their details.
+  // A field that several changes are about is one item, with all their details.
   const fields = new Map<string, Field>();
-  for (const { name, type, details } of entries) {
-    // Fields of the same name and type, wherever they sit, are one line.
-    const key = `${name}\u0000${type ?? ''}`;
-    const field: Field = fields.get(key) ?? { name, type, details: new Set<string>() };
+  for (const { name, type, typeBefore, details } of entries) {
+    // Fields of the same name and type, wherever they sit, are one item.
+    const key = `${name}\u0000${typeBefore ?? ''}\u0000${type ?? ''}`;
+    const field: Field = fields.get(key) ?? { name, type, typeBefore, details: new Set<string>() };
     details.forEach((detail) => field.details.add(detail));
     fields.set(key, field);
   }
-  const names = [...fields.values()].map(lineOf).sort(byText);
+  const items = [...fields.values()]
+    .sort((a, b) => byText(a.name, b.name) || byText(a.type ?? '', b.type ?? ''))
+    .map((field) => linesOf(sign, field));
   const object = isObjectArea(area);
   return {
     kind: 'list',
     ...(object ? {} : { title: SIGN_WORDS[sign] }),
     sign,
-    names,
+    items,
     moreLabel: object || sign === '!' ? SIGN_WORDS[sign] : area.toLowerCase(),
-    shown: Math.min(names.length, DEFAULT_NAMES_SHOWN),
+    shown: Math.min(items.length, DEFAULT_NAMES_SHOWN),
   };
 };
 
@@ -338,10 +363,10 @@ export const partLines = (part: ChangePart): string[] => {
   if (part.kind === 'fixed') {
     return [...part.lines];
   }
-  const more = part.names.length - part.shown;
+  const more = part.items.length - part.shown;
   return [
     ...(part.title === undefined ? [] : [part.title]),
-    ...part.names.slice(0, part.shown).map((name) => `${part.sign} ${name}`),
+    ...part.items.slice(0, part.shown).flat(),
     ...(more > 0 ? [`  … and ${more} more ${part.moreLabel}`] : []),
   ];
 };
@@ -424,7 +449,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
  * many media types or paths through a shared schema `oasdiff` reported it for.
  */
 export const countChanges = ({ parts }: ChangeArea): number =>
-  parts.reduce((total, part) => total + (part.kind === 'list' ? part.names.length : part.count), 0);
+  parts.reduce((total, part) => total + (part.kind === 'list' ? part.items.length : part.count), 0);
 
 /** The markdown describing the changes to one endpoint, with the default number of names. */
 export const describeChanges = (changes: readonly SpecChange[]): string[] => {

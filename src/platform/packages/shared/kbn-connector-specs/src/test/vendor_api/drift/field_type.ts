@@ -233,11 +233,7 @@ const isFieldRemoval = (id: string): boolean =>
 const lengthened = (type: string): string =>
   type.length > MAX_TYPE_LENGTH ? `${type.slice(0, MAX_TYPE_LENGTH - 1)}…` : type;
 
-export const fieldTypeOf = (
-  { id, text, operation }: SpecChange,
-  { committed, current }: SnapshotDocuments
-): string | undefined => {
-  const document = isFieldRemoval(id) ? committed : current;
+const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string | undefined => {
   if (operation === undefined || !isRecord(document) || !isRecord(document.paths)) {
     return undefined;
   }
@@ -286,3 +282,29 @@ export const fieldTypeOf = (
     /-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id) ? deref(document, node) : node;
   return lengthened(typeOf(document, shown));
 };
+
+// A field that is new, or gone, has no type on the other side.
+const isFieldAddition = (id: string): boolean =>
+  /^new-(optional|required)-request-(property|parameter)$/.test(id) ||
+  /^response-(optional|required)-property-added$/.test(id);
+
+/**
+ * The type of the field a change is about, and what it was before when the field was there before:
+ * `type` is read from the refreshed snapshot (the committed one for a field that was removed) and
+ * `typeBefore` from the committed one.
+ */
+export const fieldTypesOf = (
+  change: SpecChange,
+  { committed, current }: SnapshotDocuments
+): { type?: string; typeBefore?: string } => {
+  const type = typeIn(change, isFieldRemoval(change.id) ? committed : current);
+  const typeBefore =
+    isFieldRemoval(change.id) || isFieldAddition(change.id) ? undefined : typeIn(change, committed);
+  return {
+    ...(type === undefined ? {} : { type }),
+    ...(typeBefore === undefined ? {} : { typeBefore }),
+  };
+};
+
+export const fieldTypeOf = (change: SpecChange, documents: SnapshotDocuments): string | undefined =>
+  fieldTypesOf(change, documents).type;

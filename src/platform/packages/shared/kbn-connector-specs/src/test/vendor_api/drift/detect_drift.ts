@@ -15,7 +15,7 @@ import type { ConnectorSpec } from '../../../connector_spec';
 import { loadVendorSpec } from '../spec/load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from '../spec/load_vendor_specs';
 import { compareFields } from './compare_fields';
-import { fieldTypeOf } from './field_type';
+import { fieldTypesOf } from './field_type';
 import type { SnapshotDocuments } from './field_type';
 import type { OperationLocation } from './locate_operation';
 import { locateOperation, serverUrls } from './locate_operation';
@@ -61,6 +61,8 @@ export interface SpecChange {
    * one. Missing when the change isn't about a field or its path can't be followed.
    */
   readonly type?: string;
+  /** What the type was in the committed snapshot, for a field that was there before. */
+  readonly typeBefore?: string;
 }
 
 export interface SourceDrift {
@@ -372,10 +374,10 @@ const parseSnapshot = (text: string | undefined): unknown => {
   }
 };
 
-const withType = (change: SpecChange, documents: SnapshotDocuments): SpecChange => {
-  const type = fieldTypeOf(change, documents);
-  return type === undefined ? change : { ...change, type };
-};
+const withType = (change: SpecChange, documents: SnapshotDocuments): SpecChange => ({
+  ...change,
+  ...fieldTypesOf(change, documents),
+});
 
 const classifyChanges = async ({
   format,

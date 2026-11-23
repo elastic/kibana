@@ -198,6 +198,20 @@ describe('detectDrift', () => {
     expect(sources.main.changes?.[1]).not.toHaveProperty('type');
   });
 
+  it('gives a changed field the type it had before as well as the one it has', async () => {
+    documents[SPEC_URL] = specYaml({ itemProperties: '{ name: { type: integer } }' });
+    diffEntries = [
+      {
+        ...entry('response-property-type-changed', 1),
+        text: "the `name` response's property `type` changed from `string` to `integer` for status `200`",
+      },
+    ];
+
+    const { sources } = await detect();
+
+    expect(sources.main.changes).toMatchObject([{ type: 'integer', typeBefore: 'string' }]);
+  });
+
   it('reports vendor drift when an action fails against the latest spec only', async () => {
     documents[SPEC_URL] = specYaml({ itemsPath: '/v2/items' });
     diffEntries = [entry('api-path-removed-without-deprecation', 3)];

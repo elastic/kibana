@@ -8,7 +8,7 @@
  */
 
 import type { SpecChange } from './detect_drift';
-import { fieldTypeOf } from './field_type';
+import { fieldTypeOf, fieldTypesOf } from './field_type';
 
 const schema = (name: string) => ({ $ref: `#/components/schemas/${name}` });
 
@@ -150,6 +150,29 @@ describe('fieldTypeOf', () => {
 
     expect(fieldTypeOf(parameter('limit'), { current })).toBe('integer');
     expect(fieldTypeOf(parameter('mode'), { current })).toBe('string | null');
+  });
+
+  it('gives the type a field had before when it was there before', () => {
+    const committed = documentOf({ properties: { tags: { type: 'string' } } });
+    const retyped = change(
+      'response-property-type-changed',
+      "the `tags` response's property `type` changed from `string` to `array` for status `200`"
+    );
+    const added = change(
+      'response-optional-property-added',
+      'added the optional property `tags` to the response with the `200` status'
+    );
+    const removed = change(
+      'response-optional-property-removed',
+      'removed the optional property `tags` from the response with the `200` status'
+    );
+
+    expect(fieldTypesOf(retyped, { committed, current })).toEqual({
+      type: 'string[]',
+      typeBefore: 'string',
+    });
+    expect(fieldTypesOf(added, { committed, current })).toEqual({ type: 'string[]' });
+    expect(fieldTypesOf(removed, { committed, current })).toEqual({ type: 'string' });
   });
 
   it('takes the status the change names, else the lowest successful one', () => {
