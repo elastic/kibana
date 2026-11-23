@@ -142,6 +142,20 @@ describe('triage store decisions step', () => {
     expect(bulk).not.toHaveBeenCalled();
   });
 
+  it('reports a key below the minimum, not "no strict keys", when all its alerts were closed with no reason', async () => {
+    const { run, bulk } = setup({
+      alerts: alertsOf([['a.exe', 3]]),
+      closedWithoutReason: ['a.exe-0', 'a.exe-1', 'a.exe-2'],
+    });
+
+    const { output } = await run({});
+
+    expect(output).toEqual(
+      expect.objectContaining({ skip_reason: 'none', keys_seen: 1, keys_below_minimum: 1 })
+    );
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
   it('does not count an alert closed with no reason as evidence of a false positive', async () => {
     const { run, bulk } = setup({
       alerts: alertsOf([['a.exe', 3]]),

@@ -114,10 +114,20 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
           alerts: entries.filter(({ id }) => blockingIds.has(id)),
           spaceId,
         }).groups.map(({ hash }) => hash);
-        const { groups, alertsWithoutStrictKey } = groupByStrictKey({
-          alerts: entries.filter(({ id }) => !noEvidenceIds.has(id)),
+        // Every key the proposal has is counted, whatever its evidence: an approval whose alerts
+        // were all closed with no reason has keys, and reports them below the minimum, not as
+        // having none. The evidence filter only decides how many alerts a key has for the minimum.
+        const grouped = groupByStrictKey({
+          alerts: entries.filter(({ id }) => !blockingIds.has(id)),
           spaceId,
         });
+        const { alertsWithoutStrictKey } = grouped;
+        const groups = grouped.groups
+          .map((group) => ({
+            ...group,
+            alertIds: group.alertIds.filter((id) => !noEvidenceIds.has(id)),
+          }))
+          .sort((a, b) => b.alertIds.length - a.alertIds.length || a.hash.localeCompare(b.hash));
         if (groups.length === 0) {
           return result('no_strict_keys', { alerts_without_strict_key: alertsWithoutStrictKey });
         }
