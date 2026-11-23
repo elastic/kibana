@@ -2902,6 +2902,42 @@ describe('EditOutputFlyout', () => {
 
           expect(utils.queryByText(/minimum size \(8192\) can not be more than/)).toBeNull();
         });
+
+        it('should compare it on the managed endpoint when the batch counts items', () => {
+          mockStartServices(false, 'https://managed.example.com');
+          const { utils } = renderFlyout({
+            ...itemsQueue('managed.example.com:443'),
+            otlp_exporter: {
+              protocol: 'grpc',
+              endpoint: 'managed.example.com:443',
+              sending_queue: {
+                enabled: true,
+                sizer: 'items',
+                queue_size: 1000,
+                batch: { sizer: 'items' },
+              },
+            },
+          } as Output);
+          fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput'));
+
+          expect(utils.getByText(/minimum size \(8192\) can not be more than/)).toBeInTheDocument();
+        });
+
+        it('should clear the error and enable Save when the endpoint becomes the managed one', async () => {
+          mockStartServices(false, 'https://managed.example.com');
+          const { utils } = renderFlyout(itemsQueue('collector.example.com:4317'));
+          fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput'));
+          expect(utils.getByText(/minimum size \(8192\) can not be more than/)).toBeInTheDocument();
+
+          fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+            target: { value: 'managed.example.com:443' },
+          });
+
+          await waitFor(() => {
+            expect(utils.queryByText(/minimum size \(8192\) can not be more than/)).toBeNull();
+            expect(utils.getByText('Save and apply settings').closest('button')).toBeEnabled();
+          });
+        });
       });
 
       it('should save a queue that is off with a size of 0', async () => {
