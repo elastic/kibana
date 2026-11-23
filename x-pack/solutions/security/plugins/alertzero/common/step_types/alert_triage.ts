@@ -534,6 +534,11 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
       .describe(
         'Alerts a decision closed or skipped that have no note: a failed write, or past the time limit.'
       ),
+    blocked_by_verdict: z
+      .number()
+      .describe(
+        'Matches of an approved decision that was not acted on, because an alert of its key has a true positive or inconclusive verdict.'
+      ),
     left_for_notes: z
       .number()
       .describe(

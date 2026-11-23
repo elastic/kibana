@@ -16,7 +16,7 @@ import {
   TAG_CHUNK_SIZE,
   type DecisionAutoCloseMode,
 } from '../../alert_triage/constants';
-import { decisionId, groupByStrictKey } from '../../alert_triage/fp_decisions';
+import { decisionId, groupByStrictKey, strictKeyTag } from '../../alert_triage/fp_decisions';
 import { getTriageMatchFpDecisionsStepDefinition } from './match_fp_decisions_step';
 
 const NOW = Date.parse('2026-10-27T12:00:00.000Z');
@@ -64,6 +64,10 @@ const setup = ({
   getError,
   runSpace = 'default',
   closeTimedOut = false,
+  acknowledgedEarly = [],
+  acknowledgedDuringTag = [],
+  revokedAfterWrite = [],
+  conflictingVerdicts = [],
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
   /** Stored decisions by document id. */
@@ -90,10 +94,32 @@ const setup = ({
   runSpace?: string;
   /** The status route answers 200 but its update-by-query timed out part way. */
   closeTimedOut?: boolean;
+  /** Alerts an analyst acknowledged after the search but before the sweep's own check, so the check sees them as not open. */
+  acknowledgedEarly?: string[];
+  /** Alerts an analyst acknowledged between the sweep's check and its dismissal tag write. */
+  acknowledgedDuringTag?: string[];
+  /** Decisions a revoke deletes after the sweep has written to their alerts: the first read still finds them in force. */
+  revokedAfterWrite?: string[];
+  /** Decisions whose key has a true positive or inconclusive verdict. */
+  conflictingVerdicts?: string[];
 }) => {
+  const skipTagged = new Set<string>();
   const callKibanaApi = jest.fn(
     async ({ path, body }: { path: string; body?: Record<string, any> }) => {
       if (path.endsWith('/signals/search')) {
+        if (body?.aggs) {
+          return {
+            body: {
+              aggregations: {
+                keys: {
+                  buckets: conflictingVerdicts.map((id) => ({
+                    key: strictKeyTag(id.slice('fp-decision-'.length)),
+                  })),
+                },
+              },
+            },
+          };
+        }
         if (body?.size === 0) {
           if (countError) throw countError;
           return { body: { hits: { total: { value: closedToday } } } };
@@ -101,6 +127,19 @@ const setup = ({
         if (searchError) throw searchError;
         // The lookup of alerts that are still open: after a failed close all of them, after a close
         // that left some alone only those an analyst moved on from.
+        // The check of which alerts are `open`, before a close or around a dismissal tag write.
+        if (body?.query?.bool?.filter?.[1]?.term?.['kibana.alert.workflow_status'] === 'open') {
+          const ids: string[] = body.query.bool.filter[0].ids.values;
+          const gone = [
+            ...acknowledgedEarly,
+            ...(ids.every((id) => skipTagged.has(id)) ? acknowledgedDuringTag : []),
+          ];
+          return {
+            body: {
+              hits: { hits: ids.filter((_id) => !gone.includes(_id)).map((_id) => ({ _id })) },
+            },
+          };
+        }
         if (body?.query?.bool?.filter?.[0]?.ids) {
           const open = closeError ? body.query.bool.filter[0].ids.values : movedOn;
           return { body: { hits: { hits: open.map((_id: string) => ({ _id })) } } };
@@ -122,6 +161,15 @@ const setup = ({
           },
         };
       }
+      if (path.endsWith('/signals/tags')) {
+        const { ids, tags: change } = body as {
+          ids: string[];
+          tags: { tags_to_add: string[]; tags_to_remove: string[] };
+        };
+        if (change.tags_to_add.some((tag) => tag.startsWith('az:skipped_by_decision:'))) {
+          ids.forEach((id) => skipTagged.add(id));
+        }
+      }
       return { body: { updated: 1, timed_out: false, failures: [] } };
     }
   );
@@ -137,14 +185,17 @@ const setup = ({
       ),
     };
   });
+  const reads = new Map<string, number>();
   const get = jest.fn(async ({ id }: { id: string }) => {
     if (getError) throw getError;
     const current = decisions[id];
     if (current === undefined) throw Object.assign(new Error('not found'), { statusCode: 404 });
+    reads.set(id, (reads.get(id) ?? 0) + 1);
     return {
-      _source: revokedDuringSweep.includes(id)
-        ? { ...current, governance: { lifecycle: { status: 'deleted' } } }
-        : current,
+      _source:
+        revokedDuringSweep.includes(id) || (revokedAfterWrite.includes(id) && reads.get(id)! > 1)
+          ? { ...current, governance: { lifecycle: { status: 'deleted' } } }
+          : current,
     };
   });
   const run = () =>
@@ -182,7 +233,10 @@ const setup = ({
   const tags = () =>
     callKibanaApi.mock.calls
       .filter(([{ path }]) => path.endsWith('/signals/tags'))
-      .map(([{ body }]) => body as { ids: string[]; tags: { tags_to_add: string[] } });
+      .map(
+        ([{ body }]) =>
+          body as { ids: string[]; tags: { tags_to_add: string[]; tags_to_remove: string[] } }
+      );
   const notes = () =>
     callKibanaApi.mock.calls
       .filter(([{ path }]) => path.endsWith('/api/note'))
@@ -374,7 +428,12 @@ describe('triage match decisions step', () => {
     const inner = callKibanaApi.getMockImplementation()!;
     callKibanaApi.mockImplementation(
       async (params: { path: string; body?: Record<string, any> }) => {
-        if (params.path.endsWith('/signals/search') && params.body?.size !== 0) {
+        // Only the candidate searches: the checks of single alerts have an id filter.
+        if (
+          params.path.endsWith('/signals/search') &&
+          params.body?.size !== 0 &&
+          !params.body?.query?.bool?.filter?.[0]?.ids
+        ) {
           if (++searches > 1) throw new Error('es down');
           return { body: { hits: { hits: first } } };
         }
@@ -616,7 +675,7 @@ describe('triage match decisions step in on mode', () => {
 
     const countBody = callKibanaApi.mock.calls
       .map(([{ body }]) => body as Record<string, any> | undefined)
-      .find((body) => body?.size === 0);
+      .find((body) => body?.size === 0 && !body.aggs);
     expect(
       countBody?.query.bool.filter[1].range['kibana.alert.workflow_status_updated_at'].gte
     ).toBe(new Date(NOW - 24 * 60 * 60 * 1000).toISOString());
@@ -842,6 +901,139 @@ describe('triage match decisions step in on mode', () => {
     expect(tags()).toEqual([]);
   });
 
+  describe('what moves while the sweep writes', () => {
+    const skipTag = (id: string) => `az:skipped_by_decision:${id}`;
+
+    it('gives neither a close nor a note to an alert an analyst moved on before the close, and lets its tag go', async () => {
+      const { run, tags, closes, notes } = setup({
+        mode: 'on',
+        acknowledgedEarly: ['b'],
+        alerts: [
+          ['a', source('C:\\x.exe')],
+          ['b', source('C:\\x.exe')],
+        ],
+        decisions: approved('C:\\x.exe'),
+      });
+
+      const { output } = await run();
+
+      const tag = `az:closed_by_decision:${idOf('C:\\x.exe')}`;
+      expect(closes().map(({ signal_ids: ids }) => ids)).toEqual([['a']]);
+      expect(tags().map(({ ids, tags: change }) => [ids, change])).toEqual([
+        [['a', 'b'], { tags_to_add: [tag], tags_to_remove: [] }],
+        [['b'], { tags_to_add: [], tags_to_remove: [tag] }],
+      ]);
+      expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+      expect(output).toEqual(expect.objectContaining({ closed: 1, close_failures: 0 }));
+    });
+
+    it('writes the dismissal tags only to alerts that are still open', async () => {
+      const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+      const { run, tags, notes } = setup({
+        mode: 'on',
+        acknowledgedEarly: ['b'],
+        alerts: [
+          ['a', source('C:\\x.exe')],
+          ['b', source('C:\\x.exe')],
+        ],
+        decisions: { [id]: stored('do_not_propose') },
+      });
+
+      const { output } = await run();
+
+      expect(tags().map(({ ids }) => ids)).toEqual([['a']]);
+      expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+      expect(output).toEqual(expect.objectContaining({ skipped: 1 }));
+    });
+
+    it('takes the dismissal tags off an alert an analyst acknowledged while they were written, so it is not kept out of analysis', async () => {
+      const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+      const { run, tags, notes } = setup({
+        mode: 'on',
+        acknowledgedDuringTag: ['b'],
+        alerts: [
+          ['a', source('C:\\x.exe')],
+          ['b', source('C:\\x.exe')],
+        ],
+        decisions: { [id]: stored('do_not_propose') },
+      });
+
+      const { output } = await run();
+
+      expect(tags().map(({ ids, tags: change }) => [ids, change.tags_to_add.length])).toEqual([
+        [['a', 'b'], 2],
+        [['b'], 0],
+      ]);
+      expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+      expect(output).toEqual(expect.objectContaining({ skipped: 1 }));
+    });
+
+    it('undoes its closes when the decision was revoked while it closed, so the revoke is complete', async () => {
+      const { run, tags, closes, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+        revokedAfterWrite: [idOf('C:\\x.exe')],
+      });
+
+      const { output } = await run();
+
+      const tag = `az:closed_by_decision:${idOf('C:\\x.exe')}`;
+      expect(closes().map(({ status, signal_ids: ids }) => [status, ids])).toEqual([
+        ['closed', ['a']],
+        ['open', ['a']],
+      ]);
+      expect(tags().map(({ tags: change }) => change)).toEqual([
+        { tags_to_add: [tag], tags_to_remove: [] },
+        { tags_to_add: [], tags_to_remove: [tag] },
+      ]);
+      expect(notes()).toEqual([]);
+      expect(output).toEqual(expect.objectContaining({ closed: 0, close_failures: 0 }));
+    });
+
+    it('takes the dismissal tags off when the decision was revoked while it tagged, and writes no note', async () => {
+      const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+      const { run, tags, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: { [id]: stored('do_not_propose') },
+        revokedAfterWrite: [id],
+      });
+
+      const { output } = await run();
+
+      expect(
+        tags().map(({ tags: change }) => [change.tags_to_add.length, change.tags_to_remove])
+      ).toEqual([
+        [2, []],
+        [0, ['az:inconclusive', skipTag(id)]],
+      ]);
+      expect(notes()).toEqual([]);
+      expect(output).toEqual(expect.objectContaining({ skipped: 0 }));
+    });
+  });
+
+  it('closes nothing for an approved decision whose key has a later true positive or inconclusive verdict', async () => {
+    const { run, tags, closes, notes } = setup({
+      mode: 'on',
+      alerts: [
+        ['a', source('C:\\x.exe')],
+        ['b', source('C:\\x.exe')],
+      ],
+      decisions: approved('C:\\x.exe'),
+      conflictingVerdicts: [idOf('C:\\x.exe')],
+    });
+
+    const { output } = await run();
+
+    expect(closes()).toEqual([]);
+    expect(tags()).toEqual([]);
+    expect(notes()).toEqual([]);
+    expect(output).toEqual(
+      expect.objectContaining({ closed: 0, blocked_by_verdict: 2, close_failures: 0 })
+    );
+  });
+
   it('closes nothing, and counts a failed close, when the decision cannot be read again', async () => {
     const { run, closes } = setup({
       mode: 'on',
@@ -901,7 +1093,10 @@ describe('triage match decisions step in on mode', () => {
           throw new Error('tag failed');
         }
         const filter = params.body?.query?.bool?.filter;
-        if (params.path.endsWith('/signals/search') && filter?.[1]?.term) {
+        if (
+          params.path.endsWith('/signals/search') &&
+          filter?.[1]?.term?.['kibana.alert.workflow_tags']
+        ) {
           expect(filter[1].term).toEqual({
             'kibana.alert.workflow_tags': `az:skipped_by_decision:${id}`,
           });

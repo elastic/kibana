@@ -16,14 +16,23 @@ import {
   TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
   TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX,
 } from '../../alert_triage/constants';
-import { readActiveDecision, type StoredDecision } from '../../alert_triage/fp_decisions';
+import {
+  FP_DECISION_BLOCKING_VERDICT_TAGS,
+  FP_DECISION_ID_PREFIX,
+  readActiveDecision,
+  strictKeyTag,
+  type StoredDecision,
+} from '../../alert_triage/fp_decisions';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
 import {
   closeStillOpenAlertsAsFalsePositive,
   countClosedByDecision,
   findAlertIdsWithTag,
   findAlertsNotClosedAsFalsePositive,
+  findKeyTagsWithVerdicts,
   findOpenAlertIds,
+  findStillOpenAlertIds,
+  reopenFalsePositiveClosedAlerts,
   statusCodeOf,
   tagAlerts,
   writeAlertNotes,
@@ -43,6 +52,7 @@ export const NOTHING = {
   tag_failures: 0,
   notes_missing: 0,
   left_for_notes: 0,
+  blocked_by_verdict: 0,
   deferred: 0,
   out_of_time: false,
 };
@@ -215,10 +225,63 @@ export const createDecisionSweep = ({
   };
 
   /**
+   * Whether an alert of the decision's key already has a true positive or inconclusive verdict. The
+   * decision was approved on evidence from before, and a later verdict for the same key is
+   * evidence against it: the alerts of the key go to analysis until the decision is taken back or
+   * expires. A read that fails throws, so the caller closes nothing on a guess.
+   */
+  const hasConflictingVerdict = async (id: string): Promise<boolean> => {
+    const keyTag = strictKeyTag(id.slice(FP_DECISION_ID_PREFIX.length));
+    const found = await findKeyTagsWithVerdicts(
+      contextManager,
+      [keyTag],
+      FP_DECISION_BLOCKING_VERDICT_TAGS
+    );
+    return found.has(keyTag);
+  };
+
+  /**
+   * Called after a decision's alerts were written, to learn whether a revoke landed in between.
+   * Revoke deletes the decision first and then puts back the alerts that carry its tag, so a write
+   * made after revoke looked for them would stay. Checking after the write closes that gap: either
+   * the decision is still in force, and then the revoke has not deleted it yet and will find these
+   * alerts, or it is gone, and the caller puts back what it wrote.
+   */
+  const revokedDuringWrite = async (id: string, what: string): Promise<boolean> => {
+    if (await stillActive(id)) return false;
+    logger.info(`Decision ${id} was revoked or expired while the sweep ${what}: it is undone`);
+    return true;
+  };
+
+  /**
+   * Puts back the alerts of a decision that was revoked while the sweep closed them: they are
+   * reopened if they are still closed as a false positive, and lose the decision's tag. When this
+   * fails the tag stays on them, so running the revoke again finds them.
+   */
+  const undoClosed = async (id: string, tagged: string[], closedIds: string[]) => {
+    try {
+      const reopened = await reopenFalsePositiveClosedAlerts(contextManager, closedIds);
+      totals.closed -= reopened;
+      await tagInChunks(write, {
+        alertIds: tagged,
+        add: [],
+        remove: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
+      });
+    } catch (error) {
+      totals.close_failures++;
+      warn(`Could not put back the alerts of decision ${id}; run the revoke again`, error);
+    }
+  };
+
+  /**
    * Closes what each decision may still close today. The decision's tag goes on first, so a
    * close that lands is always findable by revoke. A failure takes the tag off the alerts that
    * stayed open, so the next sweep tries them again. When the daily count cannot be read nothing is
    * closed, because the cap could not be applied.
+   *
+   * Each chunk is narrowed to the alerts that are `open` just before the close, and the others lose
+   * the tag, so a note and a count are only given to alerts the close itself closed. After the last
+   * chunk the decision is read again: if a revoke landed meanwhile, the closes are undone.
    */
   const close = async (byDecision: Map<string, string[]>) => {
     for (const [id, alertIds] of byDecision) {
@@ -227,9 +290,17 @@ export const createDecisionSweep = ({
         continue;
       }
       let tagged: string[] = [];
+      const closedIds: string[] = [];
       try {
         if (!(await stillActive(id))) {
           logger.info(`Decision ${id} was revoked or expired during the sweep: it closes nothing`);
+          continue;
+        }
+        if (await hasConflictingVerdict(id)) {
+          totals.blocked_by_verdict += alertIds.length;
+          logger.info(
+            `Decision ${id} has a conflicting verdict on its key: its matches go to analysis`
+          );
           continue;
         }
         if (!room.has(id)) {
@@ -255,7 +326,19 @@ export const createDecisionSweep = ({
         });
         let timedOut = false;
         for (let from = 0; from < allowed.length; from += TAG_CHUNK_SIZE) {
-          const closing = allowed.slice(from, from + TAG_CHUNK_SIZE);
+          const chunk = allowed.slice(from, from + TAG_CHUNK_SIZE);
+          // An alert an analyst moved on before the close is let go here, and is not part of the
+          // attempt: the close would leave it alone, and it must get neither a note nor a count.
+          const closing = await findStillOpenAlertIds(contextManager, chunk);
+          const movedEarly = chunk.filter((alertId) => !closing.includes(alertId));
+          if (movedEarly.length > 0) {
+            await tagInChunks(write, {
+              alertIds: movedEarly,
+              add: [],
+              remove: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
+            });
+          }
+          if (closing.length === 0) continue;
           // The attempt counts against today's allowance before it is made: a close that
           // fails half way may have closed alerts, and the next page must not close another
           // full allowance of the same decision. A close that skipped alerts gives them back,
@@ -271,11 +354,7 @@ export const createDecisionSweep = ({
           // The alerts a timed-out close did not reach are released like the ones an analyst
           // moved on, so the next sweep tries them again and only closed alerts get a note.
           const moved = updated < closing.length ? await releaseMovedOn(id, closing) : [];
-          queueNotes(
-            id,
-            closing.filter((alertId) => !moved.includes(alertId)),
-            'closed'
-          );
+          closedIds.push(...closing.filter((alertId) => !moved.includes(alertId)));
         }
         if (timedOut) {
           totals.close_failures++;
@@ -286,9 +365,27 @@ export const createDecisionSweep = ({
         warn(`Could not close the alerts of decision ${id}`, error);
         await untagStillOpen(id, tagged);
       }
+      if (closedIds.length === 0) continue;
+      // What a failed chunk had closed before it keeps its tag and gets its note, as before.
+      try {
+        if (await revokedDuringWrite(id, 'closed its alerts')) {
+          await undoClosed(id, tagged, closedIds);
+          continue;
+        }
+      } catch (error) {
+        warn(`Could not read decision ${id} again after closing its alerts`, error);
+      }
+      queueNotes(id, closedIds, 'closed');
     }
   };
 
+  /**
+   * Keeps the alerts of each dismissed pattern out of analysis. The tags route takes ids only, so
+   * the open-status guard of the close cannot be part of the write: each chunk is narrowed to the
+   * alerts that are `open` just before the write, and the alerts that an analyst moved on within
+   * the window lose the tags again just after it. After the last chunk the decision is read again:
+   * if a revoke landed meanwhile, the tags are taken off.
+   */
   const tagSkipped = async (byDecision: Map<string, string[]>) => {
     for (const [id, alertIds] of byDecision) {
       if (outOfTime()) {
@@ -301,18 +398,25 @@ export const createDecisionSweep = ({
       const skipTag = `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`;
       const skipTags = [VERDICT_INCONCLUSIVE_TAG, skipTag];
       let skipping: string[] = [];
+      const skippedIds: string[] = [];
       try {
         if (!(await stillActive(id))) {
           logger.info(`Decision ${id} was revoked or expired during the sweep: it skips nothing`);
           continue;
         }
-        // Counted and noted per chunk: a later chunk that fails must not leave the alerts of
-        // an earlier one out of analysis with no note and no charge on the note allowance.
         for (let from = 0; from < allowed.length; from += TAG_CHUNK_SIZE) {
-          skipping = allowed.slice(from, from + TAG_CHUNK_SIZE);
+          skipping = await findStillOpenAlertIds(
+            contextManager,
+            allowed.slice(from, from + TAG_CHUNK_SIZE)
+          );
+          if (skipping.length === 0) continue;
           await write({ alertIds: skipping, add: skipTags, remove: [] });
-          totals.skipped += skipping.length;
-          queueNotes(id, skipping, 'skipped');
+          // An analyst may have moved an alert on between the check and the write: it must not
+          // stay out of analysis, so it loses the tags again and is not counted.
+          const stillOpen = new Set(await findStillOpenAlertIds(contextManager, skipping));
+          const movedOn = skipping.filter((alertId) => !stillOpen.has(alertId));
+          if (movedOn.length > 0) await write({ alertIds: movedOn, add: [], remove: skipTags });
+          skippedIds.push(...skipping.filter((alertId) => stillOpen.has(alertId)));
           skipping = [];
         }
       } catch (error) {
@@ -330,6 +434,22 @@ export const createDecisionSweep = ({
           }
         }
       }
+      if (skippedIds.length === 0) continue;
+      // What a failed chunk had tagged before it stays out of analysis and gets its note, as before.
+      try {
+        if (await revokedDuringWrite(id, 'tagged its alerts')) {
+          await write({ alertIds: skippedIds, add: [], remove: skipTags });
+          continue;
+        }
+      } catch (error) {
+        totals.tag_failures++;
+        warn(
+          `Could not check or undo decision ${id} after tagging its alerts; run the revoke again`,
+          error
+        );
+      }
+      totals.skipped += skippedIds.length;
+      queueNotes(id, skippedIds, 'skipped');
     }
   };
 

@@ -20,6 +20,7 @@ import {
   findKeyTagsWithVerdicts,
   findAlertIdsWithTag,
   findOpenAlertIds,
+  findStillOpenAlertIds,
   listLiveExecutionIds,
   loadAlertsByIds,
   readKeyHistory,
@@ -818,6 +819,7 @@ describe('helpers that drive a write, on a partial search result', () => {
     ],
     ['findAlertIdsByTag', (api) => findAlertIdsByTag(api, 'az:closed_by_decision:fp-decision-1')],
     ['findOpenAlertIds', (api) => findOpenAlertIds(api, ['a'])],
+    ['findStillOpenAlertIds', (api) => findStillOpenAlertIds(api, ['a'])],
     ['findAlertIdsWithTag', (api) => findAlertIdsWithTag(api, ['a'], 'az:skipped_by_decision:x')],
     ['findAlertsNotClosedAsFalsePositive', (api) => findAlertsNotClosedAsFalsePositive(api, ['a'])],
     [

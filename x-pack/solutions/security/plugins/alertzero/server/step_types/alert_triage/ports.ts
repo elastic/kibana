@@ -487,6 +487,32 @@ export const findOpenAlertIds = async (
   return (body.hits?.hits ?? []).map(({ _id }) => _id);
 };
 
+/**
+ * Which of the given alerts are `open` right now, not acknowledged: the status the close acts on.
+ * The tags route takes ids only, so a write that must not reach an alert an analyst has moved on
+ * is narrowed to these just before it, and checked again just after.
+ */
+export const findStillOpenAlertIds = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: {
+          filter: [{ ids: { values: [...alertIds] } }, { term: { [ALERT_FIELDS.status]: 'open' } }],
+        },
+      },
+    },
+  });
+  assertCompleteSearch(body);
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
 /** Which of the given alerts carry the tag. Used to undo only what a failed tag call wrote. */
 export const findAlertIdsWithTag = async (
   { callKibanaApi }: KibanaApi,
