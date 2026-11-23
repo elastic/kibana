@@ -9,6 +9,7 @@ Each Worker's global sweep reports the run, and each review reports its own rule
 | `rule_tuning_review.yaml` | `report_review_completed_declined` | `rule_tuning_review_completed` | Right before `stop_declined`, in the entry gate's `dismissed` arm |
 | `rule_tuning_review.yaml` | `report_review_completed_undecided` | `rule_tuning_review_completed` | Right before `stop_expired`, in the entry gate's `expired` arm |
 | `rule_tuning_review.yaml` | `report_review_completed` | `rule_tuning_review_completed` | Right before `emit_result` |
+| `coverage_worker.yaml` | `report_worker_blocked` | `worker_run_completed` | Right before `fail_context_engine_unavailable`, when a dependency check fails |
 | `coverage_worker.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result` |
 | `coverage_review.yaml` | `report_investigation_closed_resolved`, `_dismissed` | `worker_investigation_closed` | Right after each close in the `close_investigation` switch |
 | `coverage_review.yaml` | `report_investigation_closed_declined` | `worker_investigation_closed` | Right after `close_investigation_declined`, in the entry gate's `dismissed` arm |
@@ -23,12 +24,12 @@ Both reviews report a manual entry gate the same way: the gate's own arm reports
 | Worker | `candidates_found` | `items_dispatched` | `items_in_flight` | `source_read_failed` / `lookup_failed` |
 |---|---|---|---|---|
 | Rule Tuning | Rules over the false-positive thresholds that are still enabled, at the revision their alerts came from, so found minus requested is what the per-sweep cap held back | Reviews requested | Earlier reviews plus the ones requested | The harvest query or the enabled-rules lookup / the in-flight review lookup |
-| Rule Coverage | Pending gap indicators in the lookback window | Reviews started | Earlier reviews plus the ones started | The indicator search / the active-review lookup |
+| Rule Coverage | Pending gap indicators in the lookback window | Reviews started | Earlier reviews plus the ones started | The indicator search, unless the gaps index is missing / the active-review lookup |
 
 Neither sweep reports `items_failed`. The sweeps start their reviews without waiting for them, so the review decisions come from each review's own event.
 
 - **Rule Tuning:** `failed_source_unavailable` when the harvest or the enabled-rules lookup fails, `produced` when it requested a review, `empty_nothing_found` otherwise. The harvest drops rules already under review, so a sweep that finds only those reports `empty_nothing_found` with a non-zero `items_in_flight`, as Rule Coverage reports `empty_nothing_pending`.
-- **Rule Coverage:** `failed_source_unavailable` when the search fails, `empty_nothing_pending` with no pending indicator, `empty_at_capacity` when indicators are pending but no review slot is free, `degraded_partial` when the open-review ceiling left fewer free slots than the batch size and cut the batch short (both with `degraded_reason: capacity`), `produced` otherwise. A batch smaller than the queue with slots to spare is still `produced`.
+- **Rule Coverage:** `blocked_precondition` with `degraded_reason: dependency_unavailable` when the Context Engine or AlertZero check fails; the run then ends before the search. `failed_source_unavailable` when the gaps index is unreadable (for example closed). A missing gaps index is an empty queue, since the index does not exist until the first gap is written, so it reports `empty_nothing_pending`, like a search with no pending indicator. `empty_at_capacity` when indicators are pending but no review slot is free, `degraded_partial` when the open-review ceiling left fewer free slots than the batch size and cut the batch short (both with `degraded_reason: capacity`), `produced` otherwise. A batch smaller than the queue with slots to spare is still `produced`.
 - A failed lookup that either sweep carries on without gives `degraded_reason: dependency_unavailable`.
 
 ## Rule type and source
