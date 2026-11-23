@@ -172,6 +172,7 @@ export function loadInitialState({
   indexPatternRefs = [],
   indexPatterns = {},
   dateRange,
+  useEsqlByDefault = false,
 }: {
   persistedState?: FormBasedPersistedState;
   references?: Reference[];
@@ -181,6 +182,8 @@ export function loadInitialState({
   indexPatternRefs?: IndexPatternRef[];
   indexPatterns?: Record<string, IndexPattern>;
   dateRange?: DateRange;
+  /** Applies only to charts without persisted state, so existing charts keep using DSL. */
+  useEsqlByDefault?: boolean;
 }): FormBasedPrivateState {
   const injectedState = createStateFromPersisted({ persistedState, references });
   const state = expandFormulaColumns(injectedState, { indexPatterns, dateRange });
@@ -210,6 +213,7 @@ export function loadInitialState({
 
   return {
     layers: {},
+    ...(!persistedState && useEsqlByDefault ? { useEsql: true } : {}),
     ...state,
     currentIndexPatternId,
   };

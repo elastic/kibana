@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 
 import React from 'react';
@@ -67,6 +68,7 @@ import {
   renameIndexPattern,
   triggerActionOnIndexPatternChange,
 } from './loader';
+import { getLensFeatureFlags } from '../../get_feature_flags';
 import { toExpression } from './to_expression';
 import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
 import { FormBasedDataPanel } from './datapanel';
@@ -242,6 +244,10 @@ export function getFormBasedDatasource({
 }) {
   const { uiSettings } = core;
 
+  // New charts opt into ES|QL by default; the chart's `useEsql` state decides afterwards.
+  const shouldUseEsqlForNewCharts = () =>
+    getLensFeatureFlags().enableEsql && Boolean(uiSettings.get(ENABLE_ESQL));
+
   const DATASOURCE_ID = LENS_DATASOURCE_ID.FORM_BASED;
   const ALIAS_IDS = ['indexpattern'];
 
@@ -267,6 +273,7 @@ export function getFormBasedDatasource({
         indexPatternRefs,
         indexPatterns,
         dateRange,
+        useEsqlByDefault: shouldUseEsqlForNewCharts(),
       });
     },
 
@@ -294,6 +301,7 @@ export function getFormBasedDatasource({
       return {
         currentIndexPatternId: indexPatternId,
         layers: {},
+        ...(shouldUseEsqlForNewCharts() ? { useEsql: true } : {}),
       };
     },
 

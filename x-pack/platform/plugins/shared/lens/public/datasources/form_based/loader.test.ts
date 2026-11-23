@@ -60,6 +60,52 @@ describe('loader', () => {
       });
     });
 
+    describe('useEsqlByDefault', () => {
+      const persistedState: FormBasedPersistedState = { layers: {} };
+
+      it('sets useEsql for a new chart', () => {
+        const state = loadInitialState({
+          indexPatterns: sampleIndexPatterns,
+          indexPatternRefs,
+          storage: createMockStorage(),
+          useEsqlByDefault: true,
+        });
+        expect(state.useEsql).toBe(true);
+      });
+
+      it('does not set useEsql for a new chart by default', () => {
+        const state = loadInitialState({
+          indexPatterns: sampleIndexPatterns,
+          indexPatternRefs,
+          storage: createMockStorage(),
+        });
+        expect(state).not.toHaveProperty('useEsql');
+      });
+
+      it('does not set useEsql for a persisted chart without it', () => {
+        const state = loadInitialState({
+          persistedState,
+          references: [],
+          indexPatterns: sampleIndexPatterns,
+          indexPatternRefs,
+          storage: createMockStorage(),
+          useEsqlByDefault: true,
+        });
+        expect(state).not.toHaveProperty('useEsql');
+      });
+
+      it('keeps useEsql of a persisted chart', () => {
+        const state = loadInitialState({
+          persistedState: { ...persistedState, useEsql: true },
+          references: [],
+          indexPatterns: sampleIndexPatterns,
+          indexPatternRefs,
+          storage: createMockStorage(),
+        });
+        expect(state.useEsql).toBe(true);
+      });
+    });
+
     it('should load a default state without loading the indexPatterns when embedded', () => {
       const storage = createMockStorage();
       const state = loadInitialState({
