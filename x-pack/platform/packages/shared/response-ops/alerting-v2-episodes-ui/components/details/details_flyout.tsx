@@ -42,8 +42,7 @@ import { EMPTY_VALUE } from '../../constants';
 import { getConnectorSource, useEpisodeSource } from '../../source_labels';
 import { formatDateTime } from '../../utils/format_date_time';
 import { formatMetadataListDuration } from './translations';
-import { useAlertDetailsFlyoutWidth } from './use_alert_details_flyout_width';
-import { ALERT_DETAILS_FLYOUT_HISTORY_KEY, AlertDetailsFrame } from './alert_details_frame';
+import { AlertDetailsFrame, useAlertDetailsFrame } from './alert_details_frame';
 import {
   AlertDetailsTitleSkeleton,
   AlertDetailsValueSkeleton,
@@ -215,8 +214,6 @@ export const AlertEpisodeDetailsFlyoutContent = ({
     [actions, episodes]
   );
 
-  const initialWidth = useAlertDetailsFlyoutWidth();
-
   const viewDetailsHref = getEpisodeDetailsHref(episodeId);
   const loadedRule = isRuleLoaded(ruleState) ? ruleState.rule : undefined;
   const focusedEpisode = useMemo<FocusedEpisode | undefined>(() => {
@@ -255,7 +252,8 @@ export const AlertEpisodeDetailsFlyoutContent = ({
       invalidateEpisodeQueries,
     ]
   );
-  const [isRunbookOpen, setIsRunbookOpen] = useState(false);
+
+  const { openStackedFlyout } = useAlertDetailsFrame();
 
   const handleTabChange = (tabId: string) => {
     setTab(tabId as TabId);
@@ -295,6 +293,15 @@ export const AlertEpisodeDetailsFlyoutContent = ({
 
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
   const ruleName = isRuleLoaded(ruleState) ? ruleState.rule.metadata.name : undefined;
+  // The full runbook opens on top of the details, in their history group, so Back returns here.
+  const openFullRunbook = () =>
+    openStackedFlyout({
+      title: i18n.RUNBOOK_TITLE,
+      description: ruleName,
+      body: <AlertEpisodeRunbookSection episodeId={episodeId} services={services} />,
+      'aria-label': i18n.RUNBOOK_FULL_GUIDE_ARIA_LABEL,
+      'data-test-subj': 'alertingV2EpisodeRunbookFlyout',
+    });
   const titleNode = isLoading ? (
     <AlertDetailsTitleSkeleton />
   ) : (
@@ -520,7 +527,7 @@ export const AlertEpisodeDetailsFlyoutContent = ({
                         services={services}
                         compressed
                         showTitle
-                        onShowFullGuide={() => setIsRunbookOpen(true)}
+                        onShowFullGuide={openFullRunbook}
                       />
                     </EuiPanel>
                   )}
@@ -556,30 +563,6 @@ export const AlertEpisodeDetailsFlyoutContent = ({
               />
             </FlyoutAccordion>
           </EuiFlexGroup>
-          {/* Full runbook as its own top-level flyout. Declared in zone content, so the frame
-                treats it as a flyout of its own rather than as its content. */}
-          {isRunbookOpen && (
-            <FlyoutTemplate
-              type="overlay"
-              // Matches the episode flyout: no mask, so both levels of the history group look
-              // the same
-              ownFocus={false}
-              resizable
-              session="start"
-              historyKey={ALERT_DETAILS_FLYOUT_HISTORY_KEY}
-              size={initialWidth}
-              aria-label={i18n.RUNBOOK_FULL_GUIDE_ARIA_LABEL}
-              data-test-subj="alertingV2EpisodeRunbookFlyout"
-              onClose={() => {
-                setIsRunbookOpen(false);
-              }}
-            >
-              <FlyoutTemplate.Header title={i18n.RUNBOOK_TITLE} description={ruleName} />
-              <FlyoutTemplate.Body>
-                <AlertEpisodeRunbookSection episodeId={episodeId} services={services} />
-              </FlyoutTemplate.Body>
-            </FlyoutTemplate>
-          )}
         </FlyoutTemplate.Body.TabPanel>
 
         {/* Timeline tab */}

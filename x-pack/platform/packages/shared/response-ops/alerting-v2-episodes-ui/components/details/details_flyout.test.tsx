@@ -475,16 +475,37 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('opens the runbook in the episode flyout history group, so it has a Back button', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    const { onShowFullGuide } = mockRunbookSection.mock.calls.at(-1)![0];
+    act(() => onShowFullGuide!());
+
+    const runbookFlyoutProps = mockEuiFlyout.mock.calls
+      .filter(([props]) => props['data-test-subj'] === 'alertingV2EpisodeRunbookFlyout')
+      .at(-1)![0];
+    expect(runbookFlyoutProps).toMatchObject({ session: 'start' });
+    expect(runbookFlyoutProps.historyKey).toBe(episodeFlyoutProps().historyKey);
+  });
+
+  it('keeps the runbook open when switching tabs in the episode flyout', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    const { onShowFullGuide } = mockRunbookSection.mock.calls.at(-1)![0];
+    act(() => onShowFullGuide!());
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabTimeline'));
+
+    expect(screen.getByTestId('alertingV2EpisodeRunbookFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeFlyout')).toBeInTheDocument();
+  });
+
   it('keeps the episode flyout mounted underneath the runbook flyout', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
     const { onShowFullGuide } = mockRunbookSection.mock.calls.at(-1)![0];
     act(() => onShowFullGuide!());
 
-    // Going back has to land on the episode flyout, so it must not unmount.
-    // The manager-supplied back button is not assertable here: the Jest build of
-    // EuiFlyout is a stub that drops `session` along with type/size/ownFocus, so no
-    // manager session is ever created.
+    // Closing the runbook has to land on the episode flyout, so it must not unmount.
     expect(screen.getByTestId('alertingV2EpisodeFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeRunbookFlyout')).toBeInTheDocument();
   });
