@@ -4,6 +4,7 @@ steps:
     key: security-detection-engine
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -22,6 +23,7 @@ steps:
     key: security-detection-engine-exceptions
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:

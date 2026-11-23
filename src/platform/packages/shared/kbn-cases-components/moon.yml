@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cases-components'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-cases'
+  defaultOwner: '@elastic/security-investigations'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/cases-components'
   description: Moon project for @kbn/cases-components
   channel: ''
-  owner: '@elastic/kibana-cases'
+  owner: '@elastic/security-investigations'
   sourceRoot: src/platform/packages/shared/kbn-cases-components
 dependsOn:
   - '@kbn/i18n'

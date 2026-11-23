@@ -21,6 +21,7 @@ import { SessionCookie } from './session_cookie';
 import { SessionIndex } from './session_index';
 import type { ConfigType } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { createOnlineStatusTaskRunner } from '../elasticsearch';
 
 export interface SessionManagementServiceSetupParams {
   readonly http: Pick<HttpServiceSetup, 'basePath' | 'createCookieSessionStorageFactory'>;
@@ -93,16 +94,14 @@ export class SessionManagementService {
 
     this.statusSubscription = online$
       .pipe(
-        switchMap(async ({ scheduleRetry }) => {
-          try {
+        switchMap(
+          createOnlineStatusTaskRunner(async () => {
             await Promise.all([
               this.sessionIndex.initialize(),
               this.scheduleCleanupTask(taskManager),
             ]);
-          } catch (err) {
-            scheduleRetry();
-          }
-        })
+          })
+        )
       )
       .subscribe();
 

@@ -42,12 +42,14 @@ export const createRelevanceSearchTool = ({
   events,
   logger,
   topSnippetsConfig,
+  includeFrozen = false,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events?: ToolEventEmitter;
   logger: Logger;
   topSnippetsConfig?: TopSnippetsConfig;
+  includeFrozen?: boolean;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -64,6 +66,7 @@ export const createRelevanceSearchTool = ({
             esClient,
             logger,
             topSnippetsConfig,
+            includeFrozen,
           });
           const resources = rawResults.map(convertMatchResult);
 
@@ -105,6 +108,7 @@ export const createNaturalLanguageSearchTool = ({
   rowLimit,
   customInstructions,
   timeRange,
+  includeFrozen = false,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
@@ -113,6 +117,7 @@ export const createNaturalLanguageSearchTool = ({
   rowLimit?: number;
   customInstructions?: string;
   timeRange: TimeRange;
+  includeFrozen?: boolean;
 }) => {
   return toTool(
     async ({ query, index }) => {
@@ -131,6 +136,7 @@ export const createNaturalLanguageSearchTool = ({
             rowLimit,
             customInstructions,
             timeRange,
+            includeFrozen,
           });
 
           const results: ToolResult[] = response.esqlData

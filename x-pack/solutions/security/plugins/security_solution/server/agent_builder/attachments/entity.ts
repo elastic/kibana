@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
@@ -17,18 +17,20 @@ import { securityAttachmentDataSchema } from './security_attachment_data_schema'
  */
 export const MAX_ENTITIES_PER_ATTACHMENT = 50;
 
-const entityIdentifierSchema = z.object({
-  identifierType: z.enum(['host', 'user', 'service', 'generic']),
-  identifier: z.string().min(1),
-  /**
-   * Canonical `entity.id` value from the entity store (for example
-   * `user:name@host@namespace`). When set, the rich-card lookup targets this
-   * field directly instead of the per-type identity field, which is required
-   * for local users where `entity.name` is a composite that does not match
-   * `user.name`. Optional for backward compatibility with older payloads.
-   */
-  entityStoreId: z.string().min(1).optional(),
-});
+const entityIdentifierSchema = lazySchema(() =>
+  z.object({
+    identifierType: z.enum(['host', 'user', 'service', 'generic']),
+    identifier: z.string().min(1),
+    /**
+     * Canonical `entity.id` value from the entity store (for example
+     * `user:name@host@namespace`). When set, the rich-card lookup targets this
+     * field directly instead of the per-type identity field, which is required
+     * for local users where `entity.name` is a composite that does not match
+     * `user.name`. Optional for backward compatibility with older payloads.
+     */
+    entityStoreId: z.string().min(1).optional(),
+  })
+);
 
 /**
  * Subset of `EntityRiskScoreRecord` that `security.get_entity` embeds on the
@@ -49,25 +51,27 @@ const entityIdentifierSchema = z.object({
  * `AttachmentStateManager` validator silently drops them before the
  * payload is persisted and the client never sees them.
  */
-const riskStatsPayloadSchema = z
-  .object({
-    '@timestamp': z.string().optional(),
-    id_field: z.string().optional(),
-    id_value: z.string().optional(),
-    calculated_level: z.string(),
-    calculated_score: z.number(),
-    calculated_score_norm: z.number(),
-    category_1_score: z.number(),
-    category_1_count: z.number(),
-    category_2_score: z.number().optional(),
-    category_2_count: z.number().optional(),
-    notes: z.array(z.unknown()).optional(),
-    criticality_modifier: z.number().optional(),
-    criticality_level: z.string().optional(),
-    modifiers: z.array(z.unknown()).optional(),
-    score_type: z.string().optional(),
-  })
-  .passthrough();
+const riskStatsPayloadSchema = lazySchema(() =>
+  z
+    .object({
+      '@timestamp': z.string().optional(),
+      id_field: z.string().optional(),
+      id_value: z.string().optional(),
+      calculated_level: z.string(),
+      calculated_score: z.number(),
+      calculated_score_norm: z.number(),
+      category_1_score: z.number(),
+      category_1_count: z.number(),
+      category_2_score: z.number().optional(),
+      category_2_count: z.number().optional(),
+      notes: z.array(z.unknown()).optional(),
+      criticality_modifier: z.number().optional(),
+      criticality_level: z.string().optional(),
+      modifiers: z.array(z.unknown()).optional(),
+      score_type: z.string().optional(),
+    })
+    .passthrough()
+);
 
 /**
  * Entity attachment payload. Two backward-compatible shapes are supported:
@@ -81,18 +85,20 @@ const riskStatsPayloadSchema = z
  *    Deliberately does not carry risk stats — the multi-entity renderer
  *    fetches its own summary per row from the entity store.
  */
-const riskEntityAttachmentDataSchema = z.union([
-  securityAttachmentDataSchema.extend({
-    identifierType: z.enum(['host', 'user', 'service', 'generic']),
-    identifier: z.string().min(1),
-    entityStoreId: z.string().min(1).optional(),
-    riskStats: riskStatsPayloadSchema.optional(),
-    resolutionRiskStats: riskStatsPayloadSchema.optional(),
-  }),
-  securityAttachmentDataSchema.extend({
-    entities: z.array(entityIdentifierSchema).min(1).max(MAX_ENTITIES_PER_ATTACHMENT),
-  }),
-]);
+const riskEntityAttachmentDataSchema = lazySchema(() =>
+  z.union([
+    securityAttachmentDataSchema.extend({
+      identifierType: z.enum(['host', 'user', 'service', 'generic']),
+      identifier: z.string().min(1),
+      entityStoreId: z.string().min(1).optional(),
+      riskStats: riskStatsPayloadSchema.optional(),
+      resolutionRiskStats: riskStatsPayloadSchema.optional(),
+    }),
+    securityAttachmentDataSchema.extend({
+      entities: z.array(entityIdentifierSchema).min(1).max(MAX_ENTITIES_PER_ATTACHMENT),
+    }),
+  ])
+);
 
 /**
  * Creates the definition for the `entity` attachment type.

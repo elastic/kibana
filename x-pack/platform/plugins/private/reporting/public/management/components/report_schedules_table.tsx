@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { orderBy } from 'lodash';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
 import { useKibana } from '@kbn/reporting-public';
@@ -72,6 +72,7 @@ export const ReportSchedulesTable = () => {
     return capabilities.manageReporting.show === true;
   }, [capabilities]);
 
+  // Cosmetic: the server already filters non-admins to reports they own.
   const canManageSchedule = useCallback(
     (item: ScheduledReportApiJSON) => {
       if (hasManageReportingPrivilege) return true;
@@ -275,7 +276,10 @@ export const ReportSchedulesTable = () => {
           icon: 'dashboardApp',
           available: (item) => Boolean((item.payload as BaseParamsV2)?.locatorParams),
           onClick: async (item) => {
-            const searchParams = stringify({ scheduledReportId: item.id, ...queryParams });
+            const searchParams = queryString.stringify({
+              scheduledReportId: item.id,
+              ...queryParams,
+            });
 
             const path = buildKibanaPath({
               basePath: http.basePath.serverBasePath,

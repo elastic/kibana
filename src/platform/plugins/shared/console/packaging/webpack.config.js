@@ -122,14 +122,7 @@ module.exports = [
                 sourceMap: !isProd,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
             {
               loader: 'sass-loader',
               options: {
@@ -155,15 +148,7 @@ module.exports = [
                 sourceMap: !isProd,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                sourceMap: !isProd,
-                postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
             {
               loader: 'sass-loader',
               options: {
@@ -173,7 +158,7 @@ module.exports = [
                       loaderContext.context || loaderContext.rootContext,
                       path.resolve(
                         kibanaRoot,
-                        'src/core/public/styles/core_app/_globals_borealislight.scss'
+                        'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
                       )
                     )
                   );

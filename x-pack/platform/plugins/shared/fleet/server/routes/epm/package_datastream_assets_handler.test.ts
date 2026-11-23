@@ -35,7 +35,8 @@ jest.mock('../../services/epm/packages/input_type_packages');
 jest.mock('../../services/package_policy', () => {
   return {
     packagePolicyService: {
-      list: jest.fn(),
+      get: jest.fn(),
+      fetchAllItems: jest.fn(),
     },
   };
 });
@@ -111,16 +112,19 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
-        pkgName: 'test',
+        pkgName: 'logs',
         pkgVersion: '1.0.0',
       },
       query: {
         packagePolicyId: 'policy1',
       },
     });
-    packagePolicyServiceMock.list.mockResolvedValue({
-      items: [packagePolicy1, testPackagePolicy],
-    } as any);
+    packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
+    packagePolicyServiceMock.fetchAllItems.mockResolvedValue(
+      (async function* () {
+        yield [packagePolicy1, testPackagePolicy];
+      })()
+    );
 
     mockedGetDatasetName.mockReturnValue('custom');
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
@@ -194,7 +198,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
-        pkgName: 'test',
+        pkgName: 'logs',
         pkgVersion: '1.0.0',
       },
     });
@@ -202,13 +206,13 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await expect(
       deletePackageDatastreamAssetsHandler(context, request, response)
     ).rejects.toThrowError(
-      new FleetNotFoundError('Requested package test-1.0.0 is not an input package')
+      new FleetNotFoundError('Requested package logs-1.0.0 is not an input package')
     );
 
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
-  it('should throw not found error if package policy id does not exist', async () => {
+  it('should throw not found error if package policy id does not exist in request space', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       name: 'logs',
       version: '1.0.0',
@@ -224,13 +228,93 @@ describe('deletePackageDatastreamAssetsHandler', () => {
         packagePolicyId: 'idontexist',
       },
     });
-    packagePolicyServiceMock.list.mockRejectedValueOnce(
-      new Error('Saved object [ingest-package-policies/idontexist] not found')
+    packagePolicyServiceMock.get.mockResolvedValue(null);
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Package policy with id idontexist not found')
     );
-    await expect(
-      deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError('Saved object [ingest-package-policies/idontexist] not found');
+    expect(packagePolicyServiceMock.fetchAllItems).not.toHaveBeenCalled();
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should throw not found error if package policy belongs to a different package name', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'logs',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'policy-other-pkg',
+      },
+    });
+    packagePolicyServiceMock.get.mockResolvedValue({
+      ...packagePolicy1,
+      id: 'policy-other-pkg',
+      package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
+    });
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Package policy with id policy-other-pkg not found')
+    );
+    expect(packagePolicyServiceMock.fetchAllItems).not.toHaveBeenCalled();
+    await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should throw not found error if package policy belongs to a different package version', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'logs',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'policy-other-version',
+      },
+    });
+    packagePolicyServiceMock.get.mockResolvedValue({
+      ...packagePolicy1,
+      id: 'policy-other-version',
+      package: { name: 'logs', title: 'Test', version: '2.0.0' },
+    });
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Package policy with id policy-other-version not found')
+    );
+    expect(packagePolicyServiceMock.fetchAllItems).not.toHaveBeenCalled();
+    await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should throw not found error if package policy belongs to a different space', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'logs',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'other-space-policy-id',
+      },
+    });
+    // Space-scoped get returns null — policy not visible in request space
+    packagePolicyServiceMock.get.mockResolvedValue(null);
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      new FleetNotFoundError('Package policy with id other-space-policy-id not found')
+    );
+    expect(packagePolicyServiceMock.fetchAllItems).not.toHaveBeenCalled();
+    expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
   it('should throw error if the datastreams also exist on different packages', async () => {
@@ -242,16 +326,19 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
-        pkgName: 'test',
+        pkgName: 'logs',
         pkgVersion: '1.0.0',
       },
       query: {
         packagePolicyId: 'policy1',
       },
     });
-    packagePolicyServiceMock.list.mockResolvedValue({
-      items: [testPackagePolicy, packagePolicy1],
-    } as any);
+    packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
+    packagePolicyServiceMock.fetchAllItems.mockResolvedValue(
+      (async function* () {
+        yield [testPackagePolicy, packagePolicy1];
+      })()
+    );
 
     mockedGetDatasetName.mockReturnValue('custom');
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
@@ -279,25 +366,28 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
-        pkgName: 'test',
+        pkgName: 'logs',
         pkgVersion: '1.0.0',
       },
       query: {
         packagePolicyId: 'policy1',
       },
     });
-    packagePolicyServiceMock.list.mockResolvedValue({
-      items: [
-        packagePolicy1,
-        testPackagePolicy,
-        {
-          ...testPackagePolicy,
-          id: 'namespace-new',
-          namespace: 'new',
-          inputs: [{ streams: { vars: { 'datastream.dataset': { value: 'custom' } } } }],
-        },
-      ],
-    } as any);
+    packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
+    packagePolicyServiceMock.fetchAllItems.mockResolvedValue(
+      (async function* () {
+        yield [
+          packagePolicy1,
+          testPackagePolicy,
+          {
+            ...testPackagePolicy,
+            id: 'namespace-new',
+            namespace: 'new',
+            inputs: [{ streams: { vars: { 'datastream.dataset': { value: 'custom' } } } }],
+          },
+        ];
+      })()
+    );
 
     mockedGetDatasetName.mockReturnValue('custom');
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
@@ -312,5 +402,59 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       `Datastreams matching custom are in use by other package policies and cannot be removed`
     );
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should block removal when a conflicting policy appears on a later fetchAllItems page', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'logs',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'policy1',
+      },
+    });
+    packagePolicyServiceMock.get.mockResolvedValue(packagePolicy1);
+    // Page 1: only the target policy. Page 2: a conflicting policy using the same dataset.
+    // If the handler stopped after the first page it would miss the conflict and incorrectly
+    // allow deletion.
+    packagePolicyServiceMock.fetchAllItems.mockResolvedValue(
+      (async function* () {
+        yield [packagePolicy1];
+        yield [
+          {
+            ...testPackagePolicy,
+            id: 'conflict-policy-page-2',
+            namespace: 'default',
+            inputs: [{ streams: { vars: { 'datastream.dataset': { value: 'custom' } } } }],
+          },
+        ];
+      })()
+    );
+
+    mockedGetDatasetName.mockReturnValue('custom');
+    // Return true only when conflict-policy-page-2 is present in the accumulator.
+    // If the handler stops after page 1, the policy won't be there, the mock returns false,
+    // no error is thrown, and the test fails — proving both pages are consumed.
+    mockedIsInputPackageDatasetUsedByMultiplePolicies.mockImplementation(
+      (allPackagePolicies: Array<{ id: string }>) =>
+        allPackagePolicies.some((p) => p.id === 'conflict-policy-page-2')
+    );
+
+    await expect(deletePackageDatastreamAssetsHandler(context, request, response)).rejects.toThrow(
+      `Datastreams matching custom are in use by other package policies and cannot be removed`
+    );
+    expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+    expect(mockedIsInputPackageDatasetUsedByMultiplePolicies).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ id: 'conflict-policy-page-2' })]),
+      'custom',
+      'logs'
+    );
   });
 });

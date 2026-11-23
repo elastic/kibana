@@ -23,6 +23,7 @@ export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
 // Fixtures and Page Objects (can be extended with solution-specific logic)
 export type {
   BrowserAuthFixture,
+  GotoAppOptions,
   ScoutPage,
   PageObjects, // can be extended with solution specific Page Objects
 } from './fixtures/scope/test';
@@ -37,7 +38,7 @@ export type {
 } from './test/ui';
 
 // Worker primitives (for optional packages such as @kbn/scout-synthtrace)
-export { coreWorkerFixtures, esArchiverFixture } from './fixtures/scope/worker';
+export { coreWorkerFixtures, esArchiverFixture, apiClientFixture } from './fixtures/scope/worker';
 export type { EsArchiverFixture } from './fixtures/scope/worker';
 
 // API services (can be extended with solution specific API services)

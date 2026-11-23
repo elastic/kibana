@@ -214,6 +214,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         headers: {
           // always send a value for EIS
           'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId ?? 'inference',
+          // asStream bypasses the transport's decompression step, so explicitly request
+          // an uncompressed response to avoid receiving raw gzipped bytes as SSE events.
+          'accept-encoding': 'identity',
         },
       }
     );

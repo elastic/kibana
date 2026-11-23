@@ -560,7 +560,11 @@ describe('Custom Links', () => {
         expect(screen.getAllByTestId('externalLink')).toHaveLength(DEFAULT_NUMBER_OF_LINK);
       });
 
-      test('it renders correct number of tooltips by default', async () => {
+      test.each<[number, string]>(
+        mockCustomizedReputationLinks
+          .slice(0, DEFAULT_NUMBER_OF_LINK)
+          .map((link, idx): [number, string] => [idx, link.name])
+      )('it renders correct tooltip for link %s (%s) by default', async (idx) => {
         render(
           <TestProviders>
             <ReputationLink domain={'192.0.2.0'} />
@@ -568,15 +572,12 @@ describe('Custom Links', () => {
         );
 
         const links = screen.getAllByTestId('externalLink');
-        for (const link of links) {
-          const key = links.indexOf(link);
-          userEvent.hover(link);
-          await waitFor(() => {
-            expect(screen.getByTestId('externalLinkTooltip')).toHaveTextContent(
-              mockCustomizedReputationLinks[key].url_template.replace('{{ip}}', '192.0.2.0')
-            );
-          });
-        }
+        userEvent.hover(links[idx]);
+        await waitFor(() => {
+          expect(screen.getByTestId('externalLinkTooltip')).toHaveTextContent(
+            mockCustomizedReputationLinks[idx].url_template.replace('{{ip}}', '192.0.2.0')
+          );
+        });
       });
 
       test('it renders correct number of visible link', () => {

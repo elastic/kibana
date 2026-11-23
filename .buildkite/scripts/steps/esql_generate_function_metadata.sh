@@ -27,13 +27,13 @@ main () {
 
   report_main_step "Generate function definitions"
 
-  yarn make:defs $PARENT_DIR/elasticsearch
+  pnpm make:defs $PARENT_DIR/elasticsearch
 
   report_main_step "Generate inline function docs"
 
   cd "$KIBANA_DIR/$EDITOR_PACKAGE_DIR"
 
-  yarn make:docs $PARENT_DIR/elasticsearch
+  pnpm make:docs $PARENT_DIR/elasticsearch
 
   report_main_step "Run i18n check"
 
@@ -43,7 +43,7 @@ main () {
 
   # Check for differences
   set +e
-  git diff --exit-code --quiet $GIT_SCOPE 
+  git diff --exit-code --quiet $GIT_SCOPE
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
@@ -60,7 +60,7 @@ main () {
   PR_BODY='This PR updates the function definitions and inline docs based on the latest metadata from Elasticsearch.'
 
   # Check if a PR already exists
-  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
+  pr_search_result=$(gh pr list --search "$PR_TITLE (author:$KIBANA_MACHINE_USERNAME OR author:app/elastic-vault-github-plugin-prod)" --state open --limit 1 --json title -q ".[].title")
 
   if [ "$pr_search_result" == "$PR_TITLE" ]; then
     echo "PR already exists. Exiting."
@@ -75,6 +75,9 @@ main () {
   git checkout -b "$BRANCH_NAME"
 
   git add $GIT_SCOPE
+  if [ "$VERSION_BUMPED" == "true" ]; then
+    git add package.json pnpm-lock.yaml
+  fi
   git commit -m "Update function metadata"
 
   report_main_step "Changes committed. Creating pull request."
@@ -82,7 +85,7 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL'
 }
 
 main

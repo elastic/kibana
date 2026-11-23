@@ -65,6 +65,7 @@ export const ENDPOINT_CAPABILITIES = [
   'cancel',
   'memdump_process',
   'memdump_kernel',
+  'memdump_raw',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];

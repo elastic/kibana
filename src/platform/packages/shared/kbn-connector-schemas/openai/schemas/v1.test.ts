@@ -104,6 +104,28 @@ describe('OpenAI Schema', () => {
       ).not.toThrow();
     });
 
+    it('does not default verificationMode when omitted for Other provider', () => {
+      const result = ConfigSchema.parse({
+        apiProvider: 'Other',
+        apiUrl: 'https://custom-api.example.com',
+        defaultModel: 'custom-model',
+      });
+      // A PKI-off save must not persist verificationMode, otherwise the UI
+      // re-derives the "Enable PKI Authentication" toggle as ON on reopen.
+      expect(result).not.toHaveProperty('verificationMode');
+      expect((result as { verificationMode?: string }).verificationMode).toBeUndefined();
+    });
+
+    it('preserves an explicitly provided verificationMode for Other provider', () => {
+      const result = ConfigSchema.parse({
+        apiProvider: 'Other',
+        apiUrl: 'https://custom-api.example.com',
+        defaultModel: 'custom-model',
+        verificationMode: 'full',
+      });
+      expect((result as { verificationMode?: string }).verificationMode).toBe('full');
+    });
+
     it('throws on invalid apiProvider', () => {
       expect(() =>
         ConfigSchema.parse({

@@ -12,6 +12,7 @@ import { setupAgents } from './setup/setup_agents';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { agentBuilder } = getPageObjects(['agentBuilder']);
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Edit agent', function () {
     const { agents, agentsHooks } = setupAgents({ getPageObjects, getService });
@@ -49,7 +50,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const saveButton = agentBuilder.agentFormSaveButton();
       expect(await saveButton.isEnabled()).to.be(true);
       await saveButton.click();
-      expect(await agentBuilder.getAgentRowDisplayName(agent.id)).to.be(editedName);
+      // The list page renders before React-Query's background refetch lands, so
+      // the row can briefly show the previous name. Poll until the refresh hits.
+      await retry.try(async () => {
+        expect(await agentBuilder.getAgentRowDisplayName(agent.id)).to.be(editedName);
+      });
     });
 
     it('should clone agent', async function () {
