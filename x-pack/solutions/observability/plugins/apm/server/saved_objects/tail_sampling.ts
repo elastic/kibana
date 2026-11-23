@@ -7,7 +7,7 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type { Type } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { TAIL_SAMPLING_SAVED_OBJECT_TYPE } from '../../common/apm_saved_object_constants';
 
 // Long enough for processor names such as 'adaptive_tail_sampling'.
@@ -43,18 +43,18 @@ const tailSamplingAttributes = {
  * - 'failed': the control API call failed and needs attention.
  * Rollout status (observed and active hashes) stays with the control API.
  */
-export const TAIL_SAMPLING_POLICY_STATES = ['pending', 'synced', 'failed'] as const;
-export type TailSamplingPolicyState = (typeof TAIL_SAMPLING_POLICY_STATES)[number];
+const policyStateSchema = schema.oneOf([
+  schema.literal('pending'),
+  schema.literal('synced'),
+  schema.literal('failed'),
+]);
+
+export type TailSamplingPolicyState = TypeOf<typeof policyStateSchema>;
 
 export const tailSamplingCreateSchema = schema.object({
   ...tailSamplingAttributes,
   // Strict on write: only known states can be stored.
-  policyState: schema.oneOf(
-    TAIL_SAMPLING_POLICY_STATES.map((state) => schema.literal(state)) as [
-      Type<TailSamplingPolicyState>,
-      ...Array<Type<TailSamplingPolicyState>>
-    ]
-  ),
+  policyState: policyStateSchema,
 });
 
 export const tailSamplingForwardCompatibilitySchema = schema.object(
