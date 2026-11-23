@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { JsonSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
+
 /** Types the visual schema builder can author. */
 export type SchemaPropertyType = 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
 
@@ -32,6 +34,11 @@ export interface SchemaPropertyField {
   readonly properties?: readonly SchemaPropertyField[];
   /** Array item type (type === 'array'). */
   readonly itemType?: SchemaPropertyType;
+  /**
+   * Item schema read from the document when it is a union of scalar types (legacy `array` inputs), kept so
+   * saving does not narrow it to strings. Dropped as soon as the item type is edited.
+   */
+  readonly itemSchema?: JsonSchema;
   /** Nested object shape when itemType === 'object'. */
   readonly itemProperties?: readonly SchemaPropertyField[];
 }

@@ -434,6 +434,8 @@ const PropertyEditor = ({
                     onUpdate({
                       ...field,
                       itemType,
+                      // Choosing an item type replaces whatever union of types the items had.
+                      itemSchema: undefined,
                       itemProperties:
                         itemType === 'object' ? field.itemProperties ?? [] : undefined,
                     });

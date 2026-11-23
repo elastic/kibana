@@ -6,6 +6,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { SchemaPropertyList } from './schema_property_list';
 import { createEmptySchemaProperty } from './schema_property_model';
@@ -69,6 +70,24 @@ describe('SchemaPropertyList', () => {
       expect(screen.getByTestId('schemaProperty-empty')).toBeInTheDocument();
       expect(screen.queryByTestId('schemaProperty-add')).not.toBeInTheDocument();
     });
+  });
+
+  it('drops the union of item types a legacy array input had once an item type is chosen', async () => {
+    const onChange = jest.fn();
+    const ids = createEmptySchemaProperty({
+      id: 'ids',
+      name: 'ids',
+      type: 'array',
+      itemType: 'string',
+      itemSchema: { anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }] },
+    });
+    renderList({ properties: [ids], onChange });
+
+    await userEvent.selectOptions(screen.getByTestId('schemaProperty-itemType-ids'), 'number');
+
+    expect(onChange).toHaveBeenCalledWith([
+      expect.objectContaining({ id: 'ids', itemType: 'number', itemSchema: undefined }),
+    ]);
   });
 
   it('still offers add on an empty editable list', () => {

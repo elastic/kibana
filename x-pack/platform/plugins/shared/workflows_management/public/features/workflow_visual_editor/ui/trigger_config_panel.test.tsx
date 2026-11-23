@@ -98,6 +98,16 @@ describe('TriggerConfigPanel', () => {
     expect(fragment).toContain('string');
   });
 
+  it('shows the input form, not the raw schema editor, for a legacy input of type array', () => {
+    renderPanel({
+      initialFragment:
+        'type: manual\ninputs:\n  - name: ids\n    type: array\n    default:\n      - a\n      - b\n',
+    });
+
+    expect(screen.getAllByTestId(/^workflowTriggerConfigInput-name-/)).toHaveLength(1);
+    expect(screen.queryByTestId('workflowTriggerConfigPanelInputsSchema')).not.toBeInTheDocument();
+  });
+
   it('does not render an input builder for alert triggers', () => {
     renderPanel({
       triggerType: 'alert',

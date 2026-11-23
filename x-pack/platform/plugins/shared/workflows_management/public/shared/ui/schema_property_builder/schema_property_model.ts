@@ -99,6 +99,19 @@ const enumToStrings = (values: unknown[] | undefined): string[] => {
   return values.map((v) => (typeof v === 'string' ? v : String(v)));
 };
 
+/** `anyOf` of bare `string` / `number` / `boolean` schemas: what a legacy `array` input gets as its items. */
+const isScalarUnion = (node: JsonSchema): boolean =>
+  Array.isArray(node.anyOf) &&
+  node.anyOf.length > 0 &&
+  node.anyOf.every((option) => {
+    if (!option || typeof option !== 'object') return false;
+    const { type, ...rest } = option as { type?: unknown };
+    return (
+      (type === 'string' || type === 'number' || type === 'boolean') &&
+      Object.keys(rest).length === 0
+    );
+  });
+
 const parseProperty = (
   name: string,
   schema: JsonSchema,
@@ -122,10 +135,12 @@ const parseProperty = (
 
   let itemType: SchemaPropertyType | undefined;
   let itemProperties: SchemaPropertyField[] | undefined;
+  let itemSchema: JsonSchema | undefined;
   if (type === 'array') {
     const items = Array.isArray(schema.items) ? schema.items[0] : schema.items;
     if (items && typeof items === 'object') {
       itemType = readType(items as JsonSchema);
+      if (isScalarUnion(items as JsonSchema)) itemSchema = items as JsonSchema;
       const nestedProperties = (items as JsonSchema).properties;
       if (itemType === 'object' && nestedProperties) {
         const nestedRequired = new Set((items as JsonSchema).required ?? []);
@@ -159,6 +174,7 @@ const parseProperty = (
     properties,
     itemType,
     itemProperties,
+    itemSchema,
   };
 };
 
@@ -179,7 +195,15 @@ export const isBuilderEditableSchema = (schema: JsonModelSchemaType | undefined)
     if (node.items) {
       const items = Array.isArray(node.items) ? node.items : [node.items];
       for (const item of items) {
-        if (item && typeof item === 'object' && !walk(item as JsonSchema)) return false;
+        // A union of scalar types is how a legacy `array` input describes its items; the builder keeps it as it is.
+        if (
+          item &&
+          typeof item === 'object' &&
+          !isScalarUnion(item as JsonSchema) &&
+          !walk(item as JsonSchema)
+        ) {
+          return false;
+        }
       }
     }
     return true;
@@ -245,7 +269,9 @@ const propertyToJsonSchema = (field: SchemaPropertyField): JsonSchema => {
 
   if (field.type === 'array') {
     const itemType = field.itemType ?? 'string';
-    if (itemType === 'object') {
+    if (field.itemSchema && itemType === 'string') {
+      schema.items = field.itemSchema;
+    } else if (itemType === 'object') {
       const nested = schemaPropertiesToJsonSchema(field.itemProperties ?? []);
       schema.items = {
         type: 'object',
@@ -322,6 +348,7 @@ export const applyTypeChange = (
       nextType === 'array' && (field.itemType ?? 'string') === 'object'
         ? field.itemProperties ?? []
         : undefined,
+    itemSchema: undefined,
   };
   return next;
 };

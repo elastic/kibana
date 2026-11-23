@@ -120,6 +120,74 @@ describe('schema_property_model', () => {
       expect(parsed[1].defaultValue).toBe('dev');
     });
 
+    describe('legacy array inputs', () => {
+      const legacyUnion = { anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }] };
+      const legacyInputs = [
+        { name: 'ids', type: 'array', default: ['a', 'b'] },
+        { name: 'dry_run', type: 'boolean' },
+      ];
+
+      it('opens a legacy `array` input in the form instead of the raw editor', () => {
+        const parsed = parseInputsToSchemaProperties(legacyInputs);
+
+        expect(parsed).not.toBe('unsupported');
+        if (parsed === 'unsupported') return;
+        expect(parsed.map((p) => p.name)).toEqual(['ids', 'dry_run']);
+        expect(parsed[0]).toMatchObject({ type: 'array', itemType: 'string', mode: 'default' });
+        expect(parsed[0].defaultValue).toBe('["a","b"]');
+      });
+
+      it('writes the item types back unchanged when the field is not edited', () => {
+        const parsed = parseInputsToSchemaProperties(legacyInputs);
+        if (parsed === 'unsupported') throw new Error('expected editable inputs');
+
+        const schema = schemaPropertiesToJsonSchema(parsed);
+
+        expect(schema.properties?.ids).toMatchObject({ type: 'array', items: legacyUnion });
+      });
+
+      it('replaces the union once the item type is chosen', () => {
+        const parsed = parseInputsToSchemaProperties(legacyInputs);
+        if (parsed === 'unsupported') throw new Error('expected editable inputs');
+
+        const schema = schemaPropertiesToJsonSchema([
+          { ...parsed[0], itemType: 'number', itemSchema: undefined },
+        ]);
+
+        expect(schema.properties?.ids).toMatchObject({ items: { type: 'number' } });
+      });
+
+      it('does not bring the union back after the property type is changed and changed back', () => {
+        const parsed = parseInputsToSchemaProperties(legacyInputs);
+        if (parsed === 'unsupported') throw new Error('expected editable inputs');
+
+        const asString = applyTypeChange(parsed[0], 'string');
+        const backToArray = applyTypeChange(asString, 'array');
+
+        expect(schemaPropertiesToJsonSchema([backToArray]).properties?.ids).toMatchObject({
+          items: { type: 'string' },
+        });
+      });
+
+      it('still sends other compositions to the raw editor', () => {
+        // A union on the property itself, a union of non-scalar types, a scalar union with constraints, `oneOf`.
+        const unsupported: unknown[] = [
+          { properties: { v: { anyOf: [{ type: 'string' }, { type: 'number' }] } } },
+          { properties: { v: { type: 'array', items: { anyOf: [{ type: 'object' }] } } } },
+          {
+            properties: {
+              v: { type: 'array', items: { anyOf: [{ type: 'string', minLength: 2 }] } },
+            },
+          },
+          { properties: { v: { type: 'array', items: { oneOf: [{ type: 'string' }] } } } },
+        ];
+
+        unsupported.forEach((schema) => {
+          expect(parseInputsToSchemaProperties(schema)).toBe('unsupported');
+        });
+      });
+    });
+
     it('marks $ref schemas as unsupported for the builder', () => {
       expect(
         isBuilderEditableSchema({
