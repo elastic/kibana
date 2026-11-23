@@ -94,7 +94,8 @@ and whether the vendor API artifacts are trustworthy.
 - **Inbound `events`**: When the vendor pushes webhooks the connector is supposed to receive, the spec
   declares `events` next to `actions` (a dual spec). Flag a second connector or a classic ActionType
   added for the inbound half. Flag `events` whose `metadata.id` is missing from `SPECS_ALLOWED_EVENTS`,
-  an `eventId` that is not `buildEventId(metadata.id, definitionKey)`, `events.headers` that are not
+  an `eventId` that is not the `@kbn/connector-topics` `name` (that name still equals
+  `buildEventId(metadata.id, definitionKey)`), a schema copied onto the spec, `events.headers` that are not
   lowercase or that include `authorization` or `cookie`, `ingestTokenHash` on the schema, and
   `handleEvents` logging `rawBody` at info. A recognized body emits one typed event; an unrecognized
   body emits none; a handshake returns `type: 'http'` and does not emit. See the package README's
@@ -514,7 +515,7 @@ Report documentation issues alongside code issues.
   | a handler replacing a nested object | its least obvious field set on the current resource, surviving an update that omits it |
   | more than one auth type | each auth-specific branch, with `authType` in `ctx.secrets` rather than `ctx.config` |
   | resource variants documented by the vendor | one fixture per variant, asserting its output and constraint |
-  | `events` | the id allowlisted, `eventId === buildEventId`, a recognized body emitted and accepted by `validateEmittedEvents`, an unrecognized body emitting nothing, and a handshake returning `type: 'http'` when the vendor has one |
+  | `events` | the id allowlisted, `eventId` equal to the `@kbn/connector-topics` `name`, a recognized body emitted and accepted by `validateEmittedEvents`, an unrecognized body emitting nothing, and a handshake returning `type: 'http'` when the vendor has one |
 
   Do not read the first row as a reason to make every error a result. An ordinary `GET` that 404s or 500s
   is an error, and should stay one; the row applies to an action whose non-2xx answer is part of what the

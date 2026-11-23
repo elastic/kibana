@@ -72445,12 +72445,12 @@ paths:
             description: Comma-separated list of user IDs to filter live query history.
             example: elastic,admin
             type: string
-        - description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+        - description: Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.
           in: query
           name: sourceFilters
           required: false
           schema:
-            description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+            description: Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.
             example: live,scheduled
             type: string
         - description: The start of the time range filter (ISO 8601).
@@ -212394,6 +212394,25 @@ components:
             expiration:
               format: date-time
               type: string
+            origin:
+              description: What started the live query. Absent for live queries started from the UI, the API or a rule.
+              type: object
+              properties:
+                run_id:
+                  description: The workflow execution (run) ID that made the request.
+                  type: string
+                type:
+                  description: The kind of origin. `workflow` means a workflow run made the request.
+                  enum:
+                    - workflow
+                  type: string
+                verified:
+                  description: Whether Kibana verified that the run exists and made the request. Always `false` for now.
+                  type: boolean
+              required:
+                - type
+                - run_id
+                - verified
             pack_id:
               type: string
             pack_name:
@@ -213137,6 +213156,9 @@ components:
               additionalProperties: true
               description: ECS mapping configuration used for the query.
               type: object
+            originVerified:
+              description: Set on `Workflow` rows only. Whether Kibana verified that the workflow run made the request. Always `false` until workflow runs can be verified.
+              type: boolean
             queriesTotal:
               description: The total number of sub-queries in the live action.
               type: integer
@@ -213147,10 +213169,11 @@ components:
               description: The saved query ID, if the live query was based on a saved query.
               type: string
             source:
-              description: Whether this was a manually run live query or triggered by a rule.
+              description: Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.
               enum:
                 - Live
                 - Rule
+                - Workflow
               type: string
             sourceType:
               description: Identifies this as a live query history row.
