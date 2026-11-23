@@ -24,13 +24,13 @@ The connector connects to PostgreSQL over the native PostgreSQL protocol, on por
 
 To use the connector, you need:
 
-- A PostgreSQL database. Managed services such as Amazon RDS, Amazon Aurora, Google Cloud SQL, and Azure Database for PostgreSQL work the same way as a self-managed server.
+- A PostgreSQL database
 - A database role that can log in and access the database you want to query
 - The server hostname, the database name, and the role's credentials
 
 ### TLS [postgresql-tls]
 
-TLS is **required** by default, and the server certificate is verified according to your {{kib}} `xpack.actions.ssl` settings and any matching `xpack.actions.customHostSettings` entry for the server. If your server uses a certificate that is not signed by a public certificate authority, which is the case for Amazon RDS and Aurora, add the provider's CA bundle to `xpack.actions.ssl.certificateAuthorities` or to a `customHostSettings` entry for the host. Otherwise the connection fails with a certificate verification error.
+TLS is **required** by default, and the server certificate is verified according to your {{kib}} `xpack.actions.ssl` settings and any matching `xpack.actions.customHostSettings` entry for the server. If your server uses a certificate that is not signed by a public certificate authority, add its CA certificate to `xpack.actions.ssl.certificateAuthorities` or to a `customHostSettings` entry for the host. Otherwise the connection fails with a certificate verification error.
 
 Set **TLS** to **Disabled** only for servers that do not support TLS.
 

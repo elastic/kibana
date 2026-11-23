@@ -314,7 +314,7 @@ export const PostgresqlConnector: ConnectorSpec = {
           }),
           helpText: i18n.translate('connectorSpecs.postgresql.config.ssl.helpText', {
             defaultMessage:
-              'Required (default) encrypts the connection using Kibana TLS settings, including managed services such as Amazon RDS. Disable only for servers that do not support TLS.',
+              'Required (default) encrypts the connection using Kibana TLS settings. Disable only for servers that do not support TLS.',
           }),
         }),
     })

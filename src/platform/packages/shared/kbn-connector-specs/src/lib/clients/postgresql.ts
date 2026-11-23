@@ -22,7 +22,7 @@ const USER_ERROR_CODES = new Set([
   '42501', // insufficient_privilege
   'ECONNREFUSED', // wrong host or port
   'ENOTFOUND', // hostname cannot be resolved
-  'DEPTH_ZERO_SELF_SIGNED_CERT', // server certificate is not trusted (for example a missing RDS CA)
+  'DEPTH_ZERO_SELF_SIGNED_CERT', // server certificate is not trusted
   'SELF_SIGNED_CERT_IN_CHAIN',
   'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
   'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
