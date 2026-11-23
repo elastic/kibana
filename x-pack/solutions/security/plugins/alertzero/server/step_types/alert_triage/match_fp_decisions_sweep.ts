@@ -45,7 +45,7 @@ export const NOTHING = {
   notes_missing: 0,
   left_for_notes: 0,
   blocked_by_verdict: 0,
-  recheck_failures: 0,
+  unsettled_decisions: 0,
   deferred: 0,
   out_of_time: false,
 };
@@ -86,8 +86,6 @@ interface CloseProgress {
   unknownIds: string[];
   /** How many closes this decision added to the totals. */
   counted: number;
-  /** Whether the decision is already counted in `close_failures`: it counts once. */
-  failed: boolean;
 }
 
 const closedTag = (id: string) => `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`;
@@ -109,6 +107,21 @@ export const createDecisionSweep = ({
   const write = tagAlerts(contextManager);
   const warn = warnWith(logger);
   const totals: MatchTotals = { ...NOTHING };
+  /**
+   * Counts that are about decisions count each decision once for the whole sweep, whatever the
+   * number of pages, phases or steps in which it fails.
+   */
+  const countOncePerDecision = (counter: 'close_failures' | 'unsettled_decisions' | 'deferred') => {
+    const seen = new Set<string>();
+    return (id: string) => {
+      if (seen.has(id)) return;
+      seen.add(id);
+      totals[counter]++;
+    };
+  };
+  const countCloseFailure = countOncePerDecision('close_failures');
+  const countUnsettled = countOncePerDecision('unsettled_decisions');
+  const countDeferred = countOncePerDecision('deferred');
   /** Alerts each decision may still close today. Read once per decision, then counted down. */
   const room = new Map<string, number>();
   const adjustRoom = (id: string, by: number) => room.set(id, (room.get(id) ?? 0) + by);
@@ -131,7 +144,7 @@ export const createDecisionSweep = ({
   ) => {
     for (const [id, alertIds] of byDecision) {
       if (outOfTime()) {
-        totals.deferred++;
+        countDeferred(id);
         continue;
       }
       await handle(id, alertIds);
@@ -164,8 +177,8 @@ export const createDecisionSweep = ({
    * closes that gap: either the decision is still in force, and then the revoke has not deleted it
    * yet and will find these alerts, or it is gone, and the caller puts back what it wrote. A
    * decision that only lapsed (expired) keeps what it did while it was in force. A read that fails
-   * answers `unknown` and is counted in `recheck_failures`: the tags stay, and nothing checks
-   * again, so a revoke that already ran would not find these alerts.
+   * answers `unknown` and the decision is counted in `unsettled_decisions`: the tags stay, and
+   * nothing checks again, so a revoke that already ran would not find these alerts.
    */
   const statusAfterWrite = async (
     id: string,
@@ -179,10 +192,10 @@ export const createDecisionSweep = ({
       return status;
     } catch (error) {
       warn(
-        `Could not read decision ${id} again after the sweep ${what}; if it was revoked, run the revoke again`,
+        `Could not read decision ${id} again after the sweep ${what}; if it was revoked, run the revoke again. An alert that no longer carries the decision tag needs a manual review`,
         error
       );
-      totals.recheck_failures++;
+      countUnsettled(id);
       return 'unknown';
     }
   };
@@ -298,13 +311,6 @@ export const createDecisionSweep = ({
     }
   };
 
-  /** Counts the decision in `close_failures`, once, whatever number of its steps failed. */
-  const failClose = (progress: CloseProgress) => {
-    if (progress.failed) return;
-    progress.failed = true;
-    totals.close_failures++;
-  };
-
   /**
    * Called after the closes: reads the decision again. If a revoke landed meanwhile, the closes
    * are undone: the alerts the sweep confirmed as closed, and the ones whose close is unknown. A
@@ -331,8 +337,11 @@ export const createDecisionSweep = ({
       // a close that threw may have closed alerts that were never counted.
       totals.closed -= Math.min(reopened, counted);
     } catch (error) {
-      failClose(progress);
-      warn(`Could not put back the alerts of decision ${id}; run the revoke again`, error);
+      countUnsettled(id);
+      warn(
+        `Could not put back the alerts of decision ${id}; run the revoke again. An alert that no longer carries the decision tag needs a manual review`,
+        error
+      );
     }
   };
 
@@ -342,7 +351,7 @@ export const createDecisionSweep = ({
    * open. When the verdicts or the daily count cannot be read nothing is closed.
    */
   const closeDecision = async (id: string, alertIds: string[]) => {
-    const progress: CloseProgress = { closedIds: [], unknownIds: [], counted: 0, failed: false };
+    const progress: CloseProgress = { closedIds: [], unknownIds: [], counted: 0 };
     let tagged: string[] = [];
     try {
       if ((await statusOf(id)) !== 'active') {
@@ -355,11 +364,11 @@ export const createDecisionSweep = ({
       tagged = allowed;
       await tagInChunks(write, { alertIds: allowed, add: [closedTag(id)], remove: [] });
       if (await closeAlerts(id, allowed, progress)) {
-        failClose(progress);
+        countCloseFailure(id);
         logger.warn(`Closing the alerts of decision ${id} timed out part way`);
       }
     } catch (error) {
-      failClose(progress);
+      countCloseFailure(id);
       warn(`Could not close the alerts of decision ${id}`, error);
       await untagAfterFailedClose(id, tagged);
     }
@@ -374,7 +383,7 @@ export const createDecisionSweep = ({
     try {
       await loadConflicts([...byDecision.keys()]);
     } catch (error) {
-      totals.close_failures++;
+      byDecision.forEach((_alertIds, id) => countCloseFailure(id));
       warn('Could not read the verdicts of the decision keys; nothing is closed', error);
       return;
     }
@@ -396,8 +405,11 @@ export const createDecisionSweep = ({
     try {
       await tagInChunks(write, { alertIds: kept, add: [], remove: skipTags });
     } catch (error) {
-      totals.tag_failures++;
-      warn(`Could not put back the alerts of decision ${id}; run the revoke again`, error);
+      countUnsettled(id);
+      warn(
+        `Could not put back the alerts of decision ${id}; run the revoke again. An alert that no longer carries the decision tag needs a manual review`,
+        error
+      );
     }
   };
 

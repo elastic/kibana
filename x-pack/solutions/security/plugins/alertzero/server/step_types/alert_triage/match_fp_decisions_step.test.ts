@@ -1076,7 +1076,7 @@ describe('triage match decisions step in on mode', () => {
       expect(closes().map(({ status }) => status)).toEqual(['closed']);
       expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
       expect(output).toEqual(
-        expect.objectContaining({ closed: 1, close_failures: 0, recheck_failures: 1 })
+        expect.objectContaining({ closed: 1, close_failures: 0, unsettled_decisions: 1 })
       );
     });
 
@@ -1094,7 +1094,7 @@ describe('triage match decisions step in on mode', () => {
       expect(tags()).toHaveLength(1);
       expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
       expect(output).toEqual(
-        expect.objectContaining({ skipped: 1, tag_failures: 0, recheck_failures: 1 })
+        expect.objectContaining({ skipped: 1, tag_failures: 0, unsettled_decisions: 1 })
       );
     });
 
@@ -1117,7 +1117,9 @@ describe('triage match decisions step in on mode', () => {
 
       const { output } = await run();
 
-      expect(output).toEqual(expect.objectContaining({ close_failures: 1, recheck_failures: 1 }));
+      expect(output).toEqual(
+        expect.objectContaining({ close_failures: 1, unsettled_decisions: 1 })
+      );
     });
 
     it('counts a decision once in the failed closes when its close fails and the undo fails too', async () => {
@@ -1137,7 +1139,10 @@ describe('triage match decisions step in on mode', () => {
 
       const { output } = await run();
 
-      expect(output).toEqual(expect.objectContaining({ close_failures: 1 }));
+      // The close failed and the undo failed: one decision, counted once in each of its counts.
+      expect(output).toEqual(
+        expect.objectContaining({ close_failures: 1, unsettled_decisions: 1 })
+      );
     });
 
     it('counts a failure and writes no note when the undo of a revoked close fails', async () => {
@@ -1161,7 +1166,10 @@ describe('triage match decisions step in on mode', () => {
       const { output } = await run();
 
       expect(notes()).toEqual([]);
-      expect(output).toEqual(expect.objectContaining({ close_failures: 1 }));
+      // The close itself worked, so this is no failed close: the decision could not be settled.
+      expect(output).toEqual(
+        expect.objectContaining({ close_failures: 0, unsettled_decisions: 1 })
+      );
     });
 
     it('puts back the alerts a failed close may have closed when the decision was revoked, since nothing else can find them', async () => {
@@ -1304,7 +1312,126 @@ describe('triage match decisions step in on mode', () => {
 
       // A failed undo must not read as "kept out of analysis" for a decision that was taken back.
       expect(notes()).toEqual([]);
-      expect(output).toEqual(expect.objectContaining({ skipped: 0, tag_failures: 1 }));
+      // The tags stay on the alerts, so this is no tag update that failed: the alerts do not match
+      // again. The decision could not be settled.
+      expect(output).toEqual(
+        expect.objectContaining({ skipped: 0, tag_failures: 0, unsettled_decisions: 1 })
+      );
+    });
+  });
+
+  describe('counts that are about decisions', () => {
+    /** Page one is full and has alert `a`, page two has alert `b`: both match the same decision. */
+    const twoPages = (callKibanaApi: jest.Mock) => {
+      const first = [
+        { _id: 'a', _source: source('C:\\x.exe'), sort: [1, 'a'] },
+        ...Array.from({ length: ALERT_FETCH_LIMIT - 1 }, (_unused, i) => ({
+          _id: `old${i}`,
+          _source: source(`C:\\other${i}.exe`),
+          sort: [i + 2, `u${i}`],
+        })),
+      ];
+      const inner = callKibanaApi.getMockImplementation()!;
+      let pages = 0;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          const { path, body } = params;
+          const candidateSearch =
+            path.endsWith('/signals/search') &&
+            body?.size !== 0 &&
+            !body?.aggs &&
+            !body?.query?.bool?.filter?.[0]?.ids;
+          if (!candidateSearch) return inner(params);
+          pages++;
+          const hits =
+            pages === 1 ? first : [{ _id: 'b', _source: source('C:\\x.exe'), sort: [20_000, 'b'] }];
+          return { body: { hits: { hits } } };
+        }
+      );
+    };
+
+    it('counts a decision once in the unsettled decisions when it cannot be read again on either page', async () => {
+      const { run, callKibanaApi, get } = setup({
+        mode: 'on',
+        alerts: [],
+        decisions: approved('C:\\x.exe'),
+      });
+      twoPages(callKibanaApi);
+      // Each page reads the decision before it writes, and again after: the second read fails.
+      let reads = 0;
+      get.mockImplementation(async () => {
+        if (++reads % 2 === 0) throw new Error('es down');
+        return { _source: approved('C:\\x.exe')[idOf('C:\\x.exe')] };
+      });
+
+      const { output } = await run();
+
+      expect(reads).toBe(4);
+      expect(output).toEqual(expect.objectContaining({ closed: 2, unsettled_decisions: 1 }));
+    });
+
+    it('counts a decision once in the failed closes when its close fails on either page', async () => {
+      const { run, callKibanaApi } = setup({
+        mode: 'on',
+        alerts: [],
+        decisions: approved('C:\\x.exe'),
+      });
+      twoPages(callKibanaApi);
+      const paged = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (params.path.endsWith('/signals/status') && params.body?.status === 'closed') {
+            throw new Error('close failed');
+          }
+          return paged(params);
+        }
+      );
+
+      const { output } = await run();
+
+      expect(output).toEqual(expect.objectContaining({ close_failures: 1 }));
+    });
+
+    it('counts a decision once in the deferred decisions when it is deferred in the close and in the shadow tags', async () => {
+      // One key, two alerts: the trusted one is closed, the untrusted one is only tagged.
+      const library = (trusted: boolean) => ({
+        ...source('C:\\x.exe'),
+        event: { category: ['library'] },
+        dll: { path: 'C:\\lib\\a.dll', code_signature: { subject_name: 'Acme', trusted } },
+      });
+      const libraryId = decisionId(
+        'false_positive',
+        groupByStrictKey({ alerts: [{ id: 'x', doc: library(true) }], spaceId: 'default' })
+          .groups[0].hash
+      );
+      const dismissedId = decisionId('do_not_propose', hashOf('C:\\a.exe'));
+      const { run, callKibanaApi } = setup({
+        mode: 'on',
+        alerts: [
+          ['d', source('C:\\a.exe')],
+          ['t', library(true)],
+          ['u', library(false)],
+        ],
+        decisions: {
+          [dismissedId]: stored('do_not_propose'),
+          [libraryId]: stored('false_positive'),
+        },
+      });
+      const original = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          const response = await original(params);
+          // The dismissal is written first; its write spends the work budget.
+          if (params.path.endsWith('/signals/tags')) {
+            jest.setSystemTime(NOW + DECISION_MATCH_WORK_BUDGET_MS + 1);
+          }
+          return response;
+        }
+      );
+
+      const { output } = await run();
+
+      expect(output).toEqual(expect.objectContaining({ deferred: 1, out_of_time: true }));
     });
   });
 
