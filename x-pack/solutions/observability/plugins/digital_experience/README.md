@@ -30,6 +30,108 @@ Serverless Logs Essentials hides the feature (`xpack.features.overrides`), as th
 
 `xpack.digital_experience.enabled` is deprecated and ignored; Kibana logs a warning when it is set.
 
+## Mobile applications
+
+EDOT Android and EDOT iOS applications (and React Native apps, which run on both) are listed with
+the others. They ship with the rest of Digital Experience, behind `digitalExperience.enabled` only,
+on serverless and stateful.
+
+- **Source and type:** `source` is the data model, `otel` or `classic`. Mobile applications
+  are OpenTelemetry only, so they are `otel`; what sets them apart is their `applicationType`,
+  `mobile` (`web` for EDOT Browser and Classic RUM), and their `platforms` (`android`, `ios`).
+- **Identity:** a mobile `telemetry.sdk.name` (`android`, `iOS`), or, once the SDKs send the
+  upstream values (elastic/rum-dev#106), the Elastic distribution
+  (`resource.attributes.telemetry.distro.name: elastic`) on a mobile resource `os.name`: `Android`,
+  `iOS` or `iPadOS`, over `traces-*.otel-*,logs-*.otel-*`. The same rule as the mobile session
+  summaries. Not `os.type`, which can't tell the platforms apart (Android sends `linux`, iOS
+  `darwin`), nor `telemetry.sdk.language`, which is `java` for EDOT Android and backend Java alike.
+  EDOT Browser is the Elastic distribution too and reports the device's OS, e.g. `iOS` on an
+  iPhone, so its documents (`telemetry.sdk.language: webjs`) are left out.
+- **Platform:** `android` for `os.name: Android` or `telemetry.sdk.name: android`, `ios` otherwise.
+- **Key:** one application per `service.name`, as obs-execution#645 has it: a React Native app is
+  one row, with the platforms it reported on (`VALUES(platform)`).
+- **Framework:** React Native will be marked by `elastic.app.framework.name`, pending the SDK team's
+  review of the names; nothing reads it yet.
+- **Row metrics** (ES|QL, `server/routes/applications/mobile/`): sessions (distinct `session.id`),
+  users (distinct `app.installation.id`), error rate (exceptions per session), last seen, and the
+  latest release. Rows are sorted by sessions and capped at 1,000. Crash-free sessions is `null`
+  ("Not enough data") until a crash is defined and session start reaches the SDKs. The latest
+  release query filters on the listed `service.name`s through the request's Query DSL `terms`
+  filter, so its ES|QL text is the same on every request.
+- **Queries:** built with the `@elastic/esql` composer (`common/mobile/`: the fields and computed
+  columns, the mobile documents, the filters, the KPIs and the Discover query; and
+  `server/lib/mobile/queries.ts`) and run through the plugin's traced Elasticsearch client, one APM
+  span per query, with typed rows (`transform: 'plain'`). Every query sets `unmapped_fields` to
+  `nullify`: a field no index maps, e.g. `exception.type` on a cluster whose apps never threw, reads
+  as `null` (and counts 0) instead of failing the query. Values from the request are named params;
+  the Discover query, which takes no params, has them inlined by `inlineParams()`. Results must be
+  complete (`allow_partial_results: false`), and periods are half-open, so a period and the one
+  before it never share a document.
+- **Releases:** the release is `service.version` as the SDKs send it: Android's `versionName` and
+  iOS's short version, with the build (`versionCode`, `CFBundleVersion`) in `app.build_id`. It isn't
+  rewritten at query time; a version that carries its build would need fixing in the SDK or at
+  ingest. The latest release is each application's highest release in the last 24 hours of the time
+  range, on any platform, whatever its session count, compared as versions so `2.10.0` is after
+  `2.9.0` and `1.10` after `1.9` (`server/lib/mobile/queries.ts`, one row per application, so no
+  row limit drops one). Only plain releases are compared (`RELEASE_VERSION_PATTERN`: dot-separated
+  numbers without leading zeros): the `version` type sorts any other string after all of them, so
+  a pre-release, a build suffix or a debug build (`3.0.0-beta`, `1.2.3+45`, `debug`, `v2.1.0`)
+  would otherwise override the rollout. Empty versions are ignored. An application without a plain
+  release falls back to the release that first showed up last, and among releases that first
+  showed up at the same time, the highest as text, so the same data always gives the same release.
+  The pattern is matched in ES|QL rather than with the `semver` package in Kibana: the release is
+  picked in the same query, one row per application, before ES|QL's row cap, and
+  `1.2`-style iOS versions, which strict SemVer rejects, still count.
+- **Applications list:** Web and Mobile tabs (`applicationType` in the URL), each with its count,
+  shown when both have data, when the mobile search failed, when no readable mobile data matched
+  with partial access, or when the URL picks the kind without data (e.g. the mobile setup docs on
+  web data alone, with a tab back); otherwise the list shows the only kind there is, so going back
+  from a mobile application never opens an empty Web tab. The Mobile tab has its own table (the
+  name with a badge per platform, from `@kbn/custom-icons`, latest release, sessions, users,
+  crash-free sessions, error rate with two decimals, last seen; Users and Error rate explain
+  themselves in a header tooltip), a Platform filter (`platformFilter`: Android or iOS) and,
+  without mobile data, links to the EDOT Android and iOS docs. Each tab's filter applies only on
+  its tab: picking a tab clears the other's, and one that arrives in a URL is ignored for the other
+  tab's rows, count and links. A failed or partial mobile search is reported in
+  `mobileAvailability`, apart from the sources. The summary, page loads chart, source filter and
+  column selector are the Web tab's. The environment picker lists both environment fields and
+  "Not defined", as the filters define it: APM's sentinel, or neither field indexed (an indexed
+  `""` is a value).
+- **Application page** (`/{serviceName}?source=otel&applicationType=mobile`), all platforms:
+  `ApplicationPage` stays the route's page and hands a mobile application to
+  `MobileApplicationPage` (web ones keep the EDOT Browser and Classic RUM page). That page owns its
+  header, as the Session page does: the title, a badge per platform the application reported on,
+  Share, the Overview tab, and two actions, **Compare to the previous period** (`compare=true` in
+  the URL, so a reload or Share keeps it) and **Open in Discover**, which opens the application's
+  mobile events with the URL's filters, newest first, built in the browser from the URL
+  (`use_mobile_discover_href.ts`, `common/mobile/discover.ts`). It fetches the KPIs
+  (`use_mobile_kpis.ts`) for the header's badges and the Overview, and remounts per application, so
+  none shows another's badges, options or KPIs while loading. Any other tab's URL is replaced by
+  the Overview's.
+- **Mobile Overview:** the toolbar of every application tab (`ApplicationTabToolbar`), with the
+  environment, OS (`osName`, the `os.name` values in the time range, e.g. `iPadOS`) and release
+  filters as `FacetFilter`s, each option with its sessions as the Sessions list's facets, and the
+  date picker pinned to the right. A picked value fits its capped button (`12em`), so picking one
+  never moves the page. The filters are in the URL, so a reload or a shared link keeps them; the
+  router drops a value longer than the KPI route accepts (`common/filter_lengths.ts`). Below, the
+  KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
+  (health summary, release health, stability, users, performance, views) join the page as those
+  issues fill them, rather than showing placeholders. Every KPI uses `MobilePanel`: the current
+  value and a tooltip with the calculation and, with Compare on, its change against the previous
+  period of equal length and the previous value. A change's sign and color follow the rounded value
+  shown, so one that rounds to 0 reads `0%` with a neutral badge. A warning shows when the user
+  can't read every OTel index, as the counts may then miss data. Without mobile data it links to
+  the EDOT Android and iOS setup docs, unless the user can't read every OTel index: then it says
+  nothing matched in the indices they can read and asks them to check their access, on this page
+  and on the list's Mobile tab. With a filter set (environment, OS or release) and full access, it
+  says no data matches the filters instead of linking to the setup docs. Both prompts then offer
+  **Clear filters**, which removes the three filters in one history entry, and the list keeps its
+  "Show all environments" action.
+- **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with an
+  optional `osName` and `release`. It also lists, for the pickers, the OS names (whatever the OS
+  and release filters) and releases (on the selected OS), each with its sessions, and the
+  platforms and environments.
+
 ## Pages
 
 ### Applications (`/`)
@@ -86,7 +188,8 @@ change of their status shows up within that time:
 - sessions are set up, the task's last run succeeded, it isn't lagging, and it has caught up since
   sessions were enabled, so a build in progress is never shown as lower numbers;
 - the time range starts within the sessions' 30 day lookback (from the start of that day, in UTC);
-- the user can read `digital-experience-sessions-*`, otherwise the raw events are read quietly;
+- the user can read `digital-experience-sessions-browser-*`, which a `digital-experience-sessions-*`
+  grant covers, otherwise the raw events are read quietly;
 - the sessions hold at least one application, so applications that send no `session.id`, which the
   summaries skip, still appear when no application sends one.
 
@@ -190,6 +293,24 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   (`common/overview_filters_param.ts`). The routes read `meta` only, never a query a client wrote,
   and answer a param they would have to repair, e.g. one with more than ten values or a repeated
   one, with a 400, so a request gets the filters it asked for.
+- **Saved views:** **Views** lists the views of the space, each a name with the filters, KQL query and
+  percentile, and optionally the time range; applying one replaces them in one step. Everyone who
+  can read the app sees the views of the space and applies them. Saving, saving again and deleting
+  need `all` (the `manage` API and `save` UI privileges, and the saved object privilege for the
+  `digital-experience-view` type). A view belongs to the space, not to an application, and the space
+  holds up to 100, each with a name of its own. The routes are `GET`, `POST`, `PUT` and `DELETE`
+  `/internal/digital_experience/views`.
+- **Sharing:** the **Share** action in an application's header opens Kibana's Share modal on the
+  page the URL shows, any tab. The page is named by the app's locator (`DIGITAL_EXPERIENCE_LOCATOR`,
+  `common/locator.ts`): the service, the tab and the URL params it lists (time range, environment,
+  source, the Overview's filters, KQL query and percentile, the Sessions list's state). It is
+  registered on the browser and on the server, which creates short URLs, and other plugins can look
+  it up by its id, e.g. for the link of a rule or a report. With the **Short URLs** sub-feature
+  privilege (included in `all`) **Copy link** copies a short URL, a `url` saved object of the space,
+  and the modal can fix a relative time range; without it the link is the long URL. Following a
+  short URL needs no privilege of its own. A param the pages gain has to be added to
+  `DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS`, which a test checks against the params of the Overview
+  and the Sessions list.
 - **Sessions tab:** `browser`, `os` and `country` are the Sessions tab's own params, which take one
   value, so the tab links carry a filter over only when it is exactly one included value. The
   Sessions list's **Entry page** facet is its page filter; it is a different question from the
@@ -258,12 +379,22 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 ## Sessions
 
 A Task Manager task (`digital_experience:sessions-summaries`, every minute) summarizes EDOT Browser
-sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-<version>` with
+sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-browser-<version>` with
 ES|QL, one document per `service.name` + `session.id`: start/end time and duration, page views with
 entry/exit page and journey, page loads, clicks, JS errors, HTTP requests and failed requests, p75
 Core Web Vitals with their samples by rating, and environment, user, browser, OS and geo attributes.
 Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and it
 skips events with an empty `service.name` or `session.id`.
+
+The Sessions tab, the session detail and the applications list read `digital-experience-sessions-browser-*`,
+and the index template covers only that pattern, so session summaries of another platform under
+`digital-experience-sessions-*` never mix with the browser ones. The privileges below name
+`digital-experience-sessions-*`, which covers the browser index.
+
+Setups that enabled sessions before the index was named `digital-experience-sessions-browser-<version>`
+keep an unused `digital-experience-sessions-1` index, which can be deleted. Delete their old
+`digital-experience-sessions` index template before enabling sessions again, so it does not conflict
+with the new `digital-experience-sessions-browser` template.
 
 Each run:
 
@@ -283,15 +414,14 @@ Each run:
    applications sharing an id.
 3. Rebuilds the sessions, 5,000 at a time, from their events of the last 24 hours, the longest a
    session lasts, with their ids as a literal `IN` list, which Elasticsearch looks up in the index:
-   an `IN (subquery)` scanned the whole lookback. One query aggregates per session and page URL,
-   then per session, for the counts, times, latest attributes, web vitals and journey. It keeps the
-   raw attribute fields of each group's latest event and cleans them into attributes once per
-   session, after the aggregation: cleaning every event's fields first took about 40% of the
-   query, and the same 5,000 sessions now take about 22% less time with identical rows.
+   an `IN (subquery)` scanned the whole lookback. One query returns the counts, times, latest
+   attributes, web vitals and journey of each session (see [Summary query](#summary-query)).
 4. Turns the rows into summaries 500 at a time, letting the event loop run between chunks, as a
    whole batch at once blocked a small Kibana for about half a second. Writes one summary per
-   session, keyed by a hash of `service.name` + `session.id`, and moves the checkpoint past the
-   window.
+   session, keyed by a hash of `service.name` + `session.id`, in one bulk request per batch, and
+   moves the checkpoint past the window. On serverless a bulk waits about 0.15 to 0.4 seconds for
+   durability whatever its size: 8,000 summaries took 2.3 s in four sequential bulks and 1.4 s in
+   one.
 
 A run starts no window after 45 seconds, and runs again right away while it is behind. On the first
 run after sessions are enabled, it starts from 30 days ago, at the start of that day in UTC, so it
@@ -336,6 +466,95 @@ per recorded segment to `logs-rum.replay.otel-*`, which the task already reads a
 would cost. It is absent rather than `false` until something sets it, and readers expose it as
 `hasReplay`.
 
+### Summary query
+
+`sessionSummaryQuery` (`server/services/sessions/summary_queries.ts`) rebuilds a batch of sessions
+in one ES|QL query. Its shape, with the aggregations elided:
+
+```esql
+FROM traces-*.otel-*, logs-*.otel-*
+| WHERE <window> AND <browser SDK> AND attributes.session.id IN (<5,000 ids>)
+| EVAL <event flags>, seen_<group> = <timestamp of events with any field of the group>
+| FORK (STATS <counts>, start_time, end_time,
+              raw_<field> = LAST(TO_STRING(<field>), seen_<group>)
+          BY service, session)
+       (WHERE event_name IN (<page views>) OR name IN (<page views>)
+        | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
+            BY service, session, page_url = attributes.url.full)
+       (WHERE (event_name == "browser.web_vital" OR name == "browser.web_vital") AND <has a value>
+        | EVAL lcp = CASE(vital == "lcp", vital_value, null), ...
+        | STATS lcp_p75 = PERCENTILE(lcp, 75), lcp_samples = COUNT(lcp), ...
+            BY service, session)
+| STATS <every session and vital column> = MAX(<column>),
+        pages = TOP(first_view, 30, "asc", page_url) WHERE page_url IS NOT NULL,
+        exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
+  BY service, session
+| EVAL attribute_<name> = COALESCE(<cleaned raw_<field>>, ...)
+| EVAL <vital count> = COALESCE(<vital count>, 0), ...
+| DROP raw_*
+```
+
+- **The journey is its own branch.** Grouping every aggregation by page URL as well was the main
+  cost of the query. The second branch reads only page views and runs alongside the session stats;
+  the last `STATS` merges them, taking each column from the one row that has it. The branch filters
+  are on the source fields, as the event flags wrap them in `COALESCE`, which keeps Lucene from
+  applying them.
+- **So are the web vitals**, which are about 7% of the events: computing their columns, p75s and
+  counts on every event cost 19% to 32% of the query. A session without a vital has no row in
+  their branch, so its vital counts are set to 0 after the merge.
+- **A column per web vital**, so its p75 and sample count need no filter, and the thresholds
+  compare a number instead of the vital's name.
+- **Attributes are cleaned once per session.** The query keeps the raw fields of each group's
+  latest event and cleans them (trimmed, `""` and `"null"` as missing) after the last stage:
+  cleaning every event's fields first took about 40% of the query. Coalescing a group's fields per
+  event, before the aggregation, would save another 5% to 9% but isn't equivalent: a blank value
+  in a higher-priority field would win over a real value in a lower one, and then be cleaned to
+  null.
+- `FORK` needs Elasticsearch 9.4 or later, where its branches have no implicit `LIMIT 1000`.
+
+On 5,000 sessions of synthtrace data, the `FORK` version takes 10% to 27% less time and 5% to 15%
+less data-node CPU than aggregating per page URL first, depending on the segment layout, with
+identical rows ([#306059](https://github.com/elastic/kibana/issues/306059)), and the vitals branch
+another 19% to 32%. The measurements behind the task's design, where the time goes, and what was
+tried and dropped are in
+[`server/services/sessions/query_performance.md`](server/services/sessions/query_performance.md),
+with how to check a change: run the old and new query on the same session ids and compare every
+column of every row.
+
+### Mobile sessions
+
+A second task (`digital_experience:mobile-sessions-summaries`) summarizes EDOT Android and EDOT iOS
+sessions into `digital-experience-sessions-mobile-<version>`, with the same loop, settings and
+checkpoints as the browser one, and its own `MOBILE_SESSIONS_VERSION`, template and state. No page
+reads them yet. It reads events by `telemetry.sdk.name` (`android`, `iOS`) rather than the SDK
+language, as EDOT Android's is `java`, like any Java backend. Both SDKs are moving to the upstream
+`telemetry.sdk.*` values, so it also reads events with `telemetry.distro.name: elastic` and an
+`os.name` of `Android`, `iOS` or `iPadOS`, but EDOT Browser's (`webjs`). A summary has start/end time and duration, events,
+crashes (`app.crash`, or `crash` from older EDOT iOS), screen views (EDOT iOS `UIViewController`
+spans), taps (`app.widget.click`), HTTP requests (once per span id, as both SDKs may send a span
+twice) and failed requests, the platform (`android` or `ios`, from the OS name), and the
+environment, user, app version, build and installation id, device model identifier, OS,
+connection type and geo attributes of its latest events (`MOBILE_SESSION_ATTRIBUTE_FIELDS`). The
+installation id is a random id per install that both SDKs send, so it counts installs, a proxy for
+users that needs no opt-in user id.
+
+Mobile events arrive late more often than browser ones: both SDKs buffer them on disk while the
+device is offline, and send a crash on the next launch, with that launch's resource. A crash so
+ranks below every other event for the attributes. EDOT iOS gives it the send time as its
+`@timestamp` and the crash time as its `observed_timestamp`, so a crash counts at the earlier of
+the two. As events have no ingest time to query by, every
+hour, once the regular run has caught up, the task also rebuilds every session with an event in the
+24 hours before its checkpoint, with what is left of the run's time; a pass that doesn't finish
+carries on from where it stopped on the next runs, and one that fails keeps the regular run's
+progress. A pass rebuilds its sessions up to the regular run's checkpoint, not up to the end of
+its own window, so it never drops events the regular run has already summarized. A changed mobile
+session is rebuilt from 48 hours before its window rather than 24, the longest session and the
+latest crash, so a crash sent up to 24 hours late still sees all of its session; one sent later is
+left out, as its session's rebuild could miss its other events and replace the full summary with a
+partial one. The session ids decide what is read, so the range barely matters: 2 to 24 hours took
+the same time. Events
+that arrive more than 24 hours late are only summarized when another event of their session arrives.
+
 ### Enabling sessions
 
 Sessions are set up by an explicit action, `POST /internal/digital_experience/sessions/enable`,
@@ -368,10 +587,11 @@ After the checks, enabling runs these steps, and a failure answers 500 naming th
 (`attributes.data.step`) with its details in the server log:
 
 1. `credentials`: Kibana can store an API key, so `xpack.encryptedSavedObjects.encryptionKey` is set.
-2. `template`: puts the `digital-experience-sessions` index template, as Kibana's internal user.
-3. `index`: creates the sessions index, as the user.
-4. `task`: schedules the summaries task with an API key that Task Manager grants on the user's behalf,
-   and runs it right away.
+2. `template`: puts the `digital-experience-sessions-browser` and `digital-experience-sessions-mobile`
+   index templates, as Kibana's internal user.
+3. `index`: creates the browser and mobile sessions indices, as the user.
+4. `task`: schedules the browser and mobile summaries tasks with API keys that Task Manager grants on
+   the user's behalf, and runs them right away.
 
 Every step is safe to repeat, and the steps before a failed one are harmless on their own, so
 enabling again retries from where it failed. Enabling again also gives the task a new key, granted
@@ -390,8 +610,9 @@ as `apiKeyInvalid`. A user with the privilege then sets sessions up again from t
 which grants a new key on their behalf. Nothing re-grants it by itself: the task reads what the user
 who set sessions up can read, so only an explicit action changes whose data the summaries hold.
 
-There is no disable action. Removing the task (`digital_experience:sessions-summaries`) with the
-Task Manager API stops it and invalidates its key.
+There is no disable action. Removing a task (`digital_experience:sessions-summaries`,
+`digital_experience:mobile-sessions-summaries`) with the Task Manager API stops it and invalidates
+its key.
 
 ### Scaling and freshness
 
@@ -442,7 +663,8 @@ session detail timeline). Without it they answer 403 naming those privileges; ot
 logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status`: whether sessions are set up, the task's health,
-  lag and last error, whether it is still building, and how many days sessions are kept.
+  lag and last error, whether it is still building, and how many days sessions are kept, with the
+  same for the mobile task under `mobile`.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
   OS, country, entry page), the `environment`, `withJsErrors`, `withFailedRequests` and
   `minDurationMs` / `maxDurationMs` filters, sorting, pagination, KPIs, and how many days sessions
@@ -463,3 +685,5 @@ logged and answer 500 without Elasticsearch details:
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
   `session_detail/`) with its own components, hooks and utils; what several pages share is in
   `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.
+  The applications list keeps each tab's components in `web/` and `mobile/`, and what both use in
+  `components/`.

@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { render, screen, within } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -27,7 +29,7 @@ const renderWithServices = (ui: React.ReactElement) => {
     <KibanaContextProvider
       services={{ ...coreMock.createStart(), unifiedSearch, config: createPublicConfigMock() }}
     >
-      {ui}
+      <Router history={createMemoryHistory()}>{ui}</Router>
     </KibanaContextProvider>
   );
 };

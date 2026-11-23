@@ -33,7 +33,7 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 3166
   contentManagement: 6737
-  contextEngine: 3495
+  contextEngine: 4053
   contextEngineAgentBuilder: 2553
   controls: 4166
   core: 320
@@ -54,7 +54,7 @@ pageLoadAssetSize:
   dataViews: 1697
   dataVisualizer: 7461
   devTools: 4281
-  digitalExperience: 6000
+  digitalExperience: 8301
   discover: 21958
   discoverEnhanced: 1359
   discoveries: 31528
@@ -173,7 +173,7 @@ pageLoadAssetSize:
   screenshotMode: 979
   screenshotting: 1655
   searchAssistant: 1887
-  searchBoost: 1569
+  searchBoost: 1331
   searchGettingStarted: 2697
   searchHomepage: 4290
   searchInferenceEndpoints: 4743
@@ -194,7 +194,7 @@ pageLoadAssetSize:
   share: 379
   shared-core: 343009
   shared-misc: 155260
-  shared-packages: 6066047
+  shared-packages: 6065481
   shared-plugins: 13536562
   shared-solution-packages: 386709
   significantEvents: 4439

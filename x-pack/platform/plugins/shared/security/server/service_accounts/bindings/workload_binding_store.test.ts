@@ -158,7 +158,7 @@ describe('WorkloadBindingStore', () => {
 
     it('propagates any other failure', async () => {
       client.delete.mockRejectedValue(new Error('cluster unavailable'));
-      await expect(store.delete(COORDINATES)).rejects.toThrowError('cluster unavailable');
+      await expect(store.delete(COORDINATES)).rejects.toThrow('cluster unavailable');
     });
   });
 
@@ -300,7 +300,7 @@ describe('WorkloadBindingStore', () => {
       encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(
         new Error('cluster unavailable')
       );
-      await expect(store.getVerified(COORDINATES)).rejects.toThrowError('cluster unavailable');
+      await expect(store.getVerified(COORDINATES)).rejects.toThrow('cluster unavailable');
     });
   });
 
@@ -341,7 +341,7 @@ describe('WorkloadBindingStore', () => {
         close,
       } as never);
 
-      await expect(store.findByServiceAccountId('service-account-id')).rejects.toThrowError(
+      await expect(store.findByServiceAccountId('service-account-id')).rejects.toThrow(
         'search failed'
       );
       expect(close).toHaveBeenCalledTimes(1);
@@ -580,9 +580,126 @@ describe('WorkloadBindingStore', () => {
     it('propagates a failed search', async () => {
       client.find.mockRejectedValue(new Error('search failed'));
 
-      await expect(store.countByServiceAccountIds(['first-account'])).rejects.toThrowError(
+      await expect(store.countByServiceAccountIds(['first-account'])).rejects.toThrow(
         'search failed'
       );
+    });
+  });
+
+  describe('#summarize', () => {
+    const field = (attribute: string) =>
+      `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.${attribute}`;
+
+    const mockAggregations = (aggregations: Record<string, unknown>) =>
+      client.find.mockResolvedValue({
+        saved_objects: [],
+        total: 10_000,
+        page: 1,
+        per_page: 0,
+        aggregations,
+      } as never);
+
+    it('summarizes every binding with one aggregation across every space', async () => {
+      mockAggregations({
+        byPlugin: {
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'workflowsExecutionEngine',
+              doc_count: 3,
+              byWorkloadType: { buckets: [{ key: 'workflow', doc_count: 3 }] },
+            },
+            {
+              key: 'alerting',
+              doc_count: 2,
+              byWorkloadType: {
+                buckets: [
+                  { key: 'rule', doc_count: 1 },
+                  { key: 'action', doc_count: 1 },
+                ],
+              },
+            },
+          ],
+        },
+        byBinderType: {
+          buckets: [
+            { key: 'user', doc_count: 4 },
+            { key: 'service_account', doc_count: 1 },
+          ],
+        },
+        serviceAccounts: { value: 2 },
+      });
+
+      await expect(store.summarize()).resolves.toEqual({
+        total: 5,
+        serviceAccounts: 2,
+        byWorkload: [
+          { pluginId: 'workflowsExecutionEngine', workloadType: 'workflow', count: 3 },
+          { pluginId: 'alerting', workloadType: 'rule', count: 1 },
+          { pluginId: 'alerting', workloadType: 'action', count: 1 },
+        ],
+        byBinderType: { user: 4, api_key: 0, service_account: 1 },
+      });
+      expect(client.find).toHaveBeenCalledTimes(1);
+      expect(client.find).toHaveBeenCalledWith({
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        perPage: 0,
+        namespaces: ['*'],
+        aggs: {
+          byPlugin: {
+            terms: { field: field('pluginId'), size: 100 },
+            aggs: { byWorkloadType: { terms: { field: field('workloadType'), size: 100 } } },
+          },
+          byBinderType: { terms: { field: field('boundBy.type'), size: 100 } },
+          serviceAccounts: {
+            cardinality: { field: field('serviceAccountId'), precision_threshold: 40_000 },
+          },
+        },
+      });
+    });
+
+    it('counts bindings outside the returned plugin buckets in the total', async () => {
+      mockAggregations({
+        byPlugin: {
+          sum_other_doc_count: 7,
+          buckets: [
+            { key: 'workflowsExecutionEngine', doc_count: 3, byWorkloadType: { buckets: [] } },
+          ],
+        },
+        byBinderType: { buckets: [] },
+        serviceAccounts: { value: 1 },
+      });
+
+      const { total } = await store.summarize();
+      expect(total).toBe(10);
+    });
+
+    it('ignores binder types it does not know', async () => {
+      mockAggregations({
+        byPlugin: { buckets: [] },
+        byBinderType: { buckets: [{ key: 'something_new', doc_count: 1 }] },
+        serviceAccounts: { value: 0 },
+      });
+
+      const { byBinderType } = await store.summarize();
+      expect(byBinderType).toEqual({ user: 0, api_key: 0, service_account: 0 });
+    });
+
+    it('summarizes nothing when the search returns no aggregations', async () => {
+      client.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 0 });
+
+      await expect(store.summarize()).resolves.toEqual({
+        total: 0,
+        serviceAccounts: 0,
+        byWorkload: [],
+        byBinderType: { user: 0, api_key: 0, service_account: 0 },
+      });
+    });
+
+    it('propagates a failed search', async () => {
+      client.find.mockRejectedValue(new Error('search failed'));
+
+      await expect(store.summarize()).rejects.toThrow('search failed');
     });
   });
 

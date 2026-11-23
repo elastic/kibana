@@ -49,7 +49,6 @@ const HANDWRITTEN_RISKS: ReadonlyMap<string, StepRisk> = new Map(
     waitForApproval: SAFE,
     switch: SAFE,
     parallel: SAFE,
-    merge: SAFE,
     'loop.break': SAFE,
     'loop.continue': SAFE,
     'workflow.output': SAFE,

@@ -10,6 +10,7 @@ import type OpenAI from 'openai';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import { getTelemetryHeaders } from '../../util/telemetry_headers';
 
 export const pickConnectorTelemetryForConnector = ({
   pluginId,
@@ -42,19 +43,8 @@ export const createInferenceEndpointExecutor = ({
 }): InferenceEndpointExecutor => {
   return {
     async invoke({ body, signal, metadata, timeout = 180_000 }): Promise<Readable> {
-      const { pluginId, productSolution, productFeature, interactionId, traceId, userId, spaceId } =
-        metadata?.connectorTelemetry ?? {};
       const path = `/_inference/chat_completion/${encodeURIComponent(inferenceId)}`;
-      const headers = {
-        // always send a value for EIS
-        'X-Elastic-Product-Use-Case': pluginId ?? 'inference',
-        ...(productSolution ? { 'X-Elastic-Product-Solution': productSolution } : undefined),
-        ...(productFeature ? { 'X-Elastic-Product-Feature': productFeature } : undefined),
-        ...(interactionId ? { 'X-Elastic-Inference-Interaction-Id': interactionId } : undefined),
-        ...(traceId ? { 'X-Elastic-Trace-Id': traceId } : undefined),
-        ...(userId ? { 'X-Elastic-User-Id': userId } : undefined),
-        ...(spaceId ? { 'X-Elastic-Space-Id': spaceId } : undefined),
-      };
+      const headers = getTelemetryHeaders(metadata?.connectorTelemetry);
       // timeout for the inference call performed by the endpoint
       const querystring = { timeout: `${Math.ceil(timeout / 60000)}m` };
 

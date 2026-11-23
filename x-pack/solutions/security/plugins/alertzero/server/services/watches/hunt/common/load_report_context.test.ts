@@ -707,18 +707,22 @@ describe('loadReportHuntContext', () => {
       expect(context?.extraction_pending).toBe(true);
     });
 
-    it.each(['workflow_v4', 'workflow_v4_rejected', 'kev', 'text_indicator_list'])(
-      'is not pending when the method is %s',
-      async (extraction_method) => {
-        esClient.search.mockResolvedValue(withMethod({ extraction_method }));
-        const context = await loadReportHuntContext({
-          esClient,
-          spaceId: 'hunt-a',
-          reportId: 'rpt-1',
-        });
-        expect(context?.extraction_pending).toBe(false);
-      }
-    );
+    it.each([
+      'enrich_workflow',
+      'workflow_v4',
+      'enrich_workflow_rejected',
+      'workflow_v4_rejected',
+      'kev',
+      'text_indicator_list',
+    ])('is not pending when the method is %s', async (extraction_method) => {
+      esClient.search.mockResolvedValue(withMethod({ extraction_method }));
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.extraction_pending).toBe(false);
+    });
   });
 
   it('scopes the lookup to the acting space', async () => {

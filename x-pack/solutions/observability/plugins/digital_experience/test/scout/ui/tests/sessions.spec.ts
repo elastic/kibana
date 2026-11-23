@@ -102,10 +102,11 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     await digitalExperience.sessionLink(DETAILED_SESSION.id).click();
 
     await test.step('summarizes the session', async () => {
-      await expect(digitalExperience.sessionSummary).toContainText(DETAILED_SESSION.user);
-      await expect(page.getByTestId('digitalExperienceSessionId')).toContainText(
-        DETAILED_SESSION.id
+      // Who and when are in the page header; the summary carries the session's own details.
+      await expect(page.getByTestId('digitalExperienceSessionUser')).toContainText(
+        DETAILED_SESSION.user
       );
+      await expect(digitalExperience.sessionSummary).toContainText(DETAILED_SESSION.id);
     });
 
     await test.step('draws a segment per page visit and marks the error', async () => {

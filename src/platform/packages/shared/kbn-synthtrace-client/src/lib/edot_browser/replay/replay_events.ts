@@ -229,6 +229,8 @@ export interface ReplaySegmentPlan {
   /** Makes the first FullSnapshot at least this big. */
   minSnapshotBytes?: number;
   clickTimes?: readonly number[];
+  /** The clicks of `clickTimes` that land on the element of the click before them. */
+  repeatedClickTimes?: readonly number[];
   exceptionTimes?: readonly number[];
 }
 
@@ -261,7 +263,10 @@ const incrementalEvent = (timestamp: number, data: Record<string, unknown>): Rep
 });
 
 type Slot =
-  | { time: number; kind: 'mousemove' | 'scroll' | 'mutation' | 'input' | 'resize' | 'click' }
+  | {
+      time: number;
+      kind: 'mousemove' | 'scroll' | 'mutation' | 'input' | 'resize' | 'click' | 'repeatedClick';
+    }
   | { time: number; kind: 'checkout' }
   | { time: number; kind: 'exception' };
 
@@ -291,6 +296,7 @@ export const buildSegmentEvents = ({
   checkoutAt,
   minSnapshotBytes = 0,
   clickTimes = [],
+  repeatedClickTimes = [],
   exceptionTimes = [],
 }: ReplaySegmentPlan): ReplayRrwebEvent[] => {
   const profile = SIZE_PROFILES[size];
@@ -319,7 +325,12 @@ export const buildSegmentEvents = ({
       )[0];
       return { time: inRange(between(random, start, end)), kind } as Slot;
     }),
-    ...clickTimes.map((time): Slot => ({ time: inRange(time), kind: 'click' })),
+    ...clickTimes.map(
+      (time): Slot => ({
+        time: inRange(time),
+        kind: repeatedClickTimes.includes(time) ? 'repeatedClick' : 'click',
+      })
+    ),
     ...exceptionTimes.map((time): Slot => ({ time: inRange(time), kind: 'exception' })),
   ];
   for (let time = start + checkoutIntervalMs; time < end; time += checkoutIntervalMs) {
@@ -340,6 +351,7 @@ export const buildSegmentEvents = ({
   let scrollY = 0;
   let pointer = { x: Math.round(viewport.width / 2), y: Math.round(viewport.height / 3) };
   const targetId = () => pick(random, snapshot.targetIds);
+  let lastClick: { id: number; x: number; y: number } | undefined;
 
   slots.forEach((slot) => {
     const { time } = slot;
@@ -373,9 +385,14 @@ export const buildSegmentEvents = ({
           incrementalEvent(time, { source: SOURCE_SCROLL, id: DOCUMENT_NODE_ID, x: 0, y: scrollY })
         );
         break;
-      case 'click': {
-        const id = targetId();
-        const { x, y } = pointer;
+      case 'click':
+      case 'repeatedClick': {
+        // A segment can start in the middle of a burst, without the click it repeats
+        const { id, x, y } =
+          slot.kind === 'repeatedClick' && lastClick
+            ? lastClick
+            : { id: targetId(), x: pointer.x, y: pointer.y };
+        lastClick = { id, x, y };
         events.push(
           incrementalEvent(time, { source: SOURCE_MOUSE_INTERACTION, type: MOUSE_DOWN, id, x, y }),
           incrementalEvent(time + 1, {

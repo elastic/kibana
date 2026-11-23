@@ -38,7 +38,6 @@
       "pre_filter_shard_size": "",
       "request_cache": "__flag__",
       "routing": [],
-      "_slice": "",
       "scroll": [
         "-1",
         "0"
@@ -1650,6 +1649,10 @@
               ]
             }
           },
+          "roaring_bitmap": {
+            "field": "",
+            "missing": ""
+          },
           "reverse_nested": {
             "path": ""
           },
@@ -2266,6 +2269,7 @@
               "options": {},
               "order": {
                 "__one_of": [
+                  "none",
                   "score"
                 ]
               },
@@ -2339,6 +2343,7 @@
                       "options": {},
                       "order": {
                         "__one_of": [
+                          "none",
                           "score"
                         ]
                       },
@@ -2409,6 +2414,7 @@
                         "options": {},
                         "order": {
                           "__one_of": [
+                            "none",
                             "score"
                           ]
                         },
@@ -2568,37 +2574,16 @@
             }
           },
           "top_metrics": {
-            "field": "",
-            "missing": "",
-            "script": {
-              "__one_of": [
-                {
-                  "source": "",
-                  "id": "",
-                  "params": {},
-                  "lang": {
-                    "__one_of": [
-                      "painless",
-                      "expression",
-                      "mustache",
-                      "java"
-                    ]
-                  },
-                  "options": {
-                    "*": ""
-                  }
-                },
-                ""
-              ]
-            },
             "metrics": {
               "__one_of": [
                 {
-                  "field": ""
+                  "field": "",
+                  "missing": ""
                 },
                 [
                   {
-                    "field": ""
+                    "field": "",
+                    "missing": ""
                   }
                 ]
               ]
@@ -2805,6 +2790,7 @@
                 "options": {},
                 "order": {
                   "__one_of": [
+                    "none",
                     "score"
                   ]
                 },
@@ -2878,6 +2864,7 @@
                         "options": {},
                         "order": {
                           "__one_of": [
+                            "none",
                             "score"
                           ]
                         },
@@ -2948,6 +2935,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -3138,6 +3126,7 @@
                   "options": {},
                   "order": {
                     "__one_of": [
+                      "none",
                       "score"
                     ]
                   },
@@ -3211,6 +3200,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -3281,6 +3271,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -3400,8 +3391,7 @@
             ]
           ]
         },
-        "max_concurrent_group_searches": "",
-        "collapse": {}
+        "max_concurrent_group_searches": ""
       },
       "explain": {
         "__one_of": [
@@ -3458,6 +3448,7 @@
         "options": {},
         "order": {
           "__one_of": [
+            "none",
             "score"
           ]
         },
@@ -3531,6 +3522,7 @@
                 "options": {},
                 "order": {
                   "__one_of": [
+                    "none",
                     "score"
                   ]
                 },
@@ -3601,6 +3593,7 @@
                   "options": {},
                   "order": {
                     "__one_of": [
+                      "none",
                       "score"
                     ]
                   },
@@ -3651,7 +3644,7 @@
         "__one_of": [
           {
             "field": "",
-            "query_vector": [],
+            "query_vector": "",
             "query_vector_builder": {
               "embedding": {
                 "inference_id": "",
@@ -3700,8 +3693,7 @@
                     ]
                   ]
                 },
-                "max_concurrent_group_searches": "",
-                "collapse": {}
+                "max_concurrent_group_searches": ""
               },
               "docvalue_fields": {
                 "__any_of": [
@@ -3771,6 +3763,7 @@
                 "options": {},
                 "order": {
                   "__one_of": [
+                    "none",
                     "score"
                   ]
                 },
@@ -3844,6 +3837,7 @@
                         "options": {},
                         "order": {
                           "__one_of": [
+                            "none",
                             "score"
                           ]
                         },
@@ -3914,6 +3908,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -4038,7 +4033,7 @@
           [
             {
               "field": "",
-              "query_vector": [],
+              "query_vector": "",
               "query_vector_builder": {
                 "embedding": {
                   "inference_id": "",
@@ -4087,8 +4082,7 @@
                       ]
                     ]
                   },
-                  "max_concurrent_group_searches": "",
-                  "collapse": {}
+                  "max_concurrent_group_searches": ""
                 },
                 "docvalue_fields": {
                   "__any_of": [
@@ -4158,6 +4152,7 @@
                   "options": {},
                   "order": {
                     "__one_of": [
+                      "none",
                       "score"
                     ]
                   },
@@ -4231,6 +4226,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -4301,6 +4297,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -4635,6 +4632,7 @@
                     "options": {},
                     "order": {
                       "__one_of": [
+                        "none",
                         "score"
                       ]
                     },
@@ -4708,6 +4706,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -4778,6 +4777,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -4968,6 +4968,7 @@
                       "options": {},
                       "order": {
                         "__one_of": [
+                          "none",
                           "score"
                         ]
                       },
@@ -5041,6 +5042,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -5111,6 +5113,7 @@
                                 "options": {},
                                 "order": {
                                   "__one_of": [
+                                    "none",
                                     "score"
                                   ]
                                 },
@@ -5230,8 +5233,7 @@
                 ]
               ]
             },
-            "max_concurrent_group_searches": "",
-            "collapse": {}
+            "max_concurrent_group_searches": ""
           }
         },
         "knn": {
@@ -5250,7 +5252,7 @@
           "min_score": "",
           "_name": "",
           "field": "",
-          "query_vector": [],
+          "query_vector": "",
           "query_vector_builder": {
             "embedding": {
               "inference_id": "",
@@ -5554,7 +5556,7 @@
           "retriever": {},
           "size": "",
           "rank_window_size": "",
-          "query_vector": [],
+          "query_vector": "",
           "query_vector_builder": {
             "embedding": {
               "inference_id": "",
@@ -5923,7 +5925,8 @@
     ],
     "patterns": [
       "_search",
-      "{index}/_search"
+      "{index}/_search",
+      "{index}/{_slice}/_search"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search",
     "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-search",

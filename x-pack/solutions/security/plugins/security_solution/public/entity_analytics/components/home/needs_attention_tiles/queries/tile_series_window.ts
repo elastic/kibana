@@ -6,8 +6,7 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { TimeRange } from '../../entities_grid/common';
-import { TIME_RANGE_DAYS } from './tile_period';
+import { TIME_RANGE_DAYS, type TimeRange } from '../../queries/time_range';
 
 /**
  * Hours between two dots of the sparkline of each time range: 6 dots for every range. Each dot is

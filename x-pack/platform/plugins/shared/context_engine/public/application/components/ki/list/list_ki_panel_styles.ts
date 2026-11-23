@@ -54,6 +54,8 @@ export const useListKiPanelStyles = () => {
         minWidth: 0,
         [narrowMedia]: {
           position: 'static',
+          // One column: the open document comes first, the list below it.
+          order: -1,
         },
       }),
     }),

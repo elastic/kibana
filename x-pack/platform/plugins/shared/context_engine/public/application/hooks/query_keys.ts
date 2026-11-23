@@ -20,7 +20,8 @@ export const contextEngineQueryKeys = {
       type: string | undefined,
       query: string | undefined,
       status?: readonly KiStatus[],
-      sort?: KiListSort
+      sort?: KiListSort,
+      excludeTypes?: readonly string[]
     ) =>
       [
         'context_engine',
@@ -32,6 +33,34 @@ export const contextEngineQueryKeys = {
         query ?? '',
         status?.join(',') ?? '',
         sort ?? '',
+        // An array, not a joined string: type names may contain commas.
+        excludeTypes !== undefined ? [...excludeTypes].sort() : [],
+      ] as const,
+    // Under the `list_ki` prefix, so the KI edit / delete / restore invalidation refreshes it too.
+    listKiGroups: (
+      aiIndexId: string,
+      maxGroups: number,
+      previewSize: number,
+      query: string | undefined,
+      status: readonly KiStatus[],
+      sort: KiListSort,
+      types?: readonly string[],
+      excludeTypes?: readonly string[]
+    ) =>
+      [
+        'context_engine',
+        'ai_index',
+        aiIndexId,
+        'list_ki',
+        '_groups',
+        maxGroups,
+        previewSize,
+        query ?? '',
+        status.join(','),
+        sort,
+        // Arrays, not joined strings: type names may contain commas.
+        types !== undefined ? [...types] : [],
+        excludeTypes !== undefined ? [...excludeTypes].sort() : [],
       ] as const,
     viewKi: (
       aiIndexId: string,
@@ -51,8 +80,6 @@ export const contextEngineQueryKeys = {
   },
   dreamingTemplates: {
     list: () => ['context_engine', 'dreaming_templates', 'list'] as const,
-    all: () => ['context_engine', 'dreaming_templates', 'all'] as const,
-    detail: (id: string) => ['context_engine', 'dreaming_templates', id] as const,
   },
   connectors: {
     list: () => ['context_engine', 'connectors', 'list'] as const,

@@ -17,9 +17,14 @@ import {
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../rule_events_client';
 
-/** What an investigation concluded for an event. Its severity is the one an event takes. */
+/**
+ * What an investigation concluded for an event. Its severity is the one an event takes while the
+ * event is on the investigation's episode.
+ */
 interface InvestigationOutcome {
   severity: Severity;
+  /** The episode of the event the investigation governs. */
+  episodeId: string;
 }
 
 /**
@@ -125,8 +130,8 @@ export const isRecordedInvestigation = (
   Boolean(investigation.impact?.summary);
 
 /**
- * The events of an investigation's episodes. An episode mapping to several events governs none and
- * is returned in `ambiguousEpisodeIds`.
+ * The events of an investigation's episodes, each with the episode it is governed through. An
+ * episode mapping to several events governs none and is returned in `ambiguousEpisodeIds`.
  */
 export const eventIdsGovernedBy = ({
   investigation,
@@ -134,8 +139,12 @@ export const eventIdsGovernedBy = ({
 }: {
   investigation: InvestigationSummary;
   eventIdsByEpisode: ReadonlyMap<string, readonly string[]>;
-}): { eventIds: Set<string>; ambiguousEpisodeIds: string[] } => {
-  const eventIds = new Set<string>();
+}): {
+  eventIds: Set<string>;
+  episodeIdByEventId: Map<string, string>;
+  ambiguousEpisodeIds: string[];
+} => {
+  const episodeIdByEventId = new Map<string, string>();
   const ambiguousEpisodeIds: string[] = [];
   episodeIdsOf(investigation).forEach((episodeId) => {
     const mapped = eventIdsByEpisode.get(episodeId) ?? [];
@@ -143,14 +152,18 @@ export const eventIdsGovernedBy = ({
       ambiguousEpisodeIds.push(episodeId);
       return;
     }
-    mapped.forEach((eventId) => eventIds.add(eventId));
+    mapped.forEach((eventId) => {
+      if (!episodeIdByEventId.has(eventId)) episodeIdByEventId.set(eventId, episodeId);
+    });
   });
-  return { eventIds, ambiguousEpisodeIds };
+  return { eventIds: new Set(episodeIdByEventId.keys()), episodeIdByEventId, ambiguousEpisodeIds };
 };
 
 /**
  * Each event's outcome is that of its newest recorded investigation by `created_at` (`updated_at`
- * moves when an old one is closed), across all of its episodes.
+ * moves when an old one is closed), among the investigations of the episodes `eventIdsByEpisode`
+ * maps to it. Callers map only an event's current episode, so an earlier episode's investigation
+ * governs nothing.
  */
 export const resolveInvestigationOutcomes = ({
   investigations,
@@ -168,9 +181,10 @@ export const resolveInvestigationOutcomes = ({
     .forEach((investigation) => {
       const governed = eventIdsGovernedBy({ investigation, eventIdsByEpisode });
       governed.ambiguousEpisodeIds.forEach((episodeId) => ambiguousEpisodeIds.add(episodeId));
-      governed.eventIds.forEach((eventId) => {
-        if (!outcomes.has(eventId))
-          outcomes.set(eventId, { severity: investigation.metadata.severity });
+      governed.episodeIdByEventId.forEach((episodeId, eventId) => {
+        if (!outcomes.has(eventId)) {
+          outcomes.set(eventId, { severity: investigation.metadata.severity, episodeId });
+        }
       });
     });
 
@@ -178,9 +192,11 @@ export const resolveInvestigationOutcomes = ({
 };
 
 /**
- * The outcome of the newest recorded investigation of each given event's episodes. Investigations
- * are found by key (the episodes' alert subjects) and read by id, so the cost follows the number of
- * events asked for, never the number of investigations.
+ * The outcome of the newest recorded investigation of each given event's current episode (the one
+ * of its latest version): a reopened event is a new episode, and its earlier episodes'
+ * investigations do not govern it. Investigations are found by key (the episode's alert subject)
+ * and read by id, so the cost follows the number of events asked for, never the number of
+ * investigations.
  */
 export const loadInvestigationOutcomes = async ({
   request,
@@ -192,7 +208,10 @@ export const loadInvestigationOutcomes = async ({
 }: {
   request: KibanaRequest;
   agenticInvestigations: InvestigationsReader | undefined;
-  eventClient: Pick<RuleEventsClient, 'findEpisodeIdsByEventIds' | 'findEventIdsByEpisodeIds'>;
+  eventClient: Pick<
+    RuleEventsClient,
+    'findCurrentEpisodeIdsByEventIds' | 'findEventIdsByEpisodeIds'
+  >;
   eventIds: string[];
   logger: Logger;
   timeoutMs?: number;
@@ -204,11 +223,11 @@ export const loadInvestigationOutcomes = async ({
     logger,
     timeoutMs,
     load: async () => {
-      const episodeIdsByEvent = await eventClient.findEpisodeIdsByEventIds(eventIds);
-      const episodeIds = [...new Set([...episodeIdsByEvent.values()].flat())];
+      const currentEpisodeIds = await eventClient.findCurrentEpisodeIdsByEventIds(eventIds);
+      const episodeIds = [...new Set(currentEpisodeIds.values())];
       // The full episode-to-events map, as the hook reads it: an episode shared with an event
       // outside `eventIds` is ambiguous here too.
-      // Chunked so one long-lived event cannot push a read past the client's episode-pair cap.
+      // Chunked so a large page of events stays under the client's episode-pair cap.
       const eventIdsByEpisode = new Map<string, string[]>();
       (
         await Promise.all(

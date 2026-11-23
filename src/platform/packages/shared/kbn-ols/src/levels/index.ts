@@ -15,7 +15,7 @@ export {
   isGeneralAccessLevel,
   lowestAllowed,
   maxLevel,
-  type AclLevel,
-  type EntryLevel,
-  type GeneralAccessLevel,
+  type AclAccess,
+  type EntryAccess,
+  type GeneralAccess,
 } from './levels';
