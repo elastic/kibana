@@ -66,6 +66,7 @@ export const buildAd2SeedPlan = ({
   scenarioKey,
   baseTime = new Date(),
   runMarker = getAd2RunMarker(),
+  agentIdByHost,
 }: {
   profile?: Ad2SeedProfile;
   scenarioKey?: string;
@@ -76,6 +77,15 @@ export const buildAd2SeedPlan = ({
    * marker. A spec that owns a run passes its own.
    */
   runMarker?: string;
+  /**
+   * Opt-in `agent.id` overrides keyed by host name. In production alerts carry
+   * the enrolled endpoint's real agent id, while the seed plan mints a
+   * synthetic one no Defend agent ever enrolls under; an e2e suite that
+   * enrolls real hosts passes the enrolled ids here so downstream actions
+   * (e.g. isolate) resolve an enrolled agent. Unset keeps the synthetic ids,
+   * so the AD eval suites' fixtures are unchanged.
+   */
+  agentIdByHost?: Readonly<Record<string, string>>;
 } = {}): Ad2SeedPlan => {
   const scenarioKeys = scenarioKey ? [scenarioKey] : listAd2ScenarioKeys(profile);
   const alerts = [];
@@ -86,7 +96,7 @@ export const buildAd2SeedPlan = ({
     if (!scenario) {
       throw new Error(`Unknown AD2 scenario key "${key}" for profile "${profile}"`);
     }
-    const built = buildScenarioDocuments(scenario, baseTime, runMarker);
+    const built = buildScenarioDocuments(scenario, baseTime, runMarker, agentIdByHost);
     alerts.push(...built.alerts);
     rawEvents.push(...built.rawEvents);
   }

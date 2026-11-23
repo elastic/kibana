@@ -1763,6 +1763,7 @@
     "@fast-check/jest": "2.1.1",
     "@hey-api/openapi-ts": "0.90.10",
     "@jest/console": "29.7.0",
+    "@jest/globals": "29.7.0",
     "@jest/reporters": "29.7.0",
     "@jest/transform": "29.7.0",
     "@jest/types": "29.6.3",

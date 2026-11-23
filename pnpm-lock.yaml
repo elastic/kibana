@@ -5211,6 +5211,9 @@ importers:
       '@jest/console':
         specifier: 29.7.0
         version: 29.7.0
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0(supports-color@10.2.2)
       '@jest/reporters':
         specifier: 29.7.0
         version: 29.7.0(supports-color@10.2.2)

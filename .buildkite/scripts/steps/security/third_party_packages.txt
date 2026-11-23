@@ -82,3 +82,4 @@ monaco-marker-data-provider
 @opentelemetry/sdk-trace
 tabbable
 @opentelemetry/otlp-grpc-exporter-base
+@jest/globals

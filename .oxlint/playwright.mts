@@ -25,7 +25,13 @@ export const playwrightSettings: OxlintConfig['settings'] = {
 export const playwrightOverrides: OxlintOverride[] = [
   {
     files: PLAYWRIGHT_FILE_GLOBS,
-    excludeFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
+    // Jest unit tests, not Playwright specs: scout specs are `*.spec.ts` by the
+    // `scout_test_file_naming` rule, so any `*.test.ts` under a scout tree is a jest
+    // file (e.g. fixture unit tests) where jest globals are intentional.
+    excludeFiles: [
+      'src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts',
+      '**/test/scout{_*,}/**/*.test.ts',
+    ],
     rules: {
       // `plugin:playwright/recommended`
       'playwright/no-duplicate-slow': 'warn',
