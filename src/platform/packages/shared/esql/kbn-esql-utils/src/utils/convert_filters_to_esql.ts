@@ -176,19 +176,14 @@ const wrapWithNot = (expression: string | null, negate: boolean): string | null 
 };
 
 /**
- * A number as a double literal. A big integer written without a decimal point or an exponent is a long, or an
- * unsigned_long when it does not fit in a long, and an array needs all its values to have the same type.
+ * A number as a double literal, for the values of an array. A big integer written without a decimal point or an
+ * exponent is a long, or an unsigned_long when it does not fit in a long, and an array needs all its values to
+ * have the same type.
  */
 const formatDoubleLiteral = (value: number): string => {
   const text = String(value);
   return /[.e]/i.test(text) ? text : `${text}.0`;
 };
-
-/** The value of an exact comparison. A number that is too big to be an integer for sure is a double. */
-const formatExactValue = (value: string | number | boolean): string =>
-  typeof value === 'number' && !Number.isSafeInteger(value)
-    ? formatDoubleLiteral(value)
-    : formatESQLValue(value);
 
 /**
  * Checks that a column, that can have several values, has any of the values, like the phrases filters of DSL.
@@ -244,9 +239,7 @@ const translatePhraseFilter = (
   }
 
   const escapedField = escapeFieldName(field);
-  return mode === 'exact'
-    ? `${escapedField} == ${formatExactValue(value)}`
-    : `${escapedField} : ${formatESQLValue(value)}`;
+  return `${escapedField} ${mode === 'exact' ? '==' : ':'} ${formatESQLValue(value)}`;
 };
 
 const translatePhrasesFilter = (

@@ -476,21 +476,6 @@ describe('ES|QL filters', () => {
       expect(convertEsqlFiltersToESQLExpression([esqlFilter])).toBe('`size` == "big"');
     });
 
-    it('writes an integer that is too big to be exact as a double, and the others as they are', () => {
-      const getPhraseOf = (value: number): Filter => ({
-        ...esqlFilter,
-        meta: { ...esqlFilter.meta, params: { query: value } },
-        query: { match_phrase: { size: value } },
-      });
-
-      // an integer literal that does not fit in a long is an unsigned_long, that a double column does not compare with
-      expect(convertEsqlFiltersToESQLExpression([getPhraseOf(2 ** 63)])).toBe(
-        '`size` == 9223372036854776000.0'
-      );
-      expect(convertEsqlFiltersToESQLExpression([getPhraseOf(5)])).toBe('`size` == 5');
-      expect(convertEsqlFiltersToESQLExpression([getPhraseOf(2.5)])).toBe('`size` == 2.5');
-    });
-
     describe('several values', () => {
       it('checks them with MV_INTERSECTS, as an operator like IN evaluates to null on a multivalued column', () => {
         expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'])])).toBe(
