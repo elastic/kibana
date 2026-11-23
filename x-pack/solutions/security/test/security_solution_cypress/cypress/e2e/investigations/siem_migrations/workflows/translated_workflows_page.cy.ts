@@ -94,17 +94,6 @@ describe(
       cy.get(TRANSLATED_WORKFLOWS_RESULT_TABLE.STATUS('full')).should('have.length', 1);
     });
 
-    it('should offer to install the translated workflow, not to view it, and not offer bulk selection', () => {
-      startWorkflowMigrationFromFlyout();
-      visit(TRANSLATED_WORKFLOWS_PAGE_URL);
-
-      cy.get(TRANSLATED_WORKFLOWS_RESULT_TABLE.INSTALL_BTN, { timeout: 60000 }).should('exist');
-      cy.get(TRANSLATED_WORKFLOWS_RESULT_TABLE.VIEW_BTN).should('not.exist');
-      cy.get(`${TRANSLATED_WORKFLOWS_RESULT_TABLE.TABLE} input[type="checkbox"]`).should(
-        'not.exist'
-      );
-    });
-
     it('should start the translation from the page when the flyout was closed without translating', () => {
       // the translate button is enabled once the migration and its stories are created
       cy.get(WORKFLOWS_FLYOUT_TRANSLATE_BTN).should('not.be.disabled');

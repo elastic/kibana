@@ -79,8 +79,6 @@ export const TRANSLATED_WORKFLOWS_RESULT_TABLE = {
   ROWS: `${getDataTestSubjectSelectorStartWith('workflows-translation-table')} .euiTableRow`,
   STATUS: (status: string) => getDataTestSubjectSelector(`translationStatus-${status}`),
   WORKFLOW_NAME: getDataTestSubjectSelector('workflowName'),
-  INSTALL_BTN: getDataTestSubjectSelector('installWorkflowButton'),
-  VIEW_BTN: getDataTestSubjectSelector('viewWorkflowButton'),
 };
 
 export const WORKFLOW_MIGRATION_READY_PANEL = getDataTestSubjectSelector(
