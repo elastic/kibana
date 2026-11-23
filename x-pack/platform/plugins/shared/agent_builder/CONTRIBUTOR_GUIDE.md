@@ -442,6 +442,36 @@ in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lis
 
 (Kibana will fail to start otherwise, with an explicit error message explaining what to do)
 
+#### Tools exposed by attachments
+
+An attachment type can give the agent tools in two ways:
+
+- **Type tools:** `getTools`, on the type definition, lists the ids of tools from the tool registry that go
+  with the type (for example a tool searching alerts, for an alert attachment). They are available while at
+  least one attachment of the type is active.
+- **Bound tools:** `getBoundedTools`, on the object returned by `format`, defines tools tied to one attachment
+  (for example a tool fetching the details of the attached host). They are available while that attachment is
+  active, at its current version.
+
+Both are [dynamic tools](#tools-exposed-by-skills-and-attachments): their definitions are rendered after the
+attachment event that makes them available, and the agent calls them through `execute_dynamic_tool`.
+Adding an attachment therefore never changes the agent's native tool list.
+
+- The definitions of bound tools are rendered from the attachment version the event announces, so keep each
+  tool's description and schema a function of that version's data: anything else (time, live lookups) would
+  change an already-rendered block and invalidate the prompt cache.
+- The definitions of type tools are rendered once, after the first attachment event of the type, however many
+  attachments of the type follow.
+- A type tool the agent already has in its native tool list (selected in its configuration, for example
+  `execute_esql` for the default agent) stays a native tool: it is not described again and the agent keeps
+  calling it directly.
+- A tool added or changed during a run (for example by `attachments.add`) is callable from the next model call.
+  Deleting an attachment, or updating it to a version that binds fewer tools, makes the dropped tools
+  uncallable from the next model call. Type tools are dropped with the last active attachment of the type.
+- Bound tool ids are not scoped to the attachment: when two active attachments bind the same tool id, the
+  last one wins, and a bound tool wins over a type tool with the same id. Both cases log a warning naming
+  the tool id.
+
 #### `getAgentDescription` — describing inline rendering to the agent
 
 When your attachment type supports inline rendering, `getAgentDescription` should tell
@@ -1564,6 +1594,30 @@ agentBuilder.skills.register({
   getInlineTools: () => [myInlineToolDefinition],
 });
 ```
+
+### Tools exposed by skills and attachments
+
+Tools a skill exposes (`getRegistryTools`, `getInlineTools`) and tools an attachment exposes
+(`getTools`, `getBoundedTools`, see [Tools exposed by attachments](#tools-exposed-by-attachments)) are **dynamic tools**.
+They are never added to the model's native tool list, which stays fixed for the whole run so the
+prompt cache prefix stays valid. Instead:
+
+- Their definitions (`tool_id`, `description`, and the `parameters` JSON schema) are written into the
+  conversation: in the `dynamic_tools` field of the `load_skill` result (or an extra result appended when
+  the agent reads a skill's `SKILL.md`), and in a `<dynamic_tools>` block after the attachment event that
+  makes them available.
+- The agent calls them through the always-present `execute_dynamic_tool` tool, with `tool_id` and `params`.
+  The call is stored and shown in the UI as a call to the dynamic tool itself, and runs through the same
+  hooks, confirmation and telemetry as a native call.
+- After a compaction, the definitions of the dynamic tools still available are repeated after the summary.
+
+What this means for your tools:
+
+- Write descriptions and schemas as you would for a native tool: the model reads them as JSON in the
+  conversation instead of in its tool list.
+- A skill can expose at most 25 registry tools.
+- A tool loaded by a skill stays available in later rounds of the conversation as long as its definition
+  is still visible to the agent; otherwise the agent loads the skill again.
 
 ### Defining new base paths for your skills
 

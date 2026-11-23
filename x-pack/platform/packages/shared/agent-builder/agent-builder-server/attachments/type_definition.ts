@@ -94,6 +94,10 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * Should be used to expose generic tools related to the attachment type.
    *
    * E.g. the "esql" attachment type exposes the "execute_esql" tool that way.
+   *
+   * The tools are exposed as dynamic tools while at least one attachment of the type is active:
+   * their definitions are rendered once, after the first attachment event of the type, and the
+   * agent calls them through `execute_dynamic_tool`. They are never added to its native tool list.
    */
   getTools?: () => string[];
   /**

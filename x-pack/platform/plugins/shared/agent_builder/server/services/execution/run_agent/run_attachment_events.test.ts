@@ -22,6 +22,7 @@ import {
   RunAttachmentEvents,
   inheritedAttachmentEvents,
   runTriggerEventId,
+  type RunAttachmentEventsOptions,
 } from './run_attachment_events';
 import { getPendingTurn } from './utils/conversation_turn';
 import { pausedItems } from './utils/attachment_placement';
@@ -33,7 +34,7 @@ const getTypeDefinition = (type: string) =>
     isReadonly: false,
   } as unknown as AttachmentTypeDefinition);
 
-const setup = () => {
+const setup = (options: Partial<RunAttachmentEventsOptions> = {}) => {
   const attachmentStateManager = createAttachmentStateManager([], { getTypeDefinition });
   const runEvents = new RunAttachmentEvents({
     attachmentStateManager,
@@ -41,6 +42,7 @@ const setup = () => {
     triggerEventId: 'r1::user_message',
     inputActor: { type: EventActorType.user, id: 'u1' },
     agentId: 'agent-1',
+    ...options,
   });
   return { attachmentStateManager, runEvents };
 };
@@ -66,7 +68,7 @@ describe('RunAttachmentEvents', () => {
     await attachmentStateManager.forToolCall('c1').add({ id: 'a1', type: 'text', data: 'x' });
     await attachmentStateManager.forToolCall('c2').add({ id: 'a2', type: 'text', data: 'y' });
 
-    const drained = runEvents.drainToolCalls(['c1']);
+    const drained = await runEvents.drainToolCalls(['c1']);
 
     expect(drained.map((event) => event.data.attachment_id)).toEqual(['a1']);
     expect(drained[0]).toMatchObject({
@@ -81,7 +83,7 @@ describe('RunAttachmentEvents', () => {
     await attachmentStateManager.add({ id: 'a1', type: 'text', data: 'x' });
     runEvents.drainChatInput();
     await attachmentStateManager.forToolCall('c1').add({ id: 'a2', type: 'text', data: 'y' });
-    runEvents.drainToolCalls(['c1']);
+    await runEvents.drainToolCalls(['c1']);
     await attachmentStateManager.add({ id: 'a3', type: 'text', data: 'z' });
     runEvents.drainRemaining();
 
@@ -90,6 +92,54 @@ describe('RunAttachmentEvents', () => {
       ['a2', 'execution'],
       ['a3', 'execution'],
     ]);
+  });
+
+  describe('onToolCallEvents', () => {
+    it('is awaited with the events of the drained tool calls before drainToolCalls resolves', async () => {
+      let handled = false;
+      const onToolCallEvents = jest.fn(async () => {
+        await Promise.resolve();
+        handled = true;
+      });
+      const { attachmentStateManager, runEvents } = setup({ onToolCallEvents });
+      await attachmentStateManager.forToolCall('c1').add({ id: 'a1', type: 'text', data: 'x' });
+
+      const drained = await runEvents.drainToolCalls(['c1']);
+
+      expect(onToolCallEvents).toHaveBeenCalledTimes(1);
+      expect(onToolCallEvents).toHaveBeenCalledWith(drained);
+      expect(handled).toBe(true);
+    });
+
+    it('is not called for a batch that produced no events', async () => {
+      const onToolCallEvents = jest.fn(async () => {});
+      const { attachmentStateManager, runEvents } = setup({ onToolCallEvents });
+      await attachmentStateManager.forToolCall('c2').add({ id: 'a2', type: 'text', data: 'y' });
+
+      await runEvents.drainToolCalls(['c1']);
+
+      expect(onToolCallEvents).not.toHaveBeenCalled();
+    });
+
+    it('is not called for the incoming message or the rest of the run', async () => {
+      const onToolCallEvents = jest.fn(async () => {});
+      const { attachmentStateManager, runEvents } = setup({ onToolCallEvents });
+      await attachmentStateManager.add({ id: 'a1', type: 'text', data: 'x' });
+      runEvents.drainChatInput();
+      await attachmentStateManager.add({ id: 'a2', type: 'text', data: 'y' });
+      runEvents.drainRemaining();
+
+      expect(onToolCallEvents).not.toHaveBeenCalled();
+    });
+
+    it('lets a failing callback fail the drain', async () => {
+      const { attachmentStateManager, runEvents } = setup({
+        onToolCallEvents: jest.fn().mockRejectedValue(new Error('boom')),
+      });
+      await attachmentStateManager.forToolCall('c1').add({ id: 'a1', type: 'text', data: 'x' });
+
+      await expect(runEvents.drainToolCalls(['c1'])).rejects.toThrow('boom');
+    });
   });
 });
 

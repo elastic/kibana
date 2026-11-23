@@ -8,32 +8,32 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import {
+  mockDynamicToolResultCall,
+  mockDynamicToolResultCallOnAttachment,
   mockFinalAnswerRenderingAttachment,
-  mockToolResultCall,
-  mockToolResultCallOnAttachment,
-  toLlmToolName,
 } from '../../../common/ui/fixtures/llm_mocks';
 
-const MANAGE_RULE_LLM_TOOL_NAME = toLlmToolName(ALERTING_TOOL_IDS.manageRule);
-const ATTACH_RULE_LLM_TOOL_NAME = toLlmToolName(ALERTING_TOOL_IDS.attachRule);
+// The rule tools are the ones the rule authoring skill unlocks, so they are called as dynamic tools.
 
 /** Answers the next tool result with a `manage_rule` call applying `operations`. */
 export const mockManageRule = (proxy: LlmProxy, operations: Array<Record<string, unknown>>) =>
-  mockToolResultCall(proxy, 'agent:manage_rule', MANAGE_RULE_LLM_TOOL_NAME, { operations });
+  mockDynamicToolResultCall(proxy, 'agent:manage_rule', ALERTING_TOOL_IDS.manageRule, {
+    operations,
+  });
 
 /** Answers the next tool result with an `attach_rule` call for the saved rule `ruleId`. */
 export const mockAttachRule = (proxy: LlmProxy, ruleId: string) =>
-  mockToolResultCall(proxy, 'agent:attach_rule', ATTACH_RULE_LLM_TOOL_NAME, { ruleId });
+  mockDynamicToolResultCall(proxy, 'agent:attach_rule', ALERTING_TOOL_IDS.attachRule, { ruleId });
 
 /** Answers the `attach_rule` result with a `manage_rule` call editing the attached rule. */
 export const mockManageAttachedRule = (
   proxy: LlmProxy,
   operations: Array<Record<string, unknown>>
 ) =>
-  mockToolResultCallOnAttachment(
+  mockDynamicToolResultCallOnAttachment(
     proxy,
     'agent:manage_attached_rule',
-    MANAGE_RULE_LLM_TOOL_NAME,
+    ALERTING_TOOL_IDS.manageRule,
     'ruleAttachmentId',
     { operations }
   );

@@ -5,28 +5,31 @@
  * 2.0.
  */
 
-import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
+import type { DynamicTool } from '@kbn/agent-builder-server/runner/tool_manager';
 
 /**
  * Tools the model reaches through the `execute_dynamic_tool` meta-tool rather than through the
  * native tool list. Their definitions live in the transcript as text, so adding or removing one
  * leaves the bound tool list, and with it the prompt cache prefix, untouched.
- *
- * Not to be confused with the `dynamic` option of `ToolManager.addTools`, which binds a tool
- * natively but makes it subject to LRU eviction. That option is retired once every dynamic
- * tool goes through this registry.
  */
 export class DynamicToolRegistry {
-  private readonly tools = new Map<string, ExecutableToolWithOrigin>();
+  private readonly tools = new Map<string, DynamicTool>();
 
   /** Registers tools by id; registering an id again replaces the previous entry. */
-  public register(tools: ExecutableToolWithOrigin[]): void {
+  public register(tools: DynamicTool[]): void {
     for (const tool of tools) {
       this.tools.set(tool.id, tool);
     }
   }
 
-  public get(toolId: string): ExecutableToolWithOrigin | undefined {
+  /** Removes tools by id; an unknown id is ignored. */
+  public unregister(toolIds: string[]): void {
+    for (const toolId of toolIds) {
+      this.tools.delete(toolId);
+    }
+  }
+
+  public get(toolId: string): DynamicTool | undefined {
     return this.tools.get(toolId);
   }
 
@@ -34,7 +37,7 @@ export class DynamicToolRegistry {
     return this.tools.has(toolId);
   }
 
-  public list(): ExecutableToolWithOrigin[] {
+  public list(): DynamicTool[] {
     return [...this.tools.values()];
   }
 

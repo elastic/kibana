@@ -116,6 +116,13 @@ const getRenderTags = (messages: unknown[]): string[] => {
 };
 
 /**
+ * Whether a message carries the definition of the dynamic tool `toolId`, as rendered for the
+ * attachment that binds it. The definition is JSON inside a message, so its quotes arrive escaped.
+ */
+const definesDynamicTool = (messages: unknown[], toolId: string): boolean =>
+  new RegExp(`\\\\*"tool_id\\\\*":\\\\*"${toolId}\\\\*"`).test(JSON.stringify(messages));
+
+/**
  * Mocks one brief round: title, the agent calling the brief tool, the forced composition call
  * when `draft` is given, and the final answer, which pastes the render tags as it is told to.
  * The proxy answers with the first match.
@@ -138,11 +145,16 @@ export const mockBriefRound = (llmProxy: LlmProxy, draft?: BriefDraft): void => 
       response: createToolCallMessage(SUBMIT_BRIEF_TOOL_NAME, draft),
     });
   }
+  // The brief tool is bound to the scope attachment, so it is a dynamic tool: its definition
+  // arrives in the messages, not in the tool list, and it is called through execute_dynamic_tool.
   void llmProxy
     .intercept({
       name: 'agent: call the brief tool',
-      when: ({ tools }) => Boolean(tools?.some(({ function: fn }) => fn.name === BRIEF_TOOL_ID)),
-      responseMock: createToolCallMessage(BRIEF_TOOL_ID, {}),
+      when: ({ messages }) => definesDynamicTool(messages, BRIEF_TOOL_ID),
+      responseMock: createToolCallMessage('execute_dynamic_tool', {
+        tool_id: BRIEF_TOOL_ID,
+        params: {},
+      }),
     })
     .completeAfterIntercept();
   void llmProxy

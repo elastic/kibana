@@ -43,15 +43,23 @@ import {
   type PendingTurn,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
+import { createExecuteDynamicTool } from './tools/execute_dynamic_tool';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildResumeInitialization } from './utils/resume_initialization';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { legacyEligibleRoundIds } from './utils/compaction_coverage';
-import { historyView, translateLegacySummary } from './utils/context_coverage';
+import {
+  historyView,
+  resolveVisibility,
+  translateLegacySummary,
+  visibleAttachmentEvents,
+} from './utils/context_coverage';
 import type { PreviousRoundInfo } from './utils/context_management';
 import { createSummarizationTransformer } from './utils/tool_summarization';
 import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attachment_placement';
+import { AttachmentDynamicTools } from './utils/attachment_dynamic_tools';
+import { describedDynamicToolIds } from './utils/described_dynamic_tools';
 import { sourceEvents } from '../../conversation/client/source_events';
 import {
   runTimelineExecutionId,
@@ -246,6 +254,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   const pendingRound = pendingTurn?.compatRound;
+  // The tools an attachment makes available are announced by its events.
+  const attachmentFormatContext = { request, spaceId: context.spaceId };
+  const attachmentDynamicTools = new AttachmentDynamicTools({
+    attachmentStateManager: context.attachmentStateManager,
+    attachmentsService: attachments,
+    formatContext: attachmentFormatContext,
+    toolProvider,
+    isNativeTool: (toolId) => toolManager.hasExecutableTool(toolId),
+    logger,
+  });
   const runAttachmentEvents = new RunAttachmentEvents({
     attachmentStateManager: context.attachmentStateManager,
     roundId: pendingTurn?.id ?? roundId,
@@ -260,6 +278,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           }
     ),
     agentId: agentIdForEvents,
+    // An attachment added or changed by a tool is announced by its event: the tools bound to it
+    // are callable from the next model call, which renders their definitions. The tools of a
+    // deleted or replaced version stop being callable.
+    onToolCallEvents: async (attachmentEvents) => {
+      await attachmentDynamicTools.prepare(attachmentEvents);
+      await attachmentDynamicTools.sync(toolManager);
+    },
   });
   // Everything recorded so far came from the incoming message's attachments.
   const chatInputEvents = runAttachmentEvents.drainChatInput();
@@ -289,14 +314,40 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // The stored summary, with a cursor when it predates cycle-based compaction. What it covers is
   // hidden at render time; the graph replaces it when it compacts.
   const storedSummary = conversation?.state?.compaction_summary;
+  const { entries: historyEntries } = historyView(processedConversation);
   const compactionSummary =
     conversation && storedSummary
       ? translateLegacySummary({
           summary: storedSummary,
-          entries: historyView(processedConversation).entries,
+          entries: historyEntries,
           legacyEligibleIds: legacyEligibleRoundIds(sourceEvents(conversation)),
         })
       : undefined;
+
+  // Resolve the definitions of the attachment events that are about to be rendered: the history's
+  // but those the summary hides, then the incoming message's.
+  const renderedAttachmentEvents = [
+    ...visibleAttachmentEvents({
+      events: processedConversation.timeline,
+      entries: historyEntries,
+      visibility: resolveVisibility({
+        entries: historyEntries,
+        roundId: pendingTurn?.id ?? roundId,
+        steps: pendingTurn?.steps ?? [],
+        cursor: compactionSummary?.summarized_up_to,
+      }),
+    }),
+    ...chatInputEvents,
+  ];
+  await attachmentDynamicTools.prepare(renderedAttachmentEvents);
+  processedConversation.boundToolDefinitions = (event) => attachmentDynamicTools.get(event);
+  // The tools of the active attachments no rendered event describes get a notice ahead of the
+  // history: a conversation stored before attachment events existed carries its attachments on
+  // its messages, and a summary stored before bound tools were dynamic hides their events without
+  // carrying their definitions. The events of the run reach `prepare`, so resolving at render
+  // time reflects them.
+  processedConversation.unannouncedBoundToolDefinitions = () =>
+    attachmentDynamicTools.unannouncedDefinitions(renderedAttachmentEvents);
 
   // Started before the tool setup so a 'first' hook overlaps it, as the skill selection below does.
   const cycleHooks = new CycleHookRuntime({
@@ -319,9 +370,19 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Closed on every exit so a late background append is refused rather than queued for nothing.
   try {
-    const { staticTools, dynamicTools } = await selectTools({
+    // Dynamic tools of earlier rounds are restored only when the model can see their definition.
+    const describedToolIds = describedDynamicToolIds({
       conversation: processedConversation,
-      previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
+      compactionSummary,
+      roundId: pendingTurn?.id ?? roundId,
+      resumedSteps: pendingTurn?.steps,
+    });
+    const previousDynamicToolIds = (conversation?.state?.dynamic_tool_ids ?? []).filter((id) =>
+      describedToolIds.has(id)
+    );
+    const { staticTools, dynamicTools: dynamicSkillsTools } = await selectTools({
+      conversation: processedConversation,
+      previousDynamicToolIds,
       filteredSkills,
       skills,
       toolProvider,
@@ -335,7 +396,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       runner: context.runner,
     });
 
-    // First add static tools
+    // `execute_dynamic_tool` first: always bound, so the native tool list stays the same however
+    // many dynamic tools appear, and ahead of the configured tools, so one whose id maps to its
+    // name cannot take its binding.
+    await toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: [createExecuteDynamicTool({ toolManager })],
+      logger,
+    });
+    // Then the static tools
     await Promise.all([
       toolManager.addTools({
         type: ToolManagerToolType.executable,
@@ -383,24 +452,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       capabilities: resolvedConfiguration.capabilities,
     });
 
-    // Then add the dynamic tools
-    if (experimentalFeatures.dynamicTools) {
-      // tools loaded in previous rounds in the registry behind
-      // `execute_dynamic_tool` when the feature is on
-      await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools: dynamicTools });
-    } else {
-      // LRU bound tools with feature off
-      await toolManager.addTools(
-        {
-          type: ToolManagerToolType.executable,
-          tools: dynamicTools,
-          logger,
-        },
-        {
-          dynamic: true,
-        }
-      );
-    }
+    // Then the dynamic tools, reachable only through `execute_dynamic_tool`: the restored ones,
+    // which are the tools of the skills loaded in earlier rounds, then the ones of the active
+    // attachments (last wins on an id clash)
+    await toolManager.addTools({
+      type: ToolManagerToolType.dynamic,
+      source: 'skills',
+      tools: dynamicSkillsTools,
+      logger,
+    });
+    await attachmentDynamicTools.sync(toolManager);
 
     const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
@@ -663,9 +724,15 @@ const getConversationState = ({
   subagents?: Record<string, SubagentEntry>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
+  // The attachments' tools are left out: each run registers them from the attachments active
+  // then, while a restored tool would stay registered once its attachment is gone.
+  const dynamicToolIds = toolManager
+    .listDynamicTools()
+    .filter(({ source }) => source !== 'attachments')
+    .map(({ id }) => id);
   return {
     prompt: promptManager.dump(),
-    dynamic_tool_ids: toolManager.getDynamicToolIds(),
+    dynamic_tool_ids: dynamicToolIds,
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
     ...(subagents && Object.keys(subagents).length > 0 ? { subagents } : {}),

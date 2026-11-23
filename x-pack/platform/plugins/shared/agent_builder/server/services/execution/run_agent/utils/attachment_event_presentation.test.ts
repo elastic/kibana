@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { DynamicToolDefinition } from '@kbn/agent-builder-common';
 import { attachmentEventFixture } from '../../../../test_utils/timeline';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 import {
   createAttachmentNoticeRenderer,
   formatAttachmentEvent,
+  formatAttachmentTools,
 } from './attachment_event_presentation';
 import { formatConversationEvent } from './conversation_event_presentation';
 
@@ -139,5 +141,90 @@ describe('formatConversationEvent', () => {
     });
     expect(rendered).toBe(formatAttachmentEvent(event));
     expect(rendered).not.toContain('injected');
+  });
+});
+
+describe('attachment events with tool definitions', () => {
+  const definition: DynamicToolDefinition = {
+    tool_id: 'bound.tool',
+    description: 'Fetch the host',
+    parameters: { type: 'object', properties: {} },
+  };
+  const other: DynamicToolDefinition = { ...definition, tool_id: 'bound.other' };
+  const event = attachmentEventFixture({ id: 'e', description: 'Web traffic' });
+  const describeType = (type: string) => (type === 'text' ? 'Plain text' : undefined);
+
+  describe('formatAttachmentTools', () => {
+    it('renders one definition on a line of JSON', () => {
+      expect(formatAttachmentTools([definition])).toBe(
+        `<dynamic_tools>${JSON.stringify(definition)}</dynamic_tools>`
+      );
+    });
+
+    it('renders several definitions one per line', () => {
+      expect(formatAttachmentTools([definition, other])).toBe(
+        [
+          '<dynamic_tools>',
+          `  ${JSON.stringify(definition)}`,
+          `  ${JSON.stringify(other)}`,
+          '</dynamic_tools>',
+        ].join('\n')
+      );
+    });
+
+    it('leaves the JSON unescaped', () => {
+      const quoted: DynamicToolDefinition = { ...definition, description: 'Fetch "the" <host>' };
+
+      expect(formatAttachmentTools([quoted])).toContain('"description":"Fetch \\"the\\" <host>"');
+    });
+  });
+
+  describe('notice renderer', () => {
+    const boundToolDefinitions = (e: { id: string }) => (e.id === 'e' ? [definition] : undefined);
+
+    it('renders the definitions after the event that announces them, before its type instructions', () => {
+      const notices = createAttachmentNoticeRenderer({ describeType, boundToolDefinitions });
+
+      expect(notices.render([event])).toBe(
+        `${formatAttachmentEvent(event)}\n${formatAttachmentTools([
+          definition,
+        ])}\n\n${attachmentTypeInstructions([{ type: 'text', description: 'Plain text' }])}`
+      );
+    });
+
+    it('renders each event followed by its own definitions', () => {
+      const notices = createAttachmentNoticeRenderer({
+        describeType,
+        withTypeInstructions: false,
+        boundToolDefinitions: () => [definition],
+      });
+      const second = attachmentEventFixture({ id: 'e2', attachmentId: 'att-2' });
+
+      expect(notices.render([event, second])).toBe(
+        [
+          formatAttachmentEvent(event),
+          formatAttachmentTools([definition]),
+          formatAttachmentEvent(second),
+          formatAttachmentTools([definition]),
+        ].join('\n')
+      );
+    });
+
+    it('renders an event the lookup has no definitions for as before', () => {
+      const notices = createAttachmentNoticeRenderer({
+        describeType,
+        withTypeInstructions: false,
+        boundToolDefinitions,
+      });
+      const without = attachmentEventFixture({ id: 'other', attachmentId: 'att-2' });
+
+      expect(notices.render([without])).toBe(formatAttachmentEvent(without));
+    });
+
+    it('renders no definitions without a lookup', () => {
+      const notices = createAttachmentNoticeRenderer({ describeType, withTypeInstructions: false });
+
+      expect(notices.render([event])).toBe(formatAttachmentEvent(event));
+    });
   });
 });

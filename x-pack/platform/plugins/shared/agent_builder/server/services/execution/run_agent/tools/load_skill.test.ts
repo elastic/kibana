@@ -113,37 +113,6 @@ describe('load_skill tool', () => {
     );
   });
 
-  it('registers inline + registry tools into the tool manager and returns their ids', async () => {
-    const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
-    const convertedInline = { id: 'inline-1' } as any;
-    const registryTool = { id: 'registry-1' } as any;
-
-    const skill = createMockSkill({
-      getInlineTools: jest.fn().mockReturnValue([inlineTool]),
-      getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
-    });
-
-    ctx.skills.list.mockResolvedValue([skill]);
-    ctx.skills.convertSkillTool.mockReturnValue(convertedInline);
-    ctx.toolProvider.list.mockResolvedValue([registryTool]);
-
-    const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { skill: 'my-skill' }, ctx);
-
-    expect(ctx.toolManager.addTools).toHaveBeenCalledWith(
-      {
-        type: ToolManagerToolType.executable,
-        tools: [
-          { ...convertedInline, origin: ToolOrigin.inline },
-          { ...registryTool, origin: ToolOrigin.registry },
-        ],
-        logger: ctx.logger,
-      },
-      { dynamic: true }
-    );
-    expect((result.results[0] as any).data.loaded_tools).toEqual(['inline-1', 'registry-1']);
-  });
-
   it('includes referenced files in the response', async () => {
     const referencedContent = {
       name: 'patterns',
@@ -221,7 +190,7 @@ describe('load_skill tool', () => {
     expect(isExcludedFromFilestore(tool.id)).toBe(true);
   });
 
-  describe('with dynamic tools enabled', () => {
+  describe('dynamic tools', () => {
     const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
     const convertedInline = {
       id: 'inline-1',
@@ -236,6 +205,7 @@ describe('load_skill tool', () => {
 
     const dynamicToolsInput = {
       type: ToolManagerToolType.dynamic,
+      source: 'skills',
       tools: [
         { ...convertedInline, origin: ToolOrigin.inline },
         { ...registryTool, origin: ToolOrigin.registry },
@@ -243,7 +213,6 @@ describe('load_skill tool', () => {
     };
 
     beforeEach(() => {
-      ctx.experimentalFeatures.dynamicTools = true;
       const skill = createMockSkill({
         getInlineTools: jest.fn().mockReturnValue([inlineTool]),
         getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
@@ -258,7 +227,10 @@ describe('load_skill tool', () => {
       const result = await callHandler(tool, { skill: 'my-skill' }, ctx);
 
       expect(ctx.toolManager.addTools).toHaveBeenCalledTimes(1);
-      expect(ctx.toolManager.addTools).toHaveBeenCalledWith(dynamicToolsInput);
+      expect(ctx.toolManager.addTools).toHaveBeenCalledWith({
+        ...dynamicToolsInput,
+        logger: ctx.logger,
+      });
       expect((result.results[0] as any).data).toMatchObject({
         loaded_tools: ['inline-1', 'registry-1'],
         dynamic_tools: [
@@ -287,9 +259,8 @@ describe('load_skill tool', () => {
       expect(data).not.toHaveProperty('dynamic_tools');
     });
 
-    it('describes dynamic_tools only when the feature is on', () => {
-      expect(createLoadSkillTool().description).not.toContain('dynamic_tools');
-      expect(createLoadSkillTool({ dynamicToolsEnabled: true }).description).toContain(
+    it('describes dynamic_tools', () => {
+      expect(createLoadSkillTool().description).toContain(
         "'dynamic_tools' carries their definitions"
       );
     });

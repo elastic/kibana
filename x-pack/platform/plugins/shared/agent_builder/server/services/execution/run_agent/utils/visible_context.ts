@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { BaseMessage } from '@langchain/core/messages';
-import { isDeliveredMessageStep, isPreExecutionWorkflowStep } from '@kbn/agent-builder-common';
+import {
+  isDeliveredMessageStep,
+  isPreExecutionWorkflowStep,
+  type DynamicToolDefinition,
+} from '@kbn/agent-builder-common';
 import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { HandoverParams, PromptImageResolver } from '../prompts/types';
@@ -116,10 +120,10 @@ export const renderVisibleContext = async (
   deps: VisibleContextDeps
 ): Promise<BaseMessage[]> => {
   const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
-  const notices = noticeRendererFor(conversation);
   // the answer agent has no tools, so it should not get dynamic tool definitions
+  const notices = noticeRendererFor(conversation, { withToolDefinitions: phase === 'research' });
   const dynamicToolDefinitions =
-    phase === 'research' ? run.compactionSummary?.dynamic_tools : undefined;
+    phase === 'research' ? await researchDynamicToolDefinitions(conversation, run) : undefined;
   const history = await prepareMessages({
     conversation,
     roundResultTransformer: view.historyTransformer,
@@ -139,6 +143,23 @@ export const renderVisibleContext = async (
     attachments: { notices, resumeAnchors: conversation.resumeAnchors ?? new Map() },
   });
   return [...history, ...pinnedCurrentRunMessages(run, view.visibility), ...current];
+};
+
+/**
+ * The definitions the notice ahead of the history carries: the summary's snapshot, then the bound
+ * tools no event announces that the snapshot does not already carry (a summary stored before bound
+ * tools were dynamic lacks them). Resolved now, as the run's tools may have changed the attachments.
+ */
+const researchDynamicToolDefinitions = async (
+  conversation: ProcessedConversation,
+  run: CurrentRun
+): Promise<DynamicToolDefinition[]> => {
+  const snapshot = run.compactionSummary?.dynamic_tools ?? [];
+  const carried = new Set(snapshot.map((definition) => definition.tool_id));
+  const unannounced = ((await conversation.unannouncedBoundToolDefinitions?.()) ?? []).filter(
+    (definition) => !carried.has(definition.tool_id)
+  );
+  return [...snapshot, ...unannounced];
 };
 
 /**
@@ -176,7 +197,7 @@ export const renderUnit = async (
     return [standaloneUserMessageToLangchain(unit.entry.userMessage, notices)];
   }
   if (unit.kind === 'standalone_event') {
-    return [standaloneEventToLangchain(unit.entry.event)];
+    return [standaloneEventToLangchain(unit.entry.event, notices)];
   }
   if (unit.kind === 'current_cycle') {
     return renderCurrentRun({
