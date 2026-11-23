@@ -145,9 +145,9 @@ const breakagesReason = (breakages: readonly Breakage[]): string => {
 
 /**
  * Checks the history of a flaky test, its builds in every setup where it failed, for what the
- * build counts miss. A breakage, failed builds in a row too many to be chance, has one cause
- * rather than being flakiness: a test in one up to its latest build is broken right now, and one
- * that clears the thresholds only with its past breakages is not flaky. A test that stopped
+ * build counts miss. A breakage, builds in a row failing every attempt too many to be chance, has
+ * one cause rather than being flakiness: a test in one up to its latest build is broken right now,
+ * and one that clears the thresholds only with its past breakages is not flaky. A test that stopped
  * failing on every branch it qualifies on, for long enough to tell, is fixed. All three are
  * dropped; any other test with breakages is kept, counted without them.
  */
@@ -435,8 +435,8 @@ const buildReport = async (
     }
     const unchanged = flakyRows.length - leftOut.size - keptWithBreakages.size;
     log.info(
-      `Checked ${flakyRows.length} flaky tests for breakages (failed builds in a row, too many ` +
-        `to be chance) and fixes in ${elapsed(startedAt)}: ` +
+      `Checked ${flakyRows.length} flaky tests for breakages (builds in a row failing every ` +
+        `attempt, too many to be chance) and fixes in ${elapsed(startedAt)}: ` +
         `dropped ${leftOut.size} from the report (${dropped.broken} broken right now, ` +
         `${dropped.breakages} flaky only because of their breakages, ` +
         `${dropped.fixed} fixed: no failures in enough builds since their last one); ` +

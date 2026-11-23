@@ -19,6 +19,7 @@ import {
   type DetectionSignal,
 } from '../../../common/detection_signal';
 import { DetectionEngineSystemClient } from '../engine/es_client_tokens';
+import { getErrorMessage } from '../errors/get_error_message';
 import { getSeriesKey, type SeriesId } from '../strategies/series_key';
 import type { DetectionSignalReading } from '../strategies/types';
 import type { DetectionSignalStore, WriteSignalsResult } from './signal_store';
@@ -29,10 +30,6 @@ const BUCKET_START_FIELD = 'signal.bucket_start';
 const MAX_HISTORY_READINGS = 10_000;
 /** Signals written at the same time; Alerting v2 takes one signal per call. */
 const WRITE_CONCURRENCY = 10;
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 /** Matches the signals of the given series: the fingerprint, and the source or no source at all. */
 function getSeriesFilter(series: SeriesId[]): QueryDslQueryContainer {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ListResponse } from '@kbn/entity-inventory-plugin/common';
@@ -31,19 +31,24 @@ const getHostList = (): ListResponse => {
 
 const renderTable = (listResult: Partial<EntityListResult>) => {
   const refresh = jest.fn();
-  render(
+  const buildTable = (nextListResult: Partial<EntityListResult>) => (
     <I18nProvider>
       <KibanaContextProvider services={createAppServicesMock()}>
         <EntityTablePreferencesProvider>
           <EntityTable
             entityType={HOST_TYPE_FIXTURE}
-            listResult={{ data: INITIAL_LIST_RESPONSE, loading: false, refresh, ...listResult }}
+            listResult={{ data: INITIAL_LIST_RESPONSE, loading: false, refresh, ...nextListResult }}
           />
         </EntityTablePreferencesProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
-  return { refresh };
+  const { rerender } = render(buildTable(listResult));
+  return {
+    refresh,
+    rerenderWith: (nextListResult: Partial<EntityListResult>) =>
+      rerender(buildTable(nextListResult)),
+  };
 };
 
 describe('EntityTable', () => {
@@ -88,5 +93,28 @@ describe('EntityTable', () => {
 
     expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTableReloading')).not.toBeInTheDocument();
+  });
+
+  it('keeps the column choices through a failed load that unmounts the grid', async () => {
+    const { rerenderWith } = renderTable({ data: getHostList() });
+    fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-cloud.account.id'));
+    const hideColumn = within(screen.getByTestId('dataGridHeaderCellActionGroup-cloud.account.id'))
+      .getAllByRole('button')
+      .find((button) => button.textContent === 'Hide column');
+    if (!hideColumn) {
+      throw new Error('No hide action');
+    }
+    fireEvent.click(hideColumn);
+    await waitFor(() =>
+      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
+    );
+
+    rerenderWith({ error: new Error('boom') });
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+    rerenderWith({ data: getHostList() });
+
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridHeaderCell-host.name')).toBeInTheDocument();
+    expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
   });
 });

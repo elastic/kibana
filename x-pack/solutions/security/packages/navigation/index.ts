@@ -10,6 +10,7 @@ export type { GetAppUrl, NavigateTo } from './src/navigation';
 export { NavigationProvider } from './src/context';
 export { AlertZeroIcon } from './src/alertzero_icon';
 export {
+  ALERTZERO_APP_ID,
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   LinkCategoryType,
   SECURITY_UI_APP_ID,
