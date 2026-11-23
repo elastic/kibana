@@ -79,6 +79,15 @@ describe('resultToOption', () => {
     );
   });
 
+  it('does not use icon for `search` type', () => {
+    const input = createSearchResult({ type: 'search', icon: 'productDiscover' });
+    expect(resultToOption(input, [])).toEqual(
+      expect.objectContaining({
+        icon: { type: 'empty' },
+      })
+    );
+  });
+
   it('uses the category label as meta for `application` type', () => {
     const input = createSearchResult({ type: 'application', meta: { categoryLabel: 'category' } });
     expect(resultToOption(input, [])).toEqual(

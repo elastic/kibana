@@ -46,7 +46,6 @@ export const resultToOption = (
     type === 'integration' ||
     type.toLowerCase() === 'enterprise search' ||
     type.toLowerCase() === 'elasticsearch' ||
-    type.toLowerCase() === 'search' ||
     type.toLowerCase() === 'index' ||
     type.toLowerCase() === 'connector';
   const option: EuiSelectableTemplateSitewideOption = {
