@@ -19,6 +19,7 @@ import {
   EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAGS,
   EventLoopWatchdogService,
 } from './event_loop_watchdog_service';
+import type { ReadExecutionContext } from './execution_context_reader';
 import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
 import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
 
@@ -32,6 +33,7 @@ const available: ServiceStatus = { level: ServiceStatusLevels.available, summary
 const degraded: ServiceStatus = { level: ServiceStatusLevels.degraded, summary: '' };
 const BG_PROFILING_FLAG = 'core.eventLoopWatchdog.profiling.backgroundTasks.enabled';
 const UI_PROFILING_FLAG = 'core.eventLoopWatchdog.profiling.ui.enabled';
+const readExecutionContext: ReadExecutionContext = () => ({ type: 'task manager' });
 
 describe('EventLoopWatchdogService', () => {
   let overall$: BehaviorSubject<ServiceStatus>;
@@ -57,6 +59,7 @@ describe('EventLoopWatchdogService', () => {
       status: { overall$ },
       nodeRoles,
       serviceVersion: '9.3.0',
+      readExecutionContext,
     });
     return service;
   };
@@ -102,6 +105,8 @@ describe('EventLoopWatchdogService', () => {
           cooldownMs: { starting: 60_000, running: 60_000 },
           diagnosticDir: '/diag',
         },
+        readExecutionContext,
+        onBlock: expect.any(Function),
       });
     });
 
@@ -397,6 +402,25 @@ describe('EventLoopWatchdogService', () => {
       profilingFlags[UI_PROFILING_FLAG].next(true);
       expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
       expect(watchdog().stop).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('#getBlocks$()', () => {
+    const block = { startedAt: 1_700_000_000_000, blockedMs: 5_200, phase: 'running' as const };
+
+    it('emits the blocks the watchdog reports', async () => {
+      const service = await setup();
+      const blocks = jest.fn();
+      service.getBlocks$().subscribe(blocks);
+      params().onBlock?.(block);
+      expect(blocks.mock.calls).toEqual([[block]]);
+    });
+
+    it('can be subscribed to before setup', async () => {
+      const service = new EventLoopWatchdogService(mockCoreContext.create({ logger }));
+      const blocks = jest.fn();
+      service.getBlocks$().subscribe(blocks);
+      expect(blocks).not.toHaveBeenCalled();
     });
   });
 

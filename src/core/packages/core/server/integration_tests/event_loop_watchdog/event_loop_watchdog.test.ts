@@ -10,6 +10,7 @@
 import { spawn } from 'node:child_process';
 import Path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { EventLoopBlock, EventLoopBlockContexts } from '@kbn/core-metrics-server';
 import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
 const HARNESS = Path.resolve(__dirname, 'fixtures', 'watchdog_harness.ts');
@@ -31,6 +32,7 @@ interface WorkerLogLine {
       phase?: string;
       blockedMs?: number;
       ongoing?: boolean;
+      contexts?: EventLoopBlockContexts;
       stats?: {
         starting: PhaseStats;
         running: PhaseStats;
@@ -41,6 +43,7 @@ interface WorkerLogLine {
           captureFailed: number;
           skippedCooldown: number;
         };
+        contextSampling?: { sampledBlocks: number; samples: number; failed: number };
       };
       profile?: {
         blockedMs: number;
@@ -184,6 +187,11 @@ const expectProfilerStopped = ({ mainLogLines }: HarnessResult) => {
 };
 const restarts = ({ mainLogLines }: HarnessResult) =>
   mainLogLines.filter(({ message }) => message.includes('exited unexpectedly'));
+/** The blocks the harness's main thread received from the worker. */
+const receivedBlocks = ({ mainLogLines }: HarnessResult): EventLoopBlock[] =>
+  mainLogLines.flatMap(({ message }) =>
+    message.startsWith('block {') ? [JSON.parse(message.slice('block '.length))] : []
+  );
 
 describe('event loop watchdog in a child process', () => {
   let blocks: HarnessResult;
@@ -447,6 +455,117 @@ describe('event loop watchdog in a child process', () => {
       );
       expect(pastStartAfter).toBe(2);
       expect(restarts(result)).toEqual([]);
+    }, 120_000);
+  });
+
+  describe('execution context sampling', () => {
+    const task = { type: 'task manager', name: 'run harness', id: 'task-1' };
+    let sampled: HarnessResult;
+    let ended: WorkerLogLine[];
+
+    beforeAll(async () => {
+      sampled = await runHarness('sample_contexts');
+      ended = warnings(sampled).filter((line) => blockOf(line)?.ongoing === false);
+    }, 120_000);
+
+    it('samples without restarting the worker or failing', () => {
+      expectCleanExit(sampled);
+      expect(restarts(sampled)).toEqual([]);
+      expect(ended).toHaveLength(3);
+      const total = statsOf(sampled).reduce(
+        (totals, { contextSampling }) => ({
+          sampledBlocks: totals.sampledBlocks + (contextSampling?.sampledBlocks ?? 0),
+          failed: totals.failed + (contextSampling?.failed ?? 0),
+        }),
+        { sampledBlocks: 0, failed: 0 }
+      );
+      expect(total).toEqual({ sampledBlocks: 3, failed: 0 });
+    });
+
+    it('says which task a block ran in, while the main thread is still blocked and once it ends', () => {
+      const [ongoing] = warnings(sampled).filter((line) => blockOf(line)?.ongoing);
+      expect(ongoing.message).toMatch(
+        /^Event loop blocked for ~\d+ms so far; \d+ of \d+ samples in task manager:run harness:task-1$/
+      );
+      expect(blockOf(ongoing)?.contexts?.top).toEqual([
+        { context: task, samples: expect.any(Number) },
+      ]);
+
+      const [inTask] = ended;
+      expect(inTask.message).toMatch(
+        /^Event loop blocked for ~\d+ms; \d+ of \d+ samples in task manager:run harness:task-1$/
+      );
+      const contexts = blockOf(inTask)?.contexts;
+      // A 3 s block is sampled at 1 s and then every 500 ms.
+      expect(contexts?.samples).toBeGreaterThanOrEqual(3);
+      expect(contexts).toEqual({
+        samples: contexts?.samples,
+        withoutContext: 0,
+        top: [{ context: task, samples: contexts?.samples }],
+      });
+    });
+
+    it('says when a block ran outside any execution context', () => {
+      const [, outside] = ended;
+      expect(outside.message).toMatch(
+        /^Event loop blocked for ~\d+ms; \d+ of \d+ samples outside any execution context$/
+      );
+      const contexts = blockOf(outside)?.contexts;
+      expect(contexts?.samples).toBeGreaterThanOrEqual(1);
+      expect(contexts).toEqual({
+        samples: contexts?.samples,
+        withoutContext: contexts?.samples,
+        top: [],
+      });
+    });
+
+    it('samples the outer execution context of nested ones, in a block that is also profiled', () => {
+      const [, , nested] = ended;
+      expect(nested.message).toMatch(
+        /^Event loop blocked for ~\d+ms; \d+ of \d+ samples in task manager:run harness:task-1$/
+      );
+      const contexts = blockOf(nested)?.contexts;
+      expect(contexts?.samples).toBeGreaterThanOrEqual(3);
+      expect(contexts?.top).toEqual([{ context: task, samples: contexts?.samples }]);
+
+      const profiles = profileLogLines(sampled);
+      expect(profiles).toHaveLength(1);
+      expect(profiles[0].kibana?.event_loop_watchdog?.profile).toMatchObject({
+        stopReason: 'block_ended',
+        samples: expect.any(Number),
+      });
+      expect(profiles[0].kibana?.event_loop_watchdog?.profile?.samples).toBeGreaterThan(50);
+    });
+
+    it('passes each block that ended to the main thread, with what its samples found', () => {
+      const received = receivedBlocks(sampled);
+      expect(received).toHaveLength(3);
+      for (const [index, block] of received.entries()) {
+        const logged = blockOf(ended[index]);
+        expect(block).toEqual({
+          startedAt: expect.any(Number),
+          blockedMs: logged?.blockedMs,
+          phase: 'running',
+          contexts: logged?.contexts,
+        });
+      }
+      expect(received[0].blockedMs).toBeGreaterThanOrEqual(2_900);
+    });
+
+    it("doesn't sample a block that ends before the first sample", async () => {
+      const result = await runHarness('sample_short_block');
+      expectCleanExit(result);
+      const [warning] = warnings(result);
+      expect(warning.message).toMatch(/^Event loop blocked for ~\d+ms$/);
+      expect(blockOf(warning)?.contexts).toBeUndefined();
+      expect(receivedBlocks(result)).toEqual([
+        { startedAt: expect.any(Number), blockedMs: blockOf(warning)?.blockedMs, phase: 'running' },
+      ]);
+      const sampledBlocks = statsOf(result).reduce(
+        (total, { contextSampling }) => total + (contextSampling?.sampledBlocks ?? 0),
+        0
+      );
+      expect(sampledBlocks).toBe(0);
     }, 120_000);
   });
 });

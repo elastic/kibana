@@ -13,12 +13,18 @@
  */
 
 import { getHeapStatistics } from 'node:v8';
-import { isMainThread, workerData } from 'node:worker_threads';
+import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type {
+  EventLoopBlock,
+  EventLoopBlockContexts,
+  EventLoopBlockExecutionContext,
+} from '@kbn/core-metrics-server';
 import type { WorkerLogger } from '@kbn/core-threads-server-internal';
 import { createWorkerLogger } from '@kbn/core-threads-server-internal';
 import { BlockDetector, type DetectedBlock } from './block_detector';
 import { BlockStats } from './block_stats';
+import { ContextSampler } from './context_sampler';
 import {
   ProfileCapture,
   createInspectorSession,
@@ -35,7 +41,14 @@ import type {
   StatsLogMeta,
   WatchdogWorkerData,
 } from './types';
-import { POLL_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME, monotonicUs } from './constants';
+import {
+  BLOCK_MESSAGE_KEY,
+  MAX_LOGGED_CONTEXTS,
+  POLL_INTERVAL_MS,
+  Slot,
+  WATCHDOG_WORKER_NAME,
+  monotonicUs,
+} from './constants';
 
 export interface WatchdogWorkerDeps {
   logger: WorkerLogger;
@@ -43,6 +56,8 @@ export interface WatchdogWorkerDeps {
   nowUs?: () => number;
   heapUsed?: () => number;
   createSession?: () => InspectorSession;
+  /** Called with each block once it has ended; the worker entry posts it to the main thread. */
+  onBlockEnded?: (block: EventLoopBlock) => void;
   /**
    * Repo root that profile locations are made relative to; defaults to `REPO_ROOT`. Not in
    * `workerData`: the worker resolves `REPO_ROOT` itself.
@@ -97,6 +112,29 @@ const formatFrame = ({ name, location }: CallerSummary): string =>
 export const MAX_MESSAGE_FRAMES_LENGTH = 600;
 const MESSAGE_ELLIPSIS = '...';
 
+const formatContext = ({ type, name, id }: EventLoopBlockExecutionContext): string =>
+  `${type ?? ''}:${name ?? ''}:${id ?? ''}`;
+
+/** Longest execution context in a block message; the full one is in the line's `contexts`. */
+export const MAX_MESSAGE_CONTEXT_LENGTH = 200;
+
+/** `; <n> of <m> samples in <type:name:id>`, for the context most samples found. */
+const formatContexts = ({ samples, withoutContext, top }: EventLoopBlockContexts): string => {
+  const [first] = top;
+  if (!first || first.samples < withoutContext) {
+    return `; ${withoutContext} of ${samples} samples outside any execution context`;
+  }
+  const context = formatContext(first.context);
+  return `; ${first.samples} of ${samples} samples in ${
+    context.length <= MAX_MESSAGE_CONTEXT_LENGTH
+      ? context
+      : `${context.slice(
+          0,
+          MAX_MESSAGE_CONTEXT_LENGTH - MESSAGE_ELLIPSIS.length
+        )}${MESSAGE_ELLIPSIS}`
+  }`;
+};
+
 /** `Top: <frames>. Kibana code: <frames with callers>`, cut with `...` past the cap. */
 const formatFrameLists = ({ frames, kibanaFrames }: ProfileSummary): string => {
   const lists: string[] = [];
@@ -120,12 +158,19 @@ const formatFrameLists = ({ frames, kibanaFrames }: ProfileSummary): string => {
 
 /** Starts detection; returns a function that stops it (for tests: the worker never stops itself). */
 export const runWatchdogWorker = (
-  { shared: sharedBuffer, thresholdsMs, statsIntervalMs, profiling }: WatchdogWorkerData,
+  {
+    shared: sharedBuffer,
+    thresholdsMs,
+    statsIntervalMs,
+    profiling,
+    sampleExecutionContext,
+  }: WatchdogWorkerData,
   {
     logger,
     nowUs = monotonicUs,
     heapUsed = () => getHeapStatistics().used_heap_size,
     createSession = createInspectorSession,
+    onBlockEnded,
     root = REPO_ROOT,
   }: WatchdogWorkerDeps
 ): (() => void) => {
@@ -143,6 +188,24 @@ export const runWatchdogWorker = (
   let cooldownSkippedBlock: number | undefined;
   /** Ending a capture's session at shutdown rejects its pending commands; that isn't a failure. */
   let stopped = false;
+  /** One sampling failure is logged per stats period; the stats line counts the rest. */
+  let samplingFailureLogged = false;
+  const sampler = new ContextSampler({
+    createSession,
+    // The heartbeat the block started at is still the last one: the main thread hasn't resumed.
+    isBlocked: (blockStartedAt) =>
+      toMs(Number(Atomics.load(shared, Slot.heartbeat))) <= blockStartedAt,
+    onFailure: (error) => {
+      if (stopped || samplingFailureLogged) {
+        return;
+      }
+      samplingFailureLogged = true;
+      logger.warn(
+        `Failed to sample the execution context of an event loop block: ${errorMessage(error)}`,
+        { tags: ['event-loop-watchdog'] }
+      );
+    },
+  });
 
   /** Phase of a heartbeat: running once the main thread has marked it. */
   const phaseAt = (heartbeatUs: number): Phase => {
@@ -151,8 +214,19 @@ export const runWatchdogWorker = (
   };
 
   const onBlock = (block: DetectedBlock, nowMs: number) => {
+    const contexts = block.ongoing
+      ? sampler.contexts(block.startedAt)
+      : sampler.end(block.startedAt);
+    // Measured back from now, so a wall-clock step can't shift it.
+    const startedAtEpochMs = Date.now() - (nowMs - block.startedAt);
     // A block counts once, when it ends.
     if (!block.ongoing) {
+      onBlockEnded?.({
+        startedAt: startedAtEpochMs,
+        blockedMs: block.blockedMs,
+        phase: block.phase,
+        ...(contexts ? { contexts } : {}),
+      });
       stats.record(block);
       if (block.blockedMs >= profiling.startAfterMs[block.phase]) {
         counts.pastStartAfter++;
@@ -165,21 +239,23 @@ export const runWatchdogWorker = (
     if (!block.report) {
       return;
     }
-    const { blockedMs, startedAt, phase, suppressedBlocks, ongoing } = block;
+    const { blockedMs, phase, suppressedBlocks, ongoing } = block;
     logger.warn<BlockLogMeta>(
       `Event loop blocked for ~${blockedMs}ms${ongoing ? ' so far' : ''}${
         suppressedBlocks ? `; ${blocks(suppressedBlocks)} before it not reported` : ''
-      }`,
+      }${contexts ? formatContexts(contexts) : ''}`,
       {
         tags: ['event-loop-watchdog'],
         kibana: {
           event_loop_watchdog: {
             blockedMs,
-            // Measured back from now, so a wall-clock step can't shift it.
-            startedAt: new Date(Date.now() - (nowMs - startedAt)).toISOString(),
+            startedAt: new Date(startedAtEpochMs).toISOString(),
             phase,
             suppressedBlocks,
             ongoing,
+            ...(contexts
+              ? { contexts: { ...contexts, top: contexts.top.slice(0, MAX_LOGGED_CONTEXTS) } }
+              : {}),
           },
         },
       }
@@ -402,6 +478,10 @@ export const runWatchdogWorker = (
     if (block) {
       onBlock(block, nowMs);
     }
+    const { current } = detector;
+    if (current && sampleExecutionContext) {
+      sampler.sample(current.startedAt, nowMs);
+    }
     if (capture?.stopReason === 'block_ended') {
       capture.stopHeartbeatGapMs = Math.max(capture.stopHeartbeatGapMs, heartbeatGapMs(nowMs));
     }
@@ -430,6 +510,7 @@ export const runWatchdogWorker = (
               heapUsed: heapUsed(),
               droppedLogLines: droppedBefore - reportedDroppedLogLines,
               profiling: counts,
+              contextSampling: sampler.stats,
             },
           },
         },
@@ -439,6 +520,8 @@ export const runWatchdogWorker = (
     if (logger.getDroppedLogLineCount() === droppedBefore) {
       stats.reset(now);
       counts = noCaptures();
+      sampler.resetStats();
+      samplingFailureLogged = false;
       reportedDroppedLogLines = droppedBefore;
     }
   };
@@ -451,6 +534,7 @@ export const runWatchdogWorker = (
     stopped = true;
     clearInterval(pollTimer);
     clearInterval(statsTimer);
+    sampler.release();
     if (capture) {
       endCapture(capture);
     }
@@ -459,5 +543,8 @@ export const runWatchdogWorker = (
 
 if (!isMainThread) {
   const { data } = workerData as { data: WatchdogWorkerData };
-  runWatchdogWorker(data, { logger: createWorkerLogger(data.logging, WATCHDOG_WORKER_NAME) });
+  runWatchdogWorker(data, {
+    logger: createWorkerLogger(data.logging, WATCHDOG_WORKER_NAME),
+    onBlockEnded: (block) => parentPort?.postMessage({ [BLOCK_MESSAGE_KEY]: block }),
+  });
 }

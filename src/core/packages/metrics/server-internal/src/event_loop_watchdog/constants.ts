@@ -34,6 +34,26 @@ export const ONGOING_FAST_REPEATS_UNTIL_MS = 12_000;
 /** CPU profiler sampling interval in microseconds: about 99 Hz. */
 export const SAMPLING_INTERVAL_US = 10_101;
 
+/** A block's execution context is first sampled once the block has lasted this long... */
+export const CONTEXT_SAMPLE_AFTER_MS = 1_000;
+/** ...then this often... */
+export const CONTEXT_SAMPLE_INTERVAL_MS = 500;
+/** ...up to this many samples, which covers the first 20 seconds of a block. */
+export const MAX_CONTEXT_SAMPLES = 40;
+/** Execution contexts kept per block: the most sampled ones... */
+export const MAX_REPORTED_CONTEXTS = 5;
+/** ...of which a block's log line lists this many, to stay within the logger's line limit. */
+export const MAX_LOGGED_CONTEXTS = 3;
+/** Longest `type`, `name` or `id` kept from an execution context. */
+export const MAX_CONTEXT_FIELD_LENGTH = 80;
+/**
+ * Key of the global function that returns the running code's execution context. The main thread
+ * installs it under `Symbol.for(key)`; the worker calls it there through the inspector.
+ */
+export const CONTEXT_READER_KEY = 'kbn.core.eventLoopWatchdog.readExecutionContext';
+/** Key of the messages the worker posts to the main thread, one per block that ended. */
+export const BLOCK_MESSAGE_KEY = '__kbnEventLoopBlock';
+
 /** Kibana is considered running this long after its overall status first becomes available... */
 export const RUNNING_GRACE_MS = 30_000;
 /** ...or this long after the watchdog service starts, whichever comes first. */

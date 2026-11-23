@@ -22,6 +22,7 @@ import {
   skipWhile,
   take,
   timer,
+  Subject,
   type Observable,
   type Subscription,
 } from 'rxjs';
@@ -29,8 +30,10 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
+import type { EventLoopBlock } from '@kbn/core-metrics-server';
 import { OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
+import type { ReadExecutionContext } from './execution_context_reader';
 import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
 import { resolveWorkerLogging, type LoggingConfigSubset } from './resolve_worker_logging';
 import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
@@ -51,6 +54,8 @@ export interface EventLoopWatchdogSetupDeps {
   nodeRoles: readonly string[];
   /** Same value as main-thread log lines carry in `service.version`. */
   serviceVersion: string;
+  /** Returns the execution context of the running code, which is sampled during a block. */
+  readExecutionContext?: ReadExecutionContext;
 }
 
 export interface EventLoopWatchdogStartDeps {
@@ -68,12 +73,23 @@ export class EventLoopWatchdogService {
   private nodeRoles: readonly string[] = [];
   private subscription?: Subscription;
   private overall$?: Observable<ServiceStatus>;
+  private readonly blocks$ = new Subject<EventLoopBlock>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get(...LOGGER_CONTEXT);
   }
 
-  public async setup({ status, nodeRoles, serviceVersion }: EventLoopWatchdogSetupDeps) {
+  /** Emits each block the watchdog detects, once it has ended. Usable before `setup()`. */
+  public getBlocks$(): Observable<EventLoopBlock> {
+    return this.blocks$.asObservable();
+  }
+
+  public async setup({
+    status,
+    nodeRoles,
+    serviceVersion,
+    readExecutionContext,
+  }: EventLoopWatchdogSetupDeps) {
     this.overall$ = status.overall$;
     this.nodeRoles = nodeRoles;
     const { configService } = this.coreContext;
@@ -105,6 +121,8 @@ export class EventLoopWatchdogService {
         cooldownMs: perPhaseMs('cooldown'),
         diagnosticDir: resolveDiagnosticDir(),
       },
+      readExecutionContext,
+      onBlock: (block) => this.blocks$.next(block),
     });
   }
 

@@ -13,10 +13,20 @@ import path from 'node:path';
 import type * as WorkerThreads from 'node:worker_threads';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createWorkerLogger, type WorkerLogger } from '@kbn/core-threads-server-internal';
-import { MAX_MESSAGE_FRAMES_LENGTH, runWatchdogWorker, type WatchdogWorkerDeps } from './worker';
-import type { ProfileLogMeta, StatsLogMeta, WatchdogWorkerData } from './types';
+import {
+  MAX_MESSAGE_CONTEXT_LENGTH,
+  MAX_MESSAGE_FRAMES_LENGTH,
+  runWatchdogWorker,
+  type WatchdogWorkerDeps,
+} from './worker';
+import type { BlockLogMeta, ProfileLogMeta, StatsLogMeta, WatchdogWorkerData } from './types';
 import type { CpuProfile, InspectorSession } from './profile_capture';
 import {
+  CONTEXT_SAMPLE_AFTER_MS,
+  CONTEXT_SAMPLE_INTERVAL_MS,
+  MAX_CONTEXT_FIELD_LENGTH,
+  MAX_LOGGED_CONTEXTS,
+  MAX_REPORTED_CONTEXTS,
   ONGOING_REPORT_AFTER_MS,
   REPORT_REFILL_MS,
   SLOT_COUNT,
@@ -45,6 +55,8 @@ describe('runWatchdogWorker', () => {
   /** When set, `Profiler.start` and `Profiler.stop` reply only once these resolve. */
   let startReply: Promise<void> | undefined;
   let stopReply: Promise<void> | undefined;
+  /** What the main thread's execution context reader returns to a sample. */
+  let runningContext: unknown;
 
   const setSlot = (slot: number, us: number) => Atomics.store(shared, slot, BigInt(us));
   const beat = () => setSlot(Slot.heartbeat, nowUs);
@@ -95,6 +107,7 @@ describe('runWatchdogWorker', () => {
           maxDurationMs: { starting: 10_000, running: 10_000 },
           cooldownMs: { starting: 60_000, running: 60_000 },
         },
+        sampleExecutionContext: false,
         ...overrides,
       },
       {
@@ -164,6 +177,11 @@ describe('runWatchdogWorker', () => {
           if (failStart) {
             throw new Error('inspector unavailable');
           }
+        }
+        if (method === 'Runtime.evaluate') {
+          return runningContext === null
+            ? { result: { type: 'object', subtype: 'null', value: null } }
+            : { result: { type: 'object', value: runningContext } };
         }
         if (method !== 'Profiler.stop') {
           return {};
@@ -236,6 +254,7 @@ describe('runWatchdogWorker', () => {
     profile = sampledProfile;
     startReply = undefined;
     stopReply = undefined;
+    runningContext = null;
     shared = new BigInt64Array(new SharedArrayBuffer(SLOT_COUNT * 8));
     beat();
     logger = { ...loggerMock.create(), getDroppedLogLineCount: jest.fn(() => dropped) };
@@ -427,6 +446,7 @@ describe('runWatchdogWorker', () => {
         profilingActiveMs: 0,
         maxStopHeartbeatGapMs: 0,
       },
+      contextSampling: { sampledBlocks: 0, samples: 0, failed: 0 },
     });
   });
 
@@ -467,6 +487,305 @@ describe('runWatchdogWorker', () => {
     block(300);
     jest.advanceTimersByTime(STATS_INTERVAL_MS);
     expect(statsMeta().droppedLogLines).toBe(2);
+  });
+
+  describe('ended blocks', () => {
+    it('passes each block that ended to onBlockEnded, whether its warning is logged or not', () => {
+      const onBlockEnded = jest.fn();
+      start({}, () => nowUs, { onBlockEnded });
+      setSlot(Slot.runningSince, nowUs);
+      const firstStartedAt = Date.now();
+      for (let i = 0; i < 7; i++) {
+        block(300);
+      }
+      expect(logger.warn).toHaveBeenCalledTimes(5);
+      expect(onBlockEnded).toHaveBeenCalledTimes(7);
+      expect(onBlockEnded.mock.calls[0]).toEqual([
+        { startedAt: firstStartedAt, blockedMs: 300, phase: 'running' },
+      ]);
+      expect(onBlockEnded.mock.calls[0][0]).not.toHaveProperty('contexts');
+    });
+
+    it('passes a long block once, when it ends', () => {
+      const onBlockEnded = jest.fn();
+      start({}, () => nowUs, { onBlockEnded });
+      beat();
+      stall(ONGOING_REPORT_AFTER_MS + 500);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(onBlockEnded).not.toHaveBeenCalled();
+      resume();
+      expect(onBlockEnded).toHaveBeenCalledTimes(1);
+      expect(onBlockEnded.mock.calls[0][0]).toMatchObject({
+        blockedMs: ONGOING_REPORT_AFTER_MS + 500,
+        phase: 'starting',
+      });
+    });
+  });
+
+  describe('execution context sampling', () => {
+    const task = { type: 'task manager', name: 'run alerting:example', id: 'task-1' };
+    const rule = { ...task, child: { type: 'alert', name: 'execute example', id: 'rule-1' } };
+    const startSampling = (depOverrides: Partial<WatchdogWorkerDeps> = {}) =>
+      start({ sampleExecutionContext: true }, () => nowUs, depOverrides);
+    /** Stalls in sampling-interval steps, letting each sample's answer arrive during the block. */
+    const stallSampled = async (ms: number) => {
+      for (let elapsed = 0; elapsed < ms; elapsed += CONTEXT_SAMPLE_INTERVAL_MS) {
+        stall(Math.min(CONTEXT_SAMPLE_INTERVAL_MS, ms - elapsed));
+        await settle();
+      }
+    };
+    const sampledBlock = async (ms: number) => {
+      beat();
+      await stallSampled(ms);
+      resume();
+      await settle();
+    };
+    const blockMeta = (call = 0) =>
+      (logger.warn.mock.calls[call][1] as BlockLogMeta).kibana.event_loop_watchdog;
+
+    it("doesn't sample when the main thread has no execution context reader", async () => {
+      start();
+      runningContext = task;
+      await sampledBlock(3_000);
+      expect(sessions).toHaveLength(0);
+      expect(logger.warn).toHaveBeenLastCalledWith('Event loop blocked for ~3000ms', {
+        tags: ['event-loop-watchdog'],
+        kibana: {
+          event_loop_watchdog: expect.not.objectContaining({ contexts: expect.anything() }),
+        },
+      });
+    });
+
+    it("doesn't sample a block shorter than the first sample", async () => {
+      startSampling();
+      runningContext = task;
+      await sampledBlock(CONTEXT_SAMPLE_AFTER_MS - 25);
+      expect(sessions).toHaveLength(0);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Event loop blocked for ~${CONTEXT_SAMPLE_AFTER_MS - 25}ms`,
+        expect.anything()
+      );
+      idle(STATS_INTERVAL_MS);
+      expect(lastStats().contextSampling).toEqual({ sampledBlocks: 0, samples: 0, failed: 0 });
+    });
+
+    it('says which execution context a block ran in, while it is ongoing and once it ends', async () => {
+      const onBlockEnded = jest.fn();
+      startSampling({ onBlockEnded });
+      runningContext = rule;
+      const blockStartedAt = Date.now();
+      await sampledBlock(3_000);
+
+      // Samples at 1s and 1.5s were in by the 2s report; the block ended with 5 (1s to 3s). The
+      // rule's context, nested in the task's, is left out.
+      expect(logger.warn.mock.calls.map(([message]) => message)).toEqual([
+        'Event loop blocked for ~2000ms so far; 2 of 2 samples in task manager:run alerting:example:task-1',
+        'Event loop blocked for ~3000ms; 5 of 5 samples in task manager:run alerting:example:task-1',
+      ]);
+      expect(blockMeta(0)).toMatchObject({
+        ongoing: true,
+        contexts: { samples: 2, withoutContext: 0, top: [{ context: task, samples: 2 }] },
+      });
+      const contexts = { samples: 5, withoutContext: 0, top: [{ context: task, samples: 5 }] };
+      expect(blockMeta(1)).toMatchObject({ ongoing: false, contexts });
+      expect(blockMeta(1).contexts?.top[0].context).toEqual(task);
+      expect(onBlockEnded.mock.calls).toEqual([
+        [{ startedAt: blockStartedAt, blockedMs: 3_000, phase: 'starting', contexts }],
+      ]);
+
+      // One session for the block, ended with it.
+      expect(sessions).toHaveLength(1);
+      expect(posted()).toEqual(new Array(5).fill('Runtime.evaluate'));
+      expect(sessions[0].disconnect).toHaveBeenCalledTimes(1);
+      idle(STATS_INTERVAL_MS);
+      expect(lastStats().contextSampling).toEqual({ sampledBlocks: 1, samples: 5, failed: 0 });
+    });
+
+    it('says when most samples found no execution context', async () => {
+      startSampling();
+      runningContext = task;
+      beat();
+      await stallSampled(1_000);
+      runningContext = null;
+      await stallSampled(1_000);
+      resume();
+      expect(logger.warn).toHaveBeenLastCalledWith(
+        'Event loop blocked for ~2000ms; 2 of 3 samples outside any execution context',
+        expect.anything()
+      );
+      expect(blockMeta(logger.warn.mock.calls.length - 1).contexts).toEqual({
+        samples: 3,
+        withoutContext: 2,
+        top: [{ context: task, samples: 1 }],
+      });
+    });
+
+    it('leaves out a sample answered after the main thread resumed', async () => {
+      startSampling();
+      runningContext = task;
+      beat();
+      await stallSampled(1_000);
+      // Requested at 1.5s, but answered from the event loop once the block is over.
+      runningContext = null;
+      stall(500);
+      beat();
+      await settle();
+      stall(25);
+      expect(logger.warn).toHaveBeenLastCalledWith(
+        'Event loop blocked for ~1500ms; 1 of 1 samples in task manager:run alerting:example:task-1',
+        expect.anything()
+      );
+    });
+
+    it('cuts a long execution context in the message, and keeps it whole in the log line data', async () => {
+      startSampling();
+      const long = (label: string) =>
+        label.repeat(MAX_CONTEXT_FIELD_LENGTH).slice(0, MAX_CONTEXT_FIELD_LENGTH);
+      runningContext = { type: long('t'), name: long('n'), id: long('i') };
+      await sampledBlock(1_000);
+      const [message] = logger.warn.mock.calls[0];
+      const context = String(message).slice(String(message).indexOf(' samples in ') + 12);
+      expect(context).toHaveLength(MAX_MESSAGE_CONTEXT_LENGTH);
+      expect(context.endsWith('...')).toBe(true);
+      expect(blockMeta().contexts?.top[0].context).toEqual(runningContext);
+    });
+
+    it(`lists the ${MAX_LOGGED_CONTEXTS} most sampled contexts in the log line and ${MAX_REPORTED_CONTEXTS} in the ended block`, async () => {
+      const onBlockEnded = jest.fn();
+      startSampling({ onBlockEnded });
+      beat();
+      await stallSampled(CONTEXT_SAMPLE_AFTER_MS - CONTEXT_SAMPLE_INTERVAL_MS);
+      for (let index = 0; index < MAX_REPORTED_CONTEXTS + 1; index++) {
+        runningContext = { ...task, id: `task-${index}` };
+        await stallSampled(CONTEXT_SAMPLE_INTERVAL_MS);
+      }
+      resume();
+      const logged = blockMeta(logger.warn.mock.calls.length - 1).contexts;
+      expect(logged).toMatchObject({ samples: MAX_REPORTED_CONTEXTS + 1, withoutContext: 0 });
+      expect(logged?.top).toHaveLength(MAX_LOGGED_CONTEXTS);
+      expect(onBlockEnded.mock.calls[0][0].contexts.top).toHaveLength(MAX_REPORTED_CONTEXTS);
+    });
+
+    it('logs one sampling failure per stats period, and counts them all', async () => {
+      startSampling();
+      failConnect = true;
+      const failures = () =>
+        logger.warn.mock.calls.filter(([message]) =>
+          String(message).startsWith('Failed to sample')
+        );
+      await sampledBlock(1_500);
+      await sampledBlock(1_500);
+      expect(failures()).toEqual([
+        [
+          'Failed to sample the execution context of an event loop block: inspector not available',
+          { tags: ['event-loop-watchdog'] },
+        ],
+      ]);
+      // A block whose sampling failed is still reported, without contexts.
+      expect(logger.warn).toHaveBeenCalledWith('Event loop blocked for ~1500ms', expect.anything());
+      idle(STATS_INTERVAL_MS);
+      expect(lastStats().contextSampling).toEqual({ sampledBlocks: 0, samples: 0, failed: 2 });
+
+      await sampledBlock(1_500);
+      expect(failures()).toHaveLength(2);
+      idle(STATS_INTERVAL_MS);
+      expect(lastStats().contextSampling).toEqual({ sampledBlocks: 0, samples: 0, failed: 1 });
+    });
+
+    it('samples and profiles the same block through separate sessions', async () => {
+      start({ profiling: profilingData, sampleExecutionContext: true });
+      setSlot(Slot.profiling, 1);
+      runningContext = task;
+      await sampledBlock(2_000);
+      expect(sessions).toHaveLength(2);
+      expect(posted(0)).toEqual(new Array(3).fill('Runtime.evaluate'));
+      expect(posted(1)).toEqual([
+        'Profiler.enable',
+        'Profiler.setSamplingInterval',
+        'Profiler.start',
+        'Profiler.stop',
+      ]);
+      expect(logger.warn).toHaveBeenLastCalledWith(
+        'Event loop blocked for ~2000ms; 3 of 3 samples in task manager:run alerting:example:task-1',
+        expect.anything()
+      );
+      expect(profileLines()).toHaveLength(1);
+    });
+
+    it('ends the sampling session when the worker stops', async () => {
+      startSampling();
+      runningContext = task;
+      beat();
+      await stallSampled(1_000);
+      stop();
+      expect(sessions[0].disconnect).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps a worst-case block log line within 4,094 bytes through createWorkerLogger', async () => {
+      jest.replaceProperty(workerThreads, 'isMainThread', false);
+      jest.spyOn(process, 'uptime').mockReturnValue(999_999.999_999_999);
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'watchdog-line-size-'));
+      const logFile = path.join(tmpDir, 'worker.log');
+      const fd = fs.openSync(logFile, 'w');
+      try {
+        const realLogger = createWorkerLogger(
+          {
+            context: 'metrics.event_loop_watchdog',
+            level: 'info',
+            format: 'json',
+            service: {
+              node: { roles: ['background_tasks', 'ui'] },
+              version: '9.3.0-SNAPSHOT',
+              type: 'kibana',
+            },
+          },
+          WATCHDOG_WORKER_NAME,
+          fd
+        );
+        startSampling({ logger: realLogger });
+        // Every field at its cap, more contexts than are logged.
+        const field = (label: string) => label.padEnd(MAX_CONTEXT_FIELD_LENGTH + 10, 'x');
+        beat();
+        await stallSampled(CONTEXT_SAMPLE_AFTER_MS - CONTEXT_SAMPLE_INTERVAL_MS);
+        for (let index = 0; index < MAX_REPORTED_CONTEXTS; index++) {
+          runningContext = {
+            type: field(`type-${index}`),
+            name: field(`name-${index}`),
+            id: field(`id-${index}`),
+          };
+          await stallSampled(CONTEXT_SAMPLE_INTERVAL_MS);
+        }
+        // A block of 6 digits, as in the capture line's worst case.
+        stall(
+          100_000 -
+            CONTEXT_SAMPLE_AFTER_MS -
+            (MAX_REPORTED_CONTEXTS - 1) * CONTEXT_SAMPLE_INTERVAL_MS
+        );
+        resume();
+
+        expect(realLogger.getDroppedLogLineCount()).toBe(0);
+        const lines = fs
+          .readFileSync(logFile, 'utf8')
+          .trim()
+          .split('\n')
+          .filter((line) => line.includes('"Event loop blocked for ~100000ms;'));
+        expect(lines).toHaveLength(1);
+        expect(Buffer.byteLength(lines[0], 'utf8')).toBeLessThanOrEqual(4_094);
+        const parsed = JSON.parse(lines[0]);
+        expect(parsed.message).not.toMatch(/\[truncated\]$/);
+        const { top } = parsed.kibana.event_loop_watchdog.contexts;
+        expect(top).toHaveLength(MAX_LOGGED_CONTEXTS);
+        for (const { context } of top) {
+          expect(context.type).toHaveLength(MAX_CONTEXT_FIELD_LENGTH);
+          expect(context.name).toHaveLength(MAX_CONTEXT_FIELD_LENGTH);
+          expect(context.id).toHaveLength(MAX_CONTEXT_FIELD_LENGTH);
+        }
+      } finally {
+        fs.closeSync(fd);
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+        jest.restoreAllMocks();
+      }
+    });
   });
 
   describe('profiling', () => {

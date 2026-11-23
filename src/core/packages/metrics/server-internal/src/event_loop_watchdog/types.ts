@@ -8,6 +8,7 @@
  */
 
 import type { LogMeta } from '@kbn/logging';
+import type { EventLoopBlockContexts } from '@kbn/core-metrics-server';
 import type { WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
 import type { BlockStatsSnapshot } from './block_stats';
 import type { ProfileSummary } from './profile_summary';
@@ -30,6 +31,8 @@ export interface WatchdogWorkerData {
   statsIntervalMs: number;
   logging: WorkerLoggingConfig;
   profiling: WatchdogProfilingData;
+  /** Whether the main thread installed an execution context reader to sample during a block. */
+  sampleExecutionContext: boolean;
 }
 
 export interface BlockLogMeta extends LogMeta {
@@ -41,6 +44,8 @@ export interface BlockLogMeta extends LogMeta {
       suppressedBlocks: number;
       /** True when the block was still ongoing at log time; `blockedMs` is its length so far. */
       ongoing: boolean;
+      /** What was running during the block, when its execution context was sampled. */
+      contexts?: EventLoopBlockContexts;
     };
   };
 }
@@ -114,6 +119,16 @@ export interface ProfilingStats {
   maxStopHeartbeatGapMs: number;
 }
 
+/** Execution context sampling counts for a stats period. */
+export interface ContextSamplingStats {
+  /** Blocks that ended with at least one sample. */
+  sampledBlocks: number;
+  /** Samples answered while their block was still ongoing. */
+  samples: number;
+  /** Blocks whose sampling failed; such a block isn't sampled further. */
+  failed: number;
+}
+
 export interface StatsLogMeta extends LogMeta {
   kibana: {
     event_loop_watchdog: {
@@ -123,6 +138,7 @@ export interface StatsLogMeta extends LogMeta {
         /** Worker log lines lost since the last stats log line that was written. */
         droppedLogLines: number;
         profiling: ProfilingStats;
+        contextSampling: ContextSamplingStats;
       };
     };
   };

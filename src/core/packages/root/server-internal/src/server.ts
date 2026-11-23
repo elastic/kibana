@@ -393,6 +393,7 @@ export class Server {
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
       elasticsearchService: elasticsearchServiceSetup,
+      eventLoopBlocks$: this.eventLoopWatchdog.getBlocks$(),
     });
 
     const httpRateLimiterSetup = this.httpRateLimiter.setup({
@@ -452,6 +453,7 @@ export class Server {
       status: statusSetup,
       nodeRoles: this.nodeRoleNames,
       serviceVersion: this.serviceVersion,
+      readExecutionContext: () => executionContextSetup.get()?.toJSON(),
     });
 
     const customBrandingSetup = this.customBranding.setup();

@@ -8,6 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { EventLoopBlock } from './event_loop_blocks';
 import type { EluMetrics, OpsMetrics } from './metrics';
 
 /**
@@ -37,6 +38,19 @@ export interface MetricsServiceSetup {
    * ```
    */
   getOpsMetrics$: () => Observable<OpsMetrics>;
+
+  /**
+   * Retrieve an observable emitting each {@link EventLoopBlock} the event loop watchdog detects on
+   * the main thread, once the block has ended. It emits nothing while the watchdog is off.
+   *
+   * @example
+   * ```ts
+   * core.metrics.getEventLoopBlocks$().subscribe(({ blockedMs, contexts }) => {
+   *   // contexts?.top lists the execution contexts found running during the block
+   * })
+   * ```
+   */
+  getEventLoopBlocks$(): Observable<EventLoopBlock>;
 }
 /**
  * {@inheritdoc MetricsServiceSetup}

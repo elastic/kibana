@@ -8,6 +8,9 @@
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ExecutionContextSetup } from '@kbn/core/server';
 
+/** The `type` of the execution context every task run is wrapped in. */
+export const TASK_MANAGER_CONTEXT_TYPE = 'task manager';
+
 export interface CreateExecutionContextArgs {
   contextSetup: ExecutionContextSetup;
   baseContext: KibanaExecutionContext;
@@ -27,7 +30,7 @@ export class ExecutionContextRunnerImpl implements ExecutionContextRunner {
 
   async run<T>(fn: () => Promise<T>, context: KibanaExecutionContext = {}): Promise<T> {
     // apply the contexts in order, always add type: "task manager"
-    const finalContext = { ...context, ...this.baseContext, type: 'task manager' };
+    const finalContext = { ...context, ...this.baseContext, type: TASK_MANAGER_CONTEXT_TYPE };
     return this.contextSetup.withContext(finalContext, fn);
   }
 }

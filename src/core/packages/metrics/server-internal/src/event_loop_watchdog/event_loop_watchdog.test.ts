@@ -10,9 +10,16 @@
 import type { ManagedWorker, ManagedWorkerOptions } from '@kbn/core-threads-server-internal';
 import { createManagedWorker } from '@kbn/core-threads-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { EventLoopWatchdog } from './event_loop_watchdog';
+import { EventLoopWatchdog, type EventLoopWatchdogParams } from './event_loop_watchdog';
+import { uninstallExecutionContextReader } from './execution_context_reader';
 import type { WatchdogWorkerData } from './types';
-import { HEARTBEAT_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME } from './constants';
+import {
+  BLOCK_MESSAGE_KEY,
+  CONTEXT_READER_KEY,
+  HEARTBEAT_INTERVAL_MS,
+  Slot,
+  WATCHDOG_WORKER_NAME,
+} from './constants';
 
 jest.mock('@kbn/core-threads-server-internal', () => ({ createManagedWorker: jest.fn() }));
 
@@ -43,7 +50,7 @@ describe('EventLoopWatchdog', () => {
         createWorker.mock.calls[call][0] as ManagedWorkerOptions<WatchdogWorkerData>
       ).workerData!.shared
     );
-  const create = () =>
+  const create = (overrides: Partial<EventLoopWatchdogParams> = {}) =>
     new EventLoopWatchdog({
       logger,
       thresholdsMs: { starting: 300, running: 200 },
@@ -51,6 +58,7 @@ describe('EventLoopWatchdog', () => {
       logging,
       profiling,
       workerEntry: '/entry.js',
+      ...overrides,
     });
 
   beforeEach(() => {
@@ -84,6 +92,7 @@ describe('EventLoopWatchdog', () => {
         statsIntervalMs: 600_000,
         logging,
         profiling,
+        sampleExecutionContext: false,
       },
     });
     expect(worker.start).toHaveBeenCalledTimes(1);
@@ -226,6 +235,72 @@ describe('EventLoopWatchdog', () => {
       expect(profilingLines()).toEqual([ON, OFF]);
       resolveStop();
       await stopped;
+    });
+  });
+
+  describe('execution context sampling', () => {
+    const task = { type: 'task manager', name: 'run alerting:example', id: 'task-1' };
+    const readExecutionContext = () => task;
+    const reader = () => Reflect.get(globalThis, Symbol.for(CONTEXT_READER_KEY));
+
+    // A test that leaves its watchdog running leaves the reader too.
+    afterEach(() => uninstallExecutionContextReader());
+
+    it('tells the worker to sample when it can read the execution context', () => {
+      create({ readExecutionContext }).start();
+      expect(options().workerData?.sampleExecutionContext).toBe(true);
+    });
+
+    it("tells the worker not to sample when it can't, and installs no reader", () => {
+      create().start();
+      expect(options().workerData?.sampleExecutionContext).toBe(false);
+      expect(reader()).toBeUndefined();
+    });
+
+    it('installs the execution context reader while the worker runs', async () => {
+      const watchdog = create({ readExecutionContext });
+      expect(reader()).toBeUndefined();
+      watchdog.start();
+      expect(reader()()).toEqual(task);
+      const stopped = watchdog.stop();
+      expect(reader()).toBeUndefined();
+      resolveStop();
+      await stopped;
+    });
+
+    it('installs the reader again for a worker started later', async () => {
+      const watchdog = create({ readExecutionContext });
+      watchdog.start();
+      const stopped = watchdog.stop();
+      resolveStop();
+      await stopped;
+      watchdog.start();
+      expect(reader()()).toEqual(task);
+    });
+  });
+
+  describe('ended blocks', () => {
+    const block = { startedAt: 1_700_000_000_000, blockedMs: 5_200, phase: 'running' as const };
+
+    it("passes the worker's ended blocks to onBlock", () => {
+      const onBlock = jest.fn();
+      create({ onBlock }).start();
+      options().onMessage?.({ [BLOCK_MESSAGE_KEY]: block });
+      expect(onBlock.mock.calls).toEqual([[block]]);
+    });
+
+    it('ignores other messages', () => {
+      const onBlock = jest.fn();
+      create({ onBlock }).start();
+      options().onMessage?.('unrelated');
+      options().onMessage?.(null);
+      options().onMessage?.({ block });
+      expect(onBlock).not.toHaveBeenCalled();
+    });
+
+    it("doesn't need a listener", () => {
+      create().start();
+      expect(() => options().onMessage?.({ [BLOCK_MESSAGE_KEY]: block })).not.toThrow();
     });
   });
 

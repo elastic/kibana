@@ -10,6 +10,12 @@
 export type { MetricsServiceSetup, MetricsServiceStart } from './src/contracts';
 export type { MetricsCollector, IEventLoopDelaysMonitor } from './src/collectors';
 export type {
+  EventLoopBlock,
+  EventLoopBlockContexts,
+  EventLoopBlockContextSamples,
+  EventLoopBlockExecutionContext,
+} from './src/event_loop_blocks';
+export type {
   EluMetrics,
   OpsMetrics,
   IntervalHistogram,

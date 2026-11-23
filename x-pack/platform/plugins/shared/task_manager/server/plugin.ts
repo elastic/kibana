@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { combineLatest, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
@@ -68,6 +68,7 @@ import { TASK_MANAGER_CLAIM_NUDGE_INDEX, TASK_MANAGER_INDEX } from './constants'
 import { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
+import { logEventLoopBlocks } from './lib/log_event_loop_blocks';
 import type { Metrics } from './metrics';
 import { metricsStream } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
@@ -179,6 +180,7 @@ export class TaskManagerPlugin
   private startContract?: TaskManagerStartContract;
   private enrichFakeRequest?: FakeRequestEnricher;
   private claimNudgeService?: TaskManagerClaimNudgeService;
+  private eventLoopBlocksSubscription?: Subscription;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -228,6 +230,14 @@ export class TaskManagerPlugin
       .subscribe((metrics) => {
         this.heapSizeLimit = metrics.process.memory.heap.size_limit;
       });
+
+    if (this.shouldRunBackgroundTasks) {
+      this.eventLoopBlocksSubscription = logEventLoopBlocks({
+        blocks$: core.metrics.getEventLoopBlocks$(),
+        logger: this.logger,
+        warnThresholdMs: this.config.event_loop_delay.warn_threshold,
+      });
+    }
 
     setupSavedObjects(core.savedObjects);
 
@@ -580,6 +590,7 @@ export class TaskManagerPlugin
   public async stop() {
     this.licenseSubscriber?.cleanup();
     this.claimNudgeService?.stop();
+    this.eventLoopBlocksSubscription?.unsubscribe();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {

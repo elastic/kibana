@@ -10,3 +10,5 @@ The backoff doubles from `restart.initialDelayMs` up to `restart.maxDelayMs` (1 
 Restarts are unlimited by default, so a failing worker keeps restarting at that cap. Set
 `restart.maxAttempts` to a finite number for a worker that should become `exhausted` and stop
 retrying after that many restarts.
+
+Messages the worker entry posts to its parent port are passed to `onMessage` on the main thread.

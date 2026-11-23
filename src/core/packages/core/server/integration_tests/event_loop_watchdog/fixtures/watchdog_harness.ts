@@ -13,11 +13,13 @@
  * stderr, which also carries whatever Node and the require hook print.
  */
 
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync, writeSync } from 'node:fs';
 import Os from 'node:os';
 import Path from 'node:path';
 import type { Logger } from '@kbn/logging';
-import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal';
+import { EventLoopWatchdog, type EventLoopWatchdogParams } from '@kbn/core-metrics-server-internal';
+import type { ReadableExecutionContext } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/execution_context_reader';
 import type { WatchdogProfilingData } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/types';
 import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
@@ -94,7 +96,11 @@ const PROFILING: WatchdogProfilingData = {
   cooldownMs: perPhase(1_000),
 };
 
-const create = (workerEntry?: string, profiling = NO_PROFILING) =>
+const create = (
+  workerEntry?: string,
+  profiling = NO_PROFILING,
+  overrides: Partial<EventLoopWatchdogParams> = {}
+) =>
   new EventLoopWatchdog({
     logger,
     thresholdsMs: { starting: 200, running: 200 },
@@ -107,6 +113,7 @@ const create = (workerEntry?: string, profiling = NO_PROFILING) =>
     },
     profiling,
     workerEntry,
+    ...overrides,
   });
 
 /** Starts the watchdog, marks running and waits a moment, so the next block is a running one. */
@@ -142,6 +149,21 @@ const loadDeepCode = async (functionCount: number, depth: number) => {
   rmSync(dir, { recursive: true, force: true });
   return run;
 };
+
+/**
+ * Execution contexts kept the way Core's execution context service keeps them: in an
+ * AsyncLocalStorage, with a nested context as the `child` of the one it runs in.
+ */
+interface NestableExecutionContext extends ReadableExecutionContext {
+  readonly child?: ReadableExecutionContext;
+}
+const executionContexts = new AsyncLocalStorage<NestableExecutionContext>();
+const withContext = <T>(context: ReadableExecutionContext, fn: () => T): T => {
+  const parent = executionContexts.getStore();
+  return executionContexts.run(parent ? { ...parent, child: context } : context, fn);
+};
+const TASK_CONTEXT = { type: 'task manager', name: 'run harness', id: 'task-1' };
+const RULE_CONTEXT = { type: 'alert', name: 'execute harness', id: 'rule-1' };
 
 const scenarios: Record<string, () => Promise<void>> = {
   // 1 block while starting, then 7 while running: 5 warnings, 3 suppressed. Blocks are well over
@@ -265,6 +287,54 @@ const scenarios: Record<string, () => Promise<void>> = {
     await watchdog.stop();
     await sleep(1_000);
     writeProfilerThreadLine();
+  },
+  // Three blocks past the first sample: in a task, outside any execution context, and in a rule
+  // nested in a task while the block is also profiled; that one is sampled as the task, the outer
+  // context. Each blocks after an await, so its context
+  // reaches the blocking code through the async chain, as it does in a task run. Every block that
+  // ended is written to the main log as the main thread receives it.
+  sample_contexts: async () => {
+    const watchdog = create(undefined, PROFILING, {
+      readExecutionContext: () => executionContexts.getStore(),
+      onBlock: (block) => writeMainLogLine('info', `block ${JSON.stringify(block)}`),
+    });
+    watchdog.start();
+    await waitForLogLine('ready', 30_000);
+    watchdog.markRunning();
+    await sleep(BLOCK_GAP_MS);
+    await withContext(TASK_CONTEXT, async () => {
+      await sleep(10);
+      blockFor(3_000);
+    });
+    await sleep(BLOCK_GAP_MS);
+    blockFor(2_000);
+    await sleep(BLOCK_GAP_MS);
+    watchdog.setProfiling(true);
+    await withContext(TASK_CONTEXT, () =>
+      withContext(RULE_CONTEXT, async () => {
+        await sleep(10);
+        blockFor(3_000);
+      })
+    );
+    await sleep(STATS_INTERVAL_MS * 2);
+    await watchdog.stop();
+  },
+  // A block that ends before the first sample is never sampled: no inspector session.
+  sample_short_block: async () => {
+    const watchdog = create(undefined, NO_PROFILING, {
+      readExecutionContext: () => executionContexts.getStore(),
+      onBlock: (block) => writeMainLogLine('info', `block ${JSON.stringify(block)}`),
+    });
+    watchdog.start();
+    await waitForLogLine('ready', 30_000);
+    watchdog.markRunning();
+    await sleep(BLOCK_GAP_MS);
+    await withContext(TASK_CONTEXT, async () => {
+      await sleep(10);
+      blockFor(500);
+    });
+    await sleep(STATS_INTERVAL_MS * 2);
+    await watchdog.stop();
   },
   // Short blocks use up the warning burst, with one more whose warning is suppressed, then a block
   // that never ends: the test kills the process once the worker reports it.

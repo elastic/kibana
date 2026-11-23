@@ -275,6 +275,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       collectionInterval: deps.metrics.collectionInterval,
       getEluMetrics$: deps.metrics.getEluMetrics$,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
+      getEventLoopBlocks$: deps.metrics.getEventLoopBlocks$,
     },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
@@ -423,6 +424,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       collectionInterval: deps.metrics.collectionInterval,
       getEluMetrics$: deps.metrics.getEluMetrics$,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
+      getEventLoopBlocks$: deps.metrics.getEventLoopBlocks$,
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,

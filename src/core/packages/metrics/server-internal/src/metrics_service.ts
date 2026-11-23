@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, firstValueFrom, map, ReplaySubject, Subject, zip } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  firstValueFrom,
+  map,
+  ReplaySubject,
+  Subject,
+  zip,
+  type Observable,
+} from 'rxjs';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -18,6 +27,7 @@ import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-
 import { EventLoopUtilizationMonitor } from '@kbn/core-metrics-collectors-server-internal';
 import type {
   EluMetrics,
+  EventLoopBlock,
   OpsMetrics,
   MetricsServiceSetup,
   MetricsServiceStart,
@@ -47,6 +57,8 @@ export interface MetricsServicePrebootDeps {
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearchService: InternalElasticsearchServiceSetup;
+  /** Blocks reported by the event loop watchdog; none when omitted. */
+  eventLoopBlocks$?: Observable<EventLoopBlock>;
 }
 
 /** @internal */
@@ -90,6 +102,7 @@ export class MetricsService
   public async setup({
     http,
     elasticsearchService,
+    eventLoopBlocks$ = EMPTY,
   }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
     const config = await this.getOpsConfig();
     const collectionInterval = config.interval.asMilliseconds();
@@ -119,6 +132,7 @@ export class MetricsService
       collectionInterval,
       getOpsMetrics$: () => this.metrics$,
       getEluMetrics$: () => this.elu$,
+      getEventLoopBlocks$: () => eventLoopBlocks$,
     };
 
     return this.service;

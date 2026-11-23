@@ -9,7 +9,8 @@
 
 import moment from 'moment';
 import { merge } from 'lodash';
-import { lastValueFrom, take, toArray } from 'rxjs';
+import { Subject, lastValueFrom, take, toArray } from 'rxjs';
+import type { EventLoopBlock } from '@kbn/core-metrics-server';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -288,6 +289,37 @@ describe('MetricsService', () => {
           long: expect.closeTo(0.005, 3), // accumulating mean: 3 * 100 / 60000 = 0.005
         }),
       ]);
+    });
+
+    it("emits the event loop watchdog's blocks on getEventLoopBlocks$ call", async () => {
+      const eventLoopBlocks$ = new Subject<EventLoopBlock>();
+      await metricsService.setup({
+        http: httpMock,
+        elasticsearchService: esServiceMock,
+        eventLoopBlocks$,
+      });
+      const { getEventLoopBlocks$ } = await metricsService.start();
+      const blocks = jest.fn();
+      getEventLoopBlocks$().subscribe(blocks);
+
+      const block: EventLoopBlock = {
+        startedAt: 1_700_000_000_000,
+        blockedMs: 5_200,
+        phase: 'running',
+        contexts: {
+          samples: 9,
+          withoutContext: 0,
+          top: [{ context: { type: 'task manager', name: 'run example', id: '1' }, samples: 9 }],
+        },
+      };
+      eventLoopBlocks$.next(block);
+      expect(blocks.mock.calls).toEqual([[block]]);
+    });
+
+    it('emits no event loop blocks without an event loop watchdog', async () => {
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
+      const { getEventLoopBlocks$ } = await metricsService.start();
+      await expect(lastValueFrom(getEventLoopBlocks$().pipe(toArray()))).resolves.toEqual([]);
     });
 
     it('omits metrics from log message if they are missing or malformed', async () => {

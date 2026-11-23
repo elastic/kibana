@@ -11,8 +11,15 @@ import type { ManagedWorker, WorkerLoggingConfig } from '@kbn/core-threads-serve
 import { createManagedWorker } from '@kbn/core-threads-server-internal';
 import type { Logger } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
+import type { EventLoopBlock } from '@kbn/core-metrics-server';
+import {
+  installExecutionContextReader,
+  uninstallExecutionContextReader,
+  type ReadExecutionContext,
+} from './execution_context_reader';
 import type { Phase, WatchdogProfilingData, WatchdogWorkerData } from './types';
 import {
+  BLOCK_MESSAGE_KEY,
   HEARTBEAT_INTERVAL_MS,
   SLOT_COUNT,
   Slot,
@@ -30,9 +37,19 @@ export interface EventLoopWatchdogParams {
   statsIntervalMs: number;
   logging: WorkerLoggingConfig;
   profiling: WatchdogProfilingData;
+  /**
+   * Returns the execution context of the running code. The worker samples it during a block;
+   * without it, blocks are reported without their execution context.
+   */
+  readExecutionContext?: ReadExecutionContext;
+  /** Called on the main thread with each block the worker detected, once the block has ended. */
+  onBlock?: (block: EventLoopBlock) => void;
   /** Overrides the worker entry, for tests. */
   workerEntry?: string;
 }
+
+const isBlockMessage = (message: unknown): message is { [BLOCK_MESSAGE_KEY]: EventLoopBlock } =>
+  typeof message === 'object' && message !== null && BLOCK_MESSAGE_KEY in message;
 
 /** Main-thread side: stamps the heartbeat the worker watches. Detection runs in the worker. */
 export class EventLoopWatchdog {
@@ -53,7 +70,16 @@ export class EventLoopWatchdog {
     if (this.stopping) {
       throw new Error('Cannot start the event loop watchdog while it is stopping');
     }
-    const { logger, thresholdsMs, statsIntervalMs, logging, profiling, workerEntry } = this.params;
+    const {
+      logger,
+      thresholdsMs,
+      statsIntervalMs,
+      logging,
+      profiling,
+      readExecutionContext,
+      onBlock,
+      workerEntry,
+    } = this.params;
     // Resolve first: if it throws, no heartbeat timer is left behind.
     const entry = workerEntry ?? require.resolve('./worker');
     const shared = new BigInt64Array(
@@ -64,6 +90,9 @@ export class EventLoopWatchdog {
     Atomics.store(shared, Slot.runningSince, BigInt(this.runningSinceUs));
     this.shared = shared;
     this.writeProfilingSlot();
+    if (readExecutionContext) {
+      installExecutionContextReader(readExecutionContext);
+    }
     this.heartbeatTimer = setInterval(
       () => Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs())),
       HEARTBEAT_INTERVAL_MS
@@ -76,6 +105,7 @@ export class EventLoopWatchdog {
       statsIntervalMs,
       logging,
       profiling,
+      sampleExecutionContext: readExecutionContext !== undefined,
     };
     this.worker = createManagedWorker<WatchdogWorkerData>({
       name: WATCHDOG_WORKER_NAME,
@@ -89,6 +119,11 @@ export class EventLoopWatchdog {
       unref: true,
       // Never stays off while the flag is on: restarts back off to ManagedWorker's 1 minute cap.
       restart: { maxAttempts: Infinity },
+      onMessage: (message) => {
+        if (isBlockMessage(message)) {
+          onBlock?.(message[BLOCK_MESSAGE_KEY]);
+        }
+      },
       // Can't fire with unlimited restarts; keeps the heartbeat from outliving a future limit.
       onExhausted: () => this.clearHeartbeat(),
     });
@@ -170,6 +205,7 @@ export class EventLoopWatchdog {
     }
     this.worker = undefined;
     this.shared = undefined;
+    uninstallExecutionContextReader();
     this.logProfiling();
     this.clearHeartbeat();
     this.stopping = worker
