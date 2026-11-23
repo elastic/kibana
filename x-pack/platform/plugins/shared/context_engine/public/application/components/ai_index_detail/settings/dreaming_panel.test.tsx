@@ -12,13 +12,13 @@ import React from 'react';
 import type { AiIndexDreamingConfig } from '../../../../../common/dreaming';
 import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
 import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
-import { useAllDreamingTemplates } from '../../../hooks/use_dreaming_templates';
+import { useDreamingTemplates } from '../../../hooks/use_dreaming_templates';
 import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
 import { DreamingPanel } from './dreaming_panel';
 
 jest.mock('../../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
 jest.mock('../../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
-jest.mock('../../../hooks/use_dreaming_templates', () => ({ useAllDreamingTemplates: jest.fn() }));
+jest.mock('../../../hooks/use_dreaming_templates', () => ({ useDreamingTemplates: jest.fn() }));
 const navigateToContextEngine = jest.fn();
 jest.mock('../../../hooks/use_navigation', () => ({
   useNavigation: () => ({ navigateToContextEngine }),
@@ -74,7 +74,7 @@ describe('DreamingPanel', () => {
     jest.clearAllMocks();
     saveConfig.mockResolvedValue(true);
     jest.mocked(useSaveDreamingConfig).mockReturnValue({ saveConfig, isSaving: false });
-    jest.mocked(useAllDreamingTemplates).mockReturnValue({
+    jest.mocked(useDreamingTemplates).mockReturnValue({
       templates: [
         {
           id: 'customer_support',
@@ -198,6 +198,84 @@ describe('DreamingPanel', () => {
 
     expect(screen.getByText('Must be at least 15 minutes.')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
+  });
+
+  it('turns maintenance on with its defaults, reporting only', async () => {
+    renderPanel(aiIndexWith(factsOnly));
+
+    expect(screen.queryByTestId('contextAiIndexMaintenanceMode')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexMaintenanceEnabled'));
+    expect(screen.getByTestId('contextAiIndexMaintenanceMode')).toHaveValue('report');
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: {
+            enabled: true,
+            mode: 'report',
+            schedule: { interval: '24h' },
+            neighbors: 5,
+            sweep_size: 200,
+          },
+        }),
+      })
+    );
+  });
+
+  it('saves the maintenance mode and interval', async () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMode'), {
+      target: { value: 'apply' },
+    });
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceInterval'), {
+      target: { value: '12h' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: expect.objectContaining({
+            mode: 'apply',
+            schedule: { interval: '12h' },
+          }),
+        }),
+      })
+    );
+  });
+
+  it('does not save maintenance settings out of bounds', () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceNeighbors'), {
+      target: { value: '50' },
+    });
+
+    expect(screen.getByText('Must be a whole number from 1 to 20.')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
+  });
+
+  it('keeps the saved maintenance settings when it turns maintenance off', async () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceNeighbors'), {
+      target: { value: '50' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexMaintenanceEnabled'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: expect.objectContaining({ enabled: false, neighbors: 5 }),
+        }),
+      })
+    );
   });
 
   it('discards edits', () => {

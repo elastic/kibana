@@ -113,6 +113,10 @@ interface YamlValidationResultConnectorIdError extends YamlValidationDiagnosticB
   owner: 'connector-id-validation';
 }
 
+interface YamlValidationResultServiceAccount extends YamlValidationDiagnosticBase {
+  owner: 'service-account-validation';
+}
+
 interface YamlValidationResultJsonSchemaDefault extends YamlValidationDiagnosticBase {
   owner: 'json-schema-default-validation';
 }
@@ -140,6 +144,10 @@ interface YamlValidationResultIfConditionError extends YamlValidationDiagnosticB
 
 interface YamlValidationResultDeprecatedStep extends YamlValidationDiagnosticBase {
   owner: 'deprecated-step-validation';
+}
+
+interface YamlValidationResultStepExposure extends YamlValidationDiagnosticBase {
+  owner: 'step-exposure-validation';
 }
 
 interface YamlValidationResultEsql extends YamlValidationDiagnosticBase {
@@ -171,6 +179,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'variable-validation',
   'liquid-template-validation',
   'connector-id-validation',
+  'service-account-validation',
   'json-schema-default-validation',
   'step-property-validation',
   'workflow-inputs-validation',
@@ -178,6 +187,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'workflow-output-validation',
   'if-condition-validation',
   'deprecated-step-validation',
+  'step-exposure-validation',
   'esql-validation',
   'parallel-fan-out-validation',
   'parallel-mode-validation',
@@ -200,6 +210,7 @@ export type YamlValidationDiagnostic =
   | YamlValidationResultMonacoYaml
   | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
+  | YamlValidationResultServiceAccount
   | YamlValidationResultJsonSchemaDefault
   | YamlValidationResultStepPropertyError
   | YamlValidationResultWorkflowInputsError
@@ -207,6 +218,7 @@ export type YamlValidationDiagnostic =
   | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError
   | YamlValidationResultDeprecatedStep
+  | YamlValidationResultStepExposure
   | YamlValidationResultEsql
   | YamlValidationResultParallelFanOut
   | YamlValidationResultParallelMode

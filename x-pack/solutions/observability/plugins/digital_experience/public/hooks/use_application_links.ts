@@ -46,6 +46,7 @@ export interface ApplicationLinks {
   overviewPath: string;
   errorsHref: string;
   networkHref: string;
+  reportsHref: string;
   sessionsHref: (sessionsQuery?: SessionsListUrlQuery) => string;
   sessionHref: (sessionId: string, sessionsQuery?: SessionsListUrlQuery) => string;
 }
@@ -93,6 +94,9 @@ export const useApplicationLinks = (
       ),
       networkHref: toHref(
         router.link('/{serviceName}/network', { path: { serviceName }, query: tabQuery })
+      ),
+      reportsHref: toHref(
+        router.link('/{serviceName}/reports', { path: { serviceName }, query: tabQuery })
       ),
       sessionsHref: (sessionsQuery = {}) =>
         toHref(

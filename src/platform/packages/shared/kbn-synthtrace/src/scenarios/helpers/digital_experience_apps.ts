@@ -16,7 +16,11 @@ import {
   type EdotBrowserClientOptions,
   type EdotBrowserEvent,
   type EdotBrowserExceptionTemplate,
+  type EdotBrowserOutage,
+  type EdotBrowserPage,
+  type EdotBrowserRatedException,
   type EdotBrowserReplayVisit,
+  type EdotBrowserRequest,
   type EdotBrowserSite,
   type EdotBrowserUser,
   type Fields,
@@ -41,10 +45,38 @@ export interface DigitalExperienceEnvironment {
   withoutResourceTimings?: boolean;
 }
 
+/** A release of an app that some of its sessions run, written as `service.version`. */
+export interface DigitalExperienceVersion {
+  version: string;
+  /** Share of the app's sessions that run it, relative to its other versions. */
+  weight: number;
+  /**
+   * Uncaught exceptions that clicking an element throws in this version only, by the element's
+   * CSS selector: a regression of the release, or a bug that it fixed.
+   */
+  clickExceptions?: Readonly<Record<string, readonly EdotBrowserRatedException[]>>;
+}
+
+/**
+ * An outage of one endpoint of the app, which happens once in every period of `everyHours`, at a
+ * time drawn from the seed, for `minutes`. The requests to the endpoint sent during it get its
+ * failures.
+ */
+export interface DigitalExperienceIncident {
+  /** The URL of the request that fails, as the site's pages and click targets write it. */
+  url: string;
+  failureRate: number;
+  failureStatusCodes: readonly number[];
+  everyHours: number;
+  minutes: readonly [min: number, max: number];
+}
+
 export interface DigitalExperienceApp {
   serviceName: string;
-  serviceVersion: string;
+  /** The releases the app's sessions run, like a rollout in progress. */
+  versions: readonly [DigitalExperienceVersion, ...DigitalExperienceVersion[]];
   health: HealthProfileName;
+  incident?: DigitalExperienceIncident;
   sessionsPerMinute: number;
   /** Share of sessions (0 to 1) with a signed-in user; the others are anonymous. */
   signedInRate: number;
@@ -184,11 +216,70 @@ const stagingExperiment = (flag: string): EdotBrowserExceptionTemplate => ({
   stacks: [[{ functionName: 'FeatureFlags.get' }, { functionName: 'useFeatureFlag' }]],
 });
 
+// Safari in private browsing has no room in localStorage, so whatever writes to it throws
+const PRIVATE_BROWSING_STORAGE_ERROR: EdotBrowserRatedException = {
+  type: 'QuotaExceededError',
+  message: 'The quota has been exceeded.',
+  engines: ['webkit'],
+  rate: 0.15,
+  persistent: true,
+  stacks: [[{ functionName: 'persistCart' }, { functionName: 'async addToCart' }]],
+};
+
 export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
   {
     serviceName: 'storefront-web',
-    serviceVersion: '4.12.0',
+    versions: [
+      {
+        version: '4.12.0',
+        weight: 55,
+        // Tabs opened before 4.13.0 shipped ask for a chunk of the cart drawer that is gone
+        clickExceptions: {
+          '#add-to-cart': [
+            {
+              type: 'ChunkLoadError',
+              message: `Loading chunk 318 failed.\n(missing: ${STOREFRONT_ORIGIN}/assets/js/chunk-cart-drawer.2b97a0.js)`,
+              rate: 0.05,
+              stacks: [
+                [
+                  { functionName: 'onScriptComplete', file: '/assets/js/vendors-react.9d4e7b.js' },
+                  { functionName: 'async CartDrawer.open' },
+                ],
+              ],
+            },
+          ],
+        },
+      },
+      {
+        version: '4.13.0',
+        weight: 45,
+        // The new size picker leaves the variant unset for products that come in a single size
+        clickExceptions: {
+          '#add-to-cart': edotBrowser.readPropertyErrors(
+            { variable: 'variant', property: 'sku' },
+            {
+              rate: 0.2,
+              persistent: true,
+              stacks: [
+                [
+                  { functionName: 'toCartItem' },
+                  { functionName: 'async addToCart' },
+                  { functionName: 'async ProductActions.onAddToCart' },
+                ],
+              ],
+            }
+          ),
+        },
+      },
+    ],
     health: 'healthy',
+    incident: {
+      url: `${STOREFRONT_ORIGIN}/api/cart/items`,
+      failureRate: 0.9,
+      failureStatusCodes: [502, 503],
+      everyHours: 3,
+      minutes: [15, 25],
+    },
     sessionsPerMinute: 6,
     // Most shoppers browse without signing in
     signedInRate: 0.35,
@@ -264,6 +355,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
       pages: [
         {
           path: '/',
+          weight: 30,
           resources: [
             { path: '/assets/img/hero-autumn.webp', initiatorType: 'img', sizeBytes: 180_000 },
             {
@@ -300,9 +392,17 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
               slowTail: { rate: 0.1, factor: 10 },
             },
           ],
+          clickTargets: [
+            { tagName: 'A', cssSelector: 'section.hero > a.cta', weight: 3 },
+            { tagName: 'A', cssSelector: 'nav.main-nav > a:nth-child(2)', weight: 3 },
+            // The hero image looks like it leads somewhere, but only its button does
+            { tagName: 'IMG', cssSelector: 'section.hero > img', weight: 1.5, deadClickRate: 0.15 },
+            { tagName: 'INPUT', cssSelector: '#search' },
+          ],
         },
         {
           path: '/products',
+          weight: 22,
           resources: [
             {
               path: '/assets/img/products/thumbs-sheet.3c1d52.webp',
@@ -320,6 +420,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
         },
         {
           path: '/products/trail-running-shoes',
+          weight: 22,
           resources: [
             { path: '/assets/img/products/trail-1.webp', initiatorType: 'img', sizeBytes: 120_000 },
             {
@@ -344,22 +445,96 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
               cssSelector: '#add-to-cart',
               otelAttributes: { action: 'add-to-cart' },
               request: { method: 'POST', url: `${STOREFRONT_ORIGIN}/api/cart/items` },
+              weight: 5,
+              exceptions: [PRIVATE_BROWSING_STORAGE_ERROR],
             },
-            { tagName: 'IMG', cssSelector: 'div.gallery > img:nth-child(2)' },
+            // EDOT Browser only reports dead clicks on clickable-looking elements: the pointer
+            // gallery, a reviews link without a handler and a sold-out size
+            {
+              tagName: 'IMG',
+              cssSelector: 'div.gallery > img:nth-child(2)',
+              weight: 1.5,
+              deadClickRate: 0.35,
+            },
+            {
+              tagName: 'A',
+              cssSelector: 'div.product-info > a.reviews-count',
+              weight: 0.75,
+              deadClickRate: 0.5,
+            },
+            {
+              tagName: 'BUTTON',
+              cssSelector: 'div.size-picker > button:nth-child(5)',
+              weight: 0.5,
+              deadClickRate: 0.9,
+            },
+            { tagName: 'A', cssSelector: 'nav.breadcrumbs > a:nth-child(2)', weight: 2 },
           ],
         },
         {
+          // Search is slow on a cold index, and shoppers hammer the button while they wait
+          path: '/search?q=trail+shoes',
+          weight: 12,
+          requests: [{ method: 'GET', url: `${STOREFRONT_ORIGIN}/api/search/suggest?q=trail` }],
+          clickTargets: [
+            {
+              tagName: 'BUTTON',
+              cssSelector: 'form.search > button:nth-child(2)',
+              otelAttributes: { action: 'search' },
+              weight: 4,
+              request: {
+                method: 'GET',
+                url: `${STOREFRONT_ORIGIN}/api/search?q=trail+shoes`,
+                latencyFactor: 4,
+                slowTail: { rate: 0.6, factor: 6 },
+              },
+            },
+            { tagName: 'INPUT', cssSelector: '#search', weight: 2 },
+            { tagName: 'DIV', cssSelector: 'ul.results > li:nth-child(1) > div.card', weight: 3 },
+          ],
+          // Suggestions still in flight are aborted as the shopper types on
+          exceptions: [
+            { message: 'signal is aborted without reason', engines: ['chromium'] as const },
+            { message: 'The operation was aborted. ', engines: ['firefox'] as const },
+            { message: 'Fetch is aborted', engines: ['webkit'] as const },
+          ].map(({ message, engines }) => ({
+            type: 'AbortError',
+            message,
+            engines,
+            rate: 0.1,
+            stacks: [
+              [
+                { functionName: 'SearchSuggest.fetchSuggestions' },
+                { functionName: 'async SearchSuggest.onInput' },
+              ],
+            ],
+          })),
+        },
+        {
           path: '/cart',
+          weight: 10,
           requests: [{ method: 'GET', url: `${STOREFRONT_ORIGIN}/api/cart` }],
           clickTargets: [
             {
               tagName: 'A',
               cssSelector: 'a.checkout-button',
+              weight: 3,
+            },
+            {
+              tagName: 'BUTTON',
+              cssSelector: '#apply-promo',
+              request: {
+                method: 'POST',
+                url: `${STOREFRONT_ORIGIN}/api/cart/promo`,
+                failureRate: 0.3,
+                failureStatusCodes: [422],
+              },
             },
           ],
         },
         {
           path: '/account/orders',
+          weight: 4,
           requests: [
             {
               // One URL per order, and orders that expired can't be found any more
@@ -376,8 +551,38 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
   },
   {
     serviceName: 'checkout-web',
-    serviceVersion: '2.3.1',
+    versions: [
+      { version: '2.3.1', weight: 70 },
+      {
+        version: '2.4.0',
+        weight: 30,
+        // The new address form drops the postal code of saved addresses from before it
+        clickExceptions: {
+          '#continue-to-payment': edotBrowser.readPropertyErrors(
+            { variable: 'address', property: 'postalCode' },
+            {
+              rate: 0.35,
+              persistent: true,
+              stacks: [
+                [
+                  { functionName: 'validateShipping' },
+                  { functionName: 'ShippingForm.handleSubmit' },
+                  { functionName: 'HTMLFormElement.onsubmit' },
+                ],
+              ],
+            }
+          ),
+        },
+      },
+    ],
     health: 'erroring',
+    incident: {
+      url: `${CHECKOUT_ORIGIN}/api/payment`,
+      failureRate: 0.85,
+      failureStatusCodes: [503],
+      everyHours: 3,
+      minutes: [10, 20],
+    },
     sessionsPerMinute: 4,
     // Guest checkout aside, buyers sign in
     signedInRate: 0.8,
@@ -466,7 +671,11 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             {
               tagName: 'BUTTON',
               cssSelector: '#continue-to-payment',
+              weight: 3,
+              // It moves on to the payment step
+              deadClickRate: 0,
             },
+            { tagName: 'INPUT', cssSelector: '#address-line-1', weight: 2 },
           ],
         },
         {
@@ -497,6 +706,25 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
                 failureStatusCodes: [500, 502, 503],
                 latencyFactor: 3,
               },
+              weight: 4,
+              exceptions: [
+                {
+                  type: 'PaymentTokenizationError',
+                  message: 'Card element is not mounted',
+                  rate: 0.05,
+                  stacks: [
+                    [
+                      { functionName: 'PaymentForm.tokenize' },
+                      { functionName: 'async PaymentForm.handleSubmit' },
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              tagName: 'IMG',
+              cssSelector: 'div.accepted-cards > img:nth-child(1)',
+              deadClickRate: 0.4,
             },
           ],
         },
@@ -571,7 +799,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
   },
   {
     serviceName: 'media-portal-web',
-    serviceVersion: '7.0.4',
+    versions: [{ version: '7.0.4', weight: 1 }],
     health: 'slow',
     sessionsPerMinute: 4,
     // Subscribers only
@@ -725,6 +953,20 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
               failureStatusCodes: [404],
             },
           ],
+          clickTargets: [
+            {
+              tagName: 'BUTTON',
+              cssSelector: 'section.comments > button.load-more',
+              weight: 2,
+              request: {
+                method: 'GET',
+                url: `${MEDIA_ORIGIN}/api/comments?article=bike-lanes&page=2`,
+                latencyFactor: 1.5,
+              },
+            },
+            { tagName: 'IMG', cssSelector: 'figure.lead > img', deadClickRate: 0.3 },
+            { tagName: 'A', cssSelector: 'aside.related > a:nth-child(1)', weight: 2 },
+          ],
         },
         {
           path: '/video/weekly-roundup',
@@ -746,7 +988,10 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             {
               tagName: 'BUTTON',
               cssSelector: 'button.vjs-play-control',
+              weight: 3,
             },
+            // The poster shows a play icon, but the player only listens to its button
+            { tagName: 'DIV', cssSelector: 'div.vjs-poster', deadClickRate: 0.3 },
           ],
         },
       ],
@@ -768,7 +1013,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
   },
   {
     serviceName: 'support-center-web',
-    serviceVersion: '0.9.3',
+    versions: [{ version: '0.9.3', weight: 1 }],
     health: 'critical',
     sessionsPerMinute: 2,
     // A B2B help desk, used by the customers' agents
@@ -854,6 +1099,20 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
                 url: `${SUPPORT_ORIGIN}/api/tickets`,
                 instrumentation: 'xhr',
               },
+              weight: 3,
+              exceptions: [
+                {
+                  type: 'AttachmentUploadError',
+                  message: 'Attachment upload is still in progress',
+                  rate: 0.08,
+                  stacks: [
+                    [
+                      { functionName: 'TicketForm.assertUploadsDone' },
+                      { functionName: 'TicketForm.handleSubmit' },
+                    ],
+                  ],
+                },
+              ],
             },
             {
               tagName: 'TEXTAREA',
@@ -867,12 +1126,6 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
         },
       ],
       exceptions: [
-        {
-          type: 'Error',
-          message: 'ResizeObserver loop completed with undelivered notifications.',
-          weight: 4,
-          stacks: [[{ functionName: 'ResizeObserver.<anonymous>' }]],
-        },
         {
           type: 'TypeError',
           message: "Cannot read properties of null (reading 'focus')",
@@ -902,7 +1155,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
   },
   {
     serviceName: 'docs-web',
-    serviceVersion: '1.0.0',
+    versions: [{ version: '1.0.0', weight: 1 }],
     health: 'healthy',
     sessionsPerMinute: 1,
     // Public docs, read signed in by a few of the SaaS customers
@@ -953,7 +1206,34 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
       ],
       pages: [
         { path: '/' },
-        { path: '/guides/getting-started' },
+        {
+          path: '/guides/getting-started',
+          clickTargets: [
+            {
+              tagName: 'BUTTON',
+              cssSelector: 'div.code-block > button.copy',
+              weight: 2,
+              deadClickRate: 0,
+              // Safari only lets a page write to the clipboard right in the click handler
+              exceptions: [
+                {
+                  type: 'NotAllowedError',
+                  message:
+                    'The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission.',
+                  engines: ['webkit'],
+                  rate: 0.6,
+                  stacks: [
+                    [
+                      { functionName: 'copyToClipboard' },
+                      { functionName: 'async CodeBlock.onCopy' },
+                    ],
+                  ],
+                },
+              ],
+            },
+            { tagName: 'A', cssSelector: 'nav.sidebar > a:nth-child(3)', weight: 3 },
+          ],
+        },
         { path: '/api-reference/webhooks' },
         {
           path: '/search?q=webhooks',
@@ -1123,6 +1403,10 @@ export const parseDigitalExperienceScenarioOpts = (
 
 const MS_PER_MINUTE = 60_000;
 
+/** When the session `index` of a rate of `perMinute` sessions starts, by absolute time. */
+export const sessionTimeOf = (index: number, perMinute: number): number =>
+  Math.ceil(((index + 1) * MS_PER_MINUTE) / perMinute) - 1;
+
 /** The number of events of a per-minute rate that start in `[from, to)`, counted from the epoch. */
 const countInWindow = (perMinute: number, from: number, to: number): number =>
   Math.floor((perMinute * to) / MS_PER_MINUTE) - Math.floor((perMinute * from) / MS_PER_MINUTE);
@@ -1173,25 +1457,30 @@ export const getTimestamp = (event: Serializable<Fields>): number =>
 const getStart = (events: Array<Serializable<Fields>>): number =>
   events.reduce((start, event) => Math.min(start, getTimestamp(event)), Infinity);
 
-interface OngoingSession {
+interface OngoingSession<TFields extends Fields> {
   /** The time the session is generated for, when it starts. */
   start: number;
-  /** Its events by time, and the next one to write. */
-  events: Array<{ time: number; event: EdotBrowserEvent }>;
+  /** Its events by release time, and the next one to write. */
+  events: Array<{ time: number; event: Serializable<TFields> }>;
   next: number;
 }
 
-interface OngoingSessions {
+interface OngoingSessions<TFields extends Fields> {
   /** The end of the last window written. The window that starts there carries on from here. */
   end: number;
   /** The index of the next session to start. */
   nextIndex: number;
-  sessions: OngoingSession[];
+  sessions: Array<OngoingSession<TFields>>;
 }
 
-// Live mode calls the scenario again for every batch of a second or so, so the sessions in progress
-// are kept between batches, by run and app, instead of being simulated again for every batch
-const ongoingSessionsByKey = new Map<string, OngoingSessions>();
+/**
+ * The sessions in progress by run and app. Live mode calls the scenario again for every batch of a
+ * second or so, so a store lives for the whole process and keeps them between batches, instead of
+ * simulating them again for every batch.
+ */
+export type OngoingSessionStore<TFields extends Fields> = Map<string, OngoingSessions<TFields>>;
+
+const ongoingBrowserSessions: OngoingSessionStore<EdotBrowserDocument> = new Map();
 
 /**
  * Like {@link generatePerMinute}, except that sessions start at their time and run on from there:
@@ -1200,68 +1489,75 @@ const ongoingSessionsByKey = new Map<string, OngoingSessions>();
  * before a window are in progress, and their events after that are left out. A window that doesn't
  * follow the last one written for `key` starts over: `create` is then called again for the sessions
  * started within `maxDuration`, with `after` set to the window's start, and may return nothing for
- * a session that ended before. Every window has the same events either way.
+ * a session that ended before. Every window has the same events either way. An event is written in
+ * the window of its `releaseTime`, by default its `@timestamp`.
  */
-export const generateOngoingPerMinute = (
+export const generateOngoingPerMinute = <TFields extends Fields>(
   range: Timerange,
   perMinute: number,
   {
+    store,
     key,
     maxDuration,
     create,
+    releaseTime = getTimestamp,
   }: {
+    store: OngoingSessionStore<TFields>;
     key: string;
     maxDuration: number;
-    create: (session: { time: number; index: number; after: number }) => EdotBrowserEvent[];
+    /** When the event is sent, e.g. a crash reported on the next launch, if not its `@timestamp`. */
+    releaseTime?: (event: Serializable<TFields>) => number;
+    create: (session: {
+      time: number;
+      index: number;
+      after: number;
+    }) => Array<Serializable<TFields>>;
   }
-): SynthtraceGenerator<EdotBrowserDocument> => {
+): SynthtraceGenerator<TFields> => {
   const to = range.to.getTime();
   // The same numbering and times as generatePerMinute, by absolute time
   const indexAt = (time: number) => Math.floor((perMinute * time) / MS_PER_MINUTE);
-  const timeOf = (index: number) => Math.ceil(((index + 1) * MS_PER_MINUTE) / perMinute) - 1;
 
-  return range
-    .interval('1s')
-    .generator<EdotBrowserDocument>((windowStart, _index, { stepMilliseconds }) => {
-      const windowEnd = Math.min(windowStart + stepMilliseconds, to);
-      const previous = ongoingSessionsByKey.get(key);
-      const state: OngoingSessions =
-        previous?.end === windowStart
-          ? previous
-          : {
-              end: windowStart,
-              // One more than needed, in case rounding puts a session's time on the other side
-              nextIndex: Math.max(indexAt(windowStart - maxDuration) - 1, 0),
-              sessions: [],
-            };
+  return range.interval('1s').generator<TFields>((windowStart, _index, { stepMilliseconds }) => {
+    const windowEnd = Math.min(windowStart + stepMilliseconds, to);
+    const previous = store.get(key);
+    const state: OngoingSessions<TFields> =
+      previous?.end === windowStart
+        ? previous
+        : {
+            end: windowStart,
+            // One more than needed, in case rounding puts a session's time on the other side
+            nextIndex: Math.max(indexAt(windowStart - maxDuration) - 1, 0),
+            sessions: [],
+          };
 
-      while (state.nextIndex < indexAt(windowEnd)) {
-        const index = state.nextIndex++;
-        const start = timeOf(index);
-        const events = create({ time: start, index, after: windowStart })
-          .map((event) => ({ time: getTimestamp(event), event }))
-          .sort((a, b) => a.time - b.time);
-        state.sessions.push({ start, events, next: 0 });
-      }
+    while (state.nextIndex < indexAt(windowEnd)) {
+      const index = state.nextIndex++;
+      const start = sessionTimeOf(index, perMinute);
+      const events = create({ time: start, index, after: windowStart })
+        .map((event) => ({ time: releaseTime(event), event }))
+        .sort((a, b) => a.time - b.time);
+      state.sessions.push({ start, events, next: 0 });
+    }
 
-      const written: EdotBrowserEvent[] = [];
-      for (const session of state.sessions) {
-        const { start, events } = session;
-        while (session.next < events.length && events[session.next].time < windowEnd) {
-          const { time, event } = events[session.next++];
-          if (time >= windowStart && time >= start && time < start + maxDuration) {
-            written.push(event);
-          }
+    const written: Array<Serializable<TFields>> = [];
+    for (const session of state.sessions) {
+      const { start, events } = session;
+      while (session.next < events.length && events[session.next].time < windowEnd) {
+        const { time, event } = events[session.next++];
+        if (time >= windowStart && time >= start && time < start + maxDuration) {
+          written.push(event);
         }
       }
+    }
 
-      state.end = windowEnd;
-      state.sessions = state.sessions.filter(
-        ({ start, events, next }) => next < events.length && start + maxDuration > windowEnd
-      );
-      ongoingSessionsByKey.set(key, state);
-      return written;
-    });
+    state.end = windowEnd;
+    state.sessions = state.sessions.filter(
+      ({ start, events, next }) => next < events.length && start + maxDuration > windowEnd
+    );
+    store.set(key, state);
+    return written;
+  });
 };
 
 // EDOT Browser 0.4.0 is the first release that writes session data, 0.3.0 the last one without
@@ -1276,6 +1572,9 @@ const FOLLOW_UP_SESSION_RATE = 0.1;
 const SAME_TAB_RATE = 0.5;
 const EARLIER_VISIT_PAGE_VIEWS = 2;
 const IDLE_REQUEST_COUNT = 3;
+// A session and its earlier visits, up to an hour and a half before, take less than this many
+// times the maximum duration of a session, before the run or after it in live mode
+const OUTAGE_MARGIN_SESSIONS = 3;
 // Share of the recorded sessions that run with `replay.quality.packEvents`
 const PACKED_SESSION_RATE = 0.15;
 // Shares of the recorded sessions that get each replay edge case, with `edgeCases`
@@ -1342,6 +1641,111 @@ const getReplayTrigger = (
     : undefined;
 };
 
+const pickByWeight = <T extends { weight: number }>(
+  random: () => number,
+  items: readonly T[]
+): T => {
+  let threshold = random() * items.reduce((sum, { weight }) => sum + weight, 0);
+  for (const item of items) {
+    threshold -= item.weight;
+    if (threshold < 0) {
+      return item;
+    }
+  }
+  return items[items.length - 1];
+};
+
+const DAY_MS = 24 * HOUR_MS;
+// Traffic follows the day, from 35% of its peak at 04:00 UTC up to the peak at 16:00, and drifts
+// down by up to a quarter from one 10 minutes to the next. Sessions are generated at the peak rate
+// and thinned to that share, which keeps the average rate of the day as the app's.
+const TRAFFIC_TROUGH = 0.35;
+const TRAFFIC_PEAK_HOUR = 16;
+const TRAFFIC_DRIFT = 0.25;
+const TRAFFIC_DRIFT_MS = 10 * MINUTE_MS;
+const PEAK_TRAFFIC_FACTOR = 1 / (((1 + TRAFFIC_TROUGH) / 2) * (1 - TRAFFIC_DRIFT / 2));
+
+/** The share of its peak traffic that an app has at `time`, the same in every run with the seed. */
+export const trafficShareAt = (seed: string, serviceName: string, time: number): number => {
+  const hour = (((time % DAY_MS) + DAY_MS) % DAY_MS) / HOUR_MS;
+  const daily =
+    TRAFFIC_TROUGH +
+    (1 - TRAFFIC_TROUGH) * (0.5 + 0.5 * Math.cos((2 * Math.PI * (hour - TRAFFIC_PEAK_HOUR)) / 24));
+  const driftRandom = createSeededRandom(
+    `${seed}:${serviceName}:traffic:${Math.floor(time / TRAFFIC_DRIFT_MS)}`
+  );
+  return daily * (1 - TRAFFIC_DRIFT * driftRandom());
+};
+
+/** The incident of the period of `everyHours` that `time` falls in, from `start` to `end`. */
+export const incidentWindowAt = (
+  seed: string,
+  serviceName: string,
+  { everyHours, minutes: [minMinutes, maxMinutes] }: DigitalExperienceIncident,
+  time: number
+): { start: number; end: number } => {
+  const period = everyHours * HOUR_MS;
+  const periodStart = Math.floor(time / period) * period;
+  const random = createSeededRandom(`${seed}:${serviceName}:incident:${periodStart}`);
+  const duration = Math.round((minMinutes + random() * (maxMinutes - minMinutes)) * MINUTE_MS);
+  const start = periodStart + Math.floor(random() * (period - duration));
+  return { start, end: start + duration };
+};
+
+/** The incidents of every period of `everyHours` from `from` up to `to`, as outages. */
+export const incidentOutagesBetween = (
+  seed: string,
+  serviceName: string,
+  incident: DigitalExperienceIncident,
+  from: number,
+  to: number
+): EdotBrowserOutage[] => {
+  const period = incident.everyHours * HOUR_MS;
+  const outages: EdotBrowserOutage[] = [];
+  for (
+    let periodStart = Math.floor(from / period) * period;
+    periodStart < to;
+    periodStart += period
+  ) {
+    outages.push({
+      ...incidentWindowAt(seed, serviceName, incident, periodStart),
+      failureRate: incident.failureRate,
+      failureStatusCodes: incident.failureStatusCodes,
+    });
+  }
+  return outages;
+};
+
+/**
+ * The site as a version of the app runs it: with the exceptions that its clicks throw and the
+ * outages of the endpoint of its incident, which fail the requests sent during them.
+ */
+const siteOfVersion = (
+  site: EdotBrowserSite,
+  { clickExceptions = {} }: DigitalExperienceVersion,
+  incident?: { url: string; outages: readonly EdotBrowserOutage[] }
+): EdotBrowserSite => {
+  const duringIncident = (request: EdotBrowserRequest): EdotBrowserRequest =>
+    incident && request.url === incident.url ? { ...request, outages: incident.outages } : request;
+  const page = ({ requests, clickTargets, ...rest }: EdotBrowserPage): EdotBrowserPage => ({
+    ...rest,
+    ...(requests ? { requests: requests.map(duringIncident) } : {}),
+    ...(clickTargets
+      ? {
+          clickTargets: clickTargets.map(({ request, exceptions = [], ...target }) => ({
+            ...target,
+            ...(request ? { request: duringIncident(request) } : {}),
+            exceptions: [
+              ...exceptions,
+              ...((target.cssSelector && clickExceptions[target.cssSelector]) || []),
+            ],
+          })),
+        }
+      : {}),
+  });
+  return { ...site, pages: site.pages.map(page) };
+};
+
 /**
  * One generator per app, and environment of the app, in the catalogue, each producing EDOT Browser
  * sessions over `range`. Without the `environments` option, an app only has the scenario's
@@ -1385,8 +1789,9 @@ export const generateEdotBrowserSessions = (
   return DIGITAL_EXPERIENCE_APPS.flatMap(
     ({
       serviceName,
-      serviceVersion,
+      versions,
       health,
+      incident,
       sessionsPerMinute,
       withoutEnvironment,
       environments: appEnvironments,
@@ -1405,19 +1810,24 @@ export const generateEdotBrowserSessions = (
           : [{ name: withoutEnvironment ? undefined : environment, weight: 1 }];
       const totalWeight = deployments.reduce((sum, { weight }) => sum + weight, 0);
       const healthProfile = edotBrowser.healthProfiles[health];
+      // Each request fails by its own time, so a session that runs into an outage only fails
+      // during it, wherever the session is placed. The outages cover every session of the run,
+      // earlier visits included.
+      const incidentOutages = incident && {
+        url: incident.url,
+        outages: incidentOutagesBetween(
+          seed,
+          serviceName,
+          incident,
+          range.from.getTime() - OUTAGE_MARGIN_SESSIONS * maxDuration,
+          range.to.getTime() + OUTAGE_MARGIN_SESSIONS * maxDuration
+        ),
+      };
 
       return deployments.map((deployment) => {
         const { name, weight, exceptions, withoutExceptions, withoutResourceTimings } = deployment;
-        const app = edotBrowser.app({
-          serviceName,
-          serviceVersion,
-          environment: name,
-          distroVersion: withSessionId
-            ? DISTRO_VERSION_WITH_SESSIONS
-            : DISTRO_VERSION_WITHOUT_SESSIONS,
-        });
         const edgeCases = withEdgeCases ? DIGITAL_EXPERIENCE_EDGE_CASES[serviceName] : undefined;
-        const site: EdotBrowserSite = {
+        const deployedSite: EdotBrowserSite = {
           ...appSite,
           // Extra resources go last, so the app's own script stays its main one
           resources: [...(appSite.resources ?? []), ...(edgeCases?.resources ?? [])],
@@ -1428,6 +1838,18 @@ export const generateEdotBrowserSessions = (
             ...(exceptions ?? []),
           ],
         };
+        const releases = versions.map((version) => ({
+          weight: version.weight,
+          app: edotBrowser.app({
+            serviceName,
+            serviceVersion: version.version,
+            environment: name,
+            distroVersion: withSessionId
+              ? DISTRO_VERSION_WITH_SESSIONS
+              : DISTRO_VERSION_WITHOUT_SESSIONS,
+          }),
+          site: siteOfVersion(deployedSite, version, incidentOutages),
+        }));
         // The sessions of an app are the same whether or not it is spread over environments
         const sessionKey =
           deployments.length > 1 ? `${serviceName}:${name ?? 'no-environment'}` : serviceName;
@@ -1435,6 +1857,12 @@ export const generateEdotBrowserSessions = (
           reportExceptions: !withoutExceptions,
           reportResourceTimings: !withoutResourceTimings,
         };
+        const perMinute =
+          ((sessionsPerMinute * scale * weight) / totalWeight) * PEAK_TRAFFIC_FACTOR;
+        // Drawn apart from the session, like everything that doesn't depend on what it does
+        const isInTraffic = (index: number): boolean =>
+          createSeededRandom(`${seed}:${sessionKey}:${index}:traffic`)() <
+          trafficShareAt(seed, serviceName, sessionTimeOf(index, perMinute));
 
         // The session numbered `index`, ending at `end`, without its events before `notBefore`
         const createSession = (
@@ -1442,6 +1870,12 @@ export const generateEdotBrowserSessions = (
           end: number,
           { notBefore, includeReplay }: { notBefore: number; includeReplay: boolean }
         ): EdotBrowserEvent[] => {
+          // The version comes from the session's number, so that a session in progress keeps it,
+          // and so does a run that only simulates it to find its length
+          const { app, site } = pickByWeight(
+            createSeededRandom(`${seed}:${sessionKey}:${index}:version`),
+            releases
+          );
           const random = createSeededRandom(`${seed}:${sessionKey}:${index}`);
           const pageViews = minPageViews + Math.floor(random() * (maxPageViews - minPageViews + 1));
           const pickedProfile = edotBrowser.pickBrowserProfile(random, browserWeights);
@@ -1620,12 +2054,15 @@ export const generateEdotBrowserSessions = (
           );
         };
 
-        const perMinute = (sessionsPerMinute * scale * weight) / totalWeight;
         if (ongoingSessions) {
           return generateOngoingPerMinute(range, perMinute, {
+            store: ongoingBrowserSessions,
             key: `${runKey}:${sessionKey}`,
             maxDuration,
             create: ({ time, index, after }) => {
+              if (!isInTraffic(index)) {
+                return [];
+              }
               // The session that ends at `time` without the option, moved to start there. Simulated
               // once to find its length, without replay, which has a random source of its own.
               const draft = createSession(index, time, {
@@ -1640,7 +2077,9 @@ export const generateEdotBrowserSessions = (
           });
         }
         return generatePerMinute<EdotBrowserDocument>(range, perMinute, ({ time, index }) =>
-          createSession(index, time, { notBefore: from, includeReplay: true })
+          isInTraffic(index)
+            ? createSession(index, time, { notBefore: from, includeReplay: true })
+            : []
         );
       });
     }

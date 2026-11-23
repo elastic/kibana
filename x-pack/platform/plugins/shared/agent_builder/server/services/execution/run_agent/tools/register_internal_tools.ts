@@ -123,10 +123,10 @@ export const registerInternalTools = async ({
 
   const tools: Array<InternalBuiltinToolDefinition<any>> = [];
 
-  // Filesystem — read_file and list_files are always on; bash is FF-gated.
+  // Filesystem — read_file and list_files are always on; bash needs the FF and the `bash_tool` capability.
   tools.push(createReadFileTool({ filesystemService }));
   tools.push(createListFilesTool({ filesystemService }));
-  if (experimentalFeatures.bash && bashService) {
+  if (experimentalFeatures.bash && capabilities.bashTool && bashService) {
     tools.push(createBashTool({ bashService }));
   }
 

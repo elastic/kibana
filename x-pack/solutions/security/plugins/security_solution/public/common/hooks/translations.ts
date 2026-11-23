@@ -18,10 +18,3 @@ export const ADDED_TO_TIMELINE_TEMPLATE_MESSAGE = (fieldOrValue: string) =>
     values: { fieldOrValue },
     defaultMessage: `Added {fieldOrValue} to Timeline template`,
   });
-
-export const ERROR_FETCH_AI_CONNECTORS = i18n.translate(
-  'xpack.securitySolution.hooks.useGetAIConnectors.fetchError',
-  {
-    defaultMessage: 'Error fetching AI connectors',
-  }
-);
