@@ -12,12 +12,18 @@ import { Metadata } from '@grpc/grpc-js';
 import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { OTLPMetricExporter as OTLPMetricExporterProto } from '@opentelemetry/exporter-metrics-otlp-proto';
 import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
-import type { resources } from '@elastic/opentelemetry-node/sdk';
-import { api, metrics } from '@elastic/opentelemetry-node/sdk';
 import type { MetricsConfig, MonitoringCollectionConfig } from '@kbn/metrics-config';
 import { fromExternalVariant } from '@kbn/std';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { duration } from 'moment';
+import type { Resource } from '@opentelemetry/resources';
+import { metrics } from '@opentelemetry/api';
+import {
+  AggregationTemporality,
+  MeterProvider,
+  PeriodicExportingMetricReader,
+} from '@opentelemetry/sdk-metrics';
+import type { IMetricReader, PushMetricExporter } from '@opentelemetry/sdk-metrics';
 import { PrometheusExporter } from './prometheus_exporter';
 
 /**
@@ -27,7 +33,7 @@ export interface InitMetricsOptions {
   /**
    * The OpenTelemetry resource information
    */
-  resource: resources.Resource;
+  resource: Resource;
   /**
    * The OpenTelemetry metrics configuration
    */
@@ -48,7 +54,7 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
   const globalExportIntervalMillis = metricsConfig.interval.asMilliseconds();
   const globalExportTimeoutMillis = metricsConfig.timeout?.asMilliseconds();
 
-  const readers: metrics.IMetricReader[] = [];
+  const readers: IMetricReader[] = [];
 
   // OTel requires all readers to be initialized when initializing the SDK.
   // If the monitoring collection plugin requires the prometheus exporter, we need to initialize it now.
@@ -96,11 +102,11 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
       const commonConfig = {
         temporalityPreference:
           variant.value.temporalityPreference === 'delta'
-            ? metrics.AggregationTemporality.DELTA
-            : metrics.AggregationTemporality.CUMULATIVE,
+            ? AggregationTemporality.DELTA
+            : AggregationTemporality.CUMULATIVE,
       };
 
-      let exporter: metrics.PushMetricExporter;
+      let exporter: PushMetricExporter;
       switch (variant.type) {
         case 'grpc': {
           const metadata = new Metadata();
@@ -145,7 +151,7 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
         }
       }
 
-      return new metrics.PeriodicExportingMetricReader({
+      return new PeriodicExportingMetricReader({
         exporter,
         exportIntervalMillis,
         exportTimeoutMillis,
@@ -153,13 +159,13 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
     })
   );
 
-  const meterProvider = new metrics.MeterProvider({
+  const meterProvider = new MeterProvider({
     readers,
     resource,
     views: [],
   });
 
-  api.metrics.setGlobalMeterProvider(meterProvider);
+  metrics.setGlobalMeterProvider(meterProvider);
 
   cleanupBeforeExit(() => meterProvider.shutdown());
 }

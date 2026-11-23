@@ -7,6 +7,7 @@
 
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { createMemoryHistory } from 'history';
+import { fireEvent } from '@testing-library/react';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
@@ -49,7 +50,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       );
       if (button) {
         // Click the first button under the second child element.
-        button.simulate('click', { button: 0 });
+        fireEvent.click(button[0], { button: 0 });
       }
     });
     const queryStringWithOriginSelected = urlSearch(resolverComponentInstanceID, {
@@ -87,7 +88,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
           );
           if (button) {
             // Click the first button under the second child element.
-            button.simulate('click', { button: 0 });
+            fireEvent.click(button[0], { button: 0 });
           }
         });
         it(`should have a url search of ${urlSearch(newInstanceID, {

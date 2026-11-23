@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type { MouseEvent } from 'react';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 
 export interface SearchBoostSetupDependencies {
   management: ManagementSetup;
+}
+
+export interface LinkProps {
+  href: string;
+  onClick: (event: MouseEvent) => void;
 }

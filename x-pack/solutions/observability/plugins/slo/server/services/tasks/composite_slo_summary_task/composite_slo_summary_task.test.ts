@@ -18,6 +18,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
+import { DefaultSLODefinitionRepository } from '../../slo_definition_repository';
 import {
   CompositeSloSummaryTask,
   getCompositeSloSummaryTaskId,
@@ -161,6 +162,9 @@ describe('CompositeSloSummaryTask', () => {
       );
 
       expect(mockPersist).toHaveBeenCalledTimes(1);
+      expect(mockPersist).toHaveBeenCalledWith(
+        expect.objectContaining({ sloRepository: expect.any(DefaultSLODefinitionRepository) })
+      );
     });
 
     it('skips computeAndPersistCompositeSummaries when composite SLO feature flag is disabled', async () => {
