@@ -72,24 +72,29 @@ export const initializeFiltersManager = (
     awaitingRequiredFilters$.next(a);
   });
 
-  const childFiltersLoading$ = awaitingRequiredFilters$
-    .pipe(
-      combineLatestWith(
-        combineCompatibleChildrenApis<AppliesFilters, boolean>(
-          { children$: layoutManager.api.children$ },
-          'filtersLoading$',
-          apiAppliesFilters,
-          false,
-          (values) => {
-            return values.some((loading) => loading);
-          }
-        )
-      )
-    )
-    .pipe(
-      map(([awaitingRequiredFilters, filtersLoading]) => awaitingRequiredFilters || filtersLoading),
-      distinctUntilChanged()
-    );
+  /**
+   * Children that have not registered yet (e.g. controls waiting on their data view) are not
+   * visible to `filtersLoading$`, so `childrenLoading$` must also be included here.
+   */
+  const childFiltersLoading$ = combineLatest([
+    awaitingRequiredFilters$,
+    layoutManager.internalApi.childrenLoading$,
+    combineCompatibleChildrenApis<AppliesFilters, boolean>(
+      { children$: layoutManager.api.children$ },
+      'filtersLoading$',
+      apiAppliesFilters,
+      false,
+      (values) => {
+        return values.some((loading) => loading);
+      }
+    ),
+  ]).pipe(
+    map(
+      ([awaitingRequiredFilters, childrenLoading, filtersLoading]) =>
+        awaitingRequiredFilters || childrenLoading || filtersLoading
+    ),
+    distinctUntilChanged()
+  );
 
   const childFilters$ = combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
     { children$: layoutManager.api.children$ },

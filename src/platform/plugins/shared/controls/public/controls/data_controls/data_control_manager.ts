@@ -66,7 +66,6 @@ export const defaultDataControlState: WithAllKeys<Omit<DataControlState, 'title'
   field_name: '',
   values_source: DEFAULT_CONTROL_VALUES_SOURCE,
   esql_query: undefined,
-  required: false,
 };
 
 export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'> & {
@@ -354,9 +353,12 @@ export const initializeDataControlManager = async <EditorState extends object = 
   const waitForRequiredSubscription = combineLatest([
     dataControlStateManager.api.required$,
     appliedFilters$,
+    blockingError$,
   ])
     .pipe(
-      map(([required, appliedFilters]) => {
+      map(([required, appliedFilters, blockingError]) => {
+        // A control with a blocking error can never produce a filter, so don't wait on it forever
+        if (blockingError) return false;
         return Boolean(required && (appliedFilters ?? []).length === 0);
       })
     )

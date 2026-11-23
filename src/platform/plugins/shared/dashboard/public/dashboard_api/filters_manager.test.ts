@@ -30,8 +30,10 @@ const buildSetup = (pinnedPanelIds: string[] = []) => {
     sections: {},
     pinnedPanels: Object.fromEntries(pinnedPanelIds.map((id) => [id, { order: 0 }])),
   });
+  const childrenLoading$ = new BehaviorSubject<boolean>(false);
   const layoutManager = {
     api: { children$, layout$ },
+    internalApi: { childrenLoading$ },
   } as unknown as ReturnType<typeof initializeLayoutManager>;
   const settingsManager = {
     api: { settings: { autoApplyFilters$: new BehaviorSubject<boolean>(true) } },
@@ -52,7 +54,7 @@ const buildSetup = (pinnedPanelIds: string[] = []) => {
   const setChildren = (children: MockChild[]) =>
     children$.next(Object.fromEntries(children.map((child) => [child.uuid, child])));
 
-  return { filtersManager, awaitingRequiredFilters$, layout$, setChildren };
+  return { filtersManager, awaitingRequiredFilters$, layout$, setChildren, childrenLoading$ };
 };
 
 describe('filters manager: awaiting required filters', () => {
@@ -144,6 +146,17 @@ describe('filters manager: awaiting required filters', () => {
     expect(loadingStates.at(-1)).toBe(true);
 
     awaiting$.next(false);
+    expect(loadingStates.at(-1)).toBe(false);
+  });
+
+  test('childFiltersLoading$ is true while children are still registering, even if no registered child is loading', () => {
+    const { filtersManager, childrenLoading$ } = buildSetup(['control1']);
+    const loadingStates: boolean[] = [];
+    filtersManager.api.childFiltersLoading$.subscribe((loading) => loadingStates.push(loading));
+    childrenLoading$.next(true);
+    expect(loadingStates.at(-1)).toBe(true);
+
+    childrenLoading$.next(false);
     expect(loadingStates.at(-1)).toBe(false);
   });
 });

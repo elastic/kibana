@@ -268,6 +268,15 @@ describe('initializeDataControlManager', () => {
       expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(false);
     });
 
+    test('is false while the control has a blocking error', async () => {
+      const manager = await buildManager({ required: true });
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(true);
+      manager.api.setBlockingError(new Error('data view not found'));
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(false);
+      manager.api.setBlockingError(undefined);
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(true);
+    });
+
     test('stops updating after cleanup', async () => {
       const manager = await buildManager({ required: true });
       manager.cleanup();

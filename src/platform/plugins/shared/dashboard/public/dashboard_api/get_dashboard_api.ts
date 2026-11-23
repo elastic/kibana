@@ -267,7 +267,7 @@ export function getDashboardApi({
     layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
   }
 
-  const pauseFetchManager = initializePauseFetchManager(layoutManager.internalApi.childrenLoading$);
+  const pauseFetchManager = initializePauseFetchManager(filtersManager.api.childFiltersLoading$);
 
   const canCancel$ = new BehaviorSubject<boolean>(false);
   const canCancelSubscription = combineLatest([

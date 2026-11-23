@@ -10,18 +10,20 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, filter, first } from 'rxjs';
 
-export function initializePauseFetchManager(childrenLoading$: Observable<boolean>) {
+export function initializePauseFetchManager(childFiltersLoading$: Observable<boolean>) {
   const isFetchPaused$ = new BehaviorSubject<boolean>(true);
   const setFetchPaused = (paused: boolean) => {
     isFetchPaused$.next(paused);
   };
 
   /**
-   * Fetching stays paused until every child API is available
+   * Fetching stays paused until every child API is available and every child's initial filters
+   * are ready (`childFiltersLoading$` covers both). Otherwise panels fetch once without control
+   * filters, then again once published.
    */
-  const childrenAvailableSubscription = childrenLoading$
+  const childrenAvailableSubscription = childFiltersLoading$
     .pipe(
-      filter((childrenLoading) => !childrenLoading),
+      filter((stillLoading) => !stillLoading),
       first()
     )
     .subscribe(() => {
