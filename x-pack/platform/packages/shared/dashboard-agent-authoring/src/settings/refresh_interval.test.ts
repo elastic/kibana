@@ -6,7 +6,7 @@
  */
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { DASHBOARD_FAILURE_TYPES } from './failure_types';
+import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import { revertRefreshIntervalWithoutTimeRange } from './refresh_interval';
 
 const RUNNING = { pause: false, value: 30000 };

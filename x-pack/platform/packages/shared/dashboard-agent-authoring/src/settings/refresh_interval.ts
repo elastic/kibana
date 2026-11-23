@@ -7,8 +7,8 @@
 
 import { isEqual } from 'lodash';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { DASHBOARD_FAILURE_TYPES } from './failure_types';
-import type { DashboardFailure } from './utils';
+import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
+import type { DashboardFailure } from '../utils';
 
 const REFRESH_INTERVAL_WITHOUT_TIME_RANGE_ERROR =
   'Change to "refresh_interval" was reverted because auto-refresh is saved only together with a time range, and the dashboard has none. Set time_range in the same call: use the window the user named, or ask the user for one.';
