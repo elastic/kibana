@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
+import { inRangeRt } from '@kbn/io-ts-utils';
 import {
   logEntryAfterCursorRT,
   logEntryBeforeCursorRT,
@@ -19,12 +20,19 @@ import { searchStrategyErrorRT } from '../common/errors';
 
 export const LOG_ENTRIES_SEARCH_STRATEGY = 'infra-log-entries';
 
+/**
+ * The response holds `size × columns` column values, and every message column carries its own
+ * copy of the formatted message, so both factors must be bounded to cap memory per request.
+ */
+export const LOG_ENTRIES_MAX_SIZE = 1000;
+export const LOG_ENTRIES_MAX_COLUMNS = 20;
+
 const logEntriesBaseSearchRequestParamsRT = rt.intersection([
   rt.type({
     logView: logViewReferenceRT,
     startTimestamp: rt.number,
     endTimestamp: rt.number,
-    size: rt.number,
+    size: inRangeRt(1, LOG_ENTRIES_MAX_SIZE),
   }),
   rt.partial({
     query: jsonObjectRT,

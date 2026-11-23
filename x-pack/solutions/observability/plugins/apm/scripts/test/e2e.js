@@ -24,7 +24,7 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const e2eDir = path.join(__dirname, '../../ftr_e2e');
+const e2eDir = path.join(__dirname, '../../../apm-ftr-e2e');
 
 function runTests() {
   const mode = argv.open ? 'open' : 'run';

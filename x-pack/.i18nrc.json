@@ -120,6 +120,7 @@
     "xpack.reporting": [
       "platform/plugins/private/reporting"
     ],
+    "xpack.resolverTest": "solutions/security/test_plugins/resolver_test",
     "xpack.rollupJobs": [
       "platform/packages/private/rollup",
       "platform/plugins/private/rollup"
