@@ -32,8 +32,10 @@ It controls three things, and both enabling and disabling take effect live. The 
 | Surface | When off |
 |---------|----------|
 | Browser app `/app/alertzero` | Registered but `AppStatus.inaccessible`; every page renders core's "Application unavailable" |
-| Security solution navigation | AlertZero nodes disappear — core empties `visibleIn` and `deepLinks` for an inaccessible app, and chrome drops nav nodes whose link has no nav link. The navigation trees hold no check of their own |
+| Security solution navigation and Classic navigation | AlertZero nodes disappear — core empties `visibleIn` and `deepLinks` for an inaccessible app, and chrome drops nav nodes whose link has no nav link. The navigation trees hold no check of their own. The Classic nav lists AlertZero's pages as deep links, like Security's own entries, and the Security app's Classic side nav shows its AlertZero entry only while those deep links are in the Classic nav |
 | HTTP `/internal/alertzero/*` | `404`, via the `withAlertZeroEnabled` wrapper on every route |
+
+AlertZero is available in spaces with the Security solution view and in Classic spaces. In a space with another solution view (Observability, Search), the setting is not listed in Advanced Settings, every route returns `404` whatever the setting's value, and a direct URL shows an explanation instead of the app. Serverless projects have no spaces with a solution view, so this check does not apply there.
 
 The Agent Builder conversation template UI for investigations and escalations (the details flyout and its tabs) is **not** gated by this setting. The `agenticInvestigations` plugin registers it whenever Agent Builder is available, so the flyout is the same in every space and every solution. See the agentic investigations README, "Template UI and gating".
 

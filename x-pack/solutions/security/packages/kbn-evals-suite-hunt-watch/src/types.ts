@@ -48,8 +48,9 @@ export interface HuntReportExpectation {
    * `completed_successfully` is true (`complete` or `incomplete_final`). A retryable run with no
    * hit is not stamped, so the report stays eligible; it may still record a coverage ledger, which
    * is not a stamp. That is not the child's own `status`, which is `retired_incomplete` for a
-   * settled no-hit `incomplete_final` run and `partial` for retryable or hit-bearing incomplete
-   * runs, so a hunt that retired a report with evidence marked incomplete still counts as written.
+   * settled `incomplete_final` run (hit or not) and `partial` for a retryable run its write did
+   * not settle, a hit-bearing one included, so a hunt that stamped a report can still report
+   * `partial`.
    * `iff_completed_successfully` is for rows where the hunt may legitimately end partial, and
    * expects the stamp exactly under that rule.
    */
