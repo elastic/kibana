@@ -163,13 +163,29 @@ The `slo:resources-reconcile-task` task also migrates the SLI pipelines created 
 
 ### Index rounding
 
-`xpack.slo.sliIndexRounding` (`M`, `w` or `d`, defaults to `M`) sets the rounding of the SLI indices. Clusters with a large SLI volume can use `d` or `w` to keep each index small.
+`xpack.slo.sliIndexRounding` (`M`, `w` or `d`, defaults to `M`) sets the rounding of the SLI indices. Clusters with a large SLI volume must use `d` or `w` (see [Choosing a rounding](#choosing-a-rounding)).
 
 A rounding change applies from the start of the next UTC day: the next install (on Kibana startup, or the hourly `slo:resources-reconcile-task` run) appends a segment starting then to the routing pipeline of every version. Documents before that time keep their index when the transforms rewrite them, so no document is counted twice. A segment not in effect yet is updated in place by a further change, keeping its start, and dropped when the rounding goes back to the one in effect.
 
 Two roundings can share an index name, e.g. the daily and monthly indices of the first day of a month. Each document still goes to a single index, so this does not count any document twice.
 
-An SLI index has a single primary shard, which holds at most ~2.1 billion documents. With 1 minute buckets, an SLO instance writes about 44,640 documents per month, 10,080 per week and 1,440 per day, so a monthly index reaches that limit at about 48,000 SLO instances (the sum of the instances of every SLO). At ~1 KB per document, a monthly index passes 40 GB at about 1,000 instances: use `d` above that. Rollup transforms that failed on a full index must be restarted after the switch: `POST _transform/<id>/_stop?force=true`, then `POST _transform/<id>/_start`.
+#### Choosing a rounding
+
+An SLI index has a single primary shard. Size it by the **documents written per day**, not by the number of SLO instances: a rollup document only exists for a bucket that has data, so the documents per instance per day vary from a few hundred (short-lived groupings) to 1,440 (1 minute buckets, always active).
+
+Measured on a production cluster, an SLI document takes **~130 bytes** on disk (primary shard: ~20 GB for ~158M documents). Assuming that size, a shard of ~50 GB (the Elasticsearch shard size guideline) holds ~390M documents, and a shard holds at most ~2.1 billion documents:
+
+| Rounding | Documents per day, for a shard of ~50 GB | Documents per day, for the 2.1B documents limit |
+| --- | --- | --- |
+| `M` (31 days) | ~12M | ~68M |
+| `w` (7 days) | ~55M | ~300M |
+| `d` | ~390M | not reachable |
+
+Read the documents per day from the `docs.count` of a recent complete daily index: `GET _cat/indices/.slo-observability.sli-v3*?v&expand_wildcards=all&h=index,docs.count,pri.store.size&s=index`. A cluster above ~12M documents per day (about 8,700 instances that are always active) must set `w` or `d`. At ~158M documents per day, a monthly index would hold ~4.9B documents and be full after ~13 days. **Set the rounding before upgrading to a version where `M` is the default**: nothing selects it automatically from existing indices.
+
+Rollup transforms that failed on a full index must be restarted after the switch: `POST _transform/<id>/_stop?force=true`, then `POST _transform/<id>/_start`.
+
+Where the bytes go (measured on a ~18 GB daily index): `_source` 43%, `_id` 24%, `_seq_no` and `event.ingested` 6% each, `slo.groupings` with its `_keyed` copy 6%, `@timestamp` 3%, `slo.tags` 3%, `slo.instanceId` 3%. Use `POST <index>/_disk_usage?run_expensive_tasks=true` to measure another index.
 
 ### Troubleshooting
 
