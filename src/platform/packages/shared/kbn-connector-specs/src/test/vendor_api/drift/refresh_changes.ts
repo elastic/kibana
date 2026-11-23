@@ -56,6 +56,12 @@ interface Entry {
   readonly typeBefore?: string;
   /** What changed about it, shown in brackets; a field with several changes shows them all. */
   readonly details: readonly string[];
+  /** Discriminator keys the field gained or lost: more concrete types it can have. */
+  readonly keys?: {
+    readonly sign: '+' | '-';
+    readonly names: readonly string[];
+    readonly base: string;
+  };
 }
 
 const quoted = (text: string): string[] => [...text.matchAll(/`([^`]+)`/g)].map(([, name]) => name);
@@ -206,6 +212,56 @@ const variantNames = (list: string): string[] =>
     .map(variantName)
     .filter((name) => name !== '');
 
+/** The schema a path ends by selecting, `…/allOf[subschema #2: outlookItem]` as `outlookItem`. */
+const baseNameOf = (path: string): string | undefined => {
+  const selected = /(?:allOf|oneOf|anyOf)\[([^\]]*)\]$/.exec(path)?.[1];
+  if (selected === undefined) {
+    return undefined;
+  }
+  const name = (
+    selected.includes(': ')
+      ? selected.slice(selected.lastIndexOf(': ') + 2)
+      : selected.slice(selected.lastIndexOf('/') + 1)
+  ).trim();
+  return name === '' || name.startsWith('subschema') ? undefined : name;
+};
+
+/** A type and the concrete types it also is, `outlookItem | distributionList`. */
+const withSubtypes = (base: string, names: Iterable<string>): string => {
+  const sorted = [...new Set(names)].sort(byText);
+  const more = sorted.length - MAX_VARIANTS_NAMED;
+  return `${[base, ...sorted.slice(0, MAX_VARIANTS_NAMED)].join(' | ')}${
+    more > 0 ? ` and ${more} more` : ''
+  }`;
+};
+
+/** The keys of all the changes of a field, as one change of its type from what it was to what it is. */
+const withSubtypeChanges = (entries: readonly Entry[]): Entry[] => {
+  const others = entries.filter((entry) => entry.keys === undefined);
+  const fields = new Map<string, Entry[]>();
+  for (const entry of entries) {
+    if (entry.keys !== undefined) {
+      const key = `${entry.area}\u0000${entry.name}`;
+      fields.set(key, [...(fields.get(key) ?? []), entry]);
+    }
+  }
+  const merged = [...fields.values()].map((group): Entry => {
+    const [first] = group;
+    const keysOf = (sign: '+' | '-') =>
+      group.flatMap(({ keys }) => (keys?.sign === sign ? keys.names : []));
+    const base = first.keys?.base ?? 'object';
+    return {
+      area: first.area,
+      sign: '!',
+      name: first.name,
+      type: withSubtypes(base, keysOf('+')),
+      typeBefore: withSubtypes(base, keysOf('-')),
+      details: [],
+    };
+  });
+  return [...others, ...merged];
+};
+
 const entriesOf = (change: SpecChange): Entry[] | undefined => {
   const { id, text, type } = change;
   const names = quoted(text);
@@ -233,20 +289,36 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
     if (list === undefined) return undefined;
     const body = second === undefined || COMBINATORS.has(second);
     const sign = /-added$/.test(id) ? '+' : '-';
+    const entryArea = id.startsWith('request-') ? 'Request' : 'Response';
+    const fieldName = body ? RESPONSE_BODY : fieldOf(second);
+    if (/discriminator-mapping/.test(id)) {
+      // The keys of a discriminator aren't a part of the type: they are more concrete types the
+      // field can have, and are put with its type once all the changes of the field are known.
+      return [
+        {
+          area: entryArea,
+          sign: '!',
+          name: fieldName,
+          details: [],
+          keys: {
+            sign,
+            names: variantNames(list),
+            base: (body ? undefined : baseNameOf(second)) ?? change.typeBefore ?? type ?? 'object',
+          },
+        },
+      ];
+    }
     const what = isEnum ? list : variantNames(list).join(', ');
-    const discriminator = /discriminator-mapping/.test(id);
-    const detail = discriminator ? `${sign} discriminator: ${what}` : `${sign} ${what}`;
-    // Discriminator keys aren't a part of the type, so a field that gained them looks the same.
     // A value or variant is in the type, unless it is unknown, cut short or unchanged.
     const visible = type !== undefined && !type.includes('…') && type !== change.typeBefore;
     return [
       {
-        area: id.startsWith('request-') ? 'Request' : 'Response',
+        area: entryArea,
         sign: '!',
-        name: body ? RESPONSE_BODY : fieldOf(second),
+        name: fieldName,
         type,
         typeBefore: change.typeBefore,
-        details: discriminator || !visible ? [detail] : [],
+        details: visible ? [] : [`${sign} ${what}`],
       },
     ];
   }
@@ -323,11 +395,11 @@ interface Field {
   readonly details: Set<string>;
 }
 
-const LISTED_DETAIL = /^([+-] (?:discriminator: )?)(.+)$/;
+const LISTED_DETAIL = /^([+-] )(.+)$/;
 
 /**
- * What changed about a field, for the brackets after it: the values, variants and discriminator
- * keys that were added or removed, from all the changes of the field, are one list of their names.
+ * What changed about a field, for the brackets after it: the values and variants that were added or
+ * removed, from all the changes of the field, are one list of their names.
  */
 const detailsOf = (details: ReadonlySet<string>): string[] => {
   const listed = new Map<string, Set<string>>();
@@ -364,7 +436,7 @@ const lineOf = ({ name, type, details }: Field): string => {
 
 // What is told by the two lines of a field that changed its type: not said again in brackets.
 const isTypeChange = (detail: string): boolean =>
-  /^(was |[+-] (?!discriminator: )|now nullable$|no longer nullable$)/.test(detail);
+  /^(was |[+-] |now nullable$|no longer nullable$)/.test(detail);
 
 /** The lines of a field: what it was and what it is when its type changed, else one line. */
 const linesOf = (sign: Sign, field: Field): string[] => {
@@ -433,7 +505,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
   }
   const securityChanges = changes.filter(({ id }) => id.startsWith('api-security'));
   const scopes = scopeEntries(securityChanges);
-  entries.push(...scopes);
+  entries.splice(0, entries.length, ...withSubtypeChanges(entries), ...scopes);
   const regrouped = securityChanges.length > 0 && scopes.length === 0;
   const fixed = (count: number, ...lines: string[]): FixedPart => ({ kind: 'fixed', count, lines });
 

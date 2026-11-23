@@ -230,7 +230,7 @@ describe('describeChanges', () => {
     ).toEqual(object('Response', '- x: object', '+ x: string (now required)'));
   });
 
-  it('says what a field that gained discriminator keys got, since its type looks the same', () => {
+  it('shows a field that gained discriminator keys as the concrete types it can now be', () => {
     const added = (keys: string) =>
       change(
         'response-property-discriminator-mapping-added',
@@ -247,7 +247,25 @@ describe('describeChanges', () => {
     ).toEqual(
       object(
         'Response',
-        '! calendarView: object (+ discriminator: microsoft.graph.a, microsoft.graph.b, microsoft.graph.c and 1 more)'
+        '- calendarView: outlookItem',
+        '+ calendarView: outlookItem | microsoft.graph.a | microsoft.graph.b | microsoft.graph.c and 1 more'
+      )
+    );
+  });
+
+  it('shows the concrete types a field lost as the ones it had', () => {
+    expect(
+      describeChanges([
+        change(
+          'request-property-discriminator-mapping-deleted',
+          'removed `ExperimentFunnelsQuery, ExperimentTrendsQuery` discriminator mapping keys from the `query/oneOf[subschema #49: DataTableNode -> subschema #50: DataTableNode]/source` request property (media type: application/json)'
+        ),
+      ])
+    ).toEqual(
+      object(
+        'Request',
+        '- source: object | ExperimentFunnelsQuery | ExperimentTrendsQuery',
+        '+ source: object'
       )
     );
   });
@@ -262,7 +280,7 @@ describe('describeChanges', () => {
           'object'
         ),
       ])
-    ).toEqual(object('Response', '! entity: object (+ discriminator: microsoft.graph.group)'));
+    ).toEqual(object('Response', '- entity: entity', '+ entity: entity | microsoft.graph.group'));
   });
 
   it('shows the type of a field that gained a variant, or the variants when the type is unknown', () => {
@@ -286,7 +304,8 @@ describe('describeChanges', () => {
         object(
           'Response',
           '! (response body) (- Q1)',
-          '! resource (+ discriminator: microsoft.graph.group)'
+          '- resource: object',
+          '+ resource: object | microsoft.graph.group'
         ),
         object('Request', '! source (+ A, B, C and 1 more)')
       )
