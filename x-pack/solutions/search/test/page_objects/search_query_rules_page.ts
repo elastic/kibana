@@ -13,6 +13,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     QueryRulesEmptyPromptPage: {
