@@ -26,9 +26,14 @@ import {
   type ServiceIdentifier,
 } from 'inversify';
 import { once, wrap } from 'lodash';
-import { Global } from './services/global';
 import { OnReady, OnSetup, OnStart } from './services/plugin';
 import { SoftDependencies } from './services/soft_dependencies';
+import { createToken } from './token';
+
+/**
+ * Must stay the same symbol as the internal `Global` token in `@kbn/core-di-internal`.
+ */
+const Global = createToken<ServiceIdentifier>('Global');
 
 /**
  * Extended container module options providing Kibana-specific features.

@@ -8,7 +8,6 @@
  */
 
 import { Container, LazyServiceIdentifier, type ServiceIdentifier } from 'inversify';
-import { Global } from './services/global';
 import { OnReady, OnSetup, OnStart } from './services/plugin';
 import { SoftDependencies } from './services/soft_dependencies';
 import { KibanaContainerModule, type KibanaContainerModuleLoadOptions } from './module';
@@ -24,6 +23,7 @@ describe('KibanaContainerModule', () => {
   const token = Symbol.for('something');
   const dependencyToken = Symbol.for('dependency') as ServiceIdentifier<string>;
   const asyncDependencyToken = Symbol.for('async');
+  const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
 
   let container: Container;
   let options: KibanaContainerModuleLoadOptions;

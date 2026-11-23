@@ -18,7 +18,6 @@ import {
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import {
   createToken,
-  Global,
   OnReady,
   OnSetup,
   OnStart,
@@ -37,7 +36,10 @@ type ScopeFactory = (id?: PluginOpaqueId) => Container;
  */
 const Context = Symbol('Context') as ServiceIdentifier<Container>;
 
-export { Global };
+/**
+ * The service identifier for the global service references.
+ */
+export const Global = createToken<ServiceIdentifier>('Global');
 
 /**
  * Current plugin scope identifier.

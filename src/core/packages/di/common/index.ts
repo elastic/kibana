@@ -8,7 +8,6 @@
  */
 
 export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
-export { Global } from './src/services/global';
 export { Logger, LoggerFactory } from './src/services/logging';
 export { SoftDependencies } from './src/services/soft_dependencies';
 export {
