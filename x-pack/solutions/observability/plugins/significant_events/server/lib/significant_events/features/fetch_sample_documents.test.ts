@@ -172,7 +172,7 @@ describe('fetchSampleDocuments', () => {
     // An empty schema looks like a missing index; only the row count shows the documents.
     getEsqlColumnSchemaMock.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResponse(COUNT_RESPONSE(2));
+    esClient.esql.query.mockResponse(COUNT_RESPONSE(1));
 
     await expect(
       fetchSampleDocuments({
