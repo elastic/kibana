@@ -8,7 +8,30 @@
  */
 
 import fs from 'fs';
+import { getCloudProjectLogs } from '@kbn/scout-info';
+import { excapeHtmlCharacters } from '../../../helpers';
 import type { TestFailure } from './test_failure';
+
+const buildCloudProjectLogsSection = ({
+  elasticCloud,
+  startTime,
+  duration,
+}: TestFailure): string => {
+  const logs = getCloudProjectLogs({ target: elasticCloud, startTime, duration });
+  if (!logs) {
+    return '';
+  }
+
+  const { projectId, region, from, to, url } = logs;
+  return `
+        <div class="section" id="cloud-project-logs">
+          <h5>Cloud project logs</h5>
+          <p><a href="${excapeHtmlCharacters(
+            url
+          )}" target="_blank" rel="noopener noreferrer">Open in Discover</a>: autoscaler events, Elasticsearch and Kibana errors, Kibana pod starts and proxy errors of project <code>${projectId}</code> (${region}), from ${from} to ${to}.</p>
+        </div>
+`;
+};
 
 export const buildFailureHtml = (testFailure: TestFailure): string => {
   const {
@@ -391,6 +414,7 @@ ${retryRow}
         <div id="ci-links-placeholder">
           <!-- Placeholder for GitHub and Buildkite links -->
         </div>
+${buildCloudProjectLogsSection(testFailure)}
 
         <div class="section">
           <h5>Command Line</h5>

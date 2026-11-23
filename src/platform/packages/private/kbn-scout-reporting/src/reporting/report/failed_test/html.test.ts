@@ -40,4 +40,37 @@ describe('buildFailureHtml', () => {
     expect(html).toContain('Retries:');
     expect(html).toContain('Failed again on retry (attempt 2)');
   });
+
+  describe('Cloud project logs', () => {
+    const cloudFailure = createMockFailure({
+      target: 'cloud-serverless-security_complete',
+      startTime: '2026-11-21T06:52:10.000Z',
+      duration: 8000,
+      elasticCloud: {
+        project: { id: 'cf0e5979c7e74167b6abe94e7f5bd148' },
+        region: 'aws-eu-west-1',
+        environment: 'qa',
+      },
+    });
+
+    it('links to the logs of the QA project the test ran against', () => {
+      const html = buildFailureHtml(cloudFailure);
+
+      expect(html).toContain('<div class="section" id="cloud-project-logs">');
+      expect(html).toContain(
+        'project <code>cf0e5979c7e74167b6abe94e7f5bd148</code> (aws-eu-west-1), from 2026-11-21T06:47:10.000Z to 2026-11-21T06:54:18.000Z'
+      );
+      const links = [...html.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g)];
+      expect(links.map(([, , label]) => label)).toEqual(['Open in Discover']);
+      const [[, href]] = links;
+      expect(href).toMatch(/^https:\/\/overview\.qa\.cld\.elstc\.co\/app\/discover#\/\?_g=/);
+      // the query string separator must be escaped in an HTML attribute
+      expect(href).toContain('&amp;_a=');
+    });
+
+    it('is left out for local runs', () => {
+      const html = buildFailureHtml(createMockFailure({ startTime: '2026-11-21T06:52:10.000Z' }));
+      expect(html).not.toContain('cloud-project-logs');
+    });
+  });
 });

@@ -16,6 +16,7 @@ import type {
 } from '@playwright/test/reporter';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getKibanaModuleData } from '../../../helpers';
+import type { TestFailure } from '../../report';
 import { ScoutFailedTestReporter } from './failed_test_reporter';
 import { ScoutFailureTracker } from './failure_tracking';
 
@@ -68,6 +69,7 @@ const createMockResult = (
   ({
     status: overrides.status ?? 'failed',
     retry: overrides.retry ?? 0,
+    startTime: new Date('2026-11-21T06:52:10.000Z'),
     duration: 500,
     attachments: [],
     error: { message: 'boom', stack: 'stack trace' },
@@ -218,6 +220,54 @@ describe('ScoutFailedTestReporter', () => {
       type: 'plugin',
       visibility: 'shared',
       group: 'platform',
+    });
+  });
+
+  describe('Elastic Cloud runs', () => {
+    const CLOUD_ENV = {
+      SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID: 'cf0e5979c7e74167b6abe94e7f5bd148',
+      SCOUT_TARGET_ELASTIC_CLOUD_REGION: 'aws-eu-west-1',
+      SCOUT_TARGET_ELASTIC_CLOUD_ENVIRONMENT: 'qa',
+    };
+    const originalEnv = { ...process.env };
+
+    afterEach(() => {
+      process.env = { ...originalEnv };
+    });
+
+    const logFailureWithEnv = (env: Partial<typeof CLOUD_ENV>): TestFailure => {
+      for (const name of Object.keys(CLOUD_ENV)) {
+        delete process.env[name];
+      }
+      Object.assign(process.env, env);
+      const envReporter = new ScoutFailedTestReporter({ runId: 'test-run-id' });
+      const logEventSpy = jest
+        .spyOn((envReporter as any).report, 'logEvent')
+        .mockImplementation(() => {});
+      const hardFailure = createMockTestCase({ outcome: 'unexpected', title: 'hard failure' });
+
+      envReporter.onBegin(createMockConfig(), createMockSuite([hardFailure]));
+      envReporter.onTestEnd(hardFailure, createMockResult({ status: 'failed', retry: 0 }));
+      const [[failure]] = logEventSpy.mock.calls as Array<[TestFailure]>;
+      return failure;
+    };
+
+    it('stamps the start time and the Cloud target onto failures, for links to the project logs', () => {
+      expect(logFailureWithEnv(CLOUD_ENV)).toMatchObject({
+        startTime: '2026-11-21T06:52:10.000Z',
+        elasticCloud: {
+          project: { id: 'cf0e5979c7e74167b6abe94e7f5bd148' },
+          region: 'aws-eu-west-1',
+          environment: 'qa',
+        },
+      });
+    });
+
+    it('leaves the Cloud target unset for local runs', () => {
+      const failure = logFailureWithEnv({});
+
+      expect(failure.elasticCloud).toBeUndefined();
+      expect(failure.startTime).toBe('2026-11-21T06:52:10.000Z');
     });
   });
 
