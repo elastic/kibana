@@ -44,7 +44,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/css-utils",
     "@kbn/palettes-components",
-    "@kbn/visualizations-components"
   ],
   "exclude": [
     "target/**/*",
