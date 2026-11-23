@@ -149,7 +149,7 @@ const DreamingEditor = ({
   const { saveConfig, isSaving } = useSaveDreamingConfig();
   const { templates } = useDreamingTemplates();
   const { euiTheme } = useEuiTheme();
-  const isCompact = useIsWithinMaxBreakpoint('s');
+  const isCompact = useIsWithinMaxBreakpoint('l');
   const enabledSwitchId = useGeneratedHtmlId({ prefix: 'contextAiIndexDreamingEnabled' });
 
   const draft = edited ?? saved;
@@ -316,7 +316,11 @@ const DreamingEditor = ({
           <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={discard} data-test-subj="contextAiIndexDreamingDiscard">
+              <EuiButtonEmpty
+                onClick={discard}
+                isDisabled={isSaving}
+                data-test-subj="contextAiIndexDreamingDiscard"
+              >
                 {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.discard', {
                   defaultMessage: 'Discard changes',
                 })}

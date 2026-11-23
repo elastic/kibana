@@ -248,6 +248,15 @@ describe('DreamingPanel', () => {
     expect(screen.queryByTestId('contextAiIndexDreamingSave')).not.toBeInTheDocument();
   });
 
+  it('disables discard while saving', () => {
+    jest.mocked(useSaveDreamingConfig).mockReturnValue({ saveConfig, isSaving: true });
+    renderPanel(aiIndexWith(factsOnly));
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigFact-policy-delete'));
+
+    expect(screen.getByTestId('contextAiIndexDreamingDiscard')).toBeDisabled();
+  });
+
   it('shows the runs section when dreaming is set up', () => {
     renderPanel(aiIndexWith(factsOnly));
 
