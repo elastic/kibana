@@ -48,3 +48,24 @@ describe('tsdbCompatible filtering', () => {
     expect(suggestions).toContain('TS_COMPATIBLE_AGG');
   });
 });
+
+describe('time series source context', () => {
+  it.each([
+    'FROM (TS index | STATS AVG(/))',
+    'FROM index | WHERE 6.9 IN (TS index | STATS AVG(/))',
+  ])('suggests time series aggregations inside a TS subquery: %s', async (query) => {
+    const { suggest } = await setup();
+    const suggestions = (await suggest(query)).map((s) => s.label);
+
+    expect(suggestions).toContain('AVG_OVER_TIME');
+  });
+
+  it('does not suggest time series aggregations inside a non-TS subquery of a TS query', async () => {
+    const { suggest } = await setup();
+    const suggestions = (await suggest('TS index | WHERE 6.9 IN (FROM index | STATS AVG(/))')).map(
+      (s) => s.label
+    );
+
+    expect(suggestions).not.toContain('AVG_OVER_TIME');
+  });
+});

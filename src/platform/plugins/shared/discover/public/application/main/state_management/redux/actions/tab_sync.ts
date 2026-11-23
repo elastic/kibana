@@ -55,6 +55,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       dispatch,
       getState,
       internalState$: getInternalState$(),
+      services,
     });
 
     const getCurrentTab = () => selectTab(getState(), tabId);

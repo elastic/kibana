@@ -19,6 +19,7 @@ import { useGlobalInlineFields } from '../../../../../all_cases/hooks/use_global
 export const ListItemOptionalFields: React.FC<ListItemOptionalFieldsProps> = ({
   theCase,
   selectedFields,
+  userProfiles,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { templatesEnabled } = useCasesConfig();
@@ -53,7 +54,7 @@ export const ListItemOptionalFields: React.FC<ListItemOptionalFieldsProps> = ({
           if (isChecked) {
             const globalInlineField = globalInlineFieldsByKey.get(field);
             const fieldContent = globalInlineField
-              ? getExtendedFieldContent(globalInlineField, theCase)
+              ? getExtendedFieldContent(globalInlineField, theCase, userProfiles)
               : getListItemFieldContent(field, theCase);
             if (fieldContent != null) {
               acc.push({ ...fieldContent, field, label: name ?? fieldContent.label });
@@ -63,7 +64,7 @@ export const ListItemOptionalFields: React.FC<ListItemOptionalFieldsProps> = ({
         },
         []
       ),
-    [selectedFields, theCase, globalInlineFieldsByKey]
+    [selectedFields, theCase, globalInlineFieldsByKey, userProfiles]
   );
 
   if (visibleFields.length === 0) {

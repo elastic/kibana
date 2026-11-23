@@ -136,7 +136,9 @@ describe('get', () => {
           attributes: {
             templateId: 'tmpl-1',
             templateVersion: 2,
-            fieldDefinitions: [{ name: 'sev', type: 'keyword', label: 'Severity' }],
+            fieldDefinitions: [
+              { name: 'sev', type: 'keyword', label: 'Severity', control: 'SELECT_BASIC' },
+            ],
           },
         } as unknown as SavedObject<Template>);
 
@@ -149,6 +151,10 @@ describe('get', () => {
         expect(result.extended_fields_labels).toEqual({
           priority_as_keyword: 'Priority',
           sev_as_keyword: 'Severity',
+        });
+        expect(result.extended_fields_controls).toEqual({
+          priority_as_keyword: 'INPUT_TEXT',
+          sev_as_keyword: 'SELECT_BASIC',
         });
       });
 

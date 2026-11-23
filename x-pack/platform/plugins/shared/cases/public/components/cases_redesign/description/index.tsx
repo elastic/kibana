@@ -8,7 +8,9 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,12 +24,13 @@ import * as i18n from '../../user_actions/translations';
 import { DESCRIPTION_ID } from './constants';
 import { getDescriptionPreview, getDraftDescription } from './utils';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { EditableMarkdown, ScrollableMarkdown } from '../../markdown_editor';
+import { EditableMarkdown, ScrollableMarkdown, useProseCss } from '../../markdown_editor';
 import type { DescriptionMarkdownRefObject } from './types';
 import type { CaseUI } from '../../../containers/types';
 import type { OnUpdateFields } from '../../case_view/types';
 import { schema } from './schema';
 import { useLensDraftDescription } from './hooks/use_lens_draft_description';
+import { useRegisterActivityCollapseControls } from '../user_actions/activity_collapse_context';
 
 export type { DescriptionMarkdownRefObject } from './types';
 
@@ -43,6 +46,17 @@ export const Description = ({
   isLoadingDescription,
 }: DescriptionProps) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+
+  // The description is part of the activity column, so the column's Collapse all / Expand all owns
+  // it too — a bulk control sitting directly above the largest block on the page that skipped it
+  // read as broken.
+  useRegisterActivityCollapseControls('description', {
+    canCollapse: true,
+    allCollapsed: isCollapsed,
+    allExpanded: !isCollapsed,
+    collapseAll: useCallback(() => setIsCollapsed(true), []),
+    expandAll: useCallback(() => setIsCollapsed(false), []),
+  });
   const [isEditable, setIsEditable] = useState<boolean>(false);
 
   const descriptionRef = useRef(null);
@@ -50,6 +64,7 @@ export const Description = ({
 
   const { euiTheme } = useEuiTheme();
   const sFontSize = useEuiFontSize('s');
+  const proseCss = useProseCss();
   const { permissions, owner } = useCasesContext();
 
   const { handleOnChangeEditable } = useLensDraftDescription({
@@ -83,45 +98,64 @@ export const Description = ({
 
   const styles = useMemo(
     () => ({
-      title: css`
-        font-weight: ${euiTheme.font.weight.medium};
+      // Chevron + title are one control: the label states what collapses, the chevron sits
+      // immediately beside it rather than at the far edge of a full-width panel.
+      titleButton: css`
+        display: inline-flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        color: ${euiTheme.colors.textParagraph};
+        font-weight: ${euiTheme.font.weight.semiBold};
         font-size: ${sFontSize.fontSize};
         line-height: ${sFontSize.lineHeight};
         letter-spacing: 0;
       `,
+      // Two clamped lines rather than one ellipsised line: a single nowrap line of a long report
+      // tells the reader nothing about what they would be expanding.
       preview: css`
         color: ${euiTheme.colors.textSubdued};
         font-weight: ${euiTheme.font.weight.regular};
         font-size: ${sFontSize.fontSize};
         line-height: ${sFontSize.lineHeight};
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        display: block;
-        max-width: 40vw;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        /* Aligns with the expanded body's text edge so toggling doesn't shift the content. */
+        padding: ${euiTheme.size.m} ${euiTheme.size.l};
+      `,
+      // Everything else on this page is a plain bordered panel, so a fourth bordered panel read as
+      // just more chrome. The description gets figure/ground separation instead: a tinted, slightly
+      // inset header band that names the region, and an accent edge tying the whole block together.
+      panel: css`
+        border-inline-start: ${euiTheme.border.width.thick} solid
+          ${euiTheme.colors.borderStrongPrimary};
+        overflow: hidden;
       `,
       header: css`
-        padding: ${euiTheme.size.s};
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
         align-items: center;
         min-height: ${euiTheme.size.xxl};
-      `,
-      editIcon: css`
-        .euiButtonIcon__icon {
-          color: ${euiTheme.colors.textSubdued};
-        }
-      `,
-      content: css`
         background: ${euiTheme.colors.backgroundBaseSubdued};
-        border-radius: ${euiTheme.size.xs};
-        padding: ${euiTheme.size.s};
+      `,
+      headerWithBorder: css`
+        border-bottom: ${euiTheme.border.thin};
+      `,
+      // The description is the page's primary content — it reads on the plain panel background.
+      // A subdued fill here made the case's own text look like a disabled or quoted region.
+      content: css`
+        padding: ${euiTheme.size.m} ${euiTheme.size.l} ${euiTheme.size.l};
 
         > div {
           padding: 0;
         }
       `,
       unsavedDraft: css`
-        border-top: ${euiTheme.border.thin};
-        padding: ${euiTheme.size.s};
+        padding: 0 ${euiTheme.size.l} ${euiTheme.size.l};
       `,
     }),
     [euiTheme, sFontSize]
@@ -135,67 +169,71 @@ export const Description = ({
   return (
     <EuiPanel
       paddingSize="none"
-      hasBorder={false}
+      hasBorder
       hasShadow={false}
       grow={false}
       color="transparent"
+      css={styles.panel}
       data-test-subj="description"
     >
-      <EuiFlexGroup direction="column" gutterSize={isEditable ? 'none' : 's'}>
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup
             justifyContent="spaceBetween"
             alignItems="center"
             gutterSize="s"
-            css={styles.header}
+            css={[styles.header, !isCollapsed && styles.headerWithBorder]}
           >
             <EuiFlexItem grow={false}>
-              <EuiText data-test-subj="description-title" css={styles.title}>
-                {i18n.DESCRIPTION}
-              </EuiText>
+              {isEditable ? (
+                <EuiText
+                  data-test-subj="description-title"
+                  css={styles.titleButton}
+                  component="span"
+                >
+                  {i18n.DESCRIPTION}
+                </EuiText>
+              ) : (
+                <EuiText
+                  data-test-subj="description-title"
+                  css={styles.titleButton}
+                  component="span"
+                >
+                  {i18n.DESCRIPTION}
+                </EuiText>
+              )}
             </EuiFlexItem>
-            {isCollapsed && !isEditable && descriptionPreview ? (
-              <EuiFlexItem grow>
-                <span css={styles.preview} data-test-subj="description-preview">
-                  {descriptionPreview}
-                </span>
+            <EuiFlexItem grow />
+            {!isEditable ? (
+              <EuiFlexItem grow={false}>
+                {/* Same glyph, same corner as every comment and attachment, so one gesture reads the
+                    same everywhere in the column. */}
+                <EuiToolTip
+                  content={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
+                    aria-expanded={!isCollapsed}
+                    iconType={isCollapsed ? 'unfold' : 'fold'}
+                    onClick={toggleCollapse}
+                    data-test-subj="description-collapse-icon"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {permissions.update && !isEditable ? (
-                    <EuiToolTip content={i18n.EDIT_DESCRIPTION} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        aria-label={i18n.EDIT_DESCRIPTION}
-                        iconType="pencil"
-                        color="text"
-                        onClick={() => setIsEditable(true)}
-                        data-test-subj="description-edit-icon"
-                        css={styles.editIcon}
-                      />
-                    </EuiToolTip>
-                  ) : null}
-                </EuiFlexItem>
-                {!isEditable ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        aria-label={
-                          isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION
-                        }
-                        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-                        onClick={toggleCollapse}
-                        data-test-subj="description-collapse-icon"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {permissions.update && !isEditable ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.EDIT_DESCRIPTION} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label={i18n.EDIT_DESCRIPTION}
+                    iconType="pencil"
+                    onClick={() => setIsEditable(true)}
+                    data-test-subj="description-edit-icon"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
         {isEditable ? (
@@ -215,16 +253,40 @@ export const Description = ({
           </EuiFlexItem>
         ) : (
           <>
-            {!isCollapsed ? (
-              <EuiFlexItem css={styles.content}>
+            {isCollapsed ? (
+              descriptionPreview ? (
+                <EuiFlexItem>
+                  <span css={styles.preview} data-test-subj="description-preview">
+                    {descriptionPreview}
+                  </span>
+                </EuiFlexItem>
+              ) : null
+            ) : (
+              <EuiFlexItem css={[styles.content, proseCss]}>
                 <ScrollableMarkdown content={caseData.description} />
               </EuiFlexItem>
-            ) : null}
+            )}
             {hasUnsavedChanges ? (
               <EuiFlexItem css={styles.unsavedDraft}>
-                <EuiText color="subdued" size="xs" data-test-subj="description-unsaved-draft">
-                  {i18n.UNSAVED_DRAFT_DESCRIPTION}
-                </EuiText>
+                {/* An unsaved draft is a recovery affordance, not a footnote: it needs to be more
+                    prominent than the content it is about to overwrite, and it needs a way out. */}
+                <EuiCallOut
+                  announceOnMount
+                  size="s"
+                  color="warning"
+                  iconType="documentEdit"
+                  title={i18n.UNSAVED_DRAFT_DESCRIPTION}
+                  data-test-subj="description-unsaved-draft"
+                >
+                  <EuiButtonEmpty
+                    size="s"
+                    flush="left"
+                    onClick={() => setIsEditable(true)}
+                    data-test-subj="description-resume-draft"
+                  >
+                    {i18n.RESUME_EDITING_DESCRIPTION}
+                  </EuiButtonEmpty>
+                </EuiCallOut>
               </EuiFlexItem>
             ) : null}
           </>

@@ -32,7 +32,7 @@ export interface ComposeDiscoverTimeFieldValue {
 export const useComposeDiscoverTimeField = (): ComposeDiscoverTimeFieldValue => {
   const { watch } = useFormContext<FormValues>();
   const query = watch('query');
-  const timeField = watch('timeField') ?? '@timestamp';
+  const timeField = watch('timeField');
   const isAlert = watch('kind') === 'alert';
   const { http, dataViews } = useRuleFormServices();
 

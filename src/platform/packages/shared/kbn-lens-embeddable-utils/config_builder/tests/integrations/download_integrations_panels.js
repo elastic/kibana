@@ -9,8 +9,12 @@
 
 // bypasses linking full package to @kbn/lens-plugin, only needed for script
 // uncomment these lines when running locally
-// require('@kbn/babel-register').install();
+// require('@kbn/swc-register').install();
 // const { migrateAttributes } = require('@kbn/lens-plugin/common/transforms/transform_out');
+// const {
+//   makeLensEmbeddableFactory,
+// } = require('@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory');
+// const { migrateToLatest } = require('@kbn/kibana-utils-plugin/common');
 
 const fs = require('fs').promises;
 const path = require('path');
@@ -19,6 +23,46 @@ const { promisify } = require('util');
 const { execSync } = require('child_process');
 
 const gzipAsync = promisify(zlib.gzip);
+
+/**
+ * The exact version-gated migrations Kibana runs on a by-value Lens dashboard panel
+ * (via `makeLensEmbeddableFactory`), memoized. e.g. `commonRenameFilterReferences` at
+ * 8.1.0 moves a pre-8.1 filter's `meta.indexRefName` into `meta.index`.
+ */
+let lensEmbeddableMigrations;
+function getLensEmbeddableMigrations() {
+  if (!lensEmbeddableMigrations) {
+    // eslint-disable-next-line no-undef
+    lensEmbeddableMigrations = makeLensEmbeddableFactory(
+      () => ({}),
+      () => ({}),
+      {}
+    )().migrations();
+  }
+  return lensEmbeddableMigrations;
+}
+
+/**
+ * Run the real Lens embeddable migration chain on a by-value panel's attributes, then the
+ * content-management (V0→V1→V2) transforms. `migrateToLatest` applies only migrations newer
+ * than the panel's `version`, so old panels get migrated while current ones are left untouched.
+ */
+function migratePanelAttributes(originalAttrs, panelVersion) {
+  let attrs = originalAttrs;
+
+  // Panels always carry a version; guard defensively so a malformed panel doesn't crash the whole run.
+  if (panelVersion) {
+    // eslint-disable-next-line no-undef
+    const migrated = migrateToLatest(getLensEmbeddableMigrations(), {
+      state: { attributes: attrs },
+      version: panelVersion,
+    });
+    attrs = migrated.attributes;
+  }
+
+  // eslint-disable-next-line no-undef
+  return migrateAttributes(attrs);
+}
 
 /**
  * Clones or updates the elastic/integrations repository
@@ -95,8 +139,7 @@ async function processDashboardFile(filePath, packageName) {
 
         // Check if type is "lens"
         if (originalAttrs.type === 'lens') {
-          // eslint-disable-next-line no-undef
-          const attrs = migrateAttributes(originalAttrs);
+          const attrs = migratePanelAttributes(originalAttrs, panel.version);
           results.push({
             package_name: packageName,
             dashboard_file: path.basename(filePath),

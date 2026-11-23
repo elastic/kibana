@@ -90,7 +90,7 @@ The `UiamApiKeyProvisioningTask` runs on serverless deployments when the `alerti
 4. Writes `uiam_api_keys_provisioning_status` saved objects for tracking
 5. Queues orphaned UIAM keys for invalidation on failure
 
-Rules that should have a UIAM key but don't are tagged with `Missing Universal Api Key` (the `MISSING_UIAM_API_KEY_TAG`).
+Rules that should have a UIAM key but don't are tagged with `Missing Elastic Cloud API Key` (the `MISSING_UIAM_API_KEY_TAG`).
 
 #### Invalidation
 

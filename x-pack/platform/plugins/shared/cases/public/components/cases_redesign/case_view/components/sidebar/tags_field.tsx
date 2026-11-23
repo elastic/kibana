@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { Controller, useForm } from 'react-hook-form';
 import { useGetTags } from '../../../../../containers/use_get_tags';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
 import { MAX_LENGTH_PER_TAG, MAX_TAGS_PER_CASE } from '../../../../../../common/constants';
@@ -18,15 +17,10 @@ import {
   validateMaxTagsLength,
 } from '../../../../case_form_fields/utils';
 import * as i18n from '../../../../../common/translations';
-import { InlineFieldActions } from '../../../../templates_v2/field_types/controls/inline_field_actions';
 
 export interface TagsFieldProps {
   isLoading: boolean;
   onSubmit: (tags: string[]) => void;
-  tags: string[];
-}
-
-interface TagsFormValues {
   tags: string[];
 }
 
@@ -41,100 +35,86 @@ const validateNewTag = (value: string): string | null =>
 
 export const TagsField: React.FC<TagsFieldProps> = ({ isLoading, onSubmit, tags }) => {
   const { permissions } = useCasesContext();
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setError,
-    clearErrors,
-    formState: { isDirty },
-  } = useForm<TagsFormValues>({ defaultValues: { tags } });
+  const [error, setError] = useState<string | null>(null);
 
   const { data: tagOptions = [] } = useGetTags();
   const options = useMemo(() => tagOptions.map((label) => ({ label })), [tagOptions]);
 
-  // Read isDirty through a ref so this effect only reacts to the `tags` prop itself
-  // changing (e.g. an external update), and not to the dirty state flipping back to
-  // false as a side effect of the confirm/cancel handlers resetting the form.
-  const isDirtyRef = useRef(isDirty);
-  isDirtyRef.current = isDirty;
+  const selectedOptions = useMemo(
+    () => tags.map((label): EuiComboBoxOptionOption => ({ label })),
+    [tags]
+  );
 
-  useEffect(() => {
-    if (!isDirtyRef.current) {
-      reset({ tags });
-    }
-  }, [tags, reset]);
+  // Each add/remove persists on its own rather than behind a confirm step: the combo box already
+  // states the resulting set, so the extra step only delayed it. The field renders the committed
+  // `tags` prop, so a failed update reverts by simply never arriving.
+  const commitTags = useCallback(
+    (nextTags: string[]) => {
+      const maxTagsError = validateMaxTagsLength({
+        value: nextTags,
+        message: i18n.MAX_TAGS_ERROR(MAX_TAGS_PER_CASE),
+        limit: MAX_TAGS_PER_CASE,
+      })?.message;
 
-  const onConfirm = handleSubmit(({ tags: submittedTags }) => {
-    const trimmedTags = submittedTags.map((tag) => tag.trim());
-    onSubmit(trimmedTags);
-    // Reset to the current `tags` prop rather than the just-submitted value: the mutation
-    // triggered by `onSubmit` is fire-and-forget from here, so until it actually resolves and
-    // the prop updates, we should keep showing the last-known-good value instead of assuming
-    // success. If the mutation fails, the prop never changes and this correctly reverts.
-    reset({ tags });
-  });
+      if (maxTagsError) {
+        setError(maxTagsError);
+        return;
+      }
 
-  const onCancel = useCallback(() => {
-    reset({ tags });
-  }, [reset, tags]);
+      setError(null);
+      onSubmit(nextTags.map((tag) => tag.trim()));
+    },
+    [onSubmit]
+  );
+
+  const onChange = useCallback(
+    (selected: EuiComboBoxOptionOption[]) => {
+      commitTags(selected.map((option) => String(option.label)));
+    },
+    [commitTags]
+  );
+
+  const onCreateOption = useCallback(
+    (newTag: string) => {
+      const newTagError = validateNewTag(newTag);
+
+      if (newTagError) {
+        setError(newTagError);
+        return false;
+      }
+
+      commitTags([...tags, newTag]);
+    },
+    [commitTags, tags]
+  );
+
+  const onSearchChange = useCallback(() => setError(null), []);
 
   return (
     <EuiFlexItem grow={false} data-test-subj="case-tags">
-      <Controller
-        name="tags"
-        control={control}
-        rules={{
-          validate: (value) =>
-            validateMaxTagsLength({
-              value,
-              message: i18n.MAX_TAGS_ERROR(MAX_TAGS_PER_CASE),
-              limit: MAX_TAGS_PER_CASE,
-            })?.message ?? true,
-        }}
-        render={({ field, fieldState }) => (
-          <EuiFormRow
-            label={i18n.TAGS}
-            helpText={i18n.TAGS_HELP}
-            error={fieldState.error?.message}
-            isInvalid={!!fieldState.error}
-            fullWidth
-            data-test-subj="caseTags"
-          >
-            <EuiComboBox
-              inputRef={field.ref}
-              isInvalid={!!fieldState.error}
-              fullWidth
-              placeholder=""
-              noSuggestions={false}
-              options={options}
-              selectedOptions={field.value.map((label): EuiComboBoxOptionOption => ({ label }))}
-              onChange={(selected) => {
-                clearErrors('tags');
-                field.onChange(selected.map((option) => option.label));
-              }}
-              onCreateOption={(newTag) => {
-                const error = validateNewTag(newTag);
-
-                if (error) {
-                  setError('tags', { type: 'manual', message: error });
-                  return false;
-                }
-
-                clearErrors('tags');
-                field.onChange([...field.value, newTag]);
-              }}
-              onSearchChange={() => clearErrors('tags')}
-              isDisabled={isLoading || !permissions.update}
-              isLoading={isLoading}
-              customOptionText={i18n.ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX}
-            />
-          </EuiFormRow>
-        )}
-      />
-      {isDirty && !isLoading && (
-        <InlineFieldActions name="tags" onConfirm={onConfirm} onCancel={onCancel} />
-      )}
+      <EuiFormRow
+        label={i18n.TAGS}
+        helpText={i18n.TAGS_HELP}
+        error={error ?? undefined}
+        isInvalid={error != null}
+        fullWidth
+        data-test-subj="caseTags"
+      >
+        <EuiComboBox
+          isInvalid={error != null}
+          fullWidth
+          placeholder=""
+          noSuggestions={false}
+          options={options}
+          selectedOptions={selectedOptions}
+          onChange={onChange}
+          onCreateOption={onCreateOption}
+          onSearchChange={onSearchChange}
+          isDisabled={isLoading || !permissions.update}
+          isLoading={isLoading}
+          customOptionText={i18n.ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX}
+        />
+      </EuiFormRow>
     </EuiFlexItem>
   );
 };

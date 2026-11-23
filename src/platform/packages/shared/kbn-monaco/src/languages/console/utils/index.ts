@@ -7,4 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { checkForTripleQuotesAndEsqlQuery, unescapeInvalidChars } from './autocomplete_utils';
+export {
+  checkForTripleQuotesAndEsqlQuery,
+  createInsideConsoleStringChecker,
+  endsWithConsoleBodyContinuation,
+  findRequestLineNumber,
+  getFallbackRequestStartPosition,
+  getLineRemainderWithoutConsoleComments,
+  isEscaped,
+  isInsideConsoleComment,
+  isInsideConsoleString,
+  isInsideTripleQuotedJsonValue,
+  isRequestLineWithUrl,
+  unescapeInvalidChars,
+} from './autocomplete';

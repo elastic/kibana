@@ -133,7 +133,7 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
       typeof rawCluster === 'string'
         ? rawCluster
         : Array.isArray(rawCluster)
-        ? rawCluster[0]
+        ? rawCluster[0] ?? undefined
         : undefined;
     const remoteClusterName = getRemoteClusterName(this.props.remoteClusters ?? [], clusterParam);
     const autoFollowPattern = isNew
@@ -328,8 +328,8 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
         name,
         remoteCluster,
         leaderIndexPatterns,
-        followIndexPatternPrefix = '',
-        followIndexPatternSuffix = '',
+        followIndexPatternPrefix,
+        followIndexPatternSuffix,
       },
       isNew,
       areErrorsVisible,

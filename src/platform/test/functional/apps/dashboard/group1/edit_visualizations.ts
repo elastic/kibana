@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize library');
-      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+      await testSubjects.existOrFail('visualizationLandingPage', { timeout: 5000 });
     });
 
     it('visualize app menu navigates to the visualize listing page if the last opened visualization was linked to dashboard', async () => {
@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize library');
-      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+      await testSubjects.existOrFail('visualizationLandingPage', { timeout: 5000 });
     });
 
     describe('by value', () => {

@@ -64,7 +64,7 @@ export const STEP_ATTRIBUTES_DESCRIPTION = i18n.translate(
 export const STEP_TEMPLATE_FIELDS_TITLE = i18n.translate(
   'xpack.cases.caseView.tour.templateFields.title',
   {
-    defaultMessage: 'Template fields',
+    defaultMessage: 'Custom fields',
   }
 );
 

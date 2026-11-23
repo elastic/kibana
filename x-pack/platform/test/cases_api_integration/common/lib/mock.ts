@@ -29,6 +29,8 @@ import type {
 } from '@kbn/cases-plugin/common/types/api';
 import {
   LEGACY_FILE_ATTACHMENT_TYPE,
+  LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  LEGACY_LENS_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
@@ -143,15 +145,14 @@ export const postCommentActionsReleaseReq: ActionsAttachmentPayload = {
 export const postExternalReferenceESReq: ExternalReferenceNoSOAttachmentPayload = {
   type: AttachmentType.externalReference,
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
-  externalReferenceId: 'my-id',
-  externalReferenceAttachmentTypeId: '.test',
-  externalReferenceMetadata: null,
+  externalReferenceId: 'indicator-1',
+  externalReferenceAttachmentTypeId: LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  externalReferenceMetadata: {
+    indicatorName: 'malware.exe',
+    indicatorType: 'file',
+    indicatorFeedName: '[Filebeat] AbuseCH Malware',
+  },
   owner: 'securitySolutionFixture',
-};
-
-export const postExternalReferenceSOReq: ExternalReferenceSOAttachmentPayload = {
-  ...postExternalReferenceESReq,
-  externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
 };
 
 export const fileMetadata = () => ({
@@ -165,28 +166,33 @@ export const fileAttachmentMetadata: FileAttachmentMetadata = {
   files: [fileMetadata()],
 };
 
+export const persistableStateAttachment: PersistableStateAttachmentPayload = {
+  type: AttachmentType.persistableState,
+  owner: 'securitySolutionFixture',
+  persistableStateAttachmentTypeId: LEGACY_LENS_ATTACHMENT_TYPE,
+  persistableStateAttachmentState: { attributes: { title: 'My visualization' } },
+};
+
 export const getFilesAttachmentReq = (
   req?: Partial<ExternalReferenceSOAttachmentPayload>
 ): ExternalReferenceSOAttachmentPayload => {
   return {
-    ...postExternalReferenceSOReq,
+    type: AttachmentType.externalReference,
+    externalReferenceId: 'my-id',
     externalReferenceStorage: {
       type: ExternalReferenceStorageType.savedObject,
       soType: FILE_SO_TYPE,
     },
     externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
     externalReferenceMetadata: { ...fileAttachmentMetadata },
+    owner: 'securitySolutionFixture',
     ...req,
   };
 };
 
-export const persistableStateAttachment: PersistableStateAttachmentPayload = {
-  type: AttachmentType.persistableState,
-  owner: 'securitySolutionFixture',
-  persistableStateAttachmentTypeId: '.test',
-  persistableStateAttachmentState: { foo: 'foo' },
-};
-
+// SO-backed external reference (the migrated `.files` type) for legacy-wire-shape specs.
+export const postExternalReferenceSOReq: ExternalReferenceSOAttachmentPayload =
+  getFilesAttachmentReq();
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq

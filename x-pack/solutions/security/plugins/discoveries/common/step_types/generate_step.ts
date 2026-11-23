@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
@@ -20,47 +20,51 @@ export const GenerateStepTypeId = 'security.attack-discovery.generate';
 /**
  * Input schema for Generate step.
  */
-export const GenerateStepInputSchema = z.object({
-  /**
-   * Optional free-form text appended to the LLM generation prompt.
-   * Provides extra context, constraints, or focus areas for the model.
-   */
-  additional_context: z.string().optional(),
-  /**
-   * Pre-retrieved alerts in a format compatible with the prompt
-   */
-  alerts: z.array(z.string()).min(1),
-  /**
-   * Connector configuration
-   */
-  api_config: ApiConfigSchema,
-  /**
-   * Anonymization replacements map
-   */
-  replacements: z.record(z.string(), z.string()).optional(),
-  /**
-   * Maximum number of discoveries to generate
-   */
-  size: z.number().int().optional().default(10),
-});
+export const GenerateStepInputSchema = lazySchema(() =>
+  z.object({
+    /**
+     * Optional free-form text appended to the LLM generation prompt.
+     * Provides extra context, constraints, or focus areas for the model.
+     */
+    additional_context: z.string().optional(),
+    /**
+     * Pre-retrieved alerts in a format compatible with the prompt
+     */
+    alerts: z.array(z.string()).min(1),
+    /**
+     * Connector configuration
+     */
+    api_config: ApiConfigSchema,
+    /**
+     * Anonymization replacements map
+     */
+    replacements: z.record(z.string(), z.string()).optional(),
+    /**
+     * Maximum number of discoveries to generate
+     */
+    size: z.number().int().optional().default(10),
+  })
+);
 
 /**
  * Output schema for Generate step.
  */
-export const GenerateStepOutputSchema = z.object({
-  /**
-   * Generated attack discoveries (null if none generated)
-   */
-  attack_discoveries: z.array(AttackDiscoverySchema).nullable(),
-  /**
-   * Unique identifier for this generation execution
-   */
-  execution_uuid: z.string().uuid(),
-  /**
-   * Updated anonymization replacements map
-   */
-  replacements: z.record(z.string(), z.string()),
-});
+export const GenerateStepOutputSchema = lazySchema(() =>
+  z.object({
+    /**
+     * Generated attack discoveries (null if none generated)
+     */
+    attack_discoveries: z.array(AttackDiscoverySchema).nullable(),
+    /**
+     * Unique identifier for this generation execution
+     */
+    execution_uuid: z.string().uuid(),
+    /**
+     * Updated anonymization replacements map
+     */
+    replacements: z.record(z.string(), z.string()),
+  })
+);
 
 /**
  * Common step definition for Generate step.

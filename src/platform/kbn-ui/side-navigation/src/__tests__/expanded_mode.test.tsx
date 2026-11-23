@@ -348,6 +348,31 @@ describe('Expanded mode', () => {
         expect(badge).toBeInTheDocument();
         expect(badge).toHaveTextContent('New');
       });
+
+      /**
+       * GIVEN the side navigation is in expanded mode
+       * AND a primary menu item is new
+       * WHEN I visit that item and navigate away
+       * THEN hovering it no longer shows a New tooltip
+       */
+      it('should hide new tooltip after visiting the item and navigating away', async () => {
+        render(
+          <TestComponent
+            isCollapsed={false}
+            items={observabilityMock.navItems}
+            logo={observabilityMock.logo}
+          />
+        );
+
+        const alertsLink = screen.getByTestId(primaryItemId('alerts'));
+
+        await user.click(alertsLink);
+        await user.click(screen.getByTestId(primaryItemId('discover')));
+        await user.hover(alertsLink);
+        flushPopoverTimers();
+
+        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+      });
     });
 
     describe('More menu', () => {
@@ -369,6 +394,22 @@ describe('Expanded mode', () => {
         const moreButton = await screen.findByTestId(moreMenuId);
 
         expect(moreButton).toBeInTheDocument();
+      });
+
+      it('reports overflow measured only after the items move into More', async () => {
+        render(
+          <TestComponent
+            isCollapsed={false}
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+          />
+        );
+
+        const primaryMenu = screen.getByTestId('kbnChromeNav-primaryNavigation');
+        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'false');
+
+        await screen.findByTestId(moreMenuId);
+        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'true');
       });
 
       /**

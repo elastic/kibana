@@ -33,6 +33,7 @@ export const getNormalizeHTTPFields = ({
   projectId,
   namespace,
   version,
+  maintenanceWindows,
 }: NormalizedProjectProps): NormalizerResult<HTTPFields> => {
   const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.HTTP];
   const errors = [];
@@ -44,6 +45,7 @@ export const getNormalizeHTTPFields = ({
     projectId,
     namespace,
     version,
+    maintenanceWindows,
   });
 
   // Add common errors to errors array

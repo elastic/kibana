@@ -340,8 +340,11 @@ export const AlertsDetailsTable = memo(
         name: '',
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
-          <EuiLink onClick={() => onShowAlert(id, alert.index, alert[KIBANA_ALERTS.RULE_NAME])}>
-            <EuiIcon type={'expand'} aria-hidden={true} />
+          <EuiLink
+            data-test-subj="securitySolutionFlyoutAlertsFindingsTableExpandButton"
+            onClick={() => onShowAlert(id, alert.index, alert[KIBANA_ALERTS.RULE_NAME])}
+          >
+            <EuiIcon type={'maximize'} aria-hidden={true} />
           </EuiLink>
         ),
       },

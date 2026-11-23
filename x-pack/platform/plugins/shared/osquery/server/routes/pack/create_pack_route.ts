@@ -35,6 +35,7 @@ import {
   validatePackScheduleFields,
   buildScheduleResponseSlice,
   stripPerQueryRruleFields,
+  convergePerQueryIntervals,
 } from './utils';
 import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
@@ -137,18 +138,22 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               return rest;
             });
 
+        const convergedQueries = gatedQueries
+          ? convergePerQueryIntervals(gatedQueries as Record<string, PackQueryInput>, scheduleType)
+          : gatedQueries;
+
         const scheduleErr = validatePackScheduleFields({
           packScheduleType: scheduleType,
           packInterval,
           packRrule: rruleSchedule,
-          queries: gatedQueries as Record<string, PackQueryInput>,
+          queries: convergedQueries as Record<string, PackQueryInput>,
         });
         if (scheduleErr) {
           return response.badRequest({ body: { message: scheduleErr } });
         }
 
         const now = moment().toISOString();
-        const queries = mapValues(gatedQueries, (queryData) => ({
+        const queries = mapValues(convergedQueries, (queryData) => ({
           ...queryData,
           schedule_id: uuidv4(),
           start_date: now,
@@ -261,6 +266,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                           rrule_schedule: rruleSchedule,
                         },
                         isRruleFeatureEnabled,
+                        fallbackStartDate: packSO.attributes.created_at,
                       }
                     );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {

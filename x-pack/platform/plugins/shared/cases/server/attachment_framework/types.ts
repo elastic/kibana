@@ -7,42 +7,11 @@
 
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type { z } from '@kbn/zod/v4';
-import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
 import type {
   UnifiedAttachmentPayload,
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '../../common/types/domain/attachment/v2';
-
-export type PersistableStateAttachmentState = Pick<
-  PersistableStateAttachmentPayload,
-  'persistableStateAttachmentTypeId' | 'persistableStateAttachmentState'
->;
-
-export interface PersistableStateAttachmentType
-  extends Omit<
-    PersistableState<PersistableStateAttachmentState>,
-    'migrations' | 'inject' | 'extract'
-  > {
-  id: string;
-}
-
-export interface PersistableStateAttachmentTypeSetup
-  extends Omit<
-    PersistableStateDefinition<PersistableStateAttachmentState>,
-    'migrations' | 'inject' | 'extract'
-  > {
-  id: string;
-}
-
-export interface ExternalReferenceAttachmentType {
-  id: string;
-  /**
-   * A function to validate data stored with the attachment type. This function should throw an error
-   * if the data is not in the form it expects.
-   */
-  schemaValidator?: (data: unknown) => void;
-}
 
 /**
  * Unified attachment state for server-side persistence
@@ -78,11 +47,5 @@ export interface UnifiedAttachmentTypeSetup
 }
 
 export interface AttachmentFramework {
-  registerExternalReference: (
-    externalReferenceAttachmentType: ExternalReferenceAttachmentType
-  ) => void;
-  registerPersistableState: (
-    persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
-  ) => void;
-  registerUnified: (unifiedAttachmentType: UnifiedAttachmentTypeSetup) => void;
+  registerAttachment: (attachmentType: UnifiedAttachmentTypeSetup) => void;
 }

@@ -7,7 +7,11 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
-import { CASE_EXTENDED_FIELDS, CASE_EXTENDED_FIELDS_LABELS } from '../../../constants';
+import {
+  CASE_EXTENDED_FIELDS,
+  CASE_EXTENDED_FIELDS_LABELS,
+  CASE_EXTENDED_FIELDS_CONTROLS,
+} from '../../../constants';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
@@ -183,6 +187,11 @@ export const CaseRt = rt.intersection([
       // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.
       // Maps storage keys (e.g. `priority_as_keyword`) to user-facing labels (e.g. "Priority").
       [CASE_EXTENDED_FIELDS_LABELS]: rt.record(rt.string, rt.string),
+      // Populated alongside extended_fields_labels by enrichCasesWithFieldLabels — not persisted.
+      // Maps storage keys to the field's control type (e.g. `USER_PICKER`), so a value that needs
+      // parsing (user picker, checkbox group, toggle) can be rendered correctly wherever a case is
+      // displayed without threading full field definitions through every consumer.
+      [CASE_EXTENDED_FIELDS_CONTROLS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);

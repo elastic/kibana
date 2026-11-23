@@ -41,10 +41,6 @@ export interface FieldValueCellProps {
    */
   ruleId: string;
   /**
-   * Whether the preview link is in rule preview
-   */
-  isRulePreview: boolean;
-  /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
   getLinkValue?: (field: string) => string | null;
@@ -62,8 +58,7 @@ export interface FieldValueCellProps {
   hit?: DataTableRecord;
   /**
    * Optional wrapper that renders a preview link for supported field types (host, ip, rule).
-   * Injected by the caller so each flyout context controls its own navigation. When provided
-   * (new flyout), it is used instead of the legacy expandable-flyout `PreviewLink`.
+   * When omitted, falls back to the `PreviewLink` preview panel.
    */
   renderFlyoutLink?: OpenFlyoutLinkRenderer;
 }
@@ -80,7 +75,6 @@ export const TableFieldValueCell = memo(
     ruleId,
     getLinkValue,
     values,
-    isRulePreview,
     entityId,
     hit,
     renderFlyoutLink: RenderFlyoutLink,
@@ -108,7 +102,7 @@ export const TableFieldValueCell = memo(
           if (data.field === MESSAGE_FIELD_NAME) {
             content = <OverflowField value={value} />;
           } else if (isLink && !RenderFlyoutLink) {
-            // Legacy expandable flyout: open the preview panel.
+            // No renderFlyoutLink provided: open the preview panel.
             content = (
               <PreviewLink
                 field={data.field}

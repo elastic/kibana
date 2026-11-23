@@ -29,7 +29,7 @@ import type {
   FormBasedLayer,
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
-import type { TextBasedLayer } from '@kbn/lens-common';
+import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
@@ -260,7 +260,7 @@ describe('addLayerColumn', () => {
     expect(layer.columnOrder).toEqual(['metric_reference', 'metric', 'existing']);
   });
 
-  test('adds column with postfix and reference', () => {
+  test('adds column with reference', () => {
     const layer: PersistedIndexPatternLayer = {
       columns: {},
       columnOrder: [],
@@ -282,7 +282,7 @@ describe('addLayerColumn', () => {
       isBucketed: false,
     };
 
-    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], false, '_trendline');
+    addLayerColumn(layer, 'metric_trendline', [parentColumn, referenceColumn], false);
 
     expect(layer.columns.metric_trendline).toBeDefined();
     expect(layer.columns.metric_trendline_reference).toBeDefined();
@@ -354,6 +354,55 @@ describe('buildDatasourceStates', () => {
         },
       }
     `);
+  });
+
+  describe('ES|QL Control Variable reconstruction', () => {
+    const buildEsqlColumns = (
+      query: string,
+      columns: TextBasedLayerColumn[]
+    ): TextBasedLayerColumn[] => {
+      const results = buildDatasourceStates(
+        {
+          type: 'metric',
+          title: 'test',
+          data_source: { type: 'esql', query },
+          metrics: [{ type: 'primary', label: 'test', column: 'test' }],
+          styling: { primary: { value: { sizing: 'auto' } } },
+          sampling: 1,
+          ignore_global_filters: true,
+        },
+        () => undefined,
+        () => columns
+      );
+      const layers = results.layers.textBased?.layers ?? {};
+      return Object.values(layers).flatMap((layer) => layer.columns);
+    };
+
+    it('stamps `variable` (prefix stripped) on a column backed by a genuine Identifier Control', () => {
+      const columns = buildEsqlColumns('FROM logs | STATS COUNT(*) BY ??field', [
+        { columnId: 'a', fieldName: '??field' },
+        { columnId: 'b', fieldName: 'COUNT(*)' },
+      ]);
+
+      expect(columns.find((c) => c.fieldName === '??field')?.variable).toBe('field');
+      expect(columns.find((c) => c.fieldName === 'COUNT(*)')?.variable).toBeUndefined();
+    });
+
+    it('does NOT stamp `variable` on a real column merely named `??x` (not a query parameter)', () => {
+      const columns = buildEsqlColumns('FROM logs | EVAL `??x` = bytes | STATS m = SUM(`??x`)', [
+        { columnId: 'a', fieldName: '??x' },
+      ]);
+
+      expect(columns.find((c) => c.fieldName === '??x')?.variable).toBeUndefined();
+    });
+
+    it('does NOT stamp `variable` for Value (`?`) controls (they are literals, not columns)', () => {
+      const columns = buildEsqlColumns('FROM logs | WHERE os == ?os | STATS COUNT(*)', [
+        { columnId: 'a', fieldName: 'COUNT(*)' },
+      ]);
+
+      expect(columns.every((c) => c.variable === undefined)).toBe(true);
+    });
   });
 });
 
@@ -787,6 +836,49 @@ describe('filtersAndQueryToLensState', () => {
         query: { match_all: {} },
       },
     ]);
+  });
+
+  test.each([
+    ['kql', 'kuery'],
+    ['lucene', 'lucene'],
+  ] as const)('stores a non-empty %s query', (language, stateLanguage) => {
+    const apiState: LensApiConfig = {
+      type: 'metric',
+      title: 'test metric',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metrics: [{ type: 'primary', operation: 'count', empty_as_null: false }],
+      sampling: 1,
+      ignore_global_filters: false,
+      query: { language, expression: 'category: shoes' },
+    };
+
+    const result = filtersAndQueryToLensState(apiState, []);
+
+    expect(result.query).toEqual({ language: stateLanguage, query: 'category: shoes' });
+  });
+
+  test.each(['kql', 'lucene'] as const)('does not store an empty %s query', (language) => {
+    const apiState: LensApiConfig = {
+      type: 'metric',
+      title: 'test metric',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metrics: [{ type: 'primary', operation: 'count', empty_as_null: false }],
+      sampling: 1,
+      ignore_global_filters: false,
+      query: { language, expression: '' },
+    };
+
+    const result = filtersAndQueryToLensState(apiState, []);
+
+    expect(result.query).toBeUndefined();
   });
 
   test('handles missing filters and query gracefully', () => {

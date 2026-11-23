@@ -131,12 +131,16 @@ describe('DocumentFlyoutWrapper', () => {
       refetchDocument,
     ]);
 
-    const { getByTestId } = renderDocumentFlyoutWrapper({ onAlertUpdated });
+    const { getByTestId } = renderDocumentFlyoutWrapper({
+      onAlertUpdated,
+      dataTestSubj: 'childDocumentFlyout',
+    });
 
     expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
     expect(mockDocumentFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
         hit,
+        dataTestSubj: 'childDocumentFlyout',
         onAlertUpdated: expect.any(Function),
       })
     );

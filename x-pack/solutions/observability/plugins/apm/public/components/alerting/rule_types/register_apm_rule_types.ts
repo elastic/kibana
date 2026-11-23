@@ -33,6 +33,15 @@ const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
 
+const getAlertFieldValue = (value: unknown): string | undefined => {
+  if (value == null) {
+    return undefined;
+  }
+
+  const unwrapped = Array.isArray(value) ? value[0] : value;
+  return unwrapped == null ? undefined : String(unwrapped);
+};
+
 export function registerApmRuleTypes(
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   coreSetup: ApmCoreSetup,
@@ -53,9 +62,8 @@ export function registerApmRuleTypes(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlErrorCount(
-          // TODO:fix SERVICE_NAME when we move it to initializeIndex
-          String(fields[SERVICE_NAME]![0]),
-          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0])
+          getAlertFieldValue(fields[SERVICE_NAME]),
+          getAlertFieldValue(fields[SERVICE_ENVIRONMENT])
         ),
       };
     },
@@ -85,10 +93,9 @@ export function registerApmRuleTypes(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlTransaction(
-          // TODO:fix SERVICE_NAME when we move it to initializeIndex
-          String(fields[SERVICE_NAME]![0]),
-          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-          String(fields[TRANSACTION_TYPE]![0])
+          getAlertFieldValue(fields[SERVICE_NAME]),
+          getAlertFieldValue(fields[SERVICE_ENVIRONMENT]),
+          getAlertFieldValue(fields[TRANSACTION_TYPE])
         ),
       };
     },
@@ -117,10 +124,9 @@ export function registerApmRuleTypes(
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        // TODO:fix SERVICE_NAME when we move it to initializeIndex
-        String(fields[SERVICE_NAME]![0]),
-        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE]![0])
+        getAlertFieldValue(fields[SERVICE_NAME]),
+        getAlertFieldValue(fields[SERVICE_ENVIRONMENT]),
+        getAlertFieldValue(fields[TRANSACTION_TYPE])
       ),
     }),
     iconClass: 'bell',
@@ -148,10 +154,9 @@ export function registerApmRuleTypes(
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        // TODO:fix SERVICE_NAME when we move it to initializeIndex
-        String(fields[SERVICE_NAME]![0]),
-        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE]![0])
+        getAlertFieldValue(fields[SERVICE_NAME]),
+        getAlertFieldValue(fields[SERVICE_ENVIRONMENT]),
+        getAlertFieldValue(fields[TRANSACTION_TYPE])
       ),
     }),
     iconClass: 'bell',

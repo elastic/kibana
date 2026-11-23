@@ -60,14 +60,7 @@ export const AssetDocumentTab: FC<Partial<AssetDocumentPanelProps>> = memo(() =>
             defaultMessage="Table"
           />
         ),
-        content: (
-          <TableTab
-            hit={hit}
-            scopeId={scopeId}
-            isRulePreview={isRulePreview}
-            renderCellActions={cellActionRenderer}
-          />
-        ),
+        content: <TableTab hit={hit} scopeId={scopeId} renderCellActions={cellActionRenderer} />,
       },
       {
         id: JSON_TAB_TEST_ID,

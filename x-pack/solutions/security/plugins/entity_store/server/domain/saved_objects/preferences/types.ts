@@ -28,6 +28,8 @@ const version1: SavedObjectsFullModelVersion = {
   },
 };
 
+// Retained for 9.5.1 so existing documents remain valid. No runtime code reads or writes this
+// type anymore; registration can be removed once environments no longer hold these objects.
 export const EntityStorePreferencesType: SavedObjectsType = {
   name: EntityStorePreferencesTypeName,
   hidden: false,

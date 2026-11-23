@@ -16,6 +16,7 @@ import {
   getBaseScoreESQL,
   type EuidCompositeAggregation,
 } from '../../calculate_esql_risk_scores';
+import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
@@ -219,7 +220,8 @@ const fetchNextEuidPage = async ({
       index: alertsIndex,
       pageSize,
       afterKey,
-    })
+    }),
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
 
   const compositeAgg = (
@@ -254,10 +256,13 @@ const scorePageFromAlerts = async ({
   alertFilters: QueryDslQueryContainer[];
 }): Promise<ParsedRiskScore[]> => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
-  const esqlResponse = await esClient.esql.query({
-    query,
-    filter: { bool: { filter: alertFilters } },
-  });
+  const esqlResponse = await esClient.esql.query(
+    {
+      query,
+      filter: { bool: { filter: alertFilters } },
+    },
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+  );
 
   return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
 };

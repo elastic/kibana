@@ -7,6 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { RuntimeFieldSpec, RuntimeType } from '@kbn/data-views-plugin/common';
+import { SAFE_SNAKE_KEY, MAX_SNAKE_KEY_LENGTH } from '../../../common/constants';
 
 /**
  * Prefix on every fingerprint produced by `computeRuntimeFieldsFingerprint`.
@@ -15,7 +16,7 @@ import type { RuntimeFieldSpec, RuntimeType } from '@kbn/data-views-plugin/commo
  * cached fingerprint and forces all spaces to re-run the diff path on
  * their next ensure.
  */
-export const RUNTIME_FIELDS_BUILD_VERSION = 1;
+export const RUNTIME_FIELDS_BUILD_VERSION = 2;
 
 /**
  * Cases-template type suffixes (the second half of `<name>_as_<type>`
@@ -69,24 +70,16 @@ export const suffixToRuntimeType = (suffix: string): RuntimeType | undefined => 
 };
 
 /**
- * Charset and length cap enforced by `splitSnakeKey`. The snake-key is
- * concatenated verbatim into a Painless string literal in
- * `buildPainlessSource`, so any quote, backslash, or newline would either
- * break the script or open a script-injection path. Template field names
- * are validated upstream in `common/types/domain/template/fields.ts`, but
- * that schema accepts any string today, so this guard runs independently.
- * The length cap keeps Painless compile budgets bounded.
- */
-const SAFE_SNAKE_KEY = /^[A-Za-z0-9_]+$/;
-const MAX_SNAKE_KEY_LENGTH = 256;
-
-/**
  * Splits a snake-key into `{ name, suffix }`, or returns `null` if the key
  * has no `_as_<suffix>` segment, exceeds the length cap, or contains any
- * character outside `[A-Za-z0-9_]`.
+ * character outside the lenient read charset (`SAFE_SNAKE_KEY`).
  *
  * Splits on the last `_as_` so user-chosen names with underscores
  * (e.g. `risk_score_as_long`) recover the correct suffix.
+ *
+ * Uses the lenient `SAFE_SNAKE_KEY` (allows hyphens) rather than the strict
+ * authoring guard, so keys already in the index — including the UUID-shaped
+ * names written by the v1→v2 migration — resolve to a runtime field.
  */
 export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string } | null => {
   if (snakeKey.length === 0 || snakeKey.length > MAX_SNAKE_KEY_LENGTH) return null;

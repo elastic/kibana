@@ -17,9 +17,9 @@ description: |
   validation succeeds, so report failures never affect the generation outcome.
 enabled: true
 tags:
-  - Attack discovery
-  - Security
-  - AI Agent
+  - attack-discovery
+  - security
+  - ai-agent
   - attackDiscovery:skill_report
 
 triggers:

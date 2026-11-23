@@ -146,6 +146,7 @@ describe('webpack optimizer path', () => {
     Array [
       Array [
         Object {
+          "allowlistPluginGroups": undefined,
           "cache": true,
           "dist": true,
           "examples": true,
@@ -162,6 +163,7 @@ describe('webpack optimizer path', () => {
       ],
       Array [
         Object {
+          "allowlistPluginGroups": undefined,
           "cache": false,
           "dist": false,
           "examples": false,
@@ -310,6 +312,8 @@ describe('rspack path', () => {
         cache: true,
         dist: true,
         examples: true,
+        pluginPaths: ['/some/dir'],
+        pluginScanDirs: ['/some-scan-path'],
         basePath: '/s/kibana',
         log: expect.any(Object),
       })
@@ -405,7 +409,7 @@ describe('rspack path', () => {
     expect(runComplete).toHaveBeenCalled();
   });
 
-  it('falls back to webpack when dynamic import of @kbn/rspack-optimizer fails', async () => {
+  it('fails when dynamic import of @kbn/rspack-optimizer fails', async () => {
     rspackTestState.importShouldFail = true;
     jest.resetModules();
 
@@ -430,17 +434,13 @@ describe('rspack path', () => {
       ...defaultOptions,
     });
 
-    subscriptions.push(
-      optimizer.run$.subscribe({
-        error: (error) => {
-          throw error;
-        },
-      })
-    );
+    const error = jest.fn();
+    subscriptions.push(optimizer.run$.subscribe({ error }));
 
     await flushPromises();
 
-    expect(kbnOptimizer.runOptimizer).toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(new Error('Failed to load @kbn/rspack-optimizer'));
+    expect(kbnOptimizer.runOptimizer).not.toHaveBeenCalled();
     expect(RspackOptimizerMock).not.toHaveBeenCalled();
 
     rspackTestState.importShouldFail = false;

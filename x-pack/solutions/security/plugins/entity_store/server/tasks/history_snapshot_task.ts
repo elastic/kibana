@@ -20,6 +20,7 @@ import type { EntityStoreCoreSetup } from '../types';
 import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
 import { wrapTaskRun } from '../telemetry/traces';
+import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
@@ -40,18 +41,32 @@ async function runHistorySnapshotTask({
   fakeRequest,
   core,
   logger,
-}: RunHistorySnapshotTaskParams): Promise<{ state: Record<string, unknown> }> {
+}: RunHistorySnapshotTaskParams): Promise<{
+  state: Record<string, unknown>;
+  shouldDeleteTask?: boolean;
+}> {
   const namespace = taskInstance.state?.namespace as string | undefined;
   if (!namespace) {
     logger.error('History snapshot task missing namespace in state');
     return { state: taskInstance.state };
   }
+
+  const [start] = await core.getStartServices();
+  if (
+    await shouldDeleteOrphanedEntityStoreTask({
+      coreStart: start,
+      namespace,
+      logger,
+    })
+  ) {
+    return { state: taskInstance.state, shouldDeleteTask: true };
+  }
+
   if (!fakeRequest) {
     logger.error('No fake request found, skipping history snapshot task');
     return { state: taskInstance.state };
   }
 
-  const [start] = await core.getStartServices();
   const soClient = start.savedObjects.getScopedClient(fakeRequest);
   const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
   const taskLogger = logger.get(taskInstance.id);

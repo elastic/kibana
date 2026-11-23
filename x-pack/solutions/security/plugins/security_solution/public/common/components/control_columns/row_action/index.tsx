@@ -17,8 +17,13 @@ import {
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
-import { createCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
+import {
+  createCellActionRenderer,
+  rulePreviewCellActionRenderer,
+} from '../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { getAlertIndexAlias } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useSpaceId } from '../../../hooks/use_space_id';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../hooks/use_is_new_flyout_enabled';
@@ -95,10 +100,11 @@ const RowActionComponent = ({
   );
 
   const { telemetry } = useKibana().services;
+  const spaceId = useSpaceId();
 
   const { openFlyout } = useExpandableFlyoutApi();
   const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openDocumentFlyoutFromIndex, openNotes } = useFlyoutApi();
+  const { openDocumentFlyoutFromIndex, openDocumentFlyoutFromPattern, openNotes } = useFlyoutApi();
 
   const columnValues = useMemo(
     () =>
@@ -150,14 +156,31 @@ const RowActionComponent = ({
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (enableNewFlyout && hit) {
-      openDocumentFlyoutFromIndex({
-        documentId: eventId,
-        indexName: indexName ?? undefined,
-        renderCellActions: documentFlyoutCellActionRenderer,
-        onAlertUpdated: handleAlertUpdated,
-        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
-        title: getDocumentHistoryTitle(hit),
-      });
+      if (tableId === TableId.rulePreview) {
+        // Rule preview alert rows reference their backing .internal.preview. index, which is
+        // not included in any data view pattern. Convert to the alias and resolve via the
+        // pattern-based wrapper.
+        const resolvedIndex = indexName
+          ? getAlertIndexAlias(indexName, spaceId) ?? indexName
+          : undefined;
+        openDocumentFlyoutFromPattern({
+          documentId: eventId,
+          indexName: resolvedIndex,
+          renderCellActions: rulePreviewCellActionRenderer,
+          onAlertUpdated: handleAlertUpdated,
+          origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+          title: getDocumentHistoryTitle(hit),
+        });
+      } else {
+        openDocumentFlyoutFromIndex({
+          documentId: eventId,
+          indexName: indexName ?? undefined,
+          renderCellActions: documentFlyoutCellActionRenderer,
+          onAlertUpdated: handleAlertUpdated,
+          origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+          title: getDocumentHistoryTitle(hit),
+        });
+      }
     } else {
       openFlyout({
         right: {
@@ -177,13 +200,15 @@ const RowActionComponent = ({
   }, [
     enableNewFlyout,
     hit,
+    tableId,
+    spaceId,
+    indexName,
+    openDocumentFlyoutFromPattern,
     openDocumentFlyoutFromIndex,
     documentFlyoutCellActionRenderer,
     eventId,
-    indexName,
     handleAlertUpdated,
     openFlyout,
-    tableId,
     telemetry,
   ]);
 

@@ -40,7 +40,13 @@ export default createTestConfig('spaces_only', {
     // Tighten Task Manager's poll interval (default 3s). reconcile /
     // reset task latency dominates `runReconcileSoon` and
     // `waitForResetComplete`; 500ms cuts the worst-case wait ~6×.
-    // Mirrors `security_solution_api_integration`, which uses 1000.
+    // Mirrors `test-suites-security-solution-apis`, which uses 1000.
     '--xpack.task_manager.poll_interval=500',
+    // Turn v1 analytics OFF (force-enabled by the inherited common config via
+    // last-wins override). The v2 suite exercises no v1 route, but v1's dozen
+    // `cai:cases_analytics_index_backfill` tasks starve the singleton
+    // `cases.analyticsV2.reconciliation` task of a Task Manager worker slot,
+    // timing out `runReconcileSoon` at 30s (#277320).
+    '--xpack.cases.analytics.index.enabled=false',
   ],
 });

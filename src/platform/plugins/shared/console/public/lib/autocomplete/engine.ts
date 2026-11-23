@@ -11,6 +11,7 @@ import _ from 'lodash';
 
 import type {
   AutocompleteComponent,
+  AutocompleteMatchResult,
   AutocompleteTermDefinition,
 } from './components/autocomplete_component';
 import { ConstantComponent } from './components/constant_component';
@@ -27,6 +28,8 @@ type AutocompleteContext = AutoCompleteContext;
 
 interface WalkingStateOptions {
   depth?: number;
+  fallbackGroups?: string[];
+  preferredFallbackGroups?: string[];
   priority?: number;
   specificity?: number;
 }
@@ -76,6 +79,8 @@ export class WalkingState {
   components: AutocompleteComponent[];
   contextExtensionList: Array<Record<string, unknown>>;
   depth: number;
+  fallbackGroups: string[];
+  preferredFallbackGroups: string[];
   priority: number | undefined;
   // Number of path segments matched literally (via a ConstantComponent). Used to
   // prefer the most specific endpoint when several patterns match the same path,
@@ -87,25 +92,184 @@ export class WalkingState {
     parentName: string | undefined,
     components: AutocompleteComponent[],
     contextExtensionList: Array<Record<string, unknown>>,
-    { depth = 0, priority, specificity = 0 }: WalkingStateOptions = {}
+    {
+      depth = 0,
+      fallbackGroups = [],
+      preferredFallbackGroups = [],
+      priority,
+      specificity = 0,
+    }: WalkingStateOptions = {}
   ) {
     this.parentName = parentName;
     this.components = components;
     this.contextExtensionList = contextExtensionList;
     this.depth = depth;
+    this.fallbackGroups = fallbackGroups;
+    this.preferredFallbackGroups = preferredFallbackGroups;
     this.priority = priority;
     this.specificity = specificity;
   }
 }
 
+function getNextGroups(result: AutocompleteMatchResult): Array<{
+  next: AutocompleteComponent[];
+  fallbackGroup?: string;
+  preferredFallbackGroup?: string;
+}> {
+  const nextGroups = result.nextGroups ?? [{ next: result.next, fallback: false }];
+  const fallbackGroup =
+    _.some(nextGroups, (nextGroup) => nextGroup.fallback) &&
+    _.some(nextGroups, (nextGroup) => !nextGroup.fallback)
+      ? _.uniqueId('fallback_group_')
+      : undefined;
+
+  return nextGroups.map((nextGroup) => ({
+    next: nextGroup.next ? asArray(nextGroup.next) : [],
+    fallbackGroup: nextGroup.fallback ? fallbackGroup : undefined,
+    preferredFallbackGroup: !nextGroup.fallback ? fallbackGroup : undefined,
+  }));
+}
+
+function resolveFallbackStates(walkStates: WalkingState[]): WalkingState[] {
+  const preferredFallbackGroups = new Set(_.flatMap(walkStates, 'preferredFallbackGroups'));
+  if (!preferredFallbackGroups.size) {
+    return walkStates;
+  }
+  return _.filter(
+    walkStates,
+    (ws) =>
+      !_.some(ws.fallbackGroups, (fallbackGroup) => preferredFallbackGroups.has(fallbackGroup))
+  );
+}
+
+function orderStatesForFallbackEvaluation(walkStates: WalkingState[]): WalkingState[] {
+  const preferredStatesByFallbackGroup = new Map<string, WalkingState[]>();
+  _.each(walkStates, (state) => {
+    _.each(state.preferredFallbackGroups, (fallbackGroup) => {
+      const preferredStates = preferredStatesByFallbackGroup.get(fallbackGroup) ?? [];
+      preferredStates.push(state);
+      preferredStatesByFallbackGroup.set(fallbackGroup, preferredStates);
+    });
+  });
+  if (!preferredStatesByFallbackGroup.size) {
+    return walkStates;
+  }
+
+  const orderedStates: WalkingState[] = [];
+  const visitedStates = new Set<WalkingState>();
+  const visitedFallbackGroups = new Set<string>();
+  const visitState = (state: WalkingState) => {
+    if (visitedStates.has(state)) {
+      return;
+    }
+    visitedStates.add(state);
+
+    _.each(state.fallbackGroups, (fallbackGroup) => {
+      if (visitedFallbackGroups.has(fallbackGroup)) {
+        return;
+      }
+      visitedFallbackGroups.add(fallbackGroup);
+      _.each(preferredStatesByFallbackGroup.get(fallbackGroup), visitState);
+    });
+    orderedStates.push(state);
+  };
+
+  _.each(walkStates, visitState);
+  return orderedStates;
+}
+
+function resolveAutocompleteFallbackStates(
+  walkStates: WalkingState[],
+  preferredFallbackGroupsWithTerms: Set<string>,
+  fallbackGroupsWithTerms: Set<string>
+): WalkingState[] {
+  const preferredFallbackGroups = new Set(_.flatMap(walkStates, 'preferredFallbackGroups'));
+  const prefersExplicitBranch = (fallbackGroup: string) =>
+    preferredFallbackGroupsWithTerms.has(fallbackGroup) ||
+    (!fallbackGroupsWithTerms.has(fallbackGroup) && preferredFallbackGroups.has(fallbackGroup));
+
+  return _.filter(
+    walkStates,
+    (state) =>
+      !_.some(state.fallbackGroups, prefersExplicitBranch) &&
+      !_.some(
+        state.preferredFallbackGroups,
+        (fallbackGroup) => !prefersExplicitBranch(fallbackGroup)
+      )
+  );
+}
+
+interface AutocompleteStateEvaluation {
+  walkStates: WalkingState[];
+  stateTerms: Map<WalkingState, AutocompleteTermDefinition[]>;
+}
+
+function evaluateAutocompleteStates(
+  walkStates: WalkingState[],
+  context: AutocompleteContext,
+  editor: unknown
+): AutocompleteStateEvaluation {
+  const stateTerms = new Map<WalkingState, AutocompleteTermDefinition[]>();
+  const preferredFallbackGroupsWithTerms = new Set<string>();
+  const fallbackGroupsWithTerms = new Set<string>();
+  const statesByFallbackPreference = orderStatesForFallbackEvaluation(walkStates);
+  _.each(statesByFallbackPreference, function (ws) {
+    if (
+      _.some(ws.fallbackGroups, (fallbackGroup) =>
+        preferredFallbackGroupsWithTerms.has(fallbackGroup)
+      )
+    ) {
+      return;
+    }
+
+    const contextForState = passThroughContext(context, ws.contextExtensionList);
+    const termsForState: AutocompleteTermDefinition[] = [];
+    _.each(ws.components, function (component) {
+      const terms = component.getTerms(contextForState, editor);
+      if (terms) {
+        termsForState.push(...terms);
+      }
+    });
+
+    stateTerms.set(ws, termsForState);
+    if (termsForState.length) {
+      _.each(ws.preferredFallbackGroups, (fallbackGroup) => {
+        preferredFallbackGroupsWithTerms.add(fallbackGroup);
+      });
+      _.each(ws.fallbackGroups, (fallbackGroup) => {
+        fallbackGroupsWithTerms.add(fallbackGroup);
+      });
+    }
+  });
+
+  return {
+    walkStates: resolveAutocompleteFallbackStates(
+      walkStates,
+      preferredFallbackGroupsWithTerms,
+      fallbackGroupsWithTerms
+    ),
+    stateTerms,
+  };
+}
+
+export const getTermsForWalkingStates = (
+  walkStates: WalkingState[],
+  context: AutocompleteContext,
+  editor: unknown
+): AutocompleteTermDefinition[] => {
+  const evaluation = evaluateAutocompleteStates(walkStates, context, editor);
+  return _.flatMap(evaluation.walkStates, (state) => evaluation.stateTerms.get(state) ?? []);
+};
+
 export function walkTokenPath(
   tokenPath: Array<string | string[]>,
   walkingStates: WalkingState[],
   context: AutocompleteContext,
-  editor: unknown
+  editor: unknown,
+  preserveFallbackStates = false
 ): WalkingState[] {
   if (!tokenPath || tokenPath.length === 0) {
-    return walkingStates;
+    return preserveFallbackStates ? walkingStates : resolveFallbackStates(walkingStates);
   }
   const token = tokenPath[0];
   const nextWalkingStates: WalkingState[] = [];
@@ -119,10 +283,6 @@ export function walkTokenPath(
       const result = component.match(token, contextForState, editor);
       if (result && !_.isEmpty(result)) {
         tracer('matched [' + token + '] with:', result);
-        let next: AutocompleteComponent[] = [];
-        if (result.next) {
-          next = asArray(result.next);
-        }
 
         let extensionList: Array<Record<string, unknown>>;
         if (result.context_values) {
@@ -143,25 +303,76 @@ export function walkTokenPath(
 
         const specificity = ws.specificity + (component instanceof ConstantComponent ? 1 : 0);
 
-        nextWalkingStates.push(
-          new WalkingState(component.name, next, extensionList, {
-            depth: ws.depth + 1,
-            priority,
-            specificity,
-          })
-        );
+        if (result.nextStates) {
+          _.each(result.nextStates, (nextState) => {
+            let continuationPriority = priority;
+            if (_.isNumber(nextState.priority)) {
+              continuationPriority = _.isNumber(continuationPriority)
+                ? Math.min(continuationPriority, nextState.priority)
+                : nextState.priority;
+            }
+            nextWalkingStates.push(
+              new WalkingState(
+                nextState.parentName ?? component.name,
+                nextState.components,
+                extensionList.concat(nextState.contextExtensionList),
+                {
+                  depth: ws.depth + 1,
+                  fallbackGroups: ws.fallbackGroups.concat(nextState.fallbackGroups),
+                  preferredFallbackGroups: ws.preferredFallbackGroups.concat(
+                    nextState.preferredFallbackGroups
+                  ),
+                  priority: continuationPriority,
+                  specificity: specificity + nextState.specificity,
+                }
+              )
+            );
+          });
+          return;
+        }
+
+        const nextGroups = getNextGroups(result);
+        _.each(nextGroups, ({ next, fallbackGroup, preferredFallbackGroup }) => {
+          nextWalkingStates.push(
+            new WalkingState(component.name, next, extensionList, {
+              depth: ws.depth + 1,
+              fallbackGroups: fallbackGroup
+                ? ws.fallbackGroups.concat(fallbackGroup)
+                : ws.fallbackGroups,
+              preferredFallbackGroups: preferredFallbackGroup
+                ? ws.preferredFallbackGroups.concat(preferredFallbackGroup)
+                : ws.preferredFallbackGroups,
+              priority,
+              specificity,
+            })
+          );
+        });
       }
     });
   });
 
   if (nextWalkingStates.length === 0) {
     // no where to go, still return context variables returned so far..
-    return _.map(walkingStates, function (ws) {
-      return new WalkingState(ws.name, [], ws.contextExtensionList);
-    });
+    return resolveFallbackStates(
+      _.map(walkingStates, function (ws) {
+        return new WalkingState(ws.name, [], ws.contextExtensionList, {
+          depth: ws.depth,
+          fallbackGroups: ws.fallbackGroups,
+          preferredFallbackGroups: ws.preferredFallbackGroups,
+          priority: ws.priority,
+          specificity: ws.specificity,
+        });
+      })
+    );
   }
 
-  return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);
+  return walkTokenPath(
+    tokenPath.slice(1),
+    nextWalkingStates,
+    context,
+    editor,
+    preserveFallbackStates
+  );
 }
 
 export function populateContext(
@@ -175,28 +386,32 @@ export function populateContext(
     tokenPath,
     [new WalkingState('ROOT', components, [])],
     context,
-    editor
+    editor,
+    includeAutoComplete
   );
   if (includeAutoComplete) {
     const autoCompleteSet = new Map<ResultTerm['name'], ResultTerm>();
-    _.each(walkStates, function (ws) {
-      const contextForState = passThroughContext(context, ws.contextExtensionList);
-      _.each(ws.components, function (component) {
-        const terms = component.getTerms(contextForState, editor);
-        if (!terms) {
-          return;
-        }
-        _.each(terms, function (term) {
-          const termObj: ResultTerm = typeof term === 'string' ? { name: term } : term;
+    const evaluation = evaluateAutocompleteStates(walkStates, context, editor);
+    walkStates = evaluation.walkStates;
+    _.each(walkStates, (ws) => {
+      const terms = evaluation.stateTerms.get(ws);
+      if (!terms) {
+        return;
+      }
+      _.each(terms, function (term) {
+        const termObj: ResultTerm = typeof term === 'string' ? { name: term } : term;
 
-          // Add the term to the autoCompleteSet if it doesn't already exist
-          if (!autoCompleteSet.has(termObj.name)) {
-            autoCompleteSet.set(termObj.name, termObj);
-          }
-        });
+        // Add the term to the autoCompleteSet if it doesn't already exist
+        if (!autoCompleteSet.has(termObj.name)) {
+          autoCompleteSet.set(termObj.name, termObj);
+        }
       });
     });
     context.autoCompleteSet = Array.from(autoCompleteSet.values());
+  }
+
+  if (!includeAutoComplete) {
+    walkStates = resolveFallbackStates(walkStates);
   }
 
   // Apply accumulated context from the best matching state.
