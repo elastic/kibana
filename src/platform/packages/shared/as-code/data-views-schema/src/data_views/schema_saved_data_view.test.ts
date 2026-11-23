@@ -20,6 +20,24 @@ describe('savedDataViewSpecSchema', () => {
     expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
   });
 
+  it('accepts a list of spaces', () => {
+    const input = {
+      index_pattern: 'logs-*',
+      spaces: ['default', 'marketing'],
+    };
+
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('rejects invalid spaces', () => {
+    expect(
+      savedDataViewSpecSchema.safeParse({ index_pattern: 'logs-*', spaces: [''] }).success
+    ).toBe(false);
+    expect(
+      savedDataViewSpecSchema.safeParse({ index_pattern: 'logs-*', spaces: 'default' }).success
+    ).toBe(false);
+  });
+
   it('accepts indexed field overrides with popularity', () => {
     const input = {
       index_pattern: 'logs-*',

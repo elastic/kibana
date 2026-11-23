@@ -70,6 +70,7 @@ export function fromStoredDataViewToAsCodeSavedSchema(
     index_pattern: index.title,
     time_field: index.timeFieldName,
     allow_hidden_indices: index.allowHidden,
+    spaces: index.namespaces,
     field_settings: fieldSettings,
     ...(scriptedFields && { scripted_fields: scriptedFields }),
     ...toAsCodeFieldFilters(index.sourceFilters),

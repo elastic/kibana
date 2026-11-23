@@ -60,7 +60,7 @@ export function toStoredDataView(
 function isSavedDataView(
   dataView: AsCodeDataView | AsCodeSavedDataView
 ): dataView is AsCodeSavedDataView {
-  return 'id' in dataView;
+  return 'id' in dataView || 'spaces' in dataView;
 }
 
 function getSavedDataViewFields(
@@ -69,5 +69,6 @@ function getSavedDataViewFields(
   if (!isSavedDataView(dataView)) return {};
   return {
     id: dataView.id,
+    ...(dataView.spaces !== undefined && { namespaces: dataView.spaces }),
   };
 }

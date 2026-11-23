@@ -215,6 +215,35 @@ describe('toStoredDataView', () => {
       });
     });
 
+    it('maps spaces to namespaces', () => {
+      const dataView: AsCodeSavedDataView = {
+        id: 'dv-1',
+        index_pattern: 'logs-*',
+        spaces: ['default', 'marketing'],
+      };
+
+      expect(toStoredDataView(dataView)).toEqual(
+        expect.objectContaining({ namespaces: ['default', 'marketing'] })
+      );
+    });
+
+    it('maps spaces to namespaces when the saved data view has no id', () => {
+      const dataView: AsCodeSavedDataView = {
+        index_pattern: 'logs-*',
+        spaces: ['marketing'],
+      };
+
+      expect(toStoredDataView(dataView)).toEqual(
+        expect.objectContaining({ namespaces: ['marketing'] })
+      );
+    });
+
+    it('omits namespaces when spaces is undefined', () => {
+      const dataView: AsCodeSavedDataView = { id: 'dv-1', index_pattern: 'logs-*' };
+
+      expect(toStoredDataView(dataView)).not.toHaveProperty('namespaces');
+    });
+
     it('maps field_filters to sourceFilters', () => {
       const dataView: AsCodeSavedDataView = {
         id: 'dv-1',
