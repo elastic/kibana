@@ -530,7 +530,6 @@ export const mergeRecordBody = schema.object({
 export const applyTaskListBody = schema.object({ task_list_id: id() });
 
 export const sinceQuery = schema.object({ since: schema.maybe(isoDate()) });
-export const historyQuery = schema.object({ target_id: schema.maybe(id()) });
 export const createThreadBody = schema.object({ title: str(256, 1), anchor: optStr(256) });
 
 export const findItemsQuery = schema.object({

@@ -66,7 +66,6 @@ import {
   findActivityQuery,
   findItemsQuery,
   findRecordsQuery,
-  historyQuery,
   importBody,
   linkRecordBody,
   indicatorLookupQuery,
@@ -462,20 +461,6 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
         return response.ok({ body: await service.report((request.params as { id: string }).id) });
-      },
-    }),
-    route({
-      method: 'get',
-      path: `${base}/{id}/_history`,
-      params: { params: recordIdParams, query: historyQuery },
-      handler: async ({ context, request, response }) => {
-        const service = await getService({ context, request });
-        return response.ok({
-          body: await service.history(
-            (request.params as { id: string }).id,
-            (request.query as { target_id?: string }).target_id
-          ),
-        });
       },
     }),
     route({

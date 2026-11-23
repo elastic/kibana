@@ -25,6 +25,7 @@ import {
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MAX_TITLE_LENGTH } from '../../../../common/constants';
+import { ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX } from '../../../common/translations';
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { useGetTags } from '../../../containers/use_get_tags';
@@ -198,6 +199,7 @@ const TagsEditor: React.FC<TagsEditorProps> = ({
           options={options}
           selectedOptions={tags.map(toOption)}
           onCreateOption={addTag}
+          customOptionText={ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX}
           onChange={(selected) => setTags(selected.map(({ label }) => label))}
           isInvalid={error !== undefined}
           aria-label={i18n.TAGS}

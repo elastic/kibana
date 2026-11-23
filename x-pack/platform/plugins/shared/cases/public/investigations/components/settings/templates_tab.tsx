@@ -242,7 +242,9 @@ export const TemplatesTab: React.FC = () => {
   ];
 
   const renderTable = () => {
-    if (templatesQuery.isLoading || (typesQuery.isLoading && templates.length === 0)) {
+    // The Task lists column needs the template links and the lists; rendering rows before both
+    // arrive shows "-" or "None" for templates that do have lists.
+    if (templatesQuery.isLoading || typesQuery.isLoading || taskListsQuery.isLoading) {
       return <LoadingState label={i18n.TEMPLATES_LOADING} />;
     }
     if (templatesQuery.isError) {

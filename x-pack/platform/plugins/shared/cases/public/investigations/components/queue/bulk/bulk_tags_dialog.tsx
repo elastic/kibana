@@ -11,6 +11,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { INVESTIGATION_LIMITS } from '../../../../../common/investigations/constants';
 import { useGetTags } from '../../../../containers/use_get_tags';
 import { BulkDialog } from './bulk_dialog';
+import { ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX } from '../../../../common/translations';
 import * as i18n from './translations';
 
 const toOption = (label: string): EuiComboBoxOptionOption<string> => ({ label });
@@ -71,6 +72,7 @@ export const BulkTagsDialog: React.FC<BulkTagsDialogProps> = ({ count, onConfirm
           placeholder={i18n.TAGS_PLACEHOLDER}
           options={options}
           selectedOptions={tags.map(toOption)}
+          customOptionText={ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX}
           onCreateOption={addTag}
           onChange={(selected) => setTags(selected.map(({ label }) => label))}
           isInvalid={error !== undefined}

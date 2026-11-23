@@ -59,6 +59,7 @@ import { DuplicateStatus } from './duplicate_callout';
 import { GlobalFieldsSection } from './global_fields_section';
 import { TypeFieldsSection } from './type_fields_section';
 import { MarkdownEditor } from '../../../components/markdown_editor';
+import { ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX } from '../../../common/translations';
 import * as i18n from './translations';
 import { EMPTY_FORM, hasErrors, validateForm } from './validation';
 import type { CreateFormValues } from './validation';
@@ -388,6 +389,7 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
                 noSuggestions
                 placeholder={i18n.TAGS_PLACEHOLDER}
                 selectedOptions={toOptions(values.tags)}
+                customOptionText={ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX}
                 onCreateOption={(tag) => {
                   const trimmed = tag.trim();
                   if (trimmed.length > 0 && !values.tags.includes(trimmed)) {
@@ -422,6 +424,7 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
                 noSuggestions
                 placeholder={i18n.ENTITIES_PLACEHOLDER}
                 selectedOptions={toOptions(values.entities)}
+                customOptionText={i18n.ADD_ENTITY_CUSTOM_OPTION}
                 onCreateOption={(name) => {
                   const trimmed = name.trim();
                   if (trimmed.length > 0 && !values.entities.includes(trimmed)) {
@@ -440,6 +443,7 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
                 noSuggestions
                 placeholder={i18n.ALERT_IDS_PLACEHOLDER}
                 selectedOptions={toOptions(values.alertIds)}
+                customOptionText={i18n.ADD_ALERT_ID_CUSTOM_OPTION}
                 onCreateOption={(alertId) => {
                   const trimmed = alertId.trim();
                   if (trimmed.length > 0 && !values.alertIds.includes(trimmed)) {

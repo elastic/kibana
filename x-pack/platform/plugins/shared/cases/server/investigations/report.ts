@@ -66,14 +66,14 @@ export const buildReport = ({
   ln.push('## Verdict', '');
   if (analyst) {
     ln.push(
-      `Analyst determination: ${VERDICT_LABELS[analyst.verdict]} (set by ${analyst.set_by.name}).${
+      `Analyst verdict: ${VERDICT_LABELS[analyst.verdict]} (set by ${analyst.set_by.name}).${
         analyst.reason ? ` ${analyst.reason}` : ''
       }${agent ? ` Agent verdict (superseded): ${agent.label} (${agent.confidence}%).` : ''}`
     );
   } else if (agent) {
-    ln.push(`Agent verdict: ${agent.label} (${agent.confidence}%). No analyst determination yet.`);
+    ln.push(`Agent verdict: ${agent.label} (${agent.confidence}%). No analyst verdict yet.`);
   } else {
-    ln.push('No determination yet.');
+    ln.push('No verdict yet.');
   }
   if (record.close_outcome) {
     ln.push(

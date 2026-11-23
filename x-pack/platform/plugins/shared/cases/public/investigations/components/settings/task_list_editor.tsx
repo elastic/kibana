@@ -60,6 +60,7 @@ import {
   validateDraft,
 } from './template_draft';
 import type { DraftSubtask, DraftTask } from './template_draft';
+import { ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX } from '../../../common/translations';
 import * as i18n from '../procedure/translations';
 import * as settingsI18n from './translations';
 
@@ -345,6 +346,7 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({
             isDisabled={readOnly}
             placeholder={settingsI18n.TAGS_PLACEHOLDER}
             selectedOptions={tags.map((tag) => ({ label: tag }))}
+            customOptionText={ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX}
             onCreateOption={(value) => {
               const tag = value.trim().slice(0, INVESTIGATION_LIMITS.maxTagLength);
               if (tag.length > 0 && !tags.includes(tag)) {

@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
@@ -42,8 +43,6 @@ export interface ApplyTaskListModalProps {
 
 interface TaskListOptionData {
   description: string;
-  taskCount: number;
-  isApplied: boolean;
 }
 
 /**
@@ -71,19 +70,33 @@ export const ApplyTaskListModal: React.FC<ApplyTaskListModalProps> = ({
     () =>
       (taskListsQuery.data?.task_lists ?? []).map((list) => {
         const isApplied = appliedIds.has(list.id);
+        const taskCount = list.tasks.reduce(
+          (total, task) => total + 1 + (task.subtasks?.length ?? 0),
+          0
+        );
         return {
           key: list.id,
+          // `append` sits outside the option's truncated text, so the count is never clipped.
+          append: (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" css={noWrapStyles}>
+                  {i18n.APPLY_TASK_COUNT(taskCount)}
+                </EuiText>
+              </EuiFlexItem>
+              {isApplied ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{i18n.ALREADY_APPLIED}</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          ),
           label: list.name,
           disabled: isApplied,
           checked: selectedId === list.id ? 'on' : undefined,
           'data-test-subj': `investigationApplyTaskList-${list.id}`,
           data: {
             description: list.description,
-            taskCount: list.tasks.reduce(
-              (total, task) => total + 1 + (task.subtasks?.length ?? 0),
-              0
-            ),
-            isApplied,
           },
         };
       }),
@@ -144,30 +157,18 @@ export const ApplyTaskListModal: React.FC<ApplyTaskListModalProps> = ({
         }}
         renderOption={(option) => {
           // EuiSelectable hands the option's `data` to renderOption flattened into the option.
-          const { description = '', taskCount = 0, isApplied = false } = option;
+          const { description = '' } = option;
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{option.label}</strong>
+            <>
+              <EuiText size="s" css={truncateStyles}>
+                <strong>{option.label}</strong>
+              </EuiText>
+              {description ? (
+                <EuiText size="xs" color="subdued" css={truncateStyles}>
+                  {description}
                 </EuiText>
-                {description ? (
-                  <EuiText size="xs" color="subdued">
-                    {description}
-                  </EuiText>
-                ) : null}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {i18n.APPLY_TASK_COUNT(taskCount)}
-                </EuiText>
-              </EuiFlexItem>
-              {isApplied ? (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">{i18n.ALREADY_APPLIED}</EuiBadge>
-                </EuiFlexItem>
               ) : null}
-            </EuiFlexGroup>
+            </>
           );
         }}
         data-test-subj="investigationApplyTaskListOptions"
@@ -230,3 +231,13 @@ export const ApplyTaskListModal: React.FC<ApplyTaskListModalProps> = ({
   );
 };
 ApplyTaskListModal.displayName = 'ApplyTaskListModal';
+
+const noWrapStyles = css`
+  white-space: nowrap;
+`;
+
+const truncateStyles = css`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;

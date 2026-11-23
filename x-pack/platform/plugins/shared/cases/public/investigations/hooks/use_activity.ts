@@ -14,6 +14,7 @@ import type {
 import { createActivity, findActivity } from '../api/client';
 import { investigationKeys } from '../api/query_keys';
 import { useInvestigationsServices } from '../services';
+import { getHttpErrorStatus } from './errors';
 import { useInvestigationToasts } from './use_investigation_toasts';
 import * as i18n from './translations';
 
@@ -88,10 +89,18 @@ export const useLivePolling = (recordId: string): void => {
     },
     {
       enabled: recordId.length > 0,
-      refetchInterval: LIVE_POLL_INTERVAL_MS,
+      // A 404 means the record was deleted (here, in classic Cases or by another user): stop
+      // polling and refresh the record once so the page shows "not found" instead of a dead view.
+      refetchInterval: (_data, query) =>
+        getHttpErrorStatus(query.state.error) === 404 ? false : LIVE_POLL_INTERVAL_MS,
       refetchIntervalInBackground: false,
       retry: false,
       cacheTime: 0,
+      onError: (error) => {
+        if (getHttpErrorStatus(error) === 404) {
+          void queryClient.invalidateQueries(investigationKeys.record(recordId));
+        }
+      },
     }
   );
 };

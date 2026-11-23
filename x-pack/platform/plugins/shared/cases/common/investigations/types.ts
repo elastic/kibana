@@ -1236,17 +1236,6 @@ export interface SinceLastHandoffResponse {
   }>;
 }
 
-export interface ChangeHistoryResponse {
-  versions: Array<{
-    ts: string;
-    actor: Actor;
-    /** What changed: "Description", "Claim C3", "Closing summary", "Note E8". */
-    what: string;
-    text: string;
-    target_id: string | null;
-  }>;
-}
-
 export interface ReportResponse {
   markdown: string;
   filename: string;

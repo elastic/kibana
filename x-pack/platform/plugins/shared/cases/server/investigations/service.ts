@@ -58,7 +58,6 @@ import type {
   BulkUpdateItemsRequest,
   BulkUpdateItemsResponse,
   CapabilitiesResponse,
-  ChangeHistoryResponse,
   ClaimItem,
   CloseRecordRequest,
   CreateActivityRequest,
@@ -425,15 +424,6 @@ const ORIGIN_BY_SOURCE: Record<string, ActivityOrigin> = {
   api: 'api',
   connector: 'connector',
 };
-const HISTORY_ACTIONS = [
-  'record.created',
-  'record.description_changed',
-  'record.summary_changed',
-  'record.closed',
-  'claim.conclusion_changed',
-  'item.text_changed',
-];
-
 const emptyCounters = (): RecordCounters => ({
   evidence: 0,
   evidence_by_type: {},
@@ -1665,8 +1655,8 @@ export class InvestigationsService {
             action: 'record.connector_changed',
             message:
               !connector || connector.type === '.none'
-                ? 'Removed the external ticket connector'
-                : `Set the external ticket connector to ${connector.name}`,
+                ? 'Removed the external incident connector'
+                : `Set the external incident connector to ${connector.name}`,
           };
           break;
         }
@@ -2137,7 +2127,7 @@ export class InvestigationsService {
       log(
         'record.analyst_verdict_changed',
         req.analyst_verdict
-          ? `Set the determination to ${VERDICT_LABELS[req.analyst_verdict.verdict].toLowerCase()}`
+          ? `Set the verdict to ${VERDICT_LABELS[req.analyst_verdict.verdict].toLowerCase()}`
           : 'Reverted to the agent verdict',
         {
           details: req.analyst_verdict?.reason ?? null,
@@ -5871,48 +5861,6 @@ export class InvestigationsService {
     return { since, handoff_by: record.last_handoff?.by ?? null, items: out };
   }
 
-  public async history(recordId: string, targetId?: string): Promise<ChangeHistoryResponse> {
-    const { record } = await this.load(recordId);
-    const filter: QueryDslQueryContainer[] = [
-      terms('record_id', [recordId, ...(record.merged_from ?? [])]),
-      terms('action', HISTORY_ACTIONS),
-    ];
-    if (targetId) filter.push(term('target.id', targetId));
-    const res = await this.es.search<ActivityEntry>({
-      index: INVESTIGATION_ACTIVITY_INDEX,
-      size: 200,
-      query: { bool: { filter } },
-      sort: [{ ts: { order: 'desc' } }],
-    });
-    const versions: ChangeHistoryResponse['versions'] = [];
-    for (const hit of res.hits.hits) {
-      const e = hit._source as ActivityEntry;
-      const after = e.after as unknown;
-      let text: string | null = null;
-      let what = 'Description';
-      if (e.action === 'record.created') {
-        text = (after as { description?: string } | null)?.description ?? null;
-      } else if (e.action === 'record.description_changed') {
-        text = typeof after === 'string' ? after : null;
-      } else if (e.action === 'record.summary_changed') {
-        what = 'Summary';
-        text = typeof after === 'string' ? after : null;
-      } else if (e.action === 'record.closed') {
-        what = 'Closing summary';
-        text = typeof after === 'string' ? after : e.details ?? null;
-      } else if (e.action === 'claim.conclusion_changed') {
-        what = `Conclusion ${e.target?.ref ?? ''}`.trim();
-        text = typeof after === 'string' ? after : null;
-      } else if (e.action === 'item.text_changed') {
-        what = `Note ${e.target?.ref ?? ''}`.trim();
-        text = typeof after === 'string' ? after : null;
-      }
-      if (text)
-        versions.push({ ts: e.ts, actor: e.actor, what, text, target_id: e.target?.id ?? null });
-    }
-    return { versions };
-  }
-
   public async report(recordId: string): Promise<ReportResponse> {
     const { record } = await this.load(recordId);
     const [claims, proposals, tasks, timeline, activity, counters] = await Promise.all([
@@ -6496,7 +6444,7 @@ export class InvestigationsService {
   public async pushExternalTicket(recordId: string): Promise<ExternalTicketResponse> {
     const { record, theCase } = await this.loadForWrite(recordId);
     const connectorId = theCase.connector?.type !== '.none' ? theCase.connector?.id : undefined;
-    if (!connectorId) throw Boom.badRequest('Choose an external ticket connector first.');
+    if (!connectorId) throw Boom.badRequest('Choose an external incident connector first.');
     await this.pushNow(record, connectorId, this.actor());
     const fresh = await this.load(recordId);
     return this.buildExternalTicket(fresh.record, fresh.theCase);
@@ -6637,7 +6585,7 @@ export class InvestigationsService {
     const connector = theCase.connector;
     const external = theCase.external_service;
     if (!connector || connector.type === '.none') {
-      throw Boom.badRequest('Choose an external ticket connector first.');
+      throw Boom.badRequest('Choose an external incident connector first.');
     }
     if (!external || external.connector_id !== connector.id) {
       throw Boom.badRequest(
@@ -6702,7 +6650,7 @@ export class InvestigationsService {
         // Required tasks or fields still block the close: the record stays open, and the entry says why.
         const reason = error.message.replace(/^The investigation cannot close yet\.\s*/, '');
         changes.push(
-          `status left open because the ticket is closed but the investigation cannot close yet. ${reason}`.trim()
+          `status left open because the incident is closed but the investigation cannot close yet. ${reason}`.trim()
         );
         baselineStatus = baseline?.status ?? 'open';
       }

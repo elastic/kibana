@@ -30,7 +30,6 @@ import type {
   BulkUpdateItemsRequest,
   BulkUpdateItemsResponse,
   CapabilitiesResponse,
-  ChangeHistoryResponse,
   CloseRecordRequest,
   CreateActivityRequest,
   CreateRecordRequest,
@@ -215,12 +214,6 @@ export const getSinceLastHandoff = (http: HttpStart, recordId: string, since?: s
 
 export const getReport = (http: HttpStart, recordId: string) =>
   http.fetch<ReportResponse>(recordPath(recordId, '/_report'), { method: 'GET' });
-
-export const getChangeHistory = (http: HttpStart, recordId: string, targetId?: string) =>
-  http.fetch<ChangeHistoryResponse>(recordPath(recordId, '/_history'), {
-    method: 'GET',
-    query: toQuery({ target_id: targetId }),
-  });
 
 export const createThread = (http: HttpStart, recordId: string, body: CreateThreadRequest) =>
   http.fetch<{ record: InvestigationRecord; thread: ThreadRef }>(recordPath(recordId, '/threads'), {

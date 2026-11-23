@@ -218,3 +218,21 @@ export const DISCARD_KEEP_EDITING = i18n.translate(
     defaultMessage: 'Keep editing',
   }
 );
+
+/** Hint EuiComboBox shows for a typed entity; `{searchValue}` is filled in by the combo box. */
+export const ADD_ENTITY_CUSTOM_OPTION = i18n.translate(
+  'xpack.cases.investigations.create.addEntityCustomOption',
+  {
+    defaultMessage: 'Add {searchValue} as an entity',
+    values: { searchValue: '{searchValue}' },
+  }
+);
+
+/** Hint EuiComboBox shows for a typed alert ID; `{searchValue}` is filled in by the combo box. */
+export const ADD_ALERT_ID_CUSTOM_OPTION = i18n.translate(
+  'xpack.cases.investigations.create.addAlertIdCustomOption',
+  {
+    defaultMessage: 'Add alert {searchValue}',
+    values: { searchValue: '{searchValue}' },
+  }
+);
