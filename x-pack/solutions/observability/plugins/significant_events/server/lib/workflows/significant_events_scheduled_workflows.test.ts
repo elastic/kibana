@@ -216,6 +216,15 @@ describe('scheduled Significant Events managed workflows', () => {
       processedCount: expect.stringContaining('compute_batch_size.output.processedCount'),
     });
   });
+
+  it('detection completes an idle run as success, since the scheduled wrapper fails on any non-completed sub-workflow', () => {
+    const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
+
+    const idleStep = findStep(parsed.steps, 'exit_no_active_alerts');
+    expect(idleStep?.type).toBe('workflow.output');
+    expect(idleStep?.status).not.toBe('cancelled');
+    expect(idleStep?.with?.skipped).toBe(true);
+  });
 });
 
 describe('SignificantEventsScheduledWorkflowsService', () => {
@@ -424,7 +433,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     );
   });
 
-  it('disables and uninstalls without waiting for in-flight executions', async () => {
+  it('disables scheduling without draining or uninstalling when asked to skip the drain', async () => {
     const managementApi = createMockManagementApi({
       getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
     });
@@ -461,15 +470,14 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       'default',
       request
     );
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      `${SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID}-default`,
+      { enabled: false },
+      'default',
+      request
+    );
     expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
     expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-      { spaceId: 'default', workflowIdSuffix: 'default' }
-    );
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-      { spaceId: 'default', workflowIdSuffix: 'default' }
-    );
+    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
 });

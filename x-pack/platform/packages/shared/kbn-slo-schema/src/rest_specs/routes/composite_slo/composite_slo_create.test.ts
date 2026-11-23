@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Duration, DurationUnit } from '../../../models/duration';
 import { createCompositeSLOParamsSchema } from './composite_slo_create';
 
 const BASE_BODY = {
@@ -83,6 +84,54 @@ describe('CreateCompositeSLO schema validation', () => {
     const result = createCompositeSLOParamsSchema.safeParse(request);
 
     expect(result.success).toBe(false);
+  });
+
+  describe('string bounds', () => {
+    const members = buildMembers(2);
+    const parseBody = (overrides: Record<string, unknown>) =>
+      createCompositeSLOParamsSchema.safeParse({ body: { ...BASE_BODY, members, ...overrides } });
+
+    it.each([
+      ['name', 'a'.repeat(1024), 'a'.repeat(1025)],
+      ['description', 'a'.repeat(10000), 'a'.repeat(10001)],
+    ])('bounds %s', (field, valid, tooLong) => {
+      expect(parseBody({ [field]: valid }).success).toBe(true);
+      expect(parseBody({ [field]: tooLong }).success).toBe(false);
+    });
+
+    it('rejects an empty name', () => {
+      expect(parseBody({ name: '' }).success).toBe(false);
+    });
+
+    it('bounds timeWindow.duration', () => {
+      expect(
+        parseBody({ timeWindow: { duration: `${'1'.repeat(15)}d`, type: 'rolling' } }).success
+      ).toBe(true);
+      expect(
+        parseBody({ timeWindow: { duration: `${'1'.repeat(16)}d`, type: 'rolling' } }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('timeWindow', () => {
+    const members = buildMembers(2);
+
+    it('decodes the duration into a Duration', () => {
+      const result = createCompositeSLOParamsSchema.parse({ body: { ...BASE_BODY, members } });
+
+      expect(result.body.timeWindow.duration).toBeInstanceOf(Duration);
+      expect(result.body.timeWindow.duration.isEqual(new Duration(30, DurationUnit.Day))).toBe(
+        true
+      );
+    });
+
+    it('rejects an invalid duration', () => {
+      const result = createCompositeSLOParamsSchema.safeParse({
+        body: { ...BASE_BODY, members, timeWindow: { duration: '30x', type: 'rolling' } },
+      });
+
+      expect(result.success).toBe(false);
+    });
   });
 
   it.each(['short', 'Invalid-Upper-Case', 'a'.repeat(49)])(

@@ -11,32 +11,35 @@ import type { ApiServicesFixture, KbnClient } from '@kbn/scout-security';
 const AGENT_BUILDER_HEADERS = { 'elastic-api-version': '2023-10-31' };
 
 /**
- * AlertZero works only in a Security space, but the default space can use the Classic view.
- * Set the Security view, turn on the AlertZero setting, and return a function that restores both.
+ * These suites run AlertZero in the default space, whatever solution view it starts with.
+ * Set the solution view (Security unless told otherwise), turn on the AlertZero setting, and
+ * return a function that restores both.
  */
 export const enableAlertZero = async ({
   apiServices,
   kbnClient,
+  solution = 'security',
 }: {
   apiServices: ApiServicesFixture;
   kbnClient: KbnClient;
+  solution?: 'security' | 'classic';
 }): Promise<() => Promise<void>> => {
   const {
-    data: { solution = 'classic' },
+    data: { solution: currentSolution = 'classic' },
   } = await kbnClient.request<{ solution?: string }>({
     method: 'GET',
     path: '/api/spaces/space/default',
   });
   const restoreSolutionView =
-    solution === 'security'
+    currentSolution === solution
       ? undefined
       : async () =>
           apiServices.spaces.setSolutionView({
             id: 'default',
-            solution: solution as 'classic' | 'oblt' | 'es',
+            solution: currentSolution as 'classic' | 'oblt' | 'es' | 'security',
           });
   if (restoreSolutionView) {
-    await apiServices.spaces.setSolutionView({ id: 'default', solution: 'security' });
+    await apiServices.spaces.setSolutionView({ id: 'default', solution });
   }
   await kbnClient.uiSettings.update({ [ALERTZERO_ENABLED_SETTING_ID]: true });
 

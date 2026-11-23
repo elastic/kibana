@@ -12,7 +12,7 @@ import {
   sourceFieldToText,
 } from './helpers';
 import { render } from '@testing-library/react';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { TestProviders } from '../../../common/mock/timeline';
 import type {
   Entity,
   HostEntity,

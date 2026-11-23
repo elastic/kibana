@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFieldSearch,
@@ -25,10 +24,9 @@ import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../
 import type { Formatters } from '../../../hooks/use_formatters';
 import { FacetFilter } from '../../../components/facet_filter';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
+import { useDebouncedText } from '../../../hooks/use_debounced_text';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
 import { DURATION_BUCKETS, type SessionsListUrlQuery } from '../../../utils/sessions_list_query';
-
-export const SEARCH_DEBOUNCE_MS = 300;
 
 /** The "any value" option of a facet, which removes its filter. */
 const ANY_VALUE = '';
@@ -103,27 +101,7 @@ export function SessionsFilters({
   onSearch: (search: string) => void;
   onClear: () => void;
 }) {
-  const [search, setSearch] = useState(state.search ?? '');
-
-  // Follows the URL, e.g. when the filters are cleared or the user goes back; a search the URL
-  // already has, but with spaces still being typed around it, stays as typed.
-  useEffect(
-    () =>
-      setSearch((current) =>
-        current.trim() === (state.search ?? '') ? current : state.search ?? ''
-      ),
-    [state.search]
-  );
-
-  useDebounce(
-    () => {
-      if (search.trim() !== (state.search ?? '')) {
-        onSearch(search);
-      }
-    },
-    SEARCH_DEBOUNCE_MS,
-    [search]
-  );
+  const [search, setSearch] = useDebouncedText(state.search, onSearch);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>

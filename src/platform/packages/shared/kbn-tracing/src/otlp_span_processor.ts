@@ -11,11 +11,11 @@ import type { OTLPExportConfig } from '@kbn/tracing-config';
 import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPTraceExporter as OTLPTraceExporterGRPC } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPTraceExporter as OTLPTraceExporterPROTO } from '@opentelemetry/exporter-trace-otlp-proto';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { diag } from '@opentelemetry/api';
 import { Metadata } from '@grpc/grpc-js';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace';
 
-export class OTLPSpanProcessor extends tracing.BatchSpanProcessor {
+export class OTLPSpanProcessor extends BatchSpanProcessor {
   constructor(config: OTLPExportConfig, protocol: 'grpc' | 'http' | 'proto') {
     diag.info(`Initializing OTLP exporter with protocol: ${protocol}, url: ${config.url}`);
 
@@ -47,7 +47,8 @@ export class OTLPSpanProcessor extends tracing.BatchSpanProcessor {
         break;
     }
 
-    super(exporter, {
+    super({
+      exporter,
       scheduledDelayMillis: config.scheduled_delay,
     });
 

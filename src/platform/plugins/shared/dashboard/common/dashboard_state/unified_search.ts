@@ -8,7 +8,6 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import type { Moment } from 'moment';
 import moment from 'moment';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '@kbn/es-query';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
@@ -21,21 +20,17 @@ export type UnifiedSearchState = Pick<
   'filters' | 'query' | 'refresh_interval' | 'time_range'
 >;
 
-const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
-  if (moment(time).isValid()) {
-    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-  } else {
-    // If it's not a valid moment date, then it should be a string representing a relative time
-    // like 'now' or 'now-15m'.
-    return time as string;
-  }
+const normalizeTime = (time?: string): string | undefined => {
+  if (time === undefined) return undefined;
+  // Parse strictly as ISO 8601: without an explicit format, moment falls back to
+  // `new Date()` for relative times like 'now-7d' and logs a deprecation warning.
+  const parsed = moment(time, moment.ISO_8601);
+  // Relative times (e.g. 'now-15m') are not ISO dates and are compared as written.
+  return parsed.isValid() ? parsed.toISOString() : time;
 };
 
-export const areTimesEqual = (
-  timeA?: string | Moment | undefined,
-  timeB?: string | Moment | undefined
-) => {
-  return convertTimeToUTCString(timeA) === convertTimeToUTCString(timeB);
+export const areTimesEqual = (timeA?: string, timeB?: string): boolean => {
+  return normalizeTime(timeA) === normalizeTime(timeB);
 };
 
 /**
