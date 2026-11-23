@@ -14,6 +14,8 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import type { TimeRange } from '@kbn/es-query';
 import { DataViewSource } from '@kbn/data-source';
+import { createOptionsListControlAction } from '../../../actions/create_options_list_action';
+import { createRangeSliderControlAction } from '../../../actions/create_range_slider_action';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
@@ -43,14 +45,15 @@ jest.mock('../../utils/get_source_from_esql_query', () => ({
 
 const mockGetESQLSingleColumnValues = jest.fn();
 jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
-  const fn = (...args: unknown[]) => mockGetESQLSingleColumnValues(...args);
-  fn.isSuccess = (result: unknown) => !!result && 'values' in (result as Record<string, unknown>);
-  fn.isMultiColumnError = (result: unknown) =>
-    !!result && 'columns' in (result as Record<string, unknown>);
-  fn.hasNoResults = (result: unknown) =>
-    fn.isSuccess(result) && !(result as { values: unknown[] }).values.length;
-  fn.isNumericResult = () => false;
-  return { getESQLSingleColumnValues: fn };
+  const { getESQLSingleColumnValues } = jest.requireActual(
+    '../../../../common/options_list/get_esql_single_column_values'
+  );
+  return {
+    getESQLSingleColumnValues: Object.assign(
+      (...args: unknown[]) => mockGetESQLSingleColumnValues(...args),
+      getESQLSingleColumnValues
+    ),
+  };
 });
 
 const mockDataView = createStubDataView({
@@ -115,6 +118,7 @@ describe('Data control editor', () => {
     initialDefaultPanelTitle,
     onSave = () => {},
     waitForDataView = true,
+    actions = mockRegisteredTriggerActions,
   }: {
     initialState?: Partial<DataControlState>;
     controlId?: string;
@@ -122,11 +126,12 @@ describe('Data control editor', () => {
     initialDefaultPanelTitle?: string;
     onSave?: (dataViewId?: string) => void;
     waitForDataView?: boolean;
+    actions?: CreateControlTypeAction[];
   }) => {
     dataViewsService.get = jest.fn().mockResolvedValue(mockDataView);
     (uiActionsService as Writable<typeof uiActionsService>).getTriggerActions = jest
       .fn()
-      .mockResolvedValue(mockRegisteredTriggerActions);
+      .mockResolvedValue(actions);
 
     const controlEditor = render(
       <I18nProvider>
@@ -277,43 +282,78 @@ describe('Data control editor', () => {
       id: 'esql-dataset-id',
       title: 'logs',
       fields: [],
-      getFieldByName: (name: string) => ({ name, type: 'string', aggregatable: true }),
+      getFieldByName: (name: string) =>
+        name === 'os' ? { name, type: 'string', aggregatable: true } : undefined,
       isTimeBased: () => false,
       toFilterableSource: () => Promise.resolve(esqlSource),
     };
 
-    test('explains that a type needs another kind of field, since a field is selected', async () => {
-      mockGetSourceFromESQLQuery.mockResolvedValue(esqlSource);
+    const realActions = [createOptionsListControlAction(), createRangeSliderControlAction()];
+    const mountQueryControl = (
+      source: typeof esqlSource,
+      column: string,
+      controlType = 'options_list_control'
+    ) => {
+      mockGetSourceFromESQLQuery.mockResolvedValue(source);
       mockGetESQLSingleColumnValues.mockResolvedValue({
         values: ['linux'],
-        column: { name: 'os', type: 'keyword' },
+        column: { name: column, type: 'keyword' },
       });
-      const controlEditor = await mountComponent({
+      return mountComponent({
         controlId: 'myControl',
-        controlType: 'optionsList',
+        controlType,
         initialState: {
           values_source: ControlValuesSource.ESQL,
-          esql_query: 'FROM logs | STATS BY os',
-          field_name: 'os',
+          esql_query: `FROM logs | STATS BY ${column}`,
+          field_name: column,
           data_view_id: undefined,
         } as Partial<DataControlState>,
+        actions: realActions,
         waitForDataView: false,
       });
+    };
+    const hoverType = async (controlEditor: RenderResult, type: string) => {
+      await act(async () => {
+        // a disabled button does not get mouse events, its tooltip anchor does
+        fireEvent.mouseOver(
+          controlEditor.getByTestId(`create__${type}`).parentElement as HTMLElement
+        );
+      });
+    };
+
+    test('explains that a range slider needs a number field, for a field of the source that is not one', async () => {
+      const controlEditor = await mountQueryControl(esqlSource, 'os');
+      await waitFor(() => {
+        expect(controlEditor.getByTestId('create__options_list_control')).toBeEnabled();
+      });
+
+      await hoverType(controlEditor, 'range_slider_control');
+
+      expect(
+        await controlEditor.findByText('Range sliders are only compatible with number fields.')
+      ).toBeInTheDocument();
+    });
+
+    test('explains that the field is not in the source, for a column that the query renames', async () => {
+      const controlEditor = await mountQueryControl(esqlSource, 'renamed');
       await waitFor(() => {
         expect(controlEditor.getByTestId('control-editor-save')).toBeEnabled();
       });
 
-      await act(async () => {
-        // a disabled button does not get mouse events, its tooltip anchor does
-        fireEvent.mouseOver(
-          controlEditor.getByTestId('create__rangeSlider').parentElement as HTMLElement
-        );
-      });
+      await hoverType(controlEditor, 'options_list_control');
 
       expect(
-        await controlEditor.findByText('Select a compatible control type.')
+        await controlEditor.findByText('The selected field is not a field of the data source.')
       ).toBeInTheDocument();
-      expect(controlEditor.queryByText('Select a field first.')).not.toBeInTheDocument();
+    });
+
+    test('selects a compatible type once the query has resolved its source', async () => {
+      const controlEditor = await mountQueryControl(esqlSource, 'os', 'range_slider_control');
+
+      await waitFor(() => {
+        expect(getPressedAttribute(controlEditor, 'create__options_list_control')).toBe('true');
+      });
+      expect(getPressedAttribute(controlEditor, 'create__range_slider_control')).toBe('false');
     });
 
     test('goes back to the data view that the query reads, with its field, in field mode', async () => {

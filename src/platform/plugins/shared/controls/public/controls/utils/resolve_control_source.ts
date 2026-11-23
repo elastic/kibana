@@ -9,9 +9,10 @@
 
 import { ControlValuesSource } from '@kbn/controls-constants';
 import { DataViewSource } from '@kbn/data-source';
-import type { DataSource } from '@kbn/data-source';
+import type { DataSource, FilterableSource } from '@kbn/data-source';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { dataViewsService } from '../../services/kibana_services';
+import { coreServices, dataViewsService } from '../../services/kibana_services';
 import { getSourceFromESQLQuery } from './get_source_from_esql_query';
 
 export interface FieldSourceKey {
@@ -25,11 +26,26 @@ export interface EsqlSourceKey {
 /** What identifies the source of a control: a data view for a field, the query for a "Write a query" control */
 export type ControlSourceKey = FieldSourceKey | EsqlSourceKey;
 
+/** A data source of a control, and what filtering needs from it, which the controls build their filters from */
+export interface ControlSource {
+  dataSource: DataSource;
+  filterableSource: FilterableSource;
+}
+
 /** The data source that a control reads its values from: a data view for a field, what the query reads for a query. */
 export const resolveControlSource = async (
   key: ControlSourceKey,
   { parentApi }: { parentApi?: unknown } = {}
-): Promise<DataSource> => {
+): Promise<ControlSource> => {
+  const dataSource = await getDataSource(key, parentApi);
+  return { dataSource, filterableSource: await dataSource.toFilterableSource(coreServices?.http) };
+};
+
+/** The data view of a data source, which only a data source of a data view has. */
+export const getDataViewOfSource = (dataSource: DataSource | undefined): DataView | undefined =>
+  dataSource?.kind === 'index-pattern' ? dataSource.getDataView() : undefined;
+
+const getDataSource = async (key: ControlSourceKey, parentApi?: unknown): Promise<DataSource> => {
   if (key.valuesSource !== ControlValuesSource.ESQL) {
     return new DataViewSource(await dataViewsService.get(key.dataViewId ?? ''));
   }

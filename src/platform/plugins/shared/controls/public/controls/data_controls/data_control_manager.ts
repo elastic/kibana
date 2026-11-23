@@ -37,7 +37,7 @@ import { apiPublishesProjectRouting, type StateComparators } from '@kbn/presenta
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
-import { coreServices, dataService } from '../../services/kibana_services';
+import { dataService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
@@ -121,12 +121,15 @@ export const initializeDataControlManager = async <EditorState extends object = 
   });
 
   const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(undefined);
+  // The source that the field is looked up in. It is cleared while another one loads, so that the field
+  // of the new source is not looked up in the source that it replaces.
+  const resolvedSource$ = new BehaviorSubject<FilterableSource | undefined>(undefined);
   const field$ = new BehaviorSubject<FilterableField | undefined>(undefined);
   const defaultFieldFormatter = (toFormat: any) => String(toFormat);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>(defaultFieldFormatter);
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
   const fieldNameSubscription = combineLatest([
-    dataSources$,
+    resolvedSource$,
     dataControlStateManager.api.fieldName$,
     dataControlStateManager.api.valuesSource$,
   ])
@@ -140,8 +143,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         filtersLoading$.next(true);
       })
     )
-    .subscribe(([nextDataSources, nextFieldName]) => {
-      const dataSource = nextDataSources?.[0];
+    .subscribe(([dataSource, nextFieldName]) => {
       if (!dataSource) {
         return;
       }
@@ -209,29 +211,40 @@ export const initializeDataControlManager = async <EditorState extends object = 
     ? parentApi.projectRouting$
     : new BehaviorSubject<string | undefined>(undefined);
 
-  const dataSourceSubscription = combineLatest([
-    dataControlStateManager.api.valuesSource$,
-    dataControlStateManager.api.dataViewId$,
-    dataControlStateManager.api.esqlQuery$,
-    // Re-derive the column when the set of available variables changes
-    parentEsqlVariables$.pipe(
-      distinctUntilChanged((prev, next) => {
-        if (prev.length !== next.length) return false;
-        const prevKeys = new Set(prev.map((v) => v.key));
-        return next.every((v) => prevKeys.has(v.key));
-      })
-    ),
-    // The source of the query depends on the project routing
-    parentProjectRouting$,
-  ])
+  // What the data source of the control is read from, which depends on the mode of the control
+  const dataSourceSubscription = dataControlStateManager.api.valuesSource$
     .pipe(
-      map(([valuesSource, dataViewId, esqlQuery, esqlVariables, projectRouting]) =>
+      switchMap((valuesSource) =>
         valuesSource === ControlValuesSource.ESQL
-          ? { valuesSource, esqlQuery, esqlVariables, projectRouting }
-          : { valuesSource, dataViewId }
+          ? combineLatest([
+              dataControlStateManager.api.esqlQuery$,
+              // Re-derive the column when the set of available variables changes
+              parentEsqlVariables$.pipe(
+                distinctUntilChanged((prev, next) => {
+                  if (prev.length !== next.length) return false;
+                  const prevKeys = new Set(prev.map((v) => v.key));
+                  return next.every((v) => prevKeys.has(v.key));
+                })
+              ),
+              // The source of the query depends on the project routing
+              parentProjectRouting$,
+            ]).pipe(
+              map(([esqlQuery, esqlVariables, projectRouting]) => ({
+                valuesSource,
+                esqlQuery: esqlQuery ?? '',
+                esqlVariables,
+                projectRouting,
+              }))
+            )
+          : dataControlStateManager.api.dataViewId$.pipe(
+              map((dataViewId) => ({
+                valuesSource: ControlValuesSource.FIELD as const,
+                dataViewId,
+              }))
+            )
       ),
-      distinctUntilChanged(isEqual),
       tap(() => {
+        resolvedSource$.next(undefined);
         filtersLoading$.next(true);
         if (blockingError$.value) {
           setBlockingError(undefined);
@@ -240,8 +253,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       switchMap(async (key) => {
         let source: FilterableSource | undefined;
         try {
-          const dataSource = await resolveControlSource(key, { parentApi });
-          source = await dataSource.toFilterableSource(coreServices?.http);
+          source = (await resolveControlSource(key, { parentApi })).filterableSource;
           if (key.valuesSource !== ControlValuesSource.ESQL) return { key, source };
 
           const result = await getESQLSingleColumnValues({
@@ -262,6 +274,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     )
     .subscribe(({ key, source, fieldName, error }) => {
       if (source) {
+        resolvedSource$.next(source);
         dataSources$.next([source]);
         resolveInitialDataSourceReady(source);
       }

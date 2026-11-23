@@ -8,11 +8,12 @@
  */
 
 import { ControlValuesSource } from '@kbn/controls-constants';
-import type { DataSource } from '@kbn/data-source';
+import { DataViewSource } from '@kbn/data-source';
+import type { DataSource, FilterableSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewsService } from '../../services/kibana_services';
 import { getSourceFromESQLQuery } from './get_source_from_esql_query';
-import { resolveControlSource } from './resolve_control_source';
+import { getDataViewOfSource, resolveControlSource } from './resolve_control_source';
 
 jest.mock('./get_source_from_esql_query', () => ({ getSourceFromESQLQuery: jest.fn() }));
 
@@ -21,7 +22,12 @@ describe('resolveControlSource', () => {
     typeof getSourceFromESQLQuery
   >;
   const dataView = { id: 'myDataViewId' } as DataView;
-  const esqlSource = { kind: 'esql', id: 'esql-dataset-id' } as DataSource;
+  const esqlFilterableSource = { kind: 'esql', id: 'esql-dataset-id' } as FilterableSource;
+  const esqlSource = {
+    kind: 'esql',
+    id: 'esql-dataset-id',
+    toFilterableSource: jest.fn().mockResolvedValue(esqlFilterableSource),
+  } as unknown as DataSource;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,25 +36,26 @@ describe('resolveControlSource', () => {
   });
 
   it('loads the data view of a field, without reading any query', async () => {
-    const source = await resolveControlSource({
+    const { dataSource, filterableSource } = await resolveControlSource({
       valuesSource: ControlValuesSource.FIELD,
       dataViewId: 'myDataViewId',
     });
 
-    expect(source.kind).toBe('index-pattern');
-    expect(source.kind === 'index-pattern' && source.getDataView()).toBe(dataView);
+    expect(getDataViewOfSource(dataSource)).toBe(dataView);
+    expect(filterableSource).toBe(dataView);
     expect(dataViewsService.get).toHaveBeenCalledWith('myDataViewId');
     expect(mockGetSourceFromESQLQuery).not.toHaveBeenCalled();
   });
 
   it('derives the source of a query from the query, without loading a data view by id', async () => {
     const parentApi = {};
-    const source = await resolveControlSource(
+    const { dataSource, filterableSource } = await resolveControlSource(
       { valuesSource: ControlValuesSource.ESQL, esqlQuery: 'FROM logs | STATS BY os' },
       { parentApi }
     );
 
-    expect(source).toBe(esqlSource);
+    expect(dataSource).toBe(esqlSource);
+    expect(filterableSource).toBe(esqlFilterableSource);
     expect(mockGetSourceFromESQLQuery).toHaveBeenCalledWith('FROM logs | STATS BY os', {
       parentApi,
     });
@@ -59,5 +66,13 @@ describe('resolveControlSource', () => {
     await expect(
       resolveControlSource({ valuesSource: ControlValuesSource.ESQL, esqlQuery: '' })
     ).rejects.toThrow('Variable control is missing a query');
+  });
+
+  describe('getDataViewOfSource', () => {
+    it('is the data view of a data source of a data view, and nothing for another kind of source', () => {
+      expect(getDataViewOfSource(new DataViewSource(dataView))).toBe(dataView);
+      expect(getDataViewOfSource(esqlSource)).toBeUndefined();
+      expect(getDataViewOfSource(undefined)).toBeUndefined();
+    });
   });
 });

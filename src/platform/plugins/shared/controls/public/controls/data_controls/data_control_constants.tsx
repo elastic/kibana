@@ -61,9 +61,12 @@ export const DataControlEditorStrings = {
         }),
       getControlTypeErrorMessage: ({
         fieldSelected,
+        fieldInSource,
         controlType,
       }: {
         fieldSelected?: boolean;
+        /** False when the field is not a field of the source, as for a column that a query renames */
+        fieldInSource?: boolean;
         controlType?: string;
       }) => {
         if (!fieldSelected) {
@@ -71,6 +74,15 @@ export const DataControlEditorStrings = {
             'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.noField',
             {
               defaultMessage: 'Select a field first.',
+            }
+          );
+        }
+
+        if (fieldInSource === false) {
+          return i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.fieldNotInSource',
+            {
+              defaultMessage: 'The selected field is not a field of the data source.',
             }
           );
         }

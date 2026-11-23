@@ -230,6 +230,51 @@ describe('initializeDataControlManager', () => {
     });
   });
 
+  describe('moving to another data view', () => {
+    it('does not look for the field of the new data view in the data view that it replaces', async () => {
+      const originalGet = dataViewsService.get;
+      let resolveOther: (dataView: DataView) => void = () => {};
+      dataViewsService.get = jest
+        .fn()
+        .mockImplementation((id: string) =>
+          id === 'otherDataViewId'
+            ? new Promise((resolve) => (resolveOther = resolve))
+            : originalGet(id)
+        );
+      try {
+        const manager = await initializeDataControlManager({
+          controlId: 'myControlId',
+          controlType: 'myControlType',
+          state: dataControlState,
+          editorStateManager: initializeStateManager({}, {}),
+          parentApi: {},
+          typeDisplayName: 'My Control Type',
+        });
+        await firstValueFrom(manager.api.dataSources$.pipe(filter(Boolean)));
+        const errors: unknown[] = [];
+        manager.api.blockingError$.subscribe((error) => error && errors.push(error));
+
+        manager.reinitializeState({
+          ...dataControlState,
+          data_view_id: 'otherDataViewId',
+          field_name: 'otherField',
+        });
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        resolveOther({
+          id: 'otherDataViewId',
+          getFieldByName: (name: string) =>
+            name === 'otherField' ? { name, type: 'string', toSpec: () => ({ name }) } : undefined,
+        } as unknown as DataView);
+        await new Promise((resolve) => setTimeout(resolve, 20));
+
+        expect(errors).toEqual([]);
+        expect(manager.api.field$.value?.name).toBe('otherField');
+      } finally {
+        dataViewsService.get = originalGet;
+      }
+    });
+  });
+
   describe('ESQL query subscription', () => {
     const esqlState: DataControlState = {
       ...dataControlState,
