@@ -28,12 +28,12 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type { ConnectorTelemetryMetadata, InferenceConnector } from '@kbn/inference-common';
 import { isTemplateRequiredConnector, MessageRole, parseTemplateJson } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   normalizeConnectorFeatureIds,
-  resolveConnectorIdFromFeatures,
+  resolveFeatureIdFromFeatures,
 } from '@kbn/search-inference-endpoints/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import pRetry from 'p-retry';
@@ -92,6 +92,7 @@ const completeWithPromptTemplate = async ({
   inference,
   request,
   connectorId,
+  featureId,
   templateId,
   templateVersion,
   templateVariables,
@@ -102,6 +103,7 @@ const completeWithPromptTemplate = async ({
   inference: InferenceServerStart | undefined;
   request: KibanaRequest;
   connectorId: string | undefined;
+  featureId: string | undefined;
   templateId: string | undefined;
   templateVersion: number | undefined;
   templateVariables: Record<string, unknown>;
@@ -124,7 +126,7 @@ const completeWithPromptTemplate = async ({
   | undefined
 > => {
   if (!inference) {
-    if (templateId && connectorId) {
+    if (templateId && (connectorId || featureId)) {
       throw new Error('Inference is not available, so the prompt template cannot be sent');
     }
     return undefined;
@@ -136,47 +138,45 @@ const completeWithPromptTemplate = async ({
     return undefined;
   }
 
-  // A step with no connector uses the default GenAI connector. Resolve it before deciding
-  // whether the template fields apply, so a messages connector ignores them.
-  let resolvedConnectorId = connectorId;
-  if (!resolvedConnectorId) {
-    resolvedConnectorId = (await inference.getDefaultConnector(request))?.connectorId;
-    if (!resolvedConnectorId) {
-      return undefined;
-    }
-  }
-
   const client = inference.getClient({ request });
-  let templateRequired = false;
-  try {
-    const connector = await client.getConnectorById(resolvedConnectorId);
-    templateRequired = isTemplateRequiredConnector(connector);
-  } catch (error) {
-    if (templateId) {
-      throw error;
+  let connector: InferenceConnector;
+  if (featureId) {
+    // The inference plugin owns feature resolution: no fallback when the feature has no endpoint.
+    connector = await inference.resolveFeatureConnector(featureId, request);
+  } else {
+    // A step with no connector uses the default GenAI connector. Resolve it before deciding
+    // whether the template fields apply, so a messages connector ignores them.
+    let resolvedConnectorId = connectorId;
+    if (!resolvedConnectorId) {
+      resolvedConnectorId = (await inference.getDefaultConnector(request))?.connectorId;
+      if (!resolvedConnectorId) {
+        return undefined;
+      }
     }
-    return undefined;
+    connector = await client.getConnectorById(resolvedConnectorId);
   }
 
-  if (!templateRequired) {
+  if (!isTemplateRequiredConnector(connector)) {
     return undefined;
   }
 
   if (templateVersion == null) {
     throw new Error(
-      `Connector "${resolvedConnectorId}" requires a prompt template and cannot be called with messages`
+      `Connector "${connector.connectorId}" requires a prompt template and cannot be called with messages`
     );
   }
 
-  const startedAt = Date.now();
-  const response = await client.chatComplete({
-    connectorId: resolvedConnectorId,
-    stream: false,
-    messages: [{ role: MessageRole.User, content: '' }],
+  const templateCall = {
+    stream: false as const,
+    messages: [{ role: MessageRole.User as const, content: '' }],
     template: { id: templateId, version: templateVersion, variables: templateVariables },
     abortSignal,
     ...(connectorTelemetry ? { metadata: { connectorTelemetry } } : {}),
-  });
+  };
+  const startedAt = Date.now();
+  const response = featureId
+    ? await client.chatComplete({ featureId, ...templateCall })
+    : await client.chatComplete({ connectorId: connector.connectorId, ...templateCall });
 
   const structuredOutput = schema
     ? assertTemplateMatchesSchema(parseTemplateJson(response.content ?? ''), schema)
@@ -189,7 +189,7 @@ const completeWithPromptTemplate = async ({
     structuredOutput,
     elapsedMs: Date.now() - startedAt,
     usage: {
-      connectorId: resolvedConnectorId,
+      connectorId: connector.connectorId,
       inputTokens: promptTokens,
       outputTokens: completionTokens,
       cachedTokens: response.tokens?.cached ?? 0,
@@ -359,27 +359,35 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         }
 
         const effectiveAgentId = (agentId as string | undefined) || agentBuilderDefaultAgentId;
-        let effectiveConnectorId = resolveConnectorOrInferenceId(
+        const effectiveConnectorId = resolveConnectorOrInferenceId(
           { connectorId: connectorIdRaw, inferenceId: inferenceIdRaw },
           CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW
         );
 
+        // The winning feature is handed to the run as is: the inference plugin resolves its
+        // model together with the feature's settings, which a bare connector id would lose.
+        let effectiveFeatureId: string | undefined;
         const featureIds = normalizeConnectorFeatureIds(connectorIdByFeatureRaw);
         if (featureIds.length > 0) {
           const { searchInferenceEndpoints } = serviceManager.internalStart ?? {};
           if (!searchInferenceEndpoints) {
             throw new Error('searchInferenceEndpoints service is not available');
           }
-          const connectorIdFromFeatures = await resolveConnectorIdFromFeatures({
+          effectiveFeatureId = await resolveFeatureIdFromFeatures({
             featureIds,
             request,
             searchInferenceEndpoints,
             hasExplicitConnector: effectiveConnectorId !== undefined,
             conflictMessage: CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
           });
-          if (connectorIdFromFeatures) {
-            effectiveConnectorId = connectorIdFromFeatures;
-          }
+        }
+
+        let effectiveReasoningLevel = reasoningLevel;
+        if (effectiveFeatureId !== undefined && reasoningLevel !== undefined) {
+          context.logger.warn(
+            `reasoning-level is ignored: the step runs on inference feature "${effectiveFeatureId}", which owns its reasoning settings`
+          );
+          effectiveReasoningLevel = undefined;
         }
 
         const storeConversation = !ephemeral && (createConversation || Boolean(conversationId));
@@ -397,6 +405,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           inference: serviceManager.internalStart?.inference,
           request,
           connectorId: effectiveConnectorId,
+          featureId: effectiveFeatureId,
           templateId: normalizeOptionalStringParam(templateIdRaw),
           templateVersion: templateVersionRaw,
           templateVariables: templateVariables ?? {},
@@ -452,6 +461,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             params: {
               agentId: effectiveAgentId,
               connectorId: effectiveConnectorId,
+              ...(effectiveFeatureId ? { inferenceFeatureId: effectiveFeatureId } : {}),
               conversationId,
               ...(authorName ? { author: { full_name: authorName } } : {}),
               autoCreateConversationWithId: createConversation,
@@ -465,7 +475,9 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
                 attachments,
               },
               ...(maxContentLength !== undefined ? { maxContentLength } : {}),
-              ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
+              ...(effectiveReasoningLevel !== undefined
+                ? { reasoningLevel: effectiveReasoningLevel }
+                : {}),
               // The single source of the workflow run: the execution reports it on its round events
               // and sends it to EIS as `interactionId`, with or without a `plugin-id`.
               workflowExecutionId: context.contextManager.getContext().execution.id,

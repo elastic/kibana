@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout';
+import type { ApiClientFixture, EsClient } from '@kbn/scout';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 export interface StreamDocCount {
@@ -20,6 +20,13 @@ export const lastHourRange = () => {
   const now = Date.now();
   return { start: now - 3_600_000, end: now + 60_000 };
 };
+
+/**
+ * Makes documents rejected into a stream's failure store searchable on every shard copy, which
+ * the rejected write does not do for the separate `.fs-*` indices behind `<stream>::failures`.
+ */
+export const refreshFailureStore = (esClient: EsClient, stream: string) =>
+  esClient.indices.refresh({ index: `${stream}::failures` });
 
 export const getDocCounts = (
   apiClient: ApiClientFixture,

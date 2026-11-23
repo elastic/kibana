@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SESSIONS_LOOKBACK_DAYS } from '../common/sessions';
 import type { ApplicationSource } from '../common/types/applications';
 
 export const DIGITAL_EXPERIENCE_LABEL = i18n.translate('xpack.digitalExperience.label', {
@@ -20,12 +21,13 @@ export const PAGE_LOADS_LABEL = i18n.translate('xpack.digitalExperience.pageLoad
   defaultMessage: 'Page loads',
 });
 
-/** Why the sessions of the applications are not counted, for the places that show them. */
+/** What the sessions of the applications are counted from, for where they can't be shown. */
 export const SESSIONS_UNAVAILABLE_LABEL = i18n.translate(
   'xpack.digitalExperience.sessions.unavailable',
   {
     defaultMessage:
-      'Counted from the session summaries, for time ranges within the last 30 days. Set sessions up in the Sessions tab of an EDOT Browser application.',
+      'Counted for EDOT Browser applications from their session summaries, for time ranges within the last {days} days.',
+    values: { days: SESSIONS_LOOKBACK_DAYS },
   }
 );
 
@@ -78,4 +80,10 @@ export const SOURCE_LABELS: Record<ApplicationSource, string> = {
 export const ANONYMOUS_USER = i18n.translate(
   'xpack.digitalExperience.sessions.table.anonymousUserLabel',
   { defaultMessage: 'Anonymous' }
+);
+
+/** A page visit whose page view carried no URL, so there is no page to name. */
+export const UNKNOWN_PAGE = i18n.translate(
+  'xpack.digitalExperience.sessionDetail.unknownPageLabel',
+  { defaultMessage: 'Unknown page' }
 );

@@ -31,4 +31,10 @@ export const dsl = {
   isNotInstalled(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isInstalled() } };
   },
+  isInstallable(): QueryDslQueryContainer {
+    return { bool: { must: [genericDsl.isFullOrPartiallyTranslated(), dsl.isNotInstalled()] } };
+  },
+  isNotInstallable(): QueryDslQueryContainer {
+    return { bool: { should: [genericDsl.isNotFullOrPartiallyTranslated(), dsl.isInstalled()] } };
+  },
 };

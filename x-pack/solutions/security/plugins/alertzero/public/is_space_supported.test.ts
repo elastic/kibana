@@ -47,13 +47,13 @@ describe('isSpaceSupported$', () => {
   );
 
   it.each([[{ solution: 'classic' as const }], [{}]])(
-    'does not support a Classic space (%j)',
+    'supports a Classic space (%j)',
     async (space) => {
       const spaces = createSpaces(space);
 
       await expect(
         firstValueFrom(isSpaceSupported$({ isServerless: false, spaces }))
-      ).resolves.toBe(false);
+      ).resolves.toBe(true);
     }
   );
 
@@ -72,7 +72,7 @@ describe('isSpaceSupported$', () => {
   });
 
   it('skips the check on serverless', async () => {
-    const spaces = createSpaces({ solution: 'classic' });
+    const spaces = createSpaces({ solution: 'oblt' });
 
     await expect(firstValueFrom(isSpaceSupported$({ isServerless: true, spaces }))).resolves.toBe(
       true

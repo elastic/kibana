@@ -77,7 +77,7 @@ const mergeInspect = (...parts: Array<InspectQuery | undefined>): InspectQuery |
   };
 };
 
-export function serializeIdentityFieldsForQueryKey(
+function serializeIdentityFieldsForQueryKey(
   fields: Record<string, string> | null | undefined
 ): string {
   if (fields == null || Object.keys(fields).length === 0) {
@@ -92,7 +92,7 @@ export function serializeIdentityFieldsForQueryKey(
   );
 }
 
-export function mapHostEntityToHostItem(entity: HostEntity): HostItem {
+function mapHostEntityToHostItem(entity: HostEntity): HostItem {
   const hostData = entity.host;
   if (!hostData) {
     return {};
@@ -109,7 +109,7 @@ export function mapHostEntityToHostItem(entity: HostEntity): HostItem {
   };
 }
 
-export function mapUserEntityToUserItem(entity: UserEntity): UserItem {
+function mapUserEntityToUserItem(entity: UserEntity): UserItem {
   const userData = entity.user;
   if (!userData) {
     return {};

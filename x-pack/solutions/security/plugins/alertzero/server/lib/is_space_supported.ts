@@ -15,8 +15,9 @@ interface IsSpaceSupportedParams {
 }
 
 /**
- * AlertZero belongs to the Security solution, so only a space with the Security solution view can
- * reach it, even when the advanced setting is on. A space without a solution is a Classic space.
+ * AlertZero runs in spaces with the Security solution view and in Classic spaces. Spaces with another
+ * solution view can't reach it, even when the advanced setting is on. A space without a solution is a
+ * Classic space.
  *
  * Serverless projects have no spaces with a solution view, so the check does not apply there. When the active
  * space cannot be read, the answer is `false`: no access is the safe default.
@@ -34,7 +35,7 @@ export const isSpaceSupported = async ({
   }
   try {
     const { solution } = await spaces.spacesService.getActiveSpace(request);
-    return solution === 'security';
+    return !solution || solution === 'classic' || solution === 'security';
   } catch {
     return false;
   }

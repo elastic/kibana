@@ -54,9 +54,11 @@ export const getInvestigationQuotaReachedMessage = ({
   deniedBy?: InvestigationQuotaLimit;
 } = {}): string => {
   const settings = settingsUrl !== undefined ? `<${settingsUrl}|settings>` : 'settings';
-  return `Elastic nightshift has reached ${QUOTA_REACHED[deniedBy](
-    limit
-  )}. New investigations resume at 00:00 UTC, or an admin can raise the limit in ${settings}.`;
+  const reached = `Elastic nightshift has reached ${QUOTA_REACHED[deniedBy](limit)}.`;
+  if (limit === 0) {
+    return `${reached} New investigations stay blocked until an admin changes the limit or turns off enforcement in ${settings}.`;
+  }
+  return `${reached} New investigations resume at 00:00 UTC, or an admin can raise the limit in ${settings}.`;
 };
 
 /** Absolute settings URL in the workflow's space, or undefined when it can't be built. */

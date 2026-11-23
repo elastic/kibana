@@ -10,7 +10,6 @@ import type { ChatCompleteOptions, Model } from '@kbn/inference-common';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import {
   createInferenceInternalError,
-  createInferenceRequestAbortedError,
   createInferenceRequestError,
   InferenceTaskErrorCode,
   getConnectorFamily,
@@ -31,7 +30,11 @@ import type {
   InferenceAnonymizationOptions,
   RegexWorkerService,
 } from '@kbn/ai-anonymization-server';
-import type { ActionsClientProvider, ScopedFeatureEndpointResolver } from '../types';
+import type {
+  ActionsClientProvider,
+  InferenceModelTarget,
+  ScopedFeatureEndpointResolver,
+} from '../types';
 import type {
   InferenceAdapterChatCompleteOptions,
   InferenceConnectorAdapterChatCompleteEvent,
@@ -51,6 +54,10 @@ import {
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import {
+  resolveFeatureEndpointOrThrow,
+  type ResolvedFeatureEndpoint,
+} from '../util/resolve_feature_endpoint';
 import { anonymizeChatTemplate } from './anonymize_chat_template';
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
@@ -83,15 +90,11 @@ type CreateChatCompleteApiOptionsKey =
   | 'retryConfiguration'
   | 'maxRetries';
 
-type ChatCompleteTarget =
-  | { connectorId: string; featureId?: never }
-  | { featureId: string; connectorId?: never };
-
 type ChatCompleteApiWithCallbackInitOptions = Pick<
   ChatCompleteOptions,
   CreateChatCompleteApiOptionsKey
 > &
-  ChatCompleteTarget;
+  InferenceModelTarget;
 
 export interface ChatCompleteCallbackContext {
   model?: Partial<Model>;
@@ -206,31 +209,19 @@ async function resolveEndpoint({
   resolveFeatureEndpoint,
   abortSignal,
 }: {
-  target: ChatCompleteTarget;
+  target: InferenceModelTarget;
   resolveFeatureEndpoint?: ScopedFeatureEndpointResolver;
   abortSignal?: AbortSignal;
-}): Promise<Pick<ChatCompleteOptions, 'connectorId' | 'reasoning'>> {
+}): Promise<ResolvedFeatureEndpoint> {
   if (target.featureId === undefined) {
     return { connectorId: target.connectorId };
   }
-  const { featureId } = target;
-  if (!resolveFeatureEndpoint) {
-    throw createInferenceInternalError(
-      `Cannot call chatComplete with featureId "${featureId}": no feature endpoint resolver is registered`
-    );
-  }
-  // Skips the resolver call for an already-aborted request; `handleCancellation` covers later aborts.
-  if (abortSignal?.aborted) {
-    throw createInferenceRequestAbortedError();
-  }
-  const endpoint = await resolveFeatureEndpoint(featureId);
-  if (!endpoint) {
-    throw createInferenceRequestError(
-      `No endpoint is available for feature "${featureId}". Check the feature's model settings and the default AI connector settings.`,
-      400
-    );
-  }
-  return endpoint;
+  // Later aborts are covered by `handleCancellation`.
+  return resolveFeatureEndpointOrThrow({
+    featureId: target.featureId,
+    resolveFeatureEndpoint,
+    abortSignal,
+  });
 }
 
 function createChatCompletePipeline({
