@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type {
@@ -33,6 +34,10 @@ import {
   validateOtlpHttpEndpoint,
   validateOtlpHttpUrl,
   validateOtlpMetadataKeys,
+  validateOtlpPositiveCount,
+  validateOtlpPositiveDuration,
+  validateOtlpRandomizationFactor,
+  parseOtlpDurationMs,
   validateOtlpProxyUrl,
   validateOtlpShortString,
 } from './output_form_validators';
@@ -50,7 +55,24 @@ const QUEUE_DEFAULTS = MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue;
 
 /** The spec defaults of the settings that have a switch or a select, so they can not be empty. */
 export const OTLP_QUEUE_SPEC_DEFAULT_SIZER = 'requests';
-export const OTLP_BATCH_SPEC_DEFAULT_SIZER = 'items';
+const OTLP_QUEUE_SPEC_DEFAULT_SIZE = 1000;
+const OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE = 8192;
+const OTLP_RETRY_SPEC_DEFAULT_INITIAL_INTERVAL = '5s';
+const OTLP_RETRY_SPEC_DEFAULT_MAX_INTERVAL = '30s';
+
+/** Re-validates an input that shows an error when what its check depends on changes. */
+const useRevalidateWhenChanged = (
+  input: { errors?: string[]; validate: () => boolean },
+  dependencies: unknown[]
+) => {
+  useEffect(() => {
+    if (input.errors) {
+      input.validate();
+    }
+    // only the values it depends on: validate changes on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, dependencies);
+};
 
 type OtlpQueueConfig = NonNullable<OtlpExporterConfig['sending_queue']>;
 type OtlpQueueSizer = NonNullable<OtlpQueueConfig['sizer']>;
@@ -242,12 +264,12 @@ export function useOtlpInputs(
   const otlpQueueEnabledInput = useSwitchInput(queueInitial?.enabled ?? true, disabled);
   const otlpQueueNumConsumersInput = useInput(
     toInputValue(queueInitial?.num_consumers),
-    validateIfSelected(validateOtlpCount),
+    validateIfSelected(validateOtlpPositiveCount),
     disabled
   );
   const otlpQueueSizeInput = useInput(
     toInputValue(queueInitial?.queue_size),
-    validateIfSelected(validateOtlpCount),
+    validateIfSelected(validateOtlpPositiveCount),
     disabled
   );
   const otlpQueueSizerInput = useInput(
@@ -263,31 +285,91 @@ export function useOtlpInputs(
     queueInitial?.block_on_overflow ?? false,
     disabled
   );
+
+  // `batch: {}` enables batching with the defaults, so whether the output batches is its own setting
+  const otlpBatchEnabledInput = useSwitchInput(!!batchInitial, disabled);
+  const validateIfBatching = <T>(validator: T) =>
+    isSelected && otlpBatchEnabledInput.value ? validator : undefined;
   const otlpBatchFlushTimeoutInput = useInput(
     toInputValue(batchInitial?.flush_timeout),
-    validateIfSelected(validateOtlpDuration),
+    validateIfBatching(validateOtlpPositiveDuration),
     disabled
   );
+  // an empty unit is the spec default, the unit of the queue: a stored batch without one keeps it
+  const otlpBatchSizerInput = useInput(batchInitial?.sizer ?? '', undefined, disabled);
   const otlpBatchMinSizeInput = useInput(
     toInputValue(batchInitial?.min_size),
-    validateIfSelected(validateOtlpCount),
+    validateIfBatching((value: string) => {
+      const error = validateOtlpCount(value);
+      if (error || !value.trim() || !otlpQueueEnabledInput.value) {
+        return error;
+      }
+      // the sizes are compared when both use the same unit
+      const batchSizer = otlpBatchSizerInput.value || otlpQueueSizerInput.value;
+      const queueSize = otlpQueueSizeInput.value.trim()
+        ? Number(otlpQueueSizeInput.value)
+        : OTLP_QUEUE_SPEC_DEFAULT_SIZE;
+      if (batchSizer === otlpQueueSizerInput.value && Number(value) > queueSize) {
+        return [
+          i18n.translate('xpack.fleet.settings.outputForm.otlpBatchMinSizeTooBig', {
+            defaultMessage:
+              'The minimum size can not be more than the queue size ({queueSize}) when both use the same unit',
+            values: { queueSize },
+          }),
+        ];
+      }
+    }),
     disabled
   );
   const otlpBatchMaxSizeInput = useInput(
     toInputValue(batchInitial?.max_size),
-    validateIfSelected(validateOtlpCount),
-    disabled
-  );
-  const otlpBatchSizerInput = useInput(
-    batchInitial?.sizer ?? OTLP_BATCH_SPEC_DEFAULT_SIZER,
-    undefined,
+    validateIfBatching((value: string) => {
+      const error = validateOtlpCount(value);
+      if (error || !value.trim() || Number(value) === 0) {
+        return error;
+      }
+      // a blank minimum is the spec default
+      const minSize = otlpBatchMinSizeInput.value.trim()
+        ? Number(otlpBatchMinSizeInput.value)
+        : OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE;
+      if (Number(value) < minSize) {
+        return [
+          i18n.translate('xpack.fleet.settings.outputForm.otlpBatchMaxSizeTooSmall', {
+            defaultMessage:
+              'The maximum size can not be less than the minimum size ({minSize}), unless it is 0',
+            values: { minSize },
+          }),
+        ];
+      }
+    }),
     disabled
   );
   const otlpBatchMetadataKeysInput = useInput(
     (batchInitial?.partition?.metadata_keys ?? []).join(', '),
-    validateIfSelected(validateOtlpMetadataKeys),
+    validateIfBatching(validateOtlpMetadataKeys),
     disabled
   );
+
+  // a fix of one setting clears the error that another one showed because of it
+  useRevalidateWhenChanged(otlpBatchMinSizeInput, [
+    otlpQueueEnabledInput.value,
+    otlpQueueSizeInput.value,
+    otlpQueueSizerInput.value,
+    otlpBatchSizerInput.value,
+  ]);
+  useRevalidateWhenChanged(otlpBatchMaxSizeInput, [otlpBatchMinSizeInput.value]);
+  // the errors of the batch settings do not apply when batching is off
+  useEffect(() => {
+    if (!otlpBatchEnabledInput.value) {
+      [
+        otlpBatchFlushTimeoutInput,
+        otlpBatchMinSizeInput,
+        otlpBatchMaxSizeInput,
+        otlpBatchMetadataKeysInput,
+      ].forEach((input) => input.setErrors(undefined));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [otlpBatchEnabledInput.value]);
 
   const retry = exporter?.retry_on_failure;
   const otlpRetryEnabledInput = useSwitchInput(retry?.enabled ?? true, disabled);
@@ -298,7 +380,7 @@ export function useOtlpInputs(
   );
   const otlpRetryRandomizationFactorInput = useInput(
     toInputValue(retry?.randomization_factor),
-    validateIfSelected(validateOtlpDecimal),
+    validateIfSelected(validateOtlpRandomizationFactor),
     disabled
   );
   const otlpRetryMultiplierInput = useInput(
@@ -313,9 +395,44 @@ export function useOtlpInputs(
   );
   const otlpRetryMaxElapsedTimeInput = useInput(
     toInputValue(retry?.max_elapsed_time),
-    validateIfSelected(validateOtlpDuration),
+    validateIfSelected((value: string) => {
+      const error = validateOtlpDuration(value);
+      const elapsed = parseOtlpDurationMs(value);
+      if (error || !elapsed) {
+        // empty, or 0 to retry forever
+        return error;
+      }
+      // a blank interval is the spec default
+      const intervals = [
+        {
+          text: otlpRetryInitialIntervalInput.value.trim(),
+          fallback: OTLP_RETRY_SPEC_DEFAULT_INITIAL_INTERVAL,
+        },
+        {
+          text: otlpRetryMaxIntervalInput.value.trim(),
+          fallback: OTLP_RETRY_SPEC_DEFAULT_MAX_INTERVAL,
+        },
+      ].map(({ text: intervalText, fallback }) => {
+        const interval = intervalText || fallback;
+        return { interval, ms: parseOtlpDurationMs(interval) ?? 0 };
+      });
+      const longest = intervals.reduce((a, b) => (b.ms > a.ms ? b : a));
+      if (elapsed < longest.ms) {
+        return [
+          i18n.translate('xpack.fleet.settings.outputForm.otlpRetryMaxElapsedTimeTooSmall', {
+            defaultMessage:
+              'The maximum elapsed time can not be less than the longest retry interval ({interval}), unless it is 0',
+            values: { interval: longest.interval },
+          }),
+        ];
+      }
+    }),
     disabled
   );
+  useRevalidateWhenChanged(otlpRetryMaxElapsedTimeInput, [
+    otlpRetryInitialIntervalInput.value,
+    otlpRetryMaxIntervalInput.value,
+  ]);
 
   return {
     otlpProtocolInput,
@@ -356,6 +473,7 @@ export function useOtlpInputs(
     otlpQueueSizerInput,
     otlpQueueWaitForResultInput,
     otlpQueueBlockOnOverflowInput,
+    otlpBatchEnabledInput,
     otlpBatchFlushTimeoutInput,
     otlpBatchMinSizeInput,
     otlpBatchMaxSizeInput,
@@ -437,18 +555,16 @@ const retryTextInputs = (inputs: OtlpInputs) => [
   inputs.otlpRetryMaxElapsedTimeInput,
 ];
 
-const isBatchUnset = (inputs: OtlpInputs) =>
-  batchTextInputs(inputs).every((input) => !input.value.trim()) &&
-  inputs.otlpBatchSizerInput.value === OTLP_BATCH_SPEC_DEFAULT_SIZER;
-
-/** Whether the sending queue is left to the spec defaults: nothing is set. */
+/** Whether the sending queue is left to the spec defaults: nothing is set, and there is no batching. */
 const isQueueUnset = (inputs: OtlpInputs) =>
-  queueTextInputs(inputs).every((input) => !input.value.trim()) &&
+  [inputs.otlpQueueNumConsumersInput, inputs.otlpQueueSizeInput].every(
+    (input) => !input.value.trim()
+  ) &&
   inputs.otlpQueueEnabledInput.value &&
   !inputs.otlpQueueWaitForResultInput.value &&
   !inputs.otlpQueueBlockOnOverflowInput.value &&
   inputs.otlpQueueSizerInput.value === OTLP_QUEUE_SPEC_DEFAULT_SIZER &&
-  isBatchUnset(inputs);
+  !inputs.otlpBatchEnabledInput.value;
 
 /** Whether the retry is left to the spec defaults: nothing is set. */
 const isRetryUnset = (inputs: OtlpInputs) =>
@@ -460,6 +576,7 @@ const isQueueRecommended = (inputs: OtlpInputs) =>
   inputs.otlpQueueSizerInput.value === QUEUE_DEFAULTS.sizer &&
   inputs.otlpQueueSizeInput.value === `${QUEUE_DEFAULTS.queue_size}` &&
   inputs.otlpQueueBlockOnOverflowInput.value === QUEUE_DEFAULTS.block_on_overflow &&
+  inputs.otlpBatchEnabledInput.value &&
   !inputs.otlpQueueWaitForResultInput.value &&
   !inputs.otlpQueueNumConsumersInput.value.trim() &&
   inputs.otlpBatchFlushTimeoutInput.value === QUEUE_DEFAULTS.batch.flush_timeout &&
@@ -523,31 +640,7 @@ export const validateOtlpInputs = (inputs: OtlpInputs): boolean =>
       input.validate()
     ),
     ...[...queueTextInputs(inputs), ...retryTextInputs(inputs)].map((input) => input.validate()),
-    validateOtlpBatchSizes(inputs),
   ].every(Boolean);
-
-/** The maximum size of a batch can not be less than its minimum size, unless it has no limit (0). */
-export function validateOtlpBatchSizes(inputs: OtlpInputs): boolean {
-  const { otlpBatchMinSizeInput: minInput, otlpBatchMaxSizeInput: maxInput } = inputs;
-  const min = minInput.value.trim();
-  const max = maxInput.value.trim();
-  if (
-    min &&
-    max &&
-    !minInput.errors &&
-    !maxInput.errors &&
-    Number(max) !== 0 &&
-    Number(max) < Number(min)
-  ) {
-    maxInput.setErrors([
-      i18n.translate('xpack.fleet.settings.outputForm.otlpBatchMaxSizeTooSmall', {
-        defaultMessage: 'The maximum size can not be less than the minimum size, unless it is 0',
-      }),
-    ]);
-    return false;
-  }
-  return true;
-}
 
 // An update is deep merged into the stored output, so a cleared setting is sent as `null` to
 // remove the stored value rather than left out.
@@ -576,17 +669,21 @@ const metadataKeys = (input: { value: string }) => {
  * settings that are empty.
  */
 function buildOtlpQueueAndRetry(inputs: OtlpInputs) {
-  const batch = isBatchUnset(inputs)
-    ? null
-    : {
+  // a batch is sent while batching is on, even with every setting empty: `batch: {}` enables it
+  const batch = inputs.otlpBatchEnabledInput.value
+    ? {
         flush_timeout: text(inputs.otlpBatchFlushTimeoutInput),
         min_size: integer(inputs.otlpBatchMinSizeInput),
         max_size: integer(inputs.otlpBatchMaxSizeInput),
-        sizer: inputs.otlpBatchSizerInput.value as OtlpBatchSizer,
+        // no unit is the spec default, and the schema can not unset one: it is left out
+        ...(inputs.otlpBatchSizerInput.value
+          ? { sizer: inputs.otlpBatchSizerInput.value as OtlpBatchSizer }
+          : {}),
         partition: metadataKeys(inputs.otlpBatchMetadataKeysInput)
           ? { metadata_keys: metadataKeys(inputs.otlpBatchMetadataKeysInput) }
           : null,
-      };
+      }
+    : null;
 
   return {
     sending_queue: isQueueUnset(inputs)

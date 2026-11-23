@@ -764,13 +764,16 @@ export function validateOtlpCount(value: string) {
   }
 }
 
-/** An optional number that is not negative, such as a multiplier. */
+/**
+ * An optional number that is not negative, such as a multiplier. It accepts the exponent notation
+ * that a saved number such as `1e-7` is loaded with.
+ */
 export function validateOtlpDecimal(value: string) {
   const decimal = value?.trim() ?? '';
   if (!decimal) {
     return;
   }
-  if (!/^\d+(\.\d+)?$/.test(decimal) || !Number.isFinite(Number(decimal))) {
+  if (!/^\d+(\.\d+)?([eE][-+]?\d+)?$/.test(decimal) || !Number.isFinite(Number(decimal))) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpDecimalInvalid', {
         defaultMessage: 'Specify a number, 0 or more',
@@ -779,7 +782,7 @@ export function validateOtlpDecimal(value: string) {
   }
 }
 
-/** Optional metadata keys, separated by commas. */
+/** Optional metadata keys, separated by commas. The collector compares them case-insensitively. */
 export function validateOtlpMetadataKeys(value: string) {
   const keys = (value ?? '').split(',').map((key) => key.trim());
   if (!value?.trim()) {
@@ -790,6 +793,83 @@ export function validateOtlpMetadataKeys(value: string) {
       i18n.translate('xpack.fleet.settings.outputForm.otlpMetadataKeysInvalid', {
         defaultMessage: 'Specify up to {max} metadata keys, separated by commas',
         values: { max: 100 },
+      }),
+    ];
+  }
+  if (new Set(keys.map((key) => key.toLowerCase())).size !== keys.length) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpMetadataKeysDuplicate', {
+        defaultMessage: 'Metadata keys must be unique, whatever their case',
+      }),
+    ];
+  }
+}
+
+/** An optional whole number that is at least 1, such as a number of consumers. */
+export function validateOtlpPositiveCount(value: string) {
+  const count = value?.trim() ?? '';
+  if (!count) {
+    return;
+  }
+  if (!/^\d+$/.test(count) || !Number.isSafeInteger(Number(count)) || Number(count) < 1) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpPositiveCountInvalid', {
+        defaultMessage: 'Specify a whole number, 1 or more',
+      }),
+    ];
+  }
+}
+
+const GO_DURATION_COMPONENT_REGEX = /(\d+(?:\.\d*)?|\.\d+)(ns|us|µs|μs|ms|s|m|h)/g;
+const GO_DURATION_UNIT_MS: Record<string, number> = {
+  ns: 1e-6,
+  us: 1e-3,
+  µs: 1e-3,
+  μs: 1e-3,
+  ms: 1,
+  s: 1000,
+  m: 60 * 1000,
+  h: 60 * 60 * 1000,
+};
+
+/** The milliseconds of a valid duration, or undefined if it is empty or not a duration. */
+export function parseOtlpDurationMs(value: string): number | undefined {
+  const duration = value?.trim() ?? '';
+  if (!duration || !GO_DURATION_REGEX.test(duration)) {
+    return undefined;
+  }
+  return [...duration.matchAll(GO_DURATION_COMPONENT_REGEX)].reduce(
+    (total, [, amount, unit]) => total + Number(amount) * GO_DURATION_UNIT_MS[unit],
+    0
+  );
+}
+
+/** An optional duration that is more than zero. */
+export function validateOtlpPositiveDuration(value: string) {
+  const error = validateOtlpDuration(value);
+  if (error) {
+    return error;
+  }
+  if (value?.trim() && !parseOtlpDurationMs(value)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpPositiveDurationInvalid', {
+        defaultMessage: 'Specify a duration longer than zero, such as {examples}',
+        values: { examples: '200ms, 1s' },
+      }),
+    ];
+  }
+}
+
+/** An optional number from 0 to 1. */
+export function validateOtlpRandomizationFactor(value: string) {
+  const error = validateOtlpDecimal(value);
+  if (error) {
+    return error;
+  }
+  if (value?.trim() && Number(value) > 1) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpRandomizationFactorInvalid', {
+        defaultMessage: 'Specify a number from 0 to 1',
       }),
     ];
   }

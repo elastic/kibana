@@ -2478,7 +2478,7 @@ describe('EditOutputFlyout', () => {
         const { utils } = renderFlyout(otlpOutput);
         [...QUEUE_TEXT_FIELDS, ...RETRY_TEXT_FIELDS].forEach((testSubj) => clear(utils, testSubj));
         setValue(utils, 'otlpQueueSizerInput', 'requests');
-        setValue(utils, 'otlpBatchSizerInput', 'items');
+        click(utils, 'otlpBatchEnabledInput');
         click(utils, 'otlpQueueWaitForResultInput');
         click(utils, 'otlpQueueBlockOnOverflowInput');
         fireEvent.click(utils.getByText('Save and apply settings'));
@@ -2496,15 +2496,9 @@ describe('EditOutputFlyout', () => {
         });
       });
 
-      it('should send the batch as null when its settings are cleared', async () => {
+      it('should send the batch as null when batching is turned off', async () => {
         const { utils } = renderFlyout(otlpOutput);
-        [
-          'otlpBatchFlushTimeoutInput',
-          'otlpBatchMinSizeInput',
-          'otlpBatchMaxSizeInput',
-          'otlpBatchMetadataKeysInput',
-        ].forEach((testSubj) => clear(utils, testSubj));
-        setValue(utils, 'otlpBatchSizerInput', 'items');
+        click(utils, 'otlpBatchEnabledInput');
         fireEvent.click(utils.getByText('Save and apply settings'));
 
         await waitFor(() => {
@@ -2517,6 +2511,46 @@ describe('EditOutputFlyout', () => {
             })
           );
         });
+      });
+
+      it('should keep a stored empty batch, which enables batching with the defaults', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            protocol: 'grpc',
+            endpoint: 'collector.example.com:4317',
+            sending_queue: { enabled: true, batch: {} },
+          },
+        } as Output);
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpBatchEnabledInput')).toBeChecked();
+        expect(value(utils, 'otlpBatchSizerInput')).toBe('');
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'renamed' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                // no unit: the batch keeps the unit of the queue
+                sending_queue: expect.objectContaining({
+                  batch: { flush_timeout: null, min_size: null, max_size: null, partition: null },
+                }),
+              }),
+            })
+          );
+        });
+      });
+
+      it('should show the batch settings only while batching is on', () => {
+        const { utils } = renderFlyout(otlpOutput);
+        expect(utils.queryByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput')).not.toBeNull();
+
+        click(utils, 'otlpBatchEnabledInput');
+
+        expect(utils.queryByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput')).toBeNull();
       });
 
       it('should send null for a cleared setting of a section that still has settings', async () => {
@@ -2592,14 +2626,106 @@ describe('EditOutputFlyout', () => {
         const { utils } = renderFlyout(otlpOutput);
         setValue(utils, 'otlpBatchFlushTimeoutInput', 'soon');
         fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchFlushTimeoutInput'));
-        setValue(utils, 'otlpQueueSizeInput', '-1');
+        setValue(utils, 'otlpQueueSizeInput', '0');
         fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput'));
         setValue(utils, 'otlpRetryMultiplierInput', 'fast');
         fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpRetryMultiplierInput'));
 
         expect(utils.getByText(/Specify a duration such as/)).toBeInTheDocument();
-        expect(utils.getByText('Specify a whole number, 0 or more')).toBeInTheDocument();
+        expect(utils.getByText('Specify a whole number, 1 or more')).toBeInTheDocument();
         expect(utils.getByText('Specify a number, 0 or more')).toBeInTheDocument();
+      });
+
+      it('should require a flush timeout longer than zero, and consumers of at least 1', () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpBatchFlushTimeoutInput', '0s');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchFlushTimeoutInput'));
+        setValue(utils, 'otlpQueueNumConsumersInput', '0');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpQueueNumConsumersInput'));
+
+        expect(utils.getByText(/Specify a duration longer than zero, such as/)).toBeInTheDocument();
+        expect(utils.getByText('Specify a whole number, 1 or more')).toBeInTheDocument();
+      });
+
+      it('should require a randomization factor from 0 to 1', () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpRetryRandomizationFactorInput', '1.5');
+        fireEvent.blur(
+          utils.getByTestId('settingsOutputsFlyout.otlpRetryRandomizationFactorInput')
+        );
+
+        expect(utils.getByText('Specify a number from 0 to 1')).toBeInTheDocument();
+      });
+
+      it('should accept the exponent notation of a small number that was saved', () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            ...otlpOutput.otlp_exporter,
+            retry_on_failure: { ...storedRetry, randomization_factor: 1e-7 },
+          },
+        } as Output);
+        expect(value(utils, 'otlpRetryRandomizationFactorInput')).toBe('1e-7');
+        fireEvent.blur(
+          utils.getByTestId('settingsOutputsFlyout.otlpRetryRandomizationFactorInput')
+        );
+
+        expect(utils.queryByText('Specify a number, 0 or more')).toBeNull();
+      });
+
+      it('should require unique metadata keys, whatever their case', () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpBatchMetadataKeysInput', 'tenant, Tenant');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMetadataKeysInput'));
+
+        expect(
+          utils.getByText('Metadata keys must be unique, whatever their case')
+        ).toBeInTheDocument();
+      });
+
+      it('should require a maximum elapsed time of at least the longest retry interval', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            ...otlpOutput.otlp_exporter,
+            retry_on_failure: { enabled: true },
+          },
+        } as Output);
+        setValue(utils, 'otlpRetryMaxElapsedTimeInput', '10s');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpRetryMaxElapsedTimeInput'));
+
+        // the maximum interval is blank: the default is 30s
+        expect(
+          utils.getByText(/can not be less than the longest retry interval \(30s\)/)
+        ).toBeInTheDocument();
+
+        setValue(utils, 'otlpRetryMaxIntervalInput', '5s');
+        await waitFor(() => {
+          expect(utils.queryByText(/can not be less than the longest retry interval/)).toBeNull();
+        });
+
+        setValue(utils, 'otlpRetryMaxElapsedTimeInput', '0');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpRetryMaxElapsedTimeInput'));
+        expect(utils.queryByText(/can not be less than the longest retry interval/)).toBeNull();
+      });
+
+      it('should require a minimum batch size that fits in the queue when both use the same unit', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        setValue(utils, 'otlpQueueSizeInput', '500000');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput'));
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput'));
+
+        // 1000000 bytes of the recommended minimum do not fit in 500000 bytes
+        expect(
+          utils.getByText(/can not be more than the queue size \(500000\)/)
+        ).toBeInTheDocument();
+
+        // another unit for the batch is not compared
+        setValue(utils, 'otlpBatchSizerInput', 'items');
+        await waitFor(() => {
+          expect(utils.queryByText(/can not be more than the queue size/)).toBeNull();
+        });
       });
 
       it('should not save when the maximum batch size is below the minimum', async () => {
@@ -2611,11 +2737,38 @@ describe('EditOutputFlyout', () => {
         await waitFor(() => {
           expect(
             utils.getByText(
-              'The maximum size can not be less than the minimum size, unless it is 0'
+              'The maximum size can not be less than the minimum size (1000), unless it is 0'
             )
           ).toBeInTheDocument();
         });
         expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+
+      it('should clear the maximum batch size error when the minimum is lowered', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpBatchMinSizeInput', '1000');
+        setValue(utils, 'otlpBatchMaxSizeInput', '10');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMaxSizeInput'));
+        expect(
+          utils.getByText(/The maximum size can not be less than the minimum size/)
+        ).toBeInTheDocument();
+
+        setValue(utils, 'otlpBatchMinSizeInput', '5');
+
+        await waitFor(() => {
+          expect(
+            utils.queryByText(/The maximum size can not be less than the minimum size/)
+          ).toBeNull();
+        });
+      });
+
+      it('should compare the maximum batch size with the default minimum when the minimum is blank', () => {
+        const { utils } = renderFlyout(otlpOutput);
+        clear(utils, 'otlpBatchMinSizeInput');
+        setValue(utils, 'otlpBatchMaxSizeInput', '200');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMaxSizeInput'));
+
+        expect(utils.getByText(/minimum size \(8192\)/)).toBeInTheDocument();
       });
 
       it('should accept a maximum batch size of 0, which has no limit', async () => {

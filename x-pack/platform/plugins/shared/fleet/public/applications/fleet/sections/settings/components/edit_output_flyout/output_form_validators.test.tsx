@@ -38,7 +38,11 @@ import {
   validateOtlpHttpEndpoint,
   validateOtlpHttpUrl,
   validateOtlpMetadataKeys,
+  validateOtlpPositiveCount,
+  validateOtlpPositiveDuration,
   validateOtlpProxyUrl,
+  validateOtlpRandomizationFactor,
+  parseOtlpDurationMs,
   validateOtlpShortString,
   validateSSLCertificate,
   validateSSLKey,
@@ -709,11 +713,11 @@ describe('OTLP validators', () => {
   });
 
   describe('validateOtlpDecimal', () => {
-    it.each(['', '0', '1.5', '0.25', ' 2 '])('should accept %p', (value) => {
+    it.each(['', '0', '1.5', '0.25', ' 2 ', '1e-7', '1E3'])('should accept %p', (value) => {
       expect(validateOtlpDecimal(value)).toBeUndefined();
     });
 
-    it.each(['-1', '.5', '1.', '1e3', 'abc'])('should reject %p', (value) => {
+    it.each(['-1', '.5', '1.', '1e', 'abc'])('should reject %p', (value) => {
       expect(validateOtlpDecimal(value)).toEqual(['Specify a number, 0 or more']);
     });
   });
@@ -721,6 +725,12 @@ describe('OTLP validators', () => {
   describe('validateOtlpMetadataKeys', () => {
     it.each(['', 'a', 'a, b', ' a ,b '])('should accept %p', (value) => {
       expect(validateOtlpMetadataKeys(value)).toBeUndefined();
+    });
+
+    it('should reject keys that only differ by case', () => {
+      expect(validateOtlpMetadataKeys('tenant, Tenant')).toEqual([
+        'Metadata keys must be unique, whatever their case',
+      ]);
     });
 
     it('should reject an empty key', () => {
@@ -735,6 +745,64 @@ describe('OTLP validators', () => {
 
     it('should reject more than 100 keys', () => {
       expect(validateOtlpMetadataKeys(Array(101).fill('k').join(','))).toBeDefined();
+    });
+  });
+
+  describe('validateOtlpPositiveCount', () => {
+    it.each(['', '1', '50'])('should accept %p', (value) => {
+      expect(validateOtlpPositiveCount(value)).toBeUndefined();
+    });
+
+    it.each(['0', '-1', '1.5', 'abc'])('should reject %p', (value) => {
+      expect(validateOtlpPositiveCount(value)).toEqual(['Specify a whole number, 1 or more']);
+    });
+  });
+
+  describe('validateOtlpPositiveDuration', () => {
+    it.each(['', '1ms', '200ms', '1m30s', '0.5s'])('should accept %p', (value) => {
+      expect(validateOtlpPositiveDuration(value)).toBeUndefined();
+    });
+
+    it.each(['0', '0s', '0.0s', '0m0s'])('should reject %p', (value) => {
+      expect(validateOtlpPositiveDuration(value)).toEqual([
+        'Specify a duration longer than zero, such as 200ms, 1s',
+      ]);
+    });
+
+    it('should reject what is not a duration', () => {
+      expect(validateOtlpPositiveDuration('soon')).toEqual([
+        'Specify a duration such as 500ms, 5s, 1m30s',
+      ]);
+    });
+  });
+
+  describe('validateOtlpRandomizationFactor', () => {
+    it.each(['', '0', '0.5', '1'])('should accept %p', (value) => {
+      expect(validateOtlpRandomizationFactor(value)).toBeUndefined();
+    });
+
+    it('should reject a number above 1', () => {
+      expect(validateOtlpRandomizationFactor('1.5')).toEqual(['Specify a number from 0 to 1']);
+    });
+
+    it('should reject what is not a number', () => {
+      expect(validateOtlpRandomizationFactor('abc')).toEqual(['Specify a number, 0 or more']);
+    });
+  });
+
+  describe('parseOtlpDurationMs', () => {
+    it.each([
+      ['500ms', 500],
+      ['5s', 5000],
+      ['1m30s', 90000],
+      ['1h', 3600000],
+      ['0', 0],
+    ])('should parse %p', (value, expected) => {
+      expect(parseOtlpDurationMs(value as string)).toBe(expected);
+    });
+
+    it.each(['', 'soon'])('should not parse %p', (value) => {
+      expect(parseOtlpDurationMs(value)).toBeUndefined();
     });
   });
 

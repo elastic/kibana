@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { hasOtlpQueueSettings, hasOtlpRetrySettings } from './use_otlp_inputs';
@@ -25,20 +26,18 @@ const QUEUE_SIZER_OPTIONS = ['requests', 'items', 'bytes'].map((value) => ({
   text: value,
 }));
 
-const BATCH_SIZER_OPTIONS = ['items', 'bytes'].map((value) => ({ value, text: value }));
+const BATCH_SIZER_OPTIONS = [
+  {
+    value: '',
+    text: i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpBatchSizerSameAsQueue', {
+      defaultMessage: 'Same as the queue',
+    }),
+  },
+  ...['items', 'bytes'].map((value) => ({ value, text: value })),
+];
 
-const OtlpBatchSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
-  inputs,
-}) => (
-  <OtlpSettingsGroup
-    testSubj="otlpBatchGroup"
-    title={
-      <FormattedMessage
-        id="xpack.fleet.settings.editOutputFlyout.otlpBatchGroupTitle"
-        defaultMessage="Batching"
-      />
-    }
-  >
+const OtlpBatchFields: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ inputs }) => (
+  <>
     <OtlpTextSetting
       label={
         <FormattedMessage
@@ -49,7 +48,7 @@ const OtlpBatchSettings: React.FunctionComponent<{ inputs: OutputFormInputsType 
       helpText={
         <FormattedMessage
           id="xpack.fleet.settings.editOutputFlyout.otlpBatchFlushTimeoutHelpText"
-          defaultMessage="Time after which a batch is sent, whatever its size. {defaultHint} Batching is off unless a batch setting is set."
+          defaultMessage="Time after which a batch is sent, whatever its size. {defaultHint}"
           values={{ defaultHint: <OtlpDefaultHint defaultValue="200ms" /> }}
         />
       }
@@ -127,6 +126,38 @@ const OtlpBatchSettings: React.FunctionComponent<{ inputs: OutputFormInputsType 
       input={inputs.otlpBatchMetadataKeysInput}
       testSubj="otlpBatchMetadataKeysInput"
     />
+  </>
+);
+
+const OtlpBatchSettings: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
+  inputs,
+}) => (
+  <OtlpSettingsGroup
+    testSubj="otlpBatchGroup"
+    title={
+      <FormattedMessage
+        id="xpack.fleet.settings.editOutputFlyout.otlpBatchGroupTitle"
+        defaultMessage="Batching"
+      />
+    }
+  >
+    <OtlpSwitchSetting
+      label={
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.otlpBatchEnabledLabel"
+          defaultMessage="Batch data before sending"
+        />
+      }
+      helpText={
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.otlpBatchEnabledHelpText"
+          defaultMessage="Batching is off by default. With the switch on and the settings below empty, the collector defaults apply."
+        />
+      }
+      input={inputs.otlpBatchEnabledInput}
+      testSubj="otlpBatchEnabledInput"
+    />
+    {inputs.otlpBatchEnabledInput.value && <OtlpBatchFields inputs={inputs} />}
   </OtlpSettingsGroup>
 );
 
