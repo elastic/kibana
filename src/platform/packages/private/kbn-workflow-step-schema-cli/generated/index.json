@@ -261,12 +261,15 @@
     "console",
     "context-engine.applyDreamChanges",
     "context-engine.applyDreamRelationships",
+    "context-engine.applyMaintenanceChanges",
     "context-engine.createKi",
     "context-engine.deleteKi",
+    "context-engine.gatherMaintenance",
     "context-engine.getDreamingStatus",
     "context-engine.getFeedbackContext",
     "context-engine.readTraceTranscripts",
     "context-engine.recordImprovements",
+    "context-engine.recordMaintenanceRun",
     "context-engine.updateKi",
     "context-engine.verifyKi",
     "d3security.run",
@@ -1110,11 +1113,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "ee6589e0ed4fdb9d9b956996472514642a898ed5edf30e000f5f9dbc38756400"
+      "sha256": "ebde1d45df69d06415f5fb91c1b7a4669663e1086e4ca2b360c5d7a5de7e360f"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "6b075a35e8479cd3114245ee64ec477b466c75f69ca9c8339dd42ba97ed407c3"
+      "sha256": "4838aac2d8f501558a88aeef9e69a8e2641b846fc29fb310b3b01938e85442e5"
     }
   }
 }
