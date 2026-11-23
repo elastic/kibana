@@ -7,9 +7,12 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiScreenReaderOnly, EuiText, EuiToolTip } from '@elastic/eui';
 import type { WorkflowMigrationWorkflow } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
-import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import {
+  MigrationTranslationResult,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { PanelText } from '../../../../common/components/panel_text';
 import { StatusBadge } from './status_badge';
@@ -79,26 +82,56 @@ export const createTranslatedOnColumn = (): TableColumn => ({
   align: 'left',
 });
 
-/** The details flyout is not part of this version, the action is shown but disabled */
-export const createDetailsColumn = (): TableColumn => ({
-  name: i18n.COLUMN_DETAILS,
-  render: () => (
-    <EuiToolTip content={i18n.WORKFLOW_DETAILS_UNAVAILABLE} disableScreenReaderOutput>
-      <EuiButtonIcon
-        data-test-subj="workflowDetailsButton"
-        iconType="maximize"
-        aria-label={i18n.WORKFLOW_DETAILS_UNAVAILABLE}
-        isDisabled
-      />
-    </EuiToolTip>
+const isInstallable = (workflow: WorkflowMigrationWorkflow) =>
+  workflow.status !== SiemMigrationStatus.FAILED &&
+  (workflow.translation_result === MigrationTranslationResult.FULL ||
+    workflow.translation_result === MigrationTranslationResult.PARTIAL);
+
+/**
+ * Only one action is shown at a time: "View" once the workflow is installed, otherwise "Install" for
+ * a translated one. Failed and untranslatable workflows have no action.
+ * Both actions are placeholders for now, installing and viewing are not wired yet.
+ */
+const ActionsCell = ({ workflow }: { workflow: WorkflowMigrationWorkflow }) => {
+  if (workflow.elastic_workflow?.id) {
+    return (
+      <EuiToolTip content={i18n.VIEW_WORKFLOW} disableScreenReaderOutput>
+        <EuiButtonIcon
+          data-test-subj="viewWorkflowButton"
+          iconType="workflow"
+          aria-label={i18n.VIEW_WORKFLOW}
+        />
+      </EuiToolTip>
+    );
+  }
+  if (isInstallable(workflow)) {
+    return (
+      <EuiToolTip content={i18n.INSTALL_WORKFLOW} disableScreenReaderOutput>
+        <EuiButtonIcon
+          data-test-subj="installWorkflowButton"
+          iconType="download"
+          aria-label={i18n.INSTALL_WORKFLOW}
+        />
+      </EuiToolTip>
+    );
+  }
+  return null;
+};
+
+export const createActionsColumn = (): TableColumn => ({
+  name: (
+    <EuiScreenReaderOnly>
+      <span>{i18n.COLUMN_ACTIONS}</span>
+    </EuiScreenReaderOnly>
   ),
+  render: (workflow: WorkflowMigrationWorkflow) => <ActionsCell workflow={workflow} />,
   width: '10%',
-  align: 'center',
+  align: 'right',
 });
 
 export const getWorkflowsTableColumns = (): TableColumn[] => [
   createNameColumn(),
   createStatusColumn(),
   createTranslatedOnColumn(),
-  createDetailsColumn(),
+  createActionsColumn(),
 ];

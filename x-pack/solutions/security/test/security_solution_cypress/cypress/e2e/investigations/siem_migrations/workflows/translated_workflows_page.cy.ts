@@ -94,13 +94,12 @@ describe(
       cy.get(TRANSLATED_WORKFLOWS_RESULT_TABLE.STATUS('full')).should('have.length', 1);
     });
 
-    it('should show the details action as disabled and not offer bulk selection', () => {
+    it('should offer to install the translated workflow, not to view it, and not offer bulk selection', () => {
       startWorkflowMigrationFromFlyout();
       visit(TRANSLATED_WORKFLOWS_PAGE_URL);
 
-      cy.get(TRANSLATED_WORKFLOWS_RESULT_TABLE.DETAILS_BTN, { timeout: 60000 }).should(
-        'be.disabled'
-      );
+      cy.get(TRANSLATED_WORKFLOWS_RESULT_TABLE.INSTALL_BTN, { timeout: 60000 }).should('exist');
+      cy.get(TRANSLATED_WORKFLOWS_RESULT_TABLE.VIEW_BTN).should('not.exist');
       cy.get(`${TRANSLATED_WORKFLOWS_RESULT_TABLE.TABLE} input[type="checkbox"]`).should(
         'not.exist'
       );

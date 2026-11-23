@@ -126,13 +126,59 @@ describe('MigrationWorkflowsTable', () => {
     );
   });
 
-  it('should show a disabled details action for each workflow', async () => {
-    renderTable();
+  describe('actions', () => {
+    const getRow = async (title: string) =>
+      (await screen.findByText(title)).closest('tr') as HTMLElement;
 
-    const buttons = await screen.findAllByTestId('workflowDetailsButton');
+    it('should offer to install a translated workflow that is not installed yet', async () => {
+      renderTable();
 
-    expect(buttons).toHaveLength(3);
-    buttons.forEach((button) => expect(button).toBeDisabled());
+      const row = within(await getRow('Phishing triage'));
+
+      expect(row.getByTestId('installWorkflowButton')).toBeInTheDocument();
+      expect(row.queryByTestId('viewWorkflowButton')).not.toBeInTheDocument();
+    });
+
+    it('should offer to install a partially translated workflow', async () => {
+      renderTable();
+
+      const row = within(await getRow('Enrich IOCs'));
+
+      expect(row.getByTestId('installWorkflowButton')).toBeInTheDocument();
+    });
+
+    it('should offer to view, and not to install, a workflow that is installed', async () => {
+      mockWorkflows([
+        getWorkflow({
+          elastic_workflow: { id: 'elastic-workflow-1', title: 'Phishing triage elastic' },
+        }),
+      ]);
+      renderTable();
+
+      const row = within(await getRow('Phishing triage elastic'));
+
+      expect(row.getByTestId('viewWorkflowButton')).toBeInTheDocument();
+      expect(row.queryByTestId('installWorkflowButton')).not.toBeInTheDocument();
+    });
+
+    it('should not offer any action for a workflow that failed', async () => {
+      renderTable();
+
+      const row = within(await getRow('Broken story'));
+
+      expect(row.queryByTestId('installWorkflowButton')).not.toBeInTheDocument();
+      expect(row.queryByTestId('viewWorkflowButton')).not.toBeInTheDocument();
+    });
+
+    it('should not offer any action for an untranslatable workflow', async () => {
+      mockWorkflows([getWorkflow({ translation_result: 'untranslatable' })]);
+      renderTable();
+
+      const row = within(await getRow('Phishing triage'));
+
+      expect(row.queryByTestId('installWorkflowButton')).not.toBeInTheDocument();
+      expect(row.queryByTestId('viewWorkflowButton')).not.toBeInTheDocument();
+    });
   });
 
   it('should not offer to select workflows', async () => {

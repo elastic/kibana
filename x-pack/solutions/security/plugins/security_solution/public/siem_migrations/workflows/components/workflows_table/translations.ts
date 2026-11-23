@@ -27,14 +27,19 @@ export const COLUMN_TRANSLATED_ON = i18n.translate(
   { defaultMessage: 'Translated on' }
 );
 
-export const COLUMN_DETAILS = i18n.translate(
-  'xpack.securitySolution.siemMigrations.workflows.table.detailsColumn',
-  { defaultMessage: 'Details' }
+export const COLUMN_ACTIONS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.table.actionsColumn',
+  { defaultMessage: 'Actions' }
 );
 
-export const WORKFLOW_DETAILS_UNAVAILABLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.workflows.table.detailsUnavailable',
-  { defaultMessage: 'Workflow details are not available yet' }
+export const INSTALL_WORKFLOW = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.table.installWorkflow',
+  { defaultMessage: 'Install workflow' }
+);
+
+export const VIEW_WORKFLOW = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.table.viewWorkflow',
+  { defaultMessage: 'View workflow' }
 );
 
 export const WORKFLOW_STATUS_ERROR = i18n.translate(
