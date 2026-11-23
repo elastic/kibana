@@ -7,7 +7,7 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { Logger } from '@kbn/core-di';
-import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import { DetectionEngineSystemClient } from '../lib/engine/tokens';
 import { ScopedReconcileRunner } from '../lib/reconcile/scoped_reconcile_runner';
 import { SpaceReconcileLock } from '../lib/reconcile/space_reconcile_lock';
 

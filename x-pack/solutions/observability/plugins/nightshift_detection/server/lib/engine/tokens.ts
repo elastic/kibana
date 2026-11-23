@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { createToken } from '@kbn/core-di';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
@@ -47,4 +48,26 @@ export const Sources = createToken<Sources>('nightshiftDetection.Sources');
  */
 export const KnowledgeIndicators = createToken<KnowledgeIndicatorReader>(
   'nightshiftDetection.KnowledgeIndicators'
+);
+
+/**
+ * The engine's own Elasticsearch client: `asInternalUser` (the kibana_system user). Every read
+ * and write on `.nightshift-detection_engine-*` goes through it, so the indices stay writable
+ * without giving the detection service account any privilege on them.
+ *
+ * No service takes a client from `core` directly; it asks for this token or for
+ * {@link DetectionEngineDataClient}.
+ */
+export const DetectionEngineSystemClient = createToken<ElasticsearchClient>(
+  'nightshiftDetection.EngineSystemClient'
+);
+
+/**
+ * Request-scoped client authenticated as the space's detection service account. Generators read
+ * customer data with it, and it is the only client that touches customer indices.
+ *
+ * Bound per account scope, for a tick or a reconciliation; it is unbound outside one.
+ */
+export const DetectionEngineDataClient = createToken<ElasticsearchClient>(
+  'nightshiftDetection.EngineDataClient'
 );

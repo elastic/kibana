@@ -16,9 +16,8 @@ import type { NightshiftSourcesServerStart } from '@kbn/nightshift-sources-plugi
 import type { SignificantEventsServerStart } from '@kbn/significant-events-plugin/server';
 import { EngineHttpError } from '../errors/engine_http_error';
 import { getErrorMessage } from '../errors/get_error_message';
-import { DetectionRulesClient } from '../rules/rules_client_token';
-import { DetectionEngineDataClient } from './es_client_tokens';
-import { KnowledgeIndicators, Sources } from './tokens';
+import { DetectionRulesClient } from '../rules/tokens';
+import { DetectionEngineDataClient, KnowledgeIndicators, Sources } from './tokens';
 
 /** The catalog is read in one page; a space with more sources than this is refused. */
 const MAX_LISTED_SOURCES = 10_000;

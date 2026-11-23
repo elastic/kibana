@@ -16,12 +16,11 @@ import { wrapReading } from '../signals/wrap_reading';
 import { DetectionStateClient } from '../state/detection_state_client';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { GenerateResult } from '../strategies/types';
-import { DetectionEngineDataClient } from './es_client_tokens';
 import { planWindows } from './plan_windows';
 import type { PlannedWindow } from './plan_windows';
 import { SpaceRunLock } from './space_run_lock';
 import type { StrategyRunResult, TickResult } from './tick_result';
-import { RunContext, Sources } from './tokens';
+import { DetectionEngineDataClient, RunContext, Sources } from './tokens';
 
 /**
  * Deadline for the generators of one tick, counted from taking the space's run lock, so a slow
