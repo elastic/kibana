@@ -16,8 +16,12 @@ export const KNOWN_FAILURES_STRATEGY_ID = 'known_failures';
 export const KNOWN_FAILURES_SETTINGS = {
   /** Closed minutes the rule's change point detection reads, one bucket per minute. */
   window_minutes: 360,
-  /** Closed minutes that must all sit at or below the recovery threshold to call it recovered. */
-  recovery_minutes: 5,
+  /**
+   * Closed minutes that must all sit at or below the recovery threshold to call it recovered. One
+   * more than `rule_every_minutes`, so a run that starts late across a minute boundary still
+   * overlaps the previous one and a one-minute spike is never left out of both.
+   */
+  recovery_minutes: 6,
   /**
    * Closed minutes left out at the end of the window, because their documents may still be
    * arriving. A minute read half full looks like a dip so significant that it hides a real rise.
