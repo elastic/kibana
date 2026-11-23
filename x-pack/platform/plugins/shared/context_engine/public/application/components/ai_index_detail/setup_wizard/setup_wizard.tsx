@@ -32,6 +32,7 @@ import { useSaveAiIndexDescription } from '../../../hooks/use_save_ai_index_desc
 import type { SetupWizardDoneSteps, SetupWizardStepId } from '../../../utils/setup_wizard';
 import { validateTextInput } from '../../../utils/validate_text_input';
 import { AiIndexDescriptionField } from '../../ai_index_description_field';
+import { SourcesPanel } from '../sources/sources_panel';
 import { SETUP_WIZARD_STEP_TEXTS } from './setup_wizard_texts';
 
 // Parts of the one bordered panel: no own border, shadow or rounded corners.
@@ -131,6 +132,8 @@ export const SetupWizard = ({
   const [description, setDescription] = useState(aiIndex.description ?? '');
   // Covers the save and the refetch after it, so Finish setup can't be clicked twice.
   const [isFinishing, setIsFinishing] = useState(false);
+  // While a source saves, the wizard waits: a description saved now would send the old sources.
+  const [isSavingSources, setIsSavingSources] = useState(false);
 
   const currentIndex = steps.indexOf(currentStep);
   // Skip and Continue jump over steps that are already done. With none left, they finish setup.
@@ -150,7 +153,7 @@ export const SetupWizard = ({
     value: trimmedDescription,
     maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
   });
-  const isBusy = isSaving || isFinishing;
+  const isBusy = isSaving || isFinishing || isSavingSources;
 
   const getCanContinue = (): boolean => {
     if (currentStep === 'describe') {
@@ -234,6 +237,17 @@ export const SetupWizard = ({
               error={descriptionValidation.error}
               warning={descriptionValidation.warning}
               data-test-subj="contextSetupWizardDescription"
+            />
+          ) : currentStep === 'sources' ? (
+            // The Sources tab's editor: each change saves right away, then the AI index reloads,
+            // so the step is done (and Continue works) once the first source is in.
+            <SourcesPanel
+              isLoading={false}
+              aiIndex={aiIndex}
+              onSaved={onSaved}
+              isManaged={false}
+              showDescription={false}
+              onSavingChange={setIsSavingSources}
             />
           ) : (
             <EuiText size="s" data-test-subj="contextSetupWizardPlaceholder">

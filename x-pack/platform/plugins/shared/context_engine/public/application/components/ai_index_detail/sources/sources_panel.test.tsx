@@ -161,6 +161,23 @@ describe('SourcesPanel', () => {
     ).toBeInTheDocument();
   });
 
+  it('leaves out the description where the page already explains sources', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={jest.fn()}
+        isManaged={false}
+        showDescription={false}
+      />
+    );
+
+    expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Context reads these sources to write knowledge documents/)
+    ).not.toBeInTheDocument();
+  });
+
   it('shows read-only type panels with per-type empty copy for managed AI indexes with no sources', () => {
     renderWithProviders(
       <SourcesPanel
@@ -361,6 +378,41 @@ describe('SourcesPanel', () => {
     expect(onSaved).toHaveBeenCalledTimes(1);
     expect(screen.queryByTestId('contextAddElasticsearchDataPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
+  });
+
+  it('tells the parent while a source saves and the AI index reloads', async () => {
+    let finishReload: () => void = () => {};
+    const onSaved = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishReload = resolve;
+        })
+    );
+    const onSavingChange = jest.fn();
+    const testServices = createServices();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={onSaved}
+        isManaged={false}
+        onSavingChange={onSavingChange}
+      />,
+      testServices
+    );
+    expect(onSavingChange).toHaveBeenLastCalledWith(false);
+
+    openElasticsearchAddPanel();
+    await clickIndexOption('logs-*');
+    fireEvent.click(screen.getByTestId('contextAddSourcesConfirmButton'));
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    expect(onSavingChange).toHaveBeenLastCalledWith(true);
+
+    finishReload();
+    await waitFor(() => expect(onSavingChange).toHaveBeenLastCalledWith(false));
   });
 
   it('hides saved simple index sources from the index picker', async () => {

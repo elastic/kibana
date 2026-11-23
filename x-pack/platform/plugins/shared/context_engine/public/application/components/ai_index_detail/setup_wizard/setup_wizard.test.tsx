@@ -9,13 +9,22 @@ import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import type { SetupWizardDoneSteps, SetupWizardStepId } from '../../../utils/setup_wizard';
 import { SetupWizard } from './setup_wizard';
 
 jest.mock('../../../hooks/use_save_ai_index_description');
+
+// The Sources tab's editor has its own tests; here it only needs to show up on its step.
+const mockSourcesPanel = jest.fn();
+jest.mock('../sources/sources_panel', () => ({
+  SourcesPanel: (props: unknown) => {
+    mockSourcesPanel(props);
+    return <div data-test-subj="mockSourcesPanel" />;
+  },
+}));
 
 const { useSaveAiIndexDescription } = jest.requireMock(
   '../../../hooks/use_save_ai_index_description'
@@ -217,6 +226,34 @@ describe('SetupWizard', () => {
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Setup finished. You can change any of it in Settings.'
     );
+  });
+
+  it('Add sources step shows the Sources tab editor without its description', () => {
+    const { onSaved } = renderWizard({ initialStep: 'sources' });
+
+    expect(screen.getByTestId('mockSourcesPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSetupWizardPlaceholder')).not.toBeInTheDocument();
+    expect(mockSourcesPanel).toHaveBeenCalledWith(
+      expect.objectContaining({ aiIndex, onSaved, isManaged: false, showDescription: false })
+    );
+  });
+
+  it('Add sources step: holds every button while a source is saving', () => {
+    renderWizard({ initialStep: 'sources', done: { ...noneDone, sources: true } });
+    const { onSavingChange } = mockSourcesPanel.mock.calls[0][0] as {
+      onSavingChange: (isSaving: boolean) => void;
+    };
+
+    act(() => onSavingChange(true));
+
+    expect(screen.getByTestId('contextSetupWizardContinue')).toBeDisabled();
+    expect(screen.getByTestId('contextSetupWizardSkip')).toBeDisabled();
+    expect(screen.getByTestId('contextSetupWizardExit')).toBeDisabled();
+    expect(screen.getByTestId('contextSetupWizardStep-describe')).toBeDisabled();
+
+    act(() => onSavingChange(false));
+
+    expect(screen.getByTestId('contextSetupWizardContinue')).toBeEnabled();
   });
 
   it('clicking a step opens it', () => {

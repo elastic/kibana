@@ -8,7 +8,7 @@
 import { EuiFlexGrid, EuiFlexItem, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { useCanReadConnectors } from '../../../hooks/use_can_read_connectors';
 import { useDataConnectors } from '../../../hooks/use_data_connectors';
@@ -30,13 +30,33 @@ interface SourcesPanelProps {
   aiIndex: GetAiIndexResponse | undefined;
   onSaved: () => void | Promise<unknown>;
   isManaged: boolean;
+  /** False where the page already explains sources, e.g. the setup wizard. Defaults to true. */
+  showDescription?: boolean;
+  /**
+   * Tells the parent while a change is saving and the AI index reloads, so the parent can hold its
+   * own saves: each save sends the whole AI index, and a stale one would drop the new sources.
+   */
+  onSavingChange?: (isSaving: boolean) => void;
 }
 
-export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: SourcesPanelProps) => {
+export const SourcesPanel = ({
+  isLoading,
+  aiIndex,
+  onSaved,
+  isManaged,
+  showDescription = true,
+  onSavingChange,
+}: SourcesPanelProps) => {
   const { saveSources, isSaving: isSavingRequest } = useSaveAiIndexSources();
   const [isRefreshing, setIsRefreshing] = useState(false);
   // Controls stay disabled until the refetch lands, so the next edit never builds from a stale list.
   const isSaving = isSavingRequest || isRefreshing;
+
+  useEffect(() => {
+    onSavingChange?.(isSaving);
+  }, [isSaving, onSavingChange]);
+  // Unmounted mid-save: don't leave the parent waiting.
+  useEffect(() => () => onSavingChange?.(false), [onSavingChange]);
   const [addingKind, setAddingKind] = useState<SourcesAddingKind | undefined>();
 
   const savedSources = useMemo(() => toSelectedSources(aiIndex?.sources ?? []), [aiIndex?.sources]);
@@ -106,13 +126,17 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
 
   return (
     <div data-test-subj="contextSourcesPanel">
-      <AiIndexDetailPanelDescription>
-        <FormattedMessage
-          id="xpack.contextEngine.aiIndexDetail.sources.panelDescription"
-          defaultMessage="Context reads these sources to write knowledge documents."
-        />
-      </AiIndexDetailPanelDescription>
-      <EuiSpacer size="m" />
+      {showDescription ? (
+        <>
+          <AiIndexDetailPanelDescription>
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.sources.panelDescription"
+              defaultMessage="Context reads these sources to write knowledge documents."
+            />
+          </AiIndexDetailPanelDescription>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       {isLoading ? (
         <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />
       ) : null}
