@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -34,6 +35,13 @@ export interface RuleRow {
   scheduled_timestamp: number;
   /** The columns of the row, as the rule's query returned them. */
   data: Record<string, unknown>;
+}
+
+/** The part of a `.rule-events` document a row is read from. */
+interface RuleEventSource {
+  rule: { id: string };
+  scheduled_timestamp: string;
+  data?: Record<string, unknown>;
 }
 
 /** Lists the rules the engine manages in the scope's space, and reads the rows they wrote. */
@@ -95,44 +103,34 @@ export class ManagedRuleReader {
       return [];
     }
 
-    const response = await this.esClient.search<{
-      rule: { id: string };
-      scheduled_timestamp: string;
-      data?: Record<string, unknown>;
-    }>(
-      {
-        index: ALERT_EVENTS_DATA_STREAM,
-        size: MAX_ROWS,
-        query: {
-          bool: {
-            filter: [
-              { term: { type: 'signal' } },
-              { term: { space_id: spaceId } },
-              { terms: { 'rule.id': ruleIds } },
-              {
-                range: {
-                  '@timestamp': { gte: from, lt: to, format: 'epoch_millis' },
-                },
-              },
-            ],
-          },
-        },
-        sort: [{ scheduled_timestamp: 'desc' }],
-        _source: ['rule.id', 'scheduled_timestamp', 'data'],
-      },
+    const timestamp = esql.col('@timestamp');
+    const isSignal = esql.exp`type == ${esql.str('signal')}`;
+    const inSpace = esql.exp`space_id == ${esql.str(spaceId)}`;
+    const ofRules = esql.exp`${esql.col(['rule', 'id'])} IN (${ruleIds.map((id) => esql.str(id))})`;
+    const inWindow = esql.exp`${timestamp} >= TO_DATETIME(${esql.int(
+      from
+    )}) AND ${timestamp} < TO_DATETIME(${esql.int(to)})`;
+    const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+      .where`${isSignal} AND ${inSpace} AND ${ofRules} AND ${inWindow}`
+      .sort(['scheduled_timestamp', 'DESC'])
+      .keep('_source')
+      .limit(MAX_ROWS);
+
+    // `_source` rather than columns: `.rule-events` maps `data` as `flattened`, which ES|QL cannot
+    // return as an object. Partial results are refused so a shard failure never reads as no rows.
+    const response = await this.esClient.esql.query(
+      { query: query.print('basic'), allow_partial_results: false },
       { signal: abortSignal }
     );
+    const sourceIndex = response.columns.findIndex(({ name }) => name === '_source');
 
-    return response.hits.hits.flatMap(({ _source: source }) =>
-      source
-        ? [
-            {
-              rule_id: source.rule.id,
-              scheduled_timestamp: Date.parse(source.scheduled_timestamp),
-              data: source.data ?? {},
-            },
-          ]
-        : []
-    );
+    return response.values.map((row) => {
+      const source = row[sourceIndex] as unknown as RuleEventSource;
+      return {
+        rule_id: source.rule.id,
+        scheduled_timestamp: Date.parse(source.scheduled_timestamp),
+        data: source.data ?? {},
+      };
+    });
   }
 }
