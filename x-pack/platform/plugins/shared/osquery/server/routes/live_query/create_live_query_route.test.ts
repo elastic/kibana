@@ -314,24 +314,22 @@ describe('createLiveQueryRoute', () => {
     ['missing', notFound(), 404, 'The requested alert was not found'],
     ['unreadable', forbidden(), 403, 'Not authorized to read the requested alert'],
     ['unavailable', new Error('ES unavailable'), 500, 'Error occurred while retrieving the alert'],
-  ])('returns a structured error for an %s alert when query access is allowed', async (
-    _description,
-    error,
-    statusCode,
-    message
-  ) => {
-    const racGet = jest.fn().mockRejectedValue(error);
-    const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+  ])(
+    'returns a structured error for an %s alert when query access is allowed',
+    async (_description, error, statusCode, message) => {
+      const racGet = jest.fn().mockRejectedValue(error);
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
 
-    const response = await invokeRoute(
-      { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
-      { coreStart, racGet }
-    );
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
+        { coreStart, racGet }
+      );
 
-    expect(response.customError).toHaveBeenCalledWith({ statusCode, body: { message } });
-    expect(response.ok).not.toHaveBeenCalled();
-    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
-  });
+      expect(response.customError).toHaveBeenCalledWith({ statusCode, body: { message } });
+      expect(response.ok).not.toHaveBeenCalled();
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    }
+  );
 
   it('looks the saved query up as the expected saved object type', async () => {
     const coreStart = createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });

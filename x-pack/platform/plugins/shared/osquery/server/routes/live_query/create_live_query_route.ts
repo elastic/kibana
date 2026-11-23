@@ -97,9 +97,12 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           } else if (statusCode === 403) {
             alertError = { statusCode, message: 'Not authorized to read the requested alert' };
           } else {
-            logger.error(`Failed to retrieve alert for osquery live query request: ${error.message}`, {
-              error,
-            });
+            logger.error(
+              `Failed to retrieve alert for osquery live query request: ${error.message}`,
+              {
+                error,
+              }
+            );
             alertError = { statusCode: 500, message: 'Error occurred while retrieving the alert' };
           }
         }
