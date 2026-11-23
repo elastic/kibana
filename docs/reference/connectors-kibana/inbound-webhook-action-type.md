@@ -22,8 +22,9 @@ To receive requests with this connector, you need:
 
 - {applies_to}`serverless: preview` A [project feature tier](docs-content://deploy-manage/deploy/elastic-cloud/project-settings.md) that includes Workflows. The Security Analytics Essentials and Observability Logs Essentials tiers don't include it.
 - {applies_to}`stack: preview 9.6+` An Enterprise license, which Workflows requires.
+- {applies_to}`stack: preview 9.6+` The [`server.publicBaseUrl`](/reference/configuration-reference/general-settings.md#server-publicbaseurl) setting in `kibana.yml` set to the URL that the external tool uses to reach {{kib}}, such as `https://kibana.example.com`. {{kib}} builds the webhook URL from this setting. Without it, the webhook URL has no host, so external tools can't use it. Include the protocol and host, the port if it isn't 80 or 443, and your `server.basePath` value if you set one. Don't add a query string. Restart {{kib}} after you change the setting.
 - {applies_to}`stack: preview 9.6+` The `xpack.actions.inboundEvents.enabled` setting in `kibana.yml` set to `true`, which is the default. When it's `false`, the Inbound Webhook connector type isn't available.
-- A {{kib}} URL that the external tool can reach. A tool that runs outside your network can't send requests to `localhost`.
+- A {{kib}} host that the external tool can reach over the network. A tool that runs outside your network can't send requests to `localhost` or to an address that only your network can reach.
 
 ## Create connectors in {{kib}} [define-inbound-webhook-ui]
 
@@ -34,7 +35,7 @@ To create an Inbound Webhook connector:
 3. Select **Save**. The flyout stays open and shows the **Webhook URL** and the **Ingest token**.
 4. Before you close the flyout, copy the token and store it with the URL. {{kib}} shows the token only once. If you lose it, you can [rotate the token](#inbound-webhook-rotate-token) to get a new one.
 
-If the flyout warns that `server.publicBaseUrl` isn't set, the **Webhook URL** is a relative path that external tools can't use. Set [`server.publicBaseUrl`](/reference/configuration-reference/general-settings.md#server-publicbaseurl) to the {{kib}} host that the tool sends requests to.
+If the flyout shows a warning about `server.publicBaseUrl`, the **Webhook URL** is a relative path with no host, such as `/api/actions/events/.inboundWebhook/<connector-id>`, and external tools can't use it. Set `server.publicBaseUrl` as described in [Requirements](#inbound-webhook-requirements) and restart {{kib}}. Then open the connector again to copy the full URL. The ingest token stays the same, so use the one you copied when you saved the connector.
 
 ### Connector configuration [inbound-webhook-connector-configuration]
 
