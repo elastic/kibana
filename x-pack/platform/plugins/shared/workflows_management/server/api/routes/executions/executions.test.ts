@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { Type } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -24,8 +25,13 @@ import { MAX_WORKFLOW_ENTITY_ID_LENGTH } from '../utils/route_constants';
 import { executionIdParamSchema } from '../utils/schemas';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
+type QuerySchema = Type<{ collapse?: string }>;
+
 describe('Execution Routes', () => {
-  let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
+  let routeHandlers: Record<
+    string,
+    { handler: (...args: any[]) => Promise<any>; querySchema?: QuerySchema }
+  >;
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockRouter: IRouter;
@@ -123,15 +129,21 @@ describe('Execution Routes', () => {
     const createVersionedRoute = (method: string, path: string) => ({
       addVersion: jest
         .fn()
-        .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
-          routeHandlers[`${method}:${path}`] = {
-            handler: async (context, request, response) => {
-              request.authzResult ??= defaultAuthzResult;
-              return handler(context, request, response);
-            },
-          };
-          return { addVersion: jest.fn() };
-        }),
+        .mockImplementation(
+          (
+            { validate }: { validate?: { request?: { query?: QuerySchema } } },
+            handler: (...args: any[]) => Promise<any>
+          ) => {
+            routeHandlers[`${method}:${path}`] = {
+              querySchema: validate?.request?.query,
+              handler: async (context, request, response) => {
+                request.authzResult ??= defaultAuthzResult;
+                return handler(context, request, response);
+              },
+            };
+            return { addVersion: jest.fn() };
+          }
+        ),
     });
 
     const router = {
@@ -176,6 +188,16 @@ describe('Execution Routes', () => {
   });
 
   const handler = (method: string, path: string) => routeHandlers[`${method}:${path}`]?.handler;
+
+  it.each([
+    '/api/workflows/workflow/executions',
+    '/api/workflows/workflow/{workflowId}/executions',
+  ])('accepts workflowId as a collapse field on GET %s', (path) => {
+    const { querySchema } = routeHandlers[`GET:${path}`];
+    expect(querySchema?.validate({ collapse: 'workflowId' })).toMatchObject({
+      collapse: 'workflowId',
+    });
+  });
 
   describe('POST /api/workflows/workflow/{id}/run (run_workflow)', () => {
     const path = '/api/workflows/workflow/{id}/run';

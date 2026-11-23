@@ -92,10 +92,9 @@ export const WorkflowExecutionCollapseFields = [
   'status',
   'executedBy',
   'triggeredBy',
+  'workflowId',
 ] as const;
-export type WorkflowExecutionCollapseField =
-  | (typeof WorkflowExecutionCollapseFields)[number]
-  | 'workflowId';
+export type WorkflowExecutionCollapseField = (typeof WorkflowExecutionCollapseFields)[number];
 
 /**
  * An interface representing the state of a step scope during workflow execution.
