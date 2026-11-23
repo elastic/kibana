@@ -113,20 +113,6 @@ interface AgentToolEventCreateProps
   error_message?: string;
 }
 
-interface AgentToolEventStatusUpdateProps
-  extends ExistingAlertIdentityProps,
-    OptionalWorkflowExecutionTelemetryProps {
-  success: boolean;
-  /**
-   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with events sent by
-   * nodes that have not been upgraded yet.
-   */
-  event_uuid?: string;
-  event_id: string;
-  status: SignificantEventStatus;
-  error_message?: string;
-}
-
 /** The entry point that wrote the version, not who was behind it. */
 type SignificantEventActor = 'agent_tool' | 'rest_api' | 'stale_event_cleanup';
 
@@ -303,7 +289,6 @@ export {
   type AgentToolFailureCode,
   type KnowledgeIndicatorQueriesGenerationFailedProps,
   type KnowledgeIndicatorQueriesGenerationFailureCode,
-  type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,
   type DetectionScanProps,
   type DiscoveryCompletedProps,

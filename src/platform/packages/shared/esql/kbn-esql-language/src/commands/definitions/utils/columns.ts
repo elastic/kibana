@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, isColumn, LeafPrinter, synth } from '@elastic/esql';
-import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
+import { Builder, isColumn, isSubQuery, LeafPrinter, synth, Walker } from '@elastic/esql';
+import type { ESQLAstCommand, ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { ICommandContext, ESQLColumnData } from '../../registry/types';
 import { commandsMetadata } from '../generated/commands/commands';
 import type { Commands } from '../keywords';
@@ -32,7 +33,105 @@ export function getColumnExists(
           .map((col) => col.name)
   );
 
-  return columnIsPresent(node, set);
+  if (columnIsPresent(node, set)) {
+    return true;
+  }
+
+  // ROW only sees columns the command itself defined.
+  if (excludeFields) {
+    return false;
+  }
+
+  return getFlattenedKeyColumn(getColumnName(node), columns) !== undefined;
+}
+
+/**
+ * Returns a keyword column when the closest mapped prefix of an unmapped name is flattened.
+ */
+export function getFlattenedKeyColumn(
+  columnName: string,
+  columns: Map<string, ESQLColumnData>
+): ESQLColumnData | undefined {
+  if (columns.has(columnName) || columnName.includes('*') || !columnName.includes('.')) {
+    return undefined;
+  }
+
+  const parts = columnName.split('.');
+  if (parts.some((part) => part.length === 0)) {
+    return undefined;
+  }
+
+  for (let i = parts.length - 1; i >= 1; i--) {
+    const prefix = parts.slice(0, i).join('.');
+    const parent = columns.get(prefix);
+
+    if (!parent) {
+      continue;
+    }
+
+    if (parent.type !== KBN_FIELD_TYPES.FLATTENED) {
+      return undefined;
+    }
+
+    return {
+      name: columnName,
+      type: 'keyword',
+      userDefined: false,
+    };
+  }
+
+  return undefined;
+}
+
+/** Collects flattened keys named by a command so later commands can still see them. */
+export function getFlattenedKeyFields(
+  command: ESQLAstCommand,
+  previousColumns: ESQLColumnData[]
+): ESQLColumnData[] {
+  if (!previousColumns.some((field) => field.type === KBN_FIELD_TYPES.FLATTENED)) {
+    return [];
+  }
+
+  const columns = new Map(previousColumns.map((field) => [field.name, field]));
+  const flattenedKeys: ESQLColumnData[] = [];
+
+  Walker.walk(command, {
+    visitParens: (node, _parent, walker) => {
+      if (isSubQuery(node)) {
+        walker.skipChildren();
+      }
+    },
+    visitColumn: (node) => {
+      const name = node.parts.join('.');
+      if (columns.has(name)) {
+        return;
+      }
+
+      const keyColumn = getFlattenedKeyColumn(name, columns);
+      if (!keyColumn) {
+        return;
+      }
+
+      columns.set(name, keyColumn);
+      flattenedKeys.push(keyColumn);
+    },
+  });
+
+  return flattenedKeys;
+}
+
+/** Appends flattened keys named by a command, keeping the original list when there are none. */
+export function columnsWithFlattenedKeys(
+  command: ESQLAstCommand,
+  columns: ESQLColumnData[]
+): ESQLColumnData[] {
+  const flattenedKeyFields = getFlattenedKeyFields(command, columns);
+
+  if (flattenedKeyFields.length === 0) {
+    return columns;
+  }
+
+  return [...columns, ...flattenedKeyFields];
 }
 
 export function columnIsPresent(node: ESQLColumn | ESQLIdentifier, columns: Set<string>) {

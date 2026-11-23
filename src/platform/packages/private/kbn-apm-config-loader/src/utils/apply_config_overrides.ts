@@ -24,6 +24,7 @@ const coerceCliValue = (value: string): string | boolean | number => {
  * Manually applies the specific configuration overrides we need to load the APM config.
  * Currently, only these are needed:
  *   - server.uuid
+ *   - server.name
  *   - path.data
  *   - elastic.apm.*
  *   - telemetry.*
@@ -33,6 +34,10 @@ export const applyConfigOverrides = (config: Record<string, any>, argv: string[]
   const serverUuid = getArgValue(argv, '--server.uuid');
   if (serverUuid) {
     set(config, 'server.uuid', serverUuid);
+  }
+  const serverName = getArgValue(argv, '--server.name');
+  if (serverName) {
+    set(config, 'server.name', serverName);
   }
   const dataPath = getArgValue(argv, '--path.data');
   if (dataPath) {

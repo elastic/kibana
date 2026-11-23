@@ -200,7 +200,15 @@ export const MAX_STREAMS_UNIT_STATS_COMPONENTS = 100;
  */
 export const streamsUnitStatsComponentRefSchema = lazySchema(() =>
   z.discriminatedUnion('kind', [
-    z.strictObject({ kind: z.literal('destination'), id: streamsUnitIdentifierSchema }),
+    z.strictObject({
+      kind: z.literal('destination'),
+      id: streamsUnitIdentifierSchema,
+      /**
+       * Parts of the result that cost an extra query, so they are only sent when asked for.
+       * `delivery_series` adds `events.delivery.series`.
+       */
+      include: z.strictObject({ delivery_series: z.boolean().optional() }).optional(),
+    }),
     z.strictObject({ kind: z.literal('processor'), id: streamsUnitIdentifierSchema }),
     z.strictObject({ kind: z.literal('source'), id: streamsUnitIdentifierSchema }),
   ])
@@ -309,6 +317,28 @@ export const streamsUnitStatsSeriesSchema = z.object({
   points: z.array(z.object({ start: z.string(), value: z.number() })),
 });
 
+/**
+ * What was attempted and what failed in each bucket of the window, as counts in `unit` (items for
+ * Elasticsearch, upload attempts for S3), for a chart of delivery. `failed` includes the other two
+ * counts, and `total` includes `failed`, so `authentication + authorization <= failed <= total`.
+ * A bucket with no attempts has no point.
+ */
+export const streamsUnitStatsDeliverySeriesSchema = lazySchema(() =>
+  z.object({
+    bucket_ms: z.number(),
+    unit: z.string(),
+    points: z.array(
+      z.object({
+        start: z.string(),
+        total: z.number(),
+        failed: z.number(),
+        authentication: z.number(),
+        authorization: z.number(),
+      })
+    ),
+  })
+);
+
 export const streamsUnitStatsDestinationResultSchema = lazySchema(() =>
   z.object({
     error: streamsUnitStatsErrorSchema.optional(),
@@ -336,6 +366,12 @@ export const streamsUnitStatsDestinationResultSchema = lazySchema(() =>
         authentication: statsFailureRateSchema,
         authorization: statsFailureRateSchema,
       }),
+      /**
+       * Present only when the request asks for it, and then with no points when nothing was found.
+       * A destination type that has no way to report one leaves it out, and so does a destination
+       * whose series could not be read, which has an `error`. It covers `meta.window`.
+       */
+      delivery: z.object({ series: streamsUnitStatsDeliverySeriesSchema }).optional(),
     }),
   })
 );
@@ -447,6 +483,7 @@ export namespace StreamsUnit {
   export type StatsComponentRef = z.infer<typeof streamsUnitStatsComponentRefSchema>;
   export type StatsError = z.infer<typeof streamsUnitStatsErrorSchema>;
   export type StatsSeries = z.infer<typeof streamsUnitStatsSeriesSchema>;
+  export type StatsDeliverySeries = z.infer<typeof streamsUnitStatsDeliverySeriesSchema>;
   export type StatsDestinationResult = z.infer<typeof streamsUnitStatsDestinationResultSchema>;
   export type StatsProcessorInstance = z.infer<typeof streamsUnitStatsProcessorInstanceSchema>;
   export type StatsProcessorResult = z.infer<typeof streamsUnitStatsProcessorResultSchema>;

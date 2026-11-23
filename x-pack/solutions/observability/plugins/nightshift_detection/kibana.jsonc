@@ -10,7 +10,15 @@
     "browser": false,
     "server": true,
     "configPath": ["xpack", "nightshiftDetection"],
-    "requiredPlugins": ["significantEvents", "nightshiftSources", "licensing", "spaces"],
+    "requiredPlugins": [
+      "alertingVTwo",
+      "significantEvents",
+      "nightshiftSources",
+      "licensing",
+      "spaces",
+      "workflowsExtensions",
+      "workflowsManagement"
+    ],
     "optionalPlugins": ["cloud"],
     "requiredBundles": []
   }

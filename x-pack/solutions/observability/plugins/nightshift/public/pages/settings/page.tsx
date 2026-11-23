@@ -108,7 +108,7 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
         }}
         tabs={tabs}
       />
-      <EuiPageTemplate.Section component="div" restrictWidth={false}>
+      <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
         {tab === 'general' && <GeneralSettingsTab />}
         {tab === 'investigations' && (
           <InvestigationsSettingsTab

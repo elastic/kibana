@@ -28,6 +28,7 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { APPLICATIONS_LABEL, SESSIONS_LABEL } from '../../labels';
 import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
+import { ReportsTab } from '../reports/reports_tab';
 import { SessionsTab } from '../sessions/sessions_tab';
 import { OtelOverview } from './otel_overview/otel_overview';
 
@@ -42,10 +43,13 @@ const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
     defaultMessage: 'Network',
   }),
   sessions: SESSIONS_LABEL,
+  reports: i18n.translate('xpack.digitalExperience.application.tabs.reports', {
+    defaultMessage: 'Reports',
+  }),
 };
 
 /**
- * Errors, network and sessions are read from EDOT Browser data only; Classic RUM applications have
+ * Errors, network, sessions and reports are read from EDOT Browser data only; Classic RUM applications have
  * the ux plugin's dashboard as their Overview.
  */
 const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
@@ -152,14 +156,12 @@ export function ApplicationPage({
 }) {
   const applicationsHref = useApplicationsHref();
   const history = useHistory();
-  const { overviewHref, overviewPath, errorsHref, networkHref, sessionsHref } = useApplicationLinks(
-    serviceName,
-    source
-  );
+  const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
+    useApplicationLinks(serviceName, source);
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
-  // Classic RUM has no Errors or Network tab, so their URLs are replaced by the Overview's.
-  const isUnsupportedTab =
-    source !== APPLICATION_SOURCE.otel && (selectedTab === 'errors' || selectedTab === 'network');
+  // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
+  // replaced by the Overview's, so a new EDOT-only tab needs no entry here.
+  const isUnsupportedTab = selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
   useEffect(() => {
     if (isUnsupportedTab) {
       history.replace(overviewPath);
@@ -169,6 +171,7 @@ export function ApplicationPage({
     overview: overviewHref,
     errors: errorsHref,
     network: networkHref,
+    reports: reportsHref,
     sessions: sessionsHref(),
   };
 
@@ -204,6 +207,8 @@ export function ApplicationPage({
         return withPagePadding(<NetworkTab serviceName={serviceName} />);
       case 'sessions':
         return renderSessions();
+      case 'reports':
+        return withPagePadding(<ReportsTab />);
       default:
         return renderOverview();
     }

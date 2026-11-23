@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBetaBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -24,6 +25,7 @@ import {
   useEuiTheme,
   EuiFormRow,
   EuiLink,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
@@ -38,6 +40,8 @@ import { getTelemetry } from '../telemetry';
 import { getServices } from '../services';
 
 const EDITOR_DEFAULT_HEIGHT = 400;
+// The floor when the ES|QL section is open and the viewport is short. The editor stays resizable.
+const EDITOR_MIN_HEIGHT = 160;
 // Intentionally overestimated (header + footer + body padding + template label row + spacers + help text)
 // so the computed max-height always prevents a scrollbar regardless of minor layout changes.
 const FLYOUT_FIXED_CHROME_HEIGHT = 380;
@@ -77,6 +81,7 @@ export const EditCustomContentFlyout = ({
   onGenerateWithChat,
 }: EditCustomContentFlyoutProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
+  const templateAccordionId = useGeneratedHtmlId({ prefix: 'customContentTemplate' });
 
   const {
     draftQueries,
@@ -107,6 +112,9 @@ export const EditCustomContentFlyout = ({
   });
 
   const queriesToSave = useMemo(() => getRunnableQueries(draftQueries), [draftQueries]);
+  // A blank draft is not a query. A new panel has neither, so both sections start open.
+  const hasQuery = draftQueries.some(({ text }) => text.trim().length > 0);
+  const hasTemplate = draftTemplate.trim().length > 0;
 
   const handleGenerateWithChat = useCallback(() => {
     getTelemetry().trackGenerateWithChatClicked({
@@ -147,7 +155,7 @@ export const EditCustomContentFlyout = ({
 
   const onEsqlSectionResize = useCallback(({ height }: { width: number; height: number }) => {
     setMaxEditorHeight(
-      Math.max(EDITOR_DEFAULT_HEIGHT, window.innerHeight - FLYOUT_FIXED_CHROME_HEIGHT - height)
+      Math.max(EDITOR_MIN_HEIGHT, window.innerHeight - FLYOUT_FIXED_CHROME_HEIGHT - height)
     );
   }, []);
 
@@ -161,7 +169,7 @@ export const EditCustomContentFlyout = ({
   const editorContainerCss = css({
     position: 'relative',
     resize: 'vertical',
-    minHeight: EDITOR_DEFAULT_HEIGHT,
+    minHeight: EDITOR_MIN_HEIGHT,
     height: EDITOR_DEFAULT_HEIGHT,
     ...(maxEditorHeight !== undefined && { maxHeight: maxEditorHeight }),
     border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
@@ -238,9 +246,13 @@ export const EditCustomContentFlyout = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {/* Template section */}
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem grow={false}>
+        {/* Template accordion */}
+        <EuiAccordion
+          id={templateAccordionId}
+          data-test-subj="customContentTemplateSection"
+          initialIsOpen={!hasQuery}
+          paddingSize="none"
+          buttonContent={
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
@@ -257,9 +269,9 @@ export const EditCustomContentFlyout = ({
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-          {isAiAvailable && (
-            <EuiFlexItem grow={false}>
+          }
+          extraAction={
+            isAiAvailable ? (
               <EuiToolTip content={blockedTooltip}>
                 <AiButton
                   size="s"
@@ -276,70 +288,70 @@ export const EditCustomContentFlyout = ({
                       })}
                 </AiButton>
               </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-
-        <EuiFormRow
-          fullWidth
-          helpText={i18n.translate('xpack.customContent.editFlyout.templateHelpText', {
-            defaultMessage:
-              'HTML and CSS, with Liquid tags to insert ES|QL results. For each row, row["column"].value is the value and row["column"].pct is its percentage of the column\'s highest value, useful for bar widths.',
-          })}
+            ) : undefined
+          }
         >
-          <EuiResizeObserver onResize={onEditorContainerResize}>
-            {(editorResizeRef) => (
-              <div
-                ref={editorResizeRef}
-                css={editorContainerCss}
-                data-test-subj="customContentTemplateEditorContainer"
-              >
-                <CodeEditor
-                  languageId="liquid"
-                  value={draftTemplate}
-                  onChange={setDraftTemplate}
-                  height={editorHeight}
-                  placeholder={
-                    isAiAvailable
-                      ? i18n.translate('xpack.customContent.editFlyout.templatePlaceholderAi', {
-                          defaultMessage:
-                            '<!-- Write your HTML, CSS, and Liquid here, or select Generate with chat. -->',
-                        })
-                      : i18n.translate('xpack.customContent.editFlyout.templatePlaceholderNoAi', {
-                          defaultMessage: '<!-- Write your HTML, CSS, and Liquid here. -->',
-                        })
-                  }
-                  options={{
-                    fontSize: 12,
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    lineNumbers: 'on',
-                    folding: true,
-                  }}
-                />
-                <EuiToolTip
-                  content={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
-                    defaultMessage: 'Copy template',
-                  })}
-                  disableScreenReaderOutput
-                  anchorProps={{ css: copyButtonCss }}
+          <EuiSpacer size="s" />
+
+          <EuiFormRow
+            fullWidth
+            helpText={i18n.translate('xpack.customContent.editFlyout.templateHelpText', {
+              defaultMessage:
+                'HTML and CSS, with Liquid tags to insert ES|QL results. For each row, row["column"].value is the value and row["column"].pct is its percentage of the column\'s highest value, useful for bar widths.',
+            })}
+          >
+            <EuiResizeObserver onResize={onEditorContainerResize}>
+              {(editorResizeRef) => (
+                <div
+                  ref={editorResizeRef}
+                  css={editorContainerCss}
+                  data-test-subj="customContentTemplateEditorContainer"
                 >
-                  <EuiButtonIcon
-                    iconType="copy"
-                    aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
+                  <CodeEditor
+                    languageId="liquid"
+                    value={draftTemplate}
+                    onChange={setDraftTemplate}
+                    height={editorHeight}
+                    placeholder={
+                      isAiAvailable
+                        ? i18n.translate('xpack.customContent.editFlyout.templatePlaceholderAi', {
+                            defaultMessage:
+                              '<!-- Write your HTML, CSS, and Liquid here, or select Generate with chat. -->',
+                          })
+                        : i18n.translate('xpack.customContent.editFlyout.templatePlaceholderNoAi', {
+                            defaultMessage: '<!-- Write your HTML, CSS, and Liquid here. -->',
+                          })
+                    }
+                    options={{
+                      fontSize: 12,
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      wordWrap: 'on',
+                      lineNumbers: 'on',
+                      folding: true,
+                    }}
+                  />
+                  <EuiToolTip
+                    content={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
                       defaultMessage: 'Copy template',
                     })}
-                    onClick={() => navigator.clipboard?.writeText(draftTemplate)}
-                    data-test-subj="customContentCopyTemplateButton"
-                  />
-                </EuiToolTip>
-              </div>
-            )}
-          </EuiResizeObserver>
-        </EuiFormRow>
+                    disableScreenReaderOutput
+                    anchorProps={{ css: copyButtonCss }}
+                  >
+                    <EuiButtonIcon
+                      iconType="copy"
+                      aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
+                        defaultMessage: 'Copy template',
+                      })}
+                      onClick={() => navigator.clipboard?.writeText(draftTemplate)}
+                      data-test-subj="customContentCopyTemplateButton"
+                    />
+                  </EuiToolTip>
+                </div>
+              )}
+            </EuiResizeObserver>
+          </EuiFormRow>
+        </EuiAccordion>
 
         <EuiSpacer size="m" />
 
@@ -357,6 +369,7 @@ export const EditCustomContentFlyout = ({
                 renderError={renderError}
                 emptyQueryPosition={emptyQueryPosition}
                 esqlVariables={esqlVariables}
+                initialIsOpen={hasQuery || !hasTemplate}
               />
             </div>
           )}

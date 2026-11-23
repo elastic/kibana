@@ -9,7 +9,6 @@
 import registerDataSession from 'cypress-data-session/src/plugin';
 import { merge } from 'lodash';
 
-import { transparentApiProxy } from './support/transparent_api_proxy';
 import { samlAuthentication } from './support/saml_authentication';
 import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
@@ -88,8 +87,6 @@ export const getCypressBaseConfig = (
           samlAuthentication(on, config);
 
           dataLoaders(on, config);
-
-          transparentApiProxy(on, config);
 
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);

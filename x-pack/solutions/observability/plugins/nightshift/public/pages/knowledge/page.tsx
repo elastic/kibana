@@ -45,7 +45,7 @@ const KnowledgeLoadingSpinner = () => (
 );
 
 const KnowledgePageLoading = () => (
-  <EuiPageTemplate.Section component="div" restrictWidth={false}>
+  <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
     <KnowledgeLoadingSpinner />
   </EuiPageTemplate.Section>
 );
@@ -101,7 +101,7 @@ export function KnowledgePage({
         }}
         tabs={tabs}
       />
-      <EuiPageTemplate.Section component="div" restrictWidth={false}>
+      <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
         <React.Suspense fallback={<KnowledgeLoadingSpinner />}>
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTab />}
           {tab === 'wiki' && <WikiTab />}

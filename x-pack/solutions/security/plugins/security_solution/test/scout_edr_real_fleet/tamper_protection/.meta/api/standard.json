@@ -1,5 +1,5 @@
 {
-  "sha1": "48924381c57cae5663b105fe68165e6f1a85d711",
+  "sha1": "68ee009c64d4e8341cc52259ddff01c57f166eec",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,19 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_changing_policy_from_disabled_to_enabled.spec.ts",
+        "line": 47,
+        "column": 25
+      }
+    },
+    {
+      "id": "682c1be2e224d90-3ffda38664ffa67",
+      "title": "Uninstall an agent moved from a tamper protected to an unprotected policy rejects an uninstall without a token, then accepts it once the agent is on the unprotected policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_changing_policy_from_enabled_to_disabled.spec.ts",
         "line": 47,
         "column": 25
       }

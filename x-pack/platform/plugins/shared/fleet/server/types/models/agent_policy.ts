@@ -60,8 +60,9 @@ function validateCPU(s: string) {
 }
 
 /**
- * `overrides` as accepted from requests (REST API and `xpack.fleet.agentPolicies` in kibana.yml):
- * rejects the denied keys, including dotted paths below them.
+ * `overrides` as accepted from REST API requests: rejects the denied keys, including dotted paths
+ * below them. Not used for `xpack.fleet.agentPolicies` in kibana.yml, where rejecting them would
+ * stop Kibana from starting after an upgrade.
  *
  * Not part of `AgentPolicyBaseSchema` on purpose: that object feeds the frozen SO model-version
  * schemas (create and forward compatibility) and the response schemas. Policies saved before this
@@ -439,7 +440,14 @@ const downloadSourceIdsSchema = schema.maybe(
           "A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.",
       },
     }),
-    { maxSize: 3 }
+    {
+      maxSize: 3,
+      meta: {
+        description:
+          "An ordered list of agent binary download sources. When downloading an upgrade, Elastic Agent tries them in order until a download succeeds. Elastic Agent versions earlier than 9.6.0 only use the first source. All sources use the first source's proxy, SSL, authentication, and `reserve_diskspace` settings. If the first source uses a proxy, Fleet uses the proxy's SSL settings instead of the source's. An empty list uses the default download source. On update, omitting this field keeps the current list. If you set only the deprecated `download_source_id`, Fleet replaces the list with that source, or clears it if the value is `null`.",
+        availability: { since: '9.6.0', stability: 'stable' },
+      },
+    }
   )
 );
 

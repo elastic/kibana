@@ -32,7 +32,6 @@ import * as i18n from './translations';
 export const EPISODE_ASSIGNEE_PANEL_WIDTH = 400;
 
 const SUGGEST_SEARCH_DEBOUNCE_MS = 300;
-const SELECTABLE_HEIGHT = 320;
 
 interface AssigneePanelMessageProps {
   'data-test-subj': string;
@@ -210,7 +209,6 @@ export const EpisodeAssigneePanel = ({
       <UserProfilesSelectable<UserProfileWithAvatar | null>
         data-test-subj="alertingV2EditEpisodeAssigneeSelectable"
         searchInputId={searchInputId}
-        height={SELECTABLE_HEIGHT}
         singleSelection
         selectedOptions={selectedProfile ? [selectedProfile] : []}
         options={suggestOptions}
@@ -222,7 +220,7 @@ export const EpisodeAssigneePanel = ({
         nullOptionLabel={i18n.ASSIGNEE_PANEL_NO_ASSIGNEE_OPTION}
         searchPlaceholder={i18n.ASSIGNEE_PANEL_SEARCH_PLACEHOLDER}
       />
-      <EuiPanel color="transparent" paddingSize="s" hasShadow={false}>
+      <EuiPanel color="transparent" paddingSize="s" hasShadow={false} hasBorder={false}>
         <EuiButton
           fullWidth
           size="s"

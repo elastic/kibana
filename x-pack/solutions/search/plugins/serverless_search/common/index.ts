@@ -7,4 +7,3 @@
 
 export const PLUGIN_ID = 'serverlessSearch';
 export const PLUGIN_NAME = 'serverlessSearch';
-export const DEFAULT_INGESTION_PIPELINE = 'search-default-ingestion';

@@ -312,15 +312,14 @@ Each run:
    applications sharing an id.
 3. Rebuilds the sessions, 5,000 at a time, from their events of the last 24 hours, the longest a
    session lasts, with their ids as a literal `IN` list, which Elasticsearch looks up in the index:
-   an `IN (subquery)` scanned the whole lookback. One query aggregates per session and page URL,
-   then per session, for the counts, times, latest attributes, web vitals and journey. It keeps the
-   raw attribute fields of each group's latest event and cleans them into attributes once per
-   session, after the aggregation: cleaning every event's fields first took about 40% of the
-   query, and the same 5,000 sessions now take about 22% less time with identical rows.
+   an `IN (subquery)` scanned the whole lookback. One query returns the counts, times, latest
+   attributes, web vitals and journey of each session (see [Summary query](#summary-query)).
 4. Turns the rows into summaries 500 at a time, letting the event loop run between chunks, as a
    whole batch at once blocked a small Kibana for about half a second. Writes one summary per
-   session, keyed by a hash of `service.name` + `session.id`, and moves the checkpoint past the
-   window.
+   session, keyed by a hash of `service.name` + `session.id`, in one bulk request per batch, and
+   moves the checkpoint past the window. On serverless a bulk waits about 0.15 to 0.4 seconds for
+   durability whatever its size: 8,000 summaries took 2.3 s in four sequential bulks and 1.4 s in
+   one.
 
 A run starts no window after 45 seconds, and runs again right away while it is behind. On the first
 run after sessions are enabled, it starts from 30 days ago, at the start of that day in UTC, so it
@@ -365,6 +364,95 @@ per recorded segment to `logs-rum.replay.otel-*`, which the task already reads a
 would cost. It is absent rather than `false` until something sets it, and readers expose it as
 `hasReplay`.
 
+### Summary query
+
+`sessionSummaryQuery` (`server/services/sessions/summary_queries.ts`) rebuilds a batch of sessions
+in one ES|QL query. Its shape, with the aggregations elided:
+
+```esql
+FROM traces-*.otel-*, logs-*.otel-*
+| WHERE <window> AND <browser SDK> AND attributes.session.id IN (<5,000 ids>)
+| EVAL <event flags>, seen_<group> = <timestamp of events with any field of the group>
+| FORK (STATS <counts>, start_time, end_time,
+              raw_<field> = LAST(TO_STRING(<field>), seen_<group>)
+          BY service, session)
+       (WHERE event_name IN (<page views>) OR name IN (<page views>)
+        | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
+            BY service, session, page_url = attributes.url.full)
+       (WHERE (event_name == "browser.web_vital" OR name == "browser.web_vital") AND <has a value>
+        | EVAL lcp = CASE(vital == "lcp", vital_value, null), ...
+        | STATS lcp_p75 = PERCENTILE(lcp, 75), lcp_samples = COUNT(lcp), ...
+            BY service, session)
+| STATS <every session and vital column> = MAX(<column>),
+        pages = TOP(first_view, 30, "asc", page_url) WHERE page_url IS NOT NULL,
+        exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
+  BY service, session
+| EVAL attribute_<name> = COALESCE(<cleaned raw_<field>>, ...)
+| EVAL <vital count> = COALESCE(<vital count>, 0), ...
+| DROP raw_*
+```
+
+- **The journey is its own branch.** Grouping every aggregation by page URL as well was the main
+  cost of the query. The second branch reads only page views and runs alongside the session stats;
+  the last `STATS` merges them, taking each column from the one row that has it. The branch filters
+  are on the source fields, as the event flags wrap them in `COALESCE`, which keeps Lucene from
+  applying them.
+- **So are the web vitals**, which are about 7% of the events: computing their columns, p75s and
+  counts on every event cost 19% to 32% of the query. A session without a vital has no row in
+  their branch, so its vital counts are set to 0 after the merge.
+- **A column per web vital**, so its p75 and sample count need no filter, and the thresholds
+  compare a number instead of the vital's name.
+- **Attributes are cleaned once per session.** The query keeps the raw fields of each group's
+  latest event and cleans them (trimmed, `""` and `"null"` as missing) after the last stage:
+  cleaning every event's fields first took about 40% of the query. Coalescing a group's fields per
+  event, before the aggregation, would save another 5% to 9% but isn't equivalent: a blank value
+  in a higher-priority field would win over a real value in a lower one, and then be cleaned to
+  null.
+- `FORK` needs Elasticsearch 9.4 or later, where its branches have no implicit `LIMIT 1000`.
+
+On 5,000 sessions of synthtrace data, the `FORK` version takes 10% to 27% less time and 5% to 15%
+less data-node CPU than aggregating per page URL first, depending on the segment layout, with
+identical rows ([#306059](https://github.com/elastic/kibana/issues/306059)), and the vitals branch
+another 19% to 32%. The measurements behind the task's design, where the time goes, and what was
+tried and dropped are in
+[`server/services/sessions/query_performance.md`](server/services/sessions/query_performance.md),
+with how to check a change: run the old and new query on the same session ids and compare every
+column of every row.
+
+### Mobile sessions
+
+A second task (`digital_experience:mobile-sessions-summaries`) summarizes EDOT Android and EDOT iOS
+sessions into `digital-experience-sessions-mobile-<version>`, with the same loop, settings and
+checkpoints as the browser one, and its own `MOBILE_SESSIONS_VERSION`, template and state. No page
+reads them yet. It reads events by `telemetry.sdk.name` (`android`, `iOS`) rather than the SDK
+language, as EDOT Android's is `java`, like any Java backend. Both SDKs are moving to the upstream
+`telemetry.sdk.*` values, so it also reads events with `telemetry.distro.name: elastic` and an
+`os.name` of `Android`, `iOS` or `iPadOS`, but EDOT Browser's (`webjs`). A summary has start/end time and duration, events,
+crashes (`app.crash`, or `crash` from older EDOT iOS), screen views (EDOT iOS `UIViewController`
+spans), taps (`app.widget.click`), HTTP requests (once per span id, as both SDKs may send a span
+twice) and failed requests, the platform (`android` or `ios`, from the OS name), and the
+environment, user, app version, build and installation id, device model identifier, OS,
+connection type and geo attributes of its latest events (`MOBILE_SESSION_ATTRIBUTE_FIELDS`). The
+installation id is a random id per install that both SDKs send, so it counts installs, a proxy for
+users that needs no opt-in user id.
+
+Mobile events arrive late more often than browser ones: both SDKs buffer them on disk while the
+device is offline, and send a crash on the next launch, with that launch's resource. A crash so
+ranks below every other event for the attributes. EDOT iOS gives it the send time as its
+`@timestamp` and the crash time as its `observed_timestamp`, so a crash counts at the earlier of
+the two. As events have no ingest time to query by, every
+hour, once the regular run has caught up, the task also rebuilds every session with an event in the
+24 hours before its checkpoint, with what is left of the run's time; a pass that doesn't finish
+carries on from where it stopped on the next runs, and one that fails keeps the regular run's
+progress. A pass rebuilds its sessions up to the regular run's checkpoint, not up to the end of
+its own window, so it never drops events the regular run has already summarized. A changed mobile
+session is rebuilt from 48 hours before its window rather than 24, the longest session and the
+latest crash, so a crash sent up to 24 hours late still sees all of its session; one sent later is
+left out, as its session's rebuild could miss its other events and replace the full summary with a
+partial one. The session ids decide what is read, so the range barely matters: 2 to 24 hours took
+the same time. Events
+that arrive more than 24 hours late are only summarized when another event of their session arrives.
+
 ### Enabling sessions
 
 Sessions are set up by an explicit action, `POST /internal/digital_experience/sessions/enable`,
@@ -397,10 +485,11 @@ After the checks, enabling runs these steps, and a failure answers 500 naming th
 (`attributes.data.step`) with its details in the server log:
 
 1. `credentials`: Kibana can store an API key, so `xpack.encryptedSavedObjects.encryptionKey` is set.
-2. `template`: puts the `digital-experience-sessions-browser` index template, as Kibana's internal user.
-3. `index`: creates the sessions index, as the user.
-4. `task`: schedules the summaries task with an API key that Task Manager grants on the user's behalf,
-   and runs it right away.
+2. `template`: puts the `digital-experience-sessions-browser` and `digital-experience-sessions-mobile`
+   index templates, as Kibana's internal user.
+3. `index`: creates the browser and mobile sessions indices, as the user.
+4. `task`: schedules the browser and mobile summaries tasks with API keys that Task Manager grants on
+   the user's behalf, and runs them right away.
 
 Every step is safe to repeat, and the steps before a failed one are harmless on their own, so
 enabling again retries from where it failed. Enabling again also gives the task a new key, granted
@@ -419,8 +508,9 @@ as `apiKeyInvalid`. A user with the privilege then sets sessions up again from t
 which grants a new key on their behalf. Nothing re-grants it by itself: the task reads what the user
 who set sessions up can read, so only an explicit action changes whose data the summaries hold.
 
-There is no disable action. Removing the task (`digital_experience:sessions-summaries`) with the
-Task Manager API stops it and invalidates its key.
+There is no disable action. Removing a task (`digital_experience:sessions-summaries`,
+`digital_experience:mobile-sessions-summaries`) with the Task Manager API stops it and invalidates
+its key.
 
 ### Scaling and freshness
 
@@ -471,7 +561,8 @@ session detail timeline). Without it they answer 403 naming those privileges; ot
 logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status`: whether sessions are set up, the task's health,
-  lag and last error, whether it is still building, and how many days sessions are kept.
+  lag and last error, whether it is still building, and how many days sessions are kept, with the
+  same for the mobile task under `mobile`.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
   OS, country, entry page), the `environment`, `withJsErrors`, `withFailedRequests` and
   `minDurationMs` / `maxDurationMs` filters, sorting, pagination, KPIs, and how many days sessions

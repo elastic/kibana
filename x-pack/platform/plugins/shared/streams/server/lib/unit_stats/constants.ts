@@ -92,6 +92,10 @@ export const STATS_COLUMN = {
   acceptedRate: 'accepted_rate',
   avgLatency: 'avg_latency',
   sumItems: 'sum_items',
+  totalItems: 'total_items',
+  failedItems: 'failed_items',
+  authenticationItems: 'authentication_items',
+  authorizationItems: 'authorization_items',
   avgDurationPerItem: 'avg_duration_per_item',
 } as const;
 

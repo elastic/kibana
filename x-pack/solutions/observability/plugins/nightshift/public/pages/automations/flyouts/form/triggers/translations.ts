@@ -85,6 +85,10 @@ export const triggerLabels = {
   searchApps: i18n.translate('xpack.nightshift.automations.flyout.searchApps', {
     defaultMessage: 'Exact app name, app ID or bot ID…',
   }),
+  slackMentionHelp: i18n.translate('xpack.nightshift.automations.flyout.slackMentionHelp', {
+    defaultMessage:
+      "Messages that mention @Elastic are answered as questions and don't start this automation.",
+  }),
   slackDailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.slackDailyLimitHelp', {
     defaultMessage:
       "When reached, new messages aren't investigated until the limit resets at 12:00 AM UTC. Skipped messages appear in this automation's history.",

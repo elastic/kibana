@@ -196,7 +196,7 @@ export const attachmentsAddedTriggerCommonDefinition: CommonTriggerDefinition = 
   documentation: {
     details: i18n.translate('xpack.cases.workflowTriggers.attachmentsAdded.documentation.details', {
       defaultMessage:
-        'Emitted after attachments are added to a case, once per attachment type involved. The payload includes event.caseId, event.owner, event.ids (all attachment IDs added in that operation for this type), and event.attachmentType (e.g. "comment", "alert"). event.attachmentIds is deprecated; use event.ids instead. Use KQL on event.* for trigger conditions.',
+        'Emitted after attachments are added to a case, once per attachment type involved. The payload includes event.caseId, event.owner, event.ids (all attachment IDs added in that operation for this type), and event.attachmentType. Common values are "comment", "security.alert", "observability.alert", "stack.alert" and "security.event". Alerts and events added through POST /api/cases/:case_id/comments with type "alert" or "event" are reported as "alert" and "event". To match an alert however it was added, include both, for example event.attachmentType: "security.alert" or event.attachmentType: "alert". event.attachmentIds is deprecated; use event.ids instead. Use KQL on event.* for trigger conditions.',
     }),
     examples: [
       i18n.translate(

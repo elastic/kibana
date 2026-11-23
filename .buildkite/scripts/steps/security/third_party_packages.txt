@@ -78,3 +78,9 @@ bump-cli
 @types/mssql
 @types/pg
 monaco-marker-data-provider
+@opentelemetry/core
+@opentelemetry/resources
+@opentelemetry/sdk-metrics
+@opentelemetry/sdk-trace
+tabbable
+@opentelemetry/otlp-grpc-exporter-base
