@@ -12,42 +12,34 @@ applies_to:
 The Inbound Webhook connector lets any tool that can send an HTTP `POST` request start {{kib}} workflows. Each request starts the workflows that subscribe to the connector, and those workflows can read the request body. Use it with tools that have no built-in way to start a {{kib}} workflow, such as Prometheus Alertmanager, a CI/CD system, or an in-house service.
 
 % TODO: After the docs-content page that this line links to is published, uncomment the following line.
-% To import alerts from a monitoring tool into {{kib}} Universal Alerting, refer to [Import alerts from other monitoring tools](docs-content://explore-analyze/alerting/esql/alerts/import-alerts-from-other-tools.md).
+% To import alerts from a monitoring tool into {{kib}} Universal Alerting, refer to [Import third-party alerts into {{kib}} Universal Alerting](docs-content://explore-analyze/alerting/esql/alerts/import-third-party-alerts.md).
 
-You can use this connector in **Workflows** only, as a trigger rather than a step. To start a workflow from the connector's requests, add an `inboundWebhook.received` trigger with the connector's ID:
-
-```yaml
-triggers:
-  - type: inboundWebhook.received
-    connector-id: "<connector-id>"
-```
-
-To learn how workflows start from events, refer to [Event-driven triggers](docs-content://explore-analyze/workflows/triggers/event-driven-triggers.md).
+You can use this connector in **Workflows** only, as a trigger rather than a step.
 
 ## Requirements [inbound-webhook-requirements]
 
 To receive requests with this connector, you need:
 
-- {applies_to}`serverless: preview` A [project feature tier](docs-content://deploy-manage/deploy/elastic-cloud/project-settings.md) that includes Workflows. The Security Analytics Essentials and Observability Logs Essentials tiers don't include it.
-- {applies_to}`stack: preview 9.6+` An Enterprise license, which Workflows requires.
+- On {{serverless-full}}, a [project feature tier](docs-content://deploy-manage/deploy/elastic-cloud/project-settings.md) that includes Workflows. The Security Analytics Essentials and Observability Logs Essentials tiers don't include it.
+- On {{stack}}, an Enterprise license, which Workflows requires.
 - {applies_to}`stack: preview 9.6+` The `xpack.actions.inboundEvents.enabled` setting in `kibana.yml` set to `true`, which is the default. When it's `false`, the Inbound Webhook connector type isn't available.
-- A {{kib}} URL that the external tool can reach. Tools outside your network can't reach `localhost` or a private address.
+- A {{kib}} URL that the external tool can reach.
 
 ## Create connectors in {{kib}} [define-inbound-webhook-ui]
 
 To create an Inbound Webhook connector:
 
 1. Go to the **{{connectors-ui}}** page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
-2. Select **Create connector**.
-3. Select **Inbound Webhook connector**.
-4. In **Connector name**, enter a name that identifies the tool that sends the requests, such as Zabbix production. {{kib}} fills in **Connector ID** from the name as you enter it.
-5. (Optional) Check **Connector ID**. You can't change it after you save. If you want a different ID, edit it now. For the ID rules, refer to [Connector configuration](#inbound-webhook-connector-configuration).
-6. Save the connector.
-7. In **Connector settings**, copy the **Webhook URL** and the **Ingest token**. Save them somewhere secure, such as a password manager.
+2. Select **Create connector**, then **Inbound Webhook connector**.
+3. In **Connector name**, enter a name that identifies the tool that sends the requests, such as Zabbix production. {{kib}} fills in **Connector ID** from the name. If you want a different ID, edit it now, because you can't change it after you save. For the ID rules, refer to [Connector configuration](#inbound-webhook-connector-configuration).
+4. Save the connector.
+5. In **Connector settings**, copy the **Webhook URL** and the **Ingest token**. Save them somewhere secure, such as a password manager.
 
     {{kib}} shows the ingest token only once. If you lose it, [rotate the token](#inbound-webhook-rotate-token) to get a new one.
 
-If the flyout warns that the webhook URL is missing the {{kib}} host, add the host so that external tools can reach the URL:
+:::{dropdown} If the flyout warns that the webhook URL is missing the {{kib}} host, add the host so that external tools can reach the URL.
+
+Follow these steps:
 
 1. In `kibana.yml`, set [`server.publicBaseUrl`](/reference/configuration-reference/general-settings.md#server-publicbaseurl) to the URL that the tool uses to reach {{kib}}, such as `https://kibana.example.com`.
 
@@ -56,6 +48,8 @@ If the flyout warns that the webhook URL is missing the {{kib}} host, add the ho
 3. Open the connector again and copy the **Webhook URL**. The ingest token that you copied earlier still works.
 
 If you can't change `kibana.yml`, add the URL that the tool uses to reach {{kib}} to the start of the webhook path instead. Include your `server.basePath` value if you set one. For the full format, refer to [Webhook URL](#inbound-webhook-url-format).
+
+:::
 
 ### Connector configuration [inbound-webhook-connector-configuration]
 
@@ -67,13 +61,44 @@ Connector name
 Connector ID
 :   A unique ID that {{kib}} fills in from the name. You can change it before you save the connector, but not afterward. It can be up to 36 characters long and contain only lowercase letters, numbers, and hyphens, and it must start and end with a letter or number. The ID is the last part of the [webhook URL](#inbound-webhook-url-format), and workflows use it to subscribe to the connector.
 
+## Start a workflow from the connector [inbound-webhook-start-workflow]
+
+To start a workflow from the connector's requests, add an `inboundWebhook.received` trigger with the connector's ID to the workflow:
+
+```yaml
+triggers:
+  - type: inboundWebhook.received
+    connector-id: "<connector-id>"
+```
+
+% TODO: After the docs-content page that this line links to is published, uncomment the following line.
+% For an example workflow that creates an alert from each request, refer to [Import alerts from other tools](docs-content://explore-analyze/alerting/esql/alerts/import-third-party-alerts.md#import-alerts-other-tools).
+
+## Test with a sample request [inbound-webhook-test]
+
+To check the connection before you configure the external tool, send a sample request with `curl`:
+
+```bash
+curl -X POST \
+  'https://<kibana-host>/api/actions/events/.inboundWebhook/<connector-id>' \
+  -H 'Authorization: Bearer <ingest-token>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "alert_name": "High CPU",
+    "status": "firing",
+    "host": "web-1"
+  }'
+```
+
+When {{kib}} accepts the request, it returns HTTP 202 with `{"ok": true}` and starts the subscribed workflows. To confirm that a workflow ran, open the workflow and select **Executions**.
+
 ## Connect an external tool [inbound-webhook-url]
 
-Configure the external tool to send its data as HTTP `POST` requests to the connector's webhook URL, and to authenticate with the connector's ingest token.
+After the sample request works, set up the external tool's webhook or notification settings to send requests to the connector. Each tool names these settings differently, so use the tool's documentation to find where to enter the following values.
 
 ### Webhook URL [inbound-webhook-url-format]
 
-The URL uses one of the following formats. URLs in the default space have no `/s/<space-id>` prefix. If you set `server.basePath`, add it after `<kibana-host>`.
+Enter the webhook URL that you copied when you created the connector. The URL uses one of the following formats. URLs in the default space have no `/s/<space-id>` prefix. If you set `server.basePath`, add it after `<kibana-host>`.
 
 ```text
 https://<kibana-host>/api/actions/events/.inboundWebhook/<connector-id>
@@ -86,7 +111,7 @@ Set the request's `Content-Type` header to one of the following types. {{kib}} p
 
 | Content type | `event.body` |
 | --- | --- |
-| `application/json`, or a type that ends in `+json`, such as `application/cloudevents+json` | The parsed JSON value |
+| `application/json` | The parsed JSON value |
 | `application/x-www-form-urlencoded` | An object of the form fields |
 | `text/plain` | The body as a string |
 
@@ -109,7 +134,7 @@ Some tools send a verification request to confirm a webhook URL before they send
 
 The connector treats a request as a verification request when the body has a top-level `challenge` field whose value is a string of 1 to 1,024 characters.
 
-### Rotate the ingest token [inbound-webhook-rotate-token]
+## Rotate the ingest token [inbound-webhook-rotate-token]
 
 If you lose the ingest token or someone else might have it, rotate it:
 
@@ -118,39 +143,25 @@ If you lose the ingest token or someone else might have it, rotate it:
 3. Copy the new token. {{kib}} shows it only once.
 4. Update the external tool with the new token.
 
-### Test with a sample request [inbound-webhook-test]
-
-To check the connection before you configure the external tool, send a sample request with `curl`:
-
-```bash
-curl -X POST \
-  'https://<kibana-host>/api/actions/events/.inboundWebhook/<connector-id>' \
-  -H 'Authorization: Bearer <ingest-token>' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "alert_name": "High CPU",
-    "status": "firing",
-    "host": "web-1"
-  }'
-```
-
-When {{kib}} accepts the request, it returns HTTP 202 with `{"ok": true}` and starts the subscribed workflows. To confirm that a workflow ran, open the workflow and select **Executions**.
-
 ## Troubleshoot webhook requests [inbound-webhook-troubleshoot]
 
-The HTTP status that {{kib}} returns shows what happened to a request:
+The response that the tool gets shows what happened to a request:
 
 | Status | What it means |
 | --- | --- |
+| No response | The tool couldn't connect to {{kib}}, such as a connection error or a timeout. Refer to [Requests don't reach {{kib}}](#inbound-webhook-unreachable). |
 | 200 | The connector answered a [verification request](#inbound-webhook-verification) and didn't start any workflows. |
 | 202 | {{kib}} accepted the request. If no workflow runs, refer to [No workflow runs after a 202 response](#inbound-webhook-no-workflow). |
 | 400 | The request is invalid, such as a body that isn't valid JSON, a connector ID that's too long, or an empty `token` query parameter. The response message says which part to fix. |
-| 403 | This deployment doesn't accept webhook requests for any connector. Contact your administrator. |
 | 404 | {{kib}} rejected the URL or the token. For possible causes, refer to [Requests return 404](#inbound-webhook-404). |
 | 413 | The body is larger than the maximum size, which is 1 MB by default. |
 | 415 | The connector doesn't accept the request's content type. For the accepted types, refer to [Request body](#inbound-webhook-request-body). |
 | 429 | The tool sent too many requests. Refer to [Requests return 429](#inbound-webhook-429). |
 | 500 | {{kib}} couldn't process the request. |
+
+### Requests don't reach {{kib}} [inbound-webhook-unreachable]
+
+If the sample request works but the tool's requests fail with a connection error or a timeout, the tool can't reach your {{kib}} URL. For example, a tool hosted on the internet can't send requests to `localhost` or to an address that works only inside your network.
 
 ### No workflow runs after a 202 response [inbound-webhook-no-workflow]
 
