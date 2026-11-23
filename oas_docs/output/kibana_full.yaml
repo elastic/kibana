@@ -185315,39 +185315,15 @@ components:
           maxItems: 1000
           type: array
         auth:
-          anyOf:
-            - additionalProperties: false
-              type: object
-              properties:
-                scheme:
-                  description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
-                  enum:
-                    - api_key
-                    - bearer_token
-                  type: string
-                type:
-                  enum:
-                    - auth_header
-                  type: string
-              required:
-                - type
-                - scheme
-            - additionalProperties: false
-              type: object
-              properties:
-                name:
-                  description: The name of the header that is sent with the credential as value.
-                  maxLength: 256
-                  minLength: 1
-                  type: string
-                type:
-                  enum:
-                    - custom_header
-                  type: string
-              required:
-                - type
-                - name
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            propertyName: type
           nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
         id:
           type: string
         is_default:
@@ -186343,6 +186319,41 @@ components:
         - params
       title: Custom threshold
       type: object
+    Kibana_HTTP_APIs_otlp_auth_header:
+      additionalProperties: false
+      properties:
+        scheme:
+          description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+          enum:
+            - api_key
+            - bearer_token
+          type: string
+        type:
+          enum:
+            - auth_header
+          type: string
+      required:
+        - type
+        - scheme
+      title: otlp_auth_header
+      type: object
+    Kibana_HTTP_APIs_otlp_custom_auth_header:
+      additionalProperties: false
+      properties:
+        name:
+          description: The name of the header that is sent with the credential as value.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom_header
+          type: string
+      required:
+        - type
+        - name
+      title: otlp_custom_auth_header
+      type: object
     Kibana_HTTP_APIs_otlp_grpc_exporter:
       additionalProperties: false
       properties:
@@ -186825,6 +186836,41 @@ components:
         - endpoint
         - protocol
       title: otlp_http_exporter
+      type: object
+    Kibana_HTTP_APIs_otlp_response_auth_header:
+      additionalProperties: true
+      properties:
+        scheme:
+          description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
+          enum:
+            - api_key
+            - bearer_token
+          type: string
+        type:
+          enum:
+            - auth_header
+          type: string
+      required:
+        - type
+        - scheme
+      title: otlp_response_auth_header
+      type: object
+    Kibana_HTTP_APIs_otlp_response_custom_auth_header:
+      additionalProperties: true
+      properties:
+        name:
+          description: The name of the header that is sent with the credential as value.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom_header
+          type: string
+      required:
+        - type
+        - name
+      title: otlp_response_custom_auth_header
       type: object
     Kibana_HTTP_APIs_otlp_response_grpc_exporter:
       additionalProperties: true
@@ -187855,39 +187901,15 @@ components:
           maxItems: 1000
           type: array
         auth:
-          anyOf:
-            - additionalProperties: true
-              type: object
-              properties:
-                scheme:
-                  description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
-                  enum:
-                    - api_key
-                    - bearer_token
-                  type: string
-                type:
-                  enum:
-                    - auth_header
-                  type: string
-              required:
-                - type
-                - scheme
-            - additionalProperties: true
-              type: object
-              properties:
-                name:
-                  description: The name of the header that is sent with the credential as value.
-                  maxLength: 256
-                  minLength: 1
-                  type: string
-                type:
-                  enum:
-                    - custom_header
-                  type: string
-              required:
-                - type
-                - name
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
+            propertyName: type
           nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_response_custom_auth_header'
         id:
           type: string
         is_default:
@@ -195751,39 +195773,15 @@ components:
           maxItems: 1000
           type: array
         auth:
-          anyOf:
-            - additionalProperties: false
-              type: object
-              properties:
-                scheme:
-                  description: 'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.'
-                  enum:
-                    - api_key
-                    - bearer_token
-                  type: string
-                type:
-                  enum:
-                    - auth_header
-                  type: string
-              required:
-                - type
-                - scheme
-            - additionalProperties: false
-              type: object
-              properties:
-                name:
-                  description: The name of the header that is sent with the credential as value.
-                  maxLength: 256
-                  minLength: 1
-                  type: string
-                type:
-                  enum:
-                    - custom_header
-                  type: string
-              required:
-                - type
-                - name
+          discriminator:
+            mapping:
+              auth_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+              custom_header: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
+            propertyName: type
           nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_auth_header'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_otlp_custom_auth_header'
         id:
           type: string
         is_default:
