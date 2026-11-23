@@ -9,6 +9,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
+import { EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER } from '@kbn/workflows-extensions/server';
 import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -153,7 +154,7 @@ describe('createLiveQueryRoute', () => {
       racGet?: jest.Mock;
       getActiveSpace?: jest.Mock;
       workflowsExtensionsEnabled?: boolean;
-      headers?: Record<string, string>;
+      headers?: Record<string, string | string[]>;
     } = {}
   ) => {
     const start = coreStart ?? createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });
@@ -163,7 +164,11 @@ describe('createLiveQueryRoute', () => {
       createOsqueryContext({ coreStart: start, racGet, getActiveSpace, workflowsExtensionsEnabled })
     );
 
-    const mockRequest = httpServerMock.createKibanaRequest({ body, headers });
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body,
+      // repeated headers arrive as string[] at runtime; the mock type only models string
+      headers: headers as Record<string, string> | undefined,
+    });
     const mockResponse = httpServerMock.createResponseFactory();
 
     await getRouteHandler(mockRouter)({} as never, mockRequest, mockResponse);
@@ -421,6 +426,135 @@ describe('createLiveQueryRoute', () => {
           source: expect.objectContaining({ kind: 'saved_query' }),
         }),
       })
+    );
+  });
+
+  describe('workflow origin', () => {
+    const body = { saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] };
+    // What the workflow engine's `callKibanaApi` sends on every call, from osquery steps and
+    // generic `kibana.request` steps alike: the internal-origin marker and the execution ID.
+    const internalOrigin = { 'x-elastic-internal-origin': 'Kibana' };
+    const workflowCallHeaders = {
+      ...internalOrigin,
+      [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1',
+    };
+
+    it.each([
+      ['a workflow call', workflowCallHeaders, 'execution-1'],
+      [
+        'a UUID execution ID',
+        {
+          ...internalOrigin,
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: '123e4567-e89b-42d3-a456-426614174000',
+        },
+        '123e4567-e89b-42d3-a456-426614174000',
+      ],
+      [
+        'an execution ID using all allowed characters',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'AZaz09._:-' },
+        'AZaz09._:-',
+      ],
+      [
+        'a single-character execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e' },
+        'e',
+      ],
+      [
+        'an execution ID at the length limit',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e'.repeat(256) },
+        'e'.repeat(256),
+      ],
+    ])('records the workflow origin for %s', async (_name, headers, executionId) => {
+      const response = await invokeRoute(body, { workflowsExtensionsEnabled: true, headers });
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).toHaveBeenCalledTimes(1);
+      expect(mockedCreateActionHandler.mock.calls[0][2]?.origin).toEqual({
+        type: 'workflow',
+        run_id: executionId,
+        verified: false,
+      });
+    });
+
+    it.each([
+      [
+        'a public call without the internal-origin marker',
+        { [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1' },
+        true,
+      ],
+      ['an internal call without an execution ID', internalOrigin, true],
+      [
+        'an oversized execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e'.repeat(257) },
+        true,
+      ],
+      [
+        'an empty execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: '' },
+        true,
+      ],
+      [
+        'a whitespace-only execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: '\t' },
+        true,
+      ],
+      [
+        'an execution ID with embedded whitespace',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution id' },
+        true,
+      ],
+      [
+        'an execution ID containing a slash',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution/id' },
+        true,
+      ],
+      [
+        'a non-ASCII execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'exécution' },
+        true,
+      ],
+      [
+        'an execution ID containing a control character',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution\tid' },
+        true,
+      ],
+      [
+        // Node joins a repeated header into one comma-separated string.
+        'comma-joined repeated execution IDs',
+        {
+          ...internalOrigin,
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1, execution-2',
+        },
+        true,
+      ],
+      [
+        'only the retired osquery source headers on a public call',
+        {
+          'x-osquery-dispatch-source': 'workflow',
+          'x-osquery-dispatch-workflow-id': 'workflow-1',
+        },
+        true,
+      ],
+      [
+        // The headers an earlier revision of the osquery steps sent are no longer trusted.
+        'only the retired osquery source headers',
+        {
+          ...internalOrigin,
+          'x-osquery-dispatch-source': 'workflow',
+          'x-osquery-dispatch-workflow-id': 'workflow-1',
+        },
+        true,
+      ],
+      ['the feature disabled', workflowCallHeaders, false],
+    ])(
+      'records no origin for %s',
+      async (_name, headers: Record<string, string | string[]>, workflowsExtensionsEnabled) => {
+        const response = await invokeRoute(body, { workflowsExtensionsEnabled, headers });
+
+        expect(response.ok).toHaveBeenCalled();
+        expect(mockedCreateActionHandler).toHaveBeenCalledTimes(1);
+        expect(mockedCreateActionHandler.mock.calls[0][2]).not.toHaveProperty('origin');
+      }
     );
   });
 
