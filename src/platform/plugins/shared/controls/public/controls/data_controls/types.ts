@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataControlState } from '@kbn/controls-schemas';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField } from '@kbn/data-source';
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import type {
   HasPanelCapabilities,
@@ -31,16 +30,30 @@ import type { HasCustomPrepend } from '../types';
 export type DataControlFieldFormatter = TextContextTypeConvert | ((toFormat: any) => string);
 
 export interface PublishesField {
-  field$: PublishingSubject<DataViewField | undefined>;
+  field$: PublishingSubject<FilterableField | undefined>;
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
+}
+
+/**
+ * How `valuesSource$` is executed, based on the configured `ControlValuesSource` and the type of
+ * the data source.
+ * - `esql`: values are fetched with an ES|QL query. `query` is the user supplied query for
+ *   `ControlValuesSource.ESQL` and a generated query for `ControlValuesSource.FIELD`.
+ * - `dsl`: values are fetched with a DSL request on a data view field.
+ */
+export type ValuesSourceFetchPlan = { fetchMode: 'esql'; query?: string } | { fetchMode: 'dsl' };
+
+export interface PublishesValuesSourceFetchPlan {
+  valuesSourceFetchPlan$: PublishingSubject<ValuesSourceFetchPlan | undefined>;
 }
 
 export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
-  PublishesDataSources<DataView> &
+  PublishesDataSources &
   PublishesBlockingError &
   PublishesField &
+  PublishesValuesSourceFetchPlan &
   PublishesDataLoading &
   AppliesFilters &
   Partial<PublishesAwaitingRequiredFilters> &
@@ -52,7 +65,7 @@ export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'
 
 export interface CustomOptionsComponentProps<State extends DataControlState = DataControlState> {
   initialState: Partial<State>;
-  field?: DataViewField;
+  field?: FilterableField;
   /** Whether the control is (or, when being created, will be) pinned. Some settings only apply to pinned controls. */
   isPinned: boolean;
   updateState: (newState: Partial<State>) => void;
@@ -60,7 +73,7 @@ export interface CustomOptionsComponentProps<State extends DataControlState = Da
 }
 
 interface DataControlField {
-  field: DataViewField;
+  field: FilterableField;
   compatibleControlTypes: string[];
 }
 

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, AppHeaderLoading } from '@kbn/app-header';
+import type { AppHeaderMetadataItems } from '@kbn/app-header';
 
 import { resultsContentCss, WithoutHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
@@ -21,6 +22,7 @@ import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_
 import { SavedQueryFlyout } from '../../../saved_queries';
 import { useSaveQueryFromDetails } from './use_save_query_from_details';
 import { useRunByMetadata } from './use_run_by_metadata';
+import { useWorkflowOriginMetadata } from './use_workflow_origin_metadata';
 import { useAddIntegrationsOnlyMenu } from '../../../common/hooks/use_add_integrations_menu_item';
 import { QueryResultsAppHeader } from './query_results_app_header';
 import { ResultTabs } from '../../saved_queries/edit/tabs';
@@ -63,11 +65,16 @@ const LiveQueryDetailsPageComponent = () => {
   const query = data?.queries?.[0];
   const isSingleQuery = !!data && !data.pack_id && data.queries?.length === 1 && query != null;
 
-  const runByMetadata = useRunByMetadata({
+  const runByItems = useRunByMetadata({
     userId: data?.user_id,
     userProfileUid: data?.user_profile_uid,
     timestamp: data?.['@timestamp'],
   });
+  const workflowOriginItem = useWorkflowOriginMetadata(data?.origin);
+  const runByMetadata = useMemo<AppHeaderMetadataItems>(
+    () => (workflowOriginItem ? [runByItems[0], workflowOriginItem] : runByItems),
+    [runByItems, workflowOriginItem]
+  );
 
   const packRunMenu = useAddIntegrationsOnlyMenu();
 

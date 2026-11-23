@@ -45,6 +45,9 @@ describe('DigitalExperienceLocatorDefinition', () => {
     expect(await pathOf({ serviceName: 'storefront-web', tab: 'sessions' })).toBe(
       '/storefront-web/sessions'
     );
+    expect(await pathOf({ serviceName: 'storefront-web', tab: 'reports' })).toBe(
+      '/storefront-web/reports'
+    );
   });
 
   it('opens the Overview for a tab it does not know', async () => {
@@ -86,6 +89,25 @@ describe('DigitalExperienceLocatorDefinition', () => {
     ]);
     expect(new URLSearchParams(search).get('filters')).toBe(filters);
     expect(new URLSearchParams(search).get('kuery')).toBe('url.path : "/cart"');
+  });
+
+  it("keeps the state of a mobile application's page: its OS, release and Compare", async () => {
+    const path = await pathOf({
+      serviceName: 'shop-mobile',
+      source: 'otel',
+      applicationType: 'mobile',
+      osName: 'iOS',
+      release: '2.0.0',
+      compare: 'true',
+    });
+
+    expect(Object.fromEntries(new URLSearchParams(path.split('?')[1]))).toEqual({
+      source: 'otel',
+      applicationType: 'mobile',
+      osName: 'iOS',
+      release: '2.0.0',
+      compare: 'true',
+    });
   });
 
   it('keeps the state of the Sessions list, with its numbers and booleans', async () => {

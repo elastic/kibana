@@ -255,11 +255,11 @@
     "workflows": [
       "src/platform/packages/shared/kbn-workflows",
       "src/platform/packages/shared/kbn-workflows-library",
-      "src/platform/plugins/shared/workflows_management",
+      "x-pack/platform/plugins/shared/workflows_management",
       "x-pack/platform/plugins/shared/agent_builder_workflows"
     ],
-    "workflowsExecutionEngine": "src/platform/plugins/shared/workflows_execution_engine",
-    "workflowsExtensions": "src/platform/plugins/shared/workflows_extensions",
+    "workflowsExecutionEngine": "x-pack/platform/plugins/shared/workflows_execution_engine",
+    "workflowsExtensions": "x-pack/platform/plugins/shared/workflows_extensions",
     "aiInfra": "x-pack/platform/plugins/shared/ai_infra/product_doc_base",
     "alertsFiltersForm": "x-pack/platform/packages/shared/response-ops/alerts-filters-form",
     "anonymizationUi": "x-pack/platform/packages/shared/ai-infra/anonymization-ui",
@@ -276,6 +276,7 @@
     "responseOpsFormGenerator": "x-pack/platform/packages/shared/response-ops/form-generator",
     "connectors": "src/platform/packages/shared/kbn-connector-schemas",
     "connectorSpecs": "src/platform/packages/shared/kbn-connector-specs",
+    "connectorTopics": "src/platform/packages/shared/kbn-connector-topics",
     "esqlLanguage": "src/platform/packages/shared/esql/kbn-esql-language",
     "indexEditor": "src/platform/packages/private/kbn-index-editor",
     "palettes": "src/platform/packages/shared/kbn-palettes"

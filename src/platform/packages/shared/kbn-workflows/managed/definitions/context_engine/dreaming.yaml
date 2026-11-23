@@ -11,8 +11,10 @@ settings:
   timeout: '30m'
   concurrency:
     key: __CONCURRENCY_KEY__
-    strategy: drop
+    strategy: queue
     max: 1
+    queue-size: 10
+    queue-ttl: '24h'
 consts:
   ai_index_id: __AI_INDEX_ID__
   memories_index: __MEMORIES_INDEX__
@@ -104,14 +106,15 @@ steps:
           sort:
             - updated_at: desc
           _source:
-            - id
-            - type
-            - title
-            - content
-            - updated_at
-            - attributes
-            - permissions
-            - governance.lifecycle.status
+            includes:
+              - id
+              - type
+              - title
+              - content
+              - updated_at
+              - attributes
+              - permissions
+              - governance.lifecycle.status
           docvalue_fields:
             - field: expires_at
               format: strict_date_time
@@ -214,9 +217,11 @@ steps:
                 bool:
                   should:
                     - prefix:
-                        type: 'fact.'
+                        type:
+                          value: 'fact.'
                     - prefix:
-                        type: 'entity.'
+                        type:
+                          value: 'entity.'
                   minimum_should_match: 1
                   filter:
                     - bool:
@@ -268,6 +273,8 @@ steps:
                 Merge rather than duplicate: if a memory restates or refines an existing item, update that item.
 
                 When a memory restates or confirms an existing item, return its ref with that memory in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many memories it was seen in, and attributes["memory.last_seen_at"], when it was last seen.
+
+                An EXISTING item with attributes["memory.edited_by"] was edited by a person, and its text cannot change. When a memory changes or contradicts what it says, write what the memory says as a new item, and do not return the edited item's ref for that memory. When a memory only restates it, record the sighting as usual.
                 {%- if consts.fact_types.size > 0 %}
 
                 Facts are read on their own, so write each one to stand alone: name what it is about in its title and content, and keep every name, number, code and date exactly as stated.

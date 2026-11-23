@@ -8,8 +8,7 @@
  */
 
 import { getSafe } from '@kbn/std';
-import deepEqual from 'fast-deep-equal';
-import { cloneDeep, filter, map as lodashMap, max, omit, pick } from 'lodash';
+import { cloneDeep, omit, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -21,7 +20,6 @@ import {
   mergeMap,
   of,
   skip,
-  startWith,
   tap,
   type Observable,
 } from 'rxjs';
@@ -33,13 +31,8 @@ import type {
   PinnedControlLayoutState,
   PinnedControlLayoutState as PinnedPanelLayoutState,
 } from '@kbn/controls-schemas';
-import type {
-  DefaultEmbeddableApi,
-  EmbeddablePackageState,
-  LayoutConstraints,
-} from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError, PlacementStrategy } from '@kbn/embeddable-plugin/public';
-import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import type { PanelPackage, SerializedTitles } from '@kbn/presentation-publishing';
 import {
@@ -63,11 +56,7 @@ import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashb
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import { placeClonePanel, runPanelPlacementStrategy } from '../../panel_placement';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
-import {
-  coreServices,
-  embeddableService,
-  usageCollectionService,
-} from '../../services/kibana_services';
+import { coreServices, usageCollectionService } from '../../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
@@ -77,7 +66,14 @@ import {
   arePinnedPanelLayoutsEqual,
 } from '../../../common/dashboard_state/layout/are_layouts_equal';
 import { deserializeLayout } from '../../../common/dashboard_state/layout/deserialize_layout';
-import { getLayoutBottomRow, groupPanelsInSection } from './layout_utils';
+import { initializeGridLayout } from './grid_layout';
+import {
+  getLayoutBottomRow,
+  groupPanelsInSection,
+  reorderPinnedPanels,
+  unpinPanelFromLayout,
+} from './layout_utils';
+import { getClonedPanelTitle } from './panel_titles';
 import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,
@@ -107,31 +103,7 @@ export function initializeLayoutManager(
   let currentChildState = cloneDeep(initialChildState);
 
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
-  const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
-  const panelResizeSettings$: Observable<{ [panelType: string]: LayoutConstraints }> = layout$.pipe(
-    map(({ panels }) => {
-      return [...new Set(Object.values(panels).map((panel) => panel.type))];
-    }),
-    distinctUntilChanged(deepEqual),
-    mergeMap(async (panelTypes: string[]) => {
-      const resizeConstraints: { [panelType: string]: LayoutConstraints } = {};
-      await asyncForEach(panelTypes, async (type) => {
-        const embeddableDefinition = await embeddableService.getEmbeddableDefinition(type);
-        if (embeddableDefinition && embeddableDefinition.layoutConstraints) {
-          resizeConstraints[type] = embeddableDefinition.layoutConstraints;
-        }
-      });
-      return resizeConstraints;
-    }),
-    startWith({}) // do not block rendering by waiting for these settings
-  );
-
-  /** Keep gridLayout$ in sync with layout$ + panelResizeSettings$ */
-  const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
-    ([layout, panelResizeSettings]) => {
-      gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));
-    }
-  );
+  const { gridLayout$, cleanup: cleanupGridLayout } = initializeGridLayout(layout$); // source of truth for rendering
 
   const latestChildrenState$ = childrenLatestState$(children$);
   const childrenChanges$ = childrenUnsavedChanges$(children$);
@@ -686,34 +658,8 @@ export function initializeLayoutManager(
         return Object.keys(layout$.getValue().pinnedPanels).includes(uuid);
       },
       unpinPanel: (uuid: string) => {
-        const panelToUnpin = layout$.getValue().pinnedPanels[uuid];
-        if (!panelToUnpin) return;
-
-        const newPinnedPanels = { ...layout$.getValue().pinnedPanels };
-        const originalOrder = newPinnedPanels[uuid].order;
-        delete newPinnedPanels[uuid];
-        // adjust the order of the remaining pinned panels
-        for (const panelId of Object.keys(newPinnedPanels)) {
-          if (newPinnedPanels[panelId].order > originalOrder) newPinnedPanels[panelId].order--;
-        }
-        // place the new control panel in the top left corner, bumping other panels down as necessary
-        const updatedLayout = runPanelPlacementStrategy(PlacementStrategy.placeAtTop, {
-          currentLayout: layout$.value,
-          newPanel: {
-            uuid,
-            type: panelToUnpin.type,
-            grid: {
-              w: 12,
-              h: 2,
-            },
-          },
-        });
-
-        // update the layout with the pinned control removed and added as a panel
-        layout$.next({
-          ...updatedLayout,
-          pinnedPanels: newPinnedPanels,
-        });
+        const updatedLayout = unpinPanelFromLayout(layout$.getValue(), uuid);
+        if (updatedLayout) layout$.next(updatedLayout);
       },
       pinPanel: (uuid: string) => {
         const controlToPin = layout$.getValue().panels[uuid];
@@ -761,7 +707,7 @@ export function initializeLayoutManager(
     },
     cleanup: () => {
       stateChangedSubscription.unsubscribe();
-      gridLayoutSubscription.unsubscribe();
+      cleanupGridLayout();
       removeOrphanedChildrenSubscription.unsubscribe();
     },
   };
@@ -771,76 +717,3 @@ const getDefaultSectionTitle = () =>
   i18n.translate('dashboard.defaultSectionTitle', {
     defaultMessage: 'New collapsible section',
   });
-
-function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
-  if (rawTitle === '') return '';
-
-  const clonedTag = dashboardClonePanelActionStrings.getClonedTag();
-  const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
-  const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
-  const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
-  const similarTitles = filter(panelTitles, (title: string) => {
-    return title.startsWith(baseTitle);
-  });
-
-  const cloneNumbers = lodashMap(similarTitles, (title: string) => {
-    if (title.match(cloneRegex)) return 0;
-    const cloneTag = title.match(cloneNumberRegex);
-    return cloneTag ? parseInt(cloneTag[0].replace(/[^0-9.]/g, ''), 10) : -1;
-  });
-  const similarBaseTitlesCount = max(cloneNumbers) || 0;
-
-  return similarBaseTitlesCount < 0
-    ? baseTitle + ` (${clonedTag})`
-    : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount + 1})`;
-}
-
-/** Renumbers the pinned panels' `order` from 0 so removed panels leave no gaps */
-const reorderPinnedPanels = (
-  pinnedPanels: DashboardLayout['pinnedPanels']
-): DashboardLayout['pinnedPanels'] =>
-  Object.entries(pinnedPanels)
-    .sort(([, a], [, b]) => a.order - b.order)
-    .reduce<DashboardLayout['pinnedPanels']>(
-      (result, [key, value], i) => ({ ...result, [key]: { ...value, order: i } }),
-      {}
-    );
-
-const transformDashboardLayoutToGridLayout = (
-  layout: DashboardLayout,
-  resizeSettings: { [panelType: string]: LayoutConstraints }
-) => {
-  const newLayout: GridLayoutData = {};
-  Object.keys(layout.sections).forEach((sectionId) => {
-    const section = layout.sections[sectionId];
-    newLayout[sectionId] = {
-      id: sectionId,
-      type: 'section',
-      row: section.grid.y,
-      isCollapsed: Boolean(section.collapsed),
-      title: section.title,
-      panels: {},
-    };
-  });
-  Object.keys(layout.panels).forEach((panelId) => {
-    const grid = layout.panels[panelId].grid;
-    const type = layout.panels[panelId].type;
-    const basePanel = {
-      id: panelId,
-      row: grid.y,
-      column: grid.x,
-      width: grid.w,
-      height: grid.h,
-      resizeOptions: resizeSettings[type],
-    } as GridPanelData;
-    if (grid.sectionId) {
-      (newLayout[grid.sectionId] as GridSectionData).panels[panelId] = basePanel;
-    } else {
-      newLayout[panelId] = {
-        ...basePanel,
-        type: 'panel',
-      };
-    }
-  });
-  return newLayout;
-};

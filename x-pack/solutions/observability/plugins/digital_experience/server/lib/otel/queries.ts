@@ -29,16 +29,8 @@ import {
   SPAN_STATUS_ERROR,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
+  ENVIRONMENT_FIELDS,
 } from '../../../common/otel_data';
-
-/**
- * `service.environment` aliases the deprecated `deployment.environment`, which newer SDKs replace
- * with `deployment.environment.name`.
- */
-export const ENVIRONMENT_FIELDS = [
-  SERVICE_ENVIRONMENT,
-  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
-];
 
 /** The browser SDK documents of the time range, for every application. */
 export const browserDocuments = (start: number, end: number) => [

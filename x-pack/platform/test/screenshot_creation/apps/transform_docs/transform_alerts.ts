@@ -12,7 +12,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const commonScreenshots = getService('commonScreenshots');
   const testSubjects = getService('testSubjects');
-  const transform = getService('transform');
+  const ml = getService('ml');
+  const transformAlerting = getService('transformAlerting');
   const screenshotDirectories = ['transform_docs'];
   const pageObjects = getPageObjects(['triggersActionsUI', 'header']);
 
@@ -34,24 +35,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('transform rule screenshot', async () => {
-      await transform.testExecution.logTestStep('navigate to stack management rules');
-      await transform.navigation.navigateToRules();
+      await ml.testExecution.logTestStep('navigate to stack management rules');
+      await transformAlerting.navigateToRules();
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await transform.testExecution.logTestStep('select transform details and take screenshot');
-      await transform.alerting.selectTransformAlertType();
-      await transform.alerting.setRuleName('transform-health-rule');
+      await ml.testExecution.logTestStep('select transform details and take screenshot');
+      await transformAlerting.selectTransformAlertType();
+      await transformAlerting.setRuleName('transform-health-rule');
       testTransformId = '*';
-      await transform.alerting.selectTransforms([testTransformId]);
+      await transformAlerting.selectTransforms([testTransformId]);
       await commonScreenshots.takeScreenshot('transform-check-config', screenshotDirectories);
 
-      await transform.testExecution.logTestStep(
+      await ml.testExecution.logTestStep(
         'add server log connector and take action variable screenshot'
       );
       await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
-      await transform.alerting.openAddRuleVariable();
+      await transformAlerting.openAddRuleVariable();
       await commonScreenshots.takeScreenshot('transform-alert-actions', screenshotDirectories);
-      await transform.testExecution.logTestStep('set summary action frequency and take screenshot');
+      await ml.testExecution.logTestStep('set summary action frequency and take screenshot');
       const actionFrequency = await testSubjects.find('summaryOrPerRuleSelect');
       await actionFrequency.click();
       const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
@@ -60,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'transform-alert-summary-actions',
         screenshotDirectories
       );
-      await transform.alerting.clickCancelSaveRuleButton();
+      await transformAlerting.clickCancelSaveRuleButton();
     });
   });
 }

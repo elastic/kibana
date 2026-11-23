@@ -26,6 +26,8 @@ export interface ResolveToolCallParams {
   results: ToolResult[];
   /** Progression observed *during this execution* only; the reducer appends it to what the step already has. */
   progression: ToolCallProgress[];
+  /** The call never ran; see `ToolCallStep.interrupted`. */
+  interrupted?: true;
 }
 
 export type RunStepUpdate =
@@ -86,6 +88,7 @@ export const applyStepUpdates = (
           ...current,
           results: update.results,
           progression: [...(current.progression ?? []), ...update.progression],
+          ...(update.interrupted ? { interrupted: true } : {}),
         };
         body = [...body.slice(0, index), resolved, ...body.slice(index + 1)];
         break;

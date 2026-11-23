@@ -504,7 +504,9 @@ describe('runDefaultAgentMode', () => {
       );
 
       expect(selectToolsMock).toHaveBeenCalledWith(
-        expect.objectContaining({ capabilities: { attachmentTools: false, apiTools: true } })
+        expect.objectContaining({
+          capabilities: { attachmentTools: false, apiTools: true, bashTool: true },
+        })
       );
     });
 
@@ -518,7 +520,9 @@ describe('runDefaultAgentMode', () => {
       );
 
       expect(selectToolsMock).toHaveBeenCalledWith(
-        expect.objectContaining({ capabilities: { attachmentTools: true, apiTools: true } })
+        expect.objectContaining({
+          capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
+        })
       );
     });
   });
