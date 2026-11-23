@@ -228,13 +228,6 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
 - **Definitions.**
   - `affected`: the failing count of the rule's latest `spread`. An `off_topic` rule's second `spread`
     replaces its first, whose figure no longer applies.
-  - **Rule-match versus failure counts.** Every profile aggregate first counts lines matching the
-    rule predicate. Treat that count as a verified-failure count only when the predicate itself is
-    failure-specific: it directly requires an error, failed outcome, refusal, timeout, unhealthy
-    result, or a status/code that states one. A predicate that selects an operation, service,
-    request shape, broad log level, or routine activity is not failure-specific, even when its
-    sample has a failure. Its aggregates are rule-match counts, and the sample establishes only
-    that one verified failure was found; do not derive a second predicate from samples.
   - A rule has no `affected` when its `spread` failed or was never sent: an aggregate KI sends none,
     and an `off_topic` rule with no isolating observed-error condition keeps its profile not
     measured. Such a rule never has `affected` above 0. A `spread` of 0 with a sample
@@ -343,7 +336,7 @@ Each profile runs as its `Good (…)` example below, in the variant its scope se
 
 | Profile | Question | Measures | Window | Read |
 |---|---|---|---|---|
-| `spread` | How many lines match the rule in scope? | `affected` (rule-match lines); `total` (all lines in scope, isolating scope only) | last 1h (`now-1h`) | `affected` of `total`: the rule-match share of log lines (of attempts when the scope isolates one line per attempt). When the predicate is failure-specific, this is also the failing share. `total` = 0: not measured. `affected` = 0: no matching rows, said with no share |
+| `spread` | What share of lines in scope fail? | `affected` (failing lines); `total` (all lines in scope, isolating scope only) | last 1h (`now-1h`) | `affected` of `total`: the failing share of log lines (of attempts when the scope isolates one line per attempt). `total` = 0: not measured. `affected` = 0: no failing rows, said with no share |
 | `dimensions` | Which fields do the failing rows carry, by value? | the `candidates:` fields | last 1h (`now-1h`) | Reading `dimensions` |
 | `examples` | What do the failing messages say, and how are the failing lines split between them? | up to 5 message categories: `n`, the shared tokens, one sampled message | last 1h (`now-1h`) | Reading `examples` |
 | `trend` | Still happening? | failing lines per hour (about 24 buckets; the current hour is partial) | last 24h (`now-24h`) | Reading `trend` |
@@ -418,10 +411,8 @@ Reading `breakdown`:
 Reading `trend`:
 - Hours are clock hours. Use the hours that have ended and that the window start does not cut: the
   current hour and a first bucket the window start cuts are left out, and the latest hour is the
-  last hour that remains. The query keeps only rule-matching lines, so an hour with no row had no
-  matching lines (0), not no data, and a `trend` with no rows at all is not measured, not all zeros.
-  A failure-specific predicate makes those counts failing lines; otherwise they are rule-match
-  counts and do not establish a growing failure.
+  last hour that remains. The query keeps only failing lines, so an hour with no row had no failing lines (0),
+  not no data, and a `trend` with no rows at all is not measured, not all zeros.
 - Right after reading, add one findings entry `{rule_uuid}: trend -> ` listing every remaining hour's
   count in time order, 0 for an hour with no row (`03-06 11:00 396, 03-06 12:00 0, ...`), the
   latest hour last. Take every
@@ -666,11 +657,6 @@ Each entry:
     and one suffix (2.5–8.1k, 380–455). The two counts of the `N of M (P%)` share stay exact, so P
     can be recomputed from it. Every `field = value` pair, its value and every identifier
     stays exact.
-  - **Rule-match aggregates.** Name a profile count, share, trend or baseline as rule-matching
-    lines unless the KI predicate itself is failure-specific (Confirm step Definitions). A sample
-    that confirms a failure is evidence of a failure, not proof that every matching line failed.
-    For a non-failure-specific predicate, describe the verified sample or category separately and
-    never use the aggregate's volume or growth for the `high` severity rung.
   1. **Part 1: what the rows state.** Open with one sentence naming the specific failure the
      dominant category or the sampled message reports, with the level or status the lines carry and
      the target the lines state (a field with one value on every failing line, or the category's own tokens), so the reader meets the failure first (this sentence speaks for every failing line, so a target only the sampled row shows stays in its clause); the sample's size comes later. When the categories show several distinct problems

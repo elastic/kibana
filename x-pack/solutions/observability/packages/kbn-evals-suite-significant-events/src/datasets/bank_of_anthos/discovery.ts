@@ -46,7 +46,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     'SQLState 08001 (unable to establish a database connection) from transactionhistory fails ledger reads and cascades to frontend balance, history, payment, and deposit paths.',
   summary:
     'Frontend requests to transactionhistory, balancereader, and ledgerwriter time out (read timeout=4) on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Balance and transaction-history reads and payment and deposit submissions fail with timeouts and refusals. Onset ~14:30 UTC with no sign of recovery.',
-  severity: 'medium',
+  severity: 'high',
   confidence: 0.82,
   source_ids: ['logs'],
   signals: [
@@ -373,7 +373,6 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
 const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
   ...BALANCE_READER_ISOLATED_EVENT,
   event_id: 'frontend__balancereader-connection-refused-weak-detection',
-  severity: 'medium',
   signals: [
     {
       type: 'detection',
@@ -456,7 +455,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'active-cascade',
-          text: 'Sets status=active with severity=medium for the cascade event: the frontend’s balance, transaction-history, payment and deposit calls are stated timing out or refused, but the descriptions do not measure affected reach, a rate above normal, or a growing failure. Critical would need a stated block of those operations or of a mandatory component, which the descriptions do not state.',
+          text: 'Sets status=active with severity=high for the cascade event: the frontend’s balance, transaction-history, payment and deposit calls are stated timing out or refused, not confined to a single burst, which meets high without a share. Critical would need a stated block of those operations or of a mandatory component, which the descriptions do not state.',
           score: 3,
         },
         {
@@ -486,7 +485,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'active-confirmed-cascade',
-          text: 'Keeps the cascade event active at medium severity because freshly verified ledger signals still show the failing calls without measuring the reach or rate needed for high.',
+          text: 'Keeps the cascade event active at high severity because freshly verified ledger signals still show the failing calls.',
           score: 2,
         },
       ],
@@ -501,7 +500,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'active medium event for confirmed balance-lookup read timeouts despite weak p_value and stationary change_point_type',
+        'active high event for confirmed balance-lookup read timeouts despite weak p_value and stationary change_point_type',
       expected_confirmed_rule_uuids: {
         [BALANCE_READER_WEAK_DETECTION_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
       },
@@ -509,7 +508,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'weak-detection-strong-severity',
-          text: 'Sets severity=medium because the frontend’s balance calls to balancereader are stated timing out or refused, but the grounding does not measure the reach, growth, or rate above normal that high requires. Weak p_value and stationary change_point_type do not lower the evidence-based tier, and the assessment note names the evidence the tier rests on.',
+          text: 'Sets severity=high because the frontend’s balance calls to balancereader are stated timing out or refused, not confined to a single burst: a failing call to a named dependency is enough for high without a share. Weak p_value and stationary change_point_type must not cap severity at medium or low, and the assessment note names the evidence the tier rests on.',
           score: 3,
         },
         {
@@ -526,11 +525,6 @@ export const discovery: DatasetConfig['discovery'] = [
           id: 'weak-detection-narrative-alignment',
           text: 'Title, symptom_hypothesis, and summary state the confirmed read timeouts and blocked balance lookups without hedging the event down to medium solely because detection metadata looks weak.',
           score: 2,
-        },
-        {
-          id: 'failure-specific-profile-counts',
-          text: 'Treats the `Error getting balance` predicate as failure-specific, so its profile aggregates may be reported as failing lines rather than generic rule matches.',
-          score: 1,
         },
       ],
     },
