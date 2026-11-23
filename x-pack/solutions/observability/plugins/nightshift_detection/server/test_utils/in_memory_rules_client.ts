@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
+import { badRequest, notFound } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { BulkCreateRulesParams, BulkResponse } from '@kbn/alerting-v2-schemas';
+import {
+  parseDurationToMs,
+  type BulkCreateRulesParams,
+  type BulkResponse,
+} from '@kbn/alerting-v2-schemas';
 
 interface StoredRule {
   id: string;
   enabled: boolean;
   tags: string[];
   query: string;
+  every: string;
 }
+
+const getRunsPerMinute = (every: string) => 60_000 / parseDurationToMs(every);
+
+const scheduleBudgetError = () =>
+  badRequest('Too many schedules', {
+    code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+  });
 
 /**
  * The rule operations the reconciler and the managed rule reader use, kept in memory so a second
@@ -29,8 +41,8 @@ export class InMemoryRulesClient {
     private readonly options: {
       /** Ids whose create call fails as a whole, with the message given. */
       failCreateOf?: Map<string, string>;
-      /** Creates refused for the schedule budget once this many rules are enabled. */
-      maxEnabledRules?: number;
+      /** Creates and enables refused once the enabled rules would run more often than this a minute. */
+      maxRunsPerMinute?: number;
       /** Ids Alerting finds invalid: like Alerting, a request with one of them is refused whole. */
       invalidRuleIds?: Set<string>;
     } = {}
@@ -67,13 +79,11 @@ export class InMemoryRulesClient {
       throw badRequest('Invalid rule data', { code: ALERTING_ERROR_CODES.INVALID_RULE_DATA });
     }
 
-    const enabledAfter =
-      [...this.rules.values()].filter(({ enabled }) => enabled).length +
-      items.filter(({ enabled }) => enabled !== false).length;
-    if (this.options.maxEnabledRules !== undefined && enabledAfter > this.options.maxEnabledRules) {
-      throw badRequest('Too many schedules', {
-        code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
-      });
+    const added = items
+      .filter(({ enabled }) => enabled !== false)
+      .map(({ schedule }) => schedule.every);
+    if (!this.fitsBudget(added)) {
+      throw scheduleBudgetError();
     }
 
     const created: Array<{ id: string }> = [];
@@ -94,6 +104,7 @@ export class InMemoryRulesClient {
         enabled: item.enabled !== false,
         tags: item.metadata.tags ?? [],
         query: item.query.base,
+        every: item.schedule.every,
       });
       created.push({ id });
     });
@@ -106,11 +117,38 @@ export class InMemoryRulesClient {
   public bulkDeleteRules = async ({ ids }: { ids: string[] }): Promise<BulkResponse> =>
     this.applyToEach({ ids, apply: (id) => this.rules.delete(id) });
 
-  public bulkEnableRules = async ({ ids }: { ids: string[] }): Promise<BulkResponse> =>
-    this.applyToEach({ ids, apply: (id) => this.setEnabled({ id, enabled: true }) });
+  /** Like Alerting, checks the schedule budget only when it turns on a single rule. */
+  public enableRule = async ({ id }: { id: string }) => {
+    const rule = this.rules.get(id);
+    if (!rule) {
+      throw notFound('not found', { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND });
+    }
+    if (!rule.enabled && !this.fitsBudget([rule.every])) {
+      throw scheduleBudgetError();
+    }
+    rule.enabled = true;
+
+    return rule as unknown as Awaited<ReturnType<RulesClientApi['enableRule']>>;
+  };
 
   public bulkDisableRules = async ({ ids }: { ids: string[] }): Promise<BulkResponse> =>
     this.applyToEach({ ids, apply: (id) => this.setEnabled({ id, enabled: false }) });
+
+  private fitsBudget(addedEvery: string[]): boolean {
+    const { maxRunsPerMinute } = this.options;
+    if (maxRunsPerMinute === undefined) {
+      return true;
+    }
+    const enabledEvery = [...this.rules.values()]
+      .filter(({ enabled }) => enabled)
+      .map(({ every }) => every);
+    const runsPerMinute = [...enabledEvery, ...addedEvery].reduce(
+      (sum, every) => sum + getRunsPerMinute(every),
+      0
+    );
+
+    return runsPerMinute <= maxRunsPerMinute;
+  }
 
   private setEnabled({ id, enabled }: { id: string; enabled: boolean }): boolean {
     const rule = this.rules.get(id);
