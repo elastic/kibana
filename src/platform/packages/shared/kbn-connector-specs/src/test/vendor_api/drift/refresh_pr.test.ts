@@ -52,6 +52,47 @@ const listedNames = (body: string, connector: string): number => {
 };
 
 describe('renderRefreshPr', () => {
+  it('keeps an endpoint that two sources describe apart, with its own actions', () => {
+    const body = renderRefreshPr([
+      {
+        ...changed('.two', []),
+        sources: {
+          v1: { status: 'changed', changes: [field('GET /items', 'a')] },
+          v2: { status: 'changed', changes: [field('GET /items', 'b')] },
+        },
+        actions: [
+          {
+            action: 'listOld',
+            operations: [{ source: 'v1', operation: 'GET /items' }],
+            unmatched: [],
+            snapshotProblems: [],
+          },
+        ],
+      },
+    ]);
+    const rows = body.split('<tr>').slice(2);
+
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toContain('`GET /items` (`v1`)');
+    expect(rows[0]).toContain('`listOld`');
+    expect(rows[1]).toContain('`GET /items` (`v2`)');
+    expect(rows[1]).not.toContain('`listOld`');
+  });
+
+  it('counts no endpoint for changes to the spec as a whole', () => {
+    const body = renderRefreshPr([
+      changed('.wide', [
+        added(
+          undefined,
+          'the component security scheme `apiKey` was added',
+          'api-security-component-added'
+        ),
+      ]),
+    ]);
+
+    expect(body).toContain('New spec has 1 change to the spec as a whole.');
+  });
+
   it('finds the actions that call an MCP tool, which the manifest names `tools/call <tool>`', () => {
     const body = renderRefreshPr([
       changed(

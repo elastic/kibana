@@ -13,7 +13,7 @@
  * changed on each and the actions that call it.
  */
 
-import type { ConnectorDrift } from './detect_drift';
+import type { ConnectorDrift, SpecChange } from './detect_drift';
 import { code, listed, plural } from './issue/issue_markdown';
 import type { ChangeArea, ChangePart, ListPart } from './refresh_changes';
 import {
@@ -34,6 +34,8 @@ const byName = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 interface EndpointRow {
   readonly endpoint: string;
+  /** The source, named when the same endpoint changed in more than one. */
+  readonly source?: string;
   readonly actions: readonly string[];
   readonly areas: readonly ChangeArea[];
 }
@@ -45,34 +47,52 @@ interface ConnectorSection {
   /** Whether the new spec only regrouped the auth scopes of what the connector calls. */
   readonly onlyRegrouped: boolean;
   readonly operationsChanged: boolean;
-  /** The endpoints that changed, of which the table shows the first ones. */
+  /** The rows of the table, of which it shows the first ones. */
   readonly endpointCount: number;
+  /** The endpoints that changed, without the changes to the spec as a whole. */
+  readonly locatedCount: number;
   readonly rows: readonly EndpointRow[];
 }
 
 const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
-  const changes = Object.values(drift.sources).flatMap((source) => source.changes ?? []);
-  const byEndpoint = new Map<string, typeof changes>();
-  for (const change of changes) {
-    const endpoint = change.operation ?? NO_ENDPOINT;
-    byEndpoint.set(endpoint, [...(byEndpoint.get(endpoint) ?? []), change]);
-  }
-  const endpoints = [...byEndpoint.entries()].sort(([a], [b]) =>
-    a === NO_ENDPOINT ? 1 : b === NO_ENDPOINT ? -1 : byName(a, b)
+  const tagged = Object.entries(drift.sources).flatMap(([source, { changes }]) =>
+    (changes ?? []).map((change) => ({ source, change }))
   );
-  const actionsOf = (endpoint: string): string[] =>
+  const changes = tagged.map(({ change }) => change);
+  // An endpoint is per source, as two sources may describe the same method and path; changes to
+  // the spec as a whole share one row.
+  const groups = new Map<string, { endpoint: string; source: string; changes: SpecChange[] }>();
+  const sourcesOf = new Map<string, Set<string>>();
+  for (const { source, change } of tagged) {
+    const endpoint = change.operation ?? NO_ENDPOINT;
+    const key = endpoint === NO_ENDPOINT ? NO_ENDPOINT : `${source}\u0000${endpoint}`;
+    const group = groups.get(key) ?? { endpoint, source, changes: [] };
+    group.changes.push(change);
+    groups.set(key, group);
+    sourcesOf.set(endpoint, (sourcesOf.get(endpoint) ?? new Set()).add(source));
+  }
+  const endpoints = [...groups.values()].sort(
+    (a, b) =>
+      Number(a.endpoint === NO_ENDPOINT) - Number(b.endpoint === NO_ENDPOINT) ||
+      byName(a.endpoint, b.endpoint) ||
+      byName(a.source, b.source)
+  );
+  const actionsOf = (source: string, endpoint: string): string[] =>
     (drift.actions ?? [])
       // The manifest names an MCP tool's call `tools/call <tool>`, its changes the tool alone.
       .filter(({ operations }) =>
         operations.some(
-          ({ operation }) => operation === endpoint || operation === `tools/call ${endpoint}`
+          (call) =>
+            call.source === source &&
+            (call.operation === endpoint || call.operation === `tools/call ${endpoint}`)
         )
       )
       .map(({ action }) => action)
       .sort(byName);
-  const all = endpoints.map(([endpoint, group]) => ({
+  const all = endpoints.map(({ endpoint, source, changes: group }) => ({
     endpoint,
-    actions: actionsOf(endpoint),
+    ...(endpoint !== NO_ENDPOINT && (sourcesOf.get(endpoint)?.size ?? 0) > 1 ? { source } : {}),
+    actions: endpoint === NO_ENDPOINT ? [] : actionsOf(source, endpoint),
     areas: changeAreas(group),
   }));
   const changeCount = all.reduce(
@@ -85,17 +105,22 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
     onlyRegrouped: changes.length > 0 && changeCount === 0,
     operationsChanged: drift.operationsChanged,
     endpointCount: endpoints.length,
+    locatedCount: endpoints.filter(({ endpoint }) => endpoint !== NO_ENDPOINT).length,
     rows: all.slice(0, MAX_ENDPOINTS_PER_CONNECTOR),
   };
 };
 
-const summaryOf = ({ changeCount, endpointCount, onlyRegrouped }: ConnectorSection): string => {
-  const uses = `${plural(endpointCount, 'endpoint')} that the connector uses`;
+const summaryOf = ({ changeCount, locatedCount, onlyRegrouped }: ConnectorSection): string => {
+  // Changes to no endpoint, such as a removed schema or a new security scheme.
+  const uses =
+    locatedCount > 0
+      ? `${plural(locatedCount, 'endpoint')} that the connector uses`
+      : 'the spec as a whole';
   let what = 'has changes that `oasdiff` does not report';
   if (onlyRegrouped) {
     what = `only regroups the auth scopes of ${uses}`;
   } else if (changeCount > 0) {
-    what = `has ${plural(changeCount, 'change')} on ${uses}`;
+    what = `has ${plural(changeCount, 'change')} ${locatedCount > 0 ? 'on' : 'to'} ${uses}`;
   }
   return `New spec ${what}.`;
 };
@@ -123,10 +148,14 @@ const changesTable = (section: ConnectorSection): string[] => {
     '',
     '<table>',
     '<tr><th>Endpoint</th><th>What changed</th><th>Used in action</th></tr>',
-    ...rows.flatMap(({ endpoint, actions, areas }) => [
+    ...rows.flatMap(({ endpoint, source, actions, areas }) => [
       '<tr>',
       ...[
-        [endpoint === NO_ENDPOINT ? NO_ENDPOINT : code(endpoint)],
+        [
+          endpoint === NO_ENDPOINT
+            ? NO_ENDPOINT
+            : `${code(endpoint)}${source === undefined ? '' : ` (${code(source)})`}`,
+        ],
         cellLines(areas),
         [actions.length > 0 ? listed(actions.map(code)) : NO_ENDPOINT],
       ].flatMap((cellContent) => ['<td>', '', ...cellContent, '', '</td>']),
