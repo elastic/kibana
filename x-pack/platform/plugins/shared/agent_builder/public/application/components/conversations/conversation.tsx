@@ -126,25 +126,15 @@ export const Conversation: React.FC<{}> = () => {
     ${fullWidthAndHeightStyles}
     position: relative;
     min-height: 0;
-
-    &::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: ${scrollMaskHeight};
-      pointer-events: none;
-      z-index: 1;
-      background-color: ${euiTheme.colors.backgroundBaseRecessed};
-    }
   `;
 
+  // Fades the bottom of the scrolling content into whatever background sits behind it.
   const scrollableStyles = css`
     ${useEuiScrollBar()}
     ${useEuiOverflowScroll('y')}
     scrollbar-gutter: stable both-edges;
     overflow-anchor: none;
+    mask-image: linear-gradient(to bottom, black calc(100% - ${scrollMaskHeight}), transparent);
   `;
 
   const inputPaddingStyles = css`
