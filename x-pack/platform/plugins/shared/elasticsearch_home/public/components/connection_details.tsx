@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiShowFor,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EndpointUrl } from '@kbn/shared-components';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
@@ -25,42 +18,38 @@ export const ConnectionDetails = () => {
   const { url, isLoading } = useElasticsearchUrl();
   const getTelemetryId = useTelemetryId();
 
-  if (!isLoading && !url) {
-    return null;
-  }
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false} css={endpointUrlItem}>
-        <EndpointUrl
-          url={url}
-          isLoading={isLoading}
-          copyAriaLabel={i18n.translate(
-            'xpack.elasticsearchHome.home.connectionDetails.copyUrlAriaLabel',
-            { defaultMessage: 'Copy Elasticsearch URL' }
-          )}
-          copyTestSubj="elasticsearchHomeCopyEndpointUrl"
-          copyTelemetryId={getTelemetryId('copyEndpointUrl')}
-        />
-      </EuiFlexItem>
-      <EuiShowFor sizes={['xl']}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="text"
-            iconType="plusCircle"
-            size="s"
-            onClick={() =>
-              openWiredConnectionDetails({ props: { options: { defaultTabId: 'apiKeys' } } })
-            }
-            data-test-subj="elasticsearchHomeGenerateApiKeyButton"
-            data-telemetry-id={getTelemetryId('connectionDetails-apiKeys')}
-          >
-            {i18n.translate('xpack.elasticsearchHome.home.connectionDetails.generateApiKey', {
-              defaultMessage: 'Generate API key',
-            })}
-          </EuiButton>
+      {(isLoading || url) && (
+        <EuiFlexItem grow={false} css={endpointUrlItem}>
+          <EndpointUrl
+            url={url}
+            isLoading={isLoading}
+            copyAriaLabel={i18n.translate(
+              'xpack.elasticsearchHome.home.connectionDetails.copyUrlAriaLabel',
+              { defaultMessage: 'Copy Elasticsearch URL' }
+            )}
+            copyTestSubj="elasticsearchHomeCopyEndpointUrl"
+            copyTelemetryId={getTelemetryId('copyEndpointUrl')}
+          />
         </EuiFlexItem>
-      </EuiShowFor>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="text"
+          iconType="plusCircle"
+          size="s"
+          onClick={() =>
+            openWiredConnectionDetails({ props: { options: { defaultTabId: 'apiKeys' } } })
+          }
+          data-test-subj="elasticsearchHomeGenerateApiKeyButton"
+          data-telemetry-id={getTelemetryId('connectionDetails-apiKeys')}
+        >
+          {i18n.translate('xpack.elasticsearchHome.home.connectionDetails.generateApiKey', {
+            defaultMessage: 'Generate API key',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={i18n.translate('xpack.elasticsearchHome.home.connectionDetails.tooltip', {

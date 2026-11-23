@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { waitForApmAppMenuReady } from '../page_helpers';
+import type { ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '../constants';
 
 export class GeneralSettingsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(private readonly page: ScoutPage) {}
 
   async goto() {
-    await this.page.goto(`${this.kbnUrl.app('apm')}/settings/general-settings`);
-    return await waitForApmAppMenuReady(this.page);
+    // APM's bundle is slow to boot on a cold Cloud deployment, hence the raised `readyTimeout`.
+    await this.page.gotoApp('apm/settings/general-settings', {
+      readyWhen: this.page.testSubj.locator('apmMainContainer'),
+      readyTimeout: EXTENDED_TIMEOUT,
+    });
   }
 
   async getInspectEsQueriesButton() {

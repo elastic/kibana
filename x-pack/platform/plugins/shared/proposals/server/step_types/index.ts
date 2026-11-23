@@ -8,6 +8,7 @@
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
+import type { ResolveWorkerUser } from '../services/resolve_worker_user';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import { getCheckDecidePrivilegesStepDefinition } from './check_decide_privileges_step';
 import { getCloneProposalStepDefinition } from './clone_proposal_step';
@@ -21,18 +22,30 @@ export const registerStepDefinitions = ({
   workflowsExtensions,
   getProposalsService,
   resolveUser,
+  resolveWorkerUser,
   privileges,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getProposalsService: () => ProposalsService;
   resolveUser: ResolveProposalUser;
+  resolveWorkerUser: ResolveWorkerUser;
   privileges: ProposalPrivilegesChecker;
 }) => {
   workflowsExtensions.registerStepDefinition(
-    getCreateProposalStepDefinition({ getProposalsService, resolveUser, privileges })
+    getCreateProposalStepDefinition({
+      getProposalsService,
+      resolveUser,
+      resolveWorkerUser,
+      privileges,
+    })
   );
   workflowsExtensions.registerStepDefinition(
-    getUpdateProposalStepDefinition({ getProposalsService, resolveUser, privileges })
+    getUpdateProposalStepDefinition({
+      getProposalsService,
+      resolveUser,
+      resolveWorkerUser,
+      privileges,
+    })
   );
   workflowsExtensions.registerStepDefinition(
     getSettleIncompleteProposalStepDefinition({ getProposalsService })

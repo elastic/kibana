@@ -31,6 +31,7 @@ import type {
   FlyoutAccordionProps,
 } from '@kbn/flyout-sections';
 import type { KbnCalloutProps } from '@kbn/ui-callout';
+import type { AiButtonIconType } from '@kbn/ui-ai-components';
 
 type TabBarOwnedProps = 'aria-controls' | 'children' | 'id' | 'isSelected' | 'onClick';
 
@@ -60,10 +61,18 @@ export interface FlyoutBodyTabPanelProps {
   'data-test-subj'?: string;
 }
 
+/** Heading elements the header title can render as. */
+export type FlyoutHeaderTitleElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
 /** Props for the declarative `FlyoutTemplate.Header` zone. */
 export interface FlyoutHeaderProps {
-  /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
+  /** Title rendered by the header, in the heading element set by `titleElement`. */
   title: ReactNode;
+  /**
+   * Heading element for the title, to fit the flyout into the page's heading outline. Defaults to
+   * `h2`. The title's visual size does not depend on it.
+   */
+  titleElement?: FlyoutHeaderTitleElement;
   /**
    * Plain-text form of `title`, used to name the flyout in EUI's flyout menu. Set it when `title`
    * is a `ReactNode`. `flyoutMenuProps.title` wins when both are set. With a string `title`, it also
@@ -85,6 +94,11 @@ export interface FlyoutHeaderProps {
    * become part of the flyout's accessible name.
    */
   isLoading?: boolean;
+  /**
+   * Accessible name of the `isLoading` spinner, saying what is loading. Without it, the spinner
+   * has EUI's generic "Loading" name.
+   */
+  loadingLabel?: string;
   /** Subdued text below the title. */
   description?: ReactNode;
   /**
@@ -203,19 +217,39 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   tooltip?: ReactNode;
 }
 
+/** Colors a `FlyoutTemplate.Footer.PrimaryAction` can take. */
+export type FlyoutFooterPrimaryActionColor = 'primary' | 'danger';
+
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
 export type FlyoutFooterPrimaryActionProps = Omit<
   EuiButtonPropsForButton,
   ActionOwnedProps | 'onClick'
 > &
-  FlyoutFooterActionBaseProps;
+  FlyoutFooterActionBaseProps & {
+    /** Button color; defaults to `primary`. Use `danger` for a destructive action. */
+    color?: FlyoutFooterPrimaryActionColor;
+  };
 
-/** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
-export type FlyoutFooterSecondaryActionProps = Omit<
+type FlyoutFooterSecondaryActionCommonProps = Omit<
   EuiButtonPropsForButton,
   ActionOwnedProps | 'onClick' | 'minWidth'
 > &
   FlyoutFooterActionBaseProps;
+
+/**
+ * Icons the AI-styled secondary action accepts. `addToChat` is left out because `AiButtonEmpty`
+ * replaces the button's text with its own label for that icon, which would override `label`.
+ */
+export type FlyoutFooterAiActionIconType = Exclude<AiButtonIconType, 'addToChat'>;
+
+/** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
+export type FlyoutFooterSecondaryActionProps =
+  | (FlyoutFooterSecondaryActionCommonProps & { variant?: undefined })
+  | (Omit<FlyoutFooterSecondaryActionCommonProps, 'iconType'> & {
+      /** Renders the action with AI styling, for an action that hands off to an AI agent or chat. */
+      variant: 'ai';
+      iconType?: FlyoutFooterAiActionIconType;
+    });
 
 type WithStringName<T> = T extends { name: ReactNode } ? Omit<T, 'name'> & { name: string } : T;
 
@@ -361,3 +395,20 @@ export type FlyoutTemplateProps = Omit<EuiFlyoutProps, TemplateOwnedFlyoutProps>
     /** Called when the user clicks a tab. */
     onTabChange?: (id: string) => void;
   };
+
+/** The root props that drive the tab bar. Inside a frame, they belong to the declaration. */
+export type FlyoutTemplateTabRootProps = Pick<
+  FlyoutTemplateProps,
+  'tabs' | 'tabBarProps' | 'defaultSelectedTabId' | 'selectedTabId' | 'onTabChange'
+>;
+
+/**
+ * Props for `FlyoutTemplate.Frame`: the root props that configure the `EuiFlyout`. `children`
+ * renders `FlyoutTemplate` declarations, possibly behind components that suspend.
+ */
+export type FlyoutTemplateFrameProps = Omit<
+  FlyoutTemplateProps,
+  keyof FlyoutTemplateTabRootProps | 'children'
+> & {
+  children?: ReactNode;
+};

@@ -38,7 +38,7 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
-import { usePageReady } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools/react';
 import moment from 'moment';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
@@ -559,15 +559,15 @@ export function AlertDetails() {
             onUpdate={onUpdate}
             rule={rule}
             refetch={refetch}
-          />,
-          ...(AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid']
-            ? [
+            addToChatButton={
+              AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid'] ? (
                 <AlertAskAiAgentButton
                   alertId={alertDetail.formatted.fields['kibana.alert.uuid'] as string}
                   alertTitle={ruleTypeBreached}
-                />,
-              ]
-            : []),
+                />
+              ) : null
+            }
+          />,
         ],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',

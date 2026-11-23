@@ -28,8 +28,6 @@ export const MAX_VALUE_LABEL_LENGTH = 256;
 
 /** A mapped field path: dot-separated segments, no wildcards, expressions, quoting or whitespace. */
 export const LITERAL_FIELD_PATH_PATTERN = /^[A-Za-z0-9_@-]+(?:\.[A-Za-z0-9_@-]+)*$/;
-/** An attribute name, which becomes an ES|QL column: lowercase letters, digits and `_`, starting with a letter. */
-export const ATTRIBUTE_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
 /** One index pattern per source: no whitespace and no comma-separated list. */
 export const INDEX_PATTERN_PATTERN = /^[^\s,]+$/;
 
@@ -46,10 +44,13 @@ export const literalFieldPathSchema = lazySchema(() =>
   })
 );
 
+/**
+ * An attribute name, which becomes an ES|QL column: a field path such as `host.arch`, so a column
+ * can carry the OTel semantic convention name while each source reads its own field.
+ */
 const attributeNameSchema = lazySchema(() =>
-  z.string().min(1).max(MAX_ATTRIBUTE_NAME_LENGTH).regex(ATTRIBUTE_NAME_PATTERN, {
-    message:
-      'must be a lowercase identifier (letters, digits and underscores, starting with a letter)',
+  z.string().min(1).max(MAX_ATTRIBUTE_NAME_LENGTH).regex(LITERAL_FIELD_PATH_PATTERN, {
+    message: 'must be a field path: dot-separated segments of letters, digits, `_`, `@` and `-`',
   })
 );
 

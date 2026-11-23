@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { buildSlackThreadUrl } from '@kbn/connector-specs';
 import {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
   INVESTIGATION_SUBJECT_TYPES,
@@ -18,17 +19,18 @@ import type {
   InvestigationSubjectKey,
 } from '@kbn/agentic-investigations-plugin/common';
 import type {
-  AlertSnapshot,
+  InvestigationAlertSnapshot,
   InvestigationSubject,
   InvestigationTriggerType,
   SlackThreadReference,
 } from '../../common';
 import {
   alertInvestigationContextSchema,
-  alertSnapshotSchema,
+  investigationAlertSnapshotSchema,
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_TRIGGER_TYPES,
   toSlackThreadKey,
+  toSlackThreadSubjectId,
 } from '../../common';
 import { buildInvestigationMessage } from './build_investigation_message';
 
@@ -48,7 +50,7 @@ export const workflowSubjectInputSchema = z.object({
   id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
   summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
   triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
-  snapshot: alertSnapshotSchema.optional(),
+  snapshot: investigationAlertSnapshotSchema.optional(),
   slack: z
     .object({
       channel: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
@@ -68,16 +70,45 @@ export const workflowSubjectInputsSchema = z
 const truncateSummary = (summary: string | undefined): string | undefined =>
   summary ? summary.slice(0, MAX_EVIDENCE_TEXT_LENGTH) : undefined;
 
+export const toSlackThreadPermalink = (
+  thread: Parameters<typeof buildSlackThreadUrl>[0]
+): string | undefined => {
+  const permalink = buildSlackThreadUrl(thread);
+  return permalink.length <= MAX_SLACK_PERMALINK_LENGTH ? permalink : undefined;
+};
+
 /** True for the placeholder a manual investigation carries when the caller names no subject id. */
 const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'type' | 'id'>) =>
   type === 'manual' && id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
+
+const withSlackThread = ({
+  primary,
+  slackThread,
+  triggerType,
+}: {
+  primary: WorkflowSubjectInput;
+  slackThread?: SlackThreadReference;
+  triggerType: InvestigationTriggerType;
+}): { primary: WorkflowSubjectInput; thread: WorkflowSubjectInput[] } => {
+  if (!slackThread) {
+    return { primary, thread: [] };
+  }
+  const id = toSlackThreadSubjectId(slackThread);
+  const { workspace, channel, thread_ts: threadTs } = slackThread;
+  const permalink = toSlackThreadPermalink({ workspace, channel, threadTs });
+  const slack = { channel, thread_ts: threadTs, ...(permalink && { permalink }) };
+  if (primary.type === 'slack_thread' && primary.id === id) {
+    return { primary: { ...primary, slack }, thread: [] };
+  }
+  return { primary, thread: [{ type: 'slack_thread', id, triggerType, slack }] };
+};
 
 /**
  * The subjects one start records: the named subject and, for an alert investigation, one subject
  * per alert snapshot, each carrying its snapshot. A manual investigation without a subject id is
  * recorded under the investigation's own id, so it never matches another investigation. A start
- * about a Slack thread also records the thread, which is how the Slack thread workflow finds the
- * investigation when someone replies in it.
+ * about a Slack thread also records the thread, which is how a reply or mention in it finds the
+ * investigation; when the thread is the named subject, it is recorded once.
  */
 export const toStartSubjects = ({
   subject,
@@ -87,33 +118,22 @@ export const toStartSubjects = ({
   slackThread,
 }: {
   subject: InvestigationSubject;
-  alerts?: AlertSnapshot[];
+  alerts?: InvestigationAlertSnapshot[];
   triggerType: InvestigationTriggerType;
   investigationId: string;
   slackThread?: SlackThreadReference;
 }): WorkflowSubjectInput[] => {
-  const primaryId = isPlaceholderManualSubject(subject) ? investigationId : subject.id;
   const summary = truncateSummary(subject.summary);
-  const primary: WorkflowSubjectInput = {
-    type: subject.type,
-    id: primaryId,
+  const { primary, thread } = withSlackThread({
+    primary: {
+      type: subject.type,
+      id: isPlaceholderManualSubject(subject) ? investigationId : subject.id,
+      triggerType,
+      ...(summary ? { summary } : {}),
+    },
+    slackThread,
     triggerType,
-    ...(summary ? { summary } : {}),
-  };
-  const thread: WorkflowSubjectInput[] = slackThread
-    ? [
-        {
-          type: 'slack_thread',
-          id: toSlackThreadKey({
-            workspace: slackThread.workspace,
-            channel: slackThread.channel,
-            threadTs: slackThread.thread_ts,
-          }),
-          triggerType,
-          slack: { channel: slackThread.channel, thread_ts: slackThread.thread_ts },
-        },
-      ]
-    : [];
+  });
 
   if (subject.type !== 'alert') {
     return [primary, ...thread];
@@ -153,6 +173,7 @@ const SUBJECT_ID_FIELDS = {
   significant_event: 'significant_event_id',
   alert: 'alert_id',
   manual: 'manual_id',
+  slack_thread: 'slack_thread_id',
 } as const satisfies Record<InvestigationSubject['type'], string>;
 
 const isNightshiftSubjectType = (value: unknown): value is InvestigationSubject['type'] =>
@@ -207,7 +228,7 @@ export const withoutRecordedSubjects = (
       !recorded.some(({ subjectType, subjectId }) => subjectType === type && subjectId === id)
   );
 
-const FOLLOW_UP_PREAMBLE =
+export const FOLLOW_UP_PREAMBLE =
   'This continues the investigation in this conversation. Build on your previous findings, check whether the new information changes them, and update the investigation with your tools.';
 
 /**
@@ -223,8 +244,8 @@ export const buildFollowUpMessage = ({
 }: {
   subject: InvestigationSubject;
   message: string;
-  alerts: AlertSnapshot[];
-  newAlerts: AlertSnapshot[];
+  alerts: InvestigationAlertSnapshot[];
+  newAlerts: InvestigationAlertSnapshot[];
 }): string => {
   if (subject.type !== 'alert' || alerts.length === 0) {
     return `${FOLLOW_UP_PREAMBLE}\n\n${message}`;

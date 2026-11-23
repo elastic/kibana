@@ -21,7 +21,7 @@ stays trustworthy.
 | `hunt_result` validates against `huntResultSchema` | `SSE Attachment` (code) | tested |
 | Hit, `has_confirmed_hit` and `hit_sources` agree | `Hit Consistency` (code) | tested |
 | Proposals raised only on confirmed hits, never on canary or clean reports | `Proposal Presence`, `Canary Inverted` (code) | tested |
-| Shared principals across reports mint one actioned Proposal and record convergence | `Proposal Convergence` (code) on multi-candidate | tested |
+| Shared principals across reports mint one actioned Proposal and record convergence | `Proposal Convergence` (code) on multi-candidate (two assume-role slots) | tested |
 | Investigation stays in the triggering space | space-isolation case in `evals/hunt_watch.spec.ts` | tested |
 | Approve executes the action, dismiss does not, and the Investigation closes either way | `evals/hunt_watch_approval.spec.ts` | tested |
 | Report, queries and findings are grounded in the Worker's own tool calls | `Groundedness Analysis` (LLM judge) | tested |
@@ -45,7 +45,10 @@ The numbers above come from the baseline run on main of 2026-10-14 (golden 1.000
 hard 1.000 / 0.959 / 0.952 for Groundedness / Factuality / Relevance). They are a starting point
 for review, not a promise: a golden rerun the same day scored Relevance 0.800, so with two or
 three judged rows per cohort a single run moves by about ±0.1. Code scores are gated in the suite
-(any 0 or MISSING fails the cohort); judge scores are compared against the rolling `main` history
+(any 0 or MISSING on a gating row fails the cohort). `invariant` rows gate every subject model.
+`capability` rows, the ones whose pin needs a grounded Tier 2 query, gate the reference models
+(Claude 5.5 Opus, GPT-6 Sol) and are reported for the rest, so the weekly matrix separates a weak
+model's capability gap from a Worker regression. Judge scores are compared against the rolling `main` history
 with `node scripts/evals compare` rather than against these fixed numbers. The playbook allows
 unratified thresholds for the MVP slice but requires sign-off before any Pilot claim.
 
@@ -76,7 +79,7 @@ results arrive. This profile takes the second path and records the numbers it wo
 - Correlation across reports, and any claim about Entity Store scoring. The Worker does not do
   these and the suite does not score them.
 - A chat skill or conversational surface for hunts.
-- Fault rows beyond the two in `hard_cases.ts` (IOC bound overflow for `partial`, locked
+- Fault rows beyond the two in `hard_cases.ts` (IOC bound overflow for `retired_incomplete`, locked
   Investigation for `failed`). Retryable gaps such as `search_partial` or `index_unavailable` are
   not staged; the suite removes the one race that produced them live (see "Seeding and reset").
 - D1 and D2 authorization gates. The suite has no view of the orchestrator identity.

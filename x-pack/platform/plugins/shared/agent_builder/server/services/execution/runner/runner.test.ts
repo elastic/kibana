@@ -356,25 +356,29 @@ describe('AgentBuilder runner', () => {
         experimentalEnabled: false,
         contextEngineEnabled: false,
         expectedAiIndices: false,
+        expectedSml: false,
       },
       {
         experimentalEnabled: false,
         contextEngineEnabled: true,
-        expectedAiIndices: false,
+        expectedAiIndices: true,
+        expectedSml: false,
       },
       {
         experimentalEnabled: true,
         contextEngineEnabled: false,
         expectedAiIndices: false,
+        expectedSml: true,
       },
       {
         experimentalEnabled: true,
         contextEngineEnabled: true,
         expectedAiIndices: true,
+        expectedSml: true,
       },
     ])(
-      'sets AI index instructions to $expectedAiIndices when experimental=$experimentalEnabled and contextEngine=$contextEngineEnabled',
-      async ({ experimentalEnabled, contextEngineEnabled, expectedAiIndices }) => {
+      'sets aiIndices=$expectedAiIndices and sml=$expectedSml when experimental=$experimentalEnabled and contextEngine=$contextEngineEnabled',
+      async ({ experimentalEnabled, contextEngineEnabled, expectedAiIndices, expectedSml }) => {
         const runnerDeps = createRunnerDepsMock();
         runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
         (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
@@ -407,6 +411,7 @@ describe('AgentBuilder runner', () => {
           expect.objectContaining({
             experimentalFeatures: expect.objectContaining({
               aiIndices: expectedAiIndices,
+              sml: expectedSml,
             }),
           })
         );

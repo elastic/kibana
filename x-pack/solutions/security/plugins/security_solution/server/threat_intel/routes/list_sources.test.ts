@@ -279,7 +279,7 @@ describe('loadSourceForMutation', () => {
   it('allows a space to mutate its own source', async () => {
     const access = await loadSourceForMutation({
       esClient: globalSource('space-a') as never,
-      sourceId: 'rss:mandiant-research',
+      sourceId: 'vendor_api:elastic-security-labs',
       spaceId: 'space-a',
     });
 
@@ -289,7 +289,7 @@ describe('loadSourceForMutation', () => {
   it('denies mutation of a global catalog source from every space', async () => {
     const access = await loadSourceForMutation({
       esClient: globalSource('*') as never,
-      sourceId: 'rss:mandiant-research',
+      sourceId: 'vendor_api:elastic-security-labs',
       spaceId: 'default',
     });
 
@@ -302,7 +302,7 @@ describe('loadSourceForMutation', () => {
   it("reports another space's source as simply not found", async () => {
     const access = await loadSourceForMutation({
       esClient: globalSource('space-a') as never,
-      sourceId: 'rss:mandiant-research',
+      sourceId: 'vendor_api:elastic-security-labs',
       spaceId: 'space-b',
     });
 
@@ -331,7 +331,7 @@ describe('loadSourceForMutation', () => {
     await expect(
       loadSourceForMutation({
         esClient: esClient as never,
-        sourceId: 'rss:mandiant-research',
+        sourceId: 'vendor_api:elastic-security-labs',
         spaceId: 'default',
       })
     ).rejects.toThrow('boom');

@@ -16,6 +16,7 @@ import { ProfilingSchema } from '@kbn/profiling-utils';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { DescriptionCallout } from './description_callout';
 import { Flamegraph } from './flamegraph';
+import { ProfilingCpsCallout } from './profiling_cps_callout';
 import { ProfilingSchemaSelector } from './profiling_schema_selector';
 import { Profiling } from './profiling';
 
@@ -44,6 +45,7 @@ jest.mock('../../hooks/use_request_observable', () => ({
   useRequestObservable: () => ({ request$: undefined }),
 }));
 jest.mock('./description_callout', () => ({ DescriptionCallout: jest.fn(() => null) }));
+jest.mock('./profiling_cps_callout', () => ({ ProfilingCpsCallout: jest.fn(() => null) }));
 jest.mock('./flamegraph', () => ({ Flamegraph: jest.fn(() => null) }));
 jest.mock('./profiling_schema_selector', () => ({ ProfilingSchemaSelector: jest.fn(() => null) }));
 jest.mock('./functions', () => ({ Functions: () => null }));
@@ -75,9 +77,62 @@ const mockStatus = (data: ProfilingSchemasStatus) =>
     refetch: jest.fn(),
   } as unknown as ReturnType<typeof useFetcher>);
 
+const mockFetcherState = (state: { status: FETCH_STATUS; error?: Error }) =>
+  jest.mocked(useFetcher).mockReturnValue({
+    data: undefined,
+    refetch: jest.fn(),
+    ...state,
+  } as unknown as ReturnType<typeof useFetcher>);
+
 describe('Profiling tab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('CPS callout', () => {
+    it('is rendered when profiling has data', () => {
+      mockStatus(
+        createStatus({
+          hasOtelData: true,
+          hasUniversalProfilingData: false,
+          hasUniversalProfilingSetup: false,
+        })
+      );
+
+      render(<Profiling />);
+
+      expect(ProfilingCpsCallout).toHaveBeenCalled();
+    });
+
+    it('is rendered when profiling has no data', () => {
+      mockStatus(
+        createStatus({
+          hasOtelData: false,
+          hasUniversalProfilingData: false,
+          hasUniversalProfilingSetup: true,
+        })
+      );
+
+      render(<Profiling />);
+
+      expect(ProfilingCpsCallout).toHaveBeenCalled();
+    });
+
+    it('is not rendered while the profiling status loads', () => {
+      mockFetcherState({ status: FETCH_STATUS.LOADING });
+
+      render(<Profiling />);
+
+      expect(ProfilingCpsCallout).not.toHaveBeenCalled();
+    });
+
+    it('is not rendered when the profiling status fails to load', () => {
+      mockFetcherState({ status: FETCH_STATUS.FAILURE, error: new Error('Request failed') });
+
+      render(<Profiling />);
+
+      expect(ProfilingCpsCallout).not.toHaveBeenCalled();
+    });
   });
 
   it.each([

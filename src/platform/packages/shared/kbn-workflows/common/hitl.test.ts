@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getHitlChannelConnectorTypeFromPath, isHitlWaitStepType } from './hitl';
+import {
+  getHitlChannelConnectorTypeFromPath,
+  hasHitlExternalResumeToken,
+  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
+  HITL_TOKEN_HASH_INPUT_FIELD,
+  isHitlWaitStepType,
+  readHitlExternalResumeToken,
+} from './hitl';
 
 describe('getHitlChannelConnectorTypeFromPath', () => {
   it('maps slack, slack_api, email, slack2, teams, servicenow, and http channel connector-id paths', () => {
@@ -53,5 +60,59 @@ describe('isHitlWaitStepType', () => {
     expect(isHitlWaitStepType('waitForInput')).toBe(true);
     expect(isHitlWaitStepType('waitForApproval')).toBe(true);
     expect(isHitlWaitStepType('slack')).toBe(false);
+  });
+});
+
+describe('readHitlExternalResumeToken', () => {
+  const token = { hash: 'hash', expiresAt: '2099-01-01T00:00:00.000Z' };
+  const tokenFields = {
+    [HITL_TOKEN_HASH_INPUT_FIELD]: token.hash,
+    [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: token.expiresAt,
+  };
+
+  it('reads the token from step state', () => {
+    expect(
+      readHitlExternalResumeToken({ state: { dynamicTimeout: '1h', ...tokenFields } })
+    ).toEqual(token);
+  });
+
+  it('reads a legacy token stored on step input', () => {
+    expect(readHitlExternalResumeToken({ input: { message: 'Respond', ...tokenFields } })).toEqual(
+      token
+    );
+  });
+
+  it('prefers step state when both locations hold a token', () => {
+    expect(
+      readHitlExternalResumeToken({
+        state: tokenFields,
+        input: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: 'legacy-hash',
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: '2099-02-01T00:00:00.000Z',
+        },
+      })
+    ).toEqual(token);
+  });
+
+  it('detects a live token on one record', () => {
+    expect(hasHitlExternalResumeToken(tokenFields)).toBe(true);
+    expect(hasHitlExternalResumeToken({ message: 'Respond' })).toBe(false);
+    expect(
+      hasHitlExternalResumeToken({
+        [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+        [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+      })
+    ).toBe(false);
+  });
+
+  it('ignores null token fields left by an invalidation', () => {
+    expect(
+      readHitlExternalResumeToken({
+        state: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+        },
+      })
+    ).toBeUndefined();
   });
 });

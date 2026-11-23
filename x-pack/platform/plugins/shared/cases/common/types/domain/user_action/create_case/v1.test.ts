@@ -7,10 +7,10 @@
 
 import { ConnectorTypes } from '../../connector/v1';
 import { UserActionTypes } from '../action/v1';
-import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './v1';
+import { CreateCaseUserActionSchema, CreateCaseUserActionWithoutConnectorIdSchema } from './v1';
 
 describe('Create case', () => {
-  describe('CreateCaseUserActionRt', () => {
+  describe('CreateCaseUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.create_case,
       payload: {
@@ -39,12 +39,9 @@ describe('Create case', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CreateCaseUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = CreateCaseUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('empty category is decoded properly', () => {
@@ -53,12 +50,9 @@ describe('Create case', () => {
         payload: { ...defaultRequest.payload, category: null },
       };
 
-      const query = CreateCaseUserActionRt.decode(defaultRequestEmptyCategory);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequestEmptyCategory,
-      });
+      const result = CreateCaseUserActionSchema.safeParse(defaultRequestEmptyCategory);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequestEmptyCategory);
     });
 
     it('string category is decoded properly', () => {
@@ -67,12 +61,9 @@ describe('Create case', () => {
         payload: { ...defaultRequest.payload, category: 'sci-fi' },
       };
 
-      const query = CreateCaseUserActionRt.decode(defaultRequestStringCategory);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequestStringCategory,
-      });
+      const result = CreateCaseUserActionSchema.safeParse(defaultRequestStringCategory);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequestStringCategory);
     });
 
     it('customFields are decoded correctly', () => {
@@ -94,37 +85,29 @@ describe('Create case', () => {
         payload: { ...defaultRequest.payload, customFields },
       };
 
-      const query = CreateCaseUserActionRt.decode(defaultRequestWithCustomFields);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequestWithCustomFields,
-      });
+      const result = CreateCaseUserActionSchema.safeParse(defaultRequestWithCustomFields);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequestWithCustomFields);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = CreateCaseUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = CreateCaseUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = CreateCaseUserActionRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = CreateCaseUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('CreateCaseUserActionWithoutConnectorIdRt', () => {
+  describe('CreateCaseUserActionWithoutConnectorIdSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.create_case,
       payload: {
@@ -152,12 +135,9 @@ describe('Create case', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = CreateCaseUserActionWithoutConnectorIdSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('empty category in request', () => {
@@ -166,12 +146,10 @@ describe('Create case', () => {
         payload: { ...defaultRequest.payload, category: null },
       };
 
-      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(requestWithEmptyCategory);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithEmptyCategory,
-      });
+      const result =
+        CreateCaseUserActionWithoutConnectorIdSchema.safeParse(requestWithEmptyCategory);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(requestWithEmptyCategory);
     });
 
     it('string category in request', () => {
@@ -180,12 +158,10 @@ describe('Create case', () => {
         payload: { ...defaultRequest.payload, category: 'romance' },
       };
 
-      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(requestWithStringCategory);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithStringCategory,
-      });
+      const result =
+        CreateCaseUserActionWithoutConnectorIdSchema.safeParse(requestWithStringCategory);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(requestWithStringCategory);
     });
 
     it('customFields are decoded correctly', () => {
@@ -207,36 +183,30 @@ describe('Create case', () => {
         payload: { ...defaultRequest.payload, customFields },
       };
 
-      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(defaultRequestWithCustomFields);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequestWithCustomFields,
-      });
+      const result = CreateCaseUserActionWithoutConnectorIdSchema.safeParse(
+        defaultRequestWithCustomFields
+      );
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequestWithCustomFields);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = CreateCaseUserActionWithoutConnectorIdRt.decode({
+    it('strips unknown fields', () => {
+      const result = CreateCaseUserActionWithoutConnectorIdSchema.safeParse({
         ...defaultRequest,
         foo: 'bar',
       });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = CreateCaseUserActionWithoutConnectorIdRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = CreateCaseUserActionWithoutConnectorIdSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

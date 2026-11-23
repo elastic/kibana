@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { useWorkers } from '../hooks/use_workers_api';
 import { useInvestigationsCount } from '../hooks/use_investigations_api';
 import { ConversationsPage } from './conversations';
@@ -67,11 +67,10 @@ export const LandingPage: React.FC = () => {
   // resolution; after the onboarding decision is latched we render directly.
   if (decision === null && isUnresolved) {
     return (
-      <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiEmptyPrompt
+        data-test-subj="alertZeroLandingLoading"
+        icon={<EuiLoadingSpinner size="xl" />}
+      />
     );
   }
 

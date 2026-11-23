@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux-v7';
@@ -52,7 +51,7 @@ type MockResolverProps = {
 } & ResolverProps;
 
 /**
- * This is a mock Resolver component. It is intended to be used with `enzyme` tests via the `Simulator` class. It wraps Resolver in the required providers:
+ * This is a mock Resolver component. It is intended to be used with tests via the `Simulator` class. It wraps Resolver in the required providers:
  *  * `i18n`
  *  * `Router` using a provided `History`
  *  * `SideEffectContext.Provider` using side effect simulator it creates
@@ -70,7 +69,7 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
   const [resolverElement, setResolverElement] = useState<HTMLDivElement | null>(null);
 
   // Get a ref to the underlying Resolver element so we can resize.
-  // Use a callback function because the underlying DOM node can change. In fact, `enzyme` seems to change it a lot.
+  // Use a callback function because the underlying DOM node can change.
   const resolverRef = useCallback((element: HTMLDivElement | null) => {
     setResolverElement(element);
   }, []);
@@ -100,28 +99,25 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
       <I18nProvider>
         <Router history={props.history}>
           <KibanaContextProvider services={props.coreStart}>
-            <ExpandableFlyoutProvider>
-              <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
-                <Provider store={props.store}>
-                  <>
-                    <ResolverWithoutProviders
-                      ref={resolverRef}
-                      databaseDocumentID={props.databaseDocumentID}
-                      resolverComponentInstanceID={props.resolverComponentInstanceID}
-                      indices={props.indices}
-                      shouldUpdate={props.shouldUpdate}
-                      filters={props.filters}
-                      useLegacyExpandableFlyout={props.useLegacyExpandableFlyout}
-                      renderCellActions={props.renderCellActions}
-                    />
-                    <DetailsPanel
-                      renderCellActions={props.renderCellActions}
-                      resolverComponentInstanceID={props.resolverComponentInstanceID}
-                    />
-                  </>
-                </Provider>
-              </SideEffectContext.Provider>
-            </ExpandableFlyoutProvider>
+            <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
+              <Provider store={props.store}>
+                <>
+                  <ResolverWithoutProviders
+                    ref={resolverRef}
+                    databaseDocumentID={props.databaseDocumentID}
+                    resolverComponentInstanceID={props.resolverComponentInstanceID}
+                    indices={props.indices}
+                    shouldUpdate={props.shouldUpdate}
+                    filters={props.filters}
+                    renderCellActions={props.renderCellActions}
+                  />
+                  <DetailsPanel
+                    renderCellActions={props.renderCellActions}
+                    resolverComponentInstanceID={props.resolverComponentInstanceID}
+                  />
+                </>
+              </Provider>
+            </SideEffectContext.Provider>
           </KibanaContextProvider>
         </Router>
       </I18nProvider>

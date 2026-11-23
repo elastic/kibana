@@ -113,6 +113,8 @@ export interface DiscoveryScenario {
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
+  /** Restricts the continuation paths replayed for this scenario; every path runs when omitted. */
+  continuationPaths?: readonly string[];
   output: {
     criteria: SamplingCriterion[];
     expected_min_evidence_count?: number;

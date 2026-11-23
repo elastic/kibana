@@ -80,6 +80,7 @@ import {
   fromColorByValueLensStateToAPI,
   fromStaticColorAPIToLensState,
   fromStaticColorLensStateToAPI,
+  getSingleValuePercentColor,
   isColorByValueColor,
   isNoColor,
   NO_COLOR,
@@ -371,11 +372,18 @@ function fromCompareLensStateToAPI(
   };
 }
 
+// The runtime only draws the bar when `showBar` is set and there is a max (`showingBar`). The max
+// of a hidden bar isn't drawn, so it isn't persisted in the API, where it only exists inside the bar.
+const getShownBarMaxAccessor = (visualization: MetricVisualizationState) =>
+  visualization.showBar ? visualization.maxAccessor : undefined;
+
 function buildFromTextBasedLayer(
   layer: TextBasedLayer,
   metricAccessor: string,
   visualization: MetricVisualizationState
 ): WritableMetricConfigWithoutDataset {
+  const shownMaxAccessor = getShownBarMaxAccessor(visualization);
+
   return enrichConfigurationWithVisualizationProperties(
     {
       type: 'metric',
@@ -384,11 +392,11 @@ function buildFromTextBasedLayer(
         {
           type: 'primary',
           ...getValueApiColumn(metricAccessor, layer),
-          ...(visualization.maxAccessor
+          ...(shownMaxAccessor
             ? {
                 background_chart: {
                   type: 'bar',
-                  max_value: getValueApiColumn(visualization.maxAccessor, layer),
+                  max_value: getValueApiColumn(shownMaxAccessor, layer),
                   ...(visualization.progressDirection
                     ? { orientation: visualization.progressDirection }
                     : {}),
@@ -426,9 +434,8 @@ function buildFromFormBasedLayer(
     throw Error('The primary metric must refer to a metric operation.');
   }
 
-  const maxValue = visualization.maxAccessor
-    ? operationFromColumn(visualization.maxAccessor, layer)
-    : undefined;
+  const shownMaxAccessor = getShownBarMaxAccessor(visualization);
+  const maxValue = shownMaxAccessor ? operationFromColumn(shownMaxAccessor, layer) : undefined;
 
   if (maxValue && isAPIColumnOfBucketType(maxValue)) {
     throw Error('The max value must refer to a metric operation.');
@@ -467,7 +474,7 @@ function buildFromFormBasedLayer(
     metrics.push(secondaryMetric);
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   const breakdown_by = visualization.breakdownByAccessor
     ? operationFromColumn(visualization.breakdownByAccessor, layer)
     : undefined;
@@ -526,16 +533,22 @@ function enrichConfigurationWithVisualizationProperties(
     // The color/palette is derived from its own state presence, mirroring rendering: a color/palette
     // set without `apply_color_to` still paints the background.
     if (visualization.palette) {
-      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
+      const colorByValue = fromColorByValueLensStateToAPI(
+        visualization.palette,
+        LENS_METRIC_DEFAULT_COLOR_STEPS
+      );
       // A percentage-ranged palette (custom or named) only makes sense when there is a data range
       // to color against: a breakdown or a max (bar background). On a single value with neither,
-      // only an absolute-ranged palette (`rangeType: 'number'`) is acceptable; otherwise the
-      // coloring is dropped entirely (the palette falls back to AUTO).
+      // only an absolute-ranged palette (`rangeType: 'number'`) is acceptable. If rangeType is `'percent'`,
+      // we attempt to resolve to the equivalent static color, else coloring is dropped entirely (i.e. AUTO_COLOR).
       const isPercentagePalette = visualization.palette.params?.rangeType === 'percent';
-      const isSingleValue = !state.breakdown_by && !visualization.maxAccessor;
+      const isSingleValue = !state.breakdown_by && !getShownBarMaxAccessor(visualization);
       const hasInvalidRangeType = isPercentagePalette && isSingleValue;
 
-      primaryMetric.color = colorByValue && !hasInvalidRangeType ? colorByValue : AUTO_COLOR;
+      primaryMetric.color = hasInvalidRangeType
+        ? fromStaticColorLensStateToAPI(getSingleValuePercentColor(visualization.palette)) ??
+          AUTO_COLOR
+        : colorByValue ?? AUTO_COLOR;
     } else if (visualization.color) {
       primaryMetric.color = fromStaticColorLensStateToAPI(visualization.color);
     } else {
@@ -880,6 +893,10 @@ export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithou
   // For ES|QL metric charts with trendlines, create the trendline text-based layer.
   // buildDatasourceStates only creates the main layer; the trendline needs its own
   // layer with a BUCKET() time-bucketing query.
+  //
+  // If the query has no time field, skip the layer only — keep the visualization
+  // trendline accessors. Lens hydration rebuilds the layer after DataViews provide
+  // timeField. Clearing accessors here would drop the sparkline for good.
   const trendlineLayerId = (visualization as MetricVisualizationState).trendlineLayerId;
   const mainLayer = layers.textBased?.layers?.[DEFAULT_LAYER_ID];
   if (trendlineLayerId && isEsqlLayerWithIndex(mainLayer)) {

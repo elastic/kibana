@@ -16,6 +16,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { NoDataCardKibanaProvider } from '@kbn/shared-ux-card-no-data';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { getMockDependencies } from './fixtures/get_mock_dependencies';
 
 interface CspAppDeps {
@@ -45,9 +46,11 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
         <NoDataCardKibanaProvider coreStart={core}>
           <Router history={params.history}>
             <I18nProvider>
-              <Routes>
-                <Route path="*" render={() => <>{children}</>} />
-              </Routes>
+              <MockAppHeaderProvider>
+                <Routes>
+                  <Route path="*" render={() => <>{children}</>} />
+                </Routes>
+              </MockAppHeaderProvider>
             </I18nProvider>
           </Router>
         </NoDataCardKibanaProvider>

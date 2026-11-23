@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
@@ -38,13 +39,9 @@ const CASE_PAYLOAD = {
   owner: OBSERVABILITY_OWNER,
 };
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic).
- */
 test.describe(
   'Observability Alerting - add to case for classic alerts',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     let ruleId: string;
 

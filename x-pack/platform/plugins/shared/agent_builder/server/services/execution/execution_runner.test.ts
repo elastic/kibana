@@ -32,18 +32,35 @@ import {
   type RoundCompleteEvent,
   type RoundInterruptedEvent,
   type RoundStartedEvent,
+  type UserIdAndName,
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
   DEFAULT_CONVERSATION_TITLE,
+  ExecutionStatus,
 } from '@kbn/agent-builder-common';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type {
+  ConversationAgentExecution,
+  StoredConversationExecutionParams,
+} from '@kbn/agent-builder-server';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { UserAttributes } from '@kbn/inference-tracing';
 import { collectAndWriteEvents, handleAgentExecution, setUserAttributes } from './execution_runner';
 import {
+  createAgentsServiceStartMock,
   createConversationClientMock,
   createEmptyConversation,
+  createMockedAgentRegistry,
+  createMockedInternalAgent,
   createRound,
 } from '../../test_utils';
+import { resolveServices as actualResolveServices } from './utils/resolve_services';
 import { pausedAndResumedRoundTimeline } from '../../test_utils/timeline';
 import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { executeAgent$, generateTitle, resolveServices } from './utils';
@@ -203,7 +220,7 @@ const stubResolveServices = (
 ): void => {
   resolveServicesMock.mockResolvedValue({
     conversationClient,
-    selectedConnectorId: 'connector-1',
+    defaultModel: { connectorId: 'connector-1' },
     modelProvider: createModelProviderMock(),
   } as never);
 };
@@ -286,12 +303,9 @@ describe('handleAgentExecution', () => {
     );
   });
 
-  it('runs a standalone execution with the reasoning level returned by resolveServices', async () => {
-    resolveServicesMock.mockResolvedValue({
-      selectedConnectorId: 'connector-1',
-      modelProvider: createModelProviderMock(),
-      reasoningLevel: 'high',
-    } as never);
+  it('forwards the caller reasoningLevel to the agent run unchanged', async () => {
+    const conversationClient = createConversationClientMock();
+    stubResolveServices(conversationClient);
     executeAgentMock.mockReturnValue(
       of({
         type: ChatEventType.messageComplete,
@@ -309,57 +323,157 @@ describe('handleAgentExecution', () => {
           reasoningLevel: 'low',
         },
       } as never,
-      deps: createDeps({ conversationClient: createConversationClientMock() }),
+      deps: createDeps({ conversationClient }),
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(resolveServicesMock).toHaveBeenCalledTimes(1);
+    expect(resolveServicesMock.mock.calls[0][0]).not.toHaveProperty('reasoningLevel');
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reasoningLevel: 'low' })
+    );
+  });
+
+  it('passes the resolved defaultModel to the agent run', async () => {
+    const conversationClient = createConversationClientMock();
+    resolveServicesMock.mockResolvedValue({
+      defaultModel: { featureId: 'my_feature' },
+      modelProvider: createModelProviderMock(),
+    } as never);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.messageComplete,
+        data: { message_id: 'm-1', message_content: '' },
+      } as ChatAgentEvent)
+    );
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.standalone,
+        agentId: 'test-agent',
+        agentParams: {
+          nextInput: { message: 'summarize' },
+          connectorId: 'connector-1',
+          inferenceFeatureId: 'my_feature',
+        },
+      } as never,
+      deps: createDeps({ conversationClient }),
       request: { headers: {} } as never,
       abortSignal: new AbortController().signal,
     });
     await lastValueFrom(events$.pipe(toArray()));
 
     expect(resolveServicesMock).toHaveBeenCalledWith(
-      expect.objectContaining({ agentId: 'test-agent', reasoningLevel: 'low' })
+      expect.objectContaining({
+        agentId: 'test-agent',
+        connectorId: 'connector-1',
+        inferenceFeatureId: 'my_feature',
+      })
     );
     expect(executeAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ reasoningLevel: 'high' })
+      expect.objectContaining({ defaultModel: { featureId: 'my_feature' } })
     );
+    expect(executeAgentMock.mock.calls[0][0]).not.toHaveProperty('defaultConnectorId');
   });
 
-  it('runs a conversation execution with the reasoning level returned by resolveServices', async () => {
+  it('passes the resolved defaultModel to a conversation run', async () => {
     const conversation = createEmptyConversation({
       id: 'conversation-1',
-      title: 'Existing conversation',
       agent_id: 'test-agent',
+      user: { id: 'owner-id', username: 'owner' },
     });
     const conversationClient = createConversationClientMock();
     conversationClient.get.mockResolvedValue(conversation);
-    conversationClient.update.mockResolvedValue(conversation);
+    conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
     resolveServicesMock.mockResolvedValue({
-      selectedConnectorId: 'connector-1',
+      defaultModel: { featureId: 'my_feature' },
       modelProvider: createModelProviderMock(),
-      reasoningLevel: 'high',
     } as never);
-    executeAgentMock.mockReturnValue(
-      of({
-        type: ChatEventType.roundComplete,
-        data: { round: createRound({}) },
-      } as RoundCompleteEvent)
-    );
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
 
     const events$ = await runHandle({
-      agentParams: {
-        agentId: 'test-agent',
-        nextInput: { message: 'Hello' },
-        reasoningLevel: 'low',
-      },
+      agentParams: { inferenceFeatureId: 'my_feature' },
       conversationClient,
     });
     await lastValueFrom(events$.pipe(toArray()));
 
     expect(resolveServicesMock).toHaveBeenCalledWith(
-      expect.objectContaining({ agentId: 'test-agent', reasoningLevel: 'low' })
+      expect.objectContaining({ inferenceFeatureId: 'my_feature' })
     );
     expect(executeAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ reasoningLevel: 'high' })
+      expect.objectContaining({ defaultModel: { featureId: 'my_feature' } })
     );
+  });
+
+  describe('model source of a stored execution', () => {
+    afterEach(() => {
+      resolveServicesMock.mockReset();
+    });
+
+    // Runs the real `resolveServices` against a stored record, so the source handed to the run is
+    // the one derived from `agent_params`, not a stub.
+    const runStoredStandaloneExecution = async (agentParams: Record<string, unknown>) => {
+      const agentRegistry = createMockedAgentRegistry();
+      agentRegistry.get.mockResolvedValue(createMockedInternalAgent({ id: 'test-agent' }));
+      const agentService = createAgentsServiceStartMock();
+      agentService.getRegistry.mockResolvedValue(agentRegistry);
+      const getForFeature: jest.MockedFn<
+        SearchInferenceEndpointsPluginStart['endpoints']['getForFeature']
+      > = jest.fn();
+      resolveServicesMock.mockImplementation(actualResolveServices);
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.messageComplete,
+          data: { message_id: 'm-1', message_content: '' },
+        } as ChatAgentEvent)
+      );
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.standalone,
+          agentId: 'test-agent',
+          agentParams: { nextInput: { message: 'summarize' }, ...agentParams },
+        } as never,
+        deps: {
+          ...(createDeps({ conversationClient: createConversationClientMock() }) as object),
+          agentService,
+          inference: inferenceMock.createStartContract(),
+          searchInferenceEndpoints: { endpoints: { getForFeature } },
+          security: securityServiceMock.createStart(),
+          elasticsearch: elasticsearchServiceMock.createStart(),
+        } as never,
+        request: httpServerMock.createKibanaRequest(),
+        abortSignal: new AbortController().signal,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+      return { getForFeature };
+    };
+
+    it('runs a stored execution without inferenceFeatureId on the connector path', async () => {
+      const { getForFeature } = await runStoredStandaloneExecution({
+        connectorId: 'connector-1',
+      });
+
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ defaultModel: { connectorId: 'connector-1' } })
+      );
+      expect(getForFeature).not.toHaveBeenCalled();
+    });
+
+    it('runs a stored execution carrying inferenceFeatureId on the feature path', async () => {
+      const { getForFeature } = await runStoredStandaloneExecution({
+        inferenceFeatureId: 'my_feature',
+      });
+
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ defaultModel: { featureId: 'my_feature' } })
+      );
+      expect(getForFeature).not.toHaveBeenCalled();
+    });
   });
 
   it('loads tracing privacy settings from the request-scoped saved objects client', async () => {
@@ -466,7 +580,7 @@ describe('handleAgentExecution', () => {
     executeAgentMock.mockReturnValue(of(roundCompleteEvent));
     resolveServicesMock.mockResolvedValue({
       conversationClient,
-      selectedConnectorId: 'connector-1',
+      defaultModel: { connectorId: 'connector-1' },
       modelProvider: createModelProviderMock(),
     } as never);
 
@@ -760,7 +874,7 @@ describe('handleAgentExecution', () => {
       executeAgentMock.mockReturnValue(of(roundCompleteEvent));
       resolveServicesMock.mockResolvedValue({
         conversationClient,
-        selectedConnectorId: 'connector-1',
+        defaultModel: { connectorId: 'connector-1' },
         modelProvider: createModelProviderMock(),
       } as never);
 
@@ -816,8 +930,48 @@ describe('handleAgentExecution', () => {
   });
 
   describe('round author attribution', () => {
-    it('attributes the round to the user the execution was created for', async () => {
-      const author = { id: 'test-user-id', username: 'test_user' };
+    const createConversationExecution = ({
+      owner,
+      agentParams,
+    }: {
+      owner: UserIdAndName;
+      agentParams?: Partial<StoredConversationExecutionParams>;
+    }): ConversationAgentExecution => ({
+      executionId: 'execution-1',
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+      status: ExecutionStatus.running,
+      agentId: 'test-agent',
+      spaceId: 'default',
+      owner,
+      eventCount: 0,
+      events: [],
+      executionMode: AgentExecutionMode.conversation,
+      agentParams: {
+        agentId: 'test-agent',
+        conversationId: 'conversation-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+        nextInput: { message: 'Hello' },
+        ...agentParams,
+      },
+    });
+
+    /**
+     * Runs one round to completion for `owner`, optionally with a stored author decoration and
+     * with the author the conversation client should resolve to. Returns the mocks to assert on.
+     */
+    const runRound = async ({
+      owner,
+      requestAuthor,
+      resolvedAuthor,
+      exposeConversationClient = true,
+    }: {
+      owner: UserIdAndName;
+      requestAuthor?: StoredConversationExecutionParams['author'];
+      resolvedAuthor?: ReturnType<ReturnType<typeof createConversationClientMock>['getAuthor']>;
+      exposeConversationClient?: boolean;
+    }) => {
       const conversation = createEmptyConversation({
         id: 'conversation-1',
         agent_id: 'test-agent',
@@ -825,7 +979,9 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
-      conversationClient.getAuthor.mockReturnValue(author);
+      if (resolvedAuthor) {
+        conversationClient.getAuthor.mockReturnValue(resolvedAuthor);
+      }
 
       executeAgentMock.mockReturnValue(
         of({
@@ -834,35 +990,53 @@ describe('handleAgentExecution', () => {
         } as RoundCompleteEvent)
       );
       resolveServicesMock.mockResolvedValue({
-        conversationClient,
-        selectedConnectorId: 'connector-1',
+        ...(exposeConversationClient ? { conversationClient } : {}),
+        defaultModel: { connectorId: 'connector-1' },
         modelProvider: createModelProviderMock(),
       } as never);
 
       const deps = createDeps({ conversationClient });
 
       const events$ = await handleAgentExecution({
-        execution: {
-          executionId: 'execution-1',
-          executionMode: AgentExecutionMode.conversation,
-          owner: author,
-          agentParams: {
-            agentId: 'test-agent',
-            conversationId: 'conversation-1',
-            roundId: 'round-1',
-            conversationOperation: 'UPDATE',
-            receivedAt: '2024-01-01T00:00:00.000Z',
-            nextInput: { message: 'Hello' },
-          },
-        } as never,
+        execution: createConversationExecution({
+          owner,
+          agentParams: requestAuthor ? { author: requestAuthor } : {},
+        }),
         deps,
-        request: { headers: {} } as never,
+        request: httpServerMock.createKibanaRequest(),
         abortSignal: new AbortController().signal,
       });
-
       await lastValueFrom(events$.pipe(toArray()));
 
+      return { conversationClient, deps };
+    };
+
+    it('attributes the round to the user the execution was created for', async () => {
+      const author = { id: 'test-user-id', username: 'test_user' };
+
+      await runRound({ owner: author, resolvedAuthor: author });
+
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
+    });
+
+    it('passes the stored author decoration to the conversation client', async () => {
+      const owner = {
+        id: 'service_account:kibana/alertzero-workers',
+        username: 'kibana/alertzero-workers',
+        type: 'service_account' as const,
+      };
+      const decoration = { full_name: 'Attack Discovery Review' };
+
+      const { conversationClient } = await runRound({
+        owner,
+        requestAuthor: decoration,
+        resolvedAuthor: { ...owner, ...decoration },
+      });
+
+      expect(conversationClient.getAuthor).toHaveBeenCalledWith(undefined, decoration);
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ author: { ...owner, ...decoration } })
+      );
     });
 
     it('acts as the execution owner, keeping a service account typed', async () => {
@@ -871,44 +1045,8 @@ describe('handleAgentExecution', () => {
         username: 'kibana/automation',
         type: 'service_account' as const,
       };
-      const conversation = createEmptyConversation({
-        id: 'conversation-1',
-        agent_id: 'test-agent',
-      });
-      const conversationClient = createConversationClientMock();
-      conversationClient.get.mockResolvedValue(conversation);
-      conversationClient.update.mockResolvedValue(conversation);
-      executeAgentMock.mockReturnValue(
-        of({
-          type: ChatEventType.roundComplete,
-          data: { round: createRound({}) },
-        } as RoundCompleteEvent)
-      );
-      resolveServicesMock.mockResolvedValue({
-        selectedConnectorId: 'connector-1',
-        modelProvider: createModelProviderMock(),
-      } as never);
-      const deps = createDeps({ conversationClient });
 
-      const events$ = await handleAgentExecution({
-        execution: {
-          executionId: 'execution-1',
-          executionMode: AgentExecutionMode.conversation,
-          owner,
-          agentParams: {
-            agentId: 'test-agent',
-            conversationId: 'conversation-1',
-            roundId: 'round-1',
-            conversationOperation: 'UPDATE',
-            receivedAt: '2024-01-01T00:00:00.000Z',
-            nextInput: { message: 'Hello' },
-          },
-        } as never,
-        deps,
-        request: { headers: {} } as never,
-        abortSignal: new AbortController().signal,
-      });
-      await lastValueFrom(events$.pipe(toArray()));
+      const { deps } = await runRound({ owner, exposeConversationClient: false });
 
       const { conversationService } = deps as unknown as {
         conversationService: { getScopedClientAsUser: jest.Mock };
@@ -940,7 +1078,7 @@ describe('handleAgentExecution', () => {
       );
       resolveServicesMock.mockResolvedValue({
         conversationClient,
-        selectedConnectorId: 'connector-1',
+        defaultModel: { connectorId: 'connector-1' },
         modelProvider: createModelProviderMock(),
       } as never);
 
@@ -1596,6 +1734,11 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(conversationClient.replaceRoundEvents.mock.calls[0][0]).not.toHaveProperty(
       'skipIfTerminalExistsFor'
     );
+    // the terminal write releases this execution as the active execution
+    expect(conversationClient.replaceRoundEvents.mock.calls[0][0].activeExecution).toEqual({
+      action: 'release',
+      executionId: 'execution-1',
+    });
     expect(seen.map((event) => event.type)).toContain(TimelineEventType.executionTerminated);
     expect(seen.map((event) => event.type)).not.toContain(TimelineEventType.executionAborted);
   });

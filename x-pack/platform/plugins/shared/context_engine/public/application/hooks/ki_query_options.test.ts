@@ -26,7 +26,7 @@ describe('createKiQueryOptions', () => {
       'ki',
       'ai-index-idx-sample-ki',
       'ki-1',
-      'active,deleted',
+      'active,deleted,verification_failed',
     ]);
     expect(options.staleTime).toBe(VIEW_KI_QUERY_STALE_TIME_MS);
   });

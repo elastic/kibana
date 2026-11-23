@@ -5,8 +5,27 @@
  * 2.0.
  */
 
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
-import { fetchTriageAlerts, listLiveExecutionIds, loadAlertsByIds, tagAlerts } from './ports';
+import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
+import {
+  closeStillOpenAlertsAsFalsePositive,
+  countClosedByDecision,
+  fetchDecisionCandidates,
+  type DecisionCursor,
+  fetchTriageAlerts,
+  findAlertIdsByTag,
+  findAlertIdsClosedAsOther,
+  findAlertsNotClosedAsFalsePositive,
+  findKeyTagsWithVerdicts,
+  findAlertIdsWithTag,
+  findOpenAlertIds,
+  listLiveExecutionIds,
+  loadAlertsByIds,
+  readKeyHistory,
+  tagAlerts,
+  type TriageFilters,
+} from './ports';
 
 const tagWith = (body: Record<string, unknown>) => {
   const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body });
@@ -49,6 +68,61 @@ describe('tagAlerts', () => {
   });
 });
 
+describe('tagAlerts on a version conflict', () => {
+  const conflict = () =>
+    new KibanaApiCallError({
+      status: 409,
+      headers: {},
+      body: { version_conflicts: 1 },
+      message: 'HTTP 409: version_conflict_engine_exception',
+    });
+  const ok = { status: 200, headers: {}, body: { updated: 2, timed_out: false, failures: [] } };
+  const run = (callKibanaApi: jest.Mock) =>
+    tagAlerts({ callKibanaApi })({ alertIds: ['a1', 'a2'], add: ['t'], remove: [] });
+
+  it('repeats the call, so one alert another writer touched does not fail the sweep', async () => {
+    const callKibanaApi = jest.fn().mockRejectedValueOnce(conflict()).mockResolvedValue(ok);
+
+    await expect(run(callKibanaApi)).resolves.toBeUndefined();
+    expect(callKibanaApi).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up after three attempts', async () => {
+    const callKibanaApi = jest.fn().mockRejectedValue(conflict());
+
+    await expect(run(callKibanaApi)).rejects.toThrow('version_conflict');
+    expect(callKibanaApi).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not repeat any other error', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockRejectedValue(
+        new KibanaApiCallError({ status: 500, headers: {}, body: {}, message: 'HTTP 500' })
+      );
+
+    await expect(run(callKibanaApi)).rejects.toThrow('HTTP 500');
+    expect(callKibanaApi).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('readKeyHistory', () => {
+  it('counts the preserved model judgement as well as the legacy false-positive tag', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { aggregations: { verdicts: { buckets: {} } } },
+    });
+
+    await readKeyHistory({ callKibanaApi }, { strictKeyTags: ['k'], excludeIds: [], since: 0 });
+
+    const { aggs } = callKibanaApi.mock.calls[0][0].body;
+    expect(aggs.verdicts.filters.filters.falsePositive).toEqual({
+      terms: { 'kibana.alert.workflow_tags': ['az:false_positive', 'az:model_fp'] },
+    });
+  });
+});
+
 describe('listLiveExecutionIds', () => {
   it('lists the live execution ids of the batch workflow', async () => {
     const callKibanaApi = jest.fn().mockResolvedValue({
@@ -71,6 +145,56 @@ describe('listLiveExecutionIds', () => {
     await expect(listLiveExecutionIds({ callKibanaApi }, 'batch', logger)).resolves.toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('HTTP 403: Forbidden'));
+  });
+});
+
+describe('findKeyTagsWithVerdicts', () => {
+  const answer = (keys: string[]) => ({
+    status: 200,
+    headers: {},
+    body: { aggregations: { keys: { buckets: keys.map((key) => ({ key })) } } },
+  });
+
+  it('asks for alerts that carry a key tag and a verdict tag, and returns only the key tags', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue(answer(['k1']));
+
+    const found = await findKeyTagsWithVerdicts(
+      { callKibanaApi },
+      ['k1', 'k2'],
+      ['az:true_positive']
+    );
+
+    expect([...found]).toEqual(['k1']);
+    const { body } = callKibanaApi.mock.calls[0][0];
+    expect(body.query.bool.filter).toEqual([
+      { terms: { 'kibana.alert.workflow_tags': ['k1', 'k2'] } },
+      { terms: { 'kibana.alert.workflow_tags': ['az:true_positive'] } },
+    ]);
+    expect(body.aggs.keys.terms).toEqual(
+      expect.objectContaining({ include: ['k1', 'k2'], size: 2 })
+    );
+  });
+
+  it('searches many keys in chunks and joins the answers', async () => {
+    const keys = Array.from({ length: 1200 }, (_, index) => `k${index}`);
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValueOnce(answer(['k1']))
+      .mockResolvedValueOnce(answer(['k600']))
+      .mockResolvedValueOnce(answer([]));
+
+    const found = await findKeyTagsWithVerdicts({ callKibanaApi }, keys, ['az:inconclusive']);
+
+    expect(callKibanaApi).toHaveBeenCalledTimes(3);
+    expect([...found]).toEqual(['k1', 'k600']);
+  });
+
+  it('fails instead of reporting no verdicts when the response has no aggregation', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body: {} });
+
+    await expect(
+      findKeyTagsWithVerdicts({ callKibanaApi }, ['k1'], ['az:inconclusive'])
+    ).rejects.toThrow('Key verdicts missing');
   });
 });
 
@@ -113,12 +237,70 @@ describe('loadAlertsByIds', () => {
     ]);
   });
 
+  it('asks only for the loaded alert fields', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
+    await loadAlertsByIds({ callKibanaApi }, ['a1']);
+    expect(callKibanaApi.mock.calls[0][0].body._source).toEqual(LOADED_ALERT_FIELDS);
+  });
+
+  describe('with more ids than one search takes', () => {
+    const ids = Array.from({ length: 250 }, (_, index) => `a${index}`);
+    const hitsFor = (values: string[]) => values.map((_id) => ({ _id, _index: 'i', _source: {} }));
+
+    it('searches in chunks of 100 ids and returns one list', async () => {
+      const callKibanaApi = jest.fn().mockImplementation(async ({ body }) => ({
+        status: 200,
+        headers: {},
+        body: { hits: { hits: hitsFor(body.query.ids.values) } },
+      }));
+
+      const { alerts, missingAlertIds } = await loadAlertsByIds({ callKibanaApi }, ids);
+
+      expect(callKibanaApi.mock.calls.map(([{ body }]) => body.query.ids.values.length)).toEqual([
+        100, 100, 50,
+      ]);
+      expect(alerts).toHaveLength(250);
+      expect(missingAlertIds).toEqual([]);
+    });
+
+    it('reports an id that is missing from any chunk', async () => {
+      const callKibanaApi = jest.fn().mockImplementation(async ({ body }) => ({
+        status: 200,
+        headers: {},
+        body: {
+          hits: { hits: hitsFor(body.query.ids.values.filter((id: string) => id !== 'a150')) },
+        },
+      }));
+
+      const { missingAlertIds } = await loadAlertsByIds({ callKibanaApi }, ids);
+
+      expect(missingAlertIds).toEqual(['a150']);
+    });
+
+    it('fails the whole load when a chunk fails, so a partial list is never returned', async () => {
+      const callKibanaApi = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 200, headers: {}, body: { hits: { hits: [] } } })
+        .mockRejectedValueOnce(new Error('boom'));
+
+      await expect(loadAlertsByIds({ callKibanaApi }, ids)).rejects.toThrow('boom');
+    });
+  });
+
   it('reports the ids that could not be loaded', async () => {
     const { missingAlertIds } = await loadWith([{ _id: 'a1', _index: 'i', _source: {} }]);
 
     expect(missingAlertIds).toEqual(['gone']);
   });
 });
+
+const NO_FILTERS: TriageFilters = {
+  minSeverity: 'low',
+  excludeBuildingBlocks: false,
+  excludedRuleTags: [],
+};
 
 describe('fetchTriageAlerts', () => {
   const hit = (id: string, ruleId: string, riskScore: number) => ({
@@ -133,7 +315,12 @@ describe('fetchTriageAlerts', () => {
     },
   });
 
-  const fetchWith = (rules: Array<{ hits: unknown[] }>, claimedHits: unknown[] = []) => {
+  const fetchWith = (
+    rules: Array<{ hits: unknown[] }>,
+    claimedHits: unknown[] = [],
+    filters: Partial<TriageFilters> = {},
+    excludedClaimHits: unknown[] = []
+  ) => {
     const callKibanaApi = jest.fn().mockImplementation(async ({ body }) => ({
       status: 200,
       headers: {},
@@ -143,13 +330,58 @@ describe('fetchTriageAlerts', () => {
               rules: { buckets: rules.map(({ hits }) => ({ top: { hits: { hits } } })) },
             },
           }
-        : { hits: { hits: claimedHits } },
+        : {
+            hits: {
+              // Only the excluded-claims search negates conditions, so `must_not` tells them apart.
+              hits: JSON.stringify(body.query).includes('must_not')
+                ? excludedClaimHits
+                : claimedHits,
+            },
+          },
     }));
     return {
       callKibanaApi,
-      run: () => fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12')),
+      run: () =>
+        fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12'), {
+          ...NO_FILTERS,
+          ...filters,
+        }),
     };
   };
+
+  describe('detection of a rule that overrides the alert name', () => {
+    const overridden = (source: Record<string, unknown>) => ({
+      _id: 'd1',
+      _source: {
+        ...hit('d1', 'endpoint-rule', 50)._source,
+        'kibana.alert.rule.rule_name_override': 'message',
+        ...source,
+      },
+    });
+    const detectionOf = async (alertHit: unknown) =>
+      (await fetchWith([{ hits: [alertHit] }]).run())[0].detection;
+
+    it('is the Defend rule.id', async () => {
+      expect(await detectionOf(overridden({ 'rule.id': 'def-1', 'event.code': 'malware' }))).toBe(
+        'def-1'
+      );
+    });
+
+    it('falls back to event.code when rule.id is missing', async () => {
+      expect(await detectionOf(overridden({ 'event.code': 'shellcode_thread' }))).toBe(
+        'shellcode_thread'
+      );
+    });
+
+    it('is absent for a rule without a name override, whatever the event carries', async () => {
+      expect(
+        await detectionOf({
+          ...hit('d1', 'r', 1),
+          _source: { ...hit('d1', 'r', 1)._source, 'rule.id': 'x' },
+        })
+      ).toBeUndefined();
+    });
+  });
 
   // One rule with a large backlog used to fill the single global top-10,000 result, so quieter
   // rules never reached the planner and its fair split had nothing to share out.
@@ -209,13 +441,420 @@ describe('fetchTriageAlerts', () => {
     expect(JSON.stringify(claimed.query)).not.toContain('range');
   });
 
+  // A claim left by a failed or canceled batch is re-planned when its batch is gone. If the user has
+  // since raised the severity floor or excluded the rule's tag, that must not start a new batch.
+  it('flags a claimed alert the settings now exclude, and leaves the other claims alone', async () => {
+    const stale = hit('claimed-low', 'rule-1', 10);
+    const kept = hit('claimed-high', 'rule-2', 90);
+    const { run, callKibanaApi } = fetchWith(
+      [{ hits: [] }],
+      [stale, kept],
+      { minSeverity: 'high' },
+      [stale]
+    );
+
+    const alerts = await run();
+
+    expect(alerts.map(({ id, excludedBySettings }) => [id, excludedBySettings])).toEqual([
+      ['claimed-low', true],
+      ['claimed-high', undefined],
+    ]);
+    const excludedSearch = callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .find(({ aggs, query }) => aggs === undefined && JSON.stringify(query).includes('must_not'));
+    expect(excludedSearch.query.bool.filter).toContainEqual({
+      term: { 'kibana.alert.workflow_tags': 'az:triage_pending' },
+    });
+    expect(excludedSearch.query.bool.must_not).toEqual([
+      {
+        bool: {
+          filter: [{ terms: { 'kibana.alert.severity': ['high', 'critical'] } }],
+          must_not: [],
+        },
+      },
+    ]);
+  });
+
+  it('flags claims of excluded rule tags and building blocks the same way', async () => {
+    const stale = hit('claimed-tagged', 'rule-1', 10);
+    const { run } = fetchWith(
+      [{ hits: [] }],
+      [stale],
+      { excludeBuildingBlocks: true, excludedRuleTags: ['in-development'] },
+      [stale]
+    );
+
+    const [claimed] = await run();
+
+    expect(claimed.excludedBySettings).toBe(true);
+  });
+
+  it('does not run the excluded-claims search when the settings exclude nothing', async () => {
+    const { run, callKibanaApi } = fetchWith([{ hits: [] }], [hit('claimed-1', 'rule-1', 10)]);
+
+    await run();
+
+    const claimSearches = callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .filter(({ aggs }) => aggs === undefined);
+    expect(claimSearches).toHaveLength(1);
+  });
+
+  // Low severity is a signal, not something to triage: a minimum must keep those alerts from ever
+  // reaching a Worker, while the default must not hide any alert that has no severity.
+  it.each([
+    ['medium', ['medium', 'high', 'critical']],
+    ['high', ['high', 'critical']],
+    ['critical', ['critical']],
+  ] as const)('triages only %s and above when that is the minimum', async (min, expected) => {
+    const { run, callKibanaApi } = fetchWith([{ hits: [] }], [], { minSeverity: min });
+
+    await run();
+
+    const unclaimed = callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .find(({ aggs }) => aggs !== undefined);
+    expect(unclaimed.query.bool.filter).toContainEqual({
+      terms: { 'kibana.alert.severity': expected },
+    });
+  });
+
+  it('adds no severity clause at the lowest minimum, and never filters claimed alerts', async () => {
+    const { run, callKibanaApi } = fetchWith([{ hits: [] }]);
+
+    await run();
+
+    expect(JSON.stringify(callKibanaApi.mock.calls.map(([{ body }]) => body.query))).not.toContain(
+      'kibana.alert.severity'
+    );
+    const medium = fetchWith([{ hits: [] }], [], { minSeverity: 'medium' });
+    await medium.run();
+    const claimed = medium.callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .find(({ aggs }) => aggs === undefined);
+    expect(JSON.stringify(claimed.query)).not.toContain('kibana.alert.severity');
+  });
+
+  // A sequence's own alert is not a building block, so excluding them leaves sequences triaged.
+  it('keeps building-block alerts and tagged rules out of the unclaimed search only when asked', async () => {
+    const off = fetchWith([{ hits: [] }]);
+    await off.run();
+    const on = fetchWith([{ hits: [] }], [], {
+      excludeBuildingBlocks: true,
+      excludedRuleTags: ['SEND_TO_DEV'],
+    });
+    await on.run();
+
+    const bodies = (calls: jest.Mock['mock']['calls']) => calls.map(([{ body }]) => body);
+    const unclaimed = (calls: jest.Mock['mock']['calls']) =>
+      bodies(calls).find(({ aggs }) => aggs !== undefined);
+    const claimed = (calls: jest.Mock['mock']['calls']) =>
+      bodies(calls).find(({ aggs }) => aggs === undefined);
+    expect(JSON.stringify(unclaimed(off.callKibanaApi.mock.calls).query)).not.toContain(
+      'building_block_type'
+    );
+    expect(unclaimed(on.callKibanaApi.mock.calls).query.bool.must_not).toEqual(
+      expect.arrayContaining([
+        { exists: { field: 'kibana.alert.building_block_type' } },
+        { terms: { 'kibana.alert.rule.tags': ['SEND_TO_DEV'] } },
+      ])
+    );
+    expect(JSON.stringify(claimed(on.callKibanaApi.mock.calls).query)).not.toContain(
+      'building_block_type'
+    );
+  });
+
   it('fails rather than reading a response without the per-rule alerts as an idle queue', async () => {
     const callKibanaApi = jest
       .fn()
       .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
 
     await expect(
-      fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12'))
+      fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12'), NO_FILTERS)
     ).rejects.toThrow('Per-rule alerts missing');
+  });
+});
+
+describe('fetchDecisionCandidates', () => {
+  const run = (hits: unknown[], filters: Partial<TriageFilters> = {}, after?: DecisionCursor) => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits } } });
+    return {
+      callKibanaApi,
+      run: () =>
+        fetchDecisionCandidates(
+          { callKibanaApi },
+          'alert_analysis:',
+          Date.parse('2026-10-12'),
+          { ...NO_FILTERS, ...filters },
+          { after }
+        ),
+    };
+  };
+
+  it('returns each hit as an id, the fields a key reads and its severity', async () => {
+    const { run: fetch } = run([
+      { _id: 'a', _source: { 'kibana.alert.severity': 'low', process: { executable: 'x' } } },
+      { _id: 'b', _source: { process: { executable: 'y' } } },
+    ]);
+
+    const { candidates, after } = await fetch();
+
+    expect(candidates).toEqual([
+      { id: 'a', doc: expect.objectContaining({ process: { executable: 'x' } }), severity: 'low' },
+      { id: 'b', doc: expect.objectContaining({ process: { executable: 'y' } }) },
+    ]);
+    expect(after).toBeUndefined();
+  });
+
+  it("fetches the signers' trust flags, without which `on` would hold every signed match", async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    expect(callKibanaApi.mock.calls[0][0].body._source).toEqual(
+      expect.arrayContaining(['process.code_signature.trusted', 'dll.code_signature.trusted'])
+    );
+  });
+
+  const fullPage = (timestampOf: (i: number) => number) =>
+    Array.from({ length: ALERT_FETCH_LIMIT }, (_unused, i) => ({
+      _id: `a${i}`,
+      _source: {},
+      sort: [timestampOf(i), `uuid-${i}`],
+    }));
+
+  it('hands back the cursor of a full page: the last timestamp and the ids read at it', async () => {
+    const { after } = await run(fullPage((i) => (i < ALERT_FETCH_LIMIT - 2 ? i : 9_999_999))).run();
+
+    expect(after).toEqual({
+      timestamp: 9_999_999,
+      seenIds: [`a${ALERT_FETCH_LIMIT - 2}`, `a${ALERT_FETCH_LIMIT - 1}`],
+    });
+  });
+
+  it('reads the next page from the cursor without `search_after`, which the alerts route drops', async () => {
+    const after = { timestamp: 5000, seenIds: ['a1', 'a2'] };
+    const next = run([], {}, after);
+
+    await next.run();
+
+    const { body } = next.callKibanaApi.mock.calls[0][0];
+    expect(body.search_after).toBeUndefined();
+    expect(body.query.bool.filter).toContainEqual({
+      range: { '@timestamp': { gte: 5000, format: 'epoch_millis' } },
+    });
+    expect(body.query.bool.must_not).toContainEqual({ ids: { values: ['a1', 'a2'] } });
+  });
+
+  it('keeps the ids read before when a whole page sits inside one timestamp', async () => {
+    const previous = { timestamp: 7000, seenIds: ['before'] };
+    const { after } = await run(
+      fullPage(() => 7000),
+      {},
+      previous
+    ).run();
+
+    expect(after?.timestamp).toBe(7000);
+    expect(after?.seenIds).toHaveLength(ALERT_FETCH_LIMIT + 1);
+    expect(after?.seenIds).toContain('before');
+  });
+
+  it('has no cursor on a short page', async () => {
+    const { after } = await run(fullPage((i) => i).slice(0, 5)).run();
+
+    expect(after).toBeUndefined();
+  });
+
+  it('searches oldest first with a tiebreaker, and reads only the fields it needs', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    expect(callKibanaApi).toHaveBeenCalledTimes(1);
+    const { body } = callKibanaApi.mock.calls[0][0];
+    expect(body.size).toBe(ALERT_FETCH_LIMIT);
+    expect(body.sort).toEqual([{ '@timestamp': 'asc' }, { 'kibana.alert.uuid': 'asc' }]);
+    expect(body._source).toEqual(
+      expect.arrayContaining(['kibana.alert.severity', 'process.executable'])
+    );
+    expect(body._source).not.toContain('message');
+  });
+
+  it('leaves out alerts already triaged, claimed, or tagged by a decision', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    const query = JSON.stringify(callKibanaApi.mock.calls[0][0].body.query);
+    expect(query).toContain('az:true_positive');
+    expect(query).toContain('alert_analysis:');
+    expect(query).toContain('az:would_close:');
+    expect(query).toContain('az:would_skip:');
+  });
+
+  it('reads only open alerts, so an acknowledged alert is never closed or skipped by a decision', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    const { filter } = callKibanaApi.mock.calls[0][0].body.query.bool;
+    expect(filter).toContainEqual({ term: { 'kibana.alert.workflow_status': 'open' } });
+    expect(JSON.stringify(filter)).not.toContain('acknowledged');
+  });
+
+  it('leaves out an alert a decision closed, so a reopened alert stays open', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    const { must_not: mustNot } = callKibanaApi.mock.calls[0][0].body.query.bool;
+    expect(mustNot).toContainEqual({
+      prefix: { 'kibana.alert.workflow_tags': 'az:closed_by_decision:' },
+    });
+  });
+});
+
+describe('closeStillOpenAlertsAsFalsePositive', () => {
+  const closeWith = (body: Record<string, unknown>) => {
+    const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body });
+    return {
+      callKibanaApi,
+      run: () => closeStillOpenAlertsAsFalsePositive({ callKibanaApi }, ['a', 'b']),
+    };
+  };
+
+  it('closes only the given alerts that are still open, with the reason the closure action records', async () => {
+    const { run, callKibanaApi } = closeWith({ updated: 2, failures: [] });
+
+    await run();
+
+    expect(callKibanaApi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/api/detection_engine/signals/status',
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { ids: { values: ['a', 'b'] } },
+                { term: { 'kibana.alert.workflow_status': 'open' } },
+              ],
+            },
+          },
+          status: 'closed',
+          reason: 'false_positive',
+        },
+      })
+    );
+  });
+
+  it('returns how many alerts it closed, fewer than asked when an analyst moved some on', async () => {
+    await expect(closeWith({ updated: 1, failures: [] }).run()).resolves.toEqual({
+      updated: 1,
+      timedOut: false,
+    });
+  });
+
+  it('reports a close that timed out part way, which the route answers with a 200', async () => {
+    await expect(closeWith({ updated: 1, timed_out: true, failures: [] }).run()).resolves.toEqual({
+      updated: 1,
+      timedOut: true,
+    });
+  });
+
+  it('throws on a failure, so a partial close is never reported as done', async () => {
+    await expect(closeWith({ updated: 2, failures: [{ cause: 'x' }] }).run()).rejects.toThrow(
+      'not fully applied'
+    );
+  });
+});
+
+describe('countClosedByDecision', () => {
+  it('fails instead of granting a full allowance when the response has no total', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: {} } });
+
+    await expect(
+      countClosedByDecision({ callKibanaApi }, 'fp-decision-1', Date.parse('2026-10-27'))
+    ).rejects.toThrow('Close count missing');
+  });
+
+  it.each([
+    [{ value: 7 }, 7],
+    [12, 12],
+  ])('reads the total %p as %p', async (total, expected) => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { total } } });
+
+    const count = await countClosedByDecision(
+      { callKibanaApi },
+      'fp-decision-1',
+      Date.parse('2026-10-27')
+    );
+
+    expect(count).toBe(expected);
+    expect(JSON.stringify(callKibanaApi.mock.calls[0][0].body.query)).toContain(
+      'az:closed_by_decision:fp-decision-1'
+    );
+  });
+});
+
+// The signals search route returns the raw Elasticsearch body, so a failed shard or a timeout comes
+// back as an HTTP 200 with part of the hits. Each of these helpers drives a write or a cap, where a
+// missing hit or bucket would read as "none".
+describe('helpers that drive a write, on a partial search result', () => {
+  const helpers: Array<[string, (api: { callKibanaApi: jest.Mock }) => Promise<unknown>]> = [
+    ['countClosedByDecision', (api) => countClosedByDecision(api, 'fp-decision-1', 0)],
+    [
+      'findKeyTagsWithVerdicts',
+      (api) => findKeyTagsWithVerdicts(api, ['k1'], ['az:true_positive']),
+    ],
+    ['findAlertIdsClosedAsOther', (api) => findAlertIdsClosedAsOther(api, ['a'])],
+    ['findAlertIdsByTag', (api) => findAlertIdsByTag(api, 'az:closed_by_decision:fp-decision-1')],
+    ['findOpenAlertIds', (api) => findOpenAlertIds(api, ['a'])],
+    ['findAlertIdsWithTag', (api) => findAlertIdsWithTag(api, ['a'], 'az:skipped_by_decision:x')],
+    ['findAlertsNotClosedAsFalsePositive', (api) => findAlertsNotClosedAsFalsePositive(api, ['a'])],
+    [
+      'fetchDecisionCandidates',
+      (api) =>
+        fetchDecisionCandidates(api, 'alert_analysis:', 0, {
+          minSeverity: 'low',
+          excludeBuildingBlocks: false,
+          excludedRuleTags: [],
+        }),
+    ],
+  ];
+  const complete = {
+    timed_out: false,
+    _shards: { total: 2, successful: 2, failed: 0 },
+    hits: { total: { value: 0 }, hits: [] },
+    aggregations: { keys: { buckets: [] } },
+  };
+
+  it.each(helpers)('%s accepts a complete result', async (_name, call) => {
+    const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body: complete });
+
+    await expect(call({ callKibanaApi })).resolves.toBeDefined();
+  });
+
+  it.each(helpers)('%s throws when a shard failed', async (_name, call) => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { ...complete, _shards: { total: 2, successful: 1, failed: 1 } },
+    });
+
+    await expect(call({ callKibanaApi })).rejects.toThrow('partial result');
+  });
+
+  it.each(helpers)('%s throws when the search timed out', async (_name, call) => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { ...complete, timed_out: true } });
+
+    await expect(call({ callKibanaApi })).rejects.toThrow('partial result');
   });
 });

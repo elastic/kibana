@@ -171,6 +171,8 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
+  /** Called each time a change made from the flyout, such as a severity or status update, succeeds. */
+  onConversationUpdated?: () => void;
   /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
   trailingActions?: EuiFlyoutMenuAction[];
 }

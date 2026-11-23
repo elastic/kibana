@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-env jest */
-
 jest.mock('@elastic/eui/lib/services/react', () => {
   // `enqueueStateChange` is an EUI method to batch queued functions that trigger React `setState` calls.
   // This is for performance, but when used in certain Jest scernarios it can be nondeterministic.

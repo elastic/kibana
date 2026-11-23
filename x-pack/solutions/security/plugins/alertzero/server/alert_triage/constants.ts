@@ -6,6 +6,7 @@
  */
 
 import { TRIAGE_ALERT_COST, TRIAGE_BATCH_OVERHEAD_COST } from '@kbn/alertzero-common';
+import type { Kind } from './pattern_key';
 
 /** Largest number of alerts one batch analyses. */
 export const BATCH_ALERT_CAP = 100;
@@ -47,7 +48,121 @@ export const TRIAGE_PENDING_TAG = 'az:triage_pending';
 export const TRIAGE_EXEC_TAG_PREFIX = 'az:triage_exec:';
 export const TRIAGE_FAILED_TAG = 'az:triage_failed';
 
+/**
+ * Pattern key tags, written on every classified alert that has the key. They are not verdict tags,
+ * so the sweep ignores them. Grouping, the proposal summary and Decisions read them.
+ */
+export const TRIAGE_STRICT_KEY_TAG_PREFIX = 'az:triage_strict_key:';
+export const TRIAGE_WIDE_KEY_TAG_PREFIX = 'az:triage_wide_key:';
+
 /** Verdict tags written by the batch's classification. Any of them means the alert is done. */
+export const VERDICT_INCONCLUSIVE_TAG = 'az:inconclusive';
 export const VERDICT_TAGS = ['az:true_positive', 'az:false_positive', 'az:inconclusive'] as const;
 
 export const OPEN_ALERT_STATUSES = ['open', 'acknowledged'] as const;
+
+/** Ascending, so a minimum severity selects its own index and everything after it. */
+export const ALERT_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+
+export type AlertSeverity = (typeof ALERT_SEVERITIES)[number];
+
+/** Most alerts one grouped proposal holds. The close action's `maxItems` is the same number. */
+export const GROUPED_PROPOSAL_MAX_ALERTS = 1000;
+
+/** Most revisions one grouped proposal reaches. Each revision adds a proposal card to the chat. */
+export const GROUPED_PROPOSAL_MAX_REVISIONS = 20;
+
+/** A proposal this close to its deadline takes no joins, so a late alert still gets time to be reviewed. */
+export const GROUPED_PROPOSAL_JOIN_MARGIN_MS = 24 * 60 * 60 * 1000;
+
+/** Keys of one batch whose joins run at once. */
+export const GROUPED_PROPOSAL_JOIN_CONCURRENCY = 4;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** How long a grouped proposal waits for a decision: the gate's default, as the review never sets one. */
+export const GROUPED_PROPOSAL_EXPIRY_MS = 72 * 60 * 60 * 1000;
+
+/**
+ * Proposal ids carry the UTC day they were minted on, and the generation counter restarts each day.
+ * A proposal takes joins only until `GROUPED_PROPOSAL_JOIN_MARGIN_MS` before its deadline, so the
+ * lookup reads that many days back plus the current one. It must grow if the expiry does.
+ */
+export const GROUPED_PROPOSAL_LOOKBACK_DAYS =
+  Math.ceil((GROUPED_PROPOSAL_EXPIRY_MS - GROUPED_PROPOSAL_JOIN_MARGIN_MS) / DAY_MS) + 1;
+
+/**
+ * Proposals one key can mint in one UTC day. A key fills a proposal in hours (20 revisions at one
+ * join per sweep), and about 15 a day is the busiest case seen. Past this, the key gets random ids
+ * and no joins until the next day.
+ */
+export const GROUPED_PROPOSAL_MAX_GENERATIONS_PER_DAY = 50;
+
+/** Root ids one key adds to a head lookup. */
+export const GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY =
+  GROUPED_PROPOSAL_LOOKBACK_DAYS * GROUPED_PROPOSAL_MAX_GENERATIONS_PER_DAY;
+
+/**
+ * Most root ids one head lookup sends as a `terms` clause. Elasticsearch's default
+ * `indices.query.bool.max_clause_count` is 65,536; a batch of many keys times
+ * `GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY` can exceed that in one call.
+ */
+export const GROUPED_PROPOSAL_LIST_HEADS_TERMS = 10_000;
+
+/** Feature flag that turns Alert Triage grouping off: every batch then mints its own proposal. */
+export const TRIAGE_GROUPING_FLAG = 'alertzero.triageGrouping';
+
+/**
+ * Decisions in the sweep. In `shadow` a matching alert is only tagged, and still goes through
+ * analysis. In `on` an approved match is closed and a dismissed match is kept out of analysis.
+ * In `off` decisions are neither stored nor matched. The default is `off` until the follow-ups that
+ * `on` needs have landed, so `shadow` and `on` are set per deployment.
+ */
+export const TRIAGE_DECISION_AUTO_CLOSE_FLAG = 'alertzero.triageDecisionAutoClose';
+export type DecisionAutoCloseMode = 'off' | 'shadow' | 'on';
+/**
+ * The mode from the `alertzero.triageDecisionAutoClose` flag. Only `shadow` and `on` turn decisions
+ * on; any other value, and a missing flag provider, read as `off`.
+ */
+export const toDecisionAutoCloseMode = (value: string): DecisionAutoCloseMode =>
+  value === 'shadow' || value === 'on' ? value : 'off';
+export const TRIAGE_WOULD_CLOSE_TAG_PREFIX = 'az:would_close:';
+export const TRIAGE_WOULD_SKIP_TAG_PREFIX = 'az:would_skip:';
+/** Added before an alert is closed by a decision, so revoke can find exactly those alerts. */
+export const TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX = 'az:closed_by_decision:';
+/** Added with `az:inconclusive` to an alert a dismissed pattern kept out of analysis. */
+export const TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX = 'az:skipped_by_decision:';
+/**
+ * Notes one sweep writes at most. Each note is one call and takes about a second, 20 at a time, so
+ * this bounds the step to about a minute. A decision closes or skips only as many alerts as notes are
+ * left; the rest stay untagged and take the normal path, and are counted in `left_for_notes`.
+ */
+export const DECISION_NOTES_PER_SWEEP = 1000;
+/**
+ * How long the match step works before it stops starting new decisions, and how long it may run in
+ * all, notes included. The alerts and notes it leaves wait for the next sweep. The sweep runs on a
+ * schedule of minutes, so one step must not hold it for an hour when many decisions match.
+ */
+export const DECISION_MATCH_WORK_BUDGET_MS = 2 * 60 * 1000;
+export const DECISION_MATCH_TOTAL_BUDGET_MS = 3 * 60 * 1000;
+/** Notes written in parallel. The batch workflow writes its verdict notes at the same width. */
+export const NOTE_CONCURRENCY = 20;
+/** Pages of 10,000 alerts a revoke puts back at most. Run it again for more. */
+export const MAX_REVOKE_PAGES = 10;
+/** Most alerts one decision may close in 24 hours. A starting value, to size from shadow data. */
+export const DECISION_DAILY_CLOSE_CAP = 500;
+/** The window `DECISION_DAILY_CLOSE_CAP` counts closes over, ending now. */
+export const DECISION_CAP_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** Severities a decision may close. High and critical stay with a human unless a deployment opts in. */
+export const DECISION_AUTO_CLOSE_SEVERITIES: readonly string[] = ['low', 'medium'];
+
+/**
+ * The trust flag of the signer, per key kind that names one. Such a key leaves out the file hash, and
+ * a subject name alone can be copied into a forged certificate, so `on` acts on a match only when
+ * the signer is trusted.
+ */
+export const DECISION_SIGNER_TRUST_FIELDS: Readonly<Record<string, string>> = {
+  process: 'process.code_signature.trusted',
+  library: 'dll.code_signature.trusted',
+} satisfies Partial<Record<Kind, string>>;

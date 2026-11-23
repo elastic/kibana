@@ -57,6 +57,13 @@ describe('createThreatReport', () => {
     expect(esClient.create.mock.calls[0][0].id).toBe(result.report_id);
   });
 
+  it('leaves content.published_at unset since paste time is not a publication date', async () => {
+    const esClient = buildEsClient();
+    await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
+    const doc = esClient.create.mock.calls[0][0].document as { content: object };
+    expect(doc.content).not.toHaveProperty('published_at');
+  });
+
   it('returns duplicate status when content fingerprint already exists', async () => {
     const esClient = buildEsClient({ totalHits: 1 });
     const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);

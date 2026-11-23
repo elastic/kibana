@@ -26,7 +26,6 @@ const attachmentUpdateSchema = z.object({
  * Updates an attachment's content, creating a new version if content changed.
  */
 export const createAttachmentUpdateTool = ({
-  attachmentManager,
   attachmentsService,
 }: AttachmentToolsOptions): InternalBuiltinToolDefinition<typeof attachmentUpdateSchema> => ({
   id: attachmentTools.update,
@@ -36,7 +35,10 @@ export const createAttachmentUpdateTool = ({
   schema: attachmentUpdateSchema,
   tags: ['attachment'],
   excludeFromMcp: true,
-  handler: async ({ attachment_id: attachmentId, data, description }) => {
+  handler: async (
+    { attachment_id: attachmentId, data, description },
+    { attachments: attachmentManager }
+  ) => {
     const existing = attachmentManager.getAttachmentRecord(attachmentId);
 
     if (!existing) {

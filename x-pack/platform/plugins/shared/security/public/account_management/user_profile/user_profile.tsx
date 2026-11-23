@@ -55,6 +55,9 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
   type ContrastModeValue,
   type DarkModeValue,
+  getUserAvatarColor,
+  getUserAvatarInitials,
+  isValidUserProfileAvatarInitials,
   type LocaleValue,
   UserAvatar,
   type UserProfileData,
@@ -65,16 +68,26 @@ import { usePrimeUserLocale } from './use_prime_user_locale';
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
-import {
-  canUserChangeDetails,
-  canUserChangePassword,
-  getUserAvatarColor,
-  getUserAvatarInitials,
-} from '../../../common/model';
+import { canUserChangeDetails, canUserChangePassword } from '../../../common/model';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
+
+/** Validates avatar initials by grapheme, so an emoji with a skin tone counts as one character. */
+export const validateAvatarInitials = (value: string): string | undefined => {
+  if (!value) {
+    return i18n.translate('xpack.security.accountManagement.userProfile.initialsRequiredError', {
+      defaultMessage: 'Add initials',
+    });
+  }
+
+  if (!isValidUserProfileAvatarInitials(value)) {
+    return i18n.translate('xpack.security.accountManagement.userProfile.initialsMaxLengthError', {
+      defaultMessage: 'Enter no more than 2 characters.',
+    });
+  }
+};
 
 const formRowCSS = css`
   .euiFormRow__label {
@@ -532,24 +545,7 @@ function UserAvatarEditor({
               }
               fullWidth
             >
-              <FormField
-                name="data.avatar.initials"
-                maxLength={2}
-                validate={{
-                  required: i18n.translate(
-                    'xpack.security.accountManagement.userProfile.initialsRequiredError',
-                    { defaultMessage: 'Add initials' }
-                  ),
-                  maxLength: {
-                    value: 2,
-                    message: i18n.translate(
-                      'xpack.security.accountManagement.userProfile.initialsMaxLengthError',
-                      { defaultMessage: 'Enter no more than 2 characters.' }
-                    ),
-                  },
-                }}
-                fullWidth
-              />
+              <FormField name="data.avatar.initials" validate={validateAvatarInitials} fullWidth />
             </FormRow>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -995,13 +991,27 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
 
       // Update profile only if it's available for the current user.
       if (values.data) {
-        submitActions.push(
-          update(
-            values.avatarType === 'image'
-              ? values.data
-              : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
-          )
-        );
+        // The route can reject a stored locale, or the form's fallback for a profile without one,
+        // when the deployment does not allow switching to it. Send the locale only when changed.
+        const { locale, ...userSettingsWithoutLocale } = values.data.userSettings;
+        let userSettings: Partial<typeof values.data.userSettings> = values.data.userSettings;
+        if (locale === initialValues.data?.userSettings.locale) {
+          userSettings = userSettingsWithoutLocale;
+        }
+        const profileData = { ...values.data, userSettings };
+        if (values.avatarType === 'image') {
+          // Image mode hides the initials field, so invalid initials cannot be fixed in place. Drop them
+          // from the payload so the route does not reject the whole save.
+          const { initials, ...avatarWithoutInitials } = profileData.avatar;
+          const avatar = isValidUserProfileAvatarInitials(initials)
+            ? profileData.avatar
+            : avatarWithoutInitials;
+          submitActions.push(update({ ...profileData, avatar }));
+        } else {
+          submitActions.push(
+            update({ ...profileData, avatar: { ...profileData.avatar, imageUrl: null } })
+          );
+        }
       }
 
       if (submitActions.length === 0) {
@@ -1021,14 +1031,8 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
 
       resetInitialValues(values);
 
-      let isRefreshRequired = false;
-      if (
-        initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
-        initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode ||
-        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale
-      ) {
-        isRefreshRequired = true;
-      }
+      const isRefreshRequired =
+        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale;
 
       if (
         values.data &&

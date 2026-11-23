@@ -15,8 +15,6 @@ import { spaceTest, testData } from '../fixtures';
  * branch from the FTR): the popover lets the user load and clear queries but
  * hides save/update/delete affordances. Bulk privilege boolean assertions live
  * in the API capability specs; this spec only verifies the popover honours them.
- *
- * Custom-role auth is local-stateful only (no ECH support yet for `loginWithCustomRole`).
  */
 spaceTest.describe('Saved query menu — read-only (Discover)', { tag: testData.SQM_UI_TAG }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {

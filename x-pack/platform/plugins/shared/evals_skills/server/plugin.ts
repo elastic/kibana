@@ -21,7 +21,8 @@ import type { EvalExperimentsToolDeps } from './skills/eval_experiments/tools/de
  * "Glue" plugin that registers evals-domain Agent Builder skills. It depends on
  * both `agentBuilder` and `evals` to avoid a cyclic dependency between them.
  *
- * It has no enabled flag of its own. It follows `xpack.evals.enabled` (off by default).
+ * It has no enabled flag of its own. Its skills call the evals routes, so it registers them only
+ * when `xpack.evals.enabled` is set and `xpack.evals.mode` is `full`.
  */
 export class EvalsSkillsPlugin
   implements
@@ -42,9 +43,9 @@ export class EvalsSkillsPlugin
     coreSetup: CoreSetup<EvalsSkillsStartDependencies, EvalsSkillsPluginStart>,
     { agentBuilder, workflowsManagement, evals }: EvalsSkillsSetupDependencies
   ): EvalsSkillsPluginSetup {
-    if (!evals.enabled) {
+    if (!evals.enabled || evals.mode !== 'full') {
       this.logger.debug(
-        'The evals feature is disabled; skipping registration of evals Agent Builder skills.'
+        'The evals product is not loaded (disabled, or in runtime mode); skipping registration of evals Agent Builder skills.'
       );
       return {};
     }

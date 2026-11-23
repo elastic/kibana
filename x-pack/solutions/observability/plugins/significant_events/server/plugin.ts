@@ -17,8 +17,8 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
   combineLatest,
@@ -40,16 +40,21 @@ import {
   createSourceKnowledgeStateClient,
   sourceKnowledgeStateSavedObjectType,
   SOURCE_KNOWLEDGE_STATE_TYPE,
+  SOURCE_WRITE_LEASE_WAIT_MS,
 } from './lib/knowledge_indicators/source_knowledge_state';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
 } from './lib/slack_app/saved_object';
 import { SlackAppService } from './lib/slack_app/service';
+import {
+  createSeveritySync,
+  registerAfterInvestigationHook,
+} from './lib/significant_events/events/severity';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
-  consumeRunQuota,
   createRunQuotaInternalRepository,
+  releaseRunQuota,
   runQuotaLedgerSavedObjectType,
   runQuotaSettingsSavedObjectType,
 } from './lib/run_quotas';
@@ -69,6 +74,7 @@ import { createSignificantEventsAlertingContextResolver } from './lib/significan
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
 
 import { EbtTelemetryService } from './lib/telemetry/ebt';
+import { getDetectionSnapshotKnowledgeCounts } from './lib/telemetry/detection_snapshot_contributor';
 import { significantEventsRouteRepository } from './routes';
 import type {
   GetScopedClients,
@@ -85,16 +91,17 @@ import {
   type KnowledgeIndicatorClient,
   KnowledgeIndicatorService,
   knowledgeIndicatorsDataStream,
+  TopologySnapshotClient,
 } from './lib/knowledge_indicators';
 import {
   createSignificantEventsClients,
   createSignificantEventsServices,
 } from './lib/significant_events/significant_events_clients';
 import { detectionsDataStream } from './lib/significant_events/detections';
-import { deleteLegacyEventsDataStream } from './lib/significant_events/events';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
+import { classifyDetectionsStepDefinition } from './step_definitions/classify_detections';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import {
   createContinuousOnboardingWorkflowService,
@@ -110,7 +117,6 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
-import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
 import {
@@ -128,10 +134,12 @@ import {
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
+import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
-import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
+import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_continuous_onboarding';
+import { syncScheduledDiscovery } from './lib/scheduled_discovery/sync_scheduled_discovery';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -155,9 +163,7 @@ export class SignificantEventsPlugin
   private kibanaVersion: string;
   private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
-  private removeLegacyWorkflows?: () => Promise<void>;
   private maintenanceService?: SignificantEventsMaintenanceService;
-
   constructor(context: PluginInitializerContext) {
     this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
@@ -173,6 +179,10 @@ export class SignificantEventsPlugin
       workflowsManagement: plugins.workflowsManagement,
       cloud: plugins.cloud,
       kibanaVersion: this.kibanaVersion,
+      severitySync: createSeveritySync({
+        getAgenticInvestigations: () => this.server?.agenticInvestigations,
+        logger: this.logger,
+      }),
     } as SignificantEventsServer;
     this.server.workflowsManagement = plugins.workflowsManagement;
 
@@ -182,20 +192,38 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
-    plugins.nightshiftInvestigations?.registerInvestigationQuota(async () => {
-      if (!this.server?.core) {
-        throw new Error('Significant Events start services are unavailable');
+    plugins.nightshiftInvestigations?.registerDetectionSnapshotContributor(
+      async ({ spaceId, request, signal }) => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        return getDetectionSnapshotKnowledgeCounts({
+          signal,
+          esClient: coreStart.elasticsearch.client.asInternalUser,
+          rulesClient: await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
+            request,
+            asSpaceId(spaceId)
+          ),
+          space: spaceId,
+          logger: this.logger.get('knowledge_indicators'),
+        });
       }
-      return consumeRunQuota({
-        internalRepository: createRunQuotaInternalRepository(this.server),
-        group: 'investigation',
-      });
-    });
+    );
 
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
 
-    this.ebtTelemetryService.setup(core.analytics);
+    this.ebtTelemetryService.setup(
+      core.analytics,
+      {
+        cpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
+        originProjectId: plugins.cloud?.serverless.projectId,
+        getLinkedProjectIds: async (request) => {
+          const [, pluginsStart] = await core.getStartServices();
+          const linkedProjects = await pluginsStart.cps?.getLinkedProjects(request);
+          return linkedProjects?.map(({ id }) => id);
+        },
+      },
+      this.logger.get('telemetry')
+    );
 
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
@@ -245,17 +273,32 @@ export class SignificantEventsPlugin
         return alertEventsClientPromise;
       };
 
+      let alertActionsClientPromise: Promise<AlertActionsClientApi> | undefined;
+      const getAlertActionsClient = (): Promise<AlertActionsClientApi> => {
+        alertActionsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertActionsClientWithRequest(request);
+        return alertActionsClientPromise;
+      };
+
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
+        internalEsClient: scopedClusterClient.asInternalUser,
+        logger: this.logger,
         space,
         getAlertEventsClient,
+        getAlertActionsClient,
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
           logger: this.logger,
         }),
+        telemetry: {
+          trackEventStatusChanged: (params) =>
+            this.ebtTelemetryService.getClient().trackEventStatusChanged(params, request),
+          logger: this.logger,
+        },
       });
 
       const getAlertingV2RulesClient = async () =>
@@ -284,17 +327,21 @@ export class SignificantEventsPlugin
           space,
           context,
           config: tuningConfig,
-          withSourceWrite: (sourceId, run, options) =>
-            sourceKnowledgeState.write({
+          withSourceWrite: (sourceId, run, options) => {
+            const shouldWaitForLease = options?.waitForLease !== false;
+            return sourceKnowledgeState.write({
               sourceId,
               allowDisabled: options?.allowDisabled,
+              waitForLeaseMs: shouldWaitForLease ? SOURCE_WRITE_LEASE_WAIT_MS : undefined,
+              signal: shouldWaitForLease ? getRequestAbortSignal(request) : undefined,
               expectedRevision:
                 typeof request.headers['x-nightshift-source-revision'] === 'string' &&
                 request.headers['x-nightshift-source-revision']
                   ? request.headers['x-nightshift-source-revision']
                   : source?.esql_updated_at,
               run,
-            }),
+            });
+          },
         });
 
       let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
@@ -312,6 +359,12 @@ export class SignificantEventsPlugin
         return kiClientPromise;
       };
 
+      const getTopologySnapshotClient = async (): Promise<TopologySnapshotClient> =>
+        new TopologySnapshotClient({
+          reader: await getKnowledgeIndicatorClient(),
+          logger: this.logger.get('topology'),
+        });
+
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
 
@@ -322,6 +375,7 @@ export class SignificantEventsPlugin
         space,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        getTopologySnapshotClient,
         sourceKnowledgeState,
         scheduleSourceOnboarding: async (
           source: NightshiftSource,
@@ -360,6 +414,7 @@ export class SignificantEventsPlugin
           return true;
         },
         getAlertEventsClient,
+        getAlertActionsClient,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
@@ -373,14 +428,22 @@ export class SignificantEventsPlugin
     };
 
     const telemetryClient = this.ebtTelemetryService.getClient();
+    const { server: runQuotaServer } = this;
 
     const workflowClients = createWorkflowClients(
       plugins.workflowsManagement?.management,
       telemetryClient,
+      this.logger,
       async (request) => {
         const [, pluginsStart] = await core.getStartServices();
         return pluginsStart.nightshiftSources.getSourcesClient({ request });
-      }
+      },
+      ({ date }) =>
+        releaseRunQuota({
+          internalRepository: createRunQuotaInternalRepository(runQuotaServer),
+          group: 'ki_extraction',
+          date,
+        })
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
     this.streamsKIsOnboardingClient = streamsKIsOnboardingClient;
@@ -402,28 +465,39 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.agentBuilder) {
+      registerAfterInvestigationHook({
+        agentBuilder: plugins.agentBuilder,
+        logger: this.logger.get('afterInvestigation'),
+        getDeps: () => {
+          const { getScopedClients, server } = this;
+          if (!getScopedClients || !server) return undefined;
+          return {
+            agenticInvestigations: server.agenticInvestigations,
+            severitySync: server.severitySync,
+            getEventClient: async (request) =>
+              (await getScopedClients({ request })).getEventSearchClient(),
+          };
+        },
+      });
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
       registerSignificantEventsFeatureIdentificationAgentTypes({
         agentBuilder: plugins.agentBuilder,
       });
       registerSignificantEventsKIQueryGenerationAgentTypes({
         agentBuilder: plugins.agentBuilder,
-        isSemanticCodeSearchGroundingEnabled: async () =>
-          this.server?.core
-            ? isSignificantEventsSemanticCodeSearchGroundingEnabled(this.server.core.featureFlags)
-            : false,
       });
       void core
         .getStartServices()
         .then(async () => {
-          const { getScopedClients, server } = this;
-          if (!getScopedClients || !server) return;
+          const { getScopedClients, server, maintenanceService } = this;
+          if (!getScopedClients || !server || !maintenanceService) return;
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
             getScopedClients,
             server,
             logger: this.logger,
             telemetry: telemetryClient,
+            maintenanceService,
           });
         })
         .catch((err) => {
@@ -448,6 +522,9 @@ export class SignificantEventsPlugin
         getUiSettings: () => this.server?.core?.uiSettings,
         logger: this.logger.get('resolve_model'),
       })
+    );
+    plugins.workflowsExtensions?.registerStepDefinition(
+      classifyDetectionsStepDefinition({ logger: this.logger.get('classify_detections') })
     );
 
     // Custom event-driven triggers users can subscribe to from their own workflows.
@@ -485,15 +562,6 @@ export class SignificantEventsPlugin
         managementApi: plugins.workflowsManagement.management,
         getManagedWorkflowsClient,
       });
-
-      // TODO: remove with the legacy default-space cleanup.
-      // https://github.com/elastic/kibana/issues/294271
-      this.removeLegacyWorkflows = () =>
-        removeLegacyDefaultSpaceWorkflows({
-          getManagedWorkflowsClient,
-          managementApi,
-          logger: this.logger,
-        });
 
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
         {
@@ -552,6 +620,28 @@ export class SignificantEventsPlugin
             await syncWorkflowService?.ensureEnabled({ request, spaceId: request.spaceId });
           }
         },
+        syncContinuousOnboarding: (event) =>
+          syncContinuousOnboarding({
+            event,
+            workflowService: continuousOnboardingWorkflowService,
+            maintenanceService: this.maintenanceService,
+            getStartServices: async () => {
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              return { coreStart, pluginsStart };
+            },
+            logger: this.logger,
+          }),
+        syncScheduledDiscovery: (event) =>
+          syncScheduledDiscovery({
+            event,
+            workflowService: significantEventsScheduledWorkflowsService,
+            maintenanceService: this.maintenanceService,
+            getStartServices: async () => {
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              return { coreStart, pluginsStart };
+            },
+            logger: this.logger,
+          }),
       })
     );
 
@@ -604,13 +694,6 @@ export class SignificantEventsPlugin
       this.server.agenticInvestigations = plugins.agenticInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
-
-      // Significant Events history moved to `.rule-events`; remove the retired stream without
-      // backfilling its history into the shared Alerting v2 stream.
-      void deleteLegacyEventsDataStream({
-        esClient: core.elasticsearch.client.asInternalUser,
-        logger: this.logger,
-      });
 
       // The Elastic Slack connector is in-memory, so it survives neither a restart nor a connect
       // handled by another node. The connection document is namespace-agnostic, so one internal
@@ -800,10 +883,7 @@ export class SignificantEventsPlugin
     try {
       await this.managedWorkflowsInstaller?.install();
     } finally {
-      // Independent of the install outcome: one failing static workflow would otherwise keep the
-      // legacy default-space documents around, next to their per-space replacements, on every
-      // restart. It never throws.
-      await this.removeLegacyWorkflows?.();
+      // A partial install can still leave workflows enabled in a paused space.
       await this.reassertPauseAfterWorkflowInstall();
     }
   }
@@ -827,7 +907,7 @@ export class SignificantEventsPlugin
 
   private logFlagOffPauseError(error: unknown): void {
     this.logger.error(
-      `significantEvents: failed to pause after Nightshift was turned off: ${
+      `significantEvents: failed to pause after nightshift was turned off: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

@@ -25,7 +25,7 @@ import {
   USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES,
   USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT,
   USER_TS_EXTRACTION_CASES,
-} from '../fixtures/user_ts_extraction_cases';
+} from '../../../../fixtures/user_ts_extraction_cases';
 
 /** Archive-backed user.ts scenarios only (excludes ingested-only rows). */
 const USER_TS_ARCHIVE_SCENARIOS = USER_TS_EXTRACTION_CASES.filter((c) => !c.ingestSource);

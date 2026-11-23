@@ -109,6 +109,35 @@ describe('createServiceMapAttachmentType', () => {
       expect(result.valid).toBe(false);
     });
 
+    it('accepts timeRange, environment and a contextual or full view', async () => {
+      for (const view of ['contextual', 'full'] as const) {
+        const result = await attachmentType.validate({
+          connections: [minimalConnection],
+          serviceName: 'frontend',
+          timeRange: { start: 'now-15m', end: 'now' },
+          environment: 'production',
+          view,
+        });
+        expect(result.valid).toBe(true);
+      }
+    });
+
+    it('rejects an unknown view', async () => {
+      const result = await attachmentType.validate({
+        connections: [minimalConnection],
+        view: 'compact',
+      });
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects a timeRange missing its end', async () => {
+      const result = await attachmentType.validate({
+        connections: [minimalConnection],
+        timeRange: { start: 'now-15m' },
+      });
+      expect(result.valid).toBe(false);
+    });
+
     it('accepts nodeMetadata omitted entirely', async () => {
       const result = await attachmentType.validate({
         connections: [minimalConnection],

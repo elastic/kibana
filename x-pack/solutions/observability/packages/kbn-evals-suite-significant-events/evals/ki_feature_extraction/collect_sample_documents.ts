@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import { esql } from '@elastic/esql';
 import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocumentsEsql, DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '@kbn/ai-tools';
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
+
+// Mirrors the sampleSize default of the features identification managed workflow.
+const DEFAULT_SAMPLE_SIZE = 20;
 
 const addUniqueHitsToSample = ({
   hits,
@@ -49,7 +52,7 @@ export const collectSampleDocuments = async ({
   esClient,
   scenario,
   log,
-  size = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.sample_size,
+  size = DEFAULT_SAMPLE_SIZE,
 }: {
   esClient: Client;
   scenario: KIFeatureExtractionScenario;
@@ -74,16 +77,21 @@ export const collectSampleDocuments = async ({
       const { sampling_filters = [], ...details } = criterion;
 
       return sampling_filters.map(async (filter) => {
-        const { hits } = await getSampleDocumentsEsql({
-          esClient,
-          index: MANAGED_STREAM_SEARCH_PATTERN,
-          start: 0,
-          end: Date.now(),
-          dslFilter: [...baseDslFilter, filter],
-          size: 1,
-          abortSignal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
-        });
-        return { hits, criterion: details, filter };
+        const deadline = timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
+        try {
+          const { hits } = await getSampleDocumentsEsql({
+            esClient,
+            index: MANAGED_STREAM_SEARCH_PATTERN,
+            start: 0,
+            end: Date.now(),
+            dslFilter: [...baseDslFilter, filter],
+            size: 1,
+            abortSignal: deadline,
+          });
+          return { hits, criterion: details, filter };
+        } finally {
+          deadline.dispose();
+        }
       });
     })
   );
@@ -130,20 +138,25 @@ export const collectSampleDocuments = async ({
     const unseenCondition = seenIds.length
       ? esql.exp`${esql.col('_id')} NOT IN (${seenIds.map((id) => esql.str(id))})`
       : undefined;
-    const { hits } = await getSampleDocumentsEsql({
-      esClient,
-      index: MANAGED_STREAM_SEARCH_PATTERN,
-      start: 0,
-      end: Date.now(),
-      dslFilter: baseDslFilter,
-      whereCondition: unseenCondition,
-      size: remaining,
-      abortSignal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
-    });
+    const deadline2 = timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
+    try {
+      const { hits } = await getSampleDocumentsEsql({
+        esClient,
+        index: MANAGED_STREAM_SEARCH_PATTERN,
+        start: 0,
+        end: Date.now(),
+        dslFilter: baseDslFilter,
+        whereCondition: unseenCondition,
+        size: remaining,
+        abortSignal: deadline2,
+      });
 
-    const beforeFill = docs.length;
-    addUniqueHitsToSample({ hits, docs, seen, size });
-    generalFillCount = docs.length - beforeFill;
+      const beforeFill = docs.length;
+      addUniqueHitsToSample({ hits, docs, seen, size });
+      generalFillCount = docs.length - beforeFill;
+    } finally {
+      deadline2.dispose();
+    }
   }
 
   const criteriaDistribution = [...criterionHitCounts.entries()]

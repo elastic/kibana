@@ -69,7 +69,7 @@ describe('get', () => {
       await expect(
         find({ caseID: 'mock-id', findQueryParams: { type: [] } }, clientArgs)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find attachments case id: mock-id: Error: Invalid value \\"[]\\" supplied to \\"type\\",The length of the field type is too short. Array must be of length >= 1."`
+        `"Failed to find attachments case id: mock-id: Error: type: The length of the field type is too short. Array must be of length >= 1."`
       );
     });
 
@@ -115,7 +115,7 @@ describe('get', () => {
           clientArgs
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find attachments case id: mock-id: Error: invalid keys \\"foo\\""`
+        `"Failed to find attachments case id: mock-id: Error: Excess keys are not allowed"`
       );
     });
   });

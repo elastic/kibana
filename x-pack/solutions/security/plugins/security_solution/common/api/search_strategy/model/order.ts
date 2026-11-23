@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction } from '@kbn/timelines-plugin/common';
+import { Direction } from '@kbn/securitysolution-timeline-common';
 
 export { Direction };
 

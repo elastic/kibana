@@ -14,8 +14,8 @@ describe('AlertZero investigation summary workflow', () => {
   const definition = parse(ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW.yaml) as {
     enabled: boolean;
     triggers: Array<{ type: string; on: { condition: string } }>;
-    settings: { concurrency: { strategy: string; max: number; 'queue-size': number } };
-    steps: Array<{ type: string }>;
+    settings: { concurrency: { key: string; strategy: string; max: number } };
+    steps: Array<{ type: string; with?: Record<string, unknown> }>;
   };
 
   it('ships enabled and only matches journal notes, comments, and new attachments', () => {
@@ -31,12 +31,16 @@ describe('AlertZero investigation summary workflow', () => {
     expect(condition).not.toContain('execution_terminated');
     expect(definition.settings.concurrency).toEqual({
       key: '{{ workflow.id }}:{{ event.conversationId }}',
-      strategy: 'queue',
+      strategy: 'cancel-in-progress',
       max: 1,
-      'queue-size': 1,
     });
+  });
+
+  it('waits for the conversation to go quiet before it summarizes', () => {
     expect(definition.steps.map((step) => step.type)).toEqual([
+      'wait',
       'alertzero.investigation.summarize',
     ]);
+    expect(definition.steps[0].with).toEqual({ duration: '10s' });
   });
 });

@@ -15,17 +15,25 @@ interface LoadEventsStep {
 }
 
 describe('managed FP/TP raw-event page', () => {
-  const loadEvents = (
+  const searches = (
     parse(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.yaml) as { steps: LoadEventsStep[] }
-  ).steps.find(({ name }) => name === 'load_events');
+  ).steps.filter(
+    ({ name }) => name === 'load_events_by_host_id' || name === 'load_events_by_host_name'
+  );
 
   it('returns the page size the workflow reads', () => {
-    expect(loadEvents?.with?.size).toBe(FP_TP_RAW_EVENT_PAGE_SIZE);
+    expect(searches.map((step) => step.with?.size)).toEqual([
+      FP_TP_RAW_EVENT_PAGE_SIZE,
+      FP_TP_RAW_EVENT_PAGE_SIZE,
+    ]);
   });
 
   // The truncated-events example appends its extra events after the world's own, which
   // keeps the world's events on the page only while the page is sorted oldest first.
   it('returns the page sorted oldest first', () => {
-    expect(loadEvents?.with?.sort).toEqual([{ '@timestamp': 'asc' }]);
+    expect(searches.map((step) => step.with?.sort)).toEqual([
+      [{ '@timestamp': 'asc' }],
+      [{ '@timestamp': 'asc' }],
+    ]);
   });
 });

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import type { AnyAction, Store } from 'redux-v4';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import type { RenderResult } from '@testing-library/react';
+import { act, prettyDOM, render } from '@testing-library/react';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
@@ -24,7 +24,7 @@ import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { createResolver } from '../../store/actions';
 
 /**
- * Test a Resolver instance using jest, enzyme, and a mock data layer.
+ * Test a Resolver instance using jest, @testing-library/react, and a mock data layer.
  */
 export class Simulator {
   /**
@@ -37,9 +37,13 @@ export class Simulator {
    */
   private readonly history: HistoryPackageHistoryInterface;
   /**
-   * The 'wrapper' returned by `enzyme` that contains the rendered Resolver react code.
+   * The result returned by `@testing-library/react` that contains the rendered Resolver react code.
    */
-  private readonly wrapper: ReactWrapper;
+  private readonly renderResult: RenderResult;
+  /**
+   * The props currently passed to `MockResolver`. Used to re-render with updated props.
+   */
+  private props: React.ComponentProps<typeof MockResolver>;
   /**
    * A `redux` middleware that exposes all actions dispatched (along with the state at that point.)
    * This is used by `debugActions`.
@@ -49,9 +53,14 @@ export class Simulator {
    * Simulator which allows you to explicitly simulate resize events and trigger animation frames
    */
   private readonly sideEffectSimulator: SideEffectSimulator;
+  /**
+   * The mocked core services passed to Resolver through `KibanaContextProvider`. Tests can assert
+   * against them, e.g. `coreStart.overlays.openSystemFlyout`.
+   */
+  public readonly coreStart: ReturnType<typeof coreMock.createStart>;
 
   /**
-   * An `enzyme` supported CSS selector for process node elements.
+   * A CSS selector for process node elements.
    */
   public static nodeElementSelector({
     entityID,
@@ -67,13 +76,6 @@ export class Simulator {
     return selector;
   }
 
-  /**
-   * The simulator returns enzyme `ReactWrapper`s from various methods. Use this predicate to determine if they are DOM nodes.
-   */
-  public static isDOM(wrapper: ReactWrapper): boolean {
-    return typeof wrapper.type() === 'string';
-  }
-
   constructor({
     dataAccessLayer,
     resolverComponentInstanceID,
@@ -82,7 +84,6 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
-    useLegacyExpandableFlyout = false,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -103,7 +104,6 @@ export class Simulator {
     history: HistoryPackageHistoryInterface;
     filters: TimeFilters;
     shouldUpdate: boolean;
-    useLegacyExpandableFlyout?: boolean;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -125,43 +125,45 @@ export class Simulator {
     this.history = history;
 
     // Used for `KibanaContextProvider`
-    const coreStart = coreMock.createStart();
+    this.coreStart = coreMock.createStart();
 
-    coreStart.settings.client.get.mockImplementation(uiSetting);
+    this.coreStart.settings.client.get.mockImplementation(uiSetting);
 
     this.sideEffectSimulator = sideEffectSimulatorFactory();
 
-    // Render Resolver via the `MockResolver` component, using `enzyme`.
-    this.wrapper = mount(
-      <MockResolver
-        resolverComponentInstanceID={resolverComponentInstanceID}
-        history={this.history}
-        sideEffectSimulator={this.sideEffectSimulator}
-        store={this.store}
-        coreStart={coreStart}
-        databaseDocumentID={databaseDocumentID}
-        indices={indices}
-        filters={filters}
-        shouldUpdate={shouldUpdate}
-        useLegacyExpandableFlyout={useLegacyExpandableFlyout}
-        renderCellActions={cellActionRenderer}
-      />
-    );
+    // Render Resolver via the `MockResolver` component, using `@testing-library/react`.
+    this.props = {
+      resolverComponentInstanceID,
+      history: this.history,
+      sideEffectSimulator: this.sideEffectSimulator,
+      store: this.store,
+      coreStart: this.coreStart,
+      databaseDocumentID,
+      indices,
+      filters,
+      shouldUpdate,
+      renderCellActions: cellActionRenderer,
+    };
+    this.renderResult = render(<MockResolver {...this.props} />);
+  }
+
+  private setProps(props: Partial<React.ComponentProps<typeof MockResolver>>) {
+    this.props = { ...this.props, ...props };
+    this.renderResult.rerender(<MockResolver {...this.props} />);
   }
 
   /**
    * Unmount the Resolver component. Use this to test what happens when code that uses Resolver unmounts it.
    */
   public unmount(): void {
-    this.unmounted = true;
-    this.wrapper.unmount();
+    this.renderResult.unmount();
   }
 
   /**
    * Get the component instance ID from the component.
    */
   public get resolverComponentInstanceID(): string {
-    return this.wrapper.prop('resolverComponentInstanceID');
+    return this.props.resolverComponentInstanceID;
   }
 
   /**
@@ -169,40 +171,40 @@ export class Simulator {
    */
   public set resolverComponentInstanceID(value: string) {
     this.store.dispatch(createResolver({ id: value }));
-    this.wrapper.setProps({ resolverComponentInstanceID: value });
+    this.setProps({ resolverComponentInstanceID: value });
   }
 
   /**
    * Change the indices (updates the React component props.)
    */
   public set indices(value: string[]) {
-    this.wrapper.setProps({ indices: value });
+    this.setProps({ indices: value });
   }
 
   /**
    * Get the indices (updates the React component props.)
    */
   public get indices(): string[] {
-    return this.wrapper.prop('indices');
+    return this.props.indices;
   }
 
   /**
    * Change the shouldUpdate prop (updates the React component props.)
    */
   public set shouldUpdate(value: boolean) {
-    this.wrapper.setProps({ shouldUpdate: value });
+    this.setProps({ shouldUpdate: value });
   }
 
   public get shouldUpdate(): boolean {
-    return this.wrapper.prop('shouldUpdate');
+    return this.props.shouldUpdate;
   }
 
   public set filters(value: TimeFilters) {
-    this.wrapper.setProps({ filters: value });
+    this.setProps({ filters: value });
   }
 
   public get filters(): TimeFilters {
-    return this.wrapper.prop('filters');
+    return this.props.filters;
   }
 
   /**
@@ -218,36 +220,12 @@ export class Simulator {
   }
 
   /**
-   * Whether `unmount()` has been called. Used to guard against setState/update calls on a
-   * detached enzyme wrapper, which throw and would leave the Promise in `map()` permanently
-   * unresolved.
-   */
-  private unmounted = false;
-
-  /**
-   * EUI uses a component called `AutoSizer` that won't render its children unless it has sufficient size.
-   * This forces any `AutoSizer` instances to have a large size.
-   */
-  private forceAutoSizerOpen() {
-    if (this.unmounted) return;
-    try {
-      this.wrapper
-        .find('AutoSizer')
-        .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
-    } catch {
-      // swallow errors on stale/unmounted wrappers
-    }
-  }
-
-  /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
    * After 10 times, quit.
    * Use this to continually check a value. See `toYieldEqualTo`.
    *
-   * Each iteration waits for a `setTimeout(0)` callback that calls
-   * `forceAutoSizerOpen()` and `wrapper.update()`. These are wrapped in a
-   * try-catch so that a stale or mid-unmount wrapper cannot leave the
-   * returned Promise unresolved and cause a `beforeEach` hook to time out.
+   * Each iteration waits for a `setTimeout(0)` callback inside `act`, so that
+   * React can flush pending state updates and effects between iterations.
    *
    * When the consumer breaks from the iteration early (e.g., `toYieldEqualTo`
    * finds a match and exits its `for await...of` loop), the generator is
@@ -260,26 +238,19 @@ export class Simulator {
     while (timeoutCount < 10) {
       timeoutCount++;
       yield mapper();
-      await new Promise<void>((resolve) => {
-        setTimeout(() => {
-          try {
-            if (!this.unmounted) {
-              this.forceAutoSizerOpen();
-              this.wrapper.update();
-            }
-          } finally {
-            resolve();
-          }
-        }, 0);
+      await act(async () => {
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 0);
+        });
       });
     }
   }
 
   /**
    * Find a process node element. Takes options supported by `resolverNodeSelector`.
-   * returns a `ReactWrapper` even if nothing is found, as that is how `enzyme` does things.
+   * Returns an empty array if nothing is found.
    */
-  public processNodeElements(options: ProcessNodeElementSelectorOptions = {}): ReactWrapper {
+  public processNodeElements(options: ProcessNodeElementSelectorOptions = {}): HTMLElement[] {
     return this.domNodes(Simulator.nodeElementSelector(options));
   }
 
@@ -288,7 +259,7 @@ export class Simulator {
    */
   public processNodeSubmenuButton(
     /** nodeID for the related node */ entityID: string
-  ): ReactWrapper {
+  ): HTMLElement[] {
     return this.domNodes(
       `[data-test-subj="resolver:submenu:button"][data-test-resolver-node-id="${entityID}"]`
     );
@@ -299,7 +270,7 @@ export class Simulator {
    */
   public processNodePrimaryButton(
     /** nodeID for the related node */ entityID: string
-  ): ReactWrapper {
+  ): HTMLElement[] {
     return this.domNodes(
       `[data-test-subj="resolver:node:primary-button"][data-test-resolver-node-id="${entityID}"]`
     );
@@ -308,33 +279,34 @@ export class Simulator {
   /**
    * Return the node element with the given `entityID`.
    */
-  public selectedProcessNode(entityID: string): ReactWrapper {
+  public selectedProcessNode(entityID: string): HTMLElement[] {
     return this.processNodeElements({ entityID, selected: true });
   }
 
   /**
    * Return the node element with the given `entityID`. It will only be returned if it is not selected.
    */
-  public unselectedProcessNode(entityID: string): ReactWrapper {
-    return this.processNodeElements({ entityID }).not(
-      Simulator.nodeElementSelector({ entityID, selected: true })
+  public unselectedProcessNode(entityID: string): HTMLElement[] {
+    return this.processNodeElements({ entityID }).filter(
+      (element) => element.getAttribute('aria-selected') !== 'true'
     );
   }
 
   /**
-   * Dump all contents of the outer ReactWrapper (to be `console.log`ged as appropriate)
-   * This will include both DOM (div, span, etc.) and React/JSX (MyComponent, MyGrid, etc.)
+   * Dump the rendered DOM (to be `console.log`ged as appropriate)
    */
   public debugWrapper() {
-    return this.wrapper.debug();
+    return prettyDOM(this.renderResult.container);
   }
 
   /**
    * This manually runs the animation frames tied to a configurable timestamp in the future.
    */
   public runAnimationFramesTimeFromNow(time: number = 0) {
-    this.sideEffectSimulator.controls.time = time;
-    this.sideEffectSimulator.controls.provideAnimationFrame();
+    act(() => {
+      this.sideEffectSimulator.controls.time = time;
+      this.sideEffectSimulator.controls.provideAnimationFrame();
+    });
   }
 
   /**
@@ -360,56 +332,54 @@ export class Simulator {
   }
 
   /**
-   * Given a 'data-test-subj' value, it will resolve the react wrapper or undefined if not found
+   * Given a 'data-test-subj' value, it will resolve the matching elements or undefined if not found
    */
-  public async resolve(selector: string): Promise<ReactWrapper | undefined> {
+  public async resolve(selector: string): Promise<HTMLElement[] | undefined> {
     return this.resolveWrapper(() => this.domNodes(`[data-test-subj="${selector}"]`));
   }
 
   /**
    * Given a `role`, return DOM nodes that have it. Use this to assert that ARIA roles are present as expected.
    */
-  public domNodesWithRole(role: string): ReactWrapper {
+  public domNodesWithRole(role: string): HTMLElement[] {
     return this.domNodes(`[role="${role}"]`);
   }
 
   /**
    * Given a 'data-test-subj' selector, it will return the domNode
    */
-  public testSubject(selector: string): ReactWrapper {
+  public testSubject(selector: string): HTMLElement[] {
     return this.domNodes(`[data-test-subj="${selector}"]`);
   }
 
   /**
-   * Given a `ReactWrapper`, returns a wrapper containing immediately following `dd` siblings.
-   * `subject` must contain just 1 element.
+   * Given an element, returns the `dd` elements immediately following it.
    */
-  public descriptionDetails(subject: ReactWrapper): ReactWrapper {
-    // find the associated DOM nodes, then return an enzyme wrapper that only contains those.
-    const subjectNode = subject.getDOMNode();
-    let current = subjectNode.nextElementSibling;
-    const associated: Set<Element> = new Set();
+  public descriptionDetails(subject: HTMLElement): HTMLElement[] {
+    let current = subject.nextElementSibling;
+    const associated: HTMLElement[] = [];
     // Multiple `dt`s can be associated with a set of `dd`s. Skip immediately following `dt`s.
     while (current !== null && current.nodeName === 'DT') {
       current = current.nextElementSibling;
     }
     while (current !== null && current.nodeName === 'DD') {
-      associated.add(current);
+      associated.push(current as HTMLElement);
       current = current.nextElementSibling;
     }
-    return subject
-      .closest('dl')
-      .find('dd')
-      .filterWhere((candidate) => {
-        return associated.has(candidate.getDOMNode());
-      });
+    return associated;
   }
 
   /**
-   * Return DOM nodes that match `enzymeSelector`.
+   * Return DOM nodes that match `selector`.
    */
-  private domNodes(enzymeSelector: string): ReactWrapper {
-    return this.wrapper.find(enzymeSelector).filterWhere(Simulator.isDOM);
+  private domNodes(selector: string): HTMLElement[] {
+    // Scope to this instance's container so multiple simulators don't see each other's nodes.
+    // EUI popovers render in portals attached to `document.body`, so include those as well.
+    const roots: ParentNode[] = [
+      this.renderResult.container,
+      ...Array.from(document.body.querySelectorAll<HTMLElement>('[data-euiportal="true"]')),
+    ];
+    return roots.flatMap((root) => Array.from(root.querySelectorAll<HTMLElement>(selector)));
   }
 
   /**
@@ -426,8 +396,8 @@ export class Simulator {
     const descriptions = this.domNodes('[data-test-subj="resolver:node-detail:entry-description"]');
     const entries: Array<[string, string]> = [];
     for (let index = 0; index < Math.min(titles.length, descriptions.length); index++) {
-      const title = titles.at(index).text();
-      const description = descriptions.at(index).text();
+      const title = titles[index].textContent ?? '';
+      const description = descriptions[index].textContent ?? '';
 
       entries.push([title, description]);
     }
@@ -438,9 +408,9 @@ export class Simulator {
    * Resolve the wrapper returned by `wrapperFactory` only once it has at least 1 element in it.
    */
   public async resolveWrapper(
-    wrapperFactory: (() => Promise<ReactWrapper>) | (() => ReactWrapper),
-    predicate: (wrapper: ReactWrapper) => boolean = (wrapper) => wrapper.length > 0
-  ): Promise<ReactWrapper | undefined> {
+    wrapperFactory: (() => Promise<HTMLElement[]>) | (() => HTMLElement[]),
+    predicate: (elements: HTMLElement[]) => boolean = (elements) => elements.length > 0
+  ): Promise<HTMLElement[] | undefined> {
     for await (const wrapper of this.map(wrapperFactory)) {
       if (predicate(wrapper)) {
         return wrapper;

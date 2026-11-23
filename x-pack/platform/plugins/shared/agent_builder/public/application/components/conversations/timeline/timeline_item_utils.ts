@@ -63,12 +63,22 @@ export const accumulatorToItem = (
   eventsById: Map<string, TimelineDisplayEvent>,
   awaitingPromptEventId?: string
 ): AgentTurnItem => {
-  const { executionId, startedAt, triggerEventId, steps, terminal, streaming, attachmentRefs } =
-    acc;
+  const {
+    executionId,
+    startedAt,
+    triggerEventId,
+    steps,
+    terminal,
+    streaming,
+    attachmentRefs,
+    agentAttachmentRefs,
+  } = acc;
   const trigger = triggerEventId ? eventsById.get(triggerEventId) : undefined;
   const origin: ConversationRoundOrigin | undefined = trigger?.actor.origin;
-  const triggerAttachmentRefs =
-    trigger?.type === TimelineEventType.userMessage ? trigger.data.attachment_refs : undefined;
+  const triggerAttachmentRefs = [
+    ...(trigger?.type === TimelineEventType.userMessage ? trigger.data.attachment_refs ?? [] : []),
+    ...(agentAttachmentRefs ?? []),
+  ];
   const status = resolveStatus(acc, awaitingPromptEventId);
   const item: AgentTurnItem = {
     kind: 'agentTurn',

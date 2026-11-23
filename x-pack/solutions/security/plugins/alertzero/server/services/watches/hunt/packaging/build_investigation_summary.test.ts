@@ -10,6 +10,7 @@ import {
   buildCleanInvestigationSummary,
   buildInvestigationSummary,
 } from './build_investigation_summary';
+import { dedupeCoverageGaps } from './dedupe_coverage_gaps';
 import type { CurrentRunState } from './types';
 
 const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
@@ -32,7 +33,15 @@ const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   allEventsActionable: false,
   hasProcessBearingEvent: false,
   manualRemediation: [],
-  hosts: [{ name: 'WIN-ANALYST01', enrolled: true, agentId: 'a1', capabilities: [] }],
+  hosts: [
+    {
+      name: 'WIN-ANALYST01',
+      enrolled: true,
+      agentId: 'a1',
+      capabilities: [],
+      capabilitiesSource: 'reported',
+    },
+  ],
   processSelectors: [],
   evidence: { tier1HitCount: 0, tier2Confirmed: [{ techniqueId: 'T1078.004', rowCount: 2 }] },
   ...overrides,
@@ -56,6 +65,35 @@ describe('buildInvestigationSummary', () => {
     expect(buildInvestigationSummary({ state: state(), decided })).toContain(
       'Outcome: confirmed hit (tier2). Window: 2026-09-08 → 2026-10-08.'
     );
+  });
+
+  it('names gaps when a confirmed hit still retired without a full search', () => {
+    const unsearched = dedupeCoverageGaps([
+      { reason: 'index_not_searched', detail: 'logs-hidden-*' },
+    ]);
+    const summary = buildInvestigationSummary({ state: state(), decided, unsearched });
+    expect(summary).toContain(
+      '1 gap left part of the report unsearched; the report is retired without a full search'
+    );
+    expect(summary).toContain('Not searched: logs-hidden-* (index not searched)');
+  });
+
+  it('cuts a long gap list at an item boundary and counts the rest', () => {
+    const unsearched = dedupeCoverageGaps(
+      Array.from({ length: 60 }, (_value, index) => ({
+        reason: 'generation_budget',
+        detail: 'never searched',
+        technique_id: `T${1000 + index}.001`,
+      }))
+    );
+    const line = buildInvestigationSummary({ state: state(), decided, unsearched })
+      .split('\n')
+      .find((entry) => entry.startsWith('Not searched: '));
+
+    expect(line).toMatch(
+      /^Not searched: T1000\.001 \(generation budget exhausted\), .* \(\+\d+ more\)$/
+    );
+    expect((line ?? '').length).toBeLessThanOrEqual('Not searched: '.length + 800);
   });
 
   it('names the corroborated technique with its name', () => {
@@ -330,5 +368,41 @@ describe('buildCleanInvestigationSummary', () => {
     expect(buildCleanInvestigationSummary({ inputs: {} })).toContain(
       'Packaging: dismissed, no proposals'
     );
+  });
+});
+
+describe('buildCleanInvestigationSummary for a retired run', () => {
+  const unsearched = dedupeCoverageGaps([
+    { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' },
+  ]);
+
+  it('says the report retired without a full search instead of that nothing matched', () => {
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true, unsearched });
+    expect(summary).toContain(
+      'Outcome: no confirmed hits, but 1 gap left part of the report unsearched; the report is retired without a full search.'
+    );
+    expect(summary).toContain('Not searched: T9999 (unknown technique id)');
+    expect(summary).not.toContain('Nothing in this environment matched');
+  });
+
+  it('drops the count and the section when no gaps arrived', () => {
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true });
+    expect(summary).toContain(
+      'Outcome: no confirmed hits, but part of the report could not be searched; the report is retired without a full search.'
+    );
+    expect(summary).not.toContain('Not searched:');
+  });
+
+  it('keeps the whole summary inside the CE cap with 100 gaps', () => {
+    const many = dedupeCoverageGaps(
+      Array.from({ length: 100 }, (_, index) => ({
+        reason: 'unknown_technique_id',
+        detail: `T${9000 + index}`,
+        technique_id: `T${9000 + index}`,
+      }))
+    );
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true, unsearched: many });
+    expect(summary.length).toBeLessThanOrEqual(10_000);
+    expect(summary).toContain('at least 100 gaps');
   });
 });

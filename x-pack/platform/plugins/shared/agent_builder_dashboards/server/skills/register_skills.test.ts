@@ -39,11 +39,22 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
+  it('passes the dashboard attachment id as dashboardId', () => {
+    expect(skill.content).toContain('`dashboardId` accepts dashboard attachment ids');
+    expect(skill.content).toContain('pass the returned `data.attachment_id` as `dashboardId`');
+  });
+
   it('finds unnamed data in one broad index search without probing it', () => {
     expect(skill.content).toContain(
       'find it in one `platform.core.list_indices` call with a broad pattern around the topic (e.g. `*log*`, not `logs-*`)'
     );
     expect(skill.content).toContain('Do not query the data before generating');
+  });
+
+  it('treats by-reference panels as unknown content that can only be rearranged', () => {
+    expect(skill.content).toContain('by-reference panels (');
+    expect(skill.content).toContain('do not look it up with any tool or API');
+    expect(enhanceGuidance()).toContain('keep by-reference panels');
   });
 
   it('inlines the dashboard design guidance directly in the skill body', () => {
@@ -53,18 +64,37 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
 
+  it('publishes a config reference per ML panel type and points the skill at each one', () => {
+    const panelConfigs = skill.referencedContent?.filter(
+      ({ relativePath }) => relativePath === './panel_configs'
+    );
+
+    expect(panelConfigs?.map(({ name }) => name)).toEqual([
+      'ml_anomaly_charts',
+      'ml_anomaly_swimlane',
+      'ml_single_metric_viewer',
+    ]);
+    panelConfigs?.forEach(({ name }) => {
+      expect(skill.content).toContain(
+        `/skills/platform/dashboard/dashboards/panel_configs/${name}.md`
+      );
+    });
+  });
+
   it('loads the enhance workflow from referenced content', () => {
     expect(skill.content).toContain(ENHANCE_GUIDANCE_PATH);
     expect(skill.content).toContain('read_file');
     expect(skill.content).toContain('Do not enhance without reading it');
     expect(skill.content).not.toContain('How would you like to enhance this dashboard?');
-    expect(skill.referencedContent).toEqual([
-      expect.objectContaining({
-        name: 'enhance',
-        relativePath: '.',
-        content: expect.stringContaining('Improving an Existing Dashboard (Enhance)'),
-      }),
-    ]);
+    expect(skill.referencedContent).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'enhance',
+          relativePath: '.',
+          content: expect.stringContaining('Improving an Existing Dashboard (Enhance)'),
+        }),
+      ])
+    );
   });
 
   it('delegates enhance presentation defaults to the chart author', () => {
@@ -72,8 +102,8 @@ describe('registerSkills', () => {
     expect(guidance).toContain('applyChartRules: true');
     expect(guidance).toContain('for every existing ES|QL Lens panel');
     expect(guidance).toContain('preserveESQL: true');
-    expect(skill.content).toContain(
-      'a query change and presentation enhancement can share one edit'
+    expect(guidance).toContain(
+      'omit `preserveESQL` and describe only that change alongside the enhancement request'
     );
     // Lens mechanics stay with the chart author.
     expect(skill.content).not.toContain('apply_color_to');
@@ -107,7 +137,7 @@ describe('registerSkills', () => {
       "Skip this step when the user's message already asks for appearance only"
     );
     expect(guidance).toContain('**Content mode.** Do everything appearance mode does');
-    expect(guidance).toContain('`remove_panels`');
+    expect(guidance).toContain('Remove panels that meet the removal criteria with `remove`');
     expect(guidance).toContain(
       'replace non-ES|QL panels with new ES|QL Lens panels without asking again'
     );
@@ -120,8 +150,5 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
     expect(skill.content).toContain('only when the terms are short strings');
-    expect(skill.content).toContain(
-      'provide a new `chartType` when the request changes the chart family'
-    );
   });
 });

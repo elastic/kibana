@@ -84,6 +84,28 @@ describe('AgentReassignAgentPolicyModal', () => {
     });
   });
 
+  it('does not offer agentless policies', async () => {
+    mockPolicies([
+      POLICY_A,
+      POLICY_B,
+      {
+        id: 'policy-agentless',
+        name: 'Agentless Policy',
+        is_managed: false,
+        supports_agentless: true,
+      },
+    ] as any);
+    const { utils } = render({ agents: [{ id: 'agent-1', policy_id: 'policy-a' } as any] });
+
+    const combobox = utils.getByRole('combobox');
+    act(() => {
+      fireEvent.change(combobox, { target: { value: 'Polic' } });
+    });
+
+    expect(await utils.findByText('Policy B')).toBeInTheDocument();
+    expect(utils.queryByText('Agentless Policy')).not.toBeInTheDocument();
+  });
+
   describe('single agent', () => {
     const singleAgent = [{ id: 'agent-1', policy_id: 'policy-a' } as any];
 

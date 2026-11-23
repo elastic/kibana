@@ -18,13 +18,13 @@ import type { LifecycleDetection } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSourceEsql } from '../../../hooks/use_source_esql';
+import { useSourceEsql } from '../../../data/sources/use_source_esql';
 import {
   DETECTION_OCCURRENCE_BUCKET_SIZE,
   getChangePointLabel,
   getDetectionOccurrenceTimeRange,
   parseOccurrenceBucketSize,
-} from './change_point';
+} from '../../../common/change_point';
 
 const CHART_HEIGHT = 200;
 const RULE_EVENTS_INDEX = '.rule-events';
@@ -32,6 +32,10 @@ const DEFAULT_SPACE_ID = 'default';
 const OCCURRENCE_QUERY_LIMIT = 100;
 
 type LensESQLConfig = LensConfig & { dataset: LensESQLDataset };
+type ChangePointChartDetection = Pick<
+  LifecycleDetection,
+  'detection_id' | 'rule_uuid' | 'source_id' | 'change_point_type' | '@timestamp'
+>;
 
 /** First index of a FROM or TS command. Anything else is treated as logs. */
 const readSourceIndexPattern = (esql: string | undefined): string => {
@@ -139,7 +143,7 @@ const buildLensConfig = ({
 export function ChangePointLensChart({
   detection,
 }: {
-  detection: LifecycleDetection;
+  detection: ChangePointChartDetection;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { dataViews, lens, spaces } = useKibana().services;

@@ -7,7 +7,7 @@
 
 import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,20 +25,24 @@ const AGENTIC_INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
 const AGENTIC_INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
 const PROPOSALS_API_PRIVILEGE_READ = 'read_proposals';
 const PROPOSALS_API_PRIVILEGE_MANAGE = 'manage_proposals';
+// Significant Events manages the Alerting v2 rules behind query knowledge indicators with the
+// current user's saved objects client.
+const ALERTING_V2_RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
+const RELAY_APP_CONNECTION_SAVED_OBJECT_TYPE = 'relay-app-connection';
 
 export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
   features.registerKibanaFeature({
     id: NIGHTSHIFT_FEATURE_ID,
     name: i18n.translate('xpack.nightshift.featureRegistry.featureName', {
-      defaultMessage: 'Nightshift',
+      defaultMessage: 'nightshift',
     }),
     order: 8700,
     category: DEFAULT_APP_CATEGORIES.observability,
     minimumLicense: 'enterprise',
-    app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
+    app: [NIGHTSHIFT_APP_ID],
     privileges: {
       all: {
-        app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
+        app: [NIGHTSHIFT_APP_ID],
         api: [
           NIGHTSHIFT_API_PRIVILEGES.read,
           NIGHTSHIFT_API_PRIVILEGES.manage,
@@ -52,10 +56,17 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         // Significant Events reads as the current user.
         alerts: { read: true },
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
-        savedObject: { all: [NIGHTSHIFT_SOURCE_SO_TYPE], read: [] },
+        savedObject: {
+          all: [
+            NIGHTSHIFT_SOURCE_SO_TYPE,
+            ALERTING_V2_RULE_SAVED_OBJECT_TYPE,
+            RELAY_APP_CONNECTION_SAVED_OBJECT_TYPE,
+          ],
+          read: [],
+        },
       },
       read: {
-        app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
+        app: [NIGHTSHIFT_APP_ID],
         // Read-only Nightshift users can read investigations through the shared query API.
         api: [
           NIGHTSHIFT_API_PRIVILEGES.read,
@@ -65,7 +76,14 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         ui: [NIGHTSHIFT_UI_PRIVILEGES.show],
         alerts: { read: true },
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
-        savedObject: { all: [], read: [NIGHTSHIFT_SOURCE_SO_TYPE] },
+        savedObject: {
+          all: [],
+          read: [
+            NIGHTSHIFT_SOURCE_SO_TYPE,
+            ALERTING_V2_RULE_SAVED_OBJECT_TYPE,
+            RELAY_APP_CONNECTION_SAVED_OBJECT_TYPE,
+          ],
+        },
       },
     },
     subFeatures: [
@@ -76,7 +94,8 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         description: i18n.translate(
           'xpack.nightshift.featureRegistry.configureSubFeatureDescription',
           {
-            defaultMessage: 'Pause activity, edit settings, and manage limits.',
+            defaultMessage:
+              'Pause activity, edit settings, manage limits, and create, edit, enable, disable or delete sources. Sources decide which indices the nightshift service account reads, and the significant events and detections it finds are shown to everyone with nightshift access in the space.',
           }
         ),
         privilegeGroups: [

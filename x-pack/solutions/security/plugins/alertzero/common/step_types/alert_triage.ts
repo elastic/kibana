@@ -8,13 +8,35 @@
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 export const TRIAGE_HEADROOM_STEP_ID = 'alertzero.triage.headroom' as const;
 export const TRIAGE_PLAN_SWEEP_STEP_ID = 'alertzero.triage.planSweep' as const;
 export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const;
+export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys' as const;
+export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandidates' as const;
+export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
+export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
+export const TRIAGE_STORE_FP_DECISIONS_STEP_ID = 'alertzero.triage.storeFpDecisions' as const;
+export const TRIAGE_MATCH_FP_DECISIONS_STEP_ID = 'alertzero.triage.matchFpDecisions' as const;
+export const TRIAGE_REVOKE_FP_DECISION_STEP_ID = 'alertzero.triage.revokeFpDecision' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
+
+const impactedEntityOutputSchema = () =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    type: z.enum(['host', 'user']),
+  });
+
+// Bounded on input only: an output is built from alert fields, and a long one must not fail the step.
+const impactedEntityInputSchema = () =>
+  z.object({
+    id: z.string().max(512),
+    name: z.string().max(512),
+    type: z.enum(['host', 'user']),
+  });
 
 /** The longest sweep interval the Worker settings accept: `WorkerScheduleInterval` is at most five digits and a unit, so `99999d`. */
 const MAX_INTERVAL_MINUTES = 99_999 * 24 * 60;
@@ -56,6 +78,9 @@ const planSweepInputSchema = z.object({
   budget_per_hour: z.number().int().min(1).max(100_000),
   interval_minutes: z.number().int().min(1).max(MAX_INTERVAL_MINUTES),
   lookback_hours: z.number().int().min(1).max(8760),
+  min_severity: z.enum(['low', 'medium', 'high', 'critical']),
+  exclude_building_blocks: z.boolean(),
+  excluded_rule_tags: z.array(z.string().min(1).max(256)).max(50),
   headroom: headroomSchema.describe('Output of the headroom step.'),
 });
 
@@ -110,12 +135,16 @@ const loadAlertsInputSchema = z.object({
   alert_ids: z.array(idSchema).min(1).max(100).describe('Alerts of one triage batch.'),
 });
 
-const loadAlertsOutputSchema = z.object({
-  alerts: z
-    .array(z.record(z.string(), z.unknown()))
-    .describe('Alert documents with `_id` and `_index`, in the shape Alert Analysis takes.'),
-  missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
-});
+const loadAlertsOutputSchema = lazySchema(() =>
+  z.object({
+    alerts: z
+      .array(z.record(z.string(), z.unknown()))
+      .describe(
+        'Alerts with `_id`, `_index` and the fields Alert Analysis and the pattern keys read, in the shape Alert Analysis takes.'
+      ),
+    missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
+  })
+);
 
 export const triageLoadAlertsStepCommonDefinition: CommonStepDefinition<
   typeof loadAlertsInputSchema,
@@ -132,4 +161,469 @@ export const triageLoadAlertsStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: loadAlertsInputSchema,
   outputSchema: loadAlertsOutputSchema,
+};
+
+const tagPatternKeysInputSchema = lazySchema(() =>
+  z.object({
+    alert_ids: z
+      .array(idSchema)
+      .min(1)
+      .max(1000)
+      .describe('Alerts of one triage batch that received a verdict.'),
+    fp_candidate_ids: z
+      .array(idSchema)
+      .max(1000)
+      .describe('The false positives at or above the confidence floor, for the fallback count.'),
+    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
+  })
+);
+
+const tagPatternKeysOutputSchema = lazySchema(() =>
+  z.object({
+    alerts_with_strict_key: z.number(),
+    strict_keys: z.number(),
+    strict_keys_single_alert: z.number(),
+    wide_keys: z.number(),
+    wide_keys_single_alert: z.number(),
+    fp_candidates_on_fallback: z.number(),
+    missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
+  })
+);
+
+export const triageTagPatternKeysStepCommonDefinition: CommonStepDefinition<
+  typeof tagPatternKeysInputSchema,
+  typeof tagPatternKeysOutputSchema
+> = {
+  id: TRIAGE_TAG_PATTERN_KEYS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageTagPatternKeys.label', {
+    defaultMessage: 'Tag triage alerts with their pattern keys',
+  }),
+  description: i18n.translate('xpack.alertzero.workflows.steps.triageTagPatternKeys.description', {
+    defaultMessage:
+      'Computes the strict and wide pattern key of each alert, tags the alerts with the key hashes, and counts the keys.',
+  }),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: tagPatternKeysInputSchema,
+  outputSchema: tagPatternKeysOutputSchema,
+};
+
+const proposalTextInputShape = {
+  rule_name: lazySchema(() =>
+    z.string().max(1024).describe('Name of the rule, quoted in the proposal comment.')
+  ),
+  confidence_floor: lazySchema(() =>
+    z.number().min(0).max(1).describe('Confidence floor, quoted in the comment.')
+  ),
+};
+
+const groupFpCandidatesInputSchema = lazySchema(() =>
+  z.object({
+    fp_candidate_ids: z
+      .array(idSchema)
+      .max(1000)
+      .describe(
+        'The false positives at or above the confidence floor. May be empty, to get only the inconclusive link.'
+      ),
+    autonomy: z.enum(['manual', 'supervised']),
+    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
+    impacted_entities: z
+      .array(impactedEntityInputSchema())
+      .max(100)
+      .optional()
+      .describe('Entities the analysis found. Each new proposal keeps those its alerts name.'),
+    other_alert_ids: z
+      .array(idSchema)
+      .max(1000)
+      .optional()
+      .describe(
+        'Alerts of the batch that are in no proposal, for the entities of their Investigation.'
+      ),
+    inconclusive_alert_ids: z
+      .array(idSchema)
+      .max(1000)
+      .optional()
+      .describe(
+        'Alerts of the batch that were inconclusive, for the link in the proposal message.'
+      ),
+    ...proposalTextInputShape,
+  })
+);
+
+const groupFpCandidatesOutputSchema = lazySchema(() =>
+  z.object({
+    mints: z
+      .array(
+        z.object({
+          proposal_id: z.string().describe('The id the proposal is created under.'),
+          alert_ids: z.array(z.string()),
+          kind: z.enum(['keyed', 'pooled', 'overflow', 'failed_join', 'batch']),
+          proposal_alerts_page_query: z
+            .string()
+            .describe(
+              'Query string of the Alerts page link that shows every alert of the proposal, by its `az:proposal` tag.'
+            ),
+          title: z.string(),
+          comment: z.string(),
+          impacted_entities: z.array(impactedEntityOutputSchema()),
+        })
+      )
+      .describe('New proposals, one review each.'),
+    joins: z
+      .array(
+        z.object({
+          owner_proposal_id: z.string().describe('Root id of the proposal that took the alerts.'),
+          proposal_id: z.string().describe('The revision the join created.'),
+          revision: z.number(),
+          conversation_id: z.string().describe("The owner's Investigation."),
+          alert_ids: z.array(z.string()).describe('Only the alerts the proposal did not hold.'),
+          total_alerts: z.number().describe('How many alerts the proposal holds after this join.'),
+          alerts_page_query: z
+            .string()
+            .describe('Query string of the Alerts page link that shows just the added alerts.'),
+          impacted_entities: z
+            .array(impactedEntityOutputSchema())
+            .describe('Entities the added alerts name, for the owner Investigation.'),
+        })
+      )
+      .describe('Alerts added to an open proposal.'),
+    grouped: z.boolean().describe('False when grouping is off, so the batch has one proposal.'),
+    grouping: z
+      .enum(['on', 'supervised', 'flag_off', 'lookup_incomplete'])
+      .describe('Whether the batch was grouped, or why not.'),
+    alerts_joined: z.number(),
+    alerts_pooled: z.number(),
+    proposals_created: z.number(),
+    missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
+    other_impacted_entities: z
+      .array(impactedEntityOutputSchema())
+      .describe('Entities that the alerts in `other_alert_ids` name. Empty if none could be read.'),
+    inconclusive_alerts_page_query: z
+      .string()
+      .describe(
+        'Query string of the Alerts page link that shows the inconclusive alerts. Empty if none.'
+      ),
+  })
+);
+
+export const triageGroupFpCandidatesStepCommonDefinition: CommonStepDefinition<
+  typeof groupFpCandidatesInputSchema,
+  typeof groupFpCandidatesOutputSchema
+> = {
+  id: TRIAGE_GROUP_FP_CANDIDATES_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageGroupFpCandidates.label', {
+    defaultMessage: 'Group triage false positives into proposals',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageGroupFpCandidates.description',
+    {
+      defaultMessage:
+        'Adds the false positives of a batch to the open proposal of their pattern, or plans a new proposal for them.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: groupFpCandidatesInputSchema,
+  outputSchema: groupFpCandidatesOutputSchema,
+};
+
+const joinProposalInputSchema = lazySchema(() =>
+  z.object({
+    proposal_id: idSchema.describe('Id the review tried to create the proposal under.'),
+    alert_ids: z.array(idSchema).min(1).max(1000),
+    ...proposalTextInputShape,
+  })
+);
+
+const joinProposalOutputSchema = lazySchema(() =>
+  z.object({
+    joined: z.boolean(),
+    proposal_id: z.string().describe('The revision the join created, when it joined.'),
+    conversation_id: z.string().describe("The owner's Investigation, when it joined."),
+    revision: z.number(),
+    alert_ids: z
+      .array(z.string())
+      .describe('Only the alerts the proposal did not hold. Empty when it held them all.'),
+    alerts_page_query: z
+      .string()
+      .describe('Query string of the Alerts page link that shows just the added alerts.'),
+  })
+);
+
+export const triageJoinProposalStepCommonDefinition: CommonStepDefinition<
+  typeof joinProposalInputSchema,
+  typeof joinProposalOutputSchema
+> = {
+  id: TRIAGE_JOIN_PROPOSAL_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageJoinProposal.label', {
+    defaultMessage: 'Join a triage proposal',
+  }),
+  description: i18n.translate('xpack.alertzero.workflows.steps.triageJoinProposal.description', {
+    defaultMessage:
+      'Adds alerts to the open proposal that already holds the id, when a create collided with it.',
+  }),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: joinProposalInputSchema,
+  outputSchema: joinProposalOutputSchema,
+};
+
+const retagProposalAlertsInputSchema = lazySchema(() =>
+  z
+    .object({
+      proposal_id: idSchema
+        .optional()
+        .describe('Root id of the proposal. Open alerts tagged `az:proposal:<id>` are re-tagged.'),
+      alert_ids: z
+        .array(idSchema)
+        .max(20_000)
+        .optional()
+        .describe('Alerts to re-tag as well, for those that may lack the proposal tag.'),
+      exclude_alert_ids: z
+        .array(idSchema)
+        .max(10_000)
+        .optional()
+        .describe('Alerts to leave alone, such as the ones an approved proposal just closed.'),
+      drop_model_fp: z
+        .boolean()
+        .optional()
+        .describe('Also remove `az:model_fp`, when a human disagreed with the verdict.'),
+    })
+    .refine(({ proposal_id: proposalId, alert_ids: alertIds }) => proposalId || alertIds?.length, {
+      message: 'Either proposal_id or alert_ids is required',
+    })
+);
+
+const retagProposalAlertsOutputSchema = lazySchema(() =>
+  z.object({
+    matched: z.number().describe('Open alerts that still carried `az:false_positive`.'),
+    failed: z.number().describe('Alerts whose re-tag failed.'),
+  })
+);
+
+export const triageRetagProposalAlertsStepCommonDefinition: CommonStepDefinition<
+  typeof retagProposalAlertsInputSchema,
+  typeof retagProposalAlertsOutputSchema
+> = {
+  id: TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageRetagProposalAlerts.label', {
+    defaultMessage: 'Re-tag the alerts a proposal left behind',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageRetagProposalAlerts.description',
+    {
+      defaultMessage:
+        'Re-tags open alerts of a proposal that are still false positives as inconclusive, whether or not the proposal still lists them.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: retagProposalAlertsInputSchema,
+  outputSchema: retagProposalAlertsOutputSchema,
+};
+
+export const STORE_FP_DECISIONS_SKIP_REASONS = [
+  'none',
+  'off',
+  'supervised',
+  'disabled',
+  'denied',
+  'storage_failure',
+  'no_strict_keys',
+  'alerts_missing',
+] as const;
+export type StoreFpDecisionsSkipReason = (typeof STORE_FP_DECISIONS_SKIP_REASONS)[number];
+
+const storeFpDecisionsInputSchema = lazySchema(() =>
+  z.object({
+    outcome: z
+      .enum(['approved', 'dismissed'])
+      .describe(
+        'An approval stores false positive decisions, a dismissal stores do-not-propose items.'
+      ),
+    alert_ids: z
+      .array(idSchema)
+      .min(1)
+      .max(1000)
+      .describe("The alerts of the proposal's live revision."),
+    autonomy: z
+      .enum(['manual', 'supervised'])
+      .describe(
+        'A supervised approval is automatic, so nobody saw the pattern and nothing is stored.'
+      ),
+    proposal_id: idSchema.describe('The proposal that was decided.'),
+    investigation_id: idSchema.describe("The proposal's Investigation."),
+    approver: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('Who decided the proposal, for the audit trail.'),
+  })
+);
+
+const storeFpDecisionsOutputSchema = lazySchema(() =>
+  z.object({
+    skip_reason: z.enum(STORE_FP_DECISIONS_SKIP_REASONS),
+    keys_seen: z.number().describe('Strict keys among the alerts.'),
+    alerts_without_strict_key: z.number(),
+    keys_below_minimum: z.number().describe('Keys seen on too few alerts to become decisions.'),
+    keys_with_other_verdicts: z
+      .number()
+      .describe('Keys where an earlier alert is a true positive or inconclusive.'),
+    keys_over_cap: z.number().describe('Keys left out by the per-approval cap.'),
+    written: z.number(),
+    failed: z.number(),
+  })
+);
+
+export const triageStoreFpDecisionsStepCommonDefinition: CommonStepDefinition<
+  typeof storeFpDecisionsInputSchema,
+  typeof storeFpDecisionsOutputSchema
+> = {
+  id: TRIAGE_STORE_FP_DECISIONS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageStoreFpDecisions.label', {
+    defaultMessage: 'Store triage decisions',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageStoreFpDecisions.description',
+    {
+      defaultMessage:
+        'Stores the exact patterns of an approved or dismissed closure proposal as Knowledge Items, so later alerts can be matched without the model.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: storeFpDecisionsInputSchema,
+  outputSchema: storeFpDecisionsOutputSchema,
+};
+
+export const MATCH_FP_DECISIONS_STATUSES = ['ok', 'off', 'disabled', 'failed'] as const;
+export type MatchFpDecisionsStatus = (typeof MATCH_FP_DECISIONS_STATUSES)[number];
+
+const matchFpDecisionsInputSchema = lazySchema(() =>
+  z.object({
+    analysis_tag_prefix: idSchema.describe(
+      'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
+    ),
+    lookback_hours: z.number().int().min(1).max(8760),
+    min_severity: z.enum(['low', 'medium', 'high', 'critical']),
+    exclude_building_blocks: z.boolean(),
+    excluded_rule_tags: z.array(z.string().min(1).max(256)).max(50),
+  })
+);
+
+const matchFpDecisionsOutputSchema = lazySchema(() =>
+  z.object({
+    status: z
+      .enum(MATCH_FP_DECISIONS_STATUSES)
+      .describe(
+        '`off` when the flag is `off` (the default), `disabled` when the Context Engine is off in the space, `failed` when nothing could be matched.'
+      ),
+    candidates: z.number().describe('Open untriaged alerts of the look-back that were checked.'),
+    decisions_matched: z.number().describe('Distinct decisions that matched an alert.'),
+    would_close: z.number().describe('Alerts a false positive decision matched.'),
+    would_skip: z.number().describe('Alerts a do-not-propose item matched.'),
+    closed: z.number().describe('Alerts closed by a decision. Always 0 unless the mode is `on`.'),
+    skipped: z.number().describe('Alerts kept out of analysis by a dismissal. 0 unless `on`.'),
+    capped: z
+      .number()
+      .describe('Matches left for the normal path because the decision reached its daily cap.'),
+    close_failures: z.number().describe('Decisions whose alerts could not all be closed.'),
+    notes_missing: z
+      .number()
+      .describe(
+        'Alerts a decision closed or skipped that have no note: a failed write, or past the time limit.'
+      ),
+    left_for_notes: z
+      .number()
+      .describe(
+        'Matches left untouched for the next sweep because the sweep had no notes left for them.'
+      ),
+    deferred: z
+      .number()
+      .describe('Decisions left for the next sweep because the step ran out of time.'),
+    out_of_time: z
+      .boolean()
+      .describe('The step stopped starting decisions or reading pages because its time was spent.'),
+    excluded_by_severity: z
+      .number()
+      .describe('Matches the severity guard keeps with a human, not tagged.'),
+    held_in_shadow: z
+      .number()
+      .describe(
+        'Matches on a cloud key, an untrusted signer or a key with neither a signer nor a hash that `on` only tagged, as shadow does: the alert goes to analysis.'
+      ),
+    tag_failures: z
+      .number()
+      .describe('Tag updates that failed. Those alerts match again next sweep.'),
+  })
+);
+
+export const triageMatchFpDecisionsStepCommonDefinition: CommonStepDefinition<
+  typeof matchFpDecisionsInputSchema,
+  typeof matchFpDecisionsOutputSchema
+> = {
+  id: TRIAGE_MATCH_FP_DECISIONS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageMatchFpDecisions.label', {
+    defaultMessage: 'Match triage decisions',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageMatchFpDecisions.description',
+    {
+      defaultMessage:
+        'Matches open alerts against the stored decisions of the space, without a model. In shadow mode it only tags the matches; in on mode it closes them.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: matchFpDecisionsInputSchema,
+  outputSchema: matchFpDecisionsOutputSchema,
+};
+
+export const REVOKE_FP_DECISION_STATUSES = ['ok', 'not_found', 'denied'] as const;
+export type RevokeFpDecisionStatus = (typeof REVOKE_FP_DECISION_STATUSES)[number];
+
+const revokeFpDecisionInputSchema = lazySchema(() =>
+  z.object({
+    decision_id: z
+      .string()
+      .regex(/^fp-(decision|dismissal)-[0-9a-f]{16}$/)
+      .describe('Id of the decision: `fp-decision-<hash>` or `fp-dismissal-<hash>`.'),
+  })
+);
+
+const revokeFpDecisionOutputSchema = lazySchema(() =>
+  z.object({
+    status: z
+      .enum(REVOKE_FP_DECISION_STATUSES)
+      .describe(
+        '`not_found` when no such decision exists in this space. Alerts that carry its tag are still put back. `denied` when the caller cannot read or write the decisions index: nothing was changed.'
+      ),
+    alerts_reopened: z.number().describe('Alerts the decision closed that were reopened.'),
+    alerts_released: z
+      .number()
+      .describe('Alerts the decision kept out of analysis that went back to the backlog.'),
+    failures: z.number().describe('Steps of the revoke that failed. Run it again to finish.'),
+  })
+);
+
+export const triageRevokeFpDecisionStepCommonDefinition: CommonStepDefinition<
+  typeof revokeFpDecisionInputSchema,
+  typeof revokeFpDecisionOutputSchema
+> = {
+  id: TRIAGE_REVOKE_FP_DECISION_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageRevokeFpDecision.label', {
+    defaultMessage: 'Revoke a triage decision',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageRevokeFpDecision.description',
+    {
+      defaultMessage:
+        'Deletes a triage decision and puts back the alerts it closed or kept out of analysis.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: revokeFpDecisionInputSchema,
+  outputSchema: revokeFpDecisionOutputSchema,
 };

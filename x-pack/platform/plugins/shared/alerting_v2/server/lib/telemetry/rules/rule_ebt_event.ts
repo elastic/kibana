@@ -1,0 +1,193 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EventTypeOpts } from '@kbn/core/server';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { EventOrigin } from '../../event_origin/origin_schemas';
+import { collectRuleUpdatedFields } from './rule_updated_fields';
+import {
+  RULE_CREATED_EBT_EVENT_TYPE,
+  RULE_DELETED_EBT_EVENT_TYPE,
+  RULE_DISABLED_EBT_EVENT_TYPE,
+  RULE_ENABLED_EBT_EVENT_TYPE,
+  RULE_UPDATED_EBT_EVENT_TYPE,
+  type RuleChangedEbtData,
+  type RuleEbtEventType,
+} from './rule_ebt_schema';
+import {
+  RULE_CREATED_EVENT_TYPE,
+  RULE_DELETED_EVENT_TYPE,
+  RULE_DISABLED_EVENT_TYPE,
+  RULE_ENABLED_EVENT_TYPE,
+  RULE_UPDATED_EVENT_TYPE,
+  type RuleEventPayload,
+} from '../../events/rule_event_publisher/events';
+
+/** Domain operations reported as telemetry. Each one is its own EBT event type. */
+export const RULE_OPERATIONS = [
+  RULE_CREATED_EVENT_TYPE,
+  RULE_UPDATED_EVENT_TYPE,
+  RULE_DELETED_EVENT_TYPE,
+  RULE_ENABLED_EVENT_TYPE,
+  RULE_DISABLED_EVENT_TYPE,
+] as const;
+
+export type RuleOperation = (typeof RULE_OPERATIONS)[number];
+
+/** Maps each domain operation to the EBT event type registered for it. */
+export const RULE_EBT_EVENT_TYPE_BY_OPERATION = {
+  [RULE_CREATED_EVENT_TYPE]: RULE_CREATED_EBT_EVENT_TYPE,
+  [RULE_UPDATED_EVENT_TYPE]: RULE_UPDATED_EBT_EVENT_TYPE,
+  [RULE_DELETED_EVENT_TYPE]: RULE_DELETED_EBT_EVENT_TYPE,
+  [RULE_ENABLED_EVENT_TYPE]: RULE_ENABLED_EBT_EVENT_TYPE,
+  [RULE_DISABLED_EVENT_TYPE]: RULE_DISABLED_EBT_EVENT_TYPE,
+} as const satisfies Record<RuleOperation, RuleEbtEventType>;
+
+const ruleChangedEventSchema: EventTypeOpts<RuleChangedEbtData>['schema'] = {
+  rule_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the rule that was changed.',
+      optional: false,
+    },
+  },
+  template_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the rule template the rule was installed from, when known.',
+      optional: true,
+    },
+  },
+  created_at: {
+    type: 'date',
+    _meta: {
+      description:
+        'ISO timestamp of when the rule was created. Absent when the domain rule could not be read.',
+      optional: true,
+    },
+  },
+  kind: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Whether the rule creates alerts (`alert`) or only stores matching events (`signal`). Absent when the domain rule could not be read.',
+      optional: true,
+    },
+  },
+  builder_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The rule builder the rule was authored with, when it was created by a builder.',
+      optional: true,
+    },
+  },
+  enabled: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the rule was enabled after the operation (for `rule.deleted`, whether it was enabled when deleted). Absent when the domain rule could not be read.',
+      optional: true,
+    },
+  },
+  updated_fields: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A dotted path of a rule field whose value differs.',
+      },
+    },
+    _meta: {
+      description:
+        'Dotted paths of rule fields whose values differ on a rule update. A nested object is reported at the leaf that changed; an array is reported as one path. `version` and `updated_at` change on every write and are never reported. Omitted when none differ, and on create, delete, enable, and disable.',
+      optional: true,
+    },
+  },
+  origin: {
+    properties: {
+      actor: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Who made the change: `user` for a request carrying credentials, or `internal` for the Kibana internal user acting on its own.',
+          optional: false,
+        },
+      },
+      channel: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The channel the change was made through: `ui` for requests made by the Kibana browser app, `system` for Kibana acting on its own behalf, or `api` for any other request.',
+          optional: false,
+        },
+      },
+      app: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The app the change was made from: the app configured by the calling plugin or, for `ui` requests, the app named in the execution context. Absent otherwise.',
+          optional: true,
+        },
+      },
+    },
+    _meta: {
+      description: 'Where the change came from.',
+      optional: false,
+    },
+  },
+};
+
+/** One registered event per operation. Every event uses {@link RuleChangedEbtData}. */
+export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEbtData>> =
+  RULE_OPERATIONS.map((operation) => ({
+    eventType: RULE_EBT_EVENT_TYPE_BY_OPERATION[operation],
+    schema: ruleChangedEventSchema,
+  }));
+
+const updatedFieldsPayload = (
+  operation: RuleOperation,
+  prevRule: RuleResponse | undefined,
+  rule: RuleResponse | undefined
+): Pick<RuleChangedEbtData, 'updated_fields'> => {
+  if (operation !== RULE_UPDATED_EVENT_TYPE || !prevRule || !rule) {
+    return {};
+  }
+
+  const updatedFields = collectRuleUpdatedFields(prevRule, rule);
+  return updatedFields.length > 0 ? { updated_fields: updatedFields } : {};
+};
+
+/**
+ * Projects a rule-change telemetry payload from a lifecycle event. Rule fields
+ * are omitted when `rule` is absent, and `updated_fields` is only reported for
+ * `rule.updated`.
+ */
+export const buildRuleChangedEventData = (
+  operation: RuleOperation,
+  { ruleId, rule, prevRule, templateId }: RuleEventPayload,
+  origin: EventOrigin
+): RuleChangedEbtData => {
+  const fields = updatedFieldsPayload(operation, prevRule, rule);
+
+  if (!rule) {
+    return { rule_id: ruleId, ...fields, origin };
+  }
+
+  const { kind, enabled, created_at: createdAt, metadata } = rule;
+  const builderType = metadata.builder?.type;
+
+  return {
+    rule_id: ruleId,
+    ...(templateId ? { template_id: templateId } : {}),
+    created_at: createdAt,
+    kind,
+    ...(builderType ? { builder_type: builderType } : {}),
+    enabled,
+    ...fields,
+    origin,
+  };
+};

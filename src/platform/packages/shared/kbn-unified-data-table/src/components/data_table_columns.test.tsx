@@ -512,6 +512,46 @@ describe('Data table columns', function () {
     });
   });
 
+  describe('Summary column without a data view field', () => {
+    it('still has cell actions when the data view has no _source field, as in ES|QL', () => {
+      const getByName = dataViewWithTimefieldMock.fields.getByName.bind(
+        dataViewWithTimefieldMock.fields
+      );
+      const getByNameSpy = jest
+        .spyOn(dataViewWithTimefieldMock.fields, 'getByName')
+        .mockImplementation((name: string) => (name === '_source' ? undefined : getByName(name)));
+
+      const actual = getEuiGridColumns({
+        documentsDisplayMode: 'table',
+        columns: ['_source'],
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        isSummaryOnlyColumn: false,
+        isSortEnabled: false,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+          uiActions: servicesMock.uiActions,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        dataSource: createMockEsqlSource([]),
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+
+      getByNameSpy.mockRestore();
+
+      expect(actual.find((column) => column.id === '_source')?.cellActions?.length).toBeGreaterThan(
+        0
+      );
+    });
+  });
+
   describe('JSON column', () => {
     it('does not apply custom grid column configuration to the _source column in JSON mode', () => {
       const customizeSourceColumn = jest.fn(({ column }) => ({

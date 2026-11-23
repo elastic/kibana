@@ -1,0 +1,136 @@
+{
+  "operations": {
+    "downloadRecordingFile": [],
+    "getMeetingDetails": [
+      {
+        "method": "get",
+        "path": "/meetings/{meetingId}",
+        "source": "meetings"
+      }
+    ],
+    "getMeetingParticipants": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 30,
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "next_page_token",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "participants",
+            "nextPath": "next_page_token"
+          },
+          "style": "cursor"
+        },
+        "path": "/past_meetings/{meetingId}/participants",
+        "source": "meetings"
+      }
+    ],
+    "getMeetingRecordings": [
+      {
+        "method": "get",
+        "path": "/meetings/{meetingId}/recordings",
+        "source": "meetings"
+      }
+    ],
+    "getMeetingRegistrants": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 30,
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "next_page_token",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "registrants",
+            "nextPath": "next_page_token"
+          },
+          "style": "cursor"
+        },
+        "path": "/meetings/{meetingId}/registrants",
+        "source": "meetings"
+      }
+    ],
+    "getPastMeetingDetails": [
+      {
+        "method": "get",
+        "path": "/past_meetings/{meetingId}",
+        "source": "meetings"
+      }
+    ],
+    "listMeetings": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 30,
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "next_page_token",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "meetings",
+            "nextPath": "next_page_token"
+          },
+          "style": "cursor"
+        },
+        "path": "/users/{userId}/meetings",
+        "source": "meetings"
+      }
+    ],
+    "listUserRecordings": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 30,
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "next_page_token",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": "meetings",
+            "nextPath": "next_page_token"
+          },
+          "style": "cursor"
+        },
+        "path": "/users/{userId}/recordings",
+        "source": "meetings"
+      }
+    ],
+    "whoAmI": [
+      {
+        "method": "get",
+        "path": "/users/{userId}",
+        "source": "users"
+      }
+    ]
+  },
+  "sources": {
+    "meetings": {
+      "apiVersion": "2",
+      "fetchedAt": "2026-10-07T20:21:44.904Z",
+      "format": "openapi",
+      "url": "https://developers.zoom.us/api-hub/meetings/methods/endpoints.json"
+    },
+    "users": {
+      "apiVersion": "2",
+      "fetchedAt": "2026-10-07T20:21:44.905Z",
+      "format": "openapi",
+      "url": "https://developers.zoom.us/api-hub/users/methods/endpoints.json"
+    }
+  },
+  "unmatched": {
+    "downloadRecordingFile": [
+      {
+        "method": "get",
+        "path": "/rec/download/{token}",
+        "reason": "Recording files are downloaded from the download_url a recording lists, on zoom.us rather than api.zoom.us, which no Zoom OpenAPI spec describes; see https://developers.zoom.us/docs/api/using-zoom-apis/#download-url"
+      }
+    ]
+  }
+}

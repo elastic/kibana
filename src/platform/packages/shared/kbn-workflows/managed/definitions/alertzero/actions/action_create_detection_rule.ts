@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ACTION_CREATE_DETECTION_RULE_YAML from './action_create_detection_rule.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
@@ -21,6 +21,8 @@ export const ALERTZERO_ACTION_CREATE_RULE_WORKFLOW = {
   id: ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
-  yaml: ACTION_CREATE_DETECTION_RULE_YAML,
+  version: 3,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'action_create_detection_rule.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

@@ -22,5 +22,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./update_trained_model_spaces'));
     loadTestFile(require.resolve('./remove_from_current_space'));
     loadTestFile(require.resolve('./can_sync_to_all_spaces'));
+    loadTestFile(require.resolve('./http_api_access'));
   });
 }

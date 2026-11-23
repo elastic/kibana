@@ -208,7 +208,7 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
             })}
             helpText={i18n.translate('xpack.aiAnonymizationSettings.patternFlyout.patternHelp', {
               defaultMessage:
-                'A regular expression, evaluated with the global flag. Matching is case-sensitive.',
+                'A regular expression in RE2 syntax, evaluated with the global flag: lookahead, lookbehind and backreferences are not supported. Matching is case-sensitive; start the pattern with (?i) to ignore case.',
             })}
             isInvalid={Boolean(patternError)}
             error={patternError}

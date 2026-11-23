@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-http-resources-server'
   - '@kbn/core-plugins-server-internal'
+  - '@kbn/core-rendering-server-internal'
   - '@kbn/core-root-server-internal'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-http-router-server-internal'
@@ -167,11 +168,14 @@ dependsOn:
   - '@kbn/core-user-profile-server-mocks'
   - '@kbn/core-user-profile-browser'
   - '@kbn/core-metrics-server-internal'
+  - '@kbn/core-threads-server-internal'
   - '@kbn/zod'
   - '@kbn/core-feature-flags-browser'
   - '@kbn/core-feature-flags-browser-mocks'
   - '@kbn/core-feature-flags-server'
+  - '@kbn/core-pubsub-server'
   - '@kbn/core-feature-flags-server-mocks'
+  - '@kbn/core-feature-flags-server-internal'
   - '@kbn/core-pricing-browser'
   - '@kbn/core-pricing-server-internal'
   - '@kbn/core-pricing-common'
@@ -189,6 +193,9 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - public/**/*

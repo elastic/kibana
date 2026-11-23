@@ -12,6 +12,8 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import {
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  HUNT_USABLE_FILTER,
+  INDICATOR_ELIGIBLE_FILTER,
   THREAT_REPORTS_GET_MAPPING_PARAMS,
   getReportEmbeddingEndpointIds,
   isReportsIndexManaged,
@@ -25,7 +27,6 @@ import {
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
-import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
 
 export interface ReadinessDeps {
   esClient: ElasticsearchClient;

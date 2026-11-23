@@ -16,7 +16,7 @@ import type {
 } from '@kbn/response-ops-alerts-table/types';
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
@@ -525,7 +525,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     tableType,
     finalBoolQuery,
     refreshAlertsTable,
-    runtimeMappings
+    runtimeMappings,
+    // A host's `query` (e.g. a case's attached alert ids) replaces finalBoolQuery on the table.
+    tablePropsOverrides.query ?? finalBoolQuery
   );
   const tableBulkActions = useMemo(() => {
     if (!additionalBulkActionItems?.length) {

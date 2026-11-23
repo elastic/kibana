@@ -13,4 +13,5 @@ type ListTypesParamsType = TypeOf<typeof listTypesParamsSchema>;
 export interface ListTypesParams {
   featureId?: ListTypesParamsType['featureId'];
   includeSystemActionTypes?: ListTypesParamsType['includeSystemActionTypes'];
+  sandboxCapableOnly?: ListTypesParamsType['sandboxCapableOnly'];
 }
