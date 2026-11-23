@@ -16,6 +16,7 @@ const validAttributes = {
   processor: 'tail_sampling',
   configJson: JSON.stringify({ policies: [{ name: 'keep-errors', type: 'status_code' }] }),
   configHash: 'abc123',
+  policyState: 'pending',
 };
 
 describe('tailSampling saved object type', () => {
@@ -37,7 +38,7 @@ describe('tailSampling saved object type', () => {
       ).not.toThrow();
     });
 
-    it.each(['enabled', 'processor', 'configJson', 'configHash'])(
+    it.each(['enabled', 'processor', 'configJson', 'configHash', 'policyState'])(
       'rejects a missing %s',
       (key) => {
         const { [key]: _removed, ...rest } = validAttributes as Record<string, unknown>;
@@ -61,6 +62,18 @@ describe('tailSampling saved object type', () => {
       ).toThrow();
     });
 
+    it.each(['pending', 'synced', 'failed'])('accepts policyState %s', (policyState) => {
+      expect(() =>
+        tailSamplingCreateSchema.validate({ ...validAttributes, policyState })
+      ).not.toThrow();
+    });
+
+    it('rejects an unknown policyState', () => {
+      expect(() =>
+        tailSamplingCreateSchema.validate({ ...validAttributes, policyState: 'bogus' })
+      ).toThrow();
+    });
+
     it('rejects unknown keys', () => {
       expect(() => tailSamplingCreateSchema.validate({ ...validAttributes, extra: 1 })).toThrow();
     });
@@ -74,6 +87,15 @@ describe('tailSampling saved object type', () => {
           fromNewerVersion: 'x',
         })
       ).toEqual(validAttributes);
+    });
+
+    it('accepts a policyState added by a newer Kibana instead of throwing', () => {
+      expect(
+        tailSamplingForwardCompatibilitySchema.validate({
+          ...validAttributes,
+          policyState: 'rolling_back',
+        })
+      ).toEqual({ ...validAttributes, policyState: 'rolling_back' });
     });
   });
 });
