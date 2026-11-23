@@ -21,9 +21,9 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ExecutionStatus } from '@kbn/workflows';
+import { StepIoService } from '../../server/workflow_context_manager/step_io_service';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
-import { StepIoService } from '../../server/workflow_context_manager/step_io_service';
 
 const STEP_COUNT = 100;
 
@@ -226,7 +226,9 @@ describe('StepIoService (LRU): memory consumption', () => {
 
     // eslint-disable-next-line no-console
     console.log(
-      `[1 empty] average_memory=${formatBytes(averageMemory)}  steps=${leafSteps.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(cacheBytes)}`
+      `[1 empty] average_memory=${formatBytes(averageMemory)}  steps=${
+        leafSteps.length
+      }  retained=${stepsRetained}  cache_bytes=${formatBytes(cacheBytes)}`
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
@@ -273,7 +275,9 @@ describe('StepIoService (LRU): memory consumption', () => {
     console.log(
       `[2 over-admit] average_memory=${formatBytes(used)}  io_retention_budget=${formatBytes(
         IO_RETENTION_BUDGET_BYTES
-      )}  steps=${leafSteps.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(cacheBytes)}`
+      )}  steps=${leafSteps.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(
+        cacheBytes
+      )}`
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
@@ -288,7 +292,9 @@ describe('StepIoService (LRU): memory consumption', () => {
 
   it(`reports average_memory and io_retention_budget when each output < 20% admit threshold`, async () => {
     expect(UNDER_ADMIT_OUTPUT_BYTES).toBeLessThanOrEqual(ADMIT_THRESHOLD_BYTES);
-    expect(LRU_PRODUCER_COUNT * UNDER_ADMIT_OUTPUT_BYTES).toBeGreaterThan(IO_RETENTION_BUDGET_BYTES);
+    expect(LRU_PRODUCER_COUNT * UNDER_ADMIT_OUTPUT_BYTES).toBeGreaterThan(
+      IO_RETENTION_BUDGET_BYTES
+    );
     const unboundedIoBytes = LRU_PRODUCER_COUNT * UNDER_ADMIT_OUTPUT_BYTES;
     const ceiling = expectedCeiling(averageMemory);
 
@@ -334,7 +340,9 @@ describe('StepIoService (LRU): memory consumption', () => {
     console.log(
       `[3 under-admit] average_memory=${formatBytes(used)}  io_retention_budget=${formatBytes(
         IO_RETENTION_BUDGET_BYTES
-      )}  steps=${producers.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(cacheBytes)}`
+      )}  steps=${producers.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(
+        cacheBytes
+      )}`
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
