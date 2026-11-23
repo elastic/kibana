@@ -82,9 +82,11 @@ describe('Datadog', () => {
       typeof authType === 'string' ? authType : authType.type
     );
     expect(types).toContain('none');
-    expect((Datadog.auth?.types ?? []).map((authType) =>
-      typeof authType === 'string' ? authType : authType.type
-    )).not.toContain('none');
+    expect(
+      (Datadog.auth?.types ?? []).map((authType) =>
+        typeof authType === 'string' ? authType : authType.type
+      )
+    ).not.toContain('none');
   });
 
   it('should keep test.enabled true', () => {
