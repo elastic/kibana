@@ -221,6 +221,40 @@ describe('fetchSampleDocuments', () => {
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
   });
 
+  it('filters on entity fields that only the second column probe reports', async () => {
+    getEsqlColumnSchemaMock
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([TIMESTAMP_COLUMN, { name: 'service.name', type: 'keyword' }]);
+    getSampleDocumentsEsqlMock.mockImplementation(async ({ whereCondition }) => ({
+      hits: [createHit(whereCondition ? 'entity-1' : 'random-1')],
+      total: 1,
+    }));
+
+    const result = await fetchSampleDocuments({
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [
+        createFeature({
+          id: 'checkout',
+          updatedAt: '2026-01-02T00:00:00.000Z',
+          field: 'service.name',
+          value: 'checkout',
+        }),
+      ],
+      logger,
+      size: 10,
+      entityFilteredRatio: 0.5,
+      diverseRatio: 0,
+      maxEntityFilters: 1,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(result.hasFilteredDocuments).toBe(true);
+  });
+
   it('rejects with a 400 that explains the missing index when nothing exists to sample', async () => {
     getEsqlColumnSchemaMock.mockRejectedValueOnce(
       new Error(

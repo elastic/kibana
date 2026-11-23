@@ -129,6 +129,9 @@ export async function fetchSampleDocuments({
       return undefined;
     });
 
+    // The later probe's schema also feeds the entity arm: an index that appears between the two
+    // probes can map the entity fields the first, empty answer lacked.
+    let sampleColumns = columns;
     if (columns) {
       // Every arm filters on @timestamp. A narrowed probe drops unmapped columns, so a missing one
       // looks the same for a source with data but no @timestamp (saved before the source API
@@ -171,6 +174,7 @@ export async function fetchSampleDocuments({
         if (fullTimestampProblem) {
           throw new StatusError(`Cannot sample [${index}]: ${fullTimestampProblem}`, 400);
         }
+        sampleColumns = fullColumns;
       }
     }
 
@@ -275,7 +279,7 @@ export async function fetchSampleDocuments({
               end,
               sampleSize: entityFilteredSize,
               entityFilters,
-              columns,
+              columns: sampleColumns,
               logger,
               abortSignal: samplingSignal,
             })
