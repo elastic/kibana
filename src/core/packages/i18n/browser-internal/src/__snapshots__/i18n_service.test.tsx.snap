@@ -27,6 +27,8 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiCollapsedItemActions.allActionsDisabled\\": \\"Individual item actions are disabled when rows are being selected.\\",
     \\"euiColorPicker.alphaLabel\\": \\"Alpha channel (opacity) value\\",
     \\"euiColorPicker.ariaLabel\\": \\"Select a color\\",
+    \\"euiColorPicker.openButtonLabel\\": \\"Open color selection dialog\\",
+    \\"euiColorPicker.closeButtonLabel\\": \\"Close color selection dialog\\",
     \\"euiColorPicker.colorLabel\\": \\"Color value\\",
     \\"euiColorPicker.colorErrorMessage\\": \\"Invalid color value\\",
     \\"euiColorPicker.transparent\\": \\"Transparent\\",

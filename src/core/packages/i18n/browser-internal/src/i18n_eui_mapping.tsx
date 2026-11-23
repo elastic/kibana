@@ -181,6 +181,14 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Select a color',
       description: 'ARIA label for the color picker button',
     }),
+    'euiColorPicker.openButtonLabel': i18n.translate('core.euiColorPicker.openButtonLabel', {
+      defaultMessage: 'Open color selection dialog',
+      description: 'ARIA label for the button that opens the color selection dialog',
+    }),
+    'euiColorPicker.closeButtonLabel': i18n.translate('core.euiColorPicker.closeButtonLabel', {
+      defaultMessage: 'Close color selection dialog',
+      description: 'ARIA label for the button that closes the color selection dialog',
+    }),
     'euiColorPicker.colorLabel': i18n.translate('core.euiColorPicker.colorLabel', {
       defaultMessage: 'Color value',
     }),
