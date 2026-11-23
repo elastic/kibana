@@ -102,7 +102,7 @@ describe('resolveNamedSubquerySources', () => {
 
   it('resolves shared dependencies without duplicate index sources', () => {
     const root = parse(
-      'LET base = (FROM logs-*, remote:logs-*); LET first = (FROM base, base); LET second = (FROM first, base); FROM first, (FROM second), logs-*'
+      'LET base = (FROM logs-*, remote:logs-*); LET first = (FROM base, base); LET second = (FROM first, base); FROM first, (FROM second)'
     );
     const namedSubqueries = getNamedSubqueries(root.header);
     const sources = resolveNamedSubquerySources(root.commands[0], namedSubqueries);
@@ -110,6 +110,20 @@ describe('resolveNamedSubquerySources', () => {
     expect(sources.map(({ name }) => name)).toEqual(['logs-*', 'remote:logs-*']);
     expect(resolveNamedSubquerySources(root.commands[0], namedSubqueries)).toEqual(sources);
   });
+
+  it.each(['FROM (FROM selected), selected', 'FROM selected, (FROM selected)'])(
+    'reads the nested sources of a binding referenced at two depths, whatever the order: %s',
+    (sourceQuery) => {
+      const root = parse(`LET selected = (FROM logs-*, (FROM metrics-*)); ${sourceQuery}`);
+      const sources = resolveNamedSubquerySources(
+        root.commands[0],
+        getNamedSubqueries(root.header),
+        1
+      );
+
+      expect(new Set(sources.map(({ name }) => name))).toEqual(new Set(['logs-*', 'metrics-*']));
+    }
+  );
 
   it('resolves a chain of bindings as long as the query', () => {
     const bindings = Array.from(
@@ -136,13 +150,29 @@ describe('getReferencedNamedSubqueries', () => {
     expect(referenced.map(({ name }) => name)).toEqual(['base', 'selected', 'nested']);
   });
 
-  it('keeps a binding declared later, which Elasticsearch rejects', () => {
-    const root = parse('LET a = (FROM b); LET b = (FROM logs-*); FROM a');
-    const referenced = getReferencedNamedSubqueries(
-      root.commands[0],
-      getNamedSubqueries(root.header)
-    );
+  it.each([
+    ['a binding declared later', 'LET a = (FROM b); LET b = (FROM logs-*); FROM a', ['a', 'b']],
+    ['a binding that reads itself', 'LET a = (FROM a); FROM a', ['a']],
+  ])('keeps %s, which Elasticsearch rejects, without reading its sources', (_, query, names) => {
+    const root = parse(query);
+    const namedSubqueries = getNamedSubqueries(root.header);
 
-    expect(referenced.map(({ name }) => name)).toEqual(['a', 'b']);
+    expect(
+      getReferencedNamedSubqueries(root.commands[0], namedSubqueries).map(({ name }) => name)
+    ).toEqual(names);
+    expect(resolveNamedSubquerySources(root.commands[0], namedSubqueries)).toEqual([]);
   });
+
+  it.each(['FROM a, b', 'FROM b, a'])(
+    'reads a binding also referenced too early, whatever the order: %s',
+    (sourceQuery) => {
+      const root = parse(`LET a = (FROM b); LET b = (FROM logs-*); ${sourceQuery}`);
+      const sources = resolveNamedSubquerySources(
+        root.commands[0],
+        getNamedSubqueries(root.header)
+      );
+
+      expect(sources.map(({ name }) => name)).toEqual(['logs-*']);
+    }
+  );
 });
