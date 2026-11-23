@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Environment } from '../../../common/environment_rt';
 import { useFetcher } from '../../hooks/use_fetcher';
 
 const INITIAL_STATE = {
@@ -17,10 +18,12 @@ const INITIAL_STATE = {
 
 export function useServiceAgentFetcher({
   serviceName,
+  environment,
   start,
   end,
 }: {
   serviceName?: string;
+  environment: Environment;
   start: string;
   end: string;
 }) {
@@ -34,12 +37,12 @@ export function useServiceAgentFetcher({
         return callApmApi('GET /internal/apm/services/{serviceName}/agent', {
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { environment, start, end },
           },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, environment, start, end]
   );
 
   return { ...data, status, error };

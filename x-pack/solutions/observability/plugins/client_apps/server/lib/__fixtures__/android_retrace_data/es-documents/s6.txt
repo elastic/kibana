@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "s6",
+  "original_class": "com.example.synthetic.RangelessOnly",
+  "source_file": "RangelessOnly.kt",
+  "methods": {
+    "a": {
+      "mappings": [],
+      "default_mappings": [
+        {
+          "method": "method1",
+          "orig_range": [
+            42,
+            42
+          ]
+        }
+      ]
+    }
+  }
+}

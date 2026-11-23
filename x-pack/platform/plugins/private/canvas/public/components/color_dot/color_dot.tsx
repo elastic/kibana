@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import PropTypes from 'prop-types';
 import tinycolor from 'tinycolor2';
 
@@ -16,7 +16,7 @@ interface Props {
   value?: string;
 }
 
-export const ColorDot: FC<Props> = ({ value, children }) => {
+export const ColorDot: CanvasFunctionComponent<Props> = ({ value, children }) => {
   const tc = tinycolor(value);
   let style = {};
 
@@ -35,7 +35,6 @@ export const ColorDot: FC<Props> = ({ value, children }) => {
 };
 
 ColorDot.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   children: PropTypes.node,
   value: PropTypes.string,
 };

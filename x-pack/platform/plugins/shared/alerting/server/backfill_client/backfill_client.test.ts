@@ -253,6 +253,7 @@ describe('BackfillClient', () => {
         'ad_hoc_run-backfill': {
           title: 'Alerting Backfill Rule Run',
           priority: TaskPriority.Low,
+          taskTypeGroup: 'alerting',
           createTaskRunner: expect.any(Function),
         },
       });

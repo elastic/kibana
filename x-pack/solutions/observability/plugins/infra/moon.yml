@@ -129,19 +129,20 @@ dependsOn:
   - '@kbn/xstate-utils'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/react-query'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - types/**/*
+    - test/scout/api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

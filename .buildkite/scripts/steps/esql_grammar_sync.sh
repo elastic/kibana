@@ -121,7 +121,7 @@ main () {
 
   # Build ANTLR stuff
   cd ./src/platform/packages/shared/kbn-esql-ast
-  yarn build:antlr4:esql
+  pnpm build:antlr4:esql
 
   # Make a commit
   BRANCH_NAME="esql_grammar_sync_$(date +%s)"
@@ -136,7 +136,7 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL'
 }
 
 main

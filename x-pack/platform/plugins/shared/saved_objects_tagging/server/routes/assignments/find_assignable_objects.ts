@@ -22,9 +22,14 @@ export const registerFindAssignableObjectsRoute = (router: TagsPluginRouter) => 
       },
       validate: {
         query: schema.object({
-          search: schema.maybe(schema.string()),
+          search: schema.maybe(schema.string({ maxLength: 2048 })),
           max_results: schema.number({ min: 0, defaultValue: 1000 }),
-          types: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          types: schema.maybe(
+            schema.oneOf([
+              schema.string({ minLength: 1, maxLength: 256 }),
+              schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), { maxSize: 100 }),
+            ])
+          ),
         }),
       },
     },

@@ -46,7 +46,7 @@ export const CreateKnowledgeBaseRequestParams = z.object({
   /**
    * The KnowledgeBase `resource` value.
    */
-  resource: z.string().optional(),
+  resource: z.string(),
 });
 export type CreateKnowledgeBaseRequestParamsInput = z.input<
   typeof CreateKnowledgeBaseRequestParams
@@ -60,7 +60,7 @@ export const ReadKnowledgeBaseRequestParams = z.object({
   /**
    * The KnowledgeBase `resource` value.
    */
-  resource: z.string().optional(),
+  resource: z.string(),
 });
 export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBaseRequestParams>;
 

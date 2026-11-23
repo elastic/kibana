@@ -10,6 +10,7 @@ import { shuffle } from 'lodash';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type {
   Datatable,
+  DatatableColumn,
   DefaultInspectorAdapters,
   ExecutionContext,
 } from '@kbn/expressions-plugin/common';
@@ -129,7 +130,7 @@ describe('datatableFn', () => {
       ...table,
       columns: shuffle([
         ...table.columns,
-        { id: 'unknown', name: 'unknown', meta: { type: 'number' } },
+        { id: 'unknown', name: 'unknown', meta: { type: 'number' } } as DatatableColumn,
       ]),
     };
     const args = buildArgs();

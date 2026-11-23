@@ -671,7 +671,7 @@ This creates a table based on the results of two `essql` queries, joined into on
 
 |`rowCount`
 |`number`
-|The number of empty rows to add to the table, to be assigned a value later
+|The number of empty rows to add to the table, to be assigned a value later. Must be an integer between 0 and 10,000.
 
 Default: `1`
 |===

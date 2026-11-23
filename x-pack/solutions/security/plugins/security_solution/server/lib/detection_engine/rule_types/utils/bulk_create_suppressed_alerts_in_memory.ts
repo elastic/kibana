@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 
@@ -42,6 +43,14 @@ export interface BulkCreateSuppressedAlertsParams {
   buildReasonMessage: BuildReasonMessage;
   alertSuppression: AlertSuppressionCamel;
   wrapSuppressedHits: WrapSuppressedHits;
+  /**
+   * wraps the events that are not suppressed because they miss a suppression field,
+   * when alertSuppression.missingFieldsStrategy is set not to suppress them. Defaults to wrapHits.
+   */
+  wrapUnsuppressedHits?: (
+    hits: Array<estypes.SearchHit<SignalSource>>,
+    buildReasonMessage: BuildReasonMessage
+  ) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   enrichedEvents: SignalSourceHit[];
   toReturn: SearchAfterAndBulkCreateReturnType;
   mergeSourceAndFields?: boolean;
@@ -69,6 +78,8 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   buildReasonMessage,
   alertSuppression,
   wrapSuppressedHits,
+  wrapUnsuppressedHits = (hits, reasonMessageBuilder) =>
+    wrapHits(sharedParams, hits, reasonMessageBuilder),
   mergeSourceAndFields = false,
   maxNumberOfAlertsMultiplier,
 }: BulkCreateSuppressedAlertsParams) => {
@@ -87,7 +98,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
       mergeSourceAndFields
     );
 
-    unsuppressibleWrappedDocs = wrapHits(sharedParams, partitionedEvents[1], buildReasonMessage);
+    unsuppressibleWrappedDocs = wrapUnsuppressedHits(partitionedEvents[1], buildReasonMessage);
     suppressibleEvents = partitionedEvents[0];
   }
 

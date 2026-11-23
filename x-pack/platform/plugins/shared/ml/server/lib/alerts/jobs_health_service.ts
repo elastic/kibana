@@ -571,7 +571,7 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
               jobsHealthServiceProvider(
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
-                annotationServiceProvider(scopedClient),
+                annotationServiceProvider(scopedClient, mlClient),
                 jobAuditMessagesProvider(scopedClient, mlClient),
                 getFieldsFormatRegistry,
                 logger

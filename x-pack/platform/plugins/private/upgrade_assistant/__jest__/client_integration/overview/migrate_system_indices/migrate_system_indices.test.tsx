@@ -69,6 +69,7 @@ describe('Overview - Migrate system indices', () => {
     expect(exists('noMigrationNeededSection')).toBe(true);
     expect(exists('startSystemIndicesMigrationButton')).toBe(false);
     expect(exists('viewSystemIndicesStateButton')).toBe(false);
+    expect(exists('migrateSystemIndicesRequiredBadge')).toBe(false);
   });
 
   test('Migration in progress', async () => {
@@ -87,6 +88,53 @@ describe('Overview - Migrate system indices', () => {
     expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(true);
     // But we keep view system indices CTA
     expect(exists('viewSystemIndicesStateButton')).toBe(true);
+    expect(exists('migrateSystemIndicesRequiredBadge')).toBe(true);
+  });
+
+  describe('Required step badge', () => {
+    test('shows when migration is needed', async () => {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+        migration_status: 'MIGRATION_NEEDED',
+      });
+
+      testBed = await setupOverviewPage(httpSetup);
+      testBed.component.update();
+
+      expect(testBed.exists('migrateSystemIndicesRequiredBadge')).toBe(true);
+    });
+
+    test('shows when migration is in progress', async () => {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+        migration_status: 'IN_PROGRESS',
+      });
+
+      testBed = await setupOverviewPage(httpSetup);
+      testBed.component.update();
+
+      expect(testBed.exists('migrateSystemIndicesRequiredBadge')).toBe(true);
+    });
+
+    test('shows when migration has errored', async () => {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(
+        systemIndicesMigrationErrorStatus
+      );
+
+      testBed = await setupOverviewPage(httpSetup);
+      testBed.component.update();
+
+      expect(testBed.exists('migrateSystemIndicesRequiredBadge')).toBe(true);
+    });
+
+    test('does not show when no migration is needed', async () => {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+        migration_status: 'NO_MIGRATION_NEEDED',
+      });
+
+      testBed = await setupOverviewPage(httpSetup);
+      testBed.component.update();
+
+      expect(testBed.exists('migrateSystemIndicesRequiredBadge')).toBe(false);
+    });
   });
 
   describe('Migration needed', () => {
@@ -106,6 +154,7 @@ describe('Overview - Migrate system indices', () => {
       expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
       // Same for view system indices status
       expect(exists('viewSystemIndicesStateButton')).toBe(true);
+      expect(exists('migrateSystemIndicesRequiredBadge')).toBe(true);
     });
 
     test('handles confirmModal submission', async () => {

@@ -200,7 +200,7 @@ describe('GroupedAlertsTable', () => {
 
     expect(mockDispatch).toHaveBeenCalledTimes(2);
     expect(mockDispatch.mock.calls[0][0].payload).toEqual({
-      options: mockOptions,
+      options: defaultGroupingOptions,
       tableId: testProps.tableId,
     });
     expect(mockDispatch.mock.calls[1][0].payload).toEqual({

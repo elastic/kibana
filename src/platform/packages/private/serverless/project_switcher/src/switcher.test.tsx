@@ -54,8 +54,7 @@ const renderProjectSwitcher = (
   ];
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/274794
-describe.skip('ProjectSwitcher', () => {
+describe('ProjectSwitcher', () => {
   describe('Component', () => {
     test('is rendered', () => {
       expect(() =>
@@ -106,7 +105,10 @@ describe.skip('ProjectSwitcher', () => {
 
         const group = screen.getByTestId(TEST_ID_ITEM_GROUP);
         const project = await within(group).findByLabelText('Security');
-        await userEvent.click(project);
+        // The EuiPopover panel keeps `pointer-events: none` until its open
+        // animation settles, so opt out of the pointer-events check for the
+        // in-popover click to avoid racing that transition.
+        await userEvent.click(project, { pointerEventsCheck: 0 });
 
         expect(mock.setProjectType).toHaveBeenCalled();
       });
@@ -145,7 +147,10 @@ describe.skip('ProjectSwitcher', () => {
 
       const group = screen.getByTestId(TEST_ID_ITEM_GROUP);
       const project = await within(group).findByLabelText('Security');
-      await userEvent.click(project);
+      // The EuiPopover panel keeps `pointer-events: none` until its open
+      // animation settles, so opt out of the pointer-events check for the
+      // in-popover click to avoid racing that transition.
+      await userEvent.click(project, { pointerEventsCheck: 0 });
 
       expect(mock.coreStart.http.post).toHaveBeenCalled();
     });

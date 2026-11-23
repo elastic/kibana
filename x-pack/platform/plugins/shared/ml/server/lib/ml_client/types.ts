@@ -35,6 +35,8 @@ export interface UpdateTrainedModelDeploymentResponse {
 export interface MlStopTrainedModelDeploymentRequest
   extends estypes.MlStopTrainedModelDeploymentRequest {
   deployment_id?: string;
+  force?: boolean;
+  allow_no_match?: boolean;
 }
 
 export interface MlInferTrainedModelRequest extends estypes.MlInferTrainedModelRequest {

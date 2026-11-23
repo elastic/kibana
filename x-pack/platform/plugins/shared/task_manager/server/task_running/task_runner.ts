@@ -61,11 +61,13 @@ import type {
   RruleSchedule,
   SuccessfulRunResult,
   TaskDefinition,
+  TaskTypeGroup,
 } from '../task';
 import { isFailedRunResult, TaskStatus } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import { isUnrecoverableError, isUserError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
+import { isUnrecoverableError, isUserError } from './errors';
+import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
@@ -113,6 +115,7 @@ export interface Updatable {
     options: { validate: boolean; doc: ConcreteTaskInstance }
   ): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
+  get(id: string): Promise<ConcreteTaskInstance>;
 }
 
 type Opts = {
@@ -723,6 +726,7 @@ export class TaskManagerRunner implements TaskRunner {
       const { shouldValidate = true } = unwrap(result);
 
       let shouldUpdateTask: boolean = false;
+      const originalTask = this.instance.task;
       let partialTask: PartialConcreteTaskInstance = {
         id: this.instance.task.id,
         version: this.instance.task.version,
@@ -772,12 +776,38 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       if (shouldUpdateTask) {
-        this.instance = asRan(
-          await this.bufferedTaskStore.partialUpdate(partialTask, {
-            validate: shouldValidate,
-            doc: this.instance.task,
-          })
-        );
+        try {
+          this.instance = asRan(
+            await this.bufferedTaskStore.partialUpdate(partialTask, {
+              validate: shouldValidate,
+              doc: this.instance.task,
+            })
+          );
+        } catch (error) {
+          const isVersionConflict =
+            SavedObjectsErrorHelpers.isConflictError(error) ||
+            error.status === 409 ||
+            error.statusCode === 409 ||
+            error.error?.type === 'version_conflict_engine_exception';
+
+          if (this.isExpired && isVersionConflict) {
+            const label = `${this.taskType}:${this.instance.task.id}`;
+            this.logger.warn(
+              `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
+              { tags: [this.id, this.taskType] }
+            );
+          } else if (isVersionConflict) {
+            await resolveTaskDocumentConflicts({
+              taskId: this.id,
+              partialTask,
+              originalTask,
+              bufferedTaskStore: this.bufferedTaskStore,
+              logger: this.logger,
+            });
+          } else {
+            throw error;
+          }
+        }
       }
     }
 
@@ -814,12 +844,16 @@ export class TaskManagerRunner implements TaskRunner {
     const debugLogger = createWrappedLogger({ logger: this.logger, tags: [`metrics-debugger`] });
 
     const taskHasExpired = this.isExpired;
+    const taskTypeGroup = this.definitions.get(this.taskType)?.taskTypeGroup as
+      | TaskTypeGroup
+      | undefined;
 
     await eitherAsync(
       result,
       async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
         const taskPersistence =
           schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
+
         try {
           const processedResult = {
             task,
@@ -838,7 +872,12 @@ export class TaskManagerRunner implements TaskRunner {
             this.onTaskEvent(
               asTaskRunEvent(
                 this.id,
-                asErr({ ...processedResult, isExpired: taskHasExpired, error: taskRunError }),
+                asErr({
+                  ...processedResult,
+                  isExpired: taskHasExpired,
+                  error: taskRunError,
+                  taskTypeGroup,
+                }),
                 taskTiming
               )
             );
@@ -846,7 +885,7 @@ export class TaskManagerRunner implements TaskRunner {
             this.onTaskEvent(
               asTaskRunEvent(
                 this.id,
-                asOk({ ...processedResult, isExpired: taskHasExpired }),
+                asOk({ ...processedResult, isExpired: taskHasExpired, taskTypeGroup }),
                 taskTiming
               )
             );
@@ -861,6 +900,7 @@ export class TaskManagerRunner implements TaskRunner {
                 result: TaskRunResult.Failed,
                 isExpired: taskHasExpired,
                 error: err,
+                taskTypeGroup,
               }),
               taskTiming
             )
@@ -879,6 +919,7 @@ export class TaskManagerRunner implements TaskRunner {
               result: await this.processResultForRecurringTask(result),
               isExpired: taskHasExpired,
               error,
+              taskTypeGroup,
             }),
             taskTiming
           )

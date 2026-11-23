@@ -14,6 +14,9 @@ export default function ({ getService, getPageObjects }) {
   describe('management plugin', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.navigateToActualUrl('management');
+      // Dismiss the telemetry opt-in banner so its late render can't shift the
+      // layout out from under the client-side <Link> clicks below.
+      await PageObjects.common.dismissBanner();
     });
 
     it('should be able to navigate to management test app', async () => {

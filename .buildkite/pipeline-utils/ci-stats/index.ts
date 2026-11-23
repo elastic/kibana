@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './client';
-export * from './on_complete';
-export * from './on_metrics_viable';
-export * from './on_start';
-export * from './pick_test_group_run_order';
+export * from './client.ts';
+export * from './on_complete.ts';
+export * from './on_metrics_viable.ts';
+export * from './on_start.ts';
+export * from './pick_test_group_run_order/index.ts';

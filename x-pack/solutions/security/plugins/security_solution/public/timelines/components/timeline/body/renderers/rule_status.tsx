@@ -10,17 +10,13 @@ import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 
-import styled from 'styled-components';
-
 const mapping = {
   open: 'primary',
   acknowledged: 'warning',
   closed: 'default',
 };
 
-const StyledEuiBadge = styled(EuiBadge)`
-  text-transform: capitalize;
-`;
+const capitalizeStyle = { textTransform: 'capitalize' as const };
 
 interface BaseProps {
   value: string | number | undefined | null;
@@ -37,20 +33,34 @@ const RuleStatusComponent: React.FC<Props> = ({
   iconType,
 }) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
-  const badge = (
-    <StyledEuiBadge
+
+  if (onClick && onClickAriaLabel) {
+    return (
+      <EuiBadge
+        color={color}
+        onClick={onClick}
+        onClickAriaLabel={onClickAriaLabel}
+        iconType={iconType}
+        iconSide={iconSide}
+        data-test-subj="rule-status-badge"
+        style={capitalizeStyle}
+      >
+        {value}
+      </EuiBadge>
+    );
+  }
+
+  return (
+    <EuiBadge
       color={color}
-      onClick={onClick}
-      onClickAriaLabel={onClickAriaLabel}
       iconType={iconType}
       iconSide={iconSide}
       data-test-subj="rule-status-badge"
+      style={capitalizeStyle}
     >
       {value}
-    </StyledEuiBadge>
+    </EuiBadge>
   );
-
-  return badge;
 };
 
 export const RuleStatus = React.memo(RuleStatusComponent);

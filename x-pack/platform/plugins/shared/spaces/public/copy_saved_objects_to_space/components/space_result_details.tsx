@@ -46,7 +46,7 @@ function getSavedObjectLabel(type: string) {
     case 'index-pattern':
     case 'index-patterns':
     case 'indexPatterns':
-      return 'index patterns';
+      return 'data views';
     default:
       return type;
   }

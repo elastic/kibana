@@ -80,10 +80,24 @@ import { auditLoggingService } from './audit_logging';
 import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
+import * as secretsModule from './secrets';
 
 jest.mock('./spaces/helpers');
 
 jest.mock('./license');
+
+jest.mock('./secrets', () => ({
+  isSecretStorageEnabled: jest.fn(),
+  toCompiledSecretRef: jest.fn((id: string) => ({
+    id,
+    isSecretRef: true,
+  })),
+  extractAndWriteSecrets: jest.fn(),
+  extractAndUpdateSecrets: jest.fn(),
+  deleteSecretsIfNotReferenced: jest.fn(),
+}));
+
+const mockedSecretsModule = secretsModule as jest.Mocked<typeof secretsModule>;
 
 const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
   typeof sendTelemetryEvents
@@ -122,6 +136,25 @@ const ASSETS_MAP_FIXTURES = new Map([
   - {{this}}
   {{/each}}
   `),
+  ],
+  // Templates with a root-level custom yaml var ("Custom configurations")
+  [
+    '/ymlvarpkg-1.0.0/data_stream/ymlds/agent/stream/stream_custom.yml',
+    Buffer.from(`
+type: log
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+{{custom}}
+`),
+  ],
+  [
+    '/ymlvarpkg-1.0.0/agent/input/input_custom.yml',
+    Buffer.from(`
+type: log
+{{custom}}
+`),
   ],
 ]);
 
@@ -466,6 +499,110 @@ describe('Package policy service', () => {
         action: 'create',
         id: 'test-package-policy-2',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    describe('secret storage', () => {
+      const buildTestPolicy = () => ({
+        id: 'test-package-policy-1',
+        name: 'Test Package Policy 1',
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test_agent_policy',
+        policy_ids: ['test_agent_policy'],
+        inputs: [],
+        package: {
+          name: 'test',
+          title: 'Test',
+          version: '0.0.1',
+        },
+      });
+
+      const setupBulkCreateMocks = (soClient: ReturnType<typeof savedObjectsClientMock.create>) => {
+        // getPackageInfo must return a name/version that matches the policy's package so the
+        // package policy resolves and lands in the array passed to `soClient.bulkCreate`.
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          name: 'test',
+          version: '0.0.1',
+          policy_templates: [{ name: 'test', inputs: [] }],
+        });
+        soClient.bulkCreate.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'test-package-policy-1',
+              attributes: {
+                package: { name: 'test', title: 'Test', version: '0.0.1' },
+                inputs: [],
+              },
+              references: [],
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+        });
+        soClient.get.mockImplementation(async (_type: any, id: string) => ({
+          id,
+          attributes: { inputs: [] },
+          references: [],
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        }));
+        mockAgentPolicyGet();
+      };
+
+      beforeEach(() => {
+        // Reset call history/implementations left over from sibling tests (e.g. the
+        // audit-logger test above also triggers `isSecretStorageEnabled`).
+        mockedSecretsModule.isSecretStorageEnabled.mockReset();
+        mockedSecretsModule.extractAndWriteSecrets.mockReset();
+      });
+
+      afterEach(() => {
+        mockedSecretsModule.isSecretStorageEnabled.mockReset();
+        mockedSecretsModule.extractAndWriteSecrets.mockReset();
+        // Restore the shared default so later tests are not affected.
+        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+      });
+
+      it('extracts secrets and stores secret_references when secret storage is enabled', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = savedObjectsClientMock.create();
+        setupBulkCreateMocks(soClient);
+
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
+        mockedSecretsModule.extractAndWriteSecrets.mockImplementation(
+          async ({ packagePolicy }) => ({
+            packagePolicy,
+            secretReferences: [{ id: 'secret-1' }],
+          })
+        );
+
+        await packagePolicyService.bulkCreate(soClient, esClient, [buildTestPolicy()]);
+
+        expect(mockedSecretsModule.isSecretStorageEnabled).toHaveBeenCalledTimes(1);
+        expect(mockedSecretsModule.extractAndWriteSecrets).toHaveBeenCalledTimes(1);
+        expect(mockedSecretsModule.extractAndWriteSecrets).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esClient,
+            packagePolicy: expect.objectContaining({ name: 'Test Package Policy 1' }),
+          })
+        );
+
+        const createdAttributes = (soClient.bulkCreate.mock.calls[0][0] as any)[0].attributes;
+        expect(createdAttributes.secret_references).toEqual([{ id: 'secret-1' }]);
+      });
+
+      it('does not extract secrets when secret storage is disabled', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = savedObjectsClientMock.create();
+        setupBulkCreateMocks(soClient);
+
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(false);
+
+        await packagePolicyService.bulkCreate(soClient, esClient, [buildTestPolicy()]);
+
+        expect(mockedSecretsModule.extractAndWriteSecrets).not.toHaveBeenCalled();
+
+        const createdAttributes = (soClient.bulkCreate.mock.calls[0][0] as any)[0].attributes;
+        expect(createdAttributes).not.toHaveProperty('secret_references');
       });
     });
   });
@@ -831,6 +968,91 @@ describe('Package policy service', () => {
           ],
         },
       ]);
+    });
+
+    describe('root-level custom yaml var', () => {
+      const streamPkgInfo = {
+        name: 'ymlvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'ymlvarpkg.ymlds',
+            path: 'ymlds',
+            streams: [{ input: 'log', template_path: 'stream_custom.yml' }],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const streamInputWithCustom = (custom: string) => [
+        {
+          type: 'log',
+          enabled: true,
+          streams: [
+            {
+              id: 'stream-ymlds',
+              data_stream: { dataset: 'ymlvarpkg.ymlds', type: 'logs' },
+              enabled: true,
+              vars: {
+                paths: { value: ['/var/log/app.log'], type: 'text' },
+                custom: { value: custom, type: 'yaml' },
+              },
+            },
+          ],
+        },
+      ];
+
+      it('should reject a traversal stream id injected through the custom yaml var', async () => {
+        await expect(
+          _compilePackagePolicyInputs(
+            streamPkgInfo,
+            {},
+            streamInputWithCustom('id: ../../../../tmp/evil') as any,
+            ASSETS_MAP_FIXTURES
+          )
+        ).rejects.toThrow('path traversal');
+      });
+
+      it('should keep a safe id coming from the custom yaml var', async () => {
+        const inputs = await _compilePackagePolicyInputs(
+          streamPkgInfo,
+          {},
+          streamInputWithCustom('id: logfile-custom-id\ntags: [a]') as any,
+          ASSETS_MAP_FIXTURES
+        );
+
+        expect(inputs[0].streams[0].compiled_stream).toEqual({
+          type: 'log',
+          paths: ['/var/log/app.log'],
+          id: 'logfile-custom-id',
+          tags: ['a'],
+        });
+      });
+
+      it('should reject a traversal input id injected through the custom yaml var', async () => {
+        await expect(
+          _compilePackagePolicyInputs(
+            {
+              name: 'ymlvarpkg',
+              version: '1.0.0',
+              data_streams: [],
+              policy_templates: [{ inputs: [{ type: 'log', template_path: 'input_custom.yml' }] }],
+            } as unknown as PackageInfo,
+            {},
+            [
+              {
+                type: 'log',
+                enabled: true,
+                vars: { custom: { value: 'id: ../../tmp/evil', type: 'yaml' } },
+                streams: [],
+              },
+            ] as any,
+            ASSETS_MAP_FIXTURES
+          )
+        ).rejects.toThrow('path traversal');
+      });
     });
 
     it('should work with an input with a template and no streams', async () => {
@@ -2192,6 +2414,43 @@ describe('Package policy service', () => {
       expect(res.failedPolicies[0].packagePolicy).toEqual(toUpdate);
       expect(res.failedPolicies[0].error).toEqual(
         new PackagePolicyValidationError(`cat is a frozen variable and cannot be modified`)
+      );
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        `Preparing update to package policy [${toUpdate.id}] failed: [PackagePolicyValidationError] cat is a frozen variable and cannot be modified`
+      );
+    });
+
+    it('should put item in failedPolicies when preparing the update rejects with a non-Error value', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: mockPackagePolicy,
+          },
+        ],
+      });
+      savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+      mockedSecretsModule.isSecretStorageEnabled.mockResolvedValueOnce(true);
+      mockedSecretsModule.extractAndUpdateSecrets.mockRejectedValueOnce(undefined);
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const res = await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        mockPackagePolicy,
+      ]);
+
+      expect(res.failedPolicies).toHaveLength(1);
+      expect(res.updatedPolicies).toHaveLength(0);
+      expect(res.failedPolicies[0].packagePolicy).toEqual(mockPackagePolicy);
+      expect(res.failedPolicies[0].error).toEqual(new Error('undefined'));
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        `Preparing update to package policy [${mockPackagePolicy.id}] failed: [Error] undefined`
       );
     });
 

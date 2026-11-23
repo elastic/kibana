@@ -218,6 +218,18 @@ describe(`document level security`, () => {
     expect(wrapper.find('EuiSwitch[data-test-subj="restrictDocumentsQuery0"]')).toHaveLength(1);
     expect(wrapper.find(CodeEditorField)).toHaveLength(1);
   });
+
+  test('DLS editor resizes with its container', () => {
+    const wrapper = mountWithIntl(
+      <KibanaContextProvider services={coreMock.createStart()}>
+        <IndexPrivilegeForm {...props} />
+      </KibanaContextProvider>
+    );
+
+    expect(wrapper.find(CodeEditorField).prop('options')).toEqual(
+      expect.objectContaining({ automaticLayout: true })
+    );
+  });
 });
 
 describe('field level security', () => {

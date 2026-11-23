@@ -163,7 +163,15 @@ export class AdHocTaskRunner implements CancellableTask {
         }
       );
     } catch (err) {
-      this.logger.error(`error updating ad hoc run ${adHocRunParamsId} ${err.message}`);
+      this.logger.error(`error updating ad hoc run ${adHocRunParamsId} ${err.message}`, {
+        labels: {
+          spaceId: this.taskInstance.params.spaceId,
+          executionId: this.executionId,
+          ruleId: this.ruleId,
+          ruleType: this.ruleTypeId,
+          taskInstanceId: this.taskInstance.id,
+        },
+      });
     }
   }
 
@@ -377,6 +385,7 @@ export class AdHocTaskRunner implements CancellableTask {
         name: rule.name,
         consumer: rule.consumer,
         revision: rule.revision,
+        tags: rule.tags,
       });
 
       try {
@@ -430,7 +439,16 @@ export class AdHocTaskRunner implements CancellableTask {
         this.logger.debug(
           `Executing ad hoc run for rule ${ruleType.id}:${rule.id} for runAt ${
             this.adHocRunSchedule[this.scheduleToRunIndex].runAt
-          }`
+          }`,
+          {
+            labels: {
+              spaceId,
+              executionId: this.executionId,
+              ruleId: rule.id,
+              ruleType: ruleType.id,
+              taskInstanceId: this.taskInstance.id,
+            },
+          }
         );
         this.adHocRunSchedule[this.scheduleToRunIndex].status = adHocRunStatus.RUNNING;
         this.taskRunning.start(
@@ -476,14 +494,17 @@ export class AdHocTaskRunner implements CancellableTask {
           const message = `Executing ad hoc run with id "${adHocRunParamsId}" has resulted in Error: ${getEsErrorMessage(
             error
           )} - ${stack ?? ''}`;
-          const tags = [adHocRunParamsId, 'rule-ad-hoc-run-failed'];
-          if (this.ruleTypeId.length > 0) {
-            tags.push(this.ruleTypeId);
-          }
-          if (this.ruleId.length > 0) {
-            tags.push(this.ruleId);
-          }
-          this.logger.error(message, { tags, error: { stack_trace: stack } });
+          this.logger.error(message, {
+            labels: {
+              spaceId,
+              executionId: this.executionId,
+              ...(this.ruleId.length > 0 && { ruleId: this.ruleId }),
+              ...(this.ruleTypeId.length > 0 && { ruleType: this.ruleTypeId }),
+              taskInstanceId: this.taskInstance.id,
+            },
+            tags: [adHocRunParamsId, 'rule-ad-hoc-run-failed'],
+            error: { stack_trace: stack },
+          });
         }
 
         if (apm.currentTransaction) {
@@ -598,10 +619,26 @@ export class AdHocTaskRunner implements CancellableTask {
     } = this.taskInstance;
 
     this.logger.debug(
-      `Cancelling execution for ad hoc run with id ${adHocRunParamsId} for rule type ${this.ruleTypeId} with id ${this.ruleId} - execution exceeded rule type timeout of ${timeoutOverride}`
+      `Cancelling execution for ad hoc run with id ${adHocRunParamsId} for rule type ${this.ruleTypeId} with id ${this.ruleId} - execution exceeded rule type timeout of ${timeoutOverride}`,
+      {
+        labels: {
+          executionId: this.executionId,
+          ruleId: this.ruleId,
+          ruleType: this.ruleTypeId,
+          taskInstanceId: this.taskInstance.id,
+        },
+      }
     );
     this.logger.debug(
-      `Aborting any in-progress ES searches for rule type ${this.ruleTypeId} with id ${this.ruleId}`
+      `Aborting any in-progress ES searches for rule type ${this.ruleTypeId} with id ${this.ruleId}`,
+      {
+        labels: {
+          executionId: this.executionId,
+          ruleId: this.ruleId,
+          ruleType: this.ruleTypeId,
+          taskInstanceId: this.taskInstance.id,
+        },
+      }
     );
     this.alertingEventLogger.logTimeout({
       backfill: {
@@ -639,7 +676,15 @@ export class AdHocTaskRunner implements CancellableTask {
     } catch (e) {
       // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
       this.logger.error(
-        `Failed to cleanup ${AD_HOC_RUN_SAVED_OBJECT_TYPE} object [id="${this.taskInstance.params.adHocRunParamsId}"]: ${e.message}`
+        `Failed to cleanup ${AD_HOC_RUN_SAVED_OBJECT_TYPE} object [id="${this.taskInstance.params.adHocRunParamsId}"]: ${e.message}`,
+        {
+          labels: {
+            executionId: this.executionId,
+            ruleId: this.ruleId,
+            ruleType: this.ruleTypeId,
+            taskInstanceId: this.taskInstance.id,
+          },
+        }
       );
     }
   }

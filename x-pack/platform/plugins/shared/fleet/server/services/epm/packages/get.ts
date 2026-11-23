@@ -7,13 +7,13 @@
 
 import { parse } from 'yaml';
 import pMap from 'p-map';
-import type { MMRegExp } from 'minimatch';
-import { minimatch } from 'minimatch';
+import { Minimatch } from 'minimatch';
 import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -418,14 +418,12 @@ function getInstalledPackageSavedObjectDataStreams(
       }
 
       if (filterActiveDatastreamsName) {
-        const patternRegex = new minimatch.Minimatch(stream.name, {
+        const matcher = new Minimatch(stream.name, {
           noglobstar: true,
           nonegate: true,
-        }).makeRe() as MMRegExp;
+        });
 
-        return filterActiveDatastreamsName.some((dataStreamName) =>
-          dataStreamName.match(patternRegex)
-        );
+        return filterActiveDatastreamsName.some((dataStreamName) => matcher.match(dataStreamName));
       }
 
       return true;
@@ -645,11 +643,20 @@ export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   logger?: Logger;
+  failOnUnexpectedError?: boolean;
 }) {
-  const { savedObjectsClient, pkgName, logger } = options;
+  const { savedObjectsClient, pkgName, logger, failOnUnexpectedError } = options;
   const installation = await savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch((e) => {
+      // Not being installed is an expected condition (e.g. fetching input schema for a package
+      // that hasn't been installed yet), not a real error — avoid polluting logs at error level.
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return undefined;
+      }
+      if (failOnUnexpectedError) {
+        throw e;
+      }
       logger?.error(e);
       return undefined;
     });

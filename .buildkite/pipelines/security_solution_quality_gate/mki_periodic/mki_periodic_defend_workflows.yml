@@ -11,8 +11,9 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 125
+          diskSizeGb: 130
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         timeout_in_minutes: 300
         parallelism: 5
         retry:
@@ -93,6 +94,8 @@ steps:
           enableNestedVirtualization: true
           machineType: n2-standard-4
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -109,6 +112,8 @@ steps:
           enableNestedVirtualization: true
           machineType: n2-standard-4
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -125,6 +130,8 @@ steps:
           enableNestedVirtualization: true
           machineType: n2-standard-4
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -145,6 +152,7 @@ steps:
           machineType: n2-standard-4
           diskSizeGb: 120
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         timeout_in_minutes: 300
         parallelism: 3
         retry:

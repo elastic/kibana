@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-plugin/common';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -66,6 +67,20 @@ export interface TimelineArgs {
   refetch: inputsModel.Refetch;
   totalCount: number;
   refreshedAt: number;
+  isPartial: boolean;
+  shardFailures: EqlShardFailure[];
+  timedOut: boolean;
+}
+
+/**
+ * Subset of an Elasticsearch shard failure carried to the Correlation tab so
+ * the incomplete-results callout can surface index / shard / reason detail.
+ */
+export interface EqlShardFailure {
+  index?: string;
+  shard?: number;
+  node?: string;
+  reason?: estypes.ErrorCause;
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
@@ -89,6 +104,41 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   : T extends 'eql'
   ? TimelineEqlResponse
   : TimelineEventsAllStrategyResponse;
+
+/**
+ * Raw response fields that signal incomplete results. EQL reports dropped shards in
+ * `shard_failures` and leaves `is_partial` false once the async search finishes, so
+ * `isPartial` alone misses timed-out or failed shards.
+ */
+interface PartialResultsRawResponse {
+  timed_out?: boolean;
+  _shards?: { failed?: number };
+  shard_failures?: EqlShardFailure[];
+}
+
+interface PartialResultsState {
+  isPartial: boolean;
+  shardFailures: EqlShardFailure[];
+  timedOut: boolean;
+}
+
+const getPartialResults = (
+  isPartial: boolean | undefined,
+  rawResponse: PartialResultsRawResponse | undefined
+): PartialResultsState => {
+  const shardFailures = Array.isArray(rawResponse?.shard_failures)
+    ? rawResponse.shard_failures
+    : [];
+  const timedOut = rawResponse?.timed_out === true;
+  const hasFailedShards =
+    typeof rawResponse?._shards?.failed === 'number' && rawResponse._shards.failed > 0;
+
+  return {
+    isPartial: isPartial === true || timedOut || shardFailures.length > 0 || hasFailedShards,
+    shardFailures,
+    timedOut,
+  };
+};
 
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
@@ -237,6 +287,9 @@ export const useTimelineEventsHandler = ({
       events: [],
       loadNextBatch,
       refreshedAt: 0,
+      isPartial: false,
+      shardFailures: [],
+      timedOut: false,
     }),
     [id, loadNextBatch]
   );
@@ -285,6 +338,10 @@ export const useTimelineEventsHandler = ({
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
                     refreshedAt: Date.now(),
+                    ...getPartialResults(
+                      response.isPartial,
+                      response.rawResponse as PartialResultsRawResponse | undefined
+                    ),
                   };
                   if (id === TimelineId.active) {
                     activeTimeline.setPageName(pageName);

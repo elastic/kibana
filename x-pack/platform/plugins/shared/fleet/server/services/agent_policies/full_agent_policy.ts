@@ -44,6 +44,8 @@ import { appContextService } from '../app_context';
 
 import { getOutputSecretReferences } from '../secrets';
 
+import { sanitizeAgentPolicyOverrides } from '../../../common/services/agent_policy_overrides';
+
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
 import {
@@ -66,9 +68,16 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+  options?: {
+    standalone?: boolean;
+    agentPolicy?: AgentPolicy;
+    agentVersion?: string;
+    /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
+    redactProxySecrets?: boolean;
+  }
 ): Promise<FullAgentPolicy | null> {
   const standalone = options?.standalone ?? false;
+  const redactProxySecrets = options?.redactProxySecrets ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
@@ -152,7 +161,8 @@ export async function getFullAgentPolicy(
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
           output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone
+          standalone,
+          redactProxySecrets
         );
 
         return acc;
@@ -314,7 +324,18 @@ export async function getFullAgentPolicy(
   }
 
   if (agentPolicy.overrides) {
-    return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
+    // Overrides stored before the API validation was extended may still contain denied keys
+    const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(agentPolicy.overrides);
+    if (removedKeys.length > 0) {
+      appContextService
+        .getLogger()
+        .warn(
+          `Ignoring disallowed overrides [${removedKeys.join(', ')}] on agent policy [${
+            fullAgentPolicy.id
+          }]`
+        );
+    }
+    return deepMerge<FullAgentPolicy>(fullAgentPolicy, overrides);
   }
 
   return fullAgentPolicy;
@@ -357,7 +378,8 @@ export function generateFleetConfig(
 export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
-  standalone = false
+  standalone = false,
+  redactProxySecrets = false
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
@@ -486,9 +508,9 @@ export function transformOutputToFullPolicyOutput(
     };
   }
 
-  if (proxy) {
+  if (proxy && type !== outputType.Kafka) {
     newOutput.proxy_url = proxy.url;
-    if (proxy.proxy_headers) {
+    if (!redactProxySecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;
     }
 
@@ -507,7 +529,7 @@ export function transformOutputToFullPolicyOutput(
       }
       newOutput.ssl.certificate = proxy.certificate;
     }
-    if (proxy.certificate_key) {
+    if (!redactProxySecrets && proxy.certificate_key) {
       if (!newOutput.ssl) {
         newOutput.ssl = {};
       }

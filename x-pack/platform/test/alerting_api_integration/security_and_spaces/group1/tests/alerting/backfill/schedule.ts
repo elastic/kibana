@@ -173,7 +173,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -362,7 +362,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -777,7 +777,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -880,7 +880,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -1210,7 +1210,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;

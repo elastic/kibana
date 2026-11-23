@@ -68,8 +68,21 @@ export const putDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const { id: bodyId, ...restBody } = request.body as TypeOf<
+    typeof PutDownloadSourcesRequestSchema.body
+  > & { id?: string };
+
+  if (bodyId !== undefined && bodyId !== request.params.sourceId) {
+    return response.badRequest({
+      body: {
+        message: `Cannot change download source ID: body id does not match path sourceId "${request.params.sourceId}"`,
+      },
+    });
+  }
+
+  const data = restBody as TypeOf<typeof PutDownloadSourcesRequestSchema.body>;
   try {
-    await downloadSourceService.update(soClient, request.params.sourceId, request.body);
+    await downloadSourceService.update(soClient, request.params.sourceId, data);
     const downloadSource = await downloadSourceService.get(soClient, request.params.sourceId);
     if (downloadSource.is_default) {
       await agentPolicyService.bumpAllAgentPolicies(esClient);

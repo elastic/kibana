@@ -232,6 +232,26 @@ describe('SubActionConnector', () => {
       );
     });
 
+    it('keeps the network error message set by the request layer', async () => {
+      const cause = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
+      const networkError = new Error(
+        'The connection was interrupted before a response was received (read ECONNRESET)'
+      ) as AxiosError;
+      networkError.isAxiosError = true;
+      networkError.code = 'ECONNRESET';
+      networkError.cause = cause;
+
+      requestMock.mockImplementation(() => {
+        throw networkError;
+      });
+
+      await expect(async () =>
+        service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
+      ).rejects.toThrow(
+        'The connection was interrupted before a response was received (read ECONNRESET)'
+      );
+    });
+
     it('converts auth axios property to a basic auth header if provided', async () => {
       await service.testAuth(undefined, connectorUsageCollector);
 

@@ -23,7 +23,8 @@ import {
   waitForAnomaliesToBeLoaded,
 } from '../../../../tasks/entity_analytics';
 
-describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/279202
+describe.skip('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });

@@ -78,9 +78,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Navigate to the last step of the wizard
         await testSubjects.click('formWizardStep-5');
-        await pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect(await testSubjects.exists('indexModeTitle')).to.be(true);
+        await testSubjects.existOrFail('indexModeTitle');
         expect(await testSubjects.getVisibleText('indexModeValue')).to.be('LogsDB');
       });
     });
@@ -173,7 +172,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify Index Settings
         await testSubjects.click('settingsTabBtn');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(await testSubjects.exists('settingsTabContent')).to.be(true);
+        await testSubjects.existOrFail('settingsTabContent');
         const settingsTabContent = await testSubjects.getVisibleText('settingsTabContent');
         expect(JSON.parse(settingsTabContent)).to.eql({
           index: {
@@ -194,7 +193,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify Mappings
         await testSubjects.click('mappingsTabBtn');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(await testSubjects.exists('mappingsTabContent')).to.be(true);
+        await testSubjects.existOrFail('mappingsTabContent');
         const mappingsTabContent = await testSubjects.getVisibleText('mappingsTabContent');
         expect(JSON.parse(mappingsTabContent)).to.eql({
           dynamic_date_formats: ['basic_date'],
@@ -220,11 +219,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.indexManagement.clickNextButton();
           await pageObjects.header.waitUntilLoadingHasFinished();
 
-          expect(await testSubjects.exists('saveTemplateError')).to.be(true);
+          await testSubjects.existOrFail('saveTemplateError');
 
           await testSubjects.click('stepReviewPreviewTab');
           await pageObjects.header.waitUntilLoadingHasFinished();
-          expect(await testSubjects.exists('simulateTemplatePreview')).to.be(true);
+          await testSubjects.existOrFail('simulateTemplatePreview');
           expect(await testSubjects.getVisibleText('simulateTemplatePreview')).to.contain(
             '_source can not be disabled in index using [logsdb] index mode'
           );

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
@@ -19,11 +20,25 @@ export const buildSecurityApi = ({
   getAuthc: () => InternalAuthenticationServiceStart;
   audit: AuditServiceSetup;
 }): CoreSecurityDelegateContract => {
+  const getCurrentUser: CoreSecurityDelegateContract['authc']['getCurrentUser'] = (request) => {
+    return getAuthc().getCurrentUser(request);
+  };
+
+  const getPrincipal: CoreSecurityDelegateContract['authc']['getPrincipal'] = (request) => {
+    // Fake requests never pass through the authenticator, so their principal is not known without
+    // I/O.
+    if (request.isFakeRequest) {
+      return null;
+    }
+
+    const user = getCurrentUser(request);
+    return user ? getAuthenticatedPrincipal(user) : null;
+  };
+
   return {
     authc: {
-      getCurrentUser: (request) => {
-        return getAuthc().getCurrentUser(request);
-      },
+      getCurrentUser,
+      getPrincipal,
       apiKeys: {
         areAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),

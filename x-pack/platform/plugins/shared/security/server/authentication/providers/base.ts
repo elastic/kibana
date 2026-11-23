@@ -12,10 +12,11 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import { deepFreeze } from '@kbn/std';
+import { deepFreeze, isInternalURL } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common';
+import { AUTH_URL_HASH_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import type { DeauthenticationResult } from '../deauthentication_result';
@@ -129,6 +130,41 @@ export abstract class BaseAuthenticationProvider {
         .asScoped({ headers: { ...request.headers, ...authHeaders } })
         .asCurrentUser.security.authenticate()
     );
+  }
+
+  /**
+   * Returns the original request URL with the URL hash fragment captured on the client side and
+   * passed to the server via the `auth_url_hash` query string parameter.
+   * @param request Request instance.
+   * @param urlHash Value of the `auth_url_hash` query string parameter.
+   */
+  protected getRequestOriginalURLWithHash(request: KibanaRequest, urlHash: string) {
+    // The client-side capture URL app always sends either an empty string or a hash fragment.
+    const isURLHashFragment = urlHash === '' || urlHash.startsWith('#');
+    if (!isURLHashFragment) {
+      this.logger.warn(
+        `"${AUTH_URL_HASH_QUERY_STRING_PARAMETER}" is not a URL hash fragment and will be ignored.`
+      );
+    }
+
+    return this.getInternalRedirectURL(
+      request,
+      `${this.options.getRequestOriginalURL(request)}${isURLHashFragment ? urlHash : ''}`
+    );
+  }
+
+  /**
+   * Returns the specified URL if it's a Kibana internal URL, or the base path URL otherwise.
+   * @param request Request instance.
+   * @param redirectURL URL user is supposed to be redirected to.
+   */
+  protected getInternalRedirectURL(request: KibanaRequest, redirectURL: string) {
+    if (isInternalURL(redirectURL, this.options.basePath.serverBasePath)) {
+      return redirectURL;
+    }
+
+    this.logger.warn('Redirect URL is not a valid Kibana internal URL, using base path instead.');
+    return `${this.options.basePath.get(request)}/`;
   }
 
   /**

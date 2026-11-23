@@ -26,11 +26,13 @@ dependsOn:
   - '@kbn/jest-serializers'
   - '@kbn/repo-packages'
   - '@kbn/stdio-dev-helpers'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
   - dev
   - group-undefined
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'

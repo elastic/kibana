@@ -83,6 +83,9 @@ export class FollowerIndicesTable extends PureComponent {
   static propTypes = {
     followerIndices: PropTypes.array,
     selectFollowerIndex: PropTypes.func.isRequired,
+    selectedItems: PropTypes.array,
+    onSelectionChange: PropTypes.func,
+    resetSelection: PropTypes.func,
   };
 
   static getDerivedStateFromProps(props, state) {
@@ -105,7 +108,6 @@ export class FollowerIndicesTable extends PureComponent {
 
     this.state = {
       prevFollowerIndices: props.followerIndices,
-      selectedItems: [],
       filteredIndices: props.followerIndices,
       queryText: '',
     };
@@ -270,7 +272,8 @@ export class FollowerIndicesTable extends PureComponent {
   };
 
   render() {
-    const { selectedItems, filteredIndices } = this.state;
+    const { filteredIndices } = this.state;
+    const { selectedItems, onSelectionChange, resetSelection } = this.props;
 
     const sorting = {
       sort: {
@@ -285,12 +288,17 @@ export class FollowerIndicesTable extends PureComponent {
     };
 
     const selection = {
-      onSelectionChange: (newSelectedItems) => this.setState({ selectedItems: newSelectedItems }),
+      selected: selectedItems,
+      onSelectionChange,
     };
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <ContextMenu followerIndices={selectedItems} testSubj="contextMenuButton" />
+        <ContextMenu
+          followerIndices={selectedItems}
+          testSubj="contextMenuButton"
+          onActionComplete={resetSelection}
+        />
       ) : undefined,
       toolsRight: (
         <EuiButton

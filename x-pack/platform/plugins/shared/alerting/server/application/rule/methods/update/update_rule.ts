@@ -9,7 +9,11 @@ import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import type { SanitizedRule, RawRule } from '../../../../types';
-import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
+import {
+  validateRuleTypeParams,
+  authorizeRuleTypeParams,
+  getRuleNotifyWhenType,
+} from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -29,6 +33,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
   migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
@@ -213,6 +218,11 @@ async function updateWithOCC<Params extends RuleParams = never>(
   const actionsClient = await context.getActionsClient();
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    spaceId: context.spaceId,
+    previousParams: originalRuleSavedObject.attributes.params,
+  });
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
   await validateAndAuthorizeSystemActions({
     actionsClient,
@@ -303,7 +313,10 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   isSystemAction: (connectorId: string) => boolean;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
-  await bulkMigrateLegacyActions({ context, rules: [originalRuleSavedObject] });
+  const migratedRuleIds = await bulkMigrateLegacyActions({
+    context,
+    rules: [originalRuleSavedObject],
+  });
   const originalRule = originalRuleSavedObject.attributes;
 
   const allActions = [...updateRuleData.actions, ...(updateRuleData.systemActions ?? [])];
@@ -399,6 +412,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
 
     throw e;
   }
+
+  // Legacy actions are deleted only once the rule carrying them is saved, so a conflict can be retried
+  await deleteLegacyActionsForRules(context, migratedRuleIds);
 
   const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
     updatedRuleSavedObject.attributes,

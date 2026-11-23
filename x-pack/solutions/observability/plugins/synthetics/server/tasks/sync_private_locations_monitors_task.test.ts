@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SyncTaskRunResult } from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
   runSynPrivateLocationMonitorsTaskSoon,
@@ -74,6 +75,17 @@ const getMockTaskInstance = (state: Record<string, any> = {}): CustomTaskInstanc
     },
     params: {},
   };
+};
+
+const scheduleOf = (result: SyncTaskRunResult) => {
+  if ('schedule' in result) {
+    return result.schedule;
+  }
+};
+const runAtOf = (result: SyncTaskRunResult) => {
+  if ('runAt' in result) {
+    return result.runAt;
+  }
 };
 
 describe('SyncPrivateLocationMonitorsTask', () => {
@@ -248,6 +260,101 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.state.lastStartedAt).toBe(startedAt.toISOString());
+      expect(scheduleOf(result)).toEqual({ interval: '60m' });
+      expect(runAtOf(result)).toBeUndefined();
+    });
+
+    it('schedules an immediate follow-up when an MW is updated after this run started', async () => {
+      const startedAt = new Date('2024-06-01T10:00:00.000Z');
+      const taskInstance = {
+        ...getMockTaskInstance(),
+        startedAt,
+      };
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: false,
+      } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T10:00:05.000Z' }]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.error).toBeUndefined();
+      expect(runAtOf(result)).toBeInstanceOf(Date);
+      expect(scheduleOf(result)).toBeUndefined();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('scheduling an immediate follow-up')
+      );
+    });
+
+    it('does not follow up when only an unrelated MW was updated during this run', async () => {
+      const startedAt = new Date('2024-06-01T10:00:00.000Z');
+      const taskInstance = {
+        ...getMockTaskInstance(),
+        startedAt,
+      };
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: false,
+      } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue([{ id: 'alerting-mw', updatedAt: '2024-06-01T10:00:05.000Z' }]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(scheduleOf(result)).toEqual({ interval: '60m' });
+      expect(runAtOf(result)).toBeUndefined();
+    });
+
+    it('does not follow up when MW updatedAt is not after this run started', async () => {
+      const startedAt = new Date('2024-06-01T10:00:00.000Z');
+      const taskInstance = {
+        ...getMockTaskInstance(),
+        startedAt,
+      };
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: true,
+        updatedMWs: [],
+        missingMWIds: ['gone-mw'],
+      } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['gone-mw']);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+      jest
+        .spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws')
+        .mockResolvedValue(undefined);
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue([]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(scheduleOf(result)).toEqual({ interval: '60m' });
+      expect(runAtOf(result)).toBeUndefined();
     });
 
     it('should sync only for provided privateLocationId and clear it from state', async () => {
@@ -285,6 +392,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...taskInstance.state,
         privateLocationId: undefined,
       });
+      expect(scheduleOf(result)).toBeUndefined();
     });
   });
 
@@ -373,6 +481,38 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         monitorMwsIds: ['mw-1'],
       });
       expect(hasMWsChanged).toBe(false);
+    });
+  });
+
+  describe('haveMWsUpdatedSince', () => {
+    it('returns true when an MW was updated after the given timestamp', async () => {
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T10:00:05.000Z' }]);
+
+      await expect(task.haveMWsUpdatedSince('2024-06-01T10:00:00.000Z', ['mw-1'])).resolves.toBe(
+        true
+      );
+    });
+
+    it('returns false when MW updates are not after the given timestamp', async () => {
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T09:59:59.000Z' }]);
+
+      await expect(task.haveMWsUpdatedSince('2024-06-01T10:00:00.000Z', ['mw-1'])).resolves.toBe(
+        false
+      );
+    });
+
+    it('returns false when the updated MW is not referenced by any monitor', async () => {
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue([{ id: 'alerting-mw', updatedAt: '2024-06-01T10:00:05.000Z' }]);
+
+      await expect(task.haveMWsUpdatedSince('2024-06-01T10:00:00.000Z', ['mw-1'])).resolves.toBe(
+        false
+      );
     });
   });
 

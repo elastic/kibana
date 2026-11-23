@@ -33,7 +33,7 @@ export class InterceptUserInteractionService {
         path: TRIGGER_USER_INTERACTION_METADATA_API_ROUTE,
         validate: {
           params: schema.object({
-            triggerId: schema.string(),
+            triggerId: schema.string({ minLength: 1, maxLength: 256 }),
           }),
         },
         security: {
@@ -65,7 +65,7 @@ export class InterceptUserInteractionService {
         path: TRIGGER_USER_INTERACTION_METADATA_API_ROUTE,
         validate: {
           params: schema.object({
-            triggerId: schema.string(),
+            triggerId: schema.string({ minLength: 1, maxLength: 256 }),
           }),
           body: schema.object({
             lastInteractedInterceptId: schema.number(),

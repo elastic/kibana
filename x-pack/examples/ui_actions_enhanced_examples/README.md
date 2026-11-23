@@ -1,6 +1,6 @@
 # Ui actions enhanced examples
 
-To run this example plugin, use the command `yarn start --run-examples`.
+To run this example plugin, use the command `pnpm start --run-examples`.
 
 
 ## Drilldown examples
@@ -44,7 +44,7 @@ to add drilldowns to any app. To see examples of how drilldows can be added to
 your app, run Kibana with `--run-examples` flag:
 
 ```
-yarn start --run-examples
+pnpm start --run-examples
 ```
 
 Then go to "Developer examples" and "UI Actions Enhanced", where you can see examples

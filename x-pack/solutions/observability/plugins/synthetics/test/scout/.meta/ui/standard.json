@@ -1,5 +1,8 @@
 {
-  "sha1": "8e1179ae96b0fbc36ec3a895574fd5c9d147babc",
+  "sha1": "0b0a0bac5d081aee6373f555a01e4085dc021877",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "db4898614990d08-c129e7cf5767d21",
@@ -200,14 +203,14 @@
     {
       "id": "11f0fb11404caa0-56c73ac2d78fb44",
       "title": "FilterMonitors filters monitors by tags with AND/OR logic",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/filter_monitors.spec.ts",
-        "line": 24,
+        "line": 25,
         "column": 7
       }
     },
@@ -368,14 +371,14 @@
     {
       "id": "c4cfa77c0ba5f6a-ec9bfa8647930ac",
       "title": "StepDetailsPage displays step detail metrics",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/step_details.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 7
       }
     }

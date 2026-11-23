@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import { FormulaPublicApi, LensPublicStart, XYState } from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, LensPublicStart, UserMessage, XYState } from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from 'styled-components';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -29,6 +29,9 @@ import { useEmbeddableAttributes } from './use_embeddable_attributes';
 // disable the built-in one to avoid a duplicate menu entry (see issue #231475).
 const DISABLED_ACTIONS = ['embeddable_addToExistingCase'];
 
+// Compact KPI/sparkline embeddables cannot surface Lens inspector warnings usefully.
+const hideLensWarningBadges = () => [];
+
 export interface ExploratoryEmbeddableProps {
   id?: string;
   appendTitle?: JSX.Element;
@@ -44,6 +47,7 @@ export interface ExploratoryEmbeddableProps {
   hideTicks?: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
   onLoad?: (loading: boolean) => void;
+  onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
   caseOwner?: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
@@ -92,6 +96,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     lineHeight = 32,
     searchSessionId,
     onLoad,
+    onBeforeBadgesRender,
     analytics,
   } = props;
   const LensComponent = lens?.EmbeddableComponent;
@@ -213,6 +218,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         extraActions={actions}
         viewMode={'view'}
         searchSessionId={searchSessionId}
+        onBeforeBadgesRender={onBeforeBadgesRender ?? hideLensWarningBadges}
         onLoad={(loading, inspectorAdapters) => {
           reportEvent(inspectorAdapters);
           onLoad?.(loading);

@@ -11,6 +11,8 @@ import { render } from '../../../../utils/testing';
 import { PROFILES_MAP } from '../../../../../../../common/constants/monitor_defaults';
 
 describe('ThrottlingConfigField', () => {
+  jest.setTimeout(10_000);
+
   it('renders', async () => {
     render(
       <ThrottlingConfigField

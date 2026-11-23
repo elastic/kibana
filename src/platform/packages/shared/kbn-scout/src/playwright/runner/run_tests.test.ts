@@ -8,12 +8,21 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getPlaywrightProject, hasTestsInPlaywrightConfig } from './run_tests';
-import { execPromise } from '../utils';
+import {
+  getPlaywrightProject,
+  hasTestsInPlaywrightConfig,
+  runPlaywrightTestCheck,
+} from './run_tests';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { withProcRunner } from '@kbn/dev-proc-runner';
+import { execFilePromise, withKibanaBabelRegister } from '../utils';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
+jest.mock('@kbn/dev-proc-runner', () => ({ withProcRunner: jest.fn() }));
+jest.mock('@kbn/ci-stats-reporter', () => ({ getTimeReporter: jest.fn() }));
+
 jest.mock('../utils', () => ({
-  execPromise: jest.fn(),
+  execFilePromise: jest.fn(),
   withKibanaBabelRegister: jest.fn((env = {}) => ({
     ...env,
     NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/babel-register/install']
@@ -48,7 +57,7 @@ describe('getPlaywrightProject', () => {
 
 describe('hasTestsInPlaywrightConfig', () => {
   let mockLog: ToolingLog;
-  const execPromiseMock = execPromise as jest.Mock;
+  const execFilePromiseMock = execFilePromise as jest.Mock;
 
   beforeEach(() => {
     mockLog = {
@@ -63,7 +72,7 @@ describe('hasTestsInPlaywrightConfig', () => {
   });
 
   it(`should log the last line of stdout when tests are found and return '0'`, async () => {
-    execPromiseMock.mockImplementationOnce(() =>
+    execFilePromiseMock.mockImplementationOnce(() =>
       Promise.resolve({
         stdout: 'Listing tests:\n[local] > spec.ts > Suite > Test\nTotal: 1 test in 1 file\n',
         stderr: '',
@@ -77,8 +86,9 @@ describe('hasTestsInPlaywrightConfig', () => {
       'configPath/playwright.config.ts'
     );
 
-    expect(execPromiseMock).toHaveBeenCalledWith(
-      'playwright test pwArgs --list',
+    expect(execFilePromiseMock).toHaveBeenCalledWith(
+      'playwright',
+      ['test pwArgs', '--list'],
       expect.objectContaining({
         env: expect.objectContaining({
           SCOUT_REPORTER_ENABLED: 'false',
@@ -93,7 +103,7 @@ describe('hasTestsInPlaywrightConfig', () => {
   });
 
   it(`should log an error and return '2' when no tests are found`, async () => {
-    execPromiseMock.mockRejectedValueOnce(new Error('No tests found'));
+    execFilePromiseMock.mockRejectedValueOnce(new Error('No tests found'));
 
     const exitCode = await hasTestsInPlaywrightConfig(
       mockLog,
@@ -110,7 +120,7 @@ describe('hasTestsInPlaywrightConfig', () => {
   });
 
   it(`should log an error and return '1' when test command throws error`, async () => {
-    execPromiseMock.mockRejectedValueOnce(new Error(`unknown command 'test'`));
+    execFilePromiseMock.mockRejectedValueOnce(new Error(`unknown command 'test'`));
 
     const exitCode = await hasTestsInPlaywrightConfig(
       mockLog,
@@ -127,7 +137,7 @@ describe('hasTestsInPlaywrightConfig', () => {
   });
 
   it(`should log an error and return '1' when unknown error occurs`, async () => {
-    execPromiseMock.mockRejectedValueOnce(new Error(`unknown error`));
+    execFilePromiseMock.mockRejectedValueOnce(new Error(`unknown error`));
 
     const exitCode = await hasTestsInPlaywrightConfig(
       mockLog,
@@ -141,5 +151,29 @@ describe('hasTestsInPlaywrightConfig', () => {
       expect.stringMatching(/^scout: Unknown error occurred\./)
     );
     expect(exitCode).toEqual(1);
+  });
+});
+
+describe('runPlaywrightTestCheck', () => {
+  const run = jest.fn();
+
+  beforeEach(() => {
+    (withProcRunner as jest.Mock).mockImplementation(async (_log, fn) => fn({ run }));
+    (getTimeReporter as jest.Mock).mockReturnValue(jest.fn());
+    (withKibanaBabelRegister as jest.Mock).mockImplementation((env) => env);
+  });
+
+  it('lists the tests of a config with the Scout reporter disabled', async () => {
+    const log = { info: jest.fn() } as unknown as ToolingLog;
+
+    await runPlaywrightTestCheck(log);
+
+    expect(run).toHaveBeenCalledWith(
+      'playwright',
+      expect.objectContaining({
+        args: expect.arrayContaining(['test', '--list']),
+        env: expect.objectContaining({ SCOUT_REPORTER_ENABLED: 'false' }),
+      })
+    );
   });
 });

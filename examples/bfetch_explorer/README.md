@@ -8,4 +8,4 @@ This example app demonstrates:
    client
  - How you can create a batch processing route and consume it from the client
 
-To run this example, use the command `yarn start --run-examples`.
+To run this example, use the command `pnpm start --run-examples`.

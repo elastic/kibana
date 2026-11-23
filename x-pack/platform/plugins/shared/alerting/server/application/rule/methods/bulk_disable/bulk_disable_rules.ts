@@ -27,6 +27,7 @@ import {
   untrackRuleAlerts,
   updateMeta,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
   migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -151,13 +152,18 @@ const bulkDisableRulesWithOCC = async (
   const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
+  const migratedRuleIds = new Set<string>();
   const username = await context.getUserName();
 
   await withSpan(
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+        const migratedIds = await bulkMigrateLegacyActions({
+          context,
+          rules: response.saved_objects,
+        });
+        migratedIds.forEach((id) => migratedRuleIds.add(id));
         await pMap(response.saved_objects, async (rule) => {
           const ruleName = rule.attributes.name;
 
@@ -245,6 +251,7 @@ const bulkDisableRulesWithOCC = async (
   const taskIdsToDelete: string[] = [];
   const taskIdsToClearState: string[] = [];
   const disabledRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const savedMigratedRuleIds: string[] = [];
 
   result.saved_objects.forEach((rule) => {
     if (rule.error === undefined) {
@@ -262,6 +269,9 @@ const bulkDisableRulesWithOCC = async (
         }
       }
       disabledRules.push(rule);
+      if (migratedRuleIds.has(rule.id)) {
+        savedMigratedRuleIds.push(rule.id);
+      }
     } else {
       errors.push({
         message: rule.error.message ?? 'n/a',
@@ -273,6 +283,9 @@ const bulkDisableRulesWithOCC = async (
       });
     }
   });
+
+  // Legacy actions are deleted only once the rules carrying them are saved, so a conflict can be retried
+  await deleteLegacyActionsForRules(context, savedMigratedRuleIds);
 
   return {
     errors,

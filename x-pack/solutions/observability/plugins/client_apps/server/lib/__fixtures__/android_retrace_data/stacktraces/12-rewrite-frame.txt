@@ -1,0 +1,2 @@
+java.lang.NullPointerException: rewriteFrame test
+	at y1.size(r8-map-id-88a333638f434ed29a4a580f13c7bc9ac4a99862e9aa0a6008772de6fb12368b:4)

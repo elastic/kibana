@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '48 available fields. 5 empty fields. 4 meta fields.'
+          '49 available fields. 5 empty fields. 4 meta fields.'
         );
         expect((await discover.getColumnHeaders()).join(', ')).to.be('@timestamp, Summary');
 
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '48 available fields. 5 empty fields. 4 meta fields.'
+          '49 available fields. 5 empty fields. 4 meta fields.'
         );
         expect((await discover.getColumnHeaders()).join(', ')).to.be('@timestamp, Summary');
 

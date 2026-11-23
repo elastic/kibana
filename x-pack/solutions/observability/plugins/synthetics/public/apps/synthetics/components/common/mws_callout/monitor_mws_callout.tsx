@@ -6,31 +6,31 @@
  */
 
 import React from 'react';
-import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MwsCalloutContent } from './mws_callout_content';
+import { MwsAgentVersionCallout } from './mws_agent_version_callout';
+import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
-import { ClientPluginsStart } from '../../../../../plugin';
+import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
 
 export const MonitorMWsCallout = () => {
   const { monitor } = useSelectedMonitor();
+  const { data } = useFetchMaintenanceWindows();
+  const { outdatedLocationIds } = useOutdatedMwAgentLocationIds();
 
-  const services = useKibana<ClientPluginsStart>().services;
-  const { data } = useFetchActiveMaintenanceWindows(services, {
-    enabled: true,
-  });
-  if (!monitor) {
-    return null;
+  const monitorMWIds = monitor?.[ConfigKey.MAINTENANCE_WINDOWS] ?? [];
+  const activeMWs = getActiveMaintenanceWindows(data?.maintenanceWindows, monitorMWIds);
+
+  const hasOutdatedAgent =
+    monitorMWIds.length > 0 &&
+    (monitor?.locations ?? []).some((location) => outdatedLocationIds.has(location.id));
+
+  if (activeMWs.length) {
+    return <MwsCalloutContent activeMWs={activeMWs} hasOutdatedAgent={hasOutdatedAgent} />;
   }
-  const monitorMWs = monitor[ConfigKey.MAINTENANCE_WINDOWS];
-  const hasMonitorMWs = monitorMWs && monitorMWs.length > 0;
 
-  if (data?.length && hasMonitorMWs) {
-    const activeMWs = data.filter((mw) => monitorMWs.includes(mw.id));
-    if (activeMWs) {
-      return <MwsCalloutContent activeMWs={activeMWs} />;
-    }
+  if (hasOutdatedAgent) {
+    return <MwsAgentVersionCallout />;
   }
 
   return null;

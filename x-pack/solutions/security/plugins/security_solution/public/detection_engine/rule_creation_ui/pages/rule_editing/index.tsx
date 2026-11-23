@@ -7,10 +7,8 @@
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiResizableContainer,
   EuiSpacer,
@@ -76,6 +74,7 @@ import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/lo
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { EditRuleFormButtons } from './edit_rule_form_buttons';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -601,24 +600,12 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         justifyContent="flexEnd"
                         responsive={false}
                       >
-                        <EuiFlexItem grow={false}>
-                          <EuiButton iconType="cross" onClick={goToDetailsRule}>
-                            {i18n.CANCEL}
-                          </EuiButton>
-                        </EuiFlexItem>
-
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="ruleEditSubmitButton"
-                            fill
-                            onClick={onSubmit}
-                            iconType="save"
-                            isLoading={isLoading}
-                            isDisabled={loading}
-                          >
-                            {i18n.SAVE_CHANGES}
-                          </EuiButton>
-                        </EuiFlexItem>
+                        <EditRuleFormButtons
+                          onCancel={goToDetailsRule}
+                          onSubmit={onSubmit}
+                          isLoading={isLoading}
+                          isDisabled={loading}
+                        />
                       </EuiFlexGroup>
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>

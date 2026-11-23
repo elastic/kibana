@@ -76,8 +76,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('shows enrich policies page and docs link', async () => {
-      expect(await testSubjects.exists('enrichPoliciesList')).to.be(true);
-      expect(await testSubjects.exists('enrichPoliciesLearnMoreLink')).to.be(true);
+      await testSubjects.existOrFail('enrichPoliciesList');
+      await testSubjects.existOrFail('enrichPoliciesLearnMoreLink');
     });
 
     it('shows the details flyout when clicking on a policy name', async () => {

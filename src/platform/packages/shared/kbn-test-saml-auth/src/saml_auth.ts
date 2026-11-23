@@ -8,7 +8,10 @@
  */
 
 import { setTimeout as delay } from 'timers/promises';
-import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
+import {
+  createSAMLResponse as createMockedSAMLResponse,
+  getSAMLRequestId,
+} from '@kbn/mock-idp-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import util from 'util';
 import * as cheerio from 'cheerio';
@@ -19,6 +22,7 @@ import { isValidUrl } from './helper';
 import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
+  CustomRealmSamlSessionParams,
   LocalSamlSessionParams,
   RetryParams,
   SAMLCallbackParams,
@@ -154,7 +158,12 @@ export const createCloudSession = async (
   );
 };
 
-export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
+export const createSAMLRequest = async (
+  kbnUrl: string,
+  kbnVersion: string,
+  log: ToolingLog,
+  providerName: string = 'cloud-saml-kibana'
+) => {
   const url = kbnUrl + '/internal/security/login';
   let samlResponse: Response;
   try {
@@ -167,7 +176,7 @@ export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log:
       },
       body: JSON.stringify({
         providerType: 'saml',
-        providerName: 'cloud-saml-kibana',
+        providerName,
         currentURL: kbnUrl + '/login?next=%2F"',
       }),
       redirect: 'manual',
@@ -355,4 +364,43 @@ export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => 
   });
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, log });
   return new Session(cookie, email);
+};
+
+/**
+ * Creates a Cloud session through a custom SAML realm that trusts the mock IdP. The login is
+ * SP-initiated because Kibana stops at the first SAML provider that fails an IdP-initiated login.
+ */
+export const createCustomRealmSAMLSession = async (params: CustomRealmSamlSessionParams) => {
+  const { providerName, username, email, fullname, role, kbnHost, kbnVersion, log } = params;
+  const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion, log, providerName);
+
+  const authnRequestId = await getSAMLRequestId(location);
+  if (!authnRequestId) {
+    throw new Error(
+      `Failed to parse SAML AuthnRequest from '${providerName}' redirect: ${location}`
+    );
+  }
+
+  const samlResponse = await createMockedSAMLResponse({
+    kibanaUrl: `${kbnHost}/api/security/saml/callback`,
+    authnRequestId,
+    username,
+    full_name: fullname,
+    email,
+    roles: [role],
+  });
+
+  try {
+    const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
+    return new Session(cookie, email);
+  } catch (ex) {
+    if (ex?.cause?.status === 401) {
+      throw new Error(
+        `${ex.message}\nThe '${providerName}' SAML realm rejected the mock IdP response. Make sure the IdP metadata ` +
+          `configured for the realm contains the certificate from '@kbn/dev-utils' (certs/kibana.crt) used to sign it.`,
+        { cause: ex }
+      );
+    }
+    throw ex;
+  }
 };

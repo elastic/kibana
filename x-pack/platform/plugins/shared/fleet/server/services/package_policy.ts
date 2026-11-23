@@ -156,6 +156,10 @@ import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
+import {
+  validateNoTraversalInCompiledIds,
+  validateNoTraversalInIdOverrides,
+} from './package_policies/validate_no_traversal_ids';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -324,6 +328,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
+    validateNoTraversalInIdOverrides(enrichedPackagePolicy);
     let inputs = getInputsWithStreamIds(enrichedPackagePolicy, packagePolicyId);
 
     // Make sure the associated package is installed
@@ -558,22 +563,28 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return p;
     });
 
-    const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
-      logger,
-      packageInfos: [...packageInfos.values()],
-      savedObjectsClient: soClient,
-    });
+    const [packageInfosandAssetsMap, secretStorageEnabled] = await Promise.all([
+      getPkgInfoAssetsMap({
+        logger,
+        packageInfos: [...packageInfos.values()],
+        savedObjectsClient: soClient,
+      }),
+      isSecretStorageEnabled(esClient, soClient),
+    ]);
 
     await pMap(packagePoliciesWithIds, async (packagePolicy) => {
       try {
         const packagePolicyId = packagePolicy.id ?? uuidv4();
         const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
 
+        validateNoTraversalInIdOverrides(packagePolicy);
         let inputs = getInputsWithStreamIds(packagePolicy, packagePolicyId);
 
-        const { id, ...pkgPolicyWithoutId } = packagePolicy;
+        // eslint-disable-next-line prefer-const
+        let { id, ...pkgPolicyWithoutId } = packagePolicy;
 
         let elasticsearch: PackagePolicy['elasticsearch'];
+        let secretReferences: PolicySecretReference[] | undefined;
         if (packagePolicy.package) {
           const packageInfoAndAsset = packageInfosandAssetsMap.get(
             `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -587,10 +598,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           const { pkgInfo, assetsMap } = packageInfoAndAsset;
           validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
+          if (secretStorageEnabled) {
+            const secretsRes = await extractAndWriteSecrets({
+              packagePolicy: { ...pkgPolicyWithoutId, inputs },
+              packageInfo: pkgInfo,
+              esClient,
+            });
+
+            pkgPolicyWithoutId = secretsRes.packagePolicy;
+            secretReferences = secretsRes.secretReferences;
+            inputs = pkgPolicyWithoutId.inputs as PackagePolicyInput[];
+          }
+
           inputs = pkgInfo
             ? await _compilePackagePolicyInputs(
                 pkgInfo,
-                packagePolicy.vars || {},
+                pkgPolicyWithoutId.vars || {},
                 inputs,
                 assetsMap
               )
@@ -619,6 +642,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             elasticsearch,
             policy_id: agentPolicyIdsOfPackagePolicy[0],
             policy_ids: agentPolicyIdsOfPackagePolicy,
+            ...(secretReferences?.length && { secret_references: secretReferences }),
             revision: 1,
             created_at: isoDate,
             created_by: options?.user?.username ?? 'system',
@@ -700,6 +724,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
 
+    validateNoTraversalInIdOverrides(packagePolicy);
     let inputs = getInputsWithStreamIds(packagePolicy, packagePolicy.id);
     const { id, ...pkgPolicyWithoutId } = packagePolicy;
 
@@ -939,7 +964,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: boolean;
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
-    }
+    },
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     const savedObjectType = await getPackagePolicySavedObjectType();
     auditLoggingService.writeCustomSoAuditLog({
@@ -963,7 +989,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         'packagePolicyUpdate',
         packagePolicyUpdateWithId,
         soClient,
-        esClient
+        esClient,
+        context
       );
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
@@ -1003,6 +1030,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // eslint-disable-next-line prefer-const
     let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+    validateNoTraversalInIdOverrides(restOfPackagePolicy);
     let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
@@ -1244,6 +1272,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
         }
 
+        validateNoTraversalInIdOverrides(restOfPackagePolicy);
         let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
 
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
@@ -1308,8 +1337,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           },
           version,
         });
-      } catch (error) {
-        failedPolicies.push({ packagePolicy: packagePolicyUpdate, error });
+      } catch (caughtError) {
+        const error = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
+        logger.warn(
+          `Preparing update to package policy [${packagePolicyUpdate.id}] failed: [${error.name}] ${error.message}`
+        );
+
+        failedPolicies.push({
+          packagePolicy: packagePolicyUpdate,
+          error,
+        });
       }
     });
 
@@ -1386,6 +1423,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           (failedPolicy) => failedPolicy.packagePolicy.id === policy.id
         );
         if (!hasAlreadyFailed) {
+          logger.warn(
+            `Saving update to package policy [${policy.id}] failed: ${policy.error.message}`
+          );
           failedPolicies.push({
             packagePolicy: packagePolicyUpdates.find((p) => p.id === policy.id)!,
             error: policy.error,
@@ -2428,7 +2468,8 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           force?: boolean | undefined;
           skipUniqueNameVerification?: boolean | undefined;
         }
-      | undefined
+      | undefined,
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
       fleetAuthz: {
@@ -2436,7 +2477,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
-    return super.update(soClient, esClient, id, packagePolicyUpdate, options);
+    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context);
   }
 
   async create(
@@ -2531,7 +2572,13 @@ export async function _compilePackagePolicyInputs(
     };
   });
 
-  return Promise.all(inputsPromises);
+  const compiledInputs = await Promise.all(inputsPromises);
+
+  // Template output (e.g. from user-supplied yaml vars) is spread over the validated
+  // input/stream ids when the full agent policy is built, so reject traversal sequences here.
+  validateNoTraversalInCompiledIds(compiledInputs);
+
+  return compiledInputs;
 }
 
 async function _compilePackagePolicyInput(

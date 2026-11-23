@@ -145,8 +145,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = 'Nov 15, 2018 @ 00:00:00.000';
         await timePicker.setAbsoluteRange(fromTime, toTime);
 
-        expect(await testSubjects.exists('ESQLEditor')).to.be(true);
-        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+        expect(await testSubjects.waitForExists('ESQLEditor')).to.be(true);
+        expect(await testSubjects.waitForExists('unifiedHistogramChart')).to.be(true);
       });
 
       it('should perform test query correctly', async function () {

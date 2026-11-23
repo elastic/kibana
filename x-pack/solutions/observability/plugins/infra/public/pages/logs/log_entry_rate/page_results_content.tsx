@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import moment from 'moment';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import React, { useCallback, useMemo } from 'react';
 import { encode } from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -131,7 +131,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
         logFilter: encode(filterQuery),
       };
 
-      navigateToApp?.('logs', { path: `/stream?${stringify(params)}` });
+      navigateToApp?.('logs', { path: `/stream?${queryString.stringify(params)}` });
     },
     [timeRange, navigateToApp]
   );

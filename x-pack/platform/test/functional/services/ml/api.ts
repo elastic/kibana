@@ -317,10 +317,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async cleanAnomalyDetection() {
-      await this.deleteAllAnomalyDetectionJobs();
+      await this.deleteAllAnnotations();
       await this.deleteAllCalendars();
       await this.deleteAllFilters();
-      await this.deleteAllAnnotations();
+      await this.deleteAllAnomalyDetectionJobs();
       await this.deleteExpiredAnomalyDetectionData();
       await this.syncSavedObjects();
     },

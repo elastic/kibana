@@ -7,11 +7,14 @@ plugins:
     - discover_enhanced
     - exploratory_view
     - index_management
+    - infra
+    - logs_shared
     - logstash
     - maps
     - observability_onboarding
     - painless_lab
     - profiling
+    - security
     - security_solution
     - slo
     - spaces

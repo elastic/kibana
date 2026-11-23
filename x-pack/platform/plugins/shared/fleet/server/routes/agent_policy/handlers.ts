@@ -420,7 +420,17 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, bumpRevision, space_ids: spaceIds, ...data } = request.body;
+  const { force, bumpRevision, id: bodyId, space_ids: spaceIds, ...data } = request.body;
+
+  // The agent policy id is immutable: reject a body id that differs from the path id and never
+  // persist it, so it cannot end up in the saved object attributes.
+  if (bodyId !== undefined && bodyId !== request.params.agentPolicyId) {
+    return response.badRequest({
+      body: {
+        message: `Cannot change agent policy ID: body id does not match path agentPolicyId "${request.params.agentPolicyId}"`,
+      },
+    });
+  }
 
   let spaceId = fleetContext.spaceId;
 
@@ -536,6 +546,8 @@ export const getFullAgentPolicy: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
+  const { agentPolicyId } = request.params;
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
 
   if (request.query.kubernetes === true) {
     const agentVersion =
@@ -544,7 +556,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
       soClient,
       request.params.agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (fullAgentConfigMap) {
       const body: GetFullAgentConfigMapResponse = {
@@ -560,13 +572,10 @@ export const getFullAgentPolicy: FleetRequestHandler<
       });
     }
   } else {
-    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
-      soClient,
-      request.params.agentPolicyId,
-      {
-        standalone: request.query.standalone === true,
-      }
-    );
+    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
+      standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
+    });
     if (fullAgentPolicy) {
       const body: GetFullAgentPolicyResponse = {
         item: fullAgentPolicy,
@@ -593,6 +602,8 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     params: { agentPolicyId },
   } = request;
 
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
+
   if (request.query.kubernetes === true) {
     const agentVersion =
       await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion();
@@ -600,7 +611,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       soClient,
       request.params.agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (fullAgentConfigMap) {
       const body = fullAgentConfigMap;
@@ -621,6 +632,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
     });
     if (fullAgentPolicy) {
       const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);

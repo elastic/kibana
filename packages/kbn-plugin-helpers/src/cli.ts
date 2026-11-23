@@ -92,7 +92,7 @@ export function runCli() {
         await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
         await Tasks.writeServerFiles(context);
-        await Tasks.yarnInstall(context);
+        await Tasks.installDependencies(context);
 
         if (skipArchive !== true) {
           await Tasks.createArchive(context);
@@ -143,7 +143,7 @@ export function runCli() {
 
         if (!plugin.manifest.ui) {
           log.info(
-            'Your plugin is server only and there is no need to run a dev task in order to get it ready to test. Please just run `yarn start` at the Kibana root and your plugin will be started.'
+            'Your plugin is server only and there is no need to run a dev task in order to get it ready to test. Please just run `pnpm start` at the Kibana root and your plugin will be started.'
           );
           return;
         }

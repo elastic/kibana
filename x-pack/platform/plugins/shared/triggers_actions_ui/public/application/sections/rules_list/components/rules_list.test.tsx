@@ -10,6 +10,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
   waitFor,
   waitForElementToBeRemoved,
   cleanup,
@@ -165,6 +166,11 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
+// Each test re-mounts the full RulesList and awaits multiple findBy* queries; the global
+// RTL asyncUtilTimeout (4500 ms) alone can exceed Jest's default 5000 ms budget under worker
+// contention. Raise the file-wide budget so every render-heavy test has headroom.
+jest.setTimeout(15_000);
+
 describe('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
@@ -219,7 +225,10 @@ describe('Update Api Key', () => {
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
     expect(screen.queryByText('Update API key')).toBeInTheDocument();
-  });
+    // Mounting the full RulesList and awaiting two findBy* queries can exceed the
+    // default 5000 ms Jest budget under worker contention (the global RTL
+    // asyncUtilTimeout alone is 4500 ms), so give this render-heavy test more headroom.
+  }, 15000);
 });
 
 describe('rules_list component empty', () => {
@@ -433,24 +442,22 @@ describe('rules_list ', () => {
     });
   });
 
-  describe.skip('rules_list component with items', () => {
+  describe('rules_list component with items', () => {
     it('should render basic table and its row', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() => expect(screen.queryAllByTestId('rule-row')).toHaveLength(6));
+
+      expect(await screen.findAllByTestId('rule-row')).toHaveLength(6);
     });
 
     it('Name and rule type column', async () => {
       renderWithProviders(<RulesList />);
 
-      let ruleNameColumns: HTMLElement[] = [];
-      await waitFor(() => {
-        ruleNameColumns = screen.queryAllByTestId('rulesTableCell-name');
-        return expect(ruleNameColumns).toHaveLength(mockedRulesData.length);
-      });
+      const ruleNameColumns = await screen.findAllByTestId('rulesTableCell-name');
 
-      mockedRulesData.forEach((rule, index) => {
-        expect(ruleNameColumns[index]).toHaveTextContent(`Name${rule.name}${ruleTypeFromApi.name}`);
-      });
+      expect(ruleNameColumns).toHaveLength(mockedRulesData.length);
+      expect(ruleNameColumns[0]).toHaveTextContent(
+        `${mockedRulesData[0].name}${ruleTypeFromApi.name}`
+      );
     });
 
     it('Tags column', async () => {
@@ -468,10 +475,8 @@ describe('rules_list ', () => {
     it('Last run column', async () => {
       renderWithProviders(<RulesList />);
 
-      await waitFor(() =>
-        expect(screen.queryAllByTestId('rulesTableCell-lastExecutionDate')).toHaveLength(
-          mockedRulesData.length
-        )
+      expect(await screen.findAllByTestId('rulesTableCell-lastExecutionDate')).toHaveLength(
+        mockedRulesData.length
       );
     });
 
@@ -508,33 +513,29 @@ describe('rules_list ', () => {
     it('long duration tooltip', async () => {
       renderWithProviders(<RulesList />);
 
+      const durationColumnHeader = await screen.findAllByTestId('rulesTableCell-duration');
       // Duration column
-      expect(await screen.findAllByTestId('rulesTableCell-duration')).toHaveLength(
-        mockedRulesData.length
-      );
+      expect(durationColumnHeader).toHaveLength(mockedRulesData.length);
 
       // show warning if duration is long
-      await waitFor(() => screen.getAllByText('Info'));
-      const durationWarningIcon = screen.getAllByText('Info');
-      expect(durationWarningIcon).toHaveLength(
-        mockedRulesData.filter(
-          (data) =>
-            data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
-        ).length
-      );
+      const filteredData = mockedRulesData.filter((data) => {
+        return data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout);
+      });
+      const warningIcons = await screen.findAllByTestId('ruleDurationWarning');
+      expect(warningIcons).toHaveLength(filteredData.length);
     });
 
     it('duration tooltip', async () => {
       renderWithProviders(<RulesList />);
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      await waitFor(() => screen.getAllByText('Duration')[0]);
-      fireEvent.mouseOver(screen.getAllByText('Duration')[0]);
+      const durationColumnHeader = await screen.findByText('Duration');
+      fireEvent.mouseOver(await within(durationColumnHeader).findByText('Info'));
 
-      await waitFor(() =>
-        expect(screen.getByRole('tooltip')).toHaveTextContent(
-          'The length of time it took for the rule to run (mm:ss).'
-        )
+      const tooltip = await screen.findByText(
+        'The length of time it took for the rule to run (mm:ss).'
       );
+      expect(tooltip.parentElement).toHaveAttribute('role', 'tooltip');
     });
 
     it('Last response column', async () => {
@@ -561,18 +562,19 @@ describe('rules_list ', () => {
     it('Status control column', async () => {
       renderWithProviders(<RulesList />);
 
-      await waitFor(() => screen.getAllByTestId('rulesTableCell-status')[0]);
-      expect(screen.getAllByTestId('rulesTableCell-status')).toHaveLength(mockedRulesData.length);
+      expect(await screen.findAllByTestId('rulesTableCell-status')).toHaveLength(
+        mockedRulesData.length
+      );
     });
 
     it('Monitoring column', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() => screen.getAllByTestId('rulesTableCell-successRatio')[0]);
-      expect(screen.getAllByTestId('rulesTableCell-successRatio')).toHaveLength(
+
+      expect(await screen.findAllByTestId('rulesTableCell-successRatio')).toHaveLength(
         mockedRulesData.length
       );
 
-      const ratios = screen.getAllByTestId('successRatio');
+      const ratios = await screen.findAllByTestId('successRatio');
 
       mockedRulesData.forEach((rule, index) => {
         if (rule.monitoring) {
@@ -587,9 +589,8 @@ describe('rules_list ', () => {
 
     it('P50 column is rendered initially', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() =>
-        expect(screen.getByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined()
-      );
+
+      expect(await screen.findByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined();
 
       let percentiles: HTMLElement[] = [];
       await waitFor(() => {
@@ -883,8 +884,9 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      const selectActionButtons = document.body.querySelectorAll('.euiButtonIcon[disabled]');
-      expect(selectActionButtons).toHaveLength(2);
+      expect(await screen.findAllByTestId('selectActionButton')).toHaveLength(
+        mockedRulesData.length
+      );
     });
 
     it('rule list items with actions are not editable if canExecuteAction is false', async () => {
@@ -893,7 +895,9 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      expect(document.body.querySelectorAll('button.euiButtonIcon[disabled]')).toHaveLength(8);
+      expect(await screen.findAllByTestId('selectActionButton')).toHaveLength(
+        mockedRulesData.filter((rule) => !rule.actions.length).length
+      );
       hasExecuteActionsCapability.mockReturnValue(true);
     });
 

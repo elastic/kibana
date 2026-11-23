@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import { CanvasWorkpad } from '../../../../types';
@@ -24,7 +24,11 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const SimpleTemplate: FunctionComponent<Props> = ({ getArgValue, setArgValue, workpad }) => (
+export const SimpleTemplate: CanvasFunctionComponent<Props> = ({
+  getArgValue,
+  setArgValue,
+  workpad,
+}) => (
   <div style={{ fontSize: 0 }}>
     <ColorPickerPopover
       value={getArgValue('backgroundColor')}
@@ -41,7 +45,6 @@ SimpleTemplate.displayName = 'ContainerStyleArgSimpleInput';
 SimpleTemplate.propTypes = {
   getArgValue: PropTypes.func.isRequired,
   setArgValue: PropTypes.func.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
   workpad: PropTypes.shape({
     colors: PropTypes.array.isRequired,
   }),

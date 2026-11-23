@@ -9,6 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
+/** Opsgenie's create-alert `message` API limit. */
+export const MESSAGE_MAX_LENGTH = 130;
+
+/**
+ * HTTP-facing schema bound for `message`. Matches the vendor `description` max so Mustache-expanded
+ * messages can pass validation and be truncated to `MESSAGE_MAX_LENGTH`. Values above this still fail.
+ */
+export const MESSAGE_SCHEMA_MAX_LENGTH = 15000;
+
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
 });
@@ -70,8 +79,12 @@ const responderTypes = schema.oneOf([
  * For more information on the Opsgenie create alert schema see: https://docs.opsgenie.com/docs/alert-api#create-alert
  */
 export const CreateAlertParamsSchema = schema.object({
+  /**
+   * The max length here should be 130 according to Opsgenie's docs but we will truncate the message if it is longer than 130
+   * so we'll not impose that limit on the schema otherwise it'll get rejected prematurely (for example after Mustache expansion).
+   */
   message: schema.string({
-    maxLength: 130,
+    maxLength: MESSAGE_SCHEMA_MAX_LENGTH,
     minLength: 1,
     validate: (message) => (isEmpty(message.trim()) ? i18n.MESSAGE_NON_EMPTY : undefined),
   }),

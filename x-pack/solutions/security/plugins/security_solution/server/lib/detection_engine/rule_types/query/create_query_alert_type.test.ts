@@ -17,8 +17,11 @@ import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import { fromKueryExpression } from '@kbn/es-query';
 import { hasTimestampFields } from '../utils/utils';
+import { getFilter } from '../utils/get_filter';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
+import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 
 jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
@@ -37,6 +40,11 @@ jest.mock('@kbn/alerting-plugin/server', () => ({
   ...jest.requireActual('@kbn/alerting-plugin/server'),
   shouldCreateAlertsInAllSpaces: jest.fn().mockReturnValue(false),
 }));
+
+jest.mock('../utils/get_filter', () => {
+  const actual = jest.requireActual('../utils/get_filter');
+  return { ...actual, getFilter: jest.fn(actual.getFilter) };
+});
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -57,8 +65,9 @@ describe('Custom Query Alerts', () => {
   const { actions, alerting, lists, logger, ruleDataClient } = dependencies;
 
   const eventsTelemetry = createMockTelemetryEventsSender(true);
+  const endpointAppContextService = createMockEndpointAppContextService();
 
-  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+  const wrapperOptions = {
     actions,
     docLinks,
     lists,
@@ -72,8 +81,11 @@ describe('Custom Query Alerts', () => {
     alerting,
     eventsTelemetry,
     licensing,
+    endpointAppContextService,
     scheduleNotificationResponseActionsService: () => null,
-  });
+  };
+
+  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(wrapperOptions);
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -201,5 +213,91 @@ describe('Custom Query Alerts', () => {
           "The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
       })
     );
+  });
+
+  describe('response actions', () => {
+    const buildWrapper = (isPreview: boolean, scheduleService: jest.Mock) =>
+      createSecurityRuleTypeWrapper({
+        ...wrapperOptions,
+        isPreview,
+        scheduleNotificationResponseActionsService: scheduleService,
+      });
+
+    const runRule = async ({ isPreview }: { isPreview: boolean }) => {
+      const scheduleService = jest.fn();
+      const queryAlertType = buildWrapper(
+        isPreview,
+        scheduleService
+      )(createQueryAlertType({ id: QUERY_RULE_TYPE_ID, name: 'Custom Query Rule' }));
+      alerting.registerType(queryAlertType);
+
+      services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+        hits: {
+          hits: [sampleDocNoSortId()],
+          total: { relation: 'eq', value: 1 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: { failed: 0, skipped: 0, successful: 1, total: 1 },
+      });
+
+      await executor({ params: getQueryRuleParams() });
+      return scheduleService;
+    };
+
+    it('dispatches response actions on a normal rule run', async () => {
+      const scheduleService = await runRule({ isPreview: false });
+      expect(scheduleService).toHaveBeenCalled();
+    });
+
+    it('never dispatches response actions during preview', async () => {
+      const scheduleService = await runRule({ isPreview: true });
+      expect(scheduleService).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the rule query fails to parse', () => {
+    const registerAndRun = async () => {
+      const queryAlertType = securityRuleTypeWrapper(
+        createQueryAlertType({
+          id: QUERY_RULE_TYPE_ID,
+          name: 'Custom Query Rule',
+        })
+      );
+
+      alerting.registerType(queryAlertType);
+
+      await executor({ params: getQueryRuleParams() });
+    };
+
+    it('reports a KQL syntax error as a user error', async () => {
+      (getFilter as jest.Mock).mockImplementationOnce(() =>
+        fromKueryExpression('host.name: (a or')
+      );
+
+      await registerAndRun();
+
+      expect(mockedStatusLogger.logStatusChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatusEnum.failed,
+          message: expect.stringContaining('Expected'),
+          userError: true,
+        })
+      );
+    });
+
+    it('does not report other errors thrown while running the rule as user errors', async () => {
+      (getFilter as jest.Mock).mockRejectedValueOnce(new Error('Unexpected failure'));
+
+      await registerAndRun();
+
+      expect(mockedStatusLogger.logStatusChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatusEnum.failed,
+          message: expect.stringContaining('Unexpected failure'),
+          userError: false,
+        })
+      );
+    });
   });
 });

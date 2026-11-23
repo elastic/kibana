@@ -171,7 +171,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         let searchSessionList = await searchSessionsManagement.getList();
         let searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-        expect(searchSessionItem.searchesCount).to.be(1);
+        await retry.waitFor('the first search to be tracked in the session', async () => {
+          await searchSessionsManagement.refresh();
+          searchSessionList = await searchSessionsManagement.getList();
+          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+          return searchSessionItem.searchesCount === 1;
+        });
         await new Promise((resolve) => setTimeout(resolve, 10000));
 
         await searchSessionItem.view();
@@ -187,9 +192,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.openPopover();
         await searchSessions.viewSearchSessions();
 
-        searchSessionList = await searchSessionsManagement.getList();
-        searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-        expect(searchSessionItem.searchesCount).to.be(2);
+        await retry.waitFor('the other bucket search to be tracked in the session', async () => {
+          await searchSessionsManagement.refresh();
+          searchSessionList = await searchSessionsManagement.getList();
+          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+          return searchSessionItem.searchesCount === 2;
+        });
 
         await searchSessionItem.view();
         expect(await toasts.getCount()).to.be(0); // there should be no warnings
