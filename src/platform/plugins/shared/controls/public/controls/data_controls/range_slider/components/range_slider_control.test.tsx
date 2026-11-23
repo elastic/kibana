@@ -159,22 +159,22 @@ describe('RangeSliderControl', () => {
     expect(rangeSliderControl.getByTestId('rangeSlider__upperBoundFieldNumber')).toBeDisabled();
   });
 
-  it('sets aria-required on both bound inputs when required', () => {
+  it('describes that either bound is sufficient on both inputs when required', () => {
     const rangeSliderControl = render(<RangeSliderControl {...defaultProps} required />);
-    expect(rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber')).toHaveAttribute(
-      'aria-required',
-      'true'
+    const description = rangeSliderControl.getByText(
+      'Required. Enter a lower bound, an upper bound, or both.'
     );
-    expect(rangeSliderControl.getByTestId('rangeSlider__upperBoundFieldNumber')).toHaveAttribute(
-      'aria-required',
-      'true'
-    );
+    ['lowerBound', 'upperBound'].forEach((bound) => {
+      const input = rangeSliderControl.getByTestId(`rangeSlider__${bound}FieldNumber`);
+      expect(input).toHaveAttribute('aria-describedby', description.id);
+      expect(input).not.toHaveAttribute('aria-required');
+    });
   });
 
-  it('does not set aria-required when not required', () => {
+  it('does not describe a requirement when not required', () => {
     const rangeSliderControl = render(<RangeSliderControl {...defaultProps} />);
-    expect(
-      rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber')
-    ).not.toHaveAttribute('aria-required');
+    const input = rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber');
+    expect(input).not.toHaveAttribute('aria-describedby');
+    expect(input).not.toHaveAttribute('aria-required');
   });
 });
