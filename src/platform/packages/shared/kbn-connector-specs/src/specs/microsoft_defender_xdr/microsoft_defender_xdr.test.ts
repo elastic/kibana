@@ -8,6 +8,7 @@
  */
 
 import { MicrosoftDefenderXdr } from './microsoft_defender_xdr';
+import { UpdateAlertInputSchema } from './types';
 import type { AuthTypeDef, ConnectorSpec } from '../../connector_spec';
 
 const isAuthTypeDef = (t: string | AuthTypeDef): t is AuthTypeDef => typeof t === 'object';
@@ -474,6 +475,14 @@ describe('updateAlert handler', () => {
     });
     const body = client.patch.mock.calls[0][1] as Record<string, unknown>;
     expect(body).not.toHaveProperty('severity');
+  });
+
+  it('rejects a severity-only update at the schema layer', () => {
+    const result = UpdateAlertInputSchema.safeParse({
+      alertId: 'alert-7',
+      severity: 'high',
+    });
+    expect(result.success).toBe(false);
   });
 });
 

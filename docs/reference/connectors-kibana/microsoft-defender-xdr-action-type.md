@@ -60,8 +60,8 @@ The following actions are available for the Microsoft Defender XDR connector.
 | `runHuntingQuery` | Advanced hunting | `query` | `timespan` | `ThreatHunting.Read.All` |
 | `listDetectionRules` | Custom detection rules | — | `top`, `skip` | `CustomDetection.Read.All` |
 | `getDetectionRule` | Custom detection rules | `ruleId` | — | `CustomDetection.Read.All` |
-| `createDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `displayName`, `queryText`, `period`, `alertTemplate` | `isEnabled` | `CustomDetection.ReadWrite.All` |
-| `updateDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `ruleId` + at least one field | `displayName`, `isEnabled`, `queryText`, `period`, `alertTemplate` | `CustomDetection.ReadWrite.All` |
+| `createDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `displayName`, `queryText`, `period`, `alertTemplate` | `status` | `CustomDetection.ReadWrite.All` |
+| `updateDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `ruleId` + at least one field | `displayName`, `status`, `queryText`, `period`, `alertTemplate` | `CustomDetection.ReadWrite.All` |
 | `deleteDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `ruleId` | — | `CustomDetection.ReadWrite.All` |
 | `getThreatIntelHost` | Threat intelligence | `host` | — | `ThreatIntelligence.Read.All` |
 | `getThreatIntelHostReputation` | Threat intelligence | `host` | — | `ThreatIntelligence.Read.All` |
@@ -117,7 +117,7 @@ The following actions are available for the Microsoft Defender XDR connector.
 :   Creates a new custom detection rule that runs a KQL query on a schedule and generates alerts when the result count satisfies the trigger condition. The query must project at least one of: `DeviceId`, `AccountObjectId`, `AccountSid`, `AccountUpn`, `AccountName`, `MailboxAddress`, `FileName`, `SHA256`, `IPAddress`, `URL`. The `alertTemplate` object requires a `title` and `severity` and optionally accepts `description`, `recommendedActions`, and `mitreTechniques`. The `period` must be one of `PT1H`, `PT3H`, `PT12H`, `P1D`, or `P7D`.
 
 `updateDetectionRule`
-:   Updates an existing custom detection rule — modify `displayName`, enable/disable via `isEnabled`, change the KQL `queryText`, adjust the `period`, or update the `alertTemplate`. Provide only the fields you want to change.
+:   Updates an existing custom detection rule — modify `displayName`, enable/disable via `status` (`enabled` or `disabled`), change the KQL `queryText`, adjust the `period`, or update the `alertTemplate`. Provide only the fields you want to change.
 
 `deleteDetectionRule`
 :   Permanently deletes a custom detection rule by its numeric ID. Confirm the rule ID with `listDetectionRules` or `getDetectionRule` before deleting. This action is irreversible.
