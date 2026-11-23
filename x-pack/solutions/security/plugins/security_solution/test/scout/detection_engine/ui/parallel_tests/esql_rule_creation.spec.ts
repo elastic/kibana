@@ -22,6 +22,8 @@ const RULE_TAGS = ['test', 'newRule'];
 const NAME_OVERRIDE_FIELD = 'test_id';
 const CUSTOM_ESQL_FIELD = '_custom_agent_name';
 const SUPPRESS_BY_FIELDS = [CUSTOM_ESQL_FIELD, 'agent.type'];
+const SUPPRESS_FIELD = 'agent.type';
+const MISSING_FIELDS_TEXT = 'Do not suppress alerts for events with missing fields';
 
 spaceTest.describe(
   'ES|QL rule creation',
@@ -200,6 +202,43 @@ spaceTest.describe(
           await expect(
             ruleDetailsPage.detailValue(definitionSection, 'Suppress alerts for')
           ).toHaveText('2h');
+        });
+      }
+    );
+
+    spaceTest(
+      'saves how alert suppression handles events with missing fields',
+      async ({ pageObjects, scoutSpace }) => {
+        const { esqlRuleForm, ruleCreateWizard, ruleDetailsPage } = pageObjects;
+        const missingFieldsBehavior = ruleDetailsPage.detailValue(
+          ruleDetailsPage.definitionSection,
+          'If a suppression field is missing'
+        );
+
+        await spaceTest.step('configure suppression on the define step', async () => {
+          await esqlRuleForm.setQueryAndWaitToSettle(
+            getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id))
+          );
+          await esqlRuleForm.selectSuppressionFields([SUPPRESS_FIELD]);
+          await esqlRuleForm.doNotSuppressMissingFields.check();
+          await esqlRuleForm.continueToAboutStep();
+        });
+
+        await spaceTest.step('the define step summary shows the suppression', async () => {
+          await expect(missingFieldsBehavior).toHaveText(MISSING_FIELDS_TEXT);
+        });
+
+        await spaceTest.step('finish the wizard', async () => {
+          await ruleCreateWizard.waitForAboutStepEnabled();
+          await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
+          await ruleCreateWizard.aboutRuleDescription.fill(RULE_DESCRIPTION);
+          await ruleCreateWizard.aboutContinue.click();
+          await ruleCreateWizard.scheduleContinue.click();
+          await ruleCreateWizard.createWithoutEnablingRule();
+        });
+
+        await spaceTest.step('the rule details show the saved suppression', async () => {
+          await expect(missingFieldsBehavior).toHaveText(MISSING_FIELDS_TEXT);
         });
       }
     );
