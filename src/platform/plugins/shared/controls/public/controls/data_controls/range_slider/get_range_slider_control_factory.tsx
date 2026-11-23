@@ -8,7 +8,17 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  merge,
+  of,
+  skip,
+} from 'rxjs';
 
 import {
   apiHasPinnedPanels,
@@ -163,10 +173,14 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
           dataLoading$.next(isLoading);
         });
 
-      // Clear state when the field changes
+      // Clear state when the field or the source of the field changes
       const fieldChangedSubscription = combineLatest([
         dataControlManager.api.fieldName$,
-        dataControlManager.api.dataViewId$,
+        dataControlManager.api.dataSources$.pipe(
+          map((dataSources) => dataSources?.[0]?.id),
+          filter(Boolean),
+          distinctUntilChanged()
+        ),
       ])
         .pipe(skip(1))
         .subscribe(() => {

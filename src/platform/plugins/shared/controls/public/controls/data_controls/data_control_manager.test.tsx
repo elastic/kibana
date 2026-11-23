@@ -327,7 +327,7 @@ describe('initializeDataControlManager', () => {
       expect(mockGetESQLSingleColumnValues.mock.calls.length).toBe(initialCalls);
     });
 
-    it('keeps the derived field and data view when reinitialized with the same query', async () => {
+    it('keeps the derived field when reinitialized with the same query', async () => {
       mockGetESQLSingleColumnValues.mockResolvedValue({
         values: ['US'],
         column: { name: 'myFieldName', type: 'keyword' },
@@ -352,7 +352,6 @@ describe('initializeDataControlManager', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(dataControlManager.api.fieldName$.value).toBe('myFieldName');
-      expect(dataControlManager.api.dataViewId$.value).toBe('myDataViewId');
     });
   });
 
@@ -502,14 +501,15 @@ describe('initializeDataControlManager', () => {
       expect(errors).toEqual([]);
     });
 
-    it('reads the source of a query once, although it then sets the data view id of the control', async () => {
+    it('does not read the source of a query again when only the data view id changes', async () => {
       (getSourceFromESQLQuery as jest.Mock).mockClear();
       (getSourceFromESQLQuery as jest.Mock).mockResolvedValue(esqlSourceOf('esqlSourceId'));
       const manager = await initializeEsqlManager();
       await firstValueFrom(manager.api.dataSources$.pipe(filter(Boolean)));
+
+      manager.api.setDataViewId('anotherDataViewId');
       await new Promise((resolve) => setTimeout(resolve, 50));
 
-      expect(manager.api.dataViewId$.value).toBe('esqlSourceId');
       expect(getSourceFromESQLQuery).toHaveBeenCalledTimes(1);
     });
 

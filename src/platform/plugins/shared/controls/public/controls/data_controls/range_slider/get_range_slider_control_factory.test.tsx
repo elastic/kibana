@@ -259,6 +259,72 @@ describe('RangeSliderControlApi', () => {
     });
   });
 
+  describe('source of the control', () => {
+    test('keeps the saved step when the source of a field loads', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: rangeSliderControlSchema.parse({
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          step: 5,
+        }),
+        finalizeApi,
+        uuid,
+        parentApi,
+      });
+      await waitFor(() => expect(api.dataSources$.value?.[0].id).toBe('myDataViewId'));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect((api.serializeState() as RangeSliderControlState).step).toBe(5);
+    });
+
+    test('keeps the selections when the source loads, and clears them when the query reads another source', async () => {
+      mockGetESQLResults.mockResolvedValue({
+        response: {
+          columns: [{ name: 'myFieldName', type: 'long' }],
+          values: [[42], [256], [1024]],
+        },
+      });
+      const originalFind = dataViewsService.find;
+      const originalGet = dataViewsService.get;
+      dataViewsService.find = jest
+        .fn()
+        .mockImplementation(async (pattern: string) => [
+          { id: pattern === 'other-*' ? 'otherDataViewId' : 'myDataViewId' },
+        ]);
+      dataViewsService.get = jest.fn().mockImplementation(async (id: string) => {
+        const dataView = await originalGet('myDataViewId');
+        return { ...dataView, id };
+      });
+      try {
+        const { api } = await factory.buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
+          initialState: {
+            ...DEFAULT_RANGE_SLIDER_STATE,
+            values_source: ControlValuesSource.ESQL,
+            esql_query: 'FROM bytes-* | KEEP myFieldName',
+            value: ['100', '200'],
+          } as RangeSliderControlState,
+          finalizeApi,
+          uuid,
+          parentApi,
+        });
+        await waitFor(() => expect(api.dataSources$.value?.[0].id).toBe('myDataViewId'));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        expect((api.serializeState() as RangeSliderControlState).value).toEqual(['100', '200']);
+
+        api.setEsqlQuery('FROM other-* | KEEP myFieldName');
+
+        await waitFor(() =>
+          expect((api.serializeState() as RangeSliderControlState).value).toBeUndefined()
+        );
+      } finally {
+        dataViewsService.find = originalFind;
+        dataViewsService.get = originalGet;
+      }
+    });
+  });
+
   describe('step state', () => {
     test('default value provided when state.step is undefined', async () => {
       const { api } = await factory.buildEmbeddable({
