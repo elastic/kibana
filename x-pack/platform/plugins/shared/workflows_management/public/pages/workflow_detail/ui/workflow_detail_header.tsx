@@ -211,6 +211,8 @@ export const WorkflowDetailHeader = React.memo(
     // workflow?.valid !== false covers the initial page load before Monaco validates.
     const isSchemaValid =
       isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
+    // Validation errors block turning the workflow on, not off.
+    const canToggleEnabled = isEnabled || isSchemaValid;
 
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
@@ -240,13 +242,13 @@ export const WorkflowDetailHeader = React.memo(
           defaultMessage: 'Save changes to enable/disable workflow',
         });
       }
-      if (!isSchemaValid) {
+      if (!canToggleEnabled) {
         return i18n.translate('workflows.workflowDetailHeader.invalid', {
           defaultMessage: 'Fix validation errors to enable workflow',
         });
       }
       return undefined;
-    }, [hasUnsavedChanges, isSchemaValid]);
+    }, [hasUnsavedChanges, canToggleEnabled]);
 
     const toggleExecutionsPanel = useCallback(() => {
       if (onOpenExecutionList) {
@@ -319,7 +321,7 @@ export const WorkflowDetailHeader = React.memo(
           }
           updateWorkflow({ workflow: { enabled: checked } });
         },
-        disabled: isLoading || !canUpdateWorkflow || !isSchemaValid || hasUnsavedChanges,
+        disabled: isLoading || !canUpdateWorkflow || !canToggleEnabled || hasUnsavedChanges,
         tooltipContent: enabledSwitchTooltipContent,
         'data-test-subj': 'workflowEnabledSwitch',
       };
@@ -330,7 +332,7 @@ export const WorkflowDetailHeader = React.memo(
       updateWorkflow,
       isLoading,
       canUpdateWorkflow,
-      isSchemaValid,
+      canToggleEnabled,
       hasUnsavedChanges,
       enabledSwitchTooltipContent,
     ]);

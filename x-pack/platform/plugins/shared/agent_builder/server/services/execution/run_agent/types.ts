@@ -39,4 +39,6 @@ export interface ResolvedCapabilities {
   attachmentTools: boolean;
   /** The API tools (`discover_apis`, `describe_api`, `describe_api_type`, `execute_api`). */
   apiTools: boolean;
+  /** The virtual filesystem `bash` tool (still needs the `bash` experimental feature). */
+  bashTool: boolean;
 }
