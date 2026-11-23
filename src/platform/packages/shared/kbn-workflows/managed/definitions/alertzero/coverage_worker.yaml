@@ -132,7 +132,8 @@ steps:
       message: >-
         Context Engine is disabled in this space, the AI index
         `{{ inputs.ai_index_id | default: consts.ai_index_id }}` is not registered, or
-        this Worker cannot read it. Rule Coverage can't record decisions on gaps.
+        this Worker cannot read it. Rule Coverage can't record decisions on gaps. Enable
+        `contextEngine:enabled`, or give this Worker read access to Context Engine.
         No reviews were started. {{ steps.check_context_engine.error.message }}
 
   - name: fail_alertzero_unavailable
