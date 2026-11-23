@@ -12,7 +12,7 @@ import { MatchesTable } from './matches_table';
 
 const meta: Meta<typeof MatchesTable> = {
   component: MatchesTable,
-  title: 'Search boost/Rule matches table',
+  title: 'Search boost/Tables/Rule matches table',
   args: {
     type: 'indices',
     matches: withOutranked(createMockMatches('indices', 23), 'catalog', [1, 4]),

@@ -13,6 +13,7 @@ import {
   createSLOWithCalendarTimeWindow,
   createSLOWithTimeslicesBudgetingMethod,
 } from '../../services/fixtures/slo';
+import { sevenDaysRolling } from '../../services/fixtures/time_window';
 import {
   getChangedFields,
   getCompositeChangedFields,
@@ -157,7 +158,7 @@ describe('getCompositeChangedFields', () => {
         ...composite,
         name: 'new name',
         description: 'new description',
-        timeWindow: { duration: '7d', type: 'rolling' },
+        timeWindow: sevenDaysRolling(),
         objective: { target: 0.95 },
         tags: ['new'],
         enabled: false,
@@ -217,7 +218,7 @@ describe('getCompositeChangedFields', () => {
       getCompositeChangedFields(composite, {
         ...composite,
         version: composite.version + 1,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date(),
         updatedBy: 'someone-else',
       })
     ).toEqual([]);

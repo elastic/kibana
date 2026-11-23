@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import {
   mockEndpointRegistryModificationEvent,
   TestProviders,
 } from '../../../../../../common/mock';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { MODIFIED_REGISTRY_KEY } from '../system/translations';
 
 import { RegistryEventDetails } from './registry_event_details';
@@ -27,10 +27,8 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('RegistryEventDetails', () => {
-  const mount = useMountAppended();
-
   test('it renders the expected text given an Endpoint Registry modification event', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <RegistryEventDetails
           scopeId="some_scope"
@@ -40,7 +38,7 @@ describe('RegistryEventDetails', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       'SYSTEM\\NT AUTHORITY@win2019-endpoint-1modified registry keySOFTWARE\\WOW6432Node\\Google\\Update\\ClientState\\{430FD4D0-B729-4F61-AA34-91526481799D}\\CurrentStatewith new valueHKLM\\SOFTWARE\\WOW6432Node\\Google\\Update\\ClientState\\{430FD4D0-B729-4F61-AA34-91526481799D}\\CurrentState\\StateValueviaGoogleUpdate.exe(7408)'
     );
   });
