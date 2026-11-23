@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
 import { PrivateChannelIcon } from '../../../../components/ui/channel_label';
+import { findUnconnectedChannels } from '../../utils/unconnected_slack_channels';
 import { parseSlackChannelInput } from '../../../../common/parse_slack_channel_input';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -21,17 +22,7 @@ import {
   formatChannelLabel,
   formatChannelValue,
   useAllRelayAppBindings,
-  type UseAllRelayAppBindings,
 } from '../../../../data/relay_apps/use_relay_app_bindings';
-
-/** Selected values that are not connected channels; none unless the full connected list loaded. */
-export const findUnconnectedChannels = (
-  values: string[],
-  { bindings, isLoading, isError, isComplete }: UseAllRelayAppBindings
-): string[] =>
-  isLoading || isError || !isComplete || bindings.length === 0
-    ? []
-    : values.filter((value) => !bindings.some(({ channel }) => channel === value));
 
 // Private channels are never suggested; a user can still enter one by ID or link.
 const isSuggestedChannel = ({ visibility }: SlackChannelBinding): boolean =>
