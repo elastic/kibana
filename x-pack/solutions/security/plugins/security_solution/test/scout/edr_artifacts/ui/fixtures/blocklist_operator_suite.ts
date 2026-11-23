@@ -36,110 +36,135 @@ const signatureEntries = (type: 'match' | 'match_any') => [
 
 /**
  * Windows-signature operator CRUD. Hash create/update/delete already lives in
- * `describeArtifactListPage`. These tests stay in the blocklists spec file
- * because they mutate the same agnostic `endpoint_blocklists` list.
+ * `describeArtifactListPageItemScoped`.
+ *
+ * The agnostic `endpoint_blocklists` list is shared with the other blocklist
+ * spec files and is not space-isolated, so this suite never wipes it: every
+ * item gets a unique name, is created per-policy (never global, so it cannot
+ * show up on another worker's policy tab), and `endpointArtifactItems`
+ * deletes only the items this test created.
  */
 export const describeBlocklistOperatorField = (artifact: ArtifactTabCase): void => {
-  const { pagePrefix, listId, listType, urlPath } = artifact;
+  const { pagePrefix, listId, urlPath, entries, osTypes } = artifact;
   const condition = `${pagePrefix}-card-criteriaConditions-condition`;
 
   spaceTest.describe('Blocklist signature operator field', { tag: ARTIFACT_LIST_PAGE_TAGS }, () => {
-    spaceTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.endpointArtifacts.deleteList(listId);
-    });
-
     spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsEndpointPolicyManager();
     });
 
-    spaceTest.afterEach(async ({ apiServices }) => {
-      await apiServices.endpointArtifacts.deleteList(listId);
-    });
+    spaceTest(
+      'creates a blocklist item with the is operator',
+      async ({ pageObjects, endpointArtifactItems, endpointPolicy }) => {
+        spaceTest.setTimeout(90_000);
+        // The header add button only renders on a populated list.
+        await endpointArtifactItems.create({
+          listId,
+          name: `${ITEM_NAME} seed`,
+          entries,
+          osTypes,
+          policyId: endpointPolicy.id,
+        });
+        const name = endpointArtifactItems.uniqueName(listId, ITEM_NAME);
 
-    spaceTest('creates a blocklist item with the is operator', async ({ pageObjects }) => {
-      spaceTest.setTimeout(90_000);
-      await pageObjects.artifactListPage.goto(urlPath);
-      await pageObjects.artifactListPage.waitForEmpty(pagePrefix);
-      await pageObjects.artifactListPage.openCreateFromEmpty(pagePrefix);
-      await pageObjects.policyArtifactsPage.fillBlocklistSignatureCreateForm({
-        name: ITEM_NAME,
-        description: ITEM_DESCRIPTION,
-        operator: 'is',
-        value: SIGNATURE_MATCH_VALUE,
-      });
-      await pageObjects.artifactListPage.submitFlyout(pagePrefix);
-      await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
+        await pageObjects.artifactListPage.goto(urlPath);
+        await pageObjects.artifactListPage.waitForList(pagePrefix);
+        await pageObjects.artifactListPage.openCreateFromPage(pagePrefix);
+        await pageObjects.policyArtifactsPage.fillBlocklistSignatureCreateForm({
+          name,
+          description: ITEM_DESCRIPTION,
+          operator: 'is',
+          value: SIGNATURE_MATCH_VALUE,
+        });
+        await pageObjects.policyArtifactsPage.selectPerPolicyAssignment();
+        await pageObjects.artifactListPage.submitFlyout(pagePrefix);
+        await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
 
-      await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(ITEM_NAME);
-      await expect(pageObjects.artifactListPage.criteria(condition)).toHaveText(
-        IS_EXPECTED_CONDITION
-      );
-    });
-
-    spaceTest('creates a blocklist item with the is one of operator', async ({ pageObjects }) => {
-      spaceTest.setTimeout(90_000);
-      await pageObjects.artifactListPage.goto(urlPath);
-      await pageObjects.artifactListPage.waitForEmpty(pagePrefix);
-      await pageObjects.artifactListPage.openCreateFromEmpty(pagePrefix);
-      await pageObjects.policyArtifactsPage.fillBlocklistSignatureCreateForm({
-        name: ITEM_NAME,
-        description: ITEM_DESCRIPTION,
-        operator: 'is one of',
-        value: SIGNATURE_MATCH_ANY_VALUES,
-      });
-      await pageObjects.artifactListPage.submitFlyout(pagePrefix);
-      await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
-
-      await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(ITEM_NAME);
-      await expect(pageObjects.artifactListPage.criteria(condition)).toHaveText(
-        IS_ONE_OF_EXPECTED_CONDITION
-      );
-    });
-
-    spaceTest('updates a match_any signature item to is', async ({ pageObjects, apiServices }) => {
-      spaceTest.setTimeout(90_000);
-      await apiServices.endpointArtifacts.createList({ listId, type: listType });
-      await apiServices.endpointArtifacts.createItem({
-        name: ITEM_NAME,
-        listId,
-        entries: signatureEntries('match_any'),
-        osTypes: ['windows'],
-      });
-
-      await pageObjects.artifactListPage.goto(urlPath);
-      await pageObjects.artifactListPage.waitForList(pagePrefix);
-      await pageObjects.artifactListPage.openEdit(pagePrefix);
-      await pageObjects.policyArtifactsPage.selectBlocklistOperator('is');
-      await pageObjects.artifactListPage.submitFlyout(pagePrefix);
-      await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
-
-      await expect(pageObjects.artifactListPage.criteria(condition)).toHaveText(
-        IS_EXPECTED_CONDITION
-      );
-    });
+        const card = pageObjects.artifactListPage.cardByName(pagePrefix, name);
+        await expect(card).toBeVisible();
+        await expect(card.getByTestId(condition)).toHaveText(IS_EXPECTED_CONDITION);
+      }
+    );
 
     spaceTest(
-      'updates a match signature item to is one of',
-      async ({ pageObjects, apiServices }) => {
+      'creates a blocklist item with the is one of operator',
+      async ({ pageObjects, endpointArtifactItems, endpointPolicy }) => {
         spaceTest.setTimeout(90_000);
-        await apiServices.endpointArtifacts.createList({ listId, type: listType });
-        await apiServices.endpointArtifacts.createItem({
-          name: ITEM_NAME,
+        await endpointArtifactItems.create({
           listId,
-          entries: signatureEntries('match'),
+          name: `${ITEM_NAME} seed`,
+          entries,
+          osTypes,
+          policyId: endpointPolicy.id,
+        });
+        const name = endpointArtifactItems.uniqueName(listId, ITEM_NAME);
+
+        await pageObjects.artifactListPage.goto(urlPath);
+        await pageObjects.artifactListPage.waitForList(pagePrefix);
+        await pageObjects.artifactListPage.openCreateFromPage(pagePrefix);
+        await pageObjects.policyArtifactsPage.fillBlocklistSignatureCreateForm({
+          name,
+          description: ITEM_DESCRIPTION,
+          operator: 'is one of',
+          value: SIGNATURE_MATCH_ANY_VALUES,
+        });
+        await pageObjects.policyArtifactsPage.selectPerPolicyAssignment();
+        await pageObjects.artifactListPage.submitFlyout(pagePrefix);
+        await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
+
+        const card = pageObjects.artifactListPage.cardByName(pagePrefix, name);
+        await expect(card).toBeVisible();
+        await expect(card.getByTestId(condition)).toHaveText(IS_ONE_OF_EXPECTED_CONDITION);
+      }
+    );
+
+    spaceTest(
+      'updates a match_any signature item to is',
+      async ({ pageObjects, endpointArtifactItems, endpointPolicy }) => {
+        spaceTest.setTimeout(90_000);
+        const name = await endpointArtifactItems.create({
+          listId,
+          name: ITEM_NAME,
+          entries: signatureEntries('match_any'),
           osTypes: ['windows'],
+          policyId: endpointPolicy.id,
         });
 
         await pageObjects.artifactListPage.goto(urlPath);
         await pageObjects.artifactListPage.waitForList(pagePrefix);
-        await pageObjects.artifactListPage.openEdit(pagePrefix);
+        await pageObjects.artifactListPage.openEditByName(pagePrefix, name);
+        await pageObjects.policyArtifactsPage.selectBlocklistOperator('is');
+        await pageObjects.artifactListPage.submitFlyout(pagePrefix);
+        await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
+
+        await expect(
+          pageObjects.artifactListPage.cardByName(pagePrefix, name).getByTestId(condition)
+        ).toHaveText(IS_EXPECTED_CONDITION);
+      }
+    );
+
+    spaceTest(
+      'updates a match signature item to is one of',
+      async ({ pageObjects, endpointArtifactItems, endpointPolicy }) => {
+        spaceTest.setTimeout(90_000);
+        const name = await endpointArtifactItems.create({
+          listId,
+          name: ITEM_NAME,
+          entries: signatureEntries('match'),
+          osTypes: ['windows'],
+          policyId: endpointPolicy.id,
+        });
+
+        await pageObjects.artifactListPage.goto(urlPath);
+        await pageObjects.artifactListPage.waitForList(pagePrefix);
+        await pageObjects.artifactListPage.openEditByName(pagePrefix, name);
         await pageObjects.policyArtifactsPage.selectBlocklistOperator('is one of');
         await pageObjects.artifactListPage.submitFlyout(pagePrefix);
         await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
 
-        await expect(pageObjects.artifactListPage.criteria(condition)).toHaveText(
-          IS_ONE_OF_EXPECTED_CONDITION
-        );
+        await expect(
+          pageObjects.artifactListPage.cardByName(pagePrefix, name).getByTestId(condition)
+        ).toHaveText(IS_ONE_OF_EXPECTED_CONDITION);
       }
     );
   });

@@ -20,21 +20,33 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { getSignalTargetsWritePatterns } from '@kbn/streams-schema';
+import { DESTINATION_TYPES_WITH_STATS } from '../../stream_management/data_management/stream_detail_canvas/nodes/destination_stats_status';
 import { IngestRateChartContent } from '../../stream_detail_overview/ingest_rate_chart';
 import { DeferredMount } from '../deferred_mount';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
 import { getReadableFailureStoreNames } from './destination_index_stats';
+import { DestinationDeliverySection } from './destination_delivery_section';
 import { DestinationIndicesTable } from './destination_indices_table';
 import { useDestinationIndexStats } from './destinations_context';
+import { FlyoutPanel } from './flyout_panel';
+import { RemoteElasticsearchDestinationDetails } from './remote_elasticsearch_destination_details';
 import { S3DestinationDetails } from './s3_destination_details';
 import type { DestinationDetailActorRef } from './state_machines/destination_detail_state_machine';
-import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
-import type { DestinationViewModel } from './types';
+import type {
+  ResolvedIndicesError,
+  ResolvedIndicesStatus,
+} from './state_machines/destinations_state_machine';
+import { REMOTE_ELASTICSEARCH_TYPE, type DestinationViewModel } from './types';
 
 const UNIT_DESTINATION_FLYOUT_MAX_WIDTH = 1125;
+
+const CONFIGURATION_TITLE = i18n.translate('xpack.streams.destinations.flyout.configurationTitle', {
+  defaultMessage: 'Configuration',
+});
 
 const DestinationDeleteFooter = ({
   destinationName,
@@ -88,6 +100,7 @@ export const UnitDestinationFlyout = ({
   indices,
   indicesStatus,
   indicesError,
+  hasConnectedSource,
   destinationDetailRef,
   onShowDestinationDetail,
   onHideDestinationDetail,
@@ -95,11 +108,13 @@ export const UnitDestinationFlyout = ({
   onDelete,
   onIndexClick,
   isDeleteDisabled = false,
+  readOnly = false,
 }: {
   destination: DestinationViewModel;
   indices: ResolvedDestinationIndex[];
   indicesStatus: ResolvedIndicesStatus;
-  indicesError?: string;
+  indicesError?: ResolvedIndicesError;
+  hasConnectedSource: boolean;
   destinationDetailRef?: DestinationDetailActorRef;
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
   onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
@@ -107,6 +122,8 @@ export const UnitDestinationFlyout = ({
   onDelete: () => void;
   onIndexClick: (indexName: string) => void;
   isDeleteDisabled?: boolean;
+  /** Hides deletion for users without the V2 manage privilege. */
+  readOnly?: boolean;
 }) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsUnitDestinationFlyoutTitle' });
 
@@ -128,6 +145,9 @@ export const UnitDestinationFlyout = ({
     const failureStores = getReadableFailureStoreNames(indices).map((name) => `${name}::failures`);
     return [...patterns, ...failureStores].join(',');
   }, [destination, indices]);
+
+  // The types that report collector metrics, which the failures are read from.
+  const hasFailureStats = DESTINATION_TYPES_WITH_STATS.includes(destination.type);
 
   const totals = useMemo(
     () => ({
@@ -180,7 +200,38 @@ export const UnitDestinationFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {destination.type === 's3' ? (
-          <S3DestinationDetails destination={destination} />
+          <>
+            {hasFailureStats && (
+              <>
+                {/* S3 has no ingest chart, so its panel is the delivery of the flyout. */}
+                <DestinationDeliverySection
+                  destinationId={destination.id}
+                  destinationType={destination.type}
+                  panelRole="delivery"
+                />
+                <EuiSpacer size="l" />
+              </>
+            )}
+            <FlyoutPanel title={CONFIGURATION_TITLE}>
+              <S3DestinationDetails destination={destination} layout="grid" />
+            </FlyoutPanel>
+          </>
+        ) : destination.type === REMOTE_ELASTICSEARCH_TYPE ? (
+          <>
+            {hasFailureStats && (
+              <>
+                <DestinationDeliverySection
+                  destinationId={destination.id}
+                  destinationType={destination.type}
+                  panelRole="delivery"
+                />
+                <EuiSpacer size="l" />
+              </>
+            )}
+            <FlyoutPanel title={CONFIGURATION_TITLE}>
+              <RemoteElasticsearchDestinationDetails destination={destination} layout="grid" />
+            </FlyoutPanel>
+          </>
         ) : (
           <DeferredMount>
             {esqlSource && (
@@ -196,11 +247,23 @@ export const UnitDestinationFlyout = ({
                 <EuiSpacer size="l" />
               </>
             )}
+            {hasFailureStats && (
+              <>
+                {/* The ingest chart shows the delivery, so the panel adds only the failures to it. */}
+                <DestinationDeliverySection
+                  destinationId={destination.id}
+                  destinationType={destination.type}
+                  panelRole={esqlSource ? 'failures' : 'delivery'}
+                />
+                <EuiSpacer size="l" />
+              </>
+            )}
             <DestinationIndicesTable
               destinationId={destination.id}
               indices={indices}
               indicesStatus={indicesStatus}
               indicesError={indicesError}
+              hasConnectedSource={hasConnectedSource}
               destinationDetailRef={destinationDetailRef}
               onShowDestinationDetail={onShowDestinationDetail}
               onHideDestinationDetail={onHideDestinationDetail}
@@ -210,13 +273,15 @@ export const UnitDestinationFlyout = ({
           </DeferredMount>
         )}
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <DestinationDeleteFooter
-          destinationName={destination.name}
-          isDisabled={isDeleteDisabled}
-          onDelete={onDelete}
-        />
-      </EuiFlyoutFooter>
+      {!readOnly && (
+        <EuiFlyoutFooter>
+          <DestinationDeleteFooter
+            destinationName={destination.name}
+            isDisabled={isDeleteDisabled}
+            onDelete={onDelete}
+          />
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 };

@@ -64,6 +64,7 @@ import {
 } from '../secrets';
 
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
+import { sanitizeAgentPolicyOverrides } from '../../../common/services/agent_policy_overrides';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -552,7 +553,16 @@ export async function getFullAgentPolicy(
   }
 
   if (agentPolicy.overrides) {
-    return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
+    // Overrides stored before the API validation was extended may still contain denied keys
+    const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(agentPolicy.overrides);
+    if (removedKeys.length > 0) {
+      logger.warn(
+        `Ignoring disallowed overrides [${removedKeys.join(', ')}] on agent policy [${
+          fullAgentPolicy.id
+        }]`
+      );
+    }
+    return deepMerge<FullAgentPolicy>(fullAgentPolicy, overrides);
   }
   if (options?.standalone) {
     delete fullAgentPolicy.agent?.protection;
@@ -1113,6 +1123,10 @@ export function getBinarySourceSettings(
     sourceURI: primarySource.host,
     sources: downloadSources.map((ds) => ds.host),
   };
+
+  if (typeof primarySource?.reserve_diskspace === 'boolean') {
+    config.reserve_diskspace = { enabled: primarySource.reserve_diskspace };
+  }
 
   if (primarySource?.ssl) {
     config.ssl = {

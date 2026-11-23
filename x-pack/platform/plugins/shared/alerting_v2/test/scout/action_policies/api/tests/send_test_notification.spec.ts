@@ -12,6 +12,7 @@ import {
   ACTION_POLICY_MAX_DESTINATIONS,
   ACTION_POLICY_TEST_SEED_MAX,
   ID_MAX_LENGTH,
+  type ActionPolicyWorkflowPayloadInput,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICIES_READ_AND_WORKFLOW_EXECUTE_ROLE,
@@ -28,6 +29,26 @@ const previewUrl = (id: string) =>
 const sendUrl = (id: string) => buildPath(testData.INTERNAL_ACTION_POLICY_TEST_API_PATH, { id });
 
 const SEED = 42;
+
+const PAYLOAD: ActionPolicyWorkflowPayloadInput = {
+  id: 'test-group-1',
+  policyId: 'test-policy',
+  groupKey: {},
+  alerts: [
+    {
+      last_event_timestamp: '2026-01-01T00:00:00.000Z',
+      rule_id: 'test-rule-1',
+      source: 'internal',
+      space_id: 'default',
+      group_hash: 'test-group-hash-1',
+      alert_id: 'test-alert-1',
+      alert_status: 'active',
+      severity: 'high',
+      alert_url: 'http://localhost:5601/app/observability/alerts/test-alert-1',
+    },
+  ],
+  rules: { 'test-rule-1': { name: 'Test rule 1', grouping_fields: [] } },
+};
 
 // Sending runs the workflow as the requesting user, who authenticates with an interactive session
 // like the UI does. Tagged like the dispatcher workflow execution spec: running a workflow on
@@ -90,7 +111,7 @@ apiTest.describe(
 
       const send = await apiClient.post(sendUrl(policyId), {
         headers: noAccessHeaders,
-        body: { seed: SEED, destination_ids: [workflowId] },
+        body: { payload: PAYLOAD, destination_ids: [workflowId] },
       });
       expect(send).toHaveStatusCode(403);
     });
@@ -107,7 +128,7 @@ apiTest.describe(
 
         const send = await apiClient.post(sendUrl(policyId), {
           headers: readerHeaders,
-          body: { seed: SEED, destination_ids: [workflowId] },
+          body: { payload: PAYLOAD, destination_ids: [workflowId] },
         });
         expect(send).toHaveStatusCode(403);
       }
@@ -132,16 +153,16 @@ apiTest.describe(
 
       const invalidSendBodies = [
         { destination_ids: [workflowId] },
-        { seed: SEED, destination_ids: [] },
+        { payload: {}, destination_ids: [workflowId] },
+        { payload: PAYLOAD, destination_ids: [] },
         {
-          seed: SEED,
+          payload: PAYLOAD,
           destination_ids: Array.from(
             { length: ACTION_POLICY_MAX_DESTINATIONS + 1 },
             (_, index) => `workflow-${index}`
           ),
         },
-        { seed: SEED, destination_ids: ['a'.repeat(ID_MAX_LENGTH + 1)] },
-        { seed: SEED, destination_ids: [workflowId], payload: {} },
+        { payload: PAYLOAD, destination_ids: ['a'.repeat(ID_MAX_LENGTH + 1)] },
       ];
       for (const body of invalidSendBodies) {
         const response = await apiClient.post(sendUrl(policyId), { headers, body });
@@ -158,7 +179,7 @@ apiTest.describe(
 
         const response = await apiClient.post(sendUrl(policyId), {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-          body: { seed: SEED, destination_ids: [workflowId, 'not-a-destination'] },
+          body: { payload: PAYLOAD, destination_ids: [workflowId, 'not-a-destination'] },
         });
 
         expect(response).toHaveStatusCode(400);
@@ -197,7 +218,7 @@ apiTest.describe(
 
         const send = await apiClient.post(sendUrl(expressionPolicyId), {
           headers,
-          body: { seed: preview.body.seed, destination_ids: [workflowId] },
+          body: { payload: preview.body.groups[0], destination_ids: [workflowId] },
         });
         expect(send).toHaveStatusCode(200);
         expect(typeof send.body.results[0].workflow_execution_id).toBe('string');
@@ -228,7 +249,7 @@ apiTest.describe(
 
         const send = await apiClient.post(sendUrl(policyId), {
           headers,
-          body: { seed: SEED, destination_ids: [workflowId] },
+          body: { payload, destination_ids: [workflowId] },
         });
         expect(send).toHaveStatusCode(200);
         expect(send.body.results).toHaveLength(1);

@@ -8,15 +8,26 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 
 import { getMockCoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/__mocks__';
 import { TestProviders } from '../../../../common/mock';
+import { CoverageOverviewAppHeader } from './coverage_overview_app_header';
 import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
 import { CoverageOverviewDashboardContextProvider } from './coverage_overview_dashboard_context';
 
 jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview_query');
+
+jest.mock('../../../../common/components/app_header/use_ml_job_settings_menu_item', () => ({
+  useMlJobSettingsMenuItem: () => ({ item: undefined, flyout: null }),
+}));
+
+jest.mock('../../../../common/components/app_header/use_add_integrations_menu_item', () => ({
+  useAddIntegrationsMenuItem: () => undefined,
+}));
 
 // The invalid MITRE rules callout is gated behind the mitreAttackUpdatesUIEnabled
 // feature flag, which is off by default. Force it on for this test suite.
@@ -32,9 +43,14 @@ jest.mock('../../../../common/hooks/mitre/use_available_mitre_frameworks', () =>
 const renderCoverageOverviewDashboard = () => {
   return render(
     <TestProviders>
-      <CoverageOverviewDashboardContextProvider>
-        <CoverageOverviewDashboard />
-      </CoverageOverviewDashboardContextProvider>
+      <MemoryRouter>
+        <MockAppHeaderProvider>
+          <CoverageOverviewDashboardContextProvider>
+            <CoverageOverviewAppHeader />
+            <CoverageOverviewDashboard />
+          </CoverageOverviewDashboardContextProvider>
+        </MockAppHeaderProvider>
+      </MemoryRouter>
     </TestProviders>
   );
 };
@@ -52,28 +68,30 @@ describe('CoverageOverviewDashboard', () => {
     });
   });
 
-  test('renders the page title', () => {
+  test.each([
+    ['enterprise', 'MITRE ATT&CK®'],
+    ['atlas', 'MITRE ATLAS™'],
+  ])('describes the coverage of the %s framework below the tabs', async (framework, label) => {
+    const user = userEvent.setup();
     renderCoverageOverviewDashboard();
-    expect(screen.getByText('MITRE coverage')).toBeInTheDocument();
+    await user.click(screen.getByTestId(`coverageOverviewFrameworkTab-${framework}`));
+
+    expect(
+      screen.getByText(
+        `Your current coverage of ${label} tactics and techniques, based on installed rules.`,
+        {
+          exact: false,
+        }
+      )
+    ).toBeInTheDocument();
   });
 
-  test('renders both framework tabs with MITRE ATT&CK selected', () => {
+  test('links the description to the MITRE coverage documentation', () => {
     renderCoverageOverviewDashboard();
 
-    expect(screen.getByTestId('coverageOverviewFrameworkTabs')).toBeInTheDocument();
-    expect(screen.getByTestId('coverageOverviewFrameworkTab-enterprise')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-    expect(screen.getByTestId('coverageOverviewFrameworkTab-enterprise')).toHaveTextContent(
-      'MITRE ATT&CK®'
-    );
-    expect(screen.getByTestId('coverageOverviewFrameworkTab-atlas')).toHaveAttribute(
-      'aria-selected',
-      'false'
-    );
-    expect(screen.getByTestId('coverageOverviewFrameworkTab-atlas')).toHaveTextContent(
-      'MITRE ATLAS™'
+    expect(screen.getByRole('link', { name: /learn more/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('mitre-attack-coverage')
     );
   });
 
@@ -81,7 +99,7 @@ describe('CoverageOverviewDashboard', () => {
     mockUseAvailableMitreFrameworks.mockReturnValue(['enterprise']);
     renderCoverageOverviewDashboard();
 
-    expect(screen.queryByTestId('coverageOverviewFrameworkTabs')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('coverageOverviewFrameworkTab-enterprise')).not.toBeInTheDocument();
     expect(screen.getByTestId('coverageOverviewMatrix')).toBeInTheDocument();
   });
 

@@ -29,6 +29,11 @@ import { i18n } from '@kbn/i18n';
 
 import { GlobalRegionField } from './global_region_field';
 import { SharedAdvancedSettings } from './shared_advanced_settings';
+import type { OutputFieldProps } from './output_field';
+import type { ProxyUrlFieldProps } from './proxy_url_field';
+import type { ConditionFieldProps } from './condition_field';
+import type { ReroutePermissionsFieldProps } from './reroute_permissions_field';
+import type { CustomFieldsFieldProps } from './custom_fields_field';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
 
 const ADVANCED_ANIMATION_MS = 300;
@@ -50,8 +55,28 @@ interface SharedSettingsSectionProps {
   onNamespaceChange: (namespace: string) => void;
   /** Validation error of the namespace; the advanced section stays open while there is one. */
   namespaceError?: string;
+  dedicatedNamespaceTemplates: boolean;
+  onDedicatedNamespaceTemplatesChange: (enabled: boolean) => void;
+  isDedicatedTemplatesUnavailable?: boolean;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices?: boolean;
+  /** Whether an ECF stack is already launched. */
+  hasLaunchedEcfStack?: boolean;
+  /** Whether a selected service does not follow the namespace. */
+  hasServicesIgnoringNamespace?: boolean;
+  /** The output field, offered only where an agent-based deploy can set it. */
+  output?: OutputFieldProps;
+  /** The proxy URL field, offered for agent-based and managed integration deploys. */
+  proxyUrl?: ProxyUrlFieldProps;
+  /**
+   * The condition field, offered only where an agent-based deploy can set it. The advanced section
+   * stays open while it has an error.
+   */
+  condition?: ConditionFieldProps;
+  /** The reroute permissions field, offered for agent-based and managed integration deploys. */
+  reroutePermissions?: ReroutePermissionsFieldProps;
+  /** The custom fields, offered for managed integration deploys. */
+  customFields?: CustomFieldsFieldProps;
 }
 
 /**
@@ -74,14 +99,30 @@ export function SharedSettingsSection({
   namespace,
   onNamespaceChange,
   namespaceError,
+  dedicatedNamespaceTemplates,
+  onDedicatedNamespaceTemplatesChange,
+  isDedicatedTemplatesUnavailable = false,
   hasDeployedServices = false,
+  hasLaunchedEcfStack = false,
+  hasServicesIgnoringNamespace = false,
+  output,
+  proxyUrl,
+  condition,
+  reroutePermissions,
+  customFields,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
   const [nameTouched, setNameTouched] = useState(false);
   const [descriptionTouched, setDescriptionTouched] = useState(false);
   // Collapsed by default. It cannot be collapsed over an error, which would hide why Next is off.
   const [advancedToggled, setAdvancedToggled] = useState(false);
-  const isAdvancedOpen = advancedToggled || !!namespaceError;
+  const isAdvancedOpen =
+    advancedToggled ||
+    !!namespaceError ||
+    !!proxyUrl?.error ||
+    !!condition?.errors?.length ||
+    !!reroutePermissions?.error ||
+    !!customFields?.errors;
   const advancedId = useGeneratedHtmlId({ prefix: 'sharedAdvancedSettings' });
   const { euiTheme } = useEuiTheme();
 
@@ -253,7 +294,17 @@ export function SharedSettingsSection({
           <SharedAdvancedSettings
             namespace={namespace}
             onNamespaceChange={onNamespaceChange}
+            dedicatedNamespaceTemplates={dedicatedNamespaceTemplates}
+            onDedicatedNamespaceTemplatesChange={onDedicatedNamespaceTemplatesChange}
+            isDedicatedTemplatesUnavailable={isDedicatedTemplatesUnavailable}
             hasDeployedServices={hasDeployedServices}
+            hasLaunchedEcfStack={hasLaunchedEcfStack}
+            hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
+            output={output}
+            proxyUrl={proxyUrl}
+            condition={condition}
+            reroutePermissions={reroutePermissions}
+            customFields={customFields}
           />
         </div>
       </div>

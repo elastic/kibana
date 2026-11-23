@@ -42,7 +42,8 @@
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
     "@kbn/deeplinks-agent-builder",
-    "@kbn/agent-builder-common"
+    "@kbn/agent-builder-common",
+    "@kbn/search-api-keys-server"
   ],
   "exclude": [
     "target/**/*"

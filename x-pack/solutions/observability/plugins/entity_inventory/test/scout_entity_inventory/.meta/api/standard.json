@@ -1,0 +1,440 @@
+{
+  "sha1": "25e3d90b9c330b5546a22e7503821150eb8add33",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "5f3e82013678cd8-ec706ad4689f75a",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list returns one row per deployment, merged from the Agent and OpenTelemetry sources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 80,
+        "column": 13
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-aef9f5e37ca1038",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list returns the diagnostics: provenance per row, one query per plan and the wall time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 105,
+        "column": 11
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-a731649a56cbfc2",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list reports an attribute mapped in no index as an unavailable column of each plan of its source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 148,
+        "column": 6
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-5c7e494ef05a18e",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list returns the columns in column order, the same as the types route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 165,
+        "column": 17
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-5f17d75248eed2b",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list reports last_seen as the newest timestamp inside the window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 200,
+        "column": 53
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-f6c11ebbdd64985",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list accepts bounds with an offset other than Z",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 214,
+        "column": 53
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-e5161f384f02d57",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list cuts the rows at limit and reports truncated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 227,
+        "column": 13
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-690bdd1c8bc7a52",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list is not truncated when limit equals the entity count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 235,
+        "column": 74
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-ca16ce4242ddfc4",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list gives a source with no time-series index a FROM plan only and lists its rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 245,
+        "column": 7
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-39617270cd2c256",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list lists deployments whose documents live only in the time-series index, through the TS plan",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 259,
+        "column": 32
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-5a97de912801b69",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list lists a source with standard and time-series indices from both plans, reading each index once",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 298,
+        "column": 13
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-c9cf9a0ece366e1",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list returns only the rows a filtered alias lets through, under both the TS and FROM plans",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 345,
+        "column": 23
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-4a97cc17321ee53",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list rejects from equal to or after to with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 375,
+        "column": 19
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-d4b68d96a6b7065",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list rejects a missing or malformed bound with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 388,
+        "column": 68
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-8d32e6a64a231bf",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list rejects a limit below 1 or above 9,999 with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 395,
+        "column": 68
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-4819129197232c2",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list rejects documentFilter in the body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 407,
+        "column": 14
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-408c73607d8c610",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list rejects a limit sent as a string with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 412,
+        "column": 55
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-a851bb47d33309f",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list rejects a malformed type in the path with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 419,
+        "column": 14
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-14523e0b2adc7cb",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list answers 404 for a type with no entity definition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 423,
+        "column": 89
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-f42b181e1756ade",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list lists a type with a dynamic block that another plugin registered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 425,
+        "column": 28
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-a8ee6ecb24c704f",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list rejects a request without the kbn-xsrf header with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 428,
+        "column": 14
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-0e7c256494216e6",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list returns rows to a viewer, which can read the source indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 440,
+        "column": 67
+      }
+    },
+    {
+      "id": "5f3e82013678cd8-050b33fea1bad2d",
+      "title": "POST /internal/entity_inventory/entities/{type}/_list returns no rows and reports every plan to a user without index privileges on the sources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/list.spec.ts",
+        "line": 453,
+        "column": 13
+      }
+    },
+    {
+      "id": "ae4e9e8902d076f-5f667e42b3244c6",
+      "title": "GET /internal/entity_inventory/types returns k8s.deployment with identity, columns and sources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
+        "line": 40,
+        "column": 25
+      }
+    },
+    {
+      "id": "ae4e9e8902d076f-6b7e86fe9a6f030",
+      "title": "GET /internal/entity_inventory/types returns every type with a dynamic block",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
+        "line": 51,
+        "column": 43
+      }
+    },
+    {
+      "id": "ae4e9e8902d076f-7ae9f5f172dbeb6",
+      "title": "GET /internal/entity_inventory/types returns the same types in a non-default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
+        "line": 62,
+        "column": 18
+      }
+    },
+    {
+      "id": "ae4e9e8902d076f-e69c3938b95b91d",
+      "title": "GET /internal/entity_inventory/types returns the same types to a viewer, since the route delegates authorization to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/entity_inventory/test/scout_entity_inventory/api/tests/types.spec.ts",
+        "line": 74,
+        "column": 23
+      }
+    }
+  ]
+}

@@ -8,6 +8,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-layout",
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/observability-shared-plugin",
@@ -18,10 +19,19 @@
     "@kbn/es-query",
     "@kbn/datemath",
     "@kbn/data-views-plugin",
+    "@kbn/react-hooks",
+    "@kbn/ui-callout",
     "@kbn/typed-react-router-config",
     "@kbn/deeplinks-observability",
     "@kbn/share-plugin",
     "@kbn/ebt-click",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/react-hooks",
+    "@kbn/ui-callout",
+    "@kbn/entity-inventory-plugin",
+    "@kbn/server-route-repository-client",
+    "@kbn/shared-ux-router",
+    "@kbn/rison",
+    "@kbn/kibana-utils-plugin"
   ]
 }

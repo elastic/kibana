@@ -76,4 +76,17 @@ describe('CertificateList', () => {
 
     expect(getByText('BadSSL Expired')).toBeInTheDocument();
   });
+
+  it('gives the expander column an accessible header name', () => {
+    const { getByRole } = render(
+      <CertificateList
+        page={{ index: 0, size: 10 }}
+        sort={{ field: 'not_after', direction: 'asc' }}
+        onChange={jest.fn()}
+        certificates={{ isLoading: false, total: 0, certs: [] }}
+      />
+    );
+
+    expect(getByRole('columnheader', { name: 'Details' })).toBeInTheDocument();
+  });
 });

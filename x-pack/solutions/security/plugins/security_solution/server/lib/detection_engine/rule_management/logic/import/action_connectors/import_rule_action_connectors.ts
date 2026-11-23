@@ -10,6 +10,7 @@ import { isBoom } from '@hapi/boom';
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import { mapSOErrorsToBulkErrors } from './utils';
 import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
 import { createBulkErrorObject } from '../../../../routes/utils';
@@ -25,41 +26,42 @@ export const importRuleActionConnectors = async ({
   actionConnectors,
   actionsImporter,
   overwrite,
-}: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
-  try {
-    if (!actionConnectors.length) {
-      return NO_ACTION_RESULT;
-    }
+}: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> =>
+  withSecuritySpan('ruleManagement.importRuleActionConnectors', async () => {
+    try {
+      if (!actionConnectors.length) {
+        return NO_ACTION_RESULT;
+      }
 
-    const readStream = Readable.from(actionConnectors);
-    const { success, successCount, warnings, errors }: SavedObjectsImportResponse =
-      await actionsImporter.import({
-        readStream,
-        overwrite,
-        createNewCopies: false,
-      });
+      const readStream = Readable.from(actionConnectors);
+      const { success, successCount, warnings, errors }: SavedObjectsImportResponse =
+        await actionsImporter.import({
+          readStream,
+          overwrite,
+          createNewCopies: false,
+        });
 
-    return {
-      success,
-      successCount,
-      errors: errors ? mapSOErrorsToBulkErrors(errors) : [],
-      warnings: (warnings as WarningSchema[]) || [],
-    };
-  } catch (exc) {
-    if (isBoom(exc) && exc.output.statusCode === 403) {
       return {
-        success: false,
-        successCount: 0,
-        errors: [
-          createBulkErrorObject({
-            statusCode: 403,
-            message: `You may not have actions privileges required to import actions: ${exc.output.payload.message}`,
-          }),
-        ],
-        warnings: [],
+        success,
+        successCount,
+        errors: errors ? mapSOErrorsToBulkErrors(errors) : [],
+        warnings: (warnings as WarningSchema[]) || [],
       };
-    } else {
-      throw exc;
+    } catch (exc) {
+      if (isBoom(exc) && exc.output.statusCode === 403) {
+        return {
+          success: false,
+          successCount: 0,
+          errors: [
+            createBulkErrorObject({
+              statusCode: 403,
+              message: `You may not have actions privileges required to import actions: ${exc.output.payload.message}`,
+            }),
+          ],
+          warnings: [],
+        };
+      } else {
+        throw exc;
+      }
     }
-  }
-};
+  });

@@ -13,6 +13,7 @@ export enum EsqlSettingNames {
   COLUMN_METADATA = 'column_metadata',
   EXEMPLARS = 'exemplars',
   PROJECT_ROUTING = 'project_routing',
+  TIME_SERIES_REDUCE_PER_INDEX = 'time_series_reduce_per_index',
   TIME_ZONE = 'time_zone',
   UNMAPPED_FIELDS = 'unmapped_fields',
   WILDCARDS_MATCH_DATASETS = 'wildcards_match_datasets',
@@ -47,13 +48,13 @@ const exemplars = {
   name: EsqlSettingNames.EXEMPLARS,
   type: ['boolean', 'map_param'],
   description:
-    'When enabled, the provided `TS ... | STATS` or `PROMQL` query is not executed. Instead, exemplars considered relevant to the query are returned based on heuristics that take the selected metrics and series into account.',
+    'When enabled, the provided `TS ... | STATS` or `PROMQL` query is not executed. Instead, exemplars considered relevant to the query are returned based on heuristics that take the selected metrics and series into account. For details, refer to [Query exemplars](https://www.elastic.co/docs/reference/query-languages/esql/commands/ts#esql-ts-exemplars).',
   serverlessOnly: false,
-  preview: false,
-  snapshotOnly: true,
+  preview: true,
+  snapshotOnly: false,
   mapParams:
     "{name='limit', values=[], description='Maximum number of exemplars to return. Without it the default limit of a regular query applies.', type=[integer]}, {name='include_timeseries', values=[], description='When enabled, a `_timeseries` column is returned, holding the dimensions that identify the series each exemplar belongs to. Defaults to `false`.', type=[boolean]}",
-  ignoreAsSuggestion: true,
+  ignoreAsSuggestion: false,
 };
 
 const projectRouting = {
@@ -62,6 +63,17 @@ const projectRouting = {
   description:
     'Limits the scope of a [cross-project search (CPS)](https://www.elastic.co/docs/reference/query-languages/esql/esql-cross-serverless-projects) to specific projects before query execution, based on a [Lucene query expression](docs-content://explore-analyze/cross-project-search/cross-project-search-project-routing.md) evaluated against project tags. Excluded projects are not queried, which can reduce cost and latency. ',
   serverlessOnly: true,
+  preview: false,
+  snapshotOnly: false,
+  ignoreAsSuggestion: false,
+};
+
+const timeSeriesReducePerIndex = {
+  name: EsqlSettingNames.TIME_SERIES_REDUCE_PER_INDEX,
+  type: ['boolean'],
+  description:
+    'When enabled, time-series aggregates are reduced separately in each index before results are combined. This uses less memory and can improve query performance, but results may be approximate for time buckets that overlap index rollover boundaries and for windowed aggregates whose windows reach across those boundaries. Defaults to `false`.',
+  serverlessOnly: false,
   preview: false,
   snapshotOnly: false,
   ignoreAsSuggestion: false,
@@ -116,6 +128,7 @@ export const settings = [
   columnMetadata,
   exemplars,
   projectRouting,
+  timeSeriesReducePerIndex,
   timeZone,
   unmappedFields,
   wildcardsMatchDatasets,

@@ -1220,6 +1220,7 @@ describe('When calling package policy', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: responseBody,
       });
+      // Upgrades are not restricted to the onboarding flow: they keep the policy's configuration.
       expect(packagePolicyServiceMock.getByIDs).not.toHaveBeenCalled();
     });
 

@@ -6,7 +6,6 @@
  */
 
 import {
-  MAX_EVIDENCE_REFERENCES,
   MAX_HYPOTHESES,
   MAX_IMPACT_TOOL_ENTITIES,
 } from '@kbn/agentic-investigations-plugin/common';
@@ -82,41 +81,6 @@ describe('evidence', () => {
       description: 'Errors jumped.',
       chart: chart(points),
     });
-  });
-
-  it('keeps the queries and links that back the evidence and drops the ones the stores reject', () => {
-    const kept = limitEvidence({
-      description: 'Errors jumped.',
-      references: [
-        { query: '  FROM logs-* | STATS c = COUNT(*)  ' },
-        { url: 'https://github.com/elastic/kibana/pull/1', label: 'PR 1' },
-        { url: 'ftp://example.com/file' },
-        { url: 'not a link' },
-        { label: 'neither a query nor a link' },
-        { query: '   ' },
-      ],
-    });
-
-    expect(kept).toEqual({
-      description: 'Errors jumped.',
-      references: [
-        { query: 'FROM logs-* | STATS c = COUNT(*)' },
-        { url: 'https://github.com/elastic/kibana/pull/1', label: 'PR 1' },
-      ],
-    });
-  });
-
-  it('keeps at most the references the store accepts, and no references when none are usable', () => {
-    const many = Array.from({ length: 25 }, (_, i) => ({ query: `FROM logs-* | LIMIT ${i}` }));
-
-    expect(limitEvidence({ description: 'Many.', references: many })?.references).toHaveLength(
-      MAX_EVIDENCE_REFERENCES
-    );
-    expect(limitEvidence({ description: 'None.', references: [{ url: 'x' }] })).toEqual({
-      description: 'None.',
-    });
-    // References alone are not evidence.
-    expect(limitEvidence({ references: [{ query: 'FROM logs-*' }] })).toBeUndefined();
   });
 
   it('drops points that are not finite numbers or have no x, and a chart left with none', () => {
@@ -217,6 +181,30 @@ describe('proposals', () => {
 
   it('leaves the field out of the record when the model sent none', () => {
     expect(parse(undefined)).toBeUndefined();
+  });
+
+  it('keeps an action workflow with its input, and drops a blank one', () => {
+    expect(
+      parse([
+        {
+          title: 'Open an issue',
+          comment: 'c',
+          action_workflow_id: ' wf-open-issue ',
+          action_input: { repo: 'checkout' },
+        },
+        { title: 'Restart', comment: 'c', action_workflow_id: '  ', action_input: { a: 1 } },
+        { title: 'No input', comment: 'c', action_workflow_id: 'wf-x' },
+      ])
+    ).toEqual([
+      {
+        title: 'Open an issue',
+        comment: 'c',
+        action_workflow_id: 'wf-open-issue',
+        action_input: { repo: 'checkout' },
+      },
+      { title: 'Restart', comment: 'c' },
+      { title: 'No input', comment: 'c', action_workflow_id: 'wf-x', action_input: {} },
+    ]);
   });
 
   it('asks for proposals in the final schema only', () => {

@@ -13,7 +13,7 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser/src';
-import { flattenNav, findActiveNodes, parseNavigationTree } from './utils';
+import { collectNavTreeLinks, flattenNav, findActiveNodes, parseNavigationTree } from './utils';
 
 const getDeepLink = (id: string, path: string, title = ''): ChromeNavLink => ({
   id,
@@ -22,6 +22,52 @@ const getDeepLink = (id: string, path: string, title = ''): ChromeNavLink => ({
   title,
   baseUrl: '',
   visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
+});
+
+describe('collectNavTreeLinks', () => {
+  test('collects link targets from body and footer, recursing into children', () => {
+    const navTree = {
+      body: [
+        { type: 'recentlyAccessed' },
+        {
+          id: 'root',
+          title: 'Root',
+          children: [
+            { id: 'discover', link: 'discover' },
+            {
+              id: 'group',
+              title: 'Group',
+              children: [{ id: 'transform', link: 'management:transform' }],
+            },
+          ],
+        },
+      ],
+      footer: [{ id: 'dashboards', link: 'dashboards' }],
+    } as unknown as NavigationTreeDefinition;
+
+    expect(collectNavTreeLinks(navTree)).toEqual([
+      'discover',
+      'management:transform',
+      'dashboards',
+    ]);
+  });
+
+  test('de-duplicates repeated link targets', () => {
+    const navTree = {
+      body: [
+        { id: 'a', link: 'discover' },
+        { id: 'b', link: 'discover' },
+      ],
+    } as unknown as NavigationTreeDefinition;
+
+    expect(collectNavTreeLinks(navTree)).toEqual(['discover']);
+  });
+
+  test('returns an empty array when there are no links', () => {
+    const navTree = { body: [{ type: 'recentlyAccessed' }] } as unknown as NavigationTreeDefinition;
+
+    expect(collectNavTreeLinks(navTree)).toEqual([]);
+  });
 });
 
 describe('flattenNav', () => {

@@ -2706,6 +2706,359 @@ Object {
 }
 `;
 
+exports[`Serverless upgrade and rollback checks detect param changes to review for: attack-discovery 1`] = `
+Object {
+  "$defs": Object {
+    "__schema0": Object {
+      "description": "Connector ID",
+      "type": "string",
+    },
+    "__schema1": Object {
+      "description": "Action type ID",
+      "type": "string",
+    },
+    "__schema2": Object {
+      "$ref": "#/$defs/__schema3",
+      "description": "Default system prompt ID",
+    },
+    "__schema3": Object {
+      "type": "string",
+    },
+    "__schema4": Object {
+      "$ref": "#/$defs/__schema5",
+      "description": "Provider",
+    },
+    "__schema5": Object {
+      "enum": Array [
+        "OpenAI",
+        "Azure OpenAI",
+        "Other",
+      ],
+      "type": "string",
+    },
+    "__schema6": Object {
+      "$ref": "#/$defs/__schema7",
+      "description": "Model",
+    },
+    "__schema7": Object {
+      "type": "string",
+    },
+    "__schema8": Object {
+      "description": "The name of the connector",
+      "type": "string",
+    },
+    "__schema9": Object {
+      "properties": Object {
+        "alertRetrievalMode": Object {
+          "default": "custom_query",
+          "enum": Array [
+            "custom_query",
+            "esql",
+          ],
+          "type": "string",
+        },
+        "alertRetrievalWorkflowIds": Object {
+          "default": Array [],
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "alertRetrievalWorkflowsEnabled": Object {
+          "default": false,
+          "type": "boolean",
+        },
+        "defaultRetrievalEnabled": Object {
+          "default": false,
+          "type": "boolean",
+        },
+        "esqlQuery": Object {
+          "type": "string",
+        },
+        "skillEnabled": Object {
+          "default": true,
+          "type": "boolean",
+        },
+        "validationWorkflowId": Object {
+          "default": "default",
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+  },
+  "properties": Object {
+    "alertsIndexPattern": Object {
+      "description": "The index pattern to get alerts from",
+      "type": "string",
+    },
+    "apiConfig": Object {
+      "description": "LLM API configuration.",
+      "properties": Object {
+        "actionTypeId": Object {
+          "$ref": "#/$defs/__schema1",
+        },
+        "connectorId": Object {
+          "$ref": "#/$defs/__schema0",
+        },
+        "defaultSystemPromptId": Object {
+          "$ref": "#/$defs/__schema2",
+        },
+        "model": Object {
+          "$ref": "#/$defs/__schema6",
+        },
+        "name": Object {
+          "$ref": "#/$defs/__schema8",
+        },
+        "provider": Object {
+          "$ref": "#/$defs/__schema4",
+        },
+      },
+      "required": Array [
+        "connectorId",
+        "actionTypeId",
+        "name",
+      ],
+      "type": "object",
+    },
+    "combinedFilter": Object {
+      "additionalProperties": Object {},
+      "properties": Object {},
+      "type": "object",
+    },
+    "end": Object {
+      "type": "string",
+    },
+    "filters": Object {
+      "items": Object {},
+      "type": "array",
+    },
+    "query": Object {
+      "properties": Object {
+        "language": Object {
+          "type": "string",
+        },
+        "query": Object {
+          "anyOf": Array [
+            Object {
+              "type": "string",
+            },
+            Object {
+              "additionalProperties": Object {},
+              "properties": Object {},
+              "type": "object",
+            },
+          ],
+        },
+      },
+      "required": Array [
+        "query",
+        "language",
+      ],
+      "type": "object",
+    },
+    "size": Object {
+      "type": "number",
+    },
+    "start": Object {
+      "type": "string",
+    },
+    "workflowConfig": Object {
+      "$ref": "#/$defs/__schema9",
+      "description": "Composite workflow configuration that signals this schedule should use the orchestrator workflow executor, enabling tracking events (alert retrieval, generation, validation) to be written to the event log. Three independent retrieval toggles (skillEnabled, defaultRetrievalEnabled, alertRetrievalWorkflowsEnabled) compose the alert set; at least one must be enabled.
+",
+    },
+  },
+  "required": Array [
+    "alertsIndexPattern",
+    "apiConfig",
+    "size",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`Serverless upgrade and rollback checks detect param changes to review for: datasetQuality.degradedDocs 1`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "description": "The parameters for the degraded docs rule. These parameters are appropriate when \`rule_type_id\` is \`datasetQuality.degradedDocs\`.",
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "comparator": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "groupBy": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 1000,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
+        },
+      ],
+      "type": "array",
+    },
+    "searchConfiguration": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "index": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 10000,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "threshold": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "type": "number",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 2,
+          },
+          "name": "max",
+        },
+      ],
+      "type": "array",
+    },
+    "timeSize": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "type": "number",
+    },
+    "timeUnit": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 64,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "metas": Array [
+    Object {
+      "title": "Degraded Docs Rule Params",
+    },
+  ],
+  "type": "object",
+}
+`;
+
 exports[`Serverless upgrade and rollback checks detect param changes to review for: metrics.alert.inventory.threshold 1`] = `
 Object {
   "flags": Object {
@@ -6760,6 +7113,831 @@ Object {
     },
     "type": Object {
       "const": "eql",
+      "type": "string",
+    },
+    "version": Object {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer",
+    },
+  },
+  "required": Array [
+    "author",
+    "description",
+    "falsePositives",
+    "from",
+    "ruleId",
+    "immutable",
+    "outputIndex",
+    "riskScore",
+    "riskScoreMapping",
+    "severity",
+    "severityMapping",
+    "threat",
+    "to",
+    "references",
+    "version",
+    "exceptionsList",
+    "type",
+    "language",
+    "query",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.esqlRule 1`] = `
+Object {
+  "$defs": Object {
+    "__schema0": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
+    "__schema10": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema11": Object {
+      "type": "boolean",
+    },
+    "__schema12": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema13": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "$ref": "#/$defs/__schema14",
+          "description": "The ID of the script to run (from the Kibana Script library)",
+        },
+        "scriptInput": Object {
+          "$ref": "#/$defs/__schema15",
+          "description": "The arguments to pass to the script (if any)",
+        },
+        "timeout": Object {
+          "$ref": "#/$defs/__schema16",
+          "description": "Specify the timeout in seconds for the script execution",
+        },
+      },
+      "type": "object",
+    },
+    "__schema14": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema15": Object {
+      "maxLength": 8192,
+      "type": "string",
+    },
+    "__schema16": Object {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer",
+    },
+    "__schema17": Object {
+      "type": "string",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Technique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Technique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Technique reference",
+            "type": "string",
+          },
+          "subtechnique": Object {
+            "$ref": "#/$defs/__schema4",
+            "description": "Array containing more specific information on the attack technique.
+",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema4": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "Subtechnique ID",
+            "type": "string",
+          },
+          "name": Object {
+            "description": "Subtechnique name",
+            "type": "string",
+          },
+          "reference": Object {
+            "description": "Subtechnique reference",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "name",
+          "reference",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "__schema5": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "maxLength": 2000,
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "maxLength": 30000,
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "maxLength": 30000,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema6": Object {
+      "maxLength": 256,
+      "type": "string",
+    },
+    "__schema7": Object {
+      "maxLength": 30000,
+      "type": "string",
+    },
+    "__schema8": Object {
+      "type": "boolean",
+    },
+    "__schema9": Object {
+      "type": "boolean",
+    },
+  },
+  "properties": Object {
+    "alertSuppression": Object {
+      "properties": Object {
+        "duration": Object {
+          "properties": Object {
+            "unit": Object {
+              "enum": Array [
+                "s",
+                "m",
+                "h",
+              ],
+              "type": "string",
+            },
+            "value": Object {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer",
+            },
+          },
+          "required": Array [
+            "value",
+            "unit",
+          ],
+          "type": "object",
+        },
+        "groupBy": Object {
+          "items": Object {
+            "$ref": "#/$defs/__schema17",
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "type": "array",
+        },
+        "missingFieldsStrategy": Object {
+          "enum": Array [
+            "doNotSuppress",
+            "suppress",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "groupBy",
+      ],
+      "type": "object",
+    },
+    "author": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "buildingBlockType": Object {
+      "type": "string",
+    },
+    "description": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "exceptionsList": Object {
+      "items": Object {
+        "properties": Object {
+          "id": Object {
+            "description": "ID of the exception container",
+            "minLength": 1,
+            "type": "string",
+          },
+          "list_id": Object {
+            "description": "List ID of the exception container",
+            "minLength": 1,
+            "type": "string",
+          },
+          "namespace_type": Object {
+            "description": "Determines the exceptions validity in rule's Kibana space",
+            "enum": Array [
+              "agnostic",
+              "single",
+            ],
+            "type": "string",
+          },
+          "type": Object {
+            "enum": Array [
+              "detection",
+              "rule_default",
+              "endpoint",
+              "endpoint_trusted_apps",
+              "endpoint_trusted_devices",
+              "endpoint_events",
+              "endpoint_host_isolation_exceptions",
+              "endpoint_blocklists",
+              "endpoint_custom_yara_signatures",
+            ],
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "id",
+          "list_id",
+          "type",
+          "namespace_type",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "falsePositives": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "from": Object {
+      "type": "string",
+    },
+    "immutable": Object {
+      "type": "boolean",
+    },
+    "investigationFields": Object {
+      "anyOf": Array [
+        Object {
+          "properties": Object {
+            "field_names": Object {
+              "items": Object {
+                "$ref": "#/$defs/__schema0",
+              },
+              "minItems": 1,
+              "type": "array",
+            },
+          },
+          "required": Array [
+            "field_names",
+          ],
+          "type": "object",
+        },
+        Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "language": Object {
+      "const": "esql",
+      "type": "string",
+    },
+    "license": Object {
+      "type": "string",
+    },
+    "maxSignals": Object {
+      "default": 100,
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer",
+    },
+    "meta": Object {
+      "additionalProperties": Object {},
+      "properties": Object {},
+      "type": "object",
+    },
+    "namespace": Object {
+      "type": "string",
+    },
+    "note": Object {
+      "type": "string",
+    },
+    "outputIndex": Object {
+      "type": "string",
+    },
+    "query": Object {
+      "type": "string",
+    },
+    "references": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "relatedIntegrations": Object {
+      "items": Object {
+        "properties": Object {
+          "integration": Object {
+            "$ref": "#/$defs/__schema0",
+          },
+          "package": Object {
+            "$ref": "#/$defs/__schema0",
+          },
+          "version": Object {
+            "$ref": "#/$defs/__schema0",
+          },
+        },
+        "required": Array [
+          "package",
+          "version",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "requiredFields": Object {
+      "items": Object {
+        "properties": Object {
+          "ecs": Object {
+            "description": "Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.",
+            "type": "boolean",
+          },
+          "name": Object {
+            "description": "Name of an Elasticsearch field",
+            "minLength": 1,
+            "type": "string",
+          },
+          "type": Object {
+            "description": "Type of the Elasticsearch field",
+            "minLength": 1,
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "name",
+          "type",
+          "ecs",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "responseActions": Object {
+      "items": Object {
+        "oneOf": Array [
+          Object {
+            "properties": Object {
+              "actionTypeId": Object {
+                "const": ".osquery",
+                "type": "string",
+              },
+              "params": Object {
+                "properties": Object {
+                  "ecsMapping": Object {
+                    "$ref": "#/$defs/__schema5",
+                  },
+                  "packId": Object {
+                    "maxLength": 256,
+                    "type": "string",
+                  },
+                  "queries": Object {
+                    "items": Object {
+                      "properties": Object {
+                        "ecs_mapping": Object {
+                          "$ref": "#/$defs/__schema5",
+                        },
+                        "id": Object {
+                          "description": "Query ID",
+                          "maxLength": 256,
+                          "type": "string",
+                        },
+                        "platform": Object {
+                          "maxLength": 256,
+                          "type": "string",
+                        },
+                        "query": Object {
+                          "description": "Query to run",
+                          "maxLength": 30000,
+                          "type": "string",
+                        },
+                        "removed": Object {
+                          "type": "boolean",
+                        },
+                        "snapshot": Object {
+                          "type": "boolean",
+                        },
+                        "version": Object {
+                          "$ref": "#/$defs/__schema6",
+                          "description": "Query version",
+                        },
+                      },
+                      "required": Array [
+                        "id",
+                        "query",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                  "query": Object {
+                    "maxLength": 30000,
+                    "type": "string",
+                  },
+                  "savedQueryId": Object {
+                    "maxLength": 256,
+                    "type": "string",
+                  },
+                  "timeout": Object {
+                    "type": "number",
+                  },
+                },
+                "type": "object",
+              },
+            },
+            "required": Array [
+              "actionTypeId",
+              "params",
+            ],
+            "type": "object",
+          },
+          Object {
+            "properties": Object {
+              "actionTypeId": Object {
+                "const": ".endpoint",
+                "type": "string",
+              },
+              "params": Object {
+                "anyOf": Array [
+                  Object {
+                    "properties": Object {
+                      "command": Object {
+                        "const": "isolate",
+                        "type": "string",
+                      },
+                      "comment": Object {
+                        "maxLength": 30000,
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "command",
+                    ],
+                    "type": "object",
+                  },
+                  Object {
+                    "oneOf": Array [
+                      Object {
+                        "properties": Object {
+                          "command": Object {
+                            "const": "kill-process",
+                            "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"kill-process\\"",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "$ref": "#/$defs/__schema7",
+                            "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
+                          },
+                          "config": Object {
+                            "properties": Object {
+                              "field": Object {
+                                "description": "Field to use instead of \`process.pid\`",
+                                "maxLength": 2000,
+                                "type": "string",
+                              },
+                              "kill_descendants": Object {
+                                "$ref": "#/$defs/__schema9",
+                                "description": "Whether to also terminate the descendant processes of the targeted process.",
+                              },
+                              "overwrite": Object {
+                                "$ref": "#/$defs/__schema8",
+                                "default": true,
+                                "description": "Whether to overwrite field with \`process.pid\`",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "properties": Object {
+                          "command": Object {
+                            "const": "suspend-process",
+                            "description": "To run an endpoint response action, specify a value for the command field. Example: \\"command\\": \\"suspend-process\\"",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "$ref": "#/$defs/__schema10",
+                            "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \\"comment\\": \\"Check processes\\"",
+                          },
+                          "config": Object {
+                            "properties": Object {
+                              "field": Object {
+                                "description": "Field to use instead of process.pid",
+                                "maxLength": 2000,
+                                "type": "string",
+                              },
+                              "overwrite": Object {
+                                "$ref": "#/$defs/__schema11",
+                                "default": true,
+                                "description": "Whether to overwrite field with process.pid",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                  Object {
+                    "properties": Object {
+                      "command": Object {
+                        "const": "runscript",
+                        "type": "string",
+                      },
+                      "comment": Object {
+                        "$ref": "#/$defs/__schema12",
+                        "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log",
+                      },
+                      "config": Object {
+                        "properties": Object {
+                          "linux": Object {
+                            "$ref": "#/$defs/__schema13",
+                          },
+                          "macos": Object {
+                            "$ref": "#/$defs/__schema13",
+                          },
+                          "windows": Object {
+                            "$ref": "#/$defs/__schema13",
+                          },
+                        },
+                        "type": "object",
+                      },
+                    },
+                    "required": Array [
+                      "command",
+                    ],
+                    "type": "object",
+                  },
+                ],
+              },
+            },
+            "required": Array [
+              "actionTypeId",
+              "params",
+            ],
+            "type": "object",
+          },
+        ],
+      },
+      "type": "array",
+    },
+    "riskScore": Object {
+      "$ref": "#/$defs/__schema1",
+    },
+    "riskScoreMapping": Object {
+      "items": Object {
+        "properties": Object {
+          "field": Object {
+            "description": "Source event field used to override the default \`risk_score\`.",
+            "type": "string",
+          },
+          "operator": Object {
+            "const": "equals",
+            "type": "string",
+          },
+          "risk_score": Object {
+            "$ref": "#/$defs/__schema1",
+          },
+          "value": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "field",
+          "operator",
+          "value",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "ruleId": Object {
+      "type": "string",
+    },
+    "ruleNameOverride": Object {
+      "type": "string",
+    },
+    "ruleSource": Object {
+      "oneOf": Array [
+        Object {
+          "properties": Object {
+            "customizedFields": Object {
+              "items": Object {
+                "properties": Object {
+                  "fieldName": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "fieldName",
+                ],
+                "type": "object",
+              },
+              "type": "array",
+            },
+            "hasBaseVersion": Object {
+              "type": "boolean",
+            },
+            "isCustomized": Object {
+              "type": "boolean",
+            },
+            "type": Object {
+              "const": "external",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+            "isCustomized",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "type": Object {
+              "const": "internal",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+          ],
+          "type": "object",
+        },
+      ],
+    },
+    "setup": Object {
+      "type": "string",
+    },
+    "severity": Object {
+      "$ref": "#/$defs/__schema2",
+    },
+    "severityMapping": Object {
+      "items": Object {
+        "properties": Object {
+          "field": Object {
+            "description": "Source event field used to override the default \`severity\`.",
+            "type": "string",
+          },
+          "operator": Object {
+            "const": "equals",
+            "type": "string",
+          },
+          "severity": Object {
+            "$ref": "#/$defs/__schema2",
+          },
+          "value": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "field",
+          "operator",
+          "severity",
+          "value",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "threat": Object {
+      "items": Object {
+        "properties": Object {
+          "framework": Object {
+            "description": "Relevant attack framework",
+            "type": "string",
+          },
+          "tactic": Object {
+            "properties": Object {
+              "id": Object {
+                "description": "Tactic ID",
+                "type": "string",
+              },
+              "name": Object {
+                "description": "Tactic name",
+                "type": "string",
+              },
+              "reference": Object {
+                "description": "Tactic reference",
+                "type": "string",
+              },
+            },
+            "required": Array [
+              "id",
+              "name",
+              "reference",
+            ],
+            "type": "object",
+          },
+          "technique": Object {
+            "$ref": "#/$defs/__schema3",
+            "description": "Array containing information on the attack techniques (optional)",
+          },
+        },
+        "required": Array [
+          "framework",
+          "tactic",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "timelineId": Object {
+      "type": "string",
+    },
+    "timelineTitle": Object {
+      "type": "string",
+    },
+    "timestampOverride": Object {
+      "type": "string",
+    },
+    "timestampOverrideFallbackDisabled": Object {
+      "type": "boolean",
+    },
+    "to": Object {
+      "type": "string",
+    },
+    "type": Object {
+      "const": "esql",
       "type": "string",
     },
     "version": Object {

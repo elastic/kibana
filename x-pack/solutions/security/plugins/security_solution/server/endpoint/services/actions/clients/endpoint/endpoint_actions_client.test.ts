@@ -22,7 +22,10 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
 import { Readable } from 'stream';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { ResponseActionsRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  ResponseActionGetFileRequestBody,
+  ResponseActionsRequestBody,
+} from '../../../../../../common/api/endpoint';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
@@ -638,6 +641,235 @@ describe('EndpointActionsClient', () => {
     });
   });
 
+  describe('#getFile()', () => {
+    // NOTE: the options mock merges its defaults (which include `path`), so `parameters` is
+    //       set explicitly here to be able to test `paths` on its own.
+    const createGetFileOptions = (parameters: ResponseActionGetFileRequestBody['parameters']) => ({
+      ...responseActionsClientMock.createGetFileOptions(getCommonResponseActionOptions()),
+      parameters,
+    });
+
+    describe('when `paths` parameter is defined', () => {
+      it('should throw error when endpoint does not support `get_file_multi_path` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(createGetFileOptions({ paths: ['/one', '/two'] }))
+        ).rejects.toThrow('The following agent IDs do not support the get-file `paths` parameter');
+      });
+
+      it('should succeed when endpoint supports the `get_file_multi_path` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(
+              generator.generate({ Endpoint: { capabilities: ['get_file_multi_path'] } })
+            ),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(createGetFileOptions({ paths: ['/one', '/two'] }))
+        ).resolves.toBeDefined();
+      });
+
+      it('should send `paths` to the endpoint in the action request', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(
+              generator.generate({ Endpoint: { capabilities: ['get_file_multi_path'] } })
+            ),
+          ]),
+        });
+
+        await endpointActionsClient.getFile(createGetFileOptions({ paths: ['/one', '/two'] }));
+
+        const fleetActionsClient =
+          await classConstructorOptions.endpointService.getFleetActionsClient();
+
+        expect(fleetActionsClient.create as jest.Mock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'get-file',
+              parameters: { paths: ['/one', '/two'] },
+            }),
+          })
+        );
+      });
+    });
+
+    it('should succeed without checking capability when only `path` is defined', async () => {
+      await expect(
+        endpointActionsClient.getFile(createGetFileOptions({ path: '/some/file' }))
+      ).resolves.toBeDefined();
+    });
+
+    describe('when `force` parameter is set to `true`', () => {
+      it('should throw error when endpoint does not support `get_file_force` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: 'C:\\locked.dat', force: true },
+            })
+          )
+        ).rejects.toMatchObject({
+          message: expect.stringContaining(
+            'The following agent IDs do not support the get-file `force` parameter'
+          ),
+          statusCode: 400,
+        });
+      });
+
+      it('should succeed when endpoint supports the `get_file_force` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(
+              generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+            ),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: 'C:\\locked.dat', force: true },
+            })
+          )
+        ).resolves.toBeDefined();
+      });
+    });
+
+    it('should succeed without checking capability when `force` is not set', async () => {
+      await expect(
+        endpointActionsClient.getFile(
+          responseActionsClientMock.createGetFileOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { path: 'C:\\file.txt' },
+          })
+        )
+      ).resolves.toBeDefined();
+    });
+
+    it('should succeed without checking capability when `force` is false', async () => {
+      await expect(
+        endpointActionsClient.getFile(
+          responseActionsClientMock.createGetFileOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { path: 'C:\\file.txt', force: false },
+          })
+        )
+      ).resolves.toBeDefined();
+    });
+
+    it('should omit `force` from the Fleet action parameters when it is `false`', async () => {
+      await endpointActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({
+          ...getCommonResponseActionOptions(),
+          parameters: { path: 'C:\\file.txt', force: false },
+        })
+      );
+
+      expect(
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ parameters: { path: 'C:\\file.txt' } }),
+        })
+      );
+    });
+
+    it('should only look up the host metadata once when `force` is `true`', async () => {
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(
+            generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+          ),
+        ]),
+      });
+
+      await endpointActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({
+          ...getCommonResponseActionOptions(),
+          parameters: { path: 'C:\\file.txt', force: true },
+        })
+      );
+
+      // The capability check must not re-query the metadata, since a later (post-dispatch) validation
+      // that disagrees with the first would leave a dispatched action without a request document.
+      expect(
+        (classConstructorOptions.esClient.search as jest.Mock).mock.calls.filter(
+          ([request]) => request?.index === metadataCurrentIndexPattern
+        )
+      ).toHaveLength(1);
+    });
+
+    it('should send `force` in the Fleet action parameters when it is `true`', async () => {
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(
+            generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+          ),
+        ]),
+      });
+
+      await endpointActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({
+          ...getCommonResponseActionOptions(),
+          parameters: { path: 'C:\\file.txt', force: true },
+        })
+      );
+
+      expect(
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            parameters: { path: 'C:\\file.txt', force: true },
+          }),
+        })
+      );
+    });
+  });
+
   describe('#killProcess()', () => {
     describe('when `kill_descendants` parameter is set to `true`', () => {
       beforeEach(() => {
@@ -679,7 +911,12 @@ describe('EndpointActionsClient', () => {
               parameters: { pid: 123, kill_descendants: true },
             })
           )
-        ).rejects.toThrow('The following agent IDs do not support killing process descendents');
+        ).rejects.toMatchObject({
+          message: expect.stringContaining(
+            'The following agent IDs do not support killing process descendents'
+          ),
+          statusCode: 400,
+        });
       });
 
       it('should succeed when feature flag is enabled and endpoint supports the capability', async () => {

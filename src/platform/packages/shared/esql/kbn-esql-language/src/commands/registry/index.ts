@@ -40,11 +40,13 @@ import { rerankCommand } from './rerank';
 import { promqlCommand } from './promql';
 import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
 import { setCommand } from './set';
+import { letCommand } from './let';
 import { mmrCommand } from './mmr';
 import { metricsInfoCommand } from './metrics_info';
 import { tsInfoCommand } from './ts_info';
 import { highlightCommand } from './highlight';
 import { denseVectorCommand } from './dense_vector';
+import { fillNullCommand } from './fillnull';
 
 const esqlCommandRegistry = new CommandRegistry();
 
@@ -74,6 +76,7 @@ const baseCommands = [
   inlineStatsCommand,
   sampleCommand,
   setCommand,
+  letCommand,
   showCommand,
   timeseriesCommand,
   whereCommand,
@@ -85,6 +88,7 @@ const baseCommands = [
   tsInfoCommand,
   highlightCommand,
   denseVectorCommand,
+  fillNullCommand,
 ];
 
 baseCommands.forEach((command) => {

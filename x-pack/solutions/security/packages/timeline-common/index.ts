@@ -20,3 +20,11 @@ export type { DeprecatedCellValueElementProps } from './src/cells';
 
 export type { DeprecatedRowRenderer } from './src/rows';
 export { DeprecatedRowRendererId } from './src/rows';
+
+export type {
+  QueryOperator,
+  QueryMatch,
+  DataProvider,
+  DataProvidersAnd,
+} from './src/data_provider';
+export { IS_OPERATOR, EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './src/data_provider';

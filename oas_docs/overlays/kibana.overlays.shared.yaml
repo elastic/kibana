@@ -19,21 +19,24 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Alerting enables you to define rules, which detect complex conditions within your data.
+        Kibana Classic Alerting enables you to define rules, which detect complex conditions within your data.
         When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule.
         Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
       externalDocs:
-        description: Alerting documentation
-        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
-      x-displayName: 'Alerting'
+        description: Kibana Classic Alerting documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerting/alerts
+      x-displayName: 'Kibana Classic Alerting'
   - target: '$.tags[?(@.name=="alerting-v2")]'
     description: Change tag description and displayName
     update:
       description: >
-        Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
+        Kibana Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
         Use these endpoints to create and manage detection rules, act on alerts, and control when and how
         notifications are delivered.
-      x-displayName: 'Universal Alerting'
+      externalDocs:
+        description: Kibana Universal Alerting documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerting/esql/system-overview
+      x-displayName: 'Kibana Universal Alerting'
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:
@@ -155,16 +158,27 @@ actions:
         description: Synthetic monitoring
         url: https://www.elastic.co/docs/solutions/observability/synthetics
   - target: '$.tags[?(@.name=="data views")]'
-    description: Change displayName
+    description: Change tag description and displayName
     update:
+      description: |
+        Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+
+        ## When to use this API
+
+        - Use this API for existing integrations and for partial updates, where you send only the properties to change.
+        - Use this API to manage individual fields and runtime fields, set the default data view, or swap references. The Data views v2 API doesn't support these tasks.
+        - To manage complete data view definitions as code, use the [Data views v2 API](../group/endpoint-data-views-v2).
       x-displayName: "Data views"
   - target: '$.tags[?(@.name=="data-views-v2")]'
     description: Change tag description and displayName
     update:
-      description: >
-        Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
-        Use these endpoints to list, retrieve, create, replace, and delete data views with the
-        as-code data view definition.
+      description: |
+        Data view APIs enable you to manage data views, formerly known as Kibana index patterns. Use these endpoints to list, retrieve, create, replace, and delete data views with the as-code data view definition.
+
+        ## When to use this API
+
+        - Use this API to manage complete data view definitions as code. A `PUT` request creates the data view if it doesn't exist, or replaces its whole definition and removes any optional property you omit.
+        - For partial updates, or for integrations that use the existing format, use the [Data views API](../group/endpoint-data-views).
       x-displayName: "Data views v2"
   - target: '$.tags[?(@.name=="slo")]'
     description: Change displayName and description
@@ -191,6 +205,12 @@ actions:
       description: >
         Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
       x-displayName: 'Fleet cloud connectors'
+  - target: '$.tags[?(@.name=="Fleet IaC provisioner")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet infrastructure-as-code (IaC) provisioner APIs, including the CloudFormation callback that reports a created IAM role back to Kibana.
+      x-displayName: 'Fleet IaC provisioner'
   - target: '$.tags[?(@.name=="Elastic Package Manager (EPM)")]'
     description: Change tag description and displayName
     update:

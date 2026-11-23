@@ -9,21 +9,31 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
-  ApplicationSource,
   ApplicationSummary,
+  MobileApplicationSummary,
   TimeSeriesPoint,
+  ApplicationSource,
+  WebApplicationSummary,
 } from '../../../common/types/applications';
-import { getApplications } from './get_applications';
+import { getApplications as getApplicationsWithHistogram } from './get_applications';
+
+const HISTOGRAM = { interval: { value: 60, unit: 's' as const }, start: 0, end: 3_600_000 };
+
+const getApplications = (
+  params: Omit<Parameters<typeof getApplicationsWithHistogram>[0], 'histogram'>
+) => getApplicationsWithHistogram({ histogram: HISTOGRAM, ...params });
 
 const app = (
   serviceName: string,
   source: ApplicationSource,
   pageLoads: number
-): ApplicationSummary => ({
+): WebApplicationSummary => ({
   serviceName,
   source,
+  applicationType: 'web',
   environments: [],
   pageLoads: { count: pageLoads },
+  sessions: null,
   webVitals: {
     lcp: { p75Ms: null, sampleCount: 0, ratings: null },
     inp: { p75Ms: null, sampleCount: 0, ratings: null },
@@ -39,8 +49,9 @@ const app = (
 const result = (
   applications: ApplicationSummary[],
   environments: string[] = [],
-  pageLoadsOverTime: TimeSeriesPoint[] = []
-) => ({ applications, environments, pageLoadsOverTime });
+  pageLoadsOverTime: TimeSeriesPoint[] = [],
+  sessionsOverTime: TimeSeriesPoint[] | null = null
+) => ({ applications, environments, pageLoadsOverTime, sessionsOverTime });
 
 describe('getApplications', () => {
   const logger = loggingSystemMock.createLogger();
@@ -69,6 +80,96 @@ describe('getApplications', () => {
     });
 
     expect(unavailableSources).toEqual([]);
+  });
+
+  describe('partiallyAvailableSources', () => {
+    it('lists OTel when the user can read only some of its indices', async () => {
+      const { partiallyAvailableSources } = await getApplications({
+        getOtelApplications: async () => result([]),
+        getClassicApplications: async () => result([]),
+        hasPartialOtelAccess: async () => true,
+        hasPartialClassicAccess: async () => false,
+        logger,
+      });
+
+      expect(partiallyAvailableSources).toEqual(['otel']);
+    });
+
+    it('lists Classic when the user can read only some of its indices', async () => {
+      const { partiallyAvailableSources } = await getApplications({
+        getOtelApplications: async () => result([]),
+        getClassicApplications: async () => result([]),
+        hasPartialOtelAccess: async () => false,
+        hasPartialClassicAccess: async () => true,
+        logger,
+      });
+
+      expect(partiallyAvailableSources).toEqual(['classic']);
+    });
+
+    it('ignores the OTel access when the sessions index answered', async () => {
+      const { partiallyAvailableSources } = await getApplications({
+        getOtelApplications: async () => result([], [], [], []),
+        hasPartialOtelAccess: async () => true,
+        logger,
+      });
+
+      expect(partiallyAvailableSources).toEqual([]);
+    });
+
+    it('lists a failed source only in unavailableSources', async () => {
+      const response = await getApplications({
+        getOtelApplications: async () => {
+          throw new Error('otel down');
+        },
+        getClassicApplications: async () => result([]),
+        hasPartialOtelAccess: async () => true,
+        hasPartialClassicAccess: async () => true,
+        logger,
+      });
+
+      expect(response.unavailableSources).toEqual(['otel']);
+      expect(response.partiallyAvailableSources).toEqual(['classic']);
+    });
+
+    it('is empty without access checks', async () => {
+      const { partiallyAvailableSources } = await getApplications({
+        getOtelApplications: async () => result([]),
+        getClassicApplications: async () => result([]),
+        logger,
+      });
+
+      expect(partiallyAvailableSources).toEqual([]);
+    });
+
+    it('runs the access checks alongside the searches', async () => {
+      // Each one resolves only once the other has started, so running them one after the other
+      // would never settle and the test would time out.
+      let signalFetchStarted: () => void = () => {};
+      let signalCheckStarted: () => void = () => {};
+      const fetchStarted = new Promise<void>((resolve) => {
+        signalFetchStarted = resolve;
+      });
+      const checkStarted = new Promise<void>((resolve) => {
+        signalCheckStarted = resolve;
+      });
+
+      const response = await getApplications({
+        getOtelApplications: async () => {
+          signalFetchStarted();
+          await checkStarted;
+          return result([]);
+        },
+        hasPartialOtelAccess: async () => {
+          signalCheckStarted();
+          await fetchStarted;
+          return true;
+        },
+        logger,
+      });
+
+      expect(response.partiallyAvailableSources).toEqual(['otel']);
+    });
   });
 
   it('merges the environments of every source, without duplicates, sorted', async () => {
@@ -111,7 +212,11 @@ describe('getApplications', () => {
       logger,
     });
 
-    expect(pageLoadsOverTime).toEqual({ otel, classic });
+    expect(pageLoadsOverTime).toEqual({
+      otel,
+      classic,
+      histogram: HISTOGRAM,
+    });
   });
 
   it('returns no page loads over time for a source that failed', async () => {
@@ -126,12 +231,128 @@ describe('getApplications', () => {
     expect(pageLoadsOverTime.classic).toEqual([]);
   });
 
+  describe('sessions over time', () => {
+    const sessions = [{ timestamp: 0, count: 3 }];
+
+    it('returns the sessions of EDOT Browser when it read them from the sessions index', async () => {
+      const { sessionsOverTime } = await getApplications({
+        getOtelApplications: async () => result([], [], [], sessions),
+        getClassicApplications: async () => result([]),
+        logger,
+      });
+
+      expect(sessionsOverTime).toEqual(sessions);
+    });
+
+    it('returns none when EDOT Browser read the raw events, as Classic RUM has no sessions', async () => {
+      const { sessionsOverTime } = await getApplications({
+        getOtelApplications: async () => result([]),
+        getClassicApplications: async () => result([], [], [], sessions),
+        logger,
+      });
+
+      expect(sessionsOverTime).toBeNull();
+    });
+
+    it('returns none when EDOT Browser failed', async () => {
+      const { sessionsOverTime } = await getApplications({
+        getOtelApplications: async () => {
+          throw new Error('otel down');
+        },
+        getClassicApplications: async () => result([]),
+        logger,
+      });
+
+      expect(sessionsOverTime).toBeNull();
+    });
+  });
+
   it('does not query Classic without a Classic fetcher (serverless)', async () => {
     const getOtelApplications = jest.fn().mockResolvedValue(result([app('shop', 'otel', 1)]));
 
     const response = await getApplications({ getOtelApplications, logger });
 
     expect(response.applications).toEqual([app('shop', 'otel', 1)]);
+  });
+
+  describe('mobile applications', () => {
+    const mobileApp = (serviceName: string, sessions: number): MobileApplicationSummary => ({
+      serviceName,
+      source: 'otel',
+      applicationType: 'mobile',
+      platforms: ['android', 'ios'],
+      environments: [],
+      latestRelease: null,
+      sessions: { count: sessions },
+      users: { count: 1 },
+      crashFreeSessions: { value: null, previous: null, delta: null },
+      errorRate: null,
+      lastSeen: null,
+    });
+
+    it('lists them after the web rows, by sessions, with their EDOT source', async () => {
+      const { applications, mobileAvailability } = await getApplications({
+        getOtelApplications: async () => result([app('shop', 'otel', 5)]),
+        getMobileApplications: async () => ({
+          applications: [mobileApp('news', 1), mobileApp('shop', 9)],
+          environments: [],
+        }),
+        logger,
+      });
+
+      expect(
+        applications.map(
+          ({ serviceName, source, applicationType }) =>
+            `${serviceName}:${source}:${applicationType}`
+        )
+      ).toEqual(['shop:otel:web', 'shop:otel:mobile', 'news:otel:mobile']);
+      expect(mobileAvailability).toBe('complete');
+    });
+
+    it('sorts rows with the same activity by name, web and mobile alike', async () => {
+      const { applications } = await getApplications({
+        getOtelApplications: async () => result([app('shop', 'otel', 5), app('docs', 'otel', 5)]),
+        getMobileApplications: async () => ({
+          applications: [mobileApp('trailmap', 3), mobileApp('news', 3)],
+          environments: [],
+        }),
+        logger,
+      });
+
+      expect(applications.map(({ serviceName }) => serviceName)).toEqual([
+        'docs',
+        'shop',
+        'news',
+        'trailmap',
+      ]);
+    });
+
+    it('reports them unavailable, not a source, when their search fails', async () => {
+      const response = await getApplications({
+        getOtelApplications: async () => result([app('shop', 'otel', 5)]),
+        getMobileApplications: async () => {
+          throw new Error('security_exception');
+        },
+        logger,
+      });
+
+      expect(response.mobileAvailability).toBe('unavailable');
+      expect(response.unavailableSources).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Could not load the mobile applications')
+      );
+    });
+
+    it('reports them partial when the user can read only some of the OTel indices', async () => {
+      const { mobileAvailability } = await getApplications({
+        getOtelApplications: async () => result([app('shop', 'otel', 5)]),
+        getMobileApplications: async () => ({ applications: [], environments: [] }),
+        hasPartialMobileAccess: async () => true,
+        logger,
+      });
+
+      expect(mobileAvailability).toBe('partial');
+    });
   });
 
   it('returns the other source when one fails', async () => {

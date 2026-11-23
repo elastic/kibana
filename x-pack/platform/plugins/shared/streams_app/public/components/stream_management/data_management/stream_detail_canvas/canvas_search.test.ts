@@ -36,7 +36,7 @@ const destinationNode = (
   id: configuredDestinationNodeId(destinationId),
   type: DESTINATION_NODE_TYPE,
   position: { x: 0, y: 0 },
-  data: { destinationId, title, signals },
+  data: { destinationId, title, signals, hasSavedSource: true },
 });
 
 const edge = (sourceId: string, destinationId: string): ClassicCanvasEdge => ({
@@ -130,6 +130,7 @@ describe('resolveCanvasSearch', () => {
       position: { x: 0, y: 0 },
       data: {
         destinationId: 'd-logs',
+        hasSavedSource: true,
         title: 'prod logs',
         targetedIndexNames: ['logs-nginx-default'],
       },
@@ -139,6 +140,23 @@ describe('resolveCanvasSearch', () => {
     ]);
   });
 
+  it('matches remote index names on a remote Elasticsearch destination node', () => {
+    const destination: DestinationNode = {
+      id: configuredDestinationNodeId('d-remote'),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      data: {
+        destinationId: 'd-remote',
+        hasSavedSource: true,
+        title: 'Backup',
+        remoteIndexNames: ['archive-logs'],
+      },
+    };
+    expect(
+      nodeIdsOf(resolveCanvasSearch({ nodes: [destination], edges: [] }, 'archive-logs'))
+    ).toEqual([configuredDestinationNodeId('d-remote')]);
+  });
+
   it('matches the S3 bucket when a description replaces it as the subtitle', () => {
     const destination: DestinationNode = {
       id: configuredDestinationNodeId('d-s3'),
@@ -146,6 +164,7 @@ describe('resolveCanvasSearch', () => {
       position: { x: 0, y: 0 },
       data: {
         destinationId: 'd-s3',
+        hasSavedSource: true,
         title: 'Archive',
         subtitle: 'Long-term log archive',
         bucket: 'my-archive-bucket',
@@ -154,6 +173,24 @@ describe('resolveCanvasSearch', () => {
     expect(
       nodeIdsOf(resolveCanvasSearch({ nodes: [destination], edges: [] }, 'archive-bucket'))
     ).toEqual([configuredDestinationNodeId('d-s3')]);
+  });
+
+  it('matches the remote Elasticsearch endpoint when a description replaces it as the subtitle', () => {
+    const destination: DestinationNode = {
+      id: configuredDestinationNodeId('d-remote'),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      data: {
+        destinationId: 'd-remote',
+        hasSavedSource: true,
+        title: 'Backup',
+        subtitle: 'Long-term copy',
+        endpoint: 'https://backup-cluster.example.com:9243',
+      },
+    };
+    expect(
+      nodeIdsOf(resolveCanvasSearch({ nodes: [destination], edges: [] }, 'backup-cluster'))
+    ).toEqual([configuredDestinationNodeId('d-remote')]);
   });
 });
 

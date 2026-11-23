@@ -8,7 +8,7 @@
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import type { Alert } from '@kbn/alerting-types';
 import type { JsonValue } from '@kbn/utility-types';
-import { toObjectArrayOfStrings } from '@kbn/timelines-plugin/common';
+import { toObjectArrayOfStrings } from '../../../common/utils/to_array';
 
 const nonFlattenedFormatParamsFields = ['related_integrations', 'threat_mapping'];
 

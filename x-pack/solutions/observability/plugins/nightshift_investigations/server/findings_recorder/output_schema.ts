@@ -19,13 +19,10 @@ import {
   MAX_EVIDENCE_CHART_LABEL_LENGTH,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
-  MAX_EVIDENCE_REFERENCE_URL_LENGTH,
-  MAX_EVIDENCE_REFERENCES,
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
   MAX_IMPACT_TOOL_ENTITIES,
-  type EvidenceReference,
   type InvestigationEvidence,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
@@ -72,16 +69,9 @@ export const findingsOutputSchema = lazySchema(() => {
       .array(z.object({ x: z.string(), x_end: z.string().optional(), label: z.string() }))
       .optional(),
   });
-  // Flat so every provider accepts it: a reference is a `query`, or a `url` with an optional label.
-  const referenceSchema = z.object({
-    query: z.string().optional(),
-    url: z.string().optional(),
-    label: z.string().optional(),
-  });
   const evidenceSchema = z.object({
     description: z.string().optional(),
     chart: chartSchema.optional(),
-    references: z.array(referenceSchema).optional(),
   });
   const hypothesisSchema = z.object({
     candidate: z.string().min(1),
@@ -116,6 +106,8 @@ export const findingsOutputSchema = lazySchema(() => {
           comment: z.string().min(1),
           impact: z.string().optional(),
           confidence: z.string().optional(),
+          action_workflow_id: z.string().optional(),
+          action_input: z.record(z.string(), z.unknown()).optional(),
         })
       )
       .optional(),
@@ -152,32 +144,6 @@ export const entityIdFor = (name: string): string =>
         .update(name)
         .digest('hex')
         .slice(0, 12)}`;
-
-/**
- * The references the stores accept: a query copied as written, or an http(s) link. Anything else
- * is dropped, so one bad reference does not cost the evidence it belongs to.
- */
-const limitReferences = (raw: RawEvidence['references']): EvidenceReference[] => {
-  const references: EvidenceReference[] = [];
-  for (const { query, url, label } of raw ?? []) {
-    const text = query?.trim();
-    const link = url?.trim();
-    const name = label?.trim();
-    if (text) {
-      references.push({ query: truncate(text, MAX_EVIDENCE_TEXT_LENGTH) });
-    } else if (
-      link &&
-      link.length <= MAX_EVIDENCE_REFERENCE_URL_LENGTH &&
-      /^https?:\/\//i.test(link)
-    ) {
-      references.push({
-        url: link,
-        ...(name ? { label: truncate(name, MAX_EVIDENCE_SHORT_TEXT_LENGTH) } : {}),
-      });
-    }
-  }
-  return references.slice(0, MAX_EVIDENCE_REFERENCES);
-};
 
 /**
  * Trims evidence to what the stores accept. A chart is only the model's reading of numbers in the
@@ -229,22 +195,32 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
             : {}),
         }
       : undefined;
-  const references = limitReferences(raw.references);
   const parsed = investigationEvidenceSchema.safeParse({
     ...(description ? { description } : {}),
     ...(chart ? { chart } : {}),
-    ...(references.length ? { references } : {}),
   });
   if (parsed.success && (parsed.data.description || parsed.data.chart)) return parsed.data;
-  return description ? { description, ...(references.length ? { references } : {}) } : undefined;
+  return description ? { description } : undefined;
 };
+
+/** A proposal the final pass recorded, optionally carried out by an action workflow. */
+export interface RecordedProposal {
+  title: string;
+  comment: string;
+  impact?: string;
+  confidence?: string;
+  /** The action workflow that carries the proposal out once a person approves it. */
+  action_workflow_id?: string;
+  /** That workflow's `actionInput`. Present exactly when `action_workflow_id` is. */
+  action_input?: Record<string, unknown>;
+}
 
 /** A parsed record with its evidence trimmed to what the stores accept. */
 export type FindingsRecord = Omit<
   FindingsOutput,
   'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
 > & {
-  proposals?: Array<{ title: string; comment: string; impact?: string; confidence?: string }>;
+  proposals?: RecordedProposal[];
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
   impact_entities?: Array<{ name: string; type?: string; evidence?: InvestigationEvidence }>;
@@ -292,13 +268,19 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
       ? {
           proposals: rawProposals
             .slice(0, MAX_PROPOSALS)
-            .map(({ title, comment, impact, confidence }) => ({
+            .map(({ title, comment, impact, confidence, action_workflow_id, action_input }) => ({
               title: truncate(title.trim(), MAX_TITLE_LENGTH),
               comment: truncate(comment, MAX_COMMENT_LENGTH),
               // A value the proposal store does not know is left out, not sent to fail the write.
               ...(impact && proposalImpactSchema.safeParse(impact).success ? { impact } : {}),
               ...(confidence && proposalConfidenceSchema.safeParse(confidence).success
                 ? { confidence }
+                : {}),
+              ...(action_workflow_id?.trim()
+                ? {
+                    action_workflow_id: action_workflow_id.trim(),
+                    action_input: action_input ?? {},
+                  }
                 : {}),
             })),
         }
@@ -330,19 +312,6 @@ const EVIDENCE_JSON_SCHEMA = {
       type: 'string',
       description:
         'Markdown: what was observed and why it matters, only what a chart does not already show.',
-    },
-    references: {
-      type: 'array',
-      description:
-        'Where the observation came from, so a reader can check it: a query you actually ran, copied exactly as written with its time filter, or an http(s) link a tool returned. Give either query, or url with an optional short label. Never invent a link.',
-      items: {
-        type: 'object',
-        properties: {
-          query: { type: 'string' },
-          url: { type: 'string' },
-          label: { type: 'string' },
-        },
-      },
     },
     chart: {
       type: 'object',
@@ -482,6 +451,17 @@ export const FINDINGS_JSON_SCHEMA = {
             enum: proposalConfidenceSchema.options,
             description: 'How strongly the findings support that this action resolves the issue.',
           },
+          action_workflow_id: {
+            type: 'string',
+            description:
+              'Id of a workflow listed under Workflows that carries this action out once approved. Omit when none fits, or when none are listed.',
+          },
+          action_input: {
+            type: 'object',
+            additionalProperties: true,
+            description:
+              "The workflow's actionInput, filled to match its input schema. Only with action_workflow_id.",
+          },
         },
         required: ['title', 'comment'],
       },
@@ -503,7 +483,7 @@ export const FINDINGS_JSON_SCHEMA = {
           reason: {
             type: 'string',
             description:
-              'Two Markdown lines: **Tested:** what was checked, against which signal and window, then **Result:** what the data showed, ending in Confirmed, Dismissed or Unresolved. Under 600 characters.',
+              'Two Markdown lines: **Tested:** what was checked, against which signal and window, then **Result:** what the data showed, ending in Confirmed, Dismissed or Unresolved. While the status is investigating, add a third line, **Settled by:** the observation that would refute or confirm it, as Refuted if <signal> <comparison> <threshold> in <window>; confirmed if <the opposite>. Under 700 characters.',
           },
           evidence: {
             type: 'array',

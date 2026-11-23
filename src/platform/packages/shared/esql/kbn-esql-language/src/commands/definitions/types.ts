@@ -331,6 +331,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  subqueryNotSupportedInTs: {
+    message: string;
+    type: {};
+  };
   unknownSetting: {
     message: string;
     type: { name: string };

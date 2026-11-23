@@ -6,16 +6,31 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { createRecorderProposals } from './proposals_adapter';
+import {
+  createRecorderProposals,
+  MAX_RECORDER_ACTIONS,
+  MAX_RECORDER_ACTION_DESCRIPTION_LENGTH,
+  MAX_RECORDER_ACTION_SCHEMA_LENGTH,
+} from './proposals_adapter';
 
 const request = httpServerMock.createKibanaRequest();
 
-const setup = ({ canRead = true } = {}) => {
+const setup = ({
+  canRead = true,
+  createProposal = jest.fn().mockResolvedValue({ workflowExecutionId: 'e1' }),
+} = {}) => {
   const list = jest.fn().mockResolvedValue({
     proposals: [{ title: 'Restore the secrets' }, { title: 'Roll back the image' }],
     total: 2,
   });
-  const createProposal = jest.fn().mockResolvedValue({ workflowExecutionId: 'e1' });
+  const listActions = jest.fn().mockResolvedValue({
+    actions: Array.from({ length: 25 }, (_, i) => ({
+      workflowId: `wf-${i}`,
+      name: `wf-${i}`,
+      approvalPolicy: 'always-gate',
+    })),
+    total: 25,
+  });
   const assertCanRead = jest.fn(async () => {
     if (!canRead) throw new Error('Forbidden');
   });
@@ -24,10 +39,11 @@ const setup = ({ canRead = true } = {}) => {
       getProposalsService: () => ({ list }),
       getProposalPrivileges: () => ({ assertCanRead }),
       createProposal,
+      listActions,
     } as never,
     getSpaceId: () => 'space-a',
   });
-  return { adapter, list, createProposal, assertCanRead };
+  return { adapter, list, createProposal, assertCanRead, listActions };
 };
 
 describe('createRecorderProposals', () => {
@@ -59,7 +75,7 @@ describe('createRecorderProposals', () => {
     expect(list).not.toHaveBeenCalled();
   });
 
-  it('proposes as nightshift, in the todo category the analyst marks applied', async () => {
+  it('proposes as nightshift, in the todo category the analyst marks applied, waiving the discard reason', async () => {
     const { adapter, createProposal } = setup();
 
     await adapter.propose({
@@ -78,7 +94,109 @@ describe('createRecorderProposals', () => {
         impact: 'low',
         origin: 'nightshift',
         category: 'todo',
+        skipDiscardReason: true,
       },
     });
+  });
+
+  it("lists only the space's own action workflows, capped for the prompt", async () => {
+    const { adapter, listActions } = setup();
+
+    const actions = await adapter.listActions({ request });
+
+    expect(listActions).toHaveBeenCalledWith('space-a', request, { managedFilter: 'unmanaged' });
+    expect(actions).toHaveLength(MAX_RECORDER_ACTIONS);
+  });
+
+  it('leaves out action workflows that could run without a person approving them', async () => {
+    const { adapter, listActions } = setup();
+    listActions.mockResolvedValue({
+      actions: [
+        { workflowId: 'gated', name: 'gated', approvalPolicy: 'always-gate' },
+        { workflowId: 'autonomous', name: 'autonomous', approvalPolicy: 'autonomy-dependent' },
+      ],
+      total: 2,
+    });
+
+    const actions = await adapter.listActions({ request });
+
+    expect(actions.map(({ workflowId }) => workflowId)).toEqual(['gated']);
+  });
+
+  it('cuts a long workflow description and leaves out a workflow whose input schema is too large', async () => {
+    const { adapter, listActions } = setup();
+    const huge = 'x'.repeat(MAX_RECORDER_ACTION_SCHEMA_LENGTH);
+    listActions.mockResolvedValue({
+      actions: [
+        {
+          workflowId: 'wordy',
+          name: 'wordy',
+          approvalPolicy: 'always-gate',
+          description: 'd'.repeat(MAX_RECORDER_ACTION_DESCRIPTION_LENGTH + 100),
+          inputSchema: { properties: { actionInput: { type: 'object' } } },
+        },
+        {
+          workflowId: 'huge-schema',
+          name: 'huge-schema',
+          approvalPolicy: 'always-gate',
+          inputSchema: { properties: { actionInput: { description: huge } } },
+        },
+      ],
+      total: 2,
+    });
+
+    const actions = await adapter.listActions({ request });
+
+    expect(actions.map(({ workflowId }) => workflowId)).toEqual(['wordy']);
+    expect(actions[0].description).toBe(`${'d'.repeat(MAX_RECORDER_ACTION_DESCRIPTION_LENGTH)}…`);
+    expect(actions[0].inputSchema).toEqual({ properties: { actionInput: { type: 'object' } } });
+  });
+
+  it('proposes an action workflow through the gate, with its input and no to-do category', async () => {
+    const { adapter, createProposal } = setup();
+
+    await adapter.propose({
+      request,
+      conversationId: 'c1',
+      proposal: {
+        title: 'Open an issue',
+        comment: 'File the regression.',
+        action_workflow_id: 'wf-open-issue',
+        action_input: { repo: 'checkout', title: 'Pool exhausted' },
+      },
+    });
+
+    expect(createProposal).toHaveBeenCalledTimes(1);
+    const [{ proposal }] = createProposal.mock.calls[0];
+    expect(proposal).toEqual(
+      expect.objectContaining({
+        origin: 'nightshift',
+        actionWorkflowId: 'wf-open-issue',
+        actionInput: { repo: 'checkout', title: 'Pool exhausted' },
+      })
+    );
+    expect(proposal).not.toHaveProperty('category');
+    expect(proposal).not.toHaveProperty('skipDiscardReason');
+  });
+
+  it('rejects when the workflow refuses the input, without proposing a to-do instead', async () => {
+    const createProposal = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('actionInput does not satisfy action workflow'));
+    const { adapter } = setup({ createProposal });
+
+    await expect(
+      adapter.propose({
+        request,
+        conversationId: 'c1',
+        proposal: {
+          title: 'Open an issue',
+          comment: 'File the regression.',
+          action_workflow_id: 'wf-open-issue',
+          action_input: {},
+        },
+      })
+    ).rejects.toThrow('actionInput does not satisfy action workflow');
+    expect(createProposal).toHaveBeenCalledTimes(1);
   });
 });

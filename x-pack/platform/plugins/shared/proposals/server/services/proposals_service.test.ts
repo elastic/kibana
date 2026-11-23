@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
@@ -19,15 +20,17 @@ import {
   ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
+  ProposalInvalidGateError,
   ProposalLookupTruncatedError,
   ProposalNotFoundError,
 } from './errors';
-import type { ReleaseGateParams } from './proposals_service';
+import type { CreateProposalParams, ReleaseGateParams } from './proposals_service';
 import { ProposalsService } from './proposals_service';
 
 const SPACE_ID = 'default';
 const EXECUTION_ID = 'exec-1';
 const request = httpServerMock.createKibanaRequest();
+const CALLER = { workflowId: 'gate', executionId: 'gate-exec', request };
 
 /** The resolved actor, in the shape the service stores. */
 const analyst = (username: string, profileUid = `${username}-uid`) => ({
@@ -128,6 +131,8 @@ const createWorkflowsApi = () => ({
     },
   ]),
   resumeWorkflowExecution: jest.fn().mockResolvedValue({ resumedBy: 'analyst' }),
+  executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-2' }),
+  getChildWorkflowExecutions: jest.fn().mockResolvedValue([]),
 });
 
 /** A deadline that has already passed, independent of the clock the suite runs at. */
@@ -139,6 +144,7 @@ const createService = (
   workflowsApi: ReturnType<typeof createWorkflowsApi> | null = createWorkflowsApi()
 ) => {
   const logger = loggerMock.create();
+  const analytics = analyticsServiceMock.createAnalyticsServiceStart();
   const attachmentsClient = {
     create: jest.fn().mockResolvedValue({ id: 'attachment-1' }),
     get: jest.fn(),
@@ -148,17 +154,22 @@ const createService = (
     bulkCreate: jest.fn(),
   };
   const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
+  const resolveUser = jest.fn().mockResolvedValue(analyst('decider'));
   return {
     getAttachmentsClient,
+    resolveUser,
     service: new ProposalsService({
       storage,
       logger,
+      analytics,
       getWorkflowsApi: () => (workflowsApi ?? undefined) as never,
       getAttachmentsClient,
+      resolveUser,
     }),
     workflowsApi: workflowsApi ?? createWorkflowsApi(),
     attachmentsClient,
     logger,
+    analytics,
   };
 };
 
@@ -190,6 +201,7 @@ describe('ProposalsService', () => {
             category: 'todo',
             confidence: 'medium',
             origin: 'nightshift',
+            workflowExecutionId: EXECUTION_ID,
           },
           { spaceId: SPACE_ID, request }
         )
@@ -208,6 +220,7 @@ describe('ProposalsService', () => {
           category: 'todo',
           confidence: 'medium',
           origin: 'nightshift',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -229,6 +242,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -285,6 +299,7 @@ describe('ProposalsService', () => {
           actionInput: { name: 'Suspicious PowerShell' },
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -317,6 +332,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -344,6 +360,7 @@ describe('ProposalsService', () => {
           actionInput: { name: 'Suspicious PowerShell' },
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -365,6 +382,7 @@ describe('ProposalsService', () => {
           actionInput: { name: 'Suspicious PowerShell' },
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -386,6 +404,7 @@ describe('ProposalsService', () => {
           comment: 'Tune the noisy rule',
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -436,6 +455,7 @@ describe('ProposalsService', () => {
             impact: 'low',
             confidence: 'medium',
             origin: 'alertzero',
+            workflowExecutionId: EXECUTION_ID,
           },
           { spaceId: SPACE_ID, request }
         )
@@ -467,6 +487,7 @@ describe('ProposalsService', () => {
           impact: 'low',
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -500,6 +521,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'high',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -519,6 +541,7 @@ describe('ProposalsService', () => {
           category: 'respond',
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -551,6 +574,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'high',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -588,6 +612,7 @@ describe('ProposalsService', () => {
           impact: 'critical',
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -620,6 +645,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -650,6 +676,7 @@ describe('ProposalsService', () => {
           actionWorkflowId: 'system-alertzero-action-create-rule',
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -690,6 +717,7 @@ describe('ProposalsService', () => {
           category: '' as never,
           confidence: '' as never,
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -725,6 +753,7 @@ describe('ProposalsService', () => {
           category: 'contain',
           confidence: 'medium',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -746,6 +775,7 @@ describe('ProposalsService', () => {
           category: 'contain',
           confidence: 'high',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -768,6 +798,7 @@ describe('ProposalsService', () => {
           impact: 'low',
           confidence: 'low',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -792,16 +823,36 @@ describe('ProposalsService', () => {
           impact: 'low',
           confidence: 'medium',
           origin: 'alertzero',
-          workflowExecutionId: '',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.expiresAt).toBeUndefined();
       expect(proposal.actionWorkflowId).toBeUndefined();
-      expect(proposal.workflowExecutionId).toBeUndefined();
       // An empty action id must not look action-bearing.
       expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('refuses a gated proposal whose execution id is blank', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      // A missing execution id is fail-closed, not a signal that the proposal
+      // is gateless: nothing would ever decide this record.
+      await expect(
+        service.create(
+          {
+            conversationId: 'conv-1',
+            comment: 'Tune the noisy rule',
+            confidence: 'medium',
+            origin: 'alertzero',
+            workflowExecutionId: '',
+          },
+          { spaceId: SPACE_ID, request }
+        )
+      ).rejects.toBeInstanceOf(ProposalInvalidGateError);
+      expect(storage.index).not.toHaveBeenCalled();
     });
 
     it('should create a proposal that carries no action', async () => {
@@ -815,6 +866,7 @@ describe('ProposalsService', () => {
           impact: 'medium',
           confidence: 'high',
           origin: 'alertzero',
+          workflowExecutionId: EXECUTION_ID,
         },
         { spaceId: SPACE_ID, request }
       );
@@ -824,13 +876,99 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('assertActionProposable', () => {
+    const actionMetadata = {
+      name: 'Open an issue',
+      category: 'escalate',
+      impact: 'low',
+      reversible: true,
+      approvalPolicy: 'always-gate',
+    };
+    const withInputSchema = {
+      enabled: true,
+      definition: {
+        consts: { actionMetadata },
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                actionInput: {
+                  type: 'object',
+                  properties: { repo: { type: 'string' } },
+                  required: ['repo'],
+                },
+              },
+            },
+          },
+        ],
+      },
+    };
+
+    it('accepts an input the action declares', async () => {
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue(withInputSchema);
+      const { service } = createService(createStorage(), workflowsApi);
+
+      await expect(
+        service.assertActionProposable('wf-open-issue', { repo: 'checkout' }, SPACE_ID, request)
+      ).resolves.toBeUndefined();
+    });
+
+    it('refuses an input the action does not accept', async () => {
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue(withInputSchema);
+      const { service } = createService(createStorage(), workflowsApi);
+
+      await expect(
+        service.assertActionProposable('wf-open-issue', {}, SPACE_ID, request)
+      ).rejects.toThrow(ProposalInvalidActionInputError);
+    });
+
+    it('refuses a workflow the space does not have', async () => {
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue(null);
+      const { service } = createService(createStorage(), workflowsApi);
+
+      await expect(
+        service.assertActionProposable('wf-missing', {}, SPACE_ID, request)
+      ).rejects.toThrow('does not exist in this space');
+    });
+
+    it('refuses a disabled workflow', async () => {
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({ ...withInputSchema, enabled: false });
+      const { service } = createService(createStorage(), workflowsApi);
+
+      await expect(
+        service.assertActionProposable('wf-open-issue', { repo: 'checkout' }, SPACE_ID, request)
+      ).rejects.toThrow('is disabled');
+    });
+
+    it('refuses a workflow that is not an action workflow', async () => {
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({
+        enabled: true,
+        definition: { ...withInputSchema.definition, consts: {} },
+      });
+      const { service } = createService(createStorage(), workflowsApi);
+
+      await expect(
+        service.assertActionProposable('wf-plain', { repo: 'checkout' }, SPACE_ID, request)
+      ).rejects.toThrow('is not an action workflow');
+    });
+  });
+
   describe('create — caller-supplied id', () => {
     const ID = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
-    const idParams = (overrides: Partial<Parameters<ProposalsService['create']>[0]> = {}) => ({
+    const idParams = (
+      overrides: Partial<CreateProposalParams & { gate: 'workflow' }> = {}
+    ): CreateProposalParams => ({
       conversationId: 'conv-1',
       comment: 'Isolate the host for this finding',
       confidence: 'medium' as const,
       origin: 'alertzero' as const,
+      workflowExecutionId: EXECUTION_ID,
       id: ID,
       ...overrides,
     });
@@ -1449,7 +1587,8 @@ describe('ProposalsService', () => {
           decidedBy: analyst('analyst'),
           decisionMode: 'manual',
         },
-        SPACE_ID
+        SPACE_ID,
+        CALLER
       );
 
       expect(proposal.decision).toBe('approved');
@@ -1461,11 +1600,208 @@ describe('ProposalsService', () => {
       expect(proposal.decidedAt).toEqual(expect.any(String));
     });
 
+    describe('action execution', () => {
+      const executing = () =>
+        baseDocument({
+          decision: 'approved',
+          status: 'executing',
+          decidedAt: '2026-09-01T01:00:00Z',
+        });
+      const caller = { workflowId: 'gate', executionId: 'resolve-exec', request };
+
+      it('stamps the action run started by the settling run', async () => {
+        const storage = createStorage(executing());
+        const { service, workflowsApi } = createService(storage);
+        workflowsApi.getChildWorkflowExecutions.mockResolvedValue([
+          { workflowId: 'some-other-workflow', executionId: 'other-exec' },
+          { workflowId: 'system-alertzero-action-create-rule', executionId: 'action-exec' },
+        ]);
+
+        const proposal = await service.update(
+          { id: 'proposal-1', status: 'succeeded' },
+          SPACE_ID,
+          caller,
+          { linkActionExecution: true }
+        );
+
+        expect(workflowsApi.getChildWorkflowExecutions).toHaveBeenCalledWith(
+          'resolve-exec',
+          SPACE_ID,
+          request
+        );
+        expect(proposal.actionExecutionId).toBe('action-exec');
+        expect(storage.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            document: expect.objectContaining({ actionExecutionId: 'action-exec' }),
+          })
+        );
+      });
+
+      it('looks nothing up unless asked to link the action execution', async () => {
+        const storage = createStorage(executing());
+        const { service, workflowsApi } = createService(storage);
+
+        const proposal = await service.update(
+          { id: 'proposal-1', status: 'succeeded' },
+          SPACE_ID,
+          caller
+        );
+
+        expect(workflowsApi.getChildWorkflowExecutions).not.toHaveBeenCalled();
+        expect(proposal.actionExecutionId).toBeUndefined();
+      });
+
+      it('looks nothing up for an update that does not settle the action', async () => {
+        const storage = createStorage(baseDocument());
+        const { service, workflowsApi } = createService(storage);
+
+        await service.update(
+          { id: 'proposal-1', decision: 'approved', status: 'executing' },
+          SPACE_ID,
+          caller,
+          { linkActionExecution: true }
+        );
+
+        expect(workflowsApi.getChildWorkflowExecutions).not.toHaveBeenCalled();
+      });
+
+      it('still settles the proposal when the run cannot be read', async () => {
+        const storage = createStorage(executing());
+        const { service, workflowsApi, logger } = createService(storage);
+        workflowsApi.getChildWorkflowExecutions.mockRejectedValue(new Error('forbidden'));
+
+        const proposal = await service.update(
+          { id: 'proposal-1', status: 'failed', executionError: 'boom' },
+          SPACE_ID,
+          caller,
+          { linkActionExecution: true }
+        );
+
+        expect(proposal.status).toBe('failed');
+        expect(proposal.actionExecutionId).toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('forbidden'));
+      });
+    });
+
+    describe('decision telemetry', () => {
+      it('reports a recorded decision without its reason, rationale or category', async () => {
+        const storage = createStorage(baseDocument());
+        const { service, analytics } = createService(storage);
+
+        await service.update(
+          {
+            id: 'proposal-1',
+            decision: 'dismissed',
+            status: 'no_action',
+            decidedBy: analyst('analyst'),
+            decisionMode: 'manual',
+            dismissReason: 'duplicate',
+            rationale: 'customer secret text',
+          },
+          SPACE_ID,
+          CALLER
+        );
+
+        expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+        expect(analytics.reportEvent).toHaveBeenCalledWith('proposals_proposal_decided', {
+          proposal_id: 'proposal-1',
+          decision: 'dismissed',
+          decision_mode: 'manual',
+          status: 'no_action',
+          gate: undefined,
+          origin: 'alertzero',
+          conversation_id: 'conv-1',
+          confidence: 'medium',
+          impact: 'low',
+        });
+        const reported = JSON.stringify(analytics.reportEvent.mock.calls);
+        expect(reported).not.toContain('customer secret text');
+        expect(reported).not.toContain('duplicate');
+      });
+
+      it('reports an auto approval as auto', async () => {
+        const storage = createStorage(baseDocument());
+        const { service, analytics } = createService(storage);
+
+        await service.update(
+          { id: 'proposal-1', decision: 'approved', status: 'executing', decisionMode: 'auto' },
+          SPACE_ID,
+          CALLER
+        );
+
+        expect(analytics.reportEvent).toHaveBeenCalledWith(
+          'proposals_proposal_decided',
+          expect.objectContaining({ decision: 'approved', decision_mode: 'auto' })
+        );
+      });
+
+      it('reports nothing for an update that records no decision', async () => {
+        const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
+        const { service, analytics } = createService(storage);
+
+        await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID, CALLER);
+        await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID, CALLER);
+
+        expect(analytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('reports nothing when the decision is refused', async () => {
+        const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
+        const { service, analytics } = createService(storage);
+
+        await expect(
+          service.update(
+            { id: 'proposal-1', decision: 'dismissed', status: 'no_action' },
+            SPACE_ID,
+            CALLER
+          )
+        ).rejects.toThrow(ProposalConflictError);
+
+        expect(analytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('reports nothing when the write does not land', async () => {
+        const storage = createStorage(baseDocument());
+        storage.index.mockRejectedValueOnce(new Error('write failed'));
+        const { service, analytics } = createService(storage);
+
+        await expect(
+          service.update(
+            { id: 'proposal-1', decision: 'approved', status: 'executing' },
+            SPACE_ID,
+            CALLER
+          )
+        ).rejects.toThrow();
+
+        expect(analytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fail a decision that landed when the reporter throws', async () => {
+        const storage = createStorage(baseDocument());
+        const { service, analytics } = createService(storage);
+        analytics.reportEvent.mockImplementationOnce(() => {
+          throw new Error('ebt down');
+        });
+
+        const proposal = await service.update(
+          { id: 'proposal-1', decision: 'approved', status: 'executing' },
+          SPACE_ID,
+          CALLER
+        );
+
+        expect(proposal.decision).toBe('approved');
+      });
+    });
+
     it('should move an approved proposal to a terminal execution state', async () => {
       const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', status: 'succeeded' },
+        SPACE_ID,
+        CALLER
+      );
 
       expect(proposal.status).toBe('succeeded');
     });
@@ -1486,7 +1822,7 @@ describe('ProposalsService', () => {
         // The target differs from the settled status on purpose: re-writing the
         // same one is the idempotent case, covered separately below.
         await expect(
-          service.update({ id: 'proposal-1', status: target }, SPACE_ID)
+          service.update({ id: 'proposal-1', status: target }, SPACE_ID, CALLER)
         ).rejects.toThrow(ProposalConflictError);
         expect(storage.index).not.toHaveBeenCalled();
       }
@@ -1499,7 +1835,11 @@ describe('ProposalsService', () => {
       // `chartsSummary` reads `decidedAt` as the "closed" event. A malfunction
       // settling a proposal `expired` while its deadline is still in the future
       // would otherwise read as open until that deadline arrived.
-      const proposal = await service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', status: 'expired' },
+        SPACE_ID,
+        CALLER
+      );
 
       expect(proposal.decidedAt).toEqual(expect.any(String));
       // Settled, but nobody decided it.
@@ -1512,7 +1852,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', rationale: 'Noted' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', rationale: 'Noted' },
+        SPACE_ID,
+        CALLER
+      );
 
       expect(proposal.decidedAt).toBeUndefined();
     });
@@ -1527,7 +1871,11 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', status: 'succeeded' },
+        SPACE_ID,
+        CALLER
+      );
 
       // Write-once: the moment it stopped awaiting does not change because the
       // action later finished.
@@ -1544,7 +1892,8 @@ describe('ProposalsService', () => {
       // about recording it.
       const proposal = await service.update(
         { id: 'proposal-1', status: 'failed', executionError: 'clone unavailable' },
-        SPACE_ID
+        SPACE_ID,
+        CALLER
       );
 
       expect(proposal.status).toBe('failed');
@@ -1558,7 +1907,7 @@ describe('ProposalsService', () => {
       // `approved` + `pending` is not a legal pair, so an approval has to say
       // what happens next in the same call.
       await expect(
-        service.update({ id: 'proposal-1', decision: 'approved' }, SPACE_ID)
+        service.update({ id: 'proposal-1', decision: 'approved' }, SPACE_ID, CALLER)
       ).rejects.toThrow(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -1569,7 +1918,7 @@ describe('ProposalsService', () => {
 
       // A terminal row with no successor would still read as live.
       await expect(
-        service.update({ id: 'proposal-1', status: 'superseded' }, SPACE_ID)
+        service.update({ id: 'proposal-1', status: 'superseded' }, SPACE_ID, CALLER)
       ).rejects.toThrow(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -1580,7 +1929,8 @@ describe('ProposalsService', () => {
 
       const proposal = await service.update(
         { id: 'proposal-1', decision: 'dismissed', status: 'no_action' },
-        SPACE_ID
+        SPACE_ID,
+        CALLER
       );
 
       expect(proposal.decision).toBe('dismissed');
@@ -1594,7 +1944,7 @@ describe('ProposalsService', () => {
       // Independent of the status guard: this proposal is still `pending`, so
       // only the decision's own immutability can refuse a second approver.
       await expect(
-        service.update({ id: 'proposal-1', decision: 'dismissed' }, SPACE_ID)
+        service.update({ id: 'proposal-1', decision: 'dismissed' }, SPACE_ID, CALLER)
       ).rejects.toThrow(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -1607,7 +1957,8 @@ describe('ProposalsService', () => {
       // lets `clone` mark a failed original as superseded.
       const proposal = await service.update(
         { id: 'proposal-1', rationale: 'Retried as a new proposal' },
-        SPACE_ID
+        SPACE_ID,
+        CALLER
       );
 
       expect(proposal.rationale).toBe('Retried as a new proposal');
@@ -1626,7 +1977,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ decision, status: 'pending' }));
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', status }, SPACE_ID);
+      const proposal = await service.update({ id: 'proposal-1', status }, SPACE_ID, CALLER);
 
       expect(proposal.status).toBe(status);
       expect(proposal.decision).toBe(decision);
@@ -1649,7 +2000,7 @@ describe('ProposalsService', () => {
       // `dismissed` + `executing` would claim an action is running for a
       // proposal that was declined; `expired` means nobody answered, which a
       // decision contradicts.
-      await expect(service.update({ id: 'proposal-1', status }, SPACE_ID)).rejects.toThrow(
+      await expect(service.update({ id: 'proposal-1', status }, SPACE_ID, CALLER)).rejects.toThrow(
         ProposalConflictError
       );
       expect(storage.index).not.toHaveBeenCalled();
@@ -1661,9 +2012,9 @@ describe('ProposalsService', () => {
 
       // An on-failure handler that fires before creation succeeded resolves its
       // template to ''. Elasticsearch would answer with an opaque shard failure.
-      await expect(service.update({ id: '', status: 'expired' }, SPACE_ID)).rejects.toBeInstanceOf(
-        ProposalNotFoundError
-      );
+      await expect(
+        service.update({ id: '', status: 'expired' }, SPACE_ID, CALLER)
+      ).rejects.toBeInstanceOf(ProposalNotFoundError);
 
       expect(storage.search).not.toHaveBeenCalled();
     });
@@ -1674,7 +2025,8 @@ describe('ProposalsService', () => {
 
       const proposal = await service.update(
         { id: 'proposal-1', status: 'failed', executionError: 'action exploded' },
-        SPACE_ID
+        SPACE_ID,
+        CALLER
       );
 
       expect(proposal.status).toBe('failed');
@@ -1687,7 +2039,11 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      const proposal = await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+      const proposal = await service.update(
+        { id: 'proposal-1', status: 'succeeded' },
+        SPACE_ID,
+        CALLER
+      );
 
       expect(proposal.rationale).toBe('Looks right');
     });
@@ -3840,13 +4196,15 @@ describe('ProposalsService.reopen', () => {
       actionInput: undefined,
       category: 'todo',
       origin: 'nightshift',
+      gate: 'none',
+      workflowExecutionId: undefined,
       decision: 'approved',
       status: 'no_action',
       decidedBy: analyst('ava'),
       ...overrides,
     });
 
-  /** Serves documents by id, so the successor appears once the gate "creates" it. */
+  /** Serves documents by id, so a successor is readable as soon as it is written. */
   const createChainStorage = (original: ProposalDocument) => {
     const storage = createStorage();
     const documents = new Map<string, ProposalDocument>([['proposal-1', original]]);
@@ -3863,49 +4221,21 @@ describe('ProposalsService.reopen', () => {
         return { _id: id };
       }
     );
+    storage.delete.mockImplementation(async ({ id }: { id: string }) => {
+      documents.delete(id);
+      return { acknowledged: true, result: 'deleted' };
+    });
     return { storage, documents };
   };
 
-  const withGate = (documents: Map<string, ProposalDocument>) => {
-    const workflowsApi = {
-      ...createWorkflowsApi(),
-      executeWorkflow: jest.fn(
-        async ({ inputs }: { inputs: { proposalId: string; title: string } }) => {
-          // What the gate's `createProposal` step writes: a fresh root of its own.
-          documents.set(inputs.proposalId, {
-            ...manual({ decision: undefined, decidedBy: undefined, status: 'pending' }),
-            rootProposalId: inputs.proposalId,
-            title: inputs.title,
-            workflowExecutionId: 'exec-2',
-          });
-          return { workflowExecutionId: 'exec-2' };
-        }
-      ),
-    };
-    return workflowsApi;
-  };
-
-  it('re-offers the proposal through a new gate and links the two', async () => {
+  it('appends a gateless successor and links the two, without starting a workflow', async () => {
     const { storage, documents } = createChainStorage(manual());
-    const workflowsApi = withGate(documents);
-    const { service } = createService(storage, workflowsApi);
+    const { service, workflowsApi, attachmentsClient } = createService(storage);
 
     const { proposalId } = await service.reopen('proposal-1', SPACE_ID, request);
 
-    expect(workflowsApi.executeWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({
-        workflowId: 'system-create-proposal',
-        waitForCompletion: false,
-        inputs: expect.objectContaining({
-          conversationId: 'conv-1',
-          title: 'Tune the noisy rule',
-          origin: 'nightshift',
-          // Still a to-do so it can be marked applied again.
-          category: 'todo',
-          proposalId,
-        }),
-      })
-    );
+    // Nothing is parked on a to-do, so nothing is started for one either.
+    expect(workflowsApi.executeWorkflow).not.toHaveBeenCalled();
     // The original keeps its decision; it is only pointed at its successor.
     expect(documents.get('proposal-1')).toMatchObject({
       decision: 'approved',
@@ -3914,10 +4244,127 @@ describe('ProposalsService.reopen', () => {
     });
     expect(documents.get(proposalId)).toMatchObject({
       status: 'pending',
+      category: 'todo',
+      gate: 'none',
       rootProposalId: 'proposal-1',
       supersedes: 'proposal-1',
       revision: 2,
     });
+    const successor = documents.get(proposalId);
+    expect(successor?.decision).toBeUndefined();
+    expect(successor?.decidedBy).toBeUndefined();
+    expect(successor?.workflowExecutionId).toBeUndefined();
+    expect(successor?.expiresAt).toBeUndefined();
+    // Stamped with the reopen, not inherited: the successor is offered now, by
+    // whoever took the mark back, and nothing else records either fact.
+    expect(successor?.createdBy).toEqual(analyst('decider'));
+    expect(Date.parse(successor!.createdAt)).toBeGreaterThan(
+      Date.parse(documents.get('proposal-1')!.createdAt)
+    );
+    // The card exists by the time the call returns, so the conversation can be
+    // refreshed on the response rather than polled for.
+    expect(attachmentsClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: proposalId })
+    );
+  });
+
+  it('re-offers a gated to-do created before gateless proposals existed, as a gateless one', async () => {
+    const { storage, documents } = createChainStorage(
+      manual({
+        gate: undefined,
+        workflowExecutionId: EXECUTION_ID,
+        expiresAt: '2030-01-01T00:00:00.000Z',
+      })
+    );
+    const { service } = createService(storage);
+
+    const { proposalId } = await service.reopen('proposal-1', SPACE_ID, request);
+
+    expect(documents.get(proposalId)).toMatchObject({ gate: 'none' });
+    expect(documents.get(proposalId)?.workflowExecutionId).toBeUndefined();
+    expect(documents.get(proposalId)?.expiresAt).toBeUndefined();
+  });
+
+  it('reports a reopen once the successor is linked', async () => {
+    const { storage } = createChainStorage(manual());
+    const { service, analytics } = createService(storage);
+
+    const { proposalId } = await service.reopen('proposal-1', SPACE_ID, request);
+
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analytics.reportEvent).toHaveBeenCalledWith('proposals_proposal_reopened', {
+      proposal_id: 'proposal-1',
+      successor_id: proposalId,
+      origin: 'nightshift',
+      conversation_id: 'conv-1',
+      confidence: 'medium',
+      impact: 'low',
+    });
+  });
+
+  it('reports a reopen only for the call that won the race', async () => {
+    const { storage } = createChainStorage(manual());
+    const { service, analytics } = createService(storage);
+    let marked = false;
+    const index = storage.index.getMockImplementation()!;
+    storage.index.mockImplementation(async (args: { id: string; if_seq_no?: number }) => {
+      if (args.id === 'proposal-1' && args.if_seq_no !== undefined) {
+        if (marked) {
+          throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+        }
+        marked = true;
+      }
+      return index(args);
+    });
+
+    await Promise.allSettled([
+      service.reopen('proposal-1', SPACE_ID, request),
+      service.reopen('proposal-1', SPACE_ID, request),
+    ]);
+
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not fail a reopen that landed when the reporter throws', async () => {
+    const { storage } = createChainStorage(manual());
+    const { service, analytics } = createService(storage);
+    analytics.reportEvent.mockImplementationOnce(() => {
+      throw new Error('ebt down');
+    });
+
+    await expect(service.reopen('proposal-1', SPACE_ID, request)).resolves.toEqual({
+      proposalId: expect.any(String),
+    });
+  });
+
+  it('leaves exactly one successor when two reopens race', async () => {
+    const { storage, documents } = createChainStorage(manual());
+    const { service } = createService(storage);
+    // Both calls load the original at the same version; only the first mark lands.
+    let marked = false;
+    const index = storage.index.getMockImplementation()!;
+    storage.index.mockImplementation(async (args: { id: string; if_seq_no?: number }) => {
+      if (args.id === 'proposal-1' && args.if_seq_no !== undefined) {
+        if (marked) {
+          throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+        }
+        marked = true;
+      }
+      return index(args);
+    });
+
+    const results = await Promise.allSettled([
+      service.reopen('proposal-1', SPACE_ID, request),
+      service.reopen('proposal-1', SPACE_ID, request),
+    ]);
+
+    expect(results.map(({ status }) => status).sort()).toEqual(['fulfilled', 'rejected']);
+    const refused = results.find(({ status }) => status === 'rejected') as PromiseRejectedResult;
+    expect(refused.reason).toBeInstanceOf(ProposalConflictError);
+    // The loser deleted the row it created, so the chain has one live head.
+    const live = [...documents].filter(([id]) => id !== 'proposal-1');
+    expect(live).toHaveLength(1);
+    expect(documents.get('proposal-1')?.supersededBy).toBe(live[0][0]);
   });
 
   it.each<[string, Partial<ProposalDocument>]>([
@@ -3930,13 +4377,213 @@ describe('ProposalsService.reopen', () => {
     ['was dismissed', { decision: 'dismissed' }],
     ['was already re-offered', { supersededBy: 'proposal-2' }],
   ])('refuses a proposal that %s', async (_, overrides) => {
-    const { storage, documents } = createChainStorage(manual(overrides));
-    const workflowsApi = withGate(documents);
-    const { service } = createService(storage, workflowsApi);
+    const { storage } = createChainStorage(manual(overrides));
+    const { service, analytics } = createService(storage);
 
     await expect(service.reopen('proposal-1', SPACE_ID, request)).rejects.toBeInstanceOf(
       ProposalConflictError
     );
-    expect(workflowsApi.executeWorkflow).not.toHaveBeenCalled();
+    expect(storage.index).not.toHaveBeenCalled();
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
+  });
+});
+
+describe('ProposalsService — gateless proposals', () => {
+  const gateless = (overrides: Partial<ProposalDocument> = {}) =>
+    baseDocument({
+      actionWorkflowId: undefined,
+      actionInput: undefined,
+      category: 'todo',
+      origin: 'nightshift',
+      gate: 'none',
+      workflowExecutionId: undefined,
+      ...overrides,
+    });
+
+  describe('create', () => {
+    const gatelessParams = (overrides: Record<string, unknown> = {}) =>
+      ({
+        gate: 'none',
+        conversationId: 'conv-1',
+        comment: 'Revert the pool-size config change',
+        category: 'todo',
+        confidence: 'medium',
+        origin: 'nightshift',
+        ...overrides,
+      } as CreateProposalParams);
+
+    it('stores the gate and attributes the creator to the request', async () => {
+      const storage = createStorage();
+      const { service, resolveUser } = createService(storage);
+
+      await service.create(gatelessParams(), { spaceId: SPACE_ID, request });
+
+      expect(resolveUser).toHaveBeenCalledWith(request);
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            gate: 'none',
+            status: 'pending',
+            createdBy: analyst('decider'),
+          }),
+        })
+      );
+    });
+
+    it.each<[string, Record<string, unknown>, new (message: string) => Error]>([
+      // An action is refused one step earlier, by the guard that keeps a to-do
+      // from running anything whether it is gated or not.
+      [
+        'an action',
+        { actionWorkflowId: 'system-alertzero-action-create-rule' },
+        ProposalInvalidActionInputError,
+      ],
+      ['a gate execution', { workflowExecutionId: EXECUTION_ID }, ProposalInvalidGateError],
+      ['a deadline', { expiresAt: '2030-01-01T00:00:00.000Z' }, ProposalInvalidGateError],
+      ['another category', { category: 'tune' }, ProposalInvalidGateError],
+    ])('refuses a gateless proposal carrying %s', async (_, overrides, expected) => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(
+        service.create(gatelessParams(overrides), { spaceId: SPACE_ID, request })
+      ).rejects.toBeInstanceOf(expected);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('releaseGate', () => {
+    it('refuses a gateless proposal that is no longer pending', async () => {
+      const storage = createStorage(gateless({ status: 'executing' }));
+      const { service } = createService(storage);
+
+      await expect(
+        service.releaseGate('proposal-1', releaseParams({ approved: true }))
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('writes the decision itself, with no gate to resume', async () => {
+      const storage = createStorage(gateless());
+      const { service, workflowsApi } = createService(storage);
+
+      const decided = await service.releaseGate('proposal-1', releaseParams({ approved: true }));
+
+      expect(decided).toMatchObject({
+        decision: 'approved',
+        status: 'no_action',
+        decisionMode: 'manual',
+        decidedBy: analyst('decider'),
+      });
+      expect(decided.decidedAt).toBeDefined();
+      // Nothing is read from or resumed on the workflows side.
+      expect(workflowsApi.getWorkflowExecution).not.toHaveBeenCalled();
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+      // No revision hold: the decision is already written.
+      const [[writeArgs]] = storage.index.mock.calls;
+      expect(writeArgs.document.gateReleasedAt).toBeUndefined();
+      expect(writeArgs.if_seq_no).toBe(7);
+    });
+
+    it('records a dismissal with its reason and rationale', async () => {
+      const storage = createStorage(gateless());
+      const { service } = createService(storage);
+
+      const decided = await service.releaseGate(
+        'proposal-1',
+        releaseParams({ approved: false, dismissReason: 'duplicate', rationale: 'Already done' })
+      );
+
+      expect(decided).toMatchObject({
+        decision: 'dismissed',
+        status: 'no_action',
+        dismissReason: 'duplicate',
+        rationale: 'Already done',
+      });
+    });
+
+    it('lets only the first of two concurrent decisions land', async () => {
+      const storage = createStorage(gateless());
+      let written = false;
+      storage.index.mockImplementation(async () => {
+        await new Promise((resolve) => setImmediate(resolve));
+        if (written) {
+          throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+        }
+        written = true;
+        return { _id: 'proposal-1' };
+      });
+      const { service } = createService(storage);
+
+      const results = await Promise.allSettled([
+        service.releaseGate('proposal-1', releaseParams({ approved: true })),
+        service.releaseGate('proposal-1', releaseParams({ approved: false })),
+      ]);
+
+      expect(results.map(({ status }) => status).sort()).toEqual(['fulfilled', 'rejected']);
+      const refused = results.find(({ status }) => status === 'rejected') as PromiseRejectedResult;
+      expect(refused.reason).toBeInstanceOf(ProposalConflictError);
+    });
+
+    it('refuses a proposal that was already decided', async () => {
+      const storage = createStorage(
+        gateless({ decision: 'approved', status: 'no_action', decidedBy: analyst('ava') })
+      );
+      const { service } = createService(storage);
+
+      await expect(
+        service.releaseGate('proposal-1', releaseParams({ approved: false }))
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('decision telemetry', () => {
+    it.each([
+      [true, 'approved'],
+      [false, 'dismissed'],
+    ] as const)('reports a direct decision when approved is %s', async (approved, decision) => {
+      const storage = createStorage(gateless());
+      const { service, analytics } = createService(storage);
+
+      await service.releaseGate('proposal-1', releaseParams({ approved, rationale: 'private' }));
+
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        'proposals_proposal_decided',
+        expect.objectContaining({
+          proposal_id: 'proposal-1',
+          decision,
+          decision_mode: 'manual',
+          status: 'no_action',
+          gate: 'none',
+          origin: 'nightshift',
+        })
+      );
+      expect(JSON.stringify(analytics.reportEvent.mock.calls)).not.toContain('private');
+    });
+
+    it('reports nothing when the proposal was already decided', async () => {
+      const storage = createStorage(gateless({ decision: 'approved', status: 'no_action' }));
+      const { service, analytics } = createService(storage);
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+
+      expect(analytics.reportEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('update', () => {
+    it('refuses a workflow write to a gateless proposal', async () => {
+      const storage = createStorage(gateless());
+      const { service } = createService(storage);
+
+      await expect(
+        service.update({ id: 'proposal-1', status: 'expired' }, SPACE_ID, CALLER)
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
   });
 });
