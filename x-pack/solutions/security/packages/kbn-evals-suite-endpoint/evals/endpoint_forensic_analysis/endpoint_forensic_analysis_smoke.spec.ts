@@ -154,13 +154,13 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
           {
             input: {
               question:
-                'Reconstruct persistence on SRV-DC01 and extract IoCs. Telemetry shows the malware created mutex Global\\AcmeRansom-7F3A; keep registry keys and mutex in their own indicator categories.',
+                'Reconstruct persistence on SRV-DC01 and extract IoCs. Telemetry shows the malware created mutex Global\\AcmeRansom-7F3A; keep the mutex apart from the file paths and registry keys.',
             },
             output: {
               criteria: [
-                'Reports the Run\\Updater persistence key from endpoint registry telemetry as a registry key indicator, not a file path',
+                'Reports the Run\\Updater persistence key from endpoint registry telemetry among the extracted indicators (the extractor lists registry keys under file_paths)',
                 'Reports Global\\AcmeRansom-7F3A as a mutex indicator without inventing mechanical mutex telemetry',
-                'Keeps registry keys and mutex in distinct structured or clearly labelled categories',
+                'Keeps the mutex separate from the file paths and registry keys, rather than folding it into them',
               ],
               tool_sequence: [...FORENSIC_ESQL_TRAJECTORY, ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID],
             },
