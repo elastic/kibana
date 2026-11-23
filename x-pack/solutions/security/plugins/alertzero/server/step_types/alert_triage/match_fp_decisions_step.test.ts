@@ -1371,7 +1371,7 @@ describe('triage match decisions step in on mode', () => {
     });
 
     it('counts a decision once in the failed closes when its close fails on either page', async () => {
-      const { run, callKibanaApi } = setup({
+      const { run, callKibanaApi, closes } = setup({
         mode: 'on',
         alerts: [],
         decisions: approved('C:\\x.exe'),
@@ -1389,6 +1389,8 @@ describe('triage match decisions step in on mode', () => {
 
       const { output } = await run();
 
+      // Both pages tried to close, and both failed: the count is one because it is per decision.
+      expect(closes().flatMap(({ signal_ids: ids }) => ids)).toEqual(['a', 'b']);
       expect(output).toEqual(expect.objectContaining({ close_failures: 1 }));
     });
 
@@ -1405,7 +1407,7 @@ describe('triage match decisions step in on mode', () => {
           .groups[0].hash
       );
       const dismissedId = decisionId('do_not_propose', hashOf('C:\\a.exe'));
-      const { run, callKibanaApi } = setup({
+      const { run, callKibanaApi, closes, tags } = setup({
         mode: 'on',
         alerts: [
           ['d', source('C:\\a.exe')],
@@ -1431,6 +1433,11 @@ describe('triage match decisions step in on mode', () => {
 
       const { output } = await run();
 
+      // Neither phase ran for the decision: nothing was closed and no alert of it was tagged, so it
+      // was deferred twice and counted once.
+      expect(closes()).toEqual([]);
+      expect(tags().flatMap(({ ids }) => ids)).not.toContain('t');
+      expect(tags().flatMap(({ ids }) => ids)).not.toContain('u');
       expect(output).toEqual(expect.objectContaining({ deferred: 1, out_of_time: true }));
     });
   });
