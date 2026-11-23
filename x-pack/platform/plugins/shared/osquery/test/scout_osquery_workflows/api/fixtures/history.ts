@@ -8,8 +8,6 @@
 import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-const MAX_HISTORY_PAGES = 50;
-
 export interface HistoryRow {
   actionId?: string;
   source: string;
@@ -25,12 +23,9 @@ export const historyClient =
   (apiClient: ApiClientFixture, headers: Record<string, string>, since: string) =>
   async (actionId: string, sourceFilters?: string): Promise<HistoryRow[]> => {
     const matches: HistoryRow[] = [];
+    const followedCursors = new Set<string>();
     let nextPage: string | undefined;
-    let pages = 0;
     do {
-      pages++;
-      // A repeated cursor would otherwise spin until the test timeout instead of failing here.
-      expect(pages).toBeLessThanOrEqual(MAX_HISTORY_PAGES);
       const params = new URLSearchParams({ pageSize: '100', startDate: since });
       if (sourceFilters) params.set('sourceFilters', sourceFilters);
       if (nextPage) params.set('nextPage', nextPage);
@@ -42,7 +37,14 @@ export const historyClient =
       expect(response).toHaveStatusCode(200);
       const page = response.body as { data: HistoryRow[]; hasMore: boolean; nextPage?: string };
       matches.push(...page.data.filter((row) => row.actionId === actionId));
-      nextPage = page.hasMore ? page.nextPage : undefined;
+      if (!page.hasMore) break;
+
+      // Broken pagination must fail the test: a missing cursor would silently skip later pages,
+      // and a repeated one would loop until the test timeout.
+      expect(typeof page.nextPage === 'string' && page.nextPage.length > 0).toBe(true);
+      expect(followedCursors.has(page.nextPage as string)).toBe(false);
+      nextPage = page.nextPage as string;
+      followedCursors.add(nextPage);
     } while (nextPage);
 
     return matches;
