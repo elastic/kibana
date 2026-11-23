@@ -61,7 +61,7 @@ describe('toReading', () => {
       source_id: 'source-1',
       entity: ENTITY,
       // The minutes the rule compared, not those its scheduled time would suggest.
-      bucket_start: Date.UTC(2026, 10, 20, 10, 26),
+      bucket_start: Date.UTC(2026, 10, 20, 10, 25),
       bucket_end: Date.UTC(2026, 10, 20, 10, 31),
       value: 26,
       unit: 'count',
