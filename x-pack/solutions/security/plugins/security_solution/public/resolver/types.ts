@@ -828,7 +828,7 @@ export interface TimeFilters {
  */
 export interface ResolverProps {
   /**
-   * Used by `styled-components`.
+   * Used by `@emotion/styled`.
    */
   className?: string;
   /**

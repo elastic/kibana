@@ -66,10 +66,10 @@ describe('ProfilesTab', () => {
 
     await waitFor(() =>
       expect(getRows()).toEqual([
-        ['_performant_data_streamsManaged', 'Data streams', '1', '1', '1'],
-        ['_performant_indicesManaged', 'Indices', '1', '1', '1'],
         ['archive-cheap', 'Indices', '0', '0.25', '1'],
         ['catalog-fast', 'Indices', '2', '8.5', '1'],
+        ['default_data_streams_7dManaged', 'Data streams', '1', '1', '1'],
+        ['default_indicesManaged', 'Indices', '1', '1', '1'],
         ['logs-recent-week', 'Data streams', '1.5', '5,000', '2'],
       ])
     );
@@ -105,14 +105,14 @@ describe('ProfilesTab', () => {
     const user = userEvent.setup();
     renderProfilesTab();
 
-    await user.type(await screen.findByPlaceholderText('Search boost profiles'), 'performant');
+    await user.type(await screen.findByPlaceholderText('Search boost profiles'), 'default');
     await waitFor(() =>
       expect(screen.getByTestId('searchBoostTypeFilter-indices')).toHaveTextContent('1')
     );
 
     await user.click(screen.getByTestId('searchBoostTypeFilter-data_streams'));
     await waitFor(() =>
-      expect(getRows().map(([name]) => name)).toEqual(['_performant_data_streamsManaged'])
+      expect(getRows().map(([name]) => name)).toEqual(['default_data_streams_7dManaged'])
     );
   });
 
@@ -162,7 +162,7 @@ describe('ProfilesTab', () => {
       expect(onCreate).toHaveBeenCalled();
 
       expect(
-        within(await getRow('_performant_indices')).getByRole('button', { name: 'Edit' })
+        within(await getRow('default_indices')).getByRole('button', { name: 'Edit' })
       ).toHaveAttribute('aria-disabled', 'true');
 
       await user.click(within(await getRow('catalog-fast')).getByRole('button', { name: 'Edit' }));
@@ -174,9 +174,9 @@ describe('ProfilesTab', () => {
       renderProfilesTab({ canEdit: true, onDuplicate });
 
       await userEvent.click(
-        within(await getRow('_performant_indices')).getByRole('button', { name: 'Duplicate' })
+        within(await getRow('default_indices')).getByRole('button', { name: 'Duplicate' })
       );
-      expect(onDuplicate).toHaveBeenCalledWith(findProfile('_performant_indices'));
+      expect(onDuplicate).toHaveBeenCalledWith(findProfile('default_indices'));
     });
 
     it('offers delete on custom profiles only', async () => {
@@ -185,7 +185,7 @@ describe('ProfilesTab', () => {
       renderProfilesTab({ canEdit: true, onDelete });
 
       expect(
-        within(await getRow('_performant_indices')).queryByRole('button', { name: 'Delete' })
+        within(await getRow('default_indices')).queryByRole('button', { name: 'Delete' })
       ).toBeNull();
 
       await user.click(
@@ -200,7 +200,7 @@ describe('ProfilesTab', () => {
         onDelete: jest.fn(),
         rules: [
           {
-            name: '_default_indices',
+            name: 'default_indices',
             index_pattern: '*',
             boost_profile: 'catalog-fast',
             priority: -100,

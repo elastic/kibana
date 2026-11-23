@@ -65,9 +65,15 @@ exports[`LayerControl is rendered 1`] = `
         >
           <EuiToolTip
             content="Collapse layers panel"
+            disableScreenReaderOutput={true}
           >
             <EuiButtonIcon
               aria-label="Collapse layers panel"
+              buttonRef={
+                Object {
+                  "current": null,
+                }
+              }
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               data-test-subj="mapToggleLegendButton"
@@ -106,9 +112,15 @@ exports[`LayerControl is rendered 1`] = `
 exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
 <EuiToolTip
   content="Expand layers panel"
+  disableScreenReaderOutput={true}
   position="left"
 >
   <ExpandButton
+    buttonRef={
+      Object {
+        "current": null,
+      }
+    }
     hasErrorsOrWarnings={false}
     isLoading={false}
     onClick={[Function]}
@@ -119,9 +131,15 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
 exports[`LayerControl isLayerTOCOpen Should render expand button with error icon when layer has error 1`] = `
 <EuiToolTip
   content="Expand layers panel"
+  disableScreenReaderOutput={true}
   position="left"
 >
   <ExpandButton
+    buttonRef={
+      Object {
+        "current": null,
+      }
+    }
     hasErrorsOrWarnings={true}
     isLoading={false}
     onClick={[Function]}
@@ -132,9 +150,15 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
 exports[`LayerControl isLayerTOCOpen Should render expand button with loading icon when layer is loading 1`] = `
 <EuiToolTip
   content="Expand layers panel"
+  disableScreenReaderOutput={true}
   position="left"
 >
   <ExpandButton
+    buttonRef={
+      Object {
+        "current": null,
+      }
+    }
     hasErrorsOrWarnings={false}
     isLoading={true}
     onClick={[Function]}
@@ -207,9 +231,15 @@ exports[`LayerControl isReadOnly 1`] = `
         >
           <EuiToolTip
             content="Collapse layers panel"
+            disableScreenReaderOutput={true}
           >
             <EuiButtonIcon
               aria-label="Collapse layers panel"
+              buttonRef={
+                Object {
+                  "current": null,
+                }
+              }
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               data-test-subj="mapToggleLegendButton"
@@ -294,9 +324,15 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
         >
           <EuiToolTip
             content="Collapse layers panel"
+            disableScreenReaderOutput={true}
           >
             <EuiButtonIcon
               aria-label="Collapse layers panel"
+              buttonRef={
+                Object {
+                  "current": null,
+                }
+              }
               className="mapLayerControl__closeLayerTOCButton"
               color="text"
               data-test-subj="mapToggleLegendButton"

@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { createOrUpdateIndex } from './create_index';
+export {
+  createOrUpdateIndex,
+  isRetryableIndexInitializationError,
+  isUnknownResourceError,
+} from './create_index';
