@@ -33,6 +33,10 @@ const DisabledCategoryFilter = () => (
   </EuiFilterButton>
 );
 
+const DISABLED_FILTERS: EuiSearchBarProps['filters'] = [
+  { type: 'custom_component', component: DisabledCategoryFilter },
+];
+
 /**
  * Props for a {@link QueryInput} component.
  */
@@ -74,17 +78,16 @@ export const QueryInput = ({
     }),
   };
 
-  const filters: EuiSearchBarProps['filters'] = isDisabled
-    ? [{ type: 'custom_component', component: DisabledCategoryFilter }]
-    : [
-        {
-          type: 'field_value_selection',
-          field: CATEGORY_FIELD,
-          name: categoryFilterLabel,
-          multiSelect: 'or',
-          options: categories,
-        },
-      ];
+  const categoryFilters: EuiSearchBarProps['filters'] = [
+    {
+      type: 'field_value_selection',
+      field: CATEGORY_FIELD,
+      name: categoryFilterLabel,
+      multiSelect: 'or',
+      options: categories,
+    },
+  ];
+  const filters = isDisabled ? DISABLED_FILTERS : categoryFilters;
 
   const onChange: EuiSearchBarProps['onChange'] = ({ query: newQuery, error }) => {
     if (error) {

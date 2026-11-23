@@ -111,12 +111,12 @@ export interface InjectedMetadata {
   uiPlugins: InjectedMetadataPlugin[];
   legacyMetadata: {
     uiSettings: {
-      defaults: Record<string, any>; // UiSettingsRuntimeEntry (name, value, type, readonly, readonlyMode)
-      user: Record<string, any>; // UserProvidedValues (userValue, isOverridden)
+      defaults: Record<string, any>; // unreferencing UiSettingsRuntimeEntry here
+      user: Record<string, any>; // unreferencing UserProvidedValues here
     };
     globalUiSettings: {
-      defaults: Record<string, any>; // UiSettingsRuntimeEntry (name, value, type, readonly, readonlyMode)
-      user: Record<string, any>; // UserProvidedValues (userValue, isOverridden)
+      defaults: Record<string, any>; // unreferencing UiSettingsRuntimeEntry here
+      user: Record<string, any>; // unreferencing UserProvidedValues here
     };
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;

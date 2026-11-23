@@ -27,8 +27,8 @@ export interface UseSettingDefinitionsResult {
   /** The setting definitions, keyed by setting ID. Empty until they load. */
   definitions: UiSettingsMetadataState;
   /**
-   * True until the definitions first load. A refetch keeps the loaded definitions, so a form
-   * built from them stays mounted with its unsaved changes.
+   * True until the definitions first load. The loaded definitions stay while a refetch is in
+   * flight, so a form built from them stays mounted with its unsaved changes.
    */
   isLoading: boolean;
   /** The error from fetching the definitions, if the latest request failed. */

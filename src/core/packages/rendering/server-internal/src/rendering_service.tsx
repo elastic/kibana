@@ -413,13 +413,9 @@ export class RenderingService {
   }
 
   /**
-   * Loads the default and user-provided UI settings values needed to render the page, along
-   * with the user's dark mode/locale preferences and user storage values.
-   *
-   * Anonymous pages skip user-scoped values and async default values (the latter typically call
-   * ES via `asCurrentUser`, which would 401 on an unauthenticated request), so they only need the
-   * two synchronous `getRegistered()` calls. All other pages run every request concurrently for
-   * performance reasons.
+   * Loads the UI settings, user settings and user storage values that the page renders with.
+   * Anonymous pages skip user-scoped values and async defaults, which typically call ES as the
+   * current user and would 401.
    */
   private async loadSettingsForRender({
     request,
@@ -548,10 +544,6 @@ const withAsyncDefaultValues = async (
   return updatedSettings;
 };
 
-/**
- * Strip full UiSettingsParams down to the minimal fields needed by the browser
- * runtime client: value, type, name, readonly, readonlyMode, and sensitive.
- */
 const toRuntimeDefaults = (
   fullDefaults: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>
 ): Record<string, UiSettingsRuntimeEntry> => {

@@ -126,9 +126,7 @@ export interface IUiSettingsClient {
 export type UiSettingsMetadataState = Record<string, PublicUiSettingsParams>;
 
 /**
- * Client for fetching full settings metadata on demand.
- * Unlike IUiSettingsClient which only holds slim runtime data,
- * this client fetches the complete setting definitions from the server.
+ * Client that fetches the full setting definitions from the server on demand.
  * @public
  */
 export interface IUiSettingsMetadataClient {

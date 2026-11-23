@@ -57,7 +57,7 @@ const { definitions, isLoading, loadError, retry } = useSettingDefinitions({
 ```
 
 - `definitions` is empty until the request succeeds. Merge it with the client's current values using `mergeSettingDefinitions` from `@kbn/management-settings-utilities`.
-- `isLoading` is only true before the definitions first load. When they are fetched again, such as for a new `metadataClient`, the loaded definitions stay in place, so a form built from them stays mounted with its unsaved changes.
+- `isLoading` is only true before the definitions first load. When they are fetched again, such as for a new `metadataClient`, the loaded definitions stay in place while the request is in flight, so a form built from them stays mounted with its unsaved changes. If that request fails, `definitions` is empty and `loadError` is set.
 - `loadError` is the error from the latest request, and is cleared while `retry` fetches the definitions again.
 - Pass `isEnabled: false` to skip the request, such as when the user can't see the scope.
 
