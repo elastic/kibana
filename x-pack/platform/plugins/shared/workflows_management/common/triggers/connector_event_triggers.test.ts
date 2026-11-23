@@ -11,7 +11,7 @@ import {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
 } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
+import { slack2HitlAction } from '@kbn/connector-topics';
 import {
   getConnectorEventTriggerDefinitions,
   getConnectorTypeIdForTriggerEventId,
@@ -30,7 +30,7 @@ const expectedConnectorEventTitles = (specs: ConnectorSpec[]): Map<string, strin
       }
       const displayName = connectorTriggerDisplayName(spec.metadata.displayName);
       return Object.values(events.definitions)
-        .filter((eventDefinition) => eventDefinition.eventId !== HITL_SLACK_ACTION_EVENT_ID)
+        .filter((eventDefinition) => eventDefinition.eventId !== slack2HitlAction.name)
         .map(
           (eventDefinition) =>
             [eventDefinition.eventId, `${displayName} - ${eventDefinition.title}`] as const
@@ -72,7 +72,8 @@ describe('getConnectorEventTriggerDefinitions', () => {
       (definition) => definition.id
     );
 
+    expect(slack2HitlAction.name).toBe('slack2.hitl_action');
     expect(ids).toContain('slack2.message');
-    expect(ids).not.toContain(HITL_SLACK_ACTION_EVENT_ID);
+    expect(ids).not.toContain(slack2HitlAction.name);
   });
 });
