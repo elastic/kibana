@@ -151,8 +151,10 @@ const gaugeConfigMetricOptionsSchema = {
         ),
         mode: schema.maybe(
           schema.oneOf([schema.literal('auto'), schema.literal('bands')], {
-            meta: { description: 'Tick placement mode.' },
-            defaultValue: 'bands',
+            meta: {
+              description:
+                'Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.',
+            },
           })
         ),
       },

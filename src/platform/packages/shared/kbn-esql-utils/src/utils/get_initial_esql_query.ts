@@ -24,11 +24,32 @@ const getFinalWhereClause = (
   return ` | WHERE ${parts.join(' AND ')}`;
 };
 
+const MATCH_ALL_WILDCARD = '*';
+const REMOTE_CLUSTER_SEPARATOR = ':';
+const SOURCE_SELECTOR_SEPARATOR = '::';
+
+/**
+ * Matches every index on the local cluster (`*`) or on a remote cluster (`<cluster>:*`, which
+ * includes `*:*`). TSDB field metadata surfacing from such a broad resolution is not a reliable
+ * signal that the user wants a time series query.
+ */
+const hasOverlyBroadIndexPattern = (indexPattern: string): boolean =>
+  indexPattern.split(',').some((entry) => {
+    const [sourceWithoutSelector] = entry.trim().split(SOURCE_SELECTOR_SEPARATOR);
+    const separatorIndex = sourceWithoutSelector.lastIndexOf(REMOTE_CLUSTER_SEPARATOR);
+
+    return sourceWithoutSelector.slice(separatorIndex + 1) === MATCH_ALL_WILDCARD;
+  });
+
 /**
  * Builds an ES|QL query for the provided dataView
  * If there is @timestamp field in the index, we don't add the WHERE clause
  * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName
  * If the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command
+ * Two exceptions fall back to the FROM command, because a data view can mix TSDB and classic indices:
+ * `*` and `<cluster>:*` match every index of a cluster, so TSDB field metadata there is not a
+ * reliable signal of time series intent; and when the user has a query or filters, TS would restrict
+ * the results to the TSDB indices, where the filtered fields may not exist.
  * @param dataView
  * @param query
  * @param filters - DSL filters to convert to ES|QL WHERE clauses
@@ -52,7 +73,12 @@ export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?:
     filterBySearchText,
     filtersExpression || undefined
   );
-  const sourceCommand = dataView.isTSDBMode() ? 'TS' : 'FROM';
+  const indexPattern = dataView.getIndexPattern();
+  const hasUserFiltering = Boolean(filterBySearchText || filtersExpression);
+  const sourceCommand =
+    dataView.isTSDBMode() && !hasOverlyBroadIndexPattern(indexPattern) && !hasUserFiltering
+      ? 'TS'
+      : 'FROM';
 
-  return `${sourceCommand} ${dataView.getIndexPattern()}${whereClause}`;
+  return `${sourceCommand} ${indexPattern}${whereClause}`;
 }

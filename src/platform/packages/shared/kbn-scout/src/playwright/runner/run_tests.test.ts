@@ -15,7 +15,7 @@ import {
 } from './run_tests';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { withProcRunner } from '@kbn/dev-proc-runner';
-import { execFilePromise, withKibanaBabelRegister } from '../utils';
+import { execFilePromise, withKibanaSwcRegister } from '../utils';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
 jest.mock('@kbn/dev-proc-runner', () => ({ withProcRunner: jest.fn() }));
@@ -23,9 +23,9 @@ jest.mock('@kbn/ci-stats-reporter', () => ({ getTimeReporter: jest.fn() }));
 
 jest.mock('../utils', () => ({
   execFilePromise: jest.fn(),
-  withKibanaBabelRegister: jest.fn((env = {}) => ({
+  withKibanaSwcRegister: jest.fn((env = {}) => ({
     ...env,
-    NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/babel-register/install']
+    NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/swc-register/install']
       .filter(Boolean)
       .join(' '),
   })),
@@ -92,7 +92,7 @@ describe('hasTestsInPlaywrightConfig', () => {
       expect.objectContaining({
         env: expect.objectContaining({
           SCOUT_REPORTER_ENABLED: 'false',
-          NODE_OPTIONS: expect.stringContaining('--require=@kbn/babel-register/install'),
+          NODE_OPTIONS: expect.stringContaining('--require=@kbn/swc-register/install'),
         }),
       })
     );
@@ -160,7 +160,7 @@ describe('runPlaywrightTestCheck', () => {
   beforeEach(() => {
     (withProcRunner as jest.Mock).mockImplementation(async (_log, fn) => fn({ run }));
     (getTimeReporter as jest.Mock).mockReturnValue(jest.fn());
-    (withKibanaBabelRegister as jest.Mock).mockImplementation((env) => env);
+    (withKibanaSwcRegister as jest.Mock).mockImplementation((env) => env);
   });
 
   it('lists the tests of a config with the Scout reporter disabled', async () => {

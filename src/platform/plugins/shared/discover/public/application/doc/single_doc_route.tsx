@@ -52,8 +52,10 @@ export const SingleDocRoute = () => {
     timefilter.disableTimeRangeSelector();
   }, [timefilter]);
 
+  const rootProfileState = useRootProfile();
   const { dataView, error } = useDataView({
     index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
+    rootProfileState,
   });
   const [scopedEbtManager] = useState(() => ebtManager.createScopedEBTManager());
   const [scopedProfilesManager] = useState(() =>
@@ -62,7 +64,6 @@ export const SingleDocRoute = () => {
       toolkit: createInMemoryContextAwarenessToolkit({ profileStateRegistry }),
     })
   );
-  const rootProfileState = useRootProfile();
 
   if (error) {
     return (

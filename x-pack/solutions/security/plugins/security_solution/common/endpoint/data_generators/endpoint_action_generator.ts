@@ -553,6 +553,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_get-file_error_upload-timeout',
       'ra_get-file_error_queue-timeout',
       'ra_get-file_error_not-enough-free-space',
+      'ra_get-file_error_file-locked',
     ]);
   }
 

@@ -156,21 +156,27 @@ describe('isScoutTestsOnlyDiff', () => {
 });
 
 describe('isScoutPathOnlyDiff', () => {
-  it('returns true for fixtures / page objects, unlike isScoutTestsOnlyDiff', () => {
+  it('skips Jest for a change confined to Scout specs', () => {
+    expect(
+      isScoutPathOnlyDiff(['src/platform/plugins/shared/discover/test/scout/ui/tests/foo.spec.ts'])
+    ).toBe(true);
+  });
+
+  it('does not skip Jest for a Scout fixture that Jest may import', () => {
     expect(
       isScoutPathOnlyDiff([
         'src/platform/plugins/shared/discover/test/scout/ui/fixtures/page_objects/landing.ts',
       ])
-    ).toBe(true);
+    ).toBe(false);
   });
 
-  it('returns true when a fixtures change is mixed with in-scope specs', () => {
+  it('does not skip Jest when a fixture change is mixed with in-scope specs', () => {
     expect(
       isScoutPathOnlyDiff([
         'src/platform/plugins/shared/discover/test/scout/ui/tests/foo.spec.ts',
         'src/platform/plugins/shared/discover/test/scout/ui/fixtures/page_objects/landing.ts',
       ])
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('returns false when any non-Scout, non-noise file is present', () => {

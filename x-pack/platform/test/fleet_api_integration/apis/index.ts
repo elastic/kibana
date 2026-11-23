@@ -64,5 +64,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     // Cloud onboarding deployments
     loadTestFile(require.resolve('./cloud_onboarding_deployment'));
+
+    // Settings read API response fields
+    loadTestFile(require.resolve('./fleet_settings_response_fields'));
   });
 }

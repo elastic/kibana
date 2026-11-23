@@ -8,8 +8,6 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
-import { apm, timerange } from '@kbn/synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -22,7 +20,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const rules = getService('rules');
   const toasts = getService('toasts');
-  const synthtraceClient = getService('synthtrace');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -47,26 +44,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function createWebhookConnector(connectorName: string) {
-    await pageObjects.common.navigateToApp('triggersActionsConnectors');
-    await testSubjects.click('connectorsTab');
-
-    await testSubjects.click('createConnectorButton');
-    await testSubjects.scrollIntoView('.webhook-card');
-    await testSubjects.click('.webhook-card');
-
-    await testSubjects.setValue('nameInput', connectorName);
-    await testSubjects.setValue('webhookUrlText', 'https://test.test');
-    await testSubjects.setValue('webhookUserInput', 'fakeuser');
-    await testSubjects.setValue('webhookPasswordInput', 'fakepassword');
-
-    await retry.try(async () => {
-      await find.clickByCssSelector(
-        '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
-      );
-    });
-
-    const toastTitle = await toasts.getTitleAndDismiss();
-    expect(toastTitle).to.eql(`Created '${connectorName}'`);
+    await supertest
+      .post('/api/actions/connector')
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: connectorName,
+        connector_type_id: '.webhook',
+        config: {
+          url: 'https://test.test',
+          method: 'post',
+          hasAuth: true,
+        },
+        secrets: {
+          user: 'fakeuser',
+          password: 'fakepassword',
+        },
+      })
+      .expect(200);
   }
 
   async function deleteConnectorByName(connectorName: string) {
@@ -81,10 +75,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .expect(204, '');
   }
 
+  async function setRuleName(ruleName: string) {
+    // React doesn't observe FTR's JS-based clearValue, so the pre-filled default name has to be cleared with real key events
+    await testSubjects.setValue('ruleDetailsNameInput', ruleName, { clearWithKeyboard: true });
+    expect(await testSubjects.getAttribute('ruleDetailsNameInput', 'value')).to.eql(ruleName);
+  }
+
   async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.click(`.es-query-SelectOption`);
-    await testSubjects.setValue('ruleDetailsNameInput', alertName);
+    await setRuleName(alertName);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     await comboBox.set('thresholdIndexesComboBox', 'k');
@@ -103,14 +103,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   async function defineAPMErrorCountRule(ruleName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.click(`apm.error_rate-SelectOption`);
-    await testSubjects.setValue('ruleDetailsNameInput', ruleName);
+    await setRuleName(ruleName);
   }
 
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.click('test.always-firing-SelectOption');
     await testSubjects.scrollIntoView('ruleDetailsNameInput');
-    await testSubjects.setValue('ruleDetailsNameInput', alertName);
+    await setRuleName(alertName);
   }
 
   async function discardNewRuleCreation() {
@@ -147,9 +147,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/246218
-  describe.skip('create alert', function () {
-    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+  describe('create alert', function () {
     const webhookConnectorName = 'webhook-test';
     let esQueryRuleId: string;
     before(async () => {
@@ -166,44 +164,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         .expect(200);
 
       esQueryRuleId = createdESRule.id;
-
-      const clients = await synthtraceClient.getClients(['apmEsClient']);
-      apmSynthtraceEsClient = clients.apmEsClient;
-
-      await apmSynthtraceEsClient.initializePackage({ skipInstallation: false });
-
-      const opbeansJava = apm
-        .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
-        .instance('instance');
-
-      const opbeansNode = apm
-        .service({ name: 'opbeans-node', environment: 'production', agentName: 'node' })
-        .instance('instance');
-
-      const events = timerange('now-15m', 'now')
-        .ratePerMinute(1)
-        .generator((timestamp) => {
-          return [
-            opbeansJava
-              .transaction({ transactionName: 'tx-java' })
-              .timestamp(timestamp)
-              .duration(100)
-              .failure()
-              .errors(opbeansJava.error({ message: 'a java error' }).timestamp(timestamp + 50)),
-
-            opbeansNode
-              .transaction({ transactionName: 'tx-node' })
-              .timestamp(timestamp)
-              .duration(100)
-              .success(),
-          ];
-        });
-
-      return Promise.all([apmSynthtraceEsClient.index(events)]);
     });
 
     after(async () => {
-      await apmSynthtraceEsClient?.clean();
       await esArchiver.unload(
         'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
@@ -315,7 +278,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'test message {{alert.actionGroup}} some additional text {{rule.id}}'
       );
 
-      await find.clickByButtonText('Settings');
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
@@ -394,7 +356,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'test message {{alert.actionGroup}} some additional text {{rule.id}}'
       );
 
-      await find.clickByButtonText('Settings');
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
@@ -416,15 +377,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await firstDropdown.click();
       await firstDropdown.type('kibana.alert.action_group');
-      const filterKeyOptionsList = await find.byCssSelector('.euiComboBoxOptionsList');
-      await find.clickByButtonText('kibana.alert.action_group', filterKeyOptionsList);
+      await testSubjects.click('filterFieldOption-kibana.alert.action_group');
       const secondDropdown = await find.byCssSelector(
         '[data-test-subj="filter-0.1"] [data-test-subj="filterOperatorList"] [data-test-subj="comboBoxSearchInput"]'
       );
       await secondDropdown.click();
       await secondDropdown.type('exists');
-      const filterOperationOptionsList = await find.byCssSelector('.euiComboBoxOptionsList');
-      await find.clickByButtonText('exists', filterOperationOptionsList);
+      await testSubjects.click('filterOperatorOption-exists');
       await testSubjects.click('saveFilter');
       await testSubjects.setValue('queryInput', '_id: *');
 
@@ -466,7 +425,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('ruleActionsConnectorsModal');
       await find.clickByButtonText('Slack#xyztest');
 
-      await find.clickByButtonText('Settings');
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
@@ -490,7 +448,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('openEditRuleFlyoutButton');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      await find.clickByButtonText('Settings');
       await testSubjects.scrollIntoView('globalQueryBar');
 
       await filterBar.hasFilter('query', filter, true);
@@ -514,7 +471,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           '[data-test-subj="ruleActionsItem"] [data-test-subj="messageTextArea"]'
         )
       ).type('some text ');
-      await find.clickByButtonText('Settings');
       await testSubjects.click('ruleActionsSettingsSelectActionGroup');
       await testSubjects.click('addNewActionConnectorActionGroup-recovered');
 
@@ -596,7 +552,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.click(`.es-query-SelectOption`);
-      await testSubjects.setValue('ruleDetailsNameInput', 'alertName');
+      await setRuleName('alertName');
       await testSubjects.click('rulePageFooterCancelButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');

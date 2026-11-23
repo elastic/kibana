@@ -50,7 +50,7 @@ dependsOn:
   - '@kbn/dot-text'
   - '@kbn/yarn-lock-validator'
   - '@kbn/sort-package-json'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/rspack-optimizer'
   - '@kbn/dev-validation-runner'
   - '@kbn/test'
@@ -61,6 +61,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.js'
@@ -70,6 +71,4 @@ fileGroups:
     - '!target/**/*'
     - '!packages/**/*'
     - '!type_check_validation_loader.js'
-  jest-config:
-    - jest.config.js
 tasks: {}

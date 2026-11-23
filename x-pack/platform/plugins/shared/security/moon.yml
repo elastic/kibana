@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/features-plugin'
+  - '@kbn/content-sanitization'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/core-spaces-common'
@@ -123,6 +124,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -131,6 +133,4 @@ fileGroups:
     - test/**/*
     - __mocks__/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
