@@ -10,7 +10,7 @@ import { bucketKeys } from '../../../lib/helpers/aggregations';
 import { withNotDefined } from '../../../lib/helpers/environment';
 import { toTimeSeries } from '../../../lib/helpers/time_series';
 import { SEARCH_SPAN_NAMES } from '../constants';
-import type { SourceApplications } from '../types';
+import type { WebSourceApplications } from '../types';
 import type { SearchParams } from './search_requests';
 import { classicSearch } from './search_requests';
 import type { SearchAggregations } from './search_responses';
@@ -24,7 +24,7 @@ interface GetClassicApplicationsParams extends SearchParams {
 export const getClassicApplications = async ({
   apmEventClient,
   ...searchParams
-}: GetClassicApplicationsParams): Promise<SourceApplications> => {
+}: GetClassicApplicationsParams): Promise<WebSourceApplications> => {
   const response = await apmEventClient.search(
     SEARCH_SPAN_NAMES.classic,
     classicSearch(searchParams)
@@ -38,5 +38,6 @@ export const getClassicApplications = async ({
       aggregations?.environmentNotDefined.doc_count ?? 0
     ),
     pageLoadsOverTime: toTimeSeries(aggregations?.inEnvironment.pageLoadsOverTime?.histogram),
+    sessionsOverTime: null,
   };
 };

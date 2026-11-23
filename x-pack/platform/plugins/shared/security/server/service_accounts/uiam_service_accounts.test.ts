@@ -20,6 +20,7 @@ import type {
 
 import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS } from './fake_requests';
+import { serviceAccountsMetrics } from './metrics';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import {
   UIAM_SERVICE_ACCOUNT_MAX_ROLES,
@@ -64,16 +65,15 @@ describe('UiamServiceAccounts', () => {
     roles: ['viewer', 'editor'],
   };
 
-  /** The role assignments Kibana sends for `createParams`: application-only, org-wide, downscoped. */
-  const expectedRoleAssignments = {
-    organization: [
-      {
-        role_id: 'organization-application-only',
-        organization_id: 'organization-id',
-        application_roles: ['viewer', 'editor'],
-      },
-    ],
+  /** The role assignments Kibana sends for `createParams`: application-only, this project only, downscoped. */
+  const expectedRoleAssignment = {
+    role_id: 'security-application-only',
+    organization_id: 'organization-id',
+    all: false,
+    project_ids: ['project-id'],
+    application_roles: ['viewer', 'editor'],
   };
+  const expectedRoleAssignments = { project: { security: [expectedRoleAssignment] } };
 
   const createMockRequest = (authHeader?: string): KibanaRequest =>
     httpServerMock.createKibanaRequest({
@@ -252,9 +252,7 @@ describe('UiamServiceAccounts', () => {
         expect.anything(),
         expect.objectContaining({
           role_assignments: {
-            organization: [
-              { ...expectedRoleAssignments.organization[0], application_roles: roles },
-            ],
+            project: { security: [{ ...expectedRoleAssignment, application_roles: roles }] },
           },
         }),
         undefined
@@ -442,7 +440,7 @@ describe('UiamServiceAccounts', () => {
         expect.anything(),
         expect.objectContaining({
           role_assignments: {
-            organization: [expect.objectContaining({ application_roles: roles })],
+            project: { security: [expect.objectContaining({ application_roles: roles })] },
           },
         }),
         undefined
@@ -499,7 +497,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).rejects.toThrowError('upstream exploded');
+      ).rejects.toThrow('upstream exploded');
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to create service account [nightshift-relay]')
       );
@@ -755,7 +753,14 @@ describe('UiamServiceAccounts', () => {
           {
             ...listedAccount,
             role_assignments: {
-              ...expectedRoleAssignments,
+              // An earlier Kibana version granted these roles org-wide.
+              organization: [
+                {
+                  role_id: 'organization-application-only',
+                  organization_id: 'organization-id',
+                  application_roles: ['viewer', 'editor'],
+                },
+              ],
               project: {
                 security: [
                   {
@@ -1206,7 +1211,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+        ).rejects.toMatchObject({ refusal: 'security_disabled', output: { statusCode: 403 } });
 
         expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
       });
@@ -1218,7 +1223,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toThrowError('Error occurred during service account token exchange');
+        ).rejects.toThrow('Error occurred during service account token exchange');
       });
 
       it('rejects when the exchange response contains an empty token', async () => {
@@ -1226,7 +1231,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toThrowError('Error occurred during service account token exchange');
+        ).rejects.toThrow('Error occurred during service account token exchange');
       });
 
       // The token carries the account's roles, so an account that fills UIAM's role limits with
@@ -1251,7 +1256,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toThrowError('Error occurred during service account token exchange');
+        ).rejects.toThrow('Error occurred during service account token exchange');
       });
 
       it.each([408, 429, 500, 502, 503, 504])(
@@ -1292,6 +1297,28 @@ describe('UiamServiceAccounts', () => {
           ).rejects.toMatchObject({ cause, retryable: false });
         }
       );
+
+      it('keeps the UIAM error code, so metrics can name the reason', async () => {
+        const cause = new Boom.Boom('rejected', { statusCode: 403 });
+        Object.assign(cause.output.payload, { error: { code: '0x3B8626' } });
+        mockUiam.exchangeServiceAccountToken.mockRejectedValue(cause);
+
+        await expect(
+          serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
+        ).rejects.toMatchObject({ statusCode: 403, errorCode: '0x3B8626' });
+      });
+
+      it('measures the exchange as the initial mint of a UIAM account', async () => {
+        const measure = jest.spyOn(serviceAccountsMetrics, 'measureTokenExchange');
+
+        await serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' });
+
+        expect(measure).toHaveBeenCalledWith(
+          { backend: 'uiam', trigger: 'initial' },
+          expect.any(Function)
+        );
+        measure.mockRestore();
+      });
 
       it.each([
         'ECONNREFUSED',

@@ -36,6 +36,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { TABS_BAR_HEIGHT } from '@kbn/unified-tabs';
+import { resolveBreakdownField } from '@kbn/unified-histogram';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDiscoverCustomizationContext } from '../../../../customizations';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -56,6 +57,8 @@ import { SavedSearchURLConflictCallout } from '../../../../components/saved_sear
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { EsqlErrorHelp } from '../../../../components/common/esql_error_help';
+import { useHasEnterpriseLicense } from '../../../../components/common/use_has_enterprise_license';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
@@ -65,6 +68,7 @@ import {
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
+  useCurrentTabRuntimeState,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -99,11 +103,13 @@ export function DiscoverLayout() {
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
+    licensing,
   } = useDiscoverServices();
   const customizationContext = useDiscoverCustomizationContext();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
@@ -111,12 +117,13 @@ export function DiscoverLayout() {
   const isProjectChromeStyle = useIsProjectChromeStyle();
 
   const { main$ } = dataStateContainer.data$;
-  const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
+  const [query, savedQuery, columns, sort, grid, breakdownField] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
     state.columns,
     state.sort,
     state.grid,
+    state.breakdownField,
   ]);
   const isEsqlMode = useIsEsqlMode();
   useRegisterDiscoverEsqlFeedback();
@@ -330,6 +337,37 @@ export function DiscoverLayout() {
     return () => onAddColumnWithTracking(draggingFieldName);
   }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
+  const chartBreakdownFieldNames = useCurrentTabRuntimeState(
+    (tab) => tab.chartBreakdownFieldNames$
+  );
+
+  const onDropFieldToChart = useMemo(() => {
+    if (
+      !draggingFieldName ||
+      !canSetBreakdownField ||
+      draggingFieldName === breakdownField ||
+      (chartBreakdownFieldNames && !chartBreakdownFieldNames.includes(draggingFieldName))
+    ) {
+      return undefined;
+    }
+
+    // Only fields the chart can group by are accepted, mirroring the breakdown selector
+    const field = resolveBreakdownField({
+      breakdownField: draggingFieldName,
+      dataSource: currentDataSource,
+      columns: currentDataSource.kind === 'esql' ? currentDataSource.resultColumns : undefined,
+    });
+
+    return field ? () => onAddBreakdownField(field) : undefined;
+  }, [
+    draggingFieldName,
+    canSetBreakdownField,
+    breakdownField,
+    chartBreakdownFieldNames,
+    currentDataSource,
+    onAddBreakdownField,
+  ]);
+
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
@@ -351,6 +389,7 @@ export function DiscoverLayout() {
           onAddFilter={onAddFilter}
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
+          onDropFieldToChart={onDropFieldToChart}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -363,6 +402,7 @@ export function DiscoverLayout() {
     onAddFilter,
     onFieldEdited,
     onDropFieldToTable,
+    onDropFieldToChart,
     dataStateContainer,
   ]);
 
@@ -370,9 +410,10 @@ export function DiscoverLayout() {
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
 
+  const cancelFetchData = useCurrentTabAction(internalStateActions.cancelFetchData);
   const onCancelClick = useCallback(() => {
-    dataStateContainer.cancel();
-  }, [dataStateContainer]);
+    dispatch(cancelFetchData());
+  }, [dispatch, cancelFetchData]);
 
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
   const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
@@ -411,6 +452,37 @@ export function DiscoverLayout() {
 
     return `${TABS_BAR_HEIGHT + 1}px`;
   }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
+
+  const hasEnterpriseLicense = useHasEnterpriseLicense(licensing);
+  const connectorsUrl = core.application.capabilities.management?.insightsAndAlerting
+    ?.triggersActionsConnectors
+    ? core.application.getUrlForApp('management', {
+        deepLinkId: 'triggersActionsConnectors',
+        path: '/connectors',
+      })
+    : undefined;
+  const errorAiHelp =
+    dataState.error && isEsqlMode && isOfAggregateQueryType(query) && hasEnterpriseLicense ? (
+      <EsqlErrorHelp
+        http={core.http}
+        query={query.esql}
+        errorMessage={dataState.error.message}
+        connectorsUrl={connectorsUrl}
+        onApplyQuery={(esql) => dispatch(updateESQLQuery({ queryOrUpdater: esql }))}
+      />
+    ) : undefined;
+  const errorCallout = dataState.error ? (
+    <ErrorCallout
+      title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+        defaultMessage: 'Unable to retrieve search results',
+      })}
+      error={dataState.error}
+      isEsqlMode={isEsqlMode}
+      showErrorDialog={({ title, error }) => core.notifications.showErrorDialog({ title, error })}
+      esqlReferenceHref={docLinks.links.query.queryESQL}
+      aiHelp={errorAiHelp}
+    />
+  ) : undefined;
 
   return (
     <EuiPage
@@ -477,20 +549,11 @@ export function DiscoverLayout() {
                       <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
                     {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
-                          }
-                        )}
-                        error={dataState.error}
-                        isEsqlMode={isEsqlMode}
-                        showErrorDialog={({ title, error }) =>
-                          core.notifications.showErrorDialog({ title, error })
-                        }
-                        esqlReferenceHref={docLinks.links.query.queryESQL}
-                      />
+                      errorAiHelp ? (
+                        <div css={styles.errorContainer}>{errorCallout}</div>
+                      ) : (
+                        errorCallout
+                      )
                     ) : (
                       <DiscoverNoResults
                         isTimeBased={isTimeBased}
@@ -557,6 +620,11 @@ const componentStyles = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+  }),
+  errorContainer: css({
+    overflowY: 'auto',
+    flex: '1 1 auto',
+    minHeight: 0,
   }),
   dscPageContent: css({
     position: 'relative',

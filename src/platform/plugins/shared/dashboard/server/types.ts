@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { DashboardStateInput } from '@kbn/as-code-dashboard-schema';
+import type { DashboardState, DashboardStateInput } from '@kbn/as-code-dashboard-schema';
 import type { ScanDashboardsResult } from './scan_dashboards';
 import type {
   DashboardCreateResponseBody,
@@ -66,6 +66,11 @@ export interface DashboardPluginSetup {}
 export interface DashboardPluginStart {
   /** Client for dashboard CRUD operations. */
   client: DashboardServerClient;
+  /**
+   * Checks whether two dashboard states are equal.
+   * Panel and pinned panel configs are compared with the comparators provided by their embeddable server definitions.
+   */
+  areEqual: (a: DashboardState, b: DashboardState) => Promise<boolean>;
   /**
    * Scans dashboards with pagination.
    *

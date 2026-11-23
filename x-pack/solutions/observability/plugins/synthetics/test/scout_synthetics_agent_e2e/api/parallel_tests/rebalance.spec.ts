@@ -49,7 +49,8 @@ const MONITOR_COUNT = 2;
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet synthetics_agent_e2e
  *   node scripts/scout run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel.playwright.config.ts
  */
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/306067
+apiTest.describe.skip(
   'Synthetics real-agent shard rebalance',
   { tag: ['@local-stateful-classic'] },
   () => {

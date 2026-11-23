@@ -94,6 +94,19 @@ export const filterValueRt = (maxLength: number) =>
     'MaxLength'
   );
 
+/**
+ * `filterValueRt`'s bounds as a plain string, for a URL param the app also sets from a plain
+ * string, e.g. a picked environment, so the router drops what the routes would reject.
+ */
+export const boundedParamRt = (maxLength: number) =>
+  new t.Type<string, string, unknown>(
+    `BoundedParam(${maxLength})`,
+    (input): input is string => filterValueRt(maxLength).is(input),
+    (input, context) =>
+      filterValueRt(maxLength).is(input) ? t.success(input) : t.failure(input, context),
+    t.identity
+  );
+
 /** `toBooleanRt` for a URL param: an unset param stays unset rather than becoming `false`. */
 const booleanParamRt = new t.Type<boolean, boolean, unknown>(
   'BooleanParam',
@@ -123,7 +136,8 @@ export const sessionsListQueryRt = t.partial({
   os: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
   country: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
   entryPage: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage),
-  hasErrors: booleanParamRt,
+  withJsErrors: booleanParamRt,
+  withFailedRequests: booleanParamRt,
   duration: durationBucketRt,
   sortField: sortFieldRt,
   sortDirection: t.keyof({ asc: null, desc: null }),
@@ -139,7 +153,8 @@ const SESSIONS_LIST_QUERY_KEYS = [
   'os',
   'country',
   'entryPage',
-  'hasErrors',
+  'withJsErrors',
+  'withFailedRequests',
   'duration',
   'sortField',
   'sortDirection',

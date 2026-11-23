@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/nightshift-shared'
   - '@kbn/nightshift-sources-plugin'
   - '@kbn/core'
+  - '@kbn/std'
   - '@kbn/core-pricing-common'
   - '@kbn/significant-events-schema'
   - '@kbn/agent-builder-common'
@@ -86,6 +87,8 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/std'
+  - '@kbn/user-profile-components'
+  - '@kbn/core-security-common'
 tags:
   - plugin
   - prod

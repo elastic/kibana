@@ -57,6 +57,8 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   SAVE_AND_ENABLE_AUTOMATION: 'saveAndEnableAutomation',
   SAVE_AUTOMATION: 'saveAutomation',
   RUN_AUTOMATION: 'runAutomation',
+  REPAIR_AUTOMATION: 'repairAutomation',
+  RETRY_AUTOMATION_WORKFLOW: 'retryAutomationWorkflow',
   SAVE_TUNING_DOCUMENT: 'saveTuningDocument',
   SHOW_MORE_INVESTIGATIONS: 'showMoreInvestigations',
   TOGGLE_AUTOMATION: 'toggleAutomation',
@@ -72,6 +74,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_RULE: 'viewRule',
   VIEW_SIGNAL: 'viewSignal',
   VIEW_SETTINGS: 'viewSettings',
+  VIEW_TOPOLOGY_NODE: 'viewTopologyNode',
   VIEW_SEVERITY_INVESTIGATIONS: 'viewSeverityInvestigations',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
@@ -97,6 +100,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   DETECTION_SIGNALS_TABLE: 'nightshiftDetectionSignalsTable',
   DETECTION_DETAILS_FLYOUT: 'nightshiftDetectionDetailsFlyout',
   RULE_FLYOUT: 'nightshiftRuleFlyout',
+  RUN_QUOTA_REACHED_CALLOUT: 'nightshiftRunQuotaReachedCallout',
   ENTITY_FLYOUT: 'nightshiftEntityFlyout',
   EVENT_FLYOUT: 'nightshiftEventFlyout',
   EVENT_FLYOUT_DETECTIONS: 'nightshiftEventFlyoutDetections',
@@ -108,7 +112,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   SEVERITY_TILES: 'nightshiftSeverityTiles',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
   START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
-  STATUS_SUMMARY: 'nightshiftStatusSummary',
+  TOPOLOGY: 'nightshiftTopology',
 } as const;
 
 export const NIGHTSHIFT_EBT_DETAILS = {

@@ -1,5 +1,5 @@
 {
-  "sha1": "3b42216bef0fe8e8d7616b869e3a684a2ca751c7",
+  "sha1": "36dad87d0735c6593b652569fcdb4ae88da9691c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1456,7 +1456,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 21,
+        "line": 23,
         "column": 13
       }
     },
@@ -1472,8 +1472,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 37,
-        "column": 17
+        "line": 40,
+        "column": 15
       }
     },
     {
@@ -1488,7 +1488,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 79,
+        "line": 81,
         "column": 15
       }
     },

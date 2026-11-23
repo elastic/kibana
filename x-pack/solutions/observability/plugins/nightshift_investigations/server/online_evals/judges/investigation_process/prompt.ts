@@ -41,7 +41,7 @@ const sentence = (description: string) =>
 
 export const investigationProcessPrompt = createPrompt({
   name: 'nightshift_investigation_process',
-  description: 'Scores how a Nightshift investigation was carried out',
+  description: 'Scores how a nightshift investigation was carried out',
   input: lazySchema(() =>
     z.object({
       transcript: z.string(),

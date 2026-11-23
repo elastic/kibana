@@ -8,11 +8,21 @@
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
 import type { AiIndexDest } from '../../../../../common/http_api/ai_indices';
-import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
-import { formatKiTypeLabel, noneValueLabel } from '../../../utils/ki_display';
+import { KI_STATUSES, type KiStatus } from '../../../../../common/ki_lifecycle_status';
 
-export type ListKiTypeFilter = { kind: 'all'; value: 'all' } | { kind: 'type'; value: string };
-export const ALL_TYPE_FILTER: ListKiTypeFilter = { kind: 'all', value: 'all' };
+/** Status filter options: one status, or every status. */
+export type ListKiStatusFilterValue = KiStatus | 'all';
+export const DEFAULT_STATUS_FILTER: ListKiStatusFilterValue = 'active';
+
+/** Statuses the list API is asked for, for one status filter option. */
+export const getStatusesForFilter = (statusFilter: ListKiStatusFilterValue): KiStatus[] => {
+  switch (statusFilter) {
+    case 'all':
+      return [...KI_STATUSES];
+    default:
+      return [statusFilter];
+  }
+};
 
 export const getDiscoverEsqlQuery = (destValue: string): string => `FROM ${destValue} | LIMIT 100`;
 
@@ -26,18 +36,19 @@ export const getIndexManagementLocatorParams = (
   return { page: 'index_details', indexName: dest.value };
 };
 
-export const getListKiTypeFilterLabel = (type: string): string =>
-  type === ALL_TYPE_FILTER.value
-    ? i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.filterAll', {
-        defaultMessage: 'All',
-      })
-    : formatKiTypeLabel(type);
-
-export const getListKiStatusFilterLabel = (status: KiLifecycleStatus): string => {
+export const getListKiStatusFilterLabel = (status: ListKiStatusFilterValue): string => {
   switch (status) {
     case 'active':
       return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusActive', {
         defaultMessage: 'Active',
+      });
+    case 'expired':
+      return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusExpired', {
+        defaultMessage: 'Expired',
+      });
+    case 'all':
+      return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusAll', {
+        defaultMessage: 'All statuses',
       });
     case 'deleted':
       return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusDeleted', {
@@ -50,5 +61,9 @@ export const getListKiStatusFilterLabel = (status: KiLifecycleStatus): string =>
   }
 };
 
+const untitledLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.untitled', {
+  defaultMessage: 'Untitled',
+});
+
 export const getKiDisplayTitle = (title?: string): string =>
-  title !== undefined && title.length > 0 ? title : noneValueLabel;
+  title !== undefined && title.length > 0 ? title : untitledLabel;

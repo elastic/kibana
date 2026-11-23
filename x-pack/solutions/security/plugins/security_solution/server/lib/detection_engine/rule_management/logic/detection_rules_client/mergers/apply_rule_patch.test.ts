@@ -193,7 +193,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('threat_mapping: Invalid input: expected array, received string');
+    ).rejects.toThrow('threat_mapping: Invalid input: expected array, received string');
   });
 
   test('should reject a threat match patch whose only mapping entry is negated', async () => {
@@ -209,7 +209,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Negate mappings cannot be used as a single entry in the AND condition. Please use at least one matching mapping entry.'
     );
   });
@@ -232,7 +232,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Negate and matching mappings cannot have identical fields and values in the same AND condition.'
     );
   });
@@ -365,7 +365,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('Cardinality of a field that is being aggregated on is always 1');
+    ).rejects.toThrow('Cardinality of a field that is being aggregated on is always 1');
   });
 
   test('should reject a `type` that contradicts the existing rule type', async () => {
@@ -377,7 +377,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('type: Invalid input: expected "query"');
+    ).rejects.toThrow('type: Invalid input: expected "query"');
   });
 
   test('should reject an unknown `type`', async () => {
@@ -389,7 +389,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('type: Invalid input: expected "query"');
+    ).rejects.toThrow('type: Invalid input: expected "query"');
   });
 
   test('should accept ES|QL alerts suppression params', async () => {

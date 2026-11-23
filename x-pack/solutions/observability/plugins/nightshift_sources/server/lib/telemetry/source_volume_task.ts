@@ -143,7 +143,7 @@ export const registerSourceVolumeTask = ({
     [SOURCE_VOLUME_TASK_TYPE]: {
       title: 'Nightshift Sources - daily volume telemetry',
       description:
-        'Reports the data volume each configured Nightshift source matched over the past 24 hours via EBT.',
+        'Reports the data volume each configured nightshift source matched over the past 24 hours via EBT.',
       timeout: TASK_TIMEOUT,
       maxAttempts: 1,
       cost: TaskCost.Normal,

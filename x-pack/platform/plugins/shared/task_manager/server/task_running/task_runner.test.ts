@@ -19,13 +19,7 @@ import {
 import type { TaskEvent, TaskRun } from '../task_events';
 import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
 import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
-import {
-  getDeleteTaskRunResult,
-  TaskPriority,
-  TaskStatus,
-  TaskCost,
-  InstanceTaskCost,
-} from '../task';
+import { getDeleteTaskRunResult, TaskPriority, TaskStatus, TaskCost } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import type { TaskDefinitionRegistry } from '../task_type_dictionary';
@@ -34,7 +28,6 @@ import { mockLogger } from '../test_utils';
 import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
@@ -44,7 +37,13 @@ import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import {
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+  TracerProvider,
+} from '@opentelemetry/sdk-trace';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -80,13 +79,13 @@ describe('TaskManagerRunner', () => {
     setLabel: jest.fn(),
   };
 
-  let otelExporter: tracing.InMemorySpanExporter;
-  let otelProvider: tracing.BasicTracerProvider;
+  let otelExporter: InMemorySpanExporter;
+  let otelProvider: TracerProvider;
 
   beforeAll(() => {
-    otelExporter = new tracing.InMemorySpanExporter();
-    otelProvider = new tracing.BasicTracerProvider({
-      spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+    otelExporter = new InMemorySpanExporter();
+    otelProvider = new TracerProvider({
+      spanProcessors: [new SimpleSpanProcessor({ exporter: otelExporter })],
     });
     trace.setGlobalTracerProvider(otelProvider);
   });
@@ -196,7 +195,7 @@ describe('TaskManagerRunner', () => {
     describe('cost', () => {
       test('task instance cost takes precedence over task definition cost', async () => {
         const { runner } = await pendingStageSetup({
-          instance: { id: 'foo', taskType: 'bar', cost: InstanceTaskCost.Tiny },
+          instance: { id: 'foo', taskType: 'bar', cost: TaskCost.Tiny },
           definitions: {
             bar: {
               title: 'Bar!',
@@ -2160,6 +2159,10 @@ describe('TaskManagerRunner', () => {
           },
         });
 
+        const recordTaskRunDelaySpy = jest
+          .spyOn(taskManagerMetricsTelemetry, 'recordTaskRunDelay')
+          .mockImplementation(() => {});
+
         jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
@@ -2179,6 +2182,8 @@ describe('TaskManagerRunner', () => {
         expect(onTaskEvent).toHaveBeenCalledWith(
           asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
         );
+        expect(recordTaskRunDelaySpy).toHaveBeenCalledWith(expect.any(Number));
+        recordTaskRunDelaySpy.mockRestore();
       });
 
       test('emits TaskEvent when a recurring task is run successfully', async () => {
