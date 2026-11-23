@@ -22,7 +22,7 @@ import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { AutomationsPanel } from './automations_panel';
-import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
+import { AUTOMATIONS_HEADING_ID } from './automations_panel_id';
 
 jest.mock('../../hooks/use_automations_editor', () => ({
   useAutomationsEditor: jest.fn(),
@@ -315,10 +315,12 @@ describe('AutomationsPanel', () => {
     expect(services.application.navigateToApp).not.toHaveBeenCalled();
   });
 
-  it('takes focus from the failed-runs warning without joining the Tab order', () => {
+  it('lets the failed-runs warning focus the Automations heading without adding a Tab stop', () => {
     renderPanel();
 
-    expect(document.getElementById(AUTOMATIONS_PANEL_ID)).toHaveAttribute('tabindex', '-1');
+    const heading = screen.getByRole('heading', { name: 'Automations' });
+    expect(heading).toHaveAttribute('id', AUTOMATIONS_HEADING_ID);
+    expect(heading).toHaveAttribute('tabindex', '-1');
   });
 
   it('renders one row per automation', () => {

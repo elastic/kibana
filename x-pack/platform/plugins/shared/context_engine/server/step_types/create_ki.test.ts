@@ -225,43 +225,71 @@ describe('getCreateKiStepDefinition', () => {
     );
   });
 
-  it('keeps the first @timestamp on a rerun into an index dest, so the KI keeps its added date', async () => {
-    const esClient = {
-      search: jest.fn().mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _id: 'logs-index-profile',
-              _index: 'ai-index-idx-my-ai-index',
-              _source: {
-                ...kiInput,
-                id: 'logs-index-profile',
-                '@timestamp': '2026-10-01T08:00:00.000Z',
+  describe('rerun into an index dest', () => {
+    const firstWriter = { uri: 'workflow://wf-first', metadata: { run_id: 'exec-0' } };
+    const firstTimestamp = '2026-10-01T08:00:00.000Z';
+
+    const rerun = async (lifecycleStatus?: 'deleted') => {
+      const esClient = {
+        search: jest.fn().mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: 'logs-index-profile',
+                _index: 'ai-index-idx-my-ai-index',
+                _source: {
+                  ...kiInput,
+                  id: 'logs-index-profile',
+                  '@timestamp': firstTimestamp,
+                  governance: {
+                    provenance: { created_by: firstWriter, updated_by: firstWriter },
+                    ...(lifecycleStatus && { lifecycle: { status: lifecycleStatus } }),
+                  },
+                },
               },
-            },
-          ],
-        },
-      }),
-      index: jest.fn().mockResolvedValue({ _id: 'logs-index-profile' }),
+            ],
+          },
+        }),
+        index: jest.fn().mockResolvedValue({ _id: 'logs-index-profile' }),
+      };
+      const context = createMockStepContext({
+        input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
+        esClient,
+      });
+      const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+      const { handler } = getCreateKiStepDefinition({
+        getAiIndexService: () => service,
+        isContextEngineEnabled: enabled,
+        checkWritePrivilege: allowed,
+        verifyKi,
+        ...mockKiStepTelemetry(),
+      });
+      await handler(context);
+      const [{ document }] = esClient.index.mock.calls[0];
+      return document;
     };
-    const context = createMockStepContext({
-      input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
-      esClient,
-    });
-    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
 
-    const { handler } = getCreateKiStepDefinition({
-      getAiIndexService: () => service,
-      isContextEngineEnabled: enabled,
-      checkWritePrivilege: allowed,
-      verifyKi,
-      ...mockKiStepTelemetry(),
-    });
-    await handler(context);
+    it('keeps when and by whom the KI was created, so it keeps its added date', async () => {
+      const document = await rerun();
 
-    const [{ document }] = esClient.index.mock.calls[0];
-    expect(document['@timestamp']).toBe('2026-10-01T08:00:00.000Z');
-    expect(document.updated_at).not.toBe('2026-10-01T08:00:00.000Z');
+      expect(document['@timestamp']).toBe(firstTimestamp);
+      expect(document.updated_at).not.toBe(firstTimestamp);
+      expect(document.governance.provenance).toEqual({
+        created_by: firstWriter,
+        updated_by: mockKiWriter,
+      });
+    });
+
+    it('starts a deleted KI over, with a new date and creator', async () => {
+      const document = await rerun('deleted');
+
+      expect(document['@timestamp']).not.toBe(firstTimestamp);
+      expect(document['@timestamp']).toBe(document.updated_at);
+      expect(document.governance.provenance).toEqual({
+        created_by: mockKiWriter,
+        updated_by: mockKiWriter,
+      });
+    });
   });
 
   it('rejects a user_id change on a rerun', async () => {

@@ -7,3 +7,5 @@
 
 /** DOM id of the Automations panel, so the failed-run warning can scroll to it. */
 export const AUTOMATIONS_PANEL_ID = 'contextAiIndexAutomationsPanel';
+/** DOM id of the Automations heading, so the failed-run warning can move focus to it. */
+export const AUTOMATIONS_HEADING_ID = 'contextAiIndexAutomationsHeading';

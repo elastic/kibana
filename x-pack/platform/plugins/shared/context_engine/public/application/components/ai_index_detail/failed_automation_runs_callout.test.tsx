@@ -13,7 +13,7 @@ import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { FailedAutomationRun } from '../../hooks/use_failed_automation_runs';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
-import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
+import { AUTOMATIONS_HEADING_ID, AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 import { FailedAutomationRunsCallout } from './failed_automation_runs_callout';
 
 jest.mock('../../hooks/use_failed_automation_runs');
@@ -131,8 +131,11 @@ describe('FailedAutomationRunsCallout', () => {
     ]);
     const automationsPanel = document.createElement('div');
     automationsPanel.id = AUTOMATIONS_PANEL_ID;
-    automationsPanel.tabIndex = -1;
     automationsPanel.scrollIntoView = jest.fn();
+    const automationsHeading = document.createElement('h2');
+    automationsHeading.id = AUTOMATIONS_HEADING_ID;
+    automationsHeading.tabIndex = -1;
+    automationsPanel.appendChild(automationsHeading);
     document.body.appendChild(automationsPanel);
 
     renderCallout();
@@ -143,7 +146,7 @@ describe('FailedAutomationRunsCallout', () => {
       behavior: 'smooth',
       block: 'start',
     });
-    expect(automationsPanel).toHaveFocus();
+    expect(automationsHeading).toHaveFocus();
 
     automationsPanel.remove();
   });

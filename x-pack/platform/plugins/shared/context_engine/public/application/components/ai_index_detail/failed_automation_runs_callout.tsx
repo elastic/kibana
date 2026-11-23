@@ -16,13 +16,17 @@ import { useFailedAutomationRuns } from '../../hooks/use_failed_automation_runs'
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getWorkflowExecutionPath } from '../../utils/get_workflow_execution_path';
-import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
+import { AUTOMATIONS_HEADING_ID, AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 
-/** Scrolls to the Automations panel and moves keyboard focus there, so Tab continues from it. */
+/**
+ * Scrolls to the Automations panel and moves keyboard focus to its heading, so a screen reader
+ * announces "Automations" and Tab continues from there.
+ */
 const goToAutomations = () => {
-  const automationsPanel = document.getElementById(AUTOMATIONS_PANEL_ID);
-  automationsPanel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  automationsPanel?.focus({ preventScroll: true });
+  document
+    .getElementById(AUTOMATIONS_PANEL_ID)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById(AUTOMATIONS_HEADING_ID)?.focus({ preventScroll: true });
 };
 
 interface FailedAutomationRunsCalloutProps {

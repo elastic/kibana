@@ -41,7 +41,7 @@ import { getVisibleAutomations, getVisibleWorkflowIds } from '../../utils/visibl
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
-import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
+import { AUTOMATIONS_HEADING_ID, AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 
 /**
  * Builds the query string that tells the Workflows app to send its back button
@@ -223,12 +223,12 @@ export const AutomationsPanel = ({
   );
 
   return (
-    // `tabIndex={-1}`: the failed-runs warning moves focus here, but Tab does not stop on the panel.
-    <EuiPanel hasBorder paddingSize="l" id={AUTOMATIONS_PANEL_ID} tabIndex={-1}>
+    <EuiPanel hasBorder paddingSize="l" id={AUTOMATIONS_PANEL_ID}>
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h2>
+            {/* `tabIndex={-1}`: the failed-runs warning moves focus here, but Tab does not stop on it. */}
+            <h2 id={AUTOMATIONS_HEADING_ID} tabIndex={-1}>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
                 defaultMessage: 'Automations',
               })}
