@@ -1,5 +1,5 @@
 {
-  "sha1": "93496d9c837bc0f01288ac6a9825186fbd4f49d4",
+  "sha1": "eef7cdce86c89f8b3d50a3c3a06bc7331e165d3d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -560,6 +560,86 @@
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
         "line": 112,
         "column": 12
+      }
+    },
+    {
+      "id": "bea776dc2850b5d-c862887a4f44f2d",
+      "title": "ui settings metadata without credentials rejects unauthenticated requests for the namespace definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata_unauthenticated.spec.ts",
+        "line": 21,
+        "column": 15
+      }
+    },
+    {
+      "id": "bea776dc2850b5d-40fd2cb7c068035",
+      "title": "ui settings metadata without credentials rejects unauthenticated requests for the global definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata_unauthenticated.spec.ts",
+        "line": 21,
+        "column": 15
+      }
+    },
+    {
+      "id": "7be93aea40d2d31-bb376e0540ee199",
+      "title": "ui settings metadata returns the namespace definitions without saved values to a read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata.spec.ts",
+        "line": 49,
+        "column": 11
+      }
+    },
+    {
+      "id": "7be93aea40d2d31-4191936e6b94586",
+      "title": "ui settings metadata returns the global definitions without saved values to a read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata.spec.ts",
+        "line": 65,
+        "column": 13
       }
     },
     {
