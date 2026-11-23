@@ -12,17 +12,18 @@ import { useConversationId } from './use_conversation_id';
 import { useIsCurrentConversationStreaming } from '../../hooks/use_is_current_conversation_streaming';
 import { useConversationListMutations } from '../../hooks/use_conversation_list_mutations';
 
-/**
- * Publishes the active conversation to the shared `EventsService` whenever the
- * conversation id or fetch state changes, and resets it to `null` when the
- * subtree unmounts (e.g. the user navigates away from the full-page chat or
- * closes the sidebar).
- */
-export const ConversationChangeNotifier = (): null => {
+interface ConversationChangeNotifierProps {
+  /** Explicit selection for embedded chat; omit the prop for routed chat. */
+  agentId?: string;
+}
+
+/** Publishes the active agent and conversation binding, clearing it on unmount. */
+export const ConversationChangeNotifier = (props: ConversationChangeNotifierProps = {}): null => {
   const { eventsService } = useAgentBuilderServices();
   const conversationId = useConversationId();
   const { conversation, isError, isFetched } = useConversation();
-  const agentId = useAgentId();
+  const effectiveAgentId = useAgentId();
+  const agentId = 'agentId' in props ? props.agentId : effectiveAgentId;
 
   const { markAsRead } = useConversationListMutations({
     routeConversationId: conversationId,
@@ -32,20 +33,12 @@ export const ConversationChangeNotifier = (): null => {
   const isStreaming = useIsCurrentConversationStreaming();
 
   useEffect(() => {
-    if (!conversationId) {
-      eventsService.setActiveConversation({ id: undefined });
-      return;
-    }
-
-    if (isError) {
-      eventsService.setActiveConversation({ id: conversationId });
-      return;
-    }
-
-    if (isFetched && conversation) {
-      eventsService.setActiveConversation({ id: conversationId, conversation });
-    }
-  }, [conversationId, conversation, isError, isFetched, eventsService]);
+    eventsService.setActiveConversation({
+      id: conversationId,
+      agentId,
+      ...(conversationId && isFetched && !isError && conversation ? { conversation } : {}),
+    });
+  }, [agentId, conversationId, conversation, isError, isFetched, eventsService]);
 
   useEffect(() => {
     return () => {

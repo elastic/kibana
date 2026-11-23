@@ -10,6 +10,8 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import type { BrowserChatEvent } from './events';
 
 export interface ActiveConversation {
+  /** Agent selection, preserving an implicit default for embedded conversations. */
+  agentId?: string;
   /**
    * Active conversation id, if one already exists.
    * Undefined means we're currently in a new conversation.

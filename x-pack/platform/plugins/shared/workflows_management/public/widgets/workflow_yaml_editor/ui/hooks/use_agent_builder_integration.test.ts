@@ -209,6 +209,216 @@ describe('useAgentBuilderIntegration', () => {
     jest.clearAllMocks();
   });
 
+  describe('selected agent and conversation changes', () => {
+    const publishAgent = (
+      agentBuilder: ReturnType<typeof createMockAgentBuilder>,
+      agentId: string | undefined,
+      conversation: Omit<ActiveConversation, 'agentId'> = { id: undefined }
+    ) => {
+      act(() => {
+        agentBuilder.events.ui.activeConversation$.next({
+          ...conversation,
+          agentId,
+        });
+      });
+    };
+
+    it('keeps the implicit default agent session key until the user changes agents', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      renderHook(() => useAgentBuilderIntegration({ editorRef, isEditorMounted: true }));
+      await flushChatAccessCheck();
+      publishAgent(agentBuilder, undefined);
+
+      act(() => {
+        mockModel.simulateContentChange('name: default agent edit');
+        jest.advanceTimersByTime(500);
+      });
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: undefined })
+      );
+
+      publishAgent(agentBuilder, 'custom-workflow-agent');
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: 'custom-workflow-agent', newConversation: true })
+      );
+      publishAgent(agentBuilder, 'elastic-ai-agent');
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: 'elastic-ai-agent', newConversation: true })
+      );
+    });
+
+    it('keeps the selected agent across YAML edits, tab changes and reopening the chat', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      const initialProps: { readOnlyReason?: 'executions_tab' } = {};
+      const { result, rerender } = renderHook(
+        ({ readOnlyReason }) =>
+          useAgentBuilderIntegration({ editorRef, isEditorMounted: true, readOnlyReason }),
+        { initialProps }
+      );
+      await flushChatAccessCheck();
+      publishAgent(agentBuilder, 'elastic-ai-agent');
+      publishAgent(agentBuilder, 'custom-workflow-agent');
+
+      act(() => {
+        mockModel.simulateContentChange('name: edited');
+        jest.advanceTimersByTime(500);
+      });
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: 'custom-workflow-agent' })
+      );
+
+      rerender({ readOnlyReason: 'executions_tab' });
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: 'custom-workflow-agent' })
+      );
+
+      act(() => result.current.openAgentChat());
+      expect(agentBuilder.openChat).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: 'custom-workflow-agent' })
+      );
+    });
+
+    it('reattaches the current YAML when switching agents in an empty chat', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      renderHook(() => useAgentBuilderIntegration({ editorRef, isEditorMounted: true }));
+      await flushChatAccessCheck();
+      publishAgent(agentBuilder, 'elastic-ai-agent');
+      agentBuilder.addAttachment.mockClear();
+
+      publishAgent(agentBuilder, 'custom-workflow-agent');
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expectedAttachment(INITIAL_YAML));
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: 'custom-workflow-agent', newConversation: true })
+      );
+      agentBuilder.addAttachment.mockClear();
+      publishAgent(agentBuilder, 'another-agent');
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expectedAttachment(INITIAL_YAML));
+    });
+
+    it('preserves an explicit new conversation request during YAML sync', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({ editorRef, isEditorMounted: true })
+      );
+      await flushChatAccessCheck();
+      publishAgent(agentBuilder, 'custom-workflow-agent', { id: 'previous-conversation' });
+
+      act(() => result.current.openAgentChat({ newConversation: true }));
+      publishAgent(agentBuilder, 'custom-workflow-agent');
+      act(() => {
+        mockModel.simulateContentChange('name: new conversation');
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: 'custom-workflow-agent', newConversation: true })
+      );
+    });
+
+    it('keeps a switched agent in a new chat until its conversation binding arrives', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      renderHook(() => useAgentBuilderIntegration({ editorRef, isEditorMounted: true }));
+      await flushChatAccessCheck();
+      publishAgent(agentBuilder, 'elastic-ai-agent');
+      publishAgent(agentBuilder, 'custom-workflow-agent');
+
+      act(() => {
+        mockModel.simulateContentChange('name: edited before sending');
+        jest.advanceTimersByTime(500);
+      });
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: 'custom-workflow-agent', newConversation: true })
+      );
+
+      publishAgent(agentBuilder, 'custom-workflow-agent', { id: 'new-custom-conversation' });
+      agentBuilder.addAttachment.mockClear();
+      act(() => {
+        mockModel.simulateContentChange('name: edited while loading');
+        jest.advanceTimersByTime(500);
+      });
+      expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
+
+      publishAgent(agentBuilder, 'custom-workflow-agent', {
+        id: 'new-custom-conversation',
+        conversation: {
+          id: 'new-custom-conversation',
+          agent_id: 'custom-workflow-agent',
+          user: { id: 'test-user', username: 'test-user' },
+          title: 'Test conversation',
+          created_at: '2026-11-23T00:00:00.000Z',
+          updated_at: '2026-11-23T00:00:00.000Z',
+          rounds: [],
+          attachments: [],
+        },
+      });
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith({
+        ...expectedChatConfig(expectedAttachment('name: edited while loading')),
+        agentId: 'custom-workflow-agent',
+        newConversation: undefined,
+      });
+    });
+
+    it('uses the editor attachment instead of a previous conversation attachment in a new chat', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      renderHook(() =>
+        useAgentBuilderIntegration({ editorRef, isEditorMounted: true, workflowId: 'workflow-a' })
+      );
+      await flushChatAccessCheck();
+      publishAgent(agentBuilder, 'elastic-ai-agent', {
+        id: 'old-conversation',
+        conversation: {
+          attachments: [
+            { id: 'legacy-attachment', type: WORKFLOW_YAML_ATTACHMENT_TYPE, origin: 'workflow-a' },
+          ],
+        } as ActiveConversation['conversation'],
+      });
+      agentBuilder.addAttachment.mockClear();
+
+      publishAgent(agentBuilder, 'custom-workflow-agent');
+
+      expect(agentBuilder.addAttachment).toHaveBeenLastCalledWith(
+        expectedAttachment(INITIAL_YAML, { workflowId: 'workflow-a' })
+      );
+      const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
+      expect(bridge.setAttachmentId).toHaveBeenLastCalledWith(ATTACHMENT_ID);
+    });
+
+    it('clears chat config only when the editor unmounts', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      const initialProps: { workflowId?: string } = {};
+      const { rerender, unmount } = renderHook(
+        ({ workflowId }) =>
+          useAgentBuilderIntegration({ editorRef, isEditorMounted: true, workflowId }),
+        { initialProps }
+      );
+      await flushChatAccessCheck();
+      publishAgent(agentBuilder, 'custom-workflow-agent');
+      rerender({ workflowId: 'saved-workflow' });
+
+      expect(agentBuilder.clearChatConfig).not.toHaveBeenCalled();
+      expect(agentBuilder.setChatConfig).toHaveBeenLastCalledWith(
+        expect.objectContaining({ agentId: 'custom-workflow-agent' })
+      );
+      unmount();
+      expect(agentBuilder.clearChatConfig).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('attachment sync on mount', () => {
     it('calls setChatConfig and addAttachment when editor is mounted and chat access resolves', async () => {
       const agentBuilder = createMockAgentBuilder();

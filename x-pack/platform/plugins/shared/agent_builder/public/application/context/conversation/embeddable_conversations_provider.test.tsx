@@ -53,8 +53,18 @@ jest.mock('../../utils/refresh_lists_on_agent_changes', () => ({
   refreshListsOnAgentChanges: (...args: Parameters<typeof mockRefreshListsOnAgentChanges>) =>
     mockRefreshListsOnAgentChanges(...args),
 }));
-// Rendered by the component but irrelevant here (it has its own dependencies).
-jest.mock('./conversation_change_notifier', () => ({ ConversationChangeNotifier: () => null }));
+const mockNotifyConversationChange = jest.fn();
+jest.mock('./conversation_change_notifier', () => {
+  const { useEffect } = jest.requireActual<typeof import('react')>('react');
+  return {
+    ConversationChangeNotifier: () => {
+      useEffect(() => {
+        mockNotifyConversationChange();
+      }, []);
+      return null;
+    },
+  };
+});
 // Render the spinner as a marker so we can assert the isReady gate.
 jest.mock('../../components/redirects/redirect_loading', () => ({
   RedirectLoading: () => <div>loading-spinner</div>,
@@ -96,10 +106,12 @@ const renderEmbeddableProvider = ({
   sessionTag = TAG_A,
   getConversation = jest.fn().mockResolvedValue({ id: 'conversation-a' }),
   children = <ContextSpy />,
+  onRegisterCallbacks,
 }: {
   sessionTag?: string;
   getConversation?: jest.Mock;
   children?: React.ReactNode;
+  onRegisterCallbacks?: (callbacks: EmbeddableConversationCallbacks) => void;
 } = {}) => {
   let callbacks: EmbeddableConversationCallbacks | undefined;
   const coreStart = coreMock.createStart();
@@ -122,6 +134,7 @@ const renderEmbeddableProvider = ({
       autoSendInitialMessage
       onRegisterCallbacks={(registered) => {
         callbacks = registered;
+        onRegisterCallbacks?.(registered);
       }}
     >
       {children}
@@ -214,6 +227,21 @@ describe('EmbeddableConversationsProvider initial message', () => {
       isRestricted: false,
       isReady: true,
     });
+  });
+
+  it('registers sidebar callbacks before publishing the conversation binding', () => {
+    const order: string[] = [];
+    mockNotifyConversationChange.mockImplementationOnce(() => {
+      order.push('conversation');
+    });
+
+    renderEmbeddableProvider({
+      onRegisterCallbacks: () => {
+        order.push('callbacks');
+      },
+    });
+
+    expect(order).toEqual(['callbacks', 'conversation']);
   });
 
   it('keeps the initial message when there is no conversation to continue', async () => {

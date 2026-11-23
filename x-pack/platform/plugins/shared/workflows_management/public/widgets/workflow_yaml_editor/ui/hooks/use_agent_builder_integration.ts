@@ -8,7 +8,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { v4 } from 'uuid';
-import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ActiveConversation } from '@kbn/agent-builder-browser';
+import type {
+  ConversationAttachment,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import {
@@ -117,6 +121,9 @@ export const useAgentBuilderIntegration = ({
   const chatOpenedReportedRef = useRef(false);
   const sessionAutoOpenedRef = useRef(false);
   const conversationIdRef = useRef<string | undefined>(undefined);
+  const hasSeenAgentRef = useRef(false);
+  const selectedAgentIdRef = useRef<string | undefined>(undefined);
+  const newAgentConversationRef = useRef<true | undefined>(undefined);
   const syncAttachmentIdRef = useRef<string | undefined>(undefined);
   const attachmentTargetResolvedRef = useRef(true);
   const validationErrorsRef = useRef(validationErrors);
@@ -321,6 +328,8 @@ export const useAgentBuilderIntegration = ({
       if (!attachmentTargetResolvedRef.current) return;
       const attachment = buildAttachment(yaml);
       agentBuilder.setChatConfig({
+        agentId: selectedAgentIdRef.current,
+        newConversation: newAgentConversationRef.current,
         sessionTag: `workflow-editor:${sessionId}`,
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         attachments: [attachment],
@@ -335,6 +344,36 @@ export const useAgentBuilderIntegration = ({
     attachmentTargetResolvedRef.current = !hasPersistedConversation(sessionId);
     let originLinkRequested = false;
 
+    const updateAgentSelection = (binding: ActiveConversation): boolean => {
+      const agentId = 'agentId' in binding ? binding.agentId : selectedAgentIdRef.current;
+      const agentChanged = hasSeenAgentRef.current && agentId !== selectedAgentIdRef.current;
+      hasSeenAgentRef.current = true;
+      selectedAgentIdRef.current = agentId;
+      return agentChanged;
+    };
+
+    const resetAttachmentTarget = () => {
+      const previousAttachmentId = syncAttachmentIdRef.current;
+      if (previousAttachmentId && previousAttachmentId !== attachmentId) {
+        agentBuilder.removeAttachment(previousAttachmentId);
+      }
+      syncAttachmentIdRef.current = undefined;
+      bridge.setAttachmentId(attachmentId);
+      originLinkRequested = false;
+    };
+
+    const linkAttachmentOrigin = (
+      conversationId: string | undefined,
+      linked: VersionedAttachment | undefined
+    ) => {
+      if (!conversationId || !workflowId || originLinkRequested) return;
+      if (!linked || linked.origin === workflowId) return;
+      originLinkRequested = true;
+      void agentBuilder.updateAttachmentOrigin(conversationId, linked.id, workflowId).catch(() => {
+        originLinkRequested = false;
+      });
+    };
+
     // The chat UI publishes the conversation for every surface it renders, and
     // mints the id before the first request, so this covers new and resumed
     // conversations alike.
@@ -343,8 +382,20 @@ export const useAgentBuilderIntegration = ({
         // `null` means no chat surface is bound, which says nothing about the
         // conversation the sidebar will restore.
         if (!activeConversation) return;
+        const agentChanged = updateAgentSelection(activeConversation);
+        const conversationChanged = activeConversation.id !== conversationIdRef.current;
+        const bindingChanged = agentChanged || conversationChanged;
+        conversationIdRef.current = activeConversation.id;
         if (activeConversation.id) {
-          conversationIdRef.current = activeConversation.id;
+          newAgentConversationRef.current = undefined;
+        } else if (agentChanged) {
+          // Keep the agent selector's new-chat intent until this chat receives an id.
+          newAgentConversationRef.current = true;
+        }
+
+        if (bindingChanged) {
+          // Attachment ids belong to a conversation; a new chat starts with the editor id.
+          resetAttachmentTarget();
         }
 
         if (activeConversation.id && !activeConversation.conversation) {
@@ -367,23 +418,15 @@ export const useAgentBuilderIntegration = ({
           bridge.setAttachmentId(linked.id);
         }
 
-        if (!attachmentTargetResolvedRef.current || linkedAttachmentChanged) {
+        if (!attachmentTargetResolvedRef.current || linkedAttachmentChanged || bindingChanged) {
           attachmentTargetResolvedRef.current = true;
-          const yaml = editorRef.current?.getModel()?.getValue();
+          const yaml = editor.getModel()?.getValue();
           if (yaml !== undefined) syncAttachment(yaml);
         }
 
         // A create-session attachment predates the workflow, so nothing has
         // pointed it at one yet.
-        const conversationId = activeConversation.id;
-        if (!conversationId || !workflowId || originLinkRequested) return;
-        if (!linked || linked.origin === workflowId) return;
-        originLinkRequested = true;
-        void agentBuilder
-          .updateAttachmentOrigin(conversationId, linked.id, workflowId)
-          .catch(() => {
-            originLinkRequested = false;
-          });
+        linkAttachmentOrigin(activeConversation.id, linked);
       }
     );
 
@@ -429,7 +472,6 @@ export const useAgentBuilderIntegration = ({
       // Don't close the sidebar here — this runs on every deps change
       // (including the workflowId flip after Save). Close lives in the
       // unmount-only effect below.
-      agentBuilder.clearChatConfig();
       bridge.stop();
       attachmentBridgeRef.current = null;
       setActiveProposalManager(null);
@@ -491,9 +533,13 @@ export const useAgentBuilderIntegration = ({
   }, [canApplyProposals, workflowTabYaml, editorRef]);
 
   const openAgentChat = useCallback(
-    (options?: OpenAgentChatOptions) => {
+    (options: OpenAgentChatOptions = {}) => {
       if (!agentBuilder || !isChatAccessible) {
         return;
+      }
+
+      if (options.newConversation !== undefined) {
+        newAgentConversationRef.current = options.newConversation ? true : undefined;
       }
 
       const currentYaml = executionsTabYaml ?? editorRef.current?.getModel()?.getValue() ?? '';
@@ -501,16 +547,17 @@ export const useAgentBuilderIntegration = ({
       // Otherwise the active-conversation subscription adds it once it knows which
       // conversation this session shares.
       const shouldAttachNow =
-        attachmentTargetResolvedRef.current || options?.newConversation === true;
+        attachmentTargetResolvedRef.current || options.newConversation === true;
 
       const { chatRef } = agentBuilder.openChat({
+        agentId: selectedAgentIdRef.current,
         sessionTag: `workflow-editor:${sessionId}`,
         greetingMessage: WORKFLOW_EDITOR_GREETING,
-        initialMessage: options?.initialMessage,
-        autoSendInitialMessage: options?.autoSendInitialMessage,
-        newConversation: options?.newConversation,
+        initialMessage: options.initialMessage,
+        autoSendInitialMessage: options.autoSendInitialMessage,
+        newConversation: options.newConversation ?? newAgentConversationRef.current,
         attachments: [
-          ...(options?.attachments ?? []),
+          ...(options.attachments ?? []),
           ...(shouldAttachNow
             ? [
                 buildWorkflowAttachment({
@@ -533,7 +580,7 @@ export const useAgentBuilderIntegration = ({
       setSidebarOpen(true);
 
       if (!chatOpenedReportedRef.current) {
-        sessionAutoOpenedRef.current = options?.isAutoOpen === true;
+        sessionAutoOpenedRef.current = options.isAutoOpen === true;
         telemetry.reportWorkflowAiChatOpened({
           entryPoint: 'workflow_editor',
           sessionType: workflowId ? 'edit' : 'create',
@@ -602,6 +649,10 @@ export const useAgentBuilderIntegration = ({
     initialAgentAttachments,
     autoOpenAgentChat,
   ]);
+
+  useEffect(() => {
+    return () => agentBuilder?.clearChatConfig();
+  }, [agentBuilder]);
 
   // Close the sidebar on unmount (leaving the workflow scope). Empty deps so
   // it does not fire on prop changes. `application.navigateToApp` remounts

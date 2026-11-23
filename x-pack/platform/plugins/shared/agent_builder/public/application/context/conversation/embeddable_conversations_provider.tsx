@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
+import React, { useMemo, useEffect, useLayoutEffect, useCallback, useState, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -33,8 +33,11 @@ import { refreshListsOnAgentChanges } from '../../utils/refresh_lists_on_agent_c
  * Pins restricted (non-`manageAgents`) users to their space's default agent.
  */
 export const PinnedConversationProvider: React.FC<
-  React.PropsWithChildren<{ baseValue: NonNullable<React.ContextType<typeof ConversationContext>> }>
-> = ({ baseValue, children }) => {
+  React.PropsWithChildren<{
+    baseValue: NonNullable<React.ContextType<typeof ConversationContext>>;
+    agentId?: string;
+  }>
+> = ({ baseValue, agentId, children }) => {
   const { effectiveDefaultAgentId, isRestricted, isReady } = useEffectiveSpaceDefaultAgent();
   const value = useMemo(
     () =>
@@ -45,7 +48,7 @@ export const PinnedConversationProvider: React.FC<
   );
   return (
     <ConversationContext.Provider value={value}>
-      <ConversationChangeNotifier />
+      <ConversationChangeNotifier agentId={agentId} />
       {isReady ? children : <RedirectLoading />}
     </ConversationContext.Provider>
   );
@@ -65,7 +68,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   // Register callbacks to allow parent to update props and clear browserApiTools
   const onRegisterCallbacks = contextProps.onRegisterCallbacks;
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (onRegisterCallbacks) {
       onRegisterCallbacks({
         updateProps: (newProps) => setCurrentProps(newProps),
@@ -313,7 +316,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
         <QueryClientProvider client={queryClient}>
           <AgentBuilderServicesContext.Provider value={services}>
             <StreamingProvider conversationStreamService={conversationStreamService}>
-              <PinnedConversationProvider baseValue={conversationContextValue}>
+              <PinnedConversationProvider
+                baseValue={conversationContextValue}
+                agentId={currentProps.agentId}
+              >
                 {children}
               </PinnedConversationProvider>
             </StreamingProvider>
