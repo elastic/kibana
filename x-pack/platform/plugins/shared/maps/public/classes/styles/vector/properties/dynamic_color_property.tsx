@@ -103,8 +103,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     }
 
     return (
-      (this.isCategorical() && !this._options.useCustomColorPalette) ||
-      (this.isOrdinal() && !this._options.useCustomColorRamp)
+      (this.isCategorical() && !this._options.use_custom_color_palette) ||
+      (this.isOrdinal() && !this._options.use_custom_color_ramp)
     );
   }
 
@@ -119,11 +119,11 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   getNumberOfCategories() {
-    if (!this._options.colorCategory) {
+    if (!this._options.color_category) {
       return 0;
     }
 
-    const colors = getColorPalette(this._options.colorCategory);
+    const colors = getColorPalette(this._options.color_category);
     return colors ? colors.length : 0;
   }
 
@@ -144,13 +144,13 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   _getOrdinalColorMbExpression() {
     const invert = this._options.invert === undefined ? false : this._options.invert;
     const targetName = this.getMbFieldName();
-    if (this._options.useCustomColorRamp) {
-      if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
+    if (this._options.use_custom_color_ramp) {
+      if (!this._options.custom_color_ramp || !this._options.custom_color_ramp.length) {
         // custom color ramp config is not complete
         return null;
       }
 
-      const colorStops: Array<number | string> = this._options.customColorRamp.reduce(
+      const colorStops: Array<number | string> = this._options.custom_color_ramp.reduce(
         (accumulatedStops: Array<number | string>, nextStop: OrdinalColorStop) => {
           return [...accumulatedStops, nextStop.stop, nextStop.color];
         },
@@ -232,8 +232,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getCustomRampColorStops(): Array<number | string> {
-    return this._options.customColorRamp
-      ? this._options.customColorRamp.reduce(
+    return this._options.custom_color_ramp
+      ? this._options.custom_color_ramp.reduce(
           (accumulatedStops: Array<number | string>, nextStop: OrdinalColorStop) => {
             return [...accumulatedStops, nextStop.stop, nextStop.color];
           },
@@ -247,20 +247,20 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return this._chartsPaletteServiceGetColor('__other__');
     }
 
-    return this._options.otherCategoryColor
-      ? this._options.otherCategoryColor
+    return this._options.other_category_color
+      ? this._options.other_category_color
       : OTHER_CATEGORY_DEFAULT_COLOR;
   }
 
   _getColorPaletteStops() {
-    if (this._options.useCustomColorPalette && this._options.customColorPalette) {
-      if (isCategoricalStopsInvalid(this._options.customColorPalette)) {
+    if (this._options.use_custom_color_palette && this._options.custom_color_palette) {
+      if (isCategoricalStopsInvalid(this._options.custom_color_palette)) {
         return [];
       }
 
       const stops = [];
-      for (let i = 0; i < this._options.customColorPalette.length; i++) {
-        const config = this._options.customColorPalette[i];
+      for (let i = 0; i < this._options.custom_color_palette.length; i++) {
+        const config = this._options.custom_color_palette[i];
         stops.push({
           stop: config.stop,
           color: config.color,
@@ -281,8 +281,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     }
 
     const categories = this.getCategoryFieldMeta();
-    const colors = this._options.colorCategory
-      ? getColorPalette(this._options.colorCategory)
+    const colors = this._options.color_category
+      ? getColorPalette(this._options.color_category)
       : null;
     if (categories.length === 0 || !colors) {
       return [];
@@ -327,8 +327,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   _getCategoricalColorMbExpression() {
     const otherCategoryColor = this._getOtherCategoryColor();
     if (
-      this._options.useCustomColorPalette &&
-      (!this._options.customColorPalette || !this._options.customColorPalette.length)
+      this._options.use_custom_color_palette &&
+      (!this._options.custom_color_palette || !this._options.custom_color_palette.length)
     ) {
       return otherCategoryColor;
     }
@@ -356,8 +356,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     const invert = this._options.invert === undefined ? false : this._options.invert;
     let colorStops: Array<number | string> | null = null;
     let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
-    if (this._options.useCustomColorRamp) {
-      if (!this._options.customColorRamp) {
+    if (this._options.use_custom_color_ramp) {
+      if (!this._options.custom_color_ramp) {
         return [];
       }
       colorStops = this._getCustomRampColorStops();

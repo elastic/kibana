@@ -50,7 +50,37 @@ describe('useEndpointActions', () => {
 
     expect(result.current.showDeleteAction).toBe(false);
     expect(result.current.showInferenceFlyout).toBe(false);
+    expect(result.current.showTestAction).toBe(false);
     expect(result.current.selectedInferenceEndpoint).toBeUndefined();
+  });
+
+  describe('displayTestActionItem', () => {
+    it('should set selected endpoint and show test action', () => {
+      const { result } = renderHook(() => useEndpointActions());
+
+      act(() => {
+        result.current.displayTestActionItem(mockEndpoint);
+      });
+
+      expect(result.current.selectedInferenceEndpoint).toBe(mockEndpoint);
+      expect(result.current.showTestAction).toBe(true);
+    });
+  });
+
+  describe('onCloseTestModal', () => {
+    it('should clear selected endpoint and hide test action', () => {
+      const { result } = renderHook(() => useEndpointActions());
+
+      act(() => {
+        result.current.displayTestActionItem(mockEndpoint);
+      });
+      act(() => {
+        result.current.onCloseTestModal();
+      });
+
+      expect(result.current.selectedInferenceEndpoint).toBeUndefined();
+      expect(result.current.showTestAction).toBe(false);
+    });
   });
 
   describe('displayDeleteActionItem', () => {

@@ -15,18 +15,23 @@ import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/serve
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { DigitalExperienceLocatorDefinition } from '../common/locator';
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
+import { savedViewSavedObjectType } from './saved_objects/saved_view';
 import { createSessionsReadableCache } from './services/sessions/sessions_readable';
+import { SESSIONS_PLATFORMS } from './services/sessions/sessions_platforms';
 import { registerSessionsTask } from './services/sessions/sessions_task';
 
 interface DigitalExperienceSetupDeps {
   features: FeaturesPluginSetup;
+  share: SharePluginSetup;
   /** Optional: only the Classic RUM source (stateful) needs it. */
   apmDataAccess?: ApmDataAccessPluginSetup;
   /** Optional: only its presence is read, as the Classic RUM source needs it. */
@@ -54,6 +59,10 @@ export class Plugin
 
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
+    // Always registered, not behind a setting, so the saved objects check sees the type.
+    core.savedObjects.registerType(savedViewSavedObjectType);
+    // A short URL names its locator, and the server looks it up to create one.
+    plugins.share.url.locators.create(new DigitalExperienceLocatorDefinition());
 
     const { taskManager, encryptedSavedObjects } = plugins;
     const canEncrypt = encryptedSavedObjects?.canEncrypt === true;
@@ -82,12 +91,15 @@ export class Plugin
     });
 
     if (taskManager) {
-      registerSessionsTask({
-        core,
-        logger: this.logger,
-        taskManager,
-        settings: this.config.sessions,
-      });
+      SESSIONS_PLATFORMS.forEach((platform) =>
+        registerSessionsTask({
+          platform,
+          core,
+          logger: this.logger,
+          taskManager,
+          settings: this.config.sessions,
+        })
+      );
     }
   }
 

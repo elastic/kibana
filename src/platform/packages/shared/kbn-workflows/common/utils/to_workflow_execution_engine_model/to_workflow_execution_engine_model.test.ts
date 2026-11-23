@@ -35,6 +35,13 @@ describe('toWorkflowExecutionEngineModel', () => {
     expect(toWorkflowExecutionEngineModel(baseSource).version).toBeUndefined();
   });
 
+  it('copies workflowUid and omits it when the document has none', () => {
+    expect(
+      toWorkflowExecutionEngineModel({ ...baseSource, workflowUid: 'uid-current' }).workflowUid
+    ).toBe('uid-current');
+    expect(toWorkflowExecutionEngineModel(baseSource).workflowUid).toBeUndefined();
+  });
+
   it('passes through managed workflow fields and execution options', () => {
     expect(
       toWorkflowExecutionEngineModel(
@@ -64,6 +71,25 @@ describe('toWorkflowExecutionEngineModel', () => {
       isTestRun: true,
       isEphemeral: true,
       spaceId: 'default',
+    });
+  });
+
+  it('passes through the template origin and omits null template fields', () => {
+    expect(
+      toWorkflowExecutionEngineModel({
+        ...baseSource,
+        templateSlug: 'custom',
+        templateVersion: null,
+        templateOrigin: 'import',
+      })
+    ).toEqual({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      definition: baseSource.definition,
+      yaml: 'name: Test Workflow',
+      templateSlug: 'custom',
+      templateOrigin: 'import',
     });
   });
 });

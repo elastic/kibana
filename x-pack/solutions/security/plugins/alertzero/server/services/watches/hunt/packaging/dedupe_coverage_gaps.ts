@@ -8,6 +8,7 @@
 import type { HuntIncompleteReason } from '@kbn/alertzero-common';
 import type { PackageReportCoverageGap } from '../../../../../common/step_types/package_report';
 import { MAX_HUNT_TECHNIQUE_IDS } from '../common/hunt_technique_limit';
+import { MAX_UNSEARCHED_DETAIL_CHARS } from '../common/unsearched_patterns';
 import { truncateAtWord } from './coverage_text';
 
 const MAX_GAP_DETAIL_CHARS = 200;
@@ -31,6 +32,7 @@ export const GAP_REASON_PHRASES: Record<HuntIncompleteReason, string> = {
   nothing_searched: 'nothing searchable',
   input_truncated: 'input truncated',
   extraction_pending: 'extraction pending',
+  index_not_searched: 'index not searched',
 };
 
 const isKnownReason = (reason: string): reason is HuntIncompleteReason =>
@@ -60,7 +62,12 @@ export const dedupeCoverageGaps = (
     const key = `${gap.reason}|${gap.detail}|${gap.technique_id ?? ''}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    const detail = truncateAtWord(gap.detail, MAX_GAP_DETAIL_CHARS);
+    // An `index_not_searched` detail is the line's subject and the coordinator already bounds it,
+    // so it keeps that bound: the shorter cut dropped names and the "and N more" count.
+    const detail = truncateAtWord(
+      gap.detail,
+      gap.reason === 'index_not_searched' ? MAX_UNSEARCHED_DETAIL_CHARS : MAX_GAP_DETAIL_CHARS
+    );
     const techniqueId =
       gap.technique_id === undefined
         ? undefined
@@ -79,8 +86,9 @@ export const gapCountPhrase = ({ gaps, atLeast }: DedupedCoverageGaps): string =
   `${atLeast ? 'at least ' : ''}${gaps.length} ${gaps.length === 1 ? 'gap' : 'gaps'}`;
 
 /**
- * One gap as prose. `detail` is only worth showing for an unknown technique id, where it can be
- * the only thing that names what was missed; for every other reason the phrase says enough.
+ * One gap as prose. `detail` is shown when it is the only thing that names what was missed:
+ * an unknown technique id, or an index this hunt never searched. For every other reason the
+ * phrase says enough.
  */
 export const describeGap = ({
   reason,
@@ -88,7 +96,9 @@ export const describeGap = ({
   technique_id: techniqueId,
 }: PackageReportCoverageGap) => {
   const phrase = reasonPhrase(reason);
-  const subject = techniqueId ?? (reason === 'unknown_technique_id' ? detail : undefined);
+  const subject =
+    techniqueId ??
+    (reason === 'unknown_technique_id' || reason === 'index_not_searched' ? detail : undefined);
   return subject ? `${subject} (${phrase})` : phrase;
 };
 
@@ -96,13 +106,19 @@ export const describeGap = ({
  * The gap list as one line of prose, or undefined when nothing was reported. Identical phrases
  * collapse (several techniques can each carry `input truncated`; the count says how many gaps
  * there were). With `maxChars` the list is cut at an item boundary and the rest counted, so a
- * long list never ends mid-phrase.
+ * long list never ends mid-phrase. An `index_not_searched` gap goes first: it is the only item
+ * that names what was missed, so it is the last one a cut should cost.
  */
 export const describeGaps = (
   deduped: DedupedCoverageGaps,
   maxChars?: number
 ): string | undefined => {
-  const items = [...new Set(deduped.gaps.map(describeGap))];
+  const isIndexGap = ({ reason }: PackageReportCoverageGap) => reason === 'index_not_searched';
+  const ordered = [
+    ...deduped.gaps.filter(isIndexGap),
+    ...deduped.gaps.filter((gap) => !isIndexGap(gap)),
+  ];
+  const items = [...new Set(ordered.map(describeGap))];
   if (items.length === 0) return undefined;
   if (maxChars === undefined) return items.join(', ');
   const kept: string[] = [];

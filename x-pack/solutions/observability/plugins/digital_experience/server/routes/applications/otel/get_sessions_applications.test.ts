@@ -49,6 +49,12 @@ const setup = (aggregations: unknown) => {
   return { tracedEsClient: { search } as unknown as TracedElasticsearchClient, search };
 };
 
+const PARAMS = {
+  start: 1,
+  end: 2,
+  histogram: { interval: { value: 1, unit: 's' as const }, timeZone: 'UTC' },
+};
+
 describe('getSessionsApplications', () => {
   it('maps the sessions buckets to application summaries, with the samples and ratings summed', async () => {
     const { tracedEsClient } = setup({
@@ -79,9 +85,7 @@ describe('getSessionsApplications', () => {
       },
     });
 
-    await expect(
-      getSessionsApplications({ tracedEsClient, start: 1, end: 2 })
-    ).resolves.toMatchObject({
+    await expect(getSessionsApplications({ tracedEsClient, ...PARAMS })).resolves.toMatchObject({
       applications: [
         {
           serviceName: 'web',
@@ -130,7 +134,7 @@ describe('getSessionsApplications', () => {
       },
     });
 
-    const { applications } = await getSessionsApplications({ tracedEsClient, start: 1, end: 2 });
+    const { applications } = await getSessionsApplications({ tracedEsClient, ...PARAMS });
 
     expect(applications[0].jsErrors).toEqual({ count: 2, perPageLoad: null });
   });
@@ -142,7 +146,7 @@ describe('getSessionsApplications', () => {
       inEnvironment: { applications: { buckets: [] }, startedInRange: startedInRange() },
     });
 
-    const { environments } = await getSessionsApplications({ tracedEsClient, start: 1, end: 2 });
+    const { environments } = await getSessionsApplications({ tracedEsClient, ...PARAMS });
 
     expect(environments).toEqual(['production', 'staging', ENVIRONMENT_NOT_DEFINED_VALUE]);
   });
@@ -163,11 +167,7 @@ describe('getSessionsApplications', () => {
     it('charts the page loads of the sessions that started in each bucket', async () => {
       const { tracedEsClient } = setup(aggregations);
 
-      const { pageLoadsOverTime } = await getSessionsApplications({
-        tracedEsClient,
-        start: 1,
-        end: 2,
-      });
+      const { pageLoadsOverTime } = await getSessionsApplications({ tracedEsClient, ...PARAMS });
 
       expect(pageLoadsOverTime).toEqual([
         { timestamp: 1000, count: 7 },
@@ -178,11 +178,7 @@ describe('getSessionsApplications', () => {
     it('counts the sessions that started in each bucket, which the buckets already count', async () => {
       const { tracedEsClient } = setup(aggregations);
 
-      const { sessionsOverTime } = await getSessionsApplications({
-        tracedEsClient,
-        start: 1,
-        end: 2,
-      });
+      const { sessionsOverTime } = await getSessionsApplications({ tracedEsClient, ...PARAMS });
 
       expect(sessionsOverTime).toEqual([
         { timestamp: 1000, count: 5 },
@@ -194,7 +190,7 @@ describe('getSessionsApplications', () => {
   it('returns nothing without aggregations, e.g. when the index does not exist', async () => {
     const { tracedEsClient } = setup(undefined);
 
-    await expect(getSessionsApplications({ tracedEsClient, start: 1, end: 2 })).resolves.toEqual({
+    await expect(getSessionsApplications({ tracedEsClient, ...PARAMS })).resolves.toEqual({
       applications: [],
       environments: [],
       pageLoadsOverTime: [],
@@ -205,12 +201,12 @@ describe('getSessionsApplications', () => {
   it('searches the sessions index in a span of its own', async () => {
     const { tracedEsClient, search } = setup(undefined);
 
-    await getSessionsApplications({ tracedEsClient, start: 1, end: 2, environment: 'production' });
+    await getSessionsApplications({ tracedEsClient, ...PARAMS, environment: 'production' });
 
     expect(search).toHaveBeenCalledTimes(1);
     expect(search).toHaveBeenCalledWith(
       'get_digital_experience_otel_applications_from_sessions',
-      expect.objectContaining({ index: 'digital-experience-sessions-*' })
+      expect.objectContaining({ index: 'digital-experience-sessions-browser-*' })
     );
   });
 });

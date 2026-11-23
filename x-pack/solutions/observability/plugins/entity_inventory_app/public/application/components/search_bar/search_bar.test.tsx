@@ -6,6 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import moment from 'moment';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
@@ -59,9 +61,11 @@ const renderSearchBar = (
 
   return render(
     <KibanaContextProvider services={{ ...coreMock.createStart(), unifiedSearch, config }}>
-      <EntityInventorySearchProvider entityCategory={entityCategory}>
-        <EntityInventorySearchBar />
-      </EntityInventorySearchProvider>
+      <Router history={createMemoryHistory()}>
+        <EntityInventorySearchProvider entityCategory={entityCategory}>
+          <EntityInventorySearchBar />
+        </EntityInventorySearchProvider>
+      </Router>
     </KibanaContextProvider>
   );
 };
@@ -148,22 +152,30 @@ describe('EntityInventorySearchBar', () => {
     );
   });
 
-  it('passes the clamped range back to the search bar after an over-limit submission', () => {
+  it('keeps the previous range in the search bar after an over-limit submission', () => {
     renderSearchBar();
+    const previousFrom = lastSearchBarProps().dateRangeFrom;
 
     fireEvent.click(screen.getByTestId('mockSearchBarPick7d'));
 
-    expect(lastSearchBarProps().dateRangeFrom).toBe('now-3d');
-    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute('data-picker-from', 'now-3d');
+    expect(lastSearchBarProps().dateRangeFrom).toBe(previousFrom);
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute(
+      'data-picker-from',
+      previousFrom
+    );
   });
 
-  it('resets the picker to the clamped range when the committed range did not change', () => {
+  it('resets the picker to the previous range when the same over-limit submission is repeated', () => {
     renderSearchBar();
+    const previousFrom = lastSearchBarProps().dateRangeFrom;
 
     fireEvent.click(screen.getByTestId('mockSearchBarPick7d'));
     fireEvent.click(screen.getByTestId('mockSearchBarPick7d'));
 
-    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute('data-picker-from', 'now-3d');
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute(
+      'data-picker-from',
+      previousFrom
+    );
   });
 
   it('updates the filters passed to the search bar', () => {
@@ -174,6 +186,6 @@ describe('EntityInventorySearchBar', () => {
       lastSearchBarProps().onFiltersUpdated?.(filters);
     });
 
-    expect(lastSearchBarProps().filters).toBe(filters);
+    expect(lastSearchBarProps().filters).toEqual(filters);
   });
 });
