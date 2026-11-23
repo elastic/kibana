@@ -29,6 +29,7 @@ const present = {} as never;
 
 const episodeServices: SubjectServices = {
   http: present,
+  application: present,
   uiSettings: present,
   userProfile: present,
   notifications: present,

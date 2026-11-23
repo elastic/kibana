@@ -55,6 +55,7 @@ export type EpisodeFlyoutServices = SubjectServices &
     Pick<
       SubjectServices,
       | 'http'
+      | 'application'
       | 'uiSettings'
       | 'userProfile'
       | 'notifications'
@@ -70,7 +71,7 @@ export type EpisodeFlyoutServices = SubjectServices &
 export type SubjectFlyoutServices = SubjectServices;
 
 /**
- * Whether the episode flyout can render: it takes eight services, and a deployment that does not
+ * Whether the episode flyout can render: it takes eleven services, and a deployment that does not
  * start one of them (for example `spaces`) keeps the plain link instead.
  */
 export const hasEpisodeFlyoutServices = (
@@ -78,6 +79,7 @@ export const hasEpisodeFlyoutServices = (
 ): services is EpisodeFlyoutServices =>
   Boolean(
     services.http &&
+      services.application &&
       services.uiSettings &&
       services.userProfile &&
       services.notifications &&
