@@ -10,7 +10,7 @@
 import type { ConnectorDrift, DriftReportEntry, FailedDrift, SpecChange } from './detect_drift';
 import { connectorOf, DRIFT_ISSUE_LABEL, markerOf } from './issue_marker';
 import { findingsOf, renderDriftIssue } from './issue';
-import { code, plural } from './issue/issue_markdown';
+import { cell, code, listed, plural } from './issue/issue_markdown';
 import type { VendorApiLog } from '../record/update_vendor_api';
 import { errorMessage } from '../values';
 
@@ -84,71 +84,116 @@ const isFailed = (entry: DriftReportEntry): entry is FailedDrift => 'error' in e
 // GitHub rejects a pull request body over 65,536 characters. A Microsoft Graph connector alone
 // can report thousands of changes, each naming a schema path of up to 2.7 KB.
 const MAX_REFRESH_PR_BODY_LENGTH = 60_000;
-const MAX_EXAMPLE_LENGTH = 160;
-const MAX_OPERATIONS_PER_RULE = 3;
+const MAX_EXAMPLE_LENGTH = 100;
+const MAX_RULES_PER_ENDPOINT = 2;
+const MAX_ENDPOINTS_PER_CONNECTOR = 20;
+const NO_ENDPOINT = '—';
 
 const shorten = (text: string, max: number): string =>
   text.length > max ? `${text.slice(0, max - 1)}…` : text;
 
-/** One line per `oasdiff` rule: how many changes, on which operations, and one example. */
-const changesByRule = (changes: readonly SpecChange[]): string[] => {
-  const groups = new Map<string, SpecChange[]>();
+const byName = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/** The changes to one endpoint, by `oasdiff` rule: how many of each, and one example. */
+const whatChanged = (changes: readonly SpecChange[]): string => {
+  const rules = new Map<string, SpecChange[]>();
   for (const change of changes) {
-    groups.set(change.id, [...(groups.get(change.id) ?? []), change]);
+    rules.set(change.id, [...(rules.get(change.id) ?? []), change]);
   }
-  return [...groups.entries()]
-    .sort(([, a], [, b]) => b.length - a.length)
-    .map(([id, group]) => {
-      const operations = [
-        ...new Set(group.flatMap(({ operation }) => (operation ? [operation] : []))),
-      ];
-      const shown = operations.slice(0, MAX_OPERATIONS_PER_RULE).map(code);
-      const more = operations.length - shown.length;
-      const where =
-        shown.length > 0 ? ` on ${shown.join(', ')}${more > 0 ? ` and ${more} more` : ''}` : '';
-      return `- ${code(id)} ×${group.length}${where}, e.g. ${shorten(
-        group[0].text,
-        MAX_EXAMPLE_LENGTH
-      )}`;
-    });
+  const sorted = [...rules.entries()].sort(
+    ([idA, a], [idB, b]) => b.length - a.length || byName(idA, idB)
+  );
+  const shown = sorted
+    .slice(0, MAX_RULES_PER_ENDPOINT)
+    .map(
+      ([id, group]) =>
+        `${code(id)}${group.length > 1 ? ` ×${group.length}` : ''}: ${cell(
+          shorten(group[0].text, MAX_EXAMPLE_LENGTH)
+        )}`
+    );
+  const more = sorted.length - shown.length;
+  return [...shown, ...(more > 0 ? [`and ${plural(more, 'more rule')}`] : [])].join('<br>');
+};
+
+/** A table of the endpoints that changed, what changed on each and the actions that call it. */
+const changesTable = (drift: ConnectorDrift): string[] => {
+  const withSource =
+    Object.values(drift.sources).filter(({ changes }) => (changes ?? []).length > 0).length > 1;
+  const changes = Object.entries(drift.sources).flatMap(([name, source]) =>
+    (source.changes ?? []).map((change) => ({
+      ...change,
+      text: withSource ? `${name}: ${change.text}` : change.text,
+    }))
+  );
+  if (changes.length === 0) {
+    return [];
+  }
+  const actionsOf = (endpoint: string): string[] =>
+    (drift.actions ?? [])
+      .filter(({ operations }) => operations.some(({ operation }) => operation === endpoint))
+      .map(({ action }) => action)
+      .sort(byName);
+  const endpoints = new Map<string, SpecChange[]>();
+  for (const change of changes) {
+    const endpoint = change.operation ?? NO_ENDPOINT;
+    endpoints.set(endpoint, [...(endpoints.get(endpoint) ?? []), change]);
+  }
+  const sorted = [...endpoints.entries()].sort(([a], [b]) =>
+    a === NO_ENDPOINT ? 1 : b === NO_ENDPOINT ? -1 : byName(a, b)
+  );
+  const hidden = sorted.length - MAX_ENDPOINTS_PER_CONNECTOR;
+  return [
+    '| Endpoint | What changed | Used in action |',
+    '|---|---|---|',
+    ...sorted.slice(0, MAX_ENDPOINTS_PER_CONNECTOR).map(([endpoint, group]) => {
+      const actions = actionsOf(endpoint);
+      return `| ${endpoint === NO_ENDPOINT ? NO_ENDPOINT : code(cell(endpoint))} | ${whatChanged(
+        group
+      )} | ${actions.length > 0 ? cell(listed(actions.map(code))) : NO_ENDPOINT} |`;
+    }),
+    ...(hidden > 0
+      ? ['', `…and ${plural(hidden, 'more endpoint')}; the drift report lists them.`]
+      : []),
+  ];
 };
 
 /**
- * The body of the bot PR refreshing the artifacts of connectors with non-breaking drift. Changes
- * are grouped by rule, and connectors that don't fit under GitHub's limit are only named.
+ * The body of the bot PR refreshing the artifacts of connectors with non-breaking drift: a table
+ * per connector, in alphabetical order. A connector's table is cut after 20 endpoints, and a
+ * connector that still doesn't fit under GitHub's limit is only named.
  */
 export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
   const intro = [
     'Refreshes the `vendor_api` artifacts of connectors whose vendor specs changed without breaking them, as found by the weekly vendor API drift check (`node scripts/connector_vendor_api --drift`). The actions pass against the latest specs.',
     '',
-    'Changes are grouped by `oasdiff` rule, with the operations they touch and one example. The drift report attached to the build lists every change.',
+    'Each table lists the endpoints that changed, the `oasdiff` rules that fired on them with one example each, and the actions that call them. The drift report attached to the build lists every change.',
     '',
   ].join('\n');
 
-  const sections = drifts.map((drift) => {
-    const changes = Object.entries(drift.sources).flatMap(([name, source]) =>
-      (source.changes ?? []).map((change) => ({ ...change, text: `${name}: ${change.text}` }))
-    );
-    return {
-      connector: drift.connector,
-      text: [
-        `### ${code(drift.connector)}`,
-        '',
-        ...(drift.operationsChanged ? ['- The actions call other operations.'] : []),
-        ...changesByRule(changes),
-        ...(changes.length === 0 && !drift.operationsChanged
-          ? ['- The specs changed outside what `oasdiff` reports.']
-          : []),
-        '',
-      ].join('\n'),
-    };
-  });
+  const sections = [...drifts]
+    .sort((a, b) => byName(a.connector, b.connector))
+    .map((drift) => {
+      const table = changesTable(drift);
+      return {
+        connector: drift.connector,
+        text: [
+          `### ${code(drift.connector)}`,
+          '',
+          ...(drift.operationsChanged ? ['- The actions call other operations.', ''] : []),
+          ...table,
+          ...(table.length === 0 && !drift.operationsChanged
+            ? ['- The specs changed outside what `oasdiff` reports.']
+            : []),
+          '',
+        ].join('\n'),
+      };
+    });
 
   const shown: string[] = [];
   const omitted: string[] = [];
   let length = intro.length;
   for (const { connector, text } of sections) {
-    if (omitted.length === 0 && length + text.length + 1 <= MAX_REFRESH_PR_BODY_LENGTH) {
+    if (length + text.length + 1 <= MAX_REFRESH_PR_BODY_LENGTH) {
       shown.push(text);
       length += text.length + 1;
     } else {

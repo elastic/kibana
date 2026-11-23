@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorDrift, DriftReportEntry, SpecChange } from './detect_drift';
+import type { ActionDrift, ConnectorDrift, DriftReportEntry, SpecChange } from './detect_drift';
 import { DRIFT_ISSUE_LABEL } from './issue_marker';
 import { drifted, healthy } from './drift_fixtures';
 import { renderDriftIssue } from './issue';
@@ -268,43 +268,165 @@ describe('surfaceDrift', () => {
 // Sentry's spec moved `/api/0` from its paths into its server URL, which an overlay correction
 
 describe('renderRefreshPr', () => {
-  const changed = (connector: string, changes: SpecChange[]): ConnectorDrift => ({
+  const added = (
+    operation: string | undefined,
+    text: string,
+    id = 'response-optional-property-added'
+  ): SpecChange => ({
+    kind: 'non-breaking',
+    id,
+    text,
+    ...(operation ? { operation } : {}),
+  });
+  const calling = (action: string, ...operations: string[]): ActionDrift => ({
+    action,
+    operations: operations.map((operation) => ({ source: 'main', operation })),
+    unmatched: [],
+    snapshotProblems: [],
+  });
+  const changed = (
+    connector: string,
+    changes: SpecChange[],
+    actions: ActionDrift[] = []
+  ): ConnectorDrift => ({
     ...refreshable,
     connector,
     sources: { main: { status: 'changed', changes } },
-  });
-  const added = (operation: string, text: string): SpecChange => ({
-    kind: 'non-breaking',
-    id: 'response-optional-property-added',
-    text,
-    operation,
+    actions,
   });
 
-  it('groups the changes of a connector by rule, with the operations and one example', () => {
-    const body = renderRefreshPr([
-      changed('.other', [
-        added('GET /a', 'added `title`'),
-        added('GET /b', 'added `name`'),
-        added('GET /a', 'added `id`'),
-      ]),
-      { ...refreshable, connector: '.moved', sources: {}, operationsChanged: true },
-    ]);
-
-    expect(body).toContain(
-      '- `response-optional-property-added` ×3 on `GET /a`, `GET /b`, e.g. main: added `title`'
-    );
-    expect(body).toContain('### `.moved`\n\n- The actions call other operations.');
-  });
-
-  it('names at most three operations per rule and counts the rest', () => {
+  it('writes one table per connector with the endpoint, what changed and the actions using it', () => {
     const body = renderRefreshPr([
       changed(
         '.other',
-        ['/a', '/b', '/c', '/d', '/e'].map((path) => added(`GET ${path}`, 'added `x`'))
+        [added('GET /a', 'added `title`'), added('GET /b', 'added `name`')],
+        [calling('listA', 'GET /a'), calling('getA', 'GET /a'), calling('listB', 'GET /b')]
       ),
     ]);
 
-    expect(body).toContain('on `GET /a`, `GET /b`, `GET /c` and 2 more,');
+    expect(body).toContain(
+      [
+        '### `.other`',
+        '',
+        '| Endpoint | What changed | Used in action |',
+        '|---|---|---|',
+        '| `GET /a` | `response-optional-property-added`: added `title` | `getA` and `listA` |',
+        '| `GET /b` | `response-optional-property-added`: added `name` | `listB` |',
+      ].join('\n')
+    );
+  });
+
+  it('lists the connectors alphabetically', () => {
+    const body = renderRefreshPr(
+      ['.zoom', '.1password', '.bigquery'].map((connector) =>
+        changed(connector, [added('GET /a', 'added `x`')])
+      )
+    );
+
+    const order = [...body.matchAll(/^### `(\.[^`]+)`/gm)].map(([, connector]) => connector);
+    expect(order).toEqual(['.1password', '.bigquery', '.zoom']);
+  });
+
+  it('counts the changes of a rule on one endpoint and shows one example', () => {
+    const body = renderRefreshPr([
+      changed('.other', [
+        added('GET /a', 'added `title`'),
+        added('GET /a', 'added `name`'),
+        added('GET /a', 'added a query parameter', 'new-optional-request-parameter'),
+      ]),
+    ]);
+
+    expect(body).toContain(
+      '| `GET /a` | `response-optional-property-added` ×2: added `title`<br>`new-optional-request-parameter`: added a query parameter | — |'
+    );
+  });
+
+  it('shows the two most frequent rules of an endpoint and counts the rest', () => {
+    const body = renderRefreshPr([
+      changed(
+        '.other',
+        ['a', 'b', 'c', 'd', 'e'].map((rule) => added('GET /a', 'x', `rule-${rule}`))
+      ),
+    ]);
+
+    expect(body).toContain('<br>and 3 more rules |');
+  });
+
+  it('names an endpoint no action is recorded on with a dash, and keeps unlocated changes last', () => {
+    const body = renderRefreshPr([
+      changed('.other', [added(undefined, 'servers changed'), added('GET /a', 'added `x`')]),
+    ]);
+
+    const rows = body
+      .split('\n')
+      .filter((line) => line.startsWith('| ') && !line.includes('Endpoint'));
+    expect(rows[0]).toMatch(/^\| `GET \/a` \|/);
+    expect(rows[1]).toMatch(
+      /^\| — \| `response-optional-property-added`: servers changed \| — \|$/
+    );
+  });
+
+  it('prefixes the change with its source only when several sources changed', () => {
+    const two: ConnectorDrift = {
+      ...changed('.other', [added('GET /a', 'added `x`')]),
+      sources: {
+        v1: { status: 'changed', changes: [added('GET /a', 'added `x`')] },
+        v2: { status: 'changed', changes: [added('GET /b', 'added `y`')] },
+      },
+    };
+
+    expect(renderRefreshPr([two])).toContain('`response-optional-property-added`: v1: added `x`');
+    expect(renderRefreshPr([changed('.other', [added('GET /a', 'added `x`')])])).not.toContain(
+      'main: added'
+    );
+  });
+
+  it('notes that the actions call other operations, or that the specs changed outside oasdiff', () => {
+    const body = renderRefreshPr([
+      { ...refreshable, connector: '.moved', sources: {}, operationsChanged: true },
+      { ...refreshable, connector: '.quiet', sources: {} },
+    ]);
+
+    expect(body).toContain('### `.moved`\n\n- The actions call other operations.');
+    expect(body).toContain('### `.quiet`\n\n- The specs changed outside what `oasdiff` reports.');
+  });
+
+  it('keeps a pipe in a change from breaking the table', () => {
+    const body = renderRefreshPr([changed('.other', [added('GET /a', 'type `a | b` added')])]);
+
+    expect(body).toContain('type `a \\| b` added');
+  });
+
+  it('cuts the table of a connector after 20 endpoints and counts the rest', () => {
+    const body = renderRefreshPr([
+      changed(
+        '.other',
+        Array.from({ length: 23 }, (_, index) =>
+          added(`GET /e${String(index).padStart(2, '0')}`, 'x')
+        )
+      ),
+    ]);
+
+    expect(body).toContain('| `GET /e19` |');
+    expect(body).not.toContain('| `GET /e20` |');
+    expect(body).toContain('…and 3 more endpoints; the drift report lists them.');
+  });
+
+  it('still fits a small connector after one too big to fit', () => {
+    const big = (connector: string) =>
+      changed(
+        connector,
+        Array.from({ length: 20 }, (_, endpoint) =>
+          added(`GET /${endpoint}`, `added ${'y'.repeat(400)}`, `rule-${endpoint}`)
+        )
+      );
+    const body = renderRefreshPr([
+      ...Array.from({ length: 30 }, (_, index) => big(`.big${String(index).padStart(2, '0')}`)),
+      changed('.small', [added('GET /a', 'x')]),
+    ]);
+
+    expect(body).toContain('### `.small`');
+    expect(body).toMatch(/The changes of `\.big\d+`/);
   });
 
   it('cuts the example of a change with a long schema path', () => {
@@ -312,7 +434,7 @@ describe('renderRefreshPr', () => {
       changed('.other', [added('GET /a', `added ${'x/'.repeat(2000)}`)]),
     ]);
 
-    expect(body.length).toBeLessThan(1000);
+    expect(body.length).toBeLessThan(1500);
     expect(body).toContain('…');
   });
 
@@ -322,12 +444,9 @@ describe('renderRefreshPr', () => {
       connectors.map((connector) =>
         changed(
           connector,
-          Array.from({ length: 200 }, (_, rule) => ({
-            kind: 'non-breaking' as const,
-            id: `rule-${rule}`,
-            text: `added ${'y'.repeat(400)}`,
-            operation: `GET /${rule}`,
-          }))
+          Array.from({ length: 200 }, (_, endpoint) =>
+            added(`GET /${endpoint}`, `added ${'y'.repeat(400)}`)
+          )
         )
       )
     );
