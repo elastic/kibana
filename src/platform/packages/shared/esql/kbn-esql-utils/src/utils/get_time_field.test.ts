@@ -62,4 +62,15 @@ describe('getESQLTimeField', () => {
 
     expect(http.post).toHaveBeenCalledTimes(1);
   });
+
+  it('does not reuse the cache when the time field inside a LET changes', async () => {
+    const http = createHttp();
+    const query =
+      'LET a = (FROM logs-timefield-param-* | WHERE event.ingested >= ?_tstart); FROM a';
+
+    await getESQLTimeField({ query, http });
+    await getESQLTimeField({ query: query.replace('event.ingested', 'event.created'), http });
+
+    expect(http.post).toHaveBeenCalledTimes(2);
+  });
 });

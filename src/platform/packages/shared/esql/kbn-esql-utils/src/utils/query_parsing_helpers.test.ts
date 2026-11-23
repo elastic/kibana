@@ -241,6 +241,14 @@ describe('esql query helpers', () => {
     it('should return @timestamp for PromQL if there is no time param', () => {
       expect(parseTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
     });
+
+    it('should return the time field used inside a LET the query reads', () => {
+      expect(
+        parseTimeFieldFromESQLQuery(
+          'LET a = (FROM logs | WHERE event.ingested >= ?_tstart); FROM a'
+        )
+      ).toBe('event.ingested');
+    });
   });
 
   describe('getKqlSearchQueries', () => {

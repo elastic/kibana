@@ -239,7 +239,7 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
   const { root } = Parser.parse(esql);
   const functions: ESQLFunction[] = [];
 
-  walk(root.commands, {
+  walk([...(root.header ?? []), ...root.commands], {
     visitFunction: (node) => functions.push(node),
   });
 
