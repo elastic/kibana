@@ -16,14 +16,44 @@ import type {
   Attribution,
   DataFilters,
   DataRequestMeta,
+  EMSFileSourceDescriptor,
+  EMSTMSSourceDescriptor,
+  ESGeoGridSourceDescriptor,
+  ESGeoLineSourceDescriptor,
+  ESPewPewSourceDescriptor,
+  ESQLSourceDescriptor,
+  ESSearchSourceDescriptor,
+  KibanaTilemapSourceDescriptor,
   StyleDescriptor,
   Timeslice,
+  TiledSingleLayerVectorSourceDescriptor,
+  WMSSourceDescriptor,
+  XYZTMSSourceDescriptor,
 } from '../../../common/descriptor_types';
 import type { IStyle } from '../styles/style';
 import type { LICENSED_FEATURES } from '../../licensed_features';
 
+// SourceDescriptor is not used here because it includes a loose catch-all member that widens keyof to string
+type EditableSourceDescriptor =
+  | EMSFileSourceDescriptor
+  | EMSTMSSourceDescriptor
+  | KibanaTilemapSourceDescriptor
+  | WMSSourceDescriptor
+  | XYZTMSSourceDescriptor
+  | TiledSingleLayerVectorSourceDescriptor
+  | ESGeoGridSourceDescriptor
+  | ESGeoLineSourceDescriptor
+  | ESPewPewSourceDescriptor
+  | ESSearchSourceDescriptor
+  | ESQLSourceDescriptor;
+
+// keyof on a union only returns shared keys, distribute to get keys from any source descriptor
+type KeysOfUnion<T> = T extends unknown ? keyof T : never;
+
+export type SourcePropName = KeysOfUnion<EditableSourceDescriptor>;
+
 export type OnSourceChangeArgs = {
-  propName: string;
+  propName: SourcePropName;
   value: unknown;
   newLayerType?: LAYER_TYPE;
 };

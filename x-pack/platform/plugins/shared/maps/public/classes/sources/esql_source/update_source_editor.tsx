@@ -83,10 +83,7 @@ export function UpdateSourceEditor(props: Props) {
             onESQLChange={(change) => {
               setDateFields(change.dateFields);
               setGeoFields(change.geoFields);
-              const changes: OnSourceChangeArgs[] = [
-                { propName: 'dataViewId', value: change.adhocDataViewId },
-                { propName: 'esql', value: change.esql },
-              ];
+              const changes: OnSourceChangeArgs[] = [{ propName: 'esql', value: change.esql }];
               function ensureField(key: 'dateField' | 'geoField', fields: string[]) {
                 if (props.sourceDescriptor[key] && !fields.includes(props.sourceDescriptor[key]!)) {
                   const value = fields.length ? fields[0] : undefined;
