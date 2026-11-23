@@ -276,6 +276,20 @@ KBN_EVALS_WEEKLY=1 node $CI/get_fanout_matrix.js
 passes or fails. A build on another branch never posts to Slack; on `refs/pull/<N>/head` a failure
 is still posted as a comment on that PR.
 
+**Weekly score report.** Set `"weeklyReport": true` on a suite in `evals.suites.json` to add a
+quality score report to its weekly Slack post. The report gives each model's mean quality score and
+the change since the previous weekly build. An LLM (OpenRouter) then reads that week's failing
+examples and summarizes what changed, what keeps failing and what is worth working on. Scores come
+from the evaluations cluster (`evaluationsKbn` in the vault config). If the LLM is unavailable, the
+post lists the significant changes and the lowest scores instead. To preview the report for a past
+build, run it locally:
+
+```bash
+KBN_EVALS_CONFIG_B64="$(base64 -i x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json)" \
+  EVAL_SUITE_ID=agent-builder-visualizations EVAL_WEEKLY_REPORT_BUILD=85 EVAL_WEEKLY_REPORT_OUT=report.md \
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/weekly_score_report/build_weekly_score_report.js
+```
+
 ---
 
 ### 1.3 On-demand evals (Buildkite)

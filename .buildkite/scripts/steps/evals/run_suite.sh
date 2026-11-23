@@ -37,6 +37,7 @@ EVAL_SUITE_INFO="$(
 )"
 EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/dev/null || true)"
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
+EVAL_SUITE_WEEKLY_REPORT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.weeklyReport // false' 2>/dev/null || true)"
 # Per-suite step timeout for suites that legitimately need longer than the 120m default.
 EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
 # The suite's Scout arch/domain, for steps (e.g. the weekly pipeline) that don't pass them. The
@@ -375,6 +376,7 @@ EOF
           EVAL_PR_NUMBER: "${resolved_pr_number}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_FANOUT_STEP_KEYS: "${fanout_step_keys_csv}"
+          EVAL_SUITE_WEEKLY_REPORT: "${EVAL_SUITE_WEEKLY_REPORT:-false}"
         depends_on:
 EOF
         for key in "${fanout_step_keys[@]}"; do
@@ -382,7 +384,7 @@ EOF
         done
 
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
-        timeout_in_minutes: 10
+        timeout_in_minutes: 25
         allow_dependency_failure: true
         soft_fail: true
         agents:
