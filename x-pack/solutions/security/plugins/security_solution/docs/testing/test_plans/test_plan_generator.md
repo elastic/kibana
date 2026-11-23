@@ -321,6 +321,20 @@ If you want to force a full re-read of all linked PRs regardless of activity:
 
 The agent uses the `gh` CLI as the primary method, invoking `scripts/publish_test_plan.sh` for a deterministic publish — it writes the hidden markers at the top in a fixed order, detects any existing test plan comment, decides between PATCH and POST, posts the content, and deletes the local draft. If `gh` is not available, the agent falls back to the GitHub MCP: it runs the script with `--dry-run` (which does not need `gh`) to get the comment body, then posts it through the MCP. Either way, the comment is posted (or updated) on the issue and the local draft is deleted.
 
+### Recording execution results
+
+Every scenario ends with three checkboxes: `✅ Pass`, `❌ Fail` and `🚫 Blocked`. Once the plan is published, anyone with write access to the repository can tick one while running the plan. Tick only one per scenario. GitHub keeps who ticked each box and when in the comment's edit history, so the plan doubles as the execution record.
+
+`update` keeps the ticks of scenarios whose title and Gherkin did not change. When a scenario's steps change, its boxes are cleared and it gets a `_Scenario updated on YYYY-MM-DD, please re-execute_` line above them.
+
+### Scenario priorities and your team's critical workflows
+
+The agent sets each scenario's priority (P0, P1 or P2) from the owning team's critical-workflows map when there is one. Today only Security Solution has a map ([`critical-workflows-security-solution.md`](../../../.agents/skills/test-plan-generator/references/critical-workflows-security-solution.md)). For other teams, priorities come from general impact rules, and the plan says so with a `⚠️` note in *Known Limitations*. To add a map for your team, follow *Adding a new team* in [`critical-workflows.md`](../../../.agents/skills/test-plan-generator/references/critical-workflows.md#adding-a-new-team).
+
+### Token usage and cost
+
+After saving a draft, the agent reports the tokens used and an estimated cost in US dollars. **This only works in Claude Code for now**: in Cursor both lines show *not available for this session*, and the plan is generated as usual. See the FAQ entry [*What do the Token usage and Estimated cost lines mean?*](#faq) for how they are measured.
+
 ---
 
 ## Troubleshooting
