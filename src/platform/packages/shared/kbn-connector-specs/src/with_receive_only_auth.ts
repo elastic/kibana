@@ -7,19 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AuthTypeDef, ConnectorSpec } from './connector_spec';
+import type { ConnectorSpec } from './connector_spec';
 import { isDualConnectorSpec } from './is_dual_connector_spec';
-import { RECEIVE_ONLY_AUTH_LABEL } from './auth_types/translations';
 
 const NO_AUTH_TYPE_ID = 'none';
-
-const RECEIVE_ONLY_AUTH_TYPE: AuthTypeDef = {
-  type: NO_AUTH_TYPE_ID,
-  defaults: {},
-  overrides: {
-    label: RECEIVE_ONLY_AUTH_LABEL,
-  },
-};
 
 const augmentedSpecs = new WeakMap<ConnectorSpec, ConnectorSpec>();
 
@@ -46,7 +37,7 @@ export const withReceiveOnlyAuth = (spec: ConnectorSpec): ConnectorSpec => {
     ...spec,
     auth: {
       ...spec.auth,
-      types: [...(spec.auth?.types ?? []), RECEIVE_ONLY_AUTH_TYPE],
+      types: [...(spec.auth?.types ?? []), NO_AUTH_TYPE_ID],
     },
   };
   augmentedSpecs.set(spec, augmented);

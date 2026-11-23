@@ -370,10 +370,7 @@ describe('createConnectorTypeFromSpec', () => {
       mockActionsPlugin
     );
 
-    expect(connectorType.spec?.auth?.types).toEqual([
-      'basic',
-      expect.objectContaining({ type: 'none' }),
-    ]);
+    expect(connectorType.spec?.auth?.types).toEqual(['basic', 'none']);
     expect(() =>
       validateSecrets(
         connectorType,
