@@ -8,8 +8,6 @@
  */
 
 export { parseDuration } from '@kbn/workflows';
-export { computeRetryDelayMs } from './retry_delay/retry_delay';
-export type { RetryDelayConfig } from './retry_delay/retry_delay';
 export { buildStepExecutionId } from './build_step_execution_id/build_step_execution_id';
 export { stringifyStackFrames } from './stringify_stack_frames';
 export {

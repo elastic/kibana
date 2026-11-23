@@ -7,35 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { computeRetryDelayMs } from '@kbn/workflows';
 import {
-  getManagedInstallRetryDelayMs,
-  MANAGED_INSTALL_RETRY_DELAYS_MS,
+  MANAGED_INSTALL_MAX_RETRIES,
+  MANAGED_INSTALL_RETRY_DELAY,
   waitUnlessAborted,
 } from './managed_install_retry';
 
-describe('getManagedInstallRetryDelayMs', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
+describe('MANAGED_INSTALL_RETRY_DELAY', () => {
+  it('doubles from 1 s to 8 s with jitter, about 15 s in all', () => {
+    const nominalDelaysMs = [1_000, 2_000, 4_000, 8_000];
+    expect(MANAGED_INSTALL_MAX_RETRIES).toBe(nominalDelaysMs.length);
 
-  it('waits between half and all of the delay of the retry', () => {
-    jest.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(1);
-
-    expect(getManagedInstallRetryDelayMs(2)).toBe(2_000);
-    expect(getManagedInstallRetryDelayMs(2)).toBe(4_000);
-  });
-
-  it('keeps the last delay for retries past the schedule', () => {
-    jest.spyOn(Math, 'random').mockReturnValue(1);
-
-    expect(getManagedInstallRetryDelayMs(MANAGED_INSTALL_RETRY_DELAYS_MS.length + 5)).toBe(60_000);
-  });
-
-  it('waits about 5 minutes in all', () => {
-    const totalMs = MANAGED_INSTALL_RETRY_DELAYS_MS.reduce((sum, delayMs) => sum + delayMs, 0);
-
-    expect(totalMs).toBeGreaterThanOrEqual(4 * 60_000);
-    expect(totalMs).toBeLessThanOrEqual(6 * 60_000);
+    for (let run = 0; run < 20; run++) {
+      nominalDelaysMs.forEach((nominalMs, retry) => {
+        const delayMs = computeRetryDelayMs(MANAGED_INSTALL_RETRY_DELAY, retry);
+        expect(delayMs).toBeGreaterThanOrEqual(nominalMs / 2);
+        expect(delayMs).toBeLessThanOrEqual(nominalMs);
+      });
+    }
   });
 });
 

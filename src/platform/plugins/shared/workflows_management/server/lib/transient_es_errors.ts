@@ -30,7 +30,7 @@ export class WorkflowShardUnavailableError extends Error {
  * no living connections, connection errors, timeouts, 408/410/429/502/503/504 responses and
  * unavailable shards. Errors that would fail the same way again return false.
  */
-export const isTransientEsError = (error: unknown): error is Error => {
+export const isTransientEsError = (error: unknown): boolean => {
   if (error instanceof WorkflowShardUnavailableError) {
     return true;
   }
