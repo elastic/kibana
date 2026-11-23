@@ -142,10 +142,10 @@ export class ImportResolver {
   private adaptReq(req: string, dirname: string): string | undefined {
     // handle typescript aliases
     if (req === 'kibana/public') {
-      return this.adaptReq('src/core/public', dirname);
+      return this.adaptReq('src/core/packages/core/public', dirname);
     }
     if (req === 'kibana/server') {
-      return this.adaptReq('src/core/server', dirname);
+      return this.adaptReq('src/core/packages/core/server', dirname);
     }
 
     if (req.startsWith('@modelcontextprotocol/sdk')) {
@@ -183,6 +183,15 @@ export class ImportResolver {
 
     if (req.startsWith('vega-tooltip')) {
       return Path.resolve(REPO_ROOT, `node_modules/vega-tooltip/build`);
+    }
+
+    // We need this "hack" because our current import-resolver doesn't support "exports" in package.json.
+    if (req === 'stylelint') {
+      return Path.resolve(REPO_ROOT, `node_modules/stylelint/lib/index.mjs`);
+    }
+
+    if (req === 'meow') {
+      return Path.resolve(REPO_ROOT, `node_modules/meow/build/index.js`);
     }
 
     // turn root-relative paths into relative paths

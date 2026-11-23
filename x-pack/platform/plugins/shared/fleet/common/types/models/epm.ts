@@ -132,7 +132,10 @@ export interface ArchiveEntry {
 }
 
 export interface ArchiveIterator {
-  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  traverseEntries: (
+    onEntry: (entry: ArchiveEntry) => Promise<void>,
+    readBuffer?: (path: string) => boolean
+  ) => Promise<void>;
   getPaths: () => Promise<string[]>;
 }
 

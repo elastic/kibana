@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
         /^# HELP target_info Target metadata # TYPE target_info gauge target_info{((service_name|service_version|service_instance_id)=".+?",{0,1})+} 1/
       );
 
-      // 2. Match the specific known counter reported in src/platform/test/common/plugins/otel_metrics/server/monitoring/metrics.ts
+      // 2. Match the specific known counter reported in src/platform/test_plugins/otel_metrics/server/monitoring/metrics.ts
       expect(cleanResponseText).to.match(
         /# HELP request_count_total Counts total number of requests # TYPE request_count_total counter request_count_total\{otel_scope_name="dummyMetric"\} [0-9]/
       );

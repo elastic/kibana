@@ -8,10 +8,13 @@
     "public/**/*",
     "server/**/*",
     "__mocks__/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/cloud-plugin",
     "@kbn/features-plugin",
+    "@kbn/content-sanitization",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin",
@@ -93,6 +96,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/react-kibana-context-theme",
+    "@kbn/core-logging-server",
   ],
   "exclude": [
     "target/**/*",

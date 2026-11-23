@@ -20,6 +20,7 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine';
 import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
+import { stringifyRequiredFields } from '../three_way_diff/comparison_side/utils';
 
 export const sortAndStringifyJson = (fieldValue: unknown): string => {
   if (!fieldValue) {
@@ -467,6 +468,25 @@ export const getFieldDiffsForBuildingBlock = (
           },
         ]
       : []),
+  ];
+};
+
+export const getFieldDiffsForRequiredFields = (
+  requiredFieldsThreeWayDiff: AllFieldsDiff['required_fields']
+): FieldDiff[] => {
+  const currentRequiredFields = stringifyRequiredFields(requiredFieldsThreeWayDiff.current_version);
+  const targetRequiredFields = stringifyRequiredFields(requiredFieldsThreeWayDiff.target_version);
+
+  if (currentRequiredFields === targetRequiredFields) {
+    return [];
+  }
+
+  return [
+    {
+      fieldName: 'required_fields',
+      currentVersion: currentRequiredFields,
+      targetVersion: targetRequiredFields,
+    },
   ];
 };
 

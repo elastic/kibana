@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+      await testSubjects.existOrFail('appNotFoundPageContent', { timeout: 5000 });
       expect(await testSubjects.exists('appStatusApp')).to.eql(false);
     });
 
@@ -80,8 +80,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
+      await testSubjects.existOrFail('appStatusApp', { timeout: 5000 });
       expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
     });
 
     it('allows to change the defaultPath of an application', async () => {
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       await navigateToApp('app_status');
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+      await testSubjects.existOrFail('appStatusApp', { timeout: 5000 });
       const currentUrl = await browser.getCurrentUrl();
       expect(Url.parse(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
     });
@@ -110,22 +110,22 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
+      await testSubjects.existOrFail('appStatusApp', { timeout: 5000 });
       expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
 
       await setAppStatus({
         status: AppStatus.inaccessible,
       });
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+      await testSubjects.existOrFail('appNotFoundPageContent', { timeout: 5000 });
       expect(await testSubjects.exists('appStatusApp')).to.eql(false);
 
       await setAppStatus({
         status: AppStatus.accessible,
       });
 
+      await testSubjects.existOrFail('appStatusApp', { timeout: 5000 });
       expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
     });
   });
 }

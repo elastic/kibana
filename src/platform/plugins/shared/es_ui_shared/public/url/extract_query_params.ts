@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, ParsedQuery } from 'query-string';
+import type { ParsedQuery } from 'query-string';
+import qs from 'query-string';
 
 export function extractQueryParams(queryString: string = ''): ParsedQuery<string> {
   const hrefSplit = queryString.split('?');
@@ -15,5 +16,5 @@ export function extractQueryParams(queryString: string = ''): ParsedQuery<string
     return {};
   }
 
-  return parse(hrefSplit[1], { sort: false });
+  return qs.parse(hrefSplit[1], { sort: false });
 }

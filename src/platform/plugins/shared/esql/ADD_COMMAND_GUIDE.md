@@ -200,5 +200,3 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
 
 ### Example PR’s ⭐
 [Adding FORK command](https://github.com/elastic/kibana/pull/216743)
-
-      

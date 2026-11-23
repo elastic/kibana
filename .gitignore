@@ -95,6 +95,7 @@ selenium
 *.out
 package-lock.json
 !/.buildkite/package-lock.json
+yarn.lock
 .yo-rc.json
 .vscode
 *.sublime-*
@@ -111,20 +112,20 @@ npm-debug.log*
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 /apm-diagnostics*.json
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
+/x-pack/solutions/observability/plugins/apm-ftr-e2e/cypress/e2e/service_map/snapshots/*.actual.png
+/x-pack/solutions/observability/plugins/apm-ftr-e2e/cypress/e2e/service_map/snapshots/*.diff.png
 
 # transpiled cypress config
-x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
-x-pack/platform/plugins/shared/fleet/cypress.config.js
-x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.d.ts
-x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.js
-x-pack/platform/plugins/shared/fleet/cypress_ci.config.d.ts
-x-pack/platform/plugins/shared/fleet/cypress_ci.config.js
-x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.d.ts
-x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.js
-x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
-x-pack/platform/plugins/shared/osquery/cypress.config.js
+x-pack/platform/plugins/shared/fleet-cypress/cypress.config.d.ts
+x-pack/platform/plugins/shared/fleet-cypress/cypress.config.js
+x-pack/platform/plugins/shared/fleet-cypress/cypress.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet-cypress/cypress.config.space_awareness.js
+x-pack/platform/plugins/shared/fleet-cypress/cypress_ci.config.d.ts
+x-pack/platform/plugins/shared/fleet-cypress/cypress_ci.config.js
+x-pack/platform/plugins/shared/fleet-cypress/cypress_ci.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet-cypress/cypress_ci.config.space_awareness.js
+x-pack/platform/packages/private/osquery-plugin-cypress.config.d.ts
+x-pack/platform/packages/private/osquery-plugin-cypress.config.js
 x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts
 x-pack/solutions/search/plugins/enterprise_search/cypress.config.js
 x-pack/solutions/security/plugins/security_solution/public/management/cypress.config.d.ts
@@ -160,7 +161,7 @@ src/platform/packages/**/package-map.json
 **/.synthetics/
 **/.journeys/
 **/.rca/
-x-pack/platform/test/security_api_integration/plugins/audit_log/audit.log
+x-pack/platform/test_plugins/security_api_integration/plugins/audit_log/audit.log
 x-pack/test
 
 # ignore FTR temp directory

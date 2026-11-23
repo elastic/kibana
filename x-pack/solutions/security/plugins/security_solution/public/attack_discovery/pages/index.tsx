@@ -268,13 +268,22 @@ const AttackDiscoveryPageComponent: React.FC = () => {
   }, [attackDiscoveries, lastUpdated, replacements]);
 
   useEffect(() => {
-    // If there is only one connector, set it as the selected connector
-    if (aiConnectors != null && aiConnectors.length === 1) {
-      setConnectorId(aiConnectors[0].id);
-    } else if (aiConnectors != null && aiConnectors.length === 0) {
+    if (aiConnectors == null) {
+      return;
+    }
+
+    if (aiConnectors.length === 0) {
       // connectors have been removed, reset the connectorId and cached Attack discoveries
       setConnectorId(undefined);
       setSelectedConnectorAttackDiscoveries([]);
+    } else if (aiConnectors.length === 1) {
+      // If there is only one connector, set it as the selected connector
+      setConnectorId(aiConnectors[0].id);
+    } else {
+      // Multiple connectors are available: default to the highest-priority connector
+      // (the server already orders this list by the GenAI settings default connector,
+      // or the feature-recommended connector, first) when nothing has been selected yet.
+      setConnectorId((currentConnectorId) => currentConnectorId ?? aiConnectors[0].id);
     }
   }, [aiConnectors]);
 

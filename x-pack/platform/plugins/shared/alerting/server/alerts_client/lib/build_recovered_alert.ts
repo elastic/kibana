@@ -29,6 +29,7 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_RECOVERED,
+  ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get } from 'lodash';
@@ -112,6 +113,7 @@ export const buildRecoveredAlert = <
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set status to 'recovered'
     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+    [ALERT_TRACKED]: true,
     // Set latest duration as recovered alerts should have updated duration
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }

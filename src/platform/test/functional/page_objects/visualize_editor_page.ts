@@ -116,8 +116,16 @@ export class VisualizeEditorPageObject extends FtrService {
    * @param type aggregation type, like 'buckets', 'metrics'
    */
   public async clickBucket(bucketName: string, type = 'buckets') {
-    await this.testSubjects.click(`visEditorAdd_${type}`);
-    await this.testSubjects.click(`visEditorAdd_${type}_${bucketName}`);
+    await this.retry.try(async () => {
+      const addButton = await this.testSubjects.find(`visEditorAdd_${type}`);
+      if ((await addButton.getAttribute('aria-expanded')) !== 'true') {
+        await this.testSubjects.click(`visEditorAdd_${type}`);
+      }
+      await this.testSubjects.existOrFail(`visEditorAdd_${type}_${bucketName}`, {
+        timeout: 5000,
+      });
+      await this.testSubjects.click(`visEditorAdd_${type}_${bucketName}`);
+    });
   }
 
   public async clickEnableCustomRanges() {

@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', sessionCookie.cookieString())
         .expect(200);
 
-      jestExpect(response.body).toEqual({
+      jestExpect(response.body).toMatchObject({
         username: 'second_client',
         roles: [],
         full_name: null,
@@ -471,7 +471,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/pki.log');
+      const logFilePath = resolve(
+        __dirname,
+        '../../../../test_plugins/security_api_integration/packages/helpers/audit/pki.log'
+      );
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {

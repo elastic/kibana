@@ -232,10 +232,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Deleted 1 connector');
 
-      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsAfterDelete.length).to.eql(0);
+      await retry.waitFor('deleted connector removed from the filtered list', async () => {
+        const rows = await pageObjects.triggersActionsUI.getConnectorsList();
+        return rows.length === 0;
+      });
     });
 
     it('should bulk delete connectors', async () => {
@@ -263,10 +263,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Deleted 1 connector');
 
-      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsAfterDelete.length).to.eql(0);
+      await retry.waitFor('deleted connector removed from the filtered list', async () => {
+        const rows = await pageObjects.triggersActionsUI.getConnectorsList();
+        return rows.length === 0;
+      });
     });
 
     it('should not be able to delete a preconfigured connector', async () => {

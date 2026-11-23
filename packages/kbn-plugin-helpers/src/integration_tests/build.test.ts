@@ -9,11 +9,12 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import Zlib from 'zlib';
 
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
-import extract from 'extract-zip';
+import AdmZip from 'adm-zip';
 import del from 'del';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
@@ -81,7 +82,8 @@ describe('scripts/generate_plugin', () => {
      succ plugin archive created"
   `);
 
-    await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
+    const zip = new AdmZip(PLUGIN_ARCHIVE);
+    await zip.extractAllToAsync(TMP_DIR);
 
     const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
     files.sort((a, b) => a.localeCompare(b));
@@ -92,7 +94,6 @@ describe('scripts/generate_plugin', () => {
       "kibana/fooTestPlugin/common/index.js",
       "kibana/fooTestPlugin/kibana.json",
       "kibana/fooTestPlugin/node_modules/.modules.yaml",
-      "kibana/fooTestPlugin/node_modules/.package-map.json",
       "kibana/fooTestPlugin/node_modules/.pnpm-workspace-state-v1.json",
       "kibana/fooTestPlugin/package.json",
       "kibana/fooTestPlugin/pnpm-lock.yaml",
@@ -108,6 +109,15 @@ describe('scripts/generate_plugin', () => {
       "kibana/fooTestPlugin/tsconfig.json",
     ]
   `);
+
+    const mainBundle = Path.resolve(
+      TMP_DIR,
+      'kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js'
+    );
+    const compressedBundle = Fs.readFileSync(`${mainBundle}.br`);
+    expect(Zlib.brotliDecompressSync(compressedBundle).toString('utf-8')).toBe(
+      Fs.readFileSync(mainBundle, 'utf-8')
+    );
 
     expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json')))
       .toMatchInlineSnapshot(`

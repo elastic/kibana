@@ -137,7 +137,7 @@ export const BuildPackages: Task = {
         try {
           // copy the built npm_module target dir into the build, package.json is updated to copy
           // the sources we actually end up using into the node_modules directory when we run
-          // yarn install
+          // pnpm install
           await scanCopy({
             source: pkgSrcPath,
             destination: pkgDistPath,

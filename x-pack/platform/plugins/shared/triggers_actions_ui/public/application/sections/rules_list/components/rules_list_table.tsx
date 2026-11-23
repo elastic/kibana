@@ -684,7 +684,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               {<RuleDurationFormat duration={value} />}
               {showDurationWarning && (
                 <EuiIconTip
-                  data-test-subj="ruleDurationWarning"
+                  iconProps={{ 'data-test-subj': 'ruleDurationWarning' }}
                   anchorClassName="ruleDurationWarningIcon"
                   css={css`
                     .ruleDurationWarningIcon {

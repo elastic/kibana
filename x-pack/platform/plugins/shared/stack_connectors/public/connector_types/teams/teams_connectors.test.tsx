@@ -13,6 +13,9 @@ import { ConnectorFormTestProvider } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
+// The connector form provider tree is heavy to mount; give it headroom over the 5s default under parallel CI load.
+jest.setTimeout(30_000);
+
 describe('TeamsActionFields renders', () => {
   test('all connector fields are rendered', async () => {
     const actionConnector = {

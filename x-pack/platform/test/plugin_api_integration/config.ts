@@ -33,7 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...integrationConfig.get('kbnTestServer'),
       serverArgs: [
         ...integrationConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.eventLog.logEntries=true',
+        '--xpack.eventLog.logEntries=false',
         '--xpack.eventLog.indexEntries=true',
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
         '--xpack.task_manager.ephemeral_tasks.enabled=false',
@@ -45,7 +45,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'crowdstrikeConnectorOn',
           'microsoftDefenderEndpointOn',
         ])}`,
-        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths([
+          path.resolve(__dirname, 'plugins'),
+          path.resolve(__dirname, '../../test_plugins/plugin_api_integration'),
+          path.resolve(__dirname, '../../test_plugins/response_ops/plugin_api_integration'),
+        ]),
+        ...findTestPluginPaths(
+          path.resolve(__dirname, '../../test_plugins/plugin_api_integration/plugins')
+        ),
       ],
     },
   };

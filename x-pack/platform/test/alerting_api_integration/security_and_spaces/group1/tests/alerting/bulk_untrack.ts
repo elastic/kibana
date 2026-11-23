@@ -138,6 +138,117 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
       });
     }
 
+    describe('with more than 10 rule types', () => {
+      // The index must start with .alerts- for the alerting internal user to access it
+      const syntheticAlertsIndex = '.alerts-test.bulk-untrack-many-rule-types';
+      const ruleTypeIds = [
+        'test.always-firing',
+        'test.cumulative-firing',
+        'test.never-firing',
+        'test.failing',
+        'test.authorization',
+        'test.delayed',
+        'test.validation',
+        'test.noop',
+        'test.patternFiring',
+        'test.throw',
+      ];
+      const fixtureAlertUuids = ruleTypeIds.flatMap((ruleTypeId) => [
+        `${ruleTypeId}-alert-1`,
+        `${ruleTypeId}-alert-2`,
+      ]);
+      const siemAlertUuid = 'siem-alert';
+
+      const getAlertDoc = (ruleTypeId: string, consumer: string, alertUuid: string) => ({
+        '@timestamp': new Date().toISOString(),
+        'kibana.alert.uuid': alertUuid,
+        'kibana.alert.status': 'active',
+        'kibana.alert.rule.rule_type_id': ruleTypeId,
+        'kibana.alert.rule.consumer': consumer,
+        'kibana.alert.rule.uuid': `rule-${alertUuid}`,
+        'kibana.alert.time_range': { gte: new Date().toISOString() },
+        'kibana.space_ids': ['space1'],
+      });
+
+      const getAlertStatuses = async () => {
+        const {
+          hits: { hits },
+        } = await es.search<Record<string, string>>({
+          index: syntheticAlertsIndex,
+          size: 100,
+          query: { match_all: {} },
+        });
+        return Object.fromEntries(
+          hits.map(({ _source }) => [_source?.[ALERT_UUID], _source?.[ALERT_STATUS]])
+        );
+      };
+
+      beforeEach(async () => {
+        await es.indices.create({
+          index: syntheticAlertsIndex,
+          settings: { hidden: true },
+          mappings: {
+            properties: {
+              'kibana.alert.uuid': { type: 'keyword' },
+              'kibana.alert.status': { type: 'keyword' },
+              'kibana.alert.rule.rule_type_id': { type: 'keyword' },
+              'kibana.alert.rule.consumer': { type: 'keyword' },
+              'kibana.alert.rule.uuid': { type: 'keyword' },
+              'kibana.space_ids': { type: 'keyword' },
+            },
+          },
+        });
+        // Two alerts per fixture rule type and a single siem alert, so that the siem rule type
+        // is the 11th by alert count
+        await es.bulk({
+          index: syntheticAlertsIndex,
+          refresh: 'wait_for',
+          operations: [
+            ...ruleTypeIds.flatMap((ruleTypeId) => [
+              getAlertDoc(ruleTypeId, 'alertsFixture', `${ruleTypeId}-alert-1`),
+              getAlertDoc(ruleTypeId, 'alertsFixture', `${ruleTypeId}-alert-2`),
+            ]),
+            getAlertDoc('siem.queryRule', 'siem', siemAlertUuid),
+          ].flatMap((doc) => [{ index: {} }, doc]),
+        });
+      });
+
+      afterEach(async () => {
+        await es.indices.delete({ index: syntheticAlertsIndex, ignore_unavailable: true });
+      });
+
+      it('should not untrack any alert when a siem alert is among them', async () => {
+        await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/alerts/_bulk_untrack`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            indices: [syntheticAlertsIndex],
+            alert_uuids: [...fixtureAlertUuids, siemAlertUuid],
+          })
+          .expect(403);
+
+        const statuses = await getAlertStatuses();
+        expect(Object.values(statuses).every((status) => status === 'active')).to.be(true);
+      });
+
+      it('should untrack the alerts of all the rule types', async () => {
+        await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/alerts/_bulk_untrack`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            indices: [syntheticAlertsIndex],
+            alert_uuids: fixtureAlertUuids,
+          })
+          .expect(204);
+
+        const statuses = await getAlertStatuses();
+        fixtureAlertUuids.forEach((alertUuid) => {
+          expect(statuses[alertUuid]).to.be('untracked');
+        });
+        expect(statuses[siemAlertUuid]).to.be('active');
+      });
+    });
+
     it('should create new alerts if run rules again after alerts are untracked', async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
