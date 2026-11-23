@@ -178,7 +178,7 @@ describe('InvestigationsQueryService', () => {
           subject('conv-1', 'alert-1', {
             triggerType: 'automatic',
             summary: 'High latency',
-            automation: { id: 'automation-1', name: 'Payments alerts' },
+            via: { label: 'Payments alerts', locator: { id: 'L', params: { a: '1' } } },
           }),
         ],
         impacts: [impact('conv-1')],
@@ -229,7 +229,7 @@ describe('InvestigationsQueryService', () => {
             id: 'alert-1',
             summary: 'High latency',
             trigger_type: 'automatic',
-            automation: { id: 'automation-1', name: 'Payments alerts' },
+            via: { label: 'Payments alerts', locator: { id: 'L', params: { a: '1' } } },
             created_at: '2026-01-01T00:00:00.000Z',
           },
           { type: 'alert', id: 'alert-2', created_at: '2026-01-02T00:00:00.000Z' },

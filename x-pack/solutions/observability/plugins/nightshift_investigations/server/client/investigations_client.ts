@@ -114,7 +114,7 @@ import {
   toSlackThreadKey,
   toSlackThreadPermalink,
   toStartSubjects,
-  toSubjectAutomation,
+  toAutomationVia,
   toSubjectKeys,
   withoutRecordedSubjects,
   type WorkflowSubjectInput,
@@ -609,7 +609,7 @@ export class NightshiftInvestigationsClient {
       triggerType: trigger_type,
       investigationId: newInvestigationId,
       slackThread,
-      automation: toSubjectAutomation({ id: automationId, name: automationName }),
+      via: toAutomationVia({ id: automationId, name: automationName }),
     });
 
     const conversations = await agentBuilder.conversations.getScopedClient({

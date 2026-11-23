@@ -6,6 +6,10 @@
  */
 
 export {
+  NightshiftAutomationLocatorDefinition,
+  type NightshiftAutomationLocator,
+} from './nightshift_automation_locator';
+export {
   NightshiftSettingsLocatorDefinition,
   type NightshiftSettingsLocator,
 } from './nightshift_settings_locator';

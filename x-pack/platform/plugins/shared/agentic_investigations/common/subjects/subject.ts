@@ -19,7 +19,11 @@ import {
 const MAX_ID_LENGTH = 256;
 const MAX_TIMESTAMP_LENGTH = 64;
 const MAX_URL_LENGTH = 2048;
-const MAX_AUTOMATION_NAME_LENGTH = 500;
+const MAX_VIA_LABEL_LENGTH = 500;
+const MAX_LOCATOR_PARAMS_KEYS = 50;
+const MAX_LOCATOR_PARAMS_KEY_LENGTH = 128;
+/** Serialized size bound on a locator's params, which are opaque to the subject. */
+const MAX_LOCATOR_PARAMS_LENGTH = 8_000;
 const MAX_SNAPSHOT_KEYS = 50;
 const MAX_SNAPSHOT_KEY_LENGTH = 128;
 /** Serialized size bound on a snapshot, whose open fields (rule parameters, grouping) are opaque. */
@@ -113,17 +117,38 @@ export const slackThreadSubjectSchema = z.object({
 export type SlackThreadSubject = z.infer<typeof slackThreadSubjectSchema>;
 
 /**
- * The automation a subject triggered an investigation through. Optional: only an automation's
- * start records one, and a subject recorded without it simply has none. The name is as it was
- * when the investigation started.
+ * A page in Kibana, as a share plugin locator id and its params. The browser resolves it through
+ * the locators registry, so the subject never stores a URL and the writer's plugin owns the route.
+ * The params are opaque here: only their key count and serialized size are bounded.
  */
-export const subjectAutomationSchema = lazySchema(() =>
+export const subjectLocatorSchema = lazySchema(() =>
   z.object({
     id: z.string().min(1).max(MAX_ID_LENGTH),
-    name: z.string().min(1).max(MAX_AUTOMATION_NAME_LENGTH),
+    params: z
+      .record(z.string().max(MAX_LOCATOR_PARAMS_KEY_LENGTH), z.json())
+      .refine((value) => Object.keys(value).length <= MAX_LOCATOR_PARAMS_KEYS, {
+        message: `locator params exceed ${MAX_LOCATOR_PARAMS_KEYS} key limit`,
+      })
+      .refine((value) => JSON.stringify(value).length <= MAX_LOCATOR_PARAMS_LENGTH, {
+        message: `locator params exceed ${MAX_LOCATOR_PARAMS_LENGTH} characters`,
+      }),
   })
 );
-export type SubjectAutomation = z.infer<typeof subjectAutomationSchema>;
+export type SubjectLocator = z.infer<typeof subjectLocatorSchema>;
+
+/**
+ * What a subject triggered the investigation through (for example an automation), rendered as
+ * "via <label>" under the subject. The label links to the locator's page when the locator is
+ * registered in the browser, and is plain text otherwise. Optional: a subject recorded without
+ * it simply has none. The label is as it was when the subject was recorded.
+ */
+export const subjectViaSchema = lazySchema(() =>
+  z.object({
+    label: z.string().min(1).max(MAX_VIA_LABEL_LENGTH),
+    locator: subjectLocatorSchema.optional(),
+  })
+);
+export type SubjectVia = z.infer<typeof subjectViaSchema>;
 
 /** Identifies a subject across investigations: the lookup and claim key. */
 export const investigationSubjectKeySchema = z.object({
@@ -143,7 +168,7 @@ export const investigationSubjectInputSchema = lazySchema(() =>
       /** What the subject is about: an event title, the question asked. Plain text. */
       summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
       triggerType: investigationSubjectTriggerTypeSchema.optional(),
-      automation: subjectAutomationSchema.optional(),
+      via: subjectViaSchema.optional(),
       snapshot: alertSubjectSnapshotSchema.optional(),
       slack: slackThreadSubjectSchema.optional(),
     })
@@ -174,7 +199,7 @@ export const investigationSubjectSchema = lazySchema(() =>
     subjectId: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
     summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
     triggerType: investigationSubjectTriggerTypeSchema.optional(),
-    automation: subjectAutomationSchema.optional(),
+    via: subjectViaSchema.optional(),
     snapshot: alertSubjectSnapshotSchema.optional(),
     slack: slackThreadSubjectSchema.optional(),
     createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),

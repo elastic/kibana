@@ -11,7 +11,7 @@ import type {
   InvestigationSubjectTriggerType,
   InvestigationSubjectType,
   SlackThreadSubject,
-  SubjectAutomation,
+  SubjectVia,
 } from '../../../common/subjects/subject';
 import { SUBJECT_TYPE_LABELS, slackChannelLabel } from './translations';
 
@@ -21,8 +21,8 @@ export interface SubjectRowData {
   id: string;
   summary?: string;
   trigger_type?: InvestigationSubjectTriggerType;
-  /** The automation the subject triggered the investigation through, if any. */
-  automation?: SubjectAutomation;
+  /** What the subject triggered the investigation through, if anything: a "via" line. */
+  via?: SubjectVia;
   snapshot?: AlertSubjectSnapshot;
   slack?: SlackThreadSubject;
 }

@@ -9,7 +9,6 @@ import React from 'react';
 import moment from 'moment';
 import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { ApplicationStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
@@ -259,12 +258,12 @@ describe('SubjectView presentation', () => {
     );
   });
 
-  it('shows the automation its document records as a "via" line', () => {
+  it('shows what its document records the subject came through as a "via" line', () => {
     renderView({
       ...base,
       subjectType: 'alert',
       subjectId: 'alert-1',
-      automation: { id: 'automation-1', name: 'Payments alerts' },
+      via: { label: 'Payments alerts' },
     });
 
     expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Payments alerts');
@@ -454,69 +453,58 @@ const renderList = (subjects: SubjectRowData[], services: SubjectServices = {}) 
   );
 
 describe('SubjectList', () => {
-  describe('with the automation that started the investigation', () => {
-    const automation = { id: 'automation-1', name: 'Payments alerts' };
-    const viaAutomation = (subject: SubjectRowData): SubjectRowData => ({ ...subject, automation });
-    const getUrlForApp = jest.fn(
-      (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
-    );
-    const navigateToApp = jest.fn();
-    const application = { getUrlForApp, navigateToApp } as unknown as ApplicationStart;
+  describe('with what the subjects came through', () => {
+    const locator = { id: 'SOME_LOCATOR', params: { automationId: 'automation-1' } };
+    const via = { label: 'Payments alerts', locator };
+    const withVia = (subject: SubjectRowData): SubjectRowData => ({ ...subject, via });
+    const locatedHref = `/located/SOME_LOCATOR?${JSON.stringify(locator.params)}`;
 
-    beforeEach(() => jest.clearAllMocks());
+    it('adds a "via" line under the trigger that links to the page its locator resolves to', async () => {
+      const { services } = createShare();
+      renderList([withVia(alertSubject('a-1'))], services);
 
-    it('adds a "via" line under the trigger that links to the automation', () => {
-      renderList([viaAutomation(alertSubject('a-1'))], { application });
-
-      // The trigger row keeps its own line; the automation is a further line below it.
+      const link = await screen.findByTestId('investigationSubjectViaLink');
+      // The trigger row keeps its own line; the "via" line is a further line below it.
       expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
         /^Rule a-1Trigger · Alert$/
       );
       expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
         'via Payments alerts'
       );
-      const link = screen.getByTestId('investigationSubjectViaLink');
       expect(link).toHaveTextContent('Payments alerts');
-      expect(link).toHaveAttribute('href', '/app/nightshift/automations/automation-1');
+      expect(link).toHaveAttribute('href', locatedHref);
       expect(screen.getByTestId('investigationSubject-alert')).not.toContainElement(link);
     });
 
-    it('adds it under the "N alerts" row too, once', () => {
-      renderList([alertSubject('a-1'), alertSubject('a-2')].map(viaAutomation), { application });
+    it('adds it under the "N alerts" row too, once', async () => {
+      const { services } = createShare();
+      renderList([alertSubject('a-1'), alertSubject('a-2')].map(withVia), services);
 
+      await screen.findByTestId('investigationSubjectViaLink');
       expect(screen.getAllByTestId('investigationSubjectVia')).toHaveLength(1);
       expect(screen.getByTestId('investigationSubject-alerts')).not.toContainElement(
         screen.getByTestId('investigationSubjectVia')
       );
     });
 
-    it('opens the automation inside Kibana, and leaves a modified click to the browser', () => {
-      renderList([viaAutomation(alertSubject('a-1'))], { application });
-      const link = screen.getByTestId('investigationSubjectViaLink');
+    it('navigates through the locator inside Kibana, and leaves a modified click to the browser', async () => {
+      const { services, navigate } = createShare();
+      renderList([withVia(alertSubject('a-1'))], services);
+      const link = await screen.findByTestId('investigationSubjectViaLink');
 
       fireEvent.click(link);
-      expect(navigateToApp).toHaveBeenCalledWith('nightshift', {
-        path: '/automations/automation-1',
-      });
+      expect(navigate).toHaveBeenCalledWith(locator.params);
 
-      navigateToApp.mockClear();
+      navigate.mockClear();
       fireEvent.click(link, { metaKey: true });
-      expect(navigateToApp).not.toHaveBeenCalled();
+      expect(navigate).not.toHaveBeenCalled();
     });
 
-    it('escapes the automation id in the link', () => {
-      renderList([{ ...alertSubject('a-1'), automation: { id: 'a/b?c', name: 'Odd' } }], {
-        application,
-      });
-
-      expect(screen.getByTestId('investigationSubjectViaLink')).toHaveAttribute(
-        'href',
-        '/app/nightshift/automations/a%2Fb%3Fc'
-      );
-    });
-
-    it('shows the name without a link when the application service is missing', () => {
-      renderList([viaAutomation(alertSubject('a-1'))], {});
+    it('shows the label without a link when the locator is not registered', async () => {
+      const services = {
+        share: { url: { locators: { get: () => undefined } } },
+      } as unknown as SubjectServices;
+      renderList([withVia(alertSubject('a-1'))], services);
 
       expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
         'via Payments alerts'
@@ -524,8 +512,16 @@ describe('SubjectList', () => {
       expect(screen.queryByTestId('investigationSubjectViaLink')).not.toBeInTheDocument();
     });
 
-    it('shows no "via" line for a subject without an automation', () => {
-      renderList([alertSubject('a-1')], { application });
+    it('shows the label without a link when the subject records no locator', () => {
+      const { services } = createShare();
+      renderList([{ ...alertSubject('a-1'), via: { label: 'Slack bot' } }], services);
+
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Slack bot');
+      expect(screen.queryByTestId('investigationSubjectViaLink')).not.toBeInTheDocument();
+    });
+
+    it('shows no "via" line for a subject without one', () => {
+      renderList([alertSubject('a-1')], createShare().services);
 
       expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
     });

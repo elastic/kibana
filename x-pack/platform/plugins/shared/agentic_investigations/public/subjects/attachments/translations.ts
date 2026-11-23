@@ -53,12 +53,12 @@ export const subjectTriggerLabel = (type: InvestigationSubjectType): string =>
     values: { type: SUBJECT_TYPE_LABELS[type] },
   });
 
-/** The line under a trigger row when an automation started the investigation. */
-export const viaAutomationLabel = (automation: React.ReactNode): React.ReactNode =>
+/** The line under a trigger row naming what the subject came through, for example an automation. */
+export const viaLabel = (label: React.ReactNode): React.ReactNode =>
   React.createElement(FormattedMessage, {
-    id: 'xpack.agenticInvestigations.subjects.viaAutomation',
-    defaultMessage: 'via {automation}',
-    values: { automation },
+    id: 'xpack.agenticInvestigations.subjects.via',
+    defaultMessage: 'via {label}',
+    values: { label },
   });
 
 export const OPENS_IN_NEW_TAB = i18n.translate(

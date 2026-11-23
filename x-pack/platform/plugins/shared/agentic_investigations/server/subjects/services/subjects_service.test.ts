@@ -170,15 +170,15 @@ describe('SubjectsService', () => {
     });
   });
 
-  it('records the automation a subject came through, and keeps it when a later write leaves it out', async () => {
+  it('records what a subject came through, and keeps it when a later write leaves it out', async () => {
     const { storage, upsert } = setup();
-    const automation = { id: 'automation-1', name: 'Payments alerts' };
-    await upsert([{ ...alertSubject, automation }]);
+    const via = { label: 'Payments alerts', locator: { id: 'L', params: { a: '1' } } };
+    await upsert([{ ...alertSubject, via }]);
 
     await upsert([{ type: alertSubject.type, id: alertSubject.id, summary: 'Renamed' }]);
 
     const stored = storage.entries.get(subjectDocumentId(SPACE_ID, CONVERSATION_ID, alertSubject));
-    expect(stored?.source).toMatchObject({ automation, summary: 'Renamed' });
+    expect(stored?.source).toMatchObject({ via, summary: 'Renamed' });
   });
 
   it('does not re-stamp an unchanged subject', async () => {

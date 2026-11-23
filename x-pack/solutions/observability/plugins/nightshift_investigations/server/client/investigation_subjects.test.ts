@@ -10,8 +10,8 @@ import {
   buildFollowUpMessage,
   recoverSubjectsFromInputs,
   toSlackThreadKey,
+  toAutomationVia,
   toStartSubjects,
-  toSubjectAutomation,
   toSubjectKeys,
   withoutRecordedSubjects,
 } from './investigation_subjects';
@@ -36,29 +36,31 @@ describe('toSlackThreadKey', () => {
   });
 });
 
-describe('toSubjectAutomation', () => {
-  it('records the automation id and name, cut to the subject limits', () => {
-    expect(toSubjectAutomation({ id: 'a1', name: 'Payments alerts' })).toEqual({
-      id: 'a1',
-      name: 'Payments alerts',
+describe('toAutomationVia', () => {
+  it('records the automation name, linking to its page through the automation locator', () => {
+    expect(toAutomationVia({ id: 'a1', name: 'Payments alerts' })).toEqual({
+      label: 'Payments alerts',
+      locator: { id: 'NIGHTSHIFT_AUTOMATION_LOCATOR', params: { automationId: 'a1' } },
     });
-    expect(toSubjectAutomation({ id: 'a'.repeat(300), name: 'n'.repeat(600) })).toEqual({
-      id: 'a'.repeat(256),
-      name: 'n'.repeat(500),
+  });
+
+  it('cuts a long name, and links no id longer than a subject records', () => {
+    expect(toAutomationVia({ id: 'a'.repeat(300), name: 'n'.repeat(600) })).toEqual({
+      label: 'n'.repeat(500),
     });
   });
 
   it.each([{}, { id: 'a1' }, { name: 'Payments alerts' }, { id: '', name: '' }])(
-    'records no automation for %p',
+    'records nothing for %p',
     (automation) => {
-      expect(toSubjectAutomation(automation)).toBeUndefined();
+      expect(toAutomationVia(automation)).toBeUndefined();
     }
   );
 });
 
 describe('toStartSubjects', () => {
-  it('records the automation on every subject of a start an automation made', () => {
-    const automation = { id: 'a1', name: 'Payments alerts' };
+  it('records the via on every subject of a start an automation made', () => {
+    const via = { label: 'Payments alerts' };
 
     expect(
       toStartSubjects({
@@ -67,12 +69,12 @@ describe('toStartSubjects', () => {
         triggerType: 'automatic',
         investigationId: 'inv-1',
         slackThread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
-        automation,
-      }).map((subject) => subject.automation)
-    ).toEqual([automation, automation, automation]);
+        via,
+      }).map((subject) => subject.via)
+    ).toEqual([via, via, via]);
   });
 
-  it('records no automation for a start no automation made', () => {
+  it('records no via for a start without one', () => {
     const subjects = toStartSubjects({
       subject: { type: 'alert', id: 'alert-1' },
       alerts: [makeAlert('alert-1')],
@@ -80,7 +82,7 @@ describe('toStartSubjects', () => {
       investigationId: 'inv-1',
     });
 
-    expect(subjects[0]).not.toHaveProperty('automation');
+    expect(subjects[0]).not.toHaveProperty('via');
   });
 
   it('records one alert subject per snapshot, carrying the snapshot', () => {

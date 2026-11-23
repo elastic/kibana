@@ -750,7 +750,7 @@ const toSubjectResponse = (subject: InvestigationSubject): InvestigationSubjectR
   id: subject.subjectId,
   ...(subject.summary !== undefined && { summary: subject.summary }),
   ...(subject.triggerType !== undefined && { trigger_type: subject.triggerType }),
-  ...(subject.automation !== undefined && { automation: subject.automation }),
+  ...(subject.via !== undefined && { via: subject.via }),
   ...(subject.snapshot !== undefined && { snapshot: subject.snapshot }),
   ...(subject.slack !== undefined && { slack: subject.slack }),
   created_at: subject.createdAt,

@@ -21,11 +21,11 @@ import {
 import type {
   InvestigationSubject,
   InvestigationSubjectType,
-  SubjectAutomation,
+  SubjectVia,
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectDisplayType, getSubjectTitle, type SubjectRowData } from './subject_title';
-import { useAlertsListLink, useAutomationLink, useSubjectLink } from './subject_link';
+import { useAlertsListLink, useSubjectLink, useViaLink } from './subject_link';
 import { useSubjectFlyout } from './use_subject_flyout';
 import {
   OPEN_IN_FLYOUT,
@@ -33,7 +33,7 @@ import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
   alertsCountLabel,
-  viaAutomationLabel,
+  viaLabel,
   subjectTriggerLabel,
 } from './translations';
 
@@ -274,14 +274,12 @@ const CompactRow = ({
 };
 
 /**
- * The automation a trigger came through, as a line under the trigger's row: "via <automation>",
- * the automation opening in the Nightshift app. It sits outside the row, which is a link itself.
+ * What a trigger came through, as a line under the trigger's row: "via <label>", the label
+ * linking to the page its locator resolves to. It sits outside the row, which is a link itself.
  */
-const ViaAutomation: React.FC<{ automation: SubjectAutomation }> = ({
-  automation: { id, name },
-}) => {
+const ViaLine: React.FC<{ via: SubjectVia }> = ({ via: { label, locator } }) => {
   const { euiTheme } = useEuiTheme();
-  const { href, onClick } = useAutomationLink(id);
+  const { href, onClick } = useViaLink(locator);
 
   return (
     <EuiText
@@ -296,12 +294,12 @@ const ViaAutomation: React.FC<{ automation: SubjectAutomation }> = ({
         ${euiTextTruncate()}
       `}
     >
-      {viaAutomationLabel(
+      {viaLabel(
         href === undefined ? (
-          name
+          label
         ) : (
           <EuiLink href={href} onClick={onClick} data-test-subj="investigationSubjectViaLink">
-            {name}
+            {label}
           </EuiLink>
         )
       )}
@@ -357,7 +355,7 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
     canOpenFlyout,
   } = useSubjectFlyout(subject, href, { onLinkClick });
   const displayType = getSubjectDisplayType(subject);
-  const { automation } = subject;
+  const { via } = subject;
 
   return (
     <>
@@ -374,7 +372,7 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
           isNested={isNested}
           data-test-subj={`investigationSubject-${subject.type}`}
         />
-        {automation && !isNested && <ViaAutomation automation={automation} />}
+        {via && !isNested && <ViaLine via={via} />}
       </div>
       {flyout}
     </>
@@ -390,8 +388,8 @@ const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
 const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) => {
   const { href } = useAlertsListLink(alerts);
   const [isExpanded, setIsExpanded] = useState(false);
-  // The alerts of one investigation come through the same automation: the first one names it.
-  const [{ automation }] = alerts;
+  // The alerts of one start come through the same thing: the first one names it.
+  const [{ via }] = alerts;
 
   return (
     <>
@@ -407,7 +405,7 @@ const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) =
           isExpanded={href === undefined ? isExpanded : undefined}
           data-test-subj="investigationSubject-alerts"
         />
-        {automation && <ViaAutomation automation={automation} />}
+        {via && <ViaLine via={via} />}
       </div>
       {href === undefined &&
         isExpanded &&
@@ -418,8 +416,8 @@ const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) =
 
 /**
  * An investigation's subjects in one bordered list. Several alerts collapse into one "N alerts"
- * row, which opens the alerts list filtered to them. A subject that an automation triggered the
- * investigation through says so in a "via <automation>" line under its row.
+ * row, which opens the alerts list filtered to them. A subject that came through something (for
+ * example an automation) says so in a "via <label>" line under its row.
  */
 export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
   subjects: allSubjects,
@@ -467,9 +465,5 @@ export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
 
 /** An investigation subject, the same compact row inline in the chat and in the details flyout. */
 export const SubjectView: React.FC<InvestigationAttachmentContentProps<InvestigationSubject>> = ({
-  document: { subjectType, subjectId, summary, automation, snapshot, slack },
-}) => (
-  <SubjectRow
-    subject={{ type: subjectType, id: subjectId, summary, automation, snapshot, slack }}
-  />
-);
+  document: { subjectType, subjectId, summary, via, snapshot, slack },
+}) => <SubjectRow subject={{ type: subjectType, id: subjectId, summary, via, snapshot, slack }} />;

@@ -11,13 +11,10 @@ import {
   ALERTING_V2_EPISODES_LOCATOR,
   ALERTING_V2_EPISODES_STATUS_ALL,
 } from '@kbn/alerting-v2-constants';
-import {
-  ALERTS_LOCATOR_ID,
-  NIGHTSHIFT_APP_ID,
-  createObservabilityAlertingV2Host,
-} from '@kbn/deeplinks-observability';
+import { ALERTS_LOCATOR_ID, createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { SubjectLocator } from '../../../common/subjects/subject';
 import { isUniversalAlertSnapshot } from '../../../common/subjects/subject';
 import type { SubjectRowData } from './subject_title';
 import type { SubjectServices } from './subject_services';
@@ -216,23 +213,21 @@ export const useAlertsListLink = (alerts: readonly SubjectRowData[]): SubjectLin
 const ALERT_IDS_KEY_SEPARATOR = ',';
 
 /**
- * Where an automation's page opens: the automation's details in the Nightshift app. Without the
- * app's URL (no `application` service) there is no link and the row stays plain text.
+ * Where a subject's "via" label goes: the page its locator resolves to. Without a locator, or
+ * when the locator is not registered (its plugin disabled), there is no link and the label stays
+ * plain text.
  */
-export const useAutomationLink = (automationId: string): SubjectLink => {
-  const { application } = useKibana<SubjectServices>().services;
-  const path = `/automations/${encodeURIComponent(automationId)}`;
-  const href = application?.getUrlForApp(NIGHTSHIFT_APP_ID, { path });
-  const onClick = useCallback(
-    (event: React.MouseEvent) => {
-      if (!application || isModifiedClick(event)) {
-        return;
-      }
-      event.preventDefault();
-      void application.navigateToApp(NIGHTSHIFT_APP_ID, { path });
-    },
-    [application, path]
-  );
+export const useViaLink = (locator: SubjectLocator | undefined): SubjectLink => {
+  // Keyed on the serialized locator, so a re-render with an equal one keeps the located URL.
+  const locatorKey = locator ? JSON.stringify(locator) : undefined;
+  const target = useMemo<SubjectLocatorTarget | undefined>(() => {
+    if (!locatorKey) {
+      return undefined;
+    }
+    const { id, params } = JSON.parse(locatorKey) as SubjectLocator;
+    return { locatorId: id, params: params as SerializableRecord };
+  }, [locatorKey]);
+  const { href, onClick } = useLocatorLink(target);
   return { href, onClick: href === undefined ? undefined : onClick, isExternal: false };
 };
 

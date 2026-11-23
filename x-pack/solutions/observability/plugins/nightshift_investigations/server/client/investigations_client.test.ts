@@ -1494,7 +1494,13 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       expect(runInputs().subjects).toEqual([
         expect.objectContaining({
           id: 'alert-1',
-          automation: { id: 'automation-1', name: 'Payments alerts' },
+          via: {
+            label: 'Payments alerts',
+            locator: {
+              id: 'NIGHTSHIFT_AUTOMATION_LOCATOR',
+              params: { automationId: 'automation-1' },
+            },
+          },
         }),
       ]);
     });
@@ -1502,7 +1508,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     it('not for a start no automation made', async () => {
       await startAlerts('alert-1');
 
-      expect(runInputs().subjects[0]).not.toHaveProperty('automation');
+      expect(runInputs().subjects[0]).not.toHaveProperty('via');
     });
 
     it('only on the subjects a follow-up adds, never on the ones already recorded', async () => {
@@ -1524,7 +1530,13 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       expect(runInputs().subjects).toEqual([
         expect.objectContaining({
           id: 'alert-3',
-          automation: { id: 'automation-2', name: 'Other' },
+          via: {
+            label: 'Other',
+            locator: {
+              id: 'NIGHTSHIFT_AUTOMATION_LOCATOR',
+              params: { automationId: 'automation-2' },
+            },
+          },
         }),
       ]);
     });

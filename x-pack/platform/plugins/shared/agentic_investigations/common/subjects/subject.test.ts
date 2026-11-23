@@ -47,24 +47,30 @@ describe('alertSubjectSnapshotSchema', () => {
 });
 
 describe('investigationSubjectInputSchema', () => {
-  it('takes an optional automation with a bounded id and name', () => {
+  it('takes an optional "via" with a bounded label and locator', () => {
     const alert = { type: 'alert', id: 'alert-1' };
+    const locator = { id: 'SOME_LOCATOR', params: { automationId: 'a1', nested: { n: [1] } } };
 
     expect(investigationSubjectInputSchema.safeParse(alert).success).toBe(true);
-    expect(
-      investigationSubjectInputSchema.safeParse({
-        ...alert,
-        automation: { id: 'automation-1', name: 'Payments alerts' },
-      }).success
-    ).toBe(true);
-    for (const automation of [
-      { id: 'automation-1' },
-      { id: '', name: 'Payments alerts' },
-      { id: 'automation-1', name: 'n'.repeat(501) },
+    for (const via of [{ label: 'Payments alerts' }, { label: 'Payments alerts', locator }]) {
+      expect(investigationSubjectInputSchema.safeParse({ ...alert, via }).success).toBe(true);
+    }
+    for (const via of [
+      {},
+      { label: '' },
+      { label: 'n'.repeat(501) },
+      { label: 'x', locator: { id: '', params: {} } },
+      { label: 'x', locator: { id: 'L' } },
+      { label: 'x', locator: { id: 'L', params: { big: 'p'.repeat(8_001) } } },
+      {
+        label: 'x',
+        locator: {
+          id: 'L',
+          params: Object.fromEntries(Array.from({ length: 51 }, (_, i) => [`k${i}`, i])),
+        },
+      },
     ]) {
-      expect(investigationSubjectInputSchema.safeParse({ ...alert, automation }).success).toBe(
-        false
-      );
+      expect(investigationSubjectInputSchema.safeParse({ ...alert, via }).success).toBe(false);
     }
   });
 

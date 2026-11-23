@@ -17,8 +17,10 @@ import {
 import type {
   InvestigationSubject as StoredInvestigationSubject,
   InvestigationSubjectKey,
-  SubjectAutomation,
+  SubjectVia,
 } from '@kbn/agentic-investigations-plugin/common';
+import { NIGHTSHIFT_AUTOMATION_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { NightshiftAutomationLocatorParams } from '@kbn/nightshift-shared';
 import type {
   InvestigationAlertSnapshot,
   InvestigationSubject,
@@ -39,9 +41,10 @@ export { toSlackThreadKey };
 
 const MAX_SLACK_FIELD_LENGTH = 256;
 const MAX_SLACK_PERMALINK_LENGTH = 2048;
-// The limits of the subject document's `automation`; a longer value would fail the subject write.
+// The limits of the subject document's `via`; a longer value would fail the subject write.
+const MAX_VIA_LABEL_LENGTH = 500;
+const MAX_LOCATOR_ID_LENGTH = 256;
 const MAX_AUTOMATION_ID_LENGTH = 256;
-const MAX_AUTOMATION_NAME_LENGTH = 500;
 
 /**
  * A subject the start path hands to the investigation workflow in `inputs.subjects`, recorded on
@@ -55,10 +58,15 @@ export const workflowSubjectInputSchema = lazySchema(() =>
     id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
     summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
     triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
-    automation: z
+    via: z
       .object({
-        id: z.string().min(1).max(MAX_AUTOMATION_ID_LENGTH),
-        name: z.string().min(1).max(MAX_AUTOMATION_NAME_LENGTH),
+        label: z.string().min(1).max(MAX_VIA_LABEL_LENGTH),
+        locator: z
+          .object({
+            id: z.string().min(1).max(MAX_LOCATOR_ID_LENGTH),
+            params: z.record(z.string().max(128), z.json()),
+          })
+          .optional(),
       })
       .optional(),
     snapshot: investigationAlertSnapshotSchema.optional(),
@@ -93,28 +101,40 @@ export const toSlackThreadPermalink = (
 const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'type' | 'id'>) =>
   type === 'manual' && id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
 
-/** The automation a start came through, cut to what a subject records; none when it has no name. */
-export const toSubjectAutomation = ({
+/**
+ * The automation a start came through, as the subjects' "via": its name, linking to its details
+ * page through the Nightshift automation locator. None without both an id and a name. Cut to what
+ * a subject records; an id that does not fit gets no link, since a cut one would open another page.
+ */
+export const toAutomationVia = ({
   id,
   name,
 }: {
   id?: string;
   name?: string;
-}): SubjectAutomation | undefined =>
-  id && name
-    ? { id: id.slice(0, MAX_AUTOMATION_ID_LENGTH), name: name.slice(0, MAX_AUTOMATION_NAME_LENGTH) }
-    : undefined;
+}): SubjectVia | undefined => {
+  if (!id || !name) {
+    return undefined;
+  }
+  const params = { automationId: id } satisfies NightshiftAutomationLocatorParams;
+  return {
+    label: name.slice(0, MAX_VIA_LABEL_LENGTH),
+    ...(id.length <= MAX_AUTOMATION_ID_LENGTH && {
+      locator: { id: NIGHTSHIFT_AUTOMATION_LOCATOR_ID, params },
+    }),
+  };
+};
 
 const withSlackThread = ({
   primary,
   slackThread,
   triggerType,
-  automation,
+  via,
 }: {
   primary: WorkflowSubjectInput;
   slackThread?: SlackThreadReference;
   triggerType: InvestigationTriggerType;
-  automation?: SubjectAutomation;
+  via?: SubjectVia;
 }): { primary: WorkflowSubjectInput; thread: WorkflowSubjectInput[] } => {
   if (!slackThread) {
     return { primary, thread: [] };
@@ -128,7 +148,7 @@ const withSlackThread = ({
   }
   return {
     primary,
-    thread: [{ type: 'slack_thread', id, triggerType, ...(automation && { automation }), slack }],
+    thread: [{ type: 'slack_thread', id, triggerType, ...(via && { via }), slack }],
   };
 };
 
@@ -137,8 +157,8 @@ const withSlackThread = ({
  * per alert snapshot, each carrying its snapshot. A manual investigation without a subject id is
  * recorded under the investigation's own id, so it never matches another investigation. A start
  * about a Slack thread also records the thread, which is how a reply or mention in it finds the
- * investigation; when the thread is the named subject, it is recorded once. A start that an
- * automation made records the automation on each of them.
+ * investigation; when the thread is the named subject, it is recorded once. A start that came
+ * through something (an automation) records it as `via` on each of them.
  */
 export const toStartSubjects = ({
   subject,
@@ -146,14 +166,14 @@ export const toStartSubjects = ({
   triggerType,
   investigationId,
   slackThread,
-  automation,
+  via,
 }: {
   subject: InvestigationSubject;
   alerts?: InvestigationAlertSnapshot[];
   triggerType: InvestigationTriggerType;
   investigationId: string;
   slackThread?: SlackThreadReference;
-  automation?: SubjectAutomation;
+  via?: SubjectVia;
 }): WorkflowSubjectInput[] => {
   const summary = truncateSummary(subject.summary);
   const { primary, thread } = withSlackThread({
@@ -161,12 +181,12 @@ export const toStartSubjects = ({
       type: subject.type,
       id: isPlaceholderManualSubject(subject) ? investigationId : subject.id,
       triggerType,
-      ...(automation && { automation }),
+      ...(via && { via }),
       ...(summary ? { summary } : {}),
     },
     slackThread,
     triggerType,
-    automation,
+    via,
   });
 
   if (subject.type !== 'alert') {
@@ -178,7 +198,7 @@ export const toStartSubjects = ({
       type: 'alert',
       id: snapshot.id,
       triggerType,
-      ...(automation && { automation }),
+      ...(via && { via }),
       snapshot,
       ...(snapshot.id === subject.id && summary ? { summary } : {}),
     })

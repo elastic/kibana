@@ -104,7 +104,7 @@ describe('InvestigationOverview', () => {
     );
   });
 
-  it('shows the automation a subject came through as a "via" line under the trigger', () => {
+  it('shows what a subject came through as a "via" line under the trigger', () => {
     mockUseInvestigation.mockReturnValue({
       data: {
         ...investigation,
@@ -112,7 +112,7 @@ describe('InvestigationOverview', () => {
           {
             type: 'alert',
             id: 'alert-1',
-            automation: { id: 'automation-1', name: 'Payments alerts' },
+            via: { label: 'Payments alerts' },
             created_at: 'x',
           },
         ],
@@ -128,7 +128,7 @@ describe('InvestigationOverview', () => {
     expect(screen.queryByText('Started by')).not.toBeInTheDocument();
   });
 
-  it('shows no "via" line for an investigation no automation started', () => {
+  it('shows no "via" line for subjects without one', () => {
     mockUseInvestigation.mockReturnValue({ data: investigation });
 
     renderOverview();
