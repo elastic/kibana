@@ -12,6 +12,7 @@ import { uniqBy } from 'lodash';
 import type {
   ESQLAstCommand,
   ESQLAstHeaderCommand,
+  ESQLAstItem,
   ESQLAstLetHeaderCommand,
   ESQLAstQueryExpression,
   ESQLIdentifier,
@@ -51,7 +52,7 @@ export const findNamedSubqueryForSource = (
   source: ESQLSource,
   namedSubqueries: readonly NamedSubquery[]
 ): NamedSubquery | undefined => {
-  if (source.sourceType !== 'index' || source.prefix || source.selector) {
+  if (!canReferenceNamedSubquery(source)) {
     return undefined;
   }
 
@@ -72,7 +73,20 @@ export const getNamedSubqueriesAvailableTo = (
 export const resolveNamedSubquerySources = (
   sourceCommand: ESQLAstCommand | undefined,
   namedSubqueries: readonly NamedSubquery[]
-): ESQLSource[] => uniqBy(collectIndexSources(sourceCommand, namedSubqueries, new Set()), 'name');
+): ESQLSource[] => uniqBy(walkSources(sourceCommand, namedSubqueries).sources, 'name');
+
+/**
+ * Returns the named subqueries that a source command reads, directly or through other bindings,
+ * in declaration order.
+ */
+export const getReferencedNamedSubqueries = (
+  sourceCommand: ESQLAstCommand | undefined,
+  namedSubqueries: readonly NamedSubquery[]
+): NamedSubquery[] => {
+  const { referenced } = walkSources(sourceCommand, namedSubqueries);
+
+  return namedSubqueries.filter((namedSubquery) => referenced.has(namedSubquery));
+};
 
 const toNamedSubquery = (command: ESQLAstLetHeaderCommand): NamedSubquery | undefined => {
   const [binding] = command.args;
@@ -90,36 +104,69 @@ const toNamedSubquery = (command: ESQLAstLetHeaderCommand): NamedSubquery | unde
   return { name: left.name, identifier: left, query: right.child, command };
 };
 
-const collectIndexSources = (
+// Only an unqualified local index name can be a LET name.
+const canReferenceNamedSubquery = (source: ESQLSource): boolean =>
+  source.sourceType === 'index' && !source.prefix && !source.selector;
+
+interface PendingArg {
+  readonly arg: ESQLAstItem;
+  // How many leading bindings the arg can reference: a body sees only the bindings declared before it.
+  readonly scope: number;
+}
+
+// Depth-first with an explicit stack and a name lookup: a LET chain can be as long as the query.
+const walkSources = (
   sourceCommand: ESQLAstCommand | undefined,
-  namedSubqueries: readonly NamedSubquery[],
-  visitedBindings: Set<NamedSubquery>
-): ESQLSource[] =>
-  (sourceCommand?.args ?? []).flatMap((arg) => {
+  namedSubqueries: readonly NamedSubquery[]
+): { sources: ESQLSource[]; referenced: Set<NamedSubquery> } => {
+  // The first declaration of a name wins, as with `find`.
+  const indexByName = new Map<string, number>();
+  namedSubqueries.forEach(({ name }, index) => {
+    if (!indexByName.has(name)) {
+      indexByName.set(name, index);
+    }
+  });
+
+  const sources: ESQLSource[] = [];
+  const referenced = new Set<NamedSubquery>();
+  const pending: PendingArg[] = [];
+  // Pushed in reverse, so the args are visited in query order.
+  const pushArgs = (command: ESQLAstCommand | undefined, scope: number) => {
+    const args = command?.args ?? [];
+    for (let i = args.length - 1; i >= 0; i--) {
+      pending.push({ arg: args[i], scope });
+    }
+  };
+
+  pushArgs(sourceCommand, namedSubqueries.length);
+
+  for (let next = pending.pop(); next; next = pending.pop()) {
+    const { arg, scope } = next;
+
     if (isSubQuery(arg)) {
-      return collectIndexSources(arg.child.commands[0], namedSubqueries, visitedBindings);
+      pushArgs(arg.child.commands[0], scope);
+      continue;
     }
 
     if (!isSource(arg) || arg.sourceType !== 'index') {
-      return [];
+      continue;
     }
 
-    const namedSubquery = findNamedSubqueryForSource(arg, namedSubqueries);
+    const index = canReferenceNamedSubquery(arg) ? indexByName.get(arg.name) : undefined;
 
-    if (!namedSubquery) {
-      return [arg];
+    if (index === undefined || index >= scope) {
+      sources.push(arg);
+      continue;
     }
+
+    const namedSubquery = namedSubqueries[index];
 
     // Shared dependencies only need to be expanded once.
-    if (visitedBindings.has(namedSubquery)) {
-      return [];
+    if (!referenced.has(namedSubquery)) {
+      referenced.add(namedSubquery);
+      pushArgs(namedSubquery.query.commands[0], index);
     }
+  }
 
-    visitedBindings.add(namedSubquery);
-
-    return collectIndexSources(
-      namedSubquery.query.commands[0],
-      getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery),
-      visitedBindings
-    );
-  });
+  return { sources, referenced };
+};

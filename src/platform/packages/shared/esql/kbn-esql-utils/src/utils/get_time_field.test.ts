@@ -43,4 +43,23 @@ describe('getESQLTimeField', () => {
 
     expect(http.post).toHaveBeenCalledTimes(1);
   });
+
+  it('does not reuse the cache between a LET and a FROM with the same indices', async () => {
+    const http = createHttp();
+
+    await getESQLTimeField({ query: 'FROM logs-timefield-let-*', http });
+    await getESQLTimeField({ query: 'LET a = (FROM logs-timefield-let-*); FROM a', http });
+
+    expect(http.post).toHaveBeenCalledTimes(2);
+  });
+
+  it('reuses the cache when only the pipeline of a LET changes', async () => {
+    const http = createHttp();
+    const query = 'LET a = (FROM logs-timefield-pipe-* | LIMIT 1); FROM a';
+
+    await getESQLTimeField({ query, http });
+    await getESQLTimeField({ query: query.replace('LIMIT 1', 'LIMIT 2'), http });
+
+    expect(http.post).toHaveBeenCalledTimes(1);
+  });
 });

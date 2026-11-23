@@ -18,8 +18,8 @@ jest.mock('@kbn/esql-utils', () => ({
 }));
 
 jest.mock('@elastic/esql', () => ({
+  ...jest.requireActual('@elastic/esql'),
   Parser: { parse: jest.fn().mockReturnValue({ root: { commands: [] } }) },
-  isSubQuery: jest.fn().mockReturnValue(false),
 }));
 
 jest.mock('@kbn/esql-server-utils', () => ({
@@ -35,6 +35,7 @@ const {
   getProjectRoutingFromEsqlQuery,
 } = jest.requireMock('@kbn/esql-utils');
 const { Parser } = jest.requireMock('@elastic/esql');
+const { Parser: ActualParser } = jest.requireActual('@elastic/esql');
 const { EsqlService } = jest.requireMock('@kbn/esql-server-utils');
 
 function buildMocks() {
@@ -256,6 +257,36 @@ describe('registerGetTimeFieldRoute', () => {
         expect.anything()
       );
     });
+  });
+
+  it('checks the indices of a referenced LET separately', async () => {
+    const { router, handler, requestHandlerContext, response, context } = buildMocks();
+    const query = 'LET a = (FROM logs, ecommerce); FROM a';
+    Parser.parse.mockReturnValueOnce(ActualParser.parse(query));
+    getIndexPatternFromESQLQuery.mockReturnValueOnce('logs,ecommerce');
+    const core = await requestHandlerContext.core;
+    core.elasticsearch.client.asCurrentUser.fieldCaps
+      .mockResolvedValueOnce({ fields: { '@timestamp': {} } })
+      .mockResolvedValueOnce({ fields: {} });
+    registerGetTimeFieldRoute(router, context);
+
+    await handler(requestHandlerContext, { body: { query } }, response);
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { timeField: undefined } });
+  });
+
+  it('does not call fieldCaps for a LET without indices', async () => {
+    const { router, handler, requestHandlerContext, response, context } = buildMocks();
+    const query = 'LET a = (ROW x = 1); FROM a';
+    Parser.parse.mockReturnValueOnce(ActualParser.parse(query));
+    getIndexPatternFromESQLQuery.mockReturnValueOnce('');
+    registerGetTimeFieldRoute(router, context);
+
+    await handler(requestHandlerContext, { body: { query } }, response);
+
+    const core = await requestHandlerContext.core;
+    expect(core.elasticsearch.client.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({ body: { timeField: undefined } });
   });
 
   it('requests the views and the datasets in parallel', async () => {

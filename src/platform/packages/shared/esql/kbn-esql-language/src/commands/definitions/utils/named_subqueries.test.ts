@@ -14,6 +14,7 @@ import {
   getNamedSubqueries,
   getNamedSubqueriesAvailableTo,
   getNextNamedSubqueryName,
+  getReferencedNamedSubqueries,
   resolveNamedSubquerySources,
 } from './named_subqueries';
 
@@ -108,5 +109,40 @@ describe('resolveNamedSubquerySources', () => {
 
     expect(sources.map(({ name }) => name)).toEqual(['logs-*', 'remote:logs-*']);
     expect(resolveNamedSubquerySources(root.commands[0], namedSubqueries)).toEqual(sources);
+  });
+
+  it('resolves a chain of bindings as long as the query', () => {
+    const bindings = Array.from(
+      { length: 5000 },
+      (_, index) => `LET a${index} = (FROM ${index ? `a${index - 1}` : 'logs-*'});`
+    );
+    const root = parse(`${bindings.join(' ')} FROM a4999`);
+    const sources = resolveNamedSubquerySources(root.commands[0], getNamedSubqueries(root.header));
+
+    expect(sources.map(({ name }) => name)).toEqual(['logs-*']);
+  });
+});
+
+describe('getReferencedNamedSubqueries', () => {
+  it('returns the bindings read directly, by subqueries or by other bindings, in declaration order', () => {
+    const root = parse(
+      'LET base = (FROM logs-*); LET unused = (FROM other); LET selected = (FROM base); LET nested = (FROM metrics-*); FROM (FROM nested), selected'
+    );
+    const referenced = getReferencedNamedSubqueries(
+      root.commands[0],
+      getNamedSubqueries(root.header)
+    );
+
+    expect(referenced.map(({ name }) => name)).toEqual(['base', 'selected', 'nested']);
+  });
+
+  it('reads a binding declared later as an index', () => {
+    const root = parse('LET a = (FROM b); LET b = (FROM logs-*); FROM a');
+    const referenced = getReferencedNamedSubqueries(
+      root.commands[0],
+      getNamedSubqueries(root.header)
+    );
+
+    expect(referenced.map(({ name }) => name)).toEqual(['a']);
   });
 });

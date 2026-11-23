@@ -37,4 +37,32 @@ describe('getESQLWithSafeLimit()', () => {
       'from logs* \n| LIMIT 10000 // | STATS MIN(a) BY b'
     );
   });
+
+  it('adds the limit to the main source when a LET repeats its text', () => {
+    expect(
+      getESQLWithSafeLimit(
+        'LET selected = (FROM logs* | WHERE bytes > 0); FROM logs* | STATS count()',
+        LIMIT
+      )
+    ).toBe(
+      'LET selected = (FROM logs* | WHERE bytes > 0); FROM logs* \n| LIMIT 10000 | STATS count()'
+    );
+  });
+
+  it('adds the limit after the main SORT when a LET repeats the source and SORT', () => {
+    expect(
+      getESQLWithSafeLimit(
+        'LET selected = (FROM logs* | SORT @timestamp | LIMIT 5); FROM logs* | SORT @timestamp | STATS count()',
+        LIMIT
+      )
+    ).toBe(
+      'LET selected = (FROM logs* | SORT @timestamp | LIMIT 5); FROM logs* | SORT @timestamp \n| LIMIT 10000 | STATS count()'
+    );
+  });
+
+  it('preserves dollar sequences in LET string literals', () => {
+    expect(getESQLWithSafeLimit('LET selected = (ROW value = "$& $$"); FROM selected', LIMIT)).toBe(
+      'LET selected = (ROW value = "$& $$"); FROM selected \n| LIMIT 10000'
+    );
+  });
 });
