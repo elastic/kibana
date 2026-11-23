@@ -112,6 +112,7 @@ const createDependencies = () => {
     log: {
       debug: jest.fn<void, [string]>(),
       info: jest.fn<void, [string]>(),
+      error: jest.fn<void, [string]>(),
     },
     config: { serverless: true, projectType: 'security' as const },
     esClient: { security: { invalidateApiKey: invalidate, queryApiKeys } },
@@ -728,6 +729,69 @@ describe('requestAuth worker fixture', () => {
       await expect(stalledCreate).rejects.toThrow('teardown timed out');
       expect(harness.dependencies.samlAuth.session.getApiCredentialsForRole).not.toHaveBeenCalled();
       expect(harness.create).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      { name: 'succeeds', fails: false },
+      { name: 'fails', fails: true },
+    ])(
+      'waits for a late key revocation started while the known batch runs, and reports it if it $name',
+      async ({ fails }) => {
+        const harness = createHarness();
+        const { auth, close, done } = await harness.start();
+        const { apiKey: knownKey } = await auth.getApiKeyForAdmin();
+        const knownInvalidation = Promise.withResolvers<InvalidateResponse>();
+        const lateInvalidation = Promise.withResolvers<InvalidateResponse>();
+        harness.invalidate
+          .mockImplementationOnce(() => knownInvalidation.promise)
+          .mockImplementationOnce(() => lateInvalidation.promise);
+        const stalledResponse = Promise.withResolvers<ApiClientResponse<ApiKey>>();
+        harness.create.mockImplementationOnce(() => stalledResponse.promise);
+        const stalledCreate = auth.getApiKeyForAdmin();
+        void stalledCreate.catch(() => {});
+        await jest.advanceTimersByTimeAsync(0);
+        await close();
+
+        // Pass the deadline with the known batch still pending, then deliver the late key.
+        await jest.advanceTimersByTimeAsync(PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
+        stalledResponse.resolve(response(makeKey('straggler')));
+        await jest.advanceTimersByTimeAsync(0);
+        expect(harness.invalidate).toHaveBeenLastCalledWith({ ids: ['straggler'] });
+
+        const fixtureFinished = jest.fn();
+        void done.then(fixtureFinished, fixtureFinished);
+        knownInvalidation.resolve(invalidated([knownKey.id]));
+        await jest.advanceTimersByTimeAsync(0);
+        expect(fixtureFinished).not.toHaveBeenCalled();
+
+        if (fails) {
+          lateInvalidation.reject(new Error('revoke request failed'));
+          await expect(done).rejects.toThrow(
+            "Failed to revoke late API key 'straggler': revoke request failed"
+          );
+          expect(harness.dependencies.log.error).toHaveBeenCalledWith(
+            expect.stringContaining("Failed to revoke API key 'straggler'")
+          );
+        } else {
+          lateInvalidation.resolve(invalidated(['straggler']));
+          await expect(done).rejects.toThrow('Timed out');
+          expect(harness.dependencies.log.error).not.toHaveBeenCalled();
+        }
+      }
+    );
+
+    it('logs the key ID when a late key revocation fails after teardown has finished', async () => {
+      const { harness, done, stalledCreate, stalledResponse } = await startStalledCreate();
+      const rejectedDone = expect(done).rejects.toThrow('Timed out');
+      await jest.advanceTimersByTimeAsync(PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
+      await rejectedDone;
+
+      harness.invalidate.mockRejectedValueOnce(new Error('revoke request failed'));
+      stalledResponse.resolve(response(makeKey('straggler')));
+      await expect(stalledCreate).rejects.toThrow("Failed to revoke late API key 'straggler'");
+      expect(harness.dependencies.log.error).toHaveBeenCalledWith(
+        expect.stringContaining("Failed to revoke API key 'straggler'")
+      );
     });
 
     // Covers a late response while the worker is still alive. After the worker exits, nothing can

@@ -121,6 +121,8 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       let acceptingCredentials = true;
       // Set when the drain deadline passes; requests are left running so late keys can be revoked.
       let pendingOperationsAbandoned = false;
+      // Revocations started by abandoned operations; teardown waits for any still running.
+      const abandonedRevocations = new Set<Promise<void>>();
 
       const runCredentialOperation = (
         create: () => Promise<RoleApiCredentials>
@@ -195,7 +197,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         const apiKey = response.body;
         if (pendingOperationsAbandoned) {
           // Teardown has stopped collecting keys, so revoke this one before reporting the failure.
-          await invalidateApiKeys([apiKey]);
+          await revokeAbandonedApiKey(apiKey);
           throwIfAbandoned();
         }
 
@@ -278,6 +280,26 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         log.info(`Invalidated ${apiKeys.length} API keys`);
       };
 
+      const revokeAbandonedApiKey = (apiKey: ApiKey): Promise<void> => {
+        const revocation = invalidateApiKeys([apiKey]).catch((error) => {
+          // Logged even after teardown finishes, so the key can be revoked by hand.
+          log.error(
+            `Failed to revoke API key '${apiKey.id}' (${
+              apiKey.name
+            }) that arrived after teardown timed out: ${describeFailure(error)}`
+          );
+          throw new Error(
+            `Failed to revoke late API key '${apiKey.id}': ${describeFailure(error)}`
+          );
+        });
+        abandonedRevocations.add(revocation);
+        void revocation.then(
+          () => abandonedRevocations.delete(revocation),
+          () => abandonedRevocations.delete(revocation)
+        );
+        return revocation;
+      };
+
       const throwIfAbandoned = () => {
         if (pendingOperationsAbandoned) {
           throw new Error('API credential request abandoned because teardown timed out');
@@ -322,7 +344,12 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           Promise.allSettled([invalidateApiKeys(knownKeys)]),
           drainThenRevokeLateKeys(),
         ]);
-        throwIfAnyRejected([...knownResult, ...lateResults], 'API key cleanup failed');
+        // Keys that arrived after the deadline while cleanup ran; each is bounded by the ES timeout.
+        const abandonedResults = await Promise.allSettled(abandonedRevocations);
+        throwIfAnyRejected(
+          [...knownResult, ...lateResults, ...abandonedResults],
+          'API key cleanup failed'
+        );
       };
 
       const getApiKey = async (predefinedRole: string): Promise<RoleApiCredentials> => {
