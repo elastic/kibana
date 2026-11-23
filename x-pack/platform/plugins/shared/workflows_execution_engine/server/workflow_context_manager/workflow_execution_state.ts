@@ -255,6 +255,17 @@ export class WorkflowExecutionState {
     return this.stepIo.get(stepExecutionId)?.[type];
   }
 
+  /** How many step executions still hold an `output` in the live map. */
+  public countLiveOutputs(): number {
+    let count = 0;
+    for (const io of this.stepIo.values()) {
+      if (io.output !== undefined) {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
   /**
    * Whether this step's input was dropped from the live map after flush (or skipped
    * at resume) and must be re-fetched from Elasticsearch to be read.

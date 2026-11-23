@@ -8,8 +8,8 @@
 /**
  * Step IO heap gauges:
  *   1. empty outputs → average_memory
- *   2. output > 20% admit → average_memory + allowed_budget (logged separately)
- *   3. output < 20% admit → average_memory + allowed_budget (logged separately);
+ *   2. output > 20% admit → average_memory + io_retention_budget (logged separately)
+ *   3. output < 20% admit → average_memory + io_retention_budget (logged separately);
  *      early consumers also rehydrate after LRU eviction
  *
  * Mock artefacts that would fake a leak:
@@ -23,6 +23,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
+import { StepIoService } from '../../server/workflow_context_manager/step_io_service';
 
 const STEP_COUNT = 100;
 
@@ -32,9 +33,9 @@ const LRU_EARLY_CONSUMER_COUNT = 10;
 /** Matches StepIoService.CACHED_OUTPUT_FRACTION. */
 const ADMIT_FRACTION = 0.2;
 
-/** 10KB budget → admit threshold 2KB. */
-const ALLOWED_BUDGET_BYTES = 10_000;
-const ADMIT_THRESHOLD_BYTES = Math.floor(ALLOWED_BUDGET_BYTES * ADMIT_FRACTION);
+/** 10KB Step IO retention budget → admit threshold 2KB. */
+const IO_RETENTION_BUDGET_BYTES = 10_000;
+const ADMIT_THRESHOLD_BYTES = Math.floor(IO_RETENTION_BUDGET_BYTES * ADMIT_FRACTION);
 
 /**
  * Over-admit payload: must exceed the 20% threshold (never enters LRU).
@@ -75,7 +76,7 @@ const formatBytes = (bytes: number): string => {
 };
 
 const expectedCeiling = (averageMemory: number): number =>
-  averageMemory + ALLOWED_BUDGET_BYTES + HEAP_NOISE_BYTES;
+  averageMemory + IO_RETENTION_BUDGET_BYTES + HEAP_NOISE_BYTES;
 
 /** Same connector as sized runs, with empty payload — fair average_memory baseline. */
 const buildEmptyYaml = (n: number): string => buildSizedYaml(n, 0);
@@ -162,7 +163,35 @@ const leafStepsNamed = (
 
 const applyBudget = (fixture: WorkflowRunFixture): void => {
   (fixture.configMock as Record<string, unknown>).eviction = {
-    maxCacheSize: new ByteSizeValue(ALLOWED_BUDGET_BYTES),
+    maxCacheSize: new ByteSizeValue(IO_RETENTION_BUDGET_BYTES),
+  };
+};
+
+/** Capture the StepIoService for the next run via its write path. */
+const captureStepIoService = (): {
+  getResident: () => { stepsRetained: number; cacheBytes: number };
+  restore: () => void;
+} => {
+  let latest: StepIoService | undefined;
+  const originalWrite = StepIoService.prototype.write;
+  const writeSpy = jest
+    .spyOn(StepIoService.prototype, 'write')
+    .mockImplementation(function (this: StepIoService, ...args) {
+      latest = this;
+      return originalWrite.apply(this, args);
+    });
+
+  return {
+    getResident: () => {
+      if (!latest) {
+        return { stepsRetained: 0, cacheBytes: 0 };
+      }
+      const { liveOutputs, cacheEntries, cacheBytes } = latest.getResidentOutputStats();
+      return { stepsRetained: liveOutputs + cacheEntries, cacheBytes };
+    },
+    restore: () => {
+      writeSpy.mockRestore();
+    },
   };
 };
 
@@ -176,6 +205,7 @@ describe('StepIoService (LRU): memory consumption', () => {
     const fixture = new WorkflowRunFixture();
     fixture.stepExecutionRepositoryMock.discardOutputsAfterUpsert = true;
     applyBudget(fixture);
+    const stepIoCapture = captureStepIoService();
 
     maybeGc();
     const before = heapUsedBytes();
@@ -187,13 +217,17 @@ describe('StepIoService (LRU): memory consumption', () => {
     );
     const leafSteps = leafStepsNamed(fixture, 'step_');
     const outputsRetainedInMock = leafSteps.filter((step) => step.output != null).length;
+    const { stepsRetained, cacheBytes } = stepIoCapture.getResident();
+    stepIoCapture.restore();
 
     jest.clearAllMocks();
     maybeGc();
     averageMemory = residualHeap(before);
 
     // eslint-disable-next-line no-console
-    console.log(`[1 empty] average_memory=${formatBytes(averageMemory)}`);
+    console.log(
+      `[1 empty] average_memory=${formatBytes(averageMemory)}  steps=${leafSteps.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(cacheBytes)}`
+    );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(execution?.error).toBeUndefined();
@@ -203,7 +237,7 @@ describe('StepIoService (LRU): memory consumption', () => {
     expect(averageMemory).toBeLessThan(HEAP_NOISE_BYTES * 10);
   });
 
-  it(`reports average_memory and allowed_budget when each output > 20% admit threshold`, async () => {
+  it(`reports average_memory and io_retention_budget when each output > 20% admit threshold`, async () => {
     expect(OVER_ADMIT_OUTPUT_BYTES).toBeGreaterThan(ADMIT_THRESHOLD_BYTES);
     const unboundedIoBytes = STEP_COUNT * OVER_ADMIT_OUTPUT_BYTES;
     const ceiling = expectedCeiling(averageMemory);
@@ -211,6 +245,7 @@ describe('StepIoService (LRU): memory consumption', () => {
     const fixture = new WorkflowRunFixture();
     fixture.stepExecutionRepositoryMock.discardOutputsAfterUpsert = true;
     applyBudget(fixture);
+    const stepIoCapture = captureStepIoService();
 
     const getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
 
@@ -227,6 +262,8 @@ describe('StepIoService (LRU): memory consumption', () => {
     const leafSteps = leafStepsNamed(fixture, 'step_');
     const outputsRetainedInMock = leafSteps.filter((step) => step.output != null).length;
     const outputFetchCalls = countOutputFetches(getByIdsSpy);
+    const { stepsRetained, cacheBytes } = stepIoCapture.getResident();
+    stepIoCapture.restore();
 
     jest.clearAllMocks();
     maybeGc();
@@ -234,9 +271,9 @@ describe('StepIoService (LRU): memory consumption', () => {
 
     // eslint-disable-next-line no-console
     console.log(
-      `[2 over-admit] average_memory=${formatBytes(used)}  allowed_budget=${formatBytes(
-        ALLOWED_BUDGET_BYTES
-      )}`
+      `[2 over-admit] average_memory=${formatBytes(used)}  io_retention_budget=${formatBytes(
+        IO_RETENTION_BUDGET_BYTES
+      )}  steps=${leafSteps.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(cacheBytes)}`
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
@@ -249,9 +286,9 @@ describe('StepIoService (LRU): memory consumption', () => {
     expect(used).toBeLessThan(unboundedIoBytes);
   });
 
-  it(`reports average_memory and allowed_budget when each output < 20% admit threshold`, async () => {
+  it(`reports average_memory and io_retention_budget when each output < 20% admit threshold`, async () => {
     expect(UNDER_ADMIT_OUTPUT_BYTES).toBeLessThanOrEqual(ADMIT_THRESHOLD_BYTES);
-    expect(LRU_PRODUCER_COUNT * UNDER_ADMIT_OUTPUT_BYTES).toBeGreaterThan(ALLOWED_BUDGET_BYTES);
+    expect(LRU_PRODUCER_COUNT * UNDER_ADMIT_OUTPUT_BYTES).toBeGreaterThan(IO_RETENTION_BUDGET_BYTES);
     const unboundedIoBytes = LRU_PRODUCER_COUNT * UNDER_ADMIT_OUTPUT_BYTES;
     const ceiling = expectedCeiling(averageMemory);
 
@@ -259,6 +296,7 @@ describe('StepIoService (LRU): memory consumption', () => {
     // Keep outputs in fake ES so early consumers can rehydrate after eviction.
     fixture.stepExecutionRepositoryMock.discardOutputsAfterUpsert = false;
     applyBudget(fixture);
+    const stepIoCapture = captureStepIoService();
 
     const getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
 
@@ -283,6 +321,8 @@ describe('StepIoService (LRU): memory consumption', () => {
       output: step.output,
     }));
     const outputFetchCalls = countOutputFetches(getByIdsSpy);
+    const { stepsRetained, cacheBytes } = stepIoCapture.getResident();
+    stepIoCapture.restore();
 
     // Drop fake-ES / Jest artefacts so residual is engine + ≤budget, not N×payload.
     stripMockOutputs(fixture);
@@ -292,9 +332,9 @@ describe('StepIoService (LRU): memory consumption', () => {
 
     // eslint-disable-next-line no-console
     console.log(
-      `[3 under-admit] average_memory=${formatBytes(used)}  allowed_budget=${formatBytes(
-        ALLOWED_BUDGET_BYTES
-      )}`
+      `[3 under-admit] average_memory=${formatBytes(used)}  io_retention_budget=${formatBytes(
+        IO_RETENTION_BUDGET_BYTES
+      )}  steps=${producers.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(cacheBytes)}`
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);

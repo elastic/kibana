@@ -173,6 +173,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     };
   }
 
+  /** Resident outputs: live map + LRU cache (used by memory gauges). */
+  public getResidentOutputStats(): {
+    liveOutputs: number;
+    cacheEntries: number;
+    cacheBytes: number;
+  } {
+    return {
+      liveOutputs: this.state.countLiveOutputs(),
+      cacheEntries: this.cache.size,
+      cacheBytes: this.cache.totalBytes,
+    };
+  }
+
   private uniqueRefs(refs: ReadonlyArray<StepIoRef>): StepIoRef[] {
     const seen = new Set<string>();
     const unique: StepIoRef[] = [];
