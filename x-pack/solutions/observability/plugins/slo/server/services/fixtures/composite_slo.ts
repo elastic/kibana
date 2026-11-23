@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { storedCompositeSloDefinitionSchema } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
-import type { CompositeSLODefinition } from '../../domain/models';
+import type { CompositeSLODefinition, StoredCompositeSLODefinition } from '../../domain/models';
+import { thirtyDaysRolling } from './time_window';
 
 export const createCompositeSlo = (
   overrides: Partial<CompositeSLODefinition> = {}
 ): CompositeSLODefinition => {
-  const now = new Date('2024-01-01T00:00:00.000Z').toISOString();
+  const now = new Date('2024-01-01T00:00:00.000Z');
   return {
     id: uuidv4(),
     name: 'Test Composite SLO',
@@ -21,7 +23,7 @@ export const createCompositeSlo = (
       { sloId: uuidv4(), weight: 2 },
     ],
     compositeMethod: 'weightedAverage',
-    timeWindow: { duration: '30d', type: 'rolling' },
+    timeWindow: thirtyDaysRolling(),
     budgetingMethod: 'occurrences',
     objective: { target: 0.99 },
     tags: ['test'],
@@ -34,3 +36,7 @@ export const createCompositeSlo = (
     ...overrides,
   };
 };
+
+export const toStoredCompositeSlo = (
+  compositeSlo: CompositeSLODefinition
+): StoredCompositeSLODefinition => storedCompositeSloDefinitionSchema.encode(compositeSlo);

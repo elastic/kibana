@@ -2,7 +2,7 @@
 #
 # Orchestrates the full KI onboarding pipeline for a source:
 #   0. Metrics entities identification (deterministic — skips LLM steps when handled)
-#   1. Features recency check (auto-skips identification if features are recent)
+#   1. Features recency check (opt-in — skips identification if features are recent)
 #   2. Features identification (optional, skippable)
 #   3. Queries generation (conditional — skipped when no new features were found)
 
@@ -83,7 +83,7 @@ triggers:
         description: "Max excluded features sent in LLM prompt during features identification."
       - name: featuresMaxEntityFilters
         type: number
-        description: "Max entity filters applied during features identification sampling."
+        description: "Max entity filters applied during features identification sampling. Equality filters on the same field count as one."
       - name: featuresSamplingTimeoutMs
         type: number
         description: "Deadline (ms) per ES|QL sampling query during features identification sampling."
@@ -95,8 +95,8 @@ triggers:
         description: "Max previously identified features sent in LLM prompt during features identification."
       - name: featuresRecencyThresholdHours
         type: number
-        default: 12
-        description: "Skip features identification if features were identified within this many hours."
+        default: 0
+        description: "Skip features identification if features were identified within this many hours. 0 always identifies."
       - name: queriesMaxExistingForContext
         type: number
         description: "Max existing queries for LLM context in query generation."
@@ -258,7 +258,7 @@ steps:
         or variables.metricsEntitiesHandled == false }}
     steps:
       # -----------------------------------------------------------------------
-      # Step 1: Recency check — auto-skip features if recently identified.
+      # Step 1: Recency check — skip features if recently identified.
       #         When skipQueries=true we always want to identify features,
       #         so the recency optimization is skipped in that case.
       # -----------------------------------------------------------------------

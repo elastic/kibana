@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { of } from 'rxjs';
+import { ATTACK_FINGERPRINT_AI_INDEX_ID } from '../common/ai_indices';
 import type { AlertZeroConfig } from './config';
 import { AlertZeroPlugin } from './plugin';
 
@@ -75,15 +76,15 @@ describe('fingerprint template readiness', () => {
     );
 
     expect(contract).not.toBeInstanceOf(Promise);
-    expect(contract.attackFingerprintWritesAllowed).toBe(false);
+    expect(contract.isAiIndexWritable(ATTACK_FINGERPRINT_AI_INDEX_ID)).toBe(false);
 
     await flushPromises();
-    expect(contract.attackFingerprintWritesAllowed).toBe(false);
+    expect(contract.isAiIndexWritable(ATTACK_FINGERPRINT_AI_INDEX_ID)).toBe(false);
 
     finishInstall({ acknowledged: true });
     await flushPromises();
 
-    expect(contract.attackFingerprintWritesAllowed).toBe(true);
+    expect(contract.isAiIndexWritable(ATTACK_FINGERPRINT_AI_INDEX_ID)).toBe(true);
   });
 
   it('keeps writes refused when the template install fails', async () => {
@@ -96,6 +97,6 @@ describe('fingerprint template readiness', () => {
 
     await flushPromises();
 
-    expect(contract.attackFingerprintWritesAllowed).toBe(false);
+    expect(contract.isAiIndexWritable(ATTACK_FINGERPRINT_AI_INDEX_ID)).toBe(false);
   });
 });
