@@ -13,7 +13,7 @@ import { timeoutSignal } from '@kbn/std';
 import type {
   CloudConnectorCallbackReceivedValues,
   CloudConnectorCallerIdentityProof,
-} from '../../common/types/models/provisioning_callback';
+} from '../../../../common/types/models/provisioning_callback';
 
 /**
  * Verifies where a provisioning callback report came from. The reporting Lambda signs an STS

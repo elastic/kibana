@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ReceiveProvisioningCallbackRequestSchema } from './provisioning_callback';
+import {
+  CloudConnectorCallbackItemSchema,
+  CreateProvisioningCallbackRequestSchema,
+  ReceiveProvisioningCallbackRequestSchema,
+} from './provisioning_callback';
 
 const ACCOUNT = '123456789012';
 const PROOF = {
@@ -22,7 +26,7 @@ const PROOF = {
 const BODY = {
   role_arn: `arn:aws:iam::${ACCOUNT}:role/ElasticWorkloadIdentity-abc`,
   stack_arn: `arn:aws:cloudformation:eu-west-1:${ACCOUNT}:stack/elastic-wif/11111111-2222-3333-4444-555555555555`,
-  caller_identity: PROOF,
+  origin_proof: PROOF,
 };
 
 const validate = (body: unknown) => ReceiveProvisioningCallbackRequestSchema.body.validate(body);
@@ -33,8 +37,17 @@ describe('ReceiveProvisioningCallbackRequestSchema', () => {
   });
 
   it('requires the proof', () => {
-    const { caller_identity: _, ...withoutProof } = BODY;
-    expect(() => validate(withoutProof)).toThrow(/caller_identity/);
+    const { origin_proof: _, ...withoutProof } = BODY;
+    expect(() => validate(withoutProof)).toThrow(/origin_proof/);
+  });
+
+  it('wants the proof under its generic name, not the AWS-only one it had', () => {
+    const { origin_proof: proof, ...values } = BODY;
+    expect(() => validate({ ...values, caller_identity: proof })).toThrow(/origin_proof/);
+  });
+
+  it('rejects a body that is a report for no registered provider', () => {
+    expect(() => validate({ origin_proof: PROOF })).toThrow();
   });
 
   it.each([
@@ -48,12 +61,44 @@ describe('ReceiveProvisioningCallbackRequestSchema', () => {
       { headers: Object.fromEntries(Array.from({ length: 17 }, (__, i) => [`h${i}`, 'v'])) },
     ],
   ])('rejects %s', (_, overrides) => {
-    expect(() => validate({ ...BODY, caller_identity: { ...PROOF, ...overrides } })).toThrow();
+    expect(() => validate({ ...BODY, origin_proof: { ...PROOF, ...overrides } })).toThrow();
   });
 
   it('rejects an unknown proof field, so no URL can be smuggled in', () => {
     expect(() =>
-      validate({ ...BODY, caller_identity: { ...PROOF, url: 'https://evil.example/' } })
+      validate({ ...BODY, origin_proof: { ...PROOF, url: 'https://evil.example/' } })
     ).toThrow(/url/);
+  });
+});
+
+describe('CreateProvisioningCallbackRequestSchema', () => {
+  const validateCreate = (body: unknown) =>
+    CreateProvisioningCallbackRequestSchema.body.validate(body);
+
+  it('accepts a provider that has a callback receiver', () => {
+    expect(validateCreate({ provider: 'aws' })).toEqual({ provider: 'aws' });
+  });
+
+  it('rejects a cloud provider without a receiver, naming the ones that have one', () => {
+    expect(() => validateCreate({ provider: 'azure' })).toThrow(
+      /provisioning callbacks are supported for: aws/
+    );
+  });
+
+  it('rejects a value that is not a cloud provider at all', () => {
+    expect(() => validateCreate({ provider: 'lambda' })).toThrow(/provider/);
+  });
+});
+
+describe('CloudConnectorCallbackItemSchema', () => {
+  it('renders a record of any cloud provider, so a later provider does not break the listing', () => {
+    const item = {
+      id: 'cb-1',
+      provider: 'azure',
+      status: 'pending',
+      created_at: '2026-11-23T10:00:00.000Z',
+      expires_at: '2026-11-23T12:00:00.000Z',
+    };
+    expect(CloudConnectorCallbackItemSchema.validate(item)).toEqual(item);
   });
 });

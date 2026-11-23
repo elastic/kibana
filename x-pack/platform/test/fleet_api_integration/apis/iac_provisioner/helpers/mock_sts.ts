@@ -47,7 +47,7 @@ export interface MockSts {
 
 /**
  * msw stand-in for `sts.<region>.amazonaws.com`, which Kibana is pointed at through
- * `xpack.fleet.developer.provisioningCallbackStsUrl`. It does not check signatures: the suites
+ * `xpack.fleet.developer.provisioningCallbackVerifierUrls.aws`. It does not check signatures: the suites
  * use it to decide which account and principal a report is vouched for.
  */
 export const createMockSts = (defaultResponder: MockStsResponder): MockSts => {

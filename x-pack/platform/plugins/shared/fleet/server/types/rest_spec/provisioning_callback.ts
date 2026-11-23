@@ -7,55 +7,35 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isCloudFormationStackArn } from '../../../common/services/cloud_connectors/iac_deployment';
 import {
-  AWS_REGION_PATTERN,
-  STS_GET_CALLER_IDENTITY_BODY,
-} from '../../services/provisioning_callback_caller_identity';
+  PROVISIONING_CALLBACK_PROVIDERS,
+  isProvisioningCallbackProvider,
+} from '../../../common/types/models/provisioning_callback';
+import { provisioningCallbackReportSchema } from '../../services/provisioning_callback_providers/registry';
 
-const AWS_IAM_ROLE_ARN_PATTERN = /^arn:aws[a-zA-Z-]*:iam::\d{12}:role\/.+$/;
+const CloudProviderSchema = schema.oneOf([
+  schema.literal('aws'),
+  schema.literal('azure'),
+  schema.literal('gcp'),
+]);
 
-/** Enough for SigV4 with a session token and the two binding headers; anything more is noise. */
-const MAX_PROOF_HEADERS = 16;
-const MAX_PROOF_HEADER_NAME_LENGTH = 64;
-const MAX_PROOF_HEADER_VALUE_LENGTH = 8192;
-
-/**
- * A signed STS `GetCallerIdentity` request the service forwards to prove the AWS account the
- * report came from. Only the region, the headers and the fixed body are accepted: Kibana builds
- * the STS URL itself, so the caller cannot direct it to another host.
- */
-const CallerIdentityProofSchema = schema.object({
-  region: schema.string({
-    minLength: 1,
-    maxLength: 32,
-    validate: (value) => (AWS_REGION_PATTERN.test(value) ? undefined : 'must be an AWS region'),
-    meta: { description: 'Region of the STS endpoint the request was signed for.' },
-  }),
-  headers: schema.recordOf(
-    schema.string({ minLength: 1, maxLength: MAX_PROOF_HEADER_NAME_LENGTH }),
-    schema.string({ maxLength: MAX_PROOF_HEADER_VALUE_LENGTH }),
-    {
-      validate: (value) =>
-        Object.keys(value).length <= MAX_PROOF_HEADERS
-          ? undefined
-          : `must have at most ${MAX_PROOF_HEADERS} headers`,
-      meta: {
-        description:
-          'The signed request headers: `Authorization`, `X-Amz-Date`, `X-Amz-Security-Token`, `Content-Type`, and the signed `x-elastic-callback-id` and `x-elastic-report-sha256` headers that bind the proof to this record and this report.',
-      },
-    }
-  ),
-  body: schema.oneOf([schema.literal(STS_GET_CALLER_IDENTITY_BODY)], {
-    meta: { description: 'The signed request body.' },
-  }),
-});
+/** A cloud provider this Kibana can receive a callback for. */
+const ProvisioningCallbackProviderSchema = schema.oneOf(
+  [schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')],
+  {
+    validate: (value) =>
+      isProvisioningCallbackProvider(value)
+        ? undefined
+        : `provisioning callbacks are supported for: ${PROVISIONING_CALLBACK_PROVIDERS.join(', ')}`,
+    meta: { description: 'Cloud provider of the deployment that will report back.' },
+  }
+);
 
 const CallbackIdParamsSchema = schema.object({
   callbackId: schema.string({
     minLength: 1,
     maxLength: 128,
-    meta: { description: 'ID of the callback record, as issued to the stack.' },
+    meta: { description: 'ID of the callback record, as issued to the launched deployment.' },
   }),
 });
 
@@ -69,14 +49,14 @@ const ProvisioningCallbackStatusSchema = schema.oneOf(
   {
     meta: {
       description:
-        'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.',
+        'State of the callback record. `pending`: waiting for the deployment. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.',
     },
   }
 );
 
 export const CloudConnectorCallbackItemSchema = schema.object({
   id: schema.string(),
-  provider: schema.literal('aws'),
+  provider: CloudProviderSchema,
   status: ProvisioningCallbackStatusSchema,
   created_at: schema.string(),
   created_by: schema.maybe(schema.string()),
@@ -103,7 +83,7 @@ export const GetProvisioningCallbackAvailabilityResponseSchema = schema.object({
 
 export const CreateProvisioningCallbackRequestSchema = {
   body: schema.object({
-    provider: schema.literal('aws'),
+    provider: ProvisioningCallbackProviderSchema,
     connector_name: schema.maybe(
       schema.string({
         minLength: 1,
@@ -138,7 +118,7 @@ export const CreateProvisioningCallbackResponseSchema = schema.object({
   token: schema.string({
     meta: {
       description:
-        'The token the stack presents to report to this record, in the `x-elastic-callback-token` header. Not an Elasticsearch credential. Returned exactly once; only its hash is kept.',
+        'The token the deployment presents to report to this record, in the `x-elastic-callback-token` header. Not an Elasticsearch credential. Returned exactly once; only its hash is kept.',
     },
   }),
 });
@@ -161,23 +141,7 @@ export const DeleteProvisioningCallbackResponseSchema = schema.object({
 
 export const ReceiveProvisioningCallbackRequestSchema = {
   params: CallbackIdParamsSchema,
-  body: schema.object({
-    role_arn: schema.string({
-      minLength: 1,
-      maxLength: 2048,
-      validate: (value) =>
-        AWS_IAM_ROLE_ARN_PATTERN.test(value) ? undefined : 'must be an IAM role ARN',
-      meta: { description: 'ARN of the IAM role the stack created.' },
-    }),
-    stack_arn: schema.string({
-      minLength: 1,
-      maxLength: 2048,
-      validate: (value) =>
-        isCloudFormationStackArn(value) ? undefined : 'must be a CloudFormation stack ARN',
-      meta: { description: 'ARN (StackId) of the CloudFormation stack.' },
-    }),
-    caller_identity: CallerIdentityProofSchema,
-  }),
+  body: provisioningCallbackReportSchema(),
 };
 
 export const ReceiveProvisioningCallbackResponseSchema = schema.object({

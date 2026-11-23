@@ -78,7 +78,7 @@ const proofFor = (
 /** A report of `values` for `callbackId`, with a proof bound to both. */
 const reportFor = (callbackId: string, values: Values = PAYLOAD) => ({
   ...values,
-  caller_identity: proofFor(callbackId, values),
+  origin_proof: proofFor(callbackId, values),
 });
 
 /**
@@ -245,7 +245,7 @@ export default function (providerContext: FtrProviderContext) {
       await receiveRaw(item.id, token, PAYLOAD).expect(400);
       await receiveRaw(item.id, token, {
         ...PAYLOAD,
-        caller_identity: { ...proofFor(item.id, PAYLOAD), region: 'sts.evil.example' },
+        origin_proof: { ...proofFor(item.id, PAYLOAD), region: 'sts.evil.example' },
       }).expect(400);
       expect(sts.getRequests()).to.have.length(0);
       expect((await getRecord(item.id)).status).to.be('pending');
@@ -309,7 +309,7 @@ export default function (providerContext: FtrProviderContext) {
       await receiveRaw(item.id, token, {
         ...PAYLOAD,
         role_arn: OTHER_ROLE_ARN,
-        caller_identity: proofFor(item.id, PAYLOAD),
+        origin_proof: proofFor(item.id, PAYLOAD),
       }).expect(401);
       expect(sts.getRequests()).to.have.length(0);
       expect((await getRecord(item.id)).status).to.be('pending');
@@ -320,7 +320,7 @@ export default function (providerContext: FtrProviderContext) {
 
       await receiveRaw(item.id, token, {
         ...PAYLOAD,
-        caller_identity: proofFor(item.id, PAYLOAD, {
+        origin_proof: proofFor(item.id, PAYLOAD, {
           headers: {
             Authorization: `AWS4-HMAC-SHA256 Credential=ASIAEXAMPLE/20261113/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=${'ab'.repeat(
               32

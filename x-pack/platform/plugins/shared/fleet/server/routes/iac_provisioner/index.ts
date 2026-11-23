@@ -106,7 +106,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_AVAILABILITY_PATTERN,
       summary: 'Check provisioning callback availability',
       description:
-        'Whether a launched CloudFormation stack could report back to this Kibana: server.publicBaseUrl must be set and be an https URL. Returns the URL the stack is given, or the reason the callback cannot be used.',
+        'Whether a deployment launched from Kibana could report back to it: server.publicBaseUrl must be set and be an https URL. Returns the URL the deployment is given, or the reason the callback cannot be used.',
       access: 'internal',
       security: IAC_PROVISIONER_ROUTE_SECURITY,
     })
@@ -132,7 +132,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
       summary: 'Create a provisioning callback',
       description:
-        'Create a one-time record and the single-use token a launched CloudFormation stack presents to report its role back to Kibana. The token grants nothing but that report and is not an API key. The identity name, account type, and template details are stored on the record for the cloud connector the report creates.',
+        'Create a one-time record and the single-use token a launched deployment presents to report back to Kibana what it created. The token grants nothing but that report and is not an API key. The identity name, account type, and template details are stored on the record for the cloud connector the report creates.',
       access: 'internal',
       security: PROVISIONING_CALLBACK_WRITE_SECURITY,
     })
@@ -189,7 +189,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_DELETE_PATTERN,
       summary: 'Cancel a provisioning callback',
       description:
-        'Retire a callback record the form no longer waits on, so that its token is no longer accepted. A record the stack has already reported to is returned unchanged.',
+        'Retire a callback record the form no longer waits on, so that its token is no longer accepted. A record the deployment has already reported to is returned unchanged.',
       access: 'internal',
       security: PROVISIONING_CALLBACK_WRITE_SECURITY,
     })
@@ -212,7 +212,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 };
 
 /**
- * The route the stack's Lambda calls. It goes on the plain router: the Fleet router checks the
+ * The route the launched deployment calls. It goes on the plain router: the Fleet router checks the
  * caller's Fleet privileges on every request, and this caller has no identity to check.
  */
 export const registerPublicRoutes = (router: FleetRouter) => {
@@ -222,13 +222,13 @@ export const registerPublicRoutes = (router: FleetRouter) => {
       summary: 'Receive a provisioning callback',
       operationId: 'receive-provisioning-callback',
       description:
-        "Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account, and `caller_identity` must carry an STS `GetCallerIdentity` request signed from that account by the stack's callback function, with the callback id and the SHA-256 of the reported values among its signed headers. Kibana forwards the request to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints; a report whose proof does not verify returns 401 and leaves the record waiting. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.",
+        "Called by the deployment launched from Kibana to report what it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. The body is shaped for the record's cloud provider and must carry `origin_proof`, the provider's proof that the report was sent from the account of what it reports, bound to this callback and these values; a report whose proof does not verify returns 401 and leaves the record waiting. For AWS, the CloudFormation stack's Lambda reports `role_arn` and `stack_arn`, which must be in the same account, and the proof is an STS `GetCallerIdentity` request signed by the stack's callback function with the callback id and the SHA-256 of the reported values among its signed headers; Kibana forwards it to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.",
       access: 'public',
       security: {
         authc: {
           enabled: false,
           reason:
-            'The caller is a Lambda in the customer AWS account with no Kibana identity; the record it reports to is admitted by its own token, checked in the handler',
+            'The caller is the deployment launched in the customer account, with no Kibana identity; the record it reports to is admitted by its own token, checked in the handler',
         },
         authz: {
           enabled: false,
@@ -260,7 +260,7 @@ export const registerPublicRoutes = (router: FleetRouter) => {
             400: { description: 'A bad request.', body: genericErrorResponse },
             401: {
               description:
-                'The proof of the sending AWS account did not verify, or was made for another callback or other values.',
+                'The proof of the sending account did not verify, or was made for another callback or other values.',
               body: genericErrorResponse,
             },
             404: { description: 'Not found.', body: notFoundResponse },

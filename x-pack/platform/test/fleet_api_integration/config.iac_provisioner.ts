@@ -30,8 +30,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.cloud.deployment_url="/deployments/deploymentId"`,
         // Point the IaC Provisioner client at the msw mock the suites start on this port.
         `--xpack.fleet.iacProvisioner.api.url=${IAC_PROVISIONER_MOCK_URL}`,
-        // The callback's proof of its AWS account is forwarded to this stand-in for STS.
-        `--xpack.fleet.developer.provisioningCallbackStsUrl=${STS_MOCK_URL}`,
+        // An AWS callback's proof of its account is forwarded to this stand-in for STS.
+        `--xpack.fleet.developer.provisioningCallbackVerifierUrls.aws=${STS_MOCK_URL}`,
         `--feature_flags.overrides.fleet.enableIacProvisioner=true`,
       ],
     },

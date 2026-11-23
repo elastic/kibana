@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudProvider } from '../models/cloud_connector';
 import type {
   CloudConnectorCallback,
   CloudConnectorCallbackIdentity,
@@ -24,7 +25,7 @@ export interface GetProvisioningCallbackAvailabilityResponse {
 
 export interface CreateProvisioningCallbackRequest {
   body: CloudConnectorCallbackIdentity & {
-    provider: 'aws';
+    provider: CloudProvider;
   };
 }
 

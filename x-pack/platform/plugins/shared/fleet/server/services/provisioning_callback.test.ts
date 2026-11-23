@@ -25,11 +25,16 @@ import {
   isProvisioningCallbackTokenValid,
   mintProvisioningCallbackToken,
 } from './provisioning_callback_token';
-import { verifyCallerIdentity } from './provisioning_callback_caller_identity';
+import { verifyCallerIdentity } from './provisioning_callback_providers/aws/caller_identity';
+import { awsProvisioningCallbackProvider } from './provisioning_callback_providers/aws';
 
 jest.mock('./app_context');
 jest.mock('./audit_logging');
-jest.mock('./provisioning_callback_caller_identity');
+// Only the STS round trip is mocked; the patterns the AWS report schema uses stay real.
+jest.mock('./provisioning_callback_providers/aws/caller_identity', () => ({
+  ...jest.requireActual('./provisioning_callback_providers/aws/caller_identity'),
+  verifyCallerIdentity: jest.fn(),
+}));
 jest.mock('uuid', () => ({ v4: () => 'cb-1' }));
 
 const mockedAudit = jest.mocked(auditLoggingService);
@@ -49,7 +54,7 @@ const PROOF = {
   body: 'Action=GetCallerIdentity&Version=2011-06-15',
 };
 /** The report as received: the values plus the proof. */
-const REPORT = { ...PAYLOAD, caller_identity: PROOF };
+const REPORT = { ...PAYLOAD, origin_proof: PROOF };
 const CALLER_ARN =
   'arn:aws:sts::123456789012:assumed-role/elastic-ElasticCallbackFunctionRole-1A2B3C/elastic-ElasticCallbackFunction-A1B2C3';
 
@@ -487,6 +492,47 @@ describe('provisioningCallbackService', () => {
       });
     };
 
+    it("is invalid when the report is not shaped for the record's provider, before any proof is checked", async () => {
+      mockRecord(pendingAttrs());
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: { principal_id: 'not-an-aws-report', origin_proof: PROOF } as any,
+      });
+      expect(result).toEqual({ outcome: 'invalid', message: expect.stringMatching(/role_arn/) });
+      expect(mockedVerify).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it("judges the report with the record's provider module", async () => {
+      const validateReport = jest.spyOn(awsProvisioningCallbackProvider, 'validateReport');
+      const verifyOrigin = jest.spyOn(awsProvisioningCallbackProvider, 'verifyOrigin');
+      mockRecord(pendingAttrs());
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+      expect(validateReport).toHaveBeenCalledWith(PAYLOAD);
+      expect(verifyOrigin).toHaveBeenCalledWith(
+        PROOF,
+        { callbackId: 'cb-1', report: PAYLOAD },
+        { verifierUrl: undefined }
+      );
+    });
+
+    it('is invalid for a record whose provider has no receiver, before any proof is checked', async () => {
+      mockRecord(pendingAttrs({ provider: 'azure' }));
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+      expect(result).toEqual({
+        outcome: 'invalid',
+        message: expect.stringContaining('azure'),
+      });
+      expect(mockedVerify).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
     it('is not_found for an unknown record', async () => {
       soClient.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
@@ -598,10 +644,26 @@ describe('provisioningCallbackService', () => {
       expect(mockedVerify).not.toHaveBeenCalled();
     });
 
+    it("ignores a verifier URL configured for another provider than the record's", async () => {
+      mockRecord(pendingAttrs());
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        developer: { provisioningCallbackVerifierUrls: { azure: 'http://localhost:8092/' } },
+      } as any);
+
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(mockedVerify).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        stsUrl: undefined,
+      });
+    });
+
     it('has the proof verified against the record id and the values, at the configured STS', async () => {
       mockRecord(pendingAttrs());
       jest.mocked(appContextService.getConfig).mockReturnValue({
-        developer: { provisioningCallbackStsUrl: 'http://localhost:8091/' },
+        developer: { provisioningCallbackVerifierUrls: { aws: 'http://localhost:8091/' } },
       } as any);
 
       await provisioningCallbackService.receive(soClient, 'cb-1', {
@@ -615,7 +677,7 @@ describe('provisioningCallbackService', () => {
         { stsUrl: 'http://localhost:8091/' }
       );
       expect(logger.info).toHaveBeenCalledWith(
-        `Provisioning callback report [id=cb-1] caller identity verified [account=123456789012] [arn=${CALLER_ARN}]`
+        `Provisioning callback report [id=cb-1] caller identity verified [account=123456789012] [principal=${CALLER_ARN}]`
       );
     });
 

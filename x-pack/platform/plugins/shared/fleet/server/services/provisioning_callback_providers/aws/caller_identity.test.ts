@@ -14,7 +14,7 @@ import {
   canonicalReportDigest,
   isGeneratedResourceName,
   verifyCallerIdentity,
-} from './provisioning_callback_caller_identity';
+} from './caller_identity';
 
 const ACCOUNT = '123456789012';
 const STACK_NAME = 'elastic-wif';

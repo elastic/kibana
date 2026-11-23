@@ -14,6 +14,12 @@ const ProvisioningCallbackStatusSchema = schema.oneOf([
   schema.literal('cancelled'),
 ]);
 
+const CloudProviderSchema = schema.oneOf([
+  schema.literal('aws'),
+  schema.literal('azure'),
+  schema.literal('gcp'),
+]);
+
 const AccountTypeSchema = schema.oneOf([
   schema.literal('single-account'),
   schema.literal('organization-account'),
@@ -26,7 +32,7 @@ const AccountTypeSchema = schema.oneOf([
  * report creates.
  */
 export const ProvisioningCallbackSchemaV1 = schema.object({
-  provider: schema.literal('aws'),
+  provider: CloudProviderSchema,
   status: ProvisioningCallbackStatusSchema,
   token_hash: schema.string({ minLength: 64, maxLength: 64 }),
   created_at: schema.string({ maxLength: 64 }),

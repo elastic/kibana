@@ -470,7 +470,7 @@ const mockedAppContext = jest.mocked(appContextService);
 const PAYLOAD = {
   role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc',
   stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1',
-  caller_identity: {
+  origin_proof: {
     region: 'us-east-1',
     headers: { Authorization: 'AWS4-HMAC-SHA256 ...', 'x-elastic-callback-id': 'cb-1' },
     body: 'Action=GetCallerIdentity&Version=2011-06-15',

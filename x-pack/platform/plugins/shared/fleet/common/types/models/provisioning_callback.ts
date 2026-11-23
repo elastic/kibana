@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import type { AccountType, CloudConnectorIacState } from './cloud_connector';
+import type { AccountType, CloudConnectorIacState, CloudProvider } from './cloud_connector';
+
+/**
+ * The cloud providers whose launched deployment can report back through a provisioning callback.
+ * A record's `provider` selects how its report is checked and what it creates; a provider not
+ * listed here has no receiver in this Kibana, so no record is created for it.
+ */
+export const PROVISIONING_CALLBACK_PROVIDERS: readonly CloudProvider[] = ['aws'];
+
+export const isProvisioningCallbackProvider = (value: unknown): value is CloudProvider =>
+  PROVISIONING_CALLBACK_PROVIDERS.includes(value as CloudProvider);
 
 /**
  * `receiving` is the window between a report being accepted and what it creates existing;
@@ -21,7 +31,8 @@ export type ProvisioningCallbackStatus = 'pending' | 'receiving' | 'received' | 
  */
 export interface ProvisioningCallback {
   id: string;
-  provider: 'aws';
+  /** Which cloud the launched deployment runs in; decides how its report is checked and what it creates. */
+  provider: CloudProvider;
   status: ProvisioningCallbackStatus;
   created_at: string;
   created_by?: string;
@@ -52,9 +63,13 @@ export interface CloudConnectorCallerIdentityProof {
   body: string;
 }
 
-/** The report as the Lambda sends it: the values plus the proof of where they came from. */
+/**
+ * The report as the launched deployment sends it: the values plus `origin_proof`, the proof of
+ * which account they came from. The proof's shape is the provider's; for AWS it is a signed STS
+ * `GetCallerIdentity` request.
+ */
 export interface CloudConnectorCallbackReport extends CloudConnectorCallbackReceivedValues {
-  caller_identity: CloudConnectorCallerIdentityProof;
+  origin_proof: CloudConnectorCallerIdentityProof;
 }
 
 /**

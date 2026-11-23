@@ -59128,7 +59128,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account, and `caller_identity` must carry an STS `GetCallerIdentity` request signed from that account by the stack's callback function, with the callback id and the SHA-256 of the reported values among its signed headers. Kibana forwards the request to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints; a report whose proof does not verify returns 401 and leaves the record waiting. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
+        Called by the deployment launched from Kibana to report what it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. The body is shaped for the record's cloud provider and must carry `origin_proof`, the provider's proof that the report was sent from the account of what it reports, bound to this callback and these values; a report whose proof does not verify returns 401 and leaves the record waiting. For AWS, the CloudFormation stack's Lambda reports `role_arn` and `stack_arn`, which must be in the same account, and the proof is an STS `GetCallerIdentity` request signed by the stack's callback function with the callback id and the SHA-256 of the reported values among its signed headers; Kibana forwards it to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
       operationId: receive-provisioning-callback
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -59138,7 +59138,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: ID of the callback record, as issued to the stack.
+        - description: ID of the callback record, as issued to the launched deployment.
           in: path
           name: callbackId
           required: true
@@ -59151,10 +59151,10 @@ paths:
           application/json:
             examples:
               receiveProvisioningCallbackRequestExample:
-                description: The report the launched CloudFormation stack sends once its IAM role exists
-                summary: Report a created IAM role
+                description: What the CloudFormation stack launched from Kibana sends once its IAM role exists; other providers report their own values and proof
+                summary: AWS report of a created IAM role
                 value:
-                  caller_identity:
+                  origin_proof:
                     body: Action=GetCallerIdentity&Version=2011-06-15
                     headers:
                       Authorization: AWS4-HMAC-SHA256 Credential=ASIAEXAMPLE/20261113/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-security-token;x-elastic-callback-id;x-elastic-report-sha256, Signature=5d41402abc4b2a76b9719d911017c592e5c0c8d3b0d4c3d6b0b1e0d8f9a1b2c3
@@ -59170,7 +59170,7 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                caller_identity:
+                origin_proof:
                   additionalProperties: false
                   type: object
                   properties:
@@ -59207,7 +59207,7 @@ paths:
               required:
                 - role_arn
                 - stack_arn
-                - caller_identity
+                - origin_proof
       responses:
         '200':
           content:
@@ -59268,7 +59268,7 @@ paths:
             application/json:
               examples:
                 unverifiedExample:
-                  description: STS did not vouch that the report was signed from the account of the reported role by the stack callback function, or the proof was made for another callback or other values
+                  description: 'For AWS: STS did not vouch that the report was signed from the account of the reported role by the stack callback function, or the proof was made for another callback or other values'
                   summary: Proof of the sending account did not verify
                   value:
                     error: Unauthorized
