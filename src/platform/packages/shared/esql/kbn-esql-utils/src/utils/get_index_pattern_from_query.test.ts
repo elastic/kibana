@@ -236,6 +236,12 @@ describe('getSourceCommandQueryFromESQLQuery', () => {
     ).toBe('LET base = (FROM logs-*); FROM (FROM base), index1');
   });
 
+  it('keeps a LET declared after the LET that reads it', () => {
+    const query = 'LET a = (FROM b); LET b = (FROM logs-*); FROM a';
+
+    expect(getSourceCommandQueryFromESQLQuery(query)).toBe(query);
+  });
+
   it('leaves out a LET read only after the source command', () => {
     expect(
       getSourceCommandQueryFromESQLQuery(

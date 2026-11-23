@@ -136,13 +136,13 @@ describe('getReferencedNamedSubqueries', () => {
     expect(referenced.map(({ name }) => name)).toEqual(['base', 'selected', 'nested']);
   });
 
-  it('reads a binding declared later as an index', () => {
+  it('keeps a binding declared later, which Elasticsearch rejects', () => {
     const root = parse('LET a = (FROM b); LET b = (FROM logs-*); FROM a');
     const referenced = getReferencedNamedSubqueries(
       root.commands[0],
       getNamedSubqueries(root.header)
     );
 
-    expect(referenced.map(({ name }) => name)).toEqual(['a']);
+    expect(referenced.map(({ name }) => name)).toEqual(['a', 'b']);
   });
 });

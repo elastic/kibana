@@ -108,13 +108,9 @@ const toNamedSubquery = (command: ESQLAstLetHeaderCommand): NamedSubquery | unde
 const canReferenceNamedSubquery = (source: ESQLSource): boolean =>
   source.sourceType === 'index' && !source.prefix && !source.selector;
 
-interface PendingArg {
-  readonly arg: ESQLAstItem;
-  // How many leading bindings the arg can reference: a body sees only the bindings declared before it.
-  readonly scope: number;
-}
-
 // Depth-first with an explicit stack and a name lookup: a LET chain can be as long as the query.
+// A body that reads a binding declared later or itself is rejected by Elasticsearch: that binding
+// is still a reference, never an index, so a reduced query keeps it and fails the same way.
 const walkSources = (
   sourceCommand: ESQLAstCommand | undefined,
   namedSubqueries: readonly NamedSubquery[]
@@ -129,22 +125,20 @@ const walkSources = (
 
   const sources: ESQLSource[] = [];
   const referenced = new Set<NamedSubquery>();
-  const pending: PendingArg[] = [];
+  const pending: ESQLAstItem[] = [];
   // Pushed in reverse, so the args are visited in query order.
-  const pushArgs = (command: ESQLAstCommand | undefined, scope: number) => {
+  const pushArgs = (command: ESQLAstCommand | undefined) => {
     const args = command?.args ?? [];
     for (let i = args.length - 1; i >= 0; i--) {
-      pending.push({ arg: args[i], scope });
+      pending.push(args[i]);
     }
   };
 
-  pushArgs(sourceCommand, namedSubqueries.length);
+  pushArgs(sourceCommand);
 
-  for (let next = pending.pop(); next; next = pending.pop()) {
-    const { arg, scope } = next;
-
+  for (let arg = pending.pop(); arg; arg = pending.pop()) {
     if (isSubQuery(arg)) {
-      pushArgs(arg.child.commands[0], scope);
+      pushArgs(arg.child.commands[0]);
       continue;
     }
 
@@ -154,7 +148,7 @@ const walkSources = (
 
     const index = canReferenceNamedSubquery(arg) ? indexByName.get(arg.name) : undefined;
 
-    if (index === undefined || index >= scope) {
+    if (index === undefined) {
       sources.push(arg);
       continue;
     }
@@ -164,7 +158,7 @@ const walkSources = (
     // Shared dependencies only need to be expanded once.
     if (!referenced.has(namedSubquery)) {
       referenced.add(namedSubquery);
-      pushArgs(namedSubquery.query.commands[0], index);
+      pushArgs(namedSubquery.query.commands[0]);
     }
   }
 
