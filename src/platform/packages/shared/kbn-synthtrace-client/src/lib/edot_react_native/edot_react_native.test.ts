@@ -189,7 +189,7 @@ describe('edotReactNative', () => {
       Object.values(DEVICE_PROFILES).forEach(({ platform, resourceAttributes }) => {
         if (platform === 'android') {
           expect(resourceAttributes['os.name']).toBe('Android');
-          expect(resourceAttributes['os.type']).toBeUndefined();
+          expect(resourceAttributes['os.type']).toBe('linux');
           expect(resourceAttributes['device.manufacturer']).toBeDefined();
           expect(resourceAttributes['os.description']).toMatch(
             /^Android \d+, API level \d+, BUILD/
@@ -229,30 +229,35 @@ describe('edotReactNative', () => {
           'service.name': 'weather-demo-react-native',
           'service.version': '1.4.0',
           'deployment.environment.name': 'production',
-          'telemetry.sdk.name': 'android',
+          'telemetry.sdk.name': 'opentelemetry',
           'telemetry.sdk.language': 'java',
-          'telemetry.sdk.version': '1.10.0',
+          'telemetry.sdk.version': '1.66.0',
+          'telemetry.distro.name': 'elastic',
+          'telemetry.distro.version': '1.10.0',
           'app.installation.id': INSTALLATION_ID.toLowerCase(),
+          'os.type': 'linux',
           'os.name': 'Android',
           'device.model.identifier': 'Pixel 8',
         })
       );
       expect(doc.resource?.attributes?.['app.build_id']).toMatch(/^[0-9a-f]{64}$/);
       expect(doc.resource?.attributes?.['device.id']).toBeUndefined();
-      expect(doc.resource?.attributes?.['telemetry.distro.name']).toBeUndefined();
     });
 
     it('writes the EDOT iOS resource attributes', () => {
       const [doc] = ios().errorLog('boom').timestamp(TIMESTAMP).serialize();
       expect(doc.resource?.attributes).toEqual(
         expect.objectContaining({
-          'telemetry.sdk.name': 'iOS',
+          'telemetry.sdk.name': 'opentelemetry',
           'telemetry.sdk.language': 'swift',
           'telemetry.sdk.version': '2.3.0',
+          'telemetry.distro.name': 'elastic',
+          'telemetry.distro.version': '2.3.0',
           'app.build_id': '42',
           'app.installation.id': INSTALLATION_ID.toUpperCase(),
           'device.id': 'D2A6C1B0-0000-4000-8000-000000000002',
           'os.type': 'darwin',
+          'os.name': 'iOS',
         })
       );
     });

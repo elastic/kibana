@@ -3071,8 +3071,8 @@
       "@kbn/workflows-extensions/*": ["./x-pack/platform/plugins/shared/workflows_extensions/*"],
       "@kbn/workflows-extensions-example": ["./examples/workflows_extensions_example"],
       "@kbn/workflows-extensions-example/*": ["./examples/workflows_extensions_example/*"],
-      "@kbn/workflows-inbound-hub-test-plugin": ["./x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector"],
-      "@kbn/workflows-inbound-hub-test-plugin/*": ["./x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector/*"],
+      "@kbn/workflows-inbound-hub-test-plugin": ["./x-pack/platform/test_plugins/workflows_inbound_hub/plugins/inbound_hub_connector"],
+      "@kbn/workflows-inbound-hub-test-plugin/*": ["./x-pack/platform/test_plugins/workflows_inbound_hub/plugins/inbound_hub_connector/*"],
       "@kbn/workflows-library": ["./src/platform/packages/shared/kbn-workflows-library"],
       "@kbn/workflows-library/*": ["./src/platform/packages/shared/kbn-workflows-library/*"],
       "@kbn/workflows-management-plugin": ["./x-pack/platform/plugins/shared/workflows_management"],
@@ -3105,7 +3105,6 @@
       "@emotion/core": ["./typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": ["./typings/@elastic/opentelemetry-node/sdk"],
       "@opentelemetry/semantic-conventions/incubating": [
         "./typings/@opentelemetry/semantic-conventions/incubating"
       ],

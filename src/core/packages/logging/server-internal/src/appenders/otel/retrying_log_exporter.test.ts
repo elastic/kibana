@@ -78,7 +78,12 @@ describe('isRetryableExportError', () => {
 });
 
 describe('RetryingLogRecordExporter', () => {
+  let finishExport: jest.Mock;
+  let metrics: { startExport: jest.Mock };
+
   beforeEach(() => {
+    finishExport = jest.fn();
+    metrics = { startExport: jest.fn(() => finishExport) };
     jest.useFakeTimers();
     // Pin jitter to its midpoint so the backoff sequence is exactly 1000, 1500, 2250, ... ms.
     jest.spyOn(Math, 'random').mockReturnValue(0.5);
@@ -91,7 +96,7 @@ describe('RetryingLogRecordExporter', () => {
 
   it('passes a successful export through without scheduling retries', () => {
     const delegate = makeDelegate(SUCCESS);
-    const exporter = new RetryingLogRecordExporter(delegate, 120_000);
+    const exporter = new RetryingLogRecordExporter(delegate, 120_000, metrics);
     const callback = jest.fn();
 
     exporter.export(logs, callback);
@@ -104,7 +109,7 @@ describe('RetryingLogRecordExporter', () => {
   it('fails immediately on non-retryable errors', () => {
     const nonRetryable = failure(httpError(401));
     const delegate = makeDelegate(nonRetryable);
-    const exporter = new RetryingLogRecordExporter(delegate, 120_000);
+    const exporter = new RetryingLogRecordExporter(delegate, 120_000, metrics);
     const callback = jest.fn();
 
     exporter.export(logs, callback);
@@ -116,7 +121,7 @@ describe('RetryingLogRecordExporter', () => {
 
   it('retries transient failures with backoff until success', () => {
     const delegate = makeDelegate(failure(networkError()), failure(httpError(503)), SUCCESS);
-    const exporter = new RetryingLogRecordExporter(delegate, 120_000);
+    const exporter = new RetryingLogRecordExporter(delegate, 120_000, metrics);
     const callback = jest.fn();
 
     exporter.export(logs, callback);
@@ -135,11 +140,25 @@ describe('RetryingLogRecordExporter', () => {
     expect(delegate.export).toHaveBeenCalledTimes(3);
     expect(callback).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith(SUCCESS);
+    // One export operation, finished as a success: the retried failures are not recorded.
+    expect(metrics.startExport).toHaveBeenCalledTimes(1);
+    expect(metrics.startExport).toHaveBeenCalledWith(logs);
+    expect(finishExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledWith(undefined);
+  });
+
+  it('records a failure that carries no error as export_failed', () => {
+    const exporter = new RetryingLogRecordExporter(makeDelegate(failure()), 120_000, metrics);
+
+    exporter.export(logs, jest.fn());
+
+    expect(finishExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledWith('export_failed');
   });
 
   it('always passes the same batch of records to the delegate', () => {
     const delegate = makeDelegate(failure(networkError()), SUCCESS);
-    const exporter = new RetryingLogRecordExporter(delegate, 120_000);
+    const exporter = new RetryingLogRecordExporter(delegate, 120_000, metrics);
 
     exporter.export(logs, jest.fn());
     jest.advanceTimersByTime(1000);
@@ -151,7 +170,7 @@ describe('RetryingLogRecordExporter', () => {
 
   it('caps the backoff at 10s', () => {
     const delegate = makeDelegate(...Array(20).fill(failure(networkError())));
-    const exporter = new RetryingLogRecordExporter(delegate, 600_000);
+    const exporter = new RetryingLogRecordExporter(delegate, 600_000, metrics);
     const callback = jest.fn();
 
     exporter.export(logs, callback);
@@ -168,7 +187,7 @@ describe('RetryingLogRecordExporter', () => {
     const lastFailure = failure(httpError(503));
     const delegate = makeDelegate(failure(networkError()), failure(networkError()), lastFailure);
     // 3s budget: attempts at t=0, 1000, 2500; the next backoff (2250ms) would pass the deadline.
-    const exporter = new RetryingLogRecordExporter(delegate, 3_000);
+    const exporter = new RetryingLogRecordExporter(delegate, 3_000, metrics);
     const callback = jest.fn();
 
     exporter.export(logs, callback);
@@ -178,12 +197,15 @@ describe('RetryingLogRecordExporter', () => {
     expect(callback).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith(lastFailure);
     expect(jest.getTimerCount()).toBe(0);
+    expect(metrics.startExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledWith(lastFailure.error);
   });
 
   it('reports the failure and stops retrying when shut down with a pending retry', async () => {
     const lastFailure = failure(networkError());
     const delegate = makeDelegate(lastFailure);
-    const exporter = new RetryingLogRecordExporter(delegate, 120_000);
+    const exporter = new RetryingLogRecordExporter(delegate, 120_000, metrics);
     const callback = jest.fn();
 
     exporter.export(logs, callback);
@@ -196,6 +218,8 @@ describe('RetryingLogRecordExporter', () => {
     expect(callback).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith(lastFailure);
     expect(jest.getTimerCount()).toBe(0);
+    expect(finishExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledWith(lastFailure.error);
 
     // No further attempts after shutdown.
     jest.advanceTimersByTime(120_000);
@@ -211,7 +235,7 @@ describe('RetryingLogRecordExporter', () => {
       forceFlush: jest.fn().mockResolvedValue(undefined),
       shutdown: jest.fn().mockResolvedValue(undefined),
     };
-    const exporter = new RetryingLogRecordExporter(delegate, 120_000);
+    const exporter = new RetryingLogRecordExporter(delegate, 120_000, metrics);
     const callback = jest.fn();
 
     exporter.export(logs, callback);
@@ -222,11 +246,13 @@ describe('RetryingLogRecordExporter', () => {
 
     expect(callback).toHaveBeenCalledWith(inFlightFailure);
     expect(jest.getTimerCount()).toBe(0);
+    expect(finishExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledWith(inFlightFailure.error);
   });
 
   it('fast-forwards pending retries on forceFlush', async () => {
     const delegate = makeDelegate(failure(networkError()), SUCCESS);
-    const exporter = new RetryingLogRecordExporter(delegate, 120_000);
+    const exporter = new RetryingLogRecordExporter(delegate, 120_000, metrics);
     const callback = jest.fn();
 
     exporter.export(logs, callback);
@@ -239,5 +265,7 @@ describe('RetryingLogRecordExporter', () => {
     expect(delegate.forceFlush).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith(SUCCESS);
     expect(jest.getTimerCount()).toBe(0);
+    expect(finishExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledWith(undefined);
   });
 });
