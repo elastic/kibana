@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { ElasticsearchRoleDescriptor, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, forDeployment, testData } from '../../fixtures';
@@ -13,6 +13,11 @@ import { apiTest, forDeployment, testData } from '../../fixtures';
 const { API_BASE_PATH, COMMON_HEADERS, ES_CLIENT_PROXY_HEADERS, ES_CLIENT_PROXY_PATH } = testData;
 
 const INDEX_NAME = 'index-management-api-settings';
+
+const INDEX_METADATA_ROLE: ElasticsearchRoleDescriptor = {
+  cluster: [],
+  indices: [{ names: [INDEX_NAME], privileges: ['view_index_metadata'] }],
+};
 
 // Serverless exposes a subset, kept as its own list so it cannot silently shrink.
 const EXPECTED_DEFAULTS = [
@@ -83,14 +88,18 @@ const EXPECTED_DEFAULTS_SERVERLESS = [
 
 apiTest.describe('Index settings API', { tag: tags.deploymentAgnostic }, () => {
   let credentials: RoleApiCredentials;
+  let proxyHeaders: Record<string, string>;
   let expectedDefaults: string[];
   // Serverless reports no index-level settings for a fresh index.
   let expectedProvidedName: string | undefined;
   // Serverless manages replicas itself, so it edits another setting.
   let editableSetting: [name: string, value: string];
 
-  apiTest.beforeAll(async ({ requestAuth, config }) => {
+  apiTest.beforeAll(async ({ requestAuth, samlAuth, config }) => {
     credentials = await requestAuth.getApiKey('admin');
+    // The settings editor calls the proxy as the signed-in user, who may only read index metadata.
+    const { cookieHeader } = await samlAuth.asInteractiveUser(INDEX_METADATA_ROLE);
+    proxyHeaders = { ...COMMON_HEADERS, ...ES_CLIENT_PROXY_HEADERS, ...cookieHeader };
     expectedDefaults = forDeployment(config, {
       stateful: EXPECTED_DEFAULTS,
       serverless: EXPECTED_DEFAULTS_SERVERLESS,
@@ -119,7 +128,7 @@ apiTest.describe('Index settings API', { tag: tags.deploymentAgnostic }, () => {
     const response = await apiClient.get(
       `${ES_CLIENT_PROXY_PATH}/${INDEX_NAME}/_settings?expand_wildcards=none&flat_settings=false&include_defaults=true`,
       {
-        headers: { ...COMMON_HEADERS, ...ES_CLIENT_PROXY_HEADERS, ...credentials.apiKeyHeader },
+        headers: proxyHeaders,
         responseType: 'json',
       }
     );
