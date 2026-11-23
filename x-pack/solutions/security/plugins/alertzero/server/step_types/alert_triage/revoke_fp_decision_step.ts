@@ -46,8 +46,8 @@ import {
  * state of the Context Engine setting, because a decision left active would close the alerts again
  * once the setting is back on.
  *
- * The caller needs write access to the decisions index, which the worker's role has and users do
- * not. Without it the step reports `denied` and touches nothing, because a user cannot tell a hidden
+ * The caller needs `read` and `index` on the decisions index, which the worker's role has and users do
+ * not, besides the privileges to run workflows and to manage alerts. Without it the step reports `denied` and touches nothing, because a user cannot tell a hidden
  * decision from a missing one.
  */
 export const getTriageRevokeFpDecisionStepDefinition = () =>
