@@ -142,7 +142,7 @@ function isFallbackBoltDataUrl(url: string, boltUrl: string): boolean {
 
 /** Bolt fallback and connector events with no brand icon (the plugs glyph) stay masked. */
 function keepsTriggerGlyphMask(actionTypeId: string, iconBase64: string, boltUrl: string): boolean {
-  if (isMonochromeActionType(actionTypeId) || isFallbackBoltDataUrl(iconBase64, boltUrl)) {
+  if (isMonochromeIcon(actionTypeId, iconBase64) || isFallbackBoltDataUrl(iconBase64, boltUrl)) {
     return true;
   }
   const connectorTypeId = getConnectorTypeIdForTriggerEventId(actionTypeId);
@@ -363,6 +363,31 @@ export const isMonochromeActionType = (actionTypeId: string): boolean =>
   MonochromeIcons.has(actionTypeId) ||
   MONOCHROME_PREFIXES.some((prefix) => actionTypeId.startsWith(prefix));
 
+const SVG_PAINT_COLOR =
+  /<image|#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|\s(?:fill|stroke)="(?!none"|currentColor")/i;
+
+// A glyph with no paint color of its own (e.g. an EUI icon asset) renders black as a
+// background image, so it gets the same currentColor mask as the built-in glyphs.
+const isPlainSvgGlyph = (dataUrl: string): boolean => {
+  if (!dataUrl.startsWith('data:image/svg+xml')) {
+    return false;
+  }
+  const commaIndex = dataUrl.indexOf(',');
+  const data = dataUrl.slice(commaIndex + 1);
+  try {
+    const svg = dataUrl.slice(0, commaIndex).endsWith(';base64')
+      ? atob(data)
+      : decodeURIComponent(data);
+    return !SVG_PAINT_COLOR.test(svg);
+  } catch {
+    // Malformed data URLs (FALLBACK_BOLT_DATA_URL is one) must not stop the whole CSS injection.
+    return false;
+  }
+};
+
+const isMonochromeIcon = (actionTypeId: string, iconDataUrl: string): boolean =>
+  isMonochromeActionType(actionTypeId) || isPlainSvgGlyph(iconDataUrl);
+
 /**
  * Resolves every icon concurrently. Connector logos are lazy chunks, so resolving them one
  * by one costs a network round trip each and delays the icon CSS on high-latency deployments.
@@ -433,7 +458,7 @@ async function injectDynamicConnectorIcons(
       }
 
       let cssProperties = '';
-      if (isMonochromeActionType(connector.actionTypeId)) {
+      if (isMonochromeIcon(connector.actionTypeId, iconBase64)) {
         cssProperties = `
         mask-image: url("${iconBase64}");
         mask-size: contain;
@@ -627,7 +652,7 @@ async function injectDynamicShadowIcons(
 
       const keepGlyphMask = isTriggerConnector
         ? keepsTriggerGlyphMask(connector.actionTypeId, iconBase64, boltUrl)
-        : isMonochromeActionType(connector.actionTypeId);
+        : isMonochromeIcon(connector.actionTypeId, iconBase64);
       const bgProp = keepGlyphMask
         ? `
         mask-image: url("${iconBase64}");

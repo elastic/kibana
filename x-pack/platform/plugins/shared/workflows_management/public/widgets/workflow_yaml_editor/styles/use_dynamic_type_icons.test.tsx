@@ -208,6 +208,52 @@ describe('useDynamicTypeIcons', () => {
     unmount();
   });
 
+  it('masks plain glyph icons with currentColor and keeps colored icons as they are', async () => {
+    const plainGlyph = `data:image/svg+xml;base64,${btoa(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 0h8v8H0z"/></svg>'
+    )}`;
+    const coloredLogo = `data:image/svg+xml;base64,${btoa(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#632CA6" d="M0 0h8v8H0z"/></svg>'
+    )}`;
+    jest
+      .mocked(getIconBase64)
+      .mockImplementation(async ({ actionTypeId }) =>
+        actionTypeId === '.glyph' ? plainGlyph : coloredLogo
+      );
+    const services = createStartServicesMock();
+    const connectorsData: ConnectorsResponse = {
+      totalConnectors: 0,
+      connectorTypes: {
+        '.glyph': connectorTypeStub('.glyph'),
+        '.logo': connectorTypeStub('.logo'),
+      },
+    };
+    const onShadowIconsCssReady = jest.fn();
+
+    const { unmount } = renderHook(
+      () => useDynamicTypeIcons(connectorsData, undefined, true, undefined, onShadowIconsCssReady),
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await waitFor(() => {
+      expect(onShadowIconsCssReady).toHaveBeenCalled();
+    });
+
+    const css = onShadowIconsCssReady.mock.calls.at(-1)?.[0] ?? '';
+    const getRule = (selector: string) => {
+      const start = css.indexOf(selector);
+      return css.slice(start, css.indexOf('}', start));
+    };
+    const glyphRule = getRule('.type-inline-highlight.type-glyph::after');
+    expect(glyphRule).toContain(`mask-image: url("${plainGlyph}")`);
+    expect(glyphRule).toContain('background-color: currentColor');
+    const logoRule = getRule('.type-inline-highlight.type-logo::after');
+    expect(logoRule).toContain(`background-image: url("${coloredLogo}") !important;`);
+    expect(logoRule).not.toContain('mask-image');
+
+    unmount();
+  });
+
   it.each([
     ['the bolt fallback', 'datadog.alert', FALLBACK_BOLT_DATA_URL],
     [
