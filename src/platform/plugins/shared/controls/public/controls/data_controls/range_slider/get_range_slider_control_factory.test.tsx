@@ -172,12 +172,17 @@ describe('RangeSliderControlApi', () => {
       );
     });
 
-    test('should restore the saved range of an ES|QL control', async () => {
-      mockGetESQLResults.mockResolvedValue({
-        response: {
-          columns: [{ name: 'myFieldName', type: 'long' }],
-          values: [[42], [256], [1024]],
-        },
+    test('should restore the saved range of an ES|QL control when its column arrives late', async () => {
+      let resolveQuery: () => void = () => {};
+      const queryResolved = new Promise<void>((resolve) => (resolveQuery = resolve));
+      mockGetESQLResults.mockImplementation(async () => {
+        await queryResolved;
+        return {
+          response: {
+            columns: [{ name: 'myFieldName', type: 'long' }],
+            values: [[42], [256], [1024]],
+          },
+        };
       });
 
       const { api } = await factory.buildEmbeddable({
@@ -192,6 +197,7 @@ describe('RangeSliderControlApi', () => {
         uuid,
         parentApi,
       });
+      resolveQuery();
 
       await waitFor(() =>
         expect(api.appliedFilters$.value).toEqual([
