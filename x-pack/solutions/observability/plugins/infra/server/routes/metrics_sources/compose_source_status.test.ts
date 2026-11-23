@@ -144,6 +144,27 @@ describe('composeSourceStatus', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it('replaces the whole multiline error header so the diagnostic detail is not printed twice', async () => {
+    // An Elasticsearch `ResponseError` message spans several lines: the error type followed by
+    // `Caused by` / `Root causes` sections. The stack header is `name: message`, so those extra
+    // message lines sit between the header's first line and the stack frames.
+    const original = new Error(
+      'illegal_argument_exception\n\tCaused by:\n\t\tillegal_state_exception: broken'
+    );
+    original.name = 'ResponseError';
+    original.stack = `${original.name}: ${original.message}\n    at probe`;
+    const hasMetricIndices = jest.fn().mockRejectedValue(original);
+
+    await compose(hasMetricIndices);
+
+    const loggedError = logger.error.mock.calls[0][0] as Error;
+    const expectedMessage =
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): illegal_argument_exception\n\tCaused by:\n\t\tillegal_state_exception: broken';
+    // The enriched header carries the full original message once, followed by the original frames
+    // only — the `Caused by` block must not be repeated after the frames.
+    expect(renderMessage(loggedError)).toBe(`ResponseError: ${expectedMessage}\n    at probe`);
+  });
+
   it('collapses line breaks in the request-controlled source id so it cannot forge log lines', async () => {
     const hasMetricIndices = jest
       .fn()

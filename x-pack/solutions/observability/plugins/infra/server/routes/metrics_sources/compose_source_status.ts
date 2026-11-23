@@ -103,12 +103,18 @@ export const composeSourceStatus = async ({
       error.name = original.name;
       // Kibana's `%message` pattern conversion renders `error.stack` in place of `error.message`
       // when a stack is present, so copying the original stack verbatim would hide the source and
-      // pattern from the default console and OTel log body. Rewrite the stack's header line (the
-      // `name: message` line) to carry the enriched message while keeping the original frames, so
-      // the context survives in the rendered output and the stacktrace stays faithful.
+      // pattern from the default console and OTel log body. Rewrite the stack's header (the
+      // leading `name: message`) to carry the enriched message while keeping the original frames,
+      // so the context survives in the rendered output and the stacktrace stays faithful.
+      //
+      // The header must be replaced as a whole: an Elasticsearch `ResponseError` message spans
+      // several lines (`Caused by` / `Root causes`), so splitting on the first line break alone
+      // would leave those lines in the frames and print the diagnostic detail twice.
       if (original.stack) {
-        const [, ...frames] = original.stack.split('\n');
-        error.stack = [`${error.name}: ${message}`, ...frames].join('\n');
+        const originalHeader = `${original.name}: ${original.message}`;
+        error.stack = original.stack.startsWith(originalHeader)
+          ? `${error.name}: ${message}${original.stack.slice(originalHeader.length)}`
+          : `${error.name}: ${message}\n${original.stack}`;
       }
       logger.error(error);
     }
