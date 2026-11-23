@@ -14,7 +14,6 @@
       "preference": "",
       "realtime": "__flag__",
       "routing": [],
-      "_slice": "",
       "term_statistics": "__flag__",
       "version": "",
       "version_type": [
@@ -88,7 +87,8 @@
     ],
     "patterns": [
       "_mtermvectors",
-      "{index}/_mtermvectors"
+      "{index}/_mtermvectors",
+      "{index}/{_slice}/_mtermvectors"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mtermvectors",
     "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-mtermvectors",
