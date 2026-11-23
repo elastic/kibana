@@ -28,5 +28,6 @@ export const fillNullCommand: ICommand = {
       'FROM employees | FILLNULL DEFAULT ON *',
     ],
     preview: true,
+    hidden: true,
   },
 };
