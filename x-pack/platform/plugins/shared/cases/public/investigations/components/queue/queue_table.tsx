@@ -53,6 +53,10 @@ export interface QueueTableProps {
 }
 
 const NO_SELECTION: InvestigationRecord[] = [];
+/** Two avatars and a +N fit the assignees column at 1280 px wide. */
+const MAX_VISIBLE_ASSIGNEES = 2;
+/** Keeps the Title column readable: below this width the table scrolls instead of squeezing it. */
+const MIN_TABLE_WIDTH = '1100px';
 
 const truncateStyle = css`
   display: block;
@@ -111,7 +115,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
         field: 'display_num',
         name: i18n.COLUMN_ID,
         sortable: true,
-        width: '100px',
+        width: '84px',
         render: (_value: number, record) => (
           <span
             css={css`
@@ -139,6 +143,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
                   size="xs"
                   color="subdued"
                   css={truncateStyle}
+                  title={secondary}
                   data-test-subj="investigationQueueTitleMeta"
                 >
                   {secondary}
@@ -152,7 +157,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
         field: 'status',
         name: i18n.COLUMN_STATUS,
         sortable: true,
-        width: '176px',
+        width: '156px',
         render: (_value: string, record) => (
           <StatusCell record={record} status={getRecordStatus(statuses, record)} />
         ),
@@ -161,7 +166,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
         field: 'priority',
         name: i18n.COLUMN_PRIORITY,
         sortable: true,
-        width: '84px',
+        width: '92px',
         render: (_value: string, record) => (
           <PriorityBadge priority={record.priority} note={record.priority_note} />
         ),
@@ -169,7 +174,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
       {
         field: 'owner',
         name: i18n.COLUMN_OWNER,
-        width: '108px',
+        width: '96px',
         render: (_value: unknown, record) =>
           record.owner ? (
             <ActorBadge actor={record.owner} compact />
@@ -191,8 +196,9 @@ export const QueueTable: React.FC<QueueTableProps> = ({
               </EuiText>
             );
           }
-          const shown = record.assignees.slice(0, 3);
-          const hidden = record.assignees.length - shown.length;
+          const shown = record.assignees.slice(0, MAX_VISIBLE_ASSIGNEES);
+          const hiddenUids = record.assignees.slice(MAX_VISIBLE_ASSIGNEES);
+          const hidden = hiddenUids.length;
           return (
             <EuiFlexGroup
               gutterSize="xs"
@@ -220,7 +226,23 @@ export const QueueTable: React.FC<QueueTableProps> = ({
               })}
               {hidden > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">{`+${hidden}`}</EuiText>
+                  <EuiToolTip
+                    content={hiddenUids
+                      .map((uid) => {
+                        const profile = profiles?.get(uid);
+                        return profile ? getUserDisplayName(profile.user) : i18n.USER_UNKNOWN;
+                      })
+                      .join(', ')}
+                  >
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      tabIndex={0}
+                      css={css`
+                        white-space: nowrap;
+                      `}
+                    >{`+${hidden}`}</EuiText>
+                  </EuiToolTip>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
@@ -230,7 +252,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
       {
         field: 'verdict',
         name: i18n.COLUMN_VERDICT,
-        width: '132px',
+        width: '112px',
         render: (_value: unknown, record) => {
           const verdict = getEffectiveVerdict(record);
           if (verdict.source === null) {
@@ -266,9 +288,10 @@ export const QueueTable: React.FC<QueueTableProps> = ({
       {
         field: 'counters.evidence',
         name: i18n.COLUMN_EVIDENCE_CLAIMS,
+        description: i18n.COLUMN_EVIDENCE_CLAIMS,
         sortable: true,
         align: 'right',
-        width: '132px',
+        width: '100px',
         render: (_value: number, record) => (
           <span
             css={css`
@@ -286,7 +309,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
       {
         field: 'created_at',
         name: i18n.COLUMN_AGE,
-        width: '92px',
+        width: '72px',
         render: (_value: string, record) => <AgeCell record={record} />,
       },
       {
@@ -353,6 +376,9 @@ export const QueueTable: React.FC<QueueTableProps> = ({
       `}
     >
       <EuiBasicTable<InvestigationRecord>
+        css={css`
+          min-width: ${MIN_TABLE_WIDTH};
+        `}
         tableCaption={i18n.TABLE_CAPTION}
         tableLayout="fixed"
         responsiveBreakpoint="m"

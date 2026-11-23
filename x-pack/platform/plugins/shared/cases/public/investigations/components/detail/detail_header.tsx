@@ -16,7 +16,6 @@ import {
   EuiLink,
   EuiPopover,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -35,16 +34,17 @@ import { useInvestigationsNavigation, useRecord, useUpdateRecord } from '../../h
 import { useInvestigationsServices } from '../../services';
 import { ICONS } from '../../icons';
 import { ActorAvatar, ActorBadge } from '../shared/actor_badge';
-import { formatAge } from '../shared/formatters';
 import { VerdictBadge, getEffectiveVerdict } from '../shared/verdict_badge';
 import * as sharedI18n from '../shared/translations';
 import type { OpenModal } from '../modals/modal_props';
 import * as modalsI18n from '../modals/translations';
 import { useExternalTicketMenuItems } from '../external_ticket';
 import type { TicketMenuItem } from '../external_ticket';
+import { AgeCell } from '../queue/age_cell';
 import { AssigneesControl } from './assignees_control';
 import { PriorityControl } from './priority_control';
 import { StatusControl } from './status_control';
+import { EditableTitle, TagsControl } from './title_tags_controls';
 import * as i18n from './translations';
 
 const MAX_VISIBLE_PARTICIPANTS = 5;
@@ -273,12 +273,6 @@ const useActionPanels = ({
             'data-test-subj': 'investigationActionReport',
           },
           {
-            name: i18n.CHANGE_HISTORY,
-            icon: ICONS.history,
-            onClick: choose('history'),
-            'data-test-subj': 'investigationActionHistory',
-          },
-          {
             name: i18n.MERGE,
             icon: ICONS.merge,
             onClick: choose('merge'),
@@ -407,16 +401,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
             min-width: 0;
           `}
         >
-          <EuiTitle size="m">
-            <h1
-              css={css`
-                overflow-wrap: anywhere;
-              `}
-              data-test-subj="investigationTitle"
-            >
-              {record.title}
-            </h1>
-          </EuiTitle>
+          <EditableTitle record={record} isDisabled={isMerged} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
@@ -534,12 +519,17 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
         <MetaItem label={i18n.PRIORITY}>
           <PriorityControl record={record} isDisabled={isMerged} />
         </MetaItem>
+        <MetaItem label={i18n.TAGS}>
+          <TagsControl record={record} isDisabled={isMerged} />
+        </MetaItem>
         <MetaItem label={i18n.PARTICIPANTS}>
           <ParticipantsStack actors={getParticipants(record)} />
         </MetaItem>
         <MetaItem label={i18n.AGE}>
           <EuiText size="s">
-            <strong>{formatAge(record.created_at, record.closed_at)}</strong>
+            <strong>
+              <AgeCell record={record} />
+            </strong>
           </EuiText>
         </MetaItem>
         <MetaItem label={i18n.SCOPE}>

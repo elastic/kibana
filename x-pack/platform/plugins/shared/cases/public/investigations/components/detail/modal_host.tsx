@@ -11,7 +11,6 @@ import { useReopenRecord } from '../../hooks';
 import { ChangeTypeModal } from '../modals/change_type_modal';
 import { CloseModal } from '../modals/close_modal';
 import { DeterminationModal } from '../modals/determination_modal';
-import { HistoryModal } from '../modals/history_modal';
 import { MergeModal } from '../modals/merge_modal';
 import type { ModalName, ModalOptions } from '../modals/modal_props';
 import { PauseModal } from '../modals/pause_modal';
@@ -56,8 +55,6 @@ export const ModalHost: React.FC<ModalHostProps> = ({ name, options, record, onC
       return <DeterminationModal record={record} onClose={handleClose} />;
     case 'report':
       return <ReportModal record={record} onClose={handleClose} />;
-    case 'history':
-      return <HistoryModal record={record} onClose={handleClose} />;
     case 'merge':
       return <MergeModal record={record} onClose={handleClose} />;
     case 'close':

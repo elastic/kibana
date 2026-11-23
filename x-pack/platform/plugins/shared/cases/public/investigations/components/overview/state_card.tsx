@@ -50,6 +50,7 @@ const StateCell: React.FC<{
     <div
       css={css`
         min-width: 0;
+        overflow-wrap: anywhere;
         ${wide ? 'grid-column: 1 / -1;' : ''}
       `}
       data-test-subj={testSubj}
@@ -196,16 +197,9 @@ export const StateCard: React.FC<StateCardProps> = ({ record, onNavigateTab, onO
           <EuiFlexGroup gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               {link(
-                i18n.ATTACK_TIMELINE,
+                i18n.ACTIVITY_LINK,
                 () => onNavigateTab('activity'),
                 'investigationStateTimelineLink'
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {link(
-                i18n.CHANGE_HISTORY,
-                () => onOpenModal('history'),
-                'investigationStateHistoryLink'
               )}
             </EuiFlexItem>
           </EuiFlexGroup>

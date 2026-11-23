@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { EuiButton, EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   getHttpErrorStatus,
@@ -96,6 +96,16 @@ const NotFound: React.FC<{ title: string; body: string; testSubj: string }> = ({
   );
 };
 NotFound.displayName = 'NotFound';
+
+const BackToQueueButton: React.FC = () => {
+  const { goToQueue } = useInvestigationsNavigation();
+  return (
+    <EuiButtonEmpty onClick={goToQueue} data-test-subj="investigationBackToQueue">
+      {i18n.BACK_TO_QUEUE}
+    </EuiButtonEmpty>
+  );
+};
+BackToQueueButton.displayName = 'BackToQueueButton';
 
 export const DetailPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -207,7 +217,12 @@ export const DetailPage: React.FC = () => {
     }
     return (
       <PageMessage>
-        <ErrorState title={i18n.LOAD_ERROR_TITLE} error={error} onRetry={() => void refetch()} />
+        <ErrorState
+          title={i18n.LOAD_ERROR_TITLE}
+          error={error}
+          onRetry={() => void refetch()}
+          extraActions={<BackToQueueButton />}
+        />
       </PageMessage>
     );
   }

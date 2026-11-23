@@ -260,5 +260,5 @@ export const STATUS_WITH_PAUSE_REASON = (label: string, reason: string) =>
   });
 export const OPEN_EXTERNAL_TICKET = i18n.translate(
   'xpack.cases.investigations.activity.openExternalTicket',
-  { defaultMessage: 'Open the external ticket' }
+  { defaultMessage: 'Open the external incident' }
 );

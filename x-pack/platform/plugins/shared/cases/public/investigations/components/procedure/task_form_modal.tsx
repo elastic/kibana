@@ -40,7 +40,6 @@ import { useBulkCreateItems } from '../../hooks';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useCasesContext } from '../../../components/cases_context/use_cases_context';
 import { SeveritySelector } from '../../../components/severity/selector';
-import { SEVERITY_TITLE } from '../../../components/severity/translations';
 import type { CurrentUserProfile } from '../../../components/types';
 import { useWorkflowList } from '../../hooks/use_tasks';
 import { OWNER_TYPES, OWNER_TYPE_LABELS, PHASES } from './procedure_helpers';
@@ -221,7 +220,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <EuiFormRow label={SEVERITY_TITLE}>
+            <EuiFormRow label={i18n.FIELD_PRIORITY}>
               <SeveritySelector
                 selectedSeverity={SEVERITY_BY_PRIORITY[priority]}
                 onSeverityChange={(severity) => setPriority(PRIORITY_BY_SEVERITY[severity])}

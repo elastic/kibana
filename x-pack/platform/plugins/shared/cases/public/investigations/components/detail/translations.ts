@@ -16,17 +16,14 @@ export const ACTIONS_MENU_TITLE = i18n.translate(
 );
 export const SET_DETERMINATION = i18n.translate(
   'xpack.cases.investigations.detail.setDetermination',
-  { defaultMessage: 'Set your determination' }
+  { defaultMessage: 'Set your verdict' }
 );
 export const EDIT_DETERMINATION = i18n.translate(
   'xpack.cases.investigations.detail.editDetermination',
-  { defaultMessage: 'Edit your determination' }
+  { defaultMessage: 'Edit your verdict' }
 );
 export const GENERATE_REPORT = i18n.translate('xpack.cases.investigations.detail.generateReport', {
   defaultMessage: 'Generate report',
-});
-export const CHANGE_HISTORY = i18n.translate('xpack.cases.investigations.detail.changeHistory', {
-  defaultMessage: 'Change history',
 });
 export const MERGE = i18n.translate('xpack.cases.investigations.detail.merge', {
   defaultMessage: 'Merge with another investigation',
@@ -44,7 +41,7 @@ export const OWNER = i18n.translate('xpack.cases.investigations.detail.owner', {
   defaultMessage: 'Owner',
 });
 export const UNASSIGNED = i18n.translate('xpack.cases.investigations.detail.unassigned', {
-  defaultMessage: 'Unassigned',
+  defaultMessage: 'No owner',
 });
 export const TAKE_OWNERSHIP = i18n.translate('xpack.cases.investigations.detail.takeOwnership', {
   defaultMessage: 'Take ownership',
@@ -117,7 +114,7 @@ export const CONTEXT = i18n.translate('xpack.cases.investigations.detail.context
   defaultMessage: 'Context',
 });
 export const CHAT = i18n.translate('xpack.cases.investigations.detail.chat', {
-  defaultMessage: 'Chat',
+  defaultMessage: 'Conversation',
 });
 export const CHAT_COMING = i18n.translate('xpack.cases.investigations.detail.chatComing', {
   defaultMessage: 'Chat coming',
@@ -470,4 +467,57 @@ export const UNLINK_CONFIRM_BODY = (displayId: string, otherDisplayId: string) =
   });
 export const LINKED_BADGE = i18n.translate('xpack.cases.investigations.detail.linkedBadge', {
   defaultMessage: 'Linked',
+});
+export const TITLE_ARIA = i18n.translate('xpack.cases.investigations.detail.titleAria', {
+  defaultMessage: 'Investigation title',
+});
+export const TITLE_REQUIRED = i18n.translate('xpack.cases.investigations.detail.titleRequired', {
+  defaultMessage: 'A title is required.',
+});
+export const TITLE_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.cases.investigations.detail.titleTooLong', {
+    defaultMessage: 'The title is limited to {max} characters.',
+    values: { max },
+  });
+export const TITLE_SAVED = i18n.translate('xpack.cases.investigations.detail.titleSaved', {
+  defaultMessage: 'Title updated.',
+});
+export const TAGS = i18n.translate('xpack.cases.investigations.detail.tags', {
+  defaultMessage: 'Tags',
+});
+export const TAGS_NONE = i18n.translate('xpack.cases.investigations.detail.tagsNone', {
+  defaultMessage: 'None',
+});
+export const TAGS_MORE = (count: number) =>
+  i18n.translate('xpack.cases.investigations.detail.tagsMore', {
+    defaultMessage: '+{count}',
+    values: { count },
+  });
+export const TAGS_EDIT = i18n.translate('xpack.cases.investigations.detail.tagsEdit', {
+  defaultMessage: 'Edit tags',
+});
+export const TAGS_PLACEHOLDER = i18n.translate(
+  'xpack.cases.investigations.detail.tagsPlaceholder',
+  {
+    defaultMessage: 'Pick or type a tag and press Enter',
+  }
+);
+export const TAGS_SAVE = i18n.translate('xpack.cases.investigations.detail.tagsSave', {
+  defaultMessage: 'Save tags',
+});
+export const TAGS_CANCEL = i18n.translate('xpack.cases.investigations.detail.tagsCancel', {
+  defaultMessage: 'Cancel',
+});
+export const TAGS_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.cases.investigations.detail.tagsTooLong', {
+    defaultMessage: 'A tag is limited to {max} characters.',
+    values: { max },
+  });
+export const TAGS_TOO_MANY = (max: number) =>
+  i18n.translate('xpack.cases.investigations.detail.tagsTooMany', {
+    defaultMessage: 'An investigation can have at most {max} tags.',
+    values: { max },
+  });
+export const TAGS_SAVED = i18n.translate('xpack.cases.investigations.detail.tagsSaved', {
+  defaultMessage: 'Tags updated.',
 });

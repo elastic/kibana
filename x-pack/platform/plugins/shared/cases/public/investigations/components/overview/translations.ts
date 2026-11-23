@@ -26,15 +26,8 @@ export const WHAT_THIS_IS = i18n.translate('xpack.cases.investigations.overview.
   defaultMessage: 'What this is',
 });
 
-export const ATTACK_TIMELINE = i18n.translate(
-  'xpack.cases.investigations.overview.attackTimeline',
-  {
-    defaultMessage: 'Attack timeline',
-  }
-);
-
-export const CHANGE_HISTORY = i18n.translate('xpack.cases.investigations.overview.changeHistory', {
-  defaultMessage: 'Change history',
+export const ACTIVITY_LINK = i18n.translate('xpack.cases.investigations.overview.activityLink', {
+  defaultMessage: 'Activity',
 });
 
 export const DONE_SO_FAR = i18n.translate('xpack.cases.investigations.overview.doneSoFar', {
@@ -122,7 +115,7 @@ export const PROCEDURE_SUMMARY = (type: string, done: number, total: number, lef
 
 export const PROCEDURE_NONE = (type: string) =>
   i18n.translate('xpack.cases.investigations.overview.procedureNone', {
-    defaultMessage: '{type}: no procedure applied.',
+    defaultMessage: '{type}: no task list applied.',
     values: { type },
   });
 
@@ -211,7 +204,7 @@ export const NEXT_REOPEN = i18n.translate('xpack.cases.investigations.overview.n
 export const NEXT_APPLY_PROCEDURE = i18n.translate(
   'xpack.cases.investigations.overview.nextApplyProcedure',
   {
-    defaultMessage: 'Apply a procedure, or close the investigation with a structured outcome',
+    defaultMessage: 'Apply a task list, or close the investigation with a structured outcome',
   }
 );
 
@@ -291,7 +284,7 @@ export const VERDICT_FROM_AGENT = i18n.translate(
 export const YOUR_DETERMINATION = i18n.translate(
   'xpack.cases.investigations.overview.yourDetermination',
   {
-    defaultMessage: 'Your determination',
+    defaultMessage: 'Your verdict',
   }
 );
 
@@ -314,21 +307,21 @@ export const NO_AGENT_ASSESSMENT = i18n.translate(
 export const NO_VERDICT_CLOSED = i18n.translate(
   'xpack.cases.investigations.overview.noVerdictClosed',
   {
-    defaultMessage: 'This investigation was closed without a determination.',
+    defaultMessage: 'This investigation was closed without a verdict.',
   }
 );
 
 export const SET_YOUR_DETERMINATION = i18n.translate(
   'xpack.cases.investigations.overview.setYourDetermination',
   {
-    defaultMessage: 'Set your determination',
+    defaultMessage: 'Set your verdict',
   }
 );
 
 export const EDIT_YOUR_DETERMINATION = i18n.translate(
   'xpack.cases.investigations.overview.editYourDetermination',
   {
-    defaultMessage: 'Edit your determination',
+    defaultMessage: 'Edit your verdict',
   }
 );
 
@@ -339,7 +332,7 @@ export const EDIT = i18n.translate('xpack.cases.investigations.overview.edit', {
 export const REPLACES_AGENT_VERDICT = i18n.translate(
   'xpack.cases.investigations.overview.replacesAgentVerdict',
   {
-    defaultMessage: 'Yours replaces the agent verdict',
+    defaultMessage: 'Yours replaces the AI verdict',
   }
 );
 
@@ -395,18 +388,17 @@ export const SET_BY = (name: string) =>
   });
 
 export const REVERT_TO_AGENT = i18n.translate('xpack.cases.investigations.overview.revertToAgent', {
-  defaultMessage: 'Revert to agent verdict',
+  defaultMessage: 'Revert to AI verdict',
 });
 
 export const REVERT_TITLE = i18n.translate('xpack.cases.investigations.overview.revertTitle', {
-  defaultMessage: 'Revert to the agent verdict?',
+  defaultMessage: 'Revert to the AI verdict?',
 });
 
 export const REVERT_BODY_AGENT = i18n.translate(
   'xpack.cases.investigations.overview.revertBodyAgent',
   {
-    defaultMessage:
-      'Your determination is removed and the agent verdict becomes the current verdict again.',
+    defaultMessage: 'Your verdict is removed and the AI verdict becomes the current verdict again.',
   }
 );
 
@@ -414,7 +406,7 @@ export const REVERT_BODY_NONE = i18n.translate(
   'xpack.cases.investigations.overview.revertBodyNone',
   {
     defaultMessage:
-      'Your determination is removed. No agent assessed this investigation, so the verdict goes back to Not set.',
+      'Your verdict is removed. No agent assessed this investigation, so the verdict goes back to Not set.',
   }
 );
 
@@ -423,7 +415,7 @@ export const REVERT_CONFIRM = i18n.translate('xpack.cases.investigations.overvie
 });
 
 export const REVERTED = i18n.translate('xpack.cases.investigations.overview.reverted', {
-  defaultMessage: 'Reverted. The agent verdict is current again.',
+  defaultMessage: 'Reverted. The AI verdict is current again.',
 });
 
 export const SUPERSEDED = i18n.translate('xpack.cases.investigations.overview.superseded', {
@@ -437,20 +429,19 @@ export const SUPERSEDED_LINE = (label: string, confidence: number) =>
   });
 
 export const DIFFERS = i18n.translate('xpack.cases.investigations.overview.differs', {
-  defaultMessage: 'It differs from the determination.',
+  defaultMessage: 'It differs from your verdict.',
 });
 
 export const SUPERSEDED_NOTICE = (verdict: string) =>
   i18n.translate('xpack.cases.investigations.overview.supersededNotice', {
-    defaultMessage:
-      'Superseded by the analyst determination: {verdict}. This analysis stays on record.',
+    defaultMessage: 'Superseded by the human verdict: {verdict}. This analysis stays on record.',
     values: { verdict },
   });
 
 export const VERDICT_FROM_CLOSE = i18n.translate(
   'xpack.cases.investigations.overview.verdictFromClose',
   {
-    defaultMessage: 'Set by the closing outcome. No separate determination was recorded.',
+    defaultMessage: 'Set by the closing outcome. No separate verdict was recorded.',
   }
 );
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ICONS } from '../../icons';
 import { getHttpErrorMessage } from '../../hooks/errors';
 import * as i18n from './translations';
@@ -16,9 +16,17 @@ export interface ErrorStateProps {
   error?: unknown;
   onRetry?: () => void;
   actions?: React.ReactNode;
+  /** Shown next to Try again, for example a way back to the list. */
+  extraActions?: React.ReactNode;
 }
 
-export const ErrorState: React.FC<ErrorStateProps> = ({ title, error, onRetry, actions }) => (
+export const ErrorState: React.FC<ErrorStateProps> = ({
+  title,
+  error,
+  onRetry,
+  actions,
+  extraActions,
+}) => (
   <EuiEmptyPrompt
     iconType={ICONS.error}
     color="danger"
@@ -26,14 +34,21 @@ export const ErrorState: React.FC<ErrorStateProps> = ({ title, error, onRetry, a
     body={error ? <p>{getHttpErrorMessage(error)}</p> : undefined}
     actions={
       actions ??
-      (onRetry ? (
-        <EuiButton
-          onClick={onRetry}
-          iconType={ICONS.refresh}
-          data-test-subj="investigationErrorRetry"
-        >
-          {i18n.RETRY}
-        </EuiButton>
+      (onRetry || extraActions ? (
+        <EuiFlexGroup gutterSize="s" justifyContent="center" responsive={false} wrap>
+          {onRetry ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={onRetry}
+                iconType={ICONS.refresh}
+                data-test-subj="investigationErrorRetry"
+              >
+                {i18n.RETRY}
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
+          {extraActions ? <EuiFlexItem grow={false}>{extraActions}</EuiFlexItem> : null}
+        </EuiFlexGroup>
       ) : undefined)
     }
     titleSize="s"

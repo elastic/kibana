@@ -10,7 +10,6 @@ import type { InvestigationRecord } from '../../../../common/investigations/type
 export type ModalName =
   | 'determination'
   | 'report'
-  | 'history'
   | 'merge'
   | 'close'
   | 'reopen'

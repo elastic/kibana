@@ -21,7 +21,7 @@ const TITLE = i18n.translate('xpack.cases.caseView.investigationCallout.title', 
 });
 const BODY = i18n.translate('xpack.cases.caseView.investigationCallout.body', {
   defaultMessage:
-    'Changes you make here to the title, description, tags, severity, status, assignees, fields, comments, files and external ticket show in the investigation too. This page does not show the investigation evidence and indicators, claims, scope, proposals, procedure, statuses with paused time, agent conversation or outcome.',
+    'Changes you make here to the title, description, tags, severity, status, assignees, fields, comments, files and external incident show in the investigation too. This page does not show the investigation evidence and indicators, claims, scope, proposals, procedure, statuses with paused time, agent conversation or outcome.',
 });
 const OPEN = i18n.translate('xpack.cases.caseView.investigationCallout.open', {
   defaultMessage: 'Open investigation',

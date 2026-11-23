@@ -131,6 +131,10 @@ describe('config validation', () => {
             "taskIntervalMinutes": 10,
             "taskStartDelayMinutes": 10,
           },
+          "investigations": Object {
+            "allowBackdate": false,
+            "enabled": false,
+          },
           "markdownPlugins": Object {
             "lens": true,
           },

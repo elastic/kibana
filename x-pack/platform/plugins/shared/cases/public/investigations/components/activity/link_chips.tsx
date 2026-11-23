@@ -69,7 +69,9 @@ const CHIP_BUILDERS: Partial<
     const target = link.id;
     return target && isTabId(target)
       ? {
-          label: link.label ?? TAB_LABELS[target],
+          // The server labels this link "Discussion"; the tab is called Conversation everywhere else.
+          label:
+            target === 'conversation' ? TAB_LABELS.conversation : link.label ?? TAB_LABELS[target],
           iconType: ICONS.chevronRight,
           navigate: () => navigate(target),
         }

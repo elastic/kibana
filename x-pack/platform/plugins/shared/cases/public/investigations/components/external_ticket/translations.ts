@@ -172,5 +172,5 @@ export const READ_ONLY = i18n.translate('xpack.cases.investigations.externalTick
 
 export const TAKE_ACTION_ENTRY = i18n.translate(
   'xpack.cases.investigations.externalTicket.takeActionEntry',
-  { defaultMessage: 'External ticket…' }
+  { defaultMessage: 'External incident…' }
 );
