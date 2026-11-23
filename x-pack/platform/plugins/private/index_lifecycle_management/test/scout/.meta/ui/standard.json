@@ -1,5 +1,5 @@
 {
-  "sha1": "7c65a700611d59c2dc7072b432591c1f2df02160",
+  "sha1": "833538467f5e7b49f8107784a1bb922b4734071c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -44,6 +44,32 @@
         "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_home_page.spec.ts",
         "line": 31,
         "column": 23
+      }
+    },
+    {
+      "id": "f97514609a0a6ff-de3019579e85561",
+      "title": "Index Lifecycle Policies — forms and actions edit form, request flyout and create form have no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_policy_actions.spec.ts",
+        "line": 65,
+        "column": 9
+      }
+    },
+    {
+      "id": "f97514609a0a6ff-ff0b59895e7e7b2",
+      "title": "Index Lifecycle Policies — forms and actions policy flyout, modals and index templates flyout have no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_policy_actions.spec.ts",
+        "line": 102,
+        "column": 24
       }
     },
     {

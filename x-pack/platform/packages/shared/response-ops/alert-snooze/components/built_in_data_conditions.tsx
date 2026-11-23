@@ -32,12 +32,12 @@ const SEVERITY_LABELS: Record<AlertSeverityLevel, string> = {
 // Mapped to EUI badge color tokens.
 const SEVERITY_COLORS: Record<AlertSeverityLevel, string> = {
   critical: 'danger',
-  major: 'danger',
-  high: 'warning',
-  medium: 'success',
-  minor: 'success',
-  low: 'primary',
-  warning: 'default',
+  major: 'risk',
+  high: 'risk',
+  medium: 'warning',
+  minor: 'neutral',
+  low: 'neutral',
+  warning: 'warning',
   info: 'default',
 };
 

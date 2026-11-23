@@ -8,6 +8,7 @@
 import { badRequest, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { getUserDisplayName } from '@kbn/user-profile-components/server';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
@@ -28,7 +29,7 @@ const executionSchema = z.object({
 });
 
 const runtimeSchema = z.object({
-  dailyDispatchLimit: z.number().int().min(0).optional(),
+  dailyDispatchLimit: z.number().int().min(1).optional(),
   timeoutSeconds: z.number().int().min(1).optional(),
   dedupeWindowSeconds: z.number().int().min(0).optional(),
   overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
@@ -57,7 +58,15 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       runtime: runtimeSchema,
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    isUniversalAlertingAvailable,
+    getInvestigatorServiceAccountService,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -66,13 +75,19 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     const coreContext = await context.core;
     const spaceId = coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
+    const user = coreContext.security.authc.getCurrentUser();
+    // Before any write: refuses callers who could not write the bound workflow.
+    const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
+      request,
+      spaceId
+    );
 
     const now = new Date().toISOString();
     const attributes: NightshiftAutomationAttributes = {
       name: params.body.name,
       description: params.body.description,
       tags: params.body.tags,
-      author: coreContext.security.authc.getCurrentUser()?.username,
+      author: user ? getUserDisplayName(user) : undefined,
       automationType: params.body.automationType ?? 'custom',
       isEnabled: params.body.isEnabled ?? false,
       trigger: params.body.trigger,
@@ -92,7 +107,12 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     let workflowId: string;
     try {
-      const yaml = generateWorkflowYaml({ automationId: created.id, automation: attributes });
+      const yaml = generateWorkflowYaml({
+        automationId: created.id,
+        automation: attributes,
+        serviceAccountId,
+        universalAlerts: isUniversalAlertingAvailable(),
+      });
       const workflow = await workflowsManagement.management.createWorkflow(
         { yaml },
         spaceId,

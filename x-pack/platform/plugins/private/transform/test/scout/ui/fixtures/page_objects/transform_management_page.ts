@@ -17,7 +17,7 @@ export type TransformRowAction =
   | 'Start'
   | 'Stop';
 
-export type TransformRowColumn = 'Id' | 'Description' | 'Type' | 'Status' | 'Mode';
+export type TransformRowColumn = 'Id' | 'Description' | 'Type' | 'Status' | 'Execution';
 
 export type ExpandedRowTab = 'Details' | 'Stats' | 'Json' | 'Health' | 'Messages' | 'Preview';
 
@@ -42,6 +42,7 @@ export class TransformManagementPage {
   public readonly expandedRow: Locator;
   public readonly healthIssueTable: Locator;
   public readonly editFlyout: Locator;
+  public readonly editFlyoutFrequencyUnitSelect: Locator;
   public readonly editFlyoutIngestPipelineSelect: Locator;
   public readonly editFlyoutRetentionPolicySwitch: Locator;
   public readonly editFlyoutUpdateButton: Locator;
@@ -58,6 +59,7 @@ export class TransformManagementPage {
     this.expandedRow = page.getByTestId('transformExpandedRowTabbedContent');
     this.healthIssueTable = page.getByTestId('transformHealthTabContentIssueTable');
     this.editFlyout = page.getByTestId('transformEditFlyout');
+    this.editFlyoutFrequencyUnitSelect = page.getByTestId('transformEditFlyoutFrequencyUnitSelect');
     this.editFlyoutIngestPipelineSelect = page.getByTestId(
       'transformEditFlyoutDestinationIngestPipelineFieldSelect'
     );

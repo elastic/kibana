@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('403 when trying to create an attachment', async () => {
       await supertestWithoutAuth
         .post(`${CASES_URL}/${CASE_ID}/attachments`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           type: COMMENT_ATTACHMENT_TYPE,

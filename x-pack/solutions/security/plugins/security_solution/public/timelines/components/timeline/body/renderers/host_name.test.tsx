@@ -5,27 +5,16 @@
  * 2.0.
  */
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createEntityFlyoutApiMock } from '../../../../../flyout_v2/entity/use_entity_flyout_api.mock';
-
-const mockOpenFlyout = jest.fn();
-
-jest.mock('@kbn/expandable-flyout');
-
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
-}));
 
 jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
@@ -37,11 +26,6 @@ describe('HostName', () => {
   let flyoutApi: ReturnType<typeof createEntityFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-    });
     flyoutApi = createEntityFlyoutApiMock();
     jest
       .mocked(useFlyoutApi)
@@ -54,7 +38,6 @@ describe('HostName', () => {
 
   const props = {
     fieldName: 'host.name',
-    contextId: 'test-context-id',
     eventId: 'test-event-id',
     fieldType: 'keyword',
     isAggregatable: true,
@@ -62,27 +45,25 @@ describe('HostName', () => {
   };
 
   test('should render host name', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HostName {...props} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="host-details-button"]').last().text()).toEqual(
-      props.value
-    );
+    expect(screen.getByTestId('host-details-button')).toHaveTextContent(props.value);
   });
 
   test('should not open any flyout or panels if context in not defined', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HostName {...props} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -94,7 +75,7 @@ describe('HostName', () => {
       tabType: TimelineTabs.query,
     };
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <HostName {...props} />
@@ -102,9 +83,9 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -116,7 +97,7 @@ describe('HostName', () => {
       tabType: TimelineTabs.query,
     };
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <HostName {...props} />
@@ -124,20 +105,20 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
   });
 
-  test('should open expandable flyout on table', async () => {
+  test('should open the host flyout on table', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
       timelineID: TableId.alertsOnAlertsPage,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <HostName {...props} />
@@ -145,30 +126,23 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: 'host-panel',
-          params: {
-            hostName: props.value,
-            entityId: undefined,
-            contextID: props.contextId,
-            scopeId: TableId.alertsOnAlertsPage,
-          },
-        },
+      expect(flyoutApi.openHostFlyout).toHaveBeenCalledWith({
+        hostName: props.value,
+        entityId: undefined,
       });
     });
   });
 
-  test('should open expandable flyout in timeline', async () => {
+  test('should open the host flyout in timeline', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
       timelineID: TimelineId.active,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <HostName {...props} />
@@ -176,39 +150,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
-    await waitFor(() => {
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: 'host-panel',
-          params: {
-            hostName: props.value,
-            entityId: undefined,
-            contextID: props.contextId,
-            scopeId: 'timeline-1',
-          },
-        },
-      });
-    });
-  });
-
-  test('should open the v2 system flyout when the new flyout advanced setting is enabled', async () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-      timelineID: TimelineId.active,
-      tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <HostName {...props} />
-        </StatefulEventContext.Provider>
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
       expect(flyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
     });
@@ -216,6 +158,5 @@ describe('HostName', () => {
       hostName: props.value,
       entityId: undefined,
     });
-    expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 });

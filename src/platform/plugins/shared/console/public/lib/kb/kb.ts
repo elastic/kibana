@@ -26,8 +26,11 @@ import { isRecord } from '../../../common/utils/record_utils';
 import type { KibanaApiDocLinksMap } from '../../../common/types/api_responses';
 
 let ACTIVE_API = new Api();
-let apiLoaded = false;
+let activeApiLoad: Promise<boolean> | undefined;
 let KIBANA_API_DOC_LINKS: KibanaApiDocLinksMap = {};
+
+const ACTIVE_API_LOAD_ATTEMPTS = 3;
+const ACTIVE_API_RETRY_DELAY_MS = 500;
 
 type ParamComponentFactory = (name: string, parent?: SharedComponent) => SharedComponent;
 
@@ -159,29 +162,57 @@ export function getKibanaApiDocLinks(): KibanaApiDocLinksMap {
   return KIBANA_API_DOC_LINKS;
 }
 
-export async function loadActiveApi(http: HttpSetup) {
-  // Only load the API data once
-  if (apiLoaded) return;
-  apiLoaded = true;
+/**
+ * Loads the Elasticsearch spec definitions that back autocomplete and every API reference
+ * link, and resolves to whether they are available. Retried, because without them Console
+ * still renders a fully working-looking editor while both are dead for the page session.
+ */
+export async function loadActiveApi(http: HttpSetup): Promise<boolean> {
+  // Only load the API data once; overlapping callers share the in-flight load
+  activeApiLoad ??= (async () => {
+    const loaded = await fetchActiveApi(http);
+    // If we fail to load the API, clear the load so it can be retried
+    if (!loaded) activeApiLoad = undefined;
+    return loaded;
+  })();
+  return await activeApiLoad;
+}
 
-  try {
-    const data: unknown = await http.get(`${API_BASE_PATH}/api_server`);
-    if (isRecord(data)) {
-      setActiveApi(loadApisFromJson({ es: data.es }));
+async function fetchActiveApi(http: HttpSetup): Promise<boolean> {
+  for (let attempt = 1; attempt <= ACTIVE_API_LOAD_ATTEMPTS; attempt++) {
+    try {
+      const data: unknown = await http.get(`${API_BASE_PATH}/api_server`);
+      if (!isRecord(data) || !isRecord(data.es)) {
+        throw new Error('the response carried no Elasticsearch spec definitions');
+      }
+      const api = loadApisFromJson({ es: data.es });
+      if (!api) {
+        throw new Error('the Elasticsearch spec definitions could not be parsed');
+      }
+      setActiveApi(api);
       setKibanaApiDocLinks(isRecord(data.kibana) ? data.kibana.docLinks : undefined);
+      return true;
+    } catch (err) {
+      const responseText =
+        isRecord(err) && typeof err.responseText === 'string' ? err.responseText : String(err);
+      // eslint-disable-next-line no-console
+      console.error(
+        `failed to load API (attempt ${attempt} of ${ACTIVE_API_LOAD_ATTEMPTS}): ${responseText}`
+      );
+      if (attempt < ACTIVE_API_LOAD_ATTEMPTS) {
+        await new Promise((resolve) => setTimeout(resolve, ACTIVE_API_RETRY_DELAY_MS * attempt));
+      }
     }
-  } catch (err) {
-    const responseText =
-      isRecord(err) && typeof err.responseText === 'string' ? err.responseText : String(err);
-    // eslint-disable-next-line no-console
-    console.log(`failed to load API: ${responseText}`);
-    // If we fail to load the API, clear this flag so it can be retried
-    apiLoaded = false;
   }
+
+  return false;
 }
 
 export const _test = {
   loadApisFromJson,
   setActiveApi,
   setKibanaApiDocLinks,
+  resetApiLoaded: () => {
+    activeApiLoad = undefined;
+  },
 };

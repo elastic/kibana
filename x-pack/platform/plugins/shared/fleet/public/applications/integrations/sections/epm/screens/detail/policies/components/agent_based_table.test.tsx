@@ -125,3 +125,43 @@ describe.skip('AgentBasedPackagePoliciesTable', () => {
     expect(result.getByTestId('agentEnrollmentFlyout')).toBeInTheDocument();
   });
 });
+
+// Kept out of the suite above, which is skipped as a whole because of
+// https://github.com/elastic/kibana/issues/201837
+describe('AgentBasedPackagePoliciesTable add agent from query param', () => {
+  it('opens the agent enrollment flyout for the agent policy id coming from the url', async () => {
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(
+      <AgentBasedPackagePoliciesTable
+        isLoading={false}
+        packagePolicies={mockPackagePolicies}
+        packagePoliciesTotal={1}
+        refreshPackagePolicies={jest.fn()}
+        pagination={mockPagination}
+        addAgentToPolicyIdFromParams="1"
+      />
+    );
+
+    await act(async () => {});
+
+    expect(result.getByTestId('agentEnrollmentFlyout')).toBeInTheDocument();
+  });
+
+  it('does not open the agent enrollment flyout when the url agent policy id is unknown', async () => {
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(
+      <AgentBasedPackagePoliciesTable
+        isLoading={false}
+        packagePolicies={mockPackagePolicies}
+        packagePoliciesTotal={1}
+        refreshPackagePolicies={jest.fn()}
+        pagination={mockPagination}
+        addAgentToPolicyIdFromParams="nonexistent-id"
+      />
+    );
+
+    await act(async () => {});
+
+    expect(result.queryByTestId('agentEnrollmentFlyout')).not.toBeInTheDocument();
+  });
+});

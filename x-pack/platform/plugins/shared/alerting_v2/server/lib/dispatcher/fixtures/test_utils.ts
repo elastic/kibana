@@ -6,10 +6,14 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { configSchema } from '../../../config';
+import type { ConfigService } from '../../services/config_service/config_service';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { buildAlertDetailsUrl } from '../alert_details_url';
 import { DEFAULT_GROUPING } from '../constants';
+import type { DispatcherTelemetryContract } from '../otel/dispatcher_telemetry';
 import {
   DispatchOutcome,
   DispatchPlan,
@@ -44,6 +48,21 @@ export const MOCK_KIBANA_BASE_URL = 'https://kibana.example.com';
 
 export function createStepLogger(): LoggerServiceContract {
   return createLoggerService().loggerService;
+}
+
+export function createDispatcherTelemetryMock(): jest.Mocked<DispatcherTelemetryContract> {
+  return { recordAlertScanTruncated: jest.fn() };
+}
+
+export interface DispatcherConfigOverrides {
+  paused?: boolean;
+  run?: { timeout?: string; alerts?: { max?: number } };
+}
+
+export function createDispatcherConfigService(
+  dispatcher: DispatcherConfigOverrides = {}
+): ConfigService {
+  return createConfigServiceMock(configSchema.validate({ dispatcher }));
 }
 
 export function createDispatcherPipelineInput(
@@ -198,6 +217,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
     spaceId: 'default',
     name: 'Test rule',
     routingTags: [],
+    groupingFields: [],
     ...overrides,
   };
 }

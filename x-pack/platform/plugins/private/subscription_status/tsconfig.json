@@ -5,6 +5,7 @@
   },
   "include": [
     "public/**/*",
+    "server/**/*",
     ".storybook/**/*",
     "test/**/*"
   ],
@@ -13,7 +14,10 @@
     "@kbn/cloud-plugin",
     "@kbn/i18n",
     "@kbn/storybook",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/licensing-types",
+    "@kbn/config-schema",
+    "@kbn/licensing-plugin"
   ],
   "exclude": [
     "target/**/*",

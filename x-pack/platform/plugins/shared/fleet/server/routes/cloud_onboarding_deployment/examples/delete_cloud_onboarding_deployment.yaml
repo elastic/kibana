@@ -5,7 +5,7 @@ responses:
       application/json:
         examples:
           deleteCloudOnboardingDeploymentExample:
-            description: 'The cloud onboarding deployment was successfully deleted'
+            description: 'The cloud onboarding instance was successfully deleted'
             value:
               id: 'onboarding-deployment-id-1'
   400:
@@ -25,7 +25,7 @@ responses:
       application/json:
         examples:
           notFoundResponseExample:
-            description: 'The requested cloud onboarding deployment does not exist'
+            description: 'The requested cloud onboarding instance does not exist'
             value:
               statusCode: 404
               error: 'Not Found'

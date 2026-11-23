@@ -267,7 +267,15 @@ describe.each(CASES)(
         context: mockContext,
       });
 
-      expect(toolCallState.value).toEqual({ kind: 'confirmed', action, agentId: 'agent-b' });
+      // The displayed arguments travel with the confirmation: scan records
+      // its `path`; tools called without a `comment` record none.
+      const recordedArgs = 'path' in extraParams ? { path: extraParams.path } : undefined;
+      expect(toolCallState.value).toEqual({
+        kind: 'confirmed',
+        action,
+        agentId: 'agent-b',
+        ...(recordedArgs ? { args: recordedArgs } : {}),
+      });
     });
 
     it('records a refusal, not a target, when the card reports the action will be refused', async () => {
@@ -351,6 +359,59 @@ describe.each(CASES)(
         expect.stringContaining('not covered by a confirmation')
       );
       expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    it('does not dispatch when a confirmed call is replayed with different arguments', async () => {
+      // The card is the human gate on the whole request, its displayed
+      // arguments included: a resumed call reusing the confirmed tool-call
+      // state but swapping the comment (or, for scan, the path) must not
+      // inherit the approval.
+      const tool = build(service);
+
+      await tool.confirmation?.getConfirmation?.({
+        toolParams: { agentId: 'agent-b', comment: 'first reason', ...extraParams },
+        context: mockContext,
+      });
+      expect(toolCallState.value).toEqual(
+        expect.objectContaining({
+          kind: 'confirmed',
+          args: expect.objectContaining({ comment: 'first reason' }),
+        })
+      );
+
+      const out = results(
+        await tool.handler(
+          { agentId: 'agent-b', comment: 'swapped reason', ...extraParams },
+          mockContext
+        )
+      );
+
+      expect(out[0].type).toBe('error');
+      const data = out[0].data as Record<string, unknown>;
+      expect(data.error).toBe('invalid_argument');
+      expect(data.message).toEqual(
+        expect.stringContaining('differ from the ones the analyst confirmed')
+      );
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    it('dispatches when the replayed arguments are the ones that were confirmed', async () => {
+      const tool = build(service);
+
+      const out = results(
+        await confirmThenDispatch(tool, {
+          agentId: 'agent-b',
+          comment: 'triage note',
+          ...extraParams,
+        })
+      );
+
+      const data = out[0].data as Record<string, unknown>;
+      expect(data.found).not.toBe(false);
+      expect(client[clientMethod]).toHaveBeenCalledTimes(1);
+      expect(client[clientMethod].mock.calls[0][0]).toEqual(
+        expect.objectContaining({ endpoint_ids: ['agent-b'] })
+      );
     });
 
     it('refuses a hostName that does not match the Fleet hostname of the agentId, instead of acting on the agent', async () => {

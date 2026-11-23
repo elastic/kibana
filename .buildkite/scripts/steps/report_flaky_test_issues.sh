@@ -12,14 +12,20 @@ set -euo pipefail
 #   - elastic/kibana: live.
 # Every open failed-test issue is fetched, plus those closed in the last
 # FLAKY_TESTS_CLOSED_ISSUES_DAYS days; both count as tracking a suite, a closed one only until
-# the test it is about fails again, the new suite issue then links it. At most
+# the test it is about fails again more than FLAKY_TESTS_REOPEN_GRACE_HOURS hours after the
+# close, the new suite issue then links it. At most
 # FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run. FLAKY_TESTS_OMIT_SKIPPED_TESTS leaves
 # out flaky tests that were skipped since. Unless FLAKY_TESTS_UPDATE_ISSUES is 'false', a suite
 # that has an issue of its own gets it refreshed: its metadata records the report, a comment
 # with the report's numbers is posted when it failed since the issue was filed or last commented
 # on, and that was FLAKY_TESTS_COMMENT_COOLDOWN_DAYS days ago at least, and it is reopened when
-# it failed after the close. The body's text stays as filed.
-# GITHUB_TOKEN (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
+# it failed more than FLAKY_TESTS_REOPEN_GRACE_HOURS hours after the close. The body's text
+# stays as filed. With
+# FLAKY_TESTS_REPLACE_PER_TEST_ISSUES set to 'true', open per-test issues don't count as
+# tracking a suite: those about its flaky tests are closed as duplicates of its issue once it is
+# filed or refreshed.
+# GITHUB_TOKEN is the pipeline's short-lived Vault plugin token (elastic-vault-github-plugin-prod[bot]),
+# set by .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh
 
@@ -32,6 +38,8 @@ FLAKY_TESTS_MAX_NEW_ISSUES="${FLAKY_TESTS_MAX_NEW_ISSUES:-10}"
 FLAKY_TESTS_OMIT_SKIPPED_TESTS="${FLAKY_TESTS_OMIT_SKIPPED_TESTS:-true}"
 FLAKY_TESTS_UPDATE_ISSUES="${FLAKY_TESTS_UPDATE_ISSUES:-true}"
 FLAKY_TESTS_COMMENT_COOLDOWN_DAYS="${FLAKY_TESTS_COMMENT_COOLDOWN_DAYS:-3}"
+FLAKY_TESTS_REOPEN_GRACE_HOURS="${FLAKY_TESTS_REOPEN_GRACE_HOURS:-24}"
+FLAKY_TESTS_REPLACE_PER_TEST_ISSUES="${FLAKY_TESTS_REPLACE_PER_TEST_ISSUES:-false}"
 FLAKY_TESTS_TRACKING_REPO="${FLAKY_TESTS_TRACKING_REPO-elastic/kibana}"
 
 REPORT_DIR="target/flaky_tests"
@@ -54,8 +62,6 @@ else
 fi
 
 echo "--- Bootstrap Kibana"
-# The step only runs Node scripts; skip building the dev-mode shared webpack bundles
-export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Download flaky test report"
@@ -67,6 +73,8 @@ echo "    Closed issues since : $FLAKY_TESTS_CLOSED_ISSUES_DAYS days ago"
 echo "    Max new issues      : $FLAKY_TESTS_MAX_NEW_ISSUES"
 echo "    Omit skipped tests  : $FLAKY_TESTS_OMIT_SKIPPED_TESTS"
 echo "    Update issues       : $FLAKY_TESTS_UPDATE_ISSUES ($FLAKY_TESTS_COMMENT_COOLDOWN_DAYS days between comments at least)"
+echo "    Reopen grace        : $FLAKY_TESTS_REOPEN_GRACE_HOURS hours after a close"
+echo "    Replace per-test    : $FLAKY_TESTS_REPLACE_PER_TEST_ISSUES"
 if [[ -n "$FLAKY_TESTS_TRACKING_REPO" && "$FLAKY_TESTS_TRACKING_REPO" != "$GITHUB_REPO" ]]; then
   echo "    Also tracked in     : $FLAKY_TESTS_TRACKING_REPO (suites whose every test has an issue there get none)"
 fi
@@ -79,6 +87,7 @@ args=(
   --max-new-issues "$FLAKY_TESTS_MAX_NEW_ISSUES"
   --tracking-repo "$FLAKY_TESTS_TRACKING_REPO"
   --comment-cooldown-days "$FLAKY_TESTS_COMMENT_COOLDOWN_DAYS"
+  --reopen-grace-hours "$FLAKY_TESTS_REOPEN_GRACE_HOURS"
 )
 if [[ ${#DRY_RUN_ARGS[@]} -gt 0 ]]; then
   args+=("${DRY_RUN_ARGS[@]}")
@@ -88,6 +97,9 @@ if [[ "$FLAKY_TESTS_OMIT_SKIPPED_TESTS" == "false" ]]; then
 fi
 if [[ "$FLAKY_TESTS_UPDATE_ISSUES" == "false" ]]; then
   args+=(--no-update-issues)
+fi
+if [[ "$FLAKY_TESTS_REPLACE_PER_TEST_ISSUES" == "true" ]]; then
+  args+=(--replace-per-test-issues)
 fi
 
 # A failed GitHub write makes the CLI exit non-zero after handling every suite; annotate first,
@@ -132,6 +144,7 @@ section() {
       + (if .issue and .issue.state == "closed" then " (closed)" else "" end)
       + (if .reopened then " (reopened)" elif .commented then " (commented)" else "" end)
       + (if .supersedes then " (previously " + ([.supersedes[] | "[#\(.number)](\(.url))"] | join(", ")) + ")" else "" end)
+      + (if .replaced then " (closed as duplicates: " + ([.replaced[] | "[#\(.number)](\(.url))"] | join(", ")) + ")" else "" end)
       + (if .match then " (\(.match))" else "" end)
       + (if .reason then ": \(.reason)" else "" end)
       + (if .error then ": \(.error)" else "" end)' "$SUMMARY_PATH"

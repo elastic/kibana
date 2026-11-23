@@ -78,6 +78,33 @@ const setup = ({
 };
 
 describe('fetchComputedColumnSortPage', () => {
+  it("loads every entity with an empty value when the column's index is missing", async () => {
+    const { column, runQuery, calls } = setup({ entities: [row('a'), row('b'), row('c')] });
+    const withoutSource = async (steps: readonly string[]) => {
+      if (steps.join('\n').startsWith('FROM source')) {
+        throw new Error('no such index [.alerts-security.alerts-default]');
+      }
+      return runQuery(steps);
+    };
+
+    const rows = await fetchComputedColumnSortPage(column, ARGS, { runQuery: withoutSource });
+
+    expect(ids(rows)).toEqual(['a', 'b', 'c']);
+    expect(rows.every(({ count }) => count === 0)).toBe(true);
+    expect(calls).toEqual(['empty batch']);
+  });
+
+  it('still fails on any other error', async () => {
+    const { column } = setup({});
+    const failing = async () => {
+      throw new Error('boom');
+    };
+
+    await expect(fetchComputedColumnSortPage(column, ARGS, { runQuery: failing })).rejects.toThrow(
+      'boom'
+    );
+  });
+
   it('reads only the value rows when they fill the rows', async () => {
     const { column, runQuery, calls } = setup({
       valueRows: [row('a', 3), row('b', 2), row('c', 1)],

@@ -24,7 +24,7 @@ import {
 } from './types';
 import { RevisionReader } from './revision_reader';
 import { IndicatorWriter } from './indicator_writer';
-import { IndicatorReader } from './indicator_reader';
+import { IndicatorReader, type TopologyFeaturePageCursor } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
 import { QueryRuleOrchestrator, type PromoteQueriesResult } from './query_rule_orchestrator';
 import { computeExpiresAt } from './serializers';
@@ -72,7 +72,8 @@ export class KnowledgeIndicatorClient {
       deps.logger,
       revisionReader,
       config.feature_ttl_days,
-      deps.space
+      deps.space,
+      deps.onWrite
     );
     this.reader = new IndicatorReader(revisionReader);
     this.searcher = new IndicatorSearcher(
@@ -158,6 +159,16 @@ export class KnowledgeIndicatorClient {
     }
   ): Promise<{ hits: Feature[] }> {
     return this.reader.getFeatures(sources, options);
+  }
+
+  getTopologyFeaturesPage(options: {
+    sourceIds: string[];
+    featureTypes: string[];
+    asOf: string;
+    after?: TopologyFeaturePageCursor;
+    size: number;
+  }): Promise<{ hits: Feature[]; nextCursor?: TopologyFeaturePageCursor }> {
+    return this.reader.getTopologyFeaturesPage(options);
   }
 
   getExcludedFeatures(sourceId: string): Promise<{ hits: Feature[] }> {

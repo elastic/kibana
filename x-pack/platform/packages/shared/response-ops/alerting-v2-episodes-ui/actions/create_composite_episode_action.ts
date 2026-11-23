@@ -39,6 +39,7 @@ export const createCompositeEpisodeAction = (
   return {
     id: def.id,
     order: def.order,
+    enforcesOwnPrivileges: false,
     displayName: def.displayName,
     iconType: def.iconType,
     isCompatible: ({ episodes }) => episodes.some(isEligible),

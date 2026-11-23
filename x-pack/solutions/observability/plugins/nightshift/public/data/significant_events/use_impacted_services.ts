@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useMemo } from 'react';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
+import {
+  getImpactedServiceSourceIds,
+  resolveImpactedServices,
+  type ResolvedImpactedService,
+} from '../../common/impacted_services';
+import { useFetchSourceFeatures } from '../knowledge_indicators/use_fetch_source_features';
+
+export interface ImpactedServicesResult {
+  services: ResolvedImpactedService[];
+  isInitialLoading: boolean;
+  failedSourceIds: string[];
+  isError: boolean;
+  refetch: () => void;
+}
+
+/**
+ * Resolves one event's impacted services, loading the knowledge indicators referenced by its
+ * topology. Impacted services are event-level: every detection of an event shares this list.
+ */
+export const useImpactedServices = (event: SignificantEvent): ImpactedServicesResult => {
+  const sourceIds = useMemo(() => getImpactedServiceSourceIds([event]), [event]);
+  const { features, failedSourceIds, isInitialLoading, isError, refetch } =
+    useFetchSourceFeatures(sourceIds);
+  const services = useMemo(() => resolveImpactedServices(event, features), [event, features]);
+
+  return { services, isInitialLoading, failedSourceIds, isError, refetch };
+};

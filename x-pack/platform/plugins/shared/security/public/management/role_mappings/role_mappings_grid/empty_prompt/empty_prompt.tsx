@@ -23,7 +23,7 @@ export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
   readOnly = false,
 }) => (
   <KibanaPageTemplate.EmptyPrompt
-    iconType="managementApp"
+    iconType="gear"
     title={
       <h2>
         {readOnly ? (

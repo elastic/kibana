@@ -18,6 +18,8 @@ export interface ArtifactListPageUrlParams {
   pageSize?: number;
   filter?: string;
   includedPolicies?: string;
+  /** Only used when the page shows the Enabled column. Any value other than `enabled` or `disabled` is ignored. */
+  enabledStatus?: string;
   show?: 'create' | 'edit' | 'view' | 'import';
   itemId?: string;
   sortField?: string;

@@ -12,6 +12,10 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common/constants';
 import { IMPACT_PROPOSAL_SUMMARY_URL } from '../../../common/impact/constants';
 import type { ImpactPillsResponse } from '../../../common/impact/impact_pills';
+import {
+  INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+  INVESTIGATIONS_API_PRIVILEGE_READ,
+} from '../../investigations/constants';
 import type { ImpactRouteDependencies } from '../types';
 import { handleRouteError } from './handle_route_error';
 import { fitsPillsReach, impactPillsPageShape, PILLS_REACH_MESSAGE } from './impact_pills_page';
@@ -49,7 +53,16 @@ export const registerGetProposalImpactPillsRoute = ({
     .get({
       path: IMPACT_PROPOSAL_SUMMARY_URL,
       access: INTERNAL_ACCESS,
-      security: { authz: { requiredPrivileges: [PROPOSALS_API_PRIVILEGE_READ] } },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            PROPOSALS_API_PRIVILEGE_READ,
+            {
+              anyRequired: [INVESTIGATIONS_API_PRIVILEGE_READ, INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+            },
+          ],
+        },
+      },
       summary: 'Get the impact entities across a proposal queue',
     })
     .addVersion(

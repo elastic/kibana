@@ -18,6 +18,7 @@ import {
   vendorFallbackDataSources,
 } from './coverage_data_sources';
 import { stripFindingTitle } from './coverage_text';
+import type { DedupedCoverageGaps } from './dedupe_coverage_gaps';
 import { buildCoverageKiId } from './coverage_ki_id';
 import type { ReportHuntContext } from './load_report_hunt_context';
 import { selectCoverageBehavior, toCoverageBehaviors } from './select_coverage_behavior';
@@ -49,6 +50,8 @@ export type CoverageSubjectState = Pick<
     /** The coordinator result packaging was handed; the only source on a run with no SSE. */
     coordinator?: CoordinatorInputs;
     reportContext?: ReportHuntContext;
+    /** Gaps a retired run could not search; named on the report-scoped subject only. */
+    unsearched?: DedupedCoverageGaps;
   };
 
 const firstNonEmpty = (...lists: string[][]): string[] =>
@@ -158,6 +161,7 @@ export const deriveCoverageSubjects = ({
       report: state.reportContext,
       techniqueIds: techniqueId ? [techniqueId] : [],
       fallbackTitle: finding ? stripFindingTitle(finding.title) : undefined,
+      unsearched: techniqueId === undefined ? state.unsearched : undefined,
     });
 
     const phrase = finding

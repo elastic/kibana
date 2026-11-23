@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ElasticsearchRoleDescriptor } from '@kbn/scout';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest, getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS } from '../fixtures/expected_builtin_roles_kibana_access';
@@ -118,10 +118,12 @@ function compareRoleAccessMaps(
   return { addedRoles, removedRoles, changedRoles };
 }
 
+// Local only: this suite gates ES snapshot promotion. Cloud builds its ES and Kibana images
+// independently, so the fixture and the reserved roles can drift there without a real regression.
 apiTest.describe(
   'Built-in roles Kibana access validation',
   {
-    tag: tags.stateful.classic,
+    tag: getPlaywrightTagsFor('stateful', 'classic', 'local'),
   },
   () => {
     apiTest(

@@ -22,4 +22,5 @@ export const SESSION_VERSION_HEADER = {
 export const COMMON_HEADERS: Record<string, string> = {
   ...SESSION_VERSION_HEADER,
   'kbn-xsrf': 'foo',
+  'x-elastic-internal-origin': 'kibana',
 };

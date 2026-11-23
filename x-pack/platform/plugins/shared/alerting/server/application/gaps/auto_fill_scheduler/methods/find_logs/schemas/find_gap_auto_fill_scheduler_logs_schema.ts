@@ -6,13 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  GAP_AUTO_FILL_STATUS,
+  gapAutoFillSchedulerLimits,
+} from '../../../../../../../common/constants';
+
+const statusValues = Object.values(GAP_AUTO_FILL_STATUS);
+const { maxBackfills } = gapAutoFillSchedulerLimits;
+const MAX_LOGS_PER_PAGE = 100;
 
 export const findGapAutoFillSchedulerLogsParamsSchema = schema.object({
   id: schema.string(),
   start: schema.string(),
   end: schema.string(),
   page: schema.number({ defaultValue: 1, min: 1 }),
-  perPage: schema.number({ defaultValue: 50, min: 1, max: 100 }),
+  perPage: schema.number({ defaultValue: 50, min: 1, max: MAX_LOGS_PER_PAGE }),
   sortField: schema.oneOf([schema.literal('@timestamp')], { defaultValue: '@timestamp' }),
   sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
     defaultValue: 'desc',
@@ -24,7 +32,8 @@ export const findGapAutoFillSchedulerLogsParamsSchema = schema.object({
         schema.literal('error'),
         schema.literal('skipped'),
         schema.literal('no_gaps'),
-      ])
+      ]),
+      { maxSize: statusValues.length }
     )
   ),
 });
@@ -41,13 +50,15 @@ export const gapAutoFillSchedulerLogEntrySchema = schema.object({
         processedGaps: schema.maybe(schema.number()),
         status: schema.maybe(schema.string()),
         error: schema.maybe(schema.string()),
-      })
+      }),
+      // One result per processed rule. A run processes at most maxBackfills rules.
+      { maxSize: maxBackfills.max }
     )
   ),
 });
 
 export const gapAutoFillSchedulerLogsResultSchema = schema.object({
-  data: schema.arrayOf(gapAutoFillSchedulerLogEntrySchema),
+  data: schema.arrayOf(gapAutoFillSchedulerLogEntrySchema, { maxSize: MAX_LOGS_PER_PAGE }),
   total: schema.number(),
   page: schema.number(),
   perPage: schema.number(),

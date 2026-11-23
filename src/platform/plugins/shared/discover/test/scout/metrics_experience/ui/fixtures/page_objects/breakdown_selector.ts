@@ -8,6 +8,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export interface BreakdownSelector {
   readonly toggleButton: Locator;
@@ -35,6 +36,8 @@ export function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
         await selectable.waitFor({ state: 'visible' });
       }
       await selectableObject.search(dimensionName);
+      // The list is virtualised; clicking while EUI is still filtering misses the option.
+      await expect(selectable).toHaveAttribute('data-search-term', dimensionName);
       // The dimension options carry a status badge (append) and are shown with
       // search highlighting, so select by the stable per-option data-test-subj
       // rather than a label match. The helper still owns the search box.

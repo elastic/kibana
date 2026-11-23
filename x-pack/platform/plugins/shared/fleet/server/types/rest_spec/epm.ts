@@ -12,6 +12,7 @@ import {
   ExperimentalDataStreamFeaturesSchema,
 } from '../models/package_policy';
 import { OtelCollectorConfigSchema } from '../models';
+import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION } from '../../../common/constants';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -773,7 +774,11 @@ export const GetLimitedPackagesRequestSchema = {
 
 export const GetFileRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.get_file.pkgName',
+      meta: { description: 'Package name' },
+    }),
     pkgVersion: schema.string({ meta: { description: 'Package version' } }),
     filePath: schema.string({ meta: { description: 'File path within the package' } }),
   }),
@@ -795,7 +800,11 @@ export const NamespacePreflightCheckRequestSchema = {
 };
 
 const PackageVersionRequestParamsSchema = schema.object({
-  pkgName: schema.string({ meta: { description: 'Package name' } }),
+  pkgName: schema.savedObjectId.warn({
+    minLength: 0,
+    label: 'fleet.epm.pkgName',
+    meta: { description: 'Package name' },
+  }),
   pkgVersion: schema.string({ meta: { description: 'Package version' } }),
 });
 
@@ -834,16 +843,26 @@ export const GetInfoWithoutVersionRequestSchema = {
 };
 export const GetKnowledgeBaseRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.get_knowledge_base.pkgName',
+      meta: { description: 'Package name' },
+    }),
   }),
 };
 
 export const GetBulkAssetsRequestSchema = {
   body: schema.object(
     {
-      assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() }), {
-        maxSize: 10000,
-      }),
+      assetIds: schema.arrayOf(
+        schema.object({
+          id: schema.savedObjectId.warn({ minLength: 0, label: 'fleet.epm.bulk_assets.id' }),
+          type: schema.savedObjectType.warn({ minLength: 0, label: 'fleet.epm.bulk_assets.type' }),
+        }),
+        {
+          maxSize: 10000,
+        }
+      ),
     },
     { meta: { id: 'get_bulk_assets_request' } }
   ),
@@ -917,13 +936,19 @@ export const UpdatePackageWithoutVersionRequestSchema = {
 export const BulkNamespaceCustomizationRequestSchema = {
   body: schema.object(
     {
-      packages: schema.arrayOf(schema.string(), {
-        minSize: 1,
-        maxSize: 1000,
-        meta: {
-          description: 'Package names to apply the customization changes to.',
-        },
-      }),
+      packages: schema.arrayOf(
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.epm.bulk_namespace_customization.packages',
+        }),
+        {
+          minSize: 1,
+          maxSize: 1000,
+          meta: {
+            description: 'Package names to apply the customization changes to.',
+          },
+        }
+      ),
       enable: schema.maybe(
         schema.arrayOf(
           schema.string({
@@ -984,7 +1009,9 @@ export const BulkNamespaceCustomizationResponseSchema = schema.object(
 
 export const ReviewUpgradeRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.review_upgrade.pkgName',
       meta: { description: 'Package name to review upgrade for' },
     }),
   }),
@@ -1008,13 +1035,21 @@ export const ReviewUpgradeResponseSchema = schema.object(
 
 export const GetStatsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.get_stats.pkgName',
+      meta: { description: 'Package name' },
+    }),
   }),
 };
 
 export const GetDependenciesRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.get_dependencies.pkgName',
+      meta: { description: 'Package name' },
+    }),
     pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
 };
@@ -1066,6 +1101,13 @@ export const InstallPackageFromRegistryRequestSchema = {
               'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
           },
         }),
+        acknowledge_breaking_changes: schema.boolean({
+          defaultValue: false,
+          meta: {
+            description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+            availability: { since: '9.5.0', stability: 'stable' },
+          },
+        }),
       },
       { meta: { id: 'install_package_from_registry_request' } }
     )
@@ -1080,7 +1122,11 @@ export const InstallPackageFromRegistryWithoutVersionRequestSchema = {
 
 export const ReauthorizeTransformRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.reauthorize_transform.pkgName',
+      meta: { description: 'Package name' },
+    }),
     pkgVersion: schema.maybe(schema.string({ meta: { description: 'Package version' } })),
   }),
   query: schema.object({
@@ -1108,9 +1154,12 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
     {
       packages: schema.arrayOf(
         schema.oneOf([
-          schema.string(),
+          schema.savedObjectId.warn({ minLength: 0, label: 'fleet.epm.bulk_install.packages' }),
           schema.object({
-            name: schema.string(),
+            name: schema.savedObjectId.warn({
+              minLength: 0,
+              label: 'fleet.epm.bulk_install.packages.name',
+            }),
             version: schema.string(),
             prerelease: schema.maybe(schema.boolean()),
           }),
@@ -1125,6 +1174,13 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
             'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
         },
       }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      }),
     },
     { meta: { id: 'bulk_install_packages_from_registry_request' } }
   ),
@@ -1132,7 +1188,9 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
 
 export const GetOneBulkOperationPackagesRequestSchema = {
   params: schema.object({
-    taskId: schema.string({
+    taskId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.bulk_operation.taskId',
       meta: {
         description: 'Task ID of the bulk operation',
       },
@@ -1145,7 +1203,10 @@ export const BulkUpgradePackagesRequestSchema = {
     {
       packages: schema.arrayOf(
         schema.object({
-          name: schema.string(),
+          name: schema.savedObjectId.warn({
+            minLength: 0,
+            label: 'fleet.epm.bulk_upgrade.packages.name',
+          }),
           version: schema.maybe(schema.string()),
         }),
         { minSize: 1, maxSize: 1000 }
@@ -1153,6 +1214,13 @@ export const BulkUpgradePackagesRequestSchema = {
       prerelease: schema.maybe(schema.boolean()),
       force: schema.boolean({ defaultValue: false }),
       upgrade_package_policies: schema.boolean({ defaultValue: false }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      }),
     },
     { meta: { id: 'bulk_upgrade_packages_request' } }
   ),
@@ -1163,7 +1231,10 @@ export const BulkUninstallPackagesRequestSchema = {
     {
       packages: schema.arrayOf(
         schema.object({
-          name: schema.string(),
+          name: schema.savedObjectId.warn({
+            minLength: 0,
+            label: 'fleet.epm.bulk_uninstall.packages.name',
+          }),
           version: schema.string(),
         }),
         { minSize: 1, maxSize: 1000 }
@@ -1179,7 +1250,9 @@ export const BulkRollbackPackagesRequestSchema = {
     {
       packages: schema.arrayOf(
         schema.object({
-          name: schema.string({
+          name: schema.savedObjectId.warn({
+            minLength: 0,
+            label: 'fleet.epm.bulk_rollback.packages.name',
             meta: {
               description: 'Package name to rollback',
             },
@@ -1209,7 +1282,10 @@ export const InstallPackageByUploadRequestSchema = {
 export const CreateCustomIntegrationRequestSchema = {
   body: schema.object(
     {
-      integrationName: schema.string(),
+      integrationName: schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.epm.create_custom_integration.integrationName',
+      }),
       datasets: schema.arrayOf(
         schema.object({
           name: schema.string(),
@@ -1249,7 +1325,11 @@ export const DeletePackageWithoutVersionRequestSchema = {
 
 export const InstallKibanaAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.install_kibana_assets.pkgName',
+      meta: { description: 'Package name' },
+    }),
     pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
   body: schema.nullable(
@@ -1257,14 +1337,20 @@ export const InstallKibanaAssetsRequestSchema = {
       {
         force: schema.maybe(schema.boolean()),
         space_ids: schema.maybe(
-          schema.arrayOf(schema.string(), {
-            minSize: 1,
-            maxSize: 100,
-            meta: {
-              description:
-                'When provided, assets are installed in the specified spaces instead of the current space.',
-            },
-          })
+          schema.arrayOf(
+            schema.spaceId.warn({
+              minLength: 0,
+              label: 'fleet.epm.install_kibana_assets.space_ids',
+            }),
+            {
+              minSize: 1,
+              maxSize: 100,
+              meta: {
+                description:
+                  'When provided, assets are installed in the specified spaces instead of the current space.',
+              },
+            }
+          )
         ),
       },
       { meta: { id: 'install_kibana_assets_request' } }
@@ -1274,7 +1360,11 @@ export const InstallKibanaAssetsRequestSchema = {
 
 export const InstallRuleAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.install_rule_assets.pkgName',
+      meta: { description: 'Package name' },
+    }),
     pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
   body: schema.nullable(
@@ -1289,24 +1379,40 @@ export const InstallRuleAssetsRequestSchema = {
 
 export const DeleteKibanaAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.delete_kibana_assets.pkgName',
+      meta: { description: 'Package name' },
+    }),
     pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
 };
 
 export const DeletePackageDatastreamAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.delete_package_datastream_assets.pkgName',
+      meta: { description: 'Package name' },
+    }),
     pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
   query: schema.object({
-    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
+    packagePolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.delete_datastream_assets.packagePolicyId',
+      meta: { description: 'The ID of the package policy' },
+    }),
   }),
 };
 
 export const GetInputsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.get_inputs.pkgName',
+      meta: { description: 'Package name' },
+    }),
     pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
   query: schema.object({
@@ -1329,7 +1435,9 @@ export const GetInputsRequestSchema = {
 
 export const RollbackPackageRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.rollback_package.pkgName',
       meta: { description: 'Package name to roll back' },
     }),
   }),

@@ -123,7 +123,7 @@ export const ALERTING_V2_RULES_READ_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
-  elasticsearch: WRITER_ES_PRIVILEGES,
+  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -137,7 +137,7 @@ export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
-  elasticsearch: READER_ES_PRIVILEGES,
+  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -187,6 +187,29 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
       feature: {
         alerting_v2_action_policies: ['read'],
         discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
+ * Reads action policies and runs workflows, which is what sending a test notification requires.
+ * `workflow_execution_read` lets the spec read back the workflow test runs it started.
+ */
+export const ALERTING_V2_ACTION_POLICIES_READ_AND_WORKFLOW_EXECUTE_ROLE: KibanaRole = {
+  elasticsearch: READER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_action_policies: ['read'],
+        workflowsManagement: [
+          'minimal_read',
+          'workflow_read',
+          'workflow_execute',
+          'workflow_execution_read',
+        ],
       },
       spaces: ['*'],
     },
@@ -256,6 +279,27 @@ export const ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE: KibanaRole = {
         alerting_v2_rules: ['read'],
         workflowsManagement: ['minimal_read', 'workflow_read', 'workflow_execute'],
         discover: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
+ * {@link ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE} plus `actions: ['read']`, which includes
+ * connector execute: the dispatched workflow runs a connector step as the policy owner.
+ */
+export const ALERTING_V2_ACTION_POLICY_CONNECTOR_DISPATCH_ROLE: KibanaRole = {
+  elasticsearch: WRITER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_action_policies: ['all'],
+        alerting_v2_rules: ['read'],
+        workflowsManagement: ['minimal_read', 'workflow_read', 'workflow_execute'],
+        discover: ['all'],
+        actions: ['read'],
       },
       spaces: ['*'],
     },

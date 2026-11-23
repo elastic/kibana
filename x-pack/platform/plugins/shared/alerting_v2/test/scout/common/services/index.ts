@@ -64,8 +64,10 @@ export type { AlertActionsCleanupService } from './alert_actions_cleanup_service
 export { getAlertActionsCleanupService } from './alert_actions_cleanup_service';
 
 export type {
+  ActionPolicyChangedEbtEvent,
   EbtService,
   RuleChangedEbtEvent,
+  WaitForActionPolicyChangedEventsParams,
   WaitForRuleChangedEventsParams,
 } from './ebt_service';
 export { getEbtService } from './ebt_service';

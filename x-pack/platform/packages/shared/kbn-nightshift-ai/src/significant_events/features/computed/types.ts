@@ -9,20 +9,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
 
 /**
- * A provider that computes the value for an externally-backed computed feature.
- *
- * Some computed features (e.g. `code_analysis`) depend on capabilities that live
- * in the consuming plugin rather than in this package (Agent Builder tools, the
- * scoped request, feature flags). Those generators carry only metadata here and
- * delegate the actual computation to a provider the plugin injects via
- * {@link ComputedFeatureGeneratorOptions.providers}. Returning `undefined`
- * means "no feature" (e.g. nothing matched), and the result is skipped.
- */
-export type ComputedFeatureProvider = (
-  options: ComputedFeatureGeneratorOptions
-) => Promise<Record<string, unknown> | undefined>;
-
-/**
  * Options passed to each computed feature generator.
  */
 export interface ComputedFeatureGeneratorOptions {
@@ -32,12 +18,6 @@ export interface ComputedFeatureGeneratorOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
   signal: AbortSignal;
-  /**
-   * Optional providers for externally-backed computed features, keyed by
-   * feature type. Injected by the consuming plugin; absent providers cause the
-   * corresponding generator to be skipped.
-   */
-  providers?: Record<string, ComputedFeatureProvider | undefined>;
 }
 
 /**
@@ -63,9 +43,8 @@ export interface ComputedFeatureGenerator {
 
   /**
    * Generates the computed value for this feature. Returning `undefined` means
-   * the generator produced no feature for this run (e.g. an externally-backed
-   * generator whose provider is absent, or that found no match); such results
-   * are skipped rather than persisted.
+   * the generator produced no feature for this run; such results are skipped
+   * rather than persisted.
    */
   generate: (
     options: ComputedFeatureGeneratorOptions

@@ -112,3 +112,89 @@ export const INVENTORY_DEFINITION_FIXTURES: readonly InventoryDefinitionFixture[
   k8sNodeFixture,
   hostLikeFixture,
 ];
+
+/**
+ * An identity on `entity.id`, like the built-in `generic` but keeping the type prefix, with the
+ * `k8s.node` sources. Left out of the list above: its list query carries a raw column.
+ */
+export const entityIdFixture: InventoryDefinitionFixture = {
+  ...k8sNodeFixture,
+  type: 'inventory_generic',
+  name: 'Generic',
+  identityField: { singleField: 'entity.id' },
+};
+
+/**
+ * A `k8s.deployment` ranking the OpenTelemetry names before the Elastic Agent ones, read from both
+ * conventions' sources, with a description. Left out of the list above too.
+ */
+export const k8sDeploymentOtelAndAgentFixture: InventoryDefinitionFixture = {
+  type: 'k8s.deployment',
+  name: 'K8s Deployment',
+  description:
+    'A Kubernetes deployment, identified by cluster/namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver.',
+  managedBy,
+  identityField: {
+    euidRanking: {
+      branches: [
+        {
+          ranking: [
+            [
+              { field: 'k8s.cluster.name' },
+              { sep: '/' },
+              { field: 'k8s.namespace.name' },
+              { sep: '/' },
+              { field: 'k8s.deployment.name' },
+            ],
+            [
+              { field: 'orchestrator.cluster.name' },
+              { sep: '/' },
+              { field: 'kubernetes.namespace' },
+              { sep: '/' },
+              { field: 'kubernetes.deployment.name' },
+            ],
+          ],
+        },
+      ],
+    },
+    documentsFilter: getPresenceFilter([
+      ['k8s.cluster.name', 'k8s.namespace.name', 'k8s.deployment.name'],
+      ['orchestrator.cluster.name', 'kubernetes.namespace', 'kubernetes.deployment.name'],
+    ]),
+  },
+  dynamic: {
+    sources: [
+      {
+        indexPattern: 'metrics-kubernetes.state_deployment-*',
+        filter: 'metricset.name == "state_deployment"',
+        attributes: [
+          { name: 'available_replicas', field: 'kubernetes.deployment.replicas.available' },
+          { name: 'desired_replicas', field: 'kubernetes.deployment.replicas.desired' },
+          { name: 'paused', field: 'kubernetes.deployment.paused' },
+          { name: 'app', field: 'kubernetes.labels.app' },
+        ],
+      },
+      {
+        indexPattern: 'metrics-k8sclusterreceiver.otel-*',
+        attributes: [
+          { name: 'available_replicas', field: 'k8s.deployment.available' },
+          { name: 'desired_replicas', field: 'k8s.deployment.desired' },
+          { name: 'resource_id', field: 'k8s.deployment.uid' },
+        ],
+      },
+    ],
+  },
+};
+
+/** A ranking led by `entity.id`, with the host-like sources. Left out of the list above too. */
+export const rankedEntityIdFixture: InventoryDefinitionFixture = {
+  ...hostLikeFixture,
+  type: 'inventory_ranked_generic',
+  name: 'Ranked generic',
+  identityField: {
+    euidRanking: {
+      branches: [{ ranking: [[{ field: 'entity.id' }], [{ field: 'host.hostname' }]] }],
+    },
+    documentsFilter: getPresenceFilter([['entity.id'], ['host.hostname']]),
+  },
+};

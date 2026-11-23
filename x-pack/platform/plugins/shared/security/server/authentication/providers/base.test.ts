@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
-import { BaseAuthenticationProvider } from './base';
+import { BaseAuthenticationProvider, isMinimallyAuthenticatedUser } from './base';
 import {
   mockAuthenticationProviderOptions,
   type MockAuthenticationProviderOptions,
@@ -103,6 +103,15 @@ describe('BaseAuthenticationProvider', () => {
         }
       });
 
+      it('marks the user proxy as minimally authenticated', async () => {
+        const session = sessionMock.createValue({ username: 'testuser' });
+        const request = createMinimalAuthcRequest();
+
+        const user = await provider.getUserPublic(request, undefined, session);
+
+        expect(isMinimallyAuthenticatedUser(user)).toBe(true);
+      });
+
       it('returns a frozen user proxy', async () => {
         const session = sessionMock.createValue({ username: 'testuser' });
         const request = createMinimalAuthcRequest();
@@ -159,6 +168,31 @@ describe('BaseAuthenticationProvider', () => {
         expect(mockOptions.client.asScoped).toHaveBeenCalled();
         expect(user.username).toBe(esUser.username);
       });
+
+      it('validates reauthentication explicitly without changing request headers or adding a full-auth header', async () => {
+        const session = sessionMock.createValue({ username: 'testuser' });
+        const request = createMinimalAuthcRequest({ authorization: 'Bearer stale' });
+        const headers = request.headers;
+        const esUser = mockAuthenticatedUser();
+        const client = elasticsearchServiceMock.createScopedClusterClient();
+        client.asCurrentUser.security.authenticate.mockResponse(esUser);
+        mockOptions.client.asScoped.mockReturnValue(client);
+
+        const user = await provider.getUserPublic(
+          request,
+          { authorization: 'Bearer session' },
+          session,
+          { reauthenticate: true }
+        );
+
+        expect(client.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+          headers: { authorization: 'Bearer session' },
+        });
+        expect(user.username).toBe(esUser.username);
+        expect(request.headers).toBe(headers);
+        expect(request.headers).toEqual({ authorization: 'Bearer stale' });
+      });
     });
 
     describe('standard authentication mode', () => {
@@ -175,6 +209,7 @@ describe('BaseAuthenticationProvider', () => {
 
         expect(mockOptions.client.asScoped).toHaveBeenCalled();
         expect(user.username).toBe(esUser.username);
+        expect(isMinimallyAuthenticatedUser(user)).toBe(false);
       });
 
       it('uses original request when no auth headers are provided', async () => {

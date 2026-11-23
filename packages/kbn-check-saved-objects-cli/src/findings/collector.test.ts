@@ -190,9 +190,9 @@ describe('FindingsCollector', () => {
     );
   });
 
-  it('merges fixHint and docsAnchor from duplicate findings when absent on the first occurrence', () => {
+  it('merges fixHint from duplicate findings when absent on the first occurrence', () => {
     const collector = new FindingsCollector();
-    // First occurrence has no fixHint/docsAnchor (e.g. regular baseline check)
+    // First occurrence has no fixHint (e.g. regular baseline check)
     const firstErr = new SavedObjectsCheckError({
       ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
       severity: 'error',
@@ -208,14 +208,12 @@ describe('FindingsCollector', () => {
       message: "Missing 'create' schema.",
       serverlessBaselineUrl: 'https://storage.googleapis.com/kibana-so-types-snapshots/def.json',
       fixHint: 'Add a create schema to the model version.',
-      docsAnchor: '#defining-model-versions',
     });
 
     collector.ingestErrors([firstErr, secondErr]);
 
     const [finding] = collector.getFindings();
     expect(finding.fixHint).toBe('Add a create schema to the model version.');
-    expect(finding.docsAnchor).toBe('#defining-model-versions');
     // Both URLs are preserved
     expect(finding.baselineUrl).toBe(
       'https://storage.googleapis.com/kibana-so-types-snapshots/abc.json'
@@ -223,6 +221,24 @@ describe('FindingsCollector', () => {
     expect(finding.serverlessBaselineUrl).toBe(
       'https://storage.googleapis.com/kibana-so-types-snapshots/def.json'
     );
+  });
+
+  it('links each finding to the troubleshooting section of its rule', () => {
+    const collector = new FindingsCollector();
+    collector.ingestErrors([
+      new SavedObjectsCheckError({
+        ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
+        severity: 'error',
+        typeName: 'my-type',
+        message: "Missing 'create' schema.",
+      }),
+      new Error('unstructured failure'),
+    ]);
+
+    expect(collector.getFindings().map((f) => f.docsAnchor)).toEqual([
+      '/troubleshooting#model-version-missing-create',
+      '/troubleshooting',
+    ]);
   });
 
   it('keeps findings that share a ruleId but differ in typeName', () => {

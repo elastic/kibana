@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { Indicator } from '@kbn/slo-schema';
-import { indicatorSchemaZod, sloDefinitionSchemaZod } from '@kbn/slo-schema';
+import { indicatorSchema, sloDefinitionSchema } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import type { SLODefinition } from '../../domain/models';
@@ -17,7 +17,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
   summaryDoc: EsSummaryDocument,
   logger: Logger
 ): SLODefinition | undefined {
-  const res = sloDefinitionSchemaZod.safeParse({
+  const res = sloDefinitionSchema.safeParse({
     id: summaryDoc.slo.id,
     name: summaryDoc.slo.name,
     description: summaryDoc.slo.description,
@@ -49,7 +49,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
   });
 
   if (!res.success) {
-    logger.debug(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
+    logger.debug(`Invalid remote stored summary SLO with ID [${summaryDoc.slo.id}]`);
     logger.debug(stringifyZodError(res.error));
 
     return undefined;
@@ -62,11 +62,11 @@ export function fromRemoteSummaryDocumentToSloDefinition(
  * Temporary documents priors to 8.14 don't have indicator.params, therefore we need to fallback to a dummy
  */
 function getIndicator(summaryDoc: EsSummaryDocument, logger: Logger): Indicator {
-  const res = indicatorSchemaZod.safeParse(summaryDoc.slo.indicator);
+  const res = indicatorSchema.safeParse(summaryDoc.slo.indicator);
 
   if (!res.success) {
     logger.debug(
-      `Invalid indicator from remote summary SLO id [${summaryDoc.slo.id}] - Fallback on dummy indicator`
+      `Invalid indicator from remote summary SLO ID [${summaryDoc.slo.id}] - Fallback on dummy indicator`
     );
     logger.debug(stringifyZodError(res.error));
 

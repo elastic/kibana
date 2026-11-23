@@ -9,12 +9,16 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { LoadAlertsStepDependencies } from './alert_triage/alert_triage_steps';
+import type { DecisionAutoCloseMode } from '../alert_triage/constants';
 import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt/types';
 import {
   getTriageHeadroomStepDefinition,
   getTriageLoadAlertsStepDefinition,
   getTriagePlanSweepStepDefinition,
+  getTriageRetagProposalAlertsStepDefinition,
+  getTriageTagPatternKeysStepDefinition,
 } from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
 import { getResolveProposalsStepDefinition } from './resolve_proposals';
@@ -23,6 +27,14 @@ import {
   type SummarizeInvestigationStepDependencies,
 } from './summarize_investigation';
 import type { PackageReportStepDependencies } from './package_report/package_report_step';
+import {
+  getTriageGroupFpCandidatesStepDefinition,
+  getTriageJoinProposalStepDefinition,
+  type GroupProposalsStepDependencies,
+} from './alert_triage/group_proposals_step';
+import { getTriageMatchFpDecisionsStepDefinition } from './alert_triage/match_fp_decisions_step';
+import { getTriageRevokeFpDecisionStepDefinition } from './alert_triage/revoke_fp_decision_step';
+import { getTriageStoreFpDecisionsStepDefinition } from './alert_triage/store_fp_decisions_step';
 import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
 import { getReportWorkerOutcomeStepDefinition } from './report_worker_outcome/report_worker_outcome_step';
 
@@ -37,6 +49,9 @@ export const registerStepDefinitions = ({
   isContextEngineEnabled,
   getInternalEsClient,
   getTaskManager,
+  getWorkflowsManagement,
+  grouping,
+  getDecisionAutoCloseMode,
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -49,6 +64,9 @@ export const registerStepDefinitions = ({
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
   getInternalEsClient?: () => ElasticsearchClient;
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
+  getWorkflowsManagement: LoadAlertsStepDependencies['getWorkflowsManagement'];
+  grouping: Omit<GroupProposalsStepDependencies, 'getConversations' | 'logger'>;
+  getDecisionAutoCloseMode: () => Promise<DecisionAutoCloseMode>;
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -80,7 +98,29 @@ export const registerStepDefinitions = ({
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
-  workflowsExtensions.registerStepDefinition(getTriageLoadAlertsStepDefinition());
+  workflowsExtensions.registerStepDefinition(
+    getTriageLoadAlertsStepDefinition({ getWorkflowsManagement })
+  );
+  workflowsExtensions.registerStepDefinition(getTriageTagPatternKeysStepDefinition());
+  workflowsExtensions.registerStepDefinition(getTriageRetagProposalAlertsStepDefinition());
+  const groupingDeps = { ...grouping, getConversations, logger };
+  workflowsExtensions.registerStepDefinition(
+    getTriageGroupFpCandidatesStepDefinition(groupingDeps)
+  );
+  workflowsExtensions.registerStepDefinition(getTriageJoinProposalStepDefinition(groupingDeps));
+  workflowsExtensions.registerStepDefinition(
+    getTriageStoreFpDecisionsStepDefinition({
+      isContextEngineEnabled,
+      getMode: getDecisionAutoCloseMode,
+    })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getTriageMatchFpDecisionsStepDefinition({
+      isContextEngineEnabled,
+      getMode: getDecisionAutoCloseMode,
+    })
+  );
+  workflowsExtensions.registerStepDefinition(getTriageRevokeFpDecisionStepDefinition());
 };
 
 export { getPackageReportStepDefinition } from './package_report';

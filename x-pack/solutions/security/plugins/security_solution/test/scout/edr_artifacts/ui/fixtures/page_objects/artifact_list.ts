@@ -43,6 +43,26 @@ export class ArtifactListPage {
     return this.page.testSubj.locator(`${pagePrefix}-card-header-title`);
   }
 
+  /**
+   * The card whose title is `name`. Use it on lists that other spec files
+   * also write to (agnostic lists are not space-isolated), where `card()`
+   * can match items another worker created. The page shows the newest 10
+   * items, so this holds as long as fewer than 10 newer items land on the
+   * list between create and assert (two workers create one or two at once).
+   */
+  cardByName(pagePrefix: string, name: string): Locator {
+    // `exact` so "<name> edited" does not match a card titled "<name>".
+    return this.card(pagePrefix).filter({
+      has: this.cardTitle(pagePrefix).getByText(name, { exact: true }),
+    });
+  }
+
+  cardActionsButtonByName(pagePrefix: string, name: string): Locator {
+    return this.cardByName(pagePrefix, name).getByTestId(
+      `${pagePrefix}-card-header-actions-button`
+    );
+  }
+
   cardDescription(pagePrefix: string): Locator {
     return this.page.testSubj.locator(`${pagePrefix}-card-description`);
   }
@@ -105,8 +125,20 @@ export class ArtifactListPage {
     await this.flyoutSubmit(pagePrefix).waitFor({ state: 'visible' });
   }
 
+  /** The header add button only renders once the list has at least one item. */
+  async openCreateFromPage(pagePrefix: string) {
+    await this.pageAddButton(pagePrefix).click();
+    await this.flyoutSubmit(pagePrefix).waitFor({ state: 'visible' });
+  }
+
   async openEdit(pagePrefix: string) {
     await this.cardActionsButton(pagePrefix).click();
+    await this.cardEditAction(pagePrefix).click();
+    await this.flyoutSubmit(pagePrefix).waitFor({ state: 'visible' });
+  }
+
+  async openEditByName(pagePrefix: string, name: string) {
+    await this.cardActionsButtonByName(pagePrefix, name).click();
     await this.cardEditAction(pagePrefix).click();
     await this.flyoutSubmit(pagePrefix).waitFor({ state: 'visible' });
   }
@@ -117,6 +149,12 @@ export class ArtifactListPage {
 
   async deleteArtifact(pagePrefix: string) {
     await this.cardActionsButton(pagePrefix).click();
+    await this.cardDeleteAction(pagePrefix).click();
+    await this.deleteModalSubmit(pagePrefix).click();
+  }
+
+  async deleteArtifactByName(pagePrefix: string, name: string) {
+    await this.cardActionsButtonByName(pagePrefix, name).click();
     await this.cardDeleteAction(pagePrefix).click();
     await this.deleteModalSubmit(pagePrefix).click();
   }
