@@ -21,6 +21,7 @@ import type { ESQLMessage } from '../../types';
 
 interface ColumnValidationOptions {
   skipUnsupportedOrConflictingColumnValidation?: boolean;
+  skipUnsupportedColumnValidation?: boolean;
 }
 
 export function validateColumnForCommand(
@@ -65,6 +66,10 @@ export class ColumnValidator {
               this.shouldWarnForUnsupportedOrConflictingColumn
             ),
           ];
+        }
+
+        if (this.options.skipUnsupportedColumnValidation) {
+          return [];
         }
 
         return [

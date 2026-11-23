@@ -25,7 +25,7 @@ export const validate = (
     isParamLiteral(field)
       ? []
       : validateColumnForCommand(field, command.name, context, {
-          skipUnsupportedOrConflictingColumnValidation: true,
+          skipUnsupportedColumnValidation: true,
         })
   );
 };

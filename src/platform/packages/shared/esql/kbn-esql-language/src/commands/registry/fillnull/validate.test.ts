@@ -49,6 +49,35 @@ describe('FILLNULL validation', () => {
     );
   });
 
+  it.each(['DEFAULT', 'NULL', '"missing"'])(
+    'rejects an explicitly targeted mapping conflict with fill value %s',
+    async (value) => {
+      const { validate: validateQuery, callbacks } = await setup();
+      const { errors, warnings } = await validateQuery(
+        `FROM index | FILLNULL ${value} ON client_ip`,
+        {
+          ...callbacks,
+          getColumnsFor: async () => [
+            {
+              name: 'client_ip',
+              type: 'unsupported',
+              userDefined: false,
+              hasConflict: true,
+              originalTypes: ['ip', 'keyword'],
+            },
+          ],
+        }
+      );
+
+      expect(errors).toEqual([
+        expect.objectContaining({
+          text: 'Column [client_ip] has conflicting types across indices: [ip], [keyword]',
+        }),
+      ]);
+      expect(warnings).toEqual([]);
+    }
+  );
+
   it.each(['FILLNULL', 'FILLNULL DEFAULT', 'FILLNULL 0 ON', 'FILLNULL 0 ON doubleField,'])(
     'reports incomplete syntax for %s',
     async (command) => {
