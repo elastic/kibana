@@ -311,4 +311,56 @@ describe('initializeChangePointGridFetch', () => {
       to: 'now',
     });
   });
+
+  it('refetches and clears stale cards when esqlQuery$ emits a new query', async () => {
+    jest.mocked(fetchEsql).mockClear();
+    jest.mocked(resolveEsqlSource).mockClear();
+    const esqlQuery$ = new BehaviorSubject<string>(state.esql);
+    const discoverServices = {
+      profilesManager: {
+        createScopedProfilesManager: jest.fn().mockReturnValue({}),
+      },
+      ebtManager: { createScopedEBTManager: jest.fn() },
+      data: {},
+      dataSourceService: { unregisterEsqlSource: jest.fn() },
+    } as unknown as DiscoverServices;
+
+    const { cleanup } = initializeChangePointGridFetch({
+      api: {},
+      state: { ...state, apply_dashboard_context: false },
+      esqlQuery$,
+      discoverServices,
+      cards$,
+      searchContext$,
+      onCardsUpdated: jest.fn(),
+      setDataLoading: jest.fn(),
+      setDataViews: jest.fn(),
+      setSearchError: jest.fn(),
+      setApproximationApplied: jest.fn(),
+    });
+    cleanupFetch = cleanup;
+
+    fetchContext$.next(dashboardContext);
+    await Promise.resolve();
+    resolveSearch({
+      records: [],
+      dataSource: { kind: 'esql', id: 'source-1', resultColumns: [] },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(cards$.getValue()).toBeDefined();
+
+    const updatedEsql = 'FROM metrics-* | CHANGE_POINT latency ON @timestamp';
+    esqlQuery$.next(updatedEsql);
+    expect(cards$.getValue()).toBeUndefined();
+    await Promise.resolve();
+
+    expect(jest.mocked(resolveEsqlSource)).toHaveBeenLastCalledWith(
+      expect.objectContaining({ esql: updatedEsql })
+    );
+    expect(jest.mocked(fetchEsql)).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: { esql: updatedEsql } })
+    );
+  });
 });

@@ -99,26 +99,30 @@ export const useChangePointDetectionControlsContext = () => {
   return useContext(ChangePointDetectionControlsContext);
 };
 
-export const ChangePointDetectionControlsContextProvider: FC<PropsWithChildren<unknown>> = ({
-  children,
-}) => {
+export const ChangePointDetectionControlsContextProvider: FC<
+  PropsWithChildren<{ fieldFilter?: (field: DataViewField) => boolean }>
+> = ({ children, fieldFilter }) => {
   const { dataView } = useDataSource();
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
-    return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
-  }, [dataView]);
+    return dataView.fields.filter(
+      (field) =>
+        field.aggregatable && field.type === 'number' && (fieldFilter ? fieldFilter(field) : true)
+    );
+  }, [dataView, fieldFilter]);
 
   const splitFieldsOptions = useMemo<DataViewField[]>(() => {
     return dataView.fields.filter(
-      ({ aggregatable, esTypes, displayName }) =>
-        aggregatable &&
-        esTypes &&
-        esTypes.some((el) =>
+      (field) =>
+        field.aggregatable &&
+        field.esTypes &&
+        field.esTypes.some((el) =>
           [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP].includes(el as ES_FIELD_TYPES)
         ) &&
-        !['_id', '_index'].includes(displayName)
+        !['_id', '_index'].includes(field.displayName) &&
+        (fieldFilter ? fieldFilter(field) : true)
     );
-  }, [dataView]);
+  }, [dataView, fieldFilter]);
 
   const value = { metricFieldOptions, splitFieldsOptions };
 

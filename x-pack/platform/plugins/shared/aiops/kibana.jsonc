@@ -15,6 +15,7 @@
     "requiredPlugins": [
       "charts",
       "data",
+      "esql",
       "lens",
       "licensing",
       "uiActions",

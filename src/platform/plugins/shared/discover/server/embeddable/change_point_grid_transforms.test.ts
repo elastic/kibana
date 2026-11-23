@@ -9,7 +9,10 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ChangePointGridEmbeddableState } from './change_point_grid_schema';
-import { getChangePointGridTransforms } from './change_point_grid_transforms';
+import {
+  CHANGE_POINT_GRID_CONFIG_DATA_VIEW_REF_NAME,
+  getChangePointGridTransforms,
+} from './change_point_grid_transforms';
 
 const esql = 'FROM logs-* | CHANGE_POINT count ON @timestamp';
 
@@ -109,5 +112,83 @@ describe('change point grid embeddable transforms', () => {
     expect(apiState.static_context?.filters?.[0]).toEqual(
       expect.objectContaining({ condition: panelFilter.condition })
     );
+  });
+
+  it('moves form configuration data_view_id into references and restores a remapped reference on read', () => {
+    const state: ChangePointGridEmbeddableState = {
+      esql,
+      apply_dashboard_context: true,
+      configuration: {
+        mode: 'form',
+        data_view_id: 'logs-data-view',
+        aggregation_function: 'avg',
+        metric_field: 'bytes',
+        split_field: 'host.name',
+        partitions: ['web-1'],
+      },
+    };
+
+    const { state: storedState, references } = transformIn(state);
+
+    expect(references).toEqual([
+      {
+        name: CHANGE_POINT_GRID_CONFIG_DATA_VIEW_REF_NAME,
+        type: 'index-pattern',
+        id: 'logs-data-view',
+      },
+    ]);
+    expect(storedState.configuration).toEqual({
+      mode: 'form',
+      aggregation_function: 'avg',
+      metric_field: 'bytes',
+      split_field: 'host.name',
+      partitions: ['web-1'],
+    });
+    expect(storedState.configuration).not.toHaveProperty('data_view_id');
+
+    const apiState = transformOut(storedState, [
+      {
+        name: CHANGE_POINT_GRID_CONFIG_DATA_VIEW_REF_NAME,
+        type: 'index-pattern',
+        id: 'imported-data-view',
+      },
+    ]);
+
+    expect(apiState.configuration).toEqual({
+      mode: 'form',
+      data_view_id: 'imported-data-view',
+      aggregation_function: 'avg',
+      metric_field: 'bytes',
+      split_field: 'host.name',
+      partitions: ['web-1'],
+    });
+  });
+
+  it('passes direct-ES|QL configuration through without adding references and degrades safely if a form reference is missing', () => {
+    const directState: ChangePointGridEmbeddableState = {
+      esql,
+      apply_dashboard_context: true,
+      configuration: { mode: 'esql' },
+    };
+    const { state: storedDirect, references: directReferences } = transformIn(directState);
+    expect(directReferences).toEqual([]);
+    expect(storedDirect).toEqual(directState);
+    expect(transformOut(storedDirect, [])).toEqual(directState);
+
+    const { state: storedForm } = transformIn({
+      esql,
+      apply_dashboard_context: true,
+      configuration: {
+        mode: 'form',
+        data_view_id: 'logs-data-view',
+        aggregation_function: 'avg',
+        metric_field: 'bytes',
+      },
+    });
+    const degraded = transformOut(storedForm, []);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Unable to inject change point grid panel configuration data view')
+    );
+    expect(degraded.configuration).toEqual({ mode: 'esql' });
   });
 });

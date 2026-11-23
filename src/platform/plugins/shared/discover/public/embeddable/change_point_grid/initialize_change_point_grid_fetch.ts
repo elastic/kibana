@@ -13,7 +13,13 @@ import type { TimeRange } from '@kbn/es-query';
 import { unregisterFromDataViewsCache } from '@kbn/data-source';
 import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetch$ } from '@kbn/presentation-publishing';
-import type { BehaviorSubject } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  of,
+  type BehaviorSubject,
+  type Observable,
+} from 'rxjs';
 import { CHANGE_POINT_GRID_MAX_SERIES } from '../../../common';
 import { FetchStatus } from '../../application/types';
 import { fetchEsql } from '../../application/main/data_fetching/fetch_esql';
@@ -28,6 +34,7 @@ import { resolveChangePointGridSearchRequest } from './resolve_change_point_grid
 export const initializeChangePointGridFetch = ({
   api,
   state,
+  esqlQuery$,
   discoverServices,
   cards$,
   searchContext$,
@@ -39,6 +46,7 @@ export const initializeChangePointGridFetch = ({
 }: {
   api: unknown;
   state: ChangePointGridEmbeddableState;
+  esqlQuery$?: Observable<string>;
   discoverServices: DiscoverServices;
   cards$: BehaviorSubject<ChangePointCardModel[] | undefined>;
   searchContext$: BehaviorSubject<ChangePointGridSearchRequest | undefined>;
@@ -55,18 +63,27 @@ export const initializeChangePointGridFetch = ({
   let abortController: AbortController | undefined;
   let esqlSourceId: string | undefined;
   let previousTimeRange: TimeRange | undefined;
+  let previousEsql: string | undefined;
   let requestId = 0;
 
-  const subscription = fetch$(api).subscribe((fetchContext) => {
+  const subscription = combineLatest([
+    fetch$(api),
+    (esqlQuery$ ?? of(state.esql)).pipe(distinctUntilChanged()),
+  ]).subscribe(([fetchContext, currentEsql]) => {
+    const didEsqlChange = previousEsql !== undefined && previousEsql !== currentEsql;
     const searchRequest = resolveChangePointGridSearchRequest({
-      state,
+      state: { ...state, esql: currentEsql },
       fetchContext,
-      previousTimeRange,
+      previousTimeRange: didEsqlChange ? undefined : previousTimeRange,
     });
     if (!searchRequest) {
       return;
     }
+    previousEsql = currentEsql;
     previousTimeRange = searchRequest.timeRange;
+    if (didEsqlChange) {
+      cards$.next(undefined);
+    }
     searchContext$.next(searchRequest);
 
     abortController?.abort();
@@ -79,7 +96,7 @@ export const initializeChangePointGridFetch = ({
 
     const run = async () => {
       const { esqlSource, dataView } = await resolveEsqlSource({
-        esql: state.esql,
+        esql: currentEsql,
         services: discoverServices,
         esqlVariables: searchRequest.esqlVariables,
         timeRange: searchRequest.timeRange,
@@ -98,7 +115,7 @@ export const initializeChangePointGridFetch = ({
       esqlSourceId = esqlSource.id;
       setDataViews([dataView]);
       const result = await fetchEsql({
-        query: { esql: state.esql },
+        query: { esql: currentEsql },
         inputQuery: searchRequest.inputQuery,
         filters: searchRequest.filters,
         timeRange: searchRequest.timeRange,
@@ -122,11 +139,11 @@ export const initializeChangePointGridFetch = ({
           fetchStatus: FetchStatus.COMPLETE,
           result: result.records,
           dataSource: result.dataSource,
-          query: { esql: state.esql },
+          query: { esql: currentEsql },
           approximationApplied: result.approximationApplied,
         },
       });
-      const cards = buildChangePointCards({ table, esql: state.esql }) ?? [];
+      const cards = buildChangePointCards({ table, esql: currentEsql }) ?? [];
       cards$.next(cards.slice(0, CHANGE_POINT_GRID_MAX_SERIES));
       onCardsUpdated();
     };

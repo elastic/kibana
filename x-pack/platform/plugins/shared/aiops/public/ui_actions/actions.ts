@@ -6,6 +6,7 @@
  */
 
 export { createAddChangePointChartAction } from './create_change_point_chart';
+export { createEditChangePointGridAction } from './edit_change_point_grid';
 export { createOpenChangePointInMlAppAction } from './open_change_point_ml';
 export { createCategorizeFieldAction } from '../components/log_categorization/categorize_field_actions';
 export { createReverseCategorizeFieldAction } from '../components/log_categorization/reverse_categorize_field_actions';

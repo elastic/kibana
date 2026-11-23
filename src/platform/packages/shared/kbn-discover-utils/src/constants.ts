@@ -39,6 +39,7 @@ export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 //
 // Do not change constant value - part of public REST APIs
 //
+export const CHANGE_POINT_GRID_EMBEDDABLE_TYPE = 'change_point_grid';
 export const SEARCH_EMBEDDABLE_TYPE = 'discover_session';
 export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
 export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';

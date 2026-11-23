@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ensureDataView } from '../fixtures/data_views';
 import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
-  'change point chart attached from the dashboard',
+  'change point chart attached from the dashboard when ES|QL is disabled',
   { tag: tags.stateful.classic },
   () => {
     spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
-      await scoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
+      await scoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC', [ENABLE_ESQL]: false });
       await ensureDataView(apiServices, 'ft_ecommerce', 'order_date', scoutSpace.id);
     });
 
@@ -23,9 +24,11 @@ spaceTest.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
+    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();
+      await apiServices.dataViews.deleteByTitle('ft_ecommerce', scoutSpace.id);
       await scoutSpace.uiSettings.unset('dateFormat:tz');
+      await scoutSpace.uiSettings.unset(ENABLE_ESQL);
     });
 
     spaceTest(
