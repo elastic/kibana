@@ -225,7 +225,7 @@ export const triggerLabels = {
   getLimitBelowScheduleBody: (runs: number, limit: number) =>
     i18n.translate('xpack.nightshift.automations.flyout.limitBelowScheduleBody', {
       defaultMessage:
-        'This schedule runs up to {runs} times a day, but the daily trigger limit is {limit}. Runs above the limit are skipped. You can still save.',
+        'This schedule runs up to {runs} times a day, but the daily trigger limit is {limit}. Runs above the limit are skipped.',
       values: { runs, limit },
     }),
   getPlanLimitBody: (max: number) =>
