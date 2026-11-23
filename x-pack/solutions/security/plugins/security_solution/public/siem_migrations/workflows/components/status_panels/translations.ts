@@ -14,20 +14,20 @@ export const START_WORKFLOW_MIGRATION_CARD_TITLE = i18n.translate(
 
 export const START_WORKFLOW_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.workflows.startMigration.upload.title',
-  { defaultMessage: 'Export a Tines story to start translation.' }
+  { defaultMessage: 'Export your workflows to start translation.' }
 );
 
 export const START_WORKFLOW_MIGRATION_CARD_UPLOAD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.workflows.startMigration.upload.description',
   {
     defaultMessage:
-      'Export a Tines story as JSON and upload it here to generate Elastic Workflows YAML. Click “Upload stories” to get started.',
+      'Export your workflows from source system and upload it here to generate Elastic Workflows artifacts. Click “Upload workflows” to get started.',
   }
 );
 
 export const START_WORKFLOW_MIGRATION_CARD_UPLOAD_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.workflows.startMigration.upload.button',
-  { defaultMessage: 'Upload stories' }
+  { defaultMessage: 'Upload workflows' }
 );
 
 export const START_WORKFLOW_MIGRATION_CARD_UI_DISABLED_TEXT = i18n.translate(
@@ -40,7 +40,7 @@ export const START_WORKFLOW_MIGRATION_CARD_UI_DISABLED_TEXT = i18n.translate(
 
 export const START_WORKFLOW_MIGRATION_CARD_UPLOAD_MORE_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.workflows.startMigration.uploadMore.title',
-  { defaultMessage: 'Migrate more Tines stories' }
+  { defaultMessage: 'Need to migrate more workflows?' }
 );
 
 export const START_WORKFLOW_MIGRATION_CARD_UPLOAD_MORE_BUTTON = i18n.translate(

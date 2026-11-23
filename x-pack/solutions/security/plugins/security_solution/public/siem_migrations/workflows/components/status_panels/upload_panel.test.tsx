@@ -44,16 +44,40 @@ describe('UploadWorkflowsPanel', () => {
     expect(screen.queryByTestId('startWorkflowMigrationUploadButton')).not.toBeInTheDocument();
   });
 
+  it('should label the upload button after the workflows', () => {
+    renderPanel();
+
+    expect(screen.getByTestId('startWorkflowMigrationUploadButton')).toHaveTextContent(
+      'Upload workflows'
+    );
+  });
+
   it('should disable the upload button when disabled', () => {
     renderPanel({ isDisabled: true });
 
     expect(screen.getByTestId('startWorkflowMigrationUploadButton')).toBeDisabled();
   });
 
-  it('should explain how to export a Tines story when there are no migrations yet', () => {
+  it('should ask to export workflows when there are no migrations yet', () => {
     renderPanel();
 
-    expect(screen.getByText('Export a Tines story to start translation.')).toBeInTheDocument();
+    expect(screen.getByText('Export your workflows to start translation.')).toBeInTheDocument();
+  });
+
+  it('should explain, without naming a vendor, how to upload the exported workflows', () => {
+    renderPanel();
+
+    expect(
+      screen.getByText(
+        'Export your workflows from source system and upload it here to generate Elastic Workflows artifacts. Click “Upload workflows” to get started.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should ask whether to migrate more workflows when there are migrations already', () => {
+    renderPanel({ isUploadMore: true });
+
+    expect(screen.getByText('Need to migrate more workflows?')).toBeInTheDocument();
   });
 });
 
