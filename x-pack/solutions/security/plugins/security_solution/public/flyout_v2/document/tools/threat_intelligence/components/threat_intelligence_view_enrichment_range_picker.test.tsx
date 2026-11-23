@@ -25,6 +25,10 @@ describe('EnrichmentRangePicker', () => {
     range: { to: 'now', from: 'now-30d' },
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders a date picker and a button', () => {
     render(
       <TestProviders>
@@ -40,7 +44,27 @@ describe('EnrichmentRangePicker', () => {
     ).toBeInTheDocument();
   });
 
-  it('invokes setRange', async () => {
+  it('invokes setRange with the default range when the dates are left unchanged', async () => {
+    render(
+      <TestProviders>
+        <EnrichmentRangePicker {...rangePickerProps} />
+      </TestProviders>
+    );
+
+    const refreshButton = screen.getByTestId(
+      THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID
+    );
+    expect(refreshButton).toBeEnabled();
+
+    await userEvent.click(refreshButton);
+
+    expect(setRangeSpy).toHaveBeenCalledTimes(1);
+    const { from, to } = setRangeSpy.mock.calls[0][0];
+    expect(moment(from).isBefore(moment(to))).toBe(true);
+    expect(moment(to).diff(moment(from), 'days')).toBe(30);
+  });
+
+  it('invokes setRange with the edited start date', async () => {
     const { container } = render(
       <TestProviders>
         <EnrichmentRangePicker {...rangePickerProps} />
