@@ -89,6 +89,29 @@ function isNotFoundError(error: Error): error is errors.ResponseError & { status
   return isResponseError(error) && error.statusCode === 404;
 }
 
+/** Waits before writing again to a target that was not an alias yet. */
+const MISSING_WRITE_ALIAS_RETRY_DELAYS_MS = [500, 2000] as const;
+
+/**
+ * Elasticsearch rejects a `require_alias` write this way when the target is not an alias, such as
+ * when the node that handles the write has not applied the cluster state with the new alias yet.
+ */
+function isMissingWriteAliasCause(cause?: { type?: string; reason?: string | null }): boolean {
+  return (
+    cause?.type === 'index_not_found_exception' &&
+    Boolean(cause.reason?.includes('[require_alias]'))
+  );
+}
+
+function isMissingWriteAliasError(error: unknown): boolean {
+  return (
+    isResponseError(error as Error) &&
+    isMissingWriteAliasCause((error as errors.ResponseError).body?.error)
+  );
+}
+
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 // ES|QL signals a missing index as a 400 `verification_exception` with
 // `"Unknown index [<name>]"` instead of 404 — match it explicitly so we
 // stay consistent with `search`/`get`'s missing-index handling.
@@ -354,11 +377,41 @@ export class StorageIndexAdapter<
       writeIndex ? parseInt(last(writeIndex.name.split('-'))!, 10) : 1
     );
 
-    await this.retryBootstrap('index creation', () =>
+    const created = await this.retryBootstrap('index creation', () =>
       this.esClient.indices.create({
         index: indexName,
       })
-    ).catch(catchConflictError);
+    ).then(
+      () => true,
+      (error) => {
+        catchConflictError(error);
+        return false;
+      }
+    );
+
+    if (!created) {
+      await this.ensureWriteAlias(indexName);
+    }
+  }
+
+  /**
+   * Adds the write alias, and the template's mappings, to an index that already existed when this
+   * adapter tried to create it. An index created without the template, for example before the
+   * template existed, would otherwise fail every `require_alias` write.
+   */
+  private async ensureWriteAlias(indexName: string): Promise<void> {
+    if (await this.getCurrentWriteIndex()) {
+      return;
+    }
+
+    const aliasName = getAliasName(this.storage.name);
+    this.logger.warn(`Index ${indexName} exists without the write alias ${aliasName}; adding it`);
+    await this.retryBootstrap('write alias repair', () =>
+      this.esClient.indices.updateAliases({
+        actions: [{ add: { index: indexName, alias: aliasName, is_write_index: true } }],
+      })
+    );
+    await this.updateMappingsOfExistingIndex({ name: indexName });
   }
 
   private async updateMappingsOfExistingIndex({ name }: { name: string }) {
@@ -420,6 +473,35 @@ export class StorageIndexAdapter<
     }
 
     return await cb();
+  }
+
+  /**
+   * Validates the index components and writes, and writes again when the write target was not an
+   * alias yet. Each retry validates the components again, which repairs a missing alias.
+   */
+  private async writeToAlias<T>(
+    write: () => Promise<T>,
+    missedAlias: (response: T) => boolean
+  ): Promise<T> {
+    for (let retry = 0; ; retry++) {
+      const canRetry = retry < MISSING_WRITE_ALIAS_RETRY_DELAYS_MS.length;
+      try {
+        const response = await this.validateComponentsBeforeWriting(write);
+        if (!canRetry || !missedAlias(response)) {
+          return response;
+        }
+      } catch (error) {
+        if (!canRetry || !isMissingWriteAliasError(error)) {
+          throw error;
+        }
+      }
+
+      const delayMs = MISSING_WRITE_ALIAS_RETRY_DELAYS_MS[retry];
+      this.logger.debug(
+        `Write target ${this.getWriteTarget()} is not an alias yet; writing again in ${delayMs}ms`
+      );
+      await delay(delayMs);
+    }
   }
 
   private async ensureMappingsBeforeReading<T>(cb: () => Promise<T>): Promise<T> {
@@ -502,7 +584,7 @@ export class StorageIndexAdapter<
       return indexResponse;
     };
 
-    return this.validateComponentsBeforeWriting(attemptIndex).then(async (response) => {
+    return this.writeToAlias(attemptIndex, () => false).then(async (response) => {
       this.logger.debug(() => `Indexed document ${id} into ${response._index}`);
 
       return response;
@@ -578,7 +660,12 @@ export class StorageIndexAdapter<
       );
     };
 
-    return this.validateComponentsBeforeWriting(attemptBulk).then(async (response) => {
+    // The request targets one alias, so a missing alias fails every item and none was written.
+    const missedAlias = ({ items }: StorageClientBulkResponse) =>
+      items.length > 0 &&
+      items.every((item) => isMissingWriteAliasCause(Object.values(item)[0]?.error));
+
+    return this.writeToAlias(attemptBulk, missedAlias).then(async (response) => {
       // Check for errors and throw if throwOnFail is true
       if (throwOnFail) {
         const erroredItems = response.items.filter((item) => {

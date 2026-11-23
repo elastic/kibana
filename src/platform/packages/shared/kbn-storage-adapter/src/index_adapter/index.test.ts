@@ -19,6 +19,7 @@ const createLoggerMock = (): jest.Mocked<Logger> => {
   const logger = {
     debug: jest.fn(),
     info: jest.fn(),
+    warn: jest.fn(),
     error: jest.fn(),
     get: jest.fn(),
   } as unknown as jest.Mocked<Logger>;
@@ -78,6 +79,7 @@ const createMockEsClient = () => {
         },
       }),
       create: jest.fn().mockResolvedValue({}),
+      updateAliases: jest.fn().mockResolvedValue({ acknowledged: true }),
       exists: jest.fn().mockResolvedValue(true),
       simulateIndexTemplate: jest.fn().mockResolvedValue({
         template: { mappings: {} },
@@ -755,6 +757,149 @@ describe('StorageIndexAdapter - write index resolution', () => {
     await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
 
     expect(esClient.indices.create).toHaveBeenCalledWith({ index: 'test_index-000001' });
+  });
+});
+
+describe('StorageIndexAdapter - missing write alias', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  const writeIndexState = {
+    'test_index-000001': {
+      mappings: { _meta: { version: 'current' } },
+      aliases: { test_index: { is_write_index: true } },
+    },
+  };
+  const alreadyExists = () =>
+    new errors.ResponseError({
+      statusCode: 400,
+      body: { error: { type: 'resource_already_exists_exception' } },
+    } as unknown as TransportResult<unknown, unknown>);
+  const missingAliasCause = {
+    type: 'index_not_found_exception',
+    reason:
+      'no such index [test_index] and [require_alias] request flag is [true] and [test_index] is not an alias',
+  };
+  const missingAliasItem = (id: string) => ({
+    index: { _id: id, status: 404, error: missingAliasCause },
+  });
+  const writtenItem = (id: string) => ({ index: { _id: id, status: 201, result: 'created' } });
+  const bulkOf = (...ids: string[]) => ({
+    operations: ids.map((id) => ({ index: { _id: id, document: { foo: 'bar' } } })),
+  });
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('adds the write alias to an existing index that has none', async () => {
+    (esClient.indices.get as jest.Mock).mockResolvedValue({
+      'test_index-000001': { mappings: { _meta: { version: 'current' } }, aliases: {} },
+    });
+    (esClient.indices.create as jest.Mock).mockRejectedValue(alreadyExists());
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.updateAliases).toHaveBeenCalledWith({
+      actions: [{ add: { index: 'test_index-000001', alias: 'test_index', is_write_index: true } }],
+    });
+    expect(loggerMock.warn).toHaveBeenCalledWith(
+      'Index test_index-000001 exists without the write alias test_index; adding it'
+    );
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'test_index-000001' })
+    );
+    expect(esClient.index).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the aliases alone when a concurrent creation added the alias', async () => {
+    (esClient.indices.get as jest.Mock)
+      .mockResolvedValueOnce({})
+      .mockResolvedValue(writeIndexState);
+    (esClient.indices.create as jest.Mock).mockRejectedValue(alreadyExists());
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.updateAliases).not.toHaveBeenCalled();
+  });
+
+  it('does not look for the alias again after creating the index', async () => {
+    (esClient.indices.get as jest.Mock).mockResolvedValue({});
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+
+    // The write index lookup before writing, and the one that names the new index.
+    expect(esClient.indices.get).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.updateAliases).not.toHaveBeenCalled();
+  });
+
+  it('writes a bulk again when every item missed the alias', async () => {
+    (esClient.bulk as jest.Mock)
+      .mockResolvedValueOnce({
+        errors: true,
+        items: [missingAliasItem('a'), missingAliasItem('b')],
+      })
+      .mockResolvedValue({ errors: false, items: [writtenItem('a'), writtenItem('b')] });
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const bulk = adapter.getClient().bulk(bulkOf('a', 'b'));
+    await jest.advanceTimersByTimeAsync(500);
+
+    await expect(bulk).resolves.toMatchObject({ errors: false });
+    expect(esClient.bulk).toHaveBeenCalledTimes(2);
+  });
+
+  it('indexes a document again when the write missed the alias', async () => {
+    (esClient.index as jest.Mock)
+      .mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: missingAliasCause },
+        } as unknown as TransportResult<unknown, unknown>)
+      )
+      .mockResolvedValue({ _id: 'doc1', _index: 'test_index-000001', result: 'created' });
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const write = adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+    await jest.advanceTimersByTimeAsync(500);
+
+    await expect(write).resolves.toMatchObject({ result: 'created' });
+    expect(esClient.index).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not write a bulk again when only some items missed the alias', async () => {
+    (esClient.bulk as jest.Mock).mockResolvedValue({
+      errors: true,
+      items: [writtenItem('a'), missingAliasItem('b')],
+    });
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    await adapter.getClient().bulk(bulkOf('a', 'b'));
+
+    expect(esClient.bulk).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns the last bulk response once the retries run out', async () => {
+    (esClient.bulk as jest.Mock).mockResolvedValue({
+      errors: true,
+      items: [missingAliasItem('a')],
+    });
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const bulk = adapter.getClient().bulk(bulkOf('a'));
+    await jest.advanceTimersByTimeAsync(2500);
+
+    await expect(bulk).resolves.toMatchObject({ errors: true });
+    expect(esClient.bulk).toHaveBeenCalledTimes(3);
   });
 });
 
