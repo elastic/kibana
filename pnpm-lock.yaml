@@ -3721,11 +3721,11 @@ importers:
         specifier: 4.10.4
         version: 4.10.4
       '@launchdarkly/node-server-sdk':
-        specifier: 9.10.14
-        version: 9.10.14(supports-color@10.2.2)
+        specifier: 9.16.4
+        version: 9.16.4(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 1.2.0
-        version: 1.2.0(@launchdarkly/node-server-sdk@9.10.14(supports-color@10.2.2))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
+        specifier: 2.1.7
+        version: 2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -11701,29 +11701,37 @@ packages:
     peerDependencies:
       '@langchain/core': 1.2.3
 
+  '@launchdarkly/eventsource@0.2.4':
+    resolution: {integrity: sha512-fc5DFkpYwhgVKYK2mE446qcKxGRhnggdAWGTEXwVBehsJGXqpKmkxSyLC0RBbBt8SZn+WxpQLnw2BYu6tMD7Mw==}
+
   '@launchdarkly/js-client-sdk-common@1.32.2':
     resolution: {integrity: sha512-1m5cI3lVbuXmrP74Nz+1+ZUV8qEPGZzvUYpvoynowdweWX5EEuUK3vHtqC9umhSe2Z/Ujxy/vcmPgH3Q+5BHQA==}
 
   '@launchdarkly/js-client-sdk@4.10.4':
     resolution: {integrity: sha512-n1gvH/Or8/M2bR2HNqyLKrZ7x7lJOQx7WOaWnSibqf9hmtauE169HgtbtdMoUA9s22Z5MvSmNF6eBCJbetHlKA==}
 
-  '@launchdarkly/js-sdk-common@2.24.4':
-    resolution: {integrity: sha512-ikD6MElNa3WPUxXdUIDSBvbig21gfjemEus1Vh0HGcgLThxGglq+EGb0coyc8199+3aqu8c9kpuXEdMBZhOowA==}
-
   '@launchdarkly/js-sdk-common@2.27.0':
     resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
 
-  '@launchdarkly/js-server-sdk-common@2.18.7':
-    resolution: {integrity: sha512-v1vttu8tALIvpm1+Bal2HKtuvpdBBOTVJfAidlqS4PgSO9qyIzMa5R9fTkRFFXUpQh/iLRqPMI2TINubdfd5kg==}
+  '@launchdarkly/js-sdk-common@2.32.2':
+    resolution: {integrity: sha512-LnJUCx9FZocgSVYN50lpXrxWt2CpxB7SZEd/fHf+im5hf+cGEaxQIylhXYBzN1tmse3n/vkODBgsZJNZ3pAcxA==}
 
-  '@launchdarkly/node-server-sdk@9.10.14':
-    resolution: {integrity: sha512-mpgBT0mRBO/2dup7VrKaydyowv7pu3xRqyN7QMsXnOVF5yvC2N2HOBJ7HwBYaNtII32vEa9uQJbX8v2mBfVMaw==}
+  '@launchdarkly/js-server-sdk-common@2.26.4':
+    resolution: {integrity: sha512-DF6G7xVeK7FNEY8+88YF/oQVPwBeQEjyU3tY/SuMdbvehBDsY5Mit8JXWtZUu41SyYX9EjaogTy93TJcynhM/w==}
 
-  '@launchdarkly/openfeature-node-server@1.2.0':
-    resolution: {integrity: sha512-VXnfQJfHsofhmHV4HvURLdMiX3bSwLumyeSPzuFn+5FdNKH2l44ijwXeSsotXpANMp+Gmz1LiQLz7ftgTSHKXg==}
+  '@launchdarkly/node-server-sdk@9.16.4':
+    resolution: {integrity: sha512-1bOYuh1pEEVLNiHy1mynJlpzeriUnokFGMYAk+6lpWgahnyG2oHacC3LkMJd9dOJR0Ud5P4swl3DTti51RLOOQ==}
+
+  '@launchdarkly/openfeature-js-server-common@2.2.3':
+    resolution: {integrity: sha512-3etyrFp+C1OzrpjBnaGzXP2BN/OUAIWjhSVG2sJggdx4cnGwD0PHl9z8Y1YSTyhE7aTh7t4D3VgBP75aJ1KlaQ==}
+    peerDependencies:
+      '@openfeature/server-sdk': ^1.16.0
+
+  '@launchdarkly/openfeature-node-server@2.1.7':
+    resolution: {integrity: sha512-PtXI3e0XbkJa6/Yhl8g8ktshBMfn4OoieFJTPrTYdiPY/iiPvrNw2tn2GEtobuu8DN/LWgkBA4aE6OUo4kgb1g==}
     engines: {node: '>=20'}
     peerDependencies:
-      '@launchdarkly/node-server-sdk': 9.x
+      '@launchdarkly/node-server-sdk': ^9.0.0
       '@openfeature/server-sdk': ^1.16.0
 
   '@leichtgewicht/ip-codec@2.0.5':
@@ -13386,6 +13394,9 @@ packages:
   '@smithy/core@3.33.3':
     resolution: {integrity: sha512-CsOeKq/9kA3y6VJHt+/+VTCtBaxJ4OTFpgrjIUhPpDIKxBci1k2bJaQASF2h/ELWrulGp+t97DZ0mevfAD8idg==}
     engines: {node: '>=18.0.0'}
+    deprecated: |-
+      Deprecated due to a bug in custom logger data redaction. Upgrade to the latest version. If you used a custom logger with this
+        version, review your logs and rotate any credentials or other secrets. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.4.16':
     resolution: {integrity: sha512-QfuLWAkLzptffFW980AFeHZFdqds2B64rpEd3uJ6lgs3xVn9QegGMUgUcj+4d7dRrAsya3r58ZKpku97WcFb4w==}
@@ -18849,6 +18860,7 @@ packages:
   http-call@5.3.0:
     resolution: {integrity: sha512-ahwimsC23ICE4kPl9xTBjKB4inbRaeLyZeRunC/1Jy/Z6X8tv22MEAjK+KBOMSVLaqXPTTmd8638waVIKLGx2w==}
     engines: {node: '>=8.0.0'}
+    deprecated: Renamed to @heroku/http-call — please install @heroku/http-call instead.
 
   http-deceiver@1.2.7:
     resolution: {integrity: sha512-LmpOGxTfbpgtGVxJrj5k7asXHCgNZp5nLfp+hWc8QQRqtb7fUy6kRY3BO1h9ddF6yIPYUARgxGOwB42DnxIaNw==}
@@ -20012,10 +20024,6 @@ packages:
   launch-editor@2.14.2:
     resolution: {integrity: sha512-NHJEb30MGBCkmZXLZwz25t37QR4aY03ZzPYUJXOJaOa92uWwExI9SBQUuIznBYc1xkD7cJNGX7oc3Nl3sq2kQQ==}
 
-  launchdarkly-eventsource@2.2.0:
-    resolution: {integrity: sha512-u38fYlLSq/m6oFz0MS1/76Sj2xzlYhTKZ+sf/vju6PA86PMc6fPlY5k8CdU79edLXjNwsvIQTDvDNy3llDqB8A==}
-    engines: {node: '>=0.12.0'}
-
   lazy-ass@2.0.3:
     resolution: {integrity: sha512-/O3/DoQmI1XAhklDvF1dAjFf/epE8u3lzOZegQfLZ8G7Ud5bTRSZiFOpukHCu6jODrCA4gtIdwUCC7htxcDACA==}
     engines: {node: '> 0.8'}
@@ -20986,6 +20994,7 @@ packages:
 
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
+    deprecated: This package is no longer needed on supported Node.js versions. Node.js 16+ includes AbortController and AbortSignal as built-in globals. All Node.js versions requiring this polyfill are end-of-life. Use the built-in globals instead.
 
   node-addon-api@6.1.0:
     resolution: {integrity: sha512-+eawOlIgy680F0kBzPUNFhMZGtJ1YmqM6l4+Crf4IkImjYrO/mqPwRMh352g23uIaQKFItcQ64I7KMaJxHgAVA==}
@@ -28647,6 +28656,8 @@ snapshots:
       '@langchain/core': 1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.3.6))(ws@8.21.3)
       js-tiktoken: 1.0.21
 
+  '@launchdarkly/eventsource@0.2.4': {}
+
   '@launchdarkly/js-client-sdk-common@1.32.2':
     dependencies:
       '@launchdarkly/js-sdk-common': 2.27.0
@@ -28655,26 +28666,32 @@ snapshots:
     dependencies:
       '@launchdarkly/js-client-sdk-common': 1.32.2
 
-  '@launchdarkly/js-sdk-common@2.24.4': {}
-
   '@launchdarkly/js-sdk-common@2.27.0': {}
 
-  '@launchdarkly/js-server-sdk-common@2.18.7':
+  '@launchdarkly/js-sdk-common@2.32.2': {}
+
+  '@launchdarkly/js-server-sdk-common@2.26.4':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.24.4
+      '@launchdarkly/js-sdk-common': 2.32.2
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.10.14(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.18.7
+      '@launchdarkly/eventsource': 0.2.4
+      '@launchdarkly/js-server-sdk-common': 2.26.4
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
-      launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-node-server@1.2.0(@launchdarkly/node-server-sdk@9.10.14(supports-color@10.2.2))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
+  '@launchdarkly/openfeature-js-server-common@2.2.3(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.10.14(supports-color@10.2.2)
+      '@launchdarkly/js-sdk-common': 2.32.2
+      '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
+
+  '@launchdarkly/openfeature-node-server@2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2))(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))':
+    dependencies:
+      '@launchdarkly/node-server-sdk': 9.16.4(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.2.3(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       '@openfeature/server-sdk': 1.22.0(@openfeature/core@1.11.0)
 
   '@leichtgewicht/ip-codec@2.0.5':
@@ -38554,8 +38571,6 @@ snapshots:
       picocolors: 1.1.1
       shell-quote: 1.11.0
     optional: true
-
-  launchdarkly-eventsource@2.2.0: {}
 
   lazy-ass@2.0.3: {}
 
