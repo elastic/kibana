@@ -417,7 +417,8 @@
     {
       "id": "agent-builder-dashboards",
       "name": "Agent Builder Dashboards",
-      "slackChannel": "#kibana-presentation-reminders",
+      "slackChannel": "#dashboards-in-chat",
+      "weeklyReport": true,
       "configPath": "x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards/playwright.config.ts",
       "tags": [
         "platform",
@@ -435,7 +436,8 @@
     {
       "id": "agent-builder-visualizations",
       "name": "Agent Builder Visualizations",
-      "slackChannel": "#kibana-presentation-reminders",
+      "slackChannel": "#dashboards-in-chat",
+      "weeklyReport": true,
       "configPath": "x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations/playwright.config.ts",
       "tags": [
         "platform",
