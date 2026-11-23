@@ -39,6 +39,11 @@ export class RulesListPage {
     await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.rules}`);
   }
 
+  async scrollRulesListBy(deltaY: number): Promise<void> {
+    await this.rulesListTable.hover();
+    await this.page.mouse.wheel(0, deltaY);
+  }
+
   tagsFilterOption(tag: string) {
     return this.page.testSubj.locator(`rulesListTagsFilterOption-${tag}`);
   }

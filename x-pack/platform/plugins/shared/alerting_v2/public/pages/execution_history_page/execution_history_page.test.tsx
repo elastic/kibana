@@ -291,7 +291,6 @@ const switchToPoliciesTab = async () => {
 describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockAppHeader.mockClear();
     mockCanAccessClassicRules = true;
     mockNewEventsCount(0);
     mockRuleExecutionFetchResult();
@@ -306,13 +305,6 @@ describe('ExecutionHistoryPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /rules/i })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('tab', { name: /action policies/i })).toBeInTheDocument();
-  });
-
-  it('keeps the app header sticky', () => {
-    mockFetchResult();
-    renderPage();
-
-    expect(mockAppHeader).toHaveBeenLastCalledWith(expect.not.objectContaining({ sticky: false }));
   });
 
   it('switches the Documentation link when changing tabs', async () => {
