@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { DEFAULT_MITRE_FRAMEWORK } from './constants';
+import { DEFAULT_MITRE_FRAMEWORK, MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS } from './constants';
 import type { MitreFramework } from './schema';
-import { MITRE_FRAMEWORKS } from './schema';
-import { THREAT_FRAMEWORK_DISPLAY_NAME, getMitreFrameworkByThreatName } from './threat_framework';
+import {
+  THREAT_FRAMEWORK_DISPLAY_NAME,
+  getMitreFrameworkByThreatName,
+  isMitreFrameworkEnabledInConsumers,
+} from './threat_framework';
 
 export interface ThreatFrameworkGroup<T> {
   /** Known framework, or undefined when `framework` string is not recognized. */
@@ -20,10 +23,11 @@ export interface ThreatFrameworkGroup<T> {
 }
 
 /**
- * Groups threats by framework: known frameworks first in `MITRE_FRAMEWORKS` order,
+ * Groups threats by framework: known frameworks first in `MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS` order,
  * then unrecognized framework strings in first-seen order. Null holes are skipped.
  * A missing or blank `framework` counts as the default framework (MITRE ATT&CK), matching
- * how the form serializers default it on save.
+ * how the form serializers default it on save. Frameworks not yet enabled in consumers (ICS)
+ * are treated as unrecognized: read-only groups labelled with the raw string.
  */
 export const groupThreatsByFramework = <T extends { framework?: string }>(
   threats: readonly T[] | undefined | null
@@ -38,10 +42,13 @@ export const groupThreatsByFramework = <T extends { framework?: string }>(
   for (const threat of threats) {
     if (threat != null) {
       const rawFramework = threat.framework?.trim() ? threat.framework : undefined;
+      // Only frameworks enabled in consumers count as known; others (ICS) stay unrecognized.
       const framework =
         rawFramework === undefined
           ? DEFAULT_MITRE_FRAMEWORK
-          : getMitreFrameworkByThreatName(rawFramework);
+          : isMitreFrameworkEnabledInConsumers(rawFramework)
+          ? getMitreFrameworkByThreatName(rawFramework)
+          : undefined;
       if (framework !== undefined) {
         knownGroups.set(framework, [...(knownGroups.get(framework) ?? []), threat]);
       } else {
@@ -52,7 +59,7 @@ export const groupThreatsByFramework = <T extends { framework?: string }>(
   }
 
   const groups: Array<ThreatFrameworkGroup<T>> = [];
-  for (const framework of MITRE_FRAMEWORKS) {
+  for (const framework of MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS) {
     const frameworkThreats = knownGroups.get(framework);
     if (frameworkThreats) {
       groups.push({

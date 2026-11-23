@@ -182,6 +182,14 @@ describe('resolveMitreBucketsByFramework', () => {
             subtechniques: [],
           };
         }
+        if (framework === 'ics') {
+          return {
+            framework: 'ics' as const,
+            tactics: [{ id: 'TA0100', name: 'ICS Tactic' }],
+            techniques: [],
+            subtechniques: [],
+          };
+        }
         return {
           framework: 'enterprise' as const,
           tactics: [{ id: 'TA0099', name: 'Managed Tactic' }],
@@ -228,6 +236,14 @@ describe('resolveMitreBucketsByFramework', () => {
     const result = await resolveMitreBucketsByFramework(client, ['enterprise', 'ics']);
     expect(mockList).toHaveBeenCalledWith({ framework: 'ics' });
     expect(Object.keys(result).sort()).toEqual(['enterprise', 'ics']);
+    expect(result.enterprise).toMatchObject({
+      framework: 'enterprise',
+      tactics: [{ id: 'TA0099', name: 'Managed Tactic' }],
+    });
+    expect(result.ics).toMatchObject({
+      framework: 'ics',
+      tactics: [{ id: 'TA0100', name: 'ICS Tactic' }],
+    });
 
     const legacy = await resolveMitreBucketsByFramework(undefined, ['enterprise', 'ics']);
     expect(Object.keys(legacy)).toEqual(['enterprise']);

@@ -52,16 +52,21 @@ describe('groupThreatsByFramework', () => {
     expect(groups[1].threats[0]).toBe(atlas);
   });
 
-  it('orders enterprise, atlas, ics regardless of input order', () => {
+  it('treats ICS as an unrecognized group labelled with the raw string until consumers enable it', () => {
     const ics = buildThreat(MITRE_ICS_FRAMEWORK);
-    const atlas = buildThreat(MITRE_ATLAS_FRAMEWORK);
     const attack = buildThreat(MITRE_ATTACK_FRAMEWORK);
 
-    const groups = groupThreatsByFramework([ics, atlas, attack]);
+    const groups = groupThreatsByFramework([ics, attack]);
 
-    expect(groups.map(({ framework }) => framework)).toEqual(['enterprise', 'atlas', 'ics']);
-    expect(groups[2].label).toBe(THREAT_FRAMEWORK_DISPLAY_NAME.ics);
-    expect(groups[2].threats[0]).toBe(ics);
+    expect(groups).toEqual([
+      {
+        framework: 'enterprise',
+        label: THREAT_FRAMEWORK_DISPLAY_NAME.enterprise,
+        threats: [attack],
+      },
+      { framework: undefined, label: MITRE_ICS_FRAMEWORK, threats: [ics] },
+    ]);
+    expect(groups[1].threats[0]).toBe(ics);
   });
 
   it('places unknown frameworks after known ones in first-seen order with raw labels', () => {

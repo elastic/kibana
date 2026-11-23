@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS } from './constants';
 import type { MitreFramework } from './schema';
 
 /**
@@ -52,6 +53,14 @@ export const getMitreFrameworkByThreatName = (
   threatFrameworkName: string | undefined
 ): MitreFramework | undefined =>
   threatFrameworkName == null ? undefined : MITRE_FRAMEWORK_BY_THREAT_NAME.get(threatFrameworkName);
+
+/** True when the `framework` string is a managed framework that consumers (UI, AI, agent builder) are enabled for. */
+export const isMitreFrameworkEnabledInConsumers = (
+  threatFrameworkName: string | undefined
+): boolean => {
+  const framework = getMitreFrameworkByThreatName(threatFrameworkName);
+  return framework !== undefined && MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS.includes(framework);
+};
 
 export const isAtlasEntityId = (id: string): boolean => id.startsWith(ATLAS_ID_PREFIX);
 

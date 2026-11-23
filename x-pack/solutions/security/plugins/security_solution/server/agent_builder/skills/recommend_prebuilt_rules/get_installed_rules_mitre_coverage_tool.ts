@@ -6,10 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import {
-  MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS,
-  getMitreFrameworkByThreatName,
-} from '@kbn/security-mitre-attack-common';
+import { isMitreFrameworkEnabledInConsumers } from '@kbn/security-mitre-attack-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -23,11 +20,6 @@ export const GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID =
   'security.get_installed_rules_mitre_coverage';
 
 export const getInstalledRulesMitreCoverageSchema = lazySchema(() => z.object({}).strict());
-
-const isMitreFrameworkEnabledInConsumers = (frameworkName: string): boolean => {
-  const framework = getMitreFrameworkByThreatName(frameworkName);
-  return framework !== undefined && MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS.includes(framework);
-};
 
 const MAX_INSTALLED_RULES = 10000;
 
