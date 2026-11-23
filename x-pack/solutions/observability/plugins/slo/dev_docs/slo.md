@@ -171,7 +171,7 @@ Two roundings can share an index name, e.g. the daily and monthly indices of the
 
 #### Choosing a rounding
 
-Without `xpack.slo.sliIndexRounding`, the installer measures the largest document count of the latest 7 complete dated indices (`indices.stats`) and picks `M` below 6M documents per day, `w` below 27M and `d` above. These thresholds are half of the limits in the table below, as the choice is made once. A cluster that grows later must set the rounding explicitly.
+Without `xpack.slo.sliIndexRounding`, the installer measures the largest document count of the latest 7 complete dated indices (`_cat/indices`, which is available on serverless, unlike the indices stats API) and picks `M` below 6M documents per day, `w` below 27M and `d` above. These thresholds are half of the limits in the table below, as the choice is made once. A cluster that grows later must set the rounding explicitly.
 
 An SLI index has a single primary shard. Size it by the **documents written per day**, not by the number of SLO instances: a rollup document only exists for a bucket that has data, so the documents per instance per day vary from a few hundred (short-lived groupings) to 1,440 (1 minute buckets, always active).
 

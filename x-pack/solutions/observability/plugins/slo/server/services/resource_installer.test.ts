@@ -337,18 +337,10 @@ describe('resourceInstaller', () => {
           '.slo-observability.sli-v3.6.2026-11-16': {},
           '.slo-observability.sli-v3.6.2026-11-17': {},
         });
-        esClient.indices.stats.mockResponse({
-          _shards: { total: 1, successful: 1, failed: 0 },
-          _all: {},
-          indices: {
-            '.slo-observability.sli-v3.6.2026-11-15': {
-              primaries: { docs: { count: 1, total_size_in_bytes: 1 } },
-            },
-            '.slo-observability.sli-v3.6.2026-11-16': {
-              primaries: { docs: { count: docsPerIndex, total_size_in_bytes: 1 } },
-            },
-          },
-        });
+        esClient.cat.indices.mockResponse([
+          { index: '.slo-observability.sli-v3.6.2026-11-15', 'docs.count': '1' },
+          { index: '.slo-observability.sli-v3.6.2026-11-16', 'docs.count': String(docsPerIndex) },
+        ]);
       };
 
       const installedRouting = (esClient: EsClientMock) =>
@@ -390,7 +382,7 @@ describe('resourceInstaller', () => {
 
         await createAutoInstaller(esClient).install();
 
-        expect(esClient.indices.stats).toHaveBeenCalledWith(
+        expect(esClient.cat.indices).toHaveBeenCalledWith(
           expect.objectContaining({
             index: [
               '.slo-observability.sli-v3.6.2026-11-15',
@@ -405,7 +397,7 @@ describe('resourceInstaller', () => {
         mockTemplatesUpToDate(esClient);
         mockRoutingPipelines(esClient, {});
         mockDatedIndices(esClient, 158_000_000);
-        esClient.indices.stats.mockRejectedValue(new Error('security_exception'));
+        esClient.cat.indices.mockRejectedValue(new Error('security_exception'));
 
         await createAutoInstaller(esClient).install();
 
@@ -421,7 +413,7 @@ describe('resourceInstaller', () => {
         await createAutoInstaller(esClient).install();
 
         expect(installedRouting(esClient)).toEqual({ segments: [{ from: null, rounding: 'M' }] });
-        expect(esClient.indices.stats).not.toHaveBeenCalled();
+        expect(esClient.cat.indices).not.toHaveBeenCalled();
       });
 
       it('keeps the routing state in place', async () => {
@@ -436,7 +428,7 @@ describe('resourceInstaller', () => {
         await createAutoInstaller(esClient).install();
 
         expect(esClient.ingest.putPipeline).not.toHaveBeenCalled();
-        expect(esClient.indices.stats).not.toHaveBeenCalled();
+        expect(esClient.cat.indices).not.toHaveBeenCalled();
       });
 
       it('does not measure the volume when a rounding is configured', async () => {
@@ -448,7 +440,7 @@ describe('resourceInstaller', () => {
         await createInstaller(esClient).install();
 
         expect(installedRouting(esClient)).toEqual(DAILY_HISTORY_GUARD);
-        expect(esClient.indices.stats).not.toHaveBeenCalled();
+        expect(esClient.cat.indices).not.toHaveBeenCalled();
       });
     });
 

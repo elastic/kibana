@@ -211,15 +211,17 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     }
 
     try {
-      const { indices = {} } = await this.execute(() =>
-        this.esClient.indices.stats({
+      const rows = await this.execute(() =>
+        this.esClient.cat.indices({
           index: sample,
-          metric: 'docs',
-          level: 'indices',
+          h: ['index', 'docs.count'],
+          format: 'json',
           expand_wildcards: 'all',
         })
       );
-      const docsPerDay = max(Object.values(indices).map((stats) => stats.primaries?.docs?.count));
+      const docsPerDay = max(
+        rows.map((row) => Number(row['docs.count'])).filter((count) => Number.isFinite(count))
+      );
       if (docsPerDay === undefined) {
         return 'M';
       }
