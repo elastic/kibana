@@ -7,8 +7,8 @@
 
 import { inject, injectable } from 'inversify';
 import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
-import type { CoreStart as CoreStartContract, KibanaRequest } from '@kbn/core/server';
-import { PluginStart } from '@kbn/core-di';
+import type { CoreStart as CoreStartContract, KibanaRequest, Logger } from '@kbn/core/server';
+import { Logger as CoreLogger, PluginStart } from '@kbn/core-di';
 import type { CoreDiServiceStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -16,6 +16,7 @@ import type { NightshiftSourcesServerStart } from '@kbn/nightshift-sources-plugi
 import type { SignificantEventsServerStart } from '@kbn/significant-events-plugin/server';
 import { EngineHttpError } from '../errors/engine_http_error';
 import { ManagedRuleReader } from '../rules/managed_rule_reader';
+import { getErrorMessage } from '../errors/get_error_message';
 import { DetectionRulesClient } from '../rules/rules_client_token';
 import { DetectionEngineDataClient } from './es_client_tokens';
 import { KnowledgeIndicators, Sources } from './tokens';
@@ -27,8 +28,9 @@ const MAX_LISTED_SOURCES = 10_000;
 type AccountScopeContainer = ReturnType<CoreDiServiceStart['fork']>;
 
 /**
- * Builds the scope a tick or a rule reconciliation runs in: it forks the container and binds what
- * is read as the account behind a request, so the services resolved in it know no identity.
+ * Runs a tick or a rule reconciliation in its own scope: it forks the container, binds what is read
+ * as the account behind a request, so the services resolved in it know no identity, and releases the
+ * scope once the work is done.
  */
 @injectable()
 export class AccountScope {
@@ -41,14 +43,39 @@ export class AccountScope {
     @inject(PluginStart<SignificantEventsServerStart>('significantEvents'))
     private readonly significantEvents: SignificantEventsServerStart,
     @inject(PluginStart<AlertingServerStart>('alertingVTwo'))
-    private readonly alerting: AlertingServerStart
+    private readonly alerting: AlertingServerStart,
+    @inject(CoreLogger) private readonly logger: Logger
   ) {}
 
   /**
+   * Runs `fn` in a scope built for the account, then releases the scope, whether `fn` succeeded or
+   * not.
    * @param accountRequest A request authenticated as the space's detection service account.
-   * @returns The forked container; the caller unbinds it when the work is done.
    */
-  public async fork({
+  public async run<T>({
+    accountRequest,
+    spaceId,
+    fn,
+  }: {
+    accountRequest: KibanaRequest;
+    spaceId: string;
+    fn: (scope: AccountScopeContainer) => Promise<T>;
+  }): Promise<T> {
+    const scope = await this.fork({ accountRequest, spaceId });
+
+    try {
+      return await fn(scope);
+    } finally {
+      // A failing cleanup must not replace the work's result, or its own error, with another one.
+      try {
+        await scope.unbindAllAsync();
+      } catch (error) {
+        this.logger.warn(`Could not release the account scope: ${getErrorMessage(error)}`);
+      }
+    }
+  }
+
+  private async fork({
     accountRequest,
     spaceId,
   }: {
@@ -70,12 +97,18 @@ export class AccountScope {
     scope
       .bind(KnowledgeIndicators)
       .toConstantValue(this.significantEvents.getKnowledgeIndicatorReader({ spaceId: space }));
-    // The rules are the account's: Alerting v2 runs them with its API key.
-    scope.bind(DetectionRulesClient).toConstantValue(
-      await this.alerting.getRulesClientWithRequestInSpace(accountRequest, space, {
-        app: 'nightshift',
-      })
-    );
+    try {
+      // The rules are the account's: Alerting v2 runs them with its API key.
+      scope.bind(DetectionRulesClient).toConstantValue(
+        await this.alerting.getRulesClientWithRequestInSpace(accountRequest, space, {
+          app: 'nightshift',
+        })
+      );
+    } catch (error) {
+      // `run` releases only a scope that was built.
+      await scope.unbindAllAsync();
+      throw error;
+    }
     // Reads that rules client, so it lives and dies with the scope.
     scope.bind(ManagedRuleReader).toSelf();
 

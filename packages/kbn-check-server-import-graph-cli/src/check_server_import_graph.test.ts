@@ -49,6 +49,13 @@ describe('checkServerImportGraph', () => {
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
   });
 
+  it('fails on a react-use subpath with the default set', async () => {
+    const { passed, output } = await run(fixture('react_use_plugin', 'server', 'index.ts'));
+
+    expect(passed).toBe(false);
+    expect(output).toContain('imports react-use (`react-use/lib/useMountedState`)');
+  });
+
   it('looks for the given node modules instead of the default set', async () => {
     const entry = fixture('plugin', 'server', 'index.ts');
 

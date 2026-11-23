@@ -26,7 +26,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { ActiveExecution, ConversationEvent } from './timeline_events';
+import type { ActiveExecution, ConversationEvent, EventActor } from './timeline_events';
 import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
@@ -105,6 +105,7 @@ export interface AssistantResponse {
 export enum ConversationRoundStepType {
   toolCall = 'tool_call',
   reasoning = 'reasoning',
+  modelReasoning = 'model_reasoning',
   compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
   askUserQuestion = 'ask_user_question',
@@ -113,6 +114,8 @@ export enum ConversationRoundStepType {
   subagentRosterUpdated = 'subagent_roster_updated',
   substitution = 'substitution',
   injectedContext = 'injected_context',
+  deliveredMessage = 'delivered_message',
+  interimAnswer = 'interim_answer',
 }
 
 // tool call step
@@ -245,6 +248,30 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 };
 
 /**
+ * Reasoning text emitted by the model provider for one LLM call.
+ */
+export interface ModelReasoningStepData {
+  /** plain text reasoning content, as returned by the provider */
+  reasoning: string;
+  /** when the LLM call produced tool calls, the corresponding tool call group ID */
+  tool_call_group_id?: string;
+}
+
+export type ModelReasoningStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.modelReasoning,
+  ModelReasoningStepData
+>;
+
+export const createModelReasoningStep = (data: ModelReasoningStepData): ModelReasoningStep => ({
+  type: ConversationRoundStepType.modelReasoning,
+  ...data,
+});
+
+export const isModelReasoningStep = (step: ConversationRoundStep): step is ModelReasoningStep => {
+  return step.type === ConversationRoundStepType.modelReasoning;
+};
+
+/**
  * Defines all possible types for round steps.
  */
 // compaction step
@@ -328,6 +355,61 @@ export const isInjectedContextStep = (step: ConversationRoundStep): step is Inje
 
 /** Registration id of the skill pre-selection cycle hook; its `injected_context` steps carry it. */
 export const relevantSkillsHookId = 'relevant-skills';
+
+/** A delivered steer. The text is embedded so renderers need no event lookup. */
+export interface DeliveredMessageStepData {
+  /** The stamped `user_message` event. */
+  event_id: string;
+  author: EventActor;
+  /** True when the author is the run owner, whose credentials the run uses. */
+  is_run_owner: boolean;
+  message: string;
+  /** When the run picked the message up (ISO). */
+  delivered_at: string;
+  /** The cycle at whose check the message was picked up. */
+  cycle: number;
+  /** The tool call group that preceded the pickup, for placement. */
+  tool_call_group_id?: string;
+  /** Delivered after the preceding `interim_answer` step. */
+  after_answer?: boolean;
+}
+
+export type DeliveredMessageStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.deliveredMessage,
+  DeliveredMessageStepData
+>;
+
+export const createDeliveredMessageStep = (
+  data: DeliveredMessageStepData
+): DeliveredMessageStep => ({
+  type: ConversationRoundStepType.deliveredMessage,
+  ...data,
+});
+
+export const isDeliveredMessageStep = (
+  step: ConversationRoundStep
+): step is DeliveredMessageStep => {
+  return step.type === ConversationRoundStepType.deliveredMessage;
+};
+
+/** Preserves an answer shown before a steer continued the round; the response is the last answer. */
+export interface InterimAnswerStepData {
+  message: string;
+}
+
+export type InterimAnswerStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.interimAnswer,
+  InterimAnswerStepData
+>;
+
+export const createInterimAnswerStep = (data: InterimAnswerStepData): InterimAnswerStep => ({
+  type: ConversationRoundStepType.interimAnswer,
+  ...data,
+});
+
+export const isInterimAnswerStep = (step: ConversationRoundStep): step is InterimAnswerStep => {
+  return step.type === ConversationRoundStepType.interimAnswer;
+};
 
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
@@ -443,6 +525,7 @@ export const isPreExecutionWorkflowStep = (
 export type ConversationRoundStep =
   | ToolCallStep
   | ReasoningStep
+  | ModelReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
   | AskUserQuestionStep
@@ -450,7 +533,9 @@ export type ConversationRoundStep =
   | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
   | SubstitutionStep
-  | InjectedContextStep;
+  | InjectedContextStep
+  | DeliveredMessageStep
+  | InterimAnswerStep;
 
 /**
  * An entry in the active persistent-sub-agent roster.
@@ -757,6 +842,9 @@ export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
 
 /** Maximum accepted length for a user chat message (`input` / `message`) */
 export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
+
+/** Maximum steer length in characters. */
+export const STEER_MESSAGE_MAX_LENGTH = 4_000;
 
 /** Maximum accepted length for a client-supplied conversation title */
 export const CONVERSATION_TITLE_MAX_LENGTH = 500;

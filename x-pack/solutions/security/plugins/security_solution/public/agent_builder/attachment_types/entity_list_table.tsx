@@ -29,7 +29,7 @@ import { formatRiskScore } from '../../entity_analytics/common';
 import { CRITICALITY_LEVEL_TITLE } from '../../entity_analytics/components/asset_criticality/translations';
 import { RiskScoreLevel } from '../../entity_analytics/components/severity/common';
 import { EntityIconByType } from '../../entity_analytics/components/entity_store/helpers';
-import { TruncatedBadgeList } from '../../flyout/entity_details/shared/components/entity_source_value';
+import { TruncatedBadgeList } from '../../flyout_v2/entity/shared/components/entity_source_value';
 import { formatEntitySource } from './entity_attachment/entity_table/entity_data_source_utils';
 import { normalizeMultiValueField } from './normalize_multi_value_field';
 

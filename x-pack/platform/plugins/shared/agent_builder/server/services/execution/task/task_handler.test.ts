@@ -18,7 +18,7 @@ import {
 import { AgentExecutionMode } from '@kbn/agent-builder-common/agents';
 import { createTaskHandler } from './task_handler';
 import type { CallbackDeliveryService } from '../callback/callback_delivery_service';
-import { deliverCallbackEvents } from '../callback/deliver_callback_events';
+import { deliverCallbackEvents, deliverFailureCallback } from '../callback/deliver_callback_events';
 import { collectAndWriteEvents, handleAgentExecution } from '../execution_runner';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { createAgentExecutionClient } from '../persistence';
@@ -45,6 +45,9 @@ const createAgentExecutionClientMock = createAgentExecutionClient as jest.Mocked
 >;
 const deliverCallbackEventsMock = deliverCallbackEvents as jest.MockedFunction<
   typeof deliverCallbackEvents
+>;
+const deliverFailureCallbackMock = deliverFailureCallback as jest.MockedFunction<
+  typeof deliverFailureCallback
 >;
 const wakeParentMock = wakeParent as jest.MockedFunction<typeof wakeParent>;
 const reportToParentMock = reportToParent as jest.MockedFunction<typeof reportToParent>;
@@ -118,6 +121,7 @@ describe('TaskHandler event streaming and finalization', () => {
     logger = loggingSystemMock.createLogger();
     callbackDeliveryService = {} as unknown as jest.Mocked<CallbackDeliveryService>;
     deliverCallbackEventsMock.mockResolvedValue(undefined);
+    deliverFailureCallbackMock.mockResolvedValue(undefined);
     executionClient = {
       get: jest.fn().mockResolvedValue(execution),
       updateStatus: jest.fn().mockResolvedValue(undefined),
@@ -398,6 +402,32 @@ describe('TaskHandler event streaming and finalization', () => {
           request: fakeRequest,
         })
       );
+    });
+
+    it('delivers the aborted failure callback, keeping the recorded abort reason', async () => {
+      const abortReason = { source: 'api' as const };
+
+      await runAborted({ abortReason });
+
+      expect(deliverFailureCallbackMock).toHaveBeenCalledTimes(1);
+      expect(deliverFailureCallbackMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          execution: expect.objectContaining({ executionId: 'execution-1' }),
+          error: expect.objectContaining({
+            code: 'requestAborted',
+            meta: { abort_reason: abortReason },
+          }),
+        })
+      );
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    });
+
+    it('releases the conversation before delivering the callback', async () => {
+      await runAborted();
+
+      const [releaseOrder] = conversationClient.update.mock.invocationCallOrder;
+      const [callbackOrder] = deliverFailureCallbackMock.mock.invocationCallOrder;
+      expect(releaseOrder).toBeLessThan(callbackOrder);
     });
 
     it('releases nothing when the execution stores no conversation', async () => {

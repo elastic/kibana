@@ -52,27 +52,10 @@ export class ReconcileRulesRoute extends BaseEngineRoute {
   }
 
   protected async execute(): Promise<IKibanaResponse> {
-    const spaceId = this.getSpaceId();
-
-    // Another account's workflow must not change this space's rules; a user's call is allowed.
-    await this.account.assertServiceAccountActsForSpace({ request: this.request, spaceId });
-
-    const controller = new AbortController();
-    const subscription = this.request.events.aborted$.subscribe(() =>
-      controller.abort('the request was aborted')
-    );
-
-    try {
-      const result = await this.account.asDetectionEngineAccount({
-        request: this.request,
-        spaceId,
-        fn: (accountRequest) =>
-          this.reconciler.run({ accountRequest, spaceId, abortSignal: controller.signal }),
-      });
-
-      return this.ctx.response.ok({ body: result });
-    } finally {
-      subscription.unsubscribe();
-    }
+    return this.runAsAccount({
+      account: this.account,
+      fn: ({ accountRequest, spaceId, abortSignal }) =>
+        this.reconciler.run({ accountRequest, spaceId, abortSignal }),
+    });
   }
 }
