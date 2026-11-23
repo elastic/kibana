@@ -62,9 +62,7 @@ const HiddenValue = ({ testSubj }: { testSubj: string }) => (
 );
 
 // no value yet (e.g. no agents enrolled or no inventory reported) — not a permissions matter
-const EmptyValue = ({ testSubj }: { testSubj: string }) => (
-  <span data-test-subj={testSubj}>—</span>
-);
+const EmptyValue = ({ testSubj }: { testSubj: string }) => <span data-test-subj={testSubj}>—</span>;
 
 const yesNo = (value: boolean) =>
   value
