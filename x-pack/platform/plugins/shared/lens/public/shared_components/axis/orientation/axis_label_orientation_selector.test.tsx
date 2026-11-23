@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { AxisLabelOrientationSelectorProps } from './axis_label_orientation_selector';
 import { AxisLabelOrientationSelector } from './axis_label_orientation_selector';
-import userEvent from '@testing-library/user-event';
 
 const renderComponent = (propsOverrides?: Partial<AxisLabelOrientationSelectorProps>) => {
   return render(
@@ -31,12 +30,11 @@ describe('AxisLabelOrientationSelector', () => {
     expect(screen.getByRole('button', { name: /angled/i })).toBeEnabled();
   });
 
-  it('should call setOrientation when changing the orientation', async () => {
+  it('should call setOrientation when changing the orientation', () => {
     const setLabelOrientation = jest.fn();
     renderComponent({ setLabelOrientation });
 
-    const button = screen.getByRole('button', { name: /vertical/i });
-    await userEvent.click(button);
+    fireEvent.click(screen.getByRole('button', { name: /vertical/i }));
 
     expect(setLabelOrientation).toBeCalledTimes(1);
     expect(setLabelOrientation).toBeCalledWith(-90);

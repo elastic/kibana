@@ -33,4 +33,4 @@ buildkite-agent artifact upload "scout_playwright_configs.json"
 upload_tmp_artifact scout_playwright_configs.json scout_playwright_configs.json "$BUILDKITE_BUILD_ID"
 
 echo '--- Plan and upload Scout flaky steps'
-ts-node .buildkite/pipelines/flaky_tests/pick_scout_flaky_run_order.ts
+node .buildkite/pipelines/flaky_tests/pick_scout_flaky_run_order.ts

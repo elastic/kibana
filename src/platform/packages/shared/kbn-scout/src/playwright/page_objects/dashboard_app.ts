@@ -21,6 +21,12 @@ type CommonlyUsedTimeRange =
   | 'Last_90 days'
   | 'Last_1 year';
 
+/**
+ * Dashboard viewport can be slow to appear on cold CI runs (see https://github.com/elastic/kibana/pull/275767);
+ * the default 10s flakes on slower agents. Revisit once the root cause is fixed.
+ */
+const DEFAULT_VIEWPORT_TIMEOUT = 30_000;
+
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
@@ -175,10 +181,26 @@ export class DashboardApp {
   // ============================================================
 
   /**
+   * Reads the dashboard mode from the `data-view-mode` attribute on the viewport, mirroring the
+   * FTR `DashboardPageObject`. The viewport only renders once the dashboard has loaded, so a
+   * missing element or attribute means the app never got there and is surfaced as an error
+   * rather than a wrong verdict.
+   */
+  async getViewMode(): Promise<string> {
+    const viewMode = await this.dashboardViewport.getAttribute('data-view-mode', {
+      timeout: DEFAULT_VIEWPORT_TIMEOUT,
+    });
+    if (!viewMode) {
+      throw new Error('The dashboard viewport rendered without a "data-view-mode" attribute');
+    }
+    return viewMode;
+  }
+
+  /**
    * Checks if the dashboard is in view mode.
    */
   async getIsInViewMode(): Promise<boolean> {
-    return this.editModeButton.isVisible();
+    return (await this.getViewMode()) === 'view';
   }
 
   /**
@@ -186,20 +208,21 @@ export class DashboardApp {
    */
   async switchToEditMode() {
     await this.editModeButton.click();
-    // Wait for edit mode to be active (drag handles appear)
-    // Multiple drag handles are expected when multiple panels exist.
-    await expect
-      .poll(() => this.page.testSubj.locator('embeddablePanelDragHandle').count())
-      .toBeGreaterThan(0);
+    await this.waitForViewMode('edit');
+  }
+
+  private async waitForViewMode(mode: 'view' | 'edit') {
+    await this.dashboardViewport
+      .and(this.page.locator(`[data-view-mode="${mode}"]`))
+      .waitFor({ state: 'attached' });
   }
 
   /**
    * Clicks the cancel button to exit edit mode without saving.
    */
   async clickCancelOutOfEditMode() {
-    await expect(this.viewOnlyModeButton).toBeVisible();
     await this.viewOnlyModeButton.click();
-    await expect(this.editModeButton).toBeHidden();
+    await this.waitForViewMode('view');
   }
 
   async ensureViewMode() {
@@ -546,7 +569,7 @@ export class DashboardApp {
    * Uses the data-render-complete attribute to determine completion.
    */
   async waitForRenderComplete() {
-    await expect(this.dashboardViewport).toBeVisible();
+    await this.dashboardViewport.waitFor({ state: 'visible', timeout: DEFAULT_VIEWPORT_TIMEOUT });
 
     try {
       const count = await this.getSharedItemsCount();

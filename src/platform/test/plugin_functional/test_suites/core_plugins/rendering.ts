@@ -61,7 +61,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       }
       return JSON.parse(injectedMetadata.getAttribute('data')!);
     });
-  const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
+  const exists = (selector: string) => testSubjects.exists(selector);
   const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
   const getRenderingSession = () =>
     browser.execute(() => {

@@ -8,16 +8,22 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useUpdateIndexPattern } from './use_update_index_pattern';
 import { updateIndexPattern } from '../api';
-import { TestProviders } from '../../../common/mock/test_providers';
+import { createReactQueryWrapper } from '../../../common/mock/create_react_query_wrapper';
 
 jest.mock('../api');
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: jest.fn().mockReturnValue({
+    addSuccess: jest.fn(),
+    addError: jest.fn(),
+  }),
+}));
 
 describe('useUpdateIndexPattern', () => {
   it('updates index pattern successfully', async () => {
     (updateIndexPattern as jest.Mock).mockResolvedValue({ updated: 1 });
     const onSuccess = jest.fn();
     const { result } = renderHook(() => useUpdateIndexPattern({ onSuccess }), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     result.current.mutate({
@@ -43,7 +49,7 @@ describe('useUpdateIndexPattern', () => {
     (updateIndexPattern as jest.Mock).mockRejectedValue(mockError);
     const onError = jest.fn();
     const { result } = renderHook(() => useUpdateIndexPattern({ onError }), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     result.current.mutate({

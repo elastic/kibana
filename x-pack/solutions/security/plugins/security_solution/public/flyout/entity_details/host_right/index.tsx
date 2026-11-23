@@ -336,7 +336,8 @@ export const HostPanel = memo(function HostPanel({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={isPreviewMode}
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
           />
         )}

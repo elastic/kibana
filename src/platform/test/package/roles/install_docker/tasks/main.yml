@@ -36,4 +36,6 @@
 - name: install docker sdk
   become: yes
   pip:
-    name: docker
+    name: 
+      - 'docker==7.1.0'
+      - 'requests==2.31.0'

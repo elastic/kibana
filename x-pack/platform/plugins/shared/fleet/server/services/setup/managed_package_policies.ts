@@ -39,6 +39,10 @@ export interface UpgradeManagedPackagePoliciesResult {
 
 const TASK_TYPE = 'fleet:setup:upgrade_managed_package_policies';
 
+// Each batch raises the revision of every agent policy it touches once, so a large batch
+// keeps the number of agent policy redeployments low.
+const UPGRADE_BATCH_SIZE = 250;
+
 export function registerUpgradeManagedPackagePoliciesTask(
   taskManagerSetup: TaskManagerSetupContract
 ) {
@@ -181,12 +185,17 @@ export const upgradeManagedPackagePolicies = async (
 
   let upgradedCount = 0;
   for await (const packagePolicies of packagePoliciesFinder) {
-    for (const packagePolicy of packagePolicies) {
-      if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
-        await upgradePackagePolicy(soClient, esClient, packagePolicy, installedPackage, results);
-        upgradedCount++;
-      }
-    }
+    const outdatedPackagePolicies = packagePolicies.filter((packagePolicy) =>
+      isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)
+    );
+    await upgradePackagePolicies(
+      soClient,
+      esClient,
+      outdatedPackagePolicies,
+      installedPackage,
+      results
+    );
+    upgradedCount += outdatedPackagePolicies.length;
   }
 
   if (upgradedCount > 0) {
@@ -206,7 +215,7 @@ async function getPackagePoliciesNotMatchingVersion(
   pkgVersion: string
 ) {
   return packagePolicyService.fetchAllItems(soClient, {
-    perPage: 50,
+    perPage: UPGRADE_BATCH_SIZE,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName} AND NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version:${pkgVersion}`,
   });
 }
@@ -332,49 +341,75 @@ async function writePendingUpgradeReview(
   });
 }
 
-async function upgradePackagePolicy(
+async function upgradePackagePolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  packagePolicy: PackagePolicy,
+  packagePolicies: PackagePolicy[],
   installedPackage: Installation,
   results: UpgradeManagedPackagePoliciesResult[]
 ) {
-  // Since upgrades don't report diffs/errors, we need to perform a dry run first in order
-  // to notify the user of any granular policy upgrade errors that occur during Fleet's
-  // preconfiguration check
-  const dryRunResults = await packagePolicyService.getUpgradeDryRunDiff(
-    soClient,
-    packagePolicy.id,
-    packagePolicy,
-    installedPackage.version
-  );
+  const diffsById = new Map<string, UpgradeManagedPackagePoliciesResult['diff']>();
+  const idsToUpgrade: string[] = [];
 
-  if (dryRunResults.hasErrors) {
-    const errors = dryRunResults.diff
-      ? dryRunResults.diff?.[1].errors
-      : [dryRunResults.body?.message];
+  for (const packagePolicy of packagePolicies) {
+    // Since upgrades don't report diffs/errors, we need to perform a dry run first in order
+    // to notify the user of any granular policy upgrade errors that occur during Fleet's
+    // preconfiguration check
+    const dryRunResults = await packagePolicyService.getUpgradeDryRunDiff(
+      soClient,
+      packagePolicy.id,
+      packagePolicy,
+      installedPackage.version
+    );
 
-    appContextService
-      .getLogger()
-      .error(
-        new Error(`Error upgrading package policy ${packagePolicy.id}: ${JSON.stringify(errors)}`)
-      );
+    if (dryRunResults.hasErrors) {
+      const errors = dryRunResults.diff
+        ? dryRunResults.diff?.[1].errors
+        : [dryRunResults.body?.message];
 
-    results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors });
+      appContextService
+        .getLogger()
+        .error(
+          new Error(`Error upgrading package policy ${packagePolicy.id}: ${JSON.stringify(errors)}`)
+        );
+
+      results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors });
+      continue;
+    }
+
+    diffsById.set(packagePolicy.id, dryRunResults.diff);
+    idsToUpgrade.push(packagePolicy.id);
+  }
+
+  if (!idsToUpgrade.length) {
     return;
   }
 
   try {
-    await packagePolicyService.upgrade(
+    // Agentless is intentionally NOT filtered out under disableAgentlessLegacyAPI: the flag targets
+    // the public legacy policy APIs, not this managed/keep_policies_up_to_date auto-upgrade — which
+    // is the only automatic upgrader for those packages. Same engine the agentless API uses, and the
+    // periodic deployment-sync task reconciles the workload by revision.
+    //
+    // A single bulk call raises each affected agent policy's revision once per batch instead of
+    // once per package policy, and deploys asynchronously.
+    const upgradeResults = await packagePolicyService.bulkUpgrade(
       soClient,
       esClient,
-      packagePolicy.id,
-      { force: true },
-      packagePolicy,
+      idsToUpgrade,
+      { force: true, batchSize: UPGRADE_BATCH_SIZE },
       installedPackage.version
     );
-    results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors: [] });
+    for (const upgradeResult of upgradeResults) {
+      results.push({
+        packagePolicyId: upgradeResult.id,
+        diff: diffsById.get(upgradeResult.id),
+        errors: upgradeResult.success ? [] : [upgradeResult.body?.message],
+      });
+    }
   } catch (error) {
-    results.push({ packagePolicyId: packagePolicy.id, diff: dryRunResults.diff, errors: [error] });
+    for (const id of idsToUpgrade) {
+      results.push({ packagePolicyId: id, diff: diffsById.get(id), errors: [error] });
+    }
   }
 }

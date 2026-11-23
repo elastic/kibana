@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +50,7 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ location }) => {
-  const { id } = parse(location.search, { sort: false });
+  const { id } = queryString.parse(location.search, { sort: false });
   const mlApi = useMlApi();
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
@@ -77,9 +77,12 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
     },
   } = useMlKibana();
 
-  const { id: moduleId, index: dataViewId }: Record<string, any> = parse(location.search, {
-    sort: false,
-  });
+  const { id: moduleId, index: dataViewId }: Record<string, any> = queryString.parse(
+    location.search,
+    {
+      sort: false,
+    }
+  );
 
   const { createLinkWithUserDefaults } = useCreateADLinks();
 
