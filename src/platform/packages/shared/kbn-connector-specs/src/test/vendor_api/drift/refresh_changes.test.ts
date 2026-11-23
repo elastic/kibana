@@ -24,14 +24,11 @@ const scheme = (id: string, scopes: string[]) =>
       .join(', ')}]\` was ${id.endsWith('-added') ? 'added to' : 'removed from'} the API`
   );
 
-// What the cell has for the response or the request: the object, with the lines that changed.
+// What the cell has for the response or the request: the lines of the fields that changed.
 const object = (area: string, ...lines: string[]): string[] => [
   `**${area}**`,
   '```diff',
-  '{',
-  '  ...',
   ...lines,
-  '}',
   '```',
 ];
 // A list under its heading, a blank line between the sections of its diff block.
@@ -45,7 +42,7 @@ const areas = (...parts: string[][]): string[] =>
   parts.flatMap((part, index) => (index === 0 ? part : ['', ...part]));
 
 describe('describeChanges', () => {
-  it('shows the response as the object it is, with the fields that were added, removed and changed', () => {
+  it('shows the response with the fields that were added, removed and changed', () => {
     const lines = describeChanges([
       change(
         'response-optional-property-added',

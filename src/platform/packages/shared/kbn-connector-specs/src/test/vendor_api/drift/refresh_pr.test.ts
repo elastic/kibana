@@ -82,10 +82,7 @@ describe('renderRefreshPr', () => {
         '',
         '**Response**',
         '```diff',
-        '{',
-        '  ...',
         '+ title',
-        '}',
         '```',
         '',
         '</td>',
@@ -97,7 +94,7 @@ describe('renderRefreshPr', () => {
         '</tr>',
       ].join('\n')
     );
-    expect(body).toContain('+ name\n}\n```');
+    expect(body).toContain('+ name\n```');
     expect(body).toContain('`listB`');
     expect(body).toMatch(/<\/table>\n\n<\/details>/);
   });
@@ -187,7 +184,7 @@ describe('renderRefreshPr', () => {
       ]),
     ]);
 
-    expect(body).toContain('```diff\n{\n  ...\n+ title\n! old (deprecated)\n}\n```');
+    expect(body).toContain('```diff\n+ title\n! old (deprecated)\n```');
   });
 
   it('names an endpoint no action is recorded on with a dash, and keeps unlocated changes last', () => {

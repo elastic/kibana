@@ -9,14 +9,11 @@
 
 /**
  * The changes `oasdiff` found on one endpoint, as markdown for a cell of the refresh PR. What
- * changed in the response and in the request is shown as the object it is, with a line per field
- * that was added (`+`), removed (`-`) or changed (`!`) and its type:
+ * changed in the response and in the request is shown with a line per field that was added (`+`),
+ * removed (`-`) or changed (`!`) and its type:
  *
- *     {
- *       ...
  *     + fontVariantPosition: NORMAL | SUPER | SUB
  *     ! value: boolean | string | SlotContentId
- *     }
  *
  * Auth scopes, error responses and removed schemas follow as lists. The fields are named by their
  * path without what only matters to the diff itself: the schema composition a field sits in, the
@@ -298,7 +295,7 @@ export type ChangePart = FixedPart | ListPart;
 /** The changes in one place (response, request, …): a heading and the parts of its diff block. */
 export interface ChangeArea {
   readonly heading: string;
-  readonly braced: boolean;
+  readonly continuous: boolean;
   readonly parts: readonly ChangePart[];
 }
 
@@ -350,14 +347,14 @@ export const partLines = (part: ChangePart): string[] => {
 };
 
 /**
- * The lines of an area: its bold heading, then one diff block. The response and the request are
- * shown as the object they are; the other areas have their parts a blank line apart.
+ * The lines of an area: its bold heading, then one diff block. The response and the request have
+ * their lines one after the other; the other areas have their parts a blank line apart.
  */
-export const areaLines = ({ heading, braced, parts }: ChangeArea): string[] => [
+export const areaLines = ({ heading, continuous, parts }: ChangeArea): string[] => [
   heading,
   '```diff',
-  ...(braced
-    ? ['{', '  ...', ...parts.flatMap(partLines), '}']
+  ...(continuous
+    ? parts.flatMap(partLines)
     : parts.flatMap((part, index) => (index === 0 ? partLines(part) : ['', ...partLines(part)]))),
   '```',
   '',
@@ -389,7 +386,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
         : [
             {
               heading,
-              braced: false,
+              continuous: false,
               parts: [
                 fixed(
                   [...otherRules.values()].reduce((total, count) => total + count, 0),
@@ -403,7 +400,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
           ];
     }
     if (area === 'Auth scopes' && regrouped) {
-      return [{ heading, braced: false, parts: [fixed(0, '! same scopes, reordered')] }];
+      return [{ heading, continuous: false, parts: [fixed(0, '! same scopes, reordered')] }];
     }
     const ofArea = entries.filter((entry) => entry.area === area);
     if (ofArea.length === 0) {
@@ -412,7 +409,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
     return [
       {
         heading,
-        braced: isObjectArea(area),
+        continuous: isObjectArea(area),
         parts: SIGNS.flatMap((sign) => {
           const withSign = ofArea.filter((entry) => entry.sign === sign);
           return withSign.length === 0 ? [] : [listPart(area, sign, withSign)];
