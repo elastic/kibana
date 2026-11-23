@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
+  - '@kbn/connector-specs'
   - '@kbn/core-di-server'
   - '@kbn/esql'
   - '@kbn/esql-utils'

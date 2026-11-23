@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -49,6 +50,12 @@ export const createStartServicesMock = () => ({
       reportEvent: jest.fn(),
     },
     availability: createAvailabilityServiceMock(),
+    recentlyViewed: {
+      add: jest.fn(),
+      remove: jest.fn(),
+      get: jest.fn(() => []),
+      get$: jest.fn(() => of([])),
+    },
   },
 });
 

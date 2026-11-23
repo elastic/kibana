@@ -43,6 +43,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   function getTestRoute() {
     return supertest
@@ -168,6 +169,115 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
         expect(events[0]._source['@timestamp']).to.be.below(
           events[events.length - 1]._source['@timestamp']
         );
+      });
+
+      describe('with an alert newer than the last process event of the session', () => {
+        // An alert is raised after the process event that caused it, so the alert of the last process of a
+        // session can be newer than every process event. The last process event in the mock data is at
+        // 2022-05-10T21:39:56.832Z.
+        const LATE_ALERT_UUID = 'late-alert-uuid';
+        const LATE_ALERT_TIME = '2022-05-10T21:40:00.000Z';
+        const ALERTS_INDEX = '.internal.alerts-security.alerts-default';
+        // the total of process events of the mock session since MOCK_SESSION_START_TIME
+        const PROCESS_EVENTS_IN_SESSION = 418;
+        let lateAlertId: string;
+
+        const getAlertUuids = (
+          events: Array<{ _source: { kibana?: { alert?: { uuid: string } } } }>
+        ) => events.map((event) => event._source.kibana?.alert?.uuid).filter(Boolean);
+
+        before(async () => {
+          // clone a real alert of the mock session, so the document has the shape that Security writes
+          const { hits } = await es.search({
+            index: ALERTS_INDEX,
+            size: 1,
+            query: { term: { 'process.entry_leader.entity_id': MOCK_SESSION_ENTITY_ID } },
+          });
+          const source = hits.hits[0]._source as Record<string, unknown>;
+          const { _id } = await es.index({
+            index: ALERTS_INDEX,
+            refresh: 'wait_for',
+            document: {
+              ...source,
+              '@timestamp': LATE_ALERT_TIME,
+              'kibana.alert.uuid': LATE_ALERT_UUID,
+              'kibana.alert.original_time': LATE_ALERT_TIME,
+              'event.id': 'late-alert-event-id',
+            },
+          });
+          lateAlertId = _id;
+        });
+
+        after(async () => {
+          await es.delete({ index: ALERTS_INDEX, id: lateAlertId, refresh: 'wait_for' });
+        });
+
+        it('returns the alert on the last page of the session', async () => {
+          // fewer than the default page size of events exist, so this is the last page
+          const response = await getTestRoute().query({
+            index: MOCK_INDEX,
+            sessionEntityId: MOCK_SESSION_ENTITY_ID,
+            sessionStartTime: MOCK_SESSION_START_TIME,
+          });
+          expect(response.status).to.be(200);
+          expect(getAlertUuids(response.body.events)).to.contain(LATE_ALERT_UUID);
+        });
+
+        it('returns the alert when paging backwards from the alert time', async () => {
+          // Session View opens from the alert with its time as the cursor. No process event is at or
+          // after the cursor, so the page before the cursor must return the alert.
+          const response = await getTestRoute().query({
+            index: MOCK_INDEX,
+            sessionEntityId: MOCK_SESSION_ENTITY_ID,
+            sessionStartTime: MOCK_SESSION_START_TIME,
+            cursor: LATE_ALERT_TIME,
+            forward: false,
+          });
+          expect(response.status).to.be(200);
+          expect(getAlertUuids(response.body.events)).to.contain(LATE_ALERT_UUID);
+        });
+
+        it('leaves the alert to a later page when more process events follow', async () => {
+          // a full first page: the late alert belongs to the last page, which the client fetches next
+          const response = await getTestRoute().query({
+            index: MOCK_INDEX,
+            sessionEntityId: MOCK_SESSION_ENTITY_ID,
+            sessionStartTime: MOCK_SESSION_START_TIME,
+            pageSize: MOCK_PAGE_SIZE,
+          });
+          expect(response.status).to.be(200);
+          expect(getAlertUuids(response.body.events)).to.not.contain(LATE_ALERT_UUID);
+        });
+
+        it('returns the alert on the page after an exactly full page', async () => {
+          // A page of the size of the session is exactly full, so the client fetches the next page with the
+          // time of the last process event as cursor. That page is not empty: it starts at the last event
+          // again, is short, and so is the last page of the session.
+          const query = {
+            index: MOCK_INDEX,
+            sessionEntityId: MOCK_SESSION_ENTITY_ID,
+            sessionStartTime: MOCK_SESSION_START_TIME,
+            pageSize: PROCESS_EVENTS_IN_SESSION,
+          };
+          const firstPage = await getTestRoute().query(query);
+          expect(firstPage.status).to.be(200);
+
+          const processEvents = firstPage.body.events.filter(
+            (event: { _source: { event?: { kind?: string; action?: string } } }) =>
+              // alerts also have an exec or fork action, and have the kind signal
+              event._source.event?.kind === 'event' &&
+              ['fork', 'exec', 'end'].includes(event._source.event?.action ?? '')
+          );
+          expect(processEvents.length).to.be(PROCESS_EVENTS_IN_SESSION);
+          expect(getAlertUuids(firstPage.body.events)).to.not.contain(LATE_ALERT_UUID);
+
+          const secondPage = await getTestRoute().query({
+            ...query,
+            cursor: processEvents[processEvents.length - 1]._source['@timestamp'],
+          });
+          expect(secondPage.status).to.be(200);
+          expect(getAlertUuids(secondPage.body.events)).to.contain(LATE_ALERT_UUID);
+        });
       });
 
       it(`${PROCESS_EVENTS_ROUTE} returns a page of process events with normalized args`, async () => {

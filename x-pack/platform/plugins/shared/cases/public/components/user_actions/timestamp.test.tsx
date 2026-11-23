@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import type { ComponentType, ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
-import { TestProviders } from '../../common/mock';
+import { screen } from '@testing-library/react';
+import { renderWithTestingProviders } from '../../common/mock';
 import { UserActionTimestamp } from './timestamp';
 
 jest.mock('@kbn/i18n-react', () => {
@@ -16,9 +15,14 @@ jest.mock('@kbn/i18n-react', () => {
   i18n.init({ locale: 'en' });
 
   const originalModule = jest.requireActual('@kbn/i18n-react');
-  const FormattedRelative = jest.fn();
-  FormattedRelative.mockImplementationOnce(() => '2 days ago');
-  FormattedRelative.mockImplementation(() => '20 hours ago');
+  const { createElement } = jest.requireActual('react');
+  const FormattedRelative = jest.fn((props: { 'data-test-subj'?: string; value: string }) =>
+    createElement(
+      'span',
+      { 'data-test-subj': props['data-test-subj'] },
+      props.value === '2020-09-06T14:40:59.889Z' ? '2 days ago' : '20 hours ago'
+    )
+  );
 
   return {
     ...originalModule,
@@ -32,49 +36,25 @@ const props = {
 };
 
 describe('UserActionTimestamp ', () => {
-  let wrapper: ReactWrapper;
-
-  beforeAll(() => {
-    wrapper = mount(<UserActionTimestamp {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-    });
-  });
-
   it('it renders', async () => {
-    expect(
-      wrapper.find('[data-test-subj="user-action-title-creation-relative-time"]').first().exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="user-action-title-edited-relative-time"]').first().exists()
-    ).toBeTruthy();
+    renderWithTestingProviders(<UserActionTimestamp {...props} />);
+
+    expect(screen.getByTestId('user-action-title-creation-relative-time')).toBeInTheDocument();
+    expect(screen.getByTestId('user-action-title-edited-relative-time')).toBeInTheDocument();
   });
 
   it('it shows only the created time when the updated time is missing', async () => {
-    const newWrapper = mount(<UserActionTimestamp createdAt="2020-09-06T14:40:59.889Z" />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-    });
+    renderWithTestingProviders(<UserActionTimestamp createdAt="2020-09-06T14:40:59.889Z" />);
 
-    expect(
-      newWrapper
-        .find('[data-test-subj="user-action-title-creation-relative-time"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
-    expect(
-      newWrapper.find('[data-test-subj="user-action-title-edited-relative-time"]').first().exists()
-    ).toBeFalsy();
+    expect(screen.getByTestId('user-action-title-creation-relative-time')).toBeInTheDocument();
+    expect(screen.queryByTestId('user-action-title-edited-relative-time')).not.toBeInTheDocument();
   });
 
   it('it shows the timestamp correctly', async () => {
-    const createdText = wrapper
-      .find('[data-test-subj="user-action-title-creation-relative-time"]')
-      .first()
-      .text();
+    renderWithTestingProviders(<UserActionTimestamp {...props} />);
 
-    const updatedText = wrapper
-      .find('[data-test-subj="user-action-title-edited-relative-time"]')
-      .first()
-      .text();
+    const createdText = screen.getByTestId('user-action-title-creation-relative-time').textContent;
+    const updatedText = screen.getByTestId('user-action-title-edited-relative-time').textContent;
 
     expect(`${createdText} (${updatedText})`).toBe('2 days ago (20 hours ago)');
   });

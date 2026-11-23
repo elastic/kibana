@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { Empty } from './empty';
@@ -13,21 +13,25 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 describe('Empty', () => {
   describe('rendering', () => {
-    test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<Empty timelineId="test" browserFields={{}} />);
-      expect(wrapper).toMatchSnapshot();
+    test('renders the empty drop area', () => {
+      const { container } = render(
+        <TestProviders>
+          <Empty timelineId="test" browserFields={{}} />
+        </TestProviders>
+      );
+      expect(container.textContent).toContain('Drop');
     });
 
     const dropMessage = ['Drop', 'anything', 'highlighted', 'here'];
 
     test('it renders the expected message', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <Empty timelineId="test" browserFields={{}} />
         </TestProviders>
       );
 
-      dropMessage.forEach((word) => expect(wrapper.text()).toContain(word));
+      dropMessage.forEach((word) => expect(container.textContent).toContain(word));
     });
   });
 });

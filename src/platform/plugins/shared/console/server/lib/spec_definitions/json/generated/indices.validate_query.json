@@ -27,7 +27,7 @@
       "rewrite": "__flag__",
       "q": "",
       "routing": [],
-      "_slice": ""
+      "_slice": []
     },
     "data_autocomplete_rules": {
       "query": {
