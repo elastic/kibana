@@ -10,6 +10,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import {
   hasWorkflowReadPrivilege,
+  hasWorkflowExecutionReadPrivilege,
   hasWorkflowExecutePrivilege,
   hasWorkflowCreatePrivilege,
   hasWorkflowUpdatePrivilege,
@@ -47,6 +48,12 @@ describe('workflow privilege checks', () => {
       ).resolves.toBe(true);
     });
 
+    it('allows execution reads', async () => {
+      await expect(
+        hasWorkflowExecutionReadPrivilege({ security: undefined, request, spaceId })
+      ).resolves.toBe(true);
+    });
+
     it('allows create', async () => {
       await expect(
         hasWorkflowCreatePrivilege({ security: undefined, request, spaceId })
@@ -76,6 +83,38 @@ describe('workflow privilege checks', () => {
       const { security } = createSecurityMock(false);
       await expect(hasWorkflowReadPrivilege({ security, request, spaceId })).resolves.toBe(false);
     });
+  });
+
+  describe('hasWorkflowExecutionReadPrivilege', () => {
+    it('requires both workflow read and execution read in the requested space', async () => {
+      const { security, atSpace } = createSecurityMock(true);
+
+      await expect(
+        hasWorkflowExecutionReadPrivilege({ security, request, spaceId: 'another-space' })
+      ).resolves.toBe(true);
+
+      expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(atSpace).toHaveBeenCalledWith('another-space', {
+        kibana: [
+          `api:${WorkflowsManagementApiActions.read}`,
+          `api:${WorkflowsManagementApiActions.readExecution}`,
+        ],
+      });
+    });
+
+    it.each([WorkflowsManagementApiActions.read, WorkflowsManagementApiActions.readExecution])(
+      'denies execution reads when %s is missing',
+      async (missingPrivilege) => {
+        const { security, atSpace } = createSecurityMock(true);
+        atSpace.mockImplementation(async (_spaceId, { kibana }: { kibana: string[] }) => ({
+          hasAllRequested: !kibana.includes(`api:${missingPrivilege}`),
+        }));
+
+        await expect(
+          hasWorkflowExecutionReadPrivilege({ security, request, spaceId })
+        ).resolves.toBe(false);
+      }
+    );
   });
 
   describe('hasWorkflowExecutePrivilege', () => {

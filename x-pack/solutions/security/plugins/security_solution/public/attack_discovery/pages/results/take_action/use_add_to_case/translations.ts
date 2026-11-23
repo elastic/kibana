@@ -14,10 +14,17 @@ export const ADD_TO_CASE_SUCCESS = i18n.translate(
   }
 );
 
-export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.results.takeAction.useAddToCase.addToNewCaseButtonLabel',
+export const ALREADY_ATTACHED_TO_CASE_TITLE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.results.takeAction.useAddToCase.alreadyAttachedToCaseTitle',
   {
-    defaultMessage: 'Add to new case',
+    defaultMessage: 'Already attached to the case',
+  }
+);
+
+export const ALREADY_ATTACHED_TO_CASE_CONTENT = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.results.takeAction.useAddToCase.alreadyAttachedToCaseContent',
+  {
+    defaultMessage: 'Everything that fits in this case is already attached, so nothing was added.',
   }
 );
 

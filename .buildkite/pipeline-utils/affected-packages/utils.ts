@@ -8,7 +8,6 @@
  */
 
 import { Minimatch } from 'minimatch';
-
 const compileMatchers = (patterns: readonly string[]) =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 
@@ -19,7 +18,7 @@ const matchesAny = (file: string, matchers: ReturnType<typeof compileMatchers>):
  * Returns file paths that don't match any of the given glob patterns.
  * When `patterns` is empty, all files are returned unchanged.
  */
-export function filterIgnoredFiles(files: string[], patterns: string[]): string[] {
+export function filterIgnoredFiles(files: string[], patterns: readonly string[]): string[] {
   if (patterns.length === 0) {
     return files;
   }

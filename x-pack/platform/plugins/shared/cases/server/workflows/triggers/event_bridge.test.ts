@@ -14,9 +14,11 @@ import {
   CaseCreatedTriggerId,
   CaseUpdatedTriggerId,
   AttachmentsAddedTriggerId,
+  AttachmentsDeletedTriggerId,
   CommentsAddedTriggerId,
   CaseStatusUpdatedTriggerId,
   ExtendedFieldsUpdatedTriggerId,
+  ObservablesAddedTriggerId,
 } from '../../../common/workflows/triggers';
 import { CasesEventBus } from '../../events/event_bus';
 import { registerCasesWorkflowEventBridge } from './event_bridge';
@@ -52,7 +54,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     );
     eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
-      attachmentIds: ['attachment-1'],
+      ids: ['attachment-1'],
       attachmentType: 'alert',
       owner: 'securitySolution',
     });
@@ -73,6 +75,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     });
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(3, AttachmentsAddedTriggerId, {
       caseId: 'case-1',
+      ids: ['attachment-1'],
       attachmentIds: ['attachment-1'],
       attachmentType: 'alert',
       owner: 'securitySolution',
@@ -114,7 +117,7 @@ describe('registerCasesWorkflowEventBridge', () => {
   it('changes the legacy `user` attachment type to `comment`', async () => {
     eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
-      attachmentIds: ['attachment-1'],
+      ids: ['attachment-1'],
       attachmentType: 'user',
       owner: 'securitySolution',
     });
@@ -123,6 +126,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(1, AttachmentsAddedTriggerId, {
       caseId: 'case-1',
+      ids: ['attachment-1'],
       attachmentIds: ['attachment-1'],
       attachmentType: 'comment',
       owner: 'securitySolution',
@@ -132,7 +136,7 @@ describe('registerCasesWorkflowEventBridge', () => {
   it('emits comment added triggers when comment attachments were emitted', async () => {
     eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
-      attachmentIds: ['attachment-1'],
+      ids: ['attachment-1'],
       attachmentType: 'comment',
       owner: 'securitySolution',
     });
@@ -141,6 +145,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(1, AttachmentsAddedTriggerId, {
       caseId: 'case-1',
+      ids: ['attachment-1'],
       attachmentIds: ['attachment-1'],
       attachmentType: 'comment',
       owner: 'securitySolution',
@@ -149,6 +154,52 @@ describe('registerCasesWorkflowEventBridge', () => {
       caseId: 'case-1',
       commentIds: ['attachment-1'],
       owner: 'securitySolution',
+    });
+  });
+
+  describe('attachmentsDeleted', () => {
+    it('forwards attachments deleted events with alert references', async () => {
+      eventBus.emitAttachmentsDeleted(request, {
+        caseId: 'case-1',
+        ids: ['attachment-1'],
+        attachmentType: 'alert',
+        owner: 'securitySolution',
+        alertIds: ['alert-1'],
+        alertIndices: ['.alerts-security.alerts-default'],
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledTimes(1);
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(AttachmentsDeletedTriggerId, {
+        caseId: 'case-1',
+        ids: ['attachment-1'],
+        attachmentIds: ['attachment-1'],
+        attachmentType: 'alert',
+        owner: 'securitySolution',
+        alertIds: ['alert-1'],
+        alertIndices: ['.alerts-security.alerts-default'],
+      });
+    });
+
+    it('changes the legacy `user` attachment type to `comment` without emitting comment triggers', async () => {
+      eventBus.emitAttachmentsDeleted(request, {
+        caseId: 'case-1',
+        ids: ['attachment-1'],
+        attachmentType: 'user',
+        owner: 'securitySolution',
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledTimes(1);
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(AttachmentsDeletedTriggerId, {
+        caseId: 'case-1',
+        ids: ['attachment-1'],
+        attachmentIds: ['attachment-1'],
+        attachmentType: 'comment',
+        owner: 'securitySolution',
+      });
     });
   });
 
@@ -557,6 +608,67 @@ describe('registerCasesWorkflowEventBridge', () => {
         expect.stringContaining(
           `Failed to emit workflow trigger "${ExtendedFieldsUpdatedTriggerId}"`
         )
+      );
+    });
+  });
+
+  describe('observablesAdded trigger', () => {
+    const observablesPayload = {
+      caseId: 'case-1',
+      owner: 'securitySolution' as const,
+      observableIds: ['obs-1'],
+      observableTypeKeys: ['observable-type-ipv4'],
+    };
+
+    it('forwards observablesAdded events to workflows extensions', async () => {
+      eventBus.emitObservablesAdded(request, observablesPayload);
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(
+        ObservablesAddedTriggerId,
+        observablesPayload
+      );
+    });
+
+    it('forwards multiple observable ids and type keys', async () => {
+      const multiPayload = {
+        ...observablesPayload,
+        observableIds: ['obs-1', 'obs-2'],
+        observableTypeKeys: ['observable-type-file-hash', 'observable-type-ipv4'],
+      };
+
+      eventBus.emitObservablesAdded(request, multiPayload);
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ObservablesAddedTriggerId, multiPayload);
+    });
+
+    it('does not include value or description in the forwarded payload', async () => {
+      eventBus.emitObservablesAdded(request, observablesPayload);
+
+      await flushMicrotasks();
+
+      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[0];
+      expect(payload).not.toHaveProperty('value');
+      expect(payload).not.toHaveProperty('description');
+      expect(payload).not.toHaveProperty('observables');
+    });
+
+    it('logs a warning when forwarding fails', async () => {
+      mockClient = createWorkflowsClientMock({
+        emitEvent: jest.fn().mockRejectedValue(new Error('workflows error')),
+      });
+      workflowsExtensions.getClient.mockResolvedValue(mockClient);
+      registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
+
+      eventBus.emitObservablesAdded(request, observablesPayload);
+
+      await flushMicrotasks();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`Failed to emit workflow trigger "${ObservablesAddedTriggerId}"`)
       );
     });
   });

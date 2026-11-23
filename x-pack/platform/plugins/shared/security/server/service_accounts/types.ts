@@ -1,0 +1,177 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import type {
+  CreateServiceAccountServerParams,
+  ServiceAccount,
+  ServiceAccountSummary,
+  UiamProjectType,
+} from '@kbn/core-security-server';
+
+import type { ServiceAccountWorkloadBindingsApi } from './bindings';
+import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type { ServiceAccountsBackendType } from './metrics';
+import type { ServiceAccountsManagementApi } from './service_accounts_management';
+import type {
+  DeleteServiceAccountResponse,
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
+
+/**
+ * Paging parameters for listing service accounts. `after` is the `next_page` cursor of the
+ * previous page, opaque to the caller and specific to the backend that issued it.
+ */
+export interface ListServiceAccountsParams {
+  limit?: number;
+  after?: string;
+}
+
+/**
+ * A backend capable of managing service accounts for the current runtime.
+ *
+ * Implemented once for UIAM-backed deployments and once for Elasticsearch-backed
+ * ones, so the route and contract layers stay backend-agnostic.
+ */
+export interface ServiceAccountsBackend {
+  /** Which backend this is, for the service account metrics. */
+  readonly type: ServiceAccountsBackendType;
+
+  create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
+
+  /**
+   * Lists the service accounts this Kibana can see, one page at a time.
+   *
+   * Authorizes the Kibana caller first. On UIAM the outbound call is then authenticated as Kibana
+   * over mTLS, not as the user.
+   */
+  list(
+    request: KibanaRequest,
+    params?: ListServiceAccountsParams
+  ): Promise<ListServiceAccountsResponse>;
+
+  /**
+   * Fetches one service account by id, with the same authorization model as {@link list}.
+   */
+  get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry>;
+
+  /**
+   * Reads the name and status of one service account as Kibana, resolving `null` when there is no
+   * such account. Performs no user authorization: it backs
+   * `core.security.serviceAccounts.getWorkloadServiceAccountSummary`, which only names the account
+   * of a workload's verified binding, and whose callers authorize their users against the workload. Unlike {@link get}, `assumable` is taken from the credential Kibana
+   * stored, without asking the identity provider.
+   */
+  getSummary(id: string): Promise<ServiceAccountSummary | null>;
+
+  /**
+   * Deletes one service account, rejecting with a 404 when there is no such account. Requires the
+   * same privilege as {@link create}. Resolves with warnings about anything the delete could not
+   * clean up.
+   *
+   * Leaves the account's workload bindings alone. Checking for them first is the caller's job.
+   */
+  delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse>;
+
+  /**
+   * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`
+   * facilities. The credential is transparently replaced after an Elasticsearch token-expiry
+   * failure, within the configured
+   * `xpack.security.serviceAccounts.requestLifetime`. Already-issued tokens keep their upstream
+   * expiration. Kibana self HTTP calls replace it too: before they are sent, when it would expire
+   * before the call can time out, and after an authentication-stage 401.
+   * Performs no user authorization: callers must authorize their own users first.
+   */
+  createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest>;
+
+  /**
+   * Replaces the credential of a service-account-bound fake request after a 401 was attributed to
+   * an expired token, returning the auth headers to retry with, or `null` when the request is not
+   * bound to a service account or a replacement could not be minted. Only meant to be called by
+   * the two unauthorized-error handlers that own a retry: the Elasticsearch client's, and Core's
+   * HTTP self client's.
+   *
+   * The result is credential-only by design. The Elasticsearch client merges it into the headers
+   * it sends upstream, so nothing that must not reach Elasticsearch — notably the UIAM
+   * internal-caller attestation — belongs here. The self client derives that itself, per attempt,
+   * from whichever credential it is about to send.
+   *
+   * Only requests minted by this backend are ever refreshed. Fake requests carrying external
+   * (user-created) UIAM credentials and real inbound requests that happen to carry a service
+   * account token both resolve to `null`: their credentials are owned by someone else and are not
+   * Kibana's to re-mint.
+   */
+  reauthenticateFakeRequest(request: KibanaRequest): Promise<{ authorization: string } | null>;
+
+  /**
+   * Refreshes the credential of a service-account-bound fake request to try to cover `validForMs`.
+   * A token younger than a fifth of its lifetime is kept, as is a token minted within the last 10
+   * seconds. An older one is replaced when it expires before `validForMs`, or when its lifetime is
+   * unknown. Only meant to be called by Core's HTTP self client refresher, before a self call hands
+   * the credential to a route handler that cannot refresh it. Same credential-only result and
+   * ownership rules as {@link reauthenticateFakeRequest}. Has three outcomes:
+   *
+   * - The auth headers to send, when the current credential is reused or was replaced. This does
+   *   not guarantee that the credential lasts for the whole call.
+   * - `null` when the request is not this backend's, its `authorization` header no longer carries
+   *   the token issued for it, or a replacement failed for now (a backoff, an upstream 5xx).
+   * - A {@link ServiceAccountCredentialRefusedError} when a replacement is needed and the request
+   *   will never get one: its binding is gone or was replaced, its account was revoked, its lease
+   *   expired, or it was released while the replacement was minted.
+   *
+   * A refusal is only noticed when a replacement is needed. While the current credential covers the
+   * call nothing re-checks the binding, so a workload keeps running for up to one token lifetime
+   * after it was unbound. A credential of unknown lifetime is replaced, and so re-checked, on any
+   * self call made more than 10 seconds after it was minted.
+   */
+  refreshFakeRequestBeforeUse(
+    request: KibanaRequest,
+    validForMs: number
+  ): Promise<{ authorization: string } | null>;
+
+  /**
+   * Drops a fake request from the refresh registry: transparent credential replacement is
+   * permanently disabled and its authorization header is removed. Copies of the issued token
+   * remain valid until upstream expiry; release does not remotely invalidate them. Idempotent,
+   * and a no-op for requests this backend did not mint.
+   */
+  releaseFakeRequest(request: KibanaRequest): void;
+
+  /**
+   * Describes the service account a fake request minted by this backend is bound to, as an
+   * {@link AuthenticatedPrincipal}, without contacting Elasticsearch. `null` for every other
+   * request: real requests (classified from their authenticated user instead), fake requests this
+   * backend did not mint, and released ones.
+   */
+  getFakeRequestPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null;
+}
+
+/**
+ * Start contract of the service accounts service. `null` when the feature is
+ * disabled.
+ */
+export interface ServiceAccountsServiceStart {
+  /** Service account management and credential minting for this deployment's backend. */
+  backend: ServiceAccountsBackend;
+
+  /** Operations that span an account and its workload bindings, for the management routes. */
+  management: ServiceAccountsManagementApi;
+
+  /**
+   * Workload binding management and execution. Consumed exclusively by the Core security
+   * delegate, which scopes every call to the plugin Core identified as the caller.
+   */
+  workloads: ServiceAccountWorkloadBindingsApi;
+}
+
+export interface CloudProjectContext {
+  organizationId: string;
+  projectId: string;
+  projectType: UiamProjectType;
+}

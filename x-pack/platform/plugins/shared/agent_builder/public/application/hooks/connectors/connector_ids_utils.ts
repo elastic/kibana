@@ -11,22 +11,18 @@ interface AgentWithConnectorIds {
 
 /**
  * Returns true if the given connector is accessible to the agent.
- *
- * connector_ids === undefined/null is the legacy "all connectors" default: agents created before
- * explicit connector assignment had unrestricted access. An explicit empty array means no connectors.
+ * undefined/null means no connectors are assigned; access requires an explicit list that includes
+ * the connector ID.
  */
 export const agentHasConnector = (agent: AgentWithConnectorIds, connectorId: string): boolean => {
   const { connector_ids: connectorIds } = agent.configuration ?? {};
-  return connectorIds == null || connectorIds.includes(connectorId);
+  return connectorIds != null && connectorIds.includes(connectorId);
 };
 
 /**
- * Returns the effective connector IDs for an agent, expanding undefined/null to the full list.
+ * Returns the effective connector IDs for an agent. undefined/null means no connectors assigned.
  */
-export const getEffectiveConnectorIds = (
-  agent: AgentWithConnectorIds,
-  allConnectorIds: string[]
-): string[] => {
+export const getEffectiveConnectorIds = (agent: AgentWithConnectorIds): string[] => {
   const { connector_ids: connectorIds } = agent.configuration ?? {};
-  return connectorIds ?? allConnectorIds;
+  return connectorIds ?? [];
 };

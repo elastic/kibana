@@ -169,6 +169,15 @@ describe('Stack Alerts Feature Privileges', () => {
       ]
     `);
   });
+
+  test('both privileges include the API access needed by the rule details page', () => {
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.all.api).toEqual(
+      expect.arrayContaining(['rac', 'bulkGetUserProfiles'])
+    );
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.read.api).toEqual(
+      expect.arrayContaining(['rac', 'bulkGetUserProfiles'])
+    );
+  });
 });
 
 describe('Stack Alerts Only Feature Privileges', () => {

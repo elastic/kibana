@@ -6,6 +6,7 @@ This file defines the format of summaries and structured outputs that the agent 
 
 ## Contents
 
+- [Verbosity levels](#verbosity-levels)
 - [Scenario format](#scenario-format)
 - [Gherkin self-review](#gherkin-self-review--run-before-saving-any-draft)
 - [Issue Clarity Assessment section](#issue-clarity-assessment-section)
@@ -15,9 +16,57 @@ This file defines the format of summaries and structured outputs that the agent 
 
 ---
 
+## Verbosity levels
+
+Three levels, orthogonal to section selection: `lean`, `standard` (default), `detailed`. The level controls **prose density and per-scenario metadata rendering only** — it never affects which sections exist, which scenarios are written, or which ⚠️ entries are flagged.
+
+### Non-negotiable constraint
+
+Verbosity must never change:
+- The number of scenarios, their priorities, or their tags.
+- Which testing types are covered per feature area (see [`optional-scenarios.md`](optional-scenarios.md) coverage guidance).
+- The always-evaluated coverage decisions (upgrade / CRUD per persisted object / dependency data lifecycle — see [`optional-scenarios.md#always-evaluated-coverage`](optional-scenarios.md#always-evaluated-coverage)).
+- The presence of any ⚠️ entry in *Known Limitations*.
+- The one-clause reason on every *Out of scope* bullet.
+
+If a lower verbosity level would require dropping a ⚠️ flag or a reason clause, the flag/clause wins and the text stays.
+
+### Invocation grammar and keyword detection
+
+This table only defines the **keyword** captured from the user's invocation. Same matching applies to `generate`, `create`, `write`, `update`, and `regenerate`:
+
+| Invocation matches (case-insensitive) | `INVOCATION_VERBOSITY_KEYWORD` |
+|---|---|
+| `<verb> a lean test plan …` / `<verb> lean test plan …` | `lean` |
+| `<verb> a standard test plan …` / `<verb> standard test plan …` | `standard` |
+| `<verb> a detailed test plan …` / `<verb> detailed test plan …` | `detailed` |
+| Anything else (no level keyword at all) | *unset* |
+
+How `VERBOSITY_LEVEL` is resolved from the keyword is defined once per flow, not here: fresh drafts in [`../SKILL.md` § Modes of operation](../SKILL.md#modes-of-operation), updates in [`mode-update.md`](mode-update.md) Step 1 (`scripts/resolve_verbosity.sh`). Publish does not use the level.
+
+### What each level renders
+
+| Section | `lean` | `standard` (default) | `detailed` |
+|---|---|---|---|
+| `Overview` | One sentence covering the feature name + validation scope. | Full paragraph per the [`document-structure.md`](document-structure.md) template. | Same as `standard`. |
+| `Feature Background` | One sentence stating the problem this feature solves. | 2–4 sentences per template. | Same as `standard`. |
+| `Assumptions` | **Only bullets whose value was confirmed from a concrete source in Step 1** (issue body, PR description, Figma, sub-issue). Rendered as a single-line, `; `-separated inline form: `<value 1>; <value 2>.` If no bullet was confirmed, keep the `## Assumptions` heading and emit a one-liner `See _Known Limitations_ for open assumptions.` Do not repeat any ⚠️ from *Known Limitations* here. | Four labelled bullets per template; each unconfirmed bullet is flagged with ⚠️ inline and mirrored in *Known Limitations*. | Same as `standard`, plus a provenance suffix on each confirmed value: `Enterprise (#1234 body)`, `at least one active alert (Figma flow "Alert list")`. |
+| Scenario `**Automation coverage**:` line | Single tag: `🤖 automated (N tests)` when at least one matching test exists in the coverage catalog, or `🧪 manual only` when no matching test exists. `N` is the total count of matching tests across all types. Never list individual test names or file paths under `lean`. | Full itemised list per the *Automation coverage rules* under *Scenario format* below. | Same as `standard`. |
+| Scenario `**Source:**` line (new) | Omitted. | Omitted. | A line placed **immediately after `**Priority:**`** and **before `**Automation coverage**:`**, citing the specific sources the scenario derives from. Four allowed categories: consolidated AC (`AC1 (#1234)`), PR artifact (`PR #5678 (endpoint POST /rules)`), Always-evaluated coverage (`Always-evaluated coverage (upgrade — new SO type)`), and Code-derived (`Code-derived (new endpoint … in <path>)`). Never invent an AC number or fabricate any source; if the scenario has no traceable input in any of the four categories, apply the Core rule and stop. Multiple sources are `; `-separated on the same line. Full rules under [Scenario format § Source line rules](#scenario-format). |
+
+### Draft-save marker
+
+At draft-save time (see [`SKILL.md` § Step 3 saving-the-draft](../SKILL.md#saving-the-draft) sub-step 7 or [`mode-update.md`](mode-update.md) Step 6), always put `<!-- verbosity: <level> -->` at the top of the draft file. This marker is **always emitted regardless of level**. Published plans without it are handled in [`mode-update.md`](mode-update.md) Step 1.
+
+### AC/⚠️ safeguard
+
+`Known Limitations` ⚠️ entries for unspecified `Assumptions` values are **non-negotiable and identical across levels**. Under `lean`, they exist only in *Known Limitations* (the compact inline form shows only confirmed values). Under `standard`/`detailed`, they exist in both places. Never drop a ⚠️ from *Known Limitations* to comply with a level.
+
+---
+
 ## Scenario format
 
-Every scenario in the test plan must follow this structure exactly:
+Every scenario in the test plan must follow this structure exactly. The structure below shows the `standard`-level baseline; per-level modifications live in [Verbosity levels](#verbosity-levels) above.
 
 ````markdown
 #### Scenario: <title>
@@ -40,13 +89,33 @@ Then ...
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 ````
 
-**Automation coverage rules:**
+**Automation coverage rules (`standard` / `detailed` levels):**
 - Cross-reference the test coverage catalog built in Step 1. Find all tests whose describe blocks or test names match the behaviour described in the scenario.
 - List every matching test individually with its type and file path. Example: `2 unit tests (alerts.test.ts — "should render alert row", "should filter by status"), 1 e2e test (alerts.cy.ts — "displays alert in table")`.
 - If tests of multiple types cover the scenario, list each type separately.
 - If no tests cover the scenario, write: `No existing tests found covering this scenario.`
 - Never aggregate counts without naming the specific tests — the goal is full traceability, not a summary number.
 - The count in the summary (e.g. `2 unit tests`) must equal the number of test names listed. Count the names you write before finalising the number.
+
+**Automation coverage rules (`lean` level):**
+- Emit a single tag on the `**Automation coverage**:` line: `🤖 automated (N tests)` when at least one matching test exists in the coverage catalog, or `🧪 manual only` when no matching test exists.
+- `N` is the total count of matching tests across all types — same denominator as the itemised list would have produced.
+- Never emit test names, file paths, or per-type breakdowns under `lean`. The tag is intentionally opaque; the `Automated` / `Manual only` columns of the *Test Coverage Summary* remain the itemised source of truth regardless of level (they are populated identically across levels).
+- The Test Coverage Summary counts (populated per [`document-structure.md#test-coverage-summary--filling-in-the-table`](document-structure.md#test-coverage-summary--filling-in-the-table)) are not affected by `lean` — the summary is not a rendering of per-scenario lines, it is derived directly from the catalog.
+
+**Source line rules (`detailed` level only):**
+- Emit a `**Source:**` line **immediately after `**Priority:**`** and **before `**Automation coverage**:`**.
+- Cite the specific inputs the scenario derives from. Multiple sources are `; `-separated on the same line. Allowed source categories:
+
+  | Category | Format | When to use |
+  |---|---|---|
+  | Consolidated AC | `AC<n> (#<issue>)` — e.g. `AC1 (#1234)` | Scenario maps to a numbered item in the consolidated AC list built in Step 2. Never invent an AC number: if the scenario has no matching AC row, fall through to one of the other categories below rather than fabricate one. |
+  | PR artifact | `PR #<n> (<artifact type> <name>)` — e.g. `PR #5678 (endpoint POST /rules)`, `PR #5678 (component RuleForm)`, `PR #5678 (saved object type alert-notes)` | Scenario covers a PR artifact from the inventory built in Step 1 (new API route, service method, UI component, saved object type, feature flag, schema, etc.). |
+  | Always-evaluated coverage | `Always-evaluated coverage (<trigger> — <one-clause justification>)` — e.g. `Always-evaluated coverage (upgrade — new SO type alert-notes)`, `Always-evaluated coverage (CRUD — persisted rule object)`, `Always-evaluated coverage (dependency data lifecycle — referenced index deletion)` | Scenario was required by the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) rule (upgrade / CRUD per persisted object / dependency data lifecycle) rather than by any explicit AC or PR artifact. The justification must name the trigger so a reader can trace it back to the rule. |
+  | Code-derived | `Code-derived (<what was found> in <path>)` — e.g. `Code-derived (new endpoint POST /rules in escalation_service.ts)` | Scenario covers a fact discovered only in code (a route registered outside the PR description, a schema change surfaced in a `.gen.ts` file consumers rely on, etc.). Used sparingly; if the same fact is also cited in a PR body, prefer the PR-artifact category. |
+
+- Never invent a source. If a scenario has no traceable AC, PR artifact, always-evaluated trigger, or code-derived fact, apply the Core rule and stop — do not fabricate a `**Source:**` value. This is a hard failure of `detailed` traceability, not a soft downgrade to `standard`.
+- The `Source` line derives from the corpus already gathered in Step 1 and consolidated in Step 2 (and, for Always-evaluated coverage, the trigger rule in `optional-scenarios.md`). Writing it never triggers new fetches; when an update moves to `detailed`, [`mode-update.md`](mode-update.md) Step 3 re-reads the sources before the draft is written.
 
 **Execution block rules:**
 - Render exactly the three task-list items shown above, in that order, with the leading emoji on each line. The italic instruction line is part of the canonical block — do not reword or omit it.
@@ -73,6 +142,8 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
 - [ ] Is independent — does not rely on state left by a previous scenario
 - [ ] Is not redundant — covers something not already covered by another scenario in this plan or in a sub-issue test plan
 - [ ] **Execution block** is present at the end of the scenario, after the Gherkin block, in the canonical shape defined under *Scenario format*: three checkboxes (`✅ Pass` / `❌ Fail` / `🚫 Blocked`) plus the italic instruction line. All three boxes are unchecked. No `_Scenario updated on..._` callout is present in fresh `generate` mode
+- [ ] **Automation coverage line matches `VERBOSITY_LEVEL`.** Under `lean`: single tag `🤖 automated (N tests)` or `🧪 manual only`. Under `standard`/`detailed`: itemised list per *Automation coverage rules*.
+- [ ] **`**Source:**` line — `detailed` only.** Present between `**Priority:**` and `**Automation coverage**:`; cites verifiable sources from the four allowed categories in *Source line rules* (consolidated AC, PR artifact, always-evaluated coverage trigger, or code-derived fact); never fabricated. Absent under `lean` and `standard`.
 
 **Per-section checks (after writing all scenarios in a section):**
 - [ ] Scenarios are coherent as a set — they collectively cover the acceptance criteria for this area
@@ -100,6 +171,9 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
   - **Issue Coverage Ratio** denominator equals **Total Scenarios** from the Test Coverage Summary above — they must match.
   - **Actionable feedback** bullets present iff at least one issue scored ≤ 3 or Coverage Ratio &lt; 60%; otherwise the block is omitted.
 - [ ] Footer is present at the end of the file with the correct model identifier and today's date
+- [ ] **Verbosity invariants hold across levels.** Same scenario count, same priorities, same set of ⚠️ entries in *Known Limitations*, same *Out of scope* reasons, same always-evaluated coverage decisions as would be produced at any other level. Verbosity is prose-density-only. See [Verbosity levels § Non-negotiable constraint](#non-negotiable-constraint).
+- [ ] **Level-appropriate prose sections.** `Overview` and `Feature Background` render at the length prescribed for `VERBOSITY_LEVEL`. `Assumptions` under `lean` uses the compact inline form (or the *See Known Limitations* one-liner when no bullet was confirmed); under `detailed` every confirmed value carries a provenance suffix.
+- [ ] **Verbosity marker present.** `<!-- verbosity: <level> -->` is the first line of the draft. Do not add `<!-- tokens: … -->` or `<!-- cost: … -->` yet; they are added after the draft is saved.
 
 If any item fails, fix the scenario before saving. If fixing requires information that is not available, apply the Core rule: stop and ask the user.
 
@@ -163,52 +237,59 @@ Every test plan draft must end with this footer. Replace `[model-identifier — 
 
 ## Token usage marker
 
-Records the token count of the run that produced the current test plan comment. Two artifacts, one source of truth:
+Records the token count and the estimated cost of the agent session that produced the current test plan comment. Each one has two artifacts, one source of truth:
 
 - A machine-readable HTML comment marker in the published GitHub comment.
 - A human-readable line rendered in the chat after the Sources Summary.
 
-Both are produced from `x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py`. If the script exits non-zero — non-Claude-Code harness, missing transcript, or transcript without `usage` blocks — both artifacts fall back to their "not available" form.
+All four come from a single call to `x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py --with-cost`, so tokens and cost always describe the same moment. When the output has no `input=` line — non-Claude-Code harness, missing transcript, or transcript without `usage` blocks — both values fall back to their "not available" form. When only the `usd=` line is missing — a model with no price in the price list, an invalid local copy of it, a cost that rounds to `0.0000`, or usage with no model id worth more than 1% of the session cost — only the cost falls back; the script's stderr says which. Usage with no model id is priced at the highest prices of the session's models and left out of the cost when that is at most 1% of it.
+
+**What is measured.** The script reads the Claude Code session transcript and counts each API response once. It runs right after the draft is saved, so the totals cover the session **until the draft was saved**, including writing it. If the same chat did other work before invoking the skill, or ran the skill more than once, all of it is included; a fresh chat gives a figure for this run alone. What comes after is not included: the response that runs the script (Claude Code writes it to the transcript only after the command returns), the edit that adds the markers, and the closing chat messages — in measured runs, about a tenth of the session cost. Every `generate` or `update` replaces both markers with the current session's values; they are never added to the values of earlier runs.
 
 ### Comment marker format
 
-Prepended as the **first line** of the draft file at draft-save time, *before* `<!-- test-plan-generated -->` and `<!-- generated-by: … -->`. Step 4 (publish) does not invoke the script or modify this marker — its presence is set at draft-save time, and its absence is a legitimate signal that the generation ran on a harness without a session transcript.
+Once the draft is saved and the markers are added, the top markers are `verbosity`, then `tokens`, then `cost`. At publish time, `scripts/publish_test_plan.sh` adds the two publish markers above them (see *Final marker order* below). Step 4 does not invoke the token script or change these markers' values — their presence is set at draft-save time, and their absence is a legitimate signal that the generation ran on a harness without a session transcript.
 
 ```
 <!-- tokens: input=X output=Y cache_create=W cache_read=Z total=T -->
+<!-- cost: usd=N.NNNN pricing=YYYY-MM-DD -->
 ```
 
-- Field order matches the script output (`input`, `output`, `cache_create`, `cache_read`, `total`).
-- Values are non-negative integers (raw token counts, no thousand separators).
-- **Absence is meaningful** — if the marker is missing from a published comment, the generation run had no measurable token usage available.
-- **Refreshed on each publish.** Always reflects the current run; no historical delta.
+- Tokens field order matches the script output (`input`, `output`, `cache_create`, `cache_read`, `total`). Values are non-negative integers (raw token counts, no thousand separators).
+- `usd` is the estimated cost in US dollars with four decimals; `pricing` is the date of the prices used.
+- **The cost is an estimate at API list price**, not what anyone was billed (subscriptions and discounts are ignored). The script downloads the Anthropic prices from [gh-aw's `models.json`](https://github.com/github/gh-aw/blob/main/actions/setup/js/models.json) on every run, so a price fixed there applies from the next run and `pricing` is that day. Without network access, or if the file is invalid, it uses the copy in `.agents/scripts/model_prices.json`, and `pricing` is the date that copy was taken. The formula follows gh-aw's `computeInferenceCostUSD`; 1-hour cache writes are billed at twice the input price, as Anthropic does.
+- **Absence is meaningful** — if a marker is missing from a published comment, that value was not measurable for the generation run. A cost marker needs the tokens marker: `scripts/publish_test_plan.sh` refuses a draft that has only the cost marker.
 
 Final marker order in the published comment after Step 4 publish:
 ```
 <!-- test-plan-generated -->
 <!-- generated-by: <model-identifier> -->
+<!-- verbosity: <lean | standard | detailed> -->
 <!-- tokens: input=… output=… cache_create=… cache_read=… total=… -->
+<!-- cost: usd=… pricing=… -->
 ```
 
-Step 4 prepends `<!-- test-plan-generated -->` and `<!-- generated-by: … -->` above the tokens marker — preserve the marker unmodified.
+`scripts/publish_test_plan.sh` writes this block from the draft's markers and its `--model` flag; nobody edits the order by hand. The verbosity marker is always present (see [Verbosity levels § Draft-save marker](#verbosity-levels)); the tokens and cost markers may be absent (see *Absence is meaningful* above).
 
 ### Chat line format
 
-Rendered right after the Sources Summary and Issue Clarity Assessment blocks in [`SKILL.md` Step 3 sub-step 8](../SKILL.md#saving-the-draft) for generate mode, and [`mode-update.md` Step 8](mode-update.md) for update mode.
+Rendered right after the Sources Summary and Issue Clarity Assessment blocks in [`SKILL.md` Step 3 sub-step 8](../SKILL.md#saving-the-draft) for generate mode, and [`mode-update.md` Step 8](mode-update.md) for update mode. The token line comes first, then the cost line.
 
 **On script success:**
 ```
 **Token usage:** input=X, output=Y, cache_create=W, cache_read=Z, **total=T**
+**Estimated cost:** $0.98 (list price as of 2026-10-21)
 ```
 
-Note: commas between fields, bold on the `**Token usage:**` label and on the `**total=T**` tail. Field order matches the marker.
+Note: commas between token fields, bold on the `**Token usage:**` label and on the `**total=T**` tail. Field order matches the marker. The cost is the marker's `usd` rounded to two decimals, or `< $0.01` when `usd` is below 0.005, and the date is its `pricing` value.
 
 **On script failure (fallback):**
 ```
 **Token usage:** not available for this session
+**Estimated cost:** not available for this session
 ```
 
-Never emit `total=0` — this string is the only valid fallback.
+Each line falls back on its own: the token line can succeed while the cost line falls back. Never emit `total=0` or `$0.00` — these strings are the only valid fallbacks.
 
 ---
 
@@ -227,7 +308,7 @@ The goal is to give the user full traceability of what the agent read, what it u
 | Issue #<number> — <title> | ✅ Read |
 | Parent issue #<number> — <title> | ✅ Read / ⛔ No parent |
 | Sub-issue #<number> — <title> | ✅ Read |
-| PR #<number> — <title> | ✅ Read / ✅ Re-read (activity since plan published) / ➖ Skipped (no activity since plan published) / ⚠️ Partially read (N files skipped — too large) / ⛔ Not found |
+| PR #<number> — <title> | ✅ Read / ✅ Re-read (activity since plan published) / ✅ Re-read (level change to <VERBOSITY_LEVEL>) / ➖ Skipped (no activity since plan published) / ⚠️ Partially read (N files skipped — too large) / ⛔ Not found |
 | Figma — <file or node name> | ✅ Metadata read (N fetchable elements catalogued) / ✅ Metadata read + K opened PNGs for visual verification / ✅ Metadata read + K opened PNGs for visual verification (cap raised from 8 by user) / ✅ Metadata read (M of N children catalogued — narrowed by user selection) / ✅ Design context read (Figma Make — code-only; no screenshot support) / ✅ K opened PNGs (Slides — <node name>) / ✅ K opened PNGs (Slides — <node name>) (cap raised from 8 by user) / ✅ FigJam read / ⚠️ Screenshot budget reached (K PNGs opened — remaining scenarios verified from metadata only) / ⚠️ Screenshot budget reached (Slides link catalogued without screenshot; no Figma-derived context) / ⚠️ get_metadata budget reached (3 fetched — remaining Figma links not inspected; scenarios derived from non-Figma sources) / ⚠️ get_design_context budget reached (2 fetched — remaining escape-hatch calls skipped; affected scenarios fall back to metadata and any screenshot already gathered) / ⚠️ get_design_context budget reached (2 fetched — remaining Make links catalogued without design context) / ⚠️ Read with errors / ⚠️ Node not found in file / ⛔ Inaccessible |
 | Image — <url or description> | ✅ Analyzed / ⛔ Could not fetch |
 | Google Doc — <title or url> | ✅ Read / ⛔ MCP not available |
@@ -260,4 +341,4 @@ The goal is to give the user full traceability of what the agent read, what it u
     - Figma Make miss (no metadata, no screenshot, no design-context — nothing was fetched for the link): `⚠️ get_design_context budget reached (2 fetched — remaining Make links catalogued without design context)`. Add a KL entry naming the un-inspected Make links and any scenarios that depended on them.
   - **Cap raised via the Step 5 overage path (approved by user).** Only `get_screenshot` has a per-link raised-cap indicator because opened PNGs is countable per link — use `✅ Metadata read + K opened PNGs for visual verification (cap raised from 8 by user)` (or the Slides equivalent `✅ K opened PNGs (Slides — <node name>) (cap raised from 8 by user)`) on the link(s) that consumed the raised budget. For `get_metadata` and `get_design_context` raised caps, the per-link rows keep their standard `✅` status — the increased overall count is implicit in the number of `✅ Metadata read` or `✅ Design context read` rows. Approved-overage rows must **not** have a paired Known Limitations entry: approved overage is complete coverage.
   - Root node missing (deleted, restructured): `⚠️ Node not found in file`. Also flag in Known Limitations.
-- In **update mode**, PRs are checked for activity since the plan was published. Use `✅ Re-read (activity since plan published)` for PRs that were re-read because new commits or review activity was detected. Use `➖ Skipped (no activity since plan published)` for PRs that had no activity and were not re-read. If the user ran `update including PRs`, all PRs will show `✅ Re-read` regardless of activity.
+- In **update mode**, PRs are checked for activity since the plan was published. Use `✅ Re-read (activity since plan published)` for PRs that were re-read because new commits or review activity was detected. Use `➖ Skipped (no activity since plan published)` for PRs that had no activity and were not re-read. If the user ran `update including PRs`, all PRs will show `✅ Re-read` regardless of activity. When the new verbosity level forces a re-read of all PRs (see [`mode-update.md`](mode-update.md) Step 3), use `✅ Re-read (level change to <VERBOSITY_LEVEL>)` for the PRs that had no activity since the plan was published.

@@ -177,7 +177,17 @@ triggers:
 steps:
   - name: run_attack_discovery
     type: security.attack-discovery.run
-    timeout: '10m'
+    # 35m = the 30m pipeline budget + 5m. In sync mode this step awaits the
+    # pipeline, which enforces its own 30m budget internally
+    # (DEFAULT_PIPELINE_TIMEOUT_MS / getRemainingBudgetMs in kbn-discoveries
+    # run_manual_orchestration: ADR-008's gate 10m + generation 10m +
+    # validation 5m, shared across phases on one wall clock). This timeout must
+    # stay ABOVE it so the pipeline's own budget wins the race and fails with an
+    # attributed PipelineStepError, rather than the engine killing the step with
+    # an opaque TimeoutError while generation keeps running in the background.
+    # Must stay a literal: the engine hands `timeout` to the duration parser
+    # unrendered (elastic/kibana#290258).
+    timeout: '35m'
     with:
       # `alerts` is the primary composability point — when non-empty,
       # alert_retrieval_mode is automatically set to "provided".

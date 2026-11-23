@@ -30,6 +30,7 @@ describe('unsnooze alert instance', () => {
     auditLogger: auditLoggerMock,
     ruleTypeRegistry: ruleTypeRegistryMock,
     getUserName: async () => 'elastic',
+    getProfileUid: async () => null,
   } as unknown as RulesClientContext;
 
   it('removes only the targeted per-alert snooze entry', async () => {
@@ -78,6 +79,7 @@ describe('unsnooze alert instance', () => {
           },
         ],
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: expect.any(String),
       },
       { version: 'v1' }

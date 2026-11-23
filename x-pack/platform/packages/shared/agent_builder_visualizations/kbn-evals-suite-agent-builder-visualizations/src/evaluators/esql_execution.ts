@@ -6,9 +6,9 @@
  */
 
 import { validateQuery } from '@kbn/esql-language';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { Evaluator, EvaluationResult, Example, TaskOutput } from '@kbn/evals';
-import { substituteEsqlBindParams } from './esql_bind_params';
+import type { EsqlQueryRunner } from './esql_query_runner';
 
 export const ESQL_EXECUTION_EVALUATOR_NAME = 'ES|QL Execution Validity';
 
@@ -49,7 +49,7 @@ function extractErrorMessages(errors: ReadonlyArray<unknown>): string[] {
 
 async function evaluateSingleQuery(
   query: string,
-  esClient: ElasticsearchClient,
+  runQuery: EsqlQueryRunner,
   logger?: Logger
 ): Promise<QueryExecutionDetail> {
   const detail: QueryExecutionDetail = {
@@ -64,13 +64,9 @@ async function evaluateSingleQuery(
     return detail;
   }
 
-  // Validate the original query (bind placeholders are syntactically valid);
-  // substitute only for ES execution, which rejects `?_tstart` / `?_tend`.
-  const executableQuery = substituteEsqlBindParams(query);
-  const [astResult, execResult] = await Promise.allSettled([
-    validateQuery(query),
-    esClient.esql.query({ query: executableQuery }),
-  ]);
+  // Validate the original query (bind placeholders are syntactically valid); the
+  // runner substitutes them for ES execution, which rejects `?_tstart` / `?_tend`.
+  const [astResult, execResult] = await Promise.allSettled([validateQuery(query), runQuery(query)]);
 
   if (astResult.status === 'fulfilled') {
     const { errors } = astResult.value;
@@ -101,7 +97,7 @@ async function evaluateSingleQuery(
 
 /**
  * Two- or three-tier CODE evaluator: AST parse → ES execution → optional hit detection.
- * Score is the unweighted mean of included tiers. Requires a live ES cluster.
+ * Score is the unweighted mean of included tiers. Requires a live ES cluster via `runQuery`.
  * `scoreOnEmptyQueries` defaults to `0` (no query = failed generation).
  * `includeHitDetection` can be a per-example function keyed on dataset metadata.
  */
@@ -109,7 +105,8 @@ export function createEsqlExecutionEvaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput
 >(config: {
-  esClient: ElasticsearchClient;
+  /** Executes ES|QL; share one runner across evaluators so each query runs once. */
+  runQuery: EsqlQueryRunner;
   queryExtractor: (output: TTaskOutput) => string[];
   includeHitDetection?: IncludeHitDetection<TExample, TTaskOutput>;
   logger?: Logger;
@@ -117,7 +114,7 @@ export function createEsqlExecutionEvaluator<
   scoreOnEmptyQueries?: number;
 }): Evaluator<TExample, TTaskOutput> {
   const {
-    esClient,
+    runQuery,
     queryExtractor,
     includeHitDetection = false,
     logger,
@@ -156,7 +153,7 @@ export function createEsqlExecutionEvaluator<
           : includeHitDetection;
 
       const details = await Promise.all(
-        queries.map((query) => evaluateSingleQuery(query, esClient, logger))
+        queries.map((query) => evaluateSingleQuery(query, runQuery, logger))
       );
 
       const astValidCount = details.filter((d) => d.astValid).length;

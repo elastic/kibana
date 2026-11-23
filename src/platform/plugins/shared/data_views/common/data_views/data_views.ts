@@ -278,10 +278,6 @@ export interface DataViewsServicePublicMethods {
    */
   getTitles: (refresh?: boolean) => Promise<string[]>;
   /**
-   * Returns true if user has access to view a data view.
-   */
-  hasUserDataView: () => Promise<boolean>;
-  /**
    * Refresh fields for data view instance
    * @params dataView - Data view instance
    */
@@ -588,13 +584,6 @@ export class DataViewsService {
       await this.config.set(DEFAULT_DATA_VIEW_ID, id);
     }
   };
-
-  /**
-   * Checks if current user has a user created index pattern ignoring fleet's server default index patterns.
-   */
-  async hasUserDataView(): Promise<boolean> {
-    return this.apiClient.hasUserDataView();
-  }
 
   getMetaFields = async () => await this.config.get<string[]>(META_FIELDS);
 
@@ -1442,7 +1431,7 @@ export class DataViewsService {
       defaultId = null;
     }
 
-    if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
+    if (!defaultId && patterns.length >= 1) {
       defaultId = patterns[0].id;
       if (await this.getCanSaveAdvancedSettings()) {
         await this.config.set(DEFAULT_DATA_VIEW_ID, defaultId);

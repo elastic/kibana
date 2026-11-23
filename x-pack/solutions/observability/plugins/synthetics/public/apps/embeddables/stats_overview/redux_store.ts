@@ -9,8 +9,9 @@ import { configureStore } from 'redux-toolkit-v1';
 import createSagaMiddleware from 'redux-saga';
 import { rootReducer } from '../../synthetics/state/root_reducer';
 import { rootEffect } from '../../synthetics/state/root_effect';
+import type { RequestCancellationManager } from '../../synthetics/state/request_cancellation_manager';
 
-export const getStatsOverviewStore = () => {
+export const getStatsOverviewStore = (requestCancellationManager: RequestCancellationManager) => {
   const sagaMW = createSagaMiddleware();
 
   const store = configureStore({
@@ -20,7 +21,7 @@ export const getStatsOverviewStore = () => {
     preloadedState: {},
     enhancers: [],
   });
-  sagaMW.run(rootEffect);
+  sagaMW.run(rootEffect, requestCancellationManager);
 
   return store;
 };

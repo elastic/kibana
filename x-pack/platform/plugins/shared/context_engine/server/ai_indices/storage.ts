@@ -13,16 +13,26 @@ import type {
   AiIndexDest,
   AiIndexFeedbackAnalysis,
   AiIndexSource,
+  AiIndexTrace,
 } from '../../common/http_api/ai_indices';
+import type { AiIndexDreamingConfig, DreamingEntities } from '../../common/dreaming';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
+
+// Only for managed entries: ids are registered in code so they are bounded, and a colon is
+// safe because neither a space id nor an AI index id may contain one.
+export const buildManagedAiIndexDocId = (spaceId: string, aiIndexId: string): string =>
+  `${spaceId}:${aiIndexId}`;
 
 const storageSettings = {
   name: aiIndicesIndexName,
   schema: {
     properties: {
+      id: types.keyword({}),
+      space: types.keyword({}),
       description: types.text({}),
       managed: types.boolean({}),
+      memory_enabled: types.boolean({}),
       date_created: types.date({}),
       date_modified: types.date({}),
       dest: types.object({
@@ -34,6 +44,7 @@ const storageSettings = {
       sources: types.object({
         properties: { type: types.keyword({}), value: types.keyword({}) },
       }),
+      traces: types.object({ properties: { type: types.keyword({}), value: types.keyword({}) } }),
       feedback_analysis: types.object({
         properties: {
           enabled: types.boolean({}),
@@ -51,13 +62,16 @@ const storageSettings = {
           allowed_actions: types.keyword({}),
         },
       }),
+      dreaming: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;
 
-export interface AiIndexDocument {
+interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
+  dreaming?: AiIndexDreamingConfig;
+  memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
   managed?: boolean;
@@ -66,11 +80,42 @@ export interface AiIndexDocument {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  // Optional for documents written before traces existed; absence is `[]` on read.
+  traces?: AiIndexTrace[];
+}
+
+/** A dreaming config as stored; its entities may hold relationship `edges`, dropped on read. */
+export type StoredDreamingConfig = Omit<AiIndexDreamingConfig, 'entities'> & {
+  entities?:
+    | (DreamingEntities & {
+        edges?: Array<{
+          type: string;
+          source: string;
+          target: string;
+          description?: string;
+        }> | null;
+      })
+    | null;
+};
+
+/** What the index may hold: pre-upgrade documents predate `id` and `space`. */
+export interface StoredAiIndexDocument extends Omit<AiIndexDocumentFields, 'dreaming'> {
+  dreaming?: StoredDreamingConfig;
+  // The logical id was the ES `_id` before ids became a field.
+  id?: string;
+  // The space was implicitly default before space support existed.
+  space?: string;
+}
+
+/** A document with its identity resolved, which is all the service works with. */
+export interface AiIndexDocument extends AiIndexDocumentFields {
+  id: string;
+  space: string;
 }
 
 export type AiIndexStorageSettings = typeof storageSettings;
 
-export type AiIndexStorageClient = IStorageClient<AiIndexStorageSettings, AiIndexDocument>;
+export type AiIndexStorageClient = IStorageClient<AiIndexStorageSettings, StoredAiIndexDocument>;
 
 export const createAiIndexStorageClient = ({
   esClient,
@@ -79,7 +124,7 @@ export const createAiIndexStorageClient = ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): AiIndexStorageClient => {
-  const adapter = new StorageIndexAdapter<AiIndexStorageSettings, AiIndexDocument>(
+  const adapter = new StorageIndexAdapter<AiIndexStorageSettings, StoredAiIndexDocument>(
     esClient,
     logger,
     storageSettings

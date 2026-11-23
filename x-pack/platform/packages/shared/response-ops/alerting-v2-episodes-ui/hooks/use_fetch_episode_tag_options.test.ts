@@ -39,26 +39,26 @@ const mockTimeRange = {
 const sourceWithTags = (fetchTagOptions: EpisodeDataSource['fetchTagOptions']) =>
   createTestEpisodeSource({ fetchTagOptions });
 
-const createWrapper = (dataSource?: EpisodeDataSource) => {
+const createWrapper = (dataSource?: EpisodeDataSource, queryV2Source = true) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return ({ children }: { children: React.ReactNode }) => {
     const qcProvider = React.createElement(QueryClientProvider, { client: queryClient }, children);
-    return dataSource
-      ? React.createElement(EpisodeDataSourceProvider, { dataSource }, qcProvider)
+    return dataSource || !queryV2Source
+      ? React.createElement(EpisodeDataSourceProvider, { dataSource, queryV2Source }, qcProvider)
       : qcProvider;
   };
 };
 
-const renderTagOptions = (dataSource?: EpisodeDataSource) =>
+const renderTagOptions = (dataSource?: EpisodeDataSource, queryV2Source?: boolean) =>
   renderHook(
     () =>
       useFetchEpisodeTagOptions({
         services: mockServices,
         timeRange: mockTimeRange,
       }),
-    { wrapper: createWrapper(dataSource) }
+    { wrapper: createWrapper(dataSource, queryV2Source) }
   );
 
 afterEach(() => {
@@ -112,6 +112,30 @@ describe('useFetchEpisodeTagOptions', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.data).toEqual(['prod']);
+    expect(result.current.isError).toBe(false);
+  });
+
+  it('returns source-only tags when the v2 fetch fails', async () => {
+    mockFetchEpisodeTagOptions.mockRejectedValue(new Error('v2 failure'));
+
+    const { result } = renderTagOptions(sourceWithTags(jest.fn().mockResolvedValue(['staging'])));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data).toEqual(['staging']);
+    expect(result.current.isError).toBe(false);
+  });
+
+  it('skips the v2 fetch and returns source-only tags when queryV2Source is false', async () => {
+    const { result } = renderTagOptions(
+      sourceWithTags(jest.fn().mockResolvedValue(['staging'])),
+      false
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(mockFetchEpisodeTagOptions).not.toHaveBeenCalled();
+    expect(result.current.data).toEqual(['staging']);
   });
 
   it('skips additional data source that does not implement tag options', async () => {

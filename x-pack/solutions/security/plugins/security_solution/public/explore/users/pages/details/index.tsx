@@ -21,7 +21,7 @@ import { useDispatch } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { LastEventIndexKey } from '@kbn/securitysolution-timeline-search-strategy';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
@@ -79,10 +79,10 @@ import {
   type EntityStoreRecord,
 } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { ObservedDataSection as UserObservedDataSection } from '../../../../flyout_v2/entity/shared/components/observed_data_section';
-import { USER_PANEL_OBSERVED_USER_QUERY_ID } from '../../../../flyout/entity_details/user_right';
+import { USER_PANEL_OBSERVED_USER_QUERY_ID } from '../../../../flyout_v2/entity/user/main/constants';
 import { useObservedUser } from '../../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
+import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout_v2/entity/shared/translations';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import type { UserItem } from '../../../../../common/search_strategy';
 import type { Entity } from '../../../../../common/api/entity_analytics';
@@ -227,7 +227,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     }
 
     const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
-      EntityType.user,
+      euidApi.getBuiltInEntityDefinition(EntityType.user),
       entityFromStoreResult.entityRecord
     );
     return entityDslFilter ? euidDslFilterToPageFilters(entityDslFilter) : legacyFilters;
@@ -236,7 +236,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     entityFromStoreResult.entityRecord,
     entityStoreV2Enabled,
     noEntityInStore,
-    euidApi?.euid,
+    euidApi,
   ]);
 
   const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
@@ -430,13 +430,13 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                       type: UsersType.details,
                       userName: detailName,
                       identityFields: resolvedIdentityFields,
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityRecord: entityStoreV2Enabled
                         ? entityFromStoreResult.entityRecord
                         : undefined,
                     })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityType: 'user',
                       entityRecord: entityStoreV2Enabled
                         ? entityFromStoreResult.entityRecord

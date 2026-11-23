@@ -25,7 +25,7 @@ const dataSourcePrivilegesEntrySchema = schema.object(
         },
         maxLength: 1000,
       }),
-      { minSize: 1, maxSize: 100 }
+      { minSize: 1, maxSize: 1000 }
     ),
     privileges: schema.arrayOf(
       schema.oneOf([
@@ -115,7 +115,7 @@ export const elasticsearchRoleSchema = schema.object(
               'Cluster privileges that define the cluster level actions that users can perform.',
           },
         }),
-        { maxSize: 100 }
+        { maxSize: 1000 }
       )
     ),
     /**
@@ -133,7 +133,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
             clusters: schema.arrayOf(
               schema.string({
@@ -142,7 +142,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
           },
           {
@@ -152,7 +152,7 @@ export const elasticsearchRoleSchema = schema.object(
             },
           }
         ),
-        { maxSize: 100 }
+        { maxSize: 1000 }
       )
     ),
 
@@ -174,7 +174,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -205,7 +205,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The index level privileges that the role members have for the data streams and indices.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -263,7 +263,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -277,7 +277,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -308,7 +308,7 @@ export const elasticsearchRoleSchema = schema.object(
                     'The index level privileges that role members have for the specified indices.',
                 },
               }),
-              { minSize: 1, maxSize: 100 }
+              { minSize: 1, maxSize: 1000 }
             ),
 
             /**
@@ -359,7 +359,7 @@ export const elasticsearchRoleSchema = schema.object(
             description: 'A username that members of this role can impersonate.',
           },
         }),
-        { maxSize: 100 }
+        { maxSize: 1000 }
       )
     ),
 
@@ -414,8 +414,11 @@ const FEATURE_NAME_VALUE_REGEX = /^[a-zA-Z0-9_-]+$/;
  */
 export const getKibanaRoleSchema = (
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
-) =>
-  schema.arrayOf(
+) => {
+  // Resolving base privilege names rebuilds the full privilege map; do it once per schema.
+  const getMemoizedBasePrivilegeNames = _.once(getBasePrivilegeNames);
+
+  return schema.arrayOf(
     schema.object(
       {
         /**
@@ -440,7 +443,7 @@ export const getKibanaRoleSchema = (
                   description: 'A base privilege that grants applies to all spaces.',
                 },
                 validate(value) {
-                  const globalPrivileges = getBasePrivilegeNames().global;
+                  const globalPrivileges = getMemoizedBasePrivilegeNames().global;
                   if (!globalPrivileges.some((privilege) => privilege === value)) {
                     return `unknown global privilege "${value}", must be one of [${globalPrivileges}]`;
                   }
@@ -454,7 +457,7 @@ export const getKibanaRoleSchema = (
                   description: 'A base privilege that applies to specific spaces.',
                 },
                 validate(value) {
-                  const spacePrivileges = getBasePrivilegeNames().space;
+                  const spacePrivileges = getMemoizedBasePrivilegeNames().space;
                   if (!spacePrivileges.some((privilege) => privilege === value)) {
                     return `unknown space privilege "${value}", must be one of [${spacePrivileges}]`;
                   }
@@ -492,7 +495,7 @@ export const getKibanaRoleSchema = (
                   }
                 },
               }),
-              { maxSize: 100 }
+              { maxSize: 1000 }
             )
           )
         ),
@@ -522,18 +525,21 @@ export const getKibanaRoleSchema = (
       }
     ),
     {
+      maxSize: 1000,
       validate(value) {
-        for (const [indexA, valueA] of value.entries()) {
-          for (const valueB of value.slice(indexA + 1)) {
-            const spaceIntersection = _.intersection(valueA.spaces, valueB.spaces);
-            if (spaceIntersection.length !== 0) {
-              return `more than one privilege is applied to the following spaces: [${spaceIntersection}]`;
+        const claimed = new Set<string>();
+        for (const { spaces } of value) {
+          for (const space of spaces) {
+            if (claimed.has(space)) {
+              return `more than one privilege is applied to the following spaces: [${space}]`;
             }
+            claimed.add(space);
           }
         }
       },
     }
   );
+};
 
 export type ElasticsearchPrivilegesType = TypeOf<typeof elasticsearchRoleSchema>;
 export type KibanaPrivilegesType = TypeOf<ReturnType<typeof getKibanaRoleSchema>>;

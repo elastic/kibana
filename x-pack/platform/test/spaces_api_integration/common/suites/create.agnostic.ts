@@ -100,9 +100,12 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       color: '#5c5959',
       disabledFeatures: [
         // Disabled features are automatically added to the space when a solution is set
+        'alertzero',
         'apm',
+        'digital_experience',
         'infrastructure',
         'logs',
+        'nightshift',
         'observabilityAlerts',
         'observabilityCasesV3',
         'securitySolutionAlertsV1',
@@ -116,7 +119,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'siemV5',
         'slo',
         'uptime',
-      ],
+      ].sort(),
       solution: 'es',
     };
 

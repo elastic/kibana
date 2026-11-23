@@ -25,14 +25,15 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { AreaFillOptions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
+import { getKbnPalettes, KbnPalette } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
@@ -53,6 +54,7 @@ import {
   nonNullable,
   renewIDs,
   getColorMappingDefaults,
+  isEsqlChart,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import {
@@ -71,7 +73,12 @@ import type {
   XYByValueAnnotationLayerConfig,
   XYVisualizationState,
 } from './types';
-import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
+import {
+  visualizationSubtypes,
+  visualizationTypes,
+  defaultSeriesType,
+  defaultAreaFill,
+} from './types';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import {
   getAccessorColorConfigs,
@@ -331,7 +338,6 @@ export const getXyVisualization = ({
     }
 
     return {
-      title: 'Empty XY chart',
       legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
       valueLabels: 'hide',
       preferredSeriesType: defaultSeriesType,
@@ -372,7 +378,8 @@ export const getXyVisualization = ({
     state,
     setState,
     registerLibraryAnnotationGroup,
-    isSaveable
+    isSaveable,
+    framePublicAPI
   ) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
@@ -386,6 +393,9 @@ export const getXyVisualization = ({
           registerLibraryAnnotationGroup,
           core,
           isSaveable,
+          // Annotation library groups are data-view-based. Until the library supports
+          // ES|QL static annotations, hide both loading and saving library groups.
+          isAnnotationLibrarySupported: !isEsqlChart(framePublicAPI?.datasourceLayers ?? {}),
           eventAnnotationService,
           savedObjectsTagging,
           dataViews: data.dataViews,
@@ -404,9 +414,14 @@ export const getXyVisualization = ({
     }
   },
 
-  hasLayerSettings({ state, layerId: currentLayerId }) {
+  hasLayerSettings({ state, layerId: currentLayerId, frame }) {
     const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
-    return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
+    return {
+      // the only annotation layer setting (ignore global filters) only affects query-based
+      // annotations, which are not supported on ES|QL charts
+      data: Boolean(layer && isAnnotationsLayer(layer) && !isEsqlChart(frame.datasourceLayers)),
+      appearance: false,
+    };
   },
 
   LayerSettingsComponent(props) {
@@ -814,7 +829,7 @@ export const getXyVisualization = ({
       return null;
     }
 
-    return () => (
+    return (
       <SubtypeSwitch
         layer={layer}
         setLayerState={(newLayer: XYDataLayerConfig) =>
@@ -904,8 +919,11 @@ export const getXyVisualization = ({
       <AddLayerButton
         {...props}
         eventAnnotationService={eventAnnotationService}
-        addLayer={async (type, loadedGroupInfo, _, seriesType) => {
-          if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
+        addLayer={async (
+          layerType,
+          { extraArg: loadedGroupInfo, ignoreInitialValues, seriesType, datasourceId } = {}
+        ) => {
+          if (layerType === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
             await props.ensureIndexPattern(
               loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
             );
@@ -915,7 +933,12 @@ export const getXyVisualization = ({
               group: loadedGroupInfo,
             });
           }
-          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo, seriesType);
+          props.addLayer(layerType, {
+            extraArg: loadedGroupInfo,
+            ignoreInitialValues: ignoreInitialValues || !!loadedGroupInfo,
+            seriesType,
+            datasourceId,
+          });
         }}
       />
     );
@@ -1008,8 +1031,21 @@ export const getXyVisualization = ({
     for (const layer of getDataLayers(state.layers)) {
       const datasourceAPI = datasourceLayers[layer.layerId];
       if (datasourceAPI) {
+        const isTextBasedLayer = datasourceAPI.isTextBasedLanguage();
         for (const accessor of layer.accessors) {
           const operation = datasourceAPI.getOperationForColumnId(accessor);
+          // For ES|QL layers the real column type is only known once the query has run and
+          // produced an inspector table. Until then `getOperationForColumnId` falls back to the
+          // persisted role-based type, which can be `string` for a column that is actually numeric.
+          // Emitting this blocking error before the table exists would stop the expression from
+          // ever running, so the table that resolves the true type would never arrive (permanent
+          // error). Defer the check until this column is present in the layer's activeData.
+          const hasResolvedActiveDataColumn = Boolean(
+            activeData?.[layer.layerId]?.columns.some((column) => column.id === accessor)
+          );
+          if (isTextBasedLayer && !hasResolvedActiveDataColumn) {
+            continue;
+          }
           if (operation && operation.dataType !== 'number') {
             errors.push({
               uniqueId: XY_Y_WRONG_DATA_TYPE,
@@ -1037,6 +1073,48 @@ export const getXyVisualization = ({
     }
 
     const warnings: UserMessage[] = [];
+
+    for (const layer of getReferenceLayers(state.layers)) {
+      if (!datasourceLayers[layer.layerId]?.isTextBasedLanguage()) continue;
+      const table = activeData?.[layer.layerId];
+      if (!table) continue;
+      if (table.rows.length > 1) {
+        warnings.push({
+          uniqueId: 'xy_esql_reference_multiple_rows',
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage: i18n.translate(
+            'xpack.lens.xyVisualization.referenceMultipleRowsDescription',
+            {
+              defaultMessage:
+                'The reference line query returned multiple rows. Only the first row is used.',
+            }
+          ),
+          longMessage: '',
+        });
+      }
+      for (const accessor of layer.accessors) {
+        const column = table.columns.find(({ id }) => id === accessor);
+        const value = table.rows[0]?.[accessor];
+        if (column?.meta.type === 'number' && typeof value === 'number' && Number.isFinite(value))
+          continue;
+        warnings.push({
+          uniqueId: 'xy_esql_reference_invalid_value',
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'dimensionButton', dimensionId: accessor }],
+          shortMessage: i18n.translate(
+            'xpack.lens.xyVisualization.referenceInvalidValueDescription',
+            {
+              defaultMessage:
+                'The reference line requires a numeric value in the first result row.',
+            }
+          ),
+          longMessage: '',
+        });
+      }
+    }
 
     if (state?.layers.length > 0 && activeData) {
       const filteredLayers = [
@@ -1339,7 +1417,7 @@ export const applyChartDefaultsIfNeeded = (
 
   return {
     ...state,
-    areaFill: AreaFillOptions.SOLID,
+    areaFill: defaultAreaFill,
   };
 };
 
@@ -1617,8 +1695,9 @@ const SubtypeSwitch = ({
         panelPaddingSize="s"
         button={
           <ToolbarButton
-            aria-label={i18n.translate('xpack.lens.xyChart.stackingOptions', {
-              defaultMessage: 'Stacking',
+            aria-label={i18n.translate('xpack.lens.xyChart.stackingOptionsButtonAriaLabel', {
+              defaultMessage: 'Stacking: {stackingType}',
+              values: { stackingType: stackingType.label },
             })}
             onClick={() => setFlyoutOpen(true)}
             fullWidth

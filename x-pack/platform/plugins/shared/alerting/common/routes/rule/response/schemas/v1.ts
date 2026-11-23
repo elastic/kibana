@@ -752,6 +752,20 @@ export const ruleResponseInternalSchema = schema.object(
         },
       })
     ),
+    created_by_profile_uid: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: { description: 'The identifier for the profile that created the rule.' },
+        })
+      )
+    ),
+    updated_by_profile_uid: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: { description: 'The identifier for the profile that last updated the rule.' },
+        })
+      )
+    ),
     created_at: schema.string({
       meta: {
         description: 'The date and time that the rule was created.',
@@ -769,6 +783,16 @@ export const ruleResponseInternalSchema = schema.object(
             'The owner of the API key that is associated with the rule and used to run background tasks.',
         },
       })
+    ),
+    api_key_owner_profile_uid: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'The identifier for the profile that owns the API key associated with the rule.',
+          },
+        })
+      )
     ),
     api_key_created_by_user: schema.maybe(
       schema.nullable(

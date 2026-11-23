@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/embeddable-examples-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": "@elastic/kibana-dashboards",
   "description": "Example app that shows how to register custom embeddables",
   "group": "platform",
   "visibility": "private",

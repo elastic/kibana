@@ -83,6 +83,44 @@ describe('LogsLocatorDefinition', () => {
         query: { esql: `FROM ${CUSTOM_LOG_PATTERN}` },
       });
     });
+
+    describe('when the caller provides a data view', () => {
+      it('respects a caller-provided dataViewSpec without injecting an ES|QL query', async () => {
+        const locator = createLocator({ isEsqlDefault: true });
+        const callerDataViewSpec = { title: 'logs-nginx*', timeFieldName: '@timestamp' };
+
+        await locator.getLocation({ dataViewSpec: callerDataViewSpec } as any);
+
+        const delegatedParams = mockGetLocation.mock.calls[0][0];
+        expect(delegatedParams).toEqual({ dataViewSpec: callerDataViewSpec });
+        expect(delegatedParams).not.toHaveProperty('query');
+        expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
+      });
+
+      it('respects a caller-provided dataViewId without injecting an ES|QL query', async () => {
+        const locator = createLocator({ isEsqlDefault: true });
+
+        await locator.getLocation({ dataViewId: 'logs-*' } as any);
+
+        const delegatedParams = mockGetLocation.mock.calls[0][0];
+        expect(delegatedParams).toEqual({ dataViewId: 'logs-*' });
+        expect(delegatedParams).not.toHaveProperty('query');
+        expect(mockGetFlattenedLogSources).not.toHaveBeenCalled();
+      });
+
+      it('keeps the caller query alongside the caller-provided data view', async () => {
+        const locator = createLocator({ isEsqlDefault: true });
+        const callerDataViewSpec = { title: 'logs-nginx*', timeFieldName: '@timestamp' };
+        const callerQuery = { language: 'kuery', query: 'host.name: "my-host"' };
+
+        await locator.getLocation({ dataViewSpec: callerDataViewSpec, query: callerQuery } as any);
+
+        expect(mockGetLocation).toHaveBeenCalledWith({
+          dataViewSpec: callerDataViewSpec,
+          query: callerQuery,
+        });
+      });
+    });
   });
 
   describe('when discover.isEsqlDefault is false', () => {

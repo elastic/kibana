@@ -6,24 +6,40 @@
  */
 
 import {
-  IMPACTED_SERVICES_QUERY_PARAM,
   buildNightshiftEventFlyoutShareUrl,
+  buildNightshiftEventsPageUrl,
   clearNightshiftEventIdParam,
   getNightshiftEventIdFromSearch,
+  getNightshiftSearchQueryFromSearch,
+  getNightshiftSeverityFromSearch,
   NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
+  NIGHTSHIFT_SEARCH_QUERY_PARAM,
+  NIGHTSHIFT_SEVERITY_QUERY_PARAM,
   setNightshiftEventIdParam,
+  setNightshiftSearchQueryParam,
+  setNightshiftSeverityParam,
 } from './url_params';
 
 describe('url_params', () => {
-  it('builds a share URL with the eventId query param', () => {
-    window.history.pushState(
-      {},
-      '',
-      `/app/observability/nightshift?${IMPACTED_SERVICES_QUERY_PARAM}=logs.web`
+  it('builds a link to the events page that restores the flyout, whatever page hosts it', () => {
+    window.history.pushState({}, '', '/app/observability/investigations?tab=overview');
+    const getUrlForApp = jest.fn(
+      (appId: string, { path }: { path?: string } = {}) => `/s/space-1/app/${appId}${path}`
     );
 
+    expect(buildNightshiftEventsPageUrl(getUrlForApp, 'evt 001&x')).toBe(
+      `${window.location.origin}/s/space-1/app/nightshift/detections/events?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt+001%26x`
+    );
+    expect(getUrlForApp).toHaveBeenCalledWith('nightshift', {
+      path: `/detections/events?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt+001%26x`,
+    });
+  });
+
+  it('builds a share URL with the eventId query param', () => {
+    window.history.pushState({}, '', '/app/observability/nightshift?filter=logs.web');
+
     expect(buildNightshiftEventFlyoutShareUrl('evt-001')).toBe(
-      `${window.location.origin}/app/observability/nightshift?${IMPACTED_SERVICES_QUERY_PARAM}=logs.web&${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt-001`
+      `${window.location.origin}/app/observability/nightshift?filter=logs.web&${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt-001`
     );
   });
 
@@ -31,11 +47,11 @@ describe('url_params', () => {
     window.history.pushState(
       {},
       '',
-      `/app/observability/nightshift?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=old-id&${IMPACTED_SERVICES_QUERY_PARAM}=logs.web`
+      `/app/observability/nightshift?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=old-id&filter=logs.web`
     );
 
     expect(buildNightshiftEventFlyoutShareUrl('evt-001')).toBe(
-      `${window.location.origin}/app/observability/nightshift?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt-001&${IMPACTED_SERVICES_QUERY_PARAM}=logs.web`
+      `${window.location.origin}/app/observability/nightshift?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt-001&filter=logs.web`
     );
   });
 
@@ -49,5 +65,30 @@ describe('url_params', () => {
 
     clearNightshiftEventIdParam(params);
     expect(params.has(NIGHTSHIFT_EVENT_ID_QUERY_PARAM)).toBe(false);
+  });
+
+  it('reads and writes the search query param', () => {
+    expect(getNightshiftSearchQueryFromSearch(`?${NIGHTSHIFT_SEARCH_QUERY_PARAM}=logs.web`)).toBe(
+      'logs.web'
+    );
+    expect(getNightshiftSearchQueryFromSearch('')).toBeUndefined();
+
+    const params = new URLSearchParams();
+    setNightshiftSearchQueryParam(params, 'logs.web');
+    expect(params.get(NIGHTSHIFT_SEARCH_QUERY_PARAM)).toBe('logs.web');
+
+    setNightshiftSearchQueryParam(params, '');
+    expect(params.has(NIGHTSHIFT_SEARCH_QUERY_PARAM)).toBe(false);
+  });
+
+  it('reads and writes the severity param', () => {
+    expect(getNightshiftSeverityFromSearch(`?${NIGHTSHIFT_SEVERITY_QUERY_PARAM}=critical`)).toBe(
+      'critical'
+    );
+    expect(getNightshiftSeverityFromSearch('')).toBeUndefined();
+
+    const params = new URLSearchParams();
+    setNightshiftSeverityParam(params, 'critical');
+    expect(params.get(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe('critical');
   });
 });

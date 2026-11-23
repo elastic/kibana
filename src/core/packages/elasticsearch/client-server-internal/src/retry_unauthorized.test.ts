@@ -65,6 +65,22 @@ describe('createInternalErrorHandler', () => {
     expect(setAuthHeaders).toHaveBeenCalledWith(request, handlerResponse.authHeaders);
   });
 
+  it('passes the failed attempt headers to the authentication owner', async () => {
+    const handler = jest.fn().mockReturnValue(toolkit.notHandled());
+    const request = httpServerMock.createKibanaRequest();
+    const internalHandler = createInternalErrorHandler({
+      getHandler: () => handler,
+      request,
+      setAuthHeaders,
+    });
+    const error = createUnauthorizedError();
+    const authHeaders = { authorization: 'Bearer expired' };
+
+    await internalHandler(error, authHeaders);
+
+    expect(handler).toHaveBeenCalledWith({ request, error, authHeaders }, toolkit);
+  });
+
   it('does not call `setAuthHeaders` when the handler returns `notHandled`', async () => {
     const handlerResponse = toolkit.notHandled();
     const handler = jest.fn().mockReturnValue(handlerResponse);
@@ -119,7 +135,7 @@ describe('createInternalErrorHandler', () => {
     expect(handler).toHaveBeenCalledWith({ request, error }, expect.any(Object));
   });
 
-  it('returns `notHandled` without calling the provided handler for fake requests', async () => {
+  it('returns `notHandled` without calling the provided handler for bare `{ headers }` fake requests', async () => {
     const handler = jest.fn();
     const fakeRequest = {
       headers: {
@@ -137,6 +153,46 @@ describe('createInternalErrorHandler', () => {
 
     expect(isNotHandledResult(result)).toBe(true);
     expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('calls the provided handler for fake `CoreKibanaRequest`s', async () => {
+    const handlerResponse = toolkit.retry({ authHeaders: { authorization: 'Bearer fresh' } });
+    const handler = jest.fn().mockReturnValue(handlerResponse);
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer stale' },
+    });
+
+    const internalHandler = createInternalErrorHandler({
+      getHandler: () => handler,
+      request,
+      setAuthHeaders,
+    });
+
+    const error = createUnauthorizedError();
+    const result = await internalHandler(error);
+
+    expect(result).toEqual(handlerResponse);
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler).toHaveBeenCalledWith({ request, error }, expect.any(Object));
+  });
+
+  it('does not call `setAuthHeaders` when the handler returns `retry` for a fake `CoreKibanaRequest`', async () => {
+    const handler = jest
+      .fn()
+      .mockReturnValue(toolkit.retry({ authHeaders: { authorization: 'Bearer fresh' } }));
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer stale' },
+    });
+
+    const internalHandler = createInternalErrorHandler({
+      getHandler: () => handler,
+      request,
+      setAuthHeaders,
+    });
+
+    await internalHandler(createUnauthorizedError());
+
+    expect(setAuthHeaders).not.toHaveBeenCalled();
   });
 
   it('checks the presence of a registered handler for each error', async () => {

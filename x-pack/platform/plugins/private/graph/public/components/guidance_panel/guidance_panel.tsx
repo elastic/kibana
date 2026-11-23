@@ -53,9 +53,9 @@ function ListItem({
   const isDisabled = state === 'disabled';
 
   return (
-    // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <li
       css={[styles.listItem, isDisabled && styles.disabledListItem]}
+      // eslint-disable-next-line jsx-a11y/role-supports-aria-props
       aria-disabled={isDisabled}
       aria-current={state === 'active' ? 'step' : undefined}
     >
@@ -82,7 +82,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   useEffect(() => {
     const checkIfDataViewsExist = async () => {
-      setHasDataViews(await data.dataViews.hasData.hasUserDataView());
+      setHasDataViews(await data.dataViews.hasData.hasDataView());
     };
     checkIfDataViewsExist();
   }, [setHasDataViews, data.dataViews]);

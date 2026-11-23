@@ -9,9 +9,11 @@
 
 import type { CoreFipsService } from './fips';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
-import type { CoreSecurityDelegateContract } from './api_provider';
+import type { CoreAuthorizationService } from './authz';
+import type { CoreSecurityDelegateContract, CoreSecurityDelegateHandle } from './api_provider';
 import type { CoreAuditService } from './audit';
 import type { CoreServiceAccountsService } from './service_accounts';
+import type { CoreServiceAccountsSetup } from './service_account_workloads';
 /**
  * Setup contract for Core's security service.
  *
@@ -20,10 +22,12 @@ import type { CoreServiceAccountsService } from './service_accounts';
 export interface SecurityServiceSetup {
   /**
    * Register the security implementation that then will be used and re-exposed by Core.
+   * Returns what Core shares back with the security implementation, such as the workload types
+   * plugins register.
    *
    * @remark this should **exclusively** be used by the security plugin.
    */
-  registerSecurityDelegate(api: CoreSecurityDelegateContract): void;
+  registerSecurityDelegate(api: CoreSecurityDelegateContract): CoreSecurityDelegateHandle;
 
   /**
    * Returns a function that binds originating-user identity fields (currently
@@ -45,6 +49,12 @@ export interface SecurityServiceSetup {
    * The {@link CoreFipsService | FIPS service}
    */
   fips: CoreFipsService;
+
+  /**
+   * The {@link CoreServiceAccountsSetup | service accounts service}, through which a plugin registers
+   * the workload types it runs as service accounts.
+   */
+  serviceAccounts: CoreServiceAccountsSetup;
 }
 
 /**
@@ -57,6 +67,10 @@ export interface SecurityServiceStart {
    * The {@link CoreAuthenticationService | authentication service}
    */
   authc: CoreAuthenticationService;
+  /**
+   * The {@link CoreAuthorizationService | authorization service}
+   */
+  authz: CoreAuthorizationService;
   /**
    * The {@link CoreAuditService | audit service}
    */

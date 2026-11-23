@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/presentation-util-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/presentation-util-plugin'
   description: Moon project for @kbn/presentation-util-plugin
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/presentation_util
 dependsOn:
   - '@kbn/core'
@@ -28,14 +28,19 @@ dependsOn:
   - '@kbn/react-field'
   - '@kbn/storybook'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/shared-ux-button-toolbar'
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/field-utils'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/presentation-publishing'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - public/**/*

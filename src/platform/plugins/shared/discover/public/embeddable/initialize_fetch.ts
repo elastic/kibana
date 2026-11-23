@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
+import { combineLatest, debounceTime, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import {
   buildDataTableRecordList,
   SEARCH_EMBEDDABLE_TYPE,
@@ -24,20 +26,20 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type {
   FetchContext,
   HasParentApi,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesDataLoading,
-  PublishesBlockingError,
 } from '@kbn/presentation-publishing';
 import { apiHasExecutionContext, apiHasParentApi, fetch$ } from '@kbn/presentation-publishing';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
+import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
@@ -49,13 +51,13 @@ import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
-  PublishesBlockingError &
   PublishesDataLoading &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesTitle &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
+    abortSignal$: BehaviorSubject<AbortSignal | undefined>;
   } & Partial<HasParentApi>;
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
@@ -128,6 +130,24 @@ const getRelevantESQLVariables = (
   return [];
 };
 
+const getEsqlSourceCacheIdentity = ({
+  esql,
+  esqlVariables,
+  projectRouting,
+  timeRange,
+}: {
+  esql: string;
+  esqlVariables?: ESQLControlVariable[];
+  projectRouting?: string;
+  timeRange?: { from: string; to: string };
+}): string =>
+  JSON.stringify({
+    esql,
+    esqlVariables: esqlVariables?.map(({ key, value, type }) => ({ key, value, type })),
+    projectRouting: projectRouting ?? null,
+    timeRange: timeRange ? { from: timeRange.from, to: timeRange.to } : null,
+  });
+
 export function initializeFetch({
   api,
   stateManager,
@@ -135,8 +155,9 @@ export function initializeFetch({
   scopedProfilesManager,
   refreshTrigger$,
   setDataLoading,
-  setBlockingError,
+  setSearchError,
   setApproximationApplied,
+  esqlSource$,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
@@ -144,13 +165,26 @@ export function initializeFetch({
   scopedProfilesManager: ScopedProfilesManager;
   refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
-  setBlockingError: (error: Error | undefined) => void;
+  setSearchError: (error: Error | undefined) => void;
   setApproximationApplied: (value: boolean | undefined) => void;
+  esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
+  let cachedEsqlSource: { identity: string; source: EsqlSource } | undefined;
 
-  const observables = [fetch$(api), api.savedSearch$, api.dataViews$, refreshTrigger$] as const;
+  // `showWarnings` reports the warnings of every request the adapter retains, so a result that
+  // sent a request already reports the full set (the first page and every page loaded since)
+  const collectWarnings = (): SearchResponseWarning[] => {
+    const warnings: SearchResponseWarning[] = [];
+    discoverServices.data.search.showWarnings(inspectorAdapters.requests, (warning) => {
+      warnings.push(warning);
+      return true; // suppress the default behaviour
+    });
+    return warnings;
+  };
+
+  const observables = [fetch$(api), api.savedSearch$, api.dataSources$, refreshTrigger$] as const;
 
   const fetchSubscription = combineLatest(observables)
     .pipe(
@@ -161,11 +195,14 @@ export function initializeFetch({
           abortController.abort(AbortReason.REPLACED);
           abortController = undefined;
         }
+        // Reset pagination state when a new fetch starts
+        stateManager.pagination.next(undefined);
+        stateManager.isLoadingMore.next(false);
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
 
-        setBlockingError(undefined);
+        setSearchError(undefined);
         if (!dataView || !savedSearch.searchSource) {
           return;
         }
@@ -199,6 +236,7 @@ export function initializeFetch({
           // Get new abort controller
           const currentAbortController = new AbortController();
           abortController = currentAbortController;
+          api.abortSignal$.next(currentAbortController.signal);
 
           await scopedProfilesManager.resolveDataSourceProfile({
             dataSource: createDataSource({ dataView, query: searchSourceQuery }),
@@ -206,33 +244,67 @@ export function initializeFetch({
             query: searchSourceQuery,
           });
 
-          const esqlMode = isEsqlMode(savedSearch);
           if (
-            esqlMode &&
-            searchSourceQuery &&
+            isOfAggregateQueryType(searchSourceQuery) &&
             (!fetchContext.query || isOfQueryType(fetchContext.query))
           ) {
+            const timeRange = getTimeRangeFromFetchContext(fetchContext);
+            const esqlVariables = getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables);
+            const identity = getEsqlSourceCacheIdentity({
+              esql: searchSourceQuery.esql,
+              esqlVariables,
+              projectRouting: fetchContext.projectRouting,
+              timeRange,
+            });
+            const publishedSource = esqlSource$?.getValue();
+            // The panel already resolved this query before fetch. Resolving again and
+            // publishing a new data view emits dataSources$, which aborts this request.
+            if (
+              !cachedEsqlSource &&
+              publishedSource &&
+              publishedSource.query === searchSourceQuery.esql.trim()
+            ) {
+              cachedEsqlSource = {
+                identity,
+                source: publishedSource,
+              };
+            } else if (!cachedEsqlSource || cachedEsqlSource.identity !== identity) {
+              const { esqlSource, dataView: resolvedDataView } = await resolveEsqlSource({
+                esql: searchSourceQuery.esql,
+                services: discoverServices,
+                projectRoutingFallback: fetchContext.projectRouting,
+                timeRange,
+                esqlVariables,
+                previousSourceId: cachedEsqlSource?.source.id ?? publishedSource?.id,
+              });
+              cachedEsqlSource = {
+                identity,
+                source: esqlSource,
+              };
+              esqlSource$?.next(esqlSource);
+              if (resolvedDataView && resolvedDataView.id !== dataView.id) {
+                savedSearch.searchSource.setField('index', resolvedDataView);
+              }
+            }
+            const embeddableEsqlSource = cachedEsqlSource.source;
             // Request ES|QL data
             const result = await fetchEsql({
               query: searchSourceQuery,
-              timeRange: getTimeRangeFromFetchContext(fetchContext),
+              timeRange,
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
-              dataView,
+              esqlSource: embeddableEsqlSource,
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,
-              expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
-              esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
+              esqlVariables,
               projectRouting: fetchContext.projectRouting,
               esqlApproximation: fetchContext.isApproximate,
             });
             return {
-              columnsMeta: result.esqlQueryColumns
-                ? getTextBasedColumnsMeta(result.esqlQueryColumns)
-                : undefined,
+              resultDataSource: result.dataSource ?? embeddableEsqlSource,
               rows: result.records,
               hitCount: result.records.length,
               approximationApplied: result.approximationApplied,
@@ -243,10 +315,16 @@ export function initializeFetch({
           const executionContext = await getExecutionContext(api, discoverServices);
 
           /**
-           * Fetch via saved search
+           * Fetch via dslPaginated for pagination support
            */
-          const { rawResponse: resp } = await lastValueFrom(
-            savedSearch.searchSource.fetch$({
+          const searchRequest = savedSearch.searchSource.build();
+          const result = await discoverServices.data.search.dslPaginated(
+            {
+              ...searchRequest.body,
+              index: dataView,
+              projectRouting: fetchContext.projectRouting,
+            },
+            {
               abortSignal: currentAbortController.signal,
               sessionId: searchSessionId,
               inspector: {
@@ -260,25 +338,21 @@ export function initializeFetch({
                 }),
               },
               executionContext,
-              disableWarningToasts: true,
-              projectRouting: fetchContext.projectRouting,
-            })
+            }
           );
-          const interceptedWarnings: SearchResponseWarning[] = [];
-          discoverServices.data.search.showWarnings(inspectorAdapters.requests, (warning) => {
-            interceptedWarnings.push(warning);
-            return true; // suppress the default behaviour
-          });
+          const interceptedWarnings = collectWarnings();
 
           return {
             warnings: interceptedWarnings,
             rows: buildDataTableRecordList({
-              records: resp.hits.hits,
+              records: result.rawResponse.hits.hits as EsHitRecord[],
               dataView,
               processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
             }),
-            hitCount: resp.hits.total as number,
+            hitCount: result.rawResponse.hits.total as number,
+            resultDataSource: undefined,
             fetchContext,
+            pagination: result.pagination,
           };
         } catch (error) {
           return { error };
@@ -288,7 +362,7 @@ export function initializeFetch({
     .subscribe((next) => {
       setDataLoading(false);
       if (!next || Object.hasOwn(next, 'error')) {
-        setBlockingError(next?.error);
+        setSearchError(next?.error);
         return;
       }
 
@@ -298,14 +372,67 @@ export function initializeFetch({
 
       api.fetchWarnings$.next(next.warnings ?? []);
       api.fetchContext$.next(next.fetchContext);
-      if (Object.hasOwn(next, 'columnsMeta')) {
-        stateManager.columnsMeta.next(next.columnsMeta);
-      }
+      stateManager.resultDataSource.next(next.resultDataSource);
       setApproximationApplied(next.approximationApplied);
+      stateManager.pagination.next(next.pagination);
     });
 
+  const fetchMore = async () => {
+    const currentPagination = stateManager.pagination.getValue();
+    if (!currentPagination?.hasNextPage() || stateManager.isLoadingMore.getValue()) {
+      return;
+    }
+
+    // Own the abort controller so that cancelling the panel (or a refetch) aborts this request
+    const moreAbortController = new AbortController();
+    abortController = moreAbortController;
+
+    stateManager.isLoadingMore.next(true);
+    // The dashboard shows its cancel button based on the panels' loading state
+    setDataLoading(true);
+
+    try {
+      const executionContext = await getExecutionContext(api, discoverServices);
+      const nextPageResult = await currentPagination.nextPage({
+        abortSignal: moreAbortController.signal,
+        executionContext,
+      });
+      const dataView = api.dataSources$.getValue()?.[0];
+
+      if (!nextPageResult || !dataView) {
+        return;
+      }
+
+      const moreRecords = buildDataTableRecordList({
+        records: nextPageResult.rawResponse.hits.hits as EsHitRecord[],
+        dataView,
+        processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+      });
+
+      stateManager.rows.next([...stateManager.rows.getValue(), ...moreRecords]);
+      stateManager.pagination.next(nextPageResult.pagination);
+      // This page sent a request, so its warnings replace the current ones. A page that sent none
+      // (nothing left to load) returned above, which keeps them, e.g. a shard failure callout.
+      api.fetchWarnings$.next(collectWarnings());
+    } catch (error) {
+      if (!moreAbortController.signal.aborted) {
+        setSearchError(error);
+      }
+    } finally {
+      // A refetch that replaced this request owns the loading state now
+      if (moreAbortController.signal.reason !== AbortReason.REPLACED) {
+        stateManager.isLoadingMore.next(false);
+        setDataLoading(false);
+      }
+    }
+  };
+
   return {
-    cleanup: () => fetchSubscription.unsubscribe(),
+    fetchMore,
+    cleanup: () => {
+      abortController?.abort(AbortReason.CLEANUP);
+      fetchSubscription.unsubscribe();
+    },
     cancelRequests: () => {
       abortController?.abort();
       abortController = undefined;

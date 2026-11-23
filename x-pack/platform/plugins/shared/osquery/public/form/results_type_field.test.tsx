@@ -49,7 +49,7 @@ describe('ResultsTypeField', () => {
     expect(screen.getByTestId('resultsTypeField')).toHaveTextContent('Differential');
   });
 
-  it('should show Differential (Ignore removals) when snapshot and removed are false', () => {
+  it('should show Differential (ignore removals) when snapshot and removed are false', () => {
     render(
       <FormWrapper defaultValues={{ snapshot: false, removed: false }}>
         <ResultsTypeField />
@@ -57,7 +57,7 @@ describe('ResultsTypeField', () => {
     );
 
     expect(screen.getByTestId('resultsTypeField')).toHaveTextContent(
-      'Differential (Ignore removals)'
+      'Differential (ignore removals)'
     );
   });
 
@@ -69,6 +69,16 @@ describe('ResultsTypeField', () => {
     );
 
     expect(screen.getByText('Result type')).toBeInTheDocument();
+  });
+
+  it('should render a Beta badge on the Result type label', () => {
+    render(
+      <FormWrapper>
+        <ResultsTypeField />
+      </FormWrapper>
+    );
+
+    expect(screen.getByText('Beta')).toBeInTheDocument();
   });
 
   it('should be disabled when euiFieldProps.isDisabled is true', () => {

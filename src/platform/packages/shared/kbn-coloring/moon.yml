@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/coloring'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,20 +14,14 @@ project:
   title: '@kbn/coloring'
   description: Moon project for @kbn/coloring
   channel: ''
-  owner: '@elastic/kibana-visualizations'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/packages/shared/kbn-coloring
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/i18n-react'
   - '@kbn/interpreter'
   - '@kbn/utility-types'
-  - '@kbn/shared-ux-utility'
-  - '@kbn/test-jest-helpers'
   - '@kbn/data-plugin'
-  - '@kbn/ui-theme'
-  - '@kbn/visualization-utils'
   - '@kbn/palettes'
-  - '@kbn/field-formats-plugin'
   - '@kbn/field-formats-common'
   - '@kbn/expressions-plugin'
 tags:
@@ -42,6 +36,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -11,7 +11,8 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import type { ComposedQuery, RuleQuery } from '../../form/types';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import type { RuleQuery, RuleRecovery } from '../../form/types';
 import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
 import { QuerySandboxFlyout, type QuerySandboxFlyoutProps } from './query_sandbox_flyout';
 import type { QueryTab } from './types';
@@ -91,20 +92,23 @@ jest.mock('./compose_discover_tabs', () => ({
 const mockField = (name: string, type: string) =>
   ({ name, type, searchable: true, aggregatable: true } as DataViewFieldMap[string]);
 
-const standaloneQuery = (breach = 'FROM test-index | LIMIT 10'): RuleQuery => ({
-  format: 'standalone',
-  breach: { query: breach },
+const unifiedQuery = (base = 'FROM test-index | LIMIT 10'): RuleQuery => ({
+  base,
+  breach: { segment: '' },
 });
 
-const composedQuery = (): ComposedQuery => ({
-  format: 'composed',
+const splitQuery = (): RuleQuery => ({
   base: 'FROM test-index',
   breach: { segment: '| WHERE cpu > 70' },
-  recovery: { segment: '| WHERE cpu <= 70' },
+});
+
+const conditionRecovery = (): RuleRecovery => ({
+  strategy: recoveryStrategy.condition,
+  segment: '| WHERE cpu <= 70',
 });
 
 const defaultProps: QuerySandboxFlyoutProps = {
-  query: standaloneQuery(),
+  query: unifiedQuery(),
   onQueryChange: jest.fn(),
   timeField: '@timestamp',
   onTimeFieldChange: jest.fn(),
@@ -229,9 +233,10 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
   });
 
   it('runs the base-only query when the Base tab is active', () => {
-    const query = composedQuery();
+    const query = splitQuery();
     renderSandbox({
       query,
+      recovery: conditionRecovery(),
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'base',
       onTabChange: jest.fn(),
@@ -243,9 +248,10 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
   });
 
   it('runs the base+breach query when the Alert tab is active', () => {
-    const query = composedQuery();
+    const query = splitQuery();
     renderSandbox({
       query,
+      recovery: conditionRecovery(),
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'alert',
       onTabChange: jest.fn(),
@@ -257,21 +263,34 @@ describe('QuerySandboxFlyout — per-tab query execution', () => {
   });
 
   it('runs the base+recover query when the Recovery tab is active', () => {
-    const query = composedQuery();
+    const query = splitQuery();
+    const recovery = conditionRecovery();
     renderSandbox({
       query,
+      recovery,
       tabs: ['base', 'alert', 'recovery'],
       activeTab: 'recovery',
       onTabChange: jest.fn(),
     });
 
     expect(mockUseQueryExecution).toHaveBeenCalledWith(
-      expect.objectContaining({ query: getRecoverQuery(query) })
+      expect.objectContaining({ query: getRecoverQuery(query, recovery) })
     );
   });
 
+  it('runs an empty recovery query when no recovery block is provided', () => {
+    renderSandbox({
+      query: splitQuery(),
+      tabs: ['base', 'alert', 'recovery'],
+      activeTab: 'recovery',
+      onTabChange: jest.fn(),
+    });
+
+    expect(mockUseQueryExecution).toHaveBeenCalledWith(expect.objectContaining({ query: '' }));
+  });
+
   it('runs the base+breach query in unified (no-tabs) mode regardless of activeTab', () => {
-    const query = composedQuery();
+    const query = splitQuery();
     renderSandbox({ query, tabs: undefined, activeTab: 'recovery' });
 
     expect(mockUseQueryExecution).toHaveBeenCalledWith(

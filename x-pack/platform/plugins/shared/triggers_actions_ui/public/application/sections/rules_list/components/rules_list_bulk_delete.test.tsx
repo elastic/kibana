@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IToasts } from '@kbn/core/public';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
@@ -75,14 +75,18 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
+jest.mock('react-router-dom', () => {
+  const history = {
     push: jest.fn(),
-  }),
-  useLocation: () => ({
-    pathname: '/triggersActions/rules/',
-  }),
-}));
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
+  };
+  return {
+    useHistory: () => history,
+    useLocation: () => ({
+      pathname: '/triggersActions/rules/',
+    }),
+  };
+});
 
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
@@ -113,7 +117,7 @@ jest.mock('@kbn/alerts-ui-shared', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared'),
   MaintenanceWindowCallout: jest.fn(() => <></>),
 }));
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });

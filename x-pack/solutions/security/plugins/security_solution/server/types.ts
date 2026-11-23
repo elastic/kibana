@@ -20,6 +20,7 @@ import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/se
 import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
 import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
 import type { EntityStoreCRUDClient as EntityStoreUpdateClient } from '@kbn/entity-store/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -37,7 +38,6 @@ import type {
 import type { FrameworkRequest } from './lib/framework';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import type { EndpointInternalFleetServicesInterface } from './endpoint/services/fleet';
-import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
@@ -74,7 +74,6 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getInternalDataViewsService: () => Promise<DataViewsService>;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
-  getRiskEngineDataClient: () => RiskEngineDataClient;
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreUpdateClient: () => EntityStoreUpdateClient;
@@ -87,6 +86,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
   getRulesAuthz: () => DetectionRulesAuthz;
+  getMitreDataClient: () => MitreAttackDataClient | undefined;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

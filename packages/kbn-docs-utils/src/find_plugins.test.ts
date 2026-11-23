@@ -72,7 +72,7 @@ describe('findPackages', () => {
 
 describe('findTeamPlugins', () => {
   it('returns plugins for a given team', () => {
-    const team = '@elastic/kibana-data-discovery';
+    const team = '@elastic/kibana-discover';
     const result = findTeamPlugins(team);
     expect(Array.isArray(result)).toBe(true);
     // The function filters plugins where the team string appears in the owner array.

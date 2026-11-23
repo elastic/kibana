@@ -11,17 +11,17 @@ import {
   EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiImage,
+  EuiIllustration,
   EuiSpacer,
   EuiSuperUpdateButton,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { notFound } from '@elastic/eui-illustrations';
 import { CaseViewFilters } from './case_view_filters';
 import { useCaseViewFilters } from '../hooks/use_case_view_filters';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
-import noResultsIllustration from '../../../assets/illustration_product_no_results_magnifying_glass.svg';
 import type { CaseUI } from '../../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
@@ -43,7 +43,9 @@ import {
   EXPAND_ALL_ATTACHMENTS,
   NO_COLLAPSIBLE_ATTACHMENTS,
 } from './translations';
-import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
+import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
+import { CaseAttachmentWorkflowProvider } from '../../workflows/case_attachment_workflow_provider';
+import { useAttachmentRemoval } from './use_attachment_removal';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -116,6 +118,13 @@ export const CaseViewAttachments = ({
     [unifiedAttachmentTypeRegistry]
   );
 
+  const {
+    canRemove,
+    onRemove,
+    isRemoving,
+    modal: removalModal,
+  } = useAttachmentRemoval(caseData.id);
+
   // Render one accordion per registered type that has a tab view AND a non-zero count.
   const attachmentSections = useMemo(
     () =>
@@ -132,10 +141,25 @@ export const CaseViewAttachments = ({
           if (count < 1) {
             return [];
           }
-          return [{ id: type.id, label: type.getLabel(), count, Children }];
+          return [
+            {
+              id: type.id,
+              label: type.getLabel(),
+              count,
+              Children,
+              onRemoveSection: canRemove ? onRemove(type) : undefined,
+            },
+          ];
         })
         .sort((a, b) => a.label.localeCompare(b.label)),
-    [unifiedAttachmentTypeRegistry, countsByType, effectiveFileCount, isTypeVisible]
+    [
+      unifiedAttachmentTypeRegistry,
+      countsByType,
+      effectiveFileCount,
+      isTypeVisible,
+      canRemove,
+      onRemove,
+    ]
   );
 
   // Observables stays hardcoded: there's no other entry point to add observables
@@ -316,43 +340,51 @@ export const CaseViewAttachments = ({
             color="transparent"
             css={{ paddingBlockStart: euiTheme.size.xxl }}
             icon={
-              <EuiImage
-                css={{ width: 200, height: 148 }}
-                size="200"
+              <EuiIllustration
+                type={notFound}
                 alt=""
-                url={noResultsIllustration}
+                fullWidth={false}
+                style={{ maxInlineSize: 160 }}
               />
             }
             title={<h2>{NO_SEARCH_RESULTS_TITLE}</h2>}
             body={<p>{NO_SEARCH_RESULTS_BODY}</p>}
           />
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="m">
-            {attachmentSections.map(({ id, label, count, Children }) => (
-              <AttachmentAccordion
-                key={id}
-                id={id}
-                title={label}
-                count={count}
-                isOpen={!collapsedAttachmentIds.has(id)}
-                onToggle={(isOpen) => onAttachmentToggle(id, isOpen)}
-              >
-                <Children caseData={authorFilteredCaseData} searchTerm={searchTerm} />
-              </AttachmentAccordion>
-            ))}
-            {hasVisibleObservables && (
-              <CaseViewObservables
-                caseData={caseData}
-                observables={filteredObservables}
-                isLoading={isLoadingObservables}
-                searchTerm={searchTerm}
-                onUpdateField={onUpdateField}
-                isOpen={!collapsedAttachmentIds.has(OBSERVABLES_FILTER_ID)}
-                onToggle={(isOpen) => onAttachmentToggle(OBSERVABLES_FILTER_ID, isOpen)}
-              />
-            )}
-          </EuiFlexGroup>
+          <CaseAttachmentWorkflowProvider caseId={caseData.id}>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              {attachmentSections.map(({ id, label, count, Children, onRemoveSection }) => (
+                <AttachmentAccordion
+                  key={id}
+                  id={id}
+                  title={label}
+                  count={count}
+                  isOpen={!collapsedAttachmentIds.has(id)}
+                  onToggle={(isOpen) => onAttachmentToggle(id, isOpen)}
+                >
+                  <Children
+                    caseData={authorFilteredCaseData}
+                    searchTerm={searchTerm}
+                    onRemove={onRemoveSection}
+                    isRemoving={isRemoving}
+                  />
+                </AttachmentAccordion>
+              ))}
+              {hasVisibleObservables && (
+                <CaseViewObservables
+                  caseData={caseData}
+                  observables={filteredObservables}
+                  isLoading={isLoadingObservables}
+                  searchTerm={searchTerm}
+                  onUpdateField={onUpdateField}
+                  isOpen={!collapsedAttachmentIds.has(OBSERVABLES_FILTER_ID)}
+                  onToggle={(isOpen) => onAttachmentToggle(OBSERVABLES_FILTER_ID, isOpen)}
+                />
+              )}
+            </EuiFlexGroup>
+          </CaseAttachmentWorkflowProvider>
         )}
+        {removalModal}
       </EuiFlexItem>
     </>
   );

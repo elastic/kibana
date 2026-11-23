@@ -8,13 +8,12 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { css } from '@emotion/react';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiFlexItem, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_bar/filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_bar/filter_editor';
@@ -27,7 +26,7 @@ export const strings = {
 };
 
 interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
-  indexPatterns?: Array<DataView | string>;
+  indexPatterns?: Array<FilterableSource | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
@@ -36,11 +35,6 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   buttonProps?: Partial<EuiButtonIconProps>;
   suggestionsAbstraction?: SuggestionsAbstraction;
 }
-
-const customButtonStyles = css({
-  borderTopLeftRadius: 0,
-  borderBottomLeftRadius: 0,
-});
 
 const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   indexPatterns,
@@ -69,7 +63,6 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         size="s"
         disabled={isDisabled}
         {...buttonProps}
-        css={[buttonProps?.css, customButtonStyles]}
       />
     </EuiToolTip>
   );

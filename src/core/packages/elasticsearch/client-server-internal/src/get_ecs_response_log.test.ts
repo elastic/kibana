@@ -109,6 +109,60 @@ describe('getEcsResponseLog', () => {
       `);
     });
 
+    test('redacts x-client-authentication headers by default', () => {
+      const event = createResponseEvent({
+        requestParams: {
+          headers: { 'x-client-authentication': 'ae3fda37-xxx', 'user-agent': 'world' },
+        },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const log = getEcsResponseLog(event);
+      // @ts-expect-error ECS custom field
+      expect(log.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "user-agent": "world",
+          "x-client-authentication": "[REDACTED]",
+        }
+      `);
+    });
+
+    test('redacts es-secondary-x-client-authentication headers by default', () => {
+      const event = createResponseEvent({
+        requestParams: {
+          headers: {
+            'es-secondary-x-client-authentication': 'ae3fda37-xxx',
+            'user-agent': 'world',
+          },
+        },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const log = getEcsResponseLog(event);
+      // @ts-expect-error ECS custom field
+      expect(log.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "es-secondary-x-client-authentication": "[REDACTED]",
+          "user-agent": "world",
+        }
+      `);
+    });
+
+    test('redacts the x-elastic-callback-token header by default', () => {
+      const event = createResponseEvent({
+        requestParams: {
+          headers: { 'x-elastic-callback-token': 'ae3fda37-xxx', 'user-agent': 'world' },
+        },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const log = getEcsResponseLog(event);
+      // @ts-expect-error ECS custom field
+      expect(log.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "user-agent": "world",
+          "x-elastic-callback-token": "[REDACTED]",
+        }
+      `);
+    });
+
     test('does not mutate original headers', () => {
       const reqHeaders = { a: 'foo', b: ['hello', 'world'] };
       const resHeaders = { c: 'bar' };

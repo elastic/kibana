@@ -8,11 +8,15 @@
  */
 
 import { RELAY_AUTH_ID } from '../../auth_types/relay';
-import type { ActionContext, RelayActionClient } from '../../connector_spec';
+import type { ActionContext } from '../../connector_spec';
+import type { RelayActionClient } from '../../relay_action_client';
 import type {
+  SlackGetConversationHistoryInput,
+  SlackGetConversationRepliesInput,
   SlackListChannelsInput,
   SlackResolveChannelIdInput,
   SlackSendMessageInput,
+  SlackUpdateMessageInput,
 } from './types';
 
 const getRelaySupportedActions = () => Object.keys(slackRelay.actions);
@@ -23,8 +27,19 @@ const RELAY_MAX_BINDINGS_PAGE = 200;
 /** Marks results as coming from the connected bindings rather than a `conversations.list` call. */
 const RELAY_CHANNEL_SOURCE = 'relay-bindings' as const;
 
+const createChannelNotConnectedError = (channel: string): Error =>
+  new Error(`Channel ${channel} is not connected. Connect it in the Elastic Slack app settings.`);
+
+export type SlackRelayClient = Omit<RelayActionClient, 'trigger'> & {
+  trigger(
+    input: Parameters<RelayActionClient['trigger']>[0] & {
+      blocks?: Array<Record<string, unknown>>;
+    }
+  ): ReturnType<RelayActionClient['trigger']>;
+};
+
 export interface SlackRelayConnection {
-  client: RelayActionClient;
+  client: SlackRelayClient;
   tenantKey: string;
 }
 
@@ -62,52 +77,103 @@ const getStatusCode = (error: unknown): number | undefined => {
 };
 
 /**
- * Restates the two Relay failures a rule author can act on. Anything else is a configuration or
- * upstream problem, so it passes through unchanged.
+ * Restates the Relay failures a rule author can act on. Status is enough: 403 is "not connected"
+ * whether the name was unbound or the walk ran out, 409 is uninstalled, 429 is throttled.
  */
 function toUserFacingError(error: unknown, channel?: string): unknown {
   switch (getStatusCode(error)) {
     case 403:
-      return new Error(
-        channel
-          ? `Channel ${channel} is not connected. Connect it in the Elastic Slack app settings, then try again.`
-          : 'This connector is not allowed to read the connected channels. Reconnect the Elastic Slack app, then try again.'
-      );
+      return channel
+        ? createChannelNotConnectedError(channel)
+        : new Error('Not allowed to read the connected channels. Reconnect the Elastic Slack app.');
     case 409:
       return new Error(
-        'The Elastic Slack app is no longer installed in this workspace. Reconnect it, then try again.'
+        'The Elastic Slack app is no longer installed in this workspace. Reconnect it.'
       );
+    case 429:
+      return new Error('Slack rate-limited this request. Try again shortly.');
     default:
       return error;
   }
 }
 
-/** Posts through the Relay, returning the timestamp as `ts` so callers can thread on it as usual. */
+/** Posts through the Relay, returning the timestamp as `ts` and `timestamp` so callers can thread on either. */
 export async function relaySendMessage(
-  { client, tenantKey }: SlackRelayConnection,
+  connection: SlackRelayConnection,
   ctx: ActionContext,
   input: SlackSendMessageInput
-): Promise<{ ok: true; channel: string; ts: string }> {
+): Promise<{
+  ok: true;
+  channel: string;
+  ts: string;
+  timestamp: string;
+  externalConversationId?: string;
+}> {
   if (input.unfurlLinks !== undefined || input.unfurlMedia !== undefined) {
     ctx.log.debug(
       'Slack sendMessage: unfurl options are not supported through the Elastic Slack app and were ignored'
     );
   }
 
-  ctx.log.debug(`Slack sendMessage request through relay: channel=${input.channel}`);
+  const channel = input.channel.trim();
+  if (channel.length === 0 || channel === '#') {
+    throw new Error('Channel is required.');
+  }
+
+  ctx.log.debug(`Slack sendMessage request through relay: channel=${channel}`);
 
   try {
-    const { ref } = await client.trigger({
-      tenantKey,
-      channel: input.channel,
+    const {
+      ref,
+      channel: resolvedChannel,
+      externalConversationId,
+    } = await connection.client.trigger({
+      tenantKey: connection.tenantKey,
+      channel,
       message: input.text,
+      ...(input.blocks?.length ? { blocks: input.blocks } : {}),
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
     });
 
-    return { ok: true, channel: input.channel, ts: ref };
+    return {
+      ok: true,
+      channel: resolvedChannel,
+      ts: ref,
+      timestamp: ref,
+      ...(externalConversationId ? { externalConversationId } : {}),
+    };
   } catch (error) {
     ctx.log.error(`Slack sendMessage through relay failed: ${(error as Error).message}`);
-    throw toUserFacingError(error, input.channel);
+    throw toUserFacingError(error, channel);
+  }
+}
+
+/** Edits a message this app posted through the Relay, returning its timestamp as `ts`. */
+export async function relayUpdateMessage(
+  connection: SlackRelayConnection,
+  ctx: ActionContext,
+  input: SlackUpdateMessageInput
+): Promise<{ ok: true; channel: string; ts: string }> {
+  const channel = input.channel.trim();
+  if (channel.length === 0 || channel === '#') {
+    throw new Error('Channel is required.');
+  }
+
+  ctx.log.debug(`Slack updateMessage request through relay: channel=${channel}`);
+
+  try {
+    const { ref, channel: resolvedChannel } = await connection.client.trigger({
+      tenantKey: connection.tenantKey,
+      channel,
+      message: input.text,
+      ...(input.blocks?.length ? { blocks: input.blocks } : {}),
+      messageTs: input.messageTs,
+    });
+
+    return { ok: true, channel: resolvedChannel, ts: ref };
+  } catch (error) {
+    ctx.log.error(`Slack updateMessage through relay failed: ${(error as Error).message}`);
+    throw toUserFacingError(error, channel);
   }
 }
 
@@ -193,7 +259,7 @@ export async function relayResolveChannelId(
   let pagesFetched = 0;
 
   while (pagesFetched < input.maxPages) {
-    ctx.log.debug(`Slack resolveChannelId scan through relay (page ${pagesFetched + 1})`);
+    ctx.log.debug(`Slack connected-channel scan through relay (page ${pagesFetched + 1})`);
     const page = await fetchBindingsPage(connection, ctx, { cursor, limit: input.limit });
 
     const found = toChannels(page.bindings).find(({ name }) => {
@@ -206,7 +272,7 @@ export async function relayResolveChannelId(
     if (found) {
       return {
         ok: true,
-        found: true,
+        found: true as const,
         id: found.id,
         name: found.name,
         source: RELAY_CHANNEL_SOURCE,
@@ -224,13 +290,243 @@ export async function relayResolveChannelId(
 
   return {
     ok: true,
-    found: false,
+    found: false as const,
     id: undefined,
     name: nameNorm,
     source: RELAY_CHANNEL_SOURCE,
     pagesFetched,
     nextCursor: cursor,
   };
+}
+
+const SLACK_CONVERSATION_ID = /^[CGD][A-Z0-9]+$/;
+
+// A Slack ts or whole epoch seconds:
+// https://docs.slack.dev/reference/methods/conversations.history#arguments
+const SLACK_WINDOW_BOUND = /^\d{1,12}(\.\d{1,6})?$/;
+
+const SLACK_MESSAGE_TS = /^\d{1,12}\.\d{1,6}$/;
+
+const RELAY_MAX_READ_LIMIT = 200;
+
+/** The Relay's own default, made explicit so later pages keep the same floor. */
+const RELAY_DEFAULT_HISTORY_WINDOW_SECONDS = 2 * 60 * 60;
+
+/**
+ * A read that failed for one channel. Returned, not thrown: Agent Builder hints every thrown 403
+ * as bad credentials and every 429 as "do not move on".
+ */
+type RelayReadOutcome =
+  | { ok: false; reason: 'not_readable'; channel: string }
+  | { ok: false; reason: 'throttled'; retry_after_seconds?: number };
+
+interface ReadWindow {
+  oldest?: string;
+  latest?: string;
+}
+
+const getRelayErrorDetails = (error: unknown) => {
+  const { statusCode, reason, retryAfterSeconds } = (error ?? {}) as {
+    statusCode?: unknown;
+    reason?: unknown;
+    retryAfterSeconds?: unknown;
+  };
+  return {
+    statusCode: typeof statusCode === 'number' ? statusCode : undefined,
+    reason: typeof reason === 'string' ? reason : undefined,
+    retryAfterSeconds: typeof retryAfterSeconds === 'number' ? retryAfterSeconds : undefined,
+  };
+};
+
+const toReadOutcome = (error: unknown, channel: string): RelayReadOutcome | undefined => {
+  const { statusCode, reason, retryAfterSeconds } = getRelayErrorDetails(error);
+  if (statusCode === 403 && reason === 'not_readable') {
+    return { ok: false, reason: 'not_readable', channel };
+  }
+  if (statusCode === 429) {
+    return {
+      ok: false,
+      reason: 'throttled',
+      ...(retryAfterSeconds !== undefined ? { retry_after_seconds: retryAfterSeconds } : {}),
+    };
+  }
+  return undefined;
+};
+
+const toReadError = (error: unknown): unknown =>
+  getRelayErrorDetails(error).statusCode === 400
+    ? new Error(
+        'The Elastic Slack app rejected the read window. oldest and latest take Slack timestamps, and a window is at most 7 days.'
+      )
+    : toUserFacingError(error);
+
+/** `oldest:latest`, either side empty when open. */
+const encodeReadCursor = ({ oldest, latest }: ReadWindow): string =>
+  `${oldest ?? ''}:${latest ?? ''}`;
+
+const decodeReadCursor = (cursor: string): ReadWindow => {
+  const bounds = cursor.split(':');
+  if (bounds.length !== 2 || bounds.some((bound) => bound && !SLACK_WINDOW_BOUND.test(bound))) {
+    throw new Error(
+      'Invalid cursor. Pass the nextCursor from the previous response unchanged, or omit it.'
+    );
+  }
+  const [oldest, latest] = bounds;
+  return { ...(oldest ? { oldest } : {}), ...(latest ? { latest } : {}) };
+};
+
+type RelayReadPage = Awaited<ReturnType<RelayActionClient['readMessages']>>;
+
+const prepareRead = (
+  ctx: ActionContext,
+  action: string,
+  input: { channel: string; oldest?: string; latest?: string; inclusive?: boolean; raw?: boolean }
+): string => {
+  if (input.inclusive !== undefined || input.raw) {
+    ctx.log.debug(
+      `Slack ${action}: inclusive and raw are not supported through the Elastic Slack app and were ignored`
+    );
+  }
+  if ([input.oldest, input.latest].some((bound) => bound && !SLACK_WINDOW_BOUND.test(bound))) {
+    throw new Error('oldest and latest take Slack timestamps, e.g. "1700000000.000100".');
+  }
+  const channelId = input.channel.trim();
+  if (!SLACK_CONVERSATION_ID.test(channelId)) {
+    throw new Error(
+      `"${channelId}" is not a channel ID. Pass the channel ID (C...) from listChannels.`
+    );
+  }
+  return channelId;
+};
+
+const readPage = async (
+  ctx: ActionContext,
+  action: string,
+  channelId: string,
+  read: () => Promise<RelayReadPage>
+): Promise<RelayReadPage | RelayReadOutcome> => {
+  ctx.log.debug(`Slack ${action} request through relay: channel=${channelId}`);
+  try {
+    return await read();
+  } catch (error) {
+    const outcome = toReadOutcome(error, channelId);
+    if (outcome) {
+      return outcome;
+    }
+    ctx.log.error(`Slack ${action} through relay failed: ${(error as Error).message}`);
+    throw toReadError(error);
+  }
+};
+
+const toReadResult = (page: RelayReadPage, nextCursor: string | undefined) => ({
+  ok: true as const,
+  channel: page.channel.id,
+  channelName: page.channel.name,
+  messages: page.messages.map(({ ts, threadTs, replyCount, author, text }) => ({
+    ts,
+    user: author.id,
+    username: author.name,
+    is_bot: author.isBot,
+    text,
+    thread_ts: threadTs,
+    reply_count: replyCount,
+  })),
+  nextCursor,
+  hasMore: nextCursor !== undefined,
+});
+
+/**
+ * Reads a connected public channel through the Relay, newest first. The Relay has no cursor, so
+ * `nextCursor` encodes the next window: the same floor, ending just before the oldest message
+ * returned.
+ *
+ * `inclusive` and `raw` are ignored, and messages carry text only: no blocks, attachments or files.
+ */
+export async function relayGetConversationHistory(
+  connection: SlackRelayConnection,
+  ctx: ActionContext,
+  input: SlackGetConversationHistoryInput
+) {
+  const channelId = prepareRead(ctx, 'getConversationHistory', input);
+
+  const window = input.cursor
+    ? decodeReadCursor(input.cursor)
+    : {
+        oldest:
+          input.oldest ??
+          String(
+            Math.max(
+              0,
+              Math.floor(Number(input.latest ?? Date.now() / 1000)) -
+                RELAY_DEFAULT_HISTORY_WINDOW_SECONDS
+            )
+          ),
+        ...(input.latest ? { latest: input.latest } : {}),
+      };
+
+  const page = await readPage(ctx, 'getConversationHistory', channelId, () =>
+    connection.client.readMessages({
+      tenantKey: connection.tenantKey,
+      channelId,
+      ...window,
+      limit: Math.min(input.limit, RELAY_MAX_READ_LIMIT),
+    })
+  );
+  if ('ok' in page) {
+    return page;
+  }
+
+  const last = page.messages.at(-1);
+  return toReadResult(
+    page,
+    page.truncated && last ? encodeReadCursor({ ...window, latest: last.ts }) : undefined
+  );
+}
+
+/**
+ * Reads one thread of a connected public channel through the Relay, oldest first with the parent
+ * message included. `nextCursor` encodes the next window, starting just after the newest message
+ * returned.
+ *
+ * `inclusive` and `raw` are ignored, and messages carry text only: no blocks, attachments or files.
+ */
+export async function relayGetConversationReplies(
+  connection: SlackRelayConnection,
+  ctx: ActionContext,
+  input: SlackGetConversationRepliesInput
+) {
+  if (!SLACK_MESSAGE_TS.test(input.ts)) {
+    throw new Error('ts takes the parent message timestamp, e.g. "1700000000.000100".');
+  }
+  const channelId = prepareRead(ctx, 'getConversationReplies', input);
+
+  const window = input.cursor
+    ? decodeReadCursor(input.cursor)
+    : {
+        ...(input.oldest ? { oldest: input.oldest } : {}),
+        ...(input.latest ? { latest: input.latest } : {}),
+      };
+
+  const page = await readPage(ctx, 'getConversationReplies', channelId, () =>
+    connection.client.readThread({
+      tenantKey: connection.tenantKey,
+      channelId,
+      threadTs: input.ts,
+      ...window,
+      limit: Math.min(input.limit, RELAY_MAX_READ_LIMIT),
+    })
+  );
+  if ('ok' in page) {
+    return page;
+  }
+
+  const last = page.messages.at(-1);
+  // Only a reply newer than the floor moves the window; anything else would loop.
+  const nextCursor =
+    page.truncated && last && last.ts !== input.ts && last.ts !== window.oldest
+      ? encodeReadCursor({ ...window, oldest: last.ts })
+      : undefined;
+  return { ...toReadResult(page, nextCursor), ts: input.ts };
 }
 
 /**
@@ -265,7 +561,10 @@ export const slackRelay = {
   test: relayTest,
   actions: {
     sendMessage: relaySendMessage,
+    updateMessage: relayUpdateMessage,
     listChannels: relayListChannels,
     resolveChannelId: relayResolveChannelId,
+    getConversationHistory: relayGetConversationHistory,
+    getConversationReplies: relayGetConversationReplies,
   },
 };

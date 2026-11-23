@@ -15,6 +15,7 @@ import type {
   NavigationTreeDefinition,
   SolutionId,
   SolutionNavigationDefinition,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -66,8 +67,21 @@ export interface NavigationPublicStart {
    */
   initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
     id: SolutionId,
-    navigationTree$: Observable<NavigationTreeDefinition<LinkId>>
+    navigationTree$: Observable<NavigationTreeDefinition<LinkId>>,
+    /**
+     * Id of the plugin that owns this navigation tree. When provided, Core attributes the tree's
+     * `link` references to this plugin for the navigation-dependency enforcement test
+     * (see https://github.com/elastic/kibana/issues/66682).
+     */
+    ownerPluginId?: string
   ) => void;
+  /**
+   * Attach supplementary lists to an existing project-nav deep link.
+   * Plugins provide data; chrome renders it. One registration per target. The lists render in
+   * primary and footer hover popovers and, for panel openers, the existing side panel. They do
+   * not create a side panel or render in More.
+   */
+  registerNavigationLinks: (links: ProjectNavigationLinks) => void;
 }
 
 export interface NavigationPublicSetupDependencies {

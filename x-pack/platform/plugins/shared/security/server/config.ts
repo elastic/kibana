@@ -214,12 +214,14 @@ const providersConfigSchema = schema.object(
   }
 );
 
+export const DEFAULT_COOKIE_NAME = 'sid';
+
 export const ConfigSchema = schema.object({
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
   showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
   showNavLinks: schema.boolean({ defaultValue: true }),
-  cookieName: schema.string({ defaultValue: 'sid' }),
+  cookieName: schema.string({ defaultValue: DEFAULT_COOKIE_NAME }),
   encryptionKey: schema.conditional(
     schema.contextRef('dist'),
     true,
@@ -322,10 +324,19 @@ export const ConfigSchema = schema.object({
     serverless: schema.boolean({ defaultValue: true }),
   }),
 
-  // Setting only allowed in the Serverless offering
-  serviceAccounts: offeringBasedSchema({
-    serverless: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+  serviceAccounts: schema.object({
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: true }),
+    }),
+    requestLifetime: schema.duration({
+      defaultValue: '10m',
+      validate(value) {
+        const milliseconds = value.asMilliseconds();
+        if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+          return 'the value must be a positive, finite duration.';
+        }
+      },
     }),
   }),
 
@@ -375,6 +386,26 @@ export const ConfigSchema = schema.object({
         true,
         schema.string(),
         schema.maybe(schema.string())
+      ),
+      unsafe: schema.maybe(
+        schema.object({
+          // Default expiration for internal API keys granted via UIAM without an explicit expiration,
+          // mirroring `xpack.security.cloud.credential.mint_expiration` in Elasticsearch. Intended
+          // ONLY for short-lived test projects, so that internal API keys orphaned after the project
+          // is deleted expire instead of accumulating against the org-wide limit. Must not be set in
+          // any other project: rules, tasks, and anything else relying on these keys will break
+          // once the keys expire.
+          grantedApiKeyDefaultExpiration: schema.maybe(
+            schema.duration({
+              validate(value) {
+                const milliseconds = value.asMilliseconds();
+                if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+                  return 'the value must be a positive, finite duration.';
+                }
+              },
+            })
+          ),
+        })
       ),
     }),
   }),

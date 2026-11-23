@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { isEmpty } from 'lodash';
 import { OWNERS } from '../constants';
 import type { HttpApiPrivilegeOperation, Owner } from '../constants/types';
@@ -14,11 +14,11 @@ import type { HttpApiPrivilegeOperation, Owner } from '../constants/types';
  * This type is only used to validate for deletion, it does not check all the fields that should exist in the file
  * metadata.
  */
-export const CaseFileMetadataForDeletionRt = rt.strict({
-  caseIds: rt.array(rt.string),
+export const CaseFileMetadataForDeletionSchema = z.object({
+  caseIds: z.array(z.string().max(512)),
 });
 
-export type CaseFileMetadataForDeletion = rt.TypeOf<typeof CaseFileMetadataForDeletionRt>;
+export type CaseFileMetadataForDeletion = z.infer<typeof CaseFileMetadataForDeletionSchema>;
 
 const FILE_KIND_DELIMITER = 'FilesCases';
 

@@ -78,6 +78,7 @@ describe('useChromeAppHeaderRegistration', () => {
       menu: undefined,
       favorite: undefined,
       share: undefined,
+      experimentalDashboardAiAction: undefined,
       metadata: [{ type: 'text', label: 'Updated by: analyst' }],
       spacing: undefined,
     });

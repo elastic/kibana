@@ -1,0 +1,124 @@
+{
+  "10.2.0": [
+    {
+      "name": "Checkout latency triage",
+      "description": "Investigate checkout latency alerts.",
+      "automationType": "custom",
+      "isEnabled": true,
+      "workflowId": "workflow-checkout-latency",
+      "trigger": {
+        "rows": [
+          {
+            "kind": "alert",
+            "ruleNamePattern": "checkout",
+            "ruleNameMatchMode": "substring",
+            "alertStatus": "active",
+            "tags": [
+              "checkout"
+            ]
+          }
+        ]
+      },
+      "execution": {
+        "promptTemplate": "Find the root cause of {{alert.rule.name}}.",
+        "reasoningMode": "investigate"
+      },
+      "completion": {
+        "action": "create_investigation"
+      },
+      "runtime": {
+        "dailyDispatchLimit": 10,
+        "overlapPolicy": "drop"
+      },
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-01T10:00:00.000Z"
+    },
+    {
+      "name": "Nightly health report",
+      "automationType": "managed",
+      "isEnabled": false,
+      "trigger": {
+        "rows": [
+          {
+            "kind": "schedule",
+            "schedulePreset": "daily",
+            "timezone": "UTC"
+          }
+        ]
+      },
+      "execution": {},
+      "completion": {
+        "action": "silent"
+      },
+      "runtime": {},
+      "createdAt": "2026-09-02T08:00:00.000Z",
+      "updatedAt": "2026-09-03T08:00:00.000Z"
+    }
+  ],
+  "10.3.0": [
+    {
+      "name": "Checkout latency triage",
+      "description": "Investigate checkout latency alerts.",
+      "automationType": "custom",
+      "isEnabled": true,
+      "workflowId": "workflow-checkout-latency",
+      "trigger": {
+        "rows": [
+          {
+            "kind": "alert",
+            "ruleNamePattern": "checkout",
+            "ruleNameMatchMode": "substring",
+            "alertStatus": "active",
+            "tags": [
+              "checkout"
+            ]
+          }
+        ]
+      },
+      "execution": {
+        "promptTemplate": "Find the root cause of {{alert.rule.name}}.",
+        "reasoningMode": "investigate"
+      },
+      "completions": [
+        {
+          "action": "create_investigation"
+        }
+      ],
+      "runtime": {
+        "dailyDispatchLimit": 10,
+        "overlapPolicy": "drop"
+      },
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-01T10:00:00.000Z",
+      "completion": {
+        "action": "create_investigation"
+      }
+    },
+    {
+      "name": "Nightly health report",
+      "automationType": "managed",
+      "isEnabled": false,
+      "trigger": {
+        "rows": [
+          {
+            "kind": "schedule",
+            "schedulePreset": "daily",
+            "timezone": "UTC"
+          }
+        ]
+      },
+      "execution": {},
+      "completions": [
+        {
+          "action": "silent"
+        }
+      ],
+      "runtime": {},
+      "createdAt": "2026-09-02T08:00:00.000Z",
+      "updatedAt": "2026-09-03T08:00:00.000Z",
+      "completion": {
+        "action": "silent"
+      }
+    }
+  ]
+}

@@ -47,7 +47,8 @@ export const createRunAgentStepDefinition = (core: CoreSetup) => {
         },
         'connector-id': {
           connectorIdSelection: {
-            connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
+            connectorTypes: ['inference.unified_completion'],
+            inferenceFeatureId: 'agent_builder',
             enableCreation: false,
           },
         },

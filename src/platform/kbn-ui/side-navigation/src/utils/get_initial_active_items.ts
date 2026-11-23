@@ -29,7 +29,7 @@ export const getActiveItems = (
     return { primaryItem: null, secondaryItem: null };
   }
 
-  // Search the secondary menu items using their IDs (prioritize children over parents)
+  // Search structural secondary items only. Supplementary rows do not own active state.
   for (const primary of [...items.primaryItems, ...(items.overflowItems ?? [])]) {
     if (!primary.sections) continue;
 

@@ -84,4 +84,30 @@ describe('getActiveItems', () => {
     expect(result.primaryItem?.id).toBe('settings');
     expect(result.secondaryItem).toBeNull();
   });
+
+  it('keeps the primary active when only a supplementary row matches', () => {
+    const withSupplementarySections: NavigationStructure = {
+      ...navigation,
+      primaryItems: [
+        {
+          ...navigation.primaryItems[1],
+          supplementarySections: [
+            {
+              id: 'recent',
+              items: [createSecondary('recent-dashboard', 'Recent')],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(getActiveItems(withSupplementarySections, 'dashboards').primaryItem?.id).toBe(
+      'dashboards'
+    );
+    expect(getActiveItems(withSupplementarySections, 'dashboards').secondaryItem).toBeNull();
+    expect(getActiveItems(withSupplementarySections, 'recent-dashboard')).toEqual({
+      primaryItem: null,
+      secondaryItem: null,
+    });
+  });
 });

@@ -220,7 +220,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await pageObjects.dashboard.exitFullscreen();
     });
 
-    await page.testSubj.click('app-menu-overflow-button');
+    await pageObjects.appMenu.revealItem('dashboardFullScreenMode');
     await expect(page.testSubj.locator('dashboardFullScreenMode')).toBeVisible();
   });
 

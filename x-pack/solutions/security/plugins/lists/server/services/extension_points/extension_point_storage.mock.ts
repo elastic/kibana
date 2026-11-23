@@ -15,6 +15,7 @@ import { ExtensionPointStorage } from './extension_point_storage';
 import type {
   ExceptionsListPreCreateItemServerExtension,
   ExceptionsListPreDeleteItemServerExtension,
+  ExceptionsListPreDeleteListServerExtension,
   ExceptionsListPreExportServerExtension,
   ExceptionsListPreGetOneItemServerExtension,
   ExceptionsListPreImportServerExtension,
@@ -46,6 +47,8 @@ export interface ExtensionPointStorageContextMock {
   exceptionPreSummary: jest.Mocked<ExceptionsListPreSummaryServerExtension>;
   /** an exception list pre-delete extension */
   exceptionPreDelete: jest.Mocked<ExceptionsListPreDeleteItemServerExtension>;
+  /** an exception list container pre-delete extension */
+  exceptionPreDeleteList: jest.Mocked<ExceptionsListPreDeleteListServerExtension>;
   callbackContext: jest.Mocked<ServerExtensionCallbackContext>;
   /** An Exception List pre-import extension point */
   exceptionPreImport: jest.Mocked<ExceptionsListPreImportServerExtension>;
@@ -107,6 +110,11 @@ export const createExtensionPointStorageMock = (
     type: 'exceptionsListPreDeleteItem',
   };
 
+  const exceptionPreDeleteList: ExtensionPointStorageContextMock['exceptionPreDeleteList'] = {
+    callback: jest.fn(async ({ data }) => data),
+    type: 'exceptionsListPreDeleteList',
+  };
+
   const exceptionPreImport: ExtensionPointStorageContextMock['exceptionPreImport'] = {
     callback: jest.fn(async ({ data }) => data),
     type: 'exceptionsListPreImport',
@@ -120,6 +128,7 @@ export const createExtensionPointStorageMock = (
   extensionPointStorage.add(exceptionPreExport);
   extensionPointStorage.add(exceptionPreSummary);
   extensionPointStorage.add(exceptionPreDelete);
+  extensionPointStorage.add(exceptionPreDeleteList);
   extensionPointStorage.add(exceptionPreImport);
 
   return {
@@ -129,6 +138,7 @@ export const createExtensionPointStorageMock = (
     },
     exceptionPreCreate,
     exceptionPreDelete,
+    exceptionPreDeleteList,
     exceptionPreExport,
     exceptionPreGetOne,
     exceptionPreImport,

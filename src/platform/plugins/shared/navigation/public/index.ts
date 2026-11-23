@@ -22,7 +22,11 @@ export type {
   AddSolutionNavigationArg,
 } from './types';
 
-export { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '../common';
+export type {
+  ProjectNavigationLinks,
+  ProjectNavigationLinkList,
+  ProjectNavigationLinkItem,
+} from '@kbn/core-chrome-browser';
 
 // Export plugin after all other imports
 import { NavigationPublicPlugin } from './plugin';

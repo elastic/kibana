@@ -10,7 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { DiscoverTabType } from '@kbn/discover-utils';
+import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverDataSource } from '../../../common/data_sources';
 import type { ProfileStateDefinition } from '../../../common/context_awareness';
 import type { AsyncProfileProvider, ContextWithProfileId } from '../profile_service';
@@ -25,6 +25,7 @@ export enum DataSourceCategory {
   Traces = 'traces',
   Metrics = 'metrics',
   Logs = 'logs',
+  Security = 'security',
   Default = 'default',
 }
 

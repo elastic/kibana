@@ -24,7 +24,12 @@ import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
-import type { FieldListGroups, FieldListItem, FieldsGroup, FieldsGroupNames } from '../../types';
+import {
+  FieldsGroupNames,
+  type FieldListGroups,
+  type FieldListItem,
+  type FieldsGroup,
+} from '../../types';
 import { ExistenceFetchStatus } from '../../types';
 import {
   useRestorableState,
@@ -55,7 +60,9 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   screenReaderDescriptionId?: string;
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
   muteScreenReader?: boolean; // Changes aria-live from "polite" to "off" - it's useful when the numbers change due to something not directly related to the field list and we want to avoid announcing it.
+  isSelectedFieldsReorderable?: boolean; // Whether the selected fields can be reordered via drag and drop
   'data-test-subj'?: string;
+  onDeselectSelectedFields?: () => void;
 }
 
 function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
@@ -67,7 +74,9 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   screenReaderDescriptionId,
   muteScreenReader,
   localStorageKeyPrefix,
+  isSelectedFieldsReorderable,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
+  onDeselectSelectedFields,
 }: FieldListGroupedProps<T>) {
   const styles = useMemoCss(componentStyles);
 
@@ -142,18 +151,19 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       scrollTopRef.current = scrollContainer.scrollTop;
 
       if (nearBottom) {
-        setPageSize(
+        // Only ever grows the budget, so a scroll event can't undo what `onToggle` just reserved
+        setPageSize((currentPageSize) =>
           Math.max(
-            PAGINATION_SIZE,
+            currentPageSize,
             Math.min(
-              pageSize + PAGINATION_SIZE * 0.5,
+              currentPageSize + PAGINATION_SIZE * 0.5,
               getDisplayedFieldsLength<T>(fieldGroups, accordionState)
             )
           )
         );
       }
     }
-  }, [scrollContainer, scrollTopRef, setPageSize, pageSize, fieldGroups, accordionState]);
+  }, [scrollContainer, scrollTopRef, setPageSize, fieldGroups, accordionState]);
 
   const paginatedFields = useMemo(() => {
     let remainingItems = pageSize;
@@ -321,6 +331,9 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                   paginatedFields={paginatedFields[key]}
                   groupIndex={index + 1}
                   groupName={key as FieldsGroupNames}
+                  isReorderable={
+                    isSelectedFieldsReorderable && key === FieldsGroupNames.SelectedFields
+                  }
                   onToggle={(open) => {
                     setAccordionState((s) => ({
                       ...s,
@@ -369,6 +382,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                       </EuiSkipLink>
                     ) : null
                   }
+                  onDeselectSelectedFields={onDeselectSelectedFields}
                 />
                 <EuiSpacer size="m" />
               </Fragment>

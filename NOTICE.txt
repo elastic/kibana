@@ -61,11 +61,6 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
-This module was heavily inspired by the externals plugin that ships with webpack@97d58d31
-MIT License http://www.opensource.org/licenses/mit-license.php
-Author Tobias Koppers @sokra
-
----
 This product has relied on ASTExplorer that is licensed under MIT.
 
 ---
@@ -161,6 +156,16 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+The ORCA grader port in @kbn/evals-suite-nightshift-investigations (`orca/check_prediction.ts`)
+is adapted from the ORCA benchmark's verifier `check_prediction.py`
+(https://github.com/ORCA-bench/ORCA-bench), from "ORCA: How Ready Are Language Model Agents for
+Oncall?" by Albert Gong, Kyuseong Choi, Abhineet Agarwal, Jason Schechner, Ryan Huang, Raj
+Agrawal, Anish Agarwal and Raaz Dwivedi (arXiv:2607.28545).
+Copyright 2026 Traversal, Inc.
+Licensed under the Apache License, Version 2.0, https://www.apache.org/licenses/LICENSE-2.0
+Changes: ported from Python to TypeScript with its prompts, schemas and scoring unchanged.
 
 ---
 This code includes a copy of the `normalize-path`

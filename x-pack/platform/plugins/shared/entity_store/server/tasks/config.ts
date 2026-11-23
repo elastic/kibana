@@ -22,6 +22,16 @@ export const TasksConfig = {
     timeout: '59s',
     interval: '1m',
   },
+  // Separate task so non-priority can eventually run on its own cadence. It matches the priority
+  // schedule for now: a longer interval for the high-volume process is proposed but not decided,
+  // and a longer interval also needs a longer timeout, which changes how long one run holds a Task
+  // Manager slot.
+  [EntityStoreTaskType.enum.extractEntityNonPriority]: {
+    title: 'Entity Store - Execute Entity Task (non-priority)',
+    type: 'entity_store:v2:extract_entity_non_priority_task',
+    timeout: '59s',
+    interval: '1m',
+  },
   [EntityStoreTaskType.enum.entityMaintainer]: {
     title: 'Entity Store - Entity Maintainer Task',
     type: 'entity_store:v2:entity_maintainer_task',
@@ -50,3 +60,6 @@ export const TasksConfig = {
     timeout: '60m',
   },
 } as const satisfies Record<EntityStoreTaskType, EntityStoreTaskConfig>;
+
+export const getHistorySnapshotTaskId = (namespace: string): string =>
+  `${TasksConfig[EntityStoreTaskType.enum.historySnapshot].type}:${namespace}`;

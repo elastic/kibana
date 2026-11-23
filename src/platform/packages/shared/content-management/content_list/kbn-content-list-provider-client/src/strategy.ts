@@ -21,8 +21,13 @@ import {
   MANAGED_USER_FILTER,
   NO_CREATOR_USER_FILTER,
   getCreatorKey,
+  TAG_FILTER_ID,
 } from '@kbn/content-list-provider';
-import type { TableListViewFindItemsFn } from './types';
+import type {
+  SavedObjectReference,
+  TableListViewFindItemsFn,
+  TableListViewFindItemsOptions,
+} from './types';
 import type { ContentListFilterMap } from './filters';
 import { matchesFilterValue } from './filters';
 import type { ContentListSortFieldMap } from './sorting';
@@ -61,10 +66,10 @@ export interface ClientStrategy {
   /**
    * Fetches items and applies client-side filtering, sorting, and pagination.
    *
-   * Internally caches the server response keyed by `searchQuery`. Calls to
-   * `findItems` with the same `searchQuery` reuse the cache and only
-   * recompute the client-side transforms. A new `searchQuery` triggers a
-   * fresh server fetch.
+   * Internally caches the server response keyed by `searchQuery` and the active
+   * tag filters, both of which are resolved server-side. Calls with the same key
+   * reuse the cache and only recompute the client-side transforms; a change to
+   * either triggers a fresh server fetch.
    *
    * The core provider calls {@link ClientStrategy.onInvalidate} before
    * refetching after mutations so the next call always hits the server.
@@ -72,8 +77,9 @@ export interface ClientStrategy {
   findItems: FindItemsFn;
   /**
    * Called by the core provider before an explicit refetch (e.g. after a
-   * mutation) to clear the internal item cache. The next `findItems` call
-   * will fetch from the server regardless of `searchQuery`.
+   * mutation) to drop the internal cache key. The next `findItems` call
+   * will fetch from the server regardless of `searchQuery`. The previous
+   * snapshot stays readable via `getItems()` until that fetch resolves.
    */
   onInvalidate: () => void;
   /**
@@ -109,7 +115,8 @@ const getSortableProperty = (obj: object | undefined, key: string): string | num
  *
  * Handles the nested `attributes` structure and provides a fallback chain:
  * 1. Known fields (`title`, `description`, `updatedAt`, `createdAt`).
- * 2. Top-level item fields (`id`, `type`, etc.).
+ * 2. Top-level string or number properties (`id`, `type`, and decorator-added
+ *    values such as `accessedAt`).
  * 3. Custom attributes (`status`, `priority`, etc.).
  *
  * Returns `null` for missing values so the sorting logic can push them to the end.
@@ -140,11 +147,64 @@ const getUserContentFieldValue = (
 };
 
 /**
- * Sorts items by a specified field.
+ * Resolves the sortable value of `field` for an item.
+ *
+ * A custom `getValue` result is authoritative, including `null`, which means
+ * "no value" and sorts last. Only `undefined` (or no `getValue`) falls through
+ * to the built-in resolver.
+ */
+const getSortValue = (
+  item: UserContentCommonSchema,
+  field: string,
+  customSorts: ContentListSortFieldMap
+): string | number | null => {
+  const customValue = customSorts[field]?.getValue?.(item);
+  return customValue !== undefined ? customValue : getUserContentFieldValue(item, field);
+};
+
+/**
+ * Compares two items on a single field. Values that are `null` sort last
+ * regardless of direction, and two `null` values compare equal.
+ */
+const compareByField = (
+  a: UserContentCommonSchema,
+  b: UserContentCommonSchema,
+  field: string,
+  direction: 'asc' | 'desc',
+  customSorts: ContentListSortFieldMap
+): number => {
+  const aValue = getSortValue(a, field, customSorts);
+  const bValue = getSortValue(b, field, customSorts);
+  if (aValue === null && bValue === null) {
+    return 0;
+  }
+  if (aValue === null) {
+    return 1;
+  }
+  if (bValue === null) {
+    return -1;
+  }
+  if (typeof aValue === 'string' && typeof bValue === 'string') {
+    const comparison = aValue.localeCompare(bValue);
+    return direction === 'asc' ? comparison : -comparison;
+  }
+  if (aValue < bValue) {
+    return direction === 'asc' ? -1 : 1;
+  }
+  if (aValue > bValue) {
+    return direction === 'asc' ? 1 : -1;
+  }
+  return 0;
+};
+
+/**
+ * Sorts items by a specified field, applying the field's `fallbackSort`
+ * (if any) when the primary comparison is equal.
  *
  * @param items - The items to sort.
  * @param field - The field name to sort by.
  * @param direction - Sort direction ('asc' or 'desc').
+ * @param customSorts - Registered custom sort fields.
  * @returns A new sorted array (does not mutate the original).
  */
 const sortItems = (
@@ -153,33 +213,13 @@ const sortItems = (
   direction: 'asc' | 'desc',
   customSorts: ContentListSortFieldMap = {}
 ): UserContentCommonSchema[] => {
+  const fallbackSort = customSorts[field]?.fallbackSort;
   return [...items].sort((a, b) => {
-    const customSort = customSorts[field];
-    const aValue = customSort?.getValue?.(a) ?? getUserContentFieldValue(a, field);
-    const bValue = customSort?.getValue?.(b) ?? getUserContentFieldValue(b, field);
-
-    if (aValue === null && bValue === null) {
-      return 0;
+    const primary = compareByField(a, b, field, direction, customSorts);
+    if (primary !== 0 || !fallbackSort) {
+      return primary;
     }
-    if (aValue === null) {
-      return 1;
-    }
-    if (bValue === null) {
-      return -1;
-    }
-
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      const comparison = aValue.localeCompare(bValue);
-      return direction === 'asc' ? comparison : -comparison;
-    }
-
-    if (aValue < bValue) {
-      return direction === 'asc' ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return direction === 'asc' ? 1 : -1;
-    }
-    return 0;
+    return compareByField(a, b, fallbackSort.field, fallbackSort.direction, customSorts);
   });
 };
 
@@ -201,6 +241,29 @@ const asIncludeExclude = (value: ActiveFilters[string]): IncludeExcludeFilter | 
   value != null && typeof value === 'object' && ('include' in value || 'exclude' in value)
     ? (value as IncludeExcludeFilter)
     : undefined;
+
+/**
+ * Converts tag filter values into saved object references.
+ *
+ * The values are tag IDs: `@kbn/content-list-provider` registers a `tag` field
+ * definition that resolves tag names to IDs while parsing the query text, so
+ * both the Tags filter and a typed `tag:("name")` clause arrive here as IDs.
+ */
+const toTagReferences = (tagIds?: string[]): SavedObjectReference[] | undefined =>
+  tagIds?.length ? tagIds.map((id) => ({ type: 'tag', id })) : undefined;
+
+/**
+ * Identifies a server fetch. Tag filters are part of the key because they are
+ * sent to the server, so changing them has to invalidate the cached snapshot.
+ * IDs are sorted so the same set selected in a different order — or restored
+ * from the URL — reuses the snapshot instead of refetching it.
+ */
+const getFetchKey = (searchQuery: string, tagFilter?: IncludeExcludeFilter): string =>
+  JSON.stringify([
+    searchQuery,
+    [...(tagFilter?.include ?? [])].sort(),
+    [...(tagFilter?.exclude ?? [])].sort(),
+  ]);
 
 const RESERVED_FILTER_KEYS = new Set<string>(['search']);
 
@@ -261,6 +324,20 @@ export const filterItems = (
 };
 
 /**
+ * Parses a date string, returning `undefined` when it is absent or unparseable.
+ * An Invalid Date passes `?.` and `instanceof Date`, then throws `RangeError`
+ * the first time a consumer serialises it — `undefined` is already handled.
+ */
+const parseDate = (value?: string): Date | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+};
+
+/**
  * Transforms a `UserContentCommonSchema` item to `ContentListItem`.
  *
  * This is applied only to paginated results for performance.
@@ -298,7 +375,7 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
     title: item.attributes?.title ?? '',
     description: item.attributes?.description,
     type: item.type,
-    updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+    updatedAt: parseDate(item.updatedAt),
     tags: extractTagIds(item.references),
     createdAt: item.createdAt,
     createdBy: item.createdBy,
@@ -310,9 +387,13 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
 /**
  * Creates a client strategy that wraps a `TableListView`-style `findItems` function.
  *
- * The strategy caches the server response keyed by `searchQuery`. When filters,
- * sort, or page change without a new search query, the cached items are reused
- * and only the client-side transforms are reapplied — no server fetch occurs.
+ * The strategy caches the server response keyed by `searchQuery` and the active
+ * tag filters. Sort, page, and the remaining filters are applied client-side, so
+ * changing them reuses the cached items without a server fetch.
+ *
+ * Tag filters are the exception because they are resolved server-side: they are
+ * forwarded as `references` / `referencesToExclude` so the consumer's search API
+ * applies them before `listingLimit` truncates the result.
  *
  * The core provider calls {@link ClientStrategy.onInvalidate} before any
  * explicit refetch (e.g. after a delete) to force the next `findItems` call
@@ -332,7 +413,7 @@ export const createClientStrategy = (
 ): ClientStrategy => {
   let rawItems: UserContentCommonSchema[] = [];
   let decoratedItems: UserContentCommonSchema[] = [];
-  let lastSearchQuery: string | undefined;
+  let lastFetchKey: string | undefined;
   const listeners = new Set<ItemsSnapshotListener>();
 
   const notify = () => {
@@ -349,10 +430,21 @@ export const createClientStrategy = (
   const findItemsFn: FindItemsFn = async (params: FindItemsParams): Promise<FindItemsResult> => {
     const { searchQuery, filters, sort, page, signal } = params;
 
-    if (lastSearchQuery !== searchQuery) {
+    const tagFilter = asIncludeExclude(filters[TAG_FILTER_ID]);
+    const fetchKey = getFetchKey(searchQuery, tagFilter);
+
+    if (lastFetchKey !== fetchKey) {
+      const references = toTagReferences(tagFilter?.include);
+      const referencesToExclude = toTagReferences(tagFilter?.exclude);
+      const options: TableListViewFindItemsOptions = {
+        ...(listingLimit !== undefined && { listingLimit }),
+        ...(references && { references }),
+        ...(referencesToExclude && { referencesToExclude }),
+      };
+
       const result = await tableListViewFindItems(
         searchQuery,
-        listingLimit !== undefined ? { listingLimit } : undefined,
+        Object.keys(options).length > 0 ? options : undefined,
         signal
       );
       if (signal?.aborted) {
@@ -360,7 +452,7 @@ export const createClientStrategy = (
       }
       rawItems = result.hits;
       await applyDecoration();
-      lastSearchQuery = searchQuery;
+      lastFetchKey = fetchKey;
     }
 
     let items = filterItems(decoratedItems, filters, resolveConfig(customFilters));
@@ -378,11 +470,11 @@ export const createClientStrategy = (
     };
   };
 
+  // Only drops the cache key; the next `findItems` refetches and replaces the
+  // items. Clearing them here would instead report an empty set to `getItems()`
+  // consumers until that fetch resolves, zeroing every facet count.
   const onInvalidate = () => {
-    lastSearchQuery = undefined;
-    rawItems = [];
-    decoratedItems = [];
-    notify();
+    lastFetchKey = undefined;
   };
 
   const onRefresh = async () => {

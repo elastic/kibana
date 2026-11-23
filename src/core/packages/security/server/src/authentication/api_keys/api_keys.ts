@@ -62,10 +62,12 @@ export interface NativeAPIKeysType {
    * Tries to grant an API key for the current user.
    * @param request Request instance.
    * @param createParams Create operation parameters.
+   * @param options Optional grant options. Omit `refresh` to keep Elasticsearch's default.
    */
   grantAsInternalUser(
     request: KibanaRequest,
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    options?: GrantAPIKeyOptions
   ): Promise<GrantAPIKeyResult | null>;
 
   /**
@@ -158,6 +160,10 @@ export interface CreateCrossClusterAPIKeyParams {
   };
 }
 
+export interface GrantAPIKeyOptions {
+  refresh?: boolean | 'wait_for';
+}
+
 export interface GrantAPIKeyResult {
   /**
    * Unique id for this API key
@@ -176,6 +182,7 @@ export interface GrantAPIKeyResult {
 export interface CloneAPIKeyParams {
   name: string;
   metadata?: Record<string, unknown>;
+  refresh?: boolean | 'wait_for';
 }
 
 export interface CloneAPIKeyResult {

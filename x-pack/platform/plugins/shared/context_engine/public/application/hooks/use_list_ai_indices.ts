@@ -7,7 +7,7 @@
 
 import type { TableListViewFindItemsFn } from '@kbn/content-list-provider-client';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { useQuery, useQueryClient } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { ListAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { listAiIndices } from '../api/ai_indices';
@@ -30,7 +30,6 @@ export const useListAiIndices = (): ListAiIndicesResult => {
   const {
     services: { http },
   } = useKibana();
-  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery<ListAiIndexResponse, Error>(
     getAiIndexListQueryOptions(http)
@@ -38,13 +37,10 @@ export const useListAiIndices = (): ListAiIndicesResult => {
 
   const findItems = useCallback<TableListViewFindItemsFn>(
     async (searchQuery) => {
-      const { ai_indices } = await queryClient.ensureQueryData<ListAiIndexResponse>(
-        getAiIndexListQueryOptions(http)
-      );
-
+      const { ai_indices } = await listAiIndices(http);
       return createFindAiIndices(ai_indices)(searchQuery);
     },
-    [queryClient, http]
+    [http]
   );
 
   return {

@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { TakeAction } from '../../../../flyout/entity_details/shared/components/take_action';
+import { TakeAction } from '../../shared/components/take_action';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
@@ -18,6 +18,7 @@ import { AiAssistantButton } from '../../../../entity_analytics/components/ai_as
 import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import type { EntityToAttach } from '../../../../cases/attachments/entity';
 import { useEntityCaseTakeActionItems } from '../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
+import { useInvalidateEntityGrid } from '../../../../entity_analytics/components/home/entities_grid/hooks/use_invalidate_entity_grid';
 
 export interface FooterProps {
   /**
@@ -47,8 +48,11 @@ export const Footer = ({ hostName, identityFields, entity }: FooterProps) => {
     if (!euidApi?.euid || !entity) {
       return undefined;
     }
-    return euidApi.euid.kql.getEuidFilterBasedOnDocument('host', entity);
-  }, [euidApi?.euid, entity]);
+    return euidApi.euid.kql.getEuidFilterBasedOnDocument(
+      euidApi.getBuiltInEntityDefinition('host'),
+      entity
+    );
+  }, [euidApi, entity]);
 
   const entityStoreId = entity?.entity?.id;
   const risk = entity ? getRiskFromEntityRecord(entity) : undefined;
@@ -59,7 +63,10 @@ export const Footer = ({ hostName, identityFields, entity }: FooterProps) => {
     () => ({ id: entityStoreId ?? '', name: identityHostName, type: 'host', riskLevel, riskScore }),
     [entityStoreId, identityHostName, riskLevel, riskScore]
   );
-  const additionalItems = useEntityCaseTakeActionItems(entityToAttach);
+  const invalidateEntityGrid = useInvalidateEntityGrid();
+  const additionalItems = useEntityCaseTakeActionItems(entityToAttach, {
+    onSuccess: invalidateEntityGrid,
+  });
 
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">

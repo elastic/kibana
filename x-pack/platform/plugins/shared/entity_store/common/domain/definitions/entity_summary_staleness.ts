@@ -41,6 +41,8 @@ export interface SaveEntityAiSummarySummary {
   recommended_actions?: string[] | null;
   generated_at: number;
   staleness: EntitySummaryStaleness;
+  /** Distinguishes summary variants for the same entity (e.g. a resolution-group summary); omitted for single-entity summaries. */
+  variant_id?: string;
 }
 
 export interface SaveEntityAiSummaryParams {

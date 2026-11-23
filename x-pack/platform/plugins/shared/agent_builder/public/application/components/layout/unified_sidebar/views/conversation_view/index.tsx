@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  euiFontSize,
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -45,7 +46,6 @@ import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
-import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
@@ -97,8 +97,9 @@ const pinnedSectionCss = css`
   max-block-size: 40%;
 `;
 
-const sectionLabelCss = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+const sectionLabelCss = (euiThemeContext: UseEuiTheme) => css`
+  font-size: ${euiFontSize(euiThemeContext, 'xs').fontSize};
+  padding: ${euiThemeContext.euiTheme.size.xs} ${euiThemeContext.euiTheme.size.s};
 `;
 
 export const ConversationSidebarView: React.FC = () => {
@@ -126,8 +127,6 @@ export const ConversationSidebarView: React.FC = () => {
   const { total: unpinnedTotal } = useConversationList({ agentId, pinned: false });
   // Enable the Search button when any conversations exist across either list.
   const hasConversations = unpinnedTotal > 0 || pinnedTotal > 0;
-
-  const { removeAllErrors, removeError } = useStreamingContext();
 
   const { markAsPinned, markAsUnpinned } = useConversationListMutations({
     routeConversationId: conversationId,
@@ -235,12 +234,7 @@ export const ConversationSidebarView: React.FC = () => {
   ]);
 
   const handlePressNewConversation = () => {
-    removeAllErrors();
     navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
-  };
-
-  const handleConversationItemClick = (clickedConversationId: string) => {
-    removeError(clickedConversationId);
   };
 
   return (
@@ -251,8 +245,6 @@ export const ConversationSidebarView: React.FC = () => {
       data-test-subj="agentBuilderSidebar-conversation"
       className="eui-fullHeight"
     >
-      <EuiHorizontalRule margin="none" />
-
       <EuiFlexItem grow className="eui-fullHeight">
         <EuiFlexGroup
           direction="column"
@@ -275,15 +267,14 @@ export const ConversationSidebarView: React.FC = () => {
                 className="eui-fullHeight"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                  <EuiText size="s" color="subdued" css={sectionLabelCss}>
                     {customizeLabel}
                   </EuiText>
-                  <EuiSpacer size="xs" />
                   <SidebarNavList items={navItems} isActive={isActive} />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiSpacer size="m" />
+                  <EuiHorizontalRule margin="s" />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow className="eui-fullHeight">
@@ -299,10 +290,9 @@ export const ConversationSidebarView: React.FC = () => {
                       className="eui-fullHeight"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                        <EuiText size="s" color="subdued" css={sectionLabelCss}>
                           {pinnedLabel}
                         </EuiText>
-                        <EuiSpacer size="xs" />
                       </EuiFlexItem>
                       <EuiFlexItem
                         grow={false}
@@ -319,20 +309,18 @@ export const ConversationSidebarView: React.FC = () => {
                           isFetchingNextPage={isFetchingNextPinnedPage}
                           isDropDisabled={draggingFromId === DROPPABLE_IDS.PINNED}
                           backgroundColor={dropBackgrounds[DROPPABLE_IDS.PINNED]}
-                          onItemClick={handleConversationItemClick}
                           isDragging={draggingFromId !== null}
                         />
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
-                        <EuiSpacer size="m" />
+                        <EuiSpacer size="l" />
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="subdued" css={sectionLabelCss}>
+                        <EuiText size="s" color="subdued" css={sectionLabelCss}>
                           {chatsLabel}
                         </EuiText>
-                        <EuiSpacer size="s" />
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
@@ -391,7 +379,6 @@ export const ConversationSidebarView: React.FC = () => {
                           agentId={agentId}
                           currentConversationId={conversationId}
                           isNewConversationRoute={isNewConversationRoute}
-                          onItemClick={handleConversationItemClick}
                           isDropDisabled={draggingFromId === DROPPABLE_IDS.CHATS}
                           backgroundColor={dropBackgrounds[DROPPABLE_IDS.CHATS]}
                         />
@@ -415,7 +402,6 @@ export const ConversationSidebarView: React.FC = () => {
           currentConversationId={conversationId}
           onClose={() => setIsSearchModalOpen(false)}
           onSelectConversation={(id) => {
-            removeError(id);
             navigateToAgentBuilderUrl(
               appPaths.agent.conversations.byId({ agentId, conversationId: id })
             );

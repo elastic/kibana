@@ -27,6 +27,12 @@ import {
  */
 
 /** Local shape: the parsed YAML is untyped and only these fields are asserted on. */
+interface ParsedStep {
+  type?: string;
+  steps?: ParsedStep[];
+  else?: ParsedStep[];
+}
+
 interface ParsedActionWorkflow {
   tags?: string[];
   consts?: { actionMetadata?: unknown };
@@ -34,8 +40,15 @@ interface ParsedActionWorkflow {
     type?: string;
     inputs?: { properties?: Record<string, { type?: string }>; required?: string[] };
   }>;
-  steps?: Array<{ type?: string }>;
+  steps?: ParsedStep[];
 }
+
+const flattenSteps = (steps: ParsedStep[]): ParsedStep[] =>
+  steps.flatMap((step) => [
+    step,
+    ...flattenSteps(step.steps ?? []),
+    ...flattenSteps(step.else ?? []),
+  ]);
 
 const actionWorkflowCandidates = managedWorkflowDefinitions
   .filter((definition): definition is typeof definition & { yaml: string } => 'yaml' in definition)
@@ -77,7 +90,9 @@ describe('action workflow contract', () => {
       });
 
       it('emits an explicit output, since workflow.execute cannot type a child result', () => {
-        expect(workflow.steps?.map(({ type }) => type)).toContain('workflow.output');
+        const allSteps = flattenSteps(workflow.steps ?? []);
+
+        expect(allSteps.map(({ type }) => type)).toContain('workflow.output');
       });
     }
   );

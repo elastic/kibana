@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EngineStatus } from '.';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { TestProviders } from '../../../../../common/mock/timeline';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 const mockUseEntityStore = jest.fn();
@@ -17,6 +17,13 @@ jest.mock('../../hooks/use_entity_store', () => ({
   useEntityStoreStatus: () => mockUseEntityStore(),
   useInstallEntityStoreMutation: () => ({
     mutate: mockInstallMutate,
+    isLoading: false,
+  }),
+}));
+
+jest.mock('../../hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: () => ({
+    data: { has_install_permissions: true },
     isLoading: false,
   }),
 }));

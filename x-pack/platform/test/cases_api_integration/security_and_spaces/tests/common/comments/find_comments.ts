@@ -12,12 +12,13 @@ import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
-  persistableStateAttachment,
   postCaseReq,
-  postCommentActionsReq,
-  postCommentAlertReq,
   postCommentUserReq,
-  postExternalReferenceESReq,
+  postUnifiedActionsReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '../../../../common/lib/mock';
 import {
   createComment,
@@ -89,11 +90,11 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: postedCase.id,
         params: [
-          postCommentUserReq,
-          postCommentAlertReq,
-          postCommentActionsReq,
-          postExternalReferenceESReq,
-          persistableStateAttachment,
+          postUnifiedCommentReq,
+          postUnifiedAlertReq,
+          postUnifiedActionsReq,
+          postUnifiedIndicatorReq,
+          postUnifiedLensReq,
         ],
         expectedHttpCode: 200,
       });

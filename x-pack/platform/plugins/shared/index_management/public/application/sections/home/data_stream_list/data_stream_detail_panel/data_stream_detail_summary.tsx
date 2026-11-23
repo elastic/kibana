@@ -37,7 +37,9 @@ import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import {
   getRetentionPeriod,
   resolveLifecycleForSummary,
-  isNextGenIlm,
+  isIlmLifecyclePreferred,
+  isLookupLifecycleNotApplicable,
+  isLookupIndexMode,
   formatDlmLifecycleSummary,
   getDlmDataPhasesLabel,
   getDlmDownsamplingStepsLabel,
@@ -50,6 +52,7 @@ import { formatByteSizeString } from '../../../../lib/format_bytes';
 import type { DataStream } from '../../../../../../common';
 import { streamsDslToEsLifecycle } from './lifecycle';
 import type { ResolvedDataStreamLifecycle } from './lifecycle';
+import { LookupLifecycleNotApplicable } from '../data_retention_value';
 
 interface Detail {
   name: string;
@@ -304,7 +307,7 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
             }),
             toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeToolTip', {
               defaultMessage:
-                "The index mode applied to the data stream's backing indices, as defined in its associated index template.",
+                'The index mode reported for the data stream. Backing indices can retain modes from earlier configurations.',
             }),
             content: indexModeLabels[indexMode],
             dataTestSubj: 'indexModeDetail',
@@ -323,11 +326,20 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
         }
       ),
       content: (() => {
+        if (isLookupLifecycleNotApplicable(dataStream)) {
+          return <LookupLifecycleNotApplicable />;
+        }
+
         const effectiveLifecycle = streamsGetResponse?.effective_lifecycle;
+        // Wired streams display the lifecycle Streams resolves for them. A classic lookup stream
+        // displays the lifecycle of its eligible historical backing indices instead, because the
+        // template describes future generations that lookup mode skips.
+        const showsHistoricalLifecycle =
+          effectiveLifecycle == null && isLookupIndexMode(dataStream);
         const isIlm =
           effectiveLifecycle != null
             ? isStreamsIlmLifecycle(effectiveLifecycle)
-            : isNextGenIlm(dataStream);
+            : isIlmLifecyclePreferred(dataStream);
 
         const methodLabel = isIlm ? (
           (() => {
@@ -379,7 +391,10 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
           </EuiText>
         );
 
-        const isInherited = resolvedLifecycle.inheritSuccessful;
+        const streamsDlmLifecycle =
+          effectiveLifecycle != null && isStreamsDslLifecycle(effectiveLifecycle)
+            ? streamsDslToEsLifecycle(effectiveLifecycle.dsl)
+            : undefined;
 
         const summary = (() => {
           if (isIlm) {
@@ -415,11 +430,6 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
             return [retentionLabel, phasesLabel, downsampleLabel].filter(Boolean).join(' · ');
           }
 
-          const streamsDlmLifecycle =
-            effectiveLifecycle != null && isStreamsDslLifecycle(effectiveLifecycle)
-              ? streamsDslToEsLifecycle(effectiveLifecycle.dsl)
-              : undefined;
-
           const lifecycleForSummary = resolveLifecycleForSummary(
             streamsDlmLifecycle ?? dataStream.lifecycle,
             {
@@ -428,6 +438,16 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
           );
           return formatDlmLifecycleSummaryForDetails(lifecycleForSummary);
         })();
+
+        // Historical lifecycle is inherited only when it is the one the template resolves to.
+        const inheritsIlmFromTemplate = resolvedLifecycle.resolvedIlmPolicyName !== undefined;
+        const historicalLifecycleMatchesTemplate = isIlm
+          ? inheritsIlmFromTemplate &&
+            summaryIlmPolicyName === resolvedLifecycle.resolvedIlmPolicyName
+          : !inheritsIlmFromTemplate;
+        const isInherited =
+          resolvedLifecycle.inheritSuccessful &&
+          (!showsHistoricalLifecycle || historicalLifecycleMatchesTemplate);
 
         return (
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>

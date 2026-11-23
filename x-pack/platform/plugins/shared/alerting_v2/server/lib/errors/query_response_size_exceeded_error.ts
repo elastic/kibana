@@ -9,6 +9,9 @@ import { ByteSizeValue } from '@kbn/config-schema';
 
 export const MAX_RESPONSE_SIZE_SETTING = 'xpack.alerting_v2.rules.run.query.maxResponseSize';
 
+/** Which of the rule executor's ES|QL queries tripped the guardrail. */
+export type GuardedQueryType = 'breach' | 'recovery' | 'data_presence';
+
 /** Builds the actionable message shown in execution history when a query trips the guard. */
 export const buildQueryResponseSizeExceededMessage = (maxResponseSizeBytes?: number): string => {
   const limit =
@@ -29,17 +32,24 @@ export const buildQueryResponseSizeExceededMessage = (maxResponseSizeBytes?: num
  * rule owner sees the limit and how to stay under it.
  */
 export class QueryResponseSizeExceededError extends Error {
+  public readonly queryType: GuardedQueryType;
   public readonly maxResponseSizeBytes?: number;
 
-  constructor(maxResponseSizeBytes?: number, options?: { cause?: unknown }) {
+  constructor(
+    queryType: GuardedQueryType,
+    maxResponseSizeBytes?: number,
+    options?: { cause?: unknown }
+  ) {
     super(buildQueryResponseSizeExceededMessage(maxResponseSizeBytes), options);
     this.name = 'QueryResponseSizeExceededError';
+    this.queryType = queryType;
     this.maxResponseSizeBytes = maxResponseSizeBytes;
   }
 }
 
 export const toQueryResponseSizeExceededError = (
   cause: unknown,
+  queryType: GuardedQueryType,
   maxResponseSizeBytes?: number
 ): QueryResponseSizeExceededError =>
-  new QueryResponseSizeExceededError(maxResponseSizeBytes, { cause });
+  new QueryResponseSizeExceededError(queryType, maxResponseSizeBytes, { cause });

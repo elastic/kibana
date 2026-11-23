@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryBoolean } from '../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,
@@ -15,9 +16,11 @@ import {
 import type { MonitorFiltersResult } from '../../../common/runtime_types';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { scheduleBucketLabel } from '../common';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../common/lib/schedule_to_time';
 
 type Buckets = Array<{
-  key: string;
+  key: string | number;
   doc_count: number;
 }>;
 
@@ -45,12 +48,18 @@ const mergeBuckets = (...bucketSets: Array<Buckets | undefined>) => {
   return Array.from(map.entries()).map(([label, count]) => ({ label, count }));
 };
 
+const toScheduleBuckets = (buckets?: Buckets): Buckets | undefined =>
+  buckets?.map(({ key, doc_count: docCount }) => ({
+    key: scheduleBucketLabel(key),
+    doc_count: docCount,
+  }));
+
 export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersResult> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.FILTERS,
   validate: {
-    query: schema.object({
-      showFromAllSpaces: schema.maybe(schema.boolean()),
+    query: z.strictObject({
+      showFromAllSpaces: queryBoolean.optional(),
     }),
   },
   handler: async ({ savedObjectsClient, request }): Promise<any> => {
@@ -82,8 +91,9 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersR
       projects: mergeBuckets(projects?.buckets, projectsLegacy?.buckets).filter(
         ({ label }) => label
       ),
-      schedules: mergeBuckets(schedules?.buckets, schedulesLegacy?.buckets).map(
-        ({ label, count }) => ({ label: String(label), count })
+      schedules: mergeBuckets(
+        toScheduleBuckets(schedules?.buckets),
+        toScheduleBuckets(schedulesLegacy?.buckets)
       ),
     };
   },
@@ -140,13 +150,13 @@ const aggs = {
   },
   schedules: {
     terms: {
-      field: `${syntheticsMonitorAttributes}.${ConfigKey.SCHEDULE}.number`,
+      field: `${syntheticsMonitorAttributes}.${SCHEDULE_INTERVAL_FIELD}`,
       size: 10000,
     },
   },
   schedulesLegacy: {
     terms: {
-      field: `${legacyMonitorAttributes}.${ConfigKey.SCHEDULE}.number`,
+      field: `${legacyMonitorAttributes}.${SCHEDULE_INTERVAL_FIELD}`,
       size: 10000,
     },
   },

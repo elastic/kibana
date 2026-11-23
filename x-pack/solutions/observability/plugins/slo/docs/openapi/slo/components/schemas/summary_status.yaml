@@ -1,8 +1,0 @@
-title: summary status
-type: string
-enum:
-  - NO_DATA
-  - HEALTHY
-  - DEGRADING
-  - VIOLATED
-example: HEALTHY

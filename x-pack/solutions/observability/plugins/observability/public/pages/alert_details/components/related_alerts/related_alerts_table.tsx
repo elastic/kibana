@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { RELATED_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import type { AlertsTableSortCombinations } from '@kbn/response-ops-alerts-table/types';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { getRelatedColumns } from './get_related_columns';
@@ -81,6 +82,10 @@ export function RelatedAlertsTable({ alertData }: Props) {
         trackScores={true}
         sort={initialSort}
         casesConfiguration={caseConfiguration}
+        // Alert documents are always local to the project whose rule created them — they are
+        // never cross-project readable. Pin to origin so the page's READONLY routing (which
+        // widens the scope for APM chart data) does not leak remote-project alerts here.
+        projectRouting={PROJECT_ROUTING.ORIGIN}
         additionalContext={{
           observabilityRuleTypeRegistry,
           config,

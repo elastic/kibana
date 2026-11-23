@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Signal } from '../../../../common/http_api/signals';
+import type { Signal, SignalTag } from '../../../../common/http_api/signals';
 
 /** Test-only factory for a `tool_call` signal, defaulting to an errored `query_error` signal. */
 export const buildSignal = (
   overrides: Partial<Signal['data']> = {},
-  tags = ['query_error']
+  tags: SignalTag[] = ['query_error']
 ): Signal => ({
   signal_id: 'sig-1',
   '@timestamp': '2026-08-01T00:00:00.000Z',
@@ -27,7 +27,7 @@ export const buildSignal = (
     producer: 'agent-builder',
     span_id: 'span-1',
     conversation_id: 'conv-1',
-    agent: { id: 'a1', name: 'Support', class: 'user' },
+    agent: { id: 'a1', name: 'Support' },
     query: 'FROM ai-index-ds-support | LIMIT 10',
     returned: { columns: [], row_count: 0 },
     error: 'boom',

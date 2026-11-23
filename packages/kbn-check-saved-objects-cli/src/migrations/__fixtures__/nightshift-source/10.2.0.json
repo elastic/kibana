@@ -1,0 +1,56 @@
+{
+  "10.1.0": [
+    {
+      "title": "Nginx errors",
+      "description": "5xx responses from the edge",
+      "tags": ["nginx", "web"],
+      "esql": "FROM logs-nginx-* | WHERE status >= 500",
+      "slug": "nginx-errors",
+      "view_name": "$.nightshift.sources.default.nginx-errors",
+      "enabled": true,
+      "created_by": "marco",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "esql_updated_at": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "title": "Checkout",
+      "tags": [],
+      "esql": "FROM logs-checkout-*",
+      "slug": "checkout",
+      "view_name": "$.nightshift.sources.default.checkout",
+      "enabled": false,
+      "created_by": "system",
+      "created_at": "2026-09-02T00:00:00.000Z",
+      "updated_at": "2026-09-02T00:00:00.000Z",
+      "esql_updated_at": "2026-09-02T00:00:00.000Z"
+    }
+  ],
+  "10.2.0": [
+    {
+      "title": "Nginx errors",
+      "description": "5xx responses from the edge",
+      "tags": ["nginx", "web"],
+      "esql": "FROM logs-nginx-* | WHERE status >= 500",
+      "slug": "nginx-errors",
+      "view_name": "$.nightshift.sources.default.nginx-errors",
+      "enabled": true,
+      "created_by": "marco",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "esql_updated_at": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "title": "Checkout",
+      "tags": [],
+      "esql": "FROM logs-checkout-*",
+      "slug": "checkout",
+      "view_name": "$.nightshift.sources.default.checkout",
+      "enabled": false,
+      "created_by": "system",
+      "created_at": "2026-09-02T00:00:00.000Z",
+      "updated_at": "2026-09-02T00:00:00.000Z",
+      "esql_updated_at": "2026-09-02T00:00:00.000Z"
+    }
+  ]
+}

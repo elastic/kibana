@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -15,19 +15,15 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiTextTruncate,
+  EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useConversationList } from '../../hooks/use_conversation_list';
-import {
-  createActiveConversationListItemStyles,
-  createConversationListItemStyles,
-} from './conversation_list_item_styles';
+import { useInfiniteScroll } from '../../hooks/use_infinite_scroll';
+import { ConversationSearchResult } from './conversation_search_result';
 import { NoConversationsPrompt } from './embeddable_conversation_header/no_conversations_prompt';
 
 const labels = {
@@ -36,11 +32,20 @@ const labels = {
   }),
   searchPlaceholder: i18n.translate(
     'xpack.agentBuilder.conversationSearchModal.searchPlaceholder',
-    { defaultMessage: 'Search chats' }
+    { defaultMessage: 'Search by title' }
   ),
+  recentChats: i18n.translate('xpack.agentBuilder.conversationSearchModal.recentChats', {
+    defaultMessage: 'Recent chats',
+  }),
+  results: i18n.translate('xpack.agentBuilder.conversationSearchModal.results', {
+    defaultMessage: 'Results',
+  }),
 };
 
-const MODAL_WIDTH = 480;
+const MODAL_WIDTH = 768;
+const modalStyles = css`
+  width: ${MODAL_WIDTH}px;
+`;
 const LIST_MAX_HEIGHT = 290;
 
 interface ConversationSearchModalProps {
@@ -60,15 +65,35 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
 
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Consume both the pinned and unpinned caches — opening the modal costs no
   // extra network request since ConversationList and PinnedConversationList
-  // have already populated these keys in the sidebar.
+  // have already populated these keys in the sidebar. This is the default
+  // (empty-query) view only; a non-empty query switches to server-side search
+  // below the caches would otherwise be scoped to whatever pages are cached.
   const { conversations: unpinnedConversations = [], isLoading: isLoadingUnpinned } =
     useConversationList({ agentId, pinned: false });
   const { conversations: pinnedConversations = [], isLoading: isLoadingPinned } =
     useConversationList({ agentId, pinned: true });
-  const isLoading = isLoadingUnpinned || isLoadingPinned;
+  const isLoadingCached = isLoadingUnpinned || isLoadingPinned;
+
+  // Debounces internally and only issues a search request once `searchValue` is non-empty,
+  // so the empty-query view above keeps its zero-extra-request property.
+  const {
+    conversations: searchResults,
+    isLoading: isSearchLoading,
+    isSearching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useConversationList({ agentId, query: searchValue });
+  const sentinelRef = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    scrollContainerRef,
+  });
 
   const sortedConversations = useMemo(
     () =>
@@ -78,19 +103,17 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
     [pinnedConversations, unpinnedConversations]
   );
 
-  const filteredConversations = useMemo(() => {
-    if (!searchValue) return sortedConversations;
-    const lower = searchValue.toLowerCase();
-    return sortedConversations.filter((c) => c.title.toLowerCase().includes(lower));
-  }, [sortedConversations, searchValue]);
-
-  const itemStyles = createConversationListItemStyles(euiTheme);
-  const activeItemStyles = createActiveConversationListItemStyles(euiTheme);
+  const conversations = isSearching ? searchResults : sortedConversations;
+  const isLoading = isSearching ? isSearchLoading : isLoadingCached;
 
   const listStyles = css`
     overflow-y: auto;
     max-height: ${LIST_MAX_HEIGHT}px;
     margin-top: ${euiTheme.size.m};
+  `;
+
+  const headingStyles = css`
+    padding: ${euiTheme.size.xs} 0;
   `;
 
   const renderList = () => {
@@ -104,34 +127,47 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
       );
     }
 
-    if (filteredConversations.length === 0) {
-      return <NoConversationsPrompt isFiltered={searchValue.length > 0} />;
+    if (conversations.length === 0) {
+      return <NoConversationsPrompt isFiltered={isSearching} />;
     }
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        {filteredConversations.map((conversation) => {
-          const isActive = currentConversationId === conversation.id;
-          return (
+      <>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={headingStyles}
+          data-test-subj="agentBuilderConversationSearchListHeading"
+        >
+          {isSearching ? labels.results : labels.recentChats}
+        </EuiText>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          {conversations.map((conversation) => (
             <EuiFlexItem grow={false} key={conversation.id}>
-              <button
-                css={isActive ? activeItemStyles : itemStyles}
-                onClick={() => {
-                  onSelectConversation(conversation.id);
+              <ConversationSearchResult
+                conversation={conversation}
+                isActive={currentConversationId === conversation.id}
+                onSelect={(conversationId) => {
+                  onSelectConversation(conversationId);
                   onClose();
                 }}
-                data-test-subj={`agentBuilderConversationSearchResult-${conversation.id}`}
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                  action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_RESUME,
-                })}
-              >
-                <EuiTextTruncate text={conversation.title || conversation.id} />
-              </button>
+              />
             </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
+          ))}
+        </EuiFlexGroup>
+        {isSearching && (
+          <>
+            <div ref={sentinelRef} data-test-subj="agentBuilderConversationSearchScrollSentinel" />
+            {isFetchingNextPage && (
+              <EuiFlexGroup justifyContent="center" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="s" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </>
+        )}
+      </>
     );
   };
 
@@ -140,7 +176,7 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
       aria-labelledby={modalTitleId}
       onClose={onClose}
       outsideClickCloses={true}
-      style={{ width: MODAL_WIDTH }}
+      css={modalStyles}
       data-test-subj="agentBuilderConversationSearchModal"
     >
       <EuiModalHeader>
@@ -157,7 +193,9 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
           data-test-subj="agentBuilderConversationSearchInput"
         />
 
-        <div css={listStyles}>{renderList()}</div>
+        <div ref={scrollContainerRef} css={listStyles}>
+          {renderList()}
+        </div>
       </EuiModalBody>
     </EuiModal>
   );

@@ -84,7 +84,11 @@ describe('registerGetWorkflowTool', () => {
 
     const result = await invokeHandler(registeredTool, { workflowId: 'wf-support-cases' }, context);
 
-    expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-support-cases', 'default');
+    expect(mockApi.getWorkflow).toHaveBeenCalledWith(
+      'wf-support-cases',
+      'default',
+      expect.any(Object)
+    );
     expect(result.results).toHaveLength(1);
     expect(result.results[0]).toEqual({
       type: ToolResultType.other,

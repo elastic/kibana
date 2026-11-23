@@ -6,10 +6,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import type { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common';
 
@@ -17,13 +19,19 @@ import { SectionError, PageError } from '../../../shared_imports';
 
 import { PolicyForm, PageLoading } from '../../components';
 import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
-import { breadcrumbService, docTitleService } from '../../services/navigation';
+import { useCore } from '../../app_context';
+import { breadcrumbService, docTitleService, linkToPolicies } from '../../services/navigation';
 import { addPolicy, useLoadIndices } from '../../services/http';
+
+const pageTitle = i18n.translate('xpack.snapshotRestore.addPolicyTitle', {
+  defaultMessage: 'Create policy',
+});
 
 export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   history,
   location: { pathname },
 }) => {
+  const { docLinks } = useCore();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
@@ -35,6 +43,23 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
     breadcrumbService.setBreadcrumbs('policyAdd');
     docTitleService.setTitle('policyAdd');
   }, []);
+
+  const header = (
+    <>
+      <AppHeader
+        title={pageTitle}
+        back={{
+          href: history.createHref({ pathname: linkToPolicies() }),
+          label: i18n.translate('xpack.snapshotRestore.home.policiesTabTitle', {
+            defaultMessage: 'Policies',
+          }),
+        }}
+        docLink={docLinks.links.snapshotRestore.guide}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+    </>
+  );
 
   const onSave = async (newPolicy: SlmPolicyPayload) => {
     setIsSaving(true);
@@ -89,55 +114,51 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
 
   if (isLoadingIndices) {
     return (
-      <PageLoading>
-        <FormattedMessage
-          id="xpack.snapshotRestore.addPolicy.loadingIndicesDescription"
-          defaultMessage="Loading available indices…"
-        />
-      </PageLoading>
+      <>
+        {header}
+        <PageLoading>
+          <FormattedMessage
+            id="xpack.snapshotRestore.addPolicy.loadingIndicesDescription"
+            defaultMessage="Loading available indices…"
+          />
+        </PageLoading>
+      </>
     );
   }
 
   if (errorLoadingIndices) {
     return (
-      <PageError
-        title={
-          <FormattedMessage
-            id="xpack.snapshotRestore.addPolicy.LoadingIndicesErrorMessage"
-            defaultMessage="Error loading available indices"
-          />
-        }
-        error={errorLoadingIndices}
-      />
+      <>
+        {header}
+        <PageError
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.addPolicy.LoadingIndicesErrorMessage"
+              defaultMessage="Error loading available indices"
+            />
+          }
+          error={errorLoadingIndices}
+        />
+      </>
     );
   }
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.snapshotRestore.addPolicyTitle"
-              defaultMessage="Create policy"
-            />
-          </span>
-        }
-      />
-
-      <EuiSpacer size="l" />
-
-      <PolicyForm
-        policy={emptyPolicy}
-        indices={indices}
-        dataStreams={dataStreams}
-        currentUrl={pathname}
-        isSaving={isSaving}
-        saveError={renderSaveError()}
-        clearSaveError={clearSaveError}
-        onSave={onSave}
-        onCancel={onCancel}
-      />
-    </EuiPageSection>
+    <>
+      {header}
+      <EuiPageSection restrictWidth style={{ width: '100%' }}>
+        <PolicyForm
+          policy={emptyPolicy}
+          indices={indices}
+          dataStreams={dataStreams}
+          currentUrl={pathname}
+          isSaving={isSaving}
+          saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
+          onSave={onSave}
+          onCancel={onCancel}
+        />
+      </EuiPageSection>
+    </>
   );
 };

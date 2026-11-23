@@ -11,6 +11,7 @@ import React from 'react';
 import { act, render, screen, within, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
@@ -133,6 +134,15 @@ const inferenceEndpoints = [
 const elasticDescription = 'Runs on GPUs (token-based billing)';
 const elasticsearchDescription = 'Runs on ML Nodes (resource-based billing)';
 
+jest.mock('../../hooks/use_test_endpoint', () => ({
+  useTestEndpoint: () => ({
+    mutate: jest.fn(),
+    data: undefined,
+    error: null,
+    isLoading: false,
+  }),
+}));
+
 jest.mock('../../hooks/use_delete_endpoint', () => ({
   useDeleteEndpoint: () => ({
     mutate: jest.fn().mockImplementation(() => Promise.resolve()), // Mock implementation of the mutate function
@@ -161,17 +171,92 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 const mockUseKibana = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
 
-const renderTabularPageWithProviders = () => {
+const renderTabularPageWithProviders = (endpoints = inferenceEndpoints) => {
   return render(
     <EuiThemeProvider>
       <I18nProvider>
-        <TabularPage inferenceEndpoints={inferenceEndpoints} />
+        <TabularPage inferenceEndpoints={endpoints} />
       </I18nProvider>
     </EuiThemeProvider>
   );
 };
 
+const testActionEndpoints = [
+  {
+    inference_id: 'my-chat-endpoint',
+    task_type: 'chat_completion',
+    service: 'openai',
+    service_settings: { model_id: 'gpt-4o' },
+  },
+  {
+    inference_id: 'my-embedding-endpoint',
+    task_type: 'text_embedding',
+    service: 'openai',
+    service_settings: { model_id: 'text-embedding-3-small' },
+  },
+  {
+    inference_id: 'my-future-endpoint',
+    task_type: 'future_task',
+    service: 'openai',
+    service_settings: { model_id: 'future-model' },
+  },
+] as InferenceAPIConfigResponse[];
+
+const openRowActions = (endpointId: string) => {
+  const row = screen
+    .getAllByTestId('endpointCell')
+    .find((endpointCell) => endpointCell.textContent?.includes(endpointId))
+    ?.closest('tr');
+  if (!row) {
+    throw new Error(`No row found for endpoint ${endpointId}`);
+  }
+  act(() => {
+    within(row).getByTestId('euiCollapsedItemActionsButton').click();
+  });
+};
+
 describe('When the tabular page is loaded', () => {
+  describe('test endpoint action', () => {
+    beforeAll(() => {
+      window.history.pushState({}, '', '?groupBy=none');
+    });
+    beforeEach(() => {
+      renderTabularPageWithProviders(testActionEndpoints);
+    });
+    afterAll(() => {
+      window.history.pushState({}, '', '/');
+    });
+
+    it('should show the test action for task types that can be tested', () => {
+      openRowActions('my-chat-endpoint');
+
+      expect(screen.getByTestId('inference-endpoints-action-test-endpoint')).toBeInTheDocument();
+    });
+
+    it('should open the test modal when clicking the test action', () => {
+      openRowActions('my-chat-endpoint');
+      act(() => {
+        screen.getByTestId('inference-endpoints-action-test-endpoint').click();
+      });
+
+      expect(screen.getByTestId('testEndpointModal')).toBeInTheDocument();
+    });
+
+    it('should show the test action for embedding endpoints too', () => {
+      openRowActions('my-embedding-endpoint');
+
+      expect(screen.getByTestId('inference-endpoints-action-test-endpoint')).toBeInTheDocument();
+    });
+
+    it('should not show the test action for task types that cannot be tested', () => {
+      openRowActions('my-future-endpoint');
+
+      expect(
+        screen.queryByTestId('inference-endpoints-action-test-endpoint')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('group by none', () => {
     beforeAll(() => {
       window.history.pushState({}, '', '?groupBy=none');
@@ -361,7 +446,7 @@ describe('When the tabular page is loaded', () => {
         },
         {
           groupId: 'openai',
-          label: 'OpenAI',
+          label: SERVICE_PROVIDERS[ServiceProviderKeys.openai].name,
           countLabel: '1 endpoint',
         },
       ];

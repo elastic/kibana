@@ -8,30 +8,31 @@
  */
 
 import Path from 'path';
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
 
 import { report } from '../helpers/report';
-import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 
-export const NoUnresolvableImportsRule: Rule.RuleModule = {
+export const NoUnresolvableImportsRule: CreateOnceRule = {
   meta: {
     docs: {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unresolvable_imports',
     },
   },
-  create(context) {
-    const resolver = getImportResolver(context);
-    const sourcePath = getSourcePath(context);
+  createOnce(context) {
+    return visitAllImportStatements(() => {
+      const resolver = getImportResolver(context);
+      const sourceDirname = Path.dirname(context.physicalFilename);
 
-    return visitAllImportStatements((req, { node }) => {
-      if (req !== null && !resolver.resolve(req, Path.dirname(sourcePath))) {
-        report(context, {
-          node,
-          message: `Unable to resolve import [${req}]`,
-        });
-      }
+      return (req, { node }) => {
+        if (req !== null && !resolver.resolve(req, sourceDirname)) {
+          report(context, {
+            node,
+            message: `Unable to resolve import [${req}]`,
+          });
+        }
+      };
     });
   },
 };

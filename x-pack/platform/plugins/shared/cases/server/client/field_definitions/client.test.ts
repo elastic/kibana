@@ -440,6 +440,127 @@ describe('createFieldDefinitionsSubClient', () => {
     });
   });
 
+  describe('validateCreateFieldDefinition', () => {
+    const input = {
+      name: 'my_field',
+      owner: 'securitySolution' as const,
+      definition: 'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+    };
+
+    beforeEach(() => {
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+    });
+
+    it('resolves without writing when all checks pass', async () => {
+      await expect(client.validateCreateFieldDefinition(input)).resolves.toBeUndefined();
+      expect(
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('runs assertFieldDefinitionIsValid with strict=true', async () => {
+      await client.validateCreateFieldDefinition(input);
+      expect(
+        clientArgs.services.fieldDefinitionsService.assertFieldDefinitionIsValid
+      ).toHaveBeenCalledWith(input.definition, true);
+    });
+
+    it('propagates errors from assertFieldDefinitionIsValid', async () => {
+      clientArgs.services.fieldDefinitionsService.assertFieldDefinitionIsValid.mockImplementation(
+        () => {
+          throw Boom.badRequest('Invalid field definition: name: too short');
+        }
+      );
+
+      await expect(client.validateCreateFieldDefinition(input)).rejects.toThrow(
+        'Invalid field definition: name: too short'
+      );
+      expect(
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when the owner is at the cap', async () => {
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: Array(MAX_FIELD_DEFINITIONS_PER_OWNER).fill(
+          makeFieldDefinitionSO().attributes
+        ),
+        total: MAX_FIELD_DEFINITIONS_PER_OWNER,
+      });
+
+      await expect(client.validateCreateFieldDefinition(input)).rejects.toThrow(
+        `Cannot create more than ${MAX_FIELD_DEFINITIONS_PER_OWNER} field definitions per owner.`
+      );
+    });
+
+    it('throws 409 when a field with the same name already exists', async () => {
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeFieldDefinitionSO().attributes],
+        total: 1,
+      });
+
+      await expect(client.validateCreateFieldDefinition(input)).rejects.toThrow(
+        'A field definition with name "my_field" already exists for this owner.'
+      );
+    });
+  });
+
+  describe('validateUpdateFieldDefinition', () => {
+    const input = {
+      name: 'my_field',
+      owner: 'securitySolution' as const,
+      definition: 'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+    };
+
+    beforeEach(() => {
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+    });
+
+    it('resolves without writing when all checks pass', async () => {
+      await expect(client.validateUpdateFieldDefinition('fd-1', input)).resolves.toBeUndefined();
+      expect(
+        clientArgs.services.fieldDefinitionsService.updateFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('runs assertFieldDefinitionIsValid without strict flag', async () => {
+      await client.validateUpdateFieldDefinition('fd-1', input);
+      expect(
+        clientArgs.services.fieldDefinitionsService.assertFieldDefinitionIsValid
+      ).toHaveBeenCalledWith(input.definition);
+    });
+
+    it('propagates errors from assertFieldDefinitionIsValid', async () => {
+      clientArgs.services.fieldDefinitionsService.assertFieldDefinitionIsValid.mockImplementation(
+        () => {
+          throw Boom.badRequest('Invalid field definition: metadata.default: value too large');
+        }
+      );
+
+      await expect(client.validateUpdateFieldDefinition('fd-1', input)).rejects.toThrow(
+        'Invalid field definition: metadata.default: value too large'
+      );
+      expect(
+        clientArgs.services.fieldDefinitionsService.updateFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('throws 409 when the name identity would change', async () => {
+      // YAML name matches input name but differs from the persisted name → 409
+      await expect(
+        client.validateUpdateFieldDefinition('fd-1', {
+          ...input,
+          name: 'other_field',
+          definition: 'name: other_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 409 } });
+    });
+  });
+
   describe('deleteFieldDefinition', () => {
     beforeEach(() => {
       // No configuration exists — the active-link guard finds nothing to protect.

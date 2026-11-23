@@ -11,7 +11,7 @@ import {
   buildAddAttachmentsStepCommonDefinition,
   type AddAttachmentsStepInput,
 } from '../../../common/workflows/steps/add_attachments';
-import type { BulkCreateAttachmentsRequestV2 } from '../../../common/types/api';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { toLegacyCaseResponse } from '../../common/attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import type { CasesClient } from '../../client';
@@ -48,14 +48,14 @@ export const addAttachmentsStepDefinition = (
           const attachments = input.attachments.map((attachment) => ({
             ...(attachment as Record<string, unknown>),
             owner,
-          })) as BulkCreateAttachmentsRequestV2;
+          })) as UnifiedAttachmentPayload[];
 
-          const updatedCase = await client.attachments.bulkCreate({
+          const updatedCase = await client.attachments.bulkCreateAndGetCase({
             caseId: input.case_id,
             attachments,
           });
-          // The client returns unified comments; the output schema mirrors the
-          // public (legacy) wire shape, so convert back before validating.
+          // The output schema mirrors the public (legacy) wire shape, so convert
+          // back before validating.
           return safeParseCaseForWorkflowOutput(
             definition.outputSchema.shape.case,
             toLegacyCaseResponse(updatedCase)

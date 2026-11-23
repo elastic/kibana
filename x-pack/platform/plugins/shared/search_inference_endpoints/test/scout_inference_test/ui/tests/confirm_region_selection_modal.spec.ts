@@ -17,17 +17,7 @@ import {
   unmockRegionPolicy,
 } from '../fixtures/mocks';
 
-const REGION_PREFERENCES_REDESIGN_FEATURE_FLAG = 'searchSolution.regionPreferencesRedesignEnabled';
-
 test.describe('Confirm region selection modal', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        [REGION_PREFERENCES_REDESIGN_FEATURE_FLAG]: true,
-      },
-    });
-  });
-
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await mockInferenceEndpoints(page, eisEndpointsMockData);
     await mockNoRegionPolicy(page);
@@ -38,26 +28,6 @@ test.describe('Confirm region selection modal', { tag: [...INFERENCE_LOCAL_TAGS]
   test.afterEach(async ({ page }) => {
     await unmockInferenceEndpoints(page);
     await unmockRegionPolicy(page);
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        [REGION_PREFERENCES_REDESIGN_FEATURE_FLAG]: null,
-      },
-    });
-  });
-
-  test('Save opens the confirm region selection modal instead of the legacy confirm modal', async ({
-    pageObjects,
-  }) => {
-    const { eisModels } = pageObjects;
-
-    await eisModels.startGeoPolicySave('eu');
-
-    await expect(eisModels.confirmRegionSelectionModal).toBeVisible();
-    await expect(eisModels.confirmRegionChangeModal).toBeHidden();
-    await expect(eisModels.confirmRegionSelectionGeoList).toBeVisible();
   });
 
   test('an in-use 409 keeps the confirmation open with Issues; ignore and save retries with force', async ({

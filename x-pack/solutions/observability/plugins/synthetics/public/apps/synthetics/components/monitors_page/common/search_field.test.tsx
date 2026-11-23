@@ -10,6 +10,7 @@ import { act, fireEvent } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import type { SyntheticsUrlParams } from '../../../utils/url_params/get_supported_url_params';
 import { SearchField } from './search_field';
+import { ClearAllFilters } from './monitor_filters/clear_all_filters';
 
 describe('SearchField', () => {
   let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
@@ -83,5 +84,37 @@ describe('SearchField', () => {
 
     const current = getByTestId('syntheticsOverviewSearchInput') as HTMLInputElement;
     expect(current.value).toBe('external value');
+  });
+
+  it('does not write a pending search after clear-all when the URL query was already empty', () => {
+    useGetUrlParamsSpy.mockReturnValue({
+      query: '',
+      tags: ['prod'],
+    } as SyntheticsUrlParams);
+
+    const { getByTestId, getByRole } = render(
+      <>
+        <SearchField />
+        <ClearAllFilters />
+      </>
+    );
+
+    fireEvent.change(getByTestId('syntheticsOverviewSearchInput'), {
+      target: { value: 'checkout' },
+    });
+    fireEvent.click(getByRole('button', { name: 'Clear all selected Synthetics filters' }));
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(updateUrlParamsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: undefined,
+        tags: undefined,
+      })
+    );
+    expect(updateUrlParamsMock).not.toHaveBeenCalledWith({ query: 'checkout' });
+    expect((getByTestId('syntheticsOverviewSearchInput') as HTMLInputElement).value).toBe('');
   });
 });

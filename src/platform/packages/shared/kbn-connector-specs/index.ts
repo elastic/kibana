@@ -9,6 +9,7 @@
 
 export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
+export type { RelayActionClient } from './src/relay_action_client';
 export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
@@ -25,16 +26,32 @@ export {
 
 export { getConnectorSpec } from './src/get_connector_spec';
 export {
+  CONNECTOR_SKILL_ID_PREFIX,
+  getAllConnectorSkills,
+  getConnectorSkillRegistryId,
+  getConnectorSkillRegistryIds,
+  type ConnectorTypeSkill,
+} from './src/connector_skills';
+export { getSandboxSupportedAuthTypeIds } from './src/get_sandbox_supported_auth_type_ids';
+export { getSandboxHosts } from './src/get_sandbox_hosts';
+export {
   connectorSpecHasEvents,
   connectorTypeHasInboundEvents,
 } from './src/connector_spec_has_events';
-export { isInboundOnlyConnectorSpec } from './src/is_inbound_only_connector_spec';
-export { ingestTokenHashSchema } from './src/ingest_token_hash_schema';
+export {
+  isInboundOnlyConnectorSpec,
+  connectorTypeIsInboundOnly,
+} from './src/is_inbound_only_connector_spec';
+export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
+export { connectorTypePublishesKeys } from './src/connector_type_publishes_keys';
 export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
   MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './src/specs/inbound_webhook/constants';
-export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
+export { SLACK_MESSAGE_EVENT_ID } from './src/specs/slack/constants';
+export { toSlackPlainText } from './src/specs/slack/message_text';
+export { buildSlackThreadUrl } from './src/specs/slack/thread_url';
+export { isToolAction, TEST_CONNECTOR_SUB_ACTION, buildSkill } from './src/connector_spec';
 export type {
   ConnectorIngressContext,
   EventDefinition,
@@ -72,6 +89,15 @@ export {
   type ValidateEmittedEventsResult,
 } from './src/validate_emitted_events';
 export {
+  filterActionsBySelection,
+  formatConnectorActionLine,
+  getEffectiveScope,
+  isSelectedActionEnabled,
+  isSpecificActionsSelection,
+  resolveActionScope,
+  type SelectedActions,
+} from './src/selected_actions';
+export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,
   getFinitePositiveNumber,
@@ -94,13 +120,17 @@ export {
 } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
-export { clientTypes } from './src/lib/clients';
+export { fromConnectorSpecSchema } from './src/lib/deserialize_connector_spec';
+export type { ConnectorZodSchema } from './src/lib/deserialize_connector_spec';
+export { narrowSecretsSchemaForAuthMode } from './src/lib/narrow_secrets_schema_for_auth_mode';
 export type {
   ClientTypeSpec,
   BuildContext,
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  HostTarget,
+  PlatformServices,
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,

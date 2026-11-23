@@ -9,9 +9,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# Only runs Node scripts (never serves the UI), so skip the dev-mode shared webpack bundles.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
-
 .buildkite/scripts/bootstrap.sh
 
 # Injected as step env by the pipeline generator; require it so a missing value fails loudly.
@@ -21,4 +18,4 @@ echo '--- Update Scout Test Config Manifests'
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
 echo '--- Resolve requested configs and plan Scout flaky steps'
-ts-node .buildkite/pipelines/flaky_tests/pick_scout_flaky_run_order.ts
+node .buildkite/pipelines/flaky_tests/pick_scout_flaky_run_order.ts

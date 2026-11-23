@@ -18,6 +18,7 @@ import type {
   NavigationTreeDefinition,
   CloudLinks,
   SolutionId,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 import {
   BehaviorSubject,
@@ -39,10 +40,17 @@ import type { Location, History } from 'history';
 import deepEqual from 'react-fast-compare';
 import type { Logger } from '@kbn/logging';
 
-import { findActiveNodes, stripQueryParams } from './utils';
+import { collectNavTreeLinks, findActiveNodes, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
 import { applyCustomization, type ParsedNavigation } from './apply_customization';
+
+const rejectNavigationRegistration = (logger: Logger, message: string): void => {
+  if (process.env.NODE_ENV !== 'production') {
+    throw new Error(message);
+  }
+  logger.error(message);
+};
 
 interface StartDeps {
   history: History;
@@ -59,8 +67,15 @@ export class ProjectNavigationService {
     undefined
   );
   private readonly customizeNavigationHandler$ = new BehaviorSubject<(() => void) | null>(null);
+  private readonly registeredLinks$ = new BehaviorSubject<readonly ProjectNavigationLinks[]>([]);
 
-  constructor(private isServerless: boolean) {}
+  /**
+   * Latest `link` targets referenced by each registered solution nav tree, keyed by the id of the
+   * plugin that owns the tree. Only populated in development builds (see `collectNavDependencies`).
+   */
+  private readonly navTreeDependencies = new Map<string, string[]>();
+
+  constructor(private isServerless: boolean, private collectNavDependencies: boolean = false) {}
 
   public start(startDeps: StartDeps) {
     const {
@@ -220,6 +235,21 @@ export class ProjectNavigationService {
           })
         );
       },
+      registerNavTreeDependencies: (
+        ownerPluginId: string,
+        navTreeDefinition$: Observable<NavigationTreeDefinition>
+      ) => {
+        // Dev/test-only bookkeeping for the navigation-dependency enforcement test. No-op otherwise.
+        if (!this.collectNavDependencies) return;
+        navTreeDefinition$.pipe(takeUntil(this.stop$)).subscribe((def) => {
+          this.navTreeDependencies.set(ownerPluginId, collectNavTreeLinks(def));
+        });
+      },
+      getNavTreeDependencies: () =>
+        [...this.navTreeDependencies.entries()].map(([ownerPluginId, linkTargets]) => ({
+          ownerPluginId,
+          linkTargets,
+        })),
       getActiveSolutionNavId$: () => activeSolutionNavId$,
       getActiveSolutionNavId: () => currentNavSource$.getValue()?.id ?? null,
       setNavigationCustomization: (customization: NavigationCustomization | undefined) =>
@@ -228,11 +258,28 @@ export class ProjectNavigationService {
       registerCustomizeNavigationHandler: (handler: () => void) => {
         this.customizeNavigationHandler$.next(handler);
       },
+      registerNavigationLinks: (links: ProjectNavigationLinks) => {
+        const registered = this.registeredLinks$.getValue();
+        if (registered.some((entry) => entry.id === links.id)) {
+          rejectNavigationRegistration(logger, `Duplicate navigation id "${links.id}".`);
+          return;
+        }
+        if (registered.some((entry) => entry.target === links.target)) {
+          rejectNavigationRegistration(
+            logger,
+            `A second hover registration on target "${links.target}" is not allowed.`
+          );
+          return;
+        }
+        this.registeredLinks$.next([...registered, links]);
+      },
+      getRegisteredNavigationLinks$: () => this.registeredLinks$.asObservable(),
     };
   }
 
   public stop() {
     this.stop$.next();
     this.stop$.complete();
+    this.registeredLinks$.next([]);
   }
 }

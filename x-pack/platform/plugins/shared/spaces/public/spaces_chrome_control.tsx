@@ -75,7 +75,7 @@ export function initSpacesChromeControl(
     return;
   }
 
-  core.chrome.next.contextSwitcher.set(
+  core.chrome.controls.contextSwitcher.set(
     <SpacesChromeControl
       spacesManager={spacesManager}
       core={core}

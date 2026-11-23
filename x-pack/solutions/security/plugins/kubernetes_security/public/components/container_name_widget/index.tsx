@@ -105,8 +105,13 @@ export const ContainerNameWidget = ({
     enableAllColumns: true,
   };
 
-  const { getFilterForValueButton, getFilterOutValueButton, getCopyButton, filterManager } =
-    useSetFilter();
+  const {
+    getFilterForValueButton,
+    getFilterOutValueButton,
+    getCopyButton,
+    filterManager,
+    addSuccess,
+  } = useSetFilter();
   const filterButtons = useMemo((): FilterButtons => {
     const result: FilterButtons = {
       filterForButtons:
@@ -163,13 +168,14 @@ export const ContainerNameWidget = ({
                 ownFocus: false,
                 showTooltip: true,
                 value: aggData.key as string,
+                addSuccess,
               });
             });
           })
           .flat() || [],
     };
     return result;
-  }, [data, getCopyButton]);
+  }, [data, getCopyButton, addSuccess]);
 
   const containerNameArray = useMemo((): ContainerNameArrayDataValue[] => {
     return data

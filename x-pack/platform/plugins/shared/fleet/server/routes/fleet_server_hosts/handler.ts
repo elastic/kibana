@@ -12,6 +12,7 @@ import { isEqual } from 'lodash';
 import Boom from '@hapi/boom';
 
 import { throwIfSslPathInvalid } from '../utils/ssl_utils';
+import { sanitizeFleetServerHost } from '../utils/sanitize_settings_objects';
 import {
   SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
   SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
@@ -21,6 +22,7 @@ import { FleetServerHostUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService, fleetServerHostService } from '../../services';
 
 import type {
+  FleetRequestHandler,
   FleetServerHost,
   GetOneFleetServerHostRequestSchema,
   PostFleetServerHostRequestSchema,
@@ -155,7 +157,7 @@ export const deleteFleetServerHostHandler: RequestHandler<
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-    await fleetServerHostService.delete(esClient, request.params.itemId);
+    await fleetServerHostService.delete(esClient, request.params.itemId, { request });
     const body = {
       id: request.params.itemId,
     };
@@ -215,10 +217,18 @@ export const putFleetServerHostHandler: RequestHandler<
   }
 };
 
-export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
+export const getAllFleetServerHostsHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  const fleetContext = await context.fleet;
   const res = await fleetServerHostService.list();
+  const items = fleetContext.authz.fleet.readSettings
+    ? res.items
+    : res.items.map(sanitizeFleetServerHost);
   const body = {
-    items: res.items,
+    items,
     page: res.page,
     perPage: res.perPage,
     total: res.total,

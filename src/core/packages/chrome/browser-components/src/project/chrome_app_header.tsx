@@ -143,6 +143,7 @@ function hasExplicitAppHeaderContent(config: ChromeAppHeaderConfig | undefined):
     !!config.menu?.items?.length ||
     !!config.favorite ||
     !!config.share ||
+    !!config.experimentalDashboardAiAction ||
     !!config.description ||
     !!config.metadata?.length
   );
@@ -205,7 +206,8 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
     !config?.metadata?.length &&
     !config?.badges?.length &&
     !config?.favorite &&
-    !config?.share;
+    !config?.share &&
+    !config?.experimentalDashboardAiAction;
   const reservedMinHeight =
     config?.spacing === 'compact' || isSparse
       ? RESERVED_COMPACT_MIN_HEIGHT_PX
@@ -230,6 +232,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
           menu={menu}
           favorite={config?.favorite}
           share={config?.share}
+          experimentalDashboardAiAction={config?.experimentalDashboardAiAction}
           {...secondaryContent}
           sticky={false}
           spacing={config?.spacing}

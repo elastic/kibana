@@ -6,14 +6,11 @@
  */
 
 import {
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiBetaBadge,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -28,11 +25,12 @@ import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
-import { labels } from '../../../utils/i18n';
+import { connectorsTechPreviewBadgeProps, labels } from '../../../utils/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { PageWrapper } from '../common/page_wrapper';
 import { useListDetailPageStyles } from '../common/styles';
+import { AddConnectorMenu } from './add_connector_menu';
 import { ActiveConnectorRow } from './active_connector_row';
 import { ConnectorDetailPanel } from './connector_detail_panel';
 import { ConnectorLibraryPanel } from './connector_library_panel';
@@ -51,7 +49,6 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   const hasAllPrivileges = useHasConnectorsAllPrivileges();
   const canEditAgent = useCanUpdateAgent({ agent: agentQuery.agent ?? null });
 
-  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedConnectorId, setSelectedConnectorId] = useQueryState<string>(
     searchParamNames.connectorId
@@ -127,7 +124,6 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
     isConnectorsLoading,
   ]);
 
-  const isAddDisabled = agentQuery.agent?.configuration?.connector_ids === undefined;
   const showCustomizeEmptyState = assignedConnectors.length === 0 && !searchQuery.trim();
 
   if (isLoading) {
@@ -145,15 +141,27 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   return (
     <PageWrapper>
       {showCustomizeEmptyState ? (
-        <ConnectorsCustomizeEmptyState canEditAgent={canEditAgent} onAddFromLibrary={openLibrary} />
+        <ConnectorsCustomizeEmptyState
+          canEditAgent={canEditAgent}
+          hasAllPrivileges={hasAllPrivileges}
+          onAddFromLibrary={openLibrary}
+          onCreateNew={openCreateFlyout}
+        />
       ) : (
         <>
           <div css={styles.header}>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.connectors.title}</h1>
-                </EuiTitle>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1>{labels.connectors.title}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge {...connectorsTechPreviewBadgeProps} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -166,50 +174,10 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                   </EuiFlexItem>
                   {hasAllPrivileges && canEditAgent && (
                     <EuiFlexItem grow={false}>
-                      <EuiPopover
-                        aria-label={labels.connectors.addConnectorPopoverLabel}
-                        button={
-                          <EuiButton
-                            fill
-                            iconType="plusCircle"
-                            iconSide="left"
-                            onClick={() => setIsAddMenuOpen((prev) => !prev)}
-                            data-test-subj="agentBuilderAddConnectorButton"
-                          >
-                            {labels.connectors.addConnectorButton}
-                          </EuiButton>
-                        }
-                        isOpen={isAddMenuOpen}
-                        closePopover={() => setIsAddMenuOpen(false)}
-                        anchorPosition="downLeft"
-                        panelPaddingSize="none"
-                      >
-                        <EuiContextMenuPanel
-                          items={[
-                            <EuiContextMenuItem
-                              key="from-library"
-                              icon="download"
-                              disabled={isAddDisabled}
-                              onClick={() => {
-                                setIsAddMenuOpen(false);
-                                openLibrary();
-                              }}
-                            >
-                              {labels.connectors.fromLibraryMenuItem}
-                            </EuiContextMenuItem>,
-                            <EuiContextMenuItem
-                              key="create-new"
-                              icon="plusCircle"
-                              onClick={() => {
-                                setIsAddMenuOpen(false);
-                                openCreateFlyout();
-                              }}
-                            >
-                              {labels.connectors.createNewMenuItem}
-                            </EuiContextMenuItem>,
-                          ]}
-                        />
-                      </EuiPopover>
+                      <AddConnectorMenu
+                        onAddFromLibrary={openLibrary}
+                        onCreateNew={openCreateFlyout}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

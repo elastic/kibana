@@ -10,254 +10,210 @@
 import type { Monitor } from '../monitor';
 
 export interface MemoryInfo {
-  memoryUsage: number; // MB
-  leak: boolean;
-  history: number[]; // MB samples
-  heapUsageRatio?: number; // used / limit
-  details?: {
-    shortTrendPerMin: number; // MB/min
-    longTrendPerMin: number; // MB/min
-    baseline: number; // MB
-    absoluteIncrease: number; // MB
-  };
+  memoryUsage: number; // MiB
+  heapUsageRatio: number; // used / limit
+  growthDetected: boolean;
+  sampleCount: number;
+  shortTrendPerMin: number; // MiB/min
 }
 
 interface PerformanceMemory {
   usedJSHeapSize: number;
-  totalJSHeapSize: number;
   jsHeapSizeLimit: number;
 }
 
-type Callback = (info: MemoryInfo) => void;
+type Callback = (info: MemoryInfo | null) => void;
 
-interface Config {
-  intervalMs?: number; // sampling period
-  warmupMs?: number; // time to skip leak detection
-  maxHistory?: number; // cap stored samples
-  // Leak thresholds (MB/min, MB absolute, ratio)
-  shortTrendMbPerMin?: number;
-  longTrendMbPerMin?: number;
-  absoluteIncreaseMb?: number;
-  highPressureRatio?: number; // used / limit
-  pauseWhenHidden?: boolean; // don't sample on hidden tabs
-}
+export class MemoryMonitor implements Monitor<MemoryInfo | null> {
+  private static readonly INTERVAL_MS = 20_000;
+  private static readonly WARMUP_MS = 60_000;
+  private static readonly MIN_BASELINE_SAMPLES = 4;
+  private static readonly MAX_HISTORY = 60;
+  private static readonly SHORT_TREND_MB_PER_MIN = 15;
+  private static readonly LONG_TREND_MB_PER_MIN = 8;
+  private static readonly ABSOLUTE_INCREASE_MB = 100;
 
-export class MemoryMonitor implements Monitor<MemoryInfo> {
-  static readonly isSupported = (): boolean =>
-    typeof performance !== 'undefined' &&
-    'memory' in performance &&
-    typeof (performance as any).memory?.usedJSHeapSize === 'number';
+  private static median(values: number[]): number {
+    const sorted = [...values].sort((a, b) => a - b);
+    const middle = Math.floor(sorted.length / 2);
+    if (sorted.length % 2 === 0) {
+      return (sorted[middle - 1] + sorted[middle]) / 2;
+    }
+    return sorted[middle];
+  }
 
-  private history: number[] = [];
-  private callbacks = new Set<Callback>();
-  private timer?: number;
-  private startedAt = 0;
-
-  private readonly cfg: Required<Config>;
-
-  constructor(config: Config = {}) {
-    this.cfg = {
-      intervalMs: 20_000,
-      warmupMs: 60_000,
-      maxHistory: 60, // ~20 min @ 20s
-      shortTrendMbPerMin: 15,
-      longTrendMbPerMin: 8,
-      absoluteIncreaseMb: 100,
-      highPressureRatio: 0.85,
-      pauseWhenHidden: true,
-      ...config,
-    };
-    if (this.cfg.pauseWhenHidden && typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', this.onVisibility, false);
+  private static readPerfMemory(): PerformanceMemory | null {
+    try {
+      if (typeof performance === 'undefined') return null;
+      const perf: Performance & { memory?: Partial<PerformanceMemory> } = performance;
+      const { usedJSHeapSize, jsHeapSizeLimit } = perf.memory ?? {};
+      if (
+        typeof usedJSHeapSize !== 'number' ||
+        !Number.isFinite(usedJSHeapSize) ||
+        usedJSHeapSize < 0 ||
+        typeof jsHeapSizeLimit !== 'number' ||
+        !Number.isFinite(jsHeapSizeLimit) ||
+        jsHeapSizeLimit <= 0
+      ) {
+        return null;
+      }
+      return { usedJSHeapSize, jsHeapSizeLimit };
+    } catch {
+      return null;
     }
   }
+
+  static readonly isSupported = (): boolean => MemoryMonitor.readPerfMemory() !== null;
+
+  private history: number[] = [];
+  private sampleTimes: number[] = [];
+  private frozenBaseline: number | undefined;
+  private callbacks = new Set<Callback>();
+  private timer?: ReturnType<typeof setTimeout>;
+  private startedAt = 0;
+  private isMonitoring = false;
+  private lastInfo: MemoryInfo | null | undefined;
 
   isSupported(): boolean {
     return MemoryMonitor.isSupported();
   }
 
   startMonitoring(): void {
-    if (!this.isSupported()) return;
-    this.stopMonitoring(); // ensure clean start
-    this.history.length = 0; // reset
+    this.stopMonitoring();
+    this.resetSessionState();
+    this.lastInfo = undefined;
     this.startedAt = performance.now();
-    this.sampleOnce(); // immediate sample
-    this.scheduleNext(); // kick loop
+    this.isMonitoring = true;
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', this.onVisibility, false);
+    }
+    this.sampleOnce();
+    if (typeof document === 'undefined' || !document.hidden) {
+      this.scheduleNext();
+    }
   }
 
   stopMonitoring(): void {
-    if (this.timer != null) {
-      clearTimeout(this.timer);
-      this.timer = undefined;
+    this.isMonitoring = false;
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', this.onVisibility, false);
     }
+    this.clearTimer();
   }
 
   destroy(): void {
     this.stopMonitoring();
-    this.history.length = 0;
+    this.resetSessionState();
     this.callbacks.clear();
-    if (this.cfg.pauseWhenHidden && typeof document !== 'undefined') {
-      document.removeEventListener('visibilitychange', this.onVisibility, false);
-    }
+    this.lastInfo = undefined;
   }
 
   subscribe(cb: Callback): () => void {
     this.callbacks.add(cb);
-    // Optionally emit last value immediately
-    const last = this.history[this.history.length - 1];
-    if (last != null) cb(this.buildInfo(last));
+    if (this.lastInfo !== undefined) cb(this.lastInfo);
     return () => this.callbacks.delete(cb);
   }
 
-  // ---------- internals ----------
+  private resetSessionState() {
+    this.history = [];
+    this.sampleTimes = [];
+    this.frozenBaseline = undefined;
+  }
+
+  private clearTimer() {
+    if (this.timer == null) return;
+    clearTimeout(this.timer);
+    this.timer = undefined;
+  }
 
   private scheduleNext() {
+    this.clearTimer();
     this.timer = setTimeout(() => {
-      // Pause if hidden, but keep rescheduling to check for visibility flips
-      if (this.cfg.pauseWhenHidden && typeof document !== 'undefined' && document.hidden) {
-        this.scheduleNext();
-        return;
-      }
+      if (!this.isMonitoring || (typeof document !== 'undefined' && document.hidden)) return;
       this.sampleOnce();
-      this.scheduleNext();
-    }, this.cfg.intervalMs) as unknown as number;
+      if (this.isMonitoring && (typeof document === 'undefined' || !document.hidden)) {
+        this.scheduleNext();
+      }
+    }, MemoryMonitor.INTERVAL_MS);
   }
 
   private onVisibility = () => {
-    // On becoming visible, take a sample “now” to avoid big gaps
-    if (!document.hidden) this.sampleOnce();
+    if (!this.isMonitoring) return;
+    this.clearTimer();
+    if (document.hidden) return;
+    this.sampleOnce();
+    this.scheduleNext();
   };
 
-  private readPerfMemory(): PerformanceMemory | null {
-    try {
-      const mem = (performance as any).memory as PerformanceMemory | undefined;
-      if (!mem) return null;
-      if (typeof mem.usedJSHeapSize !== 'number' || typeof mem.jsHeapSizeLimit !== 'number')
-        return null;
-      return mem;
-    } catch {
-      return null;
-    }
-  }
-
   private sampleOnce() {
-    const mem = this.readPerfMemory();
-    if (!mem) return;
+    if (!this.isMonitoring) return;
+    const mem = MemoryMonitor.readPerfMemory();
+    if (!mem) {
+      this.lastInfo = null;
+      this.callbacks.forEach((cb) => cb(null));
+      return;
+    }
 
     const usedMB = mem.usedJSHeapSize / (1024 * 1024);
-    if (!Number.isFinite(usedMB)) return;
-
     this.history.push(usedMB);
-    if (this.history.length > this.cfg.maxHistory) this.history.shift();
+    this.sampleTimes.push(performance.now());
+    if (this.history.length > MemoryMonitor.MAX_HISTORY) {
+      this.history.shift();
+      this.sampleTimes.shift();
+    }
+    this.maybeFreezeBaseline();
 
     const info = this.buildInfo(usedMB, mem);
-    // Notify subscribers
+    this.lastInfo = info;
     this.callbacks.forEach((cb) => cb(info));
   }
 
-  private buildInfo(current: number, mem?: PerformanceMemory): MemoryInfo {
-    const leak = this.detectLeak(mem);
-    const heapUsageRatio = mem
-      ? mem.usedJSHeapSize / (mem.jsHeapSizeLimit || mem.totalJSHeapSize || 1)
-      : undefined;
-
-    const { baseline, absoluteIncrease, shortTrendPerMin, longTrendPerMin } =
-      this.computeLeakMetrics();
-
-    const base: MemoryInfo = {
-      memoryUsage: current,
-      leak,
-      history: this.history,
-      heapUsageRatio,
-      details: {
-        baseline,
-        absoluteIncrease,
-        shortTrendPerMin,
-        longTrendPerMin,
-      },
-    };
-    return base;
+  private maybeFreezeBaseline() {
+    if (this.frozenBaseline !== undefined) return;
+    if (performance.now() - this.startedAt < MemoryMonitor.WARMUP_MS) return;
+    if (this.history.length < MemoryMonitor.MIN_BASELINE_SAMPLES) return;
+    this.frozenBaseline = MemoryMonitor.median(this.history);
   }
 
-  private computeLeakMetrics() {
-    const h = this.history;
-    const n = h.length;
-
-    const elapsed = performance.now() - this.startedAt;
-    const warmedUp = elapsed >= this.cfg.warmupMs;
-
-    // Baseline = mean of earliest stable window after warm-up
-    // Choose a window near the first third of samples when available
-    const start = Math.max(0, Math.min(Math.floor(n / 3) - 5, n - 25));
-    const end = Math.max(start + 5, Math.min(start + 15, n - 20));
-    const baselineWindow = end > start ? h.slice(start, end) : [];
-    const baseline =
-      baselineWindow.length > 0
-        ? baselineWindow.reduce((s, v) => s + v, 0) / baselineWindow.length
-        : h[0] ?? 0;
-
-    const recentShort = h.slice(-10); // last 10 samples
-    const recentLong = h.slice(-20); // last 20 samples
-
-    // Trend in MB/min computed from linear regression slope per sample
-    const slopeShort = this.linearSlope(recentShort); // MB/sample
-    const slopeLong = this.linearSlope(recentLong); // MB/sample
-    const samplesPerMinute = 60_000 / this.cfg.intervalMs;
-
-    const shortTrendPerMin = slopeShort * samplesPerMinute;
-    const longTrendPerMin = slopeLong * samplesPerMinute;
-
-    const current = h[n - 1] ?? 0;
-    const absoluteIncrease = current - baseline;
+  private buildInfo(current: number, mem: PerformanceMemory): MemoryInfo {
+    const shortTrendPerMin = this.linearSlope(this.history.slice(-10), this.sampleTimes.slice(-10));
+    const longTrendPerMin = this.linearSlope(this.history.slice(-20), this.sampleTimes.slice(-20));
+    const absoluteIncrease = this.frozenBaseline === undefined ? 0 : current - this.frozenBaseline;
+    const growthDetected =
+      this.frozenBaseline !== undefined &&
+      shortTrendPerMin > MemoryMonitor.SHORT_TREND_MB_PER_MIN &&
+      longTrendPerMin > MemoryMonitor.LONG_TREND_MB_PER_MIN &&
+      absoluteIncrease > MemoryMonitor.ABSOLUTE_INCREASE_MB;
 
     return {
-      warmedUp,
-      baseline,
-      absoluteIncrease,
+      memoryUsage: current,
+      heapUsageRatio: mem.usedJSHeapSize / mem.jsHeapSizeLimit,
+      growthDetected,
+      sampleCount: this.history.length,
       shortTrendPerMin,
-      longTrendPerMin,
     };
   }
 
-  private detectLeak(mem?: PerformanceMemory): boolean {
-    if (this.history.length < 10) return false;
-
-    const { warmedUp, absoluteIncrease, shortTrendPerMin, longTrendPerMin } =
-      this.computeLeakMetrics();
-
-    if (!warmedUp) return false;
-
-    const sustainedGrowth =
-      shortTrendPerMin > this.cfg.shortTrendMbPerMin &&
-      longTrendPerMin > this.cfg.longTrendMbPerMin;
-
-    const significantIncrease = absoluteIncrease > this.cfg.absoluteIncreaseMb;
-
-    const ratioDen = mem?.jsHeapSizeLimit || mem?.totalJSHeapSize || Number.POSITIVE_INFINITY;
-    const heapUsageRatio = mem && Number.isFinite(ratioDen) ? mem.usedJSHeapSize / ratioDen : 0;
-
-    const highMemoryPressure = heapUsageRatio > this.cfg.highPressureRatio;
-
-    return sustainedGrowth && significantIncrease && highMemoryPressure;
-  }
-
-  // Least squares slope using index as x (uniform sampling)
-  private linearSlope(data: number[]): number {
+  private linearSlope(data: number[], timestamps: number[]): number {
     const n = data.length;
-    if (n < 2) return 0;
+    if (n < 2 || timestamps.length !== n) return 0;
 
-    // Optional: light smoothing
-    const smoothed = this.smooth3(data);
+    const firstTimestamp = timestamps[0];
+    const relativeMinutes = timestamps.map((timestamp) => (timestamp - firstTimestamp) / 60_000);
+    const smoothedData = this.smooth3(data);
+    const smoothedTimes = this.smooth3(relativeMinutes);
+    const meanX = smoothedTimes.reduce((sum, value) => sum + value, 0) / n;
+    const meanY = smoothedData.reduce((sum, value) => sum + value, 0) / n;
 
-    const sumX = ((n - 1) * n) / 2; // Σi
-    const sumXX = ((n - 1) * n * (2 * n - 1)) / 6; // Σi^2
-    const sumY = smoothed.reduce((s, v) => s + v, 0); // Σy
-    const sumXY = smoothed.reduce((s, v, i) => s + i * v, 0); // Σi*y
+    let covariance = 0;
+    let variance = 0;
+    for (let i = 0; i < n; i++) {
+      const centeredX = smoothedTimes[i] - meanX;
+      covariance += centeredX * (smoothedData[i] - meanY);
+      variance += centeredX * centeredX;
+    }
 
-    const denom = n * sumXX - sumX * sumX;
-    if (denom === 0) return 0;
-
-    return (n * sumXY - sumX * sumY) / denom; // MB per sample
+    return variance > 0 ? covariance / variance : 0;
   }
 
   private smooth3(data: number[]): number[] {

@@ -15,6 +15,8 @@ import { init, apm, type Transaction } from '@elastic/apm-rum';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { ApmSystem } from './apm_system';
+import { ebtSpanFilter } from './filters/ebt_span_filter';
+import { ignoredErrorsFilter } from './filters/ignored_errors_filter';
 
 const initMock = init as jest.Mocked<typeof init>;
 const apmMock = apm as DeeplyMockedKeys<typeof apm>;
@@ -42,6 +44,13 @@ describe('ApmSystem', () => {
       const apmSystem = new ApmSystem({ active: true, globalLabels: { alpha: 'one' } });
       await apmSystem.setup();
       expect(apm.addLabels).toHaveBeenCalledWith({ alpha: 'one' });
+    });
+
+    it('registers the payload filters', async () => {
+      const apmSystem = new ApmSystem({ active: true });
+      await apmSystem.setup();
+      expect(apmMock.addFilter).toHaveBeenCalledWith(ebtSpanFilter);
+      expect(apmMock.addFilter).toHaveBeenCalledWith(ignoredErrorsFilter);
     });
 
     describe('manages the page load transaction', () => {

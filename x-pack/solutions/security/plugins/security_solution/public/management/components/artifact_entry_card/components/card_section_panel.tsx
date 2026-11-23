@@ -13,10 +13,19 @@ import { EuiPanel } from '@elastic/eui';
 export type CardSectionPanelProps = Exclude<
   EuiPanelProps,
   'hasBorder' | 'hasShadow' | 'paddingSize'
->;
+> & {
+  /** Inset like a bordered collapsible card so grid column labels line up. */
+  gridHeader?: boolean;
+};
 
-const StyledEuiPanel = styled(EuiPanel)`
-  padding: ${({ theme }) => theme.euiTheme.size.xl};
+const StyledEuiPanel = styled(EuiPanel, {
+  shouldForwardProp: (prop) => prop !== 'gridHeader',
+})<CardSectionPanelProps>`
+  padding: ${({ gridHeader, theme }) =>
+    // Match the collapsible card inset (section padding + outer border) so column tracks line up.
+    gridHeader
+      ? `0 calc(${theme.euiTheme.size.l} + ${theme.euiTheme.border.width.thin}) ${theme.euiTheme.size.s}`
+      : theme.euiTheme.size.xl};
   &.top-section {
     padding-bottom: ${({ theme }) => theme.euiTheme.size.l};
   }
@@ -28,7 +37,15 @@ const StyledEuiPanel = styled(EuiPanel)`
   }
 `;
 
-export const CardSectionPanel = memo<CardSectionPanelProps>((props) => {
-  return <StyledEuiPanel {...props} hasBorder={false} hasShadow={false} paddingSize="l" />;
+export const CardSectionPanel = memo<CardSectionPanelProps>(({ gridHeader = false, ...props }) => {
+  return (
+    <StyledEuiPanel
+      {...props}
+      gridHeader={gridHeader}
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize={gridHeader ? 'none' : 'l'}
+    />
+  );
 });
 CardSectionPanel.displayName = 'CardSectionPanel';

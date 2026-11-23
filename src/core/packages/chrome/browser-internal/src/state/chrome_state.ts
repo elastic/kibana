@@ -74,6 +74,7 @@ export interface ChromeState {
   appMenu: State<AppMenuConfig | undefined>;
   contextSwitcher: State<ReactNode>;
   projectPicker: State<ReactNode>;
+  subscriptionBadge: State<ReactNode>;
   inlineAppHeader: State<InlineAppHeaderState | undefined>;
   inlineAppHeaderOwnerId: number;
   appHeader: State<ChromeAppHeaderConfig | undefined>;
@@ -133,6 +134,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
   const contextSwitcher = createState<ReactNode>(null);
   const projectPicker = createState<ReactNode>(null);
+  const subscriptionBadge = createState<ReactNode>(null);
   const inlineAppHeader = createState<InlineAppHeaderState | undefined>(undefined);
   const appHeader = createState<ChromeAppHeaderConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
@@ -180,6 +182,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     },
     contextSwitcher,
     projectPicker,
+    subscriptionBadge,
     userMenu,
     feedbackHandler,
     newsfeedHandler,

@@ -6,19 +6,33 @@
  */
 
 import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { getSupertest } from '@kbn/core-test-helpers-kbn-server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import { buildInboundEventsPath } from '../../common/inbound_events';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { INBOUND_EVENTS_API_VERSION } from '../inbound/constants';
+import { dispatchConnectorEvents } from '../inbound/dispatch_connector_events';
 import { setupTestServers } from './lib';
+
+jest.mock('../inbound/dispatch_connector_events', () => ({
+  dispatchConnectorEvents: jest.fn().mockResolvedValue({ ok: true }),
+}));
 
 interface ConnectorHttpBody {
   id: string;
   connector_type_id: string;
-  config?: { ingestTokenHash?: string };
+  is_inbound_events_enabled?: boolean;
   secrets?: { ingest_token?: string };
+}
+
+interface ScopedActionAttributes {
+  apiKey?: string;
+  uiamApiKey?: string;
+  hasInboundEventIdentity?: boolean;
 }
 
 describe('Inbound events HTTP API', () => {
@@ -51,7 +65,8 @@ describe('Inbound events HTTP API', () => {
   const postHub = (
     connectorId: string,
     token: string,
-    body: Record<string, unknown> = { eventType: 'order.created', orderId: '1' }
+    body: Record<string, unknown> = { eventType: 'order.created', orderId: '1' },
+    contentType: 'json' | 'form' = 'json'
   ) =>
     getSupertest(
       kibanaServer.root,
@@ -64,7 +79,20 @@ describe('Inbound events HTTP API', () => {
       .set('elastic-api-version', INBOUND_EVENTS_API_VERSION)
       .set('kbn-xsrf', 'kibana')
       .set('Authorization', `Bearer ${token}`)
+      .type(contentType)
       .send(body);
+
+  const readScopedAction = async (id: string): Promise<ScopedActionAttributes> => {
+    const client = kibanaServer.coreStart.savedObjects.getScopedClient(
+      httpServerMock.createKibanaRequest(),
+      {
+        includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+      }
+    );
+    const saved = await client.get<ScopedActionAttributes>(ACTION_SAVED_OBJECT_TYPE, id);
+    return saved.attributes;
+  };
 
   it('serves the versioned public route and returns 404 fail-closed for unknown connector', async () => {
     await getSupertest(
@@ -97,7 +125,6 @@ describe('Inbound events HTTP API', () => {
     expect(created.id).toEqual(expect.any(String));
     expect(created.connector_type_id).toBe(INBOUND_WEBHOOK_CONNECTOR_TYPE_ID);
     expect(created.secrets).toBeUndefined();
-    expect(created.config?.ingestTokenHash).toBeUndefined();
 
     const mintRes = await getSupertest(
       kibanaServer.root,
@@ -121,6 +148,23 @@ describe('Inbound events HTTP API', () => {
     }).expect(200, { challenge: 'abc' });
 
     await postHub(created.id, ingestToken!).expect(202, { ok: true });
+    await postHub(
+      created.id,
+      ingestToken!,
+      { payload: JSON.stringify({ eventType: 'order.created' }) },
+      'form'
+    ).expect(202, { ok: true });
+
+    await getSupertest(kibanaServer.root, 'put', `/api/actions/connector/${created.id}`)
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'sales-ingress-renamed',
+        config: {},
+        secrets: { authType: 'none' },
+      })
+      .expect(200);
+
+    await postHub(created.id, ingestToken!).expect(202, { ok: true });
 
     const getRes = await getSupertest(
       kibanaServer.root,
@@ -130,7 +174,6 @@ describe('Inbound events HTTP API', () => {
       .set('kbn-xsrf', 'kibana')
       .expect(200);
     expect((getRes.body as ConnectorHttpBody).secrets?.ingest_token).toBeUndefined();
-    expect((getRes.body as ConnectorHttpBody).config?.ingestTokenHash).toBeUndefined();
 
     const rotateRes = await getSupertest(
       kibanaServer.root,
@@ -152,5 +195,132 @@ describe('Inbound events HTTP API', () => {
 
     await postHub(created.id, ingestToken!).expect(404);
     await postHub(created.id, newToken!).expect(202, { ok: true });
+  });
+
+  it('decodes a Slack slash command form post and returns an empty HTTP 200 ack', async () => {
+    const dispatchConnectorEventsMock = jest.mocked(dispatchConnectorEvents);
+    dispatchConnectorEventsMock.mockClear();
+
+    const createRes = await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'slack-slash-command-ingress',
+        connector_type_id: '.slack2',
+        config: {},
+        secrets: { authType: 'bearer', token: 'xoxb-test-token' },
+        is_inbound_events_enabled: true,
+      })
+      .expect(200);
+    const created = createRes.body as ConnectorHttpBody;
+
+    const mintRes = await getSupertest(
+      kibanaServer.root,
+      'post',
+      `${INTERNAL_BASE_ACTION_API_PATH}/connector/${created.id}/_rotate_event_token`
+    )
+      .set('kbn-xsrf', 'kibana')
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(200);
+    const ingestToken = (mintRes.body as { ingest_token: string }).ingest_token;
+
+    const response = await getSupertest(
+      kibanaServer.root,
+      'post',
+      buildInboundEventsPath({ connectorTypeId: '.slack2', connectorId: created.id })
+    )
+      .set('elastic-api-version', INBOUND_EVENTS_API_VERSION)
+      .set('kbn-xsrf', 'kibana')
+      .set('Authorization', `Bearer ${ingestToken}`)
+      .type('form')
+      .send({
+        team_id: 'T123',
+        channel_id: 'C123',
+        channel_name: 'general',
+        user_id: 'U123',
+        user_name: 'ada',
+        command: '/investigate',
+        text: 'host & cluster=one + café',
+        api_app_id: 'A123',
+        response_url: 'https://hooks.slack.com/commands/T123/1/secret',
+        trigger_id: '13345224609.738474920.8088930838d88f008e0',
+      })
+      .expect(200);
+
+    expect(response.text).toBe('');
+    expect(dispatchConnectorEventsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          eventId: 'slack2.slash_command',
+          connectorId: created.id,
+          connectorTypeId: '.slack2',
+          correlationKey: '13345224609.738474920.8088930838d88f008e0',
+          payload: {
+            workspace: 'T123',
+            channel: 'C123',
+            channelName: 'general',
+            user: 'U123',
+            userName: 'ada',
+            command: '/investigate',
+            text: 'host & cluster=one + café',
+            responseUrl: 'https://hooks.slack.com/commands/T123/1/secret',
+            apiAppId: 'A123',
+          },
+        }),
+      })
+    );
+  });
+
+  it('stores an unencrypted presence flag and strips encrypted identity on a scoped get', async () => {
+    const createRes = await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'scoped-ingress',
+        connector_type_id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+        config: {},
+        secrets: { authType: 'none' },
+      })
+      .expect(200);
+
+    const created = createRes.body as ConnectorHttpBody;
+    const stored = await readScopedAction(created.id);
+    expect(stored.apiKey).toBeUndefined();
+    expect(stored.uiamApiKey).toBeUndefined();
+    expect(stored.hasInboundEventIdentity).toBe(true);
+
+    const getRes = await getSupertest(
+      kibanaServer.root,
+      'get',
+      `/api/actions/connector/${created.id}`
+    )
+      .set('kbn-xsrf', 'kibana')
+      .expect(200);
+    const body = getRes.body as ConnectorHttpBody & Record<string, unknown>;
+    expect(body.is_inbound_events_enabled).toBe(true);
+    expect(body.apiKey).toBeUndefined();
+    expect(body.uiamApiKey).toBeUndefined();
+  });
+
+  it('omits is_inbound_events_enabled for outbound connectors', async () => {
+    const createRes = await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'server-log',
+        connector_type_id: '.server-log',
+        config: {},
+        secrets: {},
+      })
+      .expect(200);
+
+    const created = createRes.body as ConnectorHttpBody;
+    expect(created.is_inbound_events_enabled).toBeUndefined();
+
+    const getRes = await getSupertest(
+      kibanaServer.root,
+      'get',
+      `/api/actions/connector/${created.id}`
+    )
+      .set('kbn-xsrf', 'kibana')
+      .expect(200);
+    expect((getRes.body as ConnectorHttpBody).is_inbound_events_enabled).toBeUndefined();
   });
 });

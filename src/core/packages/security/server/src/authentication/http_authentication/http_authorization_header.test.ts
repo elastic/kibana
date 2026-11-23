@@ -88,6 +88,32 @@ describe('HTTPAuthorizationHeader.parseFromRequest()', () => {
   });
 });
 
+describe('HTTPAuthorizationHeader.parseFromValue()', () => {
+  it('returns `null` for an empty value', () => {
+    expect(HTTPAuthorizationHeader.parseFromValue('')).toBeNull();
+  });
+
+  it('parses scheme and credentials', () => {
+    const header = HTTPAuthorizationHeader.parseFromValue('Bearer some-access-token');
+
+    expect(header?.scheme).toBe('Bearer');
+    expect(header?.credentials).toBe('some-access-token');
+  });
+
+  it('keeps everything after the first whitespace as credentials', () => {
+    const header = HTTPAuthorizationHeader.parseFromValue('Basic xxx yyy');
+
+    expect(header?.scheme).toBe('Basic');
+    expect(header?.credentials).toBe('xxx yyy');
+  });
+
+  it('round-trips through toString()', () => {
+    const value = 'Bearer essu_some-token';
+
+    expect(HTTPAuthorizationHeader.parseFromValue(value)?.toString()).toEqual(value);
+  });
+});
+
 describe('toString()', () => {
   it('concatenates scheme and credentials using a space', () => {
     const header = new HTTPAuthorizationHeader('Bearer', 'some-access-token');

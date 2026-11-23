@@ -7,6 +7,7 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
+import { LENS_DEFAULT_LEGEND_SIZE } from '@kbn/chart-expressions-common';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
@@ -196,7 +197,7 @@ const generateCommonArguments = (
       : layer.legendDisplay) as PartitionVisLegendDisplay,
     legendPosition: layer.legendPosition || Position.Right,
     maxLegendLines: layer.legendMaxLines ?? 1,
-    legendSize: layer.legendSize,
+    legendSize: layer.legendSize ?? LENS_DEFAULT_LEGEND_SIZE,
     nestedLegend:
       layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
         ? Boolean(layer.nestedLegend)

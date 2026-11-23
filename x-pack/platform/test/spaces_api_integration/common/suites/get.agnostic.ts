@@ -86,7 +86,9 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
           solution: 'es',
           disabledFeatures: [
             // Disabled features are automatically added to the space when a solution is set
+            'alertzero',
             'apm',
+            'digital_experience',
             'infrastructure',
             'logs',
             'observabilityAlerts',
@@ -100,6 +102,7 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
             'securitySolutionSiemMigrations',
             'securitySolutionTimeline',
             'siemV5',
+            'nightshift',
             'slo',
             'uptime',
           ],

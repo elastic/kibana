@@ -9,27 +9,33 @@ import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { useProjectRouting } from './use_project_routing';
 
-const mockGetApmInternalServices = jest.fn();
+interface MockCpsManager {
+  getProjectRouting: () => string | undefined;
+  getProjectRouting$: () => BehaviorSubject<string | undefined>;
+}
+
+const mockCpsManager$ = new BehaviorSubject<MockCpsManager | undefined>(undefined);
+
 jest.mock('../../../../plugin', () => ({
-  getApmInternalServices: () => mockGetApmInternalServices(),
+  get apmCpsManager$() {
+    return mockCpsManager$;
+  },
+  getApmCpsManager: () => mockCpsManager$.getValue(),
 }));
+
+function createCpsManager(projectRouting$: BehaviorSubject<string | undefined>): MockCpsManager {
+  return {
+    getProjectRouting: () => projectRouting$.getValue(),
+    getProjectRouting$: () => projectRouting$,
+  };
+}
 
 describe('useProjectRouting', () => {
   beforeEach(() => {
-    mockGetApmInternalServices.mockReset();
+    mockCpsManager$.next(undefined);
   });
 
-  it('returns undefined when the internal services are not set', () => {
-    mockGetApmInternalServices.mockReturnValue(undefined);
-
-    const { result } = renderHook(() => useProjectRouting());
-
-    expect(result.current).toBeUndefined();
-  });
-
-  it('returns undefined when CPS is disabled (no cpsManager)', () => {
-    mockGetApmInternalServices.mockReturnValue({ callApmApi: jest.fn() });
-
+  it('returns undefined while no CPS manager is published', () => {
     const { result } = renderHook(() => useProjectRouting());
 
     expect(result.current).toBeUndefined();
@@ -37,13 +43,7 @@ describe('useProjectRouting', () => {
 
   it('returns the current project routing and follows picker changes', () => {
     const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
-    mockGetApmInternalServices.mockReturnValue({
-      callApmApi: jest.fn(),
-      cpsManager: {
-        getProjectRouting: () => projectRouting$.getValue(),
-        getProjectRouting$: () => projectRouting$,
-      },
-    });
+    mockCpsManager$.next(createCpsManager(projectRouting$));
 
     const { result } = renderHook(() => useProjectRouting());
 
@@ -54,5 +54,39 @@ describe('useProjectRouting', () => {
     });
 
     expect(result.current).toBe('_alias:_origin');
+  });
+
+  it('follows a CPS manager published after mount', () => {
+    const { result } = renderHook(() => useProjectRouting());
+
+    expect(result.current).toBeUndefined();
+
+    const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
+    act(() => {
+      mockCpsManager$.next(createCpsManager(projectRouting$));
+    });
+
+    expect(result.current).toBe('_alias:*');
+
+    act(() => {
+      projectRouting$.next('_alias:_origin');
+    });
+
+    expect(result.current).toBe('_alias:_origin');
+  });
+
+  it('clears the routing when the CPS manager is withdrawn', () => {
+    const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
+    mockCpsManager$.next(createCpsManager(projectRouting$));
+
+    const { result } = renderHook(() => useProjectRouting());
+
+    expect(result.current).toBe('_alias:*');
+
+    act(() => {
+      mockCpsManager$.next(undefined);
+    });
+
+    expect(result.current).toBeUndefined();
   });
 });

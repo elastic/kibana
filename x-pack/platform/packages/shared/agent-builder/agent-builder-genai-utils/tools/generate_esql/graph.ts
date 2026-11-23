@@ -8,21 +8,24 @@
 import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { TimeRange } from '@kbn/agent-builder-common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
-import { extractTextContent } from '../../langchain/messages';
+import { extractRefusal, extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
 import {
   extractEsqlQueries,
   executeEsql,
+  isEsqlExecutionTimeoutError,
   validateEsqlQuery,
-  buildTimeRangeParams,
+  buildEsqlParams,
+  buildTimeSeriesTimeRangeFilter,
 } from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
@@ -42,6 +45,8 @@ import {
   isRequestDocumentationAction,
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
+import { hasRejectedJoinTarget } from './join_errors';
+import { withPromqlKeyword } from './promql_keyword';
 
 export const requestDocumentationSchema = z
   .object({
@@ -57,13 +62,15 @@ const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   target: Annotation<string>(),
-  executeQuery: Annotation<boolean>(),
+  execute: Annotation<'none' | 'schema' | 'data'>(),
   maxRetries: Annotation<number>(),
   additionalInstructions: Annotation<string | undefined>(),
   additionalContext: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
   disableNamedParams: Annotation<boolean | undefined>(),
   timeRange: Annotation<TimeRange>(),
+  esqlVariables: Annotation<ESQLControlVariable[] | undefined>(),
+  executionTimeoutMs: Annotation<number | undefined>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
@@ -87,6 +94,8 @@ export const createNlToEsqlGraph = ({
   documentation,
   esqlCallbacks,
   includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
   sessionId,
   cacheControl,
 }: {
@@ -96,6 +105,8 @@ export const createNlToEsqlGraph = ({
   documentation: EsqlLoadedDocumentation;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
   includeDatasets?: boolean;
+  includeViews?: boolean;
+  includeFrozen?: boolean;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
 }) => {
@@ -104,6 +115,8 @@ export const createNlToEsqlGraph = ({
       resourceName: state.target,
       samplingSize: 100,
       includeDatasets,
+      includeViews,
+      includeFrozen,
       esClient,
     });
 
@@ -130,10 +143,15 @@ export const createNlToEsqlGraph = ({
         nlQuery: state.nlQuery,
         documentation,
         resource: state.resource,
+        additionalContext: state.additionalContext,
       })
     );
 
-    const requestedKeywords = [...commands, ...functions];
+    const requestedKeywords = withPromqlKeyword(
+      [...commands, ...functions],
+      state.nlQuery,
+      state.additionalContext
+    );
     const fetchedDoc = docBase.getDocumentation(requestedKeywords);
 
     const action: RequestDocumentationAction = {
@@ -170,12 +188,14 @@ export const createNlToEsqlGraph = ({
 
     const responseText = extractTextContent(response);
     const queries = extractEsqlQueries(responseText);
+    const refusal = extractRefusal(response);
 
     const action: GenerateQueryAction = {
       type: 'generate_query',
       success: queries.length > 0,
       query: queries[0],
       response: responseText,
+      ...(refusal && queries.length === 0 ? { refusal } : {}),
     };
 
     return {
@@ -184,6 +204,17 @@ export const createNlToEsqlGraph = ({
     };
   };
 
+  /**
+   * Regenerating after a rejected join target cannot produce the answer: this tool returns a
+   * single query, and the question needed more than one index. Further attempts would each cost a
+   * full generation over the accumulated history, and the best they could yield is a query over
+   * the primary index alone — valid, but silently missing the other half. So the call ends and the
+   * caller gets a fast, truthful failure to act on.
+   *
+   * Decided from the errors already in state; no cluster lookup is involved.
+   */
+  const joinTargetRejected = (state: StateType): boolean => hasRejectedJoinTarget(state.actions);
+
   const branchAfterGenerate = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
     if (!isGenerateQueryAction(lastAction)) {
@@ -191,7 +222,9 @@ export const createNlToEsqlGraph = ({
     }
     if (lastAction.success) {
       return 'autocorrect_query';
-    } else if (state.currentTry >= state.maxRetries) {
+    } else if (lastAction.refusal || state.currentTry >= state.maxRetries) {
+      // A refusal is the model declining the prompt, not failing at it: re-sending the same
+      // prompt with "please try again" appended gets the same refusal, so stop here.
       return 'finalize';
     } else {
       return 'generate_esql';
@@ -220,7 +253,7 @@ export const createNlToEsqlGraph = ({
   };
 
   const branchAfterAutocorrect = async (state: StateType) => {
-    if (state.executeQuery) {
+    if (state.execute !== 'none') {
       return 'execute_query';
     } else {
       return 'validate_query';
@@ -256,11 +289,10 @@ export const createNlToEsqlGraph = ({
     if (!isValidateQueryAction(lastAction)) {
       throw new Error(`Last action is not a validate_query action`);
     }
-    if (lastAction.success || state.currentTry >= state.maxRetries) {
+    if (lastAction.success || state.currentTry >= state.maxRetries || joinTargetRejected(state)) {
       return 'finalize';
-    } else {
-      return 'generate_esql';
     }
+    return 'generate_esql';
   };
 
   // execute query step - validate first (ANTLR), then execute only if valid
@@ -290,10 +322,26 @@ export const createNlToEsqlGraph = ({
     }
 
     let action: ExecuteQueryAction;
+    const schemaOnly = state.execute === 'schema';
     try {
       const results = await executeEsql({
         query,
-        params: buildTimeRangeParams(state.timeRange),
+        params: buildEsqlParams({
+          query,
+          timeRange: state.timeRange,
+          esqlVariables: state.esqlVariables,
+        }),
+        // The schema probe only collects columns, so bounding it to the time range is safe and
+        // keeps TS and PROMQL queries from aggregating all data.
+        ...(schemaOnly
+          ? {
+              limit: 1,
+              dropNullColumns: false,
+              filter: buildTimeSeriesTimeRangeFilter(query, state.timeRange),
+            }
+          : {}),
+        includeFrozen,
+        timeoutMs: state.executionTimeoutMs,
         esClient,
       });
       action = {
@@ -308,6 +356,7 @@ export const createNlToEsqlGraph = ({
         success: false,
         query,
         error: e.message,
+        ...(isEsqlExecutionTimeoutError(e) ? { timedOut: true } : {}),
       };
     }
 
@@ -316,16 +365,28 @@ export const createNlToEsqlGraph = ({
     };
   };
 
+  /**
+   * A timed-out query is too expensive rather than wrong, so the regular fixer loop would mostly
+   * resubmit it and wait the full deadline each time. One regeneration is allowed (it covers a
+   * transient slow cluster as well as a genuinely narrower query); a second timeout ends the call.
+   */
+  const timeoutRetriesExhausted = (state: StateType): boolean =>
+    state.actions.filter((action) => isExecuteQueryAction(action) && action.timedOut).length > 1;
+
   const branchAfterQueryExecution = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
     if (!isExecuteQueryAction(lastAction)) {
       throw new Error(`Last action is not an execute_query action`);
     }
-    if (lastAction.success || state.currentTry >= state.maxRetries) {
+    if (
+      lastAction.success ||
+      state.currentTry >= state.maxRetries ||
+      joinTargetRejected(state) ||
+      (lastAction.timedOut && timeoutRetriesExhausted(state))
+    ) {
       return 'finalize';
-    } else {
-      return 'generate_esql';
     }
+    return 'generate_esql';
   };
 
   // finalize step - process / generate the outputs
@@ -342,7 +403,7 @@ export const createNlToEsqlGraph = ({
         error: lastAction.error,
       };
     }
-    // ended via AST validation when executeQuery=false - success or failure hitting max retries
+    // ended via AST validation when execute is 'none' - success or failure hitting max retries
     if (isValidateQueryAction(lastAction)) {
       return {
         answer: generateActions[generateActions.length - 1].response,
@@ -350,7 +411,7 @@ export const createNlToEsqlGraph = ({
         error: lastAction.error,
       };
     }
-    // ended via autocorrect - when executeQuery=false and validation was skipped (should not happen after adding validate_query)
+    // ended via autocorrect - when execute is 'none' and validation was skipped (should not happen after adding validate_query)
     if (isAutocorrectQueryAction(lastAction)) {
       return {
         answer: generateActions[generateActions.length - 1].response,
@@ -360,7 +421,9 @@ export const createNlToEsqlGraph = ({
     // ended via query generation - because the LLM didn't generate a query for some reason
     if (isGenerateQueryAction(lastAction)) {
       return {
-        error: 'No query was generated',
+        error: lastAction.refusal
+          ? `The model refused to generate a query: ${lastAction.refusal}`
+          : 'No query was generated',
         answer: lastAction.response,
         query: lastAction.query,
       };

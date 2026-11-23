@@ -21,7 +21,7 @@ export interface MonitorAssignedAgent {
 export interface MonitorLocationAssignment {
   locationId: string;
   locationLabel: string;
-  isAgentSharding: boolean;
+  isShardingActive: boolean;
   agentPolicyId: string;
   agentPolicyName: string;
   /**
@@ -29,4 +29,9 @@ export interface MonitorLocationAssignment {
    * Sharded: 0–1 assigned agent. Classic: every enrolled agent.
    */
   agents: MonitorAssignedAgent[];
+  /**
+   * True when at least one enrolled agent is the `elastic-agent-complete` image.
+   * Browser monitors do not run at this location when this is false.
+   */
+  hasCompleteAgent: boolean;
 }

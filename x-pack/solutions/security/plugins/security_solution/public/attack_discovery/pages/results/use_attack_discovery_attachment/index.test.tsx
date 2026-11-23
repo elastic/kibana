@@ -6,83 +6,95 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { getAttackDiscoveryMarkdown } from '@kbn/elastic-assistant-common';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
+import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_alerts';
+import { getAttackDiscoveryAttachmentData } from './get_attack_discovery_attachment_data';
 import { useAttackDiscoveryAttachment } from '.';
-import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
 
-jest.mock('@kbn/elastic-assistant-common');
 jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment');
 
-const mockGetAttackDiscoveryMarkdown = getAttackDiscoveryMarkdown as jest.Mock;
 const mockUseAgentBuilderAttachment = useAgentBuilderAttachment as jest.Mock;
+
+const [attackDiscovery] = getMockAttackDiscoveryAlerts();
+const { replacements } = attackDiscovery;
 
 describe('useAttackDiscoveryAttachment', () => {
   const mockOpenAgentBuilderFlyout = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetAttackDiscoveryMarkdown.mockReturnValue('Test markdown');
     mockUseAgentBuilderAttachment.mockReturnValue({
       openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
     });
   });
 
-  it('returns openAgentBuilderFlyout function', () => {
-    const { result } = renderHook(() => useAttackDiscoveryAttachment(mockAttackDiscovery));
+  it('attaches the discovery as a security.attack_discovery', () => {
+    renderHook(() => useAttackDiscoveryAttachment(attackDiscovery, replacements));
 
-    expect(typeof result.current).toBe('function');
+    expect(mockUseAgentBuilderAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachmentType: SecurityAgentBuilderAttachments.attackDiscovery,
+      })
+    );
   });
 
-  it('returns openAgentBuilderFlyout function when attackDiscovery is undefined', () => {
+  it('sends the de-anonymized attachment data by value', () => {
+    renderHook(() => useAttackDiscoveryAttachment(attackDiscovery, replacements));
+
+    expect(mockUseAgentBuilderAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachmentData: getAttackDiscoveryAttachmentData({ attackDiscovery, replacements }),
+      })
+    );
+  });
+
+  it('describes the attachment with the de-anonymized title', () => {
+    const anonymizedHost = '3d241119-f77a-454e-8ee3-d36e05a8714f';
+
+    renderHook(() =>
+      useAttackDiscoveryAttachment(
+        { ...attackDiscovery, title: `Attack on ${anonymizedHost}` },
+        { [anonymizedHost]: 'SRVMAC08' }
+      )
+    );
+
+    expect(mockUseAgentBuilderAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ attachmentDescription: 'Attack on SRVMAC08' })
+    );
+  });
+
+  // By value only: `data.id` already carries the persisted discovery id.
+  it('does not set an origin', () => {
+    renderHook(() => useAttackDiscoveryAttachment(attackDiscovery, replacements));
+
+    expect(mockUseAgentBuilderAttachment).toHaveBeenCalledWith(
+      expect.not.objectContaining({ origin: expect.anything() })
+    );
+  });
+
+  it('uses the attack discovery prompt', () => {
+    renderHook(() => useAttackDiscoveryAttachment(attackDiscovery, replacements));
+
+    expect(mockUseAgentBuilderAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT })
+    );
+  });
+
+  it('returns the openAgentBuilderFlyout function when a discovery is provided', () => {
+    const { result } = renderHook(() =>
+      useAttackDiscoveryAttachment(attackDiscovery, replacements)
+    );
+
+    expect(result.current).toBe(mockOpenAgentBuilderFlyout);
+  });
+
+  it('returns a no-op instead of opening Agent Builder when the discovery is undefined', () => {
     const { result } = renderHook(() => useAttackDiscoveryAttachment(undefined));
 
-    expect(typeof result.current).toBe('function');
-  });
+    result.current();
 
-  it('calls getAttackDiscoveryMarkdown with attackDiscovery and replacements', () => {
-    const replacements = { 'host.name': 'test-host' };
-    renderHook(() => useAttackDiscoveryAttachment(mockAttackDiscovery, replacements));
-
-    expect(mockGetAttackDiscoveryMarkdown).toHaveBeenCalledWith({
-      attackDiscovery: mockAttackDiscovery,
-      replacements,
-    });
-  });
-
-  it('calls getAttackDiscoveryMarkdown with undefined replacements when not provided', () => {
-    renderHook(() => useAttackDiscoveryAttachment(mockAttackDiscovery));
-
-    expect(mockGetAttackDiscoveryMarkdown).toHaveBeenCalledWith({
-      attackDiscovery: mockAttackDiscovery,
-      replacements: undefined,
-    });
-  });
-
-  it('calls useAgentBuilderAttachment with empty alert when attackDiscovery is undefined', () => {
-    renderHook(() => useAttackDiscoveryAttachment(undefined));
-
-    expect(mockUseAgentBuilderAttachment).toHaveBeenCalledWith({
-      attachmentType: SecurityAgentBuilderAttachments.alert,
-      attachmentData: {
-        alert: '',
-        attachmentLabel: 'Attack discovery',
-      },
-      attachmentPrompt: expect.any(String),
-    });
-  });
-
-  it('calls useAgentBuilderAttachment with markdown and title when attackDiscovery is provided', () => {
-    renderHook(() => useAttackDiscoveryAttachment(mockAttackDiscovery));
-
-    expect(mockUseAgentBuilderAttachment).toHaveBeenCalledWith({
-      attachmentType: SecurityAgentBuilderAttachments.alert,
-      attachmentData: {
-        alert: 'Test markdown',
-        attachmentLabel: mockAttackDiscovery.title,
-      },
-      attachmentPrompt: expect.any(String),
-    });
+    expect(mockOpenAgentBuilderFlyout).not.toHaveBeenCalled();
   });
 });

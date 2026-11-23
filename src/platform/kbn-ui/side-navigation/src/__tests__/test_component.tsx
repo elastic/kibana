@@ -36,14 +36,17 @@ export const TestComponent = ({
 
   return (
     <I18nProvider>
-      <Navigation
-        activeItemId={activeItemId}
-        isCollapsed={isCollapsed}
-        items={items}
-        onItemClick={handleItemClick}
-        onToggleCollapsed={setIsCollapsed}
-        setWidth={() => {}}
-      />
+      <>
+        <Navigation
+          activeItemId={activeItemId}
+          isCollapsed={isCollapsed}
+          items={items}
+          onItemClick={handleItemClick}
+          onToggleCollapsed={setIsCollapsed}
+          setWidth={() => {}}
+        />
+        <main tabIndex={-1}>Main content</main>
+      </>
     </I18nProvider>
   );
 };

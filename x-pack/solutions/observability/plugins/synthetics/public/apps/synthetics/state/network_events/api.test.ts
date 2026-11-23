@@ -24,21 +24,20 @@ describe('fetchNetworkEvents remoteName plumbing', () => {
   it('omits the remoteName query param for local monitors', async () => {
     await fetchNetworkEvents({ checkGroup: 'cg-1', stepIndex: 2 });
 
-    expect(mockGet).toHaveBeenCalledWith(
-      SYNTHETICS_API_URLS.NETWORK_EVENTS,
-      { checkGroup: 'cg-1', stepIndex: 2 },
-      expect.anything()
-    );
+    expect(mockGet).toHaveBeenCalledWith(SYNTHETICS_API_URLS.NETWORK_EVENTS, {
+      checkGroup: 'cg-1',
+      stepIndex: 2,
+    });
   });
 
   it('forwards remoteName to apiService.get when present', async () => {
     await fetchNetworkEvents({ checkGroup: 'cg-1', stepIndex: 2, remoteName: 'remote-a' });
 
-    expect(mockGet).toHaveBeenCalledWith(
-      SYNTHETICS_API_URLS.NETWORK_EVENTS,
-      { checkGroup: 'cg-1', stepIndex: 2, remoteName: 'remote-a' },
-      expect.anything()
-    );
+    expect(mockGet).toHaveBeenCalledWith(SYNTHETICS_API_URLS.NETWORK_EVENTS, {
+      checkGroup: 'cg-1',
+      stepIndex: 2,
+      remoteName: 'remote-a',
+    });
   });
 
   it('forwards timestamp to apiService.get when present', async () => {
@@ -48,10 +47,10 @@ describe('fetchNetworkEvents remoteName plumbing', () => {
       timestamp: '2023-01-01T00:00:00.000Z',
     });
 
-    expect(mockGet).toHaveBeenCalledWith(
-      SYNTHETICS_API_URLS.NETWORK_EVENTS,
-      { checkGroup: 'cg-1', stepIndex: 2, timestamp: '2023-01-01T00:00:00.000Z' },
-      expect.anything()
-    );
+    expect(mockGet).toHaveBeenCalledWith(SYNTHETICS_API_URLS.NETWORK_EVENTS, {
+      checkGroup: 'cg-1',
+      stepIndex: 2,
+      timestamp: '2023-01-01T00:00:00.000Z',
+    });
   });
 });

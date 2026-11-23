@@ -9,10 +9,11 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardStart } from './plugin';
-import type { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
-import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
+import { deserializeLayout } from '../common/dashboard_state/layout/deserialize_layout';
 import type { DashboardReadResponseBody } from '../server';
 import { DEFAULT_DASHBOARD_STATE } from '../common/default_dashboard_state';
 import type { DashboardApi, DashboardInternalApi } from './dashboard_api/types';
@@ -128,23 +129,27 @@ export function dashboardContextWrapper({
     savedObjectId,
   });
 
+  const changeHistoryModal = { isOpen: false, openModal: jest.fn(), closeModal: jest.fn() };
+
   return ({ children }: { children: React.ReactNode }) => (
     <I18nProvider>
-      <DashboardContext.Provider
-        value={{
-          ...api,
-          ...(apiOverrides ?? {}),
-        }}
-      >
-        <DashboardInternalContext.Provider
+      <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
+        <DashboardContext.Provider
           value={{
-            ...internalApi,
-            ...(internalApiOverrides ?? {}),
+            ...api,
+            ...(apiOverrides ?? {}),
           }}
         >
-          {children}
-        </DashboardInternalContext.Provider>
-      </DashboardContext.Provider>
+          <DashboardInternalContext.Provider
+            value={{
+              ...internalApi,
+              ...(internalApiOverrides ?? {}),
+            }}
+          >
+            {children}
+          </DashboardInternalContext.Provider>
+        </DashboardContext.Provider>
+      </ChangeHistoryModalContext.Provider>
     </I18nProvider>
   );
 }

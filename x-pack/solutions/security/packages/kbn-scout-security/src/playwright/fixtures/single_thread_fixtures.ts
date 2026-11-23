@@ -20,6 +20,7 @@ import {
   getAttackDiscoveryApiService,
   getCorrelationsApiService,
   getPrevalenceApiService,
+  getThreatIntelligenceApiService,
   getAnalyzerApiService,
   getNetworkApiService,
   getHostApiService,
@@ -92,6 +93,10 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         esClient,
         log,
       });
+      extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
+        esClient,
+        log,
+      });
       extendedApiServices.analyzer = getAnalyzerApiService({
         esClient,
         log,
@@ -110,6 +115,7 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
       });
       extendedApiServices.endpointArtifacts = getEndpointArtifactsApiService({
         kbnClient,
+        esClient,
         log,
       });
 

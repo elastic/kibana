@@ -3,7 +3,7 @@
   "id": "@kbn/cps",
   "owner": [
     "@elastic/kibana-core",
-    "@elastic/kibana-presentation"
+    "@elastic/appex-sharedux"
   ],
   "group": "platform",
   "visibility": "shared",

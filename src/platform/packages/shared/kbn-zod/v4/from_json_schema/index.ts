@@ -23,6 +23,7 @@ import { parseLiteral } from './parse_literal';
 import { parseObject } from './parse_object';
 import { parseArray } from './parse_array';
 import { parseUnion } from './parse_union';
+import { inlineRootJsonSchemaRef, normalizeJsonSchemaTypeArrays } from '../json_schema_utils';
 
 export type { JsonSchema } from './types';
 export { extractMeta as extractUiMeta } from './meta_utils';
@@ -49,6 +50,10 @@ export function fromJSONSchema(
   const { preserveMeta = false } = options;
 
   try {
+    const normalizedSchema = inlineRootJsonSchemaRef(
+      normalizeJsonSchemaTypeArrays(jsonSchema)
+    ) as JsonSchema;
+
     const parseJsonSchema = (schema: JsonSchema): z.ZodType => {
       const zodSchema = parseSchemaByType(schema, parseJsonSchema, preserveMeta);
 
@@ -62,7 +67,7 @@ export function fromJSONSchema(
       return zodSchema;
     };
 
-    return parseJsonSchema(jsonSchema as JsonSchema);
+    return parseJsonSchema(normalizedSchema);
   } catch {
     return undefined;
   }

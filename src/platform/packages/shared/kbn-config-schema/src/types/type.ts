@@ -78,6 +78,14 @@ export interface SchemaStructureEntry {
   type: string;
 }
 
+export interface GetSchemaStructureOptions {
+  /**
+   * List the nested keys inside schemas with several branches (`schema.conditional`, `offeringBasedSchema`,
+   * `schema.oneOf`, `schema.nullable`, `schema.discriminatedUnion`) instead of reporting them as a single leaf.
+   */
+  expandBranches?: boolean;
+}
+
 /**
  * Global validation Options to be provided when calling the `schema.validate()` method.
  */
@@ -123,6 +131,21 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
+let lazyDisabled =
+  typeof process !== 'undefined' && process.env?.KBN_DISABLE_LAZY_CONFIG_SCHEMA === 'true';
+
+/**
+ * Turns off lazy Joi construction: new schemas are built in their constructor (so invalid
+ * definitions throw at definition time, as before) and built schemas are held strongly.
+ * Also enabled at load time by `KBN_DISABLE_LAZY_CONFIG_SCHEMA=true`.
+ */
+export const setLazyConfigSchemaDisabled = (value: boolean): void => {
+  lazyDisabled = value;
+};
+
+const internalSchemaCache = new WeakMap<Type<any>, WeakRef<Schema>>();
+const strongSchemaCache = new WeakMap<Type<any>, Schema>();
+
 export abstract class Type<V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would
   // fail if it wasn't initialized we use a "trick" to which basically just
@@ -132,15 +155,29 @@ export abstract class Type<V> {
   // used for the `isConfigSchema` typeguard
   public readonly __isKbnConfigSchemaType = true;
 
-  /**
-   * Internal "schema" backed by Joi.
-   * @type {Schema}
-   */
-  protected readonly internalSchema: Schema;
+  private readonly schemaFactory: () => Schema;
+  private readonly baseTypeOptions: TypeOptions<any>;
   private readonly meta: TypeOptions<V>['meta'];
 
-  protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
+  protected constructor(schemaOrFactory: Schema | (() => Schema), options: TypeOptions<V> = {}) {
     this.meta = options.meta;
+    this.baseTypeOptions = { ...options };
+    this.schemaFactory =
+      typeof schemaOrFactory === 'function' ? schemaOrFactory : () => schemaOrFactory;
+
+    if (lazyDisabled) {
+      this.getSchema();
+    }
+  }
+
+  protected get internalSchema(): Schema {
+    const cached = strongSchemaCache.get(this) ?? internalSchemaCache.get(this)?.deref();
+    if (cached) {
+      return cached;
+    }
+
+    let schema = this.schemaFactory();
+    const options = this.baseTypeOptions;
 
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
@@ -186,7 +223,12 @@ export abstract class Type<V> {
       schema = schema.error(([error]) => this.onError(error));
     }
 
-    this.internalSchema = schema;
+    if (lazyDisabled) {
+      strongSchemaCache.set(this, schema);
+    } else {
+      internalSchemaCache.set(this, new WeakRef(schema));
+    }
+    return schema;
   }
 
   public extendsDeep(newOptions: ExtendsDeepOptions): Type<V> {
@@ -228,8 +270,8 @@ export abstract class Type<V> {
     return this.meta;
   }
 
-  public getSchemaStructure() {
-    return recursiveGetSchemaStructure(this.internalSchema);
+  public getSchemaStructure(options: GetSchemaStructureOptions = {}) {
+    return recursiveGetSchemaStructure(this.internalSchema, [], options);
   }
 
   protected handleError(
@@ -276,13 +318,21 @@ export abstract class Type<V> {
   }
 }
 
-function recursiveGetSchemaStructure(internalSchema: Schema, path: string[] = []) {
+function recursiveGetSchemaStructure(
+  internalSchema: Schema,
+  path: string[],
+  options: GetSchemaStructureOptions
+): SchemaStructureEntry[] {
   const array: SchemaStructureEntry[] = [];
   // Note: we are relying on Joi internals to obtain the schema structure (recursive keys).
   // This is not ideal, but it works for now and we only need it for some integration test assertions.
   // If it breaks in the future, we'll need to update our tests.
   for (const [key, val] of (internalSchema as any)._ids._byKey.entries()) {
-    array.push(...recursiveGetSchemaStructure(val.schema, [...path, key]));
+    array.push(...recursiveGetSchemaStructure(val.schema, [...path, key], options));
+  }
+
+  if (!array.length && options.expandBranches) {
+    array.push(...getBranchesStructure(internalSchema, path, options));
   }
 
   if (!array.length) {
@@ -300,6 +350,100 @@ function recursiveGetSchemaStructure(internalSchema: Schema, path: string[] = []
     });
   }
   return array;
+}
+
+interface SchemaBranchTerm {
+  schema?: SchemaLike;
+  then?: SchemaLike;
+  otherwise?: SchemaLike;
+  switch?: SchemaBranchTerm[];
+}
+
+/**
+ * Collects the branch schemas of `when` conditions (`schema.conditional`, `offeringBasedSchema`) and of
+ * alternatives (`schema.oneOf`, `schema.nullable`, `schema.discriminatedUnion`).
+ */
+function getBranchSchemas(internalSchema: Schema): Schema[] {
+  const terms = (internalSchema as any).$_terms ?? {};
+  const branchTerms: SchemaBranchTerm[] = [...(terms.whens ?? []), ...(terms.matches ?? [])];
+  const collect = ({
+    schema,
+    then,
+    otherwise,
+    switch: cases = [],
+  }: SchemaBranchTerm): Array<SchemaLike | undefined> => [
+    schema,
+    then,
+    otherwise,
+    ...cases.flatMap(collect),
+  ];
+  return branchTerms.flatMap(collect).filter((branch): branch is Schema => isSchema(branch));
+}
+
+/**
+ * Merges the nested keys of every branch of a conditional or alternatives schema.
+ *
+ * Returns an empty array when no branch has nested keys, so the caller falls back to a single leaf entry.
+ * A key gets `never` added to its type when one of the branches cannot hold it. A branch that can hold a value at
+ * the parent path (such as a record, or a nested branch schema with a scalar branch) adds its type to a single
+ * parent entry, so it stays distinct from the nested keys. A `null` or `never` value holds nothing, so it only adds
+ * `never` to the nested keys.
+ */
+function getBranchesStructure(
+  internalSchema: Schema,
+  path: string[],
+  options: GetSchemaStructureOptions
+): SchemaStructureEntry[] {
+  const branches = getBranchSchemas(internalSchema);
+
+  const nestedBranches: SchemaStructureEntry[][] = [];
+  const parentTypes: string[] = [];
+  let leafBranchCount = 0;
+  for (const branch of branches) {
+    const entries = recursiveGetSchemaStructure(branch, path, options);
+    const nested = entries.filter((entry) => entry.path.length > path.length);
+    for (const entry of entries) {
+      if (entry.path.length === path.length) {
+        parentTypes.push(...entry.type.split('|'));
+      }
+    }
+    if (nested.length) {
+      nestedBranches.push(nested);
+    } else {
+      leafBranchCount++;
+    }
+  }
+
+  if (!nestedBranches.length) {
+    return [];
+  }
+
+  // Keyed by the serialized segments, so a literal `a.b` key doesn't merge with the nested `a` -> `b` path.
+  const typesByPath = new Map<string, { path: string[]; types: string[]; branchCount: number }>();
+  for (const entries of nestedBranches) {
+    for (const { path: entryPath, type } of entries) {
+      const pathKey = JSON.stringify(entryPath);
+      const existing = typesByPath.get(pathKey) ?? { path: entryPath, types: [], branchCount: 0 };
+      existing.types.push(...type.split('|'));
+      existing.branchCount++;
+      typesByPath.set(pathKey, existing);
+    }
+  }
+
+  const valueParentTypes = [
+    ...new Set(parentTypes.filter((type) => type !== 'never' && type !== 'null')),
+  ];
+  const parentEntries: SchemaStructureEntry[] = valueParentTypes.length
+    ? [{ path, type: valueParentTypes.join('|') }]
+    : [];
+
+  const nestedEntries = [...typesByPath.values()].map(({ path: entryPath, types, branchCount }) => {
+    const isMissingFromBranch = branchCount < nestedBranches.length || leafBranchCount > 0;
+    const allTypes = isMissingFromBranch ? [...types, 'never'] : types;
+    return { path: entryPath, type: [...new Set(allTypes)].join('|') };
+  });
+
+  return [...parentEntries, ...nestedEntries];
 }
 
 /**

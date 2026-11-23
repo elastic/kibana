@@ -30,10 +30,11 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { get } from 'lodash';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type { Direction, PairedTTestResult } from '@kbn/evals-common';
+import type { Direction, ComparisonResult, MetricType, StatisticalTestId } from '@kbn/evals-common';
 import {
   useCompareExperiments,
   useEvalsTraceFetcher,
@@ -42,6 +43,7 @@ import {
 } from '../../hooks/use_evals_api';
 import { computeCompareDiff, isImproved } from './compare_diff';
 import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
+import { getErrorMessage } from '../../utils/get_error_message';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -69,7 +71,12 @@ interface ExampleScorePair {
   scoreTarget: number | null | undefined;
   traceIdBaseline: string | null;
   traceIdTarget: string | null;
+  /** Not part of the statistical comparison. */
+  isExcluded: boolean;
 }
+
+const isValidScore = (value: number | null | undefined): value is number =>
+  value != null && Number.isFinite(value);
 
 const formatScore = (value: number | null | undefined): string => {
   if (value === null || value === undefined || !Number.isFinite(value)) return '-';
@@ -110,7 +117,48 @@ const DIRECTION_HINTS: Record<Direction, string> = {
   neutral: i18n.DIFF_NEUTRAL_DIRECTION,
 };
 
-const DiffValue: React.FC<{ diff: number; direction: Direction }> = ({ diff, direction }) => {
+const TEST_LABELS: Record<StatisticalTestId, string> = {
+  paired_t: i18n.TEST_LABEL_PAIRED_T,
+  wilcoxon_signed_rank: i18n.TEST_LABEL_WILCOXON,
+  mcnemar: i18n.TEST_LABEL_MCNEMAR,
+};
+
+const METRIC_TYPE_LABELS: Record<MetricType, string> = {
+  binary: i18n.METRIC_TYPE_LABEL_BINARY,
+  continuous_bounded: i18n.METRIC_TYPE_LABEL_CONTINUOUS_BOUNDED,
+  continuous_unbounded: i18n.METRIC_TYPE_LABEL_CONTINUOUS_UNBOUNDED,
+  count: i18n.METRIC_TYPE_LABEL_COUNT,
+  ordinal_k: i18n.METRIC_TYPE_LABEL_ORDINAL,
+};
+
+const TestValue: React.FC<{
+  metricType: MetricType;
+  hypothesisTest: ComparisonResult['hypothesisTest'];
+}> = ({ metricType, hypothesisTest }) => {
+  const label = TEST_LABELS[hypothesisTest.id];
+  return (
+    <EuiToolTip
+      content={i18n.getTestTooltip(label, METRIC_TYPE_LABELS[metricType], hypothesisTest.method)}
+    >
+      <span tabIndex={0}>{label}</span>
+    </EuiToolTip>
+  );
+};
+
+const SampleSizeValue: React.FC<{ result: ComparisonResult }> = ({ result }) => (
+  <EuiToolTip content={i18n.getRepetitionsHint(result)}>
+    <span tabIndex={0}>
+      {result.sampleSize}
+      {result.repetitionWarning ? '*' : ''}
+    </span>
+  </EuiToolTip>
+);
+
+const DiffValue: React.FC<{
+  diff: number;
+  direction: Direction;
+  discordantPairs?: ComparisonResult['hypothesisTest']['discordantPairs'];
+}> = ({ diff, direction, discordantPairs }) => {
   const { euiTheme } = useEuiTheme();
   if (!Number.isFinite(diff)) return <span>-</span>;
 
@@ -127,7 +175,10 @@ const DiffValue: React.FC<{ diff: number; direction: Direction }> = ({ diff, dir
       : improved
       ? i18n.DIFF_IMPROVED
       : i18n.DIFF_REGRESSED;
-  const tooltip = verdictHint ? `${verdictHint} · ${directionHint}` : directionHint;
+  const discordantHint = discordantPairs
+    ? i18n.getDiscordantPairsHint(discordantPairs.targetOnly, discordantPairs.baselineOnly)
+    : null;
+  const tooltip = [verdictHint, directionHint, discordantHint].filter(Boolean).join(' · ');
 
   return (
     <EuiToolTip content={tooltip}>
@@ -261,7 +312,7 @@ const ExperimentHeader: React.FC<{
   );
 };
 
-const ExampleDrilldownFlyout: React.FC<{
+export const ExampleDrilldownFlyout: React.FC<{
   baselineExperimentId: string;
   targetExperimentId: string;
   datasetId: string;
@@ -322,14 +373,14 @@ const ExampleDrilldownFlyout: React.FC<{
       targetScoresByExample.set(ex.example_id, scoresByKey);
     }
 
-    const result: ExampleScorePair[] = [];
-    const coveredTargetExamples = new Set<string>();
+    const result: Array<Omit<ExampleScorePair, 'isExcluded'>> = [];
+    const shownTargetRepetitions = new Set<string>();
 
     for (const ex of baselineExamples.examples) {
       const targetScores = targetScoresByExample.get(ex.example_id);
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
-        coveredTargetExamples.add(ex.example_id);
+        shownTargetRepetitions.add(`${ex.example_id}|${score.task.repetition_index}`);
         const key = `${score.evaluator.name}|${score.task.repetition_index}`;
         const targetEntry = targetScores?.get(key);
         result.push({
@@ -346,9 +397,9 @@ const ExampleDrilldownFlyout: React.FC<{
     }
 
     for (const ex of targetExamples.examples) {
-      if (coveredTargetExamples.has(ex.example_id)) continue;
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
+        if (shownTargetRepetitions.has(`${ex.example_id}|${score.task.repetition_index}`)) continue;
         result.push({
           exampleId: ex.example_id,
           exampleIndex: ex.example_index,
@@ -362,11 +413,24 @@ const ExampleDrilldownFlyout: React.FC<{
       }
     }
 
-    return result.sort((a, b) => {
-      const indexDiff = (a.exampleIndex ?? 0) - (b.exampleIndex ?? 0);
-      if (indexDiff !== 0) return indexDiff;
-      return a.repetitionIndex - b.repetitionIndex;
-    });
+    // An example is compared when it has a valid score in each experiment.
+    const scoredInBaseline = new Set(
+      result.filter((row) => isValidScore(row.scoreBaseline)).map((row) => row.exampleId)
+    );
+    const scoredInTarget = new Set(
+      result.filter((row) => isValidScore(row.scoreTarget)).map((row) => row.exampleId)
+    );
+
+    return result
+      .map((row) => ({
+        ...row,
+        isExcluded: !scoredInBaseline.has(row.exampleId) || !scoredInTarget.has(row.exampleId),
+      }))
+      .sort((a, b) => {
+        const indexDiff = (a.exampleIndex ?? 0) - (b.exampleIndex ?? 0);
+        if (indexDiff !== 0) return indexDiff;
+        return a.repetitionIndex - b.repetitionIndex;
+      });
   }, [baselineExamples, targetExamples, evaluatorName]);
 
   const isLoading = loadingBaseline || loadingTarget;
@@ -383,12 +447,7 @@ const ExampleDrilldownFlyout: React.FC<{
           const label = hasRepetitions
             ? `${baseLabel} (rep ${item.repetitionIndex + 1})`
             : baseLabel;
-          const isPaired =
-            item.scoreBaseline != null &&
-            item.scoreTarget != null &&
-            Number.isFinite(item.scoreBaseline) &&
-            Number.isFinite(item.scoreTarget);
-          if (!isPaired) {
+          if (item.isExcluded) {
             return (
               <EuiToolTip content={i18n.FLYOUT_UNPAIRED_HINT}>
                 <span tabIndex={0}>{label}</span>
@@ -497,17 +556,14 @@ const ExampleDrilldownFlyout: React.FC<{
               loading={isLoading}
               tableLayout="auto"
               rowProps={(item) => {
-                const isPaired =
-                  item.scoreBaseline != null &&
-                  item.scoreTarget != null &&
-                  Number.isFinite(item.scoreBaseline) &&
-                  Number.isFinite(item.scoreTarget);
-
-                if (!isPaired) {
+                if (item.isExcluded) {
                   return { style: { opacity: 0.55 } };
                 }
+                if (!isValidScore(item.scoreBaseline) || !isValidScore(item.scoreTarget)) {
+                  return {};
+                }
 
-                const diff = computeCompareDiff(item.scoreTarget!, item.scoreBaseline!);
+                const diff = computeCompareDiff(item.scoreTarget, item.scoreBaseline);
                 if (diff === 0 || direction === 'neutral') return {};
                 if (isImproved(diff, direction)) {
                   return {
@@ -570,18 +626,20 @@ const clickableRowClass = css`
 export const CompareExperimentsPage: React.FC = () => {
   const history = useHistory();
   const { search } = useLocation();
-  const { euiTheme } = useEuiTheme();
 
   const params = useMemo(() => new URLSearchParams(search), [search]);
   const compareType = params.get('type') === 'execution' ? 'execution' : 'experiment';
   const baselineId = params.get('baseline') ?? '';
   const targetId = params.get('target') ?? '';
   const isExecutionCompare = compareType === 'execution';
+  // Passed to the route as is. The route validates it.
+  const repetitionPolicy = params.get('repetition_policy') ?? undefined;
 
   const { data, isLoading, error, refetch } = useCompareExperiments(
     compareType,
     baselineId,
-    targetId
+    targetId,
+    repetitionPolicy
   );
   const baselineExecutionId = isExecutionCompare ? baselineId : undefined;
   const targetExecutionId = isExecutionCompare ? targetId : undefined;
@@ -603,10 +661,10 @@ export const CompareExperimentsPage: React.FC = () => {
     direction: Direction;
   } | null>(null);
 
-  const [sortField, setSortField] = useState<keyof PairedTTestResult>('datasetName');
+  const [sortField, setSortField] = useState('datasetName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const handleRowClick = useCallback((result: PairedTTestResult) => {
+  const handleRowClick = useCallback((result: ComparisonResult) => {
     setFlyoutState({
       datasetId: result.datasetId,
       datasetName: result.datasetName,
@@ -631,8 +689,8 @@ export const CompareExperimentsPage: React.FC = () => {
     const dir = sortDirection === 'asc' ? 1 : -1;
 
     results.sort((a, b) => {
-      const valA = a[sortField];
-      const valB = b[sortField];
+      const valA = get(a, sortField);
+      const valB = get(b, sortField);
 
       if (valA == null && valB == null) return 0;
       if (valA == null) return 1;
@@ -665,12 +723,23 @@ export const CompareExperimentsPage: React.FC = () => {
       'Mean target',
       'Diff',
       'Direction',
+      'Metric type',
+      'Test',
+      'Method',
       'p-value',
       'Significant',
       'Outcome',
+      'Used baseline',
+      'Used target',
+      'Missing baseline',
+      'Missing target',
+      'Stability baseline',
+      'Stability target',
+      'Repetition warning',
+      'Repetition policy',
     ];
     const rows = sortedResults.map((r) => {
-      const diff = computeCompareDiff(r.meanTarget, r.meanBaseline);
+      const diff = computeCompareDiff(r.target.mean, r.baseline.mean);
       const significant =
         r.pValue !== null && Number.isFinite(r.pValue) && r.pValue < SIGNIFICANCE_THRESHOLD;
       let outcome = '';
@@ -681,13 +750,24 @@ export const CompareExperimentsPage: React.FC = () => {
         `"${r.datasetName.replace(/"/g, '""')}"`,
         `"${r.evaluatorName.replace(/"/g, '""')}"`,
         r.sampleSize,
-        r.meanBaseline.toFixed(4),
-        r.meanTarget.toFixed(4),
+        r.baseline.mean.toFixed(4),
+        r.target.mean.toFixed(4),
         diff.toFixed(4),
         r.direction,
+        r.metricType,
+        r.hypothesisTest.id,
+        r.hypothesisTest.method ?? '',
         r.pValue !== null && Number.isFinite(r.pValue) ? r.pValue.toFixed(6) : '',
         significant ? 'Yes' : 'No',
         outcome,
+        r.baseline.used,
+        r.target.used,
+        r.baseline.missing,
+        r.target.missing,
+        r.baseline.stability?.toFixed(4) ?? '',
+        r.target.stability?.toFixed(4) ?? '',
+        r.repetitionWarning ? 'Yes' : 'No',
+        data?.pairing.repetitionPolicy ?? '',
       ];
     });
     const csv = [header.join(','), ...rows.map((row) => row.join(','))].join('\n');
@@ -701,11 +781,11 @@ export const CompareExperimentsPage: React.FC = () => {
         csvTimerRef.current = setTimeout(() => setCsvCopyState('idle'), 2000);
       }
     );
-  }, [sortedResults]);
+  }, [sortedResults, data?.pairing.repetitionPolicy]);
 
   const firstRowByDataset = useMemo(() => {
     const seen = new Set<string>();
-    const firstRows = new Set<PairedTTestResult>();
+    const firstRows = new Set<ComparisonResult>();
     for (const item of sortedResults) {
       if (!seen.has(item.datasetId)) {
         firstRows.add(item);
@@ -717,13 +797,18 @@ export const CompareExperimentsPage: React.FC = () => {
 
   const isGroupedByDataset = sortField === 'datasetName';
 
-  const columns: Array<EuiBasicTableColumn<PairedTTestResult>> = useMemo(
+  // With one repetition per example there is no stability to show.
+  const showStability = sortedResults.some(
+    (result) => result.baseline.stability !== null || result.target.stability !== null
+  );
+
+  const columns: Array<EuiBasicTableColumn<ComparisonResult>> = useMemo(
     () => [
       {
         field: 'datasetName',
         name: i18n.COLUMN_DATASET,
         sortable: true,
-        render: (_val: string, item: PairedTTestResult) => {
+        render: (_val: string, item: ComparisonResult) => {
           if (isGroupedByDataset && !firstRowByDataset.has(item)) return null;
           return <strong>{item.datasetName}</strong>;
         },
@@ -739,16 +824,17 @@ export const CompareExperimentsPage: React.FC = () => {
         sortable: true,
         width: '60px',
         align: 'right' as const,
+        render: (_val: number, item: ComparisonResult) => <SampleSizeValue result={item} />,
       },
       {
-        field: 'meanBaseline',
+        field: 'baseline.mean',
         name: i18n.COLUMN_MEAN_BASELINE,
         sortable: true,
         render: (val: number) => formatScore(val),
         align: 'right' as const,
       },
       {
-        field: 'meanTarget',
+        field: 'target.mean',
         name: i18n.COLUMN_MEAN_TARGET,
         sortable: true,
         render: (val: number) => formatScore(val),
@@ -756,13 +842,20 @@ export const CompareExperimentsPage: React.FC = () => {
       },
       {
         name: i18n.COLUMN_DIFF,
-        render: (item: PairedTTestResult) => (
+        render: (item: ComparisonResult) => (
           <DiffValue
-            diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
+            diff={computeCompareDiff(item.target.mean, item.baseline.mean)}
             direction={item.direction}
+            discordantPairs={item.hypothesisTest.discordantPairs}
           />
         ),
         align: 'right' as const,
+      },
+      {
+        name: i18n.COLUMN_TEST,
+        render: (item: ComparisonResult) => (
+          <TestValue metricType={item.metricType} hypothesisTest={item.hypothesisTest} />
+        ),
       },
       {
         field: 'pValue',
@@ -773,21 +866,32 @@ export const CompareExperimentsPage: React.FC = () => {
       },
       {
         name: i18n.COLUMN_SIGNIFICANCE,
-        render: (item: PairedTTestResult) => (
+        render: (item: ComparisonResult) => (
           <SignificanceBadge
             pValue={item.pValue}
-            diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
+            diff={computeCompareDiff(item.target.mean, item.baseline.mean)}
             direction={item.direction}
           />
         ),
       },
+      ...(showStability
+        ? [
+            {
+              name: i18n.COLUMN_STABILITY,
+              nameTooltip: { content: i18n.STABILITY_NOTE },
+              render: (item: ComparisonResult) =>
+                `${formatScore(item.baseline.stability)} / ${formatScore(item.target.stability)}`,
+              align: 'right' as const,
+            },
+          ]
+        : []),
     ],
-    [firstRowByDataset, isGroupedByDataset]
+    [firstRowByDataset, isGroupedByDataset, showStability]
   );
 
   if (!baselineId || !targetId) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiEmptyPrompt
           iconType="compareArrows"
           title={<h2>{i18n.MISSING_EXPERIMENT_IDS_TITLE}</h2>}
@@ -801,7 +905,7 @@ export const CompareExperimentsPage: React.FC = () => {
   }
 
   return (
-    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+    <EuiPageSection paddingSize="none">
       <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="m">
@@ -853,6 +957,7 @@ export const CompareExperimentsPage: React.FC = () => {
                   type: compareType,
                   baseline: targetId,
                   target: baselineId,
+                  ...(repetitionPolicy && { repetition_policy: repetitionPolicy }),
                 });
                 history.replace({ search: swapped.toString() });
               }}
@@ -878,7 +983,7 @@ export const CompareExperimentsPage: React.FC = () => {
           color="danger"
           iconType="warning"
           title={<h2>{i18n.ERROR_TITLE}</h2>}
-          body={<p>{i18n.getErrorBody(String(error))}</p>}
+          body={<p>{i18n.getErrorBody(getErrorMessage(error))}</p>}
           actions={[
             <EuiButton onClick={() => refetch()} iconType="refresh">
               {i18n.RETRY_BUTTON}
@@ -900,6 +1005,30 @@ export const CompareExperimentsPage: React.FC = () => {
               <EuiSpacer size="m" />
             </>
           )}
+
+          {data.pairing.rejectedSlices?.length ? (
+            <>
+              <KbnWarningCallout
+                title={i18n.REJECTED_SLICES_TITLE}
+                text={i18n.getRejectedSlicesBody(
+                  data.pairing.rejectedSlices
+                    .map((slice) => `${slice.datasetName} / ${slice.evaluatorName}`)
+                    .join(', ')
+                )}
+                size="s"
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.getRepetitionPolicyNote(data.pairing.repetitionPolicy)}
+              {sortedResults.some((result) => result.repetitionWarning) &&
+                ` ${i18n.REPETITION_WARNING_NOTE}`}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
 
           {data.pairing.totalPairs > 0 && (
             <EuiFlexGroup wrap>
@@ -958,16 +1087,16 @@ export const CompareExperimentsPage: React.FC = () => {
               ]}
             />
           ) : (
-            <EuiBasicTable<PairedTTestResult>
+            <EuiBasicTable<ComparisonResult>
               tableCaption={i18n.TABLE_CAPTION}
               items={sortedResults}
               columns={columns}
               sorting={{
-                sort: { field: sortField, direction: sortDirection },
+                sort: { field: sortField as keyof ComparisonResult, direction: sortDirection },
               }}
               onChange={({ sort }) => {
                 if (sort) {
-                  setSortField(sort.field as keyof PairedTTestResult);
+                  setSortField(sort.field);
                   setSortDirection(sort.direction);
                 }
               }}

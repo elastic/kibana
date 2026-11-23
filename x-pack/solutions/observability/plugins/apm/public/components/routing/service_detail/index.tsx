@@ -7,11 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ProfilingSchemaStateProvider } from '@kbn/observability-shared-plugin/public';
 import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
 import { offsetSchema } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -228,28 +229,31 @@ export const serviceDetailRoute = {
         children: {
           '/services/{serviceName}/transactions/view': {
             element: <TransactionDetails />,
-            params: z.object({
-              query: z
-                .object({
-                  comparisonEnabled: toBooleanFromString,
-                  showCriticalPath: toBooleanFromString,
-                })
-                .merge(z.object({ transactionName: z.string().optional() }))
-                .merge(
-                  z.object({
-                    traceId: z.string().optional(),
-                    transactionId: z.string().optional(),
-                    flyoutDetailTab: z.string().optional(),
-                    sampleRangeTo: z.coerce.number().optional(),
-                    sampleRangeFrom: z.coerce.number().optional(),
-                    page: z.coerce.number().optional(),
-                    pageSize: z.coerce.number().optional(),
-                    sortField: z.string().optional(),
-                    sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+            params: lazySchema(() =>
+              z.object({
+                query: z
+                  .object({
+                    comparisonEnabled: toBooleanFromString,
+                    showCriticalPath: toBooleanFromString,
                   })
-                )
-                .merge(offsetSchema),
-            }),
+                  .merge(z.object({ transactionName: z.string().optional() }))
+                  .merge(
+                    z.object({
+                      traceId: z.string().optional(),
+                      transactionId: z.string().optional(),
+                      sampleIndex: z.coerce.number().optional(),
+                      flyoutDetailTab: z.string().optional(),
+                      sampleRangeTo: z.coerce.number().optional(),
+                      sampleRangeFrom: z.coerce.number().optional(),
+                      page: z.coerce.number().optional(),
+                      pageSize: z.coerce.number().optional(),
+                      sortField: z.string().optional(),
+                      sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                    })
+                  )
+                  .merge(offsetSchema),
+              })
+            ),
             defaults: {
               query: {
                 showCriticalPath: '',
@@ -431,13 +435,15 @@ export const serviceDetailRoute = {
         ...page({
           tab: 'profiling',
           title: i18n.translate('xpack.apm.views.profiling.title', {
-            defaultMessage: 'Universal Profiling',
+            defaultMessage: 'Profiling',
           }),
           element: <ProfilingOverview />,
           searchBarOptions: {
             hidden: true,
           },
           bottomHeaderContent: ProfilingHeaderSearchBar,
+          // Shares the selected profiling schema between the header search bar and the profiling views
+          contextWrapper: ProfilingSchemaStateProvider,
         }),
       },
       '/services/{serviceName}/dashboards': {

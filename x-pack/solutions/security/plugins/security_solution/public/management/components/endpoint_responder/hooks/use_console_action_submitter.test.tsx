@@ -31,6 +31,8 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
   let releaseSuccessActionRequestApiResponse: DeferredInterface['resolve'];
   let releaseFailedActionRequestApiResponse: DeferredInterface['reject'];
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
+  let actionGenerator: EndpointActionGenerator;
+  let createdActionDetails: ActionDetails;
 
   const ActionSubmitterTestComponent = () => {
     const [hookOptions, setHookOptions] = useState(renderArgs);
@@ -58,14 +60,14 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
 
   beforeEach(() => {
     const { render: renderComponent, coreStart } = createAppRootMockRenderer();
-    const actionGenerator = new EndpointActionGenerator();
     const deferred = getDeferred<ActionDetails>();
 
+    actionGenerator = new EndpointActionGenerator('test');
+    createdActionDetails = actionGenerator.generateActionDetails({ id: '123' });
     apiMocks = responseActionsHttpMocks(coreStart.http);
 
     hookRenderResultStorage = jest.fn();
-    releaseSuccessActionRequestApiResponse = () =>
-      deferred.resolve(actionGenerator.generateActionDetails({ id: '123' }));
+    releaseSuccessActionRequestApiResponse = () => deferred.resolve(createdActionDetails);
     releaseFailedActionRequestApiResponse = deferred.reject;
 
     let status: UseConsoleActionSubmitterOptions['status'] = 'pending';
@@ -128,7 +130,7 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
 
     expect(hookRenderResultStorage).toHaveBeenLastCalledWith({
       result: expect.anything(),
-      action: undefined,
+      actionDetails: undefined,
     });
 
     expect(renderResult.getByTestId('test-pending')).not.toBeNull();
@@ -195,6 +197,16 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
     });
   });
 
+  it('should store the action details returned by the action request api', async () => {
+    render();
+
+    releaseSuccessActionRequestApiResponse();
+
+    await waitFor(() => {
+      expect(renderArgs.store?.actionApiState?.actionDetails).toEqual(createdActionDetails);
+    });
+  });
+
   it('should store action request api error', async () => {
     render();
     const error = new Error('oh oh. request failed');
@@ -248,15 +260,14 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
     });
   });
 
-  it('should continue to show pending message until action completes', async () => {
-    apiMocks.responseProvider.actionDetails.mockImplementation(() => {
-      return {
-        data: new EndpointActionGenerator().generateActionDetails({
-          id: '123',
-          isCompleted: false,
-        }),
-      };
+  it('should continue to show pending action results until action completes', async () => {
+    const pendingActionDetails = actionGenerator.generateActionDetails({
+      id: '123',
+      isCompleted: false,
+      wasSuccessful: false,
+      agentState: { 'agent-a': { isCompleted: false, wasSuccessful: false } },
     });
+    apiMocks.responseProvider.actionDetails.mockReturnValue({ data: pendingActionDetails });
     render();
     releaseSuccessActionRequestApiResponse();
 
@@ -267,11 +278,18 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
       });
     });
 
-    expect(renderResult.getByTestId('test-pending')).not.toBeNull();
+    await waitFor(() => {
+      expect(renderArgs.store.actionApiState?.actionDetails).toBe(pendingActionDetails);
+    });
 
+    expect(renderArgs.status).toBe('pending');
+    expect(renderResult.getByTestId('test-pending')).toHaveAttribute('data-show-as', 'pending');
+    expect(renderResult.getByTestId('test-actionResult-hostStatus').textContent).toEqual(
+      'isolate is pending'
+    );
     expect(hookRenderResultStorage).toHaveBeenLastCalledWith({
       result: expect.anything(),
-      actionDetails: undefined,
+      actionDetails: pendingActionDetails,
     });
   });
 
@@ -295,31 +313,78 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
       expect(renderArgs.store.actionApiState?.actionDetailsError).toBe(error);
     });
 
-    expect(renderResult.getByTestId('test-apiFailure').textContent).toEqual(
-      'The following error was encountered:on oh. getting action details failed'
+    expect(renderArgs.setStatus).toHaveBeenLastCalledWith('error');
+    expect(renderArgs.store.actionApiState?.actionDetails).toBeUndefined();
+    expect(renderResult.getByTestId('test-pending')).toHaveAttribute('data-show-as', 'pending');
+    expect(renderResult.getByTestId('test-pending').textContent).toEqual(
+      'Unable to check on status of submitted action:on oh. getting action details failed'
     );
+    expect(renderResult.queryByTestId('test-apiFailure')).toBeNull();
   });
 
-  it('should store action details once action completes', async () => {
-    const actionDetails = new EndpointActionGenerator().generateActionDetails({ id: '123' });
+  it('should store action details and show success once action completes', async () => {
+    const actionDetails = actionGenerator.generateActionDetails({ id: '123' });
     apiMocks.responseProvider.actionDetails.mockReturnValue({ data: actionDetails });
 
     render();
     releaseSuccessActionRequestApiResponse();
 
     await waitFor(() => {
-      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
-        path: '/api/endpoint/action/123',
-        version: '2023-10-31',
-      });
+      expect(renderArgs.store.actionApiState?.actionDetails).toBe(actionDetails);
     });
 
-    expect(renderArgs.store.actionApiState?.actionDetails).toBe(actionDetails);
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-success')).toHaveAttribute('data-show-as', 'success');
+    });
+
+    expect(renderArgs.setStatus).toHaveBeenLastCalledWith('success');
+    expect(renderResult.getByTestId('test-actionResult-hostStatus').textContent).toEqual(
+      'isolate completed successfully'
+    );
     expect(hookRenderResultStorage).toHaveBeenLastCalledWith({
       result: expect.anything(),
       actionDetails,
     });
-
-    expect(renderResult.getByTestId('test-success').textContent).toEqual('');
   });
+
+  it.each`
+    title                      | overrides                                        | expectedShowAs | expectedHostStatus
+    ${'failed with errors'}    | ${{ errors: ['oh no'], agentErrors: ['oh no'] }} | ${'failure'}   | ${'isolate failed'}
+    ${'failed without errors'} | ${{}}                                            | ${'failure'}   | ${'isolate failed'}
+    ${'was canceled'}          | ${{ wasCanceled: true }}                         | ${'canceled'}  | ${'isolate was canceled'}
+  `(
+    'should show failure when action completes and $title',
+    async ({
+      overrides: { errors, agentErrors, wasCanceled = false },
+      expectedShowAs,
+      expectedHostStatus,
+    }) => {
+      const actionDetails = actionGenerator.generateActionDetails({
+        id: '123',
+        wasSuccessful: false,
+        wasCanceled,
+        errors,
+        agentState: {
+          'agent-a': { wasSuccessful: false, wasCanceled, errors: agentErrors },
+        },
+      });
+      apiMocks.responseProvider.actionDetails.mockReturnValue({ data: actionDetails });
+
+      render();
+      releaseSuccessActionRequestApiResponse();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-actionFailure')).toHaveAttribute(
+          'data-show-as',
+          expectedShowAs
+        );
+      });
+
+      expect(renderArgs.setStatus).toHaveBeenLastCalledWith('error');
+      expect(renderResult.getByTestId('test-actionResult-hostStatus').textContent).toEqual(
+        expectedHostStatus
+      );
+      expect(renderResult.queryByTestId('test-success')).toBeNull();
+    }
+  );
 });

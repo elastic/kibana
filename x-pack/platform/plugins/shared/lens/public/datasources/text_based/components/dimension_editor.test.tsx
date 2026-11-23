@@ -25,10 +25,12 @@ jest.mock('./fetch_fields_from_esql_expression', () => ({
 }));
 
 let capturedOnChoose: FieldSelectProps['onChoose'] | undefined;
+let capturedSelectedField: FieldSelectProps['selectedField'];
 
 jest.mock('./field_select', () => ({
   FieldSelect: (props: FieldSelectProps) => {
     capturedOnChoose = props.onChoose;
+    capturedSelectedField = props.selectedField;
     return <div data-test-subj="text-based-dimension-field" />;
   },
 }));
@@ -103,6 +105,7 @@ describe('TextBasedDimensionEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnChoose = undefined;
+    capturedSelectedField = undefined;
 
     fetchFieldsFromESQLExpression.mockResolvedValue({
       columns: [
@@ -110,6 +113,39 @@ describe('TextBasedDimensionEditor', () => {
         { id: 'field2', name: 'Field Two', meta: { type: 'number' } },
       ],
     });
+  });
+
+  const StatefulEditor = (props: TextBasedDimensionEditorProps) => {
+    const [state, setState] = React.useState(props.state);
+    return <TextBasedDimensionEditor {...props} state={state} setState={setState} />;
+  };
+
+  it('starts reference dimensions with query field selection and no method switch', async () => {
+    render(<StatefulEditor {...defaultProps} enableFormatSelector={false} supportStaticValue />);
+    await waitToLoad();
+    expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('lns-indexPattern-static_value-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-static_value')).not.toBeInTheDocument();
+  });
+
+  it('keeps query dimensions field-based even when static values are supported', async () => {
+    const setState = jest.fn();
+    render(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        state={stateWithColumn()}
+        enableFormatSelector={false}
+        supportStaticValue
+        setState={setState}
+        activeData={{ layer1: { type: 'datatable', columns: [], rows: [{ dim1: 42 }] } }}
+      />
+    );
+    await waitToLoad();
+    expect(capturedSelectedField?.fieldName).toBe('bytes');
+    expect(screen.queryByTestId('lns-indexPattern-static_value-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-static_value')).not.toBeInTheDocument();
+    expect(setState).not.toHaveBeenCalled();
   });
 
   it('renders correctly and fetches columns on mount', async () => {
@@ -121,7 +157,7 @@ describe('TextBasedDimensionEditor', () => {
         { esql: 'FROM my_data | limit 0' },
         {},
         { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
-        undefined,
+        expect.any(AbortController),
         undefined,
         defaultProps.esqlVariables,
         undefined
@@ -140,12 +176,34 @@ describe('TextBasedDimensionEditor', () => {
         { esql: 'FROM my_data | limit 0' },
         {},
         { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
-        undefined,
+        expect.any(AbortController),
         undefined,
         defaultProps.esqlVariables,
         true
       );
     });
+  });
+
+  it('does not refetch when the parent re-renders with a new indexPatterns reference for the same query', async () => {
+    const { rerender } = render(<TextBasedDimensionEditor {...defaultProps} />);
+    await waitToLoad();
+
+    // Simulate the parent rebuilding `indexPatterns` with the same content; only the
+    // extracted time field name is a dependency of the fetch, so no refetch should happen.
+    rerender(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        indexPatterns={{ ...defaultProps.indexPatterns }}
+      />
+    );
+    rerender(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        indexPatterns={{ ...defaultProps.indexPatterns }}
+      />
+    );
+
+    expect(fetchFieldsFromESQLExpression).toHaveBeenCalledTimes(1);
   });
 
   it('should set inMetricDimension when selecting a field in a metric dimension', async () => {

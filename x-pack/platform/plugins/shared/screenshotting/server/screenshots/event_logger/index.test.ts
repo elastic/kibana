@@ -6,25 +6,28 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ConfigType } from '@kbn/screenshotting-server';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
 import moment from 'moment';
 import type { ScreenshottingAction } from '.';
 import { Actions, EventLogger, Transactions } from '.';
 import type { ElementPosition } from '../get_element_position_data';
+import {
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+  TracerProvider,
+} from '@opentelemetry/sdk-trace';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
-let otelExporter: tracing.InMemorySpanExporter;
-let otelProvider: tracing.BasicTracerProvider;
+let otelExporter: InMemorySpanExporter;
+let otelProvider: TracerProvider;
 
 beforeAll(() => {
-  otelExporter = new tracing.InMemorySpanExporter();
-  otelProvider = new tracing.BasicTracerProvider({
-    spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+  otelExporter = new InMemorySpanExporter();
+  otelProvider = new TracerProvider({
+    spanProcessors: [new SimpleSpanProcessor({ exporter: otelExporter })],
   });
   trace.setGlobalTracerProvider(otelProvider);
 });
@@ -36,7 +39,6 @@ afterAll(async () => {
 type EventLoggerArgs = [message: string, meta: ScreenshottingAction];
 describe('Event Logger', () => {
   let eventLogger: EventLogger;
-  let config: ConfigType;
   let logSpy: jest.SpyInstance<void, EventLoggerArgs>;
 
   beforeEach(() => {
@@ -49,8 +51,7 @@ describe('Event Logger', () => {
     });
 
     const logger = loggingSystemMock.createLogger();
-    config = { capture: { zoom: 2 } } as ConfigType;
-    eventLogger = new EventLogger(logger, config);
+    eventLogger = new EventLogger(logger);
 
     logSpy = jest.spyOn(logger, 'debug') as jest.SpyInstance<void, EventLoggerArgs>;
   });
@@ -223,7 +224,7 @@ describe('Event Logger', () => {
       'screenshot capture test',
       Actions.GET_SCREENSHOT,
       'read',
-      eventLogger.getPixelsFromElementPosition(elementPosition)
+      eventLogger.getPixelsFromElementPosition(elementPosition, 2)
     );
     endScreenshot({ byte_length: 4444 });
 

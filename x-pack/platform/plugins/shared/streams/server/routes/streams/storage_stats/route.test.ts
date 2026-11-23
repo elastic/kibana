@@ -6,9 +6,11 @@
  */
 
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import { DATA_STREAM_INDEX_NAMES_FILTER_PATH } from '../doc_counts/utils';
 import { storageStatsRoutes } from './route';
 
 const route = storageStatsRoutes['GET /internal/streams/storage_stats'];
+const postRoute = storageStatsRoutes['POST /internal/streams/storage_stats'];
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
@@ -17,27 +19,54 @@ interface DataStreamInput {
   indices: string[];
 }
 
+interface MeteringIndexInput {
+  name: string;
+  datastream?: string;
+  size_in_bytes: number;
+  num_docs: number;
+}
+
+let getDataStream: jest.Mock;
+let meteringRequest: jest.Mock;
+
 const callHandler = ({
   dataStreams,
-  indicesStats,
+  indicesStats = {},
+  getDataStreamResponse,
+  isServerless = false,
+  meteringIndices = [],
+  streams,
 }: {
   dataStreams: DataStreamInput[];
-  indicesStats: Record<string, IndicesStatsIndicesStats>;
+  indicesStats?: Record<string, IndicesStatsIndicesStats>;
+  getDataStreamResponse?: object;
+  isServerless?: boolean;
+  meteringIndices?: MeteringIndexInput[];
+  streams?: string[];
 }) => {
+  getDataStream = jest.fn(
+    async ({ name }: { name?: string[] }) =>
+      getDataStreamResponse ?? {
+        data_streams: dataStreams
+          .filter((ds) => !name || name.includes(ds.name))
+          .map((ds) => ({
+            name: ds.name,
+            indices: ds.indices.map((index_name) => ({ index_name })),
+          })),
+      }
+  );
   const esClient = {
     indices: {
-      getDataStream: jest.fn().mockResolvedValue({
-        data_streams: dataStreams.map((ds) => ({
-          name: ds.name,
-          indices: ds.indices.map((index_name) => ({ index_name })),
-        })),
-      }),
+      getDataStream,
       stats: jest.fn().mockResolvedValue({ indices: indicesStats }),
     },
   };
 
+  meteringRequest = jest.fn().mockResolvedValue({ indices: meteringIndices });
+  const secondaryAuthClient = { transport: { request: meteringRequest } };
+
   const getScopedClients = jest.fn().mockResolvedValue({
-    scopedClusterClient: { asCurrentUser: esClient },
+    scopedClusterClient: { asCurrentUser: esClient, asSecondaryAuthUser: secondaryAuthClient },
     isSecurityEnabled: true,
   });
 
@@ -49,15 +78,17 @@ const callHandler = ({
   const handlerParams = {
     getScopedClients,
     request: {},
-    server: { isServerless: false },
-    params: {},
+    server: { isServerless },
+    params: streams ? { body: { streams } } : {},
     response: {},
     logger: { error: jest.fn() },
     context: {},
     telemetry,
   } as unknown as HandlerParams;
 
-  return route.handler(handlerParams);
+  return streams
+    ? postRoute.handler(handlerParams as unknown as Parameters<typeof postRoute.handler>[0])
+    : route.handler(handlerParams);
 };
 
 // Frozen searchable-snapshot indices report `size_in_bytes: 0`; their real size is in
@@ -73,6 +104,19 @@ const hotStats = (size: number): IndicesStatsIndicesStats =>
   } as IndicesStatsIndicesStats);
 
 describe('storage_stats route (stateful)', () => {
+  it('only requests the posted data streams and skips missing ones', async () => {
+    await callHandler({
+      dataStreams: [{ name: 'stream-a', indices: ['.ds-stream-a-000001'] }],
+      indicesStats: { '.ds-stream-a-000001': hotStats(1_000) },
+      streams: ['stream-a', 'stream-b'],
+    });
+
+    expect(getDataStream).toHaveBeenCalledWith(
+      { name: ['stream-a', 'stream-b'], filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH },
+      { querystring: { ignore_unavailable: true } }
+    );
+  });
+
   it('counts frozen searchable-snapshot data via total_data_set_size_in_bytes', async () => {
     const result = await callHandler({
       dataStreams: [
@@ -137,6 +181,26 @@ describe('storage_stats route (stateful)', () => {
     expect(result).toEqual([]);
   });
 
+  it('fetches data streams with only the fields it reads', async () => {
+    await callHandler({
+      dataStreams: [{ name: 'stream-a', indices: ['.ds-stream-a-000001'] }],
+      indicesStats: { '.ds-stream-a-000001': hotStats(1) },
+    });
+
+    expect(getDataStream).toHaveBeenCalledWith({
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+  });
+
+  it('returns an empty array when the filtered response has no data_streams key', async () => {
+    const result = await callHandler({
+      dataStreams: [],
+      indicesStats: {},
+      getDataStreamResponse: {},
+    });
+    expect(result).toEqual([]);
+  });
+
   it('reports replica-inclusive size (total, not primaries) to match the _store_stats route', async () => {
     // With number_of_replicas > 0, `total` (primaries + replicas) exceeds `primaries`. The route must
     // report `total` so the stream list matches the stream detail / lifecycle surfaces.
@@ -151,5 +215,51 @@ describe('storage_stats route (stateful)', () => {
     });
 
     expect(result).toEqual([{ stream: 'replicated-stream', store_size_bytes: 10_000_000 }]);
+  });
+});
+
+describe('storage_stats route (serverless)', () => {
+  it('sums metering sizes of backing indices per stream', async () => {
+    const result = await callHandler({
+      isServerless: true,
+      dataStreams: [
+        { name: 'stream-a', indices: ['.ds-stream-a-000001', '.ds-stream-a-000002'] },
+        { name: 'stream-b', indices: ['.ds-stream-b-000001'] },
+      ],
+      meteringIndices: [
+        { name: '.ds-stream-a-000001', datastream: 'stream-a', size_in_bytes: 1_000, num_docs: 1 },
+        { name: '.ds-stream-a-000002', datastream: 'stream-a', size_in_bytes: 3_000, num_docs: 2 },
+        { name: '.ds-stream-b-000001', datastream: 'stream-b', size_in_bytes: 5_000, num_docs: 3 },
+      ],
+    });
+
+    expect(meteringRequest).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/_metering/stats/stream-a,stream-b',
+    });
+    expect(result).toEqual(
+      expect.arrayContaining([
+        { stream: 'stream-a', store_size_bytes: 4_000 },
+        { stream: 'stream-b', store_size_bytes: 5_000 },
+      ])
+    );
+    expect(result).toHaveLength(2);
+  });
+
+  it('omits streams with zero metered size', async () => {
+    const result = await callHandler({
+      isServerless: true,
+      dataStreams: [{ name: 'empty-stream', indices: ['.ds-empty-stream-000001'] }],
+      meteringIndices: [
+        {
+          name: '.ds-empty-stream-000001',
+          datastream: 'empty-stream',
+          size_in_bytes: 0,
+          num_docs: 0,
+        },
+      ],
+    });
+
+    expect(result).toEqual([]);
   });
 });

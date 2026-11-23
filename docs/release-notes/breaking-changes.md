@@ -88,6 +88,28 @@ View [#282404]({{kib-pull}}282404).
 
 ## 9.5.0 [kibana-9.5.0-breaking-changes]
 
+$$$kibana-275996$$$
+::::{dropdown} Kibana now displays in the browser's preferred language by default
+**Details**<br> {{kib}} now uses the browser's `Accept-Language` preferences to choose the interface language. This applies on all deployment types when a user hasn't set a language in their profile and has no `KBN_LOCALE` cookie. If the browser's preferred language is German, French, Japanese, or Simplified Chinese and is listed in `i18n.locales`, {{kib}} displays in that language instead of English. All bundled locales are listed by default. {{kib}} then saves the resolved language in the `KBN_LOCALE` cookie, so it stays in place on later visits. Setting `i18n.defaultLocale: en` doesn't stop this, because the browser preference is only skipped when `i18n.defaultLocale` is set to a value other than `en`. Refer to [Resolution priority](/reference/configuration-reference/internationalization-settings.md#resolution-priority).
+
+**Impact**<br> After upgrading, some users may see {{kib}} in a language other than English without changing anything themselves. This is most likely in organizations that manage browser language settings centrally. Internal runbooks, screenshots, and training based on the English UI may no longer match what users see.
+
+**Action**<br> Users can change their language at any time from the user menu or their profile page.
+
+To keep English as the default for everyone while still letting users choose another language, upgrade to 9.5.6 or later and set the following settings in `kibana.yml`:
+
+```yaml
+i18n.detectBrowserLocale: false
+i18n.allowLocaleCookie: false
+```
+
+`i18n.detectBrowserLocale: false` stops {{kib}} from reading the browser's language. `i18n.allowLocaleCookie: false` stops existing `KBN_LOCALE` cookies, which might already hold the detected language, from overriding the default. Users who already saved a language in their profile keep it.
+
+If you can't upgrade to the latest 9.5.x patch yet, set `i18n.locales: ["en"]` to restore the previous English-only behavior. This also turns off per-user language selection.
+
+View [#275996]({{kib-pull}}275996) and [#295756]({{kib-pull}}295756).
+::::
+
 $$$kibana-274792$$$
 ::::{dropdown} Update Dashboards and Visualizations API requests to use short-hand duration units
 **Details**<br> The `duration` format used in visualization configuration now uses short-hand unit values aligned with {{esql}} conventions for its `from` and `to` options. This affects the `api/visualizations` and `api/dashboards` APIs for both by-value and by-reference panels.
@@ -155,6 +177,17 @@ View [#280959]({{kib-pull}}280959).
 ::::
 
 ## 9.4.0 [kibana-9.4.0-breaking-changes]
+
+$$$kibana-246359$$$
+::::{dropdown} Security API requests now limit the size of array fields
+**Details**<br> Kibana added maximum sizes to array fields in security API requests, including role definitions, API keys, role mappings, and user management. In particular, a role's `indices[].names` and `remote_indices[].names` arrays were limited to 100 entries, even though Elasticsearch accepts larger role definitions.
+
+**Impact**<br> Starting in 9.4.0, requests that create or update a role with more than 100 index names in one privilege entry fail validation in Kibana. Other security API requests can also fail when an array exceeds its new limit. Existing roles are not changed, but saving them through Kibana can fail.
+
+**Action**<br> Upgrade to 9.4.10 or later to allow up to 1,000 entries in each affected role array. For other security API arrays, reduce array sizes to the limits accepted by the API. Split requests into smaller batches only for bulk endpoints.
+
+View [#246359]({{kib-pull}}246359).
+::::
 
 $$$kibana-255122-9.4.0$$$
 ::::{dropdown} The `_source` field mode is now saved to the template index settings

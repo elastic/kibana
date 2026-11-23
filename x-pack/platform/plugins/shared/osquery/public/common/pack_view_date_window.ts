@@ -14,7 +14,7 @@ interface DateWindowParams {
   interval?: number;
 }
 
-interface DateWindowResult {
+export interface DateWindowResult {
   startDate: string | undefined;
   endDate: string | undefined;
   mode: 'absolute' | 'relative' | undefined;

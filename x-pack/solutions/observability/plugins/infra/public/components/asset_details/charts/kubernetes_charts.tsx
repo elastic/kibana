@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
+import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css, cx } from '@emotion/css';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
@@ -55,7 +55,7 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, Props>(
         ref={ref}
         extraAction={
           onShowAll ? (
-            <EuiButtonEmpty
+            <EuiLink
               aria-label={i18n.translate(
                 'xpack.infra.assetDetails.charts.kubernetes.showAllButton.ariaLabel',
                 {
@@ -64,16 +64,12 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, Props>(
               )}
               data-test-subj="infraAssetDetailsKubernetesChartsShowAllButton"
               onClick={() => onShowAll('kubernetes')}
-              size="xs"
-              flush="both"
-              iconSide="right"
-              iconType="sortRight"
             >
               <FormattedMessage
                 id="xpack.infra.assetDetails.charts.kubernetes.showAllButton"
                 defaultMessage="Show all"
               />
-            </EuiButtonEmpty>
+            </EuiLink>
           ) : null
         }
       >
@@ -144,23 +140,19 @@ export const KubernetesContainerCharts = React.forwardRef<
       ref={ref}
       extraAction={
         onShowAll ? (
-          <EuiButtonEmpty
+          <EuiLink
             aria-label={i18n.translate(
               'xpack.infra.kubernetesContainerCharts.showallButton.ariaLabel',
               { defaultMessage: 'Show all {metric} charts', values: { metric } }
             )}
             data-test-subj="infraAssetDetailsKubernetesChartsShowAllButton"
             onClick={() => onShowAll(metric)}
-            size="xs"
-            flush="both"
-            iconSide="right"
-            iconType="sortRight"
           >
             <FormattedMessage
               id="xpack.infra.assetDetails.charts.kubernetes.showAllButton"
               defaultMessage="Show all"
             />
-          </EuiButtonEmpty>
+          </EuiLink>
         ) : null
       }
     >

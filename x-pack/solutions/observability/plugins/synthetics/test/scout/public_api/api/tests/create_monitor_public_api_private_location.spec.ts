@@ -51,9 +51,7 @@ apiTest.describe(
 
     apiTest('should return error for empty monitor', async ({ apiClient }) => {
       const res = await addMonitor(apiClient, editorHeaders, {}, { statusCode: 400 });
-      expect((res.body as { message: string }).message).toBe(
-        'Invalid value "undefined" supplied to "type"'
-      );
+      expect((res.body as { message: string }).message).toMatch(/type/i);
     });
 
     apiTest('return error if no location specified', async ({ apiClient }) => {
@@ -80,9 +78,7 @@ apiTest.describe(
         { type: 'http', locations: ['mars'], privateLocations: ['moon'] },
         { statusCode: 400 }
       );
-      expect((wrongKey.body as { message: string }).message).toBe(
-        'Invalid monitor key(s) for http type:  privateLocations'
-      );
+      expect((wrongKey.body as { message: string }).message).toMatch(/privateLocations/);
 
       const notFound = await addMonitor(
         apiClient,

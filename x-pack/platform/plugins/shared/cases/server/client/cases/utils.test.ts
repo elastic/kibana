@@ -75,6 +75,13 @@ const allComments = [
   commentPersistableState,
 ];
 
+const alertAttachmentIds = new Set([commentAlert.id, commentAlertMultipleIds.id]);
+const userActionsWithoutAlerts = userActions.filter(
+  ({ comment_id: commentId }) => commentId == null || !alertAttachmentIds.has(commentId)
+);
+
+const userActionsWithoutPushes = userActions.filter(({ type }) => type !== UserActionTypes.pushed);
+
 describe('utils', () => {
   describe('dedupAssignees', () => {
     it('removes duplicate assignees', () => {
@@ -127,6 +134,32 @@ describe('utils', () => {
         apiUrl: 'https://elastic.jira.com',
       },
     });
+
+    type UserAction = CaseUserActionsDeprecatedResponse[number];
+
+    const [createCaseUserAction, pushUserAction, commentUserActionTemplate] = userActions;
+
+    const buildCommentUserAction = (
+      attachment: AttachmentV2,
+      action: UserAction['action'] = UserActionActions.create
+    ): UserAction =>
+      ({
+        ...commentUserActionTemplate,
+        action,
+        comment_id: attachment.id,
+        payload: { comment: attachment },
+      } as unknown as UserAction);
+
+    const buildUnifiedAlert = (id: string, attachmentId: string | string[]): AttachmentV2 =>
+      ({
+        ...omit(commentAlert, ['alertId', 'index', 'rule']),
+        id,
+        type: 'security.alert',
+        attachmentId,
+      } as unknown as AttachmentV2);
+
+    const unifiedAlertSingle = buildUnifiedAlert('unified-alert-1', 'alert-id-3');
+    const unifiedAlertMulti = buildUnifiedAlert('unified-alert-2', ['alert-id-4', 'alert-id-5']);
 
     it('creates an external incident correctly for Jira', async () => {
       const res = await createIncident({
@@ -393,7 +426,7 @@ describe('utils', () => {
           ...theCase,
           comments: [commentObj],
         },
-        userActions,
+        userActions: userActionsWithoutAlerts,
         connector,
         alerts: [],
         casesConnectors,
@@ -408,7 +441,57 @@ describe('utils', () => {
       ]);
     });
 
-    it('adds the total alert comments correctly', async () => {
+    it('adds the alerts summary when the case was never pushed to the connector', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [commentObj, commentAlert, commentAlertMultipleIds],
+        },
+        userActions: userActionsWithoutPushes,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
+          commentId: 'comment-user-1',
+        },
+        {
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('filters out the alerts from the comments correctly', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [{ ...commentObj, id: 'comment-user-1' }, commentAlertMultipleIds],
+        },
+        userActions: userActionsWithoutPushes,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
+          commentId: 'comment-user-1',
+        },
+        {
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('does not add the alerts summary when no alert changed since the last push', async () => {
       const res = await createIncident({
         theCase: {
           ...theCase,
@@ -426,83 +509,17 @@ describe('utils', () => {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
           commentId: 'comment-user-1',
         },
-        {
-          comment: 'Elastic Alerts attached to the case: 3',
-          commentId: 'mock-id-1-total-alerts',
-        },
-      ]);
-    });
-
-    it('filters out the alerts from the comments correctly', async () => {
-      const res = await createIncident({
-        theCase: {
-          ...theCase,
-          comments: [{ ...commentObj, id: 'comment-user-1' }, commentAlertMultipleIds],
-        },
-        userActions,
-        connector,
-        alerts: [],
-        casesConnectors,
-        spaceId: 'default',
-      });
-
-      expect(res.comments).toEqual([
-        {
-          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
-          commentId: 'comment-user-1',
-        },
-        {
-          comment: 'Elastic Alerts attached to the case: 2',
-          commentId: 'mock-id-1-total-alerts',
-        },
-      ]);
-    });
-
-    it('does not add the alerts count comment if all alerts have been pushed', async () => {
-      const res = await createIncident({
-        theCase: {
-          ...theCase,
-          comments: [
-            { ...commentObj, id: 'comment-user-1', pushed_at: '2019-11-25T21:55:00.177Z' },
-            { ...commentAlertMultipleIds, pushed_at: '2019-11-25T21:55:00.177Z' },
-          ],
-        },
-        userActions,
-        connector,
-        alerts: [],
-        casesConnectors,
-        spaceId: 'default',
-      });
-
-      expect(res.comments).toEqual([
-        {
-          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
-          commentId: 'comment-user-1',
-        },
       ]);
     });
 
     it('counts unified alert attachments toward the alerts total', async () => {
-      const unifiedAlertSingle = {
-        ...omit(commentAlert, ['alertId', 'index', 'rule']),
-        id: 'unified-alert-1',
-        type: 'security.alert',
-        attachmentId: 'alert-id-3',
-      } as unknown as AttachmentV2;
-      const unifiedAlertMulti = {
-        ...omit(commentAlert, ['alertId', 'index', 'rule']),
-        id: 'unified-alert-2',
-        type: 'security.alert',
-        attachmentId: ['alert-id-4', 'alert-id-5'],
-      } as unknown as AttachmentV2;
-
       const res = await createIncident({
         theCase: {
           ...theCase,
           // 1 legacy alert (1 id) + 2 unified alerts (1 + 2 ids) = 4 alerts total
           comments: [commentAlert, unifiedAlertSingle, unifiedAlertMulti],
         },
-        userActions,
+        userActions: userActionsWithoutPushes,
         connector,
         alerts: [],
         casesConnectors,
@@ -511,28 +528,99 @@ describe('utils', () => {
 
       expect(res.comments).toEqual([
         {
-          comment: 'Elastic Alerts attached to the case: 4',
+          comment: 'Elastic Alerts attached to the case: 4 added (4 total)',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
     });
 
-    it('skips the alerts summary when every alert (legacy or unified) has been pushed', async () => {
-      const pushedAt = '2019-11-25T21:55:00.177Z';
-      const unifiedAlertPushed = {
-        ...omit(commentAlert, ['alertId', 'index', 'rule']),
-        id: 'unified-alert-1',
-        type: 'security.alert',
-        attachmentId: ['alert-id-3', 'alert-id-4'],
-        pushed_at: pushedAt,
-      } as unknown as AttachmentV2;
+    it('reports only the alerts added since the last push', async () => {
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [commentAlert, unifiedAlertMulti] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(commentAlert),
+          pushUserAction,
+          buildCommentUserAction(unifiedAlertMulti),
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Elastic Alerts attached to the case: 2 added (3 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('reports alerts removed from an attachment since the last push', async () => {
+      const threeAlerts = buildUnifiedAlert('unified-alert-3', [
+        'alert-id-3',
+        'alert-id-4',
+        'alert-id-5',
+      ]);
+      const twoAlerts = buildUnifiedAlert('unified-alert-3', ['alert-id-3', 'alert-id-4']);
 
       const res = await createIncident({
-        theCase: {
-          ...theCase,
-          comments: [{ ...commentAlertMultipleIds, pushed_at: pushedAt }, unifiedAlertPushed],
+        theCase: { ...theCase, comments: [twoAlerts] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(threeAlerts),
+          pushUserAction,
+          buildCommentUserAction(twoAlerts, UserActionActions.update),
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Elastic Alerts attached to the case: 0 added, 1 removed (2 total)',
+          commentId: 'mock-id-1-total-alerts',
         },
-        userActions,
+      ]);
+    });
+
+    it('reports the alerts of a deleted attachment as removed', async () => {
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [commentAlert] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(commentAlert),
+          buildCommentUserAction(unifiedAlertSingle),
+          pushUserAction,
+          buildCommentUserAction(unifiedAlertSingle, UserActionActions.delete),
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Elastic Alerts attached to the case: 0 added, 1 removed (1 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('skips the alerts summary when an alert is added and removed between pushes', async () => {
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [commentAlert] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(commentAlert),
+          pushUserAction,
+          buildCommentUserAction(unifiedAlertSingle),
+          buildCommentUserAction(unifiedAlertSingle, UserActionActions.delete),
+        ],
         connector,
         alerts: [],
         casesConnectors,
@@ -540,6 +628,100 @@ describe('utils', () => {
       });
 
       expect(res.comments).toEqual([]);
+    });
+
+    it('matches a unified alert against its legacy-shaped user action', async () => {
+      const legacyPayload = {
+        ...commentAlertMultipleIds,
+        id: unifiedAlertMulti.id,
+        alertId: ['alert-id-4', 'alert-id-5'],
+      };
+
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [unifiedAlertMulti] },
+        userActions: [createCaseUserAction, buildCommentUserAction(legacyPayload), pushUserAction],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([]);
+    });
+
+    it('ignores alert ids that bulk create deduped when the original attachment is deleted', async () => {
+      const alertA = buildUnifiedAlert('unified-alert-a', 'alert-id-a');
+      const bulkCreateRequest = buildUnifiedAlert('unified-alert-bc', [
+        'alert-id-a',
+        'alert-id-b',
+        'alert-id-c',
+      ]);
+      const dedupedAttachment = buildUnifiedAlert('unified-alert-bc', ['alert-id-b', 'alert-id-c']);
+
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [dedupedAttachment] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(alertA),
+          buildCommentUserAction(bulkCreateRequest),
+          buildCommentUserAction(alertA, UserActionActions.delete),
+          pushUserAction,
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([]);
+    });
+
+    it('reports every alert on the first push to another connector', async () => {
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [commentAlert, commentAlertMultipleIds] },
+        userActions,
+        connector: createMockConnector({
+          id: '789',
+          actionTypeId: '.jira',
+          name: 'Another connector',
+          config: { apiUrl: 'https://elastic.jira.com' },
+        }),
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('pushes a comment edited after the last push with its latest content', async () => {
+      const editedComment = { ...commentObj, comment: 'Edited comment' };
+
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [editedComment] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(commentObj),
+          pushUserAction,
+          buildCommentUserAction(editedComment, UserActionActions.update),
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Edited comment\n\nAdded by elastic.',
+          commentId: 'comment-user-1',
+        },
+      ]);
     });
 
     it('adds the backlink to cases correctly', async () => {
@@ -642,7 +824,7 @@ describe('utils', () => {
           ],
           totalComment: 1,
         },
-        userActions,
+        userActions: userActionsWithoutAlerts,
         connector,
         alerts: [],
         casesConnectors,
@@ -695,7 +877,7 @@ describe('utils', () => {
           ...theCase,
           comments: [commentObj, commentAlert, commentAlertMultipleIds],
         },
-        userActions,
+        userActions: userActionsWithoutPushes,
         connector,
         alerts: [],
         casesConnectors,
@@ -710,7 +892,7 @@ describe('utils', () => {
         },
         {
           comment:
-            'Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
+            'Elastic Alerts attached to the case: 2 added (2 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -722,7 +904,7 @@ describe('utils', () => {
           ...theCase,
           comments: [commentObj, commentAlert, commentAlertMultipleIds],
         },
-        userActions,
+        userActions: userActionsWithoutPushes,
         connector,
         alerts: [],
         casesConnectors,
@@ -737,7 +919,7 @@ describe('utils', () => {
         },
         {
           comment:
-            'Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
+            'Elastic Alerts attached to the case: 2 added (2 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -816,7 +998,7 @@ describe('utils', () => {
         // https://github.com/elastic/kibana/issues/262574 will own per-type
         // connector formatting.
         {
-          comment: 'Elastic Alerts attached to the case: 3',
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -851,7 +1033,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment: 'Elastic Alerts attached to the case: 3',
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -880,10 +1062,6 @@ describe('utils', () => {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
           commentId: 'comment-user-1',
         },
-        {
-          comment: 'Elastic Alerts attached to the case: 3',
-          commentId: 'mock-id-1-total-alerts',
-        },
       ]);
     });
 
@@ -908,7 +1086,7 @@ describe('utils', () => {
         })
       ).toEqual([
         {
-          comment: 'Elastic Alerts attached to the case: 1',
+          comment: 'Elastic Alerts attached to the case: 1 added (1 total)',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -923,11 +1101,11 @@ describe('utils', () => {
         totalComments: 0,
       };
 
-      const latestPushInfo = getLatestPushInfo('456', userActions);
+      const latestPushInfo = getLatestPushInfo('456', userActionsWithoutAlerts);
 
       expect(
         formatComments({
-          userActions,
+          userActions: userActionsWithoutAlerts,
           theCase,
           latestPushInfo,
           userProfiles: userProfilesMap,
@@ -941,8 +1119,8 @@ describe('utils', () => {
         ...flattenCaseSavedObject({
           savedObject: mockCases[0],
         }),
-        comments: [isolateCommentActions],
-        totalComments: 1,
+        comments: [isolateCommentActions, commentAlert, commentAlertMultipleIds],
+        totalComments: 3,
       };
 
       const latestPushInfo = getLatestPushInfo('456', userActions);
@@ -981,7 +1159,7 @@ describe('utils', () => {
       ).toEqual([
         {
           comment:
-            'Elastic Alerts attached to the case: 1\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
+            'Elastic Alerts attached to the case: 1 added (1 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -1010,7 +1188,7 @@ describe('utils', () => {
       ).toEqual([
         {
           comment:
-            'Elastic Alerts attached to the case: 1\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
+            'Elastic Alerts attached to the case: 1 added (1 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);

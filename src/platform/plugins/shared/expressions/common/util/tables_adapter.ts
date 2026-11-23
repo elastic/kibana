@@ -14,6 +14,10 @@ export class TablesAdapter extends EventEmitter {
   #tables: { [key: string]: Datatable } = {};
 
   public allowCsvExport: boolean = false;
+  /**
+   * Controls how Inspector Data displays missing values while keeping the raw cell value intact.
+   */
+  public missingValueDisplay: 'text' | 'table' = 'text';
   /** Key of table to set as initial selection */
   public initialSelectedTable?: string;
 
@@ -24,6 +28,7 @@ export class TablesAdapter extends EventEmitter {
 
   public reset() {
     this.#tables = {};
+    this.missingValueDisplay = 'text';
     this.emit('change', this.tables);
   }
 

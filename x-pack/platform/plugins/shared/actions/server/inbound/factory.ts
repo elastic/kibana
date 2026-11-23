@@ -10,7 +10,10 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { InMemoryConnector } from '../types';
 import type { InboundEventsClient } from './client';
 import { buildInboundEventsClient } from './client';
+import { authorizeKibanaInboundRequest } from './authorize_kibana_inbound_request';
 import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
+import { getDecryptedInboundConnector } from './get_decrypted_inbound_connector';
+import type { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 
 export type { InboundEventsClient } from './client';
@@ -27,6 +30,7 @@ export interface InboundEventsClientArgs {
   maxBodyBytes: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getStartServices: CoreSetup['getStartServices'];
+  rateLimiter: InboundEventRateLimiter;
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -39,5 +43,12 @@ export function createInboundEventsClient(args: InboundEventsClientArgs): Inboun
     ...rest,
     getUnsecuredSavedObjectsClient: (spaceId) =>
       createUnsecuredInboundSavedObjectsClient({ getStartServices, spaceId }),
+    getDecryptedConnectorAttributes: (connectorId, spaceId) =>
+      getDecryptedInboundConnector({ getStartServices, connectorId, spaceId }),
+    getElasticsearchClient: async () => {
+      const [coreStart] = await getStartServices();
+      return coreStart.elasticsearch.client;
+    },
+    getKibanaRequestAccess: (request) => authorizeKibanaInboundRequest(request, getStartServices),
   });
 }

@@ -246,6 +246,7 @@ describe('cleanUpMlModelStep', () => {
 
     expect(mockDeletePrerequisiteAssets).toHaveBeenCalledWith(
       {
+        installSource: 'registry',
         indexAssets: [
           {
             id: '.metrics-endpoint.metadata_united_default',

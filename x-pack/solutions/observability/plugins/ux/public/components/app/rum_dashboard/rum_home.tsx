@@ -103,7 +103,10 @@ export function RumHome() {
       <EuiPageSection paddingSize="m" restrictWidth={false}>
         <DashboardToolbar />
         {isLoading && <EmptyStateLoading />}
-        <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+        <div
+          data-test-subj={`uxDashboard-${isLoading ? 'loading' : 'loaded'}`}
+          style={{ visibility: isLoading ? 'hidden' : 'initial' }}
+        >
           <RumOverview />
         </div>
       </EuiPageSection>
@@ -111,14 +114,20 @@ export function RumHome() {
   );
 }
 
-function DashboardToolbar() {
+export function DashboardToolbar({
+  showWebApplicationSelect = true,
+}: {
+  showWebApplicationSelect?: boolean;
+}) {
   return (
     <>
       <EuiSpacer size="m" />
       <EuiFlexGroup wrap>
-        <EuiFlexItem>
-          <WebApplicationSelect />
-        </EuiFlexItem>
+        {showWebApplicationSelect && (
+          <EuiFlexItem>
+            <WebApplicationSelect />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <UserPercentile />
         </EuiFlexItem>

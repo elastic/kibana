@@ -70,6 +70,7 @@ export function DateRangePickerControl() {
     onInputChange,
     width,
     disabled,
+    disabledTooltip,
     readOnly,
     isLoading,
     settings,
@@ -298,7 +299,9 @@ export function DateRangePickerControl() {
         ) : (
           <EuiToolTip
             content={
-              !disabled && displayFullFormattedText !== displayText
+              disabled && disabledTooltip
+                ? disabledTooltip
+                : !disabled && displayFullFormattedText !== displayText
                 ? displayFullFormattedText
                 : undefined
             }
@@ -321,6 +324,9 @@ export function DateRangePickerControl() {
               `}
               data-test-subj="dateRangePickerControlButton"
               data-date-range={`${timeRange.start} to ${timeRange.end}`}
+              data-refresh-interval={settings.autoRefresh?.intervalMs}
+              data-refresh-interval-unit={settings.autoRefresh?.intervalDisplayUnit}
+              data-refresh-paused={settings.autoRefresh?.isPaused}
               buttonRef={buttonRef}
               aria-label={collapsed ? accessibleDisplayText : undefined}
               onClick={onButtonClick}

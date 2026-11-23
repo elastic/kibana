@@ -40,8 +40,19 @@ export type SearchRepositoriesInput = z.infer<typeof SearchRepositoriesInputSche
 export const SearchIssuesInputSchema = lazySchema(() =>
   z.object({
     query: z.string().min(1).max(2000).describe('GitHub issue search query'),
-    order: z.enum(['asc', 'desc']).optional().default('desc'),
-    sort: z.string().max(50).optional().default('created'),
+    order: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .default('desc')
+      .describe('Sort direction: "asc" or "desc" (default "desc")'),
+    sort: z
+      .string()
+      .max(50)
+      .optional()
+      .default('created')
+      .describe(
+        'Field to sort results by: "comments", "reactions", "reactions-+1", "reactions--1", "reactions-smile", "reactions-thinking_face", "reactions-heart", "reactions-tada", "interactions", "created", or "updated" (default "created")'
+      ),
     page: z.number().optional().default(1).describe('Page number (1-based)'),
     perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
   })
@@ -51,8 +62,19 @@ export type SearchIssuesInput = z.infer<typeof SearchIssuesInputSchema>;
 export const SearchPullRequestsInputSchema = lazySchema(() =>
   z.object({
     query: z.string().min(1).max(2000).describe('GitHub pull request search query'),
-    order: z.enum(['asc', 'desc']).optional().default('desc'),
-    sort: z.string().max(50).optional().default('created'),
+    order: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .default('desc')
+      .describe('Sort direction: "asc" or "desc" (default "desc")'),
+    sort: z
+      .string()
+      .max(50)
+      .optional()
+      .default('created')
+      .describe(
+        'Field to sort results by: "comments", "reactions", "reactions-+1", "reactions--1", "reactions-smile", "reactions-thinking_face", "reactions-heart", "reactions-tada", "interactions", "created", or "updated" (default "created")'
+      ),
     page: z.number().optional().default(1).describe('Page number (1-based)'),
     perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
   })
@@ -72,7 +94,11 @@ export const ListIssuesInputSchema = lazySchema(() =>
   z.object({
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
-    state: z.enum(['open', 'closed', 'all']).optional().default('open'),
+    state: z
+      .enum(['open', 'closed', 'all'])
+      .optional()
+      .default('open')
+      .describe('Filter by state: "open", "closed", or "all" (default "open")'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
@@ -87,7 +113,11 @@ export const ListPullRequestsInputSchema = lazySchema(() =>
   z.object({
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
-    state: z.enum(['open', 'closed', 'all']).optional().default('open'),
+    state: z
+      .enum(['open', 'closed', 'all'])
+      .optional()
+      .default('open')
+      .describe('Filter by state: "open", "closed", or "all" (default "open")'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
@@ -217,6 +247,68 @@ export const GetIssueCommentsInputSchema = lazySchema(() =>
   })
 );
 export type GetIssueCommentsInput = z.infer<typeof GetIssueCommentsInputSchema>;
+
+const KNOWN_TIMELINE_EVENT_TYPES = [
+  'labeled',
+  'unlabeled',
+  'commented',
+  'cross-referenced',
+  'referenced',
+  'connected',
+  'disconnected',
+  'closed',
+  'reopened',
+  'assigned',
+  'unassigned',
+  'review_requested',
+  'review_request_removed',
+  'reviewed',
+  'ready_for_review',
+  'merged',
+  'renamed',
+  'committed',
+  'project_v2_item_status_changed',
+];
+
+export const GetIssueTimelineInputSchema = lazySchema(() =>
+  z.object({
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
+    issueNumber: z.number().int().positive().describe('Issue or pull request number'),
+    eventTypes: z
+      .array(z.string().max(100))
+      .max(50)
+      .optional()
+      .describe(
+        `Only return these event types, for example ["labeled","unlabeled"]. Known types: ${KNOWN_TIMELINE_EVENT_TYPES.join(
+          ', '
+        )}. Omit for all types. Filtering happens after the page is fetched, so an empty page does not mean you are done: keep paging while hasMore is true.`
+      ),
+    excludeEventTypes: z
+      .array(z.string().max(100))
+      .max(50)
+      .optional()
+      .describe(
+        'Event types GitHub should leave out, for example ["subscribed","mentioned"], which are most of a typical timeline. Applied by GitHub before paging, so it reduces the number of pages.'
+      ),
+    page: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .default(1)
+      .describe('Page number (1-based). Pass lastPage from a previous call for the latest events.'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(100)
+      .describe('Events per page (1 to 100)'),
+  })
+);
+export type GetIssueTimelineInput = z.infer<typeof GetIssueTimelineInputSchema>;
 
 export const CallToolInputSchema = lazySchema(() =>
   z.object({

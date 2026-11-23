@@ -29,6 +29,8 @@ export class BulkEnableRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Enable rules in bulk by ID',
     oasOperationObject: bulkEnableRulesOasExamples,
   } as const;

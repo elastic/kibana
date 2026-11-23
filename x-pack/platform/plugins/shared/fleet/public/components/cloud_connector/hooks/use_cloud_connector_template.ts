@@ -5,40 +5,171 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useIacProvisioner, useStartServices } from '../../../hooks';
-import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
 import {
   CLOUD_CONNECTOR_RENDER_FLOW,
   IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT,
   IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED,
   IAC_PROVISIONER_RENDER_FALLBACK_EVENT,
 } from '../../../../common/telemetry/iac_provisioner_events';
-import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connector';
+import type { CloudConnectorIacState } from '../../../../common/types/models/cloud_connector';
 import type { AccountType } from '../../../types';
+import type {
+  IacPolicyTemplateSelection,
+  RenderIacTemplateIntegration,
+  RenderIacTemplateRequest,
+} from '../../../../common/types/rest_spec/iac_provisioner';
 import type { CloudSetupForCloudConnector } from '../types';
-import { getCloudConnectorRemoteRoleTemplate } from '../utils';
+import {
+  getStaticLaunchUrl,
+  getStaticTemplate,
+  getWorkloadIdentityFederationStackParams,
+  isQuickCreateLaunchUrl,
+} from '../utils';
 
-const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
+import { getRenderIntegrations, renderArtifactTemplate } from '../render_artifact_template';
+
+const MISSING_CONTEXT_ERROR = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.missingContextError',
+  { defaultMessage: 'CloudFormation template is not available for this integration.' }
+);
+
+const TEMPLATE_GENERATION_ERROR = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.templateGenerationError',
+  {
+    defaultMessage:
+      'Failed to generate the CloudFormation template. Try again, or contact your administrator if the problem persists.',
+  }
+);
+
+const CONSOLE_OPEN_FAILED_ERROR = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.consoleOpenFailedError',
+  {
+    defaultMessage:
+      'The CloudFormation console could not be opened. Allow pop-ups for Kibana and try again.',
+  }
+);
+
+const LAUNCH_PARAMS_ERROR = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.launchParamsError',
+  {
+    defaultMessage:
+      'Kibana could not prepare this launch, so the stack would not be able to report back. Try again.',
+  }
+);
+
+const TEMPLATE_ALREADY_CURRENT = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.templateAlreadyCurrent',
+  {
+    defaultMessage:
+      'The CloudFormation stack is already up to date. No template update is required.',
+  }
+);
+
+/** Confirm payload for a static-template fallback: clears any digest so the connector reads as static. */
+const STATIC_FALLBACK_IAC: CloudConnectorIacState = {
+  iac_key: null,
+  iac_blueprint_id: null,
+  iac_blueprint_version: null,
+};
+
+export interface TemplateRendered {
+  /** IaCP's `templateSha` for the rendered template; stored on the connector as `iac_key`. */
+  key: string;
+  /** The integration set the template was rendered for; lets callers detect a later edit. */
+  integrations: RenderIacTemplateIntegration[];
+  /** Blueprint details to store alongside the key. */
+  blueprintId: string;
+  blueprintVersion: string;
+}
 
 export interface UseCloudConnectorTemplateParams {
+  /**
+   * Provider whose form is calling. Typed from the render request so it widens
+   * automatically when the IaC Provisioner gains Azure/GCP blueprints.
+   */
+  provider: RenderIacTemplateRequest['provider'];
   cloud?: CloudSetupForCloudConnector;
   accountType: AccountType;
   iacTemplateUrl?: string;
   packageName?: string;
   /**
-   * Policy templates the user has enabled in the policy being configured.
-   * The rendered template grants permissions for exactly these — no more.
+   * Policy templates the user has enabled in the policy being configured, each with
+   * the input types they enabled. The rendered template grants permissions for exactly
+   * these — no more.
    */
-  policyTemplates?: string[];
+  policyTemplates?: IacPolicyTemplateSelection[];
+  /**
+   * Stored template digest from this connector. When provided, IaCP compares it with what it
+   * would render now and answers `render: false` when the stack is already current, in which
+   * case no console is opened. Omit on first render, after a static-template fallback, and
+   * from update flows that always want an artifact.
+   */
+  templateSha?: string;
+  /** Full integration set to render (union). When set, overrides packageName + policyTemplates. */
+  integrations?: RenderIacTemplateIntegration[];
+  /** Existing stack to update; makes the launch URL a stack-update deep link. */
+  deploymentId?: string;
+  /**
+   * Open the package's static template when the render fails or cannot run. First-time
+   * onboarding wants this; update flows must not downgrade an identity that already has a
+   * generated template.
+   */
+  staticTemplateFallback?: boolean;
+  /**
+   * Called once the console has opened on the rendered template (never when a pop-up blocker kept
+   * it closed), with the key IaCP returned for it, its blueprint details and the integration
+   * set it was rendered for. Callers that write the connector at click time store all of it.
+   */
+  onTemplateRendered?: (rendered: TemplateRendered) => void;
+  /**
+   * Extra stack parameters for a new stack, resolved after the click and before the console
+   * opens. Receives the template details of the launch: the rendered key and blueprint, nulls for
+   * the static template with the IaC Provisioner on, or undefined with it off. Not used for a stack
+   * update, which keeps the stack's own parameters, or for a static URL that is not a quick-create
+   * link. An undefined result launches without them. A rejection aborts the launch: the console
+   * is closed and an error asks the user to try again.
+   */
+  getLaunchStackParams?: (
+    iac: CloudConnectorIacState | undefined
+  ) => Promise<Record<string, string> | undefined>;
 }
+
+/** The extra stack parameters could not be resolved; the launch must not go ahead without them. */
+class LaunchStackParamsError extends Error {}
+
+interface ConsoleTab {
+  /** Loads the URL; false when no console page could be opened. */
+  navigate: (url: string) => boolean;
+  close: () => void;
+}
+
+/**
+ * Opens a blank tab while the click is still being handled: pop-up blockers (Safari always,
+ * Firefox by default) drop a window.open made after an await. If the blank tab was blocked or
+ * closed, `navigate` opens the URL directly, and the blocker may drop that too.
+ */
+const openConsoleTab = (): ConsoleTab => {
+  const tab = window.open('', '_blank');
+  return {
+    navigate: (url) => {
+      if (tab && !tab.closed) {
+        tab.location.href = url;
+        return true;
+      }
+      return window.open(url, '_blank') !== null;
+    },
+    close: () => tab?.close(),
+  };
+};
 
 export type CloudConnectorLaunchButtonProps =
   /**
-   * IaC Provisioner flow: renders the template just-in-time on click and opens
-   * the CloudFormation console.
+   * IaC Provisioner flow, or a static launch with extra stack parameters: resolves the launch
+   * URL on click and opens the CloudFormation console.
    */
   | { onClick: () => Promise<void> }
   /**
@@ -53,14 +184,33 @@ export interface UseCloudConnectorTemplateResult {
   isDisabled: boolean;
   isGeneratingTemplate: boolean;
   templateGenerationError?: string;
+  /** Shown when IaCP reports the stored templateSha still matches. */
+  templateAlreadyCurrent?: string;
+  /** Persisted on the cloud connector when the package policy is saved. */
+  iacConfirm?: CloudConnectorIacState;
+  /** True once the last Launch opened the console. */
+  hasLaunched?: boolean;
+  /**
+   * Drops `iacConfirm` once a consumer has stored it, so a later save without a new Launch
+   * cannot re-post the previous render's template details.
+   */
+  clearIacConfirm: () => void;
+  isIacProvisionerEnabled: boolean;
 }
 
 export const useCloudConnectorTemplate = ({
+  provider,
   cloud,
   accountType,
   iacTemplateUrl,
   packageName,
   policyTemplates,
+  templateSha,
+  integrations,
+  deploymentId,
+  staticTemplateFallback = true,
+  onTemplateRendered,
+  getLaunchStackParams,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { analytics } = useStartServices();
@@ -68,16 +218,81 @@ export const useCloudConnectorTemplate = ({
   const [templateGenerationError, setTemplateGenerationError] = useState<string | undefined>(
     undefined
   );
+  const [templateAlreadyCurrent, setTemplateAlreadyCurrent] = useState<string | undefined>(
+    undefined
+  );
+  const [iacConfirm, setIacConfirm] = useState<CloudConnectorIacState | undefined>(undefined);
+  const clearIacConfirm = useCallback(() => setIacConfirm(undefined), []);
+  const [hasLaunched, setHasLaunched] = useState(false);
 
-  // The static URL doubles as the quick-create scaffold for the rendered
-  // artifact (console host plus any quick-create params the package's URL
-  // carries), so it is always built.
-  const staticTemplateUrl = cloud
-    ? getCloudConnectorRemoteRoleTemplate({ cloud, accountType, iacTemplateUrl })
-    : undefined;
+  const stackParams = useMemo(() => getWorkloadIdentityFederationStackParams(cloud), [cloud]);
+  // The static template is the fallback when the IaC Provisioner cannot render one.
+  const staticTemplate = useMemo(
+    () => getStaticTemplate({ provider, cloud, accountType, iacTemplateUrl, stackParams }),
+    [provider, cloud, accountType, iacTemplateUrl, stackParams]
+  );
+
+  /** Throws LaunchStackParamsError when the caller's parameters cannot be resolved. */
+  const resolveLaunchStackParams = useCallback(
+    async (iac: CloudConnectorIacState | undefined) => {
+      if (!getLaunchStackParams) {
+        return undefined;
+      }
+      try {
+        return await getLaunchStackParams(iac);
+      } catch (e) {
+        throw new LaunchStackParamsError(e instanceof Error ? e.message : String(e));
+      }
+    },
+    [getLaunchStackParams]
+  );
+
+  /** The static template's launch URL, with the extra stack parameters when it can take them. */
+  const resolveStaticLaunchUrl = useCallback(
+    async (url: string, iac: CloudConnectorIacState | undefined): Promise<string> => {
+      if (!getLaunchStackParams || !isQuickCreateLaunchUrl(url)) {
+        return url;
+      }
+      const extraStackParams = await resolveLaunchStackParams(iac);
+      return (
+        (extraStackParams &&
+          getStaticLaunchUrl({ provider, staticUrl: url, stackParams: extraStackParams })) ||
+        url
+      );
+    },
+    [getLaunchStackParams, provider, resolveLaunchStackParams]
+  );
+
+  const launchStaticTemplate = useCallback(async () => {
+    const url = staticTemplate.url;
+    if (!url) {
+      return;
+    }
+    setTemplateGenerationError(undefined);
+    setHasLaunched(false);
+    const consoleTab = openConsoleTab();
+    setIsGeneratingTemplate(true);
+    try {
+      if (consoleTab.navigate(await resolveStaticLaunchUrl(url, undefined))) {
+        setHasLaunched(true);
+      } else {
+        setTemplateGenerationError(CONSOLE_OPEN_FAILED_ERROR);
+      }
+    } catch (e) {
+      consoleTab.close();
+      setTemplateGenerationError(LAUNCH_PARAMS_ERROR);
+    } finally {
+      setIsGeneratingTemplate(false);
+    }
+  }, [resolveStaticLaunchUrl, staticTemplate.url]);
 
   const launchTemplate = useCallback(async () => {
     setTemplateGenerationError(undefined);
+    setTemplateAlreadyCurrent(undefined);
+    // Drop any previous confirm so a failed later launch cannot persist
+    // a checksum from an earlier successful render.
+    setIacConfirm(undefined);
+    setHasLaunched(false);
 
     const reportFallback = (reason: string) => {
       analytics.reportEvent(IAC_PROVISIONER_RENDER_FALLBACK_EVENT.eventType, {
@@ -86,86 +301,155 @@ export const useCloudConnectorTemplate = ({
       });
     };
 
-    // All render preconditions are checked synchronously, while the click's
-    // user activation is still live and window.open is allowed. The static
-    // URL must contain a templateURL param: it is the quick-create scaffold
-    // the rendered artifact gets swapped into, and String.replace on a
-    // non-matching URL would silently discard the render.
-    if (
-      !packageName ||
-      !policyTemplates?.length ||
-      !staticTemplateUrl ||
-      !TEMPLATE_URL_PARAM_REGEX.test(staticTemplateUrl)
-    ) {
-      if (staticTemplateUrl) {
-        reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
-        window.open(staticTemplateUrl, '_blank');
+    /**
+     * Opens the static template when allowed; false when the caller must report the failure.
+     * Without a console tab it opens one first if the extra stack parameters must be awaited.
+     */
+    const launchStatic = async (consoleTab?: ConsoleTab): Promise<boolean> => {
+      const url = staticTemplate.url;
+      if (!url || !staticTemplateFallback) {
+        return false;
+      }
+      let opened: boolean;
+      if (consoleTab || (getLaunchStackParams && isQuickCreateLaunchUrl(url))) {
+        const tab = consoleTab ?? openConsoleTab();
+        let launchUrl: string;
+        try {
+          launchUrl = await resolveStaticLaunchUrl(url, STATIC_FALLBACK_IAC);
+        } catch (e) {
+          tab.close();
+          setTemplateGenerationError(LAUNCH_PARAMS_ERROR);
+          return true;
+        }
+        opened = tab.navigate(launchUrl);
       } else {
-        setTemplateGenerationError(
-          i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.missingContextError', {
-            defaultMessage: 'CloudFormation template is not available for this integration.',
-          })
-        );
+        opened = window.open(url, '_blank') !== null;
+      }
+      // Record the static fallback only when the console actually opened, as for a render.
+      if (opened) {
+        setIacConfirm(STATIC_FALLBACK_IAC);
+        setHasLaunched(true);
+      } else {
+        setTemplateGenerationError(CONSOLE_OPEN_FAILED_ERROR);
+      }
+      return true;
+    };
+
+    const renderIntegrations = getRenderIntegrations({
+      integrations,
+      packageName,
+      policyTemplates,
+    });
+    if (renderIntegrations.length === 0) {
+      if (staticTemplate.url) {
+        reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
+      }
+      if (!(await launchStatic())) {
+        setTemplateGenerationError(staticTemplate.unresolvedTokensError ?? MISSING_CONTEXT_ERROR);
       }
       return;
     }
 
-    // The tab must open synchronously within the user gesture — popup
-    // blockers (Safari always, Firefox by default) drop window.open calls
-    // made after an await. The tab is opened blank now and navigated (or
-    // closed) once the render settles.
-    const cloudFormationTab = window.open('', '_blank');
-    const navigateTo = (url: string) => {
-      if (cloudFormationTab && !cloudFormationTab.closed) {
-        cloudFormationTab.location.href = url;
-      } else {
-        // The blank tab was blocked or closed mid-render; a direct open is
-        // the only remaining option, even if the blocker eats it too.
-        window.open(url, '_blank');
-      }
-    };
+    // Opened blank now and navigated (or closed) once the render settles.
+    const consoleTab = openConsoleTab();
 
     setIsGeneratingTemplate(true);
     try {
-      const { data, error } = await sendRenderIacTemplate({
-        provider: AWS_CLOUD_PROVIDER,
-        flow: CLOUD_CONNECTOR_RENDER_FLOW,
-        integrations: [{ name: packageName, policyTemplates }],
+      const result = await renderArtifactTemplate({
+        provider,
+        integrations: renderIntegrations,
+        templateSha,
+        deploymentId,
+        stackParams,
+        // Only a new stack gets extra parameters; an update keeps the stack's own.
+        getExtraStackParams: deploymentId
+          ? undefined
+          : (rendered) =>
+              resolveLaunchStackParams({
+                iac_key: rendered.templateSha,
+                iac_blueprint_id: rendered.blueprint.id,
+                iac_blueprint_version: rendered.blueprint.version,
+              }),
+        staticUrl: staticTemplate.url,
       });
 
-      if (error || !data) {
-        reportFallback(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
-        navigateTo(staticTemplateUrl);
-        return;
+      switch (result.status) {
+        case 'rendered':
+          // Navigate first: the template details are only recorded (and callers only unblock)
+          // for a template the user can actually see in the console. A pop-up blocker that ate
+          // both tabs must not leave a digest on the connector for a stack that was never opened.
+          if (!consoleTab.navigate(result.launchUrl)) {
+            setTemplateGenerationError(CONSOLE_OPEN_FAILED_ERROR);
+            return;
+          }
+          setIacConfirm({
+            iac_key: result.templateSha,
+            iac_blueprint_id: result.blueprint.id,
+            iac_blueprint_version: result.blueprint.version,
+          });
+          setHasLaunched(true);
+          onTemplateRendered?.({
+            key: result.templateSha,
+            integrations: renderIntegrations,
+            blueprintId: result.blueprint.id,
+            blueprintVersion: result.blueprint.version,
+          });
+          return;
+        case 'current':
+          consoleTab.close();
+          setTemplateAlreadyCurrent(TEMPLATE_ALREADY_CURRENT);
+          return;
+        case 'failed':
+          reportFallback(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
+          if (!(await launchStatic(consoleTab))) {
+            consoleTab.close();
+            setTemplateGenerationError(TEMPLATE_GENERATION_ERROR);
+          }
+          return;
+        case 'no_launch_url':
+          consoleTab.close();
+          setTemplateGenerationError(MISSING_CONTEXT_ERROR);
+          return;
       }
-
-      // Only the template source changes: swap the templateURL query param on
-      // the existing quick-create URL. artifactUrl embeds signing credentials
-      // — never cache it and never write it anywhere other than the URL.
-      navigateTo(
-        staticTemplateUrl.replace(
-          TEMPLATE_URL_PARAM_REGEX,
-          `templateURL=${encodeURIComponent(data.artifactUrl)}`
-        )
-      );
     } catch (e) {
-      cloudFormationTab?.close();
+      consoleTab.close();
+      setIacConfirm(undefined);
+      setHasLaunched(false);
       setTemplateGenerationError(
-        i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.templateGenerationError', {
-          defaultMessage:
-            'Failed to generate the CloudFormation template. Try again, or contact your administrator if the problem persists.',
-        })
+        e instanceof LaunchStackParamsError ? LAUNCH_PARAMS_ERROR : TEMPLATE_GENERATION_ERROR
       );
     } finally {
       setIsGeneratingTemplate(false);
     }
-  }, [analytics, packageName, policyTemplates, staticTemplateUrl]);
+  }, [
+    analytics,
+    deploymentId,
+    getLaunchStackParams,
+    integrations,
+    onTemplateRendered,
+    packageName,
+    policyTemplates,
+    provider,
+    resolveLaunchStackParams,
+    resolveStaticLaunchUrl,
+    stackParams,
+    staticTemplate,
+    staticTemplateFallback,
+    templateSha,
+  ]);
 
   if (!isIacProvisionerEnabled) {
     return {
-      launchButtonProps: { href: staticTemplateUrl, target: '_blank' },
-      isDisabled: !staticTemplateUrl,
-      isGeneratingTemplate: false,
+      // A plain link keeps native browser behavior unless the launch adds stack parameters.
+      launchButtonProps: getLaunchStackParams
+        ? { onClick: launchStaticTemplate }
+        : { href: staticTemplate.url, target: '_blank' },
+      isDisabled: !staticTemplate.url,
+      isGeneratingTemplate,
+      templateGenerationError: templateGenerationError ?? staticTemplate.unresolvedTokensError,
+      hasLaunched,
+      clearIacConfirm,
+      isIacProvisionerEnabled,
     };
   }
 
@@ -174,5 +458,10 @@ export const useCloudConnectorTemplate = ({
     isDisabled: false,
     isGeneratingTemplate,
     templateGenerationError,
+    templateAlreadyCurrent,
+    iacConfirm,
+    hasLaunched,
+    clearIacConfirm,
+    isIacProvisionerEnabled,
   };
 };

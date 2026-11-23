@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH } from '../constants';
 import { RuleTemplatesApi } from './rule_templates_api';
 
@@ -28,6 +29,7 @@ describe('RuleTemplatesApi', () => {
         per_page: 10,
         search: 'cpu',
         tags: ['prod'],
+        excluded_tags: ['deprecated'],
         sort_field: 'name',
         sort_order: 'asc',
       });
@@ -38,6 +40,7 @@ describe('RuleTemplatesApi', () => {
           per_page: 10,
           search: 'cpu',
           tags: ['prod'],
+          excluded_tags: ['deprecated'],
           sort_field: 'name',
           sort_order: 'asc',
         },
@@ -47,7 +50,7 @@ describe('RuleTemplatesApi', () => {
     it('omits empty search and tags', async () => {
       http.get.mockResolvedValue({ items: [], total: 0, page: 1, per_page: 20 });
 
-      await api.listRuleTemplates({ search: '', tags: [] });
+      await api.listRuleTemplates({ search: '', tags: [], excluded_tags: [] });
 
       expect(http.get).toHaveBeenCalledWith(ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH, {
         query: {
@@ -55,9 +58,29 @@ describe('RuleTemplatesApi', () => {
           per_page: undefined,
           search: undefined,
           tags: undefined,
+          excluded_tags: undefined,
           sort_field: undefined,
           sort_order: undefined,
         },
+      });
+    });
+  });
+
+  describe('listTags', () => {
+    it('fetches tags using the search prefix', async () => {
+      http.get.mockResolvedValue({ tags: ['production'] });
+
+      await expect(api.listTags({ search: 'pro' })).resolves.toEqual({ tags: ['production'] });
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/tags`, {
+        query: { search: 'pro' },
+      });
+    });
+
+    it.each([undefined, ''])('omits an absent or empty prefix: %p', async (search) => {
+      await api.listTags(search === undefined ? undefined : { search });
+
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/tags`, {
+        query: { search: undefined },
       });
     });
   });
@@ -71,6 +94,39 @@ describe('RuleTemplatesApi', () => {
       expect(http.get).toHaveBeenCalledWith(
         `${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/template-1`,
         { signal: undefined }
+      );
+    });
+  });
+
+  describe('installRuleTemplate', () => {
+    it('sends a POST request with the rule payload to the template install path', async () => {
+      const payload: CreateRuleData = {
+        kind: 'signal',
+        metadata: { name: 'CPU usage' },
+        time_field: '@timestamp',
+        schedule: { every: '1m', lookback: '5m' },
+        query: { base: 'FROM logs-*' },
+      };
+      http.post.mockResolvedValue({ id: 'rule-1' });
+
+      await expect(api.installRuleTemplate('template-1', payload)).resolves.toEqual({
+        id: 'rule-1',
+      });
+
+      expect(http.post).toHaveBeenCalledWith(
+        `${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/template-1/_install`,
+        { body: JSON.stringify(payload) }
+      );
+    });
+
+    it('encodes the template id in the path', async () => {
+      http.post.mockResolvedValue({ id: 'rule-1' });
+
+      await api.installRuleTemplate('nginx/error rate', {} as CreateRuleData);
+
+      expect(http.post).toHaveBeenCalledWith(
+        `${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/nginx%2Ferror%20rate/_install`,
+        expect.any(Object)
       );
     });
   });

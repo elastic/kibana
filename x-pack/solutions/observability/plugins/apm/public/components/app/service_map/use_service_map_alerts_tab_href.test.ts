@@ -102,6 +102,8 @@ describe('useServiceMapAlertsNavigateFactory', () => {
     // the alerts tab.
     expect(search.get('kuery')).toBe('');
     expect(search.get('environment')).toBe('production');
+    expect(search.get('rangeTo')).toBe('now');
+    expect(search.get('alertStatus')).toBe('active');
   });
 
   it('returns undefined when SPA navigation is unavailable (Agent Builder fallback)', () => {

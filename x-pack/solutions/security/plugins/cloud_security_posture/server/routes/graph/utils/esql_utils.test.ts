@@ -11,6 +11,7 @@ import {
   concatJsonObjectPropertyEsqlExprSafe,
   concatJsonObjectPropertyEsqlExprAsString,
   escapeJsonStringValueEsql,
+  concatJsonObjectPropertyEsqlExprAsStringArray,
 } from './esql_utils';
 
 describe('ESQL utils', () => {
@@ -130,6 +131,35 @@ describe('ESQL utils', () => {
 
       expect(result).toContain('customProp');
       expect(result).toContain('customVar');
+    });
+  });
+
+  describe('concatJsonObjectPropertyEsqlExprAsStringArray', () => {
+    it('emits the leading separator inside the COALESCE, not at the call site', () => {
+      // The comma must live inside the null-guard. If the caller emitted it via an enclosing
+      // CASE(field IS NOT NULL, CONCAT(SEPARATOR, <this>), ""), a non-null multi-value field
+      // whose MV_CONCAT still resolves to null would emit the comma with an empty value,
+      // producing `…,,"next"` — invalid JSON that makes parseDocumentsData throw and drops
+      // the whole document in filterDocDataToIds.
+      const result = concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source');
+
+      expect(result).toMatch(/^COALESCE\(CONCAT\(","/);
+      // Falls back to the empty string — never a bare separator.
+      expect(result).toMatch(/, ""\)$/);
+    });
+
+    it('escapes each value before joining', () => {
+      const result = concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source');
+
+      expect(result).toContain('REPLACE');
+      expect(result).toContain('MV_CONCAT');
+      expect(result).toContain('TO_STRING(entity.source)');
+    });
+
+    it('includes the property name', () => {
+      const result = concatJsonObjectPropertyEsqlExprAsStringArray('sources', 'entity.source');
+
+      expect(result).toContain('sources');
     });
   });
 });

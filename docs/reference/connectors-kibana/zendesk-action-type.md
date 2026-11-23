@@ -9,11 +9,13 @@ applies_to:
 
 # Zendesk data source connector [zendesk-action-type]
 
-The Zendesk connector connects directly to the Zendesk API. It enables federated search of tickets, users, and organizations from Zendesk Support in Workplace AI and Agent Builder.
+The Zendesk connector connects directly to the Zendesk API. It enables federated search of tickets, users, and organizations from Zendesk Support in Agent Builder.
+
+You can use this connector in **Agent Builder** and **Workflows**.
 
 ## Overview
 
-This is a **custom connector** that uses Zendesk's REST API with Basic authentication (email and API token). You configure your Zendesk subdomain and credentials when creating the connector.
+The Zendesk connector uses Zendesk's REST API with Basic authentication (email and API token). You configure your Zendesk subdomain and credentials when creating the connector.
 
 ## Create connectors in {{kib}} [define-zendesk-ui]
 

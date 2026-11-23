@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
@@ -46,7 +47,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { CredentialAccessor } from '@kbn/connector-specs';
+import type { ConnectorSigningKey, CredentialAccessor } from '@kbn/connector-specs';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
@@ -81,11 +82,7 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
-import {
-  createInboundEventsClient,
-  dispatchConnectorEvents,
-  type ConnectorEventEmitter,
-} from './inbound';
+import { setupInboundEvents, type ConnectorEventEmitter } from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -96,12 +93,15 @@ import {
   scheduleUserConnectorTokenCleanupTask,
 } from './lib/user_connector_token_cleanup_task';
 import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
   USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
+import { createConnectorJwtSigner } from './lib/connector_signing_keys';
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
@@ -110,9 +110,14 @@ import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profi
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
-import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
+import {
+  ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
+  ACTIONS_FEATURE_ID,
+  AlertHistoryEsIndexConnectorId,
+} from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
+import { UserConnectorTokenClient } from './lib/user_connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import type { ConnectorWithOptionalDeprecation } from './application/connector/lib';
 import { isConnectorDeprecated } from './application/connector/lib';
@@ -155,6 +160,12 @@ export interface PluginSetupContract {
   getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
 
   getCredential(opts: GetCredentialFnOpts): CredentialAccessor;
+
+  /** Signs claims with the Kibana-managed key of a connector whose spec publishes keys. */
+  getConnectorJwtSigner(
+    connectorId: string,
+    signingKey: ConnectorSigningKey
+  ): (claims: Record<string, unknown>) => Promise<string>;
 
   /**
    * Process-wide pool for reusable, long-lived connector clients. Empty until a client
@@ -247,6 +258,15 @@ export interface PluginStartContract {
    */
   unregisterDynamicConnector: (connectorId: string) => boolean;
   getRelayClient: () => RelayClientContract | undefined;
+
+  /**
+   * Returns the subset of `connectorIds` for which the current user holds a usable OAuth token:
+   * unexpired, or refreshable with an unexpired refresh token.
+   */
+  getUsableUserOAuthConnectorIds: (
+    request: KibanaRequest,
+    connectorIds: string[]
+  ) => Promise<Set<string>>;
 }
 
 export interface ActionsPluginsSetup {
@@ -276,6 +296,8 @@ export interface ActionsPluginsStart {
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -293,6 +315,7 @@ export class ActionsPlugin
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
+  private securityStart?: SecurityPluginStart;
   private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
@@ -309,6 +332,8 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private isCatalogFeatureFlagEnabled = false;
+  private connectorCatalogFeatureFlagSubscription?: Subscription;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -356,6 +381,8 @@ export class ActionsPlugin
           baseUrl: this.actionsConfig.relay.url,
           configurationUtilities: actionsConfigUtils,
           logger: this.logger.get('relay-client'),
+          useSystemIdentity: this.actionsConfig.relay.uiam?.enabled ?? false,
+          getSystemIdentity: () => this.securityStart?.authc.systemIdentity,
         })
       : undefined;
 
@@ -494,30 +521,17 @@ export class ActionsPlugin
 
     // Routes
     const router = core.http.createRouter<ActionsRequestHandlerContext>();
-    const inboundEventsEnabled = actionsConfigUtils.isInboundEventsEnabled();
-    const inboundEvents = inboundEventsEnabled
-      ? {
-          maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-          client: createInboundEventsClient({
-            logger: this.logger,
-            inboundEventsEnabled: true,
-            isActionTypeEnabled: (actionTypeId) =>
-              actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-            maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
-            maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-            getStartServices: core.getStartServices,
-            inMemoryConnectors: this.inMemoryConnectors,
-            emitConnectorEvents: (params) =>
-              dispatchConnectorEvents({
-                emitter: this.connectorEventEmitter,
-                params,
-              }),
-          }),
-          getSpaceId: (request: KibanaRequest) =>
-            this.spaces?.spacesService.getSpaceId(request) ?? 'default',
-        }
-      : undefined;
+    const inboundEvents = setupInboundEvents({
+      actionsConfigUtils,
+      http: core.http,
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+      spaces: this.spaces,
+      inMemoryConnectors: this.inMemoryConnectors,
+      getConnectorEventEmitter: () => this.connectorEventEmitter,
+    });
     defineRoutes({
+      getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
       router,
       licenseState: this.licenseState,
       actionsConfigUtils,
@@ -553,6 +567,21 @@ export class ActionsPlugin
         plugins.cloud
       ),
       getCredential: this.getCredentialHelper(actionsConfigUtils),
+      getConnectorJwtSigner: (connectorId: string, { jwtType }: ConnectorSigningKey) =>
+        createConnectorJwtSigner({
+          getEncryptedSavedObjectsClient: async () => {
+            const [, { encryptedSavedObjects }] = await core.getStartServices();
+            return encryptedSavedObjects.getClient({
+              includedHiddenTypes: [CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE],
+            });
+          },
+          getSavedObjectsRepository: async () => {
+            const [coreStart] = await core.getStartServices();
+            return coreStart.savedObjects.createInternalRepository([ACTION_SAVED_OBJECT_TYPE]);
+          },
+          connectorId,
+          jwtType,
+        }),
       getClientLeasePool: () => this.clientLeasePool,
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
@@ -601,6 +630,19 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    this.securityStart = plugins.security;
+    if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
+      this.logger.warn(
+        '`xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity. Relay requests will fail until `xpack.security.uiam` is configured with a client certificate (`ssl.certificate` and `ssl.key`).'
+      );
+    }
+
+    this.connectorCatalogFeatureFlagSubscription = core.featureFlags
+      .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
+      .subscribe((isCatalogEnabled: boolean) => {
+        this.isCatalogFeatureFlagEnabled = isCatalogEnabled;
+      });
+
     const {
       logger,
       licenseState,
@@ -642,9 +684,11 @@ export class ActionsPlugin
     }: {
       request: KibanaRequest;
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
-      spaceId?: string;
+      spaceId?: SpaceId;
     }) => {
       return new ActionsClient({
+        publicBaseUrl: core.http.basePath.publicBaseUrl,
+        connectorSigningKeysEnabled: this.actionsConfig.connectorSigningKeys.enabled,
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
@@ -684,6 +728,7 @@ export class ActionsPlugin
         evictClientPool: async (connectorId: string) => {
           await this.clientLeasePool.evict(connectorId);
         },
+        securityService: core.security,
       });
     };
 
@@ -900,6 +945,19 @@ export class ActionsPlugin
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
       getRelayClient: () => this.relayClient,
+      getUsableUserOAuthConnectorIds: async (request: KibanaRequest, connectorIds: string[]) => {
+        throwIfCannotEncrypt();
+        const profileUid = await getCurrentUserProfileId(request);
+        if (!profileUid) {
+          return new Set<string>();
+        }
+        return new UserConnectorTokenClient({
+          unsecuredSavedObjectsClient: getUnsecuredSavedObjectsClient(core.savedObjects, request),
+          encryptedSavedObjectsClient,
+          logger,
+          configurationUtilities: actionsConfigUtils,
+        }).getUsableOAuthConnectorIds({ profileUid, connectorIds });
+      },
     };
   }
 
@@ -1063,8 +1121,10 @@ export class ActionsPlugin
       getAxiosInstanceWithAuthHelper,
       spaces,
       connectorLifecycleListeners,
+      actionsConfig,
     } = this;
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
+    const isCatalogFeatureFlagEnabled = () => this.isCatalogFeatureFlagEnabled;
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
@@ -1093,6 +1153,8 @@ export class ActionsPlugin
           });
 
           return new ActionsClient({
+            publicBaseUrl: coreStart.http.basePath.publicBaseUrl,
+            connectorSigningKeysEnabled: actionsConfig.connectorSigningKeys.enabled,
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
@@ -1130,12 +1192,14 @@ export class ActionsPlugin
             getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
               getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
             evictClientPool,
+            securityService: coreStart.security,
           });
         },
         listTypes: (featureId?: string) => {
           return actionTypeRegistry!.list({ featureId });
         },
         getSkippedPreconfiguredConnectorIds: getSkippedPreconfiguredIds,
+        isCatalogFeatureFlagEnabled,
       };
     };
   };
@@ -1179,10 +1243,14 @@ export class ActionsPlugin
 
   private registerDynamicConnector = (connector: InMemoryConnector): boolean => {
     if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
+      const { isInboundEventsEnabled: requestedEventsEnabled, ...withoutEventsFlag } = connector;
       this.inMemoryConnectors.push({
-        ...connector,
+        ...withoutEventsFlag,
         isDynamic: true,
         isPreconfigured: true,
+        ...(this.actionsConfig.inboundEvents.enabled && requestedEventsEnabled === true
+          ? { isInboundEventsEnabled: true }
+          : {}),
       });
       this.logger.info(`Registered dynamic connector with id ${connector.id}`);
       return true;
@@ -1206,6 +1274,9 @@ export class ActionsPlugin
   };
 
   public stop() {
+    this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
+    this.connectorCatalogFeatureFlagSubscription = undefined;
+    this.isCatalogFeatureFlagEnabled = false;
     if (this.licenseState) {
       this.licenseState.clean();
     }

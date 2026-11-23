@@ -21,9 +21,13 @@ const cloneKey = async (context: RulesClientContext, name: string): Promise<Reso
   return { createdAPIKey: await context.cloneAPIKey(name), isAuthTypeApiKey: false };
 };
 
-const grantKey = async (context: RulesClientContext, name: string): Promise<ResolvedAPIKey> => {
+const grantKey = async (
+  context: RulesClientContext,
+  name: string,
+  refresh?: boolean | 'wait_for'
+): Promise<ResolvedAPIKey> => {
   const createdAPIKey = await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
-    context.createAPIKey(name)
+    context.createAPIKey(name, refresh)
   );
   return { createdAPIKey, isAuthTypeApiKey: false };
 };
@@ -31,24 +35,30 @@ const grantKey = async (context: RulesClientContext, name: string): Promise<Reso
 export interface ResolveRuleAPIKeyOptions {
   apiKeyOwnership?: RuleApiKeyOwnership;
   cloneApiKey?: boolean;
+  refresh?: boolean | 'wait_for';
 }
 
 export const resolveRuleAPIKey = async (
   context: RulesClientContext,
   name: string,
   enabled: boolean,
-  { apiKeyOwnership, cloneApiKey }: ResolveRuleAPIKeyOptions = {}
+  { apiKeyOwnership, cloneApiKey, refresh }: ResolveRuleAPIKeyOptions = {}
 ): Promise<ResolvedAPIKey> => {
   if (!enabled) {
     return { createdAPIKey: null, isAuthTypeApiKey: false };
   }
 
-  if (!apiKeyOwnership && context.cloneApiKeysOnCreate) {
-    return cloneKey(context, name);
-  }
-
   const isApiKeyAuth = context.isAuthenticationTypeAPIKey();
-  const callerKeyIsBorrowed = Boolean(cloneApiKey) && !apiKeyOwnership && isApiKeyAuth;
+
+  // The client-level flag and the per-call option both declare the caller's API key as borrowed:
+  // the rule must be minted its own key instead of persisting the caller's. The declaration is
+  // about the current request, so the rule's existing ownership does not override it: a rule the
+  // user created with their own key and that a workflow or Agent Builder later updates must not
+  // end up storing the borrowed (and later revoked) key as user-owned. Without API-key
+  // authentication there is no key to clone (cloneAsInternalUser would throw), so the declaration
+  // is a no-op and the rule is granted a framework key as usual below.
+  const callerKeyIsBorrowed =
+    (Boolean(cloneApiKey) || Boolean(context.cloneApiKeysOnCreate)) && isApiKeyAuth;
   const frameworkManaged = apiKeyOwnership?.apiKeyCreatedByUser === false;
 
   if (callerKeyIsBorrowed) {
@@ -56,7 +66,7 @@ export const resolveRuleAPIKey = async (
   }
 
   if (frameworkManaged) {
-    return isApiKeyAuth ? cloneKey(context, name) : grantKey(context, name);
+    return isApiKeyAuth ? cloneKey(context, name) : grantKey(context, name, refresh);
   }
 
   if (isApiKeyAuth) {
@@ -66,5 +76,5 @@ export const resolveRuleAPIKey = async (
     };
   }
 
-  return grantKey(context, name);
+  return grantKey(context, name, refresh);
 };

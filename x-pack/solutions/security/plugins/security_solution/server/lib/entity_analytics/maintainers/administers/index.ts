@@ -25,6 +25,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
+    relationshipsClient,
     signal,
     telemetry,
   }) => {
@@ -51,6 +52,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
       namespace,
       crudClient,
       entityMetadataClient,
+      relationshipsClient,
       integrations: buildAdministersConfigs(lastProcessedTimestamp),
       maintainerName: 'administers',
       signal,

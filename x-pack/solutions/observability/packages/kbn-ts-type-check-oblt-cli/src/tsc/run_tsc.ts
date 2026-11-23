@@ -13,6 +13,12 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import type { TsProject } from '@kbn/ts-projects';
+import {
+  buildConcurrencyArgs,
+  resolveMemoryLimit,
+  resolveTypeCheckCompiler,
+  resolveTypeCheckConcurrency,
+} from '@kbn/ts-type-check-cli';
 
 import { table, getBorderCharacters } from 'table';
 import { getChangedFiles, getAffectedProjectRefs } from './root_refs_config';
@@ -32,6 +38,19 @@ interface TscRunOptions {
 }
 
 /**
+ * Resolves the TypeScript 7 (tsgo) compiler, build concurrency args and memory
+ * limit the same way as `@kbn/ts-type-check-cli`, so local runs produce
+ * `.tsbuildinfo` files compatible with the CI-built cache archives.
+ */
+export const getTscInvocation = (
+  env: NodeJS.ProcessEnv = process.env
+): { cmd: string; args: string[]; env: Record<string, string> } => ({
+  cmd: Path.relative(REPO_ROOT, resolveTypeCheckCompiler()),
+  args: buildConcurrencyArgs(resolveTypeCheckConcurrency(env)),
+  env: { GOMEMLIMIT: resolveMemoryLimit(env) },
+});
+
+/**
  * Invokes tsc against the given config paths, returning `true` if tsc exited
  * with code 0, `false` otherwise.
  *
@@ -49,11 +68,12 @@ export async function runTsc({
 }: TscRunOptions & { configPaths: string[] }): Promise<boolean> {
   const { isVerbose, extendedDiagnostics, useProgressBar } = options;
 
-  const cmd = Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc'));
-  const env = { NODE_OPTIONS: '--max-old-space-size=10240' };
+  const { cmd, args: tsgoArgs, env } = getTscInvocation();
+  log.debug(`[TypeCheck] tsgo build args: ${tsgoArgs.join(' ')}`);
   const args = [
     '-b',
     ...configPaths,
+    ...tsgoArgs,
     '--pretty',
     ...(isVerbose ? ['--verbose'] : []),
     ...(extendedDiagnostics ? ['--extendedDiagnostics'] : []),

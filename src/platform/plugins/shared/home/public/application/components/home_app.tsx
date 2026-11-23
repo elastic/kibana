@@ -76,7 +76,7 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
               solutions={solutions}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
-              hasUserDataView={() => dataViewsService.hasUserDataView()}
+              hasDataView={() => dataViewsService.hasData.hasDataView()}
               isCloudEnabled={isCloudEnabled}
             />
           </Route>

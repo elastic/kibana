@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+const NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE =
+  'nightshift-significant-events-queries-generated';
+const NIGHTSHIFT_FEATURES_IDENTIFIED_EVENT_TYPE = 'nightshift-features-identified';
+const NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE =
+  'nightshift-agent-builder-knowledge-indicator-created';
+const NIGHTSHIFT_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE =
+  'nightshift-agent-tool-ki-identification-started';
+const NIGHTSHIFT_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE = 'nightshift-agent-tool-event-create';
+const NIGHTSHIFT_EVENT_STATUS_CHANGED_EVENT_TYPE = 'nightshift-event-status-changed';
+const SIGNIFICANT_EVENT_ENTITY_TYPE = 'significant_event';
+const NIGHTSHIFT_DISCOVERY_TRIGGERED_EVENT_TYPE =
+  'nightshift-significant-events-discovery-triggered';
+const NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE = 'nightshift-significant-events-discovery-started';
+const NIGHTSHIFT_DISCOVERY_COMPLETED_EVENT_TYPE =
+  'nightshift-significant-events-discovery-completed';
+const NIGHTSHIFT_ONBOARDING_SCHEDULED_EVENT_TYPE = 'nightshift-onboarding-scheduled';
+const NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE = 'nightshift-detection-scan';
+const NIGHTSHIFT_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE = 'nightshift-agent-tool-event-write';
+const NIGHTSHIFT_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE = 'nightshift-agent-tool-event-search';
+const NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE = 'nightshift-agent-tool-failed';
+const NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE =
+  'nightshift-significant-events-queries-generation-failed';
+
+export {
+  NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE,
+  NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_COMPLETED_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE,
+  NIGHTSHIFT_EVENT_STATUS_CHANGED_EVENT_TYPE,
+  SIGNIFICANT_EVENT_ENTITY_TYPE,
+  NIGHTSHIFT_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  NIGHTSHIFT_FEATURES_IDENTIFIED_EVENT_TYPE,
+  NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+  NIGHTSHIFT_ONBOARDING_SCHEDULED_EVENT_TYPE,
+};

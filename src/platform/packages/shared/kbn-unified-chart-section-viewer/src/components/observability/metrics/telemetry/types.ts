@@ -7,12 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HistogramPercentile, SimpleAggregation } from '@kbn/discover-utils';
+import type {
+  HistogramPercentile,
+  HistogramVisualization,
+  SimpleAggregation,
+} from '@kbn/discover-utils';
+import type { ChartSectionErrorCategory } from '../../../../common/errors/classify_chart_section_error';
 
 export type MetricAggregationConfigMetricType = 'counter' | 'gauge' | 'histogram';
+
+/** ES|QL source command of the query that failed, or `unknown` when it cannot be parsed. */
+export type MetricsEsqlQueryType = 'TS' | 'FROM' | 'unknown';
+
+export interface MetricsEsqlQueryFailureEvent {
+  error_type?: string;
+  error_category: ChartSectionErrorCategory;
+  status_code?: number;
+  query_type: MetricsEsqlQueryType;
+  profile: string;
+}
 
 export interface MetricAggregationConfigChangedEvent {
   metric_type: MetricAggregationConfigMetricType;
   previous_aggregation: SimpleAggregation | HistogramPercentile;
   new_aggregation: SimpleAggregation | HistogramPercentile;
+  previous_visualization?: HistogramVisualization;
+  new_visualization?: HistogramVisualization;
 }

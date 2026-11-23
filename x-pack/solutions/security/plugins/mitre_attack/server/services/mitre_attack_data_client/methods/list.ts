@@ -17,8 +17,8 @@ import type {
 import {
   DEFAULT_MITRE_FRAMEWORK,
   DEFAULT_MITRE_ENTITY_STATUS,
+  MITRE_ATTACK_ENTITY_SO_TYPE,
 } from '@kbn/security-mitre-attack-common';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../../../saved_objects';
 import { buildKqlFilter, getEmptyMitreEntityCollection } from '../../utils';
 import { resolveLatestVersion } from '../resolve_latest_version';
 import { validateMitreEntity } from '../../mitre_entity_validation';
@@ -46,16 +46,24 @@ export const list = async ({
     }
   }
 
-  // Fetch all entities in a single page. Each MITRE enterprise dataset has less than 1000 entities
-  // (873 for ATT&CK enterprise 19.1). 10,000 is a generous ceiling for future versions and frameworks.
+  // Fetch all entities in a single page. A single framework version is well under 1000 entities
+  // (873 for ATT&CK enterprise 19.2, ~213 for ATLAS 2026.8), and the filter below scopes the query
+  // to one framework and version. 10,000 is a generous ceiling for future versions and frameworks.
+  // Silent truncation would under-report entities, so a warning is logged below if it ever happens.
   const findResponse = await savedObjectsRepository.find<MitreEntity>({
     type: MITRE_ATTACK_ENTITY_SO_TYPE,
     namespaces: ['*'],
     perPage: 10000,
-    sortField: 'id',
+    sortField: 'name',
     sortOrder: 'asc',
     filter: buildKqlFilter({ framework, frameworkVersion, types, status }),
   });
+
+  if (findResponse.total > findResponse.saved_objects.length) {
+    logger.warn(
+      `MITRE list for framework "${framework}" version "${frameworkVersion}" was truncated: received ${findResponse.saved_objects.length} of ${findResponse.total} entities. Paging is needed to return all entities.`
+    );
+  }
 
   const tactics: MitreTactic[] = [];
   const techniques: MitreTechnique[] = [];
@@ -75,6 +83,10 @@ export const list = async ({
         break;
     }
   }
+
+  // Tactic order follows matrix-position definition, techniques and subtechniques stay sorted by name as
+  // they are also defined that way within MITRE
+  tactics.sort((a, b) => a.position - b.position);
 
   return { framework, frameworkVersion, tactics, techniques, subtechniques };
 };

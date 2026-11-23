@@ -8,9 +8,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import type { Container } from 'inversify';
 import type { InternalPageProps } from './composable_pages';
+import { createAlertingV2HostApp } from '../../common/locators';
 
 const ALL_CAPABILITIES = {
   alerting_v2_rules: { read: true, all: true },
@@ -18,6 +20,10 @@ const ALL_CAPABILITIES = {
   alerting_v2_action_policies: { read: true, all: true },
   alerting_v2_execution_history: { read: true, all: true },
 };
+
+let mockCapabilities: Record<string, Record<string, boolean>> = ALL_CAPABILITIES;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
+let mockCanReadConnectors = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const actual = jest.requireActual('react');
@@ -28,13 +34,24 @@ jest.mock('@kbn/core-di-browser', () => {
     Context: actual.createContext(undefined),
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
-        return new ActualUserCapabilities({ capabilities: ALL_CAPABILITIES });
+        return new ActualUserCapabilities({ capabilities: mockCapabilities });
+      }
+      if (token === 'uiSettings') {
+        return { get: () => mockAlertingV2ExperimentalFeaturesEnabled };
+      }
+      if (token === 'application') {
+        return { capabilities: { actions: { show: mockCanReadConnectors } } };
       }
       return {};
     },
     CoreStart: (key: string) => key,
   };
 });
+
+const mockUseBreadcrumbs = jest.fn();
+jest.mock('../hooks/use_breadcrumbs', () => ({
+  useBreadcrumbs: (...args: unknown[]) => mockUseBreadcrumbs(...args),
+}));
 
 jest.mock('../pages/rules_list_page/rules_list_page', () => ({
   RulesListPage: () => <div data-test-subj="rulesListPage">rules</div>,
@@ -52,8 +69,8 @@ jest.mock('../pages/rule_library_page/rule_library_page', () => ({
   RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
 }));
 
-jest.mock('../pages/alert_episodes_list_page/alert_episodes_list_page', () => ({
-  AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
+jest.mock('../pages/alert_episodes_list_page/alerts_list_page', () => ({
+  AlertsListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
 }));
 
 jest.mock('../pages/episode_details_page/episode_details_page', () => ({
@@ -72,6 +89,10 @@ jest.mock('../pages/execution_history_page/execution_history_page', () => ({
   ExecutionHistoryPage: () => <div data-test-subj="executionHistoryPage">history</div>,
 }));
 
+jest.mock('../pages/imports_page/imports_page', () => ({
+  ImportsPage: () => <div data-test-subj="importsPage">imports</div>,
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -80,11 +101,32 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-const createMockContainer = () => ({
-  get: jest.fn().mockReturnValue({}),
-  getAsync: jest.fn().mockResolvedValue({}),
-  isBound: jest.fn().mockReturnValue(true),
+const createMockLocator = () => ({
+  useUrl: jest.fn().mockReturnValue(''),
+  getUrl: jest.fn().mockResolvedValue(''),
+  getRedirectUrl: jest.fn().mockReturnValue(''),
+  navigate: jest.fn().mockResolvedValue(undefined),
+  navigateSync: jest.fn(),
+  getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
 });
+
+const createMockSharePlugin = () => ({
+  url: {
+    locators: {
+      get: jest.fn().mockReturnValue(createMockLocator()),
+    },
+  },
+});
+
+const createMockContainer = () => {
+  const sharePlugin = createMockSharePlugin();
+  const defaultMock = { ...sharePlugin };
+  return {
+    get: jest.fn().mockReturnValue(defaultMock),
+    getAsync: jest.fn().mockResolvedValue({}),
+    isBound: jest.fn().mockReturnValue(true),
+  };
+};
 
 const createMockCoreStart = () => {
   const container = createMockContainer();
@@ -105,6 +147,13 @@ const defaultProps = (): InternalPageProps => ({
   coreStart: createMockCoreStart(),
   container: createMockContainer() as unknown as Container,
   setBreadcrumbs: jest.fn() as (crumbs: ChromeBreadcrumb[]) => void,
+  hostApp: createAlertingV2HostApp('test', {
+    rules: '/alerting',
+    ruleLibrary: '/alerting/library',
+    alerts: '/alerting/inbox',
+    actionPolicies: '/alerting/action-policies',
+    executionHistory: '/alerting/execution-history',
+  }),
 });
 
 const renderInRouter = (ui: React.ReactElement, path = '/') =>
@@ -116,6 +165,7 @@ describe('composable pages', () => {
   let AlertingV2EpisodesPage: React.ComponentType<InternalPageProps>;
   let AlertingV2ActionPoliciesPage: React.ComponentType<InternalPageProps>;
   let AlertingV2ExecutionHistoryPage: React.ComponentType<InternalPageProps>;
+  let AlertingV2ImportsPage: React.ComponentType<InternalPageProps>;
 
   beforeAll(async () => {
     const mod = await import('./composable_pages');
@@ -124,6 +174,7 @@ describe('composable pages', () => {
     AlertingV2EpisodesPage = mod.AlertingV2EpisodesPage;
     AlertingV2ActionPoliciesPage = mod.AlertingV2ActionPoliciesPage;
     AlertingV2ExecutionHistoryPage = mod.AlertingV2ExecutionHistoryPage;
+    AlertingV2ImportsPage = mod.AlertingV2ImportsPage;
   });
 
   describe('AlertingV2RulesPage', () => {
@@ -178,6 +229,175 @@ describe('composable pages', () => {
       const props = defaultProps();
       renderInRouter(<AlertingV2EpisodesPage {...props} />);
       expect(props.container.get).toHaveBeenCalled();
+    });
+
+    it('accepts a solution hostApp', () => {
+      const hostApp = createAlertingV2HostApp('observability', {
+        rules: '/alerting',
+        ruleLibrary: '/alerting/library',
+        alerts: '/alerting/inbox',
+        actionPolicies: '/alerting/action-policies',
+        executionHistory: '/alerting/execution-history',
+      });
+
+      renderInRouter(<AlertingV2RulesPage {...defaultProps()} hostApp={hostApp} />);
+      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+    });
+  });
+
+  describe('useRouteMatch route matching', () => {
+    const renderAtRoute = (parentPath: string, location: string, ui: React.ReactElement) =>
+      render(
+        <MemoryRouter initialEntries={[location]}>
+          <Route path={parentPath}>{ui}</Route>
+        </MemoryRouter>
+      );
+
+    it('EpisodesPage renders list when parent route matches', () => {
+      renderAtRoute('/inbox', '/inbox', <AlertingV2EpisodesPage {...defaultProps()} />);
+      expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
+    });
+
+    it('EpisodesPage renders episode detail at parent/:episodeId', () => {
+      renderAtRoute('/inbox', '/inbox/ep-1', <AlertingV2EpisodesPage {...defaultProps()} />);
+      expect(screen.getByTestId('episodeDetailsPage')).toBeInTheDocument();
+    });
+
+    it('EpisodesPage at /inbox does not match /:episodeId with "inbox" as the id', () => {
+      renderAtRoute('/inbox', '/inbox', <AlertingV2EpisodesPage {...defaultProps()} />);
+      expect(screen.queryByTestId('episodeDetailsPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
+    });
+
+    it('RulesPage renders list when parent route matches', () => {
+      renderAtRoute('/rules/v2', '/rules/v2', <AlertingV2RulesPage {...defaultProps()} />);
+      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+    });
+
+    it('RulesPage renders rule detail at parent/:ruleId', () => {
+      renderAtRoute(
+        '/rules/v2',
+        '/rules/v2/some-rule',
+        <AlertingV2RulesPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
+    });
+
+    it('RulesPage renders the sequence builder at parent/sequence/:ruleId/edit', async () => {
+      renderAtRoute(
+        '/rules/v2',
+        '/rules/v2/sequence/some-rule/edit',
+        <AlertingV2RulesPage {...defaultProps()} />
+      );
+      expect(await screen.findByTestId('sequenceBuilderPage')).toBeInTheDocument();
+    });
+
+    it('RulesPage renders the sequence builder at parent/sequence/create for a clone', async () => {
+      renderAtRoute(
+        '/rules/v2',
+        '/rules/v2/sequence/create?cloneFrom=some-rule',
+        <AlertingV2RulesPage {...defaultProps()} />
+      );
+      expect(await screen.findByTestId('sequenceBuilderPage')).toBeInTheDocument();
+    });
+
+    it.each([
+      ['create', '/rules/v2/sequence/create'],
+      ['clone', '/rules/v2/sequence/create?cloneFrom=some-rule'],
+      ['edit', '/rules/v2/sequence/some-rule/edit'],
+    ])(
+      'RulesPage redirects the sequence %s URL to the list when experimental features are disabled',
+      (_name, location) => {
+        mockAlertingV2ExperimentalFeaturesEnabled = false;
+        renderAtRoute('/rules/v2', location, <AlertingV2RulesPage {...defaultProps()} />);
+
+        expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+        expect(screen.queryByTestId('sequenceBuilderPage')).not.toBeInTheDocument();
+        mockAlertingV2ExperimentalFeaturesEnabled = true;
+      }
+    );
+
+    it('ActionPoliciesPage renders list when parent route matches', () => {
+      renderAtRoute(
+        '/action-policies',
+        '/action-policies',
+        <AlertingV2ActionPoliciesPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('listActionPoliciesPage')).toBeInTheDocument();
+    });
+
+    it('ActionPoliciesPage renders create at parent/create', () => {
+      renderAtRoute(
+        '/action-policies',
+        '/action-policies/create',
+        <AlertingV2ActionPoliciesPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('actionPolicyFormPage')).toBeInTheDocument();
+    });
+
+    it('RuleLibraryPage renders when parent route matches', () => {
+      renderAtRoute(
+        '/rule-library',
+        '/rule-library',
+        <AlertingV2RuleLibraryPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('ruleLibraryPage')).toBeInTheDocument();
+    });
+
+    it('ExecutionHistoryPage renders when parent route matches', () => {
+      renderAtRoute(
+        '/execution-history',
+        '/execution-history',
+        <AlertingV2ExecutionHistoryPage {...defaultProps()} />
+      );
+      expect(screen.getByTestId('executionHistoryPage')).toBeInTheDocument();
+    });
+
+    it('ImportsPage renders when parent route matches', () => {
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+      expect(screen.getByTestId('importsPage')).toBeInTheDocument();
+    });
+
+    it('ImportsPage renders for a user who can read alerts but has no rules access', () => {
+      mockCapabilities = {
+        ...ALL_CAPABILITIES,
+        alerting_v2_rules: { read: false, all: false },
+        alerting_v2_alerts: { read: true, all: false },
+      };
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.getByTestId('importsPage')).toBeInTheDocument();
+      mockCapabilities = ALL_CAPABILITIES;
+    });
+
+    it('ImportsPage asks for alerts access when the user cannot read alerts', () => {
+      mockCapabilities = { ...ALL_CAPABILITIES, alerting_v2_alerts: { read: false, all: false } };
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertingRequiredPrivilege-alerting_v2_alerts')
+      ).toBeInTheDocument();
+      mockCapabilities = ALL_CAPABILITIES;
+    });
+
+    it('ImportsPage asks for connector access when the user cannot read connectors', () => {
+      mockCanReadConnectors = false;
+      mockUseBreadcrumbs.mockClear();
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingRequiredPrivilege-actions')).toBeInTheDocument();
+      expect(mockUseBreadcrumbs).toHaveBeenCalledWith('imports_list');
+      mockCanReadConnectors = true;
+    });
+
+    it('ImportsPage redirects away when experimental features are disabled', () => {
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
+      mockAlertingV2ExperimentalFeaturesEnabled = true;
     });
   });
 });

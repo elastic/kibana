@@ -24,13 +24,12 @@ const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
   description: 'Route every critical-priority alert to #oncall',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'wf-critical-route' }],
-  matcher: 'alert.severity = "critical"',
-  groupingMode: 'per_episode',
-  tags: ['oncall', 'critical'],
+  matcher: { expression: 'alert.severity = "critical"' },
+  grouping: { mode: 'per_alert' },
   apiKeyOwner: 'elastic',
   apiKeyCreatedByUser: true,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2026-04-01T00:00:00.000Z',
   updatedAt: '2026-04-10T00:00:00.000Z',
 } as ActionPolicySavedObjectAttributes;
@@ -199,10 +198,9 @@ describe('createActionPolicySmlType', () => {
         content: [
           'Critical alerts → Slack',
           'Route every critical-priority alert to #oncall',
-          'alert.severity = "critical"',
-          'per_episode',
+          'expression: "alert.severity = "critical""',
+          'per_alert',
           'workflow:wf-critical-route',
-          'oncall, critical',
         ].join('\n'),
       });
     });
@@ -274,17 +272,28 @@ describe('createActionPolicySmlType', () => {
     const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => {
       const originId = overrides.origin_id ?? 'policy-1';
       return {
-        id: 'sml-1',
         type: ACTION_POLICY_KI_TYPE,
         title: 'Critical alerts → Slack',
-        origin_id: originId,
-        origin: { uri: `${ACTION_POLICY_KI_TYPE}://${originId}` },
         content: '',
-        created_at: '2026-04-10T00:00:00.000Z',
-        updated_at: '2026-04-10T00:00:00.000Z',
-        spaces: ['default'],
         permissions: { kibana: { privileges: [] } },
-        ingestion_method: 'crawled' as const,
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        references: [
+          { uri: `${ACTION_POLICY_KI_TYPE}://${originId}`, relation: 'derived_from' as const },
+        ],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
+        },
       };
     };
 
@@ -308,6 +317,20 @@ describe('createActionPolicySmlType', () => {
       expect(result?.data).toEqual(expect.objectContaining({ name: baseActionPolicyAttrs.name }));
     });
 
+    it('sets the attachment origin to the raw policy id instead of the SML origin URI', async () => {
+      getActionPolicy.mockResolvedValueOnce({
+        ...baseActionPolicyAttrs,
+        id: 'policy-1',
+      });
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result?.origin).toBe('policy-1');
+    });
+
     it('returns undefined when getActionPolicy throws', async () => {
       // The entry surfaces in search results but the policy itself
       // was deleted between index time and read time — surface this
@@ -326,18 +349,13 @@ describe('createActionPolicySmlType', () => {
       expect(result).toBeUndefined();
     });
 
-    it('uses an empty string when the SML document has no origin_id', async () => {
-      // Defensive contract: `toAttachment` is invoked via the SML
-      // service which currently always sets `origin_id`, but the type
-      // is `string | undefined` and a missing value used to crash the
-      // call. Verifying the helper gracefully threads an empty string
-      // down to `getActionPolicy` so a refactor that loosens that
-      // invariant fails loud rather than 500-ing in production.
+    it('uses an empty string when the origin uri carries no id', async () => {
       getActionPolicy.mockResolvedValueOnce({ ...baseActionPolicyAttrs, id: '' });
 
       const document = buildSmlDocument();
-      // @ts-expect-error — intentionally clearing origin_id for the test
-      delete document.origin_id;
+      document.references = [
+        { uri: `${ACTION_POLICY_KI_TYPE}://`, relation: 'derived_from' as const },
+      ];
 
       await buildDefinition().toAttachment(document, buildToAttachmentContext());
 
@@ -354,6 +372,32 @@ describe('createActionPolicySmlType', () => {
 
       expect(result).toBeUndefined();
       expect(getActionPolicy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('searchByTitle', () => {
+    const search = (title: string) =>
+      buildDefinition().searchByTitle!({ title, size: 5 }, buildToAttachmentContext());
+
+    let findActionPolicies: jest.Mock;
+
+    beforeEach(() => {
+      findActionPolicies = jest.fn().mockResolvedValue({
+        items: [{ id: 'policy-1', name: 'Critical alerts' }],
+      });
+      actionPolicyClient = { findActionPolicies } as unknown as ActionPolicyClient;
+    });
+
+    it('searches action policies by the title and maps the results', async () => {
+      expect(await search('crit')).toEqual([{ originId: 'policy-1', title: 'Critical alerts' }]);
+      expect(findActionPolicies).toHaveBeenCalledWith({ search: 'crit', perPage: 5 });
+    });
+
+    it('returns nothing when Alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      expect(await search('crit')).toEqual([]);
+      expect(findActionPolicies).not.toHaveBeenCalled();
     });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ComparisonResult, RepetitionPolicy } from '@kbn/evals-common';
 
 export const PAGE_TITLE = i18n.translate('xpack.evals.compareExperiments.pageTitle', {
   defaultMessage: 'Compare experiments',
@@ -51,6 +52,69 @@ export const COLUMN_MEAN_TARGET = i18n.translate(
 export const COLUMN_DIFF = i18n.translate('xpack.evals.compareExperiments.columns.diff', {
   defaultMessage: 'Diff',
 });
+
+export const COLUMN_TEST = i18n.translate('xpack.evals.compareExperiments.columns.test', {
+  defaultMessage: 'Test',
+});
+
+export const TEST_LABEL_PAIRED_T = i18n.translate(
+  'xpack.evals.compareExperiments.testLabel.pairedT',
+  { defaultMessage: 't-test' }
+);
+
+export const TEST_LABEL_WILCOXON = i18n.translate(
+  'xpack.evals.compareExperiments.testLabel.wilcoxon',
+  { defaultMessage: 'Wilcoxon' }
+);
+
+export const TEST_LABEL_MCNEMAR = i18n.translate(
+  'xpack.evals.compareExperiments.testLabel.mcnemar',
+  { defaultMessage: 'McNemar' }
+);
+
+export const METRIC_TYPE_LABEL_BINARY = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.binary',
+  { defaultMessage: 'pass/fail scores' }
+);
+
+export const METRIC_TYPE_LABEL_CONTINUOUS_BOUNDED = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.continuousBounded',
+  { defaultMessage: 'scores in [0, 1]' }
+);
+
+export const METRIC_TYPE_LABEL_CONTINUOUS_UNBOUNDED = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.continuousUnbounded',
+  { defaultMessage: 'unbounded scores' }
+);
+
+export const METRIC_TYPE_LABEL_COUNT = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.count',
+  { defaultMessage: 'counts' }
+);
+
+export const METRIC_TYPE_LABEL_ORDINAL = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.ordinal',
+  { defaultMessage: 'ordinal scale' }
+);
+
+export const getTestTooltip = (testLabel: string, metricTypeLabel: string, method?: string) =>
+  method
+    ? i18n.translate('xpack.evals.compareExperiments.testTooltipWithMethod', {
+        defaultMessage:
+          '{testLabel} ({method}), chosen because the evaluator produces {metricTypeLabel}',
+        values: { testLabel, method, metricTypeLabel },
+      })
+    : i18n.translate('xpack.evals.compareExperiments.testTooltip', {
+        defaultMessage: '{testLabel}, chosen because the evaluator produces {metricTypeLabel}',
+        values: { testLabel, metricTypeLabel },
+      });
+
+export const getDiscordantPairsHint = (targetOnly: number, baselineOnly: number) =>
+  i18n.translate('xpack.evals.compareExperiments.discordantPairsHint', {
+    defaultMessage:
+      '{targetOnly, plural, one {# example} other {# examples}} score 1 only in target, {baselineOnly, plural, one {# example} other {# examples}} score 1 only in baseline',
+    values: { targetOnly, baselineOnly },
+  });
 
 export const COLUMN_P_VALUE = i18n.translate('xpack.evals.compareExperiments.columns.pValue', {
   defaultMessage: 'p-value',
@@ -251,10 +315,10 @@ export const DIFF_NEUTRAL_DIRECTION = i18n.translate(
 );
 
 export const FLYOUT_UNPAIRED_HINT = i18n.translate(
-  'xpack.evals.compareExperiments.flyoutUnpairedHint',
+  'xpack.evals.compareExperiments.flyoutExcludedExampleHint',
   {
     defaultMessage:
-      'This example only exists in one experiment and is excluded from the statistical comparison',
+      'This example has no valid score in one of the experiments and is excluded from the statistical comparison',
   }
 );
 
@@ -330,3 +394,52 @@ export const TRUNCATION_WARNING_BODY = i18n.translate(
 export const EXPORT_CSV_FAILED = i18n.translate('xpack.evals.compareExperiments.exportCsvFailed', {
   defaultMessage: 'Copy failed',
 });
+
+export const getRepetitionPolicyNote = (policy: RepetitionPolicy) =>
+  i18n.translate('xpack.evals.compareExperiments.repetitionPolicy', {
+    defaultMessage: 'Repetition policy: {policy}.',
+    values: { policy },
+  });
+
+export const STABILITY_NOTE = i18n.translate('xpack.evals.compareExperiments.stabilityNote', {
+  defaultMessage:
+    "Stability is the mean standard deviation across an example's repetitions, shown as baseline / target. Lower is steadier.",
+});
+
+export const REPETITION_WARNING_NOTE = i18n.translate(
+  'xpack.evals.compareExperiments.repetitionWarningNote',
+  {
+    defaultMessage:
+      'N*: some examples are missing from one experiment, ran a different number of times, or have a null score.',
+  }
+);
+
+export const COLUMN_STABILITY = i18n.translate('xpack.evals.compareExperiments.columns.stability', {
+  defaultMessage: 'Stability',
+});
+
+export const getRepetitionsHint = ({
+  baseline,
+  target,
+}: Pick<ComparisonResult, 'baseline' | 'target'>) =>
+  i18n.translate('xpack.evals.compareExperiments.repetitionsHint', {
+    defaultMessage:
+      'Valid scores: {usedBaseline} baseline, {usedTarget} target. Null scores: {missingBaseline} baseline, {missingTarget} target.',
+    values: {
+      usedBaseline: baseline.used,
+      usedTarget: target.used,
+      missingBaseline: baseline.missing,
+      missingTarget: target.missing,
+    },
+  });
+
+export const REJECTED_SLICES_TITLE = i18n.translate(
+  'xpack.evals.compareExperiments.rejectedSlicesTitle',
+  { defaultMessage: 'Left out of the median comparison' }
+);
+
+export const getRejectedSlicesBody = (slices: string) =>
+  i18n.translate('xpack.evals.compareExperiments.rejectedSlicesBody', {
+    defaultMessage: 'Score outside [0, 1]: {slices}.',
+    values: { slices },
+  });

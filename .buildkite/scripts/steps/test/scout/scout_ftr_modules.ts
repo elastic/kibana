@@ -41,7 +41,6 @@ export const SCOUT_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/test-suites-xpack-security-endpoint',
   '@kbn/test-suites-xpack-performance',
   '@kbn/test-suites-xpack-vectordb',
-  '@kbn/test-suites-xpack-workplace-ai',
   '@kbn/test-suites-security-solution-apis',
 
   // Other test-only infrastructure

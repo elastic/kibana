@@ -19,6 +19,7 @@
     "@kbn/data-views-plugin",
     "@kbn/discover-utils",
     "@kbn/expressions-plugin",
+    "@kbn/data-source",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",

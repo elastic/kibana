@@ -9,7 +9,12 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
-import { registerStatusReportTask, getResolutionState } from './status_report_task';
+import {
+  registerStatusReportTask,
+  getEntityRiskScoreDistribution,
+  getEntitySourceDistribution,
+  getResolutionState,
+} from './status_report_task';
 import { createAssetManagerClient } from './factories';
 import {
   ENTITY_STORE_METADATA_USAGE_EVENT,
@@ -21,6 +26,7 @@ import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metad
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
 import { getLatestEntitiesIndexName } from '../../common/domain/entity_index';
 import type { EntityStoreCoreSetup } from '../types';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 jest.mock('./factories');
 jest.mock('./should_delete_orphaned_task', () => ({
@@ -44,6 +50,463 @@ const makeEsqlResponse = (values: Array<Array<number | null>>) => ({
     { name: 'maxGroupAliases', type: 'long' },
   ],
   values,
+});
+
+describe('getEntityRiskScoreDistribution', () => {
+  let logger: MockedLogger;
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
+  it('counts every entity of the type, including entities with no risk band', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      aggregations: {
+        bands: {
+          buckets: [
+            { key: 'Critical', doc_count: 1 },
+            { key: 'High', doc_count: 2 },
+            { key: 'Unknown', doc_count: 3 },
+            { key: 'Severe', doc_count: 1 },
+          ],
+        },
+        scorePercentiles: { values: { '50.0': 40, '90.0': '88.5' } },
+      },
+    } as never);
+
+    const { signal } = new AbortController();
+    const result = await getEntityRiskScoreDistribution(
+      esClient,
+      'my-index',
+      'host',
+      logger,
+      signal
+    );
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      {
+        index: 'my-index',
+        size: 0,
+        track_total_hits: false,
+        query: { term: { 'entity.EngineMetadata.Type': 'host' } },
+        aggs: {
+          bands: {
+            terms: {
+              field: 'entity.risk.calculated_level',
+              size: 10,
+              missing: 'Unknown',
+            },
+          },
+          scorePercentiles: {
+            percentiles: {
+              field: 'entity.risk.calculated_score_norm',
+              percents: [50, 90],
+            },
+          },
+        },
+      },
+      { signal }
+    );
+    expect(result).toEqual({
+      critical: 1,
+      high: 2,
+      moderate: 0,
+      low: 0,
+      unknown: 4,
+      normP50: 40,
+      normP90: 88.5,
+    });
+  });
+
+  it('omits percentiles when the search has no score values', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      aggregations: {
+        bands: { buckets: [] },
+        scorePercentiles: { values: { '50.0': null, '90.0': 'NaN' } },
+      },
+    } as never);
+
+    const result = await getEntityRiskScoreDistribution(
+      esClient,
+      'my-index',
+      'user',
+      logger,
+      new AbortController().signal
+    );
+
+    expect(result).toEqual({
+      critical: 0,
+      high: 0,
+      moderate: 0,
+      low: 0,
+      unknown: 0,
+    });
+  });
+
+  it('aggregates resolution risk fields when asked for the resolution score', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      aggregations: {
+        bands: { buckets: [{ key: 'Critical', doc_count: 4 }] },
+        scorePercentiles: { values: { '50.0': 61, '90.0': 95 } },
+      },
+    } as never);
+
+    const { signal } = new AbortController();
+    const result = await getEntityRiskScoreDistribution(
+      esClient,
+      'my-index',
+      'user',
+      logger,
+      signal,
+      'resolution'
+    );
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: {
+          bands: {
+            terms: {
+              field: 'entity.relationships.resolution.risk.calculated_level',
+              size: 10,
+              missing: 'Unknown',
+            },
+          },
+          scorePercentiles: {
+            percentiles: {
+              field: 'entity.relationships.resolution.risk.calculated_score_norm',
+              percents: [50, 90],
+            },
+          },
+        },
+      }),
+      { signal }
+    );
+    expect(result).toEqual({
+      critical: 4,
+      high: 0,
+      moderate: 0,
+      low: 0,
+      unknown: 0,
+      normP50: 61,
+      normP90: 95,
+    });
+  });
+
+  describe('malformed responses', () => {
+    it('returns all-zero distribution when the search has no aggregations', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({} as never);
+
+      const result = await getEntityRiskScoreDistribution(
+        esClient,
+        'my-index',
+        'host',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ critical: 0, high: 0, moderate: 0, low: 0, unknown: 0 });
+    });
+
+    it('returns all-zero distribution when aggregations has no bands', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({ aggregations: {} } as never);
+
+      const result = await getEntityRiskScoreDistribution(
+        esClient,
+        'my-index',
+        'host',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ critical: 0, high: 0, moderate: 0, low: 0, unknown: 0 });
+    });
+
+    it('returns all-zero distribution when bands has no buckets', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        aggregations: { bands: {}, scorePercentiles: { values: {} } },
+      } as never);
+
+      const result = await getEntityRiskScoreDistribution(
+        esClient,
+        'my-index',
+        'host',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ critical: 0, high: 0, moderate: 0, low: 0, unknown: 0 });
+    });
+
+    it('maps a bucket with an undefined key to unknown', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          bands: { buckets: [{ doc_count: 5 }, { key: 'Critical', doc_count: 2 }] },
+          scorePercentiles: { values: {} },
+        },
+      } as never);
+
+      const result = await getEntityRiskScoreDistribution(
+        esClient,
+        'my-index',
+        'host',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ critical: 2, high: 0, moderate: 0, low: 0, unknown: 5 });
+    });
+
+    it('skips a bucket whose doc_count is not a number', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          bands: {
+            buckets: [
+              { key: 'High', doc_count: 'bad' },
+              { key: 'Critical', doc_count: null },
+              { key: 'Low', doc_count: 3 },
+            ],
+          },
+          scorePercentiles: { values: {} },
+        },
+      } as never);
+
+      const result = await getEntityRiskScoreDistribution(
+        esClient,
+        'my-index',
+        'host',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ critical: 0, high: 0, moderate: 0, low: 3, unknown: 0 });
+    });
+
+    it('omits percentiles when scorePercentiles is absent', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        aggregations: { bands: { buckets: [{ key: 'High', doc_count: 1 }] } },
+      } as never);
+
+      const result = await getEntityRiskScoreDistribution(
+        esClient,
+        'my-index',
+        'host',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ critical: 0, high: 1, moderate: 0, low: 0, unknown: 0 });
+    });
+  });
+
+  it('returns empty distribution and logs a warning when the search rejects', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockRejectedValue(new Error('es_down'));
+
+    const result = await getEntityRiskScoreDistribution(
+      esClient,
+      'my-index',
+      'host',
+      logger,
+      new AbortController().signal
+    );
+
+    expect(result).toEqual({});
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es_down'));
+  });
+
+  it('returns empty resolution distribution and logs a warning when the resolution search rejects', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockRejectedValue(new Error('es_down'));
+
+    const result = await getEntityRiskScoreDistribution(
+      esClient,
+      'my-index',
+      'host',
+      logger,
+      new AbortController().signal,
+      'resolution'
+    );
+
+    expect(result).toEqual({});
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es_down'));
+  });
+});
+
+describe('getEntitySourceDistribution', () => {
+  let logger: MockedLogger;
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
+  it('maps source buckets, the missing bucket, and the overflow count', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({
+      aggregations: {
+        sources: {
+          buckets: [
+            { key: 'aws', doc_count: 4 },
+            { key: 'logs-endpoint.alerts', doc_count: 3 },
+            { key: 'logs-endpoint__alerts', doc_count: 1 },
+            { key: 'unknown', doc_count: 1 },
+            { key: 12, doc_count: 2 },
+          ],
+          sum_other_doc_count: 9,
+        },
+      },
+    } as never);
+
+    const { signal } = new AbortController();
+    const result = await getEntitySourceDistribution(esClient, 'my-index', 'host', logger, signal);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      {
+        index: 'my-index',
+        size: 0,
+        track_total_hits: false,
+        query: { term: { 'entity.EngineMetadata.Type': 'host' } },
+        aggs: {
+          sources: {
+            terms: {
+              field: 'entity.source',
+              size: 100,
+              missing: 'unknown',
+            },
+          },
+        },
+      },
+      { signal }
+    );
+    expect(result).toEqual({
+      sources: {
+        aws: 4,
+        'logs-endpoint__alerts': 4,
+        unknown: 1,
+        '12': 2,
+        other: 9,
+      },
+    });
+  });
+
+  describe('malformed responses', () => {
+    it('returns an empty map when the search has no aggregations', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({} as never);
+
+      const result = await getEntitySourceDistribution(
+        esClient,
+        'my-index',
+        'user',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ sources: {} });
+    });
+
+    it('returns an empty map when aggregations are present but sources is missing', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({ aggregations: {} } as never);
+
+      const result = await getEntitySourceDistribution(
+        esClient,
+        'my-index',
+        'user',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ sources: {} });
+    });
+
+    it('returns an empty map when aggregations.sources has no buckets', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        aggregations: { sources: { sum_other_doc_count: 0 } },
+      } as never);
+
+      const result = await getEntitySourceDistribution(
+        esClient,
+        'my-index',
+        'user',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ sources: {} });
+    });
+
+    it('skips buckets where key is undefined', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          sources: {
+            buckets: [{ doc_count: 5 }, { key: 'aws', doc_count: 3 }],
+            sum_other_doc_count: 0,
+          },
+        },
+      } as never);
+
+      const result = await getEntitySourceDistribution(
+        esClient,
+        'my-index',
+        'user',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ sources: { aws: 3 } });
+    });
+
+    it('skips buckets where doc_count is not a number', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          sources: {
+            buckets: [
+              { key: 'aws', doc_count: 'not-a-number' },
+              { key: 'gcp', doc_count: null },
+              { key: 'azure', doc_count: 7 },
+            ],
+            sum_other_doc_count: 0,
+          },
+        },
+      } as never);
+
+      const result = await getEntitySourceDistribution(
+        esClient,
+        'my-index',
+        'user',
+        logger,
+        new AbortController().signal
+      );
+
+      expect(result).toEqual({ sources: { azure: 7 } });
+    });
+  });
+
+  it('returns an empty sources map and logs a warning when the search rejects', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockRejectedValue(new Error('es_down'));
+
+    const result = await getEntitySourceDistribution(
+      esClient,
+      'my-index',
+      'host',
+      logger,
+      new AbortController().signal
+    );
+
+    expect(result).toEqual({ sources: {} });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es_down'));
+  });
 });
 
 describe('getResolutionState', () => {
@@ -165,6 +628,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   let esqlQuery: jest.Mock;
   let getStatus: jest.Mock;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let withContextSpy: jest.Mock;
 
   // Drives the task the way task-manager does: register, grab the definition,
   // build the runner and run it once.
@@ -176,6 +640,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       analytics: { reportEvent },
       getStartServices: jest.fn().mockResolvedValue([
         {
+          executionContext: { withContext: withContextSpy },
           savedObjects: {
             createInternalRepository: jest.fn().mockReturnValue({
               find: jest.fn().mockResolvedValue({ saved_objects: [{ id: 'engine' }], total: 1 }),
@@ -202,6 +667,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     jest.clearAllMocks();
     logger = loggerMock.create();
     reportEvent = jest.fn();
+    withContextSpy = jest.fn(<T>(_ctx: unknown, fn: () => T) => fn());
     getStatus = jest.fn().mockResolvedValue({ status: ENTITY_STORE_STATUS.NOT_INSTALLED });
     // Store-usage counts carry a `query`; the metadata-datastream count does not.
     count = jest.fn(async (params: { query?: unknown }) =>
@@ -413,5 +879,139 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       .filter(([eventType]) => eventType === ENTITY_STORE_USAGE_EVENT.eventType)
       .map(([, payload]) => payload.entityType);
     expect(new Set(usageTypes)).toEqual(new Set(ALL_ENTITY_TYPES));
+  });
+
+  it('runs the registered runner inside the status-report execution context', async () => {
+    await runStatusReportTask();
+
+    expect(withContextSpy).toHaveBeenCalledWith(
+      buildEaExecutionContext(
+        EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_STATUS_REPORT_TASK,
+        `status:${NAMESPACE}`
+      ),
+      expect.any(Function)
+    );
+  });
+
+  it('adds per-source counts to the usage event', async () => {
+    esClient.search.mockResolvedValue({
+      aggregations: {
+        sources: {
+          buckets: [{ key: 'elastic_defend', doc_count: 3 }],
+          sum_other_doc_count: 1,
+        },
+      },
+    } as never);
+
+    await runStatusReportTask();
+
+    const usageCalls = reportEvent.mock.calls.filter(
+      ([eventType]) => eventType === ENTITY_STORE_USAGE_EVENT.eventType
+    );
+    expect(usageCalls).toHaveLength(ALL_ENTITY_TYPES.length);
+    usageCalls.forEach(([, payload]) => {
+      expect(payload).toMatchObject({
+        namespace: NAMESPACE,
+        storeSize: 5,
+        sources: { elastic_defend: 3, other: 1 },
+      });
+    });
+    expect(esClient.search).toHaveBeenCalledTimes(ALL_ENTITY_TYPES.length * 3);
+  });
+
+  it('adds base and resolution risk score distributions to the usage event', async () => {
+    esClient.search.mockImplementation(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (async (params: any) => {
+        const levelField = params?.aggs?.bands?.terms?.field;
+        if (levelField === 'entity.risk.calculated_level') {
+          return {
+            aggregations: {
+              bands: { buckets: [{ key: 'High', doc_count: 2 }] },
+              scorePercentiles: { values: { '50.0': 72, '90.0': 91 } },
+            },
+          };
+        }
+        if (levelField === 'entity.relationships.resolution.risk.calculated_level') {
+          return {
+            aggregations: {
+              bands: { buckets: [{ key: 'Critical', doc_count: 1 }] },
+              scorePercentiles: { values: { '50.0': 40, '90.0': 80 } },
+            },
+          };
+        }
+        return {
+          aggregations: {
+            sources: { buckets: [], sum_other_doc_count: 0 },
+          },
+        };
+      }) as any
+    );
+
+    await runStatusReportTask();
+
+    const usageCall = reportEvent.mock.calls.find(
+      ([eventType]) => eventType === ENTITY_STORE_USAGE_EVENT.eventType
+    );
+    expect(usageCall?.[1].baseScoreDistribution).toEqual({
+      critical: 0,
+      high: 2,
+      moderate: 0,
+      low: 0,
+      unknown: 0,
+      normP50: 72,
+      normP90: 91,
+    });
+    expect(usageCall?.[1].resolutionScoreDistribution).toEqual({
+      critical: 1,
+      high: 0,
+      moderate: 0,
+      low: 0,
+      unknown: 0,
+      normP50: 40,
+      normP90: 80,
+    });
+    expect(usageCall?.[1]).not.toHaveProperty('riskScoreDistribution');
+  });
+
+  it('reports empty distributions and logs a warning when the search queries fail for an entity type', async () => {
+    const [failingType] = ALL_ENTITY_TYPES;
+    esClient.search.mockImplementation(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (async (params: any) => {
+        if (params?.query?.term?.['entity.EngineMetadata.Type'] === failingType) {
+          throw new Error('source_boom');
+        }
+        return {
+          aggregations: {
+            sources: { buckets: [{ key: 'aws', doc_count: 2 }], sum_other_doc_count: 0 },
+          },
+        };
+      }) as any
+    );
+
+    // Task resolves — errors are caught inside each distribution function.
+    await expect(runStatusReportTask()).resolves.toBeDefined();
+
+    // Usage and resolution state events fire for every type, including the failing one.
+    const usageTypes = reportEvent.mock.calls
+      .filter(([eventType]) => eventType === ENTITY_STORE_USAGE_EVENT.eventType)
+      .map(([, payload]) => payload.entityType);
+    expect(new Set(usageTypes)).toEqual(new Set(ALL_ENTITY_TYPES));
+
+    const resolutionTypes = reportEvent.mock.calls
+      .filter(([eventType]) => eventType === ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType)
+      .map(([, payload]) => payload.entityType);
+    expect(new Set(resolutionTypes)).toEqual(new Set(ALL_ENTITY_TYPES));
+
+    // The failing type emits empty distributions.
+    const failingUsageCall = reportEvent.mock.calls.find(
+      ([eventType, payload]) =>
+        eventType === ENTITY_STORE_USAGE_EVENT.eventType && payload.entityType === failingType
+    );
+    expect(failingUsageCall?.[1].sources).toEqual({});
+    expect(failingUsageCall?.[1].baseScoreDistribution).toEqual({});
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('source_boom'));
   });
 });

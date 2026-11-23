@@ -44,7 +44,7 @@ describe('GlobalSearchBarPlugin', () => {
 
       const coreStart = coreMock.createStart();
 
-      const setSpy = jest.spyOn(coreStart.chrome.next.globalSearch, 'set');
+      const setSpy = jest.spyOn(coreStart.chrome.controls.globalSearch, 'set');
 
       service.start(coreStart, {
         globalSearch: globalSearchPluginMock.createStartContract(),
@@ -79,7 +79,7 @@ describe('GlobalSearchBarPlugin', () => {
         globalSearch: globalSearchPluginMock.createStartContract(),
       });
 
-      const onClick = (coreStart.chrome.next.globalSearch.set as jest.Mock).mock.calls[0][0]
+      const onClick = (coreStart.chrome.controls.globalSearch.set as jest.Mock).mock.calls[0][0]
         .onClick as () => void;
       onClick();
 

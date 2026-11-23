@@ -57,6 +57,7 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) => {
     'data_output_id',
     'monitoring_output_id',
     'download_source_id',
+    'download_source_ids',
     'fleet_server_host_id',
     'agent_features',
     'is_protected',
@@ -275,6 +276,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         isLoading={isLoading}
                         isDisabled={
                           !hasAllAgentPoliciesPrivileges ||
+                          agentPolicy.supports_agentless ||
                           isLoading ||
                           Object.keys(validation).length > 0 ||
                           hasAdvancedSettingsErrors ||

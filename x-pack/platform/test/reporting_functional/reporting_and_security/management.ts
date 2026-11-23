@@ -90,12 +90,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
 
         await retry.try(async () => {
-          if (
-            !(await testSubjects.exists('exportDerivativeFlyout-scheduledReports', {
-              timeout: 1000,
-            }))
-          ) {
-            if (!(await testSubjects.exists('scheduleExport', { timeout: 1000 }))) {
+          if (!(await testSubjects.exists('exportDerivativeFlyout-scheduledReports'))) {
+            if (!(await testSubjects.exists('scheduleExport'))) {
               await PageObjects.exports.clickExportTopNavButton();
             }
             await (await testSubjects.find('scheduleExport')).click();

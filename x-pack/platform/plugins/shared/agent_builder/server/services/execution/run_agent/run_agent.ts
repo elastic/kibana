@@ -11,13 +11,14 @@ import type {
   ConverseInput,
   AgentConfiguration,
   RuntimeAgentConfigurationOverrides,
-  ConversationAction,
   ConversationRoundAuthor,
+  EventActor,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import { runDefaultAgentMode } from './run_chat_agent';
+import { shouldUseDeductive, runDeductiveAgent } from './deductive';
 
 export interface RunAgentParams {
   /**
@@ -39,6 +40,8 @@ export interface RunAgentParams {
    * conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
+  /** The actor that posted the input, when it is an agent (a sub-agent's report) rather than the requesting user. */
+  actor?: EventActor;
   /**
    * Configuration of the agent to run
    */
@@ -74,10 +77,6 @@ export interface RunAgentParams {
    */
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   /**
-   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
-   */
-  action?: ConversationAction;
-  /**
    * The execution ID for this run. Used for sub-agent parent tracking.
    */
   executionId?: string;
@@ -91,5 +90,9 @@ export const runAgent = async (
   params: RunAgentParams,
   context: AgentHandlerContext
 ): Promise<RunAgentResponse> => {
+  if (shouldUseDeductive(params.agentId)) {
+    return runDeductiveAgent(params, context);
+  }
+
   return runDefaultAgentMode(params, context);
 };

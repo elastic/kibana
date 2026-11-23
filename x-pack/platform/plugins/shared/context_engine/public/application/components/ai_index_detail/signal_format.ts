@@ -6,13 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Signal } from '../../../../common/http_api/signals';
+import type { Signal, SignalTag } from '../../../../common/http_api/signals';
 
 /** The `data.status` value marking a failed tool call. Shared by the row and the detail flyout. */
 export const SIGNAL_STATUS_ERROR = 'Error';
 
-/** Known tags get a curated label; unknown tags fall back to a Title-Cased keyword. */
-const KNOWN_TAG_LABELS: Record<string, string> = {
+const TAG_LABELS: Record<SignalTag, string> = {
   query_error: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.tag.queryError', {
     defaultMessage: 'Query error',
   }),
@@ -24,26 +23,11 @@ const KNOWN_TAG_LABELS: Record<string, string> = {
   }),
 };
 
-/** Turns a snake_case keyword into a human-readable label, using curated labels where available. */
-export const humanizeTagType = (tag: string): string => {
-  const known = KNOWN_TAG_LABELS[tag];
-  if (known) {
-    return known;
-  }
-  if (!tag) {
-    return i18n.translate('xpack.contextEngine.aiIndexDetail.signals.tag.untagged', {
-      defaultMessage: 'Signal',
-    });
-  }
-  return tag
-    .split(/[_\s]+/)
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
+/** Human-readable label for a classification tag. */
+export const tagLabel = (tag: SignalTag): string => TAG_LABELS[tag];
 
 /** A one-line, human explanation of what a tag/group means, shown on the group row and flyout. */
-const KNOWN_TAG_DESCRIPTIONS: Record<string, string> = {
+const TAG_DESCRIPTIONS: Record<SignalTag, string> = {
   query_error: i18n.translate(
     'xpack.contextEngine.aiIndexDetail.signals.tagDescription.queryError',
     {
@@ -60,13 +44,8 @@ const KNOWN_TAG_DESCRIPTIONS: Record<string, string> = {
   ),
 };
 
-/** Explains a tag group in one sentence; falls back to a generic description for unknown tags. */
-export const tagDescription = (tag: string): string =>
-  KNOWN_TAG_DESCRIPTIONS[tag] ??
-  i18n.translate('xpack.contextEngine.aiIndexDetail.signals.tagDescription.fallback', {
-    defaultMessage: 'Signals classified as “{label}”.',
-    values: { label: humanizeTagType(tag) },
-  });
+/** Explains a tag group in one sentence. */
+export const tagDescription = (tag: SignalTag): string => TAG_DESCRIPTIONS[tag];
 
 const NO_TARGET = i18n.translate('xpack.contextEngine.aiIndexDetail.signals.noTarget', {
   defaultMessage: 'unknown target',
@@ -75,12 +54,15 @@ const NO_TARGET = i18n.translate('xpack.contextEngine.aiIndexDetail.signals.noTa
 /** The target index a signal is about, with a fallback so it is never blank. */
 export const signalTarget = (signal: Signal): string => signal.data.target_index || NO_TARGET;
 
-/** Picks the primary tag used to title a signal (its first tag), falling back to the signal type. */
-const primaryTag = (signal: Signal): string => signal.tags[0] ?? signal.signal_type;
+const UNTAGGED_LABEL = i18n.translate('xpack.contextEngine.aiIndexDetail.signals.tag.untagged', {
+  defaultMessage: 'Signal',
+});
 
-/** `{Type} · {target}` — e.g. `Query error · ai-index-ds-support`. */
-export const signalTitle = (signal: Signal): string =>
-  `${humanizeTagType(primaryTag(signal))} · ${signalTarget(signal)}`;
+/** `{Type} · {target}` — e.g. `Query error · ai-index-ds-support`. A clean signal carries no tag. */
+export const signalTitle = (signal: Signal): string => {
+  const [tag] = signal.tags;
+  return `${tag ? tagLabel(tag) : UNTAGGED_LABEL} · ${signalTarget(signal)}`;
+};
 
 const QUERY_KIND_LABELS: Record<Signal['data']['query_kind'], string> = {
   ki_retrieval: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.queryKind.kiRetrieval', {
@@ -96,7 +78,7 @@ const QUERY_KIND_LABELS: Record<Signal['data']['query_kind'], string> = {
 
 /** Human-readable label for a `query_kind`. */
 export const humanizeQueryKind = (queryKind: Signal['data']['query_kind']): string =>
-  QUERY_KIND_LABELS[queryKind] ?? QUERY_KIND_LABELS.other;
+  QUERY_KIND_LABELS[queryKind];
 
 /**
  * A one/two-sentence, client-side summary derived from the signal's tags and `data`. There is

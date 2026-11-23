@@ -19,6 +19,12 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { CoreSecurityDelegateServiceAccounts } from '@kbn/core-security-server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
@@ -54,10 +60,16 @@ import type { FipsServiceSetupInternal } from './fips';
 import { FipsService } from './fips';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
+import type { CloudProjectContext, ServiceAccountsServiceStart } from './service_accounts';
+import {
+  registerServiceAccountCredentialSavedObjectType,
+  registerWorkloadBindingSavedObjectType,
+  ServiceAccountsService,
+} from './service_accounts';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
-import { UiamService } from './uiam';
+import { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE, UiamService } from './uiam';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
@@ -86,6 +98,7 @@ export interface SecurityPluginSetup extends SecurityPluginSetupWithoutDeprecate
 }
 
 export interface PluginSetupDependencies {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -96,6 +109,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   cloud?: CloudStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
@@ -120,6 +134,14 @@ export class SecurityPlugin
       throw new Error('Config is not available.');
     }
     return this.config;
+  };
+
+  private uiam?: UiamService;
+  private readonly getUiam = () => {
+    if (!this.uiam) {
+      throw new Error('UIAM service is not available.');
+    }
+    return this.uiam;
   };
 
   private session?: Session;
@@ -147,6 +169,34 @@ export class SecurityPlugin
     return this.authenticationStart;
   };
 
+  /**
+   * Captured during `setup`: the project identifiers only exist on the cloud plugin's setup
+   * contract, but service accounts are started later.
+   */
+  private cloudProjectContext?: CloudProjectContext;
+
+  private readonly serviceAccountsService: ServiceAccountsService;
+  private serviceAccountsStart?: ServiceAccountsServiceStart | null;
+  /** What Core knows about workload types, handed back when the security delegate registers. */
+  private workloadTypes?: CoreSecurityDelegateServiceAccounts;
+  private readonly getWorkloadTypes = () => {
+    if (!this.workloadTypes) {
+      throw new Error(`workloadTypes is not registered!`);
+    }
+    return this.workloadTypes;
+  };
+  private canEncryptSavedObjects = false;
+  /**
+   * Returns the service account management API, or `null` when service accounts are
+   * not enabled for this deployment.
+   */
+  private readonly getServiceAccountsService = () => {
+    if (this.serviceAccountsStart === undefined) {
+      throw new Error(`serviceAccountsStart is not registered!`);
+    }
+    return this.serviceAccountsStart;
+  };
+
   private readonly featureUsageService = new SecurityFeatureUsageService();
   private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
   private readonly getFeatureUsageService = () => {
@@ -158,6 +208,7 @@ export class SecurityPlugin
 
   private readonly auditService: AuditService;
   private readonly securityLicenseService = new SecurityLicenseService();
+  private securityLicense?: SecurityLicense;
   private readonly analyticsService: AnalyticsService;
   private readonly authorizationService = new AuthorizationService();
   private readonly elasticsearchService: ElasticsearchService;
@@ -193,6 +244,9 @@ export class SecurityPlugin
       this.initializerContext.logger.get('authentication')
     );
     this.auditService = new AuditService(this.initializerContext.logger.get('audit'));
+    this.serviceAccountsService = new ServiceAccountsService(
+      this.initializerContext.logger.get('service-accounts')
+    );
 
     this.elasticsearchService = new ElasticsearchService(
       this.initializerContext.logger.get('elasticsearch')
@@ -215,9 +269,24 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
-    { features, licensing, taskManager, usageCollection, spaces, cloud }: PluginSetupDependencies
+    {
+      encryptedSavedObjects,
+      features,
+      licensing,
+      taskManager,
+      usageCollection,
+      spaces,
+      cloud,
+    }: PluginSetupDependencies
   ) {
     this.kibanaIndexName = core.savedObjects.getDefaultIndex();
+    this.canEncryptSavedObjects = encryptedSavedObjects.canEncrypt;
+
+    // Registered unconditionally, even when service accounts are disabled: a saved object type
+    // that comes and goes with a feature flag leaves its documents unreadable on any deployment
+    // that once had the feature on.
+    registerWorkloadBindingSavedObjectType(core.savedObjects, encryptedSavedObjects);
+    registerServiceAccountCredentialSavedObjectType(core.savedObjects, encryptedSavedObjects);
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>
         createConfig(rawConfig, this.initializerContext.logger.get('config'), {
@@ -230,6 +299,14 @@ export class SecurityPlugin
     });
 
     const config = this.getConfig();
+
+    if (
+      this.initializerContext.env.packageInfo.buildFlavor === 'serverless' &&
+      !config.uiam?.enabled
+    ) {
+      throw new Error('`xpack.security.uiam.enabled` must be `true` on serverless deployments.');
+    }
+
     const kibanaIndexName = this.getKibanaIndexName();
 
     // A subset of `start` services we need during `setup`.
@@ -241,6 +318,16 @@ export class SecurityPlugin
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
     });
+    this.securityLicense = license;
+    const organizationId = cloud?.organizationId;
+    const projectId = cloud?.serverless?.projectId;
+    const projectType = cloud?.serverless?.projectType
+      ? KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE[cloud.serverless.projectType]
+      : undefined;
+    this.cloudProjectContext =
+      organizationId && projectId && projectType
+        ? { organizationId, projectId, projectType }
+        : undefined;
 
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)
@@ -259,9 +346,16 @@ export class SecurityPlugin
       config,
       license,
       customBranding: core.customBranding,
+      getServiceAccounts: () => this.serviceAccountsStart ?? null,
     });
 
-    registerSecurityUsageCollector({ usageCollection, config, license });
+    registerSecurityUsageCollector({
+      usageCollection,
+      config,
+      license,
+      logger: this.logger.get('usage'),
+      getServiceAccounts: () => this.serviceAccountsStart,
+    });
 
     const getCurrentUser = (request: KibanaRequest) =>
       this.getAuthentication().getCurrentUser(request);
@@ -276,6 +370,8 @@ export class SecurityPlugin
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,
+      getFakeRequestPrincipal: (request) =>
+        this.serviceAccountsStart?.backend.getFakeRequestPrincipal(request) ?? null,
       recordAuditLoggingUsage: () => this.getFeatureUsageService().recordAuditLoggingUsage(),
     });
 
@@ -333,15 +429,18 @@ export class SecurityPlugin
 
     this.registerDeprecations(core, license);
 
-    core.security.registerSecurityDelegate(
+    ({ serviceAccounts: this.workloadTypes } = core.security.registerSecurityDelegate(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
         getSession: this.getSession,
+        getServiceAccounts: this.getServiceAccountsService,
+        getUiam: this.getUiam,
+        organizationId,
         audit: this.auditSetup,
         config,
         logger: this.logger,
       })
-    );
+    ));
     core.userProfile.registerUserProfileDelegate(
       buildUserProfileApi({
         getUserProfile: this.getUserProfileService.bind(this),
@@ -365,6 +464,7 @@ export class SecurityPlugin
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
+      getServiceAccountsService: this.getServiceAccountsService,
       serverlessProjectId: cloud?.serverless?.projectId,
       serverlessProjectType: cloud?.serverless?.projectType,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
@@ -381,6 +481,7 @@ export class SecurityPlugin
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
+        checkUserProfilesPrivileges: this.authorizationSetup.checkUserProfilesPrivileges,
         checkPrivilegesDynamicallyWithRequest:
           this.authorizationSetup.checkPrivilegesDynamicallyWithRequest,
         checkSavedObjectsPrivilegesWithRequest:
@@ -400,7 +501,14 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { cloud, features, licensing, taskManager, spaces }: PluginStartDependencies
+    {
+      cloud,
+      encryptedSavedObjects,
+      features,
+      licensing,
+      taskManager,
+      spaces,
+    }: PluginStartDependencies
   ) {
     this.logger.debug('Starting plugin');
 
@@ -419,18 +527,6 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({
-      clusterClient,
-      session,
-      getCurrentUser: core.security.authc.getCurrentUser,
-    });
-
-    // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
-    const customLogoutURL =
-      this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
-        ? cloud?.projectsUrl
-        : undefined;
-
     const config = this.getConfig();
 
     const { protocol, hostname, port } = core.http.getServerInfo();
@@ -438,6 +534,30 @@ export class SecurityPlugin
 
     const kibanaServerResourceURL =
       config.mcp?.oauth2?.metadata?.resource ?? core.http.basePath.publicBaseUrl ?? serverBaseUrl;
+
+    // Shared by every consumer below: constructing a second instance would re-read the
+    // configured TLS material and create a second connection pool.
+    const uiam = config.uiam?.enabled
+      ? new UiamService(this.logger.get('uiam'), config.uiam, {
+          kibanaServerResourceURL,
+          elasticsearchUrl: this.elasticsearchUrl,
+          kibanaVersion: this.initializerContext.env.packageInfo.version,
+        })
+      : undefined;
+    this.uiam = uiam;
+
+    this.userProfileStart = this.userProfileService.start({
+      clusterClient,
+      session,
+      getCurrentUser: core.security.authc.getCurrentUser,
+      uiam,
+    });
+
+    // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
+    const customLogoutURL =
+      this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
+        ? cloud?.projectsUrl
+        : undefined;
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
@@ -448,19 +568,33 @@ export class SecurityPlugin
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
-      uiam: config.uiam?.enabled
-        ? new UiamService(this.logger.get('uiam'), config.uiam, {
-            kibanaServerResourceURL,
-            elasticsearchUrl: this.elasticsearchUrl,
-            kibanaVersion: this.initializerContext.env.packageInfo.version,
-          })
-        : undefined,
+      uiam,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       userActivity: core.userActivity,
+    });
+
+    this.serviceAccountsStart = this.serviceAccountsService.start({
+      config,
+      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
+      license: this.securityLicense!,
+      uiam,
+      checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
+      audit: this.auditSetup!,
+      cloudProjectContext: this.cloudProjectContext,
+      clusterClient,
+      savedObjects: core.savedObjects,
+      encryptedSavedObjects,
+      canEncrypt: this.canEncryptSavedObjects,
+      getCurrentUser: this.authenticationStart.getCurrentUser,
+      getCurrentUserProfileId: (request) =>
+        this.getUserProfileService().getCurrentProfileId({ request }),
+      getUserProfiles: (uids) => this.getUserProfileService().bulkGet({ uids }),
+      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      workloadTypes: this.getWorkloadTypes(),
     });
 
     this.authorizationService.start({
@@ -482,10 +616,12 @@ export class SecurityPlugin
       authc: {
         getCurrentUser: this.authenticationStart.getCurrentUser,
         apiKeys: publicApiKeys,
+        systemIdentity: this.authenticationStart.systemIdentity,
       },
       authz: {
         actions: this.authorizationSetup!.actions,
         checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
+        checkUserProfilesPrivileges: this.authorizationSetup!.checkUserProfilesPrivileges,
         checkPrivilegesDynamicallyWithRequest:
           this.authorizationSetup!.checkPrivilegesDynamicallyWithRequest,
         checkSavedObjectsPrivilegesWithRequest:

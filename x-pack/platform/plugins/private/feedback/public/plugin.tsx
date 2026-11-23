@@ -226,7 +226,7 @@ export class FeedbackPlugin implements Plugin {
       unregisterFeedbackHandler = undefined;
 
       if (optIn) {
-        unregisterFeedbackHandler = core.chrome.next.registerFeedbackHandler(() => {
+        unregisterFeedbackHandler = core.chrome.help.registerFeedbackHandler(() => {
           openFeedbackModal(core, deps);
         });
       }

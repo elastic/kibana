@@ -9,6 +9,7 @@ import {
   createMigrationTask,
   scheduleAssetCriticalityEcsCompliancyMigration,
 } from './schedule_ecs_compliancy_migration';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -30,11 +31,17 @@ const mockTaskManagerStart = taskManagerMock.createStart();
 const logger = loggerMock.create();
 const auditLogger = auditLoggerMock.create();
 
+const TASK_TYPE = 'security-solution-ea-asset-criticality-ecs-migration';
+const TASK_ID = `${TASK_TYPE}-task-id`;
+
+const mockWithContext = jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
+
 const getStartServices = jest.fn().mockResolvedValue([
   {
     elasticsearch: {
       client: elasticsearchServiceMock.createClusterClient(),
     },
+    executionContext: { withContext: mockWithContext },
   },
   { taskManager: mockTaskManagerStart },
 ]);
@@ -180,6 +187,25 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
 
       expect(logger.debug).toHaveBeenCalledWith(
         'Task cancelled: "security-solution-ea-asset-criticality-ecs-migration"'
+      );
+    });
+
+    it('wraps the migration run in coreStart.executionContext.withContext with the expected label and id', async () => {
+      const migrationTask = createMigrationTask({
+        getStartServices,
+        logger,
+        auditLogger,
+      })({ signal: mockAbortController.signal });
+
+      await migrationTask.run();
+
+      expect(mockWithContext).toHaveBeenCalledTimes(1);
+      expect(mockWithContext).toHaveBeenCalledWith(
+        buildEaExecutionContext(
+          EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY_ECS_MIGRATION,
+          TASK_ID
+        ),
+        expect.any(Function)
       );
     });
   });

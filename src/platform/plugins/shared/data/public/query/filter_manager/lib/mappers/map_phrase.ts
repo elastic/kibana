@@ -17,6 +17,7 @@ import {
   isPhraseFilter,
 } from '@kbn/es-query';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { getEmptyOrMissingLabel } from '@kbn/field-formats-common';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['query', 'script', 'script', 'params', 'value']);
@@ -31,7 +32,7 @@ export function getPhraseDisplayValue(
   if (formatter?.convertToText) {
     return formatter.convertToText(updatedValue);
   }
-  return updatedValue === undefined ? '' : `${updatedValue}`;
+  return getEmptyOrMissingLabel(updatedValue) ?? `${updatedValue}`;
 }
 
 const getParams = (filter: PhraseFilter) => {

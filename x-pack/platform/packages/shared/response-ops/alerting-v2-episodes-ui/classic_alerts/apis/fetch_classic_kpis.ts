@@ -8,10 +8,15 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
-import { ALERT_RULE_UUID, ALERT_STATUS_ACTIVE, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_MUTED,
+  ALERT_RULE_UUID,
+  ALERT_SNOOZED,
+  ALERT_STATUS_ACTIVE,
+  ALERT_WORKFLOW_STATUS,
+} from '@kbn/rule-data-utils';
 import type { EpisodesFilterState } from '../../queries/episodes_query';
 import { buildClassicAlertsQuery } from '../utils/query';
-import { CLASSIC_ALERT_MUTED_FIELD, CLASSIC_ALERT_SNOOZED_FIELD } from '../constants';
 import type { ClassicAlertsKpisRow } from '../types';
 import {
   type BaseRacOptions,
@@ -52,10 +57,10 @@ export const buildClassicAlertsKpiAggs = (): Record<
     filter: { term: { [ALERT_WORKFLOW_STATUS]: 'acknowledged' } },
   },
   muted: {
-    filter: { term: { [CLASSIC_ALERT_MUTED_FIELD]: true } },
+    filter: { term: { [ALERT_MUTED]: true } },
   },
   snoozed: {
-    filter: { term: { [CLASSIC_ALERT_SNOOZED_FIELD]: true } },
+    filter: { term: { [ALERT_SNOOZED]: true } },
   },
 });
 

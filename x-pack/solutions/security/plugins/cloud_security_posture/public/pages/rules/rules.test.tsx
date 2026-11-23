@@ -19,6 +19,7 @@ import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
+import { ERROR_STATE_TEST_SUBJECT } from '../../components/cloud_posture_page';
 import * as TEST_SUBJECTS from './test_subjects';
 import { SECURITY_FEATURE_ID } from '../../test/constants';
 
@@ -140,5 +141,27 @@ describe('<Rules />', () => {
 
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
     expect(useCspBenchmarkIntegrationsV2).toHaveBeenCalled();
+  });
+
+  it('Display the rules container when the benchmarks request fails', async () => {
+    const params: PageUrlParams = { benchmarkId: 'cis_eks', benchmarkVersion: '1.9.1' };
+    const Component = getTestComponent(params);
+    const result = createReactQueryResponse({
+      status: 'error',
+      error: {
+        body: {
+          error: 'Forbidden',
+          message: 'security_exception: action [indices:data/read/search] is unauthorized',
+          statusCode: 403,
+        },
+      },
+    });
+
+    (useCspBenchmarkIntegrationsV2 as jest.Mock).mockReturnValue(result);
+
+    render(<Component />);
+
+    expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
+    expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
   });
 });

@@ -7,3 +7,13 @@
 
 export { EventsService } from './events_service';
 export { createPublicEventsContract } from './create_public_contract';
+export { ConversationStreamService } from './conversation_stream_service';
+export {
+  EXECUTION_STREAMING_EVENT_TYPE,
+  isExecutionStreamingEvent,
+  isTimelineDisplayEvent,
+  type ExecutionStreamingEvent,
+  type ExecutionStreamingEventData,
+  type LiveEventsState,
+  type TimelineDisplayEvent,
+} from './sse_to_events';

@@ -65,18 +65,23 @@ const setup = ({
   navLinkIds,
   isServerless = true,
   getUiSettingsHomeRoute = () => undefined,
+  collectNavDependencies = false,
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
   isServerless?: boolean;
   getUiSettingsHomeRoute?: () => string | undefined;
+  collectNavDependencies?: boolean;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
   });
   history.replace(locationPathName);
 
-  const projectNavigationService = new ProjectNavigationService(isServerless);
+  const projectNavigationService = new ProjectNavigationService(
+    isServerless,
+    collectNavDependencies
+  );
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
   const navLinksService = getNavLinksService(navLinkIds);
 
@@ -91,6 +96,54 @@ const setup = ({
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService };
 };
+
+describe('nav-tree dependency tracking', () => {
+  const buildNavTree = (linkTargets: string[]) =>
+    ({
+      body: linkTargets.map((link, idx) => ({ id: `node-${idx}`, link })),
+    } as unknown as NavigationTreeDefinition);
+
+  test('collects link targets per owner plugin when collection is enabled', () => {
+    const { projectNavigation } = setup({ collectNavDependencies: true });
+
+    projectNavigation.registerNavTreeDependencies(
+      'enterpriseSearch',
+      of(buildNavTree(['discover', 'management:transform']))
+    );
+    projectNavigation.registerNavTreeDependencies(
+      'securitySolutionEss',
+      of(buildNavTree(['alerts']))
+    );
+
+    expect(projectNavigation.getNavTreeDependencies()).toEqual([
+      { ownerPluginId: 'enterpriseSearch', linkTargets: ['discover', 'management:transform'] },
+      { ownerPluginId: 'securitySolutionEss', linkTargets: ['alerts'] },
+    ]);
+  });
+
+  test('keeps only the latest emission for a given owner plugin', () => {
+    const { projectNavigation } = setup({ collectNavDependencies: true });
+    const navTree$ = new BehaviorSubject(buildNavTree(['discover']));
+
+    projectNavigation.registerNavTreeDependencies('enterpriseSearch', navTree$);
+    navTree$.next(buildNavTree(['dashboards']));
+
+    expect(projectNavigation.getNavTreeDependencies()).toEqual([
+      { ownerPluginId: 'enterpriseSearch', linkTargets: ['dashboards'] },
+    ]);
+  });
+
+  test('is a no-op when collection is disabled (production builds)', () => {
+    const { projectNavigation } = setup({ collectNavDependencies: false });
+
+    projectNavigation.registerNavTreeDependencies(
+      'enterpriseSearch',
+      of(buildNavTree(['discover']))
+    );
+
+    expect(projectNavigation.getNavTreeDependencies()).toEqual([]);
+  });
+});
 
 describe('initNavigation()', () => {
   const setupInitNavigation = () => {
@@ -531,6 +584,43 @@ describe('initNavigation()', () => {
       sideNavStatus: 'visible',
       title: 'Project',
     });
+  });
+
+  test('should add the Search Power Cloud link to the navigation tree', async () => {
+    const { projectNavigation } = setup();
+    projectNavigation.setCloudUrls({
+      searchPowerUrl:
+        'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
+    });
+
+    projectNavigation.initNavigation<any>(
+      'vectordb',
+      of({
+        body: [
+          {
+            id: 'group1',
+            type: 'navGroup',
+            children: [{ cloudLink: 'searchPower' }],
+          },
+        ],
+      })
+    );
+
+    const treeDefinition = await lastValueFrom(
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
+    );
+    const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+
+    expect(node.children).toEqual([
+      expect.objectContaining({
+        href: 'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
+        isExternalLink: true,
+        title: 'Configure Search Power',
+      }),
+    ]);
   });
 
   test('should update the navigation tree when cloud URLs are updated after initialization', async () => {
@@ -1016,6 +1106,33 @@ describe('getActiveSolutionNavId$()', () => {
 
     activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
     expect(activeId).toBe('oblt');
+  });
+});
+
+describe('registerNavigationLinks', () => {
+  it('registers hover lists and rejects a second registration on the same target', async () => {
+    const { projectNavigation } = setup();
+
+    projectNavigation.registerNavigationLinks({
+      id: 'dashboardLinks',
+      target: 'dashboards',
+      lists: [{ id: 'recentlyViewed', title: 'Recently viewed', items$: of([]) }],
+    });
+
+    const afterFirst = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
+    expect(afterFirst).toHaveLength(1);
+
+    expect(() =>
+      projectNavigation.registerNavigationLinks({
+        id: 'otherDashboardLinks',
+        target: 'dashboards',
+        lists: [{ id: 'favorites', title: 'Favorites', items$: of([]) }],
+      })
+    ).toThrow('A second hover registration on target "dashboards" is not allowed.');
+
+    const afterSecond = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
+    expect(afterSecond).toHaveLength(1);
+    expect(afterSecond[0].id).toBe('dashboardLinks');
   });
 });
 

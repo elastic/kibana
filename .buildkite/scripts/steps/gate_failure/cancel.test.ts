@@ -25,7 +25,7 @@ const ORIGINAL_ENV = process.env;
 
 const runCancelModule = () => {
   jest.isolateModules(() => {
-    require('./cancel');
+    require('./cancel.ts');
   });
 };
 

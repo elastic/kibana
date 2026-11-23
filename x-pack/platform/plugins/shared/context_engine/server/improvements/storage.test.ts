@@ -43,6 +43,7 @@ describe('improvements storage', () => {
 
   it('indexes the fields the review UI filters and sorts on', () => {
     expect(props.ai_index_id.type).toBe('keyword');
+    expect(props.space.type).toBe('keyword');
     expect(props.status.type).toBe('keyword');
     expect(props.action.type).toBe('keyword');
     expect(props['@timestamp'].type).toBe('date');
@@ -72,13 +73,33 @@ describe('improvements storage', () => {
     expect(sourceValue?.doc_values).toBe(false);
   });
 
-  it('keeps `payload` and `resolution` in _source without indexing them', () => {
+  it('keeps `payload` in _source without indexing it', () => {
     // Proposed KI content and workflow YAML run to several kilobytes; `flattened` with its
     // `ignore_above` would silently drop them, and nothing queries inside the change.
     expect(props.payload.type).toBe('object');
     expect(props.payload.enabled).toBe(false);
-    expect(props.resolution.type).toBe('object');
-    expect(props.resolution.enabled).toBe(false);
+  });
+
+  it('indexes `resolution`, which an analysis run queries before re-proposing something', () => {
+    // ES|QL can only select mapped fields, so `enabled: false` here would hide the reviewer's
+    // reason — the one part of a rejection the next run can act on.
+    const resolution = props.resolution.properties;
+    expect(props.resolution.enabled).not.toBe(false);
+    expect(resolution?.reason.type).toBe('text');
+    expect(resolution?.error.type).toBe('text');
+    expect(resolution?.by.type).toBe('keyword');
+    expect(resolution?.applied_target_id.type).toBe('keyword');
+  });
+
+  it('declares every resolution field, since a strict mapping rejects the writes it misses', () => {
+    const written: Array<keyof NonNullable<Improvement['resolution']>> = [
+      'by',
+      'reason',
+      'error',
+      'applied_target_id',
+    ];
+
+    expect(Object.keys(props.resolution.properties ?? {}).sort()).toEqual([...written].sort());
   });
 
   it('indexes provenance so the UI can drill back to the signals behind a suggestion', () => {

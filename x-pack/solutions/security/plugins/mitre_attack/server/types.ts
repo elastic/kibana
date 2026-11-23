@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { MitreAttackDataClient } from './services/mitre_attack_data_client/mitre_attack_data_client_interface';
 
 export type MitreAttackServerSetup = Record<string, never>;
@@ -16,3 +17,19 @@ export interface MitreAttackServerStart {
    */
   getMitreDataClient?: () => MitreAttackDataClient;
 }
+
+/**
+ * Request handler context for the mitreAttack plugin.
+ *
+ * Shape differs from the start contract: the start contract encodes "flag off" as method absence
+ * and always returns a client when present, since it is only built once start() has created one.
+ * The request context always has the method because routes are registered in setup(), but it may
+ * return undefined for a request arriving in the setup-to-start window.
+ */
+export interface MitreAttackApiRequestHandlerContext {
+  getMitreDataClient: () => MitreAttackDataClient | undefined;
+}
+
+export type MitreAttackRequestHandlerContext = CustomRequestHandlerContext<{
+  mitreAttack: MitreAttackApiRequestHandlerContext;
+}>;

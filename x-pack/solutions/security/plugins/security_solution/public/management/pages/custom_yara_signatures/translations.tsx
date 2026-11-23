@@ -8,13 +8,21 @@
 import { i18n } from '@kbn/i18n';
 import type { ArtifactListPageLabels } from '../../components/artifact_list_page';
 
+export const POLICY_ASSIGNMENT_INFO_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.policyAssignmentInfoTooltip',
+  {
+    defaultMessage:
+      'Endpoints will apply these signatures once custom YARA signatures are turned on in their policy, under Memory threat protections.',
+  }
+);
+
 export const CUSTOM_YARA_SIGNATURES_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.customYaraSignatures.list.pageTitle', {
     defaultMessage: 'Custom YARA signatures',
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.customYaraSignatures.list.pageAboutInfo', {
     defaultMessage:
-      'Add and manage custom YARA signatures to enhance endpoint threat detection by scanning files and memory for patterns unique to your environment.',
+      'Add and manage custom YARA signatures to enhance endpoint threat detection by scanning memory for patterns unique to your environment.',
   }),
   pageAddButtonTitle: i18n.translate(
     'xpack.securitySolution.customYaraSignatures.list.pageAddButtonTitle',
@@ -86,6 +94,18 @@ export const CUSTOM_YARA_SIGNATURES_PAGE_LABELS: ArtifactListPageLabels = {
     'xpack.securitySolution.customYaraSignatures.list.flyoutCreateSubmitButtonLabel',
     {
       defaultMessage: 'Add YARA signature',
+    }
+  ),
+  flyoutCreateAndEnableSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.customYaraSignatures.list.flyoutCreateAndEnableSubmitButtonLabel',
+    {
+      defaultMessage: 'Create & enable signature',
+    }
+  ),
+  flyoutCreateWithoutEnablingSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.customYaraSignatures.list.flyoutCreateWithoutEnablingSubmitButtonLabel',
+    {
+      defaultMessage: 'Create signature without enabling',
     }
   ),
   flyoutCreateSubmitSuccess: ({ name }) =>

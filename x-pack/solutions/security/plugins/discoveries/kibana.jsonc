@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/discoveries-plugin",
   "owner": [
-    "@elastic/security-threat-hunting"
+    "@elastic/security-investigations"
   ],
   "group": "security",
   "visibility": "private",
@@ -27,6 +27,7 @@
       "elasticAssistant",
       "inference",
       "ruleRegistry",
+      "searchInferenceEndpoints",
       "spaces",
       "workflowsManagement"
     ],

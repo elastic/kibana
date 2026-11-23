@@ -6,12 +6,10 @@
  */
 
 import type { InfiniteData, QueryClient } from '@kbn/react-query';
-import { MAX_CONVERSATIONS_PER_PAGE, MAX_RESULT_WINDOW } from '../../../common/constants';
 import type {
   ListConversationsResponse,
   ListConversationsResponseItem,
 } from '../../../common/http_api/conversations';
-import type { ConversationsService } from '../../services/conversations/conversations_service';
 import { queryKeys } from '../query_keys';
 
 type ConversationListCache = InfiniteData<ListConversationsResponse>;
@@ -19,29 +17,6 @@ type ConversationListCache = InfiniteData<ListConversationsResponse>;
 const unpinnedKey = (agentId: string) =>
   queryKeys.conversations.byAgent(agentId, { pinned: false });
 const pinnedKey = (agentId: string) => queryKeys.conversations.byAgent(agentId, { pinned: true });
-
-const getNextPageParam = (lastPage: ListConversationsResponse) => {
-  const { page, per_page: pp, total } = lastPage.pagination;
-  const next = page + 1;
-  return page * pp < total && next * pp <= MAX_RESULT_WINDOW ? next : undefined;
-};
-
-const buildSidebarConversationListRow = (p: {
-  id: string;
-  agent_id: string;
-  title: string;
-}): ListConversationsResponseItem => {
-  const t = new Date().toISOString();
-  return {
-    id: p.id,
-    agent_id: p.agent_id,
-    user: { id: '', username: '' },
-    title: p.title,
-    created_at: t,
-    updated_at: t,
-    permissions: { rename: true, delete: true, update_access_control: true },
-  };
-};
 
 /**
  * Walk every paged list variant whose key starts with queryKeys.conversations.list and apply
@@ -74,116 +49,6 @@ const applyToAllListVariants = (
 };
 
 /**
- * Prepend `row` to the first page of an infinite-query cache entry.
- * Checks ALL loaded pages for duplicates before inserting (not just the first).
- * Synthesises a minimal first page when the cache is empty so the row is
- * visible immediately even if a prefetch failed.
- * Returns true if the row was inserted, false if it was already present.
- */
-const prependConversationToList = (
-  queryClient: QueryClient,
-  key: unknown[],
-  row: ListConversationsResponseItem
-): boolean => {
-  let inserted = false;
-  queryClient.setQueryData<ConversationListCache>(key, (prev) => {
-    const data: ConversationListCache = prev ?? {
-      pages: [
-        { pagination: { total: 0, page: 1, per_page: MAX_CONVERSATIONS_PER_PAGE }, results: [] },
-      ],
-      pageParams: [undefined],
-    };
-    if (data.pages.some((p) => p.results.some((c) => c.id === row.id))) return prev;
-    inserted = true;
-    const [firstPage, ...rest] = data.pages;
-    return {
-      ...data,
-      pages: [
-        {
-          ...firstPage,
-          pagination: { ...firstPage.pagination, total: firstPage.pagination.total + 1 },
-          results: [row, ...firstPage.results],
-        },
-        ...rest,
-      ],
-    };
-  });
-  return inserted;
-};
-
-/**
- * Ensure the unpinned list for `agentId` is in the cache, then prepend a
- * newly created conversation row. New conversations are always unpinned, so
- * both the `pinned: false` cache variant (sidebar) and the `pinned: null`
- * variant (EmbeddableConversationList, which queries without a pinned filter)
- * need updating.
- */
-export const insertSidebarConversationListRow = async ({
-  queryClient,
-  conversationsService,
-  agentId,
-  conversationId,
-  title,
-}: {
-  queryClient: QueryClient;
-  conversationsService: ConversationsService;
-  agentId: string;
-  conversationId: string;
-  title: string;
-}): Promise<boolean> => {
-  const row = buildSidebarConversationListRow({ id: conversationId, agent_id: agentId, title });
-  const key = unpinnedKey(agentId);
-  // EmbeddableConversationList calls useConversationList({ agentId }) without a
-  // pinned option, which resolves to pinned: null — a different React Query key
-  // from pinned: false. Both need the new row.
-  const allKey = queryKeys.conversations.byAgent(agentId);
-
-  // Cold-cache warm-up: must use fetchInfiniteQuery so the stored shape is
-  // { pages, pageParams } rather than a flat array.
-  if (queryClient.getQueryData<ConversationListCache>(key) === undefined) {
-    try {
-      await queryClient.fetchInfiniteQuery({
-        queryKey: key,
-        queryFn: ({ pageParam }: { pageParam?: number }) =>
-          conversationsService.list({ agentId, pinned: false, page: pageParam ?? 1 }),
-        getNextPageParam,
-      });
-    } catch {
-      // Proceed with the optimistic insert even if the prefetch fails; the next
-      // explicit refresh of the sidebar will pick up the server state.
-    }
-  }
-
-  await queryClient.cancelQueries({ queryKey: key });
-
-  const inserted = prependConversationToList(queryClient, key, row);
-  prependConversationToList(queryClient, allKey, row);
-
-  return inserted;
-};
-
-/**
- * Remove a conversation from every paged list variant (pinned and unpinned).
- */
-export const removeSidebarConversationListRow = ({
-  queryClient,
-  conversationId,
-}: {
-  queryClient: QueryClient;
-  agentId: string; // kept for call-site compatibility; removal is prefix-wide
-  conversationId: string;
-}) => {
-  applyToAllListVariants(
-    queryClient,
-    (results) => {
-      const next = results.filter((c) => c.id !== conversationId);
-      return next.length < results.length ? next : results;
-    },
-    -1
-  );
-};
-
-/**
  * Update a conversation's fields in every paged list variant.
  */
 export const patchConversationList = ({
@@ -209,6 +74,15 @@ export const patchConversationList = ({
     });
     return changed ? next : results;
   });
+};
+
+/** Mirrors the server sort order (`updated_at` desc, then `created_at` desc). */
+const isListedBefore = (
+  item: ListConversationsResponseItem,
+  other: ListConversationsResponseItem
+): boolean => {
+  if (item.updated_at !== other.updated_at) return item.updated_at > other.updated_at;
+  return item.created_at > other.created_at;
 };
 
 /**
@@ -259,20 +133,36 @@ export const movePinnedConversationBetweenLists = ({
   }
   const row = { ...movedRow, pinned };
 
-  // Prepend to the first page of the target list, if it's cached.
+  // Insert into the target list at the position the server sorts it to, if it's cached.
   queryClient.setQueryData<ConversationListCache>(targetKey, (prev) => {
     if (!prev) return prev;
-    const [firstPage, ...rest] = prev.pages;
+    const { pages } = prev;
+    const isAfterRow = (item: ListConversationsResponseItem) => !isListedBefore(item, row);
+
+    let insertPageIndex = pages.findIndex((page) => page.results.some(isAfterRow));
+    let insertIndex =
+      insertPageIndex === -1 ? -1 : pages[insertPageIndex].results.findIndex(isAfterRow);
+
+    // Older than every loaded row: it belongs after them, so only add it when nothing is left
+    // to load. Otherwise it appears when the later pages are fetched.
+    const loadedCount = pages.reduce((sum, page) => sum + page.results.length, 0);
+    const isFullyLoaded = loadedCount >= pages[0].pagination.total;
+    if (insertPageIndex === -1 && isFullyLoaded) {
+      insertPageIndex = pages.length - 1;
+      insertIndex = pages[insertPageIndex].results.length;
+    }
+
     return {
       ...prev,
-      pages: [
-        {
-          ...firstPage,
-          pagination: { ...firstPage.pagination, total: firstPage.pagination.total + 1 },
-          results: [row, ...firstPage.results],
-        },
-        ...rest,
-      ],
+      pages: pages.map((page, pageIndex) => {
+        const pagination = { ...page.pagination, total: page.pagination.total + 1 };
+        if (pageIndex !== insertPageIndex) return { ...page, pagination };
+        return {
+          ...page,
+          pagination,
+          results: [...page.results.slice(0, insertIndex), row, ...page.results.slice(insertIndex)],
+        };
+      }),
     };
   });
 };

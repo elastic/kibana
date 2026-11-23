@@ -1,0 +1,133 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { HuntForThreatResponse } from '@kbn/alertzero-common';
+import { API_VERSIONS, HuntForThreatRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
+import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
+import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
+import type { RouteDependencies } from '../register_routes';
+import { unsearchedGaps } from '../../services/watches/hunt/common/unsearched_patterns';
+import { blockedScopeMessage } from './blocked_scope_message';
+import { huntEsClient } from './hunt_es_client';
+import { resolveHuntUniverse } from './resolve_hunt_universe';
+
+export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat` as const;
+
+/**
+ * Runs Tier 1's deterministic search over the space's Security Solution default data
+ * view. A `blocked` scope is refused outright (409) so an empty universe never reads as
+ * a clean zero-hit search.
+ */
+export const registerHuntForThreatRoute = ({
+  router,
+  logger,
+  getSpaceId,
+  getClusterClient,
+  isCpsEnabled,
+}: RouteDependencies) => {
+  router.versioned
+    .post({
+      path: HUNT_FOR_THREAT_URL,
+      access: INTERNAL_API_ACCESS,
+      security: {
+        authz: {
+          requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
+        },
+      },
+      summary: 'Run IOC Hunt',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(HuntForThreatRequestBody),
+          },
+        },
+      },
+      withAlertZeroEnabled(async (context, request, response) => {
+        try {
+          const { iocs, techniques, time_range, size } = request.body;
+          const spaceId = getSpaceId(request);
+          const esClient = huntEsClient({ getClusterClient, request });
+          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger,
+            isCpsEnabled()
+          );
+
+          // `discovered` is the datasets stage 1 parsed for the report matcher; the wire
+          // scope carries what they matched, not the list itself.
+          const { discovered: _discovered, ...scope } = await resolveHuntScope({
+            esClient,
+            spaceId,
+            indexPatterns,
+            policySkippedPatterns: policySkipped,
+            crossProjectSearch: isCpsEnabled(),
+            logger,
+          });
+
+          if (scope.status === 'blocked') {
+            // Deliberately a different convention from the coordinator route, which
+            // answers a blocked scope with 200 + `status: 'blocked'` instead: the
+            // coordinator chains Tier 1 into Tier 2 and a caller there reads the status
+            // field either way, so a hard error would just be a status check wearing an
+            // exception handler. This standalone route has no chain to read a body field
+            // from, so refusing outright is the more direct signal.
+            return response.customError({
+              statusCode: 409,
+              body: {
+                message: blockedScopeMessage(scope, indexPatterns),
+              },
+            });
+          }
+
+          const result = await huntForThreat(esClient, {
+            scope: {
+              search_patterns: scope.index_patterns,
+              window: scope.window,
+              row_limit: scope.row_limit,
+            },
+            iocs,
+            techniques,
+            time_range,
+            size,
+          });
+
+          // Drop internal grounding digests, as the coordinator does: they are built
+          // from `_source` for Tier 2 and are not part of the wire schema.
+          const { sample_event_summaries: _summaries, ...wireResult } = result;
+
+          // A name the scope dropped was never searched. The coordinator records that as a gap;
+          // this route has no coordinator, so it goes on the IOC Hunt result itself.
+          const incomplete = [
+            ...unsearchedGaps(scope, indexPatterns),
+            ...(wireResult.incomplete ?? []),
+          ];
+
+          const body: HuntForThreatResponse = {
+            scope,
+            result: { ...wireResult, ...(incomplete.length > 0 ? { incomplete } : {}) },
+          };
+          return response.ok({ body });
+        } catch (err) {
+          if (err instanceof InvalidHuntWindowError) {
+            return response.badRequest({ body: { message: err.message } });
+          }
+          logger.error(`Failed to run hunt_for_threat: ${(err as Error).message}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Failed to run hunt_for_threat' },
+          });
+        }
+      })
+    );
+};

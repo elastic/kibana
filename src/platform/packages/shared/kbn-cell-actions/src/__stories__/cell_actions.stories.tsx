@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-types';
 import { CellActionsProvider } from '../context/cell_actions_context';
 import { makeAction } from '../mocks/helpers';
 import { CellActions } from '../components/cell_actions';

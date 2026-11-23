@@ -3,23 +3,42 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: complete
 
+### AlertZero and its runtime dependencies default to off in serverless; they are only available in
+### the Complete tier. Users still opt in per space with `securitySolution:enableAlertZero`.
+xpack.alertzero.enabled: true
+xpack.agenticInvestigations.enabled: true
+xpack.proposals.enabled: true
+
 xpack.features.overrides:
   ### Workflows Management should be moved from Analytics category to the Security one.
   workflowsManagement.category: "security"
+  ### AlertZero and the features it relies on come right after Security (1100). Agentic
+  ### investigations and Proposals are moved from Analytics category to the Security one.
+  alertzero.order: 1101
+  agenticInvestigations:
+    category: "security"
+    order: 1102
+  proposals:
+    category: "security"
+    order: 1103
+
   ### Agent Builder feature is available in this tier; move it from Analytics category to Security.
   agentBuilder:
     category: "security"
-    order: 1101
+    order: 1104
   ### Agent Builder SML should match Agent Builder for role management.
   agentBuilderSml:
     category: "security"
-    order: 1102
+    order: 1105
   ### Context Engine should match Agent Builder for role management.
   contextEngine:
     category: "security"
-    order: 1103
-  ### Agentic investigations should be moved from Analytics category to the Security one.
-  # agenticInvestigations.category: "security" # TODO: uncomment when agentic investigations plugin is enabled
+    order: 1106
+  ### Dashboards and Discover follow the AI features in this tier (1101/1102 in `serverless.security.yml`).
+  discover_v2.order: 1108
+  dashboard_v2.order: 1109
+  ### Machine Learning stays the last item in the Security category (see `serverless.security.yml`).
+  ml.order: 1110
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

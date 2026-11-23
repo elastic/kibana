@@ -16,11 +16,9 @@ import { useEuiBreakpoint, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 import { isDefined } from '@kbn/ml-is-defined';
-
-import type { LinkCardProps } from '../../../common/components/results_links/link_card';
+import { LinkCard, type LinkCardProps } from '@kbn/file-upload';
+import type { GetAdditionalLinks } from '@kbn/file-upload-common';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { LinkCard } from '../../../common/components/results_links/link_card';
-import type { GetAdditionalLinks } from '../../../common/components/results_links';
 
 interface Props {
   dataView: DataView;

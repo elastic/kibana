@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { NULL_LABEL } from '@kbn/field-formats-common';
+import { NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const config = getService('config');
   const browser = getService('browser');
+  const elasticChart = getService('elasticChart');
 
   function getTranslationFr(term: string, field?: string) {
     switch (term) {
@@ -33,9 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `Moyenne de ${field}` : `Moyenne`;
       case 'sum':
         return 'somme';
-      case 'null':
-        // fieldFormats.nullLabel
-        return '(null)';
       default:
         return term;
     }
@@ -56,9 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `${field} の平均` : `平均`;
       case 'sum':
         return '合計';
-      case 'null':
-        // fieldFormats.nullLabel
-        return '（null）';
       default:
         return term;
     }
@@ -79,9 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `${field} 的平均值` : '平均值';
       case 'sum':
         return '求和';
-      case 'null':
-        // fieldFormats.nullLabel
-        return '（空）';
       default:
         return term;
     }
@@ -109,27 +101,59 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'sum':
         // xpack.maps.aggType.sumLabel
         return 'Summe';
-      case 'null':
-        // fieldFormats.nullLabel
-        return '(Null)';
+      default:
+        return term;
+    }
+  }
+
+  function getTranslationPt(term: string, field?: string) {
+    switch (term) {
+      case 'datatable':
+        // xpack.lens.datatable.label
+        return 'Tabela';
+      case 'Number':
+        // xpack.lens.indexPattern.numberFormatLabel
+        return 'Número';
+      case 'Records':
+        // xpack.lens.indexPattern.records
+        return 'Registros';
+      case 'records':
+        // xpack.lens.indexPattern.records
+        return 'Registros';
+      case 'moving_average':
+        // xpack.lens.indexPattern.movingAverage
+        return 'Média móvel';
+      case 'average':
+        // xpack.dataVisualizer.index.lensChart.averageOfLabel
+        return field ? `Média de ${field}` : `Média`;
+      case 'sum':
+        // xpack.maps.aggType.sumLabel
+        return 'soma';
       default:
         return term;
     }
   }
 
   function getExpectedI18nTranslator(locale: string): (term: string, field?: string) => string {
-    switch (locale) {
-      case 'ja-JP':
-        return getTranslationJa;
-      case 'zh-CN':
-        return getTranslationZh;
-      case 'fr-FR':
-        return getTranslationFr;
-      case 'de-DE':
-        return getTranslationDe;
-      default:
-        return (v: string, field?: string) => (v === 'null' ? NULL_LABEL : v);
-    }
+    const translate = ((): ((term: string, field?: string) => string) => {
+      switch (locale) {
+        case 'ja-JP':
+          return getTranslationJa;
+        case 'zh-CN':
+          return getTranslationZh;
+        case 'fr-FR':
+          return getTranslationFr;
+        case 'de-DE':
+          return getTranslationDe;
+        case 'pt-BR':
+          return getTranslationPt;
+        default:
+          return (v: string) => v;
+      }
+    })();
+
+    // The datatable renders null values as a dash, which is identical in every locale.
+    return (term, field) => (term === 'null' ? NULL_PLACEHOLDER : translate(term, field));
   }
 
   describe('lens smokescreen tests', () => {
@@ -171,6 +195,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: termTranslator('Records'),
       });
       await lens.closeDimensionEditor();
+
+      await elasticChart.waitForRenderComplete('xyVisChart');
 
       // Two Y axes that are both valid
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);

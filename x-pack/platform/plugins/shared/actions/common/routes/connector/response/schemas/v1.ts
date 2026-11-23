@@ -7,68 +7,115 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const connectorResponseSchema = schema.object(
-  {
-    id: schema.string({
+const connectorResponseFields = {
+  id: schema.string({
+    meta: {
+      description: 'The identifier for the connector.',
+    },
+  }),
+  name: schema.string({
+    meta: {
+      description: ' The name of the connector.',
+    },
+  }),
+  config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  connector_type_id: schema.string({
+    meta: { description: 'The connector type identifier.' },
+  }),
+  is_missing_secrets: schema.maybe(
+    schema.boolean({
+      meta: { description: 'Indicates whether the connector is missing secrets.' },
+    })
+  ),
+  is_preconfigured: schema.boolean({
+    meta: {
+      description:
+        'Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ',
+    },
+  }),
+  is_deprecated: schema.boolean({
+    meta: { description: 'Indicates whether the connector is deprecated.' },
+  }),
+  is_system_action: schema.boolean({
+    meta: { description: 'Indicates whether the connector is used for system actions.' },
+  }),
+  is_connector_type_deprecated: schema.boolean({
+    meta: { description: 'Indicates whether the connector type is deprecated.' },
+  }),
+  auth_mode: schema.maybe(
+    schema.oneOf([schema.literal('shared'), schema.literal('per-user')], {
       meta: {
-        description: 'The identifier for the connector.',
+        description: 'The authentication mode used for the connector.',
       },
-    }),
-    name: schema.string({
-      meta: {
-        description: ' The name of the connector.',
-      },
-    }),
-    config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    connector_type_id: schema.string({
-      meta: { description: 'The connector type identifier.' },
-    }),
-    is_missing_secrets: schema.maybe(
-      schema.boolean({
-        meta: { description: 'Indicates whether the connector is missing secrets.' },
-      })
-    ),
-    is_preconfigured: schema.boolean({
+    })
+  ),
+};
+
+const isInboundEventsEnabledResponseField = {
+  is_inbound_events_enabled: schema.maybe(
+    schema.boolean({
       meta: {
         description:
-          'Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ',
+          'Indicates whether this connector can receive inbound events. Always true for inbound-only connectors. For connectors that also send actions, true after inbound events have been turned on.',
       },
-    }),
-    is_deprecated: schema.boolean({
-      meta: { description: 'Indicates whether the connector is deprecated.' },
-    }),
-    is_system_action: schema.boolean({
-      meta: { description: 'Indicates whether the connector is used for system actions.' },
-    }),
-    is_connector_type_deprecated: schema.boolean({
-      meta: { description: 'Indicates whether the connector type is deprecated.' },
-    }),
-    auth_mode: schema.maybe(
-      schema.oneOf([schema.literal('shared'), schema.literal('per-user')], {
-        meta: {
-          description: 'The authentication mode used for the connector.',
-        },
-      })
-    ),
-  },
-  { meta: { id: 'connector_response' } }
-);
+    })
+  ),
+};
 
-const connectorResponseWithReferencesCountSchema = connectorResponseSchema.extends(
-  {
-    referenced_by_count: schema.number({
+const specVersionResponseField = {
+  spec_version: schema.maybe(
+    schema.string({
       meta: {
         description:
-          'The number of saved objects that reference the connector. If is_preconfigured is true, this value is not calculated.',
+          'The exact major.minor schema version pinned to the connector. Present for versioned connector types.',
       },
-    }),
-  },
-  { meta: { id: 'connector_response_with_references_count' } }
-);
+    })
+  ),
+};
 
-export const getAllConnectorsResponseSchema = schema.arrayOf(
-  connectorResponseWithReferencesCountSchema
-);
+const referencedByCountField = {
+  referenced_by_count: schema.number({
+    meta: {
+      description:
+        'The number of saved objects that reference the connector. If is_preconfigured is true, this value is not calculated.',
+    },
+  }),
+};
+
+/** Connector response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
+export const getConnectorResponseSchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
+  schema.object(
+    {
+      ...connectorResponseFields,
+      ...(includeInboundEventsField ? isInboundEventsEnabledResponseField : {}),
+      ...(includeSpecVersionField ? specVersionResponseField : {}),
+    },
+    { meta: { id: 'connector_response' } }
+  );
+
+/** Get-all connectors response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
+export const getGetAllConnectorsResponseSchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
+  // codeql[js/kibana/unbounded-array-in-schema] Response schema for the connector list; Kibana builds the array, it is not request input
+  schema.arrayOf(
+    getConnectorResponseSchema(includeInboundEventsField, includeSpecVersionField).extends(
+      referencedByCountField,
+      {
+        meta: { id: 'connector_response_with_references_count' },
+      }
+    )
+  );
+
+/** Flag-on schema so TypeOf includes the optional field. */
+export const connectorResponseSchema = getConnectorResponseSchema(true, true);
+
+/** Flag-on schema so TypeOf includes the optional field. */
+export const getAllConnectorsResponseSchema = getGetAllConnectorsResponseSchema(true, true);
 
 export const connectorTypeResponseSchema = schema.object(
   {
@@ -328,4 +375,30 @@ export const getConnectorSpecResponseBodySchema = schema.object({
       description: 'When true, this connector type supports the reserved test sub-action.',
     },
   }),
+  actions: schema.arrayOf(
+    schema.object({
+      name: schema.string({
+        meta: { description: 'The action key, e.g. "listIncidents".' },
+      }),
+      description: schema.maybe(
+        schema.string({
+          meta: { description: 'Human-readable description of what this action does.' },
+        })
+      ),
+      is_tool: schema.boolean({
+        meta: { description: 'Whether this action is exposed as an agent tool.' },
+      }),
+      scope: schema.maybe(
+        schema.oneOf([schema.literal('read'), schema.literal('write'), schema.literal('destroy')], {
+          meta: { description: 'Permission scope of this action (read, write, or destroy).' },
+        })
+      ),
+    }),
+    {
+      maxSize: 500,
+      meta: {
+        description: 'The actions available on this connector type.',
+      },
+    }
+  ),
 });

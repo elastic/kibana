@@ -8,14 +8,15 @@
  */
 
 import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public';
-import type { ExportModalShareOpts } from '../../share_context_menu';
+import type { ScreenCaptureExportShareOpts } from '../../share_context_menu';
 import { checkLicense } from '../../..';
 import { hasCapabilityByKey } from '../../shared';
 
 export const reportingPDFExportShareIntegration = ({
   apiClient,
   startServices$,
-}: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
+  isExperimental,
+}: ScreenCaptureExportShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
   const supportedObjectTypes = ['dashboard', 'visualization', 'lens', 'ai_value_report'];
 
   return {
@@ -23,7 +24,7 @@ export const reportingPDFExportShareIntegration = ({
     groupId: 'export',
     getShareIntegrationConfig: async (...args) => {
       const { getShareMenuItems } = await import('./pdf_export_config');
-      return getShareMenuItems({ apiClient, startServices$ })(...args);
+      return getShareMenuItems({ apiClient, startServices$, isExperimental })(...args);
     },
     prerequisiteCheck({ license, capabilities, objectType }) {
       if (!license) {

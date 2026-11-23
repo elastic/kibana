@@ -21,7 +21,7 @@ import type {
 } from '../common';
 import { parseExpression } from '../common';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { __getLastExecution, __getLastRenderMode } = require('./services');
 
 const element = null as unknown as HTMLElement;
@@ -40,7 +40,7 @@ jest.mock('./services', () => {
   };
 
   const service: ExpressionsService =
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     new (require('../common/service/expressions_services').ExpressionsService)();
 
   const testFn: AnyExpressionFunctionDefinition = {
@@ -51,7 +51,7 @@ jest.mock('./services', () => {
   };
   service.registerFunction(testFn);
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   for (const func of require('../common/test_helpers/expression_functions').functionTestSpecs) {
     service.registerFunction(func);
   }
@@ -213,5 +213,35 @@ describe('ExpressionLoader', () => {
     const expressionDataHandler = new ExpressionLoader(element, expressionString, {});
     expect(expressionDataHandler.inspect()).toHaveProperty('tables');
     expect(expressionDataHandler.inspect()).toHaveProperty('requests');
+  });
+
+  it('does not start loading when abortController is already aborted', () => {
+    const abortController = new AbortController();
+    abortController.abort('pre-aborted');
+
+    const expressionLoader = new ExpressionLoader(element, expressionString, { abortController });
+
+    // If loading started, getExpression() would return the expression
+    // When aborted before loading, there's no execution so getExpression() returns undefined
+    expect(expressionLoader.getExpression()).toBeUndefined();
+  });
+
+  it('does not update when abortController is already aborted', async () => {
+    const expressionLoader = new ExpressionLoader(element, expressionString, {});
+
+    // Wait for initial load to complete
+    await firstValueFrom(expressionLoader.data$);
+
+    // Store the expression before update attempt
+    const expressionBeforeUpdate = expressionLoader.getExpression();
+
+    const abortController = new AbortController();
+    abortController.abort('pre-aborted');
+
+    // Update with an aborted controller - should not trigger a new execution
+    expressionLoader.update('var foo', { abortController, variables: { foo: 123 } });
+
+    // The expression should still be the original one since the aborted update shouldn't have started a new execution
+    expect(expressionLoader.getExpression()).toBe(expressionBeforeUpdate);
   });
 });

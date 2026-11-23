@@ -124,8 +124,8 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   useEffect(() => {
     const checkESOrDataViewExist = async () => {
       // check if there is any data view or data source
-      const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
-      if (hasUserDataView) {
+      const hasDataView = await dataViews.hasData.hasDataView().catch(() => false);
+      if (hasDataView) {
         // Adding this check as TSVB asks for the default dataview on initialization
         const defaultDataView = await dataViews.defaultDataViewExists();
         if (!defaultDataView) {

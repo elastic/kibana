@@ -40,8 +40,8 @@ describe('getStepIconType', () => {
     ['refresh', 'foreach'],
     ['refresh', 'while'],
     ['refresh', 'enter-while'],
-    ['tokenNumber', 'foreach-iteration'],
-    ['tokenNumber', 'while-iteration'],
+    ['list', 'foreach-iteration'],
+    ['list', 'while-iteration'],
     ['controls', 'loop.break'],
     ['controls', 'loop.continue'],
     ['controls', 'loop-break'],
@@ -56,6 +56,7 @@ describe('getStepIconType', () => {
     ['mail', 'email'],
     ['logoSlack', 'slack'],
     ['logoSlack', 'slack_api'],
+    ['logoSlack', 'slack2'],
     ['sparkles', 'inference'],
   ])('should return "%s" icon for the "%s" step type', (expectedIcon, nodeType) => {
     expect(getStepIconType(nodeType)).toBe(expectedIcon);

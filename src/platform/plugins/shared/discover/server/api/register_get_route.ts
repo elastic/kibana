@@ -29,18 +29,24 @@ export const registerGetRoute = (
     .get({
       path: `${basePath}/{id}`,
       summary: 'Get a Discover session',
+      operationId: 'get-discover-session',
       description: 'Returns the complete state of a Discover session by ID.',
       ...routeConfig,
     })
     .addVersion(
       {
         version: routeVersion,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).getDiscoverSessionOASOperationObject,
+        },
         validate: {
           request: {
             params: z
               .object({
                 id: z.string().meta({
-                  description: 'The Discover session ID.',
+                  description:
+                    'The Discover session ID, as returned by the create or search endpoints.',
                 }),
               })
               .strict(),

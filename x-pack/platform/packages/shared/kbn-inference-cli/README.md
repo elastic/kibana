@@ -36,7 +36,7 @@ log.info(response.output);
 Running a recipe:
 
 ```bash
-yarn run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
+pnpm run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
 ```
 
 ## EIS
@@ -48,7 +48,7 @@ You can connect your local Elasticsearch to the Elastic Inference Service (EIS) 
 1. **Elasticsearch**: Start Elasticsearch with the EIS URL of the QA environment and an Enterprise trial license:
 
    ```bash
-   yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
+   pnpm es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
    ```
 
 2. **Vault Access**: The script fetches the EIS API key from Vault. Make sure you are logged in:
@@ -81,7 +81,7 @@ You can connect your local Elasticsearch to the Elastic Inference Service (EIS) 
 
 ```bash
 # Terminal 1: Start Elasticsearch with the EIS URL
-yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
+pnpm es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
 
 # Terminal 2: Configure EIS API key, once Elasticsearch is green
 node scripts/eis.js

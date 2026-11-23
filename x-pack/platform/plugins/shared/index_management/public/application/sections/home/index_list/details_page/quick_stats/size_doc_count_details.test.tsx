@@ -119,29 +119,14 @@ describe('SizeDocCountDetails', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows the formatted vector count alongside the doc count', () => {
+  it('hides the vector count when enableVectorCount is disabled', () => {
+    mockUseAppContext.mockReturnValue({
+      config: { enableSizeAndDocCount: true, enableVectorCount: false },
+    } as ReturnType<typeof useAppContext>);
+
     renderComponent({
       docCount: { isLoading: false, isError: false, count: 1234 },
       vectorCount: { isError: false, count: 5678 },
-    });
-
-    expect(screen.getByText(Number(5678).toLocaleString())).toBeInTheDocument();
-    expect(screen.getByText('Vectors')).toBeInTheDocument();
-  });
-
-  it('uses the singular label for a single vector', () => {
-    renderComponent({
-      docCount: { isLoading: false, isError: false, count: 1 },
-      vectorCount: { isError: false, count: 1 },
-    });
-
-    expect(screen.getByText('Vector')).toBeInTheDocument();
-  });
-
-  it('omits the vector count when it is unavailable', () => {
-    renderComponent({
-      docCount: { isLoading: false, isError: false, count: 1234 },
-      vectorCount: { isError: false },
     });
 
     expect(screen.queryByTestId('indexDetailsVectorCount')).not.toBeInTheDocument();
@@ -149,14 +134,52 @@ describe('SizeDocCountDetails', () => {
     expect(screen.getByText('Documents')).toBeInTheDocument();
   });
 
-  it('shows a warning when the vector count request fails', () => {
-    renderComponent({
-      docCount: { isLoading: false, isError: false, count: 1234 },
-      vectorCount: { isError: true },
+  describe('when enableVectorCount is enabled', () => {
+    beforeEach(() => {
+      mockUseAppContext.mockReturnValue({
+        config: { enableSizeAndDocCount: true, enableVectorCount: true },
+      } as ReturnType<typeof useAppContext>);
     });
 
-    expect(screen.getByText('Unable to retrieve vectors')).toBeInTheDocument();
-    expect(screen.queryByTestId('indexDetailsVectorCount')).not.toBeInTheDocument();
-    expect(screen.getByText('Documents')).toBeInTheDocument();
+    it('shows the formatted vector count alongside the doc count', () => {
+      renderComponent({
+        docCount: { isLoading: false, isError: false, count: 1234 },
+        vectorCount: { isError: false, count: 5678 },
+      });
+
+      expect(screen.getByText(Number(5678).toLocaleString())).toBeInTheDocument();
+      expect(screen.getByText('Vectors')).toBeInTheDocument();
+    });
+
+    it('uses the singular label for a single vector', () => {
+      renderComponent({
+        docCount: { isLoading: false, isError: false, count: 1 },
+        vectorCount: { isError: false, count: 1 },
+      });
+
+      expect(screen.getByText('Vector')).toBeInTheDocument();
+    });
+
+    it('omits the vector count when it is unavailable', () => {
+      renderComponent({
+        docCount: { isLoading: false, isError: false, count: 1234 },
+        vectorCount: { isError: false },
+      });
+
+      expect(screen.queryByTestId('indexDetailsVectorCount')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('indexDetailsVectorCountError')).not.toBeInTheDocument();
+      expect(screen.getByText('Documents')).toBeInTheDocument();
+    });
+
+    it('shows a warning when the vector count request fails', () => {
+      renderComponent({
+        docCount: { isLoading: false, isError: false, count: 1234 },
+        vectorCount: { isError: true },
+      });
+
+      expect(screen.getByText('Unable to retrieve vectors')).toBeInTheDocument();
+      expect(screen.queryByTestId('indexDetailsVectorCount')).not.toBeInTheDocument();
+      expect(screen.getByText('Documents')).toBeInTheDocument();
+    });
   });
 });

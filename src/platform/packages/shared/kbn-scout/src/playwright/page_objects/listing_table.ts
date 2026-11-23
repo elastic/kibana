@@ -8,6 +8,7 @@
  */
 
 import type { Locator } from 'playwright/test';
+import { euiSelectors } from '../eui_components';
 import type { ScoutPage } from '..';
 
 export class ListingTable {
@@ -24,7 +25,7 @@ export class ListingTable {
   }
 
   async getAllItemsNames(): Promise<string[]> {
-    const links = this.table.locator('.euiTableRow .euiLink');
+    const links = this.table.locator(`${euiSelectors.basicTable.ROW_SELECTOR} .euiLink`);
     return links.allTextContents();
   }
 

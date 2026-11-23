@@ -35,7 +35,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           all: [],
           read: [],
         },
-        ui: [uiPrivileges.show],
+        ui: [uiPrivileges.show, uiPrivileges.write],
       },
       read: {
         app: [CONTEXT_ENGINE_APP_ID],
@@ -48,5 +48,37 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ui: [uiPrivileges.show],
       },
     },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.contextEngine.featureRegistry.subFeatures.memory', {
+          defaultMessage: 'Memory',
+        }),
+        description: i18n.translate(
+          'xpack.contextEngine.featureRegistry.subFeatures.memoryDescription',
+          {
+            defaultMessage:
+              'Lets the holder write and forget the session memory of any user in the space. Not needed for your own session memory, and does not apply to memory in AI indices. Not included in All. Grant only to trusted applications and API keys.',
+          }
+        ),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'manage_memory',
+                name: i18n.translate(
+                  'xpack.contextEngine.featureRegistry.subFeatures.manageMemory.privilege',
+                  { defaultMessage: 'Manage memory' }
+                ),
+                includeIn: 'none',
+                api: [apiPrivileges.manageMemory],
+                savedObject: { all: [], read: [] },
+                ui: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 };

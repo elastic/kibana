@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 
@@ -15,7 +16,7 @@ const UI_SETTING_KEY = 'securitySolution:enableAttackDiscoveryWorkflows';
 
 const buildFeatureFlags = (value: boolean): CoreStart['featureFlags'] =>
   ({
-    getBooleanValue: jest.fn().mockResolvedValue(value),
+    getBooleanValue$: jest.fn().mockReturnValue(of(value)),
   } as unknown as CoreStart['featureFlags']);
 
 const buildUiSettingsClient = (value: boolean): IUiSettingsClient =>
@@ -92,7 +93,7 @@ describe('isWorkflowsEnabledForSpace', () => {
 
     await isWorkflowsEnabledForSpace({ featureFlags, uiSettingsClient });
 
-    expect(featureFlags.getBooleanValue).toHaveBeenCalledWith(FEATURE_FLAG_KEY, expect.anything());
+    expect(featureFlags.getBooleanValue$).toHaveBeenCalledWith(FEATURE_FLAG_KEY, expect.anything());
   });
 
   it('returns false when uiSetting returns null', async () => {

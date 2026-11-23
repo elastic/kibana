@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { of } from 'rxjs';
 import { ConnectedServicesPage, type ConnectedServicesPageProps } from '.';
 import { useCloudConnectedAppContext } from '../../app_context';
@@ -21,9 +22,11 @@ const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.Mock
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(
-    <IntlProvider locale="en" messages={{}}>
-      {component}
-    </IntlProvider>
+    <MockAppHeaderProvider>
+      <IntlProvider locale="en" messages={{}}>
+        {component}
+      </IntlProvider>
+    </MockAppHeaderProvider>
   );
 };
 
@@ -103,7 +106,7 @@ describe('ConnectedServicesPage', () => {
       renderWithIntl(<ConnectedServicesPage {...defaultProps} />);
 
       // Open the actions popover
-      const actionsButton = screen.getByRole('button', { name: /actions/i });
+      const actionsButton = await screen.findByRole('button', { name: 'More' });
       await userEvent.click(actionsButton);
 
       // Click the rotate API key menu item
@@ -129,7 +132,7 @@ describe('ConnectedServicesPage', () => {
       renderWithIntl(<ConnectedServicesPage {...defaultProps} />);
 
       // Open the actions popover
-      const actionsButton = screen.getByRole('button', { name: /actions/i });
+      const actionsButton = await screen.findByRole('button', { name: 'More' });
       await userEvent.click(actionsButton);
 
       // Click the rotate API key menu item

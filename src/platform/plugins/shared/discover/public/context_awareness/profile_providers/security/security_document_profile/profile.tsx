@@ -10,7 +10,7 @@
 import React from 'react';
 import { getFieldValue } from '@kbn/discover-utils';
 import type { DocumentProfileProvider } from '../../../profiles';
-import { DocumentType, SolutionType } from '../../../profiles';
+import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SECURITY_PROFILE_ID, SIGNAL_RULE_NAME_FIELD_NAME } from '../constants';
 import * as i18n from '../translations';
@@ -52,8 +52,13 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
         };
       },
     },
-    resolve: ({ rootContext }) => {
-      if (rootContext.solutionType !== SolutionType.Security) {
+    resolve: ({ rootContext, dataSourceContext }) => {
+      // Security navigation keeps this profile when another data source profile won that layer.
+      // Classic only reaches it through the Security data source profile.
+      const inSecuritySolution = rootContext.solutionType === SolutionType.Security;
+      const securityDataSource = dataSourceContext.category === DataSourceCategory.Security;
+
+      if (!inSecuritySolution && !securityDataSource) {
         return { isMatch: false };
       }
 

@@ -8,13 +8,16 @@
  */
 
 import type { MenuItem } from '../../types';
+import { getPopoverSections } from './get_menu_item_sections';
 
 /**
- * Utility function for checking whether the menu item has a submenu.
- *
- * @param item - the menu item to check.
- * @returns `true` if the menu item has a submenu, `false` otherwise.
+ * Whether the hover popover has content.
  */
 export const getHasSubmenu = (item: MenuItem): boolean => {
-  return !!item.sections && item.sections.length > 0;
+  return (getPopoverSections(item)?.length ?? 0) > 0;
 };
+
+/**
+ * Nested submenu in More. Structural `sections` only — supplementary sections stay out.
+ */
+export const getHasMoreSubmenu = (item: MenuItem): boolean => (item.sections?.length ?? 0) > 0;

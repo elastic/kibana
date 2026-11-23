@@ -33,16 +33,18 @@ export const LayoutApplication = ({
   const { appearance } = useLayoutConfig();
 
   return (
-    <div
-      css={styles.root(appearance)}
-      id={APP_MAIN_SCROLL_CONTAINER_ID}
-      className="kbnChromeLayoutApplication"
-      data-test-subj="kbnChromeLayoutApplication"
-      tabIndex={-1}
-    >
-      {topBar && <div css={styles.topBar}>{topBar}</div>}
-      <div css={[styles.content]}>{children}</div>
-      {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}
+    <div css={styles.root(appearance)}>
+      <div
+        css={styles.scrollContainer}
+        id={APP_MAIN_SCROLL_CONTAINER_ID}
+        className="kbnChromeLayoutApplication"
+        data-test-subj="kbnChromeLayoutApplication"
+        tabIndex={-1}
+      >
+        {topBar && <div css={styles.topBar}>{topBar}</div>}
+        <div css={[styles.content]}>{children}</div>
+        {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}
+      </div>
     </div>
   );
 };

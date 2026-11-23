@@ -154,7 +154,7 @@ export class SnapshotRestorePage {
 
   /**
    * Reloads the snapshots table once then waits for the named snapshot's row to show a terminal
-   * state. Callers wait on Elasticsearch first (`waitForSlmSnapshotToFinish`), so a single reload
+   * state. Callers wait on Elasticsearch first (`waitForSnapshotToFinish`), so a single reload
    * is enough to surface the completed state in the UI.
    */
   async waitUntilSnapshotComplete(nameContains: string) {

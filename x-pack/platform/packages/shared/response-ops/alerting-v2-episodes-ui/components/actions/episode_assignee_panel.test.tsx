@@ -91,7 +91,6 @@ describe('EpisodeAssigneePanel', () => {
     mockSuggest.mockResolvedValue([mockJoana, mockAnt]);
     const { onApply } = renderPanel();
 
-    await userEvent.type(screen.getByPlaceholderText('Search users'), 'joana');
     await userEvent.click(await findUserOption(mockJoana.user.email!));
     // Selecting a different user before applying must not fan out extra writes.
     await userEvent.click(await findUserOption(mockAnt.user.email!));
@@ -131,7 +130,7 @@ describe('EpisodeAssigneePanel', () => {
 
     // EuiSelectable renders the message twice: once visibly, once in its live region.
     const [message] = await screen.findAllByTestId('alertingV2EditEpisodeAssigneeEmptyList');
-    expect(message).toHaveTextContent('The selected episodes do not have any assigned users');
+    expect(message).toHaveTextContent('The selected alerts do not have any assigned users');
   });
   it('lists suggested users before anything is typed', async () => {
     mockSuggest.mockResolvedValue([mockJoana, mockAnt]);

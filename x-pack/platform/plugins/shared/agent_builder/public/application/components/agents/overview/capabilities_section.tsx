@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { labels } from '../../../utils/i18n';
+import { connectorsTechPreviewBadgeProps, labels } from '../../../utils/i18n';
 import { CapabilityCard } from './capability_card';
 import skillsImage from './assets/connected-power-plug.svg';
 import pluginsImage from './assets/projects-folder.svg';
@@ -88,19 +88,19 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
           />
         </EuiFlexItem>
       )}
-      {isExperimentalFeaturesEnabled && (
-        <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
-          <CapabilityCard
-            count={connectorsCount}
-            title={overviewLabels.connectorsLabel(connectorsCount)}
-            description={overviewLabels.connectorsDescription}
-            emptyDescription={overviewLabels.connectorsOnboardingDescription}
-            image={connectorsImage}
-            href={connectorsHref}
-            onClick={onNavigateToConnectors}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
+        <CapabilityCard
+          dataTestSubj="agentOverviewCapabilityCardConnectors"
+          count={connectorsCount}
+          title={overviewLabels.connectorsLabel(connectorsCount)}
+          betaBadgeProps={connectorsTechPreviewBadgeProps}
+          description={overviewLabels.connectorsDescription}
+          emptyDescription={overviewLabels.connectorsOnboardingDescription}
+          image={connectorsImage}
+          href={connectorsHref}
+          onClick={onNavigateToConnectors}
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
         <CapabilityCard
           dataTestSubj="agentOverviewCapabilityCardTools"

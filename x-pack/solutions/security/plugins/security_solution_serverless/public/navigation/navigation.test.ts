@@ -47,7 +47,11 @@ describe('Security Side Nav', () => {
     await registerSolutionNavigation(services, []);
 
     expect(initNavigationSpy).toHaveBeenCalled();
-    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Classic);
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(
+      services,
+      AIChatExperience.Classic,
+      false
+    );
     expect(mockedCreateAiNavigationTree).not.toHaveBeenCalled();
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
@@ -73,7 +77,6 @@ describe('Security Side Nav', () => {
     expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
       services,
       AIChatExperience.Classic,
-      false,
       false
     );
     expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
@@ -98,7 +101,11 @@ describe('Security Side Nav', () => {
 
     await registerSolutionNavigation(services, []);
 
-    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Agent);
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(
+      services,
+      AIChatExperience.Agent,
+      false
+    );
   });
 
   it('passes workflows UI enabled true when settings return true', async () => {
@@ -120,8 +127,7 @@ describe('Security Side Nav', () => {
     expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(
       services,
       AIChatExperience.Classic,
-      true,
-      false
+      true
     );
   });
 });

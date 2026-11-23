@@ -103,6 +103,35 @@ describe('applyGrouping', () => {
     expect(card.isCollectionCard).toBe(true);
     expect(card.name).toBe('nginx');
     expect(card.groupMembers).toHaveLength(2);
+    expect(card.maxCardHeight).toBeUndefined();
+  });
+
+  it('uses the icon and version of the member named after the group', () => {
+    const icons = [{ src: '/img/logo_nginx.svg', type: 'image/svg+xml' }];
+    const pkg1 = makePackage({
+      id: 'nginx-1',
+      name: 'nginx',
+      version: '3.2.3',
+      icons,
+      group: 'nginx',
+    });
+    const pkg2 = makePackage({ id: 'nginx-otel-1', name: 'nginx_otel', group: 'nginx' });
+    const [card] = applyGrouping({ items: [pkg2, pkg1], ...baseParams }).collectionCards;
+    expect(card.icons).toEqual(icons);
+    expect(card.version).toBe('3.2.3');
+  });
+
+  it('leaves icons empty when no member is named after the group', () => {
+    const pkg1 = makePackage({
+      id: 'redis-otel-1',
+      name: 'redis_otel',
+      icons: [{ src: '/img/logo.svg', type: 'image/svg+xml' }],
+      group: 'redis',
+    });
+    const pkg2 = makePackage({ id: 'redis-ent-1', name: 'redisenterprise', group: 'redis' });
+    const [card] = applyGrouping({ items: [pkg1, pkg2], ...baseParams }).collectionCards;
+    expect(card.icons).toEqual([]);
+    expect(card.version).toBe('');
   });
 
   it('deduplicates members by name so multi-policy-template packages count as one', () => {

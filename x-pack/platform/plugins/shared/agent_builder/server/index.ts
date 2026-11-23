@@ -42,3 +42,8 @@ export type {
   ConversationExecutionParams,
   ConversationAgentExecution,
 } from '@kbn/agent-builder-server/execution';
+export {
+  loadTracingPrivacySettings,
+  withAgentBuilderContext,
+  type TracingPrivacySettings,
+} from './tracing';

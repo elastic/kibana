@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import type { FlyoutTabProps } from '../types';
+import type { FlyoutTabBarProps, FlyoutTabProps } from '../types';
 
 /** `FlyoutTabProps` enriched with generated DOM ids for the tab and its panel. */
 export interface FlyoutTabDescriptor extends FlyoutTabProps {
@@ -19,6 +19,7 @@ export interface FlyoutTabDescriptor extends FlyoutTabProps {
 
 export interface FlyoutTabsState {
   tabs: FlyoutTabDescriptor[];
+  tabBarProps?: FlyoutTabBarProps;
   selectedTabId: string | undefined;
   selectTab: (id: string) => void;
 }

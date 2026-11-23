@@ -7,9 +7,9 @@
 
 import type { PluginSetupDependencies } from '../types';
 import { investigationTemplate } from './investigation';
-import { incidentTemplate } from './incident';
+import { escalationTemplate } from './escalation';
 
-const BUILTIN_TEMPLATES = [investigationTemplate, incidentTemplate];
+const BUILTIN_TEMPLATES = [investigationTemplate, escalationTemplate];
 
 export const registerConversationTemplates = ({
   setupDeps,

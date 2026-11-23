@@ -60,7 +60,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
   data-test-subj="table-dns-loading-false"
 >
   <header
-    class="toggle-expand siemHeaderSection css-125xqyz-header"
+    class="toggle-expand siemHeaderSection css-qibzrl-header"
     data-test-subj="header-section"
   >
     <div
@@ -229,7 +229,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="paginated-basic-table"
   >
     <div
-      class="emotion-euiContainerCSS"
+      class="euiTable__wrapper emotion-euiContainerCSS"
     >
       <table
         class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"

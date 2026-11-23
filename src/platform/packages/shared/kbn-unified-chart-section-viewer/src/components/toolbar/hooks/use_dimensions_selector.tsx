@@ -138,11 +138,10 @@ export const useDimensionsSelector = ({
     }, DEBOUNCE_TIME);
   }, [singleSelection]);
 
+  // Flush rather than cancel so a selection made just before unmount is still committed
   useEffect(() => {
     return () => {
-      if (debouncedOnChange) {
-        debouncedOnChange.cancel();
-      }
+      debouncedOnChange?.flush();
     };
   }, [debouncedOnChange]);
 

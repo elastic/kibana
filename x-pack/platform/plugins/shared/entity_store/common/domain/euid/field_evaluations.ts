@@ -255,12 +255,12 @@ export function applyFieldEvaluations(
  * These are NOT identity-specific: they do not feed directly into the EUID expression.
  *
  * For identity-specific evaluations (e.g. `entity.namespace` for user), use
- * {@link getIdentityFieldEvaluationsFromDefinition}.
+ * {@link getIdentityFieldEvaluations}.
  */
-export function getFieldEvaluationsFromDefinition(
-  entityDefinition: Pick<EntityDefinitionWithoutId, 'fieldEvaluations' | 'identityField'>
+export function getFieldEvaluations(
+  entityDefinition: Pick<EntityDefinitionWithoutId, 'extraction'>
 ): FieldEvaluation[] {
-  return entityDefinition.fieldEvaluations ?? [];
+  return entityDefinition.extraction?.fieldEvaluations ?? [];
 }
 
 /**
@@ -268,7 +268,7 @@ export function getFieldEvaluationsFromDefinition(
  * e.g. `entity.namespace` for user, which is a direct prerequisite of the EUID expression.
  * Returns an empty array for single-field identities (generic, service, host).
  */
-export function getIdentityFieldEvaluationsFromDefinition(
+export function getIdentityFieldEvaluations(
   entityDefinition: Pick<EntityDefinitionWithoutId, 'identityField'>
 ): FieldEvaluation[] {
   if (isSingleFieldIdentity(entityDefinition.identityField)) {

@@ -1,5 +1,5 @@
 {
-  "sha1": "7d7ff637a9b302696f85dc951b912b7d72096b30",
+  "sha1": "04fc3902170859b958c61d748bc8c396d0084499",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -64,13 +64,12 @@
       "title": "Snapshot & Restore — home page cleanup repository via repository details flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/home_page.spec.ts",
-        "line": 22,
-        "column": 24
+        "line": 26,
+        "column": 5
       }
     },
     {

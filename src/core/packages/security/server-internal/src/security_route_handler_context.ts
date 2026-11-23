@@ -11,12 +11,14 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuthzRequestHandlerContext,
   AuditRequestHandlerContext,
 } from '@kbn/core-security-server';
 import type { InternalSecurityServiceStart } from './internal_contracts';
 
 export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerContext {
   #authc?: AuthcRequestHandlerContext;
+  #authz?: AuthzRequestHandlerContext;
   #audit?: AuditRequestHandlerContext;
   constructor(
     private readonly securityStart: InternalSecurityServiceStart,
@@ -29,6 +31,7 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
 
       this.#authc = {
         getCurrentUser: () => this.securityStart.authc.getCurrentUser(this.request),
+        getPrincipal: () => this.securityStart.authc.getPrincipal(this.request),
         apiKeys: {
           areAPIKeysEnabled: () => this.securityStart.authc.apiKeys.areAPIKeysEnabled(),
           create: (createParams) =>
@@ -50,6 +53,22 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
       };
     }
     return this.#authc;
+  }
+
+  public get authz() {
+    if (this.#authz == null) {
+      const uiam = this.securityStart.authz.uiam;
+
+      this.#authz = {
+        uiam: uiam
+          ? {
+              canViewBillingDetails: () => uiam.canViewBillingDetails(this.request),
+              canInviteOrganizationMembers: () => uiam.canInviteOrganizationMembers(this.request),
+            }
+          : null,
+      };
+    }
+    return this.#authz;
   }
 
   public get audit() {

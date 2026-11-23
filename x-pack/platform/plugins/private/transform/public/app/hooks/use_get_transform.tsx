@@ -7,10 +7,10 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath, type IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { GetTransformsResponseSchema } from '../../../server/routes/api_schemas/transforms';
-import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
+import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 import type { TransformId } from '../../../common/types/transform';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -21,10 +21,13 @@ export const useGetTransform = (transformId: TransformId, enabled?: boolean) => 
   return useQuery<GetTransformsResponseSchema, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM, transformId],
     ({ signal }) =>
-      http.get<GetTransformsResponseSchema>(addInternalBasePath(`transforms/${transformId}`), {
-        version: '1',
-        signal,
-      }),
+      http.get<GetTransformsResponseSchema>(
+        buildPath('/internal/transform/transforms/{transformId}', { transformId }),
+        {
+          version: '1',
+          signal,
+        }
+      ),
     { enabled }
   );
 };

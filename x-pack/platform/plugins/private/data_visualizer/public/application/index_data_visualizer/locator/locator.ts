@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { encode } from '@kbn/rison';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type Dictionary, isRisonSerializationRequired } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
@@ -77,8 +77,6 @@ export interface IndexDataVisualizerLocatorParams extends SerializableRecord {
   sortField?: string;
   showDistributions?: number;
 }
-
-export type IndexDataVisualizerLocator = LocatorPublic<IndexDataVisualizerLocatorParams>;
 
 export class IndexDataVisualizerLocatorDefinition
   implements LocatorDefinition<IndexDataVisualizerLocatorParams>
@@ -182,7 +180,7 @@ export class IndexDataVisualizerLocatorDefinition
       }
     });
 
-    const newLocationSearchString = stringify(parsedQueryString, {
+    const newLocationSearchString = queryString.stringify(parsedQueryString, {
       sort: false,
       encode: false,
     });

@@ -10,10 +10,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { Header } from './header';
-import {
-  managedUserDetails,
-  mockManagedUserData,
-} from '../../../../flyout/entity_details/user_right/mocks';
+import { managedUserDetails, mockManagedUserData } from '../mocks';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 
 const defaultLastSeen = {
@@ -29,6 +26,12 @@ const mockProps = {
 
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
+jest.mock('../../../shared/components/flyout_header_actions', () => ({
+  FlyoutHeaderActions: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mockFlyoutHeaderActions">{children}</div>
+  ),
+}));
+
 describe('Header', () => {
   it('renders', () => {
     const { getByTestId } = render(
@@ -38,6 +41,7 @@ describe('Header', () => {
     );
 
     expect(getByTestId('user-panel-header')).toBeInTheDocument();
+    expect(getByTestId('mockFlyoutHeaderActions')).toBeInTheDocument();
   });
 
   it('renders observed user date when it is bigger than managed user date', () => {

@@ -51,6 +51,7 @@ import {
   type EditorFrameSetup,
   type LensDocument,
   type LensByRefSerializedState,
+  type DefaultVisualizationOverrides,
   LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -284,7 +285,8 @@ export type LensSuggestionsApi = (
   dataViews: DataView,
   excludedVisualizations?: string[],
   preferredChartType?: ChartType,
-  preferredVisAttributes?: TypedLensByValueInput['attributes']
+  preferredVisAttributes?: TypedLensByValueInput['attributes'],
+  defaultVisualizationOverrides?: DefaultVisualizationOverrides
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -797,7 +799,8 @@ export class LensPlugin {
             dataView,
             excludedVisualizations,
             preferredChartType,
-            preferredVisAttributes
+            preferredVisAttributes,
+            defaultVisualizationOverrides
           ) => {
             return suggestionsApi({
               datasourceMap,
@@ -807,6 +810,7 @@ export class LensPlugin {
               excludedVisualizations,
               preferredChartType,
               preferredVisAttributes,
+              defaultVisualizationOverrides,
             });
           },
         };

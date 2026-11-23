@@ -5,25 +5,29 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiAccordion, EuiSpacer, EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 
 import {
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
   CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
 import {
   extractRawCredentialVars,
   getCredentialKeyFromVarName,
 } from '../../../../common/services/cloud_connectors';
+import { getEnabledInputsByPolicyTemplate } from '../../../../common/services/policy_template';
 import { type CloudConnectorFormProps } from '../types';
 
 import { updateInputVarsWithCredentials, isAwsCredentials } from '../utils';
-import { ORGANIZATION_ACCOUNT } from '../constants';
+import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER, ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
+import { setPendingCloudConnectorIac } from '../../../hooks/use_request/pending_cloud_connector_iac';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
@@ -38,29 +42,39 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   setCredentials,
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
+  templateSha,
 }) => {
   // The rendered template must cover every policy template the user enabled
-  // in this policy — not just the first enabled input's.
+  // in this policy, and only the inputs they actually turned on.
+  const inputs = newPolicy?.inputs;
   const enabledPolicyTemplates = useMemo(
-    () => [
-      ...new Set(
-        newPolicy?.inputs
-          ?.filter((input) => input.enabled)
-          .map((input) => input.policy_template)
-          .filter((policyTemplate): policyTemplate is string => Boolean(policyTemplate)) ?? []
-      ),
-    ],
-    [newPolicy?.inputs]
+    () => getEnabledInputsByPolicyTemplate({ inputs }),
+    [inputs]
   );
 
-  const { launchButtonProps, isDisabled, isGeneratingTemplate, templateGenerationError } =
-    useCloudConnectorTemplate({
-      cloud,
-      accountType,
-      iacTemplateUrl,
-      packageName: packageInfo?.name,
-      policyTemplates: enabledPolicyTemplates,
-    });
+  const {
+    launchButtonProps,
+    isDisabled,
+    isGeneratingTemplate,
+    templateGenerationError,
+    templateAlreadyCurrent,
+    iacConfirm,
+  } = useCloudConnectorTemplate({
+    provider: AWS_PROVIDER,
+    cloud,
+    accountType,
+    iacTemplateUrl,
+    packageName: packageInfo?.name,
+    policyTemplates: enabledPolicyTemplates,
+    templateSha,
+  });
+
+  useEffect(() => {
+    setPendingCloudConnectorIac(newPolicy.name, iacConfirm);
+    return () => {
+      setPendingCloudConnectorIac(newPolicy.name, undefined);
+    };
+  }, [iacConfirm, newPolicy.name]);
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
@@ -71,6 +85,11 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     : inputVars;
 
   const fields = getAwsCloudConnectorsCredentialsFormOptions(updatedInputVars);
+  const hasExternalId = !!fields?.some(
+    (field) =>
+      field.id === AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID ||
+      field.id === AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID
+  );
 
   return (
     <>
@@ -93,7 +112,10 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         buttonContent={<EuiLink>{'Steps to assume role'}</EuiLink>}
         paddingSize="l"
       >
-        <CloudFormationCloudCredentialsGuide accountType={accountType} />
+        <CloudFormationCloudCredentialsGuide
+          accountType={accountType}
+          hasExternalId={hasExternalId}
+        />
       </EuiAccordion>
       <EuiSpacer size="l" />
       <EuiButton
@@ -102,7 +124,9 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         iconType="rocket"
         isLoading={isGeneratingTemplate}
         isDisabled={isDisabled}
-        {...launchButtonProps}
+        onClick={'onClick' in launchButtonProps ? launchButtonProps.onClick : undefined}
+        href={'href' in launchButtonProps ? launchButtonProps.href : undefined}
+        target={'target' in launchButtonProps ? launchButtonProps.target : undefined}
       >
         <FormattedMessage
           id="xpack.fleet.cloudConnector.aws.launchCloudFormationButton"
@@ -112,12 +136,21 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
       {templateGenerationError && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             data-test-subj={CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ}
             title={templateGenerationError}
-            color="danger"
-            iconType="error"
+            size="s"
+          />
+        </>
+      )}
+      {templateAlreadyCurrent && (
+        <>
+          <EuiSpacer size="m" />
+          <KbnSuccessCallout
+            announceOnMount
+            data-test-subj={CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ}
+            title={templateAlreadyCurrent}
             size="s"
           />
         </>

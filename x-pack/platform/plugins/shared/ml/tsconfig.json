@@ -52,6 +52,7 @@
     "@kbn/deeplinks-ml",
     "@kbn/content-management-utils",
     "@kbn/embeddable-plugin",
+    "@kbn/es-errors",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/es-ui-shared-plugin",
@@ -73,6 +74,7 @@
     "@kbn/maps-plugin",
     "@kbn/ml-agg-utils",
     "@kbn/ml-anomaly-utils",
+    "@kbn/ml-cancellable-search",
     "@kbn/ml-server-schemas",
     "@kbn/ml-category-validator",
     "@kbn/ml-creation-wizard-utils",
@@ -101,7 +103,6 @@
     "@kbn/ml-validators",
     "@kbn/ml-cps",
     "@kbn/ml-cps-common",
-    "@kbn/monaco",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
@@ -156,6 +157,8 @@
     "@kbn/as-code-filters-transforms",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-visualizations",
     "@kbn/zod",
     "@kbn/cps",
     "@kbn/cps-utils",
@@ -164,6 +167,8 @@
     "@kbn/core-http-common",
     "@kbn/core-rendering-browser",
     "@kbn/app-header",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/date-range-picker",
+    "@kbn/date-range-picker-presets"
   ]
 }

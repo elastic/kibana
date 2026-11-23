@@ -21,7 +21,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const cases = getService('cases');
   const svlCases = getService('svlCases');
-  const find = getService('find');
   const toasts = getService('toasts');
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -93,13 +92,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('confirmModalConfirmButton');
         }
 
-        if (await cases.common.isRedesignEnabled()) {
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).toContain(caseTitle);
-        } else {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).toEqual(caseTitle);
-        }
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(caseTitle);
 
         await retry.waitFor('lens attachment comment renders after navigation', async () => {
           return testSubjects.exists('comment-lens-lens');
@@ -120,7 +114,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         // verify that solution filter is not visible
         await testSubjects.missingOrFail('options-filter-popover-button-owner');
 
-        await testSubjects.click(`cases-table-row-select-${theCase.id}`);
+        await cases.common.selectCaseInModal(theCase.id);
 
         await cases.common.expectToasterToContain(`Case ${theCaseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');
@@ -131,13 +125,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('confirmModalConfirmButton');
         }
 
-        if (await cases.common.isRedesignEnabled()) {
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).toContain(theCaseTitle);
-        } else {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).toEqual(theCaseTitle);
-        }
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(theCaseTitle);
 
         await testSubjects.existOrFail('comment-lens-lens');
       });

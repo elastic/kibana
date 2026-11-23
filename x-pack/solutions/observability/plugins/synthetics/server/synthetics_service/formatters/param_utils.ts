@@ -11,7 +11,7 @@ import {
   type SyntheticsMonitor,
   MonitorTypeEnum,
 } from '../../../common/runtime_types';
-import { PARAMS_KEYS_TO_SKIP } from './common';
+import { PARAMS_REFERENCE_SCAN_SKIP } from './common';
 
 export const SHELL_PARAMS_REGEX = /\$\{[a-zA-Z_][a-zA-Z0-9\._\-?:]*\}/g;
 
@@ -106,7 +106,10 @@ export const monitorUsesGlobalParams = (
   monitor: SyntheticsMonitor,
   modifiedParamKeys?: string[]
 ): boolean => {
-  if (monitor.type === MonitorTypeEnum.BROWSER) {
+  // Browser and API monitors access params via JavaScript (`params.paramName`)
+  // which cannot be reliably detected by scanning script content, so assume
+  // they always use global params.
+  if (monitor.type === MonitorTypeEnum.BROWSER || monitor.type === MonitorTypeEnum.API) {
     return true;
   }
 
@@ -115,7 +118,7 @@ export const monitorUsesGlobalParams = (
   const keysToCheck = Object.keys(monitor) as Array<keyof SyntheticsMonitor>;
 
   for (const key of keysToCheck) {
-    if (PARAMS_KEYS_TO_SKIP.includes(key as ConfigKey)) {
+    if (PARAMS_REFERENCE_SCAN_SKIP.includes(key as ConfigKey)) {
       continue;
     }
 

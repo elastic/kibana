@@ -8,4 +8,8 @@
 export const ES = {
   AUDITBEAT:
     'x-pack/solutions/security/test/security_solution_cypress/es_archives/auditbeat_single',
+  THREAT_INDICATOR:
+    'x-pack/solutions/security/test/security_solution_cypress/es_archives/threat_indicator',
+  SUSPICIOUS_SOURCE_EVENT:
+    'x-pack/solutions/security/test/security_solution_cypress/es_archives/suspicious_source_event',
 };

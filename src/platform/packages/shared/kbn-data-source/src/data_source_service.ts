@@ -8,9 +8,10 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataSource } from './types';
 import type { EsqlSource } from './sources/esql_source';
 import { DataViewSource } from './sources/data_view_source';
+
+type DataSource = EsqlSource | DataViewSource;
 
 /**
  * Minimal DataView lookup contract used by `DataSourceService`.
@@ -47,15 +48,6 @@ export class DataSourceService {
     } catch {
       return undefined;
     }
-  }
-
-  /** Synchronous alternative to `get()` for callers that already have a `DataView` in hand. */
-  public fromDataView(dataView: DataView): DataSource | undefined {
-    if (!dataView.id) return undefined;
-    if (dataView.id.startsWith(ESQL_ID_PREFIX)) {
-      return this.esqlSources.get(dataView.id);
-    }
-    return new DataViewSource(dataView);
   }
 
   public registerEsqlSource(source: EsqlSource): void {

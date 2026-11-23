@@ -51,6 +51,8 @@ dependsOn:
   - '@kbn/core-di-internal'
   - '@kbn/core-di-server'
   - '@kbn/core-http-request-handler-context-server-internal'
+  - '@kbn/core-security-server-mocks'
+  - '@kbn/tracing-utils'
 tags:
   - shared-server
   - package
@@ -62,6 +64,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

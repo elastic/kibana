@@ -21,6 +21,7 @@ import { fetchEntitiesByIds } from '../maintainer/utils/fetch_entities_by_ids';
 import { applyScoreModifiersFromEntities } from '../modifiers/apply_modifiers_from_entities';
 import { fetchWatchlistConfigs } from '../maintainer/utils/fetch_watchlist_configs';
 import { buildCommonAlertFilters } from '../maintainer/steps/build_alert_filters';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from '../constants';
 
 interface CalculateScoresWithESQLV2Params extends CalculateScoresParams {
   esClient: ElasticsearchClient;
@@ -79,7 +80,7 @@ export const calculateScoresWithESQLV2 = async ({
   namespace,
 }: CalculateScoresWithESQLV2Params): Promise<RiskScoresPreviewResponse> => {
   const now = new Date().toISOString();
-  const sampleSize = alertSampleSizePerShard ?? 10000;
+  const sampleSize = alertSampleSizePerShard ?? DEFAULT_ALERT_SAMPLE_SIZE;
   const identifierTypes: EntityType[] = identifierType
     ? [identifierType]
     : getEntityAnalyticsEntityTypes();
@@ -130,7 +131,7 @@ export const calculateScoresWithESQLV2 = async ({
         query,
         filter: { bool: { filter: entityFilters } },
       });
-      const baseScores = (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(index));
+      const baseScores = (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(index, sampleSize));
       const entityIds = baseScores.map((score) => score.entity_id);
       const entities = await fetchEntitiesByIds({
         crudClient,

@@ -31,7 +31,12 @@ const STATEFUL_ONLY_REASON =
 /**
  * One file per artifact type so Playwright can run files in parallel. Each
  * file owns a single agnostic list id (spaces do not isolate those lists).
- * ALL and READ/NONE stay in the same file so they cannot race on that list.
+ * Policy-tab ALL/READ/NONE and list-page RBAC stay in the same file so they
+ * cannot race on that list.
+ *
+ * `beforeAll` / `afterEach` wipe the whole list. When another spec file also
+ * writes to the list, use `describeArtifactTabPolicyDetailsItemScoped`, which
+ * deletes only the items it created (blocklists do).
  */
 export const describeArtifactTabPolicyDetails = (
   artifact: ArtifactTabCase,
@@ -142,7 +147,7 @@ export const describeArtifactTabPolicyDetails = (
       spaceTest(
         `ALL user can add an artifact from an empty tab`,
         async ({ browserAuth, pageObjects, endpointPolicy }) => {
-          await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
+          await browserAuth.loginAsEndpointPolicyManager();
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
           await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
           await pageObjects.policyArtifactsPage.waitForEmptyUnexisting();
@@ -163,7 +168,8 @@ export const describeArtifactTabPolicyDetails = (
             'back link returns to policy details and the next tab is reachable',
             async () => {
               await expect(pageObjects.policyDetailsPage.pageContainer).toHaveCount(0);
-              await expect(pageObjects.policyDetailsPage.backToOrigin).toHaveText(
+              // The back button is icon-only (tooltip/aria-label only, no visible text).
+              await expect(pageObjects.policyDetailsPage.backToOrigin).toHaveAccessibleName(
                 `Back to ${endpointPolicy.name} policy`
               );
               await pageObjects.policyDetailsPage.clickBackToOrigin();
@@ -187,7 +193,7 @@ export const describeArtifactTabPolicyDetails = (
             entries: artifact.entries,
             osTypes: artifact.osTypes,
           });
-          await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
+          await browserAuth.loginAsEndpointPolicyManager();
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
           await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
           await pageObjects.policyArtifactsPage.waitForEmptyUnassigned();
@@ -227,7 +233,7 @@ export const describeArtifactTabPolicyDetails = (
             osTypes: artifact.osTypes,
             policyId: endpointPolicy.id,
           });
-          await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
+          await browserAuth.loginAsEndpointPolicyManager();
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
           await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
           await pageObjects.policyArtifactsPage.waitForAssignedList();

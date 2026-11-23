@@ -1,5 +1,5 @@
 {
-  "sha1": "f6099bcca2c4ed7515039250b995a8ee39916dcc",
+  "sha1": "2f05d86e1143968fd4224c6f8e46f8d23cf8513f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -117,8 +117,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/visualization.spec.ts",
-        "line": 35,
-        "column": 54
+        "line": 36,
+        "column": 39
+      }
+    },
+    {
+      "id": "ab58e95611b8fe2-bbaea3172aa6ed4",
+      "title": "Canvas visualization embeddable adds a by-reference Vega panel from the library and edits it in the library editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/visualization.spec.ts",
+        "line": 38,
+        "column": 18
       }
     },
     {
@@ -130,8 +143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/visualization.spec.ts",
-        "line": 38,
-        "column": 18
+        "line": 45,
+        "column": 5
       }
     },
     {
@@ -338,7 +351,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/saved_object_resolve.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 9
       }
     },
@@ -351,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/saved_object_resolve.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 20
       }
     },

@@ -16,6 +16,7 @@
       "security"
     ],
     "requiredPlugins": [
+      "encryptedSavedObjects",
       "features",
       "licensing",
       "taskManager"

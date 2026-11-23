@@ -15,6 +15,7 @@
     "@kbn/scout",
     "@kbn/rule-data-utils",
     "@kbn/rison",
-    "@kbn/global-search-plugin"
+    "@kbn/global-search-plugin",
+    "@kbn/app-header"
   ]
 }

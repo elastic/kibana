@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreSetup, LoggerFactory } from '@kbn/core/server';
 import {
@@ -17,6 +18,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
+import { DefaultSLODefinitionRepository } from '../../slo_definition_repository';
 import {
   CompositeSloSummaryTask,
   getCompositeSloSummaryTaskId,
@@ -95,7 +97,7 @@ describe('CompositeSloSummaryTask', () => {
           createInternalRepository: jest.fn().mockReturnValue(savedObjectsRepositoryMock.create()),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(options?.compositeSloEnabled ?? true),
+          getBooleanValue$: jest.fn().mockReturnValue(of(options?.compositeSloEnabled ?? true)),
         },
       } as never,
       {} as never,
@@ -160,6 +162,9 @@ describe('CompositeSloSummaryTask', () => {
       );
 
       expect(mockPersist).toHaveBeenCalledTimes(1);
+      expect(mockPersist).toHaveBeenCalledWith(
+        expect.objectContaining({ sloRepository: expect.any(DefaultSLODefinitionRepository) })
+      );
     });
 
     it('skips computeAndPersistCompositeSummaries when composite SLO feature flag is disabled', async () => {

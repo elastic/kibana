@@ -125,6 +125,7 @@ export enum SecurityPageName {
    * external links
    */
   externalLinkAgentBuilder = 'external_link-agent_builder',
+  externalLinkAlertZero = 'external_link-alertzero',
   externalLinkDiscover = 'external_link-discover',
   externalLinkWorkflows = 'external_link-workflows',
 
@@ -137,19 +138,16 @@ export enum SecurityPageName {
    * AlertZero pages.
    *
    * These live on the `alertzero` plugin rather than `securitySolutionUI`, so their link ids are built with
-   * `alertZeroLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
-   * name is the same concept, and the app prefix is what distinguishes the two links.
+   * `alertZeroLink()` instead of `securityLink()`.
    */
-  alertZeroChats = 'chats',
-  alertZeroRecords = 'records',
-  alertZeroThreatHunt = 'threat_hunt',
-  alertZeroStreams = 'streams',
+  alertZeroEscalations = 'escalations',
   alertZeroWatches = 'watches',
   alertZeroWatchesWorkers = 'watches_workers',
   alertZeroWatchesSkills = 'watches_skills',
   alertZeroWatchFloor = 'watch_floor',
   alertZeroWatchOfficer = 'watch_officer',
-  alertZeroWatchDark = 'watch_dark',
+  alertZeroWatchHunt = 'watch_hunt',
   alertZeroWatchDeep = 'watch_deep',
   alertZeroWatchDetection = 'watch_detection',
+  alertZeroWatchForensics = 'watch_forensics',
 }

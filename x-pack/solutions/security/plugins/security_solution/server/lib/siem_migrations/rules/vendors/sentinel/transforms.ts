@@ -6,6 +6,7 @@
  */
 
 import type { Threat } from '../../../../../../common/api/detection_engine';
+import { MITRE_ATTACK_FRAMEWORK } from '../../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SentinelRule } from '../../../../../../common/siem_migrations/parsers/sentinel/types';
 import type { MigrationTranslationFields } from '../../../../../../common/siem_migrations/rules/utils';
@@ -57,7 +58,7 @@ export function transformSentinelMitreMapping(
     const tacticDisplayName = SENTINEL_TACTIC_NAME_TO_DISPLAY[tacticName] ?? tacticName;
 
     return {
-      framework: 'MITRE ATT&CK',
+      framework: MITRE_ATTACK_FRAMEWORK,
       tactic: {
         id: tacticId,
         reference: `${TACTICS_BASE_URL}${tacticId}/`,

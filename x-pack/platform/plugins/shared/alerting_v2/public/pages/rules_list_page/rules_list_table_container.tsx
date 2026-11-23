@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { Criteria } from '@elastic/eui';
 import {
   useActiveFilters,
@@ -13,7 +13,7 @@ import {
   useContentListPagination,
   useContentListSort,
 } from '@kbn/content-list-provider';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import { useService } from '@kbn/core-di-browser';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useBulkSelect } from '../../hooks/use_bulk_select';
@@ -27,9 +27,10 @@ import { DeleteConfirmationModal } from '../../components/rule/modals/delete_con
 import { useRuleChangeHistoryModal } from '../../components/rule/modals/change_history';
 import { UpdateApiKeyConfirmationModal } from '../../components/rule/modals/update_api_key_confirmation_modal';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
-import { paths } from '../../constants';
 import type { RuleContentListItem } from './rules_data_source';
 import { toRulesQueryParams } from './rules_query_params';
+import { RULES_LIST_DEFAULT_SORT, SORT_FIELD_TO_COLUMN_ID } from './rules_list_columns';
+import { useRulesListVisibleColumns } from './use_rules_list_visible_columns';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
 const API_SORT_TO_TABLE_FIELD: Record<string, RulesListTableSortField> = {
@@ -59,8 +60,6 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   onCloneInFlyout,
 }) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
   const { items: contentItems, totalItems, isLoading, hasActiveQuery } = useContentListItems();
@@ -73,6 +72,19 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const items = contentItems.map((item) => (item as RuleContentListItem).rule);
 
   const tableSortField = API_SORT_TO_TABLE_FIELD[sortField];
+
+  const { visibleColumnIds, setVisibleColumnIds } = useRulesListVisibleColumns();
+
+  const sortedColumnId = SORT_FIELD_TO_COLUMN_ID[sortField];
+  const isSortedColumnHidden =
+    sortedColumnId !== undefined && !visibleColumnIds.includes(sortedColumnId);
+
+  // Content List restores sort from the URL and localStorage independently of column visibility.
+  useEffect(() => {
+    if (isSortedColumnHidden) {
+      setSort(RULES_LIST_DEFAULT_SORT.field, RULES_LIST_DEFAULT_SORT.direction);
+    }
+  }, [isSortedColumnHidden, setSort]);
 
   const onTableChange = ({ page: tablePage, sort }: Criteria<RuleApiResponse>) => {
     if (sort) {
@@ -233,8 +245,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
         onBulkUpdateApiKey={handleBulkUpdateApiKey}
-        onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
-        onExpand={(r) => setExpandedRuleId(r.id)}
+        onOpenSummary={(r) => setExpandedRuleId(r.id)}
         onQuickEdit={(r) => onEditInFlyout(r)}
         onEdit={(r) => onEditInFlyout(r)}
         onClone={(r) => onCloneInFlyout(r)}
@@ -248,11 +259,18 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         }
         isBulkTogglingEnabled={bulkEnableMutation.isLoading || bulkDisableMutation.isLoading}
         onTableChange={onTableChange}
+        visibleColumnIds={visibleColumnIds}
+        onVisibleColumnIdsChange={setVisibleColumnIds}
       />
       {expandedRule ? (
         <RuleSummaryFlyout
+          ruleId={expandedRule.id}
           rule={expandedRule}
           canWrite={canWrite}
+          isToggleLoading={
+            toggleEnabledMutation.isLoading &&
+            toggleEnabledMutation.variables?.id === expandedRule.id
+          }
           onClose={() => setExpandedRuleId(null)}
           onEdit={(r) => {
             setExpandedRuleId(null);

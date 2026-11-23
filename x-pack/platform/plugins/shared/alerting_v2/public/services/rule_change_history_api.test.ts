@@ -17,25 +17,25 @@ describe('RuleChangeHistoryApi', () => {
   };
 
   describe('listRuleChanges', () => {
-    it('GETs the encoded rule history endpoint', async () => {
+    it('GETs the change-history collection filtered by rule', async () => {
       const { api, http } = buildApi();
 
       await api.listRuleChanges({ id: 'rule-1' });
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/alerting/v2/rules/rule-1/history',
-        expect.any(Object)
+        '/internal/alerting/v2/change_history/rules',
+        expect.objectContaining({ query: expect.objectContaining({ rule_id: 'rule-1' }) })
       );
     });
 
-    it('encodes the rule id path parameter', async () => {
+    it('sends a rule id with reserved characters as a query param, not a path segment', async () => {
       const { api, http } = buildApi();
 
       await api.listRuleChanges({ id: 'a/b c' });
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/alerting/v2/rules/a%2Fb%20c/history',
-        expect.any(Object)
+        '/internal/alerting/v2/change_history/rules',
+        expect.objectContaining({ query: expect.objectContaining({ rule_id: 'a/b c' }) })
       );
     });
 
@@ -44,8 +44,8 @@ describe('RuleChangeHistoryApi', () => {
 
       await api.listRuleChanges({ id: 'rule-1', page: 2, perPage: 25 });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/rules/rule-1/history', {
-        query: { page: 2, per_page: 25 },
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/change_history/rules', {
+        query: { rule_id: 'rule-1', page: 2, per_page: 25 },
         signal: undefined,
       });
     });
@@ -55,8 +55,8 @@ describe('RuleChangeHistoryApi', () => {
 
       await api.listRuleChanges({ id: 'rule-1' });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/rules/rule-1/history', {
-        query: { page: undefined, per_page: undefined },
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/change_history/rules', {
+        query: { rule_id: 'rule-1', page: undefined, per_page: undefined },
         signal: undefined,
       });
     });
@@ -68,7 +68,7 @@ describe('RuleChangeHistoryApi', () => {
       await api.listRuleChanges({ id: 'rule-1', signal });
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/alerting/v2/rules/rule-1/history',
+        '/internal/alerting/v2/change_history/rules',
         expect.objectContaining({ signal })
       );
     });
@@ -90,22 +90,22 @@ describe('RuleChangeHistoryApi', () => {
   });
 
   describe('getRuleChangeEvent', () => {
-    it('GETs the encoded detail endpoint with rule id and event id', async () => {
+    it('GETs the change by id', async () => {
       const { api, http } = buildApi();
 
-      await api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1' });
+      await api.getRuleChangeEvent({ eventId: 'evt-1' });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/rules/rule-1/history/evt-1', {
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/change_history/rules/evt-1', {
         signal: undefined,
       });
     });
 
-    it('encodes both path parameters', async () => {
+    it('encodes the change id path parameter', async () => {
       const { api, http } = buildApi();
 
-      await api.getRuleChangeEvent({ id: 'a/b', eventId: 'c/d' });
+      await api.getRuleChangeEvent({ eventId: 'c/d' });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/rules/a%2Fb/history/c%2Fd', {
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/change_history/rules/c%2Fd', {
         signal: undefined,
       });
     });
@@ -114,10 +114,10 @@ describe('RuleChangeHistoryApi', () => {
       const { api, http } = buildApi();
       const signal = new AbortController().signal;
 
-      await api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1', signal });
+      await api.getRuleChangeEvent({ eventId: 'evt-1', signal });
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/alerting/v2/rules/rule-1/history/evt-1',
+        '/internal/alerting/v2/change_history/rules/evt-1',
         expect.objectContaining({ signal })
       );
     });
@@ -127,18 +127,14 @@ describe('RuleChangeHistoryApi', () => {
       const detail = { id: 'evt-1', snapshot: { name: 'rule' } };
       http.get.mockResolvedValueOnce(detail);
 
-      await expect(api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1' })).resolves.toEqual(
-        detail
-      );
+      await expect(api.getRuleChangeEvent({ eventId: 'evt-1' })).resolves.toEqual(detail);
     });
 
     it('propagates errors from http.get', async () => {
       const { api, http } = buildApi();
       http.get.mockRejectedValueOnce(new Error('nope'));
 
-      await expect(api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1' })).rejects.toThrow(
-        'nope'
-      );
+      await expect(api.getRuleChangeEvent({ eventId: 'evt-1' })).rejects.toThrow('nope');
     });
   });
 });

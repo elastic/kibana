@@ -27,6 +27,10 @@ import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
 import type { RateLimiterConfig } from './rate_limiter';
 import type { HttpConfig } from './http_config';
+import type {
+  SelfClientOwnClientAuthenticationCheck,
+  SelfClientUiamAttestationGetter,
+} from './self_client';
 
 /** @internal */
 export interface InternalHttpServicePreboot
@@ -69,7 +73,7 @@ export interface InternalHttpServiceSetup
     cb: (req: CoreKibanaRequest, metadata: PostValidationMetadata) => void
   ): void;
   registerRouterAfterListening: (router: IRouter) => void;
-  registerStaticDir: (path: string, dirPath: string) => void;
+  registerStaticDir: HttpServerSetup['registerStaticDir'];
   authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContextBase,
@@ -90,6 +94,10 @@ export interface InternalHttpServiceStart extends Omit<HttpServiceStart, 'static
   isListening: () => boolean;
   setRedactedSessionIdGetter: (
     getter: (request: KibanaRequest) => Promise<string | undefined>
+  ) => void;
+  setSelfClientUiamAttestationGetter: (getter: SelfClientUiamAttestationGetter) => void;
+  setSelfClientOwnClientAuthenticationCheck: (
+    check: SelfClientOwnClientAuthenticationCheck
   ) => void;
 }
 

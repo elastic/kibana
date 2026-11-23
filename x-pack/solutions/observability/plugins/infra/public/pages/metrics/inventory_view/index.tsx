@@ -12,37 +12,31 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { AppHeader } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
+import { InfraOnboardingPage } from '../../../components/shared/templates/infra_onboarding_page';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { useInfraHasData } from '../../../hooks/use_infra_has_data';
 import { inventoryTitle } from '../../../translations';
 import { SnapshotContainer } from './components/snapshot_container';
-import { InventoryOnboardingPage } from './components/inventory_onboarding_page';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
 import { InventoryViewsProvider } from './hooks/use_inventory_views';
 import { WaffleOptionsProvider } from './hooks/use_waffle_options';
 import { InventoryTimeRangeMetadataProvider } from './providers/inventory_timerange_metadata_provider';
-import { useInventoryHasData } from './hooks/use_inventory_has_data';
 import { useMetricsAppHeaderMenu } from '../header/use_metrics_app_header_menu';
 
 export const SnapshotPage = (): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
-  useMetricsBreadcrumbs(
-    [
-      {
-        text: inventoryTitle,
-      },
-    ],
-    { parent: 'app' }
-  );
+  useMetricsBreadcrumbs([{ text: inventoryTitle }], {
+    parent: 'app',
+  });
 
   const { menu, flyouts } = useMetricsAppHeaderMenu();
-  const { hasData, loading } = useInventoryHasData();
-  const showOnboarding = !loading && !hasData;
+  const { showOnboarding } = useInfraHasData();
 
-  // Template noDataConfig ignores children; Inventory renders onboarding as body instead.
   return (
     <InventoryViewsProvider>
       <WaffleOptionsProvider>
@@ -74,7 +68,7 @@ export const SnapshotPage = (): React.ReactElement => {
                   }}
                 >
                   {showOnboarding ? (
-                    <InventoryOnboardingPage />
+                    <InfraOnboardingPage />
                   ) : (
                     <EuiPageSection
                       paddingSize="m"

@@ -97,7 +97,7 @@ export const TabbedTableListView = ({
   const hideHeader = !title && !description && hideTabs;
 
   return (
-    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+    <KibanaPageTemplate panelled restrictWidth={false} data-test-subj={pageDataTestSubject}>
       {!hideHeader && (
         <KibanaPageTemplate.Header
           pageTitle={title ? <span id={headingId}>{title}</span> : undefined}
@@ -117,6 +117,7 @@ export const TabbedTableListView = ({
       )}
       <KibanaPageTemplate.Section
         aria-labelledby={hasInitialFetchReturned && title ? headingId : undefined}
+        paddingSize="m"
       >
         {/* Any children passed to the component */}
         {children}

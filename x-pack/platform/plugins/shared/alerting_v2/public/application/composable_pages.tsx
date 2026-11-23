@@ -11,31 +11,34 @@ import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import { Context } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AppHeaderTab } from '@kbn/app-header';
+import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import { RulesApp } from './rules_app';
 import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
+import { ImportsApp } from './imports_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
-import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import { LocatorProvider } from './locator_context';
+import { TabsProvider } from './tabs_context';
+import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
+import type { AlertingV2HostApp } from '../../common/locators';
+import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
+import { AlertingV2AlertsProvider } from './alerts_provider';
+import { ManageRulesHrefProvider } from './manage_rules_href_context';
+import type { EpisodeDetailsPageProps } from '../pages/episode_details_page/episode_details_page';
 
-export interface AlertingV2PageProps {
+export interface AlertingV2PageProps extends EpisodeDetailsPageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  basePath?: string;
+  hostApp: AlertingV2HostApp;
+  privilegeCheck?: PrivilegeCheck;
+  tabs?: AppHeaderTab[];
+  createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  manageRulesHref?: string;
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
@@ -46,19 +49,35 @@ export interface InternalPageProps extends AlertingV2PageProps {
 const StandardProviders = ({
   container,
   setBreadcrumbs,
+  hostApp,
+  privilegeCheck,
+  tabs,
   children,
 }: {
   container: Container;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  hostApp: AlertingV2HostApp;
+  privilegeCheck?: PrivilegeCheck;
+  tabs?: AppHeaderTab[];
   children: React.ReactNode;
 }) => {
   const [queryClient] = useState(() => new QueryClient());
+  const locators = useMemo(() => {
+    const share = container.get(PluginStart('share')) as SharePluginStart;
+    return bindLocatorsToHost(getAlertingV2Locators(share), hostApp);
+  }, [container, hostApp]);
   return (
     <Context.Provider value={container}>
       <QueryClientProvider client={queryClient}>
-        <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-          <I18nProvider>{children}</I18nProvider>
-        </BreadcrumbProvider>
+        <LocatorProvider locators={locators}>
+          <TabsProvider tabs={tabs}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <PrivilegeCheckProvider value={privilegeCheck}>
+                <I18nProvider>{children}</I18nProvider>
+              </PrivilegeCheckProvider>
+            </BreadcrumbProvider>
+          </TabsProvider>
+        </LocatorProvider>
       </QueryClientProvider>
     </Context.Provider>
   );
@@ -67,83 +86,108 @@ const StandardProviders = ({
 export const AlertingV2RulesPage = ({
   container,
   setBreadcrumbs,
-  basePath = '',
+  hostApp,
+  privilegeCheck,
+  tabs,
 }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <RulesApp basePath={basePath} />
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+    tabs={tabs}
+  >
+    <RulesApp />
   </StandardProviders>
 );
 
 export const AlertingV2RuleLibraryPage = ({
   container,
   setBreadcrumbs,
-  basePath = '',
+  hostApp,
+  privilegeCheck,
 }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <RuleLibraryApp basePath={basePath} />
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+  >
+    <RuleLibraryApp />
   </StandardProviders>
 );
 
 export const AlertingV2ActionPoliciesPage = ({
   container,
   setBreadcrumbs,
-  basePath = '',
+  hostApp,
+  privilegeCheck,
 }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <ActionPoliciesApp basePath={basePath} />
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+  >
+    <ActionPoliciesApp />
   </StandardProviders>
 );
 
 export const AlertingV2ExecutionHistoryPage = ({
   container,
   setBreadcrumbs,
-  basePath = '',
+  hostApp,
+  privilegeCheck,
 }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <ExecutionHistoryApp basePath={basePath} />
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+  >
+    <ExecutionHistoryApp />
   </StandardProviders>
 );
 
-const episodesStorage = new Storage(localStorage);
+export const AlertingV2ImportsPage = ({
+  container,
+  setBreadcrumbs,
+  hostApp,
+  privilegeCheck,
+}: InternalPageProps) => (
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+  >
+    <ImportsApp />
+  </StandardProviders>
+);
 
 export const AlertingV2EpisodesPage = ({
   coreStart,
   container,
   setBreadcrumbs,
-  basePath = '',
-}: InternalPageProps) => {
-  const [queryClient] = useState(() => new QueryClient());
-
-  const kibanaReactServices: AlertEpisodesKibanaServices = useMemo(
-    () => ({
-      ...coreStart,
-      share: container.get(PluginStart('share')) as SharePluginStart,
-      data: container.get(PluginStart('data')) as DataPublicPluginStart,
-      dataViews: container.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
-      expressions: container.get(PluginStart('expressions')) as ExpressionsStart,
-      uiActions: container.get(PluginStart('uiActions')) as UiActionsStart,
-      fieldFormats: container.get(PluginStart('fieldFormats')) as FieldFormatsStart,
-      lens: container.get(PluginStart('lens')) as LensPublicStart,
-      charts: container.get(PluginStart('charts')) as ChartsPluginStart,
-      storage: episodesStorage,
-      toastNotifications: coreStart.notifications.toasts,
-      unifiedDocViewer: container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart,
-      spaces: container.get(PluginStart('spaces')) as SpacesPluginStart,
-    }),
-    [coreStart, container]
-  );
-
-  return (
-    <KibanaContextProvider services={kibanaReactServices}>
-      <Context.Provider value={container}>
-        <QueryClientProvider client={queryClient}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>
-              <EpisodesApp basePath={basePath} />
-            </I18nProvider>
-          </BreadcrumbProvider>
-        </QueryClientProvider>
-      </Context.Provider>
-    </KibanaContextProvider>
-  );
-};
+  hostApp,
+  privilegeCheck,
+  createActions,
+  useAdditionalEpisodeDetailsHeaderMenuItems,
+  manageRulesHref,
+}: InternalPageProps) => (
+  <AlertingV2AlertsProvider
+    coreStart={coreStart}
+    container={container}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+    createActions={createActions}
+  >
+    <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+      <ManageRulesHrefProvider value={manageRulesHref}>
+        <EpisodesApp
+          useAdditionalEpisodeDetailsHeaderMenuItems={useAdditionalEpisodeDetailsHeaderMenuItems}
+        />
+      </ManageRulesHrefProvider>
+    </BreadcrumbProvider>
+  </AlertingV2AlertsProvider>
+);

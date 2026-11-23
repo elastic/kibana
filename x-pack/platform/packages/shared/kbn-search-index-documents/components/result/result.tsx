@@ -39,6 +39,28 @@ export interface ResultProps {
   hasDeleteDocumentsPrivilege?: boolean;
 }
 
+const getExpandTooltipText = (isExpanded: boolean, hiddenFieldCount: number): string => {
+  if (hiddenFieldCount > 0) {
+    return isExpanded
+      ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showFewer', {
+          defaultMessage: 'Show {amount} fewer fields',
+          values: { amount: hiddenFieldCount },
+        })
+      : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showMore', {
+          defaultMessage: 'Show {amount} more fields',
+          values: { amount: hiddenFieldCount },
+        });
+  }
+
+  return isExpanded
+    ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.collapse', {
+        defaultMessage: 'Collapse fields',
+      })
+    : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.expand', {
+        defaultMessage: 'Expand fields',
+      });
+};
+
 export const Result: React.FC<ResultProps> = ({
   metaData,
   fields,
@@ -50,21 +72,7 @@ export const Result: React.FC<ResultProps> = ({
   hasDeleteDocumentsPrivilege,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const tooltipText =
-    fields.length <= defaultVisibleFields
-      ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.allVisible', {
-          defaultMessage: 'All fields are visible',
-        })
-      : isExpanded
-      ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showFewer', {
-          defaultMessage: 'Show {amount} fewer fields',
-          values: { amount: fields.length - defaultVisibleFields },
-        })
-      : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showMore', {
-          defaultMessage: 'Show {amount} more fields',
-          values: { amount: fields.length - defaultVisibleFields },
-        });
-  const toolTipContent = <>{tooltipText}</>;
+  const tooltipText = getExpandTooltipText(isExpanded, fields.length - defaultVisibleFields);
 
   const showResultsFields = isExpanded ? fields.length > 0 : defaultVisibleFields > 0;
 
@@ -72,15 +80,15 @@ export const Result: React.FC<ResultProps> = ({
   return (
     <>
       <EuiSplitPanel.Outer hasBorder={true} data-test-subj="search-index-documents-result">
-        <EuiSplitPanel.Inner paddingSize="m" color="plain" className="resultHeaderContainer">
+        <EuiSplitPanel.Inner paddingSize="s" color="plain" className="resultHeaderContainer">
           <EuiFlexGroup gutterSize="none" alignItems="center">
             <EuiFlexItem>
               {compactCard && (
                 <ResultHeader
                   title={
                     metaData.title ??
-                    i18n.translate('searchIndexDocuments.result.title.id', {
-                      defaultMessage: 'Document id: {id}',
+                    i18n.translate('xpack.searchIndexDocuments.result.title.id', {
+                      defaultMessage: 'Document ID: {id}',
                       values: { id: metaData.id },
                     })
                   }
@@ -93,8 +101,8 @@ export const Result: React.FC<ResultProps> = ({
                   showScore={showScore}
                   title={
                     metaData.title ??
-                    i18n.translate('searchIndexDocuments.result.title.id', {
-                      defaultMessage: 'Document id: {id}',
+                    i18n.translate('xpack.searchIndexDocuments.result.title.id', {
+                      defaultMessage: 'Document ID: {id}',
                       values: { id: metaData.id },
                     })
                   }
@@ -108,11 +116,16 @@ export const Result: React.FC<ResultProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="left" content={toolTipContent} ref={tooltipRef}>
+              <EuiToolTip
+                position="left"
+                content={tooltipText}
+                ref={tooltipRef}
+                disableScreenReaderOutput
+              >
                 <EuiButtonIcon
                   size="xs"
                   iconType={isExpanded ? 'fold' : 'unfold'}
-                  color={isExpanded ? 'danger' : 'primary'}
+                  color="text"
                   data-test-subj={isExpanded ? 'documentShowLessFields' : 'documentShowMoreFields'}
                   onClick={(e: React.MouseEvent<HTMLElement>) => {
                     e.stopPropagation();
@@ -129,7 +142,7 @@ export const Result: React.FC<ResultProps> = ({
         {showResultsFields && (
           <>
             <EuiHorizontalRule margin="none" />
-            <EuiSplitPanel.Inner paddingSize="m">
+            <EuiSplitPanel.Inner paddingSize="s">
               <ResultFields
                 documentId={metaData.id}
                 isExpanded={isExpanded}

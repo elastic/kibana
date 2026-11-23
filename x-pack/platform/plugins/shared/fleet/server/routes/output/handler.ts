@@ -9,9 +9,11 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
+  FleetRequestHandler,
   DeleteOutputRequestSchema,
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
+  GetOutputAgentPolicyCountRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
@@ -27,12 +29,16 @@ import { outputService } from '../../services/output';
 import { FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
+import { sanitizeOutput } from '../utils/sanitize_settings_objects';
 
-export const getOutputsHandler: RequestHandler = async (context, request, response) => {
+export const getOutputsHandler: FleetRequestHandler = async (context, request, response) => {
+  const fleetContext = await context.fleet;
   const outputs = await outputService.list();
 
   const body: GetOutputsResponse = {
-    items: outputs.items,
+    items: fleetContext.authz.fleet.readSettings
+      ? outputs.items
+      : outputs.items.map((output) => sanitizeOutput(output)),
     page: outputs.page,
     perPage: outputs.perPage,
     total: outputs.total,
@@ -41,14 +47,15 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   return response.ok({ body });
 };
 
-export const getOneOutputHandler: RequestHandler<
+export const getOneOutputHandler: FleetRequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
   try {
+    const fleetContext = await context.fleet;
     const output = await outputService.get(request.params.outputId);
 
     const body: GetOneOutputResponse = {
-      item: output,
+      item: fleetContext.authz.fleet.readSettings ? output : sanitizeOutput(output),
     };
 
     return response.ok({ body });
@@ -72,11 +79,19 @@ export const putOutputHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
+    const { id: bodyId, ...updateBody } = request.body as UpdateOutput & { id?: string };
+    if (bodyId !== undefined && bodyId !== request.params.outputId) {
+      return response.badRequest({
+        body: {
+          message: `Cannot change output ID: body id does not match path outputId "${request.params.outputId}"`,
+        },
+      });
+    }
     await outputService.update(
       soClient,
       esClient,
       request.params.outputId,
-      request.body as UpdateOutput
+      updateBody as UpdateOutput
     );
     const output = await outputService.get(request.params.outputId);
     await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
@@ -126,7 +141,7 @@ export const deleteOutputHandler: RequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    await outputService.delete(request.params.outputId);
+    await outputService.delete(request.params.outputId, { request });
 
     const body: DeleteOutputResponse = {
       id: request.params.outputId,
@@ -167,4 +182,27 @@ export const getLatestOutputHealth: RequestHandler<
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const outputHealth = await outputService.getLatestOutputHealth(esClient, request.params.outputId);
   return response.ok({ body: outputHealth });
+};
+
+export const getOutputAgentPolicyCountHandler: RequestHandler<
+  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.params>,
+  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.query>
+> = async (context, request, response) => {
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  try {
+    const output = await outputService.get(request.params.outputId);
+    // Apply pending flyout values so counts reflect state after save, not before.
+    const { isDefault, isDefaultMonitoring } = request.query;
+    if (isDefault !== undefined) output.is_default = isDefault;
+    if (isDefaultMonitoring !== undefined) output.is_default_monitoring = isDefaultMonitoring;
+    const counts = await outputService.getAgentAndPolicyCountForOutput(esClient, output);
+    return response.ok({ body: counts });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
+    }
+    throw error;
+  }
 };

@@ -13,7 +13,7 @@ import {
 
 describe('QueryResponseSizeExceededError', () => {
   it('names the limit, the setting and the fix', () => {
-    const error = new QueryResponseSizeExceededError(10 * 1024 * 1024);
+    const error = new QueryResponseSizeExceededError('breach', 10 * 1024 * 1024);
 
     expect(error.message).toContain('ES|QL query response exceeded the maximum allowed size');
     expect(error.message).toContain('10mb');
@@ -21,10 +21,11 @@ describe('QueryResponseSizeExceededError', () => {
     expect(error.message).toContain('KEEP');
     expect(error.message).toContain('STATS');
     expect(error.maxResponseSizeBytes).toBe(10 * 1024 * 1024);
+    expect(error.queryType).toBe('breach');
   });
 
   it('falls back to naming the setting when the limit is unknown', () => {
-    const error = new QueryResponseSizeExceededError();
+    const error = new QueryResponseSizeExceededError('recovery');
 
     expect(error.message).toContain(`configured by ${MAX_RESPONSE_SIZE_SETTING}`);
     expect(error.maxResponseSizeBytes).toBeUndefined();
@@ -32,7 +33,8 @@ describe('QueryResponseSizeExceededError', () => {
 
   it('keeps the original transport error as the cause', () => {
     const cause = new Error('The content length (52428801) is bigger than the maximum allowed');
-    const error = toQueryResponseSizeExceededError(cause, 50 * 1024 * 1024);
+    const error = toQueryResponseSizeExceededError(cause, 'data_presence', 50 * 1024 * 1024);
+    expect(error.queryType).toBe('data_presence');
 
     expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(error.cause).toBe(cause);

@@ -6,23 +6,33 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   ActionButtonType,
   type AttachmentRenderProps,
   type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
-import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
-import { paths } from '../../constants';
+import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
+import {
+  ActionPolicySummaryDefinitionSection,
+  ActionPolicySummaryDestinationsSection,
+  ActionPolicySummaryNotificationSection,
+} from '../../components/action_policy/action_policy_summary';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
-import { RulesApi } from '../../services/rules_api';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
-
-const EMPTY_VALUE = '-';
+import {
+  recordAttachmentSync,
+  syncAttachmentOrigin,
+  useRecordedAttachmentSync,
+} from './attachment_save_state';
 
 type ActionPolicyCanvasData = ActionPolicyAttachment['data'] & { id: string; name: string };
 
@@ -36,22 +46,23 @@ export const ActionPolicyCanvasContent = ({
   updateOrigin,
 }: ActionPolicyCanvasContentProps) => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
-  const rulesApi = useService(RulesApi);
   const workflowApi = useService(WorkflowApi);
-  const application = useService(CoreStart('application'));
-  const basePath = useService(CoreStart('http')).basePath;
+  const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
+  const [queryClient] = useState(() => new QueryClient());
 
   const { data: rawData, origin } = attachment;
   const data = rawData as ActionPolicyCanvasData;
+  const { description, matcher, grouping, throttle, destinations } = data;
   // Origin is only set if the action policy has been persisted
   const isPersisted = Boolean(origin);
+  const recordedSyncedAt = useRecordedAttachmentSync(attachment.id);
 
   const [mounted, setMounted] = useState(false);
   const [dependenciesReady, setDependenciesReady] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checks: Array<Promise<{ workflow?: boolean; rule?: boolean }>> = [];
+    const checks: Array<Promise<{ workflow?: boolean }>> = [];
     const abortController = new AbortController();
 
     const workflowDestinations = (data.destinations ?? []).filter((d) => d.type === 'workflow');
@@ -64,16 +75,6 @@ export const ActionPolicyCanvasContent = ({
       );
     }
 
-    const linkedRuleId = extractRuleIdFromMatcher(data.matcher);
-    if (linkedRuleId) {
-      checks.push(
-        rulesApi
-          .getRule(linkedRuleId, abortController.signal)
-          .then(() => ({ rule: true }))
-          .catch(() => ({ rule: false }))
-      );
-    }
-
     if (checks.length === 0) {
       setDependenciesReady(true);
       return;
@@ -83,14 +84,14 @@ export const ActionPolicyCanvasContent = ({
 
     Promise.all(checks).then((results) => {
       if (!abortController.signal.aborted) {
-        setDependenciesReady(results.every((result) => result.workflow || result.rule));
+        setDependenciesReady(results.every((result) => result.workflow));
       }
     });
 
     return () => {
       abortController.abort();
     };
-  }, [workflowApi, rulesApi, data.destinations, data.matcher]);
+  }, [workflowApi, data.destinations]);
 
   const hasDraftDependencies = dependenciesReady !== true;
 
@@ -114,8 +115,8 @@ export const ActionPolicyCanvasContent = ({
           type: ActionButtonType.PRIMARY,
           disabled: hasDraftDependencies,
           disabledReason: hasDraftDependencies
-            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveRuleAndWorkflowFirst', {
-                defaultMessage: 'Save rule and workflow before saving policy.',
+            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst', {
+                defaultMessage: 'Save workflow before saving policy.',
               })
             : undefined,
           handler: async () => {
@@ -124,7 +125,8 @@ export const ActionPolicyCanvasContent = ({
                 data.id,
                 attachmentDataToActionPolicyPayload(data)
               );
-              await updateOrigin(data.id);
+              // Linking the origin is what turns the draft into a saved policy, so a failure here is surfaced.
+              recordAttachmentSync(attachment.id, await updateOrigin(data.id));
               notifications.toasts.addSuccess(
                 i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
                   defaultMessage: 'Policy "{name}" created',
@@ -164,6 +166,8 @@ export const ActionPolicyCanvasContent = ({
               data.id,
               attachmentDataToActionPolicyPayload(data)
             );
+            // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
+            await syncAttachmentOrigin(attachment.id, () => updateOrigin(data.id));
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',
@@ -185,9 +189,13 @@ export const ActionPolicyCanvasContent = ({
           defaultMessage: 'View in Policies',
         }),
         icon: 'external',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: () => {
-          application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(data.id)));
+          getAlertingV2Locators(share).actionPolicyLocators.navigateSync({
+            page: 'edit',
+            actionPolicyId: data.id,
+            host: OBSERVABILITY_ALERTING_HOST.actionPolicies,
+          });
         },
       },
     ]);
@@ -197,31 +205,23 @@ export const ActionPolicyCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     actionPoliciesApi,
-    application,
-    basePath,
+    share,
     notifications,
     data,
     hasDraftDependencies,
+    attachment.id,
+    // Re-registering the buttons after a recorded sync redraws the canvas header, so getHeader
+    // re-evaluates the unsaved changes badge against the new sync date.
+    recordedSyncedAt,
   ]);
 
   return (
-    <EuiPanel paddingSize="l" hasShadow={false}>
-      <EuiTitle size="s">
-        <h2>{data.name ?? EMPTY_VALUE}</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <ActionPolicyDefinitionList policy={data} />
-    </EuiPanel>
+    <QueryClientProvider client={queryClient}>
+      <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+        <ActionPolicySummaryDefinitionSection description={description} matcher={matcher} />
+        <ActionPolicySummaryNotificationSection grouping={grouping} throttle={throttle} />
+        <ActionPolicySummaryDestinationsSection destinations={destinations} />
+      </EuiPanel>
+    </QueryClientProvider>
   );
-};
-
-/**
- * Extracts a rule ID from a KQL matcher string if it contains a `rule.id` clause.
- * Supports both quoted (`rule.id: "abc"`) and unquoted (`rule.id: abc`) values.
- * Returns `undefined` when the matcher is absent or doesn't reference `rule.id`.
- */
-const extractRuleIdFromMatcher = (matcher: string | null | undefined): string | undefined => {
-  if (!matcher) return undefined;
-  const match = matcher.match(/rule\.id\s*:\s*"?([^"\s]+)"?/);
-  return match?.[1];
 };

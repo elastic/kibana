@@ -35,7 +35,6 @@ export const toClientContract = (
     tags: location.tags,
     geo: location.geo,
     spaces: locationObject.namespaces,
-    ...(location.isAgentSharding === true ? { isAgentSharding: true } : {}),
   };
 };
 
@@ -54,7 +53,6 @@ export const allLocationsToClientContract = (
       tags: location.tags,
       geo: location.geo,
       spaces: location.spaces,
-      ...(location.isAgentSharding === true ? { isAgentSharding: true } : {}),
     };
   });
 };
@@ -69,13 +67,11 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     geo: location.geo,
     namespace: location.namespace,
     spaces: location.spaces,
-    ...(location.isAgentSharding === true ? { isAgentSharding: true } : {}),
   };
 };
 
-// Label and sharding edits must rewrite this location's monitors: the label is
-// stored on each monitor's locations array, and toggling isAgentSharding
-// restamps (or clears) per-monitor `${agent.id}` package-policy conditions.
+// Label edits must rewrite this location's monitors: the label is stored on
+// each monitor's locations array.
 export const updatePrivateLocationMonitors = async ({
   locationId,
   newLocationLabel,

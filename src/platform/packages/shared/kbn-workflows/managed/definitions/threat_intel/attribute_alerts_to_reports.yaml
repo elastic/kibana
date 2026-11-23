@@ -3,9 +3,13 @@ version: "1"
 # alerts in the last 7d tie back to that report, then write the totals onto the doc.
 # IOC promotion drives Indicator Match hits; extracted ATT&CK techniques drive overlap
 # with other rules. Scoped to the workflow's Kibana space; up to 100 reports per pass.
-# Unlike enrich/ingest, this pass does not include space_id: "*" catalog rows:
-# environment_hits are per-space alert totals, and writing them onto a shared
-# global doc would let each space's hourly run clobber the others.
+# Includes `space_id: "*"` catalog rows. `evidence` is a nested per-space array
+# (shared with Hunt Watch's hunt-outcome writer), so spaces cannot clobber each
+# other. This task only ever sets its own keys (`alert_hits*`) on the matched
+# element, never the whole element, so it cannot wipe out that space's hunt
+# fields. Writes use `elasticsearch.update` + script (Bulk rejects scripts on
+# indices with `semantic_text`). `retry_on_conflict` covers cross-space
+# concurrency on shared global docs (`concurrency.key` is per-space only).
 name: Attribute alerts to reports
 description: Count environment alerts linked to each threat report and store totals on the report
 tags:
@@ -37,8 +41,8 @@ steps:
             - range:
                 lineage.extracted_at:
                   gte: "now-30d"
-            - term:
-                space_id: "{{ variables.spaceId }}"
+            - terms:
+                space_id: ["{{ variables.spaceId }}", "*"]
           should:
             # nested `exists`; `exists` on the parent path matches nothing.
             - nested:
@@ -55,11 +59,6 @@ steps:
       # Body sort must be a field name string, not `"@timestamp:desc"`.
       sort:
         - "@timestamp"
-
-  - name: init_attribution_bulk
-    type: data.set
-    with:
-      bulk_operations: []
 
   # One search for all layer-1 counts. Per-report `term` queries inside foreach
   # were 100 sequential alert searches per hourly pass.
@@ -83,7 +82,8 @@ steps:
                 path: threat.enrichments
                 query:
                   regexp:
-                    threat.enrichments.indicator.reference: "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
+                    threat.enrichments.indicator.reference:
+                      value: "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
       aggs:
         by_report_ref:
           nested:
@@ -109,9 +109,37 @@ steps:
         type: data.set
         with:
           report_ref: "threat-report:{{ foreach.item._id }}"
+          # The clauses of the layer 2 `should`, as a JSON array. The connector schema only accepts
+          # a templated value directly at `query.bool.should`, so every clause is built here:
+          # the report's technique ids against the technique field, the same ids against the
+          # sub-technique field, and one clause per distinct parent technique of a stored
+          # sub-technique id, for rules tagged at the parent only (the alert carries the parent
+          # in `technique.id` and no sub-technique of it in `technique.subtechnique.id`).
+          # The alert's threat array is flattened, so a rule that tags the parent alone under
+          # one tactic and the parent with a sub-technique under another is not parent-only.
+          technique_clauses: >-
+            [{"terms":{"kibana.alert.rule.threat.technique.id":{"index":{{ foreach.item._index | json }},"id":{{ foreach.item._id | json }},"path":"extracted.behaviors.technique_id"}}},
+            {"terms":{"kibana.alert.rule.threat.technique.subtechnique.id":{"index":{{ foreach.item._index | json }},"id":{{ foreach.item._id | json }},"path":"extracted.behaviors.technique_id"}}}
+            {%- assign seen = "|" -%}
+            {%- for behavior in foreach.item._source.extracted.behaviors -%}
+            {%- assign parts = behavior.technique_id | split: "." -%}
+            {%- assign parent = parts | first -%}
+            {%- assign marker = parent | append: "|" | prepend: "|" -%}
+            {%- if parts.size == 2 and parent != blank -%}
+            {%- unless seen contains marker -%}
+            ,{"bool":{"filter":[{"term":{"kibana.alert.rule.threat.technique.id":{{ parent | json }}}}],"must_not":[{"prefix":{"kibana.alert.rule.threat.technique.subtechnique.id":{{ parent | append: "." | json }}}}]}}
+            {%- assign seen = seen | append: parent | append: "|" -%}
+            {%- endunless -%}
+            {%- endif -%}
+            {%- endfor -%}]
 
-      # Layer 2 — behavioral DE rule alerts whose ATT&CK techniques overlap
-      # with this report's `extracted.behaviors.technique_id` values.
+      # Layer 2 — behavioral DE rule alerts whose ATT&CK tags sit on the same line of the
+      # ATT&CK tree as one of this report's `extracted.behaviors.technique_id` values: the
+      # same id in either alert field, or the behavior's parent technique when the rule is
+      # tagged at the parent only. A rule tagged with a different sub-technique of the same
+      # parent does not count. Same two fields Hunt reads, exact-case match. Hunt matches
+      # exact ids only, so the parent-only clause can count alerts Hunt does not attribute
+      # to the report. One search, so an alert that satisfies several clauses is counted once.
       - name: layer2_search
         type: elasticsearch.search
         with:
@@ -125,14 +153,11 @@ steps:
                       gte: "now-7d"
                 - term:
                     kibana.space_ids: "{{ variables.spaceId }}"
-                - terms:
-                    kibana.alert.rule.threat.technique.id:
-                      index: "{{ foreach.item._index }}"
-                      id: "{{ foreach.item._id }}"
-                      path: extracted.behaviors.technique_id
               must_not:
                 - term:
                     kibana.alert.rule.type: threat_match
+              should: "${{ variables.technique_clauses | json_parse }}"
+              minimum_should_match: 1
         on-failure:
           continue: true
 
@@ -142,20 +167,24 @@ steps:
           layer1_count: "${{ steps.count_all_layer1_hits.output.aggregations.by_report_ref.refs.buckets | default: [] | where: 'key', variables.report_ref | map: 'alert_count' | map: 'doc_count' | first | default: 0 }}"
           layer2_count: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
 
-      - name: queue_bulk_update_meta
-        type: data.set
+      # `.kibana-threat-reports` is plugin-owned and hidden, so this runs as an internal route
+      # (asInternalUser) rather than a plain `elasticsearch.update`, which would run as whichever
+      # identity enabled this workflow and 403 for every non-superuser. No upsert body: the report
+      # was just loaded, so a missing doc must fail loudly rather than materialize a partial row.
+      - name: write_evidence
+        type: kibana.request
         with:
-          bulk_operations: "${{ variables.bulk_operations | push: {'update': {'_index': foreach.item._index, '_id': foreach.item._id}} }}"
-
-      - name: queue_bulk_update_doc
-        type: data.set
-        with:
-          bulk_operations: "${{ variables.bulk_operations | push: {'doc': {'attribution': {'environment_hits': {'window': '7d', 'computed_at': now, 'layer_1_ioc_match': variables.layer1_count, 'layer_2_behavioral': variables.layer2_count}, 'environment_hits_total': variables.layer1_count | plus: variables.layer2_count}}}} }}"
-
-  - name: write_attributions_bulk
-    type: elasticsearch.bulk
-    if: "variables.bulk_operations.size > 0"
-    with:
-      operations: "${{ variables.bulk_operations }}"
-    on-failure:
-      continue: true
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/threat_intel/attribute_alerts_evidence"
+          headers:
+            elastic-api-version: "1"
+          body:
+            index: "{{ foreach.item._index }}"
+            id: "{{ foreach.item._id }}"
+            window: "7d"
+            computedAt: "${{ now }}"
+            iocMatchHits: "${{ variables.layer1_count }}"
+            techniqueOverlapHits: "${{ variables.layer2_count }}"
+            alertHitsTotal: "${{ variables.layer1_count | plus: variables.layer2_count }}"
+        on-failure:
+          continue: true

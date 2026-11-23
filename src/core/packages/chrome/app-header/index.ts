@@ -33,11 +33,18 @@ export type {
   AppHeaderTab,
   AppHeaderTabAction,
   AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
   AppHeaderDescription,
   AppHeaderEditableTitle,
   AppHeaderFavoriteAction,
   AppHeaderFavoriteStatus,
   AppHeaderShareAction,
+  /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  AppHeaderExperimentalDashboardAiAction,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,
