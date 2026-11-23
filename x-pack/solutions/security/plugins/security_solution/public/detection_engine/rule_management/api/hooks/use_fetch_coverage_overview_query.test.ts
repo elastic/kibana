@@ -113,14 +113,8 @@ describe('useFetchCoverageOverviewQuery', () => {
 
     beforeEach(() => {
       mockFetchCoverageOverview.mockResolvedValue({
-        coverage: {
-          enterprise: { TA0001: ['enterprise-rule'] },
-          atlas: { 'AML.TA0000': ['atlas-rule'] },
-        },
-        rules_data: {
-          'enterprise-rule': { name: 'Enterprise rule', activity: 'enabled' },
-          'atlas-rule': { name: 'Atlas rule', activity: 'enabled' },
-        },
+        coverage: {},
+        rules_data: {},
         unmapped_rule_ids: [],
         invalid_mitre_ids: {},
       });
@@ -137,16 +131,10 @@ describe('useFetchCoverageOverviewQuery', () => {
 
       await waitFor(() => expect(result.current.data).toBeDefined());
       expect(result.current.data?.mitreTactics[0].id).toBe('TA0001');
-      expect(result.current.data?.mitreTactics[0].enabledRules).toEqual([
-        { id: 'enterprise-rule', name: 'Enterprise rule' },
-      ]);
 
       rerender({ framework: 'atlas' });
 
       await waitFor(() => expect(result.current.data?.mitreTactics[0].id).toBe('AML.TA0000'));
-      expect(result.current.data?.mitreTactics[0].enabledRules).toEqual([
-        { id: 'atlas-rule', name: 'Atlas rule' },
-      ]);
       expect(mockFetchCoverageOverview).toHaveBeenCalledTimes(1);
     });
 

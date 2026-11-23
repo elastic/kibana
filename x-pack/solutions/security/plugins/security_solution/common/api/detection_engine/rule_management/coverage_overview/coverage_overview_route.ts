@@ -80,11 +80,9 @@ export type CoverageOverviewResponse = t.TypeOf<typeof CoverageOverviewResponse>
 export const CoverageOverviewResponse = t.exact(
   t.type({
     /**
-     * Map having the framework (`enterprise`, `atlas`, `ics`) as the key and, as the value, a map
-     * having (tacticId, techniqueId or subtechniqueId) as the key and an array of rule ids as the
-     * value. Only frameworks that have coverage are present.
+     * Map having (tacticId, techniqueId or subtechniqueId) as the key and an array of rule ids as the value
      */
-    coverage: t.record(t.string, t.record(t.string, NonEmptyArray(t.string))),
+    coverage: t.record(t.string, NonEmptyArray(t.string)),
     /**
      * Array of rule ids that have no MITRE threat mapping at all
      */

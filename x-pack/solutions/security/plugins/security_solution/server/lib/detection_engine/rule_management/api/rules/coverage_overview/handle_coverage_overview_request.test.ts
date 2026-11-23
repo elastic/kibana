@@ -433,10 +433,9 @@ describe('handleCoverageOverviewRequest', () => {
     it('includes ATLAS ids in coverage and does not count an ATLAS-only rule as unmapped', async () => {
       const result = await run([makeRule('rule-atlas', [makeAtlasThreat()])], makeClient(true));
 
-      expect(result.coverage.atlas[ATLAS_TACTIC_ID]).toEqual(['rule-atlas']);
-      expect(result.coverage.atlas[ATLAS_TECHNIQUE_ID]).toEqual(['rule-atlas']);
-      expect(result.coverage.atlas[ATLAS_SUBTECHNIQUE_ID]).toEqual(['rule-atlas']);
-      expect(result.coverage.enterprise).toBeUndefined();
+      expect(result.coverage[ATLAS_TACTIC_ID]).toEqual(['rule-atlas']);
+      expect(result.coverage[ATLAS_TECHNIQUE_ID]).toEqual(['rule-atlas']);
+      expect(result.coverage[ATLAS_SUBTECHNIQUE_ID]).toEqual(['rule-atlas']);
       expect(result.unmapped_rule_ids).toEqual([]);
       expect(result.rules_data['rule-atlas']).toBeDefined();
     });
@@ -451,41 +450,27 @@ describe('handleCoverageOverviewRequest', () => {
       expect(result.unmapped_rule_ids).toEqual(['rule-mobile']);
     });
 
-    it('keeps an ATLAS-labelled Enterprise id under atlas only and reports it as invalid', async () => {
+    it('does not count ids whose prefix belongs to another framework than the entry label', async () => {
       const mislabelled = {
         ...makeAtlasThreat(),
         tactic: { ...makeAtlasThreat().tactic, id: VALID_TACTIC_ID },
-        technique: [
-          { ...makeAtlasThreat().technique[0], id: VALID_TECHNIQUE_ID, subtechnique: [] },
-        ],
+        technique: [{ ...makeAtlasThreat().technique[0], id: 'T1059', subtechnique: [] }],
       };
       const result = await run([makeRule('rule-mislabelled', [mislabelled])], makeClient(true));
 
-      expect(result.coverage.enterprise).toBeUndefined();
-      expect(result.coverage.atlas[VALID_TECHNIQUE_ID]).toEqual(['rule-mislabelled']);
-      expect(result.invalid_mitre_ids['rule-mislabelled']).toEqual({
-        atlas: [VALID_TACTIC_ID, VALID_TECHNIQUE_ID],
-      });
-      expect(result.unmapped_rule_ids).toEqual([]);
+      expect(result.coverage).toEqual({});
+      expect(result.unmapped_rule_ids).toEqual(['rule-mislabelled']);
     });
 
-    it('keeps an Enterprise-labelled ATLAS id under enterprise only', async () => {
+    it('does not count an AML id labelled as Enterprise in coverage', async () => {
       const mislabelled = { ...makeAttackThreat(), technique: [{ id: 'AML.T0044', name: 'x' }] };
       const result = await run([makeRule('rule-mislabelled', [mislabelled])], makeClient(true));
 
-      expect(result.coverage.enterprise['AML.T0044']).toEqual(['rule-mislabelled']);
-      expect(result.coverage.atlas).toBeUndefined();
+      expect(result.coverage['AML.T0044']).toBeUndefined();
+      expect(result.coverage[VALID_TACTIC_ID]).toEqual(['rule-mislabelled']);
       expect(result.invalid_mitre_ids['rule-mislabelled']).toEqual({
         enterprise: ['AML.T0044'],
       });
-    });
-
-    it('keeps an ATLAS-labelled Enterprise id under atlas only when atlas buckets fail', async () => {
-      const mislabelled = { ...makeAtlasThreat(), technique: [{ id: 'T1059', name: 'x' }] };
-      const result = await run([makeRule('rule-mislabelled', [mislabelled])], makeClient(false));
-
-      expect(result.coverage.atlas.T1059).toEqual(['rule-mislabelled']);
-      expect(result.coverage.enterprise?.T1059).toBeUndefined();
     });
 
     it('flags only ATLAS ids missing from the atlas buckets', async () => {
@@ -528,10 +513,10 @@ describe('handleCoverageOverviewRequest', () => {
         makeClient(true)
       );
 
-      expect(result.coverage.enterprise[VALID_TACTIC_ID]).toEqual(['rule-both']);
-      expect(result.coverage.enterprise[VALID_TECHNIQUE_ID]).toEqual(['rule-both']);
-      expect(result.coverage.atlas[ATLAS_TACTIC_ID]).toEqual(['rule-both']);
-      expect(result.coverage.atlas[ATLAS_TECHNIQUE_ID]).toEqual(['rule-both']);
+      expect(result.coverage[VALID_TACTIC_ID]).toEqual(['rule-both']);
+      expect(result.coverage[VALID_TECHNIQUE_ID]).toEqual(['rule-both']);
+      expect(result.coverage[ATLAS_TACTIC_ID]).toEqual(['rule-both']);
+      expect(result.coverage[ATLAS_TECHNIQUE_ID]).toEqual(['rule-both']);
       expect(result.unmapped_rule_ids).toEqual([]);
       expect(result.invalid_mitre_ids).toEqual({});
     });
@@ -643,10 +628,9 @@ describe('handleCoverageOverviewRequest', () => {
     it('includes ICS ids in coverage and does not count an ICS-only rule as unmapped', async () => {
       const result = await run([makeRule('rule-ics', [makeIcsThreat()])], makeClient(true));
 
-      expect(result.coverage.ics[ICS_TACTIC_ID]).toEqual(['rule-ics']);
-      expect(result.coverage.ics[ICS_TECHNIQUE_ID]).toEqual(['rule-ics']);
-      expect(result.coverage.ics[ICS_SUBTECHNIQUE_ID]).toEqual(['rule-ics']);
-      expect(result.coverage.enterprise).toBeUndefined();
+      expect(result.coverage[ICS_TACTIC_ID]).toEqual(['rule-ics']);
+      expect(result.coverage[ICS_TECHNIQUE_ID]).toEqual(['rule-ics']);
+      expect(result.coverage[ICS_SUBTECHNIQUE_ID]).toEqual(['rule-ics']);
       expect(result.unmapped_rule_ids).toEqual([]);
       expect(result.invalid_mitre_ids).toEqual({});
     });
@@ -657,31 +641,8 @@ describe('handleCoverageOverviewRequest', () => {
         makeClient(true)
       );
 
-      expect(result.coverage.ics[ICS_T1XXX_TECHNIQUE_ID]).toEqual(['rule-ics']);
+      expect(result.coverage[ICS_T1XXX_TECHNIQUE_ID]).toEqual(['rule-ics']);
       expect(result.invalid_mitre_ids).toEqual({});
-    });
-
-    it('keeps an ICS-labelled Enterprise id under ics only and reports it as invalid', async () => {
-      const result = await run(
-        [makeRule('rule-mislabelled', [makeIcsThreat('T1059')])],
-        makeClient(true)
-      );
-
-      expect(result.coverage.ics.T1059).toEqual(['rule-mislabelled']);
-      expect(result.coverage.enterprise).toBeUndefined();
-      expect(result.invalid_mitre_ids['rule-mislabelled']).toEqual({
-        ics: ['T1059'],
-      });
-    });
-
-    it('keeps an ICS-labelled Enterprise id under ics only when ics buckets fail', async () => {
-      const result = await run(
-        [makeRule('rule-mislabelled', [makeIcsThreat('T1059')])],
-        makeClient(false)
-      );
-
-      expect(result.coverage.ics.T1059).toEqual(['rule-mislabelled']);
-      expect(result.coverage.enterprise).toBeUndefined();
     });
 
     it('validates the same id separately per framework', async () => {
@@ -699,33 +660,15 @@ describe('handleCoverageOverviewRequest', () => {
       expect(result.invalid_mitre_ids['rule-both']).toEqual({
         enterprise: [ICS_T1XXX_TECHNIQUE_ID],
       });
-      expect(result.coverage.ics[ICS_T1XXX_TECHNIQUE_ID]).toEqual(['rule-both']);
+      expect(result.coverage[ICS_T1XXX_TECHNIQUE_ID]).toEqual(['rule-both']);
     });
 
-    it('lists each rule once per framework for an id shared by Enterprise and ICS entries', async () => {
-      const result = await run(
-        [
-          makeRule('rule-both', [
-            makeAttackThreat(ICS_T1XXX_TECHNIQUE_ID),
-            makeIcsThreat(ICS_T1XXX_TECHNIQUE_ID),
-          ]),
-          makeRule('rule-ics-only', [makeIcsThreat(ICS_T1XXX_TECHNIQUE_ID)]),
-        ],
-        makeClient(true)
-      );
+    it('reports an ICS-labelled bogus id under invalid_mitre_ids.ics and does not mark the rule unmapped', async () => {
+      const result = await run([makeRule('rule-ics', [makeIcsThreat('T9999')])], makeClient(true));
 
-      expect(result.coverage.enterprise[ICS_T1XXX_TECHNIQUE_ID]).toEqual(['rule-both']);
-      expect(result.coverage.ics[ICS_T1XXX_TECHNIQUE_ID]).toEqual(['rule-both', 'rule-ics-only']);
-    });
-
-    it('lists a rule once for an id covered by two frameworks', async () => {
-      const result = await run(
-        [makeRule('rule-both', [makeAttackThreat('T1059'), makeIcsThreat('T1691')])],
-        makeClient(true)
-      );
-
-      expect(result.coverage.enterprise.T1059).toEqual(['rule-both']);
-      expect(result.coverage.ics.T1691).toEqual(['rule-both']);
+      expect(result.invalid_mitre_ids['rule-ics']).toEqual({ ics: ['T9999'] });
+      expect(result.coverage.T9999).toEqual(['rule-ics']);
+      expect(result.unmapped_rule_ids).toEqual([]);
     });
 
     it('does not flag ICS ids when ics buckets are unavailable', async () => {

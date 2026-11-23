@@ -9,6 +9,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import { isAtlasEntityId } from '@kbn/security-mitre-attack-common';
 import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
@@ -95,20 +96,12 @@ export async function handleCoverageOverviewRequest({
     }
   }
 
-  // Coverage is accumulated per (framework, id) so an id shared by two frameworks never merges
-  // their rules and a mislabelled id stays scoped to the framework it is labelled with.
-  const coverageByFramework = new Map<MitreFramework, Map<string, Set<string>>>();
-  const response = rules.data.reduce(
-    (acc, rule) => appendRuleToResponse(acc, rule, validIdsByFramework, coverageByFramework),
-    {
-      coverage: {},
-      unmapped_rule_ids: [],
-      rules_data: {},
-      invalid_mitre_ids: {},
-    } as CoverageOverviewResponse
-  );
-  response.coverage = buildCoverageResponse(coverageByFramework);
-  return response;
+  return rules.data.reduce((acc, rule) => appendRuleToResponse(acc, rule, validIdsByFramework), {
+    coverage: {},
+    unmapped_rule_ids: [],
+    rules_data: {},
+    invalid_mitre_ids: {},
+  } as CoverageOverviewResponse);
 }
 
 function getIsEnabledFilter(activitySet: Set<CoverageOverviewRuleActivity>): boolean | undefined {
@@ -128,17 +121,16 @@ function appendRuleToResponse(
   response: CoverageOverviewResponse,
   rule: SanitizedRule<CoverageOverviewRuleParams>,
   // Frameworks absent from the map (bucket resolution failed) skip invalid-ID detection
-  validIdsByFramework: ValidMitreIdSetsByFramework,
-  coverageByFramework: Map<MitreFramework, Map<string, Set<string>>>
+  validIdsByFramework: ValidMitreIdSetsByFramework
 ): CoverageOverviewResponse {
   const categories = extractRuleMitreCategories(rule);
 
-  for (const { framework, id } of categories) {
-    const coverageById = coverageByFramework.get(framework) ?? new Map<string, Set<string>>();
-    const ruleIds = coverageById.get(id) ?? new Set<string>();
-    ruleIds.add(rule.id);
-    coverageById.set(id, ruleIds);
-    coverageByFramework.set(framework, coverageById);
+  for (const category of categories) {
+    if (!response.coverage[category]) {
+      response.coverage[category] = [rule.id];
+    } else {
+      response.coverage[category].push(rule.id);
+    }
   }
 
   if (categories.length === 0) {
@@ -164,41 +156,17 @@ function appendRuleToResponse(
 }
 
 /**
- * Builds the response's `coverage` map keyed by framework, then by id. Frameworks without
- * coverage are omitted.
+ * Extracts a deduplicated list of MITRE (ATT&CK Enterprise, ATLAS and ICS) tactic, technique, and
+ * sub-technique ids referenced by a rule. ATLAS ids (`AML.` prefix) are only counted when the
+ * entry is labelled ATLAS, and vice versa, so a mislabelled entry does not bleed into the other
+ * framework's matrix. Enterprise and ICS ids are not distinguishable by shape, so mislabelling
+ * between those two is not detected. A rule with no counted ids is unmapped.
  */
-function buildCoverageResponse(
-  coverageByFramework: Map<MitreFramework, Map<string, Set<string>>>
-): CoverageOverviewResponse['coverage'] {
-  const coverage: CoverageOverviewResponse['coverage'] = {};
-  for (const [framework, coverageById] of coverageByFramework) {
-    const frameworkCoverage: Record<string, [string, ...string[]]> = {};
-    for (const [id, ruleIds] of coverageById) {
-      const [firstRuleId, ...otherRuleIds] = Array.from(ruleIds);
-      frameworkCoverage[id] = [firstRuleId, ...otherRuleIds];
-    }
-    coverage[framework] = frameworkCoverage;
-  }
-  return coverage;
-}
-
-/**
- * Extracts the deduplicated (framework, id) tactic, technique, and sub-technique pairs a rule
- * has mapped. The framework comes from the threat entry's `framework` string, never from the id:
- * ATT&CK Enterprise and ICS ids are indistinguishable by shape. Coverage is keyed by framework,
- * so an id labelled with the wrong framework never reaches another framework's matrix; it is
- * reported through `invalid_mitre_ids` instead.
- *
- * A rule is unmapped only when it has no MITRE threat entries at all. A rule whose only ids are
- * invalid or mislabelled is not unmapped: it is reported as invalidly mapped.
- */
-function extractRuleMitreCategories(
-  rule: SanitizedRule<CoverageOverviewRuleParams>
-): Array<{ framework: MitreFramework; id: string }> {
+function extractRuleMitreCategories(rule: SanitizedRule<CoverageOverviewRuleParams>): string[] {
   // dedupe in case data isn't valid in ES
-  const categories = new Map<string, { framework: MitreFramework; id: string }>();
-  for (const { framework, id } of iterateMitreThreatEntities(rule.params.threat)) {
-    categories.set(`${framework}:${id}`, { framework, id });
+  const categories = new Set<string>();
+  for (const { id, framework } of iterateMitreThreatEntities(rule.params.threat)) {
+    if (isAtlasEntityId(id) === (framework === 'atlas')) categories.add(id);
   }
-  return Array.from(categories.values());
+  return Array.from(categories);
 }

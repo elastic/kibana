@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MitreEntitySummaryBuckets, MitreFramework } from '@kbn/security-mitre-attack-common';
+import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-common';
 import type {
   CoverageOverviewResponse,
   CoverageOverviewRuleAttributes,
@@ -21,28 +21,26 @@ import { buildCoverageOverviewMitreGraph } from './build_coverage_overview_mitre
 
 export function buildCoverageOverviewDashboardModel(
   apiResponse: CoverageOverviewResponse,
-  mitreData: MitreEntitySummaryBuckets,
-  framework: MitreFramework
+  mitreData: MitreEntitySummaryBuckets
 ): CoverageOverviewDashboard {
-  const coverage = apiResponse.coverage[framework] ?? {};
   const { tactics, techniques, subtechniques } = mitreData;
   const mitreTactics = buildCoverageOverviewMitreGraph(tactics, techniques, subtechniques);
 
   for (const tactic of mitreTactics) {
-    for (const ruleId of coverage[tactic.id] ?? []) {
+    for (const ruleId of apiResponse.coverage[tactic.id] ?? []) {
       addRule(tactic, ruleId, apiResponse.rules_data[ruleId]);
     }
 
     for (const technique of tactic.techniques) {
-      for (const ruleId of coverage[technique.id] ?? []) {
-        if (coverage[tactic.id]?.includes(ruleId)) {
+      for (const ruleId of apiResponse.coverage[technique.id] ?? []) {
+        if (apiResponse.coverage[tactic.id]?.includes(ruleId)) {
           addRule(technique, ruleId, apiResponse.rules_data[ruleId]);
         }
       }
 
       for (const subtechnique of technique.subtechniques) {
-        for (const ruleId of coverage[subtechnique.id] ?? []) {
-          if (coverage[tactic.id]?.includes(ruleId)) {
+        for (const ruleId of apiResponse.coverage[subtechnique.id] ?? []) {
+          if (apiResponse.coverage[tactic.id]?.includes(ruleId)) {
             addRule(subtechnique, ruleId, apiResponse.rules_data[ruleId]);
           }
         }
