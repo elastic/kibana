@@ -128,9 +128,12 @@ describe('useTimelineEventsDetails - broadened index retry (SDH #1666)', () => {
 
     // Two calls: primary (stale) then the broadened pattern.
     expect(search).toHaveBeenCalledTimes(2);
+    // Primary lookup keeps its request unchanged: it must NOT opt into hidden-index expansion.
     expect(search.mock.calls[0][0]).toEqual(expect.objectContaining({ indexName: STALE_INDEX }));
+    expect(search.mock.calls[0][0]).not.toHaveProperty('includeHiddenIndices', true);
+    // Only the fallback retry broadens the index name AND opts into hidden-index expansion.
     expect(search.mock.calls[1][0]).toEqual(
-      expect.objectContaining({ indexName: BROADENED_INDEX })
+      expect.objectContaining({ indexName: BROADENED_INDEX, includeHiddenIndices: true })
     );
     expect(addError).not.toHaveBeenCalled();
   });

@@ -51,13 +51,16 @@ const truncateList = (fields: string[], max: number): string[] => {
 const createIndexSummaries = async ({
   indices,
   esClient,
+  includeFrozen,
 }: {
   indices: IndexSearchSource[];
   esClient: ElasticsearchClient;
+  includeFrozen: boolean;
 }): Promise<ResourceDescriptor[]> => {
   const indexFields = await getIndexFields({
     indices: indices.map((i) => i.name),
     esClient,
+    includeFrozen,
   });
 
   return indices.map(({ name }) => {
@@ -89,9 +92,11 @@ const createAliasSummaries = async ({
 const createDatastreamSummaries = async ({
   datastreams,
   esClient,
+  includeFrozen,
 }: {
   datastreams: DataStreamSearchSource[];
   esClient: ElasticsearchClient;
+  includeFrozen: boolean;
 }): Promise<ResourceDescriptor[]> => {
   const { local, remote } = partitionByCcs(datastreams);
   const descriptors: ResourceDescriptor[] = [];
@@ -121,6 +126,7 @@ const createDatastreamSummaries = async ({
     const fieldsByDs = await getBatchedFieldsFromFieldCaps({
       resources: remote.map((r) => r.name),
       esClient,
+      includeFrozen,
     });
 
     for (const { name } of remote) {
@@ -140,6 +146,7 @@ export const indexExplorer = async ({
   indexPattern = '*',
   includeAliases = true,
   includeDatastream = true,
+  includeFrozen = false,
   limit = 1,
   esClient,
   model,
@@ -149,6 +156,7 @@ export const indexExplorer = async ({
   indexPattern?: string;
   includeAliases?: boolean;
   includeDatastream?: boolean;
+  includeFrozen?: boolean;
   limit?: number;
   esClient: ElasticsearchClient;
   model: ScopedModel;
@@ -190,13 +198,18 @@ export const indexExplorer = async ({
 
   const resources: ResourceDescriptor[] = [];
   if (indexCount > 0) {
-    const indexDescriptors = await createIndexSummaries({ indices: sources.indices, esClient });
+    const indexDescriptors = await createIndexSummaries({
+      indices: sources.indices,
+      esClient,
+      includeFrozen,
+    });
     resources.push(...indexDescriptors);
   }
   if (dataStreamCount > 0 && includeDatastream) {
     const dsDescriptors = await createDatastreamSummaries({
       datastreams: sources.data_streams,
       esClient,
+      includeFrozen,
     });
     resources.push(...dsDescriptors);
   }

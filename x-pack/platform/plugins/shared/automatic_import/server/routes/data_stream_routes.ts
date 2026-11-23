@@ -19,6 +19,7 @@ import {
   ReanalyzeDataStreamRequestBody,
   UploadSamplesToDataStreamRequestBody,
   UpdateDataStreamPipelineRequestBody,
+  UPLOAD_SAMPLES_MAX_REQUEST_BYTES,
 } from '../../common';
 
 export const registerDataStreamRoutes = (
@@ -45,6 +46,7 @@ const uploadSamplesRoute = (
           requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
         },
       },
+      options: { body: { maxBytes: UPLOAD_SAMPLES_MAX_REQUEST_BYTES } },
     })
     .addVersion(
       {

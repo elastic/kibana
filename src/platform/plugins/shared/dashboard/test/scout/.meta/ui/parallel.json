@@ -1,5 +1,8 @@
 {
-  "sha1": "398c0db27df387a8d0132606a1232a6917ae5f79",
+  "sha1": "8613b4056e1234f7cd5e36501596617d89add089",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "98600d12651f127-aa69b48f5334963",
@@ -50,6 +53,58 @@
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/async_dashboard.spec.ts",
         "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "31ccac69c1e0eda-0a1bc65e6a03637",
+      "title": "Dashboard embed top menu does not show the edit button when show-top-menu is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_embed_top_menu.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "31ccac69c1e0eda-593e7dddf068d59",
+      "title": "Dashboard embed top menu shows the edit button when show-top-menu is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_embed_top_menu.spec.ts",
+        "line": 58,
         "column": 12
       }
     },

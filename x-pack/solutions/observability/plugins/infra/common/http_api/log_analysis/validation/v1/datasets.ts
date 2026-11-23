@@ -6,6 +6,8 @@
  */
 
 import * as rt from 'io-ts';
+import { LimitedSizeArray } from '@kbn/securitysolution-io-ts-types';
+import { MAX_VALIDATION_INDICES } from './constants';
 
 export const LOG_ANALYSIS_VALIDATE_DATASETS_PATH =
   '/api/infra/log_analysis/validation/log_entry_datasets';
@@ -15,7 +17,7 @@ export const LOG_ANALYSIS_VALIDATE_DATASETS_PATH =
  */
 export const validateLogEntryDatasetsRequestPayloadRT = rt.type({
   data: rt.type({
-    indices: rt.array(rt.string),
+    indices: LimitedSizeArray({ codec: rt.string, maxSize: MAX_VALIDATION_INDICES }),
     timestampField: rt.string,
     startTime: rt.number,
     endTime: rt.number,

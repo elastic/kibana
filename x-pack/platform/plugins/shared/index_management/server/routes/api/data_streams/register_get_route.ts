@@ -208,7 +208,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
 
 export function registerGetOneRoute({ router, lib: { handleEsError }, config }: RouteDependencies) {
   const paramsSchema = schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 1000 }),
   });
   router.get(
     {

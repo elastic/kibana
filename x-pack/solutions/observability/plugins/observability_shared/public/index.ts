@@ -37,6 +37,15 @@ export { LoadWhenInView } from './components/load_when_in_view/get_load_when_in_
 export { TagsList } from './components/tags_list/tags_list_lazy';
 export type { TagsListProps } from './components/tags_list/tags_list';
 
+export { TagsComboBox } from './components/tags_combo_box/tags_combo_box_lazy';
+export type { TagsComboBoxProps } from './components/tags_combo_box/tags_combo_box';
+export {
+  createTagsPasteHandler,
+  getNewTags,
+  hasTagDelimiter,
+  splitTags,
+} from './components/tags_combo_box/tags_input';
+
 export { TechnicalPreviewBadge } from './components/technical_preview_badge/technical_preview_badge';
 
 export { InspectorContextProvider } from './contexts/inspector/inspector_context';

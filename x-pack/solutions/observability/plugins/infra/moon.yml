@@ -145,6 +145,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query-constants'
   - '@kbn/cps'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -157,6 +158,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - types/**/*
+    - test/scout/api/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

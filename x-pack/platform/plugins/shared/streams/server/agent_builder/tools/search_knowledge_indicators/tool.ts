@@ -8,11 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type {
-  BuiltinToolDefinition,
-  StaticToolRegistration,
-  ToolAvailabilityResult,
-} from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
 import type { StreamsServer } from '../../../types';
@@ -60,7 +56,7 @@ export function createSearchKnowledgeIndicatorsTool({
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
-}): StaticToolRegistration<typeof searchKnowledgeIndicatorsSchema> {
+}): BuiltinToolDefinition<typeof searchKnowledgeIndicatorsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof searchKnowledgeIndicatorsSchema> = {
     id: STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
     type: ToolType.builtin,

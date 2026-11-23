@@ -134,6 +134,10 @@ export function PipelineEditorProvider({ getService }: FtrProviderContext) {
       queueMaxBytesUnits: string;
       queueCheckpointWrites: string;
     }): Promise<void> {
+      // Wait for the lazy Monaco editor to mount so its model is registered before
+      // getCodeEditorValue() reads it; otherwise it can return `undefined`.
+      await monacoEditor.waitCodeEditorReady('pipelineField');
+
       const values = await Promise.all([
         testSubjects.getAttribute(SUBJ_INPUT_ID, 'value'),
         testSubjects.getAttribute(SUBJ_INPUT_DESCRIPTION, 'value'),

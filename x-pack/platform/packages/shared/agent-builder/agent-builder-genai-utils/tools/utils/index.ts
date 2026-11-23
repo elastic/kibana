@@ -6,6 +6,7 @@
  */
 
 export { esqlResponseToJson, extractEsqlQueries, executeEsql, interpolateEsqlQuery } from './esql';
+export { FROZEN_TIER, excludeFrozenTierQuery, applyFrozenTierExclusion } from './data_tiers';
 export {
   flattenMapping,
   cleanupMapping,
@@ -14,6 +15,7 @@ export {
   type MappingField,
 } from './mappings';
 export {
+  fetchFieldCaps,
   processFieldCapsResponse,
   processFieldCapsResponsePerIndex,
   type FieldListFromFieldCapsResponse,

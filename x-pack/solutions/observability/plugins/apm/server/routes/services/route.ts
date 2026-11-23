@@ -286,17 +286,18 @@ const serviceAgentRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: rangeRt,
+    query: t.intersection([rangeRt, environmentRt]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAgentResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { start, end } = params.query;
+    const { environment, start, end } = params.query;
 
     const apmServiceAgent = await getServiceAgent({
       serviceName,
+      environment,
       apmEventClient,
       start,
       end,

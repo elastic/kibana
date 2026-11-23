@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isValidNamespace } from '../../services';
+import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../services';
 import { MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY } from '../../constants/package_policy';
 
 export const PackagePolicyNamespaceSchema = schema.string({
@@ -329,6 +329,20 @@ export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
   { unknowns: 'ignore', meta: { id: 'package_policy_v23' } }
 );
 
+// REST-only input and stream IDs. PackagePolicyInputsSchema and PackagePolicyStreamsSchema stay
+// unchanged because they also feed PackagePolicySchema, which re-validates stored policies (e.g.
+// after external callbacks), so a pre-existing id must not make those paths fail.
+// `validate` rejects path-traversal ids early; the service layer enforces the same check for
+// non-REST callers.
+const RestPackagePolicyInputIdSchema = schema.maybe(
+  schema.string({ validate: validateNoPathTraversalIdSchema })
+);
+
+const RestPackagePolicyStreamSchema = schema.object({
+  ...PackagePolicyStreamsSchema,
+  id: schema.maybe(schema.string({ validate: validateNoPathTraversalIdSchema })), // BWC < 7.11
+});
+
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
   enabled: schema.maybe(schema.boolean()),
@@ -336,9 +350,8 @@ const CreatePackagePolicyProps = {
   inputs: schema.arrayOf(
     schema.object({
       ...PackagePolicyInputsSchema,
-      streams: schema.maybe(
-        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
-      ),
+      id: RestPackagePolicyInputIdSchema,
+      streams: schema.maybe(schema.arrayOf(RestPackagePolicyStreamSchema, { maxSize: 1000 })),
     }),
     { maxSize: 1000 }
   ),
@@ -450,8 +463,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
   )
 );
 
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiles)-(.*)$/;
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 function validateAdditionalDatastreamsPermissions(values: string[]) {
   for (const val of values) {
@@ -593,9 +605,8 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object(
       schema.arrayOf(
         schema.object({
           ...PackagePolicyInputsSchema,
-          streams: schema.maybe(
-            schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
-          ),
+          id: RestPackagePolicyInputIdSchema,
+          streams: schema.maybe(schema.arrayOf(RestPackagePolicyStreamSchema, { maxSize: 1000 })),
         }),
         { maxSize: 1000 }
       )
