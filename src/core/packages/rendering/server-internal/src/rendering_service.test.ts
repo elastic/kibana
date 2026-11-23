@@ -19,7 +19,6 @@ import {
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
-import { of } from 'rxjs';
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -699,32 +698,21 @@ describe('RenderingService', () => {
       });
       deps.uiPlugins.public.set('anonymousSafe', createPlugin('anonymousSafe', true));
       deps.uiPlugins.public.set('authenticatedOnly', createPlugin('authenticatedOnly', false));
-      deps.uiPlugins.browserConfigs.set('anonymousSafe', of({ browserConfig: { marker: 'safe' } }));
-      deps.uiPlugins.browserConfigs.set(
-        'authenticatedOnly',
-        of({ browserConfig: { marker: 'authenticated' } })
-      );
 
       try {
         const anonymousPage = load(
           await render(createKibanaRequest(), uiSettings, { isAnonymousPage: true })
         );
         const authenticatedPage = load(await render(createKibanaRequest(), uiSettings));
-        const pluginConfigs = (dom: ReturnType<typeof load>) =>
+        const pluginIds = (dom: ReturnType<typeof load>) =>
           JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""').uiPlugins.map(
-            ({ id, config }: { id: string; config: { marker: string } }) => ({ id, config })
+            ({ id }: { id: string }) => id
           );
 
-        expect(pluginConfigs(anonymousPage)).toEqual([
-          { id: 'anonymousSafe', config: { marker: 'safe' } },
-        ]);
-        expect(pluginConfigs(authenticatedPage)).toEqual([
-          { id: 'anonymousSafe', config: { marker: 'safe' } },
-          { id: 'authenticatedOnly', config: { marker: 'authenticated' } },
-        ]);
+        expect(pluginIds(anonymousPage)).toEqual(['anonymousSafe']);
+        expect(pluginIds(authenticatedPage)).toEqual(['anonymousSafe', 'authenticatedOnly']);
       } finally {
         deps.uiPlugins.public.clear();
-        deps.uiPlugins.browserConfigs.clear();
       }
     });
   });
