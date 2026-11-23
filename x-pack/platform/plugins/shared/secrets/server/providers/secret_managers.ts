@@ -13,7 +13,10 @@ import { SecretValidationError } from '@kbn/secrets';
  * The connector types that can hold secrets. How a value is read comes from the
  * `secretManager` member of each spec: nothing here is specific to one connector.
  */
-const SECRET_MANAGER_SPECS: readonly ConnectorSpec[] = [connectorsSpecs.GcpSecretManager];
+const SECRET_MANAGER_SPECS: readonly ConnectorSpec[] = [
+  connectorsSpecs.GcpSecretManager,
+  connectorsSpecs.AwsSsmConnector,
+];
 
 export interface SecretManagerReadParams {
   subAction: string;
@@ -51,7 +54,9 @@ const createSecretManager = ({
     getReadParams: (reference) => {
       const input = toInput(reference);
       if (!input) {
-        throw new SecretValidationError(`A ${displayName} reference looks like ${referenceFormat}`);
+        throw new SecretValidationError(
+          `A reference for the ${displayName} connector looks like ${referenceFormat}`
+        );
       }
       // The connector's own rules for the input of its action.
       const result = action.input.safeParse(input);
