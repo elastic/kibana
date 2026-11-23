@@ -126,6 +126,26 @@ describe('useSendMessageMutation', () => {
     expect(messageOf(conversationStreamService.getSnapshot(conversationId))).toBe('Hi there');
   });
 
+  it('skips the release when the connection is closed locally: no refetch, composer and pending message untouched', async () => {
+    const { bindings, source, result } = setup();
+    const resetAttachments = jest.fn();
+
+    act(() => result.current.mutate({ ...vars, resetAttachments }));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    act(() => source.next(started as ChatEvent));
+    act(() => {
+      result.current.detachAll();
+      // The aborted fetch rejects, as core http does once the signal fires.
+      source.error(Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' }));
+    });
+
+    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    expect(mockGet).not.toHaveBeenCalled();
+    expect(resetAttachments).not.toHaveBeenCalled();
+    expect(bindings.clearPendingMessage).not.toHaveBeenCalled();
+    expect(mockAbort).not.toHaveBeenCalled();
+  });
+
   it('records the staged attachments with the pending message, not the screen context', async () => {
     const { bindings, result } = setup();
     const attachment = { id: 'a-1', type: 'text', data: { content: 'hello' } };
@@ -338,6 +358,68 @@ describe('useSendMessageMutation', () => {
 
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
     expect(mockAddDanger).not.toHaveBeenCalled();
+  });
+
+  describe('a rejection the caller handles', () => {
+    const busy = Object.assign(new Error('Conversation busy'), {
+      name: 'HttpFetchError',
+      request: {},
+      response: { status: 409 },
+      body: {
+        statusCode: 409,
+        message: 'Conversation busy',
+        attributes: { code: 'conversationBusy' },
+      },
+    });
+
+    it('shows no toast when the caller takes the rejection', async () => {
+      const { bindings, source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([]));
+      const onRejected = jest.fn().mockReturnValue(true);
+
+      act(() => result.current.mutate({ ...vars, onRejected }));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => source.error(busy));
+
+      await waitFor(() =>
+        expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId)
+      );
+      expect(onRejected).toHaveBeenCalledWith(busy);
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    it('shows the toast when the caller declines the rejection', async () => {
+      const { source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([]));
+      const onRejected = jest.fn().mockReturnValue(false);
+
+      act(() => result.current.mutate({ ...vars, onRejected }));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => source.error(busy));
+
+      await waitFor(() =>
+        expect(mockAddDanger).toHaveBeenCalledWith({ title: 'Conversation busy' })
+      );
+      expect(onRejected).toHaveBeenCalledWith(busy);
+    });
+
+    it('does not consult the caller for an error after the run started', async () => {
+      const { bindings, source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
+      const onRejected = jest.fn().mockReturnValue(true);
+
+      act(() => result.current.mutate({ ...vars, onRejected }));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => {
+        source.next(started as ChatEvent);
+        source.error(busy);
+      });
+
+      await waitFor(() =>
+        expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId)
+      );
+      expect(onRejected).not.toHaveBeenCalled();
+    });
   });
 
   it.each([502, 503, 504])(

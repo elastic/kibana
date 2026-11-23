@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { executeEsql, type EsqlResponse } from './execute_esql';
+export {
+  executeEsql,
+  EsqlExecutionTimeoutError,
+  isEsqlExecutionTimeoutError,
+  type EsqlResponse,
+} from './execute_esql';
 export { extractEsqlQueries, esqlResponseToJson } from './misc';
 export { interpolateEsqlQuery } from './interpolate_query';
 export { applyLimit } from './apply_limit';

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   AreaSeries,
   Axis,
@@ -19,9 +18,9 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import type { DomainRange } from '@elastic/charts';
 import {
   EuiButtonGroup,
+  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -30,13 +29,27 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import {
+  DEFAULT_OVERVIEW_PERCENTILE,
+  OVERVIEW_PERCENTILES,
+} from '../../../../../common/overview_filters';
+import type { OverviewPercentile } from '../../../../../common/overview_filters';
+import type { HistogramBuckets } from '../../../../../common/types/applications';
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { ChartArea } from '../../../../components/chart_area';
+import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
+import { getTimeChartXDomain, type TimeChartXDomain } from '../../../../utils/histogram_interval';
+import {
+  APPLICATION_OVERVIEW_EBT_ELEMENTS,
+  DIGITAL_EXPERIENCE_EBT_ACTIONS,
+} from '../../../../ebt_constants';
+import { usePersistedChoice } from '../../../../hooks/use_persisted_choice';
 import { useFormatters } from '../../../../hooks/use_formatters';
-import { LOAD_TIME_LABEL, PAGE_LOADS_LABEL } from '../../../../labels';
+import { loadTimeLabel, PAGE_LOADS_LABEL } from '../../../../labels';
 import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../../utils/brush_time_range';
 import { formatDurationMs } from '../../../../utils/format_duration';
@@ -76,7 +89,27 @@ const CHART_TYPE_LEGEND = i18n.translate(
   { defaultMessage: 'Trend chart type' }
 );
 
-type TrendChartType = 'area' | 'bar';
+const PERCENTILE_LABEL = i18n.translate('xpack.digitalExperience.overview.trends.percentileLabel', {
+  defaultMessage: 'Load time percentile',
+});
+
+const PERCENTILE_PREPEND = i18n.translate(
+  'xpack.digitalExperience.overview.trends.percentilePrepend',
+  { defaultMessage: 'Percentile' }
+);
+
+const PERCENTILE_OPTIONS = OVERVIEW_PERCENTILES.map((percentile) => ({
+  value: percentile,
+  text: `p${percentile}`,
+}));
+
+const toPercentile = (value: string): OverviewPercentile =>
+  OVERVIEW_PERCENTILES.find((percentile) => String(percentile) === value) ??
+  DEFAULT_OVERVIEW_PERCENTILE;
+
+const TREND_CHART_TYPES = ['area', 'bar'] as const;
+
+type TrendChartType = (typeof TREND_CHART_TYPES)[number];
 
 const CHART_TYPE_OPTIONS: Array<{ id: TrendChartType; label: string; iconType: string }> = [
   {
@@ -95,16 +128,6 @@ const CHART_TYPE_OPTIONS: Array<{ id: TrendChartType; label: string; iconType: s
   },
 ];
 
-const toChartType = (value: string | undefined): TrendChartType =>
-  value === 'bar' ? 'bar' : 'area';
-
-/** The chart type the user last picked, kept across visits; areas by default. */
-const useTrendChartType = (): [TrendChartType, (chartType: TrendChartType) => void] => {
-  const [saved, setSaved] = useLocalStorage<TrendChartType>(CHART_TYPE_STORAGE_KEY, 'area');
-  // Anything else in the storage, e.g. from an older version, falls back to areas.
-  return [toChartType(saved), setSaved];
-};
-
 /** One metric over the time range, as areas or bars on the shared time axis. */
 function TrendChart({
   points,
@@ -117,12 +140,12 @@ function TrendChart({
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
-  metric: 'pageLoads' | 'loadTimeP75Ms';
+  metric: 'pageLoads' | 'loadTimePercentileMs';
   name: string;
   color: string;
   formatValue: (value: number) => string;
   chartType: TrendChartType;
-  xDomain: DomainRange | undefined;
+  xDomain: TimeChartXDomain | undefined;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
   const baseTheme = useElasticChartsTheme();
@@ -141,7 +164,7 @@ function TrendChart({
   };
 
   return (
-    <Chart size={{ height: CHART_HEIGHT }}>
+    <Chart size={{ height: '100%' }}>
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
@@ -150,6 +173,7 @@ function TrendChart({
         xDomain={xDomain}
       />
       <Tooltip headerFormatter={({ value }) => formatDate(value)} />
+      <PartialBucketsEndzones xDomain={xDomain} />
       <Axis id="time" position={Position.Bottom} style={HIDDEN_AXIS_LINES} />
       <Axis
         id={`${metric}Axis`}
@@ -192,8 +216,13 @@ function TrendRow({
   'data-test-subj': string;
 }) {
   return (
-    <div data-test-subj={dataTestSubj}>
-      <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+    // A column of its own: the rows share the height of the panel, which is as tall as the panel
+    // of the Core Web Vitals beside it, instead of leaving it empty under the charts.
+    <div
+      data-test-subj={dataTestSubj}
+      css={{ display: 'flex', flexDirection: 'column', flex: '1 1 0' }}
+    >
+      <EuiFlexGroup css={{ flexGrow: 0 }} alignItems="baseline" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
             {label}
@@ -208,6 +237,7 @@ function TrendRow({
         )}
       </EuiFlexGroup>
       <ChartArea
+        grow
         height={CHART_HEIGHT}
         isLoading={isLoading}
         hasData={hasData}
@@ -225,37 +255,62 @@ function TrendRow({
  */
 export function OverviewTrends({
   points,
+  histogram,
   pageLoads,
-  loadTimeP75Ms,
+  loadTimePercentileMs,
+  percentile,
+  onPercentileChange,
   isLoading,
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
+  /** The buckets of the points; `undefined` until the first response. */
+  histogram: HistogramBuckets | undefined;
   /** The page loads of the whole range, the sum of the points. */
   pageLoads: number;
   /** The load time of the whole range, which the points' percentiles do not add up to. */
-  loadTimeP75Ms: number | null;
+  loadTimePercentileMs: number | null;
+  /** The percentile of the load time and its trend. */
+  percentile: OverviewPercentile;
+  onPercentileChange: (percentile: OverviewPercentile) => void;
   isLoading: boolean;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
   const { euiTheme } = useEuiTheme();
-  const { formatNumber } = useFormatters();
-  const [chartType, setChartType] = useTrendChartType();
+  const { formatNumber, timeZone } = useFormatters();
+  // The chart type the user last picked, kept across visits; areas by default.
+  const [chartType, setChartType] = usePersistedChoice(
+    CHART_TYPE_STORAGE_KEY,
+    TREND_CHART_TYPES,
+    'area'
+  );
 
   const hasPageLoads = points.some((point) => point.pageLoads > 0);
-  const hasLoadTimes = points.some((point) => point.loadTimeP75Ms !== null);
+  const hasLoadTimes = points.some((point) => point.loadTimePercentileMs !== null);
 
   // Both charts span the whole time range, whatever each one has data for.
-  const xDomain: DomainRange | undefined =
-    points.length > 0
-      ? { min: points[0].timestamp, max: points[points.length - 1].timestamp }
-      : undefined;
+  const xDomain = getTimeChartXDomain({
+    points,
+    histogram,
+    timeZone,
+    hasBars: chartType === 'bar',
+  });
 
   const chartProps = { points, chartType, xDomain, onTimeRangeSelect };
 
   return (
-    <EuiPanel hasBorder data-test-subj="digitalExperienceOverviewTrends">
-      <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="s">
+    <EuiPanel
+      hasBorder
+      data-test-subj="digitalExperienceOverviewTrends"
+      css={{ display: 'flex', flexDirection: 'column' }}
+    >
+      {/* A flex group grows by default, which in the panel's column would take room from the charts. */}
+      <EuiFlexGroup
+        css={{ flexGrow: 0 }}
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+      >
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h2>{TRENDS_TITLE}</h2>
@@ -263,6 +318,22 @@ export function OverviewTrends({
           <EuiText size="xs" color="subdued">
             {TRENDS_SUBTITLE}
           </EuiText>
+        </EuiFlexItem>
+        {/* Wide enough for the label of the select, which it would otherwise cut short. */}
+        <EuiFlexItem grow={false} css={{ minInlineSize: '11rem' }}>
+          <EuiSelect
+            compressed
+            prepend={PERCENTILE_PREPEND}
+            aria-label={PERCENTILE_LABEL}
+            options={PERCENTILE_OPTIONS}
+            value={percentile}
+            onChange={(event) => onPercentileChange(toPercentile(event.target.value))}
+            data-test-subj="digitalExperienceOverviewPercentile"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+              element: APPLICATION_OVERVIEW_EBT_ELEMENTS.PERCENTILE,
+            })}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
@@ -273,7 +344,7 @@ export function OverviewTrends({
             isIconOnly
             options={CHART_TYPE_OPTIONS}
             idSelected={chartType}
-            onChange={(id) => setChartType(toChartType(id))}
+            onChange={setChartType}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -297,16 +368,22 @@ export function OverviewTrends({
       <EuiSpacer size="s" />
       <TrendRow
         data-test-subj="digitalExperienceOverviewLoadTimeTrend"
-        label={LOAD_TIME_LABEL}
-        value={loadTimeP75Ms === null ? <EmptyCellValue /> : formatDurationMs(loadTimeP75Ms)}
+        label={loadTimeLabel(percentile)}
+        value={
+          loadTimePercentileMs === null ? (
+            <EmptyCellValue />
+          ) : (
+            formatDurationMs(loadTimePercentileMs)
+          )
+        }
         isLoading={isLoading}
         hasData={hasLoadTimes}
         emptyMessage={hasPageLoads ? NO_LOAD_TIMES : NO_PAGE_LOADS}
       >
         <TrendChart
           {...chartProps}
-          metric="loadTimeP75Ms"
-          name={LOAD_TIME_LABEL}
+          metric="loadTimePercentileMs"
+          name={loadTimeLabel(percentile)}
           color={euiTheme.colors.vis.euiColorVis1}
           formatValue={formatDurationMs}
         />

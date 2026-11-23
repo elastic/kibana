@@ -23,9 +23,9 @@ import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
   getSeverityWithLow,
-  getThemeResolvedSeverityColor,
   ML_ANOMALY_THRESHOLD,
 } from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 

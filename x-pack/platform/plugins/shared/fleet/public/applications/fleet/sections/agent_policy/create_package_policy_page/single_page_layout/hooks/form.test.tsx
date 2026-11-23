@@ -289,6 +289,31 @@ describe('useOnSubmit', () => {
   });
 
   describe('copy source (defaultPolicyData) field carry-over', () => {
+    it.each(["${host.os.type} == 'linux'", null])(
+      'carries the integration condition %p onto the copied base policy',
+      async (condition) => {
+        renderResult = testRenderer.renderHook(() =>
+          useOnSubmit({
+            agentCount: 0,
+            packageInfo,
+            withSysMonitoring: false,
+            selectedPolicyTab: SelectedPolicyTab.NEW,
+            newAgentPolicy: { name: 'test', namespace: '' },
+            queryParamsPolicyId: undefined,
+            hasFleetAddAgentsPrivileges: true,
+            setNewAgentPolicy: jest.fn(),
+            setSelectedPolicyTab: jest.fn(),
+            defaultPolicyData: { name: 'copied-policy', condition },
+          })
+        );
+
+        await waitFor(() => {
+          expect(renderResult.result.current.packagePolicy.name).toBe('copied-policy');
+          expect(renderResult.result.current.packagePolicy.condition).toBe(condition);
+        });
+      }
+    );
+
     // Copying a policy seeds the create form from `defaultPolicyData` via a `pick` allowlist.
     // Agentless copies hydrate that source through `agentlessPolicyToPackagePolicy`, which carries
     // `global_data_tags` and `var_group_selections`; the allowlist must forward them or they are

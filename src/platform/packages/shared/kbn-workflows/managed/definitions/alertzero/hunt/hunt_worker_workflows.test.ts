@@ -52,7 +52,10 @@ interface YamlStep {
   with?: {
     result_report_intent_targets?: string;
     result_behaviors?: string;
+    result_coverage_gaps?: string;
     report_intent_targets?: string;
+    type?: string;
+    render_inline?: boolean;
     'workflow-id'?: string;
     'run-as-mode'?: string;
     inputs?: Record<string, unknown>;
@@ -127,6 +130,15 @@ describe('Hunt Watch worker chain', () => {
     expect(names.indexOf('append_workflow_execution')).toBeLessThan(
       names.indexOf('attach_threat_report')
     );
+  });
+
+  // `render_inline` is the only thing that shows this card in the thread; the agent does not render it.
+  it('attaches the threat report as an inline card', () => {
+    const attach = stepIn(findOrCreateInvestigation.steps, 'attach_threat_report');
+
+    expect(attach?.type).toBe('ai.attachment.add');
+    expect(attach?.with?.type).toBe('security.threat');
+    expect(attach?.with?.render_inline).toBe(true);
   });
 
   it.each([
@@ -325,6 +337,69 @@ describe('Hunt Watch worker chain', () => {
           },
         })
       ).toEqual(expected);
+    });
+
+    describe('coverage_gaps', () => {
+      const gap = (id: string) => ({
+        reason: 'unknown_technique_id',
+        detail: id,
+        technique_id: id,
+      });
+      const gapsOutput = (result: Record<string, unknown> | undefined) =>
+        evaluateExpression(resultVariables().result_coverage_gaps as string, {
+          steps: {
+            read_hunt_result: result ? { output: { data: { result } } } : undefined,
+          },
+        });
+
+      it('concatenates the coordinator, Tier 1 and Tier 2 gaps, coordinator first', () => {
+        expect(
+          gapsOutput({
+            incomplete: [gap('C')],
+            tier1: { incomplete: [gap('T1')] },
+            tier2: { incomplete: [gap('T2')] },
+          })
+        ).toEqual([gap('C'), gap('T1'), gap('T2')]);
+      });
+
+      it.each([
+        [
+          'no coordinator gaps',
+          { tier1: { incomplete: [gap('T1')] }, tier2: { incomplete: [gap('T2')] } },
+          ['T1', 'T2'],
+        ],
+        [
+          'no Tier 1 gaps',
+          { incomplete: [gap('C')], tier1: {}, tier2: { incomplete: [gap('T2')] } },
+          ['C', 'T2'],
+        ],
+        [
+          'no Tier 2 (it never ran)',
+          { incomplete: [gap('C')], tier1: { incomplete: [gap('T1')] } },
+          ['C', 'T1'],
+        ],
+      ])('renders %s without error', (_name, result, expected) => {
+        expect(
+          (gapsOutput(result) as Array<{ technique_id: string }>).map((entry) => entry.technique_id)
+        ).toEqual(expected);
+      });
+
+      it.each([
+        ['every list nil', {}],
+        ['no read at all', undefined],
+      ])('is an empty array with %s', (_name, result) => {
+        expect(gapsOutput(result)).toEqual([]);
+      });
+
+      it('bounds the list at 100 and keeps the coordinator gaps ahead of technique gaps', () => {
+        const many = Array.from({ length: 150 }, (_, index) => gap(`T${index}`));
+        const bounded = gapsOutput({
+          incomplete: [{ reason: 'input_truncated', detail: 'prefix only' }],
+          tier2: { incomplete: many },
+        }) as Array<{ reason: string }>;
+        expect(bounded).toHaveLength(100);
+        expect(bounded[0].reason).toBe('input_truncated');
+      });
     });
 
     it('reads behaviors as an empty array when Tier 2 never ran', () => {
@@ -592,7 +667,12 @@ describe('Hunt Watch worker chain', () => {
   describe('hunt — result status from the polled envelope', () => {
     const variables = stepIn(huntSteps, 'resolve_result_status')?.with as Record<string, string>;
     const liquid = createWorkflowLiquidEngine();
-    const render = (template: string, readOutput: unknown): string =>
+    const render = (
+      template: string,
+      readOutput: unknown,
+      writeEvidenceError?: string,
+      settledByCap?: boolean
+    ): string =>
       liquid
         .parseAndRenderSync(template, {
           inputs: { investigationConversationId: 'conv-1' },
@@ -602,11 +682,18 @@ describe('Hunt Watch worker chain', () => {
               output: { run_id: 'run-1', state: 'running', result_attachment_id: 'att-1' },
             },
             ...(readOutput === undefined ? {} : { read_hunt_result: { output: readOutput } }),
+            ...(writeEvidenceError === undefined
+              ? settledByCap === undefined
+                ? {}
+                : { write_evidence: { output: { acknowledged: true, settledByCap } } }
+              : { write_evidence: { error: { message: writeEvidenceError } } }),
           },
         })
         .trim();
-    const status = (readOutput: unknown) => render(variables.result_status, readOutput);
-    const reason = (readOutput: unknown) => render(variables.result_reason, readOutput);
+    const status = (readOutput: unknown, writeEvidenceError?: string, settledByCap?: boolean) =>
+      render(variables.result_status, readOutput, writeEvidenceError, settledByCap);
+    const reason = (readOutput: unknown, writeEvidenceError?: string, settledByCap?: boolean) =>
+      render(variables.result_reason, readOutput, writeEvidenceError, settledByCap);
 
     const LIMIT_REASON =
       'Hunt coordinator did not finish before the hunt child stopped polling (60 reads, 10s apart); see hunt execution exec-1.';
@@ -626,6 +713,90 @@ describe('Hunt Watch worker chain', () => {
       };
       expect(status(completed)).toBe('partial');
       expect(reason(completed)).toContain('incomplete but retryable (Tier 2 timed out)');
+    });
+
+    it('is retired_incomplete for a retryable run the write settled because the ledger is full', () => {
+      const completed = {
+        data: {
+          state: 'completed',
+          result: { completeness: 'incomplete_retryable', message: 'Tier 2 timed out' },
+        },
+      };
+      expect(status(completed, undefined, true)).toBe('retired_incomplete');
+      expect(reason(completed, undefined, true)).toContain('coverage ledger is full');
+      expect(status(completed, undefined, false)).toBe('partial');
+    });
+
+    it('stays partial for a ledger-settled retryable run with a confirmed hit', () => {
+      const completed = {
+        data: {
+          state: 'completed',
+          result: {
+            completeness: 'incomplete_retryable',
+            has_confirmed_hit: true,
+            message: 'Tier 2 timed out',
+          },
+        },
+      };
+      expect(status(completed, undefined, true)).toBe('partial');
+    });
+
+    // What the coordinator writes when both tiers ran and the scope dropped an index.
+    const BOTH_TIERS_MESSAGE =
+      'IOC Hunt: environment_hits_found. Behavior Hunt: behaviors_proposed (3 proposed, 1 coverage gap(s)). The default data view names `custom-edr-1`, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.';
+    const incompleteFinal = (hasConfirmedHit: boolean) => ({
+      data: {
+        state: 'completed',
+        result: {
+          completeness: 'incomplete_final',
+          has_confirmed_hit: hasConfirmedHit,
+          message: BOTH_TIERS_MESSAGE,
+        },
+      },
+    });
+
+    it('is retired_incomplete for a settled incomplete_final run with no hit', () => {
+      expect(status(incompleteFinal(false))).toBe('retired_incomplete');
+      expect(reason(incompleteFinal(false))).toContain(
+        'retired without having been fully searched; its executed searches are recorded'
+      );
+    });
+
+    it('is retired_incomplete for a settled incomplete_final run with a confirmed hit', () => {
+      expect(status(incompleteFinal(true))).toBe('retired_incomplete');
+      // The write records `hit` for this run, so the no-hit wording about evidence "marked
+      // incomplete rather than clean" would be false here.
+      expect(reason(incompleteFinal(true))).toBe(
+        `The confirmed hit was recorded on the report, but the hunt left a gap a later run could not close (${BOTH_TIERS_MESSAGE}), so the report is retired without having been fully searched; its executed searches are recorded.`
+      );
+    });
+
+    it('stays partial for an incomplete_final run with a confirmed hit whose evidence write failed', () => {
+      expect(status(incompleteFinal(true), 'write failed: 503')).toBe('partial');
+      expect(reason(incompleteFinal(true), 'write failed: 503')).toContain(
+        'could not be recorded on the report (write failed: 503)'
+      );
+    });
+
+    it('stays partial, quoting the error, when the evidence write failed and the gate was not stamped', () => {
+      expect(status(incompleteFinal(false), 'write failed: 503')).toBe('partial');
+      expect(reason(incompleteFinal(false), 'write failed: 503')).toContain(
+        'could not be recorded on the report (write failed: 503)'
+      );
+      expect(reason(incompleteFinal(false), 'write failed: 503')).toContain(
+        'stays eligible for a later sweep'
+      );
+    });
+
+    it('stays partial for incomplete_retryable whatever the evidence write did', () => {
+      const retryable = {
+        data: {
+          state: 'completed',
+          result: { completeness: 'incomplete_retryable', message: 'x' },
+        },
+      };
+      expect(status(retryable)).toBe('partial');
+      expect(status(retryable, 'boom')).toBe('partial');
     });
 
     it('is failed with the fixed limit reason when the poll ends on a run still running', () => {
@@ -1362,5 +1533,310 @@ describe('Hunt Watch worker chain', () => {
         );
       });
     });
+  });
+});
+
+describe('Hunt Watch worker: a retired_incomplete hunt', () => {
+  const liquid = createWorkflowLiquidEngine();
+  const packageInputs = () => stepIn(workerSteps, 'package_report')?.with?.inputs ?? {};
+  const outcomeWith = () =>
+    stepIn(workerSteps, 'resolve_run_outcome')?.with as Record<string, string>;
+  const conclusion = (context: Record<string, unknown>): string => {
+    const message = (
+      stepIn(workerSteps, 'write_run_conclusion')?.with?.inputs as Record<string, string>
+    ).message;
+    return liquid
+      .parseAndRenderSync(message, {
+        foreach: { item: 'rpt-1' },
+        execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
+        ...context,
+      })
+      .trim();
+  };
+  const retiredContext = (huntStatus: string, coverageGaps: unknown[] = []) => ({
+    steps: {
+      resolve_run_outcome: { output: { outcome: 'completed' } },
+      hunt: {
+        output: {
+          status: huntStatus,
+          headline: 'No confirmed hits',
+          reason: 'The hunt left a gap a later run could not close.',
+          coverage_gaps: coverageGaps,
+        },
+      },
+      package_report: {
+        output: { status: 'packaged', summary: 'Closed this Investigation as benign.' },
+      },
+    },
+  });
+
+  it('keeps the hunt reason in the note when packaging did not complete on a retired run', () => {
+    const base = retiredContext('retired_incomplete');
+    const message = conclusion({
+      steps: {
+        ...base.steps,
+        resolve_run_outcome: { output: { outcome: 'partial' } },
+        package_report: { output: { status: 'run_incomplete', reason: 'No current-run SSE' } },
+      },
+    });
+
+    expect(message).toContain('### Hunt Watch run partial: packaging did not complete');
+    expect(message).toContain(
+      '**Hunt:** No confirmed hits. The hunt left a gap a later run could not close.'
+    );
+  });
+
+  it('adds no hunt reason to that note when the hunt itself was not retired', () => {
+    const base = retiredContext('success');
+    const message = conclusion({
+      steps: {
+        ...base.steps,
+        resolve_run_outcome: { output: { outcome: 'partial' } },
+        package_report: { output: { status: 'run_incomplete', reason: 'No current-run SSE' } },
+      },
+    });
+
+    expect(message).toContain('**Hunt:** No confirmed hits.\n');
+    expect(message).not.toContain('The hunt left a gap');
+  });
+
+  it('forwards the hunt coverage gaps to packaging, and an empty list when there are none', () => {
+    const gap = { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' };
+    expect(
+      evaluateExpression(packageInputs().coverageGaps as string, {
+        steps: { hunt: { output: { coverage_gaps: [gap] } } },
+      })
+    ).toEqual([gap]);
+    expect(
+      evaluateExpression(packageInputs().coverageGaps as string, {
+        steps: { hunt: { output: {} } },
+      })
+    ).toEqual([]);
+  });
+
+  it.each([
+    ['packaged it', 'packaged', 'completed'],
+    ['could not package it', 'run_incomplete', 'partial'],
+  ])('counts the branch by what packaging did when it %s', (_name, packageStatus, expected) => {
+    expect(
+      liquid
+        .parseAndRenderSync(outcomeWith().outcome, {
+          steps: {
+            hunt: { output: { status: 'retired_incomplete' } },
+            package_report: { output: { status: packageStatus } },
+          },
+        })
+        .trim()
+    ).toBe(expected);
+  });
+
+  it('closes with a heading that says the report retired without a full search', () => {
+    const message = conclusion(retiredContext('retired_incomplete'));
+    expect(message).toContain(
+      '### Hunt Watch run completed: the report is retired without a full search'
+    );
+    expect(message).toContain('no confirmed hits, but part of the report could not be searched');
+    expect(message).toContain('The report will not be swept again on its own');
+    expect(message).toContain('Closed this Investigation as benign.');
+  });
+
+  it('names a confirmed hit when the retired run packaged one', () => {
+    const message = conclusion({
+      steps: {
+        ...retiredContext('retired_incomplete').steps,
+        hunt: {
+          output: {
+            ...retiredContext('retired_incomplete').steps.hunt.output,
+            hit: true,
+            headline: 'Confirmed hit',
+          },
+        },
+      },
+    });
+    expect(message).toContain(
+      'confirmed hit(s) were packaged, but part of the report could not be searched'
+    );
+    expect(message).not.toContain('no confirmed hits, but');
+  });
+
+  // Whether the Investigation summary names the gaps depends on packaging having closed it, which
+  // only the packaging summary knows (a held or failed close still returns `packaged`).
+  it('leaves the claim about naming the gaps to the packaging summary', () => {
+    const gaps = [{ reason: 'input_truncated', detail: 'x' }];
+    for (const message of [
+      conclusion(retiredContext('retired_incomplete', gaps)),
+      conclusion(retiredContext('retired_incomplete')),
+    ]) {
+      expect(message).not.toContain('names what was not searched');
+      expect(message).toContain('The report will not be swept again on its own');
+    }
+  });
+
+  it('never claims coverage items were recorded, which the Worker cannot see', () => {
+    expect(conclusion(retiredContext('retired_incomplete'))).not.toContain(
+      'coverage knowledge item'
+    );
+  });
+
+  describe('when nothing reached the environment', () => {
+    const nothingSearched = {
+      reason: 'nothing_searched',
+      detail: 'IOC Hunt mapped no searchable term and Behavior Hunt executed no query.',
+    };
+
+    it('closes with a short message that is not a clean result and says how to replay', () => {
+      const context = retiredContext('retired_incomplete', [nothingSearched]);
+      context.steps.package_report.output.summary =
+        'No confirmed hits, so packaging closed this Investigation as other rather than benign, because no search ran and the report is retired without one.';
+
+      expect(conclusion(context)).toBe(
+        [
+          '### Hunt Watch run completed: nothing was searched',
+          '- **Report:** `rpt-1`',
+          '- **Packaging:** No confirmed hits, so packaging closed this Investigation as other rather than benign, because no search ran and the report is retired without one.',
+          '- **What this means:** no search ran, so this says nothing about whether the environment is clean. The report will not be swept again on its own; a manual run targeting this report replays it.',
+          '- **Run:** `exec-1` ([full per-stage detail](https://kibana/exec-1))',
+        ].join('\n')
+      );
+    });
+
+    it('keeps the packaging note that says why the Investigation stayed open', () => {
+      const context = retiredContext('retired_incomplete', [nothingSearched]);
+      context.steps.package_report.output.summary =
+        'No confirmed hits this run, but the Investigation still has a Proposal from an earlier run, so packaging left it open.';
+
+      expect(conclusion(context)).toContain(
+        '- **Packaging:** No confirmed hits this run, but the Investigation still has a Proposal from an earlier run, so packaging left it open.'
+      );
+    });
+
+    it('stays short when other gaps are recorded beside it', () => {
+      const message = conclusion(
+        retiredContext('retired_incomplete', [
+          { reason: 'input_truncated', detail: 'x' },
+          nothingSearched,
+        ])
+      );
+
+      expect(message).toContain('### Hunt Watch run completed: nothing was searched');
+      expect(message).not.toContain('**Hunt:**');
+    });
+
+    it('keeps the long form when some search ran and a gap remained', () => {
+      const message = conclusion(
+        retiredContext('retired_incomplete', [{ reason: 'input_truncated', detail: 'x' }])
+      );
+
+      expect(message).toContain(
+        '### Hunt Watch run completed: the report is retired without a full search'
+      );
+      expect(message).toContain('**Packaging:**');
+    });
+
+    it('keeps the long form for a hunt that was not retired', () => {
+      const message = conclusion(retiredContext('success', [nothingSearched]));
+
+      expect(message).toContain('### Hunt Watch run completed\n');
+      expect(message).not.toContain('nothing was searched');
+    });
+  });
+
+  it('keeps the generic completed heading for a successful hunt', () => {
+    const message = conclusion(retiredContext('success'));
+    expect(message).toContain('### Hunt Watch run completed\n');
+    expect(message).not.toContain('retired without a full search');
+  });
+});
+
+describe('Hunt Watch packaging summary for a settled no-hit run', () => {
+  const template = (
+    stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<string, string>
+  ).package_summary;
+  const summary = (huntStatus: string, coverageGaps?: unknown[], status = 'packaged') =>
+    createWorkflowLiquidEngine()
+      .parseAndRenderSync(template, {
+        inputs: { huntStatus, ...(coverageGaps ? { coverageGaps } : {}) },
+        steps: {
+          decide_and_package: {
+            output: {
+              status,
+              dismiss: true,
+              converged: [],
+              proposals: [],
+              coverage: { written: [1, 2, 3], skipped: [] },
+            },
+          },
+        },
+        variables: { package_status: status === 'packaged' ? 'success' : 'run_incomplete' },
+      })
+      .trim();
+
+  it('says the Investigation summary names what was not searched when the gaps arrived', () => {
+    expect(summary('retired_incomplete', [{ reason: 'input_truncated', detail: 'x' }])).toBe(
+      'No confirmed hits, so packaging closed this Investigation as other rather than benign, because part of the report could not be searched and the report is retired without a full search; the Investigation summary names what was not searched; recorded 3 coverage knowledge items for Detection Watch.'
+    );
+  });
+
+  it('makes no claim about naming the gaps when none arrived (an older Worker)', () => {
+    expect(summary('retired_incomplete')).toBe(
+      'No confirmed hits, so packaging closed this Investigation as other rather than benign, because part of the report could not be searched and the report is retired without a full search; recorded 3 coverage knowledge items for Detection Watch.'
+    );
+  });
+
+  it('says no search ran, not that part of the report could not be searched, when nothing was searched', () => {
+    const text = summary('retired_incomplete', [
+      { reason: 'nothing_searched', detail: 'nothing reached the environment' },
+    ]);
+    expect(text).toBe(
+      'No confirmed hits, so packaging closed this Investigation as other rather than benign, because no search ran and the report is retired without one; recorded 3 coverage knowledge items for Detection Watch.'
+    );
+    expect(text).not.toContain('names what was not searched');
+  });
+
+  it('keeps the clean wording for a successful run', () => {
+    expect(summary('success')).toBe(
+      'No confirmed hits, so packaging closed this Investigation as benign and recorded 3 coverage knowledge items for Detection Watch.'
+    );
+  });
+});
+
+describe('Hunt Watch packaging summary for an incomplete run', () => {
+  const template = (
+    stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<string, string>
+  ).package_summary;
+  const summary = (hasConfirmedHit: boolean) =>
+    createWorkflowLiquidEngine()
+      .parseAndRenderSync(template, {
+        inputs: { huntStatus: 'partial', hasConfirmedHit },
+        steps: { decide_and_package: { output: { status: 'run_incomplete' } } },
+        variables: { package_status: 'run_incomplete', package_reason: 'no attachment' },
+      })
+      .trim();
+
+  it('promises a later sweep for a partial run with no confirmed hit', () => {
+    expect(summary(false)).toContain('a later sweep hunts this report again');
+  });
+
+  it('does not promise a re-hunt when the run had a confirmed hit', () => {
+    const message = summary(true);
+    expect(message).not.toContain('later sweep');
+    expect(message).toContain('stays open for a retry');
+  });
+});
+
+describe('Hunt Watch dismissal close reason', () => {
+  const template = (
+    (stepIn(packageReportSteps, 'dismiss_investigation_if_clean')?.with as Record<string, unknown>)
+      .updates as Record<string, string>
+  ).close_reason;
+  const closeReason = (huntStatus: string) =>
+    createWorkflowLiquidEngine().parseAndRenderSync(template, { inputs: { huntStatus } }).trim();
+
+  it('closes a fully searched clean run as benign', () => {
+    expect(closeReason('success')).toBe('benign');
+  });
+
+  it('closes a retired run as other, so it is not mistaken for a full clean close', () => {
+    expect(closeReason('retired_incomplete')).toBe('other');
   });
 });

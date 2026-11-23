@@ -74,8 +74,10 @@ describe('ObservabilityAlertingPlugin', () => {
           RulesPage: () => null,
           RuleLibraryPage: () => null,
           EpisodesPage: () => null,
+          AlertsProvider: ({ children }: { children?: React.ReactNode }) => children ?? null,
           ActionPoliciesPage: () => null,
           ExecutionHistoryPage: () => null,
+          ImportsPage: () => null,
           CreateRuleOptionsFlyout: () => null,
           createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(

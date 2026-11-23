@@ -28,9 +28,10 @@ import type {
   ConversationRoundStep,
   RoundInput,
   BackgroundExecutionState,
+  DeliveredMessageStepData,
+  InterimAnswerStepData,
   SubagentRosterEntry,
   SubstitutionStepData,
-  TodoItem,
 } from './conversation';
 import type {
   PromptRequestSource,
@@ -50,6 +51,8 @@ export enum ChatEventType {
   toolUi = 'tool_ui',
   toolResult = 'tool_result',
   reasoning = 'reasoning',
+  modelReasoningChunk = 'model_reasoning_chunk',
+  modelReasoning = 'model_reasoning',
   messageChunk = 'message_chunk',
   messageComplete = 'message_complete',
   thinkingComplete = 'thinking_complete',
@@ -63,6 +66,8 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
+  messageDelivered = 'message_delivered',
+  interimAnswer = 'interim_answer',
   subagentRosterUpdated = 'subagent_roster_updated',
   userQuestionAsked = 'user_question_asked',
   userQuestionAnswered = 'user_question_answered',
@@ -83,6 +88,8 @@ export interface ToolCallEventData {
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
   tool_type?: ToolType;
+  /** Short description, provided by the model, of what the agent is doing with this call. */
+  intent?: string;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;
@@ -236,7 +243,10 @@ export const createUserQuestionAnsweredEvent = (
 export interface ReasoningEventData {
   /** plain text reasoning content */
   reasoning: string;
-  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  /**
+   * when reasoning is bound to a tool call, the corresponding tool call ID
+   * @deprecated No longer produced; kept for conversations stored before tool call intent.
+   */
   tool_call_id?: string;
   /** when reasoning is bound to a tool call, the corresponding tool call group */
   tool_call_group_id?: string;
@@ -250,6 +260,46 @@ export const isReasoningEvent = (
   event: AgentBuilderEvent<string, any>
 ): event is ReasoningEvent => {
   return event.type === ChatEventType.reasoning;
+};
+
+export interface ModelReasoningChunkEventData {
+  /** ID of the LLM response this chunk is bound to, shared with its `message_chunk` events */
+  message_id: string;
+  /** chunk (reasoning text delta) */
+  text_chunk: string;
+}
+
+export type ModelReasoningChunkEvent = ChatEventBase<
+  ChatEventType.modelReasoningChunk,
+  ModelReasoningChunkEventData
+>;
+
+export const isModelReasoningChunkEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ModelReasoningChunkEvent => {
+  return event.type === ChatEventType.modelReasoningChunk;
+};
+
+// Model reasoning
+
+export interface ModelReasoningEventData {
+  /** ID of the LLM response this reasoning is bound to, shared with its `model_reasoning_chunk` events */
+  message_id: string;
+  /** full reasoning text of the LLM response */
+  reasoning: string;
+  /** when the LLM response produced tool calls, the corresponding tool call group ID */
+  tool_call_group_id?: string;
+}
+
+export type ModelReasoningEvent = ChatEventBase<
+  ChatEventType.modelReasoning,
+  ModelReasoningEventData
+>;
+
+export const isModelReasoningEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ModelReasoningEvent => {
+  return event.type === ChatEventType.modelReasoning;
 };
 
 // Message chunk
@@ -549,6 +599,42 @@ export const isBackgroundAgentCompleteEvent = (
   return event.type === ChatEventType.backgroundAgentComplete;
 };
 
+export type MessageDeliveredEventData = DeliveredMessageStepData;
+
+export type MessageDeliveredEvent = ChatEventBase<
+  ChatEventType.messageDelivered,
+  MessageDeliveredEventData
+>;
+
+export const createMessageDeliveredEvent = (
+  data: MessageDeliveredEventData
+): MessageDeliveredEvent => ({
+  type: ChatEventType.messageDelivered,
+  data,
+});
+
+export const isMessageDeliveredEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is MessageDeliveredEvent => {
+  return event.type === ChatEventType.messageDelivered;
+};
+
+/** Moves the current answer into a step; subsequent chunks start a new answer. */
+export type InterimAnswerEventData = InterimAnswerStepData;
+
+export type InterimAnswerEvent = ChatEventBase<ChatEventType.interimAnswer, InterimAnswerEventData>;
+
+export const createInterimAnswerEvent = (data: InterimAnswerEventData): InterimAnswerEvent => ({
+  type: ChatEventType.interimAnswer,
+  data,
+});
+
+export const isInterimAnswerEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is InterimAnswerEvent => {
+  return event.type === ChatEventType.interimAnswer;
+};
+
 export interface SubagentRosterUpdatedEventData {
   /** Full active roster at time of emission. */
   roster: SubagentRosterEntry[];
@@ -594,19 +680,6 @@ export const isSubstitutionAppliedEvent = (
   return event.type === ChatEventType.substitutionApplied;
 };
 
-export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
-
-export interface TodosUpdatedUiEventData {
-  todos: TodoItem[];
-}
-
-export const isTodosUpdatedEvent = (event: AgentBuilderEvent<string, any>) => {
-  return isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
-    event,
-    TODOS_UPDATED_UI_EVENT
-  );
-};
-
 /**
  * Custom type of the `tool_ui` event `execute_api` sends after a successful call to an API that
  * is not read-only, in a conversation execution.
@@ -644,6 +717,8 @@ export type ChatAgentEvent =
   | ToolResultEvent
   | PromptRequestEvent
   | ReasoningEvent
+  | ModelReasoningChunkEvent
+  | ModelReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent
@@ -653,6 +728,8 @@ export type ChatAgentEvent =
   | CompactionStartedEvent
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
+  | MessageDeliveredEvent
+  | InterimAnswerEvent
   | SubagentRosterUpdatedEvent
   | SubstitutionAppliedEvent
   | UserQuestionAskedEvent

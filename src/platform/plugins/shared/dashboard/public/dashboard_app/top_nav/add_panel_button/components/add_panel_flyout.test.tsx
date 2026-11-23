@@ -73,7 +73,7 @@ describe('AddPanelFlyout', () => {
 
   describe('tabs', () => {
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../use_menu_item_groups').useMenuItemGroups = () => ({});
     });
 
@@ -136,7 +136,7 @@ describe('AddPanelFlyout', () => {
 
   describe('header', () => {
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../use_menu_item_groups').useMenuItemGroups = () => ({});
     });
 
@@ -152,7 +152,7 @@ describe('AddPanelFlyout', () => {
 
   describe('displays errors', () => {
     beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../use_menu_item_groups').useMenuItemGroups = () => ({
         loading: false,
         error: new Error('simulated useMenuItemGroups error'),
@@ -194,7 +194,7 @@ describe('AddPanelFlyout', () => {
     ];
     beforeEach(() => {
       onClickMock.mockClear();
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('../use_menu_item_groups').useMenuItemGroups = () => ({
         groups,
         loading: false,

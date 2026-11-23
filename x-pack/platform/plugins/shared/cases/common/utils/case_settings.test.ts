@@ -6,8 +6,8 @@
  */
 
 import {
+  canStoreExtractObservablesTrue,
   getCaseSettings,
-  isObservablesExtractionBlocked,
   resolveExtractObservables,
 } from './case_settings';
 
@@ -48,23 +48,23 @@ describe('getCaseSettings', () => {
   );
 });
 
-describe('isObservablesExtractionBlocked', () => {
-  it('returns true only for Observability (known owner with observables disabled)', () => {
-    expect(isObservablesExtractionBlocked('observability')).toBe(true);
+describe('canStoreExtractObservablesTrue', () => {
+  it('returns true for Security (owner that auto-extracts)', () => {
+    expect(canStoreExtractObservablesTrue('securitySolution')).toBe(true);
   });
 
-  it('returns false for Security', () => {
-    expect(isObservablesExtractionBlocked('securitySolution')).toBe(false);
+  it('returns false for Stack (observables on, auto-extract off)', () => {
+    expect(canStoreExtractObservablesTrue('cases')).toBe(false);
   });
 
-  it('returns false for Stack', () => {
-    expect(isObservablesExtractionBlocked('cases')).toBe(false);
+  it('returns false for Observability (observables off)', () => {
+    expect(canStoreExtractObservablesTrue('observability')).toBe(false);
   });
 
-  it.each([[''], ['foobar'], ['securitySolutionFixture']])(
-    'returns false for unknown owner %j so space config is respected',
+  it.each([[''], ['foobar'], ['securitySolutionFixture'], ['toString']])(
+    'returns true for unknown owner %j because it is not guarded',
     (owner) => {
-      expect(isObservablesExtractionBlocked(owner)).toBe(false);
+      expect(canStoreExtractObservablesTrue(owner)).toBe(true);
     }
   );
 });
@@ -74,6 +74,12 @@ describe('resolveExtractObservables', () => {
     expect(resolveExtractObservables('observability', true)).toBe(false);
     expect(resolveExtractObservables('observability', false)).toBe(false);
     expect(resolveExtractObservables('observability', undefined)).toBe(false);
+  });
+
+  it('returns false for Stack regardless of space config', () => {
+    expect(resolveExtractObservables('cases', true)).toBe(false);
+    expect(resolveExtractObservables('cases', false)).toBe(false);
+    expect(resolveExtractObservables('cases', undefined)).toBe(false);
   });
 
   it('returns the space config value when present for Security', () => {

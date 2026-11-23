@@ -6,7 +6,7 @@
  */
 
 import type { CatalogueNamedFieldDefinition } from '@kbn/streams-schema';
-import { validateValues } from './client_validation';
+import { validateItemScopes, validateValues } from './client_validation';
 import { addFieldsDefinition, testCatalogue } from './test_helpers';
 
 const context = { metadata: testCatalogue.metadata, telemetry: ['logs' as const] };
@@ -29,6 +29,36 @@ describe('validateValues', () => {
     expect(validateValues(fields, { fields: [] }, context)).toEqual({
       '/fields': 'This field is required',
     });
+  });
+
+  it('flags an item scoped to a signal the processor no longer applies to', () => {
+    const item = { location: 'attributes', path: 'team', action: 'upsert', value: 'core' };
+    expect(
+      validateValues(
+        fields,
+        {
+          fields: [
+            { ...item, telemetry: ['logs'] },
+            { ...item, telemetry: ['metrics'] },
+          ],
+        },
+        context
+      )
+    ).toEqual({
+      '/fields/1/telemetry':
+        'Applies to signals this processor no longer handles. Change it or remove the item.',
+    });
+  });
+
+  it('flags no item scopes while no signals are chosen', () => {
+    const item = { location: 'attributes', path: 'team', action: 'upsert', value: 'core' };
+    expect(
+      validateItemScopes(
+        fields,
+        { fields: [{ ...item, telemetry: ['metrics'] }] },
+        { ...context, telemetry: [] }
+      )
+    ).toEqual({});
   });
 
   it('does not require a field that config outside the form supplies', () => {

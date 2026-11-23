@@ -44,7 +44,7 @@ import {
 import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
-import { getFullname, getUsername } from '../../tasks/common';
+import { getMessageAuthorName, getUsername } from '../../tasks/common';
 import { login } from '../../tasks/login';
 import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
@@ -354,9 +354,10 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
 
 // In ESS the secondary user logs in with basic auth, where the user name is the role name
 // itself. In serverless the mock IdP derives both the user name and the full name from the role,
-// and the user name is a hash rather than the role name.
+// and the user name is a hash rather than the role name. The message header shows the full name,
+// or the username when the profile has none. It does not show the email.
 const getSecondaryUsername = (isServerless: boolean, role: string) =>
   isServerless ? getUsername(role) : cy.wrap(role);
 
 const getSecondaryFullName = (isServerless: boolean, role: string) =>
-  isServerless ? getFullname(role) : cy.wrap(role);
+  isServerless ? getMessageAuthorName(role) : cy.wrap(role);

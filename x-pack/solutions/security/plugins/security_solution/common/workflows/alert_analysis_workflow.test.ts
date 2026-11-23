@@ -114,6 +114,7 @@ describe('AlertAnalysisWorkflowOutput', () => {
     agent_id: 'elastic-ai-agent',
     impacted_entities: [{ id: 'host:ws-1', name: 'ws-1', type: 'host' as const }],
     missing_alert_ids: [] as string[],
+    conversation_ids: ['conversation-1'],
   };
 
   it('accepts a full workflow.output payload including attribution and impact fields', () => {
@@ -231,6 +232,7 @@ describe('AlertAnalysisWorkflowOutput YAML sync', () => {
     expect(impactedEntity.items?.properties?.name?.maxLength).toBe(MAX_ENTITY_NAME_LENGTH);
     expect(impactedEntity.items?.properties?.type?.enum).toEqual(['host', 'user']);
     expect(workflow.outputs.properties.missing_alert_ids?.maxItems).toBe(1000);
+    expect(workflow.outputs.properties.conversation_ids?.maxItems).toBe(1000);
     expect(workflow.outputs.properties.verdicts.items?.properties?.rationale?.maxLength).toBe(500);
     expect(
       workflow.outputs.properties.verdicts.items?.properties?.contributing_factors?.maxItems

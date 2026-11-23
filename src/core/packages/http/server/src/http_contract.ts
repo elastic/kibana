@@ -22,10 +22,12 @@ import type {
   OnPreRoutingHandler,
 } from './lifecycle';
 import type { HttpSelfUnauthorizedErrorHandler } from './self_client_unauthorized_error_handler';
+import type { HttpSelfCredentialRefresher } from './self_client_credential_refresher';
 import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
 import type { GetAuthState, IsAuthenticated } from './auth_state';
+import type { IAuthHeadersStorage } from './auth_headers';
 import type { SessionStorageCookieOptions, SessionStorageFactory } from './session_storage';
 import type { ApiVersion } from './versioning';
 import type { KibanaRequest } from './router';
@@ -382,10 +384,11 @@ export interface HttpServiceSetup<
    * A handler should return a state to associate with the incoming request.
    * The state can be retrieved later via http.auth.get(..)
    * Only one AuthenticationHandler can be registered. See {@link AuthenticationHandler}.
+   * Lets the authentication owner read current credentials and store renewed headers.
    *
    * @param handler {@link AuthenticationHandler} - function to perform authentication.
    */
-  registerAuth: (handler: AuthenticationHandler) => void;
+  registerAuth: (handler: AuthenticationHandler) => IAuthHeadersStorage;
 
   /**
    * To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
@@ -504,6 +507,15 @@ export interface HttpServiceSetup<
    * Can only be called once, and is reserved for the security plugin.
    */
   setSelfClientUnauthorizedErrorHandler: (handler: HttpSelfUnauthorizedErrorHandler) => void;
+
+  /**
+   * Set the {@link HttpSelfCredentialRefresher | refresher} consulted before every Kibana self HTTP
+   * call, giving its owner a chance to replace a short-lived credential that would expire while
+   * the target route handler is still running.
+   *
+   * Can only be called once, and is reserved for the security plugin.
+   */
+  setSelfClientCredentialRefresher: (refresher: HttpSelfCredentialRefresher) => void;
 }
 
 /** @public */

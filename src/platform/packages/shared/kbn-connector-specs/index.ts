@@ -25,7 +25,15 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
+export {
+  CONNECTOR_SKILL_ID_PREFIX,
+  getAllConnectorSkills,
+  getConnectorSkillRegistryId,
+  getConnectorSkillRegistryIds,
+  type ConnectorTypeSkill,
+} from './src/connector_skills';
 export { getSandboxSupportedAuthTypeIds } from './src/get_sandbox_supported_auth_type_ids';
+export { getSandboxHosts } from './src/get_sandbox_hosts';
 export {
   connectorSpecHasEvents,
   connectorTypeHasInboundEvents,
@@ -36,12 +44,14 @@ export {
 } from './src/is_inbound_only_connector_spec';
 export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
 export { connectorTypePublishesKeys } from './src/connector_type_publishes_keys';
-export { ingestTokenHashSchema } from './src/ingest_token_hash_schema';
 export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
   MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './src/specs/inbound_webhook/constants';
-export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
+export { SLACK_MESSAGE_EVENT_ID } from './src/specs/slack/constants';
+export { toSlackPlainText } from './src/specs/slack/message_text';
+export { buildSlackThreadUrl } from './src/specs/slack/thread_url';
+export { isToolAction, TEST_CONNECTOR_SUB_ACTION, buildSkill } from './src/connector_spec';
 export type {
   ConnectorIngressContext,
   EventDefinition,

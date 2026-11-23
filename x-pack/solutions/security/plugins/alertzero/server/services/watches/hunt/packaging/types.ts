@@ -8,6 +8,7 @@
 import type { ActionCatalogEntry, ActionSubjectKind } from '@kbn/alertzero-common';
 import type {
   PackageReportBehavior,
+  PackageReportCoverageGap,
   PackageReportMintPayload,
 } from '../../../../../common/step_types/package_report';
 import type { CapabilitiesSource } from '../../../fleet/resolve_host_enrollment';
@@ -126,6 +127,8 @@ export interface CoordinatorInputs {
   /** The coordinator's report-intent datasets: where a rule for this report would query. */
   reportIntentTargets?: string[];
   behaviors?: PackageReportBehavior[];
+  /** What a `retired_incomplete` run could not search; absent on an older Worker. */
+  coverageGaps?: PackageReportCoverageGap[];
 }
 
 /** What one current-run SSE contributes to a coverage subject. */

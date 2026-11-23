@@ -1,5 +1,5 @@
 {
-  "sha1": "c3eef27a606db3efead8d9f43700c88a4c4323f4",
+  "sha1": "a97922e1ea76d9b85541d804115663ff3e00c862",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -257,6 +257,19 @@
       }
     },
     {
+      "id": "e7cbb386f3174f3-2245c9e81b5e95d",
+      "title": "Discover ES|QL controls - by-reference panel editing should add a control created in the Discover editor to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_by_reference_panel_edit.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
       "id": "522783e286abcbe-e798696b29f45a8",
       "title": "Discover ES|QL controls - open dashboard panel in Discover should retain the controls and their state",
       "expectedStatus": "passed",
@@ -317,8 +330,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 59,
+        "column": 69
       }
     },
     {
@@ -330,8 +343,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 94,
+        "column": 27
+      }
+    },
+    {
+      "id": "c9f80285597a240-feaaf625de49796",
+      "title": "Discover ES|QL controls - saving to a dashboard should update the existing control when saving from Discover to a dashboard that already has it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
+        "line": 143,
+        "column": 27
       }
     },
     {
@@ -823,7 +849,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_table_filtering.spec.ts",
-        "line": 44,
+        "line": 45,
         "column": 70
       }
     },
@@ -843,8 +869,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_table_filtering.spec.ts",
-        "line": 51,
-        "column": 31
+        "line": 55,
+        "column": 24
       }
     },
     {

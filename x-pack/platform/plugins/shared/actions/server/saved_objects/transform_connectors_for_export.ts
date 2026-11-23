@@ -49,6 +49,7 @@ function transformConnectorForExport(
     hasInboundEventIdentity: _hasInboundEventIdentity,
     ...exportAttributes
   } = connector.attributes;
+  // Legacy config.ingestTokenHash is ignored and must not be exported.
   const { ingestTokenHash: _ingestTokenHash, ...exportConfig } = (exportAttributes.config ??
     {}) as Record<string, unknown>;
 

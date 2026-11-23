@@ -77,10 +77,10 @@ node scripts/edot_collector
 
 | Mode | Loads |
 | --- | --- |
-| `runtime` | Only what other plugins need to run evaluators in-process. No HTTP routes, `evals` feature or privileges, data streams, app, management section, or `ai.evals.*` workflow steps. |
-| `full` (default) | Also everything runtime mode leaves out: the evals UI and API that the `@kbn/evals` CLI, in-tool experiments, and the Agent Builder evals skills use. |
+| `runtime` (default) | Only what other plugins need to run evaluators in-process. No HTTP routes, `evals` feature or privileges, data streams, app, management section, or `ai.evals.*` workflow steps. |
+| `full` | Also everything runtime mode leaves out: the evals UI and API that the `@kbn/evals` CLI, in-tool experiments, and the Agent Builder evals skills use. |
 
-Runtime mode is for deployments that run evaluators in the background without exposing evals to users. The default will move to `runtime`, so anything that uses the evals UI or API, including local development, Scout and FTR configs, and the golden cluster, sets `xpack.evals.mode: full` explicitly. Against a runtime-mode Kibana, the `@kbn/evals` CLI reports that the evals API is not available.
+Runtime mode is for deployments that run evaluators in the background without exposing evals to users. Anything that uses the evals UI or API, including local development, Scout and FTR configs, and the golden cluster, sets `xpack.evals.mode: full` explicitly. Against a runtime-mode Kibana, the `@kbn/evals` CLI reports that the evals API is not available.
 
 ### Prerequisite data
 
@@ -109,7 +109,7 @@ In addition to the dev-only `@kbn/evals` CLI (which runs suites in CI), the plug
 
 An **experiment** evaluates one task model against one or more datasets. Running the same configuration against several models produces multiple experiments you can compare.
 
-> Running experiments requires an **Enterprise** license (it runs on [Kibana Workflows](../../../../src/platform/plugins/shared/workflows_management)). When Workflows is unavailable, experiment execution is disabled; the rest of the plugin (browsing, ingestion, datasets, tracing) is unaffected.
+> Running experiments requires an **Enterprise** license (it runs on [Kibana Workflows](../../../../x-pack/platform/plugins/shared/workflows_management)). When Workflows is unavailable, experiment execution is disabled; the rest of the plugin (browsing, ingestion, datasets, tracing) is unaffected.
 
 ### Running experiments
 
@@ -320,6 +320,21 @@ The plugin UI is organized into five navigation tabs:
 - **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view that runs a paired hypothesis test per evaluator (McNemar for pass/fail scores, Wilcoxon signed-rank or paired t-test otherwise). The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
 - **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor), tag and set the maturity of a dataset, and filter the listing by tag or maturity
 - **Evaluators** — a catalog of every evaluator in the space, searchable and filterable by kind (LLM judge or code) and origin (built-in or user-defined), showing each one's version and required inputs. Selecting a name opens a read-only view of the stored definition, including the versions saved before it. Built-ins are read-only; user-defined judges can be created, edited, and deleted here by users holding `manage_evals`. The editor collects the judge's prompts, the trace evidence it needs, and its output scores, and can run the draft against a real trace ID before saving — the connector chosen for that test is not stored on the definition.
+
+#### Comparing experiments
+
+A comparison runs one paired test per evaluator, and each example counts once: its repetitions are combined first, so N is the number of examples. Repetitions of one example share the same input, so they are not independent evidence.
+
+`repetition_policy` sets how the repetitions are combined. The page takes it from its URL, which the CLI report link sets for `median`. The `ai.evals.compareExperiments` workflow step always uses the default.
+
+- `mean` (default): the average of the example's valid scores.
+- `median`: the median. Only for scores in [0, 1]. Other slices are left out and listed in `pairing.rejectedSlices`, and the request fails with 400 when none is left.
+
+Under `mean`, pass/fail and whole-number scores become decimals when an example's repetitions disagree, so those rows get Wilcoxon signed-rank or the paired t-test instead of McNemar. With 5 or fewer examples, Wilcoxon cannot reach p < 0.05.
+
+Each row also shows, per experiment, how many repetitions were used and how many had a null score, and the stability: the mean standard deviation of each paired example's repetitions, null when no example has two. A row is flagged (`repetitionWarning`, `N*` in the reports) when an example has a different number of valid repetitions in the two experiments, or a null score.
+
+Compare selected picks the baseline for you: the run on `main`, or else the older run. To flip them, use Swap on the Compare page.
 
 #### Score direction
 

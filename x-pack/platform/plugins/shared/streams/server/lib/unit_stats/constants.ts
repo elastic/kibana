@@ -15,7 +15,7 @@ import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
  */
 
 /** The stats queries and the existence probe both use the exact name. */
-export const UNIT_METRICS_STREAM = 'metrics-streams.otel-default';
+export { UNIT_METRICS_STREAM } from '../../../common/constants';
 
 export const UNIT_STATS_DEFAULT_WINDOW_MS = 15 * 60 * 1000;
 
@@ -30,10 +30,42 @@ export const CONFIG_HASH_FIELD = 'resource.attributes.streams.config.hash';
 
 export const DIRECTION_FIELD = 'attributes.direction';
 export const OUTCOME_FIELD = 'attributes.outcome';
+/**
+ * The outcome of a document that an Elasticsearch destination redirected to the failure store. The
+ * exporter reports such a document twice, here and under its `failed_*` outcome.
+ */
+export const FAILURE_STORE_OUTCOME = 'failure_store';
+/**
+ * Says what became of a `failure_store` row's document. `used`: it went to the failure store, and
+ * the exporter also counted it as a success. Any other value (`not_enabled`, `failed`): it did not,
+ * and the exporter also counted it under its `failed_*` outcome.
+ */
+export const FAILURE_STORE_FIELD = 'attributes.failure_store';
+export const FAILURE_STORE_USED = 'used';
 
 export const DESTINATION_ID_FIELD = 'scope.attributes.streams.destination.id';
+/**
+ * The collection a destination wrote to, as the exporter reports it: the data stream or index of
+ * an Elasticsearch document. A failure of a whole request has none.
+ */
+export const COLLECTION_NAME_FIELD = 'attributes.db.collection.name';
+/**
+ * The reason of a rejected document, as the Elasticsearch exporter reports it with its own error
+ * type, for example `security_exception`. A failure of a whole request has none.
+ */
+export const ERROR_TYPE_FIELD = 'attributes.error.type';
+/** Set on a rejected item only, so a stream with no failures yet has no such field. */
+export const HTTP_STATUS_CODE_FIELD = 'attributes.http.response.status_code';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';
 export const DESTINATION_DURATION_FIELD = 'metrics.streams.destination.duration';
+
+/**
+ * Source metrics come from the ingest collector, not from a unit collector. They have no scope
+ * attributes, so the `scope.attributes.streams.*` paths above match nothing for a source, and no
+ * config hash. The source id and the outcome are datapoint attributes.
+ */
+export const SOURCE_ID_FIELD = 'attributes.source.id';
+export const SOURCE_ITEMS_FIELD = 'metrics.streams.source.items';
 
 /** The telemetry calls a processor a step. */
 export const STEP_ID_FIELD = 'scope.attributes.streams.step.id';
@@ -52,10 +84,27 @@ export const STATS_COLUMN = {
   bucket: 'bucket',
   incomingRate: 'incoming_rate',
   failedRate: 'failed_rate',
+  attemptsRate: 'attempts_rate',
+  authenticationRate: 'authentication_rate',
+  authorizationRate: 'authorization_rate',
+  collection: 'collection',
+  reason: 'reason',
+  acceptedRate: 'accepted_rate',
   avgLatency: 'avg_latency',
   sumItems: 'sum_items',
+  totalItems: 'total_items',
+  failedItems: 'failed_items',
+  authenticationItems: 'authentication_items',
+  authorizationItems: 'authorization_items',
   avgDurationPerItem: 'avg_duration_per_item',
 } as const;
+
+/**
+ * The most causes one failure rate lists in its breakdown, the ones with the highest rates. A
+ * destination can write to many collections, because a pattern built from record values can create
+ * many data streams, and the response must stay small.
+ */
+export const MAX_FAILURE_BREAKDOWN_ENTRIES = 25;
 
 /** The bucket count a series aims for, as Discover's auto interval does with a bar target. */
 export const SERIES_TARGET_BUCKETS = 50;
@@ -72,5 +121,9 @@ export const SERIES_MIN_BUCKET_MS = 10_000;
 
 /** UCUM units. Durations are natively in seconds, so no conversion happens. */
 export const ITEM_UNIT = '{item}';
+/** What an S3 failure rate counts: upload attempts, not items. */
+export const REQUEST_UNIT = '{request}';
 export const SECONDS_UNIT = 's';
+/** A share of attempts, 100 being all of them. */
+export const PERCENT_UNIT = '%';
 export const RATE_TIME_UNIT = 's';

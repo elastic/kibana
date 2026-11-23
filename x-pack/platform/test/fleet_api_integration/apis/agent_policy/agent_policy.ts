@@ -1964,6 +1964,44 @@ export default function (providerContext: FtrProviderContext) {
           'Output of type "logstash" is not usable with policy "test-agentless-policy".'
         );
       });
+
+      it('should keep the agent policy id immutable', async () => {
+        const {
+          body: { item: policy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'Immutable id policy', namespace: 'default' })
+          .expect(200);
+        createdPolicyIds.push(policy.id);
+
+        // a body id that differs from the path id is rejected, including unsafe ids
+        for (const id of ['../../../../\\@bad-account.co', 'some-other-id']) {
+          const { body } = await supertest
+            .put(`/api/fleet/agent_policies/${policy.id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ id, name: 'Immutable id policy', namespace: 'default' })
+            .expect(400);
+          expect(body.message).to.contain('Cannot change agent policy ID');
+        }
+
+        // a body id matching the path id is accepted and ignored
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${policy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ id: policy.id, name: 'Immutable id policy updated', namespace: 'default' })
+          .expect(200);
+        expect(updatedPolicy.id).to.eql(policy.id);
+        expect(updatedPolicy.name).to.eql('Immutable id policy updated');
+
+        // reads always return the canonical saved object id
+        const {
+          body: { item: fetchedPolicy },
+        } = await supertest.get(`/api/fleet/agent_policies/${policy.id}`).expect(200);
+        expect(fetchedPolicy.id).to.eql(policy.id);
+      });
     });
 
     describe('POST /api/fleet/agent_policies/delete', () => {

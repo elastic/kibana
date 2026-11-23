@@ -965,7 +965,7 @@ groups:
         datatype: string
         applies_to:
           stack: ga
-          ech: unavailable
+          ech: ga
           self: ga
 
       - setting: server.selfHttp.maxRedirects
@@ -1773,12 +1773,25 @@ groups:
           ech: unavailable
           self: ga
 
-      - setting: xpack.upgrade_assistant.ui.enabled
+      - setting: xpack.subscription_status.enabled
         description: |
-          Set this value to false to disable the Upgrade Assistant UI.
+          Set this value to false to hide the license badge in the {{kib}} header. The badge shows trial and Basic license information.
         datatype: bool
         default: true
+        applies_to:
+          stack: ga 9.7
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.upgrade_assistant.ui.enabled
+        description: |
+          Shows or hides the Upgrade Assistant UI without disabling the plugin. Set this value to `true` to show the UI, or to `false` to hide it.
+        datatype: bool
+        default: false
         applies_to:
           stack: ga
           ech: unavailable
           self: ga
+        note: |
+          :applies_to: stack: ga =9.0
+          In this version, this setting defaults to `true`.
