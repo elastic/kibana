@@ -14,6 +14,8 @@ export {
   MAX_DURATION_LENGTH,
   parseDuration,
 } from './duration/duration';
+export { applyBackoffJitter } from './backoff_jitter/backoff_jitter';
+export { computeRetryDelayMs, type RetryDelayConfig } from './retry_delay/retry_delay';
 export { extractTemplateVariables } from './extract_template_variables/extract_template_variables';
 export {
   findInputsInGraph,
