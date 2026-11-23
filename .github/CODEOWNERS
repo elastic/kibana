@@ -1999,11 +1999,13 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /.github/codeql @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/packages/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
+/src/core/packages/core/server/integration_tests/exposed_config_keys/ @elastic/kibana-security
 /src/platform/plugins/shared/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/is_internal_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.ts @elastic/kibana-core @elastic/kibana-security
+/src/platform/test/plugin_functional/test_suites/hardening @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/login_page.ts @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/roles.ts @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/spaces.ts @elastic/kibana-security
