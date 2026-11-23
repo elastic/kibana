@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
   RunWorkflowResponseDto,
+  TemplateOriginFieldsSource,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
@@ -35,6 +36,8 @@ export interface UpdateWorkflowParams {
   workflow: Partial<WorkflowDetailDto>;
   /** Workflow definition from list/detail cache; used for enable/disable telemetry metadata. */
   workflowDefinition?: Partial<WorkflowYaml> | null;
+  /** Template the workflow was created from (list/detail cache); used for telemetry. */
+  templateOrigin?: TemplateOriginFieldsSource;
   isBulkAction?: boolean;
   bulkActionCount?: number;
   /**
@@ -171,6 +174,7 @@ export function useWorkflowActions() {
         }),
         origin: 'workflow_list',
         error: errorObj,
+        templateOrigin: variables.templateOrigin,
       });
     },
     onSuccess: (_, variables) => {
@@ -188,6 +192,7 @@ export function useWorkflowActions() {
         }),
         origin: 'workflow_list',
         error: undefined,
+        templateOrigin: variables.templateOrigin,
       });
 
       queryClient.invalidateQueries({
