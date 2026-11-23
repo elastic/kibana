@@ -15,23 +15,41 @@ import { findKeyTagsWithVerdicts } from '../ports';
 
 type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
 
+/** Decisions per search: the key tags go in one `terms` clause, which stays far below its limit. */
+const DECISIONS_PER_SEARCH = 500;
+
 /**
  * Which of the given approved decisions have a key that an alert already carries with a true
  * positive or inconclusive verdict. The decision was approved on evidence from before, and a later
- * verdict for the same key is evidence against it. One search covers all the decisions. A read
+ * verdict for the same key is evidence against it. One search covers up to 500 decisions. A read
  * that fails throws, so the caller closes nothing on a guess.
+ *
+ * `shouldStop` is asked before each search. Once it answers true, the decisions that are not read
+ * yet are left out of the result, so the caller must not act on them. It is meant for a work
+ * deadline, which stays passed once it has passed.
  */
 export const findDecisionsWithConflictingVerdicts = async (
   api: KibanaApi,
-  decisionIds: readonly string[]
+  decisionIds: readonly string[],
+  shouldStop: () => boolean = () => false
 ): Promise<Set<string>> => {
-  const idByKeyTag = new Map(
-    decisionIds.map((id) => [strictKeyTag(id.slice(FP_DECISION_ID_PREFIX.length)), id])
-  );
-  const withVerdicts = await findKeyTagsWithVerdicts(
-    api,
-    [...idByKeyTag.keys()],
-    FP_DECISION_BLOCKING_VERDICT_TAGS
-  );
-  return new Set([...withVerdicts].flatMap((keyTag) => idByKeyTag.get(keyTag) ?? []));
+  const found = new Set<string>();
+  for (let from = 0; from < decisionIds.length; from += DECISIONS_PER_SEARCH) {
+    if (shouldStop()) break;
+    const idByKeyTag = new Map(
+      decisionIds
+        .slice(from, from + DECISIONS_PER_SEARCH)
+        .map((id) => [strictKeyTag(id.slice(FP_DECISION_ID_PREFIX.length)), id])
+    );
+    const withVerdicts = await findKeyTagsWithVerdicts(
+      api,
+      [...idByKeyTag.keys()],
+      FP_DECISION_BLOCKING_VERDICT_TAGS
+    );
+    withVerdicts.forEach((keyTag) => {
+      const id = idByKeyTag.get(keyTag);
+      if (id !== undefined) found.add(id);
+    });
+  }
+  return found;
 };

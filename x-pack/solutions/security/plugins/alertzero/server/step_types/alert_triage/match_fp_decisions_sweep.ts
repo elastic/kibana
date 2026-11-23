@@ -180,12 +180,13 @@ export const createDecisionSweep = ({
    * The decisions whose key has a true positive or inconclusive verdict. A verdict can be recorded
    * at any time, so only a positive answer is kept for the sweep: a decision that had none is read
    * again for each page, one search for all the decisions of the page that are not known to have
-   * one. A decision that has one stays blocked for the sweep.
+   * one. A decision that has one stays blocked for the sweep. The search stops at the work
+   * deadline: the decisions it did not reach are deferred by the check that starts each decision.
    */
   const conflicting = new Set<string>();
   const loadConflicts = async (ids: string[]) => {
     const unknown = ids.filter((id) => !conflicting.has(id));
-    const found = await findDecisionsWithConflictingVerdicts(contextManager, unknown);
+    const found = await findDecisionsWithConflictingVerdicts(contextManager, unknown, outOfTime);
     found.forEach((id) => conflicting.add(id));
   };
 

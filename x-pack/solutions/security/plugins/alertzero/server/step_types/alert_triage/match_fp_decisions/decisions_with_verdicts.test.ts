@@ -50,4 +50,37 @@ describe('findDecisionsWithConflictingVerdicts', () => {
 
     await expect(findDecisionsWithConflictingVerdicts(api, [A])).rejects.toThrow('es down');
   });
+
+  it('searches in chunks of 500 decisions', async () => {
+    const api = apiWith([]);
+    const ids = Array.from(
+      { length: 501 },
+      (_unused, i) => `fp-decision-${i.toString(16).padStart(16, '0')}`
+    );
+
+    await findDecisionsWithConflictingVerdicts(api, ids);
+
+    expect(api.callKibanaApi).toHaveBeenCalledTimes(2);
+  });
+
+  it('stops before the next search once told to, and leaves the decisions it did not read out', async () => {
+    const api = apiWith([]);
+    const ids = Array.from(
+      { length: 1001 },
+      (_unused, i) => `fp-decision-${i.toString(16).padStart(16, '0')}`
+    );
+    const shouldStop = jest.fn().mockReturnValueOnce(false).mockReturnValue(true);
+
+    await findDecisionsWithConflictingVerdicts(api, ids, shouldStop);
+
+    expect(api.callKibanaApi).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not search at all when it is told to stop at once', async () => {
+    const api = apiWith([]);
+
+    await findDecisionsWithConflictingVerdicts(api, [A], () => true);
+
+    expect(api.callKibanaApi).not.toHaveBeenCalled();
+  });
 });

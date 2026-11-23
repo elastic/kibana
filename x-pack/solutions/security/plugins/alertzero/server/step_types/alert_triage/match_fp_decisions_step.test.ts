@@ -1756,6 +1756,36 @@ describe('triage match decisions step in on mode', () => {
       );
     });
 
+    it('does not read the verdicts once the dismissals have used the work budget, and defers the closes', async () => {
+      const dismissedId = decisionId('do_not_propose', hashOf('C:\\a.exe'));
+      const { run, callKibanaApi, closes } = setup({
+        mode: 'on',
+        alerts: [
+          ['d', source('C:\\a.exe')],
+          ['f', source('C:\\b.exe')],
+        ],
+        decisions: { ...approved('C:\\b.exe'), [dismissedId]: stored('do_not_propose') },
+      });
+      const original = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          const response = await original(params);
+          // The dismissal is written first; its write is the one that spends the work budget.
+          if (params.path.endsWith('/signals/tags')) {
+            jest.setSystemTime(NOW + DECISION_MATCH_WORK_BUDGET_MS + 1);
+          }
+          return response;
+        }
+      );
+
+      const { output } = await run();
+
+      const verdictSearches = callKibanaApi.mock.calls.filter(([{ body }]) => body?.aggs);
+      expect(verdictSearches).toHaveLength(0);
+      expect(closes()).toEqual([]);
+      expect(output).toEqual(expect.objectContaining({ deferred: 1, out_of_time: true }));
+    });
+
     it('still writes the notes of what it closed within the total budget', async () => {
       const { run, callKibanaApi, notes } = setup({ mode: 'on', ...manyApproved(3) });
       const original = callKibanaApi.getMockImplementation()!;
