@@ -69,7 +69,7 @@ const grantAll = (client: Client) => {
 const requestedIndexPrivileges = [
   { names: SOURCE_INDICES, privileges: ['read', 'view_index_metadata'] },
   {
-    names: ['digital-experience-sessions-*'],
+    names: ['digital-experience-sessions-browser-*'],
     privileges: ['read', 'view_index_metadata', 'index', 'create_index'],
   },
 ];
@@ -88,7 +88,7 @@ describe('sessions privileges', () => {
         cluster: {},
         index: {
           'traces-*.otel-*': { read: false, view_index_metadata: true },
-          'digital-experience-sessions-*': { read: true, create_index: false },
+          'digital-experience-sessions-browser-*': { read: true, create_index: false },
         },
         application: {},
         username: 'reader',
@@ -96,7 +96,7 @@ describe('sessions privileges', () => {
 
       expect(await getMissingSessionsPrivileges(client, { isServerless: false })).toEqual([
         'index:traces-*.otel-*:read',
-        'index:digital-experience-sessions-*:create_index',
+        'index:digital-experience-sessions-browser-*:create_index',
       ]);
     });
 
@@ -135,7 +135,7 @@ describe('sessions privileges', () => {
       client.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
         cluster: {},
-        index: { 'digital-experience-sessions-*': { create_index: false } },
+        index: { 'digital-experience-sessions-browser-*': { create_index: false } },
         application: {},
         username: 'reader',
       });
@@ -143,7 +143,9 @@ describe('sessions privileges', () => {
       const error = await checkSessionsPrivileges(client, { isServerless: false }).catch((e) => e);
 
       expect(error).toBeInstanceOf(SessionsPrivilegesError);
-      expect(error.missingPrivileges).toEqual(['index:digital-experience-sessions-*:create_index']);
+      expect(error.missingPrivileges).toEqual([
+        'index:digital-experience-sessions-browser-*:create_index',
+      ]);
       expect(client.security.getUserPrivileges).not.toHaveBeenCalled();
     });
 

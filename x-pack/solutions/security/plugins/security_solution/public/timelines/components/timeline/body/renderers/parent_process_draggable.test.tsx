@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
 
 import { ParentProcessDraggable } from './parent_process_draggable';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 jest.mock('../../../../../common/lib/kibana');
@@ -37,10 +37,9 @@ describe('ParentProcessDraggable', () => {
   beforeEach(() => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
-  const mount = useMountAppended();
 
   test('displays the text, endgameParentProcessName, processParentName, processParentPid, and processPpid when they are all provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ParentProcessDraggable
           scopeId="some_scope"
@@ -54,13 +53,13 @@ describe('ParentProcessDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       'via parent process[processParentName][endgameParentProcessName](789)(456)'
     );
   });
 
   test('displays nothing when the text is provided, but endgameParentProcessName and processParentName are both undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ParentProcessDraggable
           scopeId="some_scope"
@@ -74,11 +73,11 @@ describe('ParentProcessDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+    expect(container).toBeEmptyDOMElement();
   });
 
   test('displays the text and endgameParentProcessName when processPpid is undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ParentProcessDraggable
           scopeId="some_scope"
@@ -92,11 +91,11 @@ describe('ParentProcessDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('via parent process[endgameParentProcessName]');
+    expect(container.textContent).toEqual('via parent process[endgameParentProcessName]');
   });
 
   test('displays the text and processParentName when processParentPid is undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ParentProcessDraggable
           scopeId="some_scope"
@@ -110,11 +109,11 @@ describe('ParentProcessDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('via parent process[processParentName]');
+    expect(container.textContent).toEqual('via parent process[processParentName]');
   });
 
   test('displays the endgameParentProcessName when both processPpid and text are undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ParentProcessDraggable
           scopeId="some_scope"
@@ -128,11 +127,11 @@ describe('ParentProcessDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('[endgameParentProcessName]');
+    expect(container.textContent).toEqual('[endgameParentProcessName]');
   });
 
   test('displays the processParentName when both processParentPid and text are undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ParentProcessDraggable
           scopeId="some_scope"
@@ -146,11 +145,11 @@ describe('ParentProcessDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('[processParentName]');
+    expect(container.textContent).toEqual('[processParentName]');
   });
 
   test('should passing correct scopeId to cell actions', () => {
-    mount(
+    render(
       <TestProviders>
         <ParentProcessDraggable
           scopeId="some_scope"

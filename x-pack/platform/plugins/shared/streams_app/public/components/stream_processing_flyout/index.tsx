@@ -79,6 +79,7 @@ export function ProcessingFlyout({
   const createPosition = useSelector(ref, (state) => state.context.createPosition);
   const isSaving = useSelector(ref, (state) => state.matches('saving'));
   const hasChanges = useSelector(ref, (state) => state.context.hasChanges);
+  const hasEditorChanges = useSelector(ref, (state) => state.context.hasEditorChanges);
   const editable = useSelector(ref, (state) => state.context.editable);
   const telemetry = useSelector(ref, (state) => state.context.telemetry);
   const diagnostics = useSelector(ref, (state) => state.context.diagnostics);
@@ -145,9 +146,10 @@ export function ProcessingFlyout({
     [ref]
   );
   const cancelStep = useCallback(() => ref.send({ type: 'step.cancel' }), [ref]);
+  const changeStep = useCallback(() => ref.send({ type: 'step.change' }), [ref]);
 
   const confirmClose = useDiscardConfirm(closeProcessingFlyout, {
-    enabled: hasChanges || isEditing,
+    enabled: hasChanges || hasEditorChanges,
     ...discardProcessingChangesPromptOptions,
   });
   // Closing does not cancel a save in flight, so the flyout stays open until it settles.
@@ -206,6 +208,7 @@ export function ProcessingFlyout({
         onMove={moveStep}
         onCommit={commitStep}
         onCancel={cancelStep}
+        onChange={changeStep}
       />
     );
   };

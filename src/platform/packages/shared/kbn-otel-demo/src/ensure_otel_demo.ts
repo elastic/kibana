@@ -268,12 +268,8 @@ export async function deployDemo({
     });
   }
 
-  // Stop any existing deployment after scenario images are built, so a build failure does not
-  // unnecessarily tear down a running demo.
-  log.debug('Removing existing deployment');
-  await down(log, namespace, demoConfig.displayName);
-
-  // Resolve collector image: EDOT by default, vanilla with --vanilla
+  // Resolve the collector before tearing down, so a resolution failure leaves
+  // the running demo in place. Scenario image builds above follow the same rule.
   let collectorImage: string;
   if (useVanillaCollector) {
     collectorImage = 'otel/opentelemetry-collector-contrib:0.115.1';
@@ -282,6 +278,9 @@ export async function deployDemo({
     collectorImage = `docker.elastic.co/elastic-agent/elastic-otel-collector:${edotVersion}`;
   }
   log.info(`Using collector: ${collectorImage}`);
+
+  log.debug('Removing existing deployment');
+  await down(log, namespace, demoConfig.displayName);
 
   // Generate OTel Collector configuration
   const collectorConfig = useVanillaCollector

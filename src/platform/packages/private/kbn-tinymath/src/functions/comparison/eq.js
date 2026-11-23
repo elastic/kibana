@@ -8,17 +8,18 @@
  */
 
 /**
- * Performs an equality comparison between two values.
+ * Checks whether two values are equal. For arrays, the function returns `true` only if every element is equal.
  * @param {number|number[]} a a number or an array of numbers
- * @param {number|number[]} b a number or an array of numbers
- * @return {boolean} Returns true if `a` and `b` are equal, false otherwise.  Returns an array with the equality comparison of each element if `a` is an array.
+ * @param {number|number[]} b a number, or, if `a` is also an array, an array of numbers with the same length as `a`
+ * @return {boolean} `true` if `a` and `b` are equal, `false` otherwise. If `a` is an array, returns `true` only if every element of `a` equals `b`, or equals the element at the same index of `b` if `b` is an array.
  * @throws `'Missing b value'` if `b` is not provided
- * @throws `'Array length mismatch'` if `args` contains arrays of different lengths
+ * @throws `'Array length mismatch'` if `a` and `b` are arrays of different lengths
  * @example
  * eq(1, 1) // returns true
  * eq(1, 2) // returns false
- * eq([1, 2], 1) // returns [true, false]
- * eq([1, 2], [1, 2]) // returns [true, true]
+ * eq([1, 1], 1) // returns true
+ * eq([1, 2], 1) // returns false
+ * eq([1, 2], [1, 2]) // returns true
  */
 
 function eq(a, b) {
