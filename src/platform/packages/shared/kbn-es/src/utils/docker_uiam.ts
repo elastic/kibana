@@ -404,15 +404,17 @@ export function getUiamContainers({
   const containers = includeOAuth
     ? [...UIAM_BASE_CONTAINERS, UIAM_OAUTH_CONTAINER]
     : [...UIAM_BASE_CONTAINERS];
-  if (ephemeralTokenExpiration === undefined && accessTokenExpiration === undefined) {
+  // An empty lifetime is never valid, so treat it as unset. CLI parsers, such as `getopts`, use `''` for
+  // string flags that aren't passed.
+  if (!ephemeralTokenExpiration && !accessTokenExpiration) {
     return containers;
   }
 
-  if (ephemeralTokenExpiration !== undefined) {
+  if (ephemeralTokenExpiration) {
     assertEphemeralTokenExpiration(ephemeralTokenExpiration);
   }
 
-  if (accessTokenExpiration !== undefined) {
+  if (accessTokenExpiration) {
     assertAccessTokenExpiration(accessTokenExpiration);
   }
 
