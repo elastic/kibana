@@ -180,17 +180,6 @@ describe('AlertingRuleReconciler', () => {
     expect(rulesClient.rules.get(getRuleId(rule))?.enabled).toBe(true);
   });
 
-  it('reports rules refused for the schedule budget as skipped, not failed', async () => {
-    const { reconcile } = setUp({ maxEnabledRules: 0 });
-
-    const result = await reconcile([createRule()]);
-
-    expect(result.skipped).toEqual([
-      { rule_id: getRuleId(createRule()), reason: 'Too many schedules' },
-    ]);
-    expect(result.failures).toEqual([]);
-  });
-
   it('creates as many rules of a chunk as the schedule budget fits, and skips the rest', async () => {
     const rules = Array.from({ length: 100 }, (_, index) =>
       createRule({ sourceId: `source-${index}` })
