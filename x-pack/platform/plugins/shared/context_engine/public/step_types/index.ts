@@ -34,3 +34,18 @@ export const registerStepDefinitions = ({
     (await isEnabled()) ? (await loadDefinitions()).deleteKiStepDefinition : undefined
   );
 };
+
+/** Registers the steps of the managed maintenance workflow, which the server registers whatever the setting. */
+export const registerMaintenanceStepDefinitions = (
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
+): void => {
+  workflowsExtensions.registerStepDefinition(
+    async () => (await import('./definitions')).gatherMaintenanceStepDefinition
+  );
+  workflowsExtensions.registerStepDefinition(
+    async () => (await import('./definitions')).applyMaintenanceChangesStepDefinition
+  );
+  workflowsExtensions.registerStepDefinition(
+    async () => (await import('./definitions')).recordMaintenanceRunStepDefinition
+  );
+};

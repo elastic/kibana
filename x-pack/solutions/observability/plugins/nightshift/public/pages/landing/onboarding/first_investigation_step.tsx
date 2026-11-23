@@ -108,6 +108,23 @@ export function OnboardingFirstInvestigationStep({
     [isStarting, startInvestigation]
   );
 
+  const compose = (
+    <ComposeCard
+      key="compose"
+      title={i18n.translate('xpack.nightshift.onboarding.investigate.customTitle', {
+        defaultMessage: 'Ask your own question',
+      })}
+      value={message}
+      onChange={setMessage}
+      isStarting={isStarting}
+      isLoading={isStarting && startingPrompt === message.trim()}
+      onSubmit={() => {
+        const prompt = message.trim();
+        if (prompt) start(prompt);
+      }}
+    />
+  );
+
   if (isRunning) {
     return (
       <div
@@ -126,6 +143,7 @@ export function OnboardingFirstInvestigationStep({
           <EuiSpacer size="m" />
           <ConnectSourcesGrid filter={isAdditionalType} />
         </section>
+        {compose}
       </div>
     );
   }
@@ -204,19 +222,7 @@ export function OnboardingFirstInvestigationStep({
           />
         </EuiPanel>
       )}
-      <ComposeCard
-        title={i18n.translate('xpack.nightshift.onboarding.investigate.customTitle', {
-          defaultMessage: 'Ask your own question',
-        })}
-        value={message}
-        onChange={setMessage}
-        isStarting={isStarting}
-        isLoading={isStarting && startingPrompt === message.trim()}
-        onSubmit={() => {
-          const prompt = message.trim();
-          if (prompt) start(prompt);
-        }}
-      />
+      {compose}
     </div>
   );
 }

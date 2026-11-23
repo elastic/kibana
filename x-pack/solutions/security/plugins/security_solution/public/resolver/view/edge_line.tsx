@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { applyMatrix3, distance, angle } from '../models/vector2';
 import type { Vector2, Matrix3, EdgeLineMetadata } from '../types';
@@ -18,7 +18,9 @@ interface StyledEdgeLine {
   readonly magFactorX: number;
 }
 
-const StyledEdgeLine = styled.div<StyledEdgeLine>`
+const StyledEdgeLine = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'resolverEdgeColor' && prop !== 'magFactorX',
+})<StyledEdgeLine>`
   position: absolute;
   height: ${(props) => {
     return `${fontSize(props.magFactorX, 12, 8.5)}px`;
@@ -34,7 +36,13 @@ interface StyledElapsedTime {
   readonly textColor: string;
 }
 
-const StyledElapsedTime = styled.div<StyledElapsedTime>`
+const StyledElapsedTime = styled('div', {
+  shouldForwardProp: (prop) =>
+    prop !== 'backgroundColor' &&
+    prop !== 'leftPct' &&
+    prop !== 'scaledTypeSize' &&
+    prop !== 'textColor',
+})<StyledElapsedTime>`
   background-color: ${(props) => props.backgroundColor};
   color: ${(props) => props.textColor};
   font-size: ${(props) => `${props.scaledTypeSize}px`};

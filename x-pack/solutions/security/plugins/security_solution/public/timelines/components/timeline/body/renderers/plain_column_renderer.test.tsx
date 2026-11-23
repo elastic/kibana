@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
 import { plainColumnRenderer } from './plain_column_renderer';
 import { deleteItemIdx, findItem, getValues } from './helpers';
@@ -30,8 +29,6 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../../common/components/link_to');
 
 describe('plain_column_renderer', () => {
-  const mount = useMountAppended();
-
   describe('rendering', () => {
     let mockDatum: TimelineNonEcsData[];
     const _id = mockTimelineData[0]._id;
@@ -39,7 +36,7 @@ describe('plain_column_renderer', () => {
       mockDatum = cloneDeep(mockTimelineData[0].data);
     });
 
-    test('renders correctly against snapshot', () => {
+    test('renders the formatted field value', () => {
       const column = plainColumnRenderer.renderColumn({
         columnName: 'event.category',
         eventId: _id,
@@ -47,8 +44,12 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === 'event.category')!,
         scopeId: 'test',
       });
-      const wrapper = shallow(<span>{column}</span>);
-      expect(wrapper).toMatchSnapshot();
+      render(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+      expect(screen.getByText('Access')).toBeInTheDocument();
     });
 
     test('should return isInstance false if source is empty', () => {
@@ -72,12 +73,12 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === 'event.category')!,
         scopeId: 'test',
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{column}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Access');
+      expect(container.textContent).toEqual('Access');
     });
 
     test('should return the value of destination.ip if destination.ip has a valid value', () => {
@@ -88,12 +89,12 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === 'destination.ip')!,
         scopeId: 'test',
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{column}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('192.168.0.3');
+      expect(container.textContent).toEqual('192.168.0.3');
     });
 
     test('should return the value of destination.bytes if destination.bytes has a valid value', () => {
@@ -104,12 +105,12 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === 'destination.bytes')!,
         scopeId: 'test',
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{column}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('120.6KB');
+      expect(container.textContent).toEqual('120.6KB');
     });
 
     test('should return the value of event.action if event has a valid value', () => {
@@ -120,12 +121,12 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === 'event.action')!,
         scopeId: 'test',
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{column}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Action');
+      expect(container.textContent).toEqual('Action');
     });
 
     test('should return the time formatted as per Kibana advanced settings if timestamp has a valid value', () => {
@@ -136,12 +137,12 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === '@timestamp')!,
         scopeId: 'test',
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{column}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Nov 5, 2018 @ 19:03:25.937');
+      expect(container.textContent).toEqual('Nov 5, 2018 @ 19:03:25.937');
     });
 
     test('should return an empty value if destination ip is empty', () => {
@@ -153,12 +154,12 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === 'destination.ip')!,
         scopeId: 'test',
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{emptyColumn}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      expect(container.textContent).toEqual(getEmptyValue());
     });
 
     test('should return an empty value if event severity is empty', () => {
@@ -170,12 +171,12 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === 'event.severity')!,
         scopeId: 'test',
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{emptyColumn}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      expect(container.textContent).toEqual(getEmptyValue());
     });
 
     test('should render a message text', () => {
@@ -187,12 +188,12 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === 'message')!,
         scopeId: 'test',
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{column}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('I am a log file message');
+      expect(container.textContent).toEqual('I am a log file message');
     });
 
     test('should join multiple values with a comma [not draggable]', () => {
@@ -204,13 +205,13 @@ describe('plain_column_renderer', () => {
         field: defaultHeaders.find((h) => h.id === 'message')!,
         scopeId: 'test',
       });
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <span>{column}</span>
         </TestProviders>
       );
       const values = getValues('process.args', data);
-      expect(wrapper.text()).toEqual(values?.join(', '));
+      expect(container.textContent).toEqual(values?.join(', '));
     });
   });
 });

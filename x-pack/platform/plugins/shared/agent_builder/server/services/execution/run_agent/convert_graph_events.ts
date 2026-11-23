@@ -10,12 +10,21 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type { BackgroundAgentCompleteStep, ChatAgentEvent } from '@kbn/agent-builder-common/chat';
+import type {
+  BackgroundAgentCompleteStep,
+  ChatAgentEvent,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common/chat';
 import {
   ChatEventType,
+  createMessageDeliveredEvent,
+  createInterimAnswerEvent,
+  isInterimAnswerStep,
   createSubstitutionAppliedEvent,
   isBackgroundAgentCompleteStep,
   isCompactionStep,
+  isModelReasoningStep,
+  isDeliveredMessageStep,
   isReasoningStep,
   isSubagentRosterUpdatedStep,
   isSubstitutionStep,
@@ -23,6 +32,8 @@ import {
 import {
   createBrowserToolCallEvent,
   createMessageEvent,
+  createModelReasoningChunkEvent,
+  createModelReasoningEvent,
   createPromptRequestEvent,
   createReasoningEvent,
   createTextChunkEvent,
@@ -31,6 +42,7 @@ import {
   createSubagentRosterUpdatedEvent,
   createToolCallEvent,
   createToolResultEvent,
+  extractReasoningContent,
   extractTextContent,
   hasTag,
   matchEvent,
@@ -70,11 +82,19 @@ interface ExecuteToolNodeOutput {
  */
 const stepUpdatesToEvents = (
   updates: RunStepUpdate[],
-  renderState: ToolRenderStateUpdate
+  renderState: ToolRenderStateUpdate,
+  messageId: string
 ): ChatAgentEvent[] => {
   const events: ChatAgentEvent[] = [];
   for (const update of updates) {
-    if (update.type === 'append' && isReasoningStep(update.step)) {
+    if (update.type === 'append' && isModelReasoningStep(update.step)) {
+      events.push(
+        createModelReasoningEvent(update.step.reasoning, {
+          messageId,
+          toolCallGroupId: update.step.tool_call_group_id,
+        })
+      );
+    } else if (update.type === 'append' && isReasoningStep(update.step)) {
       events.push(
         createReasoningEvent(update.step.reasoning, {
           toolCallId: update.step.tool_call_id,
@@ -111,6 +131,20 @@ const stepUpdatesToEvents = (
 };
 
 const stripStepType = ({ type, ...execution }: BackgroundAgentCompleteStep) => execution;
+
+const notificationEvent = (step: ConversationRoundStep): ChatAgentEvent | undefined => {
+  if (isBackgroundAgentCompleteStep(step)) {
+    return createBackgroundAgentCompleteEvent(stripStepType(step));
+  }
+  if (isInterimAnswerStep(step)) {
+    return createInterimAnswerEvent({ message: step.message });
+  }
+  if (isDeliveredMessageStep(step)) {
+    const { type, ...data } = step;
+    return createMessageDeliveredEvent(data);
+  }
+  return undefined;
+};
 
 const NODE_NAMES: ReadonlySet<string> = new Set(Object.values(steps));
 
@@ -162,7 +196,10 @@ export const convertGraphEvents = ({
         }
 
         // reset per-turn first-chunk tracker at the start of each research turn
-        if (matchEvent(event, 'on_chain_start') && matchName(event, steps.researchAgent)) {
+        if (
+          matchEvent(event, 'on_chain_start') &&
+          (matchName(event, steps.researchAgent) || matchName(event, steps.forcedAnswer))
+        ) {
           // reset per-turn first-chunk tracker at the start of each research turn
           currentTurnFirstChunkAt = undefined;
           // reset message id between research turns
@@ -176,6 +213,14 @@ export const convertGraphEvents = ({
           (hasTag(event, tags.answerAgent) || hasTag(event, tags.researchAgent))
         ) {
           const chunk: AIMessageChunk = event.data.chunk;
+          const chunkEvents: ChatAgentEvent[] = [];
+          // only research turns persist their reasoning as a `model_reasoning` step
+          const reasoningContent = hasTag(event, tags.researchAgent)
+            ? extractReasoningContent(chunk)
+            : undefined;
+          if (reasoningContent) {
+            chunkEvents.push(createModelReasoningChunkEvent(reasoningContent, { messageId }));
+          }
           const textContent = extractTextContent(chunk);
           if (textContent) {
             if (
@@ -185,16 +230,23 @@ export const convertGraphEvents = ({
             ) {
               currentTurnFirstChunkAt = Date.now();
             }
-            return of(createTextChunkEvent(textContent, { messageId }));
+            chunkEvents.push(createTextChunkEvent(textContent, { messageId }));
+          }
+          if (chunkEvents.length > 0) {
+            return of(...chunkEvents);
           }
         }
 
-        // emit reasoning and tool call events for research agent turns
-        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.researchAgent)) {
+        // emit research and forced-answer events
+        if (
+          isRootGraphNodeEnd(event, graphName) &&
+          (matchName(event, steps.researchAgent) || matchName(event, steps.forcedAnswer))
+        ) {
           const output = event.data.output as ResearchNodeOutput;
           const events: ChatAgentEvent[] = stepUpdatesToEvents(
             output.steps ?? [],
-            output.toolRenderState ?? {}
+            output.toolRenderState ?? {},
+            messageId
           );
 
           // Backdated thinking-complete: when the research agent's terminal turn
@@ -301,20 +353,16 @@ export const convertGraphEvents = ({
           return completed.length > 0 ? of(...completed) : EMPTY;
         }
 
-        // emit background execution complete events
-        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.checkBackgroundWork)) {
+        if (
+          isRootGraphNodeEnd(event, graphName) &&
+          (matchName(event, steps.checkBackgroundWork) ||
+            matchName(event, steps.checkIncomingAfterAnswer))
+        ) {
           const output = event.data.output as { steps?: RunStepUpdate[] };
-          const bgEvents: ChatAgentEvent[] = [];
-
-          for (const update of output.steps ?? []) {
-            if (update.type === 'append' && isBackgroundAgentCompleteStep(update.step)) {
-              bgEvents.push(createBackgroundAgentCompleteEvent(stripStepType(update.step)));
-            }
-          }
-
-          if (bgEvents.length > 0) {
-            return of(...bgEvents);
-          }
+          const notifications = (output.steps ?? []).flatMap((update) =>
+            update.type === 'append' ? notificationEvent(update.step) ?? [] : []
+          );
+          return notifications.length > 0 ? of(...notifications) : EMPTY;
         }
 
         return EMPTY;
