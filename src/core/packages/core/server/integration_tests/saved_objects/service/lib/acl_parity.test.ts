@@ -258,6 +258,9 @@ describe('ACL storage in Saved Objects', () => {
       namespaces: ['default'],
       query: { match_all: {} },
     });
+    expect(found).toHaveLength(1);
+    expect(foundWithoutExtensions).toHaveLength(1);
+    expect(hits.hits).toHaveLength(1);
     const results: Record<string, object | undefined> = {
       get: await repository.get(SET_TYPE, id),
       bulkGet: bulkGot[0],
