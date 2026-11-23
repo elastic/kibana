@@ -144,7 +144,7 @@ describe('useMergeCases', () => {
   it('warns when a later step failed although every source merged', async () => {
     mergeCasesMock.mockResolvedValue({
       ...response,
-      failures: [{ step: 'note', caseId: 'case-1', reason: 'boom' }],
+      failures: [{ step: 'activity', caseId: 'case-1', reason: 'boom' }],
     });
     const { result } = renderMergeHook(createQueryClient());
 

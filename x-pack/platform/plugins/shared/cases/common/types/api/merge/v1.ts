@@ -7,6 +7,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
+  MAX_AI_CONNECTOR_ID_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CASES_TO_MERGE,
   MAX_CASE_ID_LENGTH,
@@ -18,6 +19,7 @@ import {
   MAX_MERGE_ATTACHMENT_KEY_LENGTH,
   MAX_MERGE_CHOICE_KEYS,
   MAX_MERGE_EXTENDED_FIELDS,
+  MAX_MERGE_RESOLVE_REASON_LENGTH,
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
   MIN_CASES_TO_MERGE,
@@ -30,7 +32,7 @@ import {
   CaseStatusSchema,
   CaseTemplateSchema,
 } from '../../domain/case/v1';
-import { CaseUserProfileSchema } from '../../domain/user/v1';
+import { CaseUserProfileSchema, UserSchema } from '../../domain/user/v1';
 import { MergeCountsSchema, MergeSourceOutcomeSchema } from '../../domain/user_action/merge/v1';
 import { CaseRequestCustomFieldsSchema } from '../case/v1';
 
@@ -157,6 +159,17 @@ export const MergeCasesRequestSchema = lazySchema(() =>
 );
 
 /**
+ * Asks the AI for a value for every field the cases disagree on. It takes the same choices as the
+ * preview: a field the request already sets counts as decided.
+ */
+export const MergeCasesResolveRequestSchema = lazySchema(() =>
+  MergeCasesPreviewRequestSchema.extend({
+    /** The AI connector to ask. The default AI connector when absent. */
+    connectorId: z.string().max(MAX_AI_CONNECTOR_ID_LENGTH).optional(),
+  })
+);
+
+/**
  * Preview response
  */
 
@@ -173,6 +186,33 @@ export const MergePreviewCaseSchema = lazySchema(() =>
     totalAlerts: z.number(),
     template: CaseTemplateSchema.nullable(),
     merge: CaseMergeSchema.nullable(),
+    /** For the case hover card. */
+    description: z.string(),
+    createdBy: UserSchema,
+    closedAt: z.string().nullable(),
+    closedBy: UserSchema.nullable(),
+    assignees: z.array(CaseUserProfileSchema),
+    tags: z.array(z.string()),
+    totalComments: z.number(),
+    totalObservables: z.number(),
+    /** The name of the case's template at its latest version, when templates are on. */
+    templateName: z.string().nullable(),
+  })
+);
+
+/** Why a case's value can't be used with the chosen template. */
+export const MergeOptionIssueSchema = lazySchema(() =>
+  z.object({
+    code: z.enum([
+      'notAnOption',
+      'belowMin',
+      'aboveMax',
+      'tooShort',
+      'tooLong',
+      'pattern',
+      'notNumber',
+    ]),
+    message: z.string(),
   })
 );
 
@@ -222,8 +262,17 @@ const mergeSingleValueFieldSchema = <T extends z.ZodTypeAny>(valueSchema: T) =>
     provenance: MergeFieldProvenanceSchema,
     /** The case the suggestion comes from, when it comes from a single case. */
     sourceCaseId: z.string().nullable(),
-    /** Every distinct non-empty value with the cases that hold it, in case order. */
-    options: z.array(z.object({ value: valueSchema, caseIds: z.array(z.string()) })),
+    /**
+     * Every distinct non-empty value with the cases that hold it, in case order. `invalid` is set
+     * when the chosen template rejects the value; such an option can't be picked.
+     */
+    options: z.array(
+      z.object({
+        value: valueSchema,
+        caseIds: z.array(z.string()),
+        invalid: MergeOptionIssueSchema.optional(),
+      })
+    ),
     /** True when two or more cases hold different non-empty values. */
     hasConflict: z.boolean(),
   });
@@ -235,7 +284,35 @@ const mergeCombinedFieldSchema = <T extends z.ZodTypeAny>(valueSchema: T) =>
     max: z.number(),
     /** How many have to be removed to fit `max`. */
     overBy: z.number(),
+    /** Each combined value with the cases that hold it. */
+    items: z.array(z.object({ value: valueSchema, caseIds: z.array(z.string()) })),
   });
+
+/** What the UI needs to render an input for a template field. */
+export const MergeFieldDefinitionSchema = lazySchema(() =>
+  z.object({
+    /** The storage type, such as keyword, long or date. */
+    type: z.string(),
+    /** The allowed options of select, radio and checkbox fields. */
+    options: z.array(z.string()).optional(),
+    validation: z
+      .object({
+        min: z.number().optional(),
+        max: z.number().optional(),
+        minLength: z.number().optional(),
+        maxLength: z.number().optional(),
+        pattern: z.object({ regex: z.string(), message: z.string().optional() }).optional(),
+      })
+      .optional(),
+    metadata: z
+      .object({
+        multiple: z.boolean().optional(),
+        showTime: z.boolean().optional(),
+        timezone: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 
 export const MergeCustomFieldPreviewSchema = lazySchema(() =>
   mergeSingleValueFieldSchema(CustomFieldValueSchema).extend({
@@ -260,21 +337,32 @@ export const MergeExtendedFieldPreviewSchema = lazySchema(() =>
     isGlobal: z.boolean(),
     /** Why the value is not valid for the chosen template, if it is not. */
     errors: z.array(z.string()),
+    definition: MergeFieldDefinitionSchema,
+    /** Multi-value fields: each value with the cases that hold it. */
+    items: z.array(z.object({ value: z.string(), caseIds: z.array(z.string()) })).optional(),
+    /** Multi-value fields: values the chosen template doesn't allow, which stay on their cases. */
+    notCopiedValues: z
+      .array(z.object({ value: z.string(), caseIds: z.array(z.string()) }))
+      .optional(),
   })
+);
+
+export const MergeConflictFieldSchema = lazySchema(() =>
+  z.enum([
+    'title',
+    'description',
+    'severity',
+    'category',
+    'connector',
+    'template',
+    'customFields',
+    'extendedFields',
+  ])
 );
 
 export const MergeConflictSchema = lazySchema(() =>
   z.object({
-    field: z.enum([
-      'title',
-      'description',
-      'severity',
-      'category',
-      'connector',
-      'template',
-      'customFields',
-      'extendedFields',
-    ]),
+    field: MergeConflictFieldSchema,
     /** The custom field key or template field storage key. */
     key: z.string().optional(),
     label: z.string().optional(),
@@ -330,7 +418,16 @@ const mergeChoiceSchema = <T extends z.ZodRawShape>(shape: T) =>
     ...shape,
   });
 
-/** Every item the merge would copy, so the user can leave some out. */
+/** Items the merge never copies, which stay on their source cases. */
+export const MergeStayingAttachmentsSchema = lazySchema(() =>
+  z.object({
+    total: z.number(),
+    /** Only the source cases that hold any. */
+    byCase: z.array(z.object({ caseId: z.string(), count: z.number() })),
+  })
+);
+
+/** Every item the merge would copy, so the user can see them and leave some out. */
 export const MergeAttachmentChoicesSchema = lazySchema(() =>
   z.object({
     /** Alerts that no attack brought; an attack's alerts follow the attack. */
@@ -369,6 +466,8 @@ export const MergeCasesPreviewResponseSchema = lazySchema(() =>
     fields: z.object({
       title: mergeSingleValueFieldSchema(z.string()),
       description: mergeSingleValueFieldSchema(z.string()).extend({
+        /** Length of every description combined, so the UI can say how much to shorten. */
+        combinedLength: z.number(),
         /** Every case's description combined, when they differ and fit the limit. */
         combinedValue: z.string().nullable(),
       }),
@@ -414,13 +513,35 @@ export const MergeCasesPreviewResponseSchema = lazySchema(() =>
       attacks: MergeAttachmentSummarySchema,
       observables: MergeAttachmentSummarySchema,
       other: MergeAttachmentSummarySchema,
-      /** Not copied: files stay on their source cases. */
-      files: z.object({ total: z.number() }),
-      /** Not copied: comments stay on their source cases. */
-      comments: z.object({ total: z.number() }),
+      files: MergeStayingAttachmentsSchema,
+      comments: MergeStayingAttachmentsSchema,
     }),
-    /** Set only when a limit is exceeded. */
-    choices: MergeAttachmentChoicesSchema.nullable(),
+    choices: MergeAttachmentChoicesSchema,
+  })
+);
+
+/**
+ * Resolve response
+ */
+
+export const MergeResolveReasonSchema = lazySchema(() =>
+  z.object({
+    field: MergeConflictFieldSchema,
+    /** The custom field key or template field storage key. */
+    key: z.string().optional(),
+    reason: z.string().max(MAX_MERGE_RESOLVE_REASON_LENGTH),
+  })
+);
+
+export const MergeCasesResolveResponseSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The values the AI chose, only for the fields it settled. A field it couldn't settle is left
+     * out, for the user to choose.
+     */
+    fields: MergeFieldsRequestSchema,
+    /** Why the AI chose each value, one per field in `fields`. */
+    reasons: z.array(MergeResolveReasonSchema),
   })
 );
 
@@ -472,6 +593,10 @@ export type MergeAttachmentChoice = z.infer<typeof MergeAttachmentChoiceSchema>;
 export type MergeAttachmentsRequest = z.infer<typeof MergeAttachmentsRequestSchema>;
 export type MergeCasesPreviewRequest = z.infer<typeof MergeCasesPreviewRequestSchema>;
 export type MergeCasesRequest = z.infer<typeof MergeCasesRequestSchema>;
+export type MergeCasesResolveRequest = z.infer<typeof MergeCasesResolveRequestSchema>;
+export type MergeCasesResolveResponse = z.infer<typeof MergeCasesResolveResponseSchema>;
+export type MergeResolveReason = z.infer<typeof MergeResolveReasonSchema>;
+export type MergeConflictField = z.infer<typeof MergeConflictFieldSchema>;
 export type MergePreviewCase = z.infer<typeof MergePreviewCaseSchema>;
 export type MergeFieldProvenance = z.infer<typeof MergeFieldProvenanceSchema>;
 export type MergeTemplateOption = z.infer<typeof MergeTemplateOptionSchema>;
@@ -482,7 +607,10 @@ export type MergeLimit = z.infer<typeof MergeLimitSchema>;
 export type MergeNotCopiedReason = z.infer<typeof MergeNotCopiedReasonSchema>;
 export type MergeAttachmentSummary = z.infer<typeof MergeAttachmentSummarySchema>;
 export type MergeAttachmentChoices = z.infer<typeof MergeAttachmentChoicesSchema>;
+export type MergeStayingAttachments = z.infer<typeof MergeStayingAttachmentsSchema>;
 export type MergeCasesPreviewResponse = z.infer<typeof MergeCasesPreviewResponseSchema>;
 export type MergeFailureStep = z.infer<typeof MergeFailureStepSchema>;
 export type MergeSourceResult = z.infer<typeof MergeSourceResultSchema>;
 export type MergeCasesResponse = z.infer<typeof MergeCasesResponseSchema>;
+export type MergeOptionIssue = z.infer<typeof MergeOptionIssueSchema>;
+export type MergeFieldDefinition = z.infer<typeof MergeFieldDefinitionSchema>;

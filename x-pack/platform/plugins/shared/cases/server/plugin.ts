@@ -499,6 +499,7 @@ export class CasePlugin
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
       licensingPluginStart: plugins.licensing,
+      inferencePluginStart: plugins.inference,
       /**
        * Lens will be always defined as
        * it is declared as required plugin in kibana.json

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual } from 'lodash';
+import { isEqual, isUndefined, omitBy } from 'lodash';
 import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_DESCRIPTION_LENGTH,
@@ -17,6 +17,7 @@ import type {
   MergeConflict,
   MergeCustomFieldPreview,
   MergeExtendedFieldPreview,
+  MergeFieldDefinition,
   MergeFieldProvenance,
   MergeFieldsRequest,
   MergeLimit,
@@ -32,7 +33,10 @@ import type {
 import { CaseSeverity, ConnectorTypes } from '../../../../common/types/domain';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { FieldType, isDisplayOnlyField } from '../../../../common/types/domain/template/fields';
-import { getExtendedFieldIssues } from '../../../../common/types/domain/template/validate_extended_fields';
+import {
+  getExtendedFieldIssue,
+  getExtendedFieldIssues,
+} from '../../../../common/types/domain/template/validate_extended_fields';
 import { getNoneConnector } from '../../../../common/utils/connectors';
 import {
   buildExtendedFieldsDefaults,
@@ -211,28 +215,38 @@ export const buildSingleValueField = <T>({
   };
 };
 
+interface CombinedValues<T> {
+  value: T[];
+  provenance: MergeFieldProvenance;
+  /** Each combined value with the cases that hold it, in first-seen order. */
+  items: Array<ValueOption<T>>;
+}
+
 const combineValues = <T>(
   orderedCases: Case[],
   getValues: (theCase: Case) => T[],
   getKey: (value: T) => string
-): { value: T[]; provenance: MergeFieldProvenance } => {
-  const seen = new Set<string>();
-  const combined: T[] = [];
+): CombinedValues<T> => {
+  const byKey = new Map<string, ValueOption<T>>();
   for (const theCase of orderedCases) {
     for (const value of getValues(theCase)) {
       const key = getKey(value);
-      if (!seen.has(key)) {
-        seen.add(key);
-        combined.push(value);
+      const existing = byKey.get(key);
+      if (existing == null) {
+        byKey.set(key, { value, caseIds: [theCase.id] });
+      } else if (!existing.caseIds.includes(theCase.id)) {
+        existing.caseIds.push(theCase.id);
       }
     }
   }
 
+  const items = [...byKey.values()];
   const keysPerCase = orderedCases.map((theCase) => getValues(theCase).map(getKey).sort());
   const allSame = keysPerCase.every((keys) => isEqual(keys, keysPerCase[0]));
   return {
-    value: combined,
-    provenance: combined.length === 0 ? 'none' : allSame ? 'same' : 'combined',
+    value: items.map(({ value }) => value),
+    provenance: items.length === 0 ? 'none' : allSame ? 'same' : 'combined',
+    items,
   };
 };
 
@@ -242,13 +256,16 @@ const isEmptyString = (value: string | null | undefined) =>
 const caseLabel = ({ incremental_id: incrementalId, title }: Case) =>
   incrementalId != null ? `#${incrementalId}` : title;
 
-/** Every case's description, each under the case it comes from, when that fits the limit. */
+/**
+ * Every case's description, each under the case it comes from. The text is only offered when it
+ * fits the limit; its length is always reported so the UI can say how much to shorten.
+ */
 const combineDescriptions = (
   orderedCases: Case[],
   options: Array<ValueOption<string>>
-): string | null => {
+): { combinedValue: string | null; combinedLength: number } => {
   if (options.length < 2) {
-    return null;
+    return { combinedValue: null, combinedLength: 0 };
   }
   const combined = options
     .map(({ value, caseIds }) => {
@@ -260,7 +277,10 @@ const combineDescriptions = (
       return `From ${from}:\n\n${value}`;
     })
     .join('\n\n---\n\n');
-  return combined.length <= MAX_DESCRIPTION_LENGTH ? combined : null;
+  return {
+    combinedValue: combined.length <= MAX_DESCRIPTION_LENGTH ? combined : null,
+    combinedLength: combined.length,
+  };
 };
 
 const toConnectorComparable = ({ id, type, fields }: CaseConnector) => ({ id, type, fields });
@@ -271,10 +291,11 @@ const differentValuesConflict = (
   extra: Pick<MergeConflict, 'key' | 'label'> = {}
 ): MergeConflict => ({ field, ...extra, reason: 'differentValues', resolved });
 
+/** Matches the UI: a user picker holds several people unless `multiple` is explicitly false. */
 const isMultiValueField = (field: InlineField) =>
   field.control === FieldType.CHECKBOX_GROUP ||
   (field.control === FieldType.USER_PICKER &&
-    (field.metadata as { multiple?: boolean } | undefined)?.multiple === true);
+    (field.metadata as { multiple?: boolean } | undefined)?.multiple !== false);
 
 const parseJsonArray = (value: string): unknown[] => {
   try {
@@ -291,6 +312,46 @@ const multiValueKey = (item: unknown): string =>
     : typeof item === 'object' && item != null && 'uid' in item
     ? String((item as { uid: unknown }).uid)
     : JSON.stringify(item);
+
+/** The string a multi-value item is shown and compared as: the option itself, or the user's JSON. */
+const multiValueItemString = (item: unknown): string =>
+  typeof item === 'string' ? item : JSON.stringify(item);
+
+/** What the UI needs to render an input for the field. */
+const toFieldDefinition = (field: InlineField): MergeFieldDefinition => {
+  const metadata = (field.metadata ?? {}) as Record<string, unknown>;
+  const { validation } = field;
+  const definedValidation = omitBy(
+    {
+      min: validation?.min,
+      max: validation?.max,
+      minLength: validation?.min_length,
+      maxLength: validation?.max_length,
+      pattern: validation?.pattern,
+    },
+    isUndefined
+  );
+  const definedMetadata = omitBy(
+    {
+      multiple: typeof metadata.multiple === 'boolean' ? metadata.multiple : undefined,
+      showTime: typeof metadata.show_time === 'boolean' ? metadata.show_time : undefined,
+      timezone: typeof metadata.timezone === 'string' ? metadata.timezone : undefined,
+    },
+    isUndefined
+  );
+  return {
+    type: field.type,
+    ...(Array.isArray(metadata.options)
+      ? {
+          options: metadata.options.filter(
+            (option): option is string => typeof option === 'string'
+          ),
+        }
+      : {}),
+    ...(Object.keys(definedValidation).length > 0 ? { validation: definedValidation } : {}),
+    ...(Object.keys(definedMetadata).length > 0 ? { metadata: definedMetadata } : {}),
+  };
+};
 
 const isEmptyExtendedValue = (value: string | undefined) =>
   value == null || value === '' || value === '[]';
@@ -462,9 +523,15 @@ const buildExtendedFields = (
     requestFields,
     linkedStorageKeys,
     globalFields,
+    templates,
   }: Pick<
     BuildMergeFieldsArgs,
-    'orderedCases' | 'destination' | 'requestFields' | 'linkedStorageKeys' | 'globalFields'
+    | 'orderedCases'
+    | 'destination'
+    | 'requestFields'
+    | 'linkedStorageKeys'
+    | 'globalFields'
+    | 'templates'
   >,
   templateFields: InlineField[],
   conflicts: MergeConflict[]
@@ -485,7 +552,10 @@ const buildExtendedFields = (
     const key = getFieldSnakeKey(field.name, field.type);
     const label = field.label ?? field.name;
     const multiValue = isMultiValueField(field);
-    let row: SingleValueField<string>;
+    let row: Omit<SingleValueField<string>, 'options'> & {
+      options: MergeExtendedFieldPreview['options'];
+    };
+    let multiValueItems: Pick<MergeExtendedFieldPreview, 'items' | 'notCopiedValues'> = {};
 
     if (multiValue) {
       const combined = combineValues(
@@ -496,15 +566,40 @@ const buildExtendedFields = (
         },
         multiValueKey
       );
+      // Checkbox items the template doesn't offer stay on their cases instead of blocking the merge.
+      const isAllowed = (item: unknown) =>
+        field.control !== FieldType.CHECKBOX_GROUP ||
+        getExtendedFieldIssue(field, JSON.stringify([item])) == null;
+      const allowed = combined.items.filter(({ value }) => isAllowed(value));
+      const notAllowed = combined.items.filter(({ value }) => !isAllowed(value));
+      const toItem = ({ value, caseIds }: ValueOption<unknown>) => ({
+        value: multiValueItemString(value),
+        caseIds,
+      });
+      multiValueItems = {
+        items: allowed.map(toItem),
+        notCopiedValues: notAllowed.map(toItem),
+      };
+
       const options = collectOptions(
         orderedCases,
         (theCase) => getStoredExtendedValue(theCase, key) ?? '',
         isEmptyExtendedValue
-      );
+      ).map((option) => {
+        const invalid = parseJsonArray(option.value)
+          .map((item) =>
+            isAllowed(item) ? undefined : getExtendedFieldIssue(field, JSON.stringify([item]))
+          )
+          .find((issue) => issue != null);
+        return invalid != null ? { ...option, invalid } : option;
+      });
       row = {
-        value: combined.value.length > 0 ? JSON.stringify(combined.value) : defaults[key] ?? '',
+        value:
+          allowed.length > 0
+            ? JSON.stringify(allowed.map(({ value }) => value))
+            : defaults[key] ?? '',
         provenance:
-          combined.value.length > 0
+          allowed.length > 0
             ? combined.provenance
             : isEmptyExtendedValue(defaults[key])
             ? 'none'
@@ -514,13 +609,20 @@ const buildExtendedFields = (
         hasConflict: false,
       };
     } else {
-      row = buildSingleValueField<string>({
+      const single = buildSingleValueField<string>({
         orderedCases,
         destination,
         getValue: (theCase) => getStoredExtendedValue(theCase, key) ?? '',
         isEmpty: isEmptyExtendedValue,
         emptyValue: '',
       });
+      row = {
+        ...single,
+        options: single.options.map((option) => {
+          const invalid = getExtendedFieldIssue(field, option.value);
+          return invalid != null ? { ...option, invalid } : option;
+        }),
+      };
       if (row.provenance === 'none' && !isEmptyExtendedValue(defaults[key])) {
         row = { ...row, value: defaults[key], provenance: 'templateDefault' };
       }
@@ -544,6 +646,8 @@ const buildExtendedFields = (
       multiValue,
       required: field.validation?.required === true,
       isGlobal,
+      definition: toFieldDefinition(field),
+      ...multiValueItems,
     });
   }
 
@@ -566,6 +670,13 @@ const buildExtendedFields = (
   }
 
   // Template fields the sources hold that the destination's template does not define stay on them.
+  const labelsByKey = new Map<string, string>();
+  for (const field of [...[...templates.fieldsByVersion.values()].flat(), ...globalFields]) {
+    const fieldKey = getFieldSnakeKey(field.name, field.type);
+    if (!labelsByKey.has(fieldKey)) {
+      labelsByKey.set(fieldKey, field.label ?? field.name);
+    }
+  }
   const applicableKeys = new Set(
     applicable.map(({ field }) => getFieldSnakeKey(field.name, field.type))
   );
@@ -584,7 +695,7 @@ const buildExtendedFields = (
     values,
     notCopiedFields: [...notCopied].map(([key, caseIds]) => ({
       key,
-      label: key.replace(/_as_[a-z0-9_]+$/, ''),
+      label: labelsByKey.get(key) ?? key.replace(/_as_[a-z0-9_]+$/, ''),
       caseIds,
     })),
   };
@@ -622,7 +733,7 @@ export const buildMergeFields = (args: BuildMergeFieldsArgs): MergeFieldsResult 
   });
   const description = {
     ...descriptionField,
-    combinedValue: combineDescriptions(orderedCases, descriptionField.options),
+    ...combineDescriptions(orderedCases, descriptionField.options),
   };
   const severity = buildSingleValueField<CaseSeverity>({
     orderedCases,
@@ -676,11 +787,16 @@ export const buildMergeFields = (args: BuildMergeFieldsArgs): MergeFieldsResult 
     ({ assignees }) => assignees.map(({ uid }) => ({ uid })),
     ({ uid }) => uid
   );
-  const assigneesValue = canChangeAssignees
+  const assigneesValue: CombinedValues<CaseUserProfile> = canChangeAssignees
     ? combinedAssignees
     : {
         value: destination?.assignees.map(({ uid }) => ({ uid })) ?? [],
         provenance: (destination?.assignees.length ?? 0) > 0 ? 'destination' : 'none',
+        items:
+          destination?.assignees.map(({ uid }) => ({
+            value: { uid },
+            caseIds: [destination.id],
+          })) ?? [],
       };
 
   // With the templates feature off, templates are left as they are.
@@ -712,7 +828,7 @@ export const buildMergeFields = (args: BuildMergeFieldsArgs): MergeFieldsResult 
     : { rows: [], values: {}, notCopiedFields: [] };
 
   const finalTags = requestFields?.tags ?? tags.value;
-  const finalAssignees = requestFields?.assignees ?? (assigneesValue.value as CaseUserProfile[]);
+  const finalAssignees = requestFields?.assignees ?? assigneesValue.value;
   const limits: MergeLimit[] = [];
   if (finalTags.length > MAX_TAGS_PER_CASE) {
     limits.push({
@@ -746,8 +862,9 @@ export const buildMergeFields = (args: BuildMergeFieldsArgs): MergeFieldsResult 
       overBy: Math.max(0, tags.value.length - MAX_TAGS_PER_CASE),
     },
     assignees: {
-      value: assigneesValue.value as CaseUserProfile[],
-      provenance: assigneesValue.provenance as MergeFieldProvenance,
+      value: assigneesValue.value,
+      provenance: assigneesValue.provenance,
+      items: assigneesValue.items,
       max: MAX_ASSIGNEES_PER_CASE,
       overBy: Math.max(0, assigneesValue.value.length - MAX_ASSIGNEES_PER_CASE),
       canChange: canChangeAssignees,

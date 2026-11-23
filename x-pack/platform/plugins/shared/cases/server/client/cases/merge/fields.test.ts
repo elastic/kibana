@@ -76,11 +76,24 @@ describe('buildMergeFields', () => {
         })
       );
       expect(fields.description.combinedValue).toContain('Other');
+      expect(fields.description.combinedLength).toBe(fields.description.combinedValue?.length);
       expect(conflicts).toEqual([
         { field: 'title', reason: 'differentValues', resolved: false },
         { field: 'description', reason: 'differentValues', resolved: false },
       ]);
       expect(values.title).toBe('Phishing');
+    });
+
+    it('reports the combined description length even when it is too long to offer', () => {
+      const { fields } = build({
+        orderedCases: [
+          { ...first, description: 'a'.repeat(16_000) },
+          { ...second, description: 'b'.repeat(16_000) },
+        ],
+      });
+
+      expect(fields.description.combinedValue).toBeNull();
+      expect(fields.description.combinedLength).toBeGreaterThan(30_000);
     });
 
     it('takes the request value for a conflict and marks it resolved', () => {
@@ -133,7 +146,13 @@ describe('buildMergeFields', () => {
       expect(fields.tags).toEqual(
         expect.objectContaining({ provenance: 'combined', overBy: 1, max: MAX_TAGS_PER_CASE })
       );
+      expect(fields.tags.items[0]).toEqual({ value: 'tag-0', caseIds: [first.id] });
+      expect(fields.tags.items.at(-1)).toEqual({ value: 'extra', caseIds: [second.id] });
       expect(fields.assignees.value).toEqual([{ uid: 'u1' }, { uid: 'u2' }]);
+      expect(fields.assignees.items).toEqual([
+        { value: { uid: 'u1' }, caseIds: [first.id] },
+        { value: { uid: 'u2' }, caseIds: [second.id] },
+      ]);
       expect(conflicts).toEqual([]);
       expect(limits).toEqual([
         { kind: 'tags', max: MAX_TAGS_PER_CASE, total: MAX_TAGS_PER_CASE + 1, overBy: 1 },
@@ -268,6 +287,7 @@ describe('buildMergeFields', () => {
           ],
         ],
         [templateVersionKey('t-a', 2), [field('verdict')]],
+        [templateVersionKey('t-b', 1), [field('region', { label: 'Region' })]],
       ]),
     };
 
@@ -355,26 +375,180 @@ describe('buildMergeFields', () => {
       ).toEqual([
         ['verdict_as_keyword', '', 'none'],
         ['tier_as_keyword', 'silver', 'templateDefault'],
-        ['labels_as_keyword', '["a","b","z"]', 'combined'],
+        ['labels_as_keyword', '["a","b"]', 'combined'],
       ]);
+      // A checkbox item the template doesn't offer stays on its case instead of blocking.
       expect(conflicts).toEqual([
         expect.objectContaining({
           field: 'extendedFields',
           key: 'verdict_as_keyword',
           reason: 'required',
         }),
-        expect.objectContaining({
-          field: 'extendedFields',
-          key: 'labels_as_keyword',
-          reason: 'invalidValue',
-        }),
       ]);
+      const labels = fields.extendedFields.find(({ key }) => key === 'labels_as_keyword');
+      expect(labels?.items).toEqual([
+        { value: 'a', caseIds: [first.id] },
+        { value: 'b', caseIds: [second.id] },
+      ]);
+      expect(labels?.notCopiedValues).toEqual([{ value: 'z', caseIds: [second.id] }]);
+      expect(labels?.options[1].invalid).toEqual(expect.objectContaining({ code: 'notAnOption' }));
       expect(values.extendedFields).toEqual({
         tier_as_keyword: 'silver',
-        labels_as_keyword: '["a","b","z"]',
+        labels_as_keyword: '["a","b"]',
       });
+      // The label comes from the template that defines the field.
       expect(fields.notCopiedFields).toEqual([
-        { key: 'region_as_keyword', label: 'region', caseIds: [first.id] },
+        { key: 'region_as_keyword', label: 'Region', caseIds: [first.id] },
+      ]);
+    });
+
+    it('flags each case value the chosen template rejects, with a reason code', () => {
+      const strict: MergeTemplates = {
+        ...templates,
+        fieldsByVersion: new Map([
+          [
+            templateVersionKey('t-a', 3),
+            [
+              field('tier', {
+                control: 'SELECT_BASIC',
+                metadata: { options: ['gold', 'silver'] },
+              } as Partial<InlineField>),
+              field('score', {
+                control: 'INPUT_NUMBER',
+                type: 'long',
+                validation: { min: 0, max: 100 },
+              } as Partial<InlineField>),
+            ],
+          ],
+        ]),
+      };
+      const { fields } = build({
+        orderedCases: [
+          {
+            ...withTemplate(first, 't-a', 3),
+            extended_fields: { tier_as_keyword: 'gold', score_as_long: '72' },
+          },
+          {
+            ...withTemplate(second, 't-a', 3),
+            extended_fields: { tier_as_keyword: 'bronze', score_as_long: '120' },
+          },
+        ],
+        templates: strict,
+      });
+
+      const byKey = new Map(fields.extendedFields.map((row) => [row.key, row]));
+      expect(byKey.get('tier_as_keyword')?.options).toEqual([
+        { value: 'gold', caseIds: [first.id] },
+        {
+          value: 'bronze',
+          caseIds: [second.id],
+          invalid: { code: 'notAnOption', message: 'Field "tier" must be one of: gold, silver' },
+        },
+      ]);
+      expect(byKey.get('score_as_long')?.options[1].invalid).toEqual({
+        code: 'aboveMax',
+        message: 'Field "score" must be <= 100',
+      });
+      expect(byKey.get('score_as_long')?.options[0].invalid).toBeUndefined();
+    });
+
+    it('describes each template field so the UI can render an input for it', () => {
+      const described: MergeTemplates = {
+        ...templates,
+        fieldsByVersion: new Map([
+          [
+            templateVersionKey('t-a', 3),
+            [
+              field('tier', {
+                control: 'SELECT_BASIC',
+                metadata: { options: ['gold', 'silver'], default: 'silver' },
+              } as Partial<InlineField>),
+              field('score', {
+                control: 'INPUT_NUMBER',
+                type: 'long',
+                validation: { min: 0, max: 100 },
+              } as Partial<InlineField>),
+              field('summary', {
+                validation: { max_length: 160, pattern: { regex: '^[A-Z]' } },
+              }),
+              field('seen', {
+                control: 'DATE_PICKER',
+                type: 'date',
+                metadata: { show_time: true, timezone: 'utc' },
+              } as Partial<InlineField>),
+            ],
+          ],
+        ]),
+      };
+      const { fields } = build({
+        orderedCases: [withTemplate(first, 't-a', 3), withTemplate(second, 't-a', 3)],
+        templates: described,
+      });
+
+      expect(fields.extendedFields.map(({ key, definition }) => [key, definition])).toEqual([
+        ['tier_as_keyword', { type: 'keyword', options: ['gold', 'silver'] }],
+        ['score_as_long', { type: 'long', validation: { min: 0, max: 100 } }],
+        [
+          'summary_as_keyword',
+          { type: 'keyword', validation: { maxLength: 160, pattern: { regex: '^[A-Z]' } } },
+        ],
+        ['seen_as_date', { type: 'date', metadata: { showTime: true, timezone: 'utc' } }],
+      ]);
+    });
+
+    it('combines a user picker unless it is set to a single user', () => {
+      const pickers: MergeTemplates = {
+        ...templates,
+        fieldsByVersion: new Map([
+          [
+            templateVersionKey('t-a', 3),
+            [
+              field('responders', { control: 'USER_PICKER' }),
+              field('commander', {
+                control: 'USER_PICKER',
+                metadata: { multiple: false },
+              } as Partial<InlineField>),
+            ],
+          ],
+        ]),
+      };
+      const priya = { uid: 'u-priya', name: 'Priya Raman' };
+      const dana = { uid: 'u-dana', name: 'Dana Whitfield' };
+      const { fields, conflicts } = build({
+        orderedCases: [
+          {
+            ...withTemplate(first, 't-a', 3),
+            extended_fields: {
+              responders_as_keyword: JSON.stringify([priya]),
+              commander_as_keyword: JSON.stringify([priya]),
+            },
+          },
+          {
+            ...withTemplate(second, 't-a', 3),
+            extended_fields: {
+              responders_as_keyword: JSON.stringify([dana, priya]),
+              commander_as_keyword: JSON.stringify([dana]),
+            },
+          },
+        ],
+        templates: pickers,
+      });
+
+      const [responders, commander] = fields.extendedFields;
+      expect(responders).toEqual(
+        expect.objectContaining({
+          multiValue: true,
+          value: JSON.stringify([priya, dana]),
+          items: [
+            { value: JSON.stringify(priya), caseIds: [first.id, second.id] },
+            { value: JSON.stringify(dana), caseIds: [second.id] },
+          ],
+          notCopiedValues: [],
+        })
+      );
+      expect(commander).toEqual(expect.objectContaining({ multiValue: false, hasConflict: true }));
+      expect(conflicts).toEqual([
+        expect.objectContaining({ field: 'extendedFields', key: 'commander_as_keyword' }),
       ]);
     });
 

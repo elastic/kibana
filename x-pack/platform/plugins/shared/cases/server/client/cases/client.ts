@@ -33,6 +33,8 @@ import type {
   MergeCasesPreviewResponse,
   MergeCasesRequest,
   MergeCasesResponse,
+  MergeCasesResolveRequest,
+  MergeCasesResolveResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -78,6 +80,8 @@ import type { ApplicableFieldsResponse } from '../../../common/types/domain/temp
 import { withUsageCounter } from '../usage_counters';
 import { merge } from './merge/merge';
 import { mergePreview } from './merge/preview';
+import type { MergeResolveOptions } from './merge/resolve';
+import { mergeResolve } from './merge/resolve';
 
 /**
  * API for interacting with the cases entities.
@@ -199,6 +203,14 @@ export interface CasesSubClient {
    */
   mergePreview(params: MergeCasesPreviewRequest): Promise<MergeCasesPreviewResponse>;
   /**
+   * Asks an LLM for a value for every field the cases disagree on, for the user to check before
+   * merging. Writes nothing.
+   */
+  mergeResolve(
+    params: MergeCasesResolveRequest,
+    options?: MergeResolveOptions
+  ): Promise<MergeCasesResolveResponse>;
+  /**
    * Merges cases into a new case or into one of them, copying their attachments.
    */
   merge(params: MergeCasesRequest): Promise<MergeCasesResponse>;
@@ -230,6 +242,7 @@ const usageCounterByMethod = {
   bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
   mergePreview: null,
+  mergeResolve: 'merge_cases_resolve_ai',
   merge: 'merge_cases',
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
@@ -314,6 +327,12 @@ export const createCasesSubClient = (
       getApplicableFields(params, clientArgs),
     mergePreview: (params: MergeCasesPreviewRequest) =>
       mergePreview(params, clientArgs, casesClient),
+    mergeResolve: withUsageCounter(
+      usageCounterByMethod.mergeResolve,
+      clientArgs,
+      (params: MergeCasesResolveRequest, options?: MergeResolveOptions) =>
+        mergeResolve(params, clientArgs, casesClient, options)
+    ),
     merge: withUsageCounter(usageCounterByMethod.merge, clientArgs, (params: MergeCasesRequest) =>
       merge(params, clientArgs, casesClient)
     ),

@@ -40,6 +40,11 @@ export const CASES_API_ERROR_CODES = {
    * attachment is over its destination limit. The 400 lists every conflict and limit.
    */
   MERGE_BLOCKED: 'merge_blocked',
+  /**
+   * Resolving a merge's conflicts with AI needs an AI connector the user can use, and the
+   * inference plugin. The 400 carries this code when there is none, so the UI can say so.
+   */
+  MERGE_RESOLVE_NO_AI_CONNECTOR: 'merge_resolve_no_ai_connector',
 } as const;
 
 export type CasesApiErrorCode = (typeof CASES_API_ERROR_CODES)[keyof typeof CASES_API_ERROR_CODES];
@@ -112,6 +117,11 @@ export interface MergeBlockedErrorAttributes {
   limits: MergeBlockedLimit[];
 }
 
+/** `attributes` payload for `merge_resolve_no_ai_connector` (HTTP 400). */
+export interface MergeResolveNoAiConnectorErrorAttributes {
+  code: typeof CASES_API_ERROR_CODES.MERGE_RESOLVE_NO_AI_CONNECTOR;
+}
+
 /**
  * Union of every typed error-attributes shape Cases serializes. Extend this
  * union when introducing a new machine-readable error code.
@@ -120,7 +130,8 @@ export type CasesApiErrorAttributes =
   | FieldIdentityImmutableErrorAttributes
   | FieldLinkageMalformedErrorAttributes
   | FieldRepresentationsConflictErrorAttributes
-  | MergeBlockedErrorAttributes;
+  | MergeBlockedErrorAttributes
+  | MergeResolveNoAiConnectorErrorAttributes;
 
 const ALL_ERROR_CODES: readonly string[] = Object.values(CASES_API_ERROR_CODES);
 

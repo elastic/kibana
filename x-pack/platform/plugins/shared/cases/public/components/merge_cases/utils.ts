@@ -6,18 +6,17 @@
  */
 
 import { i18n as kbnI18n } from '@kbn/i18n';
-import {
-  MAX_CASES_TO_MERGE,
-  MAX_DESCRIPTION_LENGTH,
-  MIN_CASES_TO_MERGE,
-} from '../../../common/constants';
+import { isEqual } from 'lodash';
+import { MAX_CASES_TO_MERGE, MIN_CASES_TO_MERGE } from '../../../common/constants';
 import type {
   MergeAttachmentChoices,
   MergeAttachmentSummary,
   MergeAttachmentsRequest,
   MergeCasesPreviewResponse,
   MergeCasesRequest,
+  MergeCasesResolveResponse,
   MergeConflict,
+  MergeExtendedFieldPreview,
   MergeFieldsRequest,
   MergePreviewCase,
   MergeTemplateOption,
@@ -32,6 +31,9 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import type { CasesPermissions } from '../../../common';
 import type { CaseUI } from '../../containers/types';
 import * as i18n from './translations';
+import type { DifferencesSummary } from './value_cards/field_state';
+
+export type { DifferencesSummary };
 
 type CaseReferenceSource = Pick<MergePreviewCase, 'title'> & { incrementalId?: number | null };
 
@@ -91,6 +93,9 @@ export const getMergeDisabledReason = (
  * Field choices
  */
 
+/** Where the cases go: a new case, or one of them. */
+export type MergeInto = 'new' | 'existing';
+
 export type CustomFieldValue = string | number | boolean | null;
 
 export interface CustomFieldChoice {
@@ -145,6 +150,50 @@ export const hasFieldChoice = (choices: MergeFieldChoices, key: MergeFieldKey): 
   }
 
   return Object.prototype.hasOwnProperty.call(choices, key);
+};
+
+const withoutEntry = <T>(
+  record: Readonly<Record<string, T>> | undefined,
+  key: string
+): Record<string, T> =>
+  Object.fromEntries(Object.entries(record ?? {}).filter(([entryKey]) => entryKey !== key));
+
+const isSingleFieldKey = (key: MergeFieldKey): key is MergeSingleFieldKey =>
+  !key.startsWith(CUSTOM_FIELDS_PREFIX) && !key.startsWith(EXTENDED_FIELDS_PREFIX);
+
+/** The choices without the user's value for a field, so the field takes the server's default. */
+export const withoutFieldChoice = (
+  choices: MergeFieldChoices,
+  key: MergeFieldKey
+): MergeFieldChoices => {
+  const next: MergeFieldChoices = { ...choices };
+  if (isSingleFieldKey(key)) {
+    delete next[key];
+    return next;
+  }
+
+  if (key.startsWith(CUSTOM_FIELDS_PREFIX)) {
+    const customFields = withoutEntry(choices.customFields, key.slice(CUSTOM_FIELDS_PREFIX.length));
+    delete next.customFields;
+    return Object.keys(customFields).length > 0 ? { ...next, customFields } : next;
+  }
+
+  const extendedFields = withoutEntry(
+    choices.extendedFields,
+    key.slice(EXTENDED_FIELDS_PREFIX.length)
+  );
+  delete next.extendedFields;
+  return Object.keys(extendedFields).length > 0 ? { ...next, extendedFields } : next;
+};
+
+/** Every field the choices hold a value for. */
+export const getChoiceKeys = (choices: MergeFieldChoices): MergeFieldKey[] => {
+  const { customFields, extendedFields, ...singleFields } = choices;
+  return [
+    ...(Object.keys(singleFields) as MergeSingleFieldKey[]),
+    ...Object.keys(customFields ?? {}).map((key): MergeFieldKey => `customFields.${key}`),
+    ...Object.keys(extendedFields ?? {}).map((key): MergeFieldKey => `extendedFields.${key}`),
+  ];
 };
 
 /**
@@ -291,6 +340,43 @@ export const buildMergeFields = (
 });
 
 /**
+ * The choices for the values the AI chose, the reverse of `buildMergeFields`. A template the cases
+ * don't use is left out.
+ */
+export const toChoicesFromFields = (
+  { fields: previewFields }: Pick<MergeCasesPreviewResponse, 'fields'>,
+  fields: MergeFieldsRequest
+): MergeFieldChoices => {
+  const { template, customFields, extendedFields, ...singleFields } = fields;
+  const templateOption =
+    template != null
+      ? previewFields.template.candidates.find(({ id }) => id === template.id)
+      : undefined;
+  const customChoices = Object.fromEntries(
+    (customFields ?? []).map(({ key, type, value }): [string, CustomFieldChoice] => [
+      key,
+      { type, value },
+    ])
+  );
+
+  return {
+    ...singleFields,
+    ...(template === null ? { template: null } : {}),
+    ...(templateOption != null ? { template: templateOption } : {}),
+    ...(Object.keys(customChoices).length > 0 ? { customFields: customChoices } : {}),
+    ...(extendedFields != null && Object.keys(extendedFields).length > 0
+      ? { extendedFields: { ...extendedFields } }
+      : {}),
+  };
+};
+
+/** The AI's reason for each field it chose, by field key. */
+export const toAiReasons = (
+  reasons: MergeCasesResolveResponse['reasons']
+): ReadonlyMap<MergeFieldKey, string> =>
+  new Map(reasons.map(({ field, key, reason }) => [getConflictKey({ field, key }), reason]));
+
+/**
  * Attachments
  */
 
@@ -366,33 +452,57 @@ export const getRoomForKind = (
 ): number | null =>
   summary.overBy > 0 ? Math.max(0, getLimitedChoices(choices, kind).length - summary.overBy) : null;
 
-/** Returns the keys of every alert except the `count` most recently added to a case. */
+/** Returns the keys of every item except the `count` most recently added to a case. */
 export const getKeysOutsideNewest = (
-  alerts: MergeAttachmentChoices['alerts'],
+  items: ReadonlyArray<Pick<MergeChoice, 'key' | 'addedAt'>>,
   count: number
 ): string[] =>
-  alerts
-    .map((alert, position) => ({ alert, position }))
+  items
+    .map((item, position) => ({ item, position }))
     .sort(
       (first, second) =>
-        second.alert.addedAt.localeCompare(first.alert.addedAt) || first.position - second.position
+        second.item.addedAt.localeCompare(first.item.addedAt) || first.position - second.position
     )
     .slice(count)
-    .map(({ alert }) => alert.key);
+    .map(({ item }) => item.key);
+
+export const LIMITED_CHOICE_KINDS = ['alerts', 'observables', 'other'] as const;
+export type LimitedChoiceKind = (typeof LIMITED_CHOICE_KINDS)[number];
+
+/**
+ * Returns the exclusions that keep, of every given kind over its limit, the newest items that fit.
+ * Attacks, kinds within their limits and items that don't count toward a limit keep the user's
+ * choices.
+ */
+export const getExclusionsKeepingNewest = (
+  { attachments, choices }: Pick<MergeCasesPreviewResponse, 'attachments' | 'choices'>,
+  excludedKeys: ReadonlySet<string>,
+  kinds: readonly LimitedChoiceKind[] = LIMITED_CHOICE_KINDS
+): Set<string> => {
+  const next = new Set(excludedKeys);
+  for (const kind of kinds) {
+    const room =
+      kind === 'alerts'
+        ? getRoomForAlerts(attachments.alerts, choices, excludedKeys)
+        : getRoomForKind(attachments[kind], choices, kind);
+    if (room != null) {
+      const limited = getLimitedChoices(choices, kind);
+      limited.forEach(({ key }) => next.delete(key));
+      getKeysOutsideNewest(limited, room).forEach((key) => next.add(key));
+    }
+  }
+  return next;
+};
 
 /** Applies the user's exclusions to the preview counts and limits. */
 export const applyExclusions = (
   { attachments, choices }: Pick<MergeCasesPreviewResponse, 'attachments' | 'choices'>,
   excludedKeys: ReadonlySet<string>
 ): SelectedAttachments => {
-  const alertsLeftWithAttacks =
-    choices != null ? getAlertKeysLeftOutWithAttacks(choices, excludedKeys).size : 0;
+  const alertsLeftWithAttacks = getAlertKeysLeftOutWithAttacks(choices, excludedKeys).size;
 
   const summarize = (kind: MergeChoiceKind): SelectedAttachmentSummary => {
     const summary = attachments[kind];
-    if (choices == null) {
-      return { ...summary, excluded: 0 };
-    }
     const kindChoices: MergeChoice[] = choices[kind];
     const isExcluded = ({ key }: MergeChoice) => excludedKeys.has(key);
     const excludedItems = kindChoices.filter(isExcluded).length;
@@ -418,21 +528,14 @@ export const applyExclusions = (
 
 type CopiedAttachmentSummaries = Pick<SelectedAttachments, MergeChoiceKind>;
 
-export const getAttachmentsToCopyCount = (attachments: CopiedAttachmentSummaries): number =>
-  MERGE_CHOICE_KINDS.reduce((count, kind) => count + attachments[kind].toCopy, 0);
-
 /**
  * Sends, per kind, the shorter list: the items to leave out or the items to keep. Excluded keys the
  * preview no longer offers are dropped, so stale ones never reach the request.
  */
 export const buildAttachmentsRequest = (
-  choices: MergeAttachmentChoices | null,
+  choices: MergeAttachmentChoices,
   excludedKeys: ReadonlySet<string>
 ): MergeAttachmentsRequest | undefined => {
-  if (choices == null) {
-    return undefined;
-  }
-
   const request: MergeAttachmentsRequest = {};
   for (const kind of MERGE_CHOICE_KINDS) {
     const kindChoices: MergeChoice[] = choices[kind];
@@ -450,10 +553,77 @@ export const buildAttachmentsRequest = (
 };
 
 /**
- * Blocking reasons
+ * Steps
  */
 
-const getLimitedKindReason = (attachments: CopiedAttachmentSummaries): string | undefined => {
+export type MergeStep = 'cases' | 'differences' | 'attachments' | 'review';
+
+export const MERGE_STEPS: readonly MergeStep[] = [
+  'cases',
+  'differences',
+  'attachments',
+  'review',
+] as const;
+
+/** What each step needs before the user can move past it. */
+export interface MergeStepState {
+  /** Whether the user can't move past the step yet. */
+  isBlocked: boolean;
+  /** Why, for the footer; unset when the step itself shows what is left. */
+  blocker?: string;
+  /** Nothing to decide on the step, so Next passes it; it's still shown as done and can be opened. */
+  isSkippable: boolean;
+}
+
+export type MergeStepStates = Record<MergeStep, MergeStepState>;
+
+export const getCasesStepBlocker = ({
+  caseCount,
+  canChooseDestination,
+  mergeInto,
+  hasDestination,
+}: {
+  caseCount: number;
+  /** False when the user can't create a case and no selected case is open. */
+  canChooseDestination: boolean;
+  mergeInto: MergeInto;
+  hasDestination: boolean;
+}): string | undefined => {
+  if (caseCount < MIN_CASES_TO_MERGE) {
+    return i18n.BLOCKED_ADD_ANOTHER_CASE;
+  }
+
+  if (!canChooseDestination) {
+    return i18n.BLOCKED_NO_DESTINATION;
+  }
+
+  if (mergeInto === 'existing' && !hasDestination) {
+    return i18n.BLOCKED_CHOOSE_CASE_TO_MERGE_INTO;
+  }
+
+  return undefined;
+};
+
+/** Why the Conflicts step is blocked; nothing while values are left to choose, which its bar counts. */
+export const getDifferencesStepBlocker = ({ blocking }: DifferencesSummary): string | undefined => {
+  const [first] = blocking;
+  if (first == null || blocking.some(({ state }) => state === 'chooseOne')) {
+    return undefined;
+  }
+
+  switch (first.state) {
+    case 'required':
+      return i18n.BLOCKED_FILL_IN_FIELD(first.label);
+    case 'invalid':
+      return i18n.BLOCKED_CHANGE_FIELD(first.label);
+    default:
+      return i18n.BLOCKED_FIX_LIMIT(first.label);
+  }
+};
+
+export const getAttachmentsStepBlocker = (
+  attachments: CopiedAttachmentSummaries
+): string | undefined => {
   if (attachments.alerts.overBy > 0) {
     return i18n.BLOCKED_LEAVE_OUT_ALERTS(attachments.alerts.overBy);
   }
@@ -469,92 +639,203 @@ const getLimitedKindReason = (attachments: CopiedAttachmentSummaries): string | 
   return undefined;
 };
 
-const getConflictLabel = (conflict: MergeConflict): string => {
-  switch (conflict.field) {
-    case 'title':
-      return i18n.TITLE_FIELD;
-    case 'description':
-      return i18n.DESCRIPTION_FIELD;
-    case 'severity':
-      return i18n.SEVERITY_FIELD;
-    case 'category':
-      return i18n.CATEGORY_FIELD;
-    case 'connector':
-      return i18n.CONNECTOR_FIELD;
-    case 'template':
-      return i18n.TEMPLATE_FIELD;
-    default:
-      return conflict.label ?? conflict.key ?? conflict.field;
+/** The Differences step has nothing to decide when no field differs or needs a value. */
+export const isDifferencesStepSkippable = ({ total, blocking }: DifferencesSummary): boolean =>
+  total === 0 && blocking.length === 0;
+
+/** The step Next opens: the next one with something to decide, else Review. */
+export const getNextStep = (
+  current: MergeStep,
+  states: MergeStepStates
+): { step: MergeStep; passed: MergeStep[] } => {
+  const passed: MergeStep[] = [];
+  for (const step of MERGE_STEPS.slice(MERGE_STEPS.indexOf(current) + 1)) {
+    if (step === 'review' || !states[step].isSkippable) {
+      return { step, passed };
+    }
+    passed.push(step);
   }
+  return { step: 'review', passed };
 };
 
-/** Returns the first reason the merge can't run, in the order the user resolves them. */
-export const getMergeBlockingReason = ({
-  caseCount,
-  canChooseDestination,
-  preview,
-  attachments,
-  values,
-  unresolvedConflicts,
-  includeAssignees,
-}: {
-  caseCount: number;
-  /** False when the user can't create a case and no selected case is open. */
-  canChooseDestination: boolean;
-  preview: MergeCasesPreviewResponse;
-  /** The preview counts after the user's exclusions. */
-  attachments: CopiedAttachmentSummaries;
-  values: MergeFieldValues;
-  unresolvedConflicts: MergeConflict[];
-  includeAssignees: boolean;
-}): string | undefined => {
+/** The step Back opens: the previous one with something to decide, else Cases. */
+export const getPreviousStep = (current: MergeStep, states: MergeStepStates): MergeStep => {
+  const earlier = MERGE_STEPS.slice(0, MERGE_STEPS.indexOf(current)).reverse();
+  return earlier.find((step) => step === 'cases' || !states[step].isSkippable) ?? 'cases';
+};
+
+/** A step can be opened once every step before it can be passed. */
+export const canOpenStep = (step: MergeStep, states: MergeStepStates): boolean =>
+  MERGE_STEPS.slice(0, MERGE_STEPS.indexOf(step)).every((earlier) => !states[earlier].isBlocked);
+
+/** The first step that still blocks the merge, if any. */
+export const getFirstBlockedStep = (states: MergeStepStates): MergeStep | undefined =>
+  MERGE_STEPS.find((step) => states[step].isBlocked);
+
+/**
+ * The merged case, for Review
+ */
+
+/** Where a merged value comes from. */
+export type MergedValueSource = 'cases' | 'own' | 'combined' | 'templateDefault' | 'none';
+
+export interface MergedValue<T> {
+  value: T;
+  /** The cases that hold the value; empty when the user typed it or no case has one. */
+  caseIds: string[];
+  source: MergedValueSource;
+}
+
+interface SingleValueRow<T> {
+  value: T;
+  provenance: string;
+  options: Array<{ value: T; caseIds: string[] }>;
+}
+
+const resolveSingleValue = <T>(row: SingleValueRow<T>, choice: T | undefined): MergedValue<T> => {
+  const value = choice !== undefined ? choice : row.value;
+  const option = row.options.find((candidate) => isEqual(candidate.value, value));
+  if (option != null) {
+    return { value, caseIds: option.caseIds, source: 'cases' };
+  }
+  if (choice !== undefined) {
+    return { value, caseIds: [], source: 'own' };
+  }
+  return {
+    value,
+    caseIds: [],
+    source: row.provenance === 'templateDefault' ? 'templateDefault' : 'none',
+  };
+};
+
+export interface MergedTemplateField {
+  key: string;
+  label: string;
+  value: string;
+  caseIds: string[];
+  source: MergedValueSource;
+}
+
+export interface MergedCustomField {
+  key: string;
+  label: string;
+  value: CustomFieldValue;
+  caseIds: string[];
+  source: MergedValueSource;
+}
+
+export interface MergedCasePreview {
+  title: MergedValue<string>;
+  description: MergedValue<string>;
+  severity: MergedValue<CaseSeverity>;
+  category: MergedValue<string | null>;
+  connector: MergedValue<CaseConnector>;
+  template: MergedValue<MergeTemplateOption | null>;
+  tags: string[];
+  assignees: CaseAssignees;
+  customFields: MergedCustomField[];
+  extendedFields: MergedTemplateField[];
+}
+
+const isEmptyExtendedValue = (value: string | undefined): boolean =>
+  value == null || value.length === 0 || value === '[]';
+
+const resolveExtendedField = (
+  row: MergeExtendedFieldPreview,
+  choice: string | undefined
+): MergedTemplateField => {
+  const { value, caseIds, source } = resolveSingleValue(row, choice);
+  return {
+    key: row.key,
+    label: row.label,
+    value,
+    caseIds: row.multiValue
+      ? [...new Set((row.items ?? []).flatMap((item) => item.caseIds))]
+      : caseIds,
+    source: row.multiValue && choice === undefined ? 'cases' : source,
+  };
+};
+
+/**
+ * The values the new or existing case gets: the user's choice, else the value every case shares
+ * (or the template's default). Only meaningful once every conflict has a choice.
+ */
+export const getMergedCasePreview = (
+  preview: MergeCasesPreviewResponse,
+  choices: MergeFieldChoices
+): MergedCasePreview => {
   const { fields } = preview;
+  const combined = combineDescriptions(preview);
+  const description = resolveSingleValue(fields.description, choices.description);
+  const isCombined = fields.description.options.length > 1 && description.value === combined;
 
-  if (caseCount < MIN_CASES_TO_MERGE) {
-    return i18n.BLOCKED_ADD_ANOTHER_CASE;
-  }
-
-  if (!canChooseDestination) {
-    return i18n.BLOCKED_NO_DESTINATION;
-  }
-
-  if (values.title.trim().length === 0) {
-    return i18n.BLOCKED_ENTER_TITLE;
-  }
-
-  if (values.description.trim().length === 0) {
-    return i18n.BLOCKED_ENTER_DESCRIPTION;
-  }
-
-  if (values.description.length > MAX_DESCRIPTION_LENGTH) {
-    return i18n.BLOCKED_SHORTEN_DESCRIPTION;
-  }
-
-  const valueConflicts = unresolvedConflicts.filter(({ reason }) => reason !== 'required');
-  if (valueConflicts.length > 0) {
-    return i18n.BLOCKED_RESOLVE_CONFLICTS(valueConflicts.length);
-  }
-
-  const [missingRequired] = unresolvedConflicts.filter(({ reason }) => reason === 'required');
-  if (missingRequired != null) {
-    return i18n.BLOCKED_FILL_IN_FIELD(getConflictLabel(missingRequired));
-  }
-
-  const limitedKindReason = getLimitedKindReason(attachments);
-  if (limitedKindReason != null) {
-    return limitedKindReason;
-  }
-
-  if (includeAssignees && values.assignees.length > fields.assignees.max) {
-    return i18n.BLOCKED_TOO_MANY_ASSIGNEES(values.assignees.length - fields.assignees.max);
-  }
-
-  if (values.tags.length > fields.tags.max) {
-    return i18n.BLOCKED_TOO_MANY_TAGS(values.tags.length - fields.tags.max);
-  }
-
-  return undefined;
+  return {
+    title: resolveSingleValue(fields.title, choices.title),
+    description: isCombined
+      ? {
+          value: combined,
+          caseIds: fields.description.options.flatMap(({ caseIds }) => caseIds),
+          source: 'combined',
+        }
+      : description,
+    severity: resolveSingleValue(fields.severity, choices.severity),
+    category: resolveSingleValue(fields.category, choices.category),
+    connector: resolveSingleValue(fields.connector, choices.connector),
+    template: resolveSingleValue(
+      { ...fields.template, options: fields.template.options },
+      choices.template
+    ),
+    tags: choices.tags ?? fields.tags.value,
+    assignees: choices.assignees ?? fields.assignees.value,
+    customFields: fields.customFields
+      .map((row) => {
+        const resolved = resolveSingleValue(row, choices.customFields?.[row.key]?.value);
+        return { key: row.key, label: row.label, ...resolved };
+      })
+      .filter(({ value }) => value != null && value !== ''),
+    extendedFields: fields.extendedFields
+      .map((row) => resolveExtendedField(row, choices.extendedFields?.[row.key]))
+      .filter(({ value }) => !isEmptyExtendedValue(value)),
+  };
 };
+
+/** Turns a stored template field value into text: JSON lists become comma-separated names. */
+export const formatTemplateFieldValue = (value: string): string => {
+  if (!value.startsWith('[')) {
+    return value;
+  }
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) {
+      return value;
+    }
+    return parsed
+      .map((item: unknown) => {
+        if (typeof item === 'string') {
+          return item;
+        }
+        if (item != null && typeof item === 'object' && 'name' in item) {
+          return String((item as { name: unknown }).name);
+        }
+        return String(item);
+      })
+      .join(', ');
+  } catch {
+    return value;
+  }
+};
+
+/** Splits a list into what shows and what hides behind "Show N more": all of it fits up to `max`. */
+export const splitOverflow = <T>(
+  items: readonly T[],
+  { max, visibleWhenOverflowing }: { max: number; visibleWhenOverflowing: number }
+): { visible: T[]; hidden: T[] } =>
+  items.length <= max
+    ? { visible: [...items], hidden: [] }
+    : {
+        visible: items.slice(0, visibleWhenOverflowing),
+        hidden: items.slice(visibleWhenOverflowing),
+      };
 
 export const buildMergeRequest = ({
   caseIds,
@@ -562,7 +843,6 @@ export const buildMergeRequest = ({
   choices,
   includeAssignees,
   closeSources,
-  note,
   attachments,
 }: {
   caseIds: string[];
@@ -570,10 +850,8 @@ export const buildMergeRequest = ({
   choices: MergeFieldChoices;
   includeAssignees: boolean;
   closeSources: boolean;
-  note: string | null;
   attachments?: MergeAttachmentsRequest;
 }): MergeCasesRequest => {
-  const trimmedNote = note?.trim() ?? '';
   const fields = buildMergeFields(choices, { includeAssignees });
 
   return {
@@ -582,7 +860,6 @@ export const buildMergeRequest = ({
     ...(Object.keys(fields).length > 0 ? { fields } : {}),
     ...(attachments != null ? { attachments } : {}),
     closeSources,
-    ...(trimmedNote.length > 0 ? { note: trimmedNote } : {}),
   };
 };
 

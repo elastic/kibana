@@ -6,116 +6,106 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiBasicTableColumn, EuiSuperSelectOption } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { EuiStepsHorizontalProps, EuiStepStatus } from '@elastic/eui';
 import {
-  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormRow,
   EuiIcon,
   EuiSkeletonText,
   EuiSpacer,
-  EuiSuperSelect,
+  EuiStepsHorizontal,
   EuiText,
-  EuiTextArea,
   EuiTitle,
-  EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { Status } from '@kbn/cases-components';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import {
-  MAX_CASES_TO_MERGE,
-  MAX_COMMENT_LENGTH,
-  MIN_CASES_TO_MERGE,
-} from '../../../common/constants';
 import type { MergeCasesResponse } from '../../../common/types/api';
-import type { CaseSeverity } from '../../../common/types/domain';
-import { CaseStatuses } from '../../../common/types/domain';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import type { CasesUI } from '../../containers/types';
 import { useGetMergeCasesPreview } from '../../containers/use_get_merge_cases_preview';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CancelCreationConfirmationModal } from '../create/cancel_creation_confirmation_modal';
-import { CaseDetailsLink } from '../links';
-import { SeverityHealth } from '../severity/config';
-import { MergeAddCases } from './merge_add_cases';
-import { MergeAttachmentsSection } from './merge_attachments_section';
-import { MergeCaseDetailsSection } from './merge_case_details_section';
-import { MergeSectionTitle } from './merge_section_title';
+import { AttachmentsStep } from './steps/attachments_step';
+import { CasesStep, CasesStepBar } from './steps/cases_step';
+import { MERGE_INTO_COMPACT_SAVING } from './steps/merge_into_choice';
+import { useCompactOnScroll } from './steps/use_compact_on_scroll';
+import { ConflictsBar } from './steps/conflicts_bar';
+import { DifferencesStep } from './steps/differences_step';
+import { ReviewStep } from './steps/review_step';
 import type { MergeOrigin } from './use_merge_cases';
 import { getMergeBlockedAttributes, useMergeCases } from './use_merge_cases';
 import type { MergeCaseSummary } from './use_merge_flyout_state';
 import { toMergeCaseSummary, useMergeFlyoutState } from './use_merge_flyout_state';
+import { useMergeAiAvailability } from './use_merge_ai_availability';
+import type { MergeFieldKey, MergeStep, MergeStepStates } from './utils';
 import {
+  MERGE_STEPS,
   applyExclusions,
   buildAttachmentsRequest,
   buildMergeRequest,
   buildPreviewFields,
-  getAttachmentsToCopyCount,
+  canOpenStep,
+  getAttachmentsStepBlocker,
   getCaseReference,
+  getCasesStepBlocker,
   getConflictKey,
-  getFieldValues,
-  getMergeBlockingReason,
-  getUnresolvedConflicts,
+  getDifferencesStepBlocker,
+  getFirstBlockedStep,
+  getNextStep,
+  getPreviousStep,
+  isDifferencesStepSkippable,
 } from './utils';
+import { focusFieldRow } from './value_cards/field_row';
+import { getDifferencesSummary } from './value_cards/field_state';
 import * as i18n from './translations';
 
-const NEW_CASE_VALUE = '';
+const STEP_TITLES: Record<MergeStep, string> = {
+  cases: i18n.STEP_CASES,
+  differences: i18n.STEP_DIFFERENCES,
+  attachments: i18n.STEP_ATTACHMENTS,
+  review: i18n.STEP_REVIEW,
+};
+
+const ATTACHMENT_LIMIT_KINDS = new Set(['alerts', 'observables', 'other']);
+
+const scrollToField = (fieldKey: MergeFieldKey) => focusFieldRow(fieldKey, { smooth: true });
 
 interface MergeCasesFlyoutFooterProps {
-  isLoadingCases: boolean;
-  blockingReason?: string;
-  summary: string;
+  step: MergeStep;
+  status: string;
+  isBlocked: boolean;
   isMerging: boolean;
-  isDisabled: boolean;
+  nextLabel?: string;
+  mergeLabel: string;
+  isNextDisabled: boolean;
   onCancel: () => void;
+  onBack: () => void;
+  onNext: () => void;
   onMerge: () => void;
 }
 
-type MergeCasesFlyoutFooterStatusProps = Pick<
-  MergeCasesFlyoutFooterProps,
-  'isLoadingCases' | 'blockingReason' | 'summary'
->;
-
-const MergeCasesFlyoutFooterStatus = React.memo<MergeCasesFlyoutFooterStatusProps>(
-  ({ isLoadingCases, blockingReason, summary }) => {
-    if (isLoadingCases) {
-      return (
-        <EuiText size="s" color="subdued" data-test-subj="merge-cases-loading">
-          {i18n.LOADING_CASES}
-        </EuiText>
-      );
-    }
-
-    if (blockingReason != null) {
-      return (
-        <EuiText size="s" color="warning" data-test-subj="merge-cases-blocking-reason">
-          <EuiIcon type="warning" aria-hidden={true} /> {blockingReason}
-        </EuiText>
-      );
-    }
-
-    return (
-      <EuiText size="s" color="subdued" data-test-subj="merge-cases-summary">
-        {summary}
-      </EuiText>
-    );
-  }
-);
-MergeCasesFlyoutFooterStatus.displayName = 'MergeCasesFlyoutFooterStatus';
-
 const MergeCasesFlyoutFooter = React.memo<MergeCasesFlyoutFooterProps>(
-  ({ isLoadingCases, blockingReason, summary, isMerging, isDisabled, onCancel, onMerge }) => (
+  ({
+    step,
+    status,
+    isBlocked,
+    isMerging,
+    nextLabel,
+    mergeLabel,
+    isNextDisabled,
+    onCancel,
+    onBack,
+    onNext,
+    onMerge,
+  }) => (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -130,30 +120,58 @@ const MergeCasesFlyoutFooter = React.memo<MergeCasesFlyoutFooterProps>(
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
-              {/* Announces why the merge is blocked, or what it will do, as it changes. */}
+              {/* Announces why the user can't go on, as it changes. */}
               <div
                 role="status"
                 aria-live="polite"
                 aria-atomic="true"
                 data-test-subj="merge-cases-footer-status"
               >
-                <MergeCasesFlyoutFooterStatus
-                  isLoadingCases={isLoadingCases}
-                  blockingReason={blockingReason}
-                  summary={summary}
-                />
+                {status.length > 0 ? (
+                  <EuiText
+                    size="s"
+                    color={isBlocked ? 'warning' : 'subdued'}
+                    data-test-subj={
+                      isBlocked ? 'merge-cases-blocking-reason' : 'merge-cases-footer-message'
+                    }
+                  >
+                    {isBlocked ? <EuiIcon type="warning" aria-hidden={true} /> : null} {status}
+                  </EuiText>
+                ) : null}
               </div>
             </EuiFlexItem>
+            {step !== 'cases' ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={onBack}
+                  isDisabled={isMerging}
+                  data-test-subj="merge-cases-back"
+                >
+                  {i18n.BACK}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={onMerge}
-                isLoading={isMerging}
-                isDisabled={isDisabled}
-                data-test-subj="merge-cases-submit"
-              >
-                {isMerging ? i18n.MERGING : i18n.MERGE_CASES}
-              </EuiButton>
+              {step === 'review' ? (
+                <EuiButton
+                  fill
+                  onClick={onMerge}
+                  isLoading={isMerging}
+                  isDisabled={isNextDisabled || isMerging}
+                  data-test-subj="merge-cases-submit"
+                >
+                  {isMerging ? i18n.MERGING : mergeLabel}
+                </EuiButton>
+              ) : (
+                <EuiButton
+                  fill
+                  onClick={onNext}
+                  isDisabled={isNextDisabled}
+                  data-test-subj="merge-cases-next"
+                >
+                  {nextLabel}
+                </EuiButton>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -174,9 +192,18 @@ export interface MergeCasesFlyoutProps {
 export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
   ({ initialCases, origin, onClose, onMerged }) => {
     const flyoutTitleId = useGeneratedHtmlId({ prefix: 'mergeCasesFlyoutTitle' });
+    const { euiTheme } = useEuiTheme();
     const { permissions } = useCasesContext();
     const { caseAssignmentAuthorized } = useCasesFeatures();
     const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
+    const [minWidth, setMinWidth] = useState<number>();
+    const [bodyScroller, setBodyScroller] = useState<HTMLDivElement | null>(null);
+    // The width it opens at is the narrowest the steps are laid out for, so it can only grow.
+    const keepOpeningWidth = useCallback((flyout: HTMLElement | null) => {
+      if (flyout != null) {
+        setMinWidth((current) => current ?? flyout.offsetWidth);
+      }
+    }, []);
 
     const initialSummaries = useMemo(() => initialCases.map(toMergeCaseSummary), [initialCases]);
     const {
@@ -185,16 +212,34 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
       setField,
       setCustomField,
       setExtendedField,
+      clearField,
       addCase,
       removeCase,
+      setMergeInto,
       setDestination,
       setExclusions,
       setCloseSources,
-      setNote,
       markForReview,
       dismissChangedNotice,
+      applyChoices,
+      applyAiResolution,
+      goTo,
     } = useMergeFlyoutState({ initialCases: initialSummaries, canCreate: permissions.create });
-    const { choices, needsReview, excludedKeys, closeSources, note, destinationCaseId } = state;
+    const isAiAvailable = useMergeAiAvailability();
+    const {
+      choices,
+      needsReview,
+      aiReasons,
+      excludedKeys,
+      closeSources,
+      mergeInto,
+      destinationCaseId,
+      step,
+    } = state;
+    const isCasesBarCompact = useCompactOnScroll(
+      step === 'cases' ? bodyScroller : null,
+      MERGE_INTO_COMPACT_SAVING
+    );
 
     const caseIds = useMemo(() => state.cases.map(({ id }) => id), [state.cases]);
     const previewFields = useMemo(
@@ -207,11 +252,11 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
       [choices.customFields, choices.extendedFields, choices.template]
     );
 
-    const {
-      data: preview,
-      isLoading: isLoadingPreview,
-      isFetching: isFetchingPreview,
-    } = useGetMergeCasesPreview({ caseIds, destinationCaseId, fields: previewFields });
+    const { data: preview, isFetching: isFetchingPreview } = useGetMergeCasesPreview({
+      caseIds,
+      destinationCaseId,
+      fields: previewFields,
+    });
     const { mutate: mergeCases, isLoading: isMerging } = useMergeCases();
 
     // The preview has the cases' current status and counts; until it arrives, show the selection.
@@ -224,83 +269,78 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
         return previewCase != null ? { ...theCase, ...previewCase } : theCase;
       });
     }, [preview?.cases, state.cases]);
-    const casesById = useMemo(
-      () => new Map((preview?.cases ?? []).map((theCase) => [theCase.id, theCase])),
-      [preview?.cases]
-    );
 
-    const values = useMemo(
-      () => (preview != null ? getFieldValues(preview, choices) : undefined),
-      [choices, preview]
-    );
-    const unresolvedConflicts = useMemo(
-      () => (preview != null ? getUnresolvedConflicts(preview, choices, needsReview) : []),
-      [choices, needsReview, preview]
-    );
-    const unresolvedKeys = useMemo(
-      () => new Set(unresolvedConflicts.map((conflict) => getConflictKey(conflict))),
-      [unresolvedConflicts]
-    );
     const selectedAttachments = useMemo(
       () => (preview != null ? applyExclusions(preview, excludedKeys) : undefined),
       [excludedKeys, preview]
+    );
+    const differencesSummary = useMemo(
+      () => (preview != null ? getDifferencesSummary(preview, choices, needsReview) : undefined),
+      [choices, needsReview, preview]
     );
 
     const destinationCase =
       destinationCaseId != null ? tableCases.find(({ id }) => id === destinationCaseId) : undefined;
     const destinationRef = destinationCase != null ? getCaseReference(destinationCase) : undefined;
-    const sources = tableCases.filter(({ id }) => id !== destinationCaseId);
-    const sourcesToClose = sources.filter(({ status }) => status !== CaseStatuses.closed);
-    const openCases = tableCases.filter(({ status }) => status !== CaseStatuses.closed);
     const canChooseDestination = permissions.create || destinationCaseId != null;
     const includeAssignees =
       caseAssignmentAuthorized && (preview?.fields.assignees.canChange ?? false);
 
-    const isLoadingCases = caseIds.length >= MIN_CASES_TO_MERGE && preview == null;
-
-    const blockingReason = useMemo(() => {
-      if (caseIds.length < MIN_CASES_TO_MERGE) {
-        return i18n.BLOCKED_ADD_ANOTHER_CASE;
-      }
-
-      if (preview == null || selectedAttachments == null || values == null) {
-        return undefined;
-      }
-
-      return getMergeBlockingReason({
-        caseCount: caseIds.length,
-        canChooseDestination,
-        preview,
-        attachments: selectedAttachments,
-        values,
-        unresolvedConflicts,
-        includeAssignees,
-      });
+    const stepStates = useMemo<MergeStepStates>(() => {
+      const casesBlocker =
+        getCasesStepBlocker({
+          caseCount: caseIds.length,
+          canChooseDestination,
+          mergeInto,
+          hasDestination: destinationCaseId != null,
+        }) ?? (preview == null ? i18n.LOADING_CASES : undefined);
+      const attachmentsBlocker =
+        selectedAttachments != null
+          ? getAttachmentsStepBlocker(selectedAttachments)
+          : i18n.LOADING_CASES;
+      return {
+        cases: { isBlocked: casesBlocker != null, blocker: casesBlocker, isSkippable: false },
+        differences:
+          differencesSummary != null
+            ? {
+                isBlocked: differencesSummary.blocking.length > 0,
+                blocker: getDifferencesStepBlocker(differencesSummary),
+                isSkippable: isDifferencesStepSkippable(differencesSummary),
+              }
+            : { isBlocked: true, blocker: i18n.LOADING_CASES, isSkippable: false },
+        attachments: {
+          isBlocked: attachmentsBlocker != null,
+          blocker: attachmentsBlocker,
+          // Always shown, even with nothing to leave out, so the user sees what gets copied.
+          isSkippable: false,
+        },
+        review: { isBlocked: false, isSkippable: false },
+      };
     }, [
       canChooseDestination,
       caseIds.length,
-      includeAssignees,
+      destinationCaseId,
+      differencesSummary,
+      mergeInto,
       preview,
       selectedAttachments,
-      unresolvedConflicts,
-      values,
     ]);
 
-    const summary = useMemo(() => {
-      if (selectedAttachments == null) {
-        return '';
+    const next = step !== 'review' ? getNextStep(step, stepStates) : undefined;
+    const firstBlockedStep = getFirstBlockedStep(stepStates);
+    const currentBlocker = stepStates[step].blocker;
+
+    const footerStatus = (() => {
+      if (step === 'review') {
+        return firstBlockedStep != null
+          ? { text: i18n.BLOCKED_ON_STEP(STEP_TITLES[firstBlockedStep]), isBlocked: true }
+          : { text: '', isBlocked: false };
       }
-
-      const attachmentsToCopy = getAttachmentsToCopyCount(selectedAttachments);
-      const copies =
-        destinationRef != null
-          ? i18n.SUMMARY_COPIES_EXISTING_CASE(attachmentsToCopy, destinationRef)
-          : i18n.SUMMARY_COPIES_NEW_CASE(attachmentsToCopy);
-
-      return closeSources && sourcesToClose.length > 0
-        ? `${copies} ${i18n.SUMMARY_CLOSES(sourcesToClose.length)}`
-        : copies;
-    }, [closeSources, destinationRef, selectedAttachments, sourcesToClose.length]);
+      if (currentBlocker != null) {
+        return { text: currentBlocker, isBlocked: currentBlocker !== i18n.LOADING_CASES };
+      }
+      return { text: '', isBlocked: false };
+    })();
 
     const requestClose = useCallback(() => {
       if (isMerging) {
@@ -312,6 +352,19 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
       }
       onClose();
     }, [isDirty, isMerging, onClose]);
+
+    const onNext = useCallback(() => {
+      if (step === 'review') {
+        return;
+      }
+      const { step: nextStep, passed } = getNextStep(step, stepStates);
+      goTo(nextStep, { passed });
+    }, [goTo, step, stepStates]);
+
+    const onBack = useCallback(
+      () => goTo(getPreviousStep(step, stepStates)),
+      [goTo, step, stepStates]
+    );
 
     const onMerge = useCallback(() => {
       if (preview == null) {
@@ -326,7 +379,6 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
             choices,
             includeAssignees,
             closeSources,
-            note,
             attachments: buildAttachmentsRequest(preview.choices, excludedKeys),
           }),
           origin,
@@ -335,9 +387,18 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
           onSuccess: onMerged,
           onError: (error) => {
             const blocked = getMergeBlockedAttributes(error);
-            if (blocked != null) {
-              // The preview refetches on its own; ask the user to look at what the server named.
-              markForReview(blocked.conflicts.map((conflict) => getConflictKey(conflict)));
+            if (blocked == null) {
+              return;
+            }
+            // The preview refetches on its own; take the user to what the server named.
+            const keys = blocked.conflicts.map((conflict) => getConflictKey(conflict));
+            if (keys.length > 0) {
+              markForReview(keys);
+              goTo('differences', { focusField: keys[0] });
+            } else if (blocked.limits.some(({ kind }) => ATTACHMENT_LIMIT_KINDS.has(kind))) {
+              goTo('attachments');
+            } else if (blocked.limits.length > 0) {
+              goTo('differences');
             }
           },
         }
@@ -348,155 +409,188 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
       closeSources,
       destinationCaseId,
       excludedKeys,
+      goTo,
       includeAssignees,
       markForReview,
       mergeCases,
-      note,
       onMerged,
       origin,
       preview,
     ]);
 
-    const destinationOptions = useMemo<Array<EuiSuperSelectOption<string>>>(
-      () => [
-        {
-          value: NEW_CASE_VALUE,
-          inputDisplay: i18n.NEW_CASE,
-          disabled: !permissions.create,
-          // Without create, the row's help text says why "New case" is disabled.
-          dropdownDisplay: (
-            <EuiText size="s" color={permissions.create ? 'default' : 'subdued'}>
-              {i18n.NEW_CASE}
-            </EuiText>
-          ),
-          'data-test-subj': 'merge-cases-destination-new',
-        },
-        ...openCases.map((theCase) => ({
-          value: theCase.id,
-          inputDisplay: (
-            <EuiText size="s" className="eui-textTruncate">
-              {theCase.incrementalId != null
-                ? `${getCaseReference(theCase)} ${theCase.title}`
-                : theCase.title}
-            </EuiText>
-          ),
-          dropdownDisplay: (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem
-                css={css`
-                  min-width: 0;
-                `}
-              >
-                <EuiText size="s" className="eui-textTruncate">
-                  {theCase.incrementalId != null
-                    ? `${getCaseReference(theCase)} ${theCase.title}`
-                    : theCase.title}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <Status status={theCase.status} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          'data-test-subj': `merge-cases-destination-${theCase.id}`,
-        })),
-      ],
-      [openCases, permissions.create]
+    const steps = useMemo<EuiStepsHorizontalProps['steps']>(
+      () =>
+        MERGE_STEPS.map((stepId) => {
+          const { isBlocked, isSkippable } = stepStates[stepId];
+          const isOpenable = canOpenStep(stepId, stepStates);
+          const status: EuiStepStatus =
+            stepId === step
+              ? 'current'
+              : !isOpenable
+              ? 'disabled'
+              : state.visitedSteps.has(stepId) && isBlocked
+              ? 'warning'
+              : state.visitedSteps.has(stepId) || isSkippable
+              ? 'complete'
+              : 'incomplete';
+          return {
+            title: STEP_TITLES[stepId],
+            status,
+            disabled: !isOpenable || isMerging,
+            onClick: () => goTo(stepId),
+            'data-test-subj': `merge-step-${stepId}`,
+          };
+        }),
+      [goTo, isMerging, state.visitedSteps, step, stepStates]
     );
 
-    const caseColumns = useMemo<Array<EuiBasicTableColumn<MergeCaseSummary>>>(
-      () => [
-        {
-          name: i18n.CASE_COLUMN,
-          truncateText: true,
-          render: (theCase: MergeCaseSummary) => (
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <CaseDetailsLink detailName={theCase.id} title={theCase.title} target="_blank">
-                  {getCaseReference(theCase)}
-                </CaseDetailsLink>
-              </EuiFlexItem>
-              {theCase.incrementalId != null ? (
-                <EuiFlexItem
-                  css={css`
-                    min-width: 0;
-                  `}
-                >
-                  <EuiText size="s" className="eui-textTruncate" title={theCase.title}>
-                    {theCase.title}
-                  </EuiText>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          ),
-        },
-        {
-          field: 'status',
-          name: i18n.STATUS_COLUMN,
-          width: '110px',
-          render: (status: MergeCaseSummary['status']) => <Status status={status} />,
-        },
-        {
-          field: 'severity',
-          name: i18n.SEVERITY_COLUMN,
-          width: '100px',
-          render: (severity: CaseSeverity) => <SeverityHealth severity={severity} />,
-        },
-        {
-          field: 'totalAlerts',
-          name: i18n.ALERTS_COLUMN,
-          width: '70px',
-          align: 'right',
-        },
-        {
-          width: '40px',
-          actions: [
-            {
-              name: (theCase: MergeCaseSummary) => i18n.REMOVE_CASE(getCaseReference(theCase)),
-              description: (theCase: MergeCaseSummary) =>
-                i18n.REMOVE_CASE(getCaseReference(theCase)),
-              render: (theCase: MergeCaseSummary) => (
-                <EuiToolTip
-                  content={i18n.REMOVE_CASE(getCaseReference(theCase))}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    iconType="cross"
-                    color="text"
-                    isDisabled={isMerging}
-                    onClick={() => removeCase(theCase.id)}
-                    aria-label={i18n.REMOVE_CASE(getCaseReference(theCase))}
-                    data-test-subj={`merge-cases-remove-${theCase.id}`}
-                  />
-                </EuiToolTip>
-              ),
-            },
-          ],
-        },
-      ],
-      [isMerging, removeCase]
-    );
+    const isPreviewMissing = preview == null || selectedAttachments == null;
 
-    const isControlsDisabled = isMerging;
+    const renderStepBar = () => {
+      if (step === 'cases') {
+        return (
+          <CasesStepBar
+            cases={tableCases}
+            mergeInto={mergeInto}
+            canCreate={permissions.create}
+            onSetMergeInto={setMergeInto}
+            isCompact={isCasesBarCompact}
+            isDisabled={isMerging}
+          />
+        );
+      }
+
+      if (
+        step === 'differences' &&
+        preview != null &&
+        differencesSummary != null &&
+        differencesSummary.total > 0
+      ) {
+        return (
+          <ConflictsBar
+            preview={preview}
+            caseIds={caseIds}
+            destinationCaseId={destinationCaseId}
+            choices={choices}
+            summary={differencesSummary}
+            isAiAvailable={isAiAvailable}
+            isDisabled={isMerging}
+            onApplyChoices={applyChoices}
+            onApplyAiResolution={applyAiResolution}
+            onGoToField={scrollToField}
+          />
+        );
+      }
+
+      return null;
+    };
+
+    const renderStep = () => {
+      if (step === 'cases') {
+        return (
+          <CasesStep
+            cases={tableCases}
+            previewCases={preview?.cases ?? []}
+            mergeInto={mergeInto}
+            destinationCaseId={destinationCaseId}
+            onSetDestination={setDestination}
+            onAddCase={addCase}
+            onRemoveCase={removeCase}
+            isDisabled={isMerging}
+          />
+        );
+      }
+
+      if (isPreviewMissing) {
+        return <EuiSkeletonText lines={6} />;
+      }
+
+      if (step === 'differences') {
+        return (
+          <DifferencesStep
+            preview={preview}
+            choices={choices}
+            needsReview={needsReview}
+            aiReasons={aiReasons}
+            destinationCaseId={destinationCaseId}
+            caseAssignmentAuthorized={caseAssignmentAuthorized}
+            isDisabled={isMerging}
+            focusField={state.focusField}
+            onSetField={setField}
+            onSetCustomField={setCustomField}
+            onSetExtendedField={setExtendedField}
+            onClearField={clearField}
+          />
+        );
+      }
+
+      if (step === 'attachments') {
+        return (
+          <AttachmentsStep
+            preview={preview}
+            attachments={selectedAttachments}
+            excludedKeys={excludedKeys}
+            onChangeExclusions={setExclusions}
+            destinationRef={destinationRef}
+            isDisabled={isMerging}
+          />
+        );
+      }
+
+      return (
+        <ReviewStep
+          preview={preview}
+          choices={choices}
+          aiReasons={aiReasons}
+          attachments={selectedAttachments}
+          destinationCaseId={destinationCaseId}
+          closeSources={closeSources}
+          onSetCloseSources={setCloseSources}
+          showAssignees={caseAssignmentAuthorized}
+          isDisabled={isMerging}
+        />
+      );
+    };
+
     return (
       <>
         <EuiFlyout
+          ref={keepOpeningWidth}
           ownFocus
+          // One width for every step, so the flyout doesn't jump between them.
           size="m"
+          resizable
+          minWidth={minWidth}
+          // A merge in progress shouldn't be lost to a stray click on the page behind it.
+          outsideClickCloses={false}
           onClose={requestClose}
           aria-labelledby={flyoutTitleId}
           data-test-subj="merge-cases-flyout"
         >
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2 id={flyoutTitleId}>{i18n.FLYOUT_TITLE(caseIds.length)}</h2>
+            <EuiTitle size="s">
+              <h2 id={flyoutTitleId}>{i18n.FLYOUT_TITLE}</h2>
             </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              {i18n.FLYOUT_DESCRIPTION}
-            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiStepsHorizontal
+              size="s"
+              steps={steps}
+              aria-label={i18n.STEPS_ARIA_LABEL}
+              data-test-subj="merge-cases-steps"
+            />
           </EuiFlyoutHeader>
-          <EuiFlyoutBody>
+          {/* Between the header and the body, so it stays put while the cases or fields scroll. */}
+          {renderStepBar()}
+          <EuiFlyoutBody
+            scrollContainerRef={setBodyScroller}
+            css={
+              step === 'differences'
+                ? css`
+                    background: ${euiTheme.colors.backgroundBaseSubdued};
+                  `
+                : undefined
+            }
+          >
             {state.showChangedNotice ? (
               <>
                 <KbnWarningCallout
@@ -509,161 +603,23 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
                 <EuiSpacer size="m" />
               </>
             ) : null}
-            <EuiFormRow
-              fullWidth
-              label={i18n.MERGE_INTO}
-              helpText={
-                destinationRef != null
-                  ? i18n.EXISTING_DESTINATION_HELP(destinationRef)
-                  : !permissions.create
-                  ? i18n.NEW_CASE_NO_PERMISSION
-                  : tableCases.some(({ status }) => status === CaseStatuses.closed)
-                  ? i18n.CLOSED_CASES_NOT_OFFERED
-                  : undefined
-              }
-            >
-              <EuiSuperSelect
-                fullWidth
-                options={destinationOptions}
-                valueOfSelected={destinationCaseId ?? NEW_CASE_VALUE}
-                onChange={(value) => setDestination(value === NEW_CASE_VALUE ? undefined : value)}
-                disabled={isControlsDisabled}
-                data-test-subj="merge-cases-destination"
-              />
-            </EuiFormRow>
-
-            <EuiSpacer size="l" />
-            <MergeSectionTitle
-              title={i18n.CASES_SECTION}
-              badge={
-                <EuiText size="xs" color="subdued">
-                  {i18n.CASES_COUNTER(caseIds.length, MAX_CASES_TO_MERGE)}
-                </EuiText>
-              }
-            />
-            <EuiSpacer size="s" />
-            <EuiBasicTable
-              compressed
-              tableCaption={i18n.CASES_SECTION}
-              items={tableCases}
-              itemId="id"
-              columns={caseColumns}
-              data-test-subj="merge-cases-table"
-            />
-            <EuiSpacer size="s" />
-            <MergeAddCases
-              selectedCases={state.cases}
-              owner={state.cases[0]?.owner}
-              onAddCase={addCase}
-              isDisabled={isControlsDisabled}
-            />
-
-            <EuiSpacer size="l" />
-            {preview != null && values != null ? (
-              <MergeCaseDetailsSection
-                preview={preview}
-                values={values}
-                choices={choices}
-                unresolvedKeys={unresolvedKeys}
-                onSetField={setField}
-                onSetCustomField={setCustomField}
-                onSetExtendedField={setExtendedField}
-                destinationRef={destinationRef}
-                showAssignees={caseAssignmentAuthorized}
-                isDisabled={isControlsDisabled}
-              />
-            ) : (
-              <>
-                <MergeSectionTitle title={i18n.CASE_DETAILS_SECTION} />
-                <EuiSpacer size="s" />
-                {isLoadingPreview || isLoadingCases ? <EuiSkeletonText lines={5} /> : null}
-              </>
-            )}
-
-            <EuiSpacer size="l" />
-            <MergeSectionTitle title={i18n.ATTACHMENTS_SECTION} />
-            <EuiSpacer size="s" />
-            {preview != null && selectedAttachments != null ? (
-              <MergeAttachmentsSection
-                preview={preview}
-                attachments={selectedAttachments}
-                casesById={casesById}
-                excludedKeys={excludedKeys}
-                onChangeExclusions={setExclusions}
-                destinationRef={destinationRef}
-                isDisabled={isControlsDisabled}
-              />
-            ) : isLoadingPreview || isLoadingCases ? (
-              <EuiSkeletonText lines={3} />
-            ) : null}
-
-            <EuiSpacer size="l" />
-            <MergeSectionTitle title={i18n.AFTER_MERGING_SECTION} />
-            <EuiSpacer size="s" />
-            {sourcesToClose.length > 0 ? (
-              <EuiFormRow
-                fullWidth
-                helpText={
-                  destinationRef != null
-                    ? i18n.CLOSE_SOURCES_HELP_EXISTING_CASE(destinationRef, sourcesToClose.length)
-                    : i18n.CLOSE_SOURCES_HELP
-                }
-              >
-                <EuiCheckbox
-                  id={`${flyoutTitleId}-close-sources`}
-                  label={i18n.CLOSE_SOURCES(sourcesToClose.length)}
-                  checked={closeSources}
-                  disabled={isControlsDisabled}
-                  onChange={(event) => setCloseSources(event.target.checked)}
-                  data-test-subj="merge-cases-close-sources"
-                />
-              </EuiFormRow>
-            ) : sources.length > 0 ? (
-              <EuiText size="s" color="subdued" data-test-subj="merge-cases-no-sources-to-close">
-                {i18n.NO_SOURCES_TO_CLOSE}
-              </EuiText>
-            ) : null}
-            <EuiSpacer size="s" />
-            {note != null ? (
-              <EuiFormRow
-                fullWidth
-                label={i18n.NOTE}
-                helpText={
-                  destinationRef != null
-                    ? i18n.NOTE_HELP_EXISTING_CASE(destinationRef)
-                    : i18n.NOTE_HELP_NEW_CASE
-                }
-              >
-                <EuiTextArea
-                  fullWidth
-                  rows={3}
-                  value={note}
-                  maxLength={MAX_COMMENT_LENGTH}
-                  disabled={isControlsDisabled}
-                  onChange={(event) => setNote(event.target.value)}
-                  data-test-subj="merge-cases-note"
-                />
-              </EuiFormRow>
-            ) : (
-              <EuiButtonEmpty
-                size="s"
-                flush="left"
-                iconType="plusCircle"
-                onClick={() => setNote('')}
-                isDisabled={isControlsDisabled}
-                data-test-subj="merge-cases-add-note"
-              >
-                {i18n.ADD_NOTE}
-              </EuiButtonEmpty>
-            )}
+            {renderStep()}
           </EuiFlyoutBody>
           <MergeCasesFlyoutFooter
-            isLoadingCases={isLoadingCases}
-            blockingReason={blockingReason}
-            summary={summary}
+            step={step}
+            status={footerStatus.text}
+            isBlocked={footerStatus.isBlocked}
             isMerging={isMerging}
-            isDisabled={isLoadingCases || blockingReason != null || isFetchingPreview || isMerging}
+            nextLabel={next != null ? i18n.NEXT : undefined}
+            mergeLabel={i18n.MERGE}
+            isNextDisabled={
+              step === 'review'
+                ? firstBlockedStep != null || isFetchingPreview
+                : stepStates[step].isBlocked
+            }
             onCancel={requestClose}
+            onBack={onBack}
+            onNext={onNext}
             onMerge={onMerge}
           />
         </EuiFlyout>

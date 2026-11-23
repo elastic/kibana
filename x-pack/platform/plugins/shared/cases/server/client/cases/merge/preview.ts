@@ -20,9 +20,11 @@ import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../../common/ru
 import type { CasesClient } from '../../client';
 import type { CasesClientArgs } from '../../types';
 import { loadMergeContext } from './context';
+import type { MergeTemplates } from './fields';
 import { getUnresolvedConflicts } from './fields';
 
-const toPreviewCase = (theCase: Case): MergePreviewCase => ({
+/** A case as the preview lists it, with what the case hover card shows. */
+export const toPreviewCase = (theCase: Case, templates: MergeTemplates): MergePreviewCase => ({
   id: theCase.id,
   version: theCase.version,
   title: theCase.title,
@@ -34,6 +36,18 @@ const toPreviewCase = (theCase: Case): MergePreviewCase => ({
   totalAlerts: theCase.totalAlerts,
   template: theCase.template ?? null,
   merge: theCase.merge ?? null,
+  description: theCase.description,
+  createdBy: theCase.created_by,
+  closedAt: theCase.closed_at,
+  closedBy: theCase.closed_by,
+  assignees: theCase.assignees,
+  tags: theCase.tags,
+  totalComments: theCase.totalComment,
+  totalObservables: theCase.total_observables ?? theCase.observables?.length ?? 0,
+  templateName:
+    templates.enabled && theCase.template != null
+      ? templates.candidates.get(theCase.template.id)?.name ?? null
+      : null,
 });
 
 /**
@@ -50,17 +64,16 @@ export const mergePreview = async (
 
   try {
     const request = decodeWithExcessOrThrowZod(MergeCasesPreviewRequestSchema)(params);
-    const { orderedCases, destination, fields, plan } = await loadMergeContext(
+    const { orderedCases, destination, fields, plan, templates } = await loadMergeContext(
       request,
       clientArgs,
       casesClient
     );
 
     const limits = [...plan.limits, ...fields.limits];
-    const isOverLimit = plan.limits.length > 0;
 
     return decodeOrThrowZod(MergeCasesPreviewResponseSchema)({
-      cases: orderedCases.map(toPreviewCase),
+      cases: orderedCases.map((theCase) => toPreviewCase(theCase, templates)),
       destination: { id: destination?.id ?? null, isNew: destination == null },
       fields: fields.fields,
       effectiveTemplate: fields.effectiveTemplate,
@@ -70,11 +83,10 @@ export const mergePreview = async (
       attachments: {
         ...plan.summaries,
         alerts: { ...plan.summaries.alerts, byRule: plan.alertsByRule },
-        files: { total: plan.files },
-        comments: { total: plan.comments },
+        files: plan.files,
+        comments: plan.comments,
       },
-      // Once the user has chosen, the choices stay available so they can change their mind.
-      choices: isOverLimit || request.attachments != null ? plan.choices : null,
+      choices: plan.choices,
     });
   } catch (error) {
     throw createCaseError({

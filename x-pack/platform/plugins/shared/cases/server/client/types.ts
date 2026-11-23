@@ -8,6 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SavedObjectsClientContract, Logger, KibanaRequest } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { IBasePath } from '@kbn/core-http-browser';
@@ -72,6 +73,8 @@ export interface CasesClientArgs {
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
   readonly clientSource: CasesClientSource;
+  /** Absent when the inference plugin is disabled. */
+  readonly inference?: InferenceServerStart;
   /**
    * Set only on the internal writes of a merge, so the triggers they fire can say the change came
    * from a merge. Never set from a request.

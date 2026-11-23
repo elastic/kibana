@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useQuery } from '@kbn/react-query';
 import type { MergeCasesPreviewResponse, MergeFieldsRequest } from '../../common/types/api';
 import { useCasesToast } from '../common/use_cases_toast';
@@ -12,6 +14,9 @@ import type { ServerError } from '../types';
 import { getMergeCasesPreview } from './api';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
+
+/** Typing a value only refetches the preview once the user pauses. */
+export const MERGE_PREVIEW_DEBOUNCE_MS = 300;
 
 export const useGetMergeCasesPreview = ({
   caseIds,
@@ -24,15 +29,17 @@ export const useGetMergeCasesPreview = ({
   fields?: MergeFieldsRequest;
 }) => {
   const { showErrorToast } = useCasesToast();
+  const [debouncedFields, setDebouncedFields] = useState(fields);
+  useDebounce(() => setDebouncedFields(fields), MERGE_PREVIEW_DEBOUNCE_MS, [fields]);
 
   return useQuery<MergeCasesPreviewResponse, ServerError>(
-    casesQueriesKeys.mergePreview(caseIds, destinationCaseId, fields),
+    casesQueriesKeys.mergePreview(caseIds, destinationCaseId, debouncedFields),
     ({ signal }) =>
       getMergeCasesPreview({
         request: {
           caseIds,
           ...(destinationCaseId != null ? { destinationCaseId } : {}),
-          ...(fields != null ? { fields } : {}),
+          ...(debouncedFields != null ? { fields: debouncedFields } : {}),
         },
         signal,
       }),

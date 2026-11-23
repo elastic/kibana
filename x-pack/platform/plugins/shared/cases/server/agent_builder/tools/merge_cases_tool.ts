@@ -22,6 +22,11 @@ import { mergeCasesStepCommonDefinition } from '../../../common/workflows/steps/
 import { MergeFieldsRequestSchema } from '../../../common/types/api/merge/v1';
 import { CaseStatuses } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
+import {
+  formatMergeValue,
+  getMergeCaseRef,
+  getMergeConflictRow,
+} from '../../client/cases/merge/describe';
 import { mergeCasesStepDefinition } from '../../workflows/steps/merge_cases';
 import { invokeStepHandler } from '../utils/invoke_step';
 import { confirmMerge } from '../utils/confirm_merge';
@@ -72,51 +77,6 @@ const NEWEST_UP_TO_LIMIT: MergeAttachmentsRequest = {
   other: { mode: 'newest' },
 };
 
-const MAX_VALUE_LENGTH = 200;
-
-type DisplayValue = string | number | boolean | null | { name: string };
-
-const formatValue = (value: DisplayValue): string => {
-  if (value == null) {
-    return 'none';
-  }
-  if (typeof value === 'object') {
-    return `"${value.name}"`;
-  }
-  const text = String(value);
-  return JSON.stringify(
-    text.length > MAX_VALUE_LENGTH ? `${text.slice(0, MAX_VALUE_LENGTH)}…` : text
-  );
-};
-
-const getCaseRef = (preview: MergeCasesPreviewResponse, caseId: string): string => {
-  const theCase = preview.cases.find(({ id }) => id === caseId);
-  if (theCase == null) {
-    return caseId;
-  }
-  return theCase.incrementalId != null ? `#${theCase.incrementalId}` : `"${theCase.title}"`;
-};
-
-const getConflictRow = (
-  { fields }: MergeCasesPreviewResponse,
-  { field, key }: MergeConflict
-):
-  | { value: DisplayValue; options: Array<{ value: DisplayValue; caseIds: string[] }> }
-  | undefined => {
-  switch (field) {
-    case 'customFields':
-      return fields.customFields.find((row) => row.key === key);
-    case 'extendedFields':
-      return fields.extendedFields.find((row) => row.key === key);
-    case 'connector':
-      return fields.connector;
-    case 'template':
-      return fields.template;
-    default:
-      return fields[field];
-  }
-};
-
 const describeConflict = (preview: MergeCasesPreviewResponse, conflict: MergeConflict): string => {
   const path = conflict.key != null ? `${conflict.field}.${conflict.key}` : conflict.field;
   const name = conflict.label != null ? `${path} (${conflict.label})` : path;
@@ -130,17 +90,19 @@ const describeConflict = (preview: MergeCasesPreviewResponse, conflict: MergeCon
     }; choose another value or clear it.`;
   }
 
-  const row = getConflictRow(preview, conflict);
+  const row = getMergeConflictRow(preview, conflict);
   if (row == null) {
     return `- ${name}: the cases hold different values.`;
   }
   const options = row.options
     .map(
       ({ value, caseIds }) =>
-        `${formatValue(value)} (${caseIds.map((id) => getCaseRef(preview, id)).join(', ')})`
+        `${formatMergeValue(value)} (${caseIds
+          .map((id) => getMergeCaseRef(preview, id))
+          .join(', ')})`
     )
     .join('; ');
-  return `- ${name}: ${options}. Suggested: ${formatValue(row.value)}.`;
+  return `- ${name}: ${options}. Suggested: ${formatMergeValue(row.value)}.`;
 };
 
 const describeLimit = ({ kind, total, max, overBy }: MergeLimit): string =>
@@ -176,7 +138,7 @@ export const buildMergeSummary = (
   { fields, close_sources: closeSources = true }: MergeCasesToolParams
 ): string => {
   const { cases, destination, attachments } = preview;
-  const caseRefs = cases.map(({ id }) => getCaseRef(preview, id));
+  const caseRefs = cases.map(({ id }) => getMergeCaseRef(preview, id));
   const sources = cases.filter(({ id }) => id !== destination.id);
   const kinds = ['alerts', 'events', 'attacks', 'observables', 'other'] as const;
 
@@ -198,11 +160,11 @@ export const buildMergeSummary = (
     i18n.CONFIRM_CASES(caseRefs.join(', ')),
     destination.isNew || destination.id == null
       ? i18n.CONFIRM_INTO_NEW_CASE(fields?.title ?? preview.fields.title.value)
-      : i18n.CONFIRM_INTO_EXISTING_CASE(getCaseRef(preview, destination.id)),
+      : i18n.CONFIRM_INTO_EXISTING_CASE(getMergeCaseRef(preview, destination.id)),
     copies.length > 0 ? i18n.CONFIRM_COPIES(copies) : i18n.CONFIRM_NOTHING_TO_COPY,
     ...(leftOut.length > 0 ? [i18n.CONFIRM_LEFT_OUT(leftOut)] : []),
     toClose.length > 0
-      ? i18n.CONFIRM_CLOSES(toClose.map((id) => getCaseRef(preview, id)).join(', '))
+      ? i18n.CONFIRM_CLOSES(toClose.map((id) => getMergeCaseRef(preview, id)).join(', '))
       : i18n.CONFIRM_CLOSES_NONE,
   ].join('\n\n');
 };

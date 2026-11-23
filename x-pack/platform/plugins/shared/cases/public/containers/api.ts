@@ -33,6 +33,8 @@ import type {
   MergeCasesPreviewResponse,
   MergeCasesRequest,
   MergeCasesResponse,
+  MergeCasesResolveRequest,
+  MergeCasesResolveResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -79,6 +81,7 @@ import {
   CASES_INTERNAL_URL,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
   INTERNAL_MERGE_CASES_PREVIEW_URL,
+  INTERNAL_MERGE_CASES_RESOLVE_URL,
   INTERNAL_MERGE_CASES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
@@ -780,6 +783,20 @@ export const getMergeCasesPreview = async ({
   signal?: AbortSignal;
 }): Promise<MergeCasesPreviewResponse> =>
   KibanaServices.get().http.fetch<MergeCasesPreviewResponse>(INTERNAL_MERGE_CASES_PREVIEW_URL, {
+    method: 'POST',
+    version: MERGE_CASES_API_VERSION,
+    body: JSON.stringify(request),
+    signal,
+  });
+
+export const resolveMergeConflicts = async ({
+  request,
+  signal,
+}: {
+  request: MergeCasesResolveRequest;
+  signal?: AbortSignal;
+}): Promise<MergeCasesResolveResponse> =>
+  KibanaServices.get().http.fetch<MergeCasesResolveResponse>(INTERNAL_MERGE_CASES_RESOLVE_URL, {
     method: 'POST',
     version: MERGE_CASES_API_VERSION,
     body: JSON.stringify(request),

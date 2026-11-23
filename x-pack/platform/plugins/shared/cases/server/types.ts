@@ -50,6 +50,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -91,6 +92,8 @@ export interface CasesServerStartDependencies {
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  /** Asks an LLM to settle the fields that differ when merging cases. */
+  inference?: InferenceServerStart;
   /**
    * Data views server plugin — needed by cases-analytics v2 to create
    * per-space managed `Cases` data views. Optional because v2 is the only

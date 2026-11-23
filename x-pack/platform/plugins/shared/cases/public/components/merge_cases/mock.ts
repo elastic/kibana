@@ -44,6 +44,15 @@ export const mergePreviewCase = (
   totalAlerts: 0,
   template: null,
   merge: null,
+  description: '',
+  createdBy: { username: 'elastic', full_name: 'Elastic User', email: null },
+  closedAt: null,
+  closedBy: null,
+  assignees: [],
+  tags: [],
+  totalComments: 0,
+  totalObservables: 0,
+  templateName: null,
   ...overrides,
 });
 
@@ -60,10 +69,18 @@ const noneConnector = {
   fields: null,
 } as const;
 
+export const emptyMergeChoices = (): MergeCasesPreviewResponse['choices'] => ({
+  alerts: [],
+  events: [],
+  attacks: [],
+  observables: [],
+  other: [],
+});
+
 /** A preview of merging #118 "Phishing" and #119 "Follow-up" into a new case. */
 export const buildMergePreview = ({
   attachments = {},
-  choices = null,
+  choices = emptyMergeChoices(),
   conflicts = [titleConflict],
   fields = {},
 }: {
@@ -95,6 +112,7 @@ export const buildMergePreview = ({
       options: [{ value: 'First description', caseIds: ['case-1', 'case-2'] }],
       hasConflict: false,
       combinedValue: null,
+      combinedLength: 17,
     },
     severity: {
       value: CaseSeverity.LOW,
@@ -127,12 +145,19 @@ export const buildMergePreview = ({
     },
     customFields: [],
     extendedFields: [],
-    tags: { value: ['phishing'], provenance: 'combined', max: 200, overBy: 0 },
+    tags: {
+      value: ['phishing'],
+      provenance: 'combined',
+      max: 200,
+      overBy: 0,
+      items: [{ value: 'phishing', caseIds: ['case-1'] }],
+    },
     assignees: {
       value: [],
       provenance: 'none',
       max: 10,
       overBy: 0,
+      items: [],
       canChange: true,
       unavailableReason: null,
     },
@@ -149,8 +174,8 @@ export const buildMergePreview = ({
     events: mergeSummary(),
     observables: mergeSummary({ max: 50 }),
     other: mergeSummary({ total: 2, toCopy: 2, max: 100 }),
-    files: { total: 0 },
-    comments: { total: 1 },
+    files: { total: 0, byCase: [] },
+    comments: { total: 1, byCase: [{ caseId: 'case-1', count: 1 }] },
     ...attachments,
   },
   choices,

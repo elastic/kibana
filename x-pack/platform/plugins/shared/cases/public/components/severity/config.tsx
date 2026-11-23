@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import type { EuiHealthProps } from '@elastic/eui';
 import { useEuiTheme, EuiHealth } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { CaseSeverity } from '../../../common/types/domain';
@@ -19,6 +20,8 @@ interface SeverityConfig {
 
 interface Props {
   severity: CaseSeverity;
+  /** Matches the text it sits beside; EuiHealth's own default otherwise. */
+  textSize?: EuiHealthProps['textSize'];
 }
 
 export const severities: Record<CaseSeverity, SeverityConfig> = {
@@ -40,7 +43,7 @@ export const severities: Record<CaseSeverity, SeverityConfig> = {
   },
 };
 
-export const SeverityHealth: React.FC<Props> = ({ severity }) => {
+export const SeverityHealth: React.FC<Props> = ({ severity, textSize }) => {
   const { euiTheme } = useEuiTheme();
 
   const severityData = {
@@ -65,7 +68,11 @@ export const SeverityHealth: React.FC<Props> = ({ severity }) => {
   const { color, label } = severityData[severity];
 
   return (
-    <EuiHealth color={color} data-test-subj={`case-table-column-severity-${severity}`}>
+    <EuiHealth
+      color={color}
+      textSize={textSize}
+      data-test-subj={`case-table-column-severity-${severity}`}
+    >
       {label}
     </EuiHealth>
   );

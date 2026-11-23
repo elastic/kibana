@@ -9,25 +9,39 @@ import type { MergeAttachmentChoices, MergeConflict } from '../../../common/type
 import { CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import { basicCase } from '../../containers/mock';
 import { buildMergePreview, mergeSummary, titleConflict } from './mock';
+import type { MergeStepStates } from './utils';
 import {
   applyExclusions,
   buildAttachmentsRequest,
   buildMergeRequest,
   buildPreviewFields,
   canMergeCases,
+  canOpenStep,
   combineDescriptions,
   formatCaseList,
-  getAttachmentsToCopyCount,
+  formatTemplateFieldValue,
+  getAttachmentsStepBlocker,
   getCaseReference,
+  getCasesStepBlocker,
+  getChoiceKeys,
   getConflictKey,
+  getDifferencesStepBlocker,
+  getExclusionsKeepingNewest,
   getFieldValues,
+  getFirstBlockedStep,
   getKeysOutsideNewest,
   getLatestDestinationId,
-  getMergeBlockingReason,
+  getMergedCasePreview,
   getMergeDisabledReason,
+  getNextStep,
+  getPreviousStep,
   getRoomForAlerts,
   getUnresolvedConflicts,
   hasFieldChoice,
+  isDifferencesStepSkippable,
+  splitOverflow,
+  toAiReasons,
+  toChoicesFromFields,
 } from './utils';
 
 const alertChoice = (key: string, addedAt: string) => ({
@@ -244,18 +258,82 @@ describe('merge cases utils', () => {
     });
 
     it('reports how many standalone alerts fit after the attacks left out', () => {
-      expect(getRoomForAlerts(preview.attachments.alerts, preview.choices!, new Set())).toBe(0);
+      expect(getRoomForAlerts(preview.attachments.alerts, preview.choices, new Set())).toBe(0);
       expect(
-        getRoomForAlerts(preview.attachments.alerts, preview.choices!, new Set(['attack-1']))
+        getRoomForAlerts(preview.attachments.alerts, preview.choices, new Set(['attack-1']))
       ).toBe(1);
     });
 
     it('leaves out everything but the most recently added alerts', () => {
-      expect(getKeysOutsideNewest(preview.choices!.alerts, 1)).toEqual(['alert-3', 'alert-1']);
+      expect(getKeysOutsideNewest(preview.choices.alerts, 1)).toEqual(['alert-3', 'alert-1']);
     });
 
-    it('adds up every attachment kind that is copied', () => {
-      expect(getAttachmentsToCopyCount(applyExclusions(preview, new Set()))).toBe(1007);
+    it('keeps the newest alerts that fit beside the attacks, replacing alert choices', () => {
+      expect(getExclusionsKeepingNewest(preview, new Set(['attack-1', 'alert-2']))).toEqual(
+        new Set(['attack-1', 'alert-3', 'alert-1'])
+      );
+    });
+
+    describe('keeping the newest of every kind', () => {
+      const otherChoice = (key: string, addedAt: string, countsTowardLimit: boolean) => ({
+        key,
+        sourceCaseId: 'case-1',
+        addedAt,
+        type: countsTowardLimit ? 'lens' : 'user',
+        countsTowardLimit,
+      });
+      const kindsPreview = buildMergePreview({
+        attachments: {
+          observables: mergeSummary({ total: 3, toCopy: 3, max: 2, overBy: 1 }),
+          other: mergeSummary({ total: 3, toCopy: 3, max: 1, overBy: 1 }),
+          events: mergeSummary({ total: 1, toCopy: 1 }),
+        },
+        choices: choices({
+          observables: ['2024-01-01', '2024-01-03', '2024-01-02'].map((day, position) => ({
+            key: `obs-${position + 1}`,
+            sourceCaseId: 'case-1',
+            addedAt: `${day}T00:00:00.000Z`,
+            typeKey: 'ipv4',
+            value: `10.0.0.${position + 1}`,
+          })),
+          other: [
+            otherChoice('lens-1', '2024-01-01T00:00:00.000Z', true),
+            otherChoice('lens-2', '2024-01-02T00:00:00.000Z', true),
+            otherChoice('note-1', '2024-01-01T00:00:00.000Z', false),
+          ],
+          events: [
+            {
+              key: 'event-1',
+              sourceCaseId: 'case-1',
+              addedAt: '2024-01-01T00:00:00.000Z',
+              eventId: 'event-1',
+              index: '.events',
+            },
+          ],
+        }),
+      });
+
+      it('leaves out the oldest items that count toward each limit', () => {
+        expect(getExclusionsKeepingNewest(kindsPreview, new Set())).toEqual(
+          new Set(['obs-1', 'lens-1'])
+        );
+      });
+
+      it('keeps choices on kinds without a limit and items that never count', () => {
+        const excluded = getExclusionsKeepingNewest(kindsPreview, new Set(['event-1', 'note-1']));
+
+        expect(excluded).toEqual(new Set(['event-1', 'note-1', 'obs-1', 'lens-1']));
+        expect(applyExclusions(kindsPreview, excluded)).toMatchObject({
+          observables: { overBy: 0, toCopy: 2 },
+          other: { overBy: 0, toCopy: 1 },
+        });
+      });
+
+      it('only touches the kinds asked for', () => {
+        expect(getExclusionsKeepingNewest(kindsPreview, new Set(), ['observables'])).toEqual(
+          new Set(['obs-1'])
+        );
+      });
     });
 
     it('sends the shorter list per kind', () => {
@@ -270,52 +348,68 @@ describe('merge cases utils', () => {
       });
     });
 
-    it('sends nothing without choices or exclusions', () => {
-      expect(buildAttachmentsRequest(null, new Set(['alert-1']))).toBeUndefined();
+    it('sends nothing without exclusions the preview offers', () => {
+      expect(buildAttachmentsRequest(preview.choices, new Set())).toBeUndefined();
       expect(buildAttachmentsRequest(preview.choices, new Set(['stale']))).toBeUndefined();
     });
   });
 
-  describe('getMergeBlockingReason', () => {
+  describe('steps', () => {
     const preview = buildMergePreview({ conflicts: [] });
-    const args = {
-      caseCount: 2,
-      canChooseDestination: true,
-      preview,
-      attachments: applyExclusions(preview, new Set()),
-      values: getFieldValues(preview, {}),
-      unresolvedConflicts: [],
-      includeAssignees: true,
-    };
-
-    it('does not block a valid merge', () => {
-      expect(getMergeBlockingReason(args)).toBeUndefined();
+    const states = (overrides: Partial<MergeStepStates> = {}): MergeStepStates => ({
+      cases: { isBlocked: false, isSkippable: false },
+      differences: { isBlocked: false, isSkippable: false },
+      attachments: { isBlocked: false, isSkippable: false },
+      review: { isBlocked: false, isSkippable: false },
+      ...overrides,
     });
 
-    it('blocks until every conflict is resolved', () => {
+    it('blocks the Cases step until there are two cases and, for an existing case, the one to keep', () => {
+      const ready = {
+        caseCount: 2,
+        canChooseDestination: true,
+        mergeInto: 'new' as const,
+        hasDestination: false,
+      };
+      expect(getCasesStepBlocker(ready)).toBeUndefined();
+      expect(getCasesStepBlocker({ ...ready, caseCount: 1 })).toBe('Add another case to merge');
+      expect(getCasesStepBlocker({ ...ready, canChooseDestination: false })).toBe(
+        'Add an open case to merge into'
+      );
+      expect(getCasesStepBlocker({ ...ready, mergeInto: 'existing' })).toBe(
+        'Choose the case to merge into'
+      );
       expect(
-        getMergeBlockingReason({
-          ...args,
-          unresolvedConflicts: [titleConflict, { ...titleConflict, field: 'severity' }],
-        })
-      ).toBe('Resolve 2 conflicts to merge');
+        getCasesStepBlocker({ ...ready, mergeInto: 'existing', hasDestination: true })
+      ).toBeUndefined();
     });
 
-    it('names an empty required field', () => {
+    it('says nothing while values are left to choose, as the conflicts bar counts them', () => {
       expect(
-        getMergeBlockingReason({
-          ...args,
-          unresolvedConflicts: [
-            {
-              field: 'extendedFields',
-              key: 'verdict_as_keyword',
-              label: 'Verdict',
-              reason: 'required',
-              resolved: false,
-            },
+        getDifferencesStepBlocker({
+          total: 6,
+          resolved: 4,
+          blocking: [
+            { key: 'category', label: 'Category', state: 'chooseOne' },
+            { key: 'extendedFields.impact_as_keyword', label: 'Impact', state: 'required' },
+            { key: 'template', label: 'Template', state: 'chooseOne' },
           ],
         })
-      ).toBe('Fill in Verdict to merge');
+      ).toBeUndefined();
+    });
+
+    it('names a required, invalid or over-limit field', () => {
+      const summary = (state: 'required' | 'invalid' | 'overLimit') => ({
+        total: 0,
+        resolved: 0,
+        blocking: [{ key: 'tags' as const, label: 'Tags', state }],
+      });
+      expect(getDifferencesStepBlocker(summary('required'))).toBe('Fill in Tags to continue');
+      expect(getDifferencesStepBlocker(summary('invalid'))).toBe('Change Tags to continue');
+      expect(getDifferencesStepBlocker(summary('overLimit'))).toBe(
+        'Bring Tags within its limit to continue'
+      );
+      expect(getDifferencesStepBlocker({ total: 2, resolved: 2, blocking: [] })).toBeUndefined();
     });
 
     it('asks to leave out what is over a limit', () => {
@@ -329,18 +423,187 @@ describe('merge cases utils', () => {
         },
       });
 
-      expect(
-        getMergeBlockingReason({
-          ...args,
-          preview: overLimit,
-          attachments: applyExclusions(overLimit, new Set()),
-        })
-      ).toBe('Leave out 240 alerts to merge');
+      expect(getAttachmentsStepBlocker(applyExclusions(overLimit, new Set()))).toBe(
+        'Leave out 240 alerts to continue'
+      );
+      expect(getAttachmentsStepBlocker(applyExclusions(preview, new Set()))).toBeUndefined();
     });
 
-    it('needs a destination the user can merge into', () => {
-      expect(getMergeBlockingReason({ ...args, canChooseDestination: false })).toBe(
-        'Add an open case to merge into'
+    it('skips the Differences step only when nothing differs or needs a value', () => {
+      expect(isDifferencesStepSkippable({ total: 0, resolved: 0, blocking: [] })).toBe(true);
+      expect(isDifferencesStepSkippable({ total: 1, resolved: 1, blocking: [] })).toBe(false);
+      expect(
+        isDifferencesStepSkippable({
+          total: 0,
+          resolved: 0,
+          blocking: [{ key: 'tags', label: 'Tags', state: 'overLimit' }],
+        })
+      ).toBe(false);
+    });
+
+    it('passes the steps with nothing to decide', () => {
+      const skipBoth = states({
+        differences: { isBlocked: false, isSkippable: true },
+        attachments: { isBlocked: false, isSkippable: true },
+      });
+      expect(getNextStep('cases', skipBoth)).toEqual({
+        step: 'review',
+        passed: ['differences', 'attachments'],
+      });
+      expect(getPreviousStep('review', skipBoth)).toBe('cases');
+
+      const skipAttachments = states({ attachments: { isBlocked: false, isSkippable: true } });
+      expect(getNextStep('differences', skipAttachments)).toEqual({
+        step: 'review',
+        passed: ['attachments'],
+      });
+      expect(getPreviousStep('review', skipAttachments)).toBe('differences');
+      expect(getNextStep('cases', states())).toEqual({ step: 'differences', passed: [] });
+    });
+
+    it('opens a step only when every step before it can be passed', () => {
+      const blocked = states({ differences: { isBlocked: true, isSkippable: false } });
+      expect(canOpenStep('differences', blocked)).toBe(true);
+      expect(canOpenStep('attachments', blocked)).toBe(false);
+      expect(canOpenStep('review', blocked)).toBe(false);
+      expect(getFirstBlockedStep(blocked)).toBe('differences');
+      expect(getFirstBlockedStep(states())).toBeUndefined();
+    });
+  });
+
+  describe('getMergedCasePreview', () => {
+    it("names the cases a chosen value comes from, or marks the user's own", () => {
+      const preview = buildMergePreview();
+      expect(getMergedCasePreview(preview, { title: 'Follow-up' }).title).toEqual({
+        value: 'Follow-up',
+        caseIds: ['case-2'],
+        source: 'cases',
+      });
+      expect(getMergedCasePreview(preview, { title: 'Credential attacks' }).title).toEqual({
+        value: 'Credential attacks',
+        caseIds: [],
+        source: 'own',
+      });
+    });
+
+    it('takes the shared value for a field the cases agree on', () => {
+      const merged = getMergedCasePreview(buildMergePreview(), { title: 'Phishing' });
+      expect(merged.severity).toEqual({
+        value: CaseSeverity.LOW,
+        caseIds: ['case-1', 'case-2'],
+        source: 'cases',
+      });
+      expect(merged.tags).toEqual(['phishing']);
+    });
+
+    it('marks combined descriptions', () => {
+      const preview = buildMergePreview({
+        fields: {
+          description: {
+            value: 'First',
+            provenance: 'oldest',
+            sourceCaseId: 'case-1',
+            options: [
+              { value: 'First', caseIds: ['case-1'] },
+              { value: 'Second', caseIds: ['case-2'] },
+            ],
+            hasConflict: true,
+            combinedValue: 'First and second',
+            combinedLength: 16,
+          },
+        },
+      });
+      expect(
+        getMergedCasePreview(preview, { description: 'First and second' }).description
+      ).toEqual({ value: 'First and second', caseIds: ['case-1', 'case-2'], source: 'combined' });
+    });
+
+    it('formats template field lists', () => {
+      expect(formatTemplateFieldValue('["VPN","Okta"]')).toBe('VPN, Okta');
+      expect(formatTemplateFieldValue('[{"uid":"u1","name":"Priya Raman"}]')).toBe('Priya Raman');
+      expect(formatTemplateFieldValue('Phishing')).toBe('Phishing');
+    });
+  });
+
+  describe('splitOverflow', () => {
+    it('shows everything up to the maximum, then a few and hides the rest', () => {
+      expect(splitOverflow([1, 2, 3, 4], { max: 4, visibleWhenOverflowing: 4 })).toEqual({
+        visible: [1, 2, 3, 4],
+        hidden: [],
+      });
+      expect(splitOverflow([1, 2, 3, 4, 5, 6], { max: 5, visibleWhenOverflowing: 4 })).toEqual({
+        visible: [1, 2, 3, 4],
+        hidden: [5, 6],
+      });
+    });
+  });
+
+  describe('getChoiceKeys', () => {
+    it('lists every field the choices hold', () => {
+      expect(
+        getChoiceKeys({
+          title: 'Phishing',
+          customFields: { ticket: { type: CustomFieldTypes.TEXT, value: 'INC-1' } },
+          extendedFields: { impact_as_keyword: 'High' },
+        })
+      ).toEqual(['title', 'customFields.ticket', 'extendedFields.impact_as_keyword']);
+    });
+  });
+
+  describe('toChoicesFromFields', () => {
+    const phishingTemplate = { id: 'template-1', name: 'Phishing', isEnabled: true };
+    const preview = buildMergePreview({
+      fields: {
+        template: {
+          value: null,
+          provenance: 'none',
+          sourceCaseId: null,
+          options: [],
+          hasConflict: true,
+          candidates: [phishingTemplate],
+        },
+      },
+    });
+
+    it('turns the request fields the AI chose into choices', () => {
+      expect(
+        toChoicesFromFields(preview, {
+          title: 'Phishing wave',
+          severity: CaseSeverity.HIGH,
+          category: null,
+          template: { id: 'template-1' },
+          customFields: [{ key: 'ticket', type: CustomFieldTypes.TEXT, value: 'INC-1' }],
+          extendedFields: { impact_as_keyword: 'High' },
+        })
+      ).toEqual({
+        title: 'Phishing wave',
+        severity: CaseSeverity.HIGH,
+        category: null,
+        template: phishingTemplate,
+        customFields: { ticket: { type: CustomFieldTypes.TEXT, value: 'INC-1' } },
+        extendedFields: { impact_as_keyword: 'High' },
+      });
+    });
+
+    it('leaves out a template the cases do not use', () => {
+      expect(toChoicesFromFields(preview, { template: { id: 'unknown' } })).toEqual({});
+    });
+  });
+
+  describe('toAiReasons', () => {
+    it('keys each reason by its field', () => {
+      expect(
+        toAiReasons([
+          { field: 'title', reason: 'Covers both.' },
+          { field: 'customFields', key: 'ticket', reason: 'Only #118 has one.' },
+          { field: 'extendedFields', key: 'impact_as_keyword', reason: 'Highest.' },
+        ])
+      ).toEqual(
+        new Map([
+          ['title', 'Covers both.'],
+          ['customFields.ticket', 'Only #118 has one.'],
+          ['extendedFields.impact_as_keyword', 'Highest.'],
+        ])
       );
     });
   });
@@ -378,7 +641,6 @@ describe('merge cases utils', () => {
           },
           includeAssignees: false,
           closeSources: true,
-          note: '  ',
         })
       ).toEqual({
         caseIds: ['case-1', 'case-2'],
@@ -394,7 +656,7 @@ describe('merge cases utils', () => {
       });
     });
 
-    it('sends the destination, the choices, the note and closeSources', () => {
+    it('sends the destination, the choices and closeSources', () => {
       expect(
         buildMergeRequest({
           caseIds: ['case-1', 'case-2'],
@@ -402,7 +664,6 @@ describe('merge cases utils', () => {
           choices: {},
           includeAssignees: true,
           closeSources: false,
-          note: ' Duplicates ',
           attachments: { alerts: { mode: 'exclude', keys: ['alert-1'] } },
         })
       ).toEqual({
@@ -410,7 +671,6 @@ describe('merge cases utils', () => {
         destinationCaseId: 'case-1',
         attachments: { alerts: { mode: 'exclude', keys: ['alert-1'] } },
         closeSources: false,
-        note: 'Duplicates',
       });
     });
   });

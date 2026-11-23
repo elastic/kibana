@@ -310,16 +310,28 @@ describe('buildAttachmentPlan', () => {
     );
   });
 
-  it('counts files and comments without copying them', () => {
+  it('counts files and comments per case without copying them', () => {
     const result = plan([first, second], {
       [first.id]: [
         valueAttachment('c1', COMMENT_ATTACHMENT_TYPE, { content: 'note' }),
         valueAttachment('f1', FILE_ATTACHMENT_TYPE, {}),
       ],
+      [second.id]: [
+        valueAttachment('c2', COMMENT_ATTACHMENT_TYPE, { content: 'first' }),
+        valueAttachment('c3', COMMENT_ATTACHMENT_TYPE, { content: 'second' }),
+      ],
     });
 
-    expect(result).toEqual(expect.objectContaining({ files: 1, comments: 1 }));
+    expect(result.files).toEqual({ total: 1, byCase: [{ caseId: first.id, count: 1 }] });
+    expect(result.comments).toEqual({
+      total: 3,
+      byCase: [
+        { caseId: first.id, count: 1 },
+        { caseId: second.id, count: 2 },
+      ],
+    });
     expect(result.sources[0].items).toEqual([]);
+    expect(result.sources[1].items).toEqual([]);
   });
 
   it('does not copy value attachments again from a source already linked to the destination', () => {

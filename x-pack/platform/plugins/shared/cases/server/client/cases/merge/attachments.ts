@@ -19,6 +19,7 @@ import type {
   MergeAttachmentsRequest,
   MergeLimit,
   MergeNotCopiedReason,
+  MergeStayingAttachments,
 } from '../../../../common/types/api';
 import type {
   AttachmentV2,
@@ -72,8 +73,8 @@ export interface MergeAttachmentPlan {
   /** Every item the user could leave out, keyed for the request's `attachments`. */
   choices: MergeAttachmentChoices;
   limits: MergeLimit[];
-  files: number;
-  comments: number;
+  files: MergeStayingAttachments;
+  comments: MergeStayingAttachments;
   /** Keys of everything the destination holds once the merge is done. */
   seenKeys: Set<string>;
 }
@@ -374,9 +375,18 @@ interface PlanState {
   /** Keys `newest` leaves out, for every kind. */
   leftOutByNewest: Set<string>;
   limitedOther: { existing: number; toCopy: number };
-  files: number;
-  comments: number;
+  /** Per source case id. */
+  files: Map<string, number>;
+  comments: Map<string, number>;
 }
+
+const addOne = (counts: Map<string, number>, caseId: string) =>
+  counts.set(caseId, (counts.get(caseId) ?? 0) + 1);
+
+const toStaying = (counts: Map<string, number>): MergeStayingAttachments => ({
+  total: [...counts.values()].reduce((sum, count) => sum + count, 0),
+  byCase: [...counts].map(([caseId, count]) => ({ caseId, count })),
+});
 
 const getAttackIds = (payload: UnifiedAttachmentPayload) =>
   isUnifiedReferenceAttachmentRequest(payload) ? toStringArray(payload.attachmentId) : [];
@@ -789,9 +799,9 @@ const planSource = (state: PlanState, { theCase, parsed }: SourceAttachments): M
   for (const parsedAttachment of parsed) {
     const { kind } = parsedAttachment;
     if (kind === 'files') {
-      state.files += 1;
+      addOne(state.files, theCase.id);
     } else if (kind === 'comments') {
-      state.comments += 1;
+      addOne(state.comments, theCase.id);
     } else if (kind === 'alerts' || kind === 'events') {
       planReferenced(state, source, kind, parsedAttachment);
     } else {
@@ -872,8 +882,8 @@ export const buildAttachmentPlan = ({
     alertCandidates: new Map(),
     leftOutByNewest: new Set(),
     limitedOther: { existing: 0, toCopy: 0 },
-    files: 0,
-    comments: 0,
+    files: new Map(),
+    comments: new Map(),
   };
 
   const withAttachments = (theCase: Case): SourceAttachments => ({
@@ -902,8 +912,8 @@ export const buildAttachmentPlan = ({
     alertsByRule: [...state.alertsByRule.values()],
     choices: state.choices,
     limits: getLimits(state),
-    files: state.files,
-    comments: state.comments,
+    files: toStaying(state.files),
+    comments: toStaying(state.comments),
     seenKeys: state.seenKeys,
   };
 };

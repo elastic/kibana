@@ -26,6 +26,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type {
   AlertsClient,
@@ -80,6 +81,7 @@ interface CasesClientFactoryArgs {
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
   licensingPluginStart: LicensingPluginStart;
+  inferencePluginStart?: InferenceServerStart;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
@@ -236,6 +238,7 @@ export class CasesClientFactory {
       request,
       closeReasonValidator: boundCloseReasonValidator,
       clientSource,
+      inference: this.options.inferencePluginStart,
     };
   }
 

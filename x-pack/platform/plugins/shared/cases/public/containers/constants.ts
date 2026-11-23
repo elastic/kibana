@@ -112,6 +112,7 @@ export const casesMutationsKeys = {
   bulkExportTemplates: ['bulk-export-templates'] as const,
   changeAppliedTemplate: ['change-applied-template'] as const,
   mergeCases: ['merge-cases'] as const,
+  resolveMergeConflicts: ['resolve-merge-conflicts'] as const,
 };
 
 export const inferenceKeys = {

@@ -9,12 +9,14 @@ import Boom from '@hapi/boom';
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   INTERNAL_MERGE_CASES_PREVIEW_URL,
+  INTERNAL_MERGE_CASES_RESOLVE_URL,
   INTERNAL_MERGE_CASES_URL,
   MERGE_CASES_API_VERSION,
 } from '../../../../../common/constants';
 import type {
   MergeCasesPreviewResponse,
   MergeCasesRequest,
+  MergeCasesResolveResponse,
   MergeCasesResponse,
 } from '../../../../../common/types/api';
 import { CaseSeverity } from '../../../../../common/types/domain';
@@ -27,6 +29,7 @@ import { registerRoutes } from '../../register_routes';
 import type { CaseRoute } from '../../types';
 import { mergeCasesRoute } from './merge_cases';
 import { mergeCasesPreviewRoute } from './merge_cases_preview';
+import { mergeCasesResolveRoute } from './merge_cases_resolve';
 
 const mergeRequest: MergeCasesRequest = {
   caseIds: ['case-1', 'case-2'],
@@ -64,7 +67,7 @@ describe('merge cases routes', () => {
     registerRoutes({
       router,
       logger: loggingSystemMock.createLogger(),
-      routes: [mergeCasesRoute, mergeCasesPreviewRoute] as CaseRoute[],
+      routes: [mergeCasesRoute, mergeCasesPreviewRoute, mergeCasesResolveRoute] as CaseRoute[],
       kibanaVersion: '9.4.0',
     });
     return router;
@@ -89,6 +92,7 @@ describe('merge cases routes', () => {
   it.each([
     [INTERNAL_MERGE_CASES_URL, 'Merge cases'],
     [INTERNAL_MERGE_CASES_PREVIEW_URL, 'Preview a case merge'],
+    [INTERNAL_MERGE_CASES_RESOLVE_URL, 'Resolve case merge conflicts with AI'],
   ])('registers %s as a documented, versioned internal POST route', (path, summary) => {
     const router = register();
     const { config, versions } = router.versioned.getRoute('post', path);
@@ -106,27 +110,28 @@ describe('merge cases routes', () => {
     expect(Object.keys(versions)).toEqual([MERGE_CASES_API_VERSION]);
   });
 
-  it.each([INTERNAL_MERGE_CASES_URL, INTERNAL_MERGE_CASES_PREVIEW_URL])(
-    'validates the body of %s against the merge request schema',
-    (path) => {
-      const router = register();
-      const {
-        config: { validate },
-      } = router.versioned.getRoute('post', path).versions[MERGE_CASES_API_VERSION];
-      const bodyValidation = (validate as { request: { body: Function } }).request.body;
-      const validationFactory = {
-        ok: (value: unknown) => ({ value }),
-        badRequest: (error: unknown) => ({ error }),
-      };
+  it.each([
+    INTERNAL_MERGE_CASES_URL,
+    INTERNAL_MERGE_CASES_PREVIEW_URL,
+    INTERNAL_MERGE_CASES_RESOLVE_URL,
+  ])('validates the body of %s against the merge request schema', (path) => {
+    const router = register();
+    const {
+      config: { validate },
+    } = router.versioned.getRoute('post', path).versions[MERGE_CASES_API_VERSION];
+    const bodyValidation = (validate as { request: { body: Function } }).request.body;
+    const validationFactory = {
+      ok: (value: unknown) => ({ value }),
+      badRequest: (error: unknown) => ({ error }),
+    };
 
-      expect(bodyValidation({ caseIds: ['only-one'] }, validationFactory)).toEqual(
-        expect.objectContaining({ error: expect.anything() })
-      );
-      expect(bodyValidation({ caseIds: ['case-1', 'case-2'] }, validationFactory)).toEqual({
-        value: { caseIds: ['case-1', 'case-2'] },
-      });
-    }
-  );
+    expect(bodyValidation({ caseIds: ['only-one'] }, validationFactory)).toEqual(
+      expect.objectContaining({ error: expect.anything() })
+    );
+    expect(bodyValidation({ caseIds: ['case-1', 'case-2'] }, validationFactory)).toEqual({
+      value: { caseIds: ['case-1', 'case-2'] },
+    });
+  });
 
   it('merges the cases in the request body and returns the result', async () => {
     casesClient.cases.merge.mockResolvedValue(mergeResponse);
@@ -186,6 +191,39 @@ describe('merge cases routes', () => {
         statusCode: 400,
         body: expect.objectContaining({ attributes }),
       })
+    );
+  });
+
+  it('asks the AI to resolve the conflicts, passing an abort signal', async () => {
+    const resolved: MergeCasesResolveResponse = {
+      fields: { severity: CaseSeverity.HIGH },
+      reasons: [{ field: 'severity', reason: 'The highest.' }],
+    };
+    casesClient.cases.mergeResolve.mockResolvedValue(resolved);
+
+    const response = await callRoute(INTERNAL_MERGE_CASES_RESOLVE_URL, {
+      caseIds: ['case-1', 'case-2'],
+    });
+
+    expect(casesClient.cases.mergeResolve).toHaveBeenCalledWith(
+      { caseIds: ['case-1', 'case-2'] },
+      { abortSignal: expect.any(AbortSignal) }
+    );
+    expect(response.ok).toHaveBeenCalledWith({ body: resolved });
+  });
+
+  it('responds with the code that says no AI connector is available', async () => {
+    const attributes = { code: CASES_API_ERROR_CODES.MERGE_RESOLVE_NO_AI_CONNECTOR };
+    casesClient.cases.mergeResolve.mockRejectedValue(
+      createTypedApiError({ statusCode: 400, message: 'No AI connector', attributes })
+    );
+
+    const response = await callRoute(INTERNAL_MERGE_CASES_RESOLVE_URL, {
+      caseIds: ['case-1', 'case-2'],
+    });
+
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({ statusCode: 400, body: expect.objectContaining({ attributes }) })
     );
   });
 

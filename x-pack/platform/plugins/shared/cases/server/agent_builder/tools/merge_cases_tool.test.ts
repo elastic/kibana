@@ -51,6 +51,15 @@ const previewCase = (id: string, incrementalId: number, status = CaseStatuses.op
   totalAlerts: 1,
   template: null,
   merge: null,
+  description: '',
+  createdBy: { username: 'elastic', full_name: null, email: null },
+  closedAt: null,
+  closedBy: null,
+  assignees: [],
+  tags: [],
+  totalComments: 0,
+  totalObservables: 0,
+  templateName: null,
 });
 
 const buildPreview = (
@@ -60,7 +69,7 @@ const buildPreview = (
   destination: { id: null, isNew: true },
   fields: {
     title: singleField('Phishing'),
-    description: { ...singleField('Report'), combinedValue: null },
+    description: { ...singleField('Report'), combinedValue: null, combinedLength: 0 },
     severity: {
       value: CaseSeverity.HIGH,
       provenance: 'highest',
@@ -76,12 +85,13 @@ const buildPreview = (
     template: { ...singleField(null), candidates: [] },
     customFields: [],
     extendedFields: [],
-    tags: { value: [], provenance: 'none', max: 200, overBy: 0 },
+    tags: { value: [], provenance: 'none', max: 200, overBy: 0, items: [] },
     assignees: {
       value: [],
       provenance: 'none',
       max: 10,
       overBy: 0,
+      items: [],
       canChange: true,
       unavailableReason: null,
     },
@@ -97,10 +107,10 @@ const buildPreview = (
     attacks: emptySummary,
     observables: { ...emptySummary, toCopy: 1 },
     other: emptySummary,
-    files: { total: 2 },
-    comments: { total: 0 },
+    files: { total: 2, byCase: [{ caseId: 'case-1', count: 2 }] },
+    comments: { total: 0, byCase: [] },
   },
-  choices: null,
+  choices: { alerts: [], events: [], attacks: [], observables: [], other: [] },
   ...overrides,
 });
 

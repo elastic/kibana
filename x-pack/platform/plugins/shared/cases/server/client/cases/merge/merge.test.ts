@@ -686,8 +686,72 @@ describe('mergePreview', () => {
     expect(preview.fields.severity).toEqual(
       expect.objectContaining({ value: CaseSeverity.CRITICAL, provenance: 'highest' })
     );
-    expect(preview.choices).toBeNull();
     expect(createMock).not.toHaveBeenCalled();
+  });
+
+  it('lists every item it would copy, even when nothing is over a limit', async () => {
+    casesClient.attachments.getAll.mockImplementation(async ({ caseID }) =>
+      caseID === firstCase.id
+        ? [alertAttachment('a1', ['alert-1', 'alert-2'])]
+        : [alertAttachment('a2', ['alert-2'])]
+    );
+
+    const preview = await mergePreview({ caseIds: request.caseIds }, clientArgs, casesClient);
+
+    expect(preview.limits).toEqual([]);
+    expect(
+      preview.choices.alerts.map(({ alertId, sourceCaseId }) => [alertId, sourceCaseId])
+    ).toEqual([
+      ['alert-1', firstCase.id],
+      ['alert-2', firstCase.id],
+    ]);
+  });
+
+  it('gives each case what its hover card shows', async () => {
+    casesClient.cases.bulkGet.mockResolvedValue({
+      cases: [
+        {
+          ...firstCase,
+          title: 'Phishing',
+          created_by: { username: 'priya', full_name: 'Priya Raman', email: null },
+          assignees: [{ uid: 'u-priya' }],
+          tags: ['phishing'],
+          totalComment: 4,
+          total_observables: 2,
+        },
+        {
+          ...secondCase,
+          title: 'Phishing follow-up',
+          closed_at: '2024-02-03T00:00:00.000Z',
+          closed_by: { username: 'marco', full_name: 'Marco Silva', email: null },
+          total_observables: null,
+          observables: [observable('o1', '10.0.0.1')],
+        },
+      ],
+      errors: [],
+    });
+
+    const preview = await mergePreview({ caseIds: request.caseIds }, clientArgs, casesClient);
+
+    expect(preview.cases[0]).toEqual(
+      expect.objectContaining({
+        createdBy: { username: 'priya', full_name: 'Priya Raman', email: null },
+        closedAt: null,
+        closedBy: null,
+        assignees: [{ uid: 'u-priya' }],
+        tags: ['phishing'],
+        totalComments: 4,
+        totalObservables: 2,
+        templateName: null,
+      })
+    );
+    expect(preview.cases[1]).toEqual(
+      expect.objectContaining({
+        closedAt: '2024-02-03T00:00:00.000Z',
+        closedBy: { username: 'marco', full_name: 'Marco Silva', email: null },
+        totalObservables: 1,
+      })
+    );
   });
 
   it('reports alerts the merge leaves out on its own', async () => {

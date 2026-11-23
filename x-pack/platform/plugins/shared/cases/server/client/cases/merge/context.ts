@@ -42,6 +42,8 @@ export interface MergeContext {
   missingDestinationAlerts: AlertInfo[];
   hasPlatinumLicense: boolean;
   canChangeAssignees: boolean;
+  /** The templates the cases use; empty and disabled when the templates feature is off. */
+  templates: MergeTemplates;
 }
 
 const loadTemplates = async (
@@ -249,5 +251,6 @@ export const loadMergeContext = async (
     missingDestinationAlerts: missingDestination,
     hasPlatinumLicense,
     canChangeAssignees,
+    templates,
   };
 };

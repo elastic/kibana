@@ -31,17 +31,35 @@ export const validateExtendedFieldValueSizes = (
   return errors;
 };
 
+/** Why a template field rejects a value. */
+export type FieldValueIssueCode =
+  | 'notAnOption'
+  | 'belowMin'
+  | 'aboveMax'
+  | 'tooShort'
+  | 'tooLong'
+  | 'pattern'
+  | 'notNumber';
+
+export interface FieldValueIssue {
+  code: FieldValueIssueCode;
+  message: string;
+}
+
 const validatePattern = (
   label: string,
   value: string,
   validation: InlineField['validation'],
-  errors: string[]
+  issues: FieldValueIssue[]
 ): void => {
   if (!validation?.pattern) return;
   const { regex, message } = validation.pattern;
   try {
     if (!new RegExp(regex).test(value)) {
-      errors.push(message ?? `Field "${label}" does not match pattern ${regex}`);
+      issues.push({
+        code: 'pattern',
+        message: message ?? `Field "${label}" does not match pattern ${regex}`,
+      });
     }
   } catch {
     // invalid regex in template definition — skip silently
@@ -52,13 +70,19 @@ const validateLengthConstraints = (
   label: string,
   value: string,
   validation: InlineField['validation'],
-  errors: string[]
+  issues: FieldValueIssue[]
 ): void => {
   if (validation?.min_length !== undefined && value.length < validation.min_length) {
-    errors.push(`Field "${label}" must be at least ${validation.min_length} characters`);
+    issues.push({
+      code: 'tooShort',
+      message: `Field "${label}" must be at least ${validation.min_length} characters`,
+    });
   }
   if (validation?.max_length !== undefined && value.length > validation.max_length) {
-    errors.push(`Field "${label}" must be at most ${validation.max_length} characters`);
+    issues.push({
+      code: 'tooLong',
+      message: `Field "${label}" must be at most ${validation.max_length} characters`,
+    });
   }
 };
 
@@ -66,18 +90,18 @@ const validateNumericConstraints = (
   label: string,
   value: string,
   validation: InlineField['validation'],
-  errors: string[]
+  issues: FieldValueIssue[]
 ): void => {
   const num = Number(value);
   if (!Number.isFinite(num)) {
-    errors.push(`Field "${label}" must be a number`);
+    issues.push({ code: 'notNumber', message: `Field "${label}" must be a number` });
     return;
   }
   if (validation?.min !== undefined && num < validation.min) {
-    errors.push(`Field "${label}" must be >= ${validation.min}`);
+    issues.push({ code: 'belowMin', message: `Field "${label}" must be >= ${validation.min}` });
   }
   if (validation?.max !== undefined && num > validation.max) {
-    errors.push(`Field "${label}" must be <= ${validation.max}`);
+    issues.push({ code: 'aboveMax', message: `Field "${label}" must be <= ${validation.max}` });
   }
 };
 
@@ -85,10 +109,13 @@ const validateOptions = (
   label: string,
   value: string,
   options: string[],
-  errors: string[]
+  issues: FieldValueIssue[]
 ): void => {
   if (!options.includes(value)) {
-    errors.push(`Field "${label}" must be one of: ${options.join(', ')}`);
+    issues.push({
+      code: 'notAnOption',
+      message: `Field "${label}" must be one of: ${options.join(', ')}`,
+    });
   }
 };
 
@@ -96,7 +123,7 @@ const validateCheckboxGroupOptions = (
   label: string,
   value: string,
   options: string[],
-  errors: string[]
+  issues: FieldValueIssue[]
 ): void => {
   const notAnArrayError = `Field "${label}" must be a JSON array of strings, e.g. ["option1","option2"]`;
 
@@ -104,24 +131,27 @@ const validateCheckboxGroupOptions = (
   try {
     selected = JSON.parse(value);
   } catch {
-    errors.push(notAnArrayError);
+    issues.push({ code: 'notAnOption', message: notAnArrayError });
     return;
   }
 
   if (!Array.isArray(selected) || selected.some((item) => typeof item !== 'string')) {
-    errors.push(notAnArrayError);
+    issues.push({ code: 'notAnOption', message: notAnArrayError });
     return;
   }
 
   const invalid = selected.filter((item: string) => !options.includes(item));
   if (invalid.length > 0) {
-    errors.push(`Field "${label}" contains invalid options: ${invalid.join(', ')}`);
+    issues.push({
+      code: 'notAnOption',
+      message: `Field "${label}" contains invalid options: ${invalid.join(', ')}`,
+    });
   }
 };
 
-const validateToggleValue = (label: string, value: string, errors: string[]): void => {
+const validateToggleValue = (label: string, value: string, issues: FieldValueIssue[]): void => {
   if (value !== 'true' && value !== 'false') {
-    errors.push(`Field "${label}" must be either true or false`);
+    issues.push({ code: 'notAnOption', message: `Field "${label}" must be either true or false` });
   }
 };
 
@@ -173,33 +203,49 @@ const buildUnknownKeyError = (
   return `${problem}. No fields are available for this case`;
 };
 
-const validateField = (field: InlineField, value: string, errors: string[]): void => {
+const collectFieldValueIssues = (field: InlineField, value: string): FieldValueIssue[] => {
   const label = field.label ?? field.name;
+  const issues: FieldValueIssue[] = [];
 
-  validatePattern(label, value, field.validation, errors);
+  validatePattern(label, value, field.validation, issues);
 
   if (field.control === FieldType.INPUT_TEXT || field.control === FieldType.TEXTAREA) {
-    validateLengthConstraints(label, value, field.validation, errors);
+    validateLengthConstraints(label, value, field.validation, issues);
   } else if (field.control === FieldType.INPUT_NUMBER) {
-    validateNumericConstraints(label, value, field.validation, errors);
+    validateNumericConstraints(label, value, field.validation, issues);
   } else if (field.control === FieldType.SELECT_BASIC || field.control === FieldType.RADIO_GROUP) {
     validateOptions(
       label,
       value,
       (field.metadata as { options?: string[] })?.options ?? [],
-      errors
+      issues
     );
   } else if (field.control === FieldType.CHECKBOX_GROUP) {
     validateCheckboxGroupOptions(
       label,
       value,
       (field.metadata as { options?: string[] })?.options ?? [],
-      errors
+      issues
     );
   } else if (field.control === FieldType.TOGGLE) {
-    validateToggleValue(label, value, errors);
+    validateToggleValue(label, value, issues);
   }
+
+  return issues;
 };
+
+const validateField = (field: InlineField, value: string, errors: string[]): void => {
+  errors.push(...collectFieldValueIssues(field, value).map(({ message }) => message));
+};
+
+/**
+ * The first reason a template field rejects a non-empty value, with a code the UI can act on, or
+ * undefined when the field accepts it. Required-ness and conditions are not checked here.
+ */
+export const getExtendedFieldIssue = (
+  field: InlineField,
+  value: string
+): FieldValueIssue | undefined => collectFieldValueIssues(field, value)[0];
 
 export const validateExtendedFields = (
   extendedFields: Record<string, string>,

@@ -111,6 +111,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     bulkDeleteObservables: jest.fn(),
     getApplicableFields: jest.fn(),
     mergePreview: jest.fn(),
+    mergeResolve: jest.fn(),
     merge: jest.fn(),
   });
 };

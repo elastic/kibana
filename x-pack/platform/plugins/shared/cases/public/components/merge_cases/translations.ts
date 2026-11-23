@@ -28,56 +28,18 @@ export const DISABLED_MIXED_OWNERS = i18n.translate(
   { defaultMessage: 'Select cases from one solution to merge them.' }
 );
 
-export const FLYOUT_TITLE = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.flyout.title', {
-    defaultMessage: 'Merge {count, plural, one {# case} other {# cases}}',
-    values: { count },
-  });
-
-export const FLYOUT_DESCRIPTION = i18n.translate('xpack.cases.mergeCases.flyout.description', {
-  defaultMessage:
-    'Alerts, events, attacks, and observables are copied into one case. Files, comments, and history stay on the source cases.',
-});
-
-export const MERGE_INTO = i18n.translate('xpack.cases.mergeCases.mergeInto', {
-  defaultMessage: 'Merge into',
-});
-
-export const NEW_CASE = i18n.translate('xpack.cases.mergeCases.newCase', {
-  defaultMessage: 'New case',
-});
-
-export const EXISTING_DESTINATION_HELP = (caseRef: string) =>
-  i18n.translate('xpack.cases.mergeCases.existingDestinationHelp', {
-    defaultMessage: '{caseRef} keeps its number and links. Its values are the defaults.',
-    values: { caseRef },
-  });
-
-export const CLOSED_CASES_NOT_OFFERED = i18n.translate(
-  'xpack.cases.mergeCases.closedCasesNotOffered',
-  { defaultMessage: 'Closed cases can be merged, but not merged into.' }
-);
-
-export const CASES_SECTION = i18n.translate('xpack.cases.mergeCases.casesSection', {
-  defaultMessage: 'Cases',
+export const FLYOUT_TITLE = i18n.translate('xpack.cases.mergeCases.flyout.title', {
+  defaultMessage: 'Merge cases',
 });
 
 export const CASES_COUNTER = (count: number, max: number) =>
   i18n.translate('xpack.cases.mergeCases.casesCounter', {
-    defaultMessage: '{count} of {max}',
+    defaultMessage: '{count} of {max} cases',
     values: { count, max },
   });
 
 export const CASE_COLUMN = i18n.translate('xpack.cases.mergeCases.caseColumn', {
   defaultMessage: 'Case',
-});
-
-export const STATUS_COLUMN = i18n.translate('xpack.cases.mergeCases.statusColumn', {
-  defaultMessage: 'Status',
-});
-
-export const SEVERITY_COLUMN = i18n.translate('xpack.cases.mergeCases.severityColumn', {
-  defaultMessage: 'Severity',
 });
 
 export const ALERTS_COLUMN = i18n.translate('xpack.cases.mergeCases.alertsColumn', {
@@ -90,30 +52,16 @@ export const REMOVE_CASE = (caseRef: string) =>
     values: { caseRef },
   });
 
-export const CASE_DETAILS_SECTION = i18n.translate('xpack.cases.mergeCases.caseDetailsSection', {
-  defaultMessage: 'Case details',
-});
-
-export const CONFLICTS_TO_RESOLVE = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.conflictsToResolve', {
-    defaultMessage: '{count, plural, one {# conflict} other {# conflicts}} to resolve',
-    values: { count },
-  });
-
-export const CONFLICTS_RESOLVED = i18n.translate('xpack.cases.mergeCases.conflictsResolved', {
-  defaultMessage: 'Conflicts resolved',
-});
-
-export const NO_CONFLICTS = i18n.translate('xpack.cases.mergeCases.noConflicts', {
-  defaultMessage: 'No conflicts',
-});
-
 export const TITLE_FIELD = i18n.translate('xpack.cases.mergeCases.field.title', {
   defaultMessage: 'Title',
 });
 
 export const SEVERITY_FIELD = i18n.translate('xpack.cases.mergeCases.field.severity', {
   defaultMessage: 'Severity',
+});
+
+export const STATUS_FIELD = i18n.translate('xpack.cases.mergeCases.field.status', {
+  defaultMessage: 'Status',
 });
 
 export const DESCRIPTION_FIELD = i18n.translate('xpack.cases.mergeCases.field.description', {
@@ -148,73 +96,8 @@ export const NO_CONNECTOR = i18n.translate('xpack.cases.mergeCases.noConnector',
   defaultMessage: 'No connector',
 });
 
-export const TEMPLATE_DISABLED = i18n.translate('xpack.cases.mergeCases.templateDisabled', {
-  defaultMessage: 'Disabled',
-});
-
-export const REQUIRED = i18n.translate('xpack.cases.mergeCases.required', {
-  defaultMessage: 'Required',
-});
-
-export const TOGGLE_ON = i18n.translate('xpack.cases.mergeCases.toggleOn', {
-  defaultMessage: 'On',
-});
-
-export const TOGGLE_OFF = i18n.translate('xpack.cases.mergeCases.toggleOff', {
-  defaultMessage: 'Off',
-});
-
-export const NOT_COPIED_FIELDS = (fields: string) =>
-  i18n.translate('xpack.cases.mergeCases.notCopiedFields', {
-    defaultMessage:
-      "Not copied, the destination's template doesn't define them. They stay on the source cases: {fields}",
-    values: { fields },
-  });
-
-export const ASSIGNEES_UNAVAILABLE_LICENSE = i18n.translate(
-  'xpack.cases.mergeCases.assigneesUnavailableLicense',
-  { defaultMessage: 'Assignees need a Platinum license. The merge leaves them unchanged.' }
-);
-
-export const ASSIGNEES_UNAVAILABLE_PRIVILEGE = i18n.translate(
-  'xpack.cases.mergeCases.assigneesUnavailablePrivilege',
-  { defaultMessage: "You can't assign users. The merge leaves assignees unchanged." }
-);
-
-export const FROM_CASE = (caseRef: string) =>
-  i18n.translate('xpack.cases.mergeCases.provenance.fromCase', {
-    defaultMessage: 'From {caseRef}',
-    values: { caseRef },
-  });
-
-export const FROM_CASES = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.provenance.fromCases', {
-    defaultMessage: 'From {count} cases',
-    values: { count },
-  });
-
-export const HIGHEST = i18n.translate('xpack.cases.mergeCases.provenance.highest', {
-  defaultMessage: 'Highest',
-});
-
-export const COMBINED = i18n.translate('xpack.cases.mergeCases.provenance.combined', {
-  defaultMessage: 'Combined',
-});
-
-export const SAME_IN_ALL_CASES = i18n.translate('xpack.cases.mergeCases.provenance.same', {
-  defaultMessage: 'Same in all cases',
-});
-
 export const NOT_SET = i18n.translate('xpack.cases.mergeCases.provenance.none', {
   defaultMessage: 'Not set in any case',
-});
-
-export const EDITED = i18n.translate('xpack.cases.mergeCases.provenance.edited', {
-  defaultMessage: 'Edited',
-});
-
-export const MOST_USED = i18n.translate('xpack.cases.mergeCases.provenance.mostUsed', {
-  defaultMessage: 'Used by most cases',
 });
 
 export const TEMPLATE_DEFAULT = i18n.translate(
@@ -222,68 +105,12 @@ export const TEMPLATE_DEFAULT = i18n.translate(
   { defaultMessage: "Template's default" }
 );
 
-export const SUGGESTED = (provenance: string) =>
-  i18n.translate('xpack.cases.mergeCases.provenance.suggested', {
-    defaultMessage: 'Suggested: {provenance}',
-    values: { provenance },
-  });
-
 export const EMPTY_VALUE = i18n.translate('xpack.cases.mergeCases.emptyValue', {
   defaultMessage: 'None',
 });
 
-export const CONFLICT_TRIGGER = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.conflictTrigger', {
-    defaultMessage: '{count} values, choose one',
-    values: { count },
-  });
-
-export const CHANGE_VALUE = i18n.translate('xpack.cases.mergeCases.changeValue', {
-  defaultMessage: 'Change',
-});
-
-export const RESOLVED = i18n.translate('xpack.cases.mergeCases.resolved', {
-  defaultMessage: 'Resolved',
-});
-
-export const USE_SUGGESTION = i18n.translate('xpack.cases.mergeCases.useSuggestion', {
-  defaultMessage: 'Use suggestion',
-});
-
-export const USE_SUGGESTION_ARIA_LABEL = (field: string) =>
-  i18n.translate('xpack.cases.mergeCases.useSuggestionAriaLabel', {
-    defaultMessage: 'Use the suggested {field}',
-    values: { field },
-  });
-
-export const INVALID_VALUE = i18n.translate('xpack.cases.mergeCases.invalidValue', {
-  defaultMessage: "The template doesn't accept this value. Choose another one or clear it.",
-});
-
-export const CONFLICT_ARIA_LABEL = (field: string, count: number) =>
-  i18n.translate('xpack.cases.mergeCases.conflictAriaLabel', {
-    defaultMessage: '{field} has {count} different values. Select the value to keep.',
-    values: { field, count },
-  });
-
-export const POPOVER_TITLE_NEW_CASE = (field: string) =>
-  i18n.translate('xpack.cases.mergeCases.popoverTitleNewCase', {
-    defaultMessage: '{field} for the new case',
-    values: { field },
-  });
-
-export const POPOVER_TITLE_EXISTING_CASE = (field: string, caseRef: string) =>
-  i18n.translate('xpack.cases.mergeCases.popoverTitleExistingCase', {
-    defaultMessage: '{field} for {caseRef}',
-    values: { field, caseRef },
-  });
-
 export const EDIT = i18n.translate('xpack.cases.mergeCases.edit', {
   defaultMessage: 'Edit',
-});
-
-export const DONE = i18n.translate('xpack.cases.mergeCases.done', {
-  defaultMessage: 'Done',
 });
 
 export const EDIT_FIELD_ARIA_LABEL = (field: string) =>
@@ -291,10 +118,6 @@ export const EDIT_FIELD_ARIA_LABEL = (field: string) =>
     defaultMessage: 'Edit {field}',
     values: { field },
   });
-
-export const COMBINE_DESCRIPTIONS = i18n.translate('xpack.cases.mergeCases.combineDescriptions', {
-  defaultMessage: 'Combine descriptions',
-});
 
 export const COMBINED_DESCRIPTION_HEADING = (caseRef: string) =>
   i18n.translate('xpack.cases.mergeCases.combinedDescriptionHeading', {
@@ -307,17 +130,6 @@ export const ASSIGNEES_OVER_LIMIT = (max: number, count: number) =>
     defaultMessage: 'A case can have up to {max} assignees. Remove {count} to merge.',
     values: { max, count },
   });
-
-export const DESCRIPTION_TOO_LONG = (max: number) =>
-  i18n.translate('xpack.cases.mergeCases.descriptionTooLong', {
-    defaultMessage:
-      'Descriptions must be {max} characters or fewer. Edit the description to merge.',
-    values: { max },
-  });
-
-export const ATTACHMENTS_SECTION = i18n.translate('xpack.cases.mergeCases.attachmentsSection', {
-  defaultMessage: 'Attachments',
-});
 
 export const ALERTS = i18n.translate('xpack.cases.mergeCases.attachments.alerts', {
   defaultMessage: 'Alerts',
@@ -384,63 +196,16 @@ export const OVER_LIMIT_BADGE = (count: number, max: number) =>
     values: { count, max },
   });
 
-export const ALERTS_OVER_LIMIT = (max: number) =>
-  i18n.translate('xpack.cases.mergeCases.attachments.alertsOverLimit', {
-    defaultMessage:
-      'A case can have up to {max} alerts. Choose which ones to copy, or remove cases from this merge.',
-    values: { max },
-  });
-
-export const OBSERVABLES_OVER_LIMIT = (max: number) =>
-  i18n.translate('xpack.cases.mergeCases.attachments.observablesOverLimit', {
-    defaultMessage:
-      'A case can have up to {max} observables. Choose which ones to copy, or remove cases from this merge.',
-    values: { max },
-  });
-
-export const OTHER_OVER_LIMIT = (max: number) =>
-  i18n.translate('xpack.cases.mergeCases.attachments.otherOverLimit', {
-    defaultMessage:
-      'A case can have up to {max} of these attachments. Choose which ones to copy, or remove cases from this merge.',
-    values: { max },
-  });
-
 export const LEFT_OUT = (count: number) =>
   i18n.translate('xpack.cases.mergeCases.attachments.leftOut', {
     defaultMessage: '{count} left out',
     values: { count },
   });
 
-export const CHOOSE_ATTACHMENTS = i18n.translate(
-  'xpack.cases.mergeCases.attachments.chooseAttachments',
-  { defaultMessage: 'Choose attachments' }
-);
-
-export const CHOOSE_ATTACHMENTS_ARIA_LABEL = (kind: string) =>
-  i18n.translate('xpack.cases.mergeCases.attachments.chooseAttachmentsAriaLabel', {
-    defaultMessage: 'Choose which {kind} to copy',
-    values: { kind },
-  });
-
-export const CHOOSE_ATTACHMENTS_TITLE = i18n.translate('xpack.cases.mergeCases.choices.title', {
-  defaultMessage: 'Choose attachments to copy',
-});
-
-export const CHOOSE_ATTACHMENTS_DESCRIPTION = i18n.translate(
-  'xpack.cases.mergeCases.choices.description',
-  { defaultMessage: 'Attachments you leave out stay on their source cases.' }
-);
-
 export const CHOICES_SELECTED = (selected: number, total: number) =>
   i18n.translate('xpack.cases.mergeCases.choices.selected', {
     defaultMessage: '{selected} of {total} selected',
     values: { selected, total },
-  });
-
-export const CHOICES_LEAVE_OUT_MORE = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.choices.leaveOutMore', {
-    defaultMessage: 'Leave out {count} more to stay within the limit.',
-    values: { count },
   });
 
 export const CHOICES_WITHIN_LIMIT = i18n.translate('xpack.cases.mergeCases.choices.withinLimit', {
@@ -450,16 +215,6 @@ export const CHOICES_WITHIN_LIMIT = i18n.translate('xpack.cases.mergeCases.choic
 export const KEEP_NEWEST = (count: number) =>
   i18n.translate('xpack.cases.mergeCases.choices.keepNewest', {
     defaultMessage: 'Keep the newest {count}',
-    values: { count },
-  });
-
-export const KEEP_NEWEST_HELP = i18n.translate('xpack.cases.mergeCases.choices.keepNewestHelp', {
-  defaultMessage: 'Keeps the alerts most recently added to a case and leaves out the rest.',
-});
-
-export const CHOICES_LEFT_OUT_TOTAL = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.choices.leftOutTotal', {
-    defaultMessage: '{count} left out',
     values: { count },
   });
 
@@ -536,12 +291,11 @@ export const ATTACK_COLUMN = i18n.translate('xpack.cases.mergeCases.choices.atta
   defaultMessage: 'Attack',
 });
 
-export const ATTACK_ALERTS = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.choices.attackAlerts', {
+export const ALERT_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.mergeCases.choices.alertCount', {
     defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
     values: { count },
   });
-
 export const UNTITLED_ATTACK = i18n.translate('xpack.cases.mergeCases.choices.untitledAttack', {
   defaultMessage: 'Untitled attack',
 });
@@ -555,73 +309,14 @@ export const COUNTS_TOWARD_LIMIT = i18n.translate(
   { defaultMessage: 'Counts toward the limit' }
 );
 
-export const APPLY = i18n.translate('xpack.cases.mergeCases.choices.apply', {
-  defaultMessage: 'Apply',
-});
-
 export const NO_ATTACHMENTS = i18n.translate('xpack.cases.mergeCases.attachments.none', {
   defaultMessage: 'No attachments to copy.',
-});
-
-export const FILES_STAY = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.attachments.filesStay', {
-    defaultMessage: '{count, plural, one {# file stays} other {# files stay}} on the source cases.',
-    values: { count },
-  });
-
-export const COMMENTS_STAY = i18n.translate('xpack.cases.mergeCases.attachments.commentsStay', {
-  defaultMessage: 'Comments stay on the source cases. The new case links to each one.',
-});
-
-export const COMMENTS_STAY_EXISTING_CASE = (caseRef: string) =>
-  i18n.translate('xpack.cases.mergeCases.attachments.commentsStayExistingCase', {
-    defaultMessage: 'Comments stay on the source cases. {caseRef} links to each one.',
-    values: { caseRef },
-  });
-
-export const AFTER_MERGING_SECTION = i18n.translate('xpack.cases.mergeCases.afterMerging', {
-  defaultMessage: 'After merging',
 });
 
 export const CLOSE_SOURCES = (count: number) =>
   i18n.translate('xpack.cases.mergeCases.closeSources', {
     defaultMessage: 'Close the {count, plural, one {source case} other {# source cases}}',
     values: { count },
-  });
-
-export const CLOSE_SOURCES_HELP = i18n.translate('xpack.cases.mergeCases.closeSourcesHelp', {
-  defaultMessage:
-    'They keep their comments, attachments, and history, and link to the new case. Their alerts keep their status.',
-});
-
-export const CLOSE_SOURCES_HELP_EXISTING_CASE = (caseRef: string, count: number) =>
-  i18n.translate('xpack.cases.mergeCases.closeSourcesHelpExistingCase', {
-    defaultMessage:
-      '{count, plural, one {It keeps its comments, attachments, and history, and links to {caseRef}. Its alerts keep their status.} other {They keep their comments, attachments, and history, and link to {caseRef}. Their alerts keep their status.}}',
-    values: { caseRef, count },
-  });
-
-export const NO_SOURCES_TO_CLOSE = i18n.translate('xpack.cases.mergeCases.noSourcesToClose', {
-  defaultMessage:
-    'The source cases are already closed. They keep their comments, attachments, and history, and link to the destination.',
-});
-
-export const ADD_NOTE = i18n.translate('xpack.cases.mergeCases.addNote', {
-  defaultMessage: 'Add a note',
-});
-
-export const NOTE = i18n.translate('xpack.cases.mergeCases.note', {
-  defaultMessage: 'Note',
-});
-
-export const NOTE_HELP_NEW_CASE = i18n.translate('xpack.cases.mergeCases.noteHelpNewCase', {
-  defaultMessage: 'Added as a comment on the new case.',
-});
-
-export const NOTE_HELP_EXISTING_CASE = (caseRef: string) =>
-  i18n.translate('xpack.cases.mergeCases.noteHelpExistingCase', {
-    defaultMessage: 'Added as a comment on {caseRef}.',
-    values: { caseRef },
   });
 
 export const CANCEL = i18n.translate('xpack.cases.mergeCases.cancel', {
@@ -636,43 +331,9 @@ export const LOADING_CASES = i18n.translate('xpack.cases.mergeCases.loadingCases
   defaultMessage: 'Loading cases...',
 });
 
-export const SUMMARY_COPIES_NEW_CASE = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.summary.copiesNewCase', {
-    defaultMessage:
-      '{count, plural, =0 {Nothing to copy into the new case.} one {Copies # attachment into the new case.} other {Copies # attachments into the new case.}}',
-    values: { count },
-  });
-
-export const SUMMARY_COPIES_EXISTING_CASE = (count: number, caseRef: string) =>
-  i18n.translate('xpack.cases.mergeCases.summary.copiesExistingCase', {
-    defaultMessage:
-      '{count, plural, =0 {Nothing to copy into {caseRef}.} one {Copies # attachment into {caseRef}.} other {Copies # attachments into {caseRef}.}}',
-    values: { count, caseRef },
-  });
-
-export const SUMMARY_CLOSES = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.summary.closes', {
-    defaultMessage: 'Closes {count, plural, one {# case} other {# cases}}.',
-    values: { count },
-  });
-
 export const BLOCKED_ADD_ANOTHER_CASE = i18n.translate(
   'xpack.cases.mergeCases.blocked.addAnotherCase',
   { defaultMessage: 'Add another case to merge' }
-);
-
-export const BLOCKED_ENTER_TITLE = i18n.translate('xpack.cases.mergeCases.blocked.enterTitle', {
-  defaultMessage: 'Enter a title to merge',
-});
-
-export const BLOCKED_ENTER_DESCRIPTION = i18n.translate(
-  'xpack.cases.mergeCases.blocked.enterDescription',
-  { defaultMessage: 'Enter a description to merge' }
-);
-
-export const BLOCKED_SHORTEN_DESCRIPTION = i18n.translate(
-  'xpack.cases.mergeCases.blocked.shortenDescription',
-  { defaultMessage: 'Shorten the description to merge' }
 );
 
 export const BLOCKED_NO_DESTINATION = i18n.translate(
@@ -680,45 +341,29 @@ export const BLOCKED_NO_DESTINATION = i18n.translate(
   { defaultMessage: 'Add an open case to merge into' }
 );
 
-export const BLOCKED_RESOLVE_CONFLICTS = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.blocked.resolveConflicts', {
-    defaultMessage: 'Resolve {count, plural, one {# conflict} other {# conflicts}} to merge',
-    values: { count },
-  });
-
 export const BLOCKED_FILL_IN_FIELD = (field: string) =>
   i18n.translate('xpack.cases.mergeCases.blocked.fillInField', {
-    defaultMessage: 'Fill in {field} to merge',
+    defaultMessage: 'Fill in {field} to continue',
     values: { field },
   });
 
 export const BLOCKED_LEAVE_OUT_ALERTS = (count: number) =>
   i18n.translate('xpack.cases.mergeCases.blocked.leaveOutAlerts', {
-    defaultMessage: 'Leave out {count, plural, one {# alert} other {# alerts}} to merge',
+    defaultMessage: 'Leave out {count, plural, one {# alert} other {# alerts}} to continue',
     values: { count },
   });
 
 export const BLOCKED_LEAVE_OUT_OBSERVABLES = (count: number) =>
   i18n.translate('xpack.cases.mergeCases.blocked.leaveOutObservables', {
-    defaultMessage: 'Leave out {count, plural, one {# observable} other {# observables}} to merge',
+    defaultMessage:
+      'Leave out {count, plural, one {# observable} other {# observables}} to continue',
     values: { count },
   });
 
 export const BLOCKED_LEAVE_OUT_OTHER = (count: number) =>
   i18n.translate('xpack.cases.mergeCases.blocked.leaveOutOther', {
-    defaultMessage: 'Leave out {count, plural, one {# attachment} other {# attachments}} to merge',
-    values: { count },
-  });
-
-export const BLOCKED_TOO_MANY_ASSIGNEES = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.blocked.tooManyAssignees', {
-    defaultMessage: 'Remove {count, plural, one {# assignee} other {# assignees}} to merge',
-    values: { count },
-  });
-
-export const BLOCKED_TOO_MANY_TAGS = (count: number) =>
-  i18n.translate('xpack.cases.mergeCases.blocked.tooManyTags', {
-    defaultMessage: 'Remove {count, plural, one {# tag} other {# tags}} to merge',
+    defaultMessage:
+      'Leave out {count, plural, one {# attachment} other {# attachments}} to continue',
     values: { count },
   });
 
@@ -756,7 +401,7 @@ export const PARTIAL_NOT_MERGED_BODY = (count: number, caseRefs: string, caseRef
 export const PARTIAL_STEPS_BODY = (caseRef: string) =>
   i18n.translate('xpack.cases.mergeCases.partialStepsBody', {
     defaultMessage:
-      "Every case was merged, but the activity entries or the note weren't all added. Check the activity of {caseRef}.",
+      "Every case was merged, but the activity entries weren't all added. Check the activity of {caseRef}.",
     values: { caseRef },
   });
 
@@ -787,15 +432,30 @@ export const ADD_CASES = i18n.translate('xpack.cases.mergeCases.addCases', {
   defaultMessage: 'Add cases',
 });
 
-export const ADD_CASES_PLACEHOLDER = i18n.translate('xpack.cases.mergeCases.addCasesPlaceholder', {
-  defaultMessage: 'Search by title or #number',
-});
-
 export const ADD_CASES_LIMIT = (max: number) =>
   i18n.translate('xpack.cases.mergeCases.addCasesLimit', {
     defaultMessage: 'You can merge up to {max} cases at once.',
     values: { max },
   });
+
+export const ADD_CASES_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.cases.mergeCases.addCasesSearchPlaceholder',
+  {
+    defaultMessage: 'Search by #number or title',
+  }
+);
+
+export const ADD_CASES_NONE = i18n.translate('xpack.cases.mergeCases.addCasesNone', {
+  defaultMessage: 'No cases found.',
+});
+
+export const ADD_CASES_NO_MATCHES = i18n.translate('xpack.cases.mergeCases.addCasesNoMatches', {
+  defaultMessage: 'No cases match your search.',
+});
+
+export const ADD_CASES_ERROR = i18n.translate('xpack.cases.mergeCases.addCasesError', {
+  defaultMessage: "Couldn't load cases. Close this list and try again.",
+});
 
 export const NEW_CASE_NO_PERMISSION = i18n.translate('xpack.cases.mergeCases.newCaseNoPermission', {
   defaultMessage: "You can't create cases, so merge into one of the open cases.",
@@ -821,3 +481,341 @@ export const CASES_CHANGED_BODY = i18n.translate('xpack.cases.mergeCases.casesCh
   defaultMessage:
     'The preview was refreshed. Review the fields marked to resolve, then merge again.',
 });
+
+export const STEP_CASES = i18n.translate('xpack.cases.mergeCases.step.cases', {
+  defaultMessage: 'Cases',
+});
+
+export const STEP_DIFFERENCES = i18n.translate('xpack.cases.mergeCases.step.differences', {
+  defaultMessage: 'Conflicts',
+});
+
+export const STEP_ATTACHMENTS = i18n.translate('xpack.cases.mergeCases.step.attachments', {
+  defaultMessage: 'Attachments',
+});
+
+export const STEP_REVIEW = i18n.translate('xpack.cases.mergeCases.step.review', {
+  defaultMessage: 'Review',
+});
+
+export const STEPS_ARIA_LABEL = i18n.translate('xpack.cases.mergeCases.step.ariaLabel', {
+  defaultMessage: 'Merge steps',
+});
+
+export const NEXT = i18n.translate('xpack.cases.mergeCases.next', {
+  defaultMessage: 'Next',
+});
+
+export const BACK = i18n.translate('xpack.cases.mergeCases.back', {
+  defaultMessage: 'Back',
+});
+
+export const MERGE = i18n.translate('xpack.cases.mergeCases.merge', {
+  defaultMessage: 'Merge',
+});
+
+export const BLOCKED_CHANGE_FIELD = (field: string) =>
+  i18n.translate('xpack.cases.mergeCases.blocked.changeField', {
+    defaultMessage: 'Change {field} to continue',
+    values: { field },
+  });
+
+export const BLOCKED_FIX_LIMIT = (field: string) =>
+  i18n.translate('xpack.cases.mergeCases.blocked.fixLimit', {
+    defaultMessage: 'Bring {field} within its limit to continue',
+    values: { field },
+  });
+
+export const BLOCKED_ON_STEP = (step: string) =>
+  i18n.translate('xpack.cases.mergeCases.blocked.onStep', {
+    defaultMessage: 'Something changed on {step}. Go back to it to merge.',
+    values: { step },
+  });
+
+export const MERGE_INTO_LEGEND = i18n.translate(
+  'xpack.cases.mergeCases.casesStep.mergeIntoLegend',
+  {
+    defaultMessage: 'Merge into',
+  }
+);
+
+export const MERGE_INTO_NEW_TITLE = i18n.translate(
+  'xpack.cases.mergeCases.casesStep.mergeIntoNewTitle',
+  { defaultMessage: 'Merge into a new case' }
+);
+
+export const MERGE_INTO_NEW_DESCRIPTION = i18n.translate(
+  'xpack.cases.mergeCases.casesStep.mergeIntoNewDescription',
+  { defaultMessage: 'Starts a new case with their attachments.' }
+);
+
+export const MERGE_INTO_EXISTING_TITLE = i18n.translate(
+  'xpack.cases.mergeCases.casesStep.mergeIntoExistingTitle',
+  { defaultMessage: 'Merge into an existing case' }
+);
+
+export const MERGE_INTO_EXISTING_DESCRIPTION = i18n.translate(
+  'xpack.cases.mergeCases.casesStep.mergeIntoExistingDescription',
+  { defaultMessage: "Adds the others' attachments to the case you choose." }
+);
+
+export const MERGE_INTO_EXISTING_NONE_OPEN = i18n.translate(
+  'xpack.cases.mergeCases.casesStep.mergeIntoExistingNoneOpen',
+  { defaultMessage: 'All the cases are closed. Reopen one to merge into it.' }
+);
+
+export const CASES_TO_MERGE = i18n.translate('xpack.cases.mergeCases.casesStep.casesToMerge', {
+  defaultMessage: 'Cases to merge',
+});
+
+export const CHOOSE_CASE_TO_MERGE_INTO = i18n.translate(
+  'xpack.cases.mergeCases.casesStep.chooseCaseToMergeInto',
+  { defaultMessage: 'Choose the case to merge into' }
+);
+
+export const BLOCKED_CHOOSE_CASE_TO_MERGE_INTO = i18n.translate(
+  'xpack.cases.mergeCases.blocked.chooseCaseToMergeInto',
+  { defaultMessage: 'Choose the case to merge into' }
+);
+
+export const CLOSED_CASE_CANNOT_KEEP = i18n.translate(
+  'xpack.cases.mergeCases.casesStep.closedCaseCannotKeep',
+  { defaultMessage: 'Reopen it to merge into it. It can still be merged in.' }
+);
+
+export const FACT_STATUS = i18n.translate('xpack.cases.mergeCases.casesStep.factStatus', {
+  defaultMessage: 'Status',
+});
+
+export const FACT_SEVERITY = i18n.translate('xpack.cases.mergeCases.casesStep.factSeverity', {
+  defaultMessage: 'Severity',
+});
+
+export const FACT_ALERTS = i18n.translate('xpack.cases.mergeCases.casesStep.factAlerts', {
+  defaultMessage: 'Alerts',
+});
+
+export const FACT_OPENED = i18n.translate('xpack.cases.mergeCases.casesStep.factOpened', {
+  defaultMessage: 'Opened',
+});
+
+export const FACT_CLOSED = i18n.translate('xpack.cases.mergeCases.casesStep.factClosed', {
+  defaultMessage: 'Closed',
+});
+
+export const LEAVE_OUT_BY = i18n.translate('xpack.cases.mergeCases.attachmentsStep.leaveOutBy', {
+  defaultMessage: 'Leave out alerts',
+});
+
+export const BY_RULE = i18n.translate('xpack.cases.mergeCases.attachmentsStep.byRule', {
+  defaultMessage: 'By rule',
+});
+
+export const BY_CASE = i18n.translate('xpack.cases.mergeCases.attachmentsStep.byCase', {
+  defaultMessage: 'By case',
+});
+
+export const KEEP_NEWEST_RESULT = (count: number, left: number) =>
+  i18n.translate('xpack.cases.mergeCases.attachmentsStep.keepNewestResult', {
+    defaultMessage:
+      'Keeps the {count} alerts most recently added to a case. {left, plural, one {# alert stays} other {# alerts stay}} on the source cases.',
+    values: { count, left },
+  });
+
+export const KEEP_NEWEST_UP_TO_LIMITS = i18n.translate(
+  'xpack.cases.mergeCases.attachmentsStep.keepNewestUpToLimits',
+  { defaultMessage: 'Keep the newest up to each limit' }
+);
+
+export const OVER_LIMITS_HINT = i18n.translate(
+  'xpack.cases.mergeCases.attachmentsStep.overLimitsHint',
+  { defaultMessage: 'Some attachments are over a limit. Uncheck items below, or keep the newest.' }
+);
+
+export const WITHIN_LIMITS = i18n.translate('xpack.cases.mergeCases.attachmentsStep.withinLimits', {
+  defaultMessage: 'Every attachment is within its limit.',
+});
+
+export const ALERTS_OVER_LIMIT_INLINE = (total: number, max: number, overBy: number) =>
+  i18n.translate('xpack.cases.mergeCases.attachmentsStep.alertsOverLimit', {
+    defaultMessage:
+      'The cases hold {total} alerts and a case holds {max}. Leave out {overBy} more.',
+    values: { total, max, overBy },
+  });
+
+export const KIND_OVER_LIMIT_INLINE = (kind: string, total: number, max: number, overBy: number) =>
+  i18n.translate('xpack.cases.mergeCases.attachmentsStep.kindOverLimit', {
+    defaultMessage:
+      'The cases hold {total} {kind, select, observables {observables} other {other attachments}} and a case holds {max}. Leave out {overBy} more.',
+    values: { kind, total, max, overBy },
+  });
+
+export const COPY_CASE_ALERTS = (caseRef: string) =>
+  i18n.translate('xpack.cases.mergeCases.attachmentsStep.copyCaseAlerts', {
+    defaultMessage: 'Copy the alerts from {caseRef}',
+    values: { caseRef },
+  });
+
+export const ALERTS_BY_CASE = i18n.translate(
+  'xpack.cases.mergeCases.attachmentsStep.alertsByCase',
+  {
+    defaultMessage: 'Alerts by case',
+  }
+);
+
+export const FILES_AND_COMMENTS = i18n.translate(
+  'xpack.cases.mergeCases.attachmentsStep.filesAndComments',
+  { defaultMessage: 'Files and comments' }
+);
+
+export const FILES_AND_COMMENTS_STAY = (files: number, comments: number) =>
+  i18n.translate('xpack.cases.mergeCases.attachmentsStep.filesAndCommentsStay', {
+    defaultMessage:
+      '{files, plural, one {# file} other {# files}} and {comments, plural, one {# comment} other {# comments}} stay on the source cases',
+    values: { files, comments },
+  });
+
+export const FILES_COLUMN = i18n.translate('xpack.cases.mergeCases.attachmentsStep.filesColumn', {
+  defaultMessage: 'Files',
+});
+
+export const COMMENTS_COLUMN = i18n.translate(
+  'xpack.cases.mergeCases.attachmentsStep.commentsColumn',
+  { defaultMessage: 'Comments' }
+);
+
+export const ALERTS_WITH_ATTACKS = (count: number) =>
+  i18n.translate('xpack.cases.mergeCases.attachmentsStep.alertsWithAttacks', {
+    defaultMessage:
+      '{count, plural, one {# more alert comes} other {# more alerts come}} with the attacks below.',
+    values: { count },
+  });
+
+export const PREVIEW_ARIA_LABEL = i18n.translate('xpack.cases.mergeCases.review.previewAriaLabel', {
+  defaultMessage: 'Preview of the merged case',
+});
+
+export const PREVIEW = i18n.translate('xpack.cases.mergeCases.review.preview', {
+  defaultMessage: 'Preview',
+});
+
+export const PREVIEW_TRAIL_NEW_CASE = i18n.translate(
+  'xpack.cases.mergeCases.review.previewTrailNewCase',
+  { defaultMessage: 'Cases / New case' }
+);
+
+export const PREVIEW_TRAIL_EXISTING_CASE = (caseRef: string) =>
+  i18n.translate('xpack.cases.mergeCases.review.previewTrailExistingCase', {
+    defaultMessage: 'Cases / {caseRef}',
+    values: { caseRef },
+  });
+
+export const SHOW_ORIGINS = i18n.translate('xpack.cases.mergeCases.review.showOrigins', {
+  defaultMessage: 'Show where values come from',
+});
+
+export const SHOW_ALL = i18n.translate('xpack.cases.mergeCases.review.showAll', {
+  defaultMessage: 'Show all',
+});
+
+export const SHOW_LESS = i18n.translate('xpack.cases.mergeCases.review.showLess', {
+  defaultMessage: 'Show less',
+});
+
+export const FROM = i18n.translate('xpack.cases.mergeCases.review.from', {
+  defaultMessage: 'From',
+});
+
+export const YOUR_OWN_VALUE = i18n.translate('xpack.cases.mergeCases.review.yourOwnValue', {
+  defaultMessage: 'Your own value',
+});
+
+export const COMBINED_FROM = (count: number) =>
+  i18n.translate('xpack.cases.mergeCases.review.combinedFrom', {
+    defaultMessage: 'Combined from {count, plural, one {# case} other {# cases}}',
+    values: { count },
+  });
+
+export const NOT_SET_IN_ANY_CASE = i18n.translate('xpack.cases.mergeCases.review.notSet', {
+  defaultMessage: 'Not set',
+});
+
+export const MERGED_ATTACHMENT_COUNTS = (
+  alerts: number,
+  observables: number,
+  events: number,
+  other: number
+) =>
+  i18n.translate('xpack.cases.mergeCases.review.attachmentCounts', {
+    defaultMessage:
+      'The merged case will have {alerts, plural, one {# alert} other {# alerts}}, {observables, plural, one {# observable} other {# observables}}, {events, plural, one {# event} other {# events}} and {other, plural, one {# other attachment} other {# other attachments}}.',
+    values: { alerts, observables, events, other },
+  });
+
+export const MORE_ITEMS = (count: number) =>
+  i18n.translate('xpack.cases.mergeCases.review.moreItems', {
+    defaultMessage: '+{count}',
+    values: { count },
+  });
+
+export const SOURCE_CASES = i18n.translate('xpack.cases.mergeCases.review.sourceCases', {
+  defaultMessage: 'Source cases',
+});
+
+export const SOURCES_KEEP_INFO = i18n.translate('xpack.cases.mergeCases.review.sourcesKeepInfo', {
+  defaultMessage: 'What the source cases keep',
+});
+
+export const SOURCES_CLOSE_SUMMARY = (close: number, alreadyClosed: number) =>
+  i18n.translate('xpack.cases.mergeCases.review.sourcesCloseSummary', {
+    defaultMessage:
+      '{close, plural, =0 {None will close} other {# will close}}{alreadyClosed, plural, =0 {} one {, # is already closed} other {, # are already closed}}',
+    values: { close, alreadyClosed },
+  });
+
+export const STAYS_CLOSED = i18n.translate('xpack.cases.mergeCases.review.staysClosed', {
+  defaultMessage: 'Stays closed',
+});
+
+export const STAYS_AS_IS = i18n.translate('xpack.cases.mergeCases.review.staysAsIs', {
+  defaultMessage: 'Stays as is',
+});
+
+export const BECOMES = i18n.translate('xpack.cases.mergeCases.review.becomes', {
+  defaultMessage: 'becomes',
+});
+
+export const SHOW_MORE_CASES = (count: number) =>
+  i18n.translate('xpack.cases.mergeCases.review.showMoreCases', {
+    defaultMessage: 'Show {count, plural, one {# more case} other {# more cases}}',
+    values: { count },
+  });
+
+export const SHOW_FEWER = i18n.translate('xpack.cases.mergeCases.review.showFewer', {
+  defaultMessage: 'Show fewer',
+});
+
+export const SOURCES_KEEP = i18n.translate('xpack.cases.mergeCases.review.sourcesKeep', {
+  defaultMessage:
+    'Each keeps its comments, attachments, and history, and shows a "Merged into" badge linking to the merged case.',
+});
+
+export const OTHER_ATTACHMENTS_SHORT = i18n.translate('xpack.cases.mergeCases.review.otherTab', {
+  defaultMessage: 'Other',
+});
+
+export const AI_NO_CONNECTOR_TITLE = i18n.translate('xpack.cases.mergeCases.ai.noConnectorTitle', {
+  defaultMessage: 'No AI connector available',
+});
+
+export const AI_NO_CONNECTOR_BODY = i18n.translate('xpack.cases.mergeCases.ai.noConnectorBody', {
+  defaultMessage:
+    'Set up an AI connector in Stack Management to resolve conflicts with AI, or choose the values yourself.',
+});
+
+export const AI_RESOLVE_FAILED_TITLE = i18n.translate(
+  'xpack.cases.mergeCases.ai.resolveFailedTitle',
+  {
+    defaultMessage: "Couldn't resolve the conflicts with AI",
+  }
+);
