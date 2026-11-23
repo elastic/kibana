@@ -925,6 +925,7 @@ export const registerAiIndexRoutes = ({
                 kiId,
                 ki: request.body.ki,
                 writer,
+                personEdit: true,
                 backingIndex,
               });
               return { output: result };
