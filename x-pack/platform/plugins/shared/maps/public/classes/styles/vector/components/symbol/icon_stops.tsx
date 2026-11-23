@@ -74,7 +74,7 @@ export function IconStops({
 }: Props) {
   const styles = useMemoCss(mapColorStopsStyles);
   return iconStops
-    .map(({ stop, icon, iconSource }, index): ReactElement | undefined => {
+    .map(({ stop, icon, icon_source: iconSource }, index): ReactElement | undefined => {
       const iconInfo =
         iconSource === ICON_SOURCE.CUSTOM
           ? customIcons.find(({ symbolId }) => symbolId === icon)

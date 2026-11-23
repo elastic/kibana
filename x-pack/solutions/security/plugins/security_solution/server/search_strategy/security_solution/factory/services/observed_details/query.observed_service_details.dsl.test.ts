@@ -12,4 +12,18 @@ describe('buildServiceDetailsQuery', () => {
   test('build query from options correctly', () => {
     expect(buildObservedServiceDetailsQuery(mockOptions)).toMatchSnapshot();
   });
+
+  test('filters by service.name when no filter query is provided', () => {
+    const query = buildObservedServiceDetailsQuery({ ...mockOptions, filterQuery: undefined });
+    expect(query.query?.bool?.filter).toContainEqual({
+      term: { 'service.name': mockOptions.serviceName },
+    });
+  });
+
+  test('replaces the service.name term with the identity filter query when provided', () => {
+    const query = buildObservedServiceDetailsQuery(mockOptions);
+    expect(query.query?.bool?.filter).not.toContainEqual({
+      term: { 'service.name': mockOptions.serviceName },
+    });
+  });
 });

@@ -24,47 +24,29 @@ import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
-import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
-import { closeAddToCaseModal, createAddToCaseAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import { closeAddToCaseModal } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EuiPageSection } from '@elastic/eui';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
-import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
-import { AlertingNavPromo } from '@kbn/observability-plugin/public';
+import {
+  AlertingNavPromo,
+  createObservabilityEpisodeActions,
+} from '@kbn/observability-plugin/public';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_IMPORTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 import type { ObservabilityAlertingCases } from '../types';
-import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
-import { createViewInAppAction } from '../actions/view_in_app';
 import { useInvestigateEpisodeHeaderMenuItems } from '../actions/use_investigate_episode_header_menu_items';
 import {
   getObservabilityRulesTabVisibility,
   hasObservabilityAlertingCapabilities,
 } from './has_observability_alerting_privilege';
-
-const createObservabilityEpisodeActions = (
-  cases: ObservabilityAlertingCases | undefined,
-  getAlertFormatter: TriggersAndActionsUIPublicPluginStart['getAlertFormatter'],
-  { rendering, http, notifications }: EpisodeActionsDeps
-): EpisodeAction[] => [
-  createInvestigateEpisodeAction(),
-  createViewInAppAction({ http, notifications, getAlertFormatter }),
-  ...(cases
-    ? [
-        createAddToCaseAction({
-          cases: cases.service,
-          owner: OBSERVABILITY_OWNER,
-          rendering,
-          kibanaServices: cases.kibanaServices,
-        }),
-      ]
-    : []),
-];
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
@@ -173,6 +155,7 @@ export const ObservabilityAlertingApp = ({
     EpisodesPage,
     ActionPoliciesPage,
     ExecutionHistoryPage,
+    ImportsPage,
     createAlertingV2HostApp: createHost,
   } = alertingVTwo;
 
@@ -212,7 +195,8 @@ export const ObservabilityAlertingApp = ({
 
   const { getAlertFormatter } = triggersActionsUi;
   const createActions = useCallback(
-    (deps: EpisodeActionsDeps) => createObservabilityEpisodeActions(cases, getAlertFormatter, deps),
+    (deps: EpisodeActionsDeps) =>
+      createObservabilityEpisodeActions({ cases, getAlertFormatter }, deps),
     [cases, getAlertFormatter]
   );
 
@@ -300,6 +284,11 @@ export const ObservabilityAlertingApp = ({
               setBreadcrumbs={setBreadcrumbs}
               hostApp={hostApp}
             />
+          </EuiPageSection>
+        </Route>
+        <Route path={OBSERVABILITY_ALERTING_IMPORTS_PATH}>
+          <EuiPageSection paddingSize="m">
+            <ImportsPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp} />
           </EuiPageSection>
         </Route>
         <Redirect to={OBSERVABILITY_ALERTING_ALERTS_PATH} />

@@ -118,6 +118,40 @@ describe('runFindingsPass', () => {
     expect(Object.keys(call.tools)).toContain('structuredOutput');
   });
 
+  it('reports the usage of a pass as a findings_recorder background activity', async () => {
+    const { deps, memory } = setup();
+    const telemetry = { reportBackgroundActivity: jest.fn() };
+    const model = await jest.mocked(createOptimizeModel)({} as never);
+    jest.mocked(createOptimizeModel).mockImplementation(async ({ modelUsage }) => {
+      modelUsage?.addModelProvider(() => ({
+        calls: [
+          {
+            connectorId: 'eis-claude',
+            model: 'claude-sonnet',
+            tokens: { prompt: 100, completion: 10, total: 110 },
+          },
+        ],
+      }));
+      return model;
+    });
+
+    await run({ ...deps, telemetry: telemetry as never }, memory);
+
+    expect(telemetry.reportBackgroundActivity).toHaveBeenCalledWith({
+      activity: 'findings_recorder',
+      outcome: 'success',
+      conversation_id: 'c1',
+      duration_ms: expect.any(Number),
+      connector_id: 'eis-claude',
+      model: 'claude-sonnet',
+      llm_calls: 1,
+      input_tokens: 100,
+      output_tokens: 10,
+      cached_input_tokens: 0,
+      reasoning_tokens: 0,
+    });
+  });
+
   it('tells the recorder a user changed the severity, and does not write one', async () => {
     const { deps, patchMetadata, chatComplete, memory } = setup({
       events: [
@@ -569,10 +603,17 @@ describe('runFindingsPass', () => {
   });
 
   describe('proposals', () => {
-    const proposed = (titles: string[] = []) => ({
+    const proposed = (titles: string[] = [], actions: unknown[] = []) => ({
       listTitles: jest.fn().mockResolvedValue(titles),
+      listActions: jest.fn().mockResolvedValue(actions),
       propose: jest.fn().mockResolvedValue(undefined),
     });
+    const openIssue = {
+      workflowId: 'wf-open-issue',
+      name: 'Open GitHub issue',
+      approvalPolicy: 'always-gate',
+      inputSchema: { properties: { actionInput: { type: 'object' } } },
+    };
     const withProposals = {
       ...output,
       proposals: [
@@ -603,6 +644,85 @@ describe('runFindingsPass', () => {
           confidence: 'high',
         },
       });
+    });
+
+    it('lists the action workflows in the final prompt only', async () => {
+      const proposals = proposed([], [openIssue]);
+      const live = setup({ answers: [answerWith(withProposals)], proposals });
+      await run(live.deps, live.memory);
+      expect(proposals.listActions).not.toHaveBeenCalled();
+
+      const final = setup({ answers: [answerWith(withProposals)], proposals });
+      await run(final.deps, final.memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.listActions).toHaveBeenCalledWith({ request });
+      const { system } = final.chatComplete.mock.calls[0][0];
+      expect(system).toBe(
+        buildRecorderSystemPrompt({ final: true, actions: [openIssue as never] })
+      );
+      expect(system).toContain('wf-open-issue');
+    });
+
+    it('keeps the final prompt unchanged when the space has no action workflows', async () => {
+      const proposals = proposed();
+      const { deps, chatComplete, memory } = setup({
+        answers: [answerWith(withProposals)],
+        proposals,
+      });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(chatComplete.mock.calls[0][0].system).toBe(buildRecorderSystemPrompt({ final: true }));
+    });
+
+    it('runs only a listed action workflow, and does not write one naming an unlisted workflow', async () => {
+      const proposals = proposed([], [openIssue]);
+      const withActions = {
+        ...output,
+        proposals: [
+          {
+            title: 'Open an issue',
+            comment: 'File the regression.',
+            action_workflow_id: 'wf-open-issue',
+            action_input: { repo: 'checkout' },
+          },
+          {
+            title: 'Restart the pods',
+            comment: 'Restart them.',
+            action_workflow_id: 'wf-not-listed',
+            action_input: { namespace: 'prod' },
+          },
+        ],
+      };
+      const { deps, memory } = setup({ answers: [answerWith(withActions)], proposals });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.propose).toHaveBeenCalledWith({
+        request,
+        conversationId: 'c1',
+        proposal: {
+          title: 'Open an issue',
+          comment: 'File the regression.',
+          action_workflow_id: 'wf-open-issue',
+          action_input: { repo: 'checkout' },
+        },
+      });
+      expect(proposals.propose).toHaveBeenCalledTimes(1);
+      expect(deps.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('action workflow [wf-not-listed] is not offered')
+      );
+    });
+
+    it('proposes the rest when one proposal cannot be written', async () => {
+      const proposals = proposed();
+      proposals.propose.mockRejectedValueOnce(new Error('boom'));
+      const { deps, memory } = setup({ answers: [answerWith(withProposals)], proposals });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.propose).toHaveBeenCalledTimes(2);
+      expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
     });
 
     it('never proposes from a live pass', async () => {
@@ -960,6 +1080,7 @@ describe('runFindingsPass with workspace files', () => {
       expect(prompt).toContain('noun phrase of at most eight words');
       expect(prompt).toContain('**Tested:**');
       expect(prompt).toContain('**Result:**');
+      expect(prompt).toContain('**Settled by:**');
       expect(prompt).toContain('never "I checked..."');
     }
     expect(final).toContain('At most 70 words of Markdown');
@@ -967,6 +1088,24 @@ describe('runFindingsPass with workspace files', () => {
     expect(final).toContain('at most 45 words in all');
     expect(live).not.toContain('Cause not confirmed:');
     expect(live).not.toContain('45 words');
+  });
+
+  it('asks for a chart on the impact and on each entity whenever the conversation holds a series', () => {
+    const final = buildRecorderSystemPrompt({ final: true });
+    const finalFiles = buildRecorderSystemPrompt({ final: true, files: true });
+
+    for (const prompt of [final, finalFiles]) {
+      expect(prompt).toContain('always include a chart for the impact and for each listed entity');
+      expect(prompt).toContain('a series of three or more points');
+      expect(prompt).toContain('one per listed entity');
+      expect(prompt).toContain('Check every listed entity against the conversation');
+      expect(prompt).toContain('an entity gets its own chart even when the same series is also');
+      expect(prompt).toContain('When no impact was found');
+      expect(prompt).toContain('a chart of one or two points is never drawn');
+      // Never fabricate points: a chart still comes only from numbers in the conversation.
+      expect(prompt).toContain('never estimate, extend or invent a point');
+    }
+    expect(buildRecorderSystemPrompt({ final: false })).not.toContain('chart');
   });
 
   it('sends the prompt that matches the pass', async () => {

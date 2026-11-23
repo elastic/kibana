@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ServiceMapResponse, ServiceMapServiceStats } from '@kbn/apm-types';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-types';
 import { enableServiceMapGrouping, removeServiceMapGroupingOverride } from '../../../shared';
 import {
   apiTest,
+  COMMON_HEADERS,
+  getServiceMap,
+  toSourceQuery,
   testData,
   SERVICE_MAP_STATS_BACKEND,
   SERVICE_MAP_STATS_DATA,
@@ -21,38 +23,11 @@ import {
   SERVICE_MAP_STATS_WORKER,
 } from '../../fixtures';
 
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'scout',
-  'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
-  Accept: 'application/json',
+const STATS_QUERY = {
+  start: SERVICE_MAP_STATS_START_DATE,
+  end: SERVICE_MAP_STATS_END_DATE,
+  environment: testData.ENVIRONMENT_ALL,
 };
-
-const getServiceMap = (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>,
-  query: Record<string, string> = {}
-) =>
-  apiClient.get(
-    `internal/apm/service-map?${new URLSearchParams({
-      start: SERVICE_MAP_STATS_START_DATE,
-      end: SERVICE_MAP_STATS_END_DATE,
-      environment: testData.ENVIRONMENT_ALL,
-      kuery: '',
-      ...query,
-    }).toString()}`,
-    { headers, responseType: 'json' }
-  );
-
-const toSourceQuery = (
-  documentType: ApmDocumentType,
-  rollupInterval: RollupInterval,
-  useDurationSummary: boolean
-): Record<string, string> => ({
-  documentType,
-  rollupInterval,
-  useDurationSummary: String(useDurationSummary),
-});
 
 const MINUTES = 60;
 const { frontend, backend, worker } = SERVICE_MAP_STATS_DATA;
@@ -113,11 +88,17 @@ apiTest.describe(
       apiTest(
         `returns each service's stats from ${rollupInterval} service transaction metrics`,
         async ({ apiClient }) => {
-          const response = await getServiceMap(
-            apiClient,
+          const response = await getServiceMap(apiClient, {
             headers,
-            toSourceQuery(ApmDocumentType.ServiceTransactionMetric, rollupInterval, true)
-          );
+            query: {
+              ...STATS_QUERY,
+              ...toSourceQuery({
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval,
+                useDurationSummary: true,
+              }),
+            },
+          });
 
           expect(response).toHaveStatusCode(200);
           expect(getStatsByService(response.body)).toStrictEqual(EXPECTED_STATS);
@@ -132,11 +113,13 @@ apiTest.describe(
       apiTest(
         `returns the same stats from ${documentType} at ${rollupInterval}`,
         async ({ apiClient }) => {
-          const response = await getServiceMap(
-            apiClient,
+          const response = await getServiceMap(apiClient, {
             headers,
-            toSourceQuery(documentType, rollupInterval, useDurationSummary)
-          );
+            query: {
+              ...STATS_QUERY,
+              ...toSourceQuery({ documentType, rollupInterval, useDurationSummary }),
+            },
+          });
 
           expect(response).toHaveStatusCode(200);
           const statsByService = getStatsByService(response.body);
@@ -155,13 +138,17 @@ apiTest.describe(
       'falls back to transaction metrics when the kuery filters on a transaction name',
       async ({ apiClient }) => {
         // Service transaction metrics don't have `transaction.name`, so they match nothing
-        const response = await getServiceMap(apiClient, headers, {
-          ...toSourceQuery(
-            ApmDocumentType.ServiceTransactionMetric,
-            RollupInterval.OneMinute,
-            true
-          ),
-          kuery: 'transaction.name : "GET /api"',
+        const response = await getServiceMap(apiClient, {
+          headers,
+          query: {
+            ...STATS_QUERY,
+            ...toSourceQuery({
+              documentType: ApmDocumentType.ServiceTransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+              useDurationSummary: true,
+            }),
+            kuery: 'transaction.name : "GET /api"',
+          },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -179,7 +166,7 @@ apiTest.describe(
     );
 
     apiTest('rejects a request without a data source', async ({ apiClient }) => {
-      const response = await getServiceMap(apiClient, headers);
+      const response = await getServiceMap(apiClient, { headers, query: STATS_QUERY });
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.message).toContain('`documentType` and `rollupInterval` are required');

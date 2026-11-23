@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APPLICATION_SOURCE } from '../../../../common/application_source';
-import type { ApplicationSummary, TimeSeriesPoint } from '../../../../common/types/applications';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
+import type { TimeSeriesPoint, WebApplicationSummary } from '../../../../common/types/applications';
 import { bucketKeys, ratio, toLastSeen } from '../../../lib/helpers/aggregations';
 import { toHttpRequests } from '../../../lib/helpers/http_requests';
 import { toWebVitals, type VitalAggregation } from '../../../lib/helpers/web_vitals';
@@ -32,7 +32,7 @@ const toVitalAggregation = ({
 /** One application from its sessions bucket. */
 export const toSessionsApplication = ({
   key,
-  doc_count: sessionCount,
+  startedSessions,
   environments,
   pageLoads,
   jsErrors,
@@ -44,12 +44,13 @@ export const toSessionsApplication = ({
   fcp,
   ttfb,
   lastSeen,
-}: SessionsBucket): ApplicationSummary => ({
+}: SessionsBucket): WebApplicationSummary => ({
   serviceName: key,
   source: APPLICATION_SOURCE.otel,
+  applicationType: APPLICATION_TYPE.web,
   environments: bucketKeys(environments),
   pageLoads: { count: pageLoads.value },
-  sessions: { count: sessionCount },
+  sessions: { count: startedSessions.doc_count },
   webVitals: toWebVitals({
     lcp: toVitalAggregation(lcp),
     inp: toVitalAggregation(inp),
@@ -66,16 +67,7 @@ export const toSessionsApplication = ({
 export const toSessionsTimeSeries = (
   aggregations?: SessionsAggregations['inEnvironment']
 ): TimeSeriesPoint[] =>
-  (aggregations?.pageLoadsOverTime.buckets ?? []).map(({ key, pageLoads }) => ({
+  (aggregations?.startedInRange.pageLoadsOverTime.buckets ?? []).map(({ key, pageLoads }) => ({
     timestamp: key,
     count: pageLoads.value,
-  }));
-
-/** The sessions that started in each bucket, which the buckets already count. */
-export const toStartedSessionsTimeSeries = (
-  aggregations?: SessionsAggregations['inEnvironment']
-): TimeSeriesPoint[] =>
-  (aggregations?.pageLoadsOverTime.buckets ?? []).map(({ key, doc_count: count }) => ({
-    timestamp: key,
-    count,
   }));

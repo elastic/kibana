@@ -218,4 +218,37 @@ test.describe('Stream map', { tag: tags.serverless.observability.complete }, () 
     await page.keyboard.press('Control+z');
     await expect(streams.canvasUndo).toBeDisabled();
   });
+
+  test('warns before leaving the map with unsaved changes, but not for a flyout', async ({
+    page,
+    pageObjects: { streams },
+  }) => {
+    const saveChanges = page.testSubj.locator('streamsCanvasSaveChanges');
+    const leaveModal = page.testSubj.locator('navigationBlockConfirmModal');
+
+    // Shift-click selects the node without opening its flyout, and Delete only stages the removal.
+    await streams.clickCanvasNode(streams.getCanvasSourceNode(SOURCE_NAME), {
+      modifiers: ['Shift'],
+    });
+    await page.keyboard.press('Delete');
+    await expect(saveChanges).toBeVisible();
+
+    // A flyout only changes the query string, so opening and closing one stays on the page.
+    await streams.clickCanvasNode(streams.getCanvasDestinationNode(DESTINATION_NAME));
+    await expect(page.testSubj.locator('streamsUnitDestinationFlyout')).toBeVisible();
+    await expect(leaveModal).toHaveCount(0);
+    await streams.closeFlyout();
+    await expect(leaveModal).toHaveCount(0);
+
+    await streams.clickStreamsLayoutTab('sources');
+    await expect(leaveModal).toBeVisible();
+    await leaveModal.getByTestId('confirmModalCancelButton').click();
+    await expect(leaveModal).toHaveCount(0);
+    await expect(page).toHaveURL(/\/v2\/unit\/default\/map(\?|$)/);
+    await expect(saveChanges).toBeVisible();
+
+    await streams.clickStreamsLayoutTab('sources');
+    await leaveModal.getByTestId('confirmModalConfirmButton').click();
+    await expect(page).toHaveURL(/\/v2\/unit\/default\/sources(\?|$)/);
+  });
 });

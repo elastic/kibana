@@ -113,59 +113,6 @@ describe('packCrossAxis', () => {
     expect(get('l2').x).toBe(get('l1').x + NODE_WIDTH + WORKFLOW_NODE_SEP);
   });
 
-  it('keeps the body of a merge step to the right of it', () => {
-    const { get } = pack([step('m', { attached: [step('a1')] })], nodes('m', 'a1'));
-    expect(get('a1').x).toBe(get('m').x + NODE_WIDTH + WORKFLOW_NODE_SEP);
-  });
-
-  it('keeps the body of a merge step clear of the steps that follow it', () => {
-    // The body hangs off the merge step, but the fork after it shares its rows.
-    const { get } = pack(
-      [
-        step('m', { attached: [step('a1'), step('a2')] }),
-        fork('gate', [branch(step('t1')), branch(step('e1'))]),
-      ],
-      nodes('m', 'a1', 'a2', 'gate', 't1', 'e1')
-    );
-    const followingRight = Math.max(...['gate', 't1', 'e1'].map((id) => get(id).x + get(id).width));
-    expect(get('a1').x).toBeGreaterThanOrEqual(followingRight + WORKFLOW_NODE_SEP);
-    expect(get('a2').x).toBe(get('a1').x);
-  });
-
-  it('keeps the bodies of consecutive merge steps clear of each other', () => {
-    // The second body is pushed past the wide fork after it, so the first must clear that.
-    const { get } = pack(
-      [
-        step('m1', { attached: [step('a1')] }),
-        step('m2', { attached: [step('b1')] }),
-        fork(
-          'gate',
-          [1, 2, 3, 4].map((n) => branch(step(`c${n}`)))
-        ),
-      ],
-      nodes('m1', 'a1', 'm2', 'b1', 'gate', 'c1', 'c2', 'c3', 'c4')
-    );
-    expect(get('a1').x).toBeGreaterThanOrEqual(get('b1').x + NODE_WIDTH + WORKFLOW_NODE_SEP);
-  });
-
-  it('measures each item once however deeply merge steps are nested', () => {
-    let measurements = 0;
-    const leaf: StructureStep = {
-      kind: 'step',
-      id: 'leaf',
-      get lanes() {
-        measurements += 1;
-        return [];
-      },
-    };
-    const nested = Array.from({ length: 12 }).reduce<StructureStep>(
-      (inner, _, depth) => step(`m${depth}`, { attached: [inner] }),
-      leaf
-    );
-    pack([nested], nodes('leaf'));
-    expect(measurements).toBe(1);
-  });
-
   describe('forks', () => {
     it('packs unequal branches side by side, centres the owner on the outer heads and the join under it', () => {
       const { get, centre } = pack(

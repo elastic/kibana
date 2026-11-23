@@ -297,6 +297,37 @@ describe('SharedSettingsSection', () => {
     });
   });
 
+  describe('custom fields', () => {
+    it('is hidden unless the deployment method offers it', () => {
+      renderSection();
+
+      expect(screen.queryByTestId('sharedSettingsCustomFieldsAdd')).not.toBeInTheDocument();
+    });
+
+    it('reports a new row', () => {
+      const onChange = jest.fn();
+      renderSection({ customFields: { value: [], onChange } });
+
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+      fireEvent.click(screen.getByTestId('sharedSettingsCustomFieldsAdd'));
+
+      expect(onChange).toHaveBeenCalledWith([{ name: '', value: '' }]);
+    });
+
+    it('opens the advanced options on its own while a field is invalid', () => {
+      renderSection({
+        customFields: {
+          value: [{ name: 'my team', value: 'a' }],
+          onChange: jest.fn(),
+          errors: { rows: [{ name: 'Name cannot contain spaces.' }] },
+        },
+      });
+
+      expect(screen.getByTestId('sharedSettingsCustomFieldName-0')).toBeVisible();
+      expect(screen.getByText('Name cannot contain spaces.')).toBeInTheDocument();
+    });
+  });
+
   describe('output', () => {
     const outputProps = (
       overrides: Partial<

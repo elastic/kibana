@@ -7,50 +7,43 @@
 
 import type {
   CoreSetup,
-  CoreStart,
   Logger,
   PluginInitializerContext,
   Plugin as PluginType,
 } from '@kbn/core/server';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
-import type {
-  EncryptedSavedObjectsPluginSetup,
-  EncryptedSavedObjectsPluginStart,
-} from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { DigitalExperienceLocatorDefinition } from '../common/locator';
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
-import {
-  SessionsApiKeys,
-  sessionsApiKeyEncryptionParams,
-  sessionsApiKeySavedObjectType,
-} from './sessions/sessions_api_key';
-import {
-  getLastAutoUpdateState,
-  registerSessionsHealthTask,
-  scheduleSessionsHealthTask,
-} from './sessions/sessions_health_task';
+import { savedViewSavedObjectType } from './saved_objects/saved_view';
+import { createSessionsReadableCache } from './services/sessions/sessions_readable';
+import { SESSIONS_PLATFORMS } from './services/sessions/sessions_platforms';
+import { registerSessionsTask } from './services/sessions/sessions_task';
 
 interface DigitalExperienceSetupDeps {
   features: FeaturesPluginSetup;
+  share: SharePluginSetup;
   /** Optional: only the Classic RUM source (stateful) needs it. */
   apmDataAccess?: ApmDataAccessPluginSetup;
   /** Optional: only its presence is read, as the Classic RUM source needs it. */
   ux?: unknown;
+  /** Optional: it runs the summaries task, so sessions need it. */
   taskManager?: TaskManagerSetupContract;
-  /** Optional: without it, or without an encryption key, sessions need manual updates. */
+  /** Optional: without it, or without an encryption key, the task's API key can't be stored. */
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
 }
 
 interface DigitalExperienceStartDeps {
   taskManager?: TaskManagerStartContract;
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
 }
 
 export class Plugin
@@ -66,21 +59,20 @@ export class Plugin
 
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
+    // Always registered, not behind a setting, so the saved objects check sees the type.
+    core.savedObjects.registerType(savedViewSavedObjectType);
+    // A short URL names its locator, and the server looks it up to create one.
+    plugins.share.url.locators.create(new DigitalExperienceLocatorDefinition());
 
-    core.savedObjects.registerType(sessionsApiKeySavedObjectType);
-    plugins.encryptedSavedObjects?.registerType(sessionsApiKeyEncryptionParams);
-    const sessionsApiKeys = new SessionsApiKeys({
-      logger: this.logger,
-      encryptedSavedObjects: plugins.encryptedSavedObjects,
-      hasTaskManager: plugins.taskManager !== undefined,
-      getStartServices: async () => {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        return { core: coreStart, encryptedSavedObjects: pluginsStart.encryptedSavedObjects };
-      },
-    });
+    const { taskManager, encryptedSavedObjects } = plugins;
+    const canEncrypt = encryptedSavedObjects?.canEncrypt === true;
+    if (taskManager && encryptedSavedObjects) {
+      // Task Manager stores the summaries task's API key encrypted.
+      taskManager.registerCanEncryptedSavedObjects(encryptedSavedObjects.canEncrypt);
+    }
 
+    const sessionsReadable = createSessionsReadableCache();
     const { buildFlavor } = this.initializerContext.env.packageInfo;
-    const settings = this.config.sessions;
     registerRoutes({
       core,
       logger: this.logger,
@@ -89,32 +81,29 @@ export class Plugin
         plugins: { apmDataAccess: plugins.apmDataAccess },
         isServerless: buildFlavor === 'serverless',
         isUxEnabled: plugins.ux !== undefined,
-        sessionsSettings: settings,
-        sessionsApiKeys,
-        getSessionsAutoUpdateState: async () => {
-          const [, { taskManager }] = await core.getStartServices();
-          return taskManager ? getLastAutoUpdateState(taskManager, this.logger) : {};
+        sessionsSettings: this.config.sessions,
+        getSessionsServices: async () => {
+          const [, pluginsStart] = await core.getStartServices();
+          return { taskManager: pluginsStart.taskManager, canEncrypt, sessionsReadable };
         },
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,
     });
 
-    if (plugins.taskManager) {
-      registerSessionsHealthTask({
-        core,
-        logger: this.logger,
-        taskManager: plugins.taskManager,
-        settings,
-        apiKeys: sessionsApiKeys,
-      });
+    if (taskManager) {
+      SESSIONS_PLATFORMS.forEach((platform) =>
+        registerSessionsTask({
+          platform,
+          core,
+          logger: this.logger,
+          taskManager,
+          settings: this.config.sessions,
+        })
+      );
     }
   }
 
-  public start(_core: CoreStart, plugins: DigitalExperienceStartDeps) {
-    if (plugins.taskManager) {
-      void scheduleSessionsHealthTask({ logger: this.logger, taskManager: plugins.taskManager });
-    }
-  }
+  public start() {}
 
   public stop() {}
 }

@@ -3,7 +3,7 @@
   "id": "@kbn/unified-data-table",
   "owner": [
     "@elastic/kibana-discover",
-    "@elastic/security-threat-hunting"
+    "@elastic/security-investigations"
   ],
   "group": "platform",
   "visibility": "shared",

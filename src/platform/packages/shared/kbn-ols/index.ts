@@ -7,19 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type { AclAccess, EntryAccess, GeneralAccess } from './src/levels';
 export {
-  ACL_LEVELS,
-  compareLevels,
-  isAclLevel,
-  isEntryLevel,
-  isGeneralAccessLevel,
-  lowestAllowed,
-  maxLevel,
-  type AclLevel,
-  type EntryLevel,
-  type GeneralAccessLevel,
-} from './src/levels';
-export { PRINCIPAL_TYPES, type Principal, type PrincipalType } from './src/principals';
+  PRINCIPAL_TYPES,
+  type Principal,
+  type PrincipalType,
+  type StoredPrincipal,
+} from './src/principals';
 export {
   isReservedOperation,
   REQUIRED_OPERATIONS,
@@ -31,12 +25,41 @@ export {
 } from './src/policy';
 export {
   ACL_FIELD,
+  ACL_MAPPING,
+  getAclState,
   normalizeAclSource,
   toAclSource,
   type Acl,
   type AclEntry,
+  type AclGeneral,
+  type AclGrant,
   type AclState,
   type StoredAcl,
   type StoredAclEntry,
+  type StoredAclGeneral,
 } from './src/acl';
 export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/read_filter';
+export {
+  evaluateAcl,
+  generalAccessPermits,
+  isRestricted,
+  toObjectDecision,
+  type AclDecision,
+  type AclObjectDecision,
+  type EvaluateAclParams,
+} from './src/evaluation';
+export {
+  AclChangeError,
+  MAX_ACL_ENTRIES,
+  prepareAclChange,
+  prepareInitialAcl,
+  readEditableAcl,
+  type AclChange,
+  type AclChangeErrorCode,
+  type EditableAcl,
+  type EditableAclEntry,
+  type InitialAccess,
+  type PrepareAclChangeParams,
+  type PrepareInitialAclParams,
+  type PreparedAclChange,
+} from './src/changes';

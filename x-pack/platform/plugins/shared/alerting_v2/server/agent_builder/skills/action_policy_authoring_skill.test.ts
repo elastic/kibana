@@ -79,7 +79,7 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the action policy inline tools to manage and attach policies', async () => {
+  it('exposes only the action policy inline tools to manage, attach and link policies', async () => {
     const skill = createActionPolicyAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
@@ -88,6 +88,7 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(inlineToolIds).toEqual([
       ALERTING_TOOL_IDS.manageActionPolicy,
       ALERTING_TOOL_IDS.attachActionPolicy,
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy,
     ]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageRule);
   });

@@ -14,6 +14,7 @@ import {
   deleteSubmittedHostActions,
   waitForHostIsolation,
 } from '../../common/complete_host_action';
+import { runCleanups } from '../../common/run_cleanups';
 import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_form';
 import { openAlertFlyoutForRule } from '../fixtures/open_alert_flyout';
 
@@ -48,23 +49,13 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ esClient, config }) => {
-      const failures: unknown[] = [];
-      for (const cleanup of [
-        () => deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds }),
-        () => seededHost?.cleanup(),
-      ]) {
-        try {
-          await cleanup();
-        } catch (error) {
-          failures.push(error);
-        }
-      }
-      if (failures.length === 1) {
-        throw failures[0];
-      }
-      if (failures.length > 1) {
-        throw new AggregateError(failures, 'Failed to clean up the seeded host and its actions');
-      }
+      await runCleanups(
+        [
+          () => deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds }),
+          () => seededHost?.cleanup(),
+        ],
+        'Failed to clean up the seeded host and its actions'
+      );
     });
 
     spaceTest(
