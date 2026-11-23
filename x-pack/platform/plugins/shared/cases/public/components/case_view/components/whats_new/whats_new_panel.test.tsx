@@ -19,6 +19,7 @@ import {
 } from './jump_to_new_activity_context';
 
 jest.mock('./use_get_case_delta');
+jest.mock('../../../../containers/api');
 jest.mock('./use_mark_case_seen');
 
 const useGetCaseDeltaMock = jest.mocked(useGetCaseDelta);
@@ -102,6 +103,20 @@ describe('WhatsNewPanel', () => {
     await userEvent.click(screen.getByTestId('case-view-whats-new-jump'));
 
     expect(jump).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers the AI summary when the server says it is available', () => {
+    mockDelta({ since, counts, aiSummaryAvailable: true } as never);
+
+    render(<WhatsNewPanel caseId="case-1" />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('case-view-ai-summary-button')).toBeInTheDocument();
+  });
+
+  it('does not offer the AI summary when the server says it is not available', () => {
+    render(<WhatsNewPanel caseId="case-1" />, { wrapper: TestProviders });
+
+    expect(screen.queryByTestId('case-view-ai-summary-button')).not.toBeInTheDocument();
   });
 
   it('shows nothing on a first visit', () => {

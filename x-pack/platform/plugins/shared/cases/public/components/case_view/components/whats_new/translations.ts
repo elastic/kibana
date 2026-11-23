@@ -96,3 +96,102 @@ export const AND_MORE = (list: string, more: number) =>
     defaultMessage: '{list} and {more} more',
     values: { list, more },
   });
+
+export const SUMMARIZE_WITH_AI = i18n.translate('xpack.cases.caseView.whatsNew.summarizeWithAi', {
+  defaultMessage: 'Summarize with AI',
+});
+
+export const AI_SUMMARY_TITLE = i18n.translate('xpack.cases.caseView.whatsNew.aiSummaryTitle', {
+  defaultMessage: 'AI summary',
+});
+
+export const AI_SUMMARY_DISCLAIMER = i18n.translate(
+  'xpack.cases.caseView.whatsNew.aiSummaryDisclaimer',
+  {
+    defaultMessage: 'AI-generated. Check the sources.',
+  }
+);
+
+export const AI_SUMMARY_LOADING = i18n.translate('xpack.cases.caseView.whatsNew.aiSummaryLoading', {
+  defaultMessage: 'Summarizing the new activity',
+});
+
+export const AI_SUMMARY_ERROR_TITLE = i18n.translate(
+  'xpack.cases.caseView.whatsNew.aiSummaryErrorTitle',
+  {
+    defaultMessage: 'Could not summarize the new activity',
+  }
+);
+
+export const AI_SUMMARY_ERROR_BODY = i18n.translate(
+  'xpack.cases.caseView.whatsNew.aiSummaryErrorBody',
+  {
+    defaultMessage: 'The AI model did not answer. Try again, or read the lists above.',
+  }
+);
+
+export const AI_SUMMARY_EMPTY = i18n.translate('xpack.cases.caseView.whatsNew.aiSummaryEmpty', {
+  defaultMessage: 'The model returned no summary.',
+});
+
+export const TRY_AGAIN = i18n.translate('xpack.cases.caseView.whatsNew.tryAgain', {
+  defaultMessage: 'Try again',
+});
+
+export const REGENERATE = i18n.translate('xpack.cases.caseView.whatsNew.regenerate', {
+  defaultMessage: 'Regenerate',
+});
+
+export const SOURCES = i18n.translate('xpack.cases.caseView.whatsNew.sources', {
+  defaultMessage: 'Sources',
+});
+
+export const SOURCE_ALERT = (rule: string) =>
+  i18n.translate('xpack.cases.caseView.whatsNew.sourceAlert', {
+    defaultMessage: 'Alert {rule}',
+    values: { rule },
+  });
+
+export const SOURCE_ALERT_NO_RULE = i18n.translate(
+  'xpack.cases.caseView.whatsNew.sourceAlertNoRule',
+  {
+    defaultMessage: 'Alert',
+  }
+);
+
+export const SOURCE_COMMENT = (author: string) =>
+  i18n.translate('xpack.cases.caseView.whatsNew.sourceComment', {
+    defaultMessage: 'Comment by {author}',
+    values: { author },
+  });
+
+export const SOURCE_STATUS = (status: string, author: string) =>
+  i18n.translate('xpack.cases.caseView.whatsNew.sourceStatus', {
+    defaultMessage: 'Status set to {status} by {author}',
+    values: { status, author },
+  });
+
+export const SOURCE_SEVERITY = (severity: string, author: string) =>
+  i18n.translate('xpack.cases.caseView.whatsNew.sourceSeverity', {
+    defaultMessage: 'Severity set to {severity} by {author}',
+    values: { severity, author },
+  });
+
+export const SOURCE_FILE = (name: string) =>
+  i18n.translate('xpack.cases.caseView.whatsNew.sourceFile', {
+    defaultMessage: 'File {name}',
+    values: { name },
+  });
+
+export const SOURCE_OBSERVABLES = (count: number, actionType: string) =>
+  i18n.translate('xpack.cases.caseView.whatsNew.sourceObservables', {
+    defaultMessage:
+      '{count, plural, one {# observable} other {# observables}} {actionType, select, add {added} delete {removed} other {updated}}',
+    values: { count, actionType },
+  });
+
+export const SOURCE_OTHER_CHANGE = (author: string) =>
+  i18n.translate('xpack.cases.caseView.whatsNew.sourceOtherChange', {
+    defaultMessage: 'Case change by {author}',
+    values: { author },
+  });

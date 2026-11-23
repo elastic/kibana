@@ -21,10 +21,12 @@ import {
 import { FormattedRelative } from '@kbn/i18n-react';
 import { CASE_VIEW_PAGE_TABS } from '../../../../../common/types';
 import { useCaseViewParams } from '../../../../common/navigation';
+import { AiSummaryButton, AiSummaryResult } from './ai_summary';
 import { buildHighlights } from './build_highlights';
 import { useJumpToNewActivity } from './jump_to_new_activity_context';
 import { useGetCaseDelta } from './use_get_case_delta';
 import { useMarkCaseSeen } from './use_mark_case_seen';
+import { useSummarizeCaseDelta } from './use_summarize_case_delta';
 import * as i18n from './translations';
 
 interface WhatsNewPanelProps {
@@ -34,6 +36,12 @@ interface WhatsNewPanelProps {
 const WhatsNewPanelComponent: React.FC<WhatsNewPanelProps> = ({ caseId }) => {
   const { data } = useGetCaseDelta(caseId);
   const { mutate: markSeen } = useMarkCaseSeen(caseId);
+  const {
+    mutate: summarize,
+    data: summary,
+    isLoading: isSummarizing,
+    isError: isSummaryError,
+  } = useSummarizeCaseDelta(caseId);
   const jumpToNewActivity = useJumpToNewActivity();
   const { tabId } = useCaseViewParams();
   const isActivityTab = tabId == null || tabId === CASE_VIEW_PAGE_TABS.ACTIVITY;
@@ -71,13 +79,27 @@ const WhatsNewPanelComponent: React.FC<WhatsNewPanelProps> = ({ caseId }) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            onClick={() => markSeen()}
-            data-test-subj="case-view-whats-new-dismiss"
-          >
-            {i18n.MARK_AS_SEEN}
-          </EuiButtonEmpty>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {data.aiSummaryAvailable && (
+              <EuiFlexItem grow={false}>
+                <AiSummaryButton
+                  data={summary}
+                  isLoading={isSummarizing}
+                  isError={isSummaryError}
+                  onSummarize={() => summarize()}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={() => markSeen()}
+                data-test-subj="case-view-whats-new-dismiss"
+              >
+                {i18n.MARK_AS_SEEN}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
@@ -109,6 +131,17 @@ const WhatsNewPanelComponent: React.FC<WhatsNewPanelProps> = ({ caseId }) => {
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
+        </>
+      )}
+      {data.aiSummaryAvailable && (
+        <>
+          <EuiSpacer size="m" />
+          <AiSummaryResult
+            data={summary}
+            isLoading={isSummarizing}
+            isError={isSummaryError}
+            onSummarize={() => summarize()}
+          />
         </>
       )}
       {isActivityTab && (
