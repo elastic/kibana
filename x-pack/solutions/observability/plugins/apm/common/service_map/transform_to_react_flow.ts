@@ -164,5 +164,6 @@ export function transformToReactFlow(
     edges: grouped.edges,
     nodesCount: grouped.nodesCount,
     tracesCount,
+    ...(data.serviceGrouping ? { serviceGrouping: data.serviceGrouping } : {}),
   };
 }

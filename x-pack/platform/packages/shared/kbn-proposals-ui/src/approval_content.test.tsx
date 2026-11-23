@@ -8,7 +8,7 @@
 import React from 'react';
 import type { IBasePath } from '@kbn/core-http-browser';
 import moment from 'moment';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
@@ -310,6 +310,66 @@ describe('ApprovalContent', () => {
     );
   });
 
+  describe('action details', () => {
+    const basePath = {
+      serverBasePath: '/kbn',
+      prepend: (path: string) => `/kbn/s/ops${path}`,
+    } as unknown as IBasePath;
+    const actionProposal: ApprovalProposal = {
+      ...baseProposal,
+      actionWorkflowId: 'open-a-follow-up-case',
+      action: { name: 'Open a follow-up case' } as ApprovalProposal['action'],
+      actionInput: { title: 'Checkout faults', severity: 'high' },
+    };
+
+    it('links the workflow it runs, by name, in the current space', () => {
+      renderContent({ proposal: actionProposal, basePath, 'data-test-subj': 'card' });
+      const link = screen.getByTestId('card-workflowLink');
+      expect(link).toHaveTextContent('Open a follow-up case');
+      expect(link).toHaveAttribute('href', '/kbn/s/ops/app/workflows/open-a-follow-up-case');
+      expect(screen.queryByTestId('card-executionLink')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the workflow id when the action has no name', () => {
+      renderContent({
+        proposal: { ...actionProposal, action: undefined },
+        'data-test-subj': 'card',
+      });
+      expect(screen.getByTestId('card-workflowLink')).toHaveTextContent('open-a-follow-up-case');
+    });
+
+    it('shows the raw input it will be called with, collapsed', () => {
+      renderContent({ proposal: actionProposal, 'data-test-subj': 'card' });
+      const toggle = screen.getByRole('button', { name: 'Input parameters' });
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      fireEvent.click(toggle);
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.getByTestId('card-actionInputCode')).toHaveTextContent('"severity": "high"');
+    });
+
+    it('links the execution once the action has run', () => {
+      renderContent({
+        proposal: {
+          ...actionProposal,
+          status: 'succeeded',
+          decision: 'approved',
+          actionExecutionId: 'exec-42',
+        },
+        basePath,
+        'data-test-subj': 'card',
+      });
+      expect(screen.getByTestId('card-executionLink')).toHaveAttribute(
+        'href',
+        '/kbn/s/ops/app/workflows/open-a-follow-up-case?tab=executions&executionId=exec-42'
+      );
+    });
+
+    it('renders nothing for a proposal with no action', () => {
+      renderContent({ 'data-test-subj': 'card' });
+      expect(screen.queryByTestId('card-actionDetails')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
     const { container } = renderContent({
       proposal: {
@@ -392,10 +452,37 @@ describe('ApprovalContent', () => {
       expect(screen.queryByTestId('approvalContent-reopen')).not.toBeInTheDocument();
     });
 
-    it('disables Mark as not applied when read-only', () => {
+    it('disables Mark as not applied when read-only', async () => {
       renderContent({ proposal: appliedTodo, onReopen: jest.fn(), readOnly: true });
 
-      expect(screen.getByTestId('approvalContent-reopen')).toBeDisabled();
+      const reopen = screen.getByTestId('approvalContent-reopen');
+      expect(reopen).toHaveAttribute('aria-disabled', 'true');
+      act(() => reopen.focus());
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "You don't have the required privileges to apply or decline proposals."
+      );
+    });
+
+    it('explains read-only Mark as applied and Decline with a shared tooltip', async () => {
+      renderContent({
+        proposal: todoProposal,
+        readOnly: true,
+        onDismiss: jest.fn(),
+      });
+
+      const confirm = screen.getByTestId('approvalContent-confirm');
+      const dismiss = screen.getByTestId('approvalContent-dismiss');
+      expect(confirm).toHaveAttribute('aria-disabled', 'true');
+      expect(dismiss).toHaveAttribute('aria-disabled', 'true');
+
+      act(() => dismiss.focus());
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "You don't have the required privileges to apply or decline proposals."
+      );
+      act(() => confirm.focus());
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        "You don't have the required privileges to apply or decline proposals."
+      );
     });
 
     it('records the application through onApprove when Mark as applied is clicked', async () => {

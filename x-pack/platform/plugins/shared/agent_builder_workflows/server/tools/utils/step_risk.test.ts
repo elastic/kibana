@@ -20,6 +20,13 @@ describe('getStepRisk', () => {
     ['cases.getCase', { safe: true, destructive: false }],
     ['cases.deleteCases', { safe: false, destructive: true }],
     ['cases.mergeCases', { safe: false, destructive: false }],
+    ['security.findEndpointArtifacts', { safe: true, destructive: false }],
+    ['security.searchIntegrationKnowledge', { safe: true, destructive: false }],
+    ['security.resolveEndpointHosts', { safe: true, destructive: false }],
+    ['security.getEndpointHostDiagnostics', { safe: true, destructive: false }],
+    ['security.getEndpointPackageStatus', { safe: true, destructive: false }],
+    ['security.getEndpointInventoryCounts', { safe: true, destructive: false }],
+    ['security.finalizeTroubleshootingDiagnosis', { safe: true, destructive: false }],
     ['http', { safe: false, destructive: false }],
     ['elasticsearch.request', { safe: false, destructive: false }],
   ])('classifies %s', (stepType, expected) => {

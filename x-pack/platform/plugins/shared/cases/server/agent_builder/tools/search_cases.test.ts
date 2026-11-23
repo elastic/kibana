@@ -50,6 +50,7 @@ const buildCase = (overrides: Record<string, unknown> = {}) => ({
 
 const buildMockAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
+  getActive: jest.fn().mockReturnValue([]),
   get: jest.fn(),
   delete: jest.fn(),
   update: jest.fn(),

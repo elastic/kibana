@@ -20,7 +20,11 @@ import { i18n } from '@kbn/i18n';
 import { useReactFlow } from '@xyflow/react';
 import { css } from '@emotion/react';
 import type { ServiceMapNode } from '../../../../common/service_map';
-import { isServiceNodeData } from '../../../../common/service_map';
+import {
+  isServiceGroupNode,
+  isServiceGroupNodeData,
+  isServiceNodeData,
+} from '../../../../common/service_map';
 import { NODE_WIDTH, NODE_HEIGHT, CENTER_ANIMATION_DURATION_MS } from './constants';
 import { useServiceMapHighlight } from '../../shared/service_map/service_map_search_context';
 
@@ -31,8 +35,26 @@ const CENTER_ZOOM = 1.2;
 function getSearchableNodes(nodes: ServiceMapNode[]): ServiceMapNode[] {
   return nodes.filter(
     (n) =>
-      !n.hidden && ((n.type === 'service' && isServiceNodeData(n.data)) || n.type === 'dependency')
+      !n.hidden &&
+      ((n.type === 'service' && isServiceNodeData(n.data)) ||
+        isServiceGroupNode(n) ||
+        n.type === 'dependency')
   );
+}
+
+function nodeMatchesSearchQuery(node: ServiceMapNode, query: string): boolean {
+  if (node.data.label && String(node.data.label).toLowerCase().includes(query)) {
+    return true;
+  }
+  // Closed groups: match label + members only. Ids like `calls:search` would make
+  // typing "call" hit every calls:* group even when the label is just the busiest service.
+  if (isServiceGroupNodeData(node.data)) {
+    return node.data.memberServiceIds.some((memberId) => memberId.toLowerCase().includes(query));
+  }
+  if (node.id.toLowerCase().includes(query)) {
+    return true;
+  }
+  return false;
 }
 
 function getAbsolutePosition(
@@ -61,8 +83,9 @@ export interface ServiceMapFindInPageProps {
 }
 
 /**
- * Find-in-page for the service map: filters visible service/dependency nodes, centers the canvas on
- * matches, and keeps `selectedIndex` aligned with the last centered match (so prev/next stay in sync).
+ * Find-in-page for the service map: filters visible service, closed-group, and dependency nodes,
+ * centers the canvas on matches, and keeps `selectedIndex` aligned with the last centered match
+ * (so prev/next stay in sync).
  */
 export function ServiceMapFindInPage({
   nodes,
@@ -94,11 +117,7 @@ export function ServiceMapFindInPage({
     if (!q) {
       return [];
     }
-    return searchableNodes.filter(
-      (node) =>
-        (node.data.label && String(node.data.label).toLowerCase().includes(q)) ||
-        node.id.toLowerCase().includes(q)
-    );
+    return searchableNodes.filter((node) => nodeMatchesSearchQuery(node, q));
   }, [searchableNodes, searchQuery]);
 
   searchResultsRef.current = searchResults;

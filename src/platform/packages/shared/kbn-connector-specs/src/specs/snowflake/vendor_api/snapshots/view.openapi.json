@@ -256,11 +256,6 @@
     "schemas": {
       "DataMetricSchedule": {
         "discriminator": {
-          "mapping": {
-            "CRON": "DataMetricCronSchedule",
-            "MINUTES": "DataMetricMinutesSchedule",
-            "TRIGGER_ON_CHANGES": "DataMetricTriggerOnChangesSchedule"
-          },
           "propertyName": "schedule_type"
         },
         "properties": {

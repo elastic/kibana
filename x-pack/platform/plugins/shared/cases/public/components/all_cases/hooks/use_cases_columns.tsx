@@ -68,6 +68,8 @@ export interface GetCasesColumn {
   disableActions?: boolean;
   disabledCases?: Set<string>;
   mergeDestinations?: Map<string, MergeCaseSnapshot>;
+  /** While `disabledCases` is loading, no case can be selected, as any of them may be disabled. */
+  isLoadingDisabledCases?: boolean;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -85,6 +87,7 @@ export const useCasesColumns = ({
   selectedColumns,
   disabledCases,
   mergeDestinations,
+  isLoadingDisabledCases = false,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -344,7 +347,7 @@ export const useCasesColumns = ({
           if (theCase.id != null) {
             const isAlreadyAttached = disabledCases?.has(theCase.id) ?? false;
             const isClosed = theCase.status === CaseStatuses.closed;
-            const disabled = isAlreadyAttached || isClosed;
+            const disabled = isAlreadyAttached || isClosed || isLoadingDisabledCases;
             const selectButton = (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
@@ -387,6 +390,7 @@ export const useCasesColumns = ({
       userProfiles,
       disabledCases,
       mergeDestinations,
+      isLoadingDisabledCases,
     ]
   );
 

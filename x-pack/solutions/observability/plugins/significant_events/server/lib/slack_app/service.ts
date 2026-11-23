@@ -27,6 +27,7 @@ import {
   type RelayClientContract,
 } from '@kbn/actions-plugin/server';
 import { RELAY_AUTH_ID } from '@kbn/connector-specs';
+import { getUserDisplayName } from '@kbn/user-profile-components/server';
 import type { SignificantEventsServer } from '../../types';
 import type {
   SlackAppAvailableChannelsResponse,
@@ -384,6 +385,13 @@ export class SlackAppService {
     };
   }
 
+  private async relayRoleExists(request: KibanaRequest, name: string): Promise<boolean> {
+    const { roles } = await this.server.core.elasticsearch.client
+      .asScoped(request)
+      .asCurrentUser.security.queryRole({ query: { term: { name } }, size: 1 });
+    return roles.length > 0;
+  }
+
   private async mintServiceAccountCredential(
     request: KibanaRequest
   ): Promise<MintedRelayCredential> {
@@ -399,6 +407,14 @@ export class SlackAppService {
       throw new SlackAppUnavailableError(
         'Relay UIAM install requires UIAM service accounts. Enable `xpack.security.serviceAccounts` and configure `xpack.security.uiam`.'
       );
+    }
+
+    for (const role of RELAY_SERVICE_ACCOUNT_ROLES) {
+      if (!(await this.relayRoleExists(request, role))) {
+        throw new SlackAppUnavailableError(
+          `The role [${role}] required by the Elastic Slack app does not exist on this deployment.`
+        );
+      }
     }
 
     const { id: serviceAccountId } = await serviceAccounts.create(request, {
@@ -510,7 +526,9 @@ export class SlackAppService {
     const existingConnection = await this.readConnection(soClient);
     const credential = await this.mintCredential(request, relayClient);
 
-    const username = this.server.security.authc.getCurrentUser(request)?.username;
+    const user = this.server.security.authc.getCurrentUser(request);
+    const username = user?.username;
+    const createdBy = user ? getUserDisplayName(user) : undefined;
 
     let installResponse;
     try {
@@ -525,6 +543,7 @@ export class SlackAppService {
         kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
         kibana_version: this.server.kibanaVersion,
         license_info: license.type ?? 'basic',
+        // Do not send display name, only the username for security reasons, as it could be an email or other sensitive information.
         ...(username ? { created_by_user_key: username } : {}),
         ...(agentId ? { agent_id: agentId } : {}),
       });
@@ -545,7 +564,7 @@ export class SlackAppService {
       claimId: installResponse.claim_id,
       tenantKey: null,
       surface: 'slack',
-      createdBy: username,
+      createdBy,
       createdAt: now,
     });
 

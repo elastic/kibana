@@ -8,8 +8,7 @@
  */
 
 import type { DependencyList } from 'react';
-import { useEffect, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
+import { useEffect, useRef, useState } from 'react';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorGetUrlParams, LocatorPublic } from '..';
 
@@ -20,7 +19,14 @@ export const useLocatorUrl = <P extends SerializableRecord>(
   deps: DependencyList = []
 ): string => {
   const [url, setUrl] = useState<string>('');
-  const isMounted = useMountedState();
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
@@ -32,11 +38,11 @@ export const useLocatorUrl = <P extends SerializableRecord>(
     locator
       .getUrl(params, getUrlParams)
       .then((result: string) => {
-        if (!isMounted()) return;
+        if (!isMounted.current) return;
         setUrl(result);
       })
       .catch((error) => {
-        if (!isMounted()) return;
+        if (!isMounted.current) return;
         // eslint-disable-next-line no-console
         console.error('useLocatorUrl', error);
         setUrl('');

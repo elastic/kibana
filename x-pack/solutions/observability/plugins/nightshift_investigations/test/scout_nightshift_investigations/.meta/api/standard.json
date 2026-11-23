@@ -1,5 +1,5 @@
 {
-  "sha1": "9408d68beaefa4cff82564a6ebe1f9dd7accb03a",
+  "sha1": "19b21440ad2c13a7e6c5a1cf371c25de06e88284",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -348,7 +348,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 102,
+        "line": 103,
         "column": 7
       }
     },
@@ -362,7 +362,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 15
       }
     },
@@ -376,7 +376,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 183,
+        "line": 184,
         "column": 20
       }
     },
@@ -390,7 +390,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 236,
+        "line": 237,
         "column": 11
       }
     },
@@ -404,7 +404,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 259,
+        "line": 260,
         "column": 19
       }
     },
@@ -474,8 +474,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 123,
-        "column": 47
+        "line": 128,
+        "column": 29
       }
     },
     {
@@ -488,7 +488,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 141,
+        "line": 146,
         "column": 14
       }
     },
@@ -502,8 +502,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 162,
-        "column": 15
+        "line": 167,
+        "column": 41
       }
     },
     {
@@ -516,13 +516,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 186,
+        "line": 192,
         "column": 71
       }
     },
     {
-      "id": "63a66063df79f9e-4086e916e3d62e9",
-      "title": "Scheduled Nightshift automations an edited schedule starts a scoped investigation and stops it at the configured timeout",
+      "id": "63a66063df79f9e-ce3f009945d7bf5",
+      "title": "Scheduled Nightshift automations an edited schedule starts an investigation and stops it at the configured timeout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -544,7 +544,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 220,
+        "line": 219,
         "column": 15
       }
     },
@@ -558,7 +558,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 379,
+        "line": 377,
         "column": 66
       }
     },

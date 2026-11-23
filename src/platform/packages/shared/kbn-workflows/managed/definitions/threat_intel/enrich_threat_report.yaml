@@ -80,10 +80,17 @@ steps:
                 # would strand other Spaces' pending duplicates on skip_already_extracted.
                 - term:
                     lineage.extraction_method: pending
+                # enrich_workflow_rejected is what this workflow writes now. workflow_v4_rejected is the
+                # legacy value on existing reports. Keep in sync with REJECTED_EXTRACTION_METHODS
+                # in kbn-alertzero-common.
+                - terms:
+                    lineage.extraction_method:
+                      - enrich_workflow_rejected
+                      - workflow_v4_rejected
+                # The editor schema requires the object form for non-string term values.
                 - term:
-                    lineage.extraction_method: workflow_v4_rejected
-                - term:
-                    extracted.gate.is_intelligence: false
+                    extracted.gate.is_intelligence:
+                      value: false
                 - ids:
                     values:
                       - "{{ foreach.item._id }}"
@@ -166,7 +173,7 @@ steps:
                   context_coverage: "${{ steps.assess_relevance.output.context.coverage }}"
               lineage:
                 extracted_at: "${{ now }}"
-                extraction_method: workflow_v4_rejected
+                extraction_method: enrich_workflow_rejected
         on-failure:
           continue: true
 
@@ -225,7 +232,7 @@ steps:
         type: data.set
         if: "${{ steps.extract_iocs.error == null and steps.enrich_report_core.error == null }}"
         with:
-          extraction_method: workflow_v4
+          extraction_method: enrich_workflow
 
       - name: mark_llm_enrich_incomplete
         type: data.set
@@ -314,10 +321,17 @@ steps:
                       - "{{ foreach.item._id }}"
                 # Hard-rejected reports keep stale ioc_set_hash / iocs for forensics;
                 # they must not surface as related intelligence.
+                # enrich_workflow_rejected is what this workflow writes now. workflow_v4_rejected is the
+                # legacy value on existing reports. Keep in sync with REJECTED_EXTRACTION_METHODS
+                # in kbn-alertzero-common.
+                - terms:
+                    lineage.extraction_method:
+                      - enrich_workflow_rejected
+                      - workflow_v4_rejected
+                # The editor schema requires the object form for non-string term values.
                 - term:
-                    lineage.extraction_method: workflow_v4_rejected
-                - term:
-                    extracted.gate.is_intelligence: false
+                    extracted.gate.is_intelligence:
+                      value: false
               should:
                 - term:
                     extracted.ioc_set_hash:

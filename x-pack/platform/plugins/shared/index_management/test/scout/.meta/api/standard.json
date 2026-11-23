@@ -1,5 +1,5 @@
 {
-  "sha1": "0a5a461ece2240e6ab2b5bf7b0769a7f7aebaec4",
+  "sha1": "251a42c820f8eeedd4801ebff34cbc68d601a499",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1652,8 +1652,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 61,
-        "column": 47
+        "line": 59,
+        "column": 5
       }
     },
     {
@@ -1666,8 +1666,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 62,
-        "column": 27
+        "line": 61,
+        "column": 49
       }
     },
     {
@@ -1680,7 +1680,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/indices_actions.spec.ts",
-        "line": 67,
+        "line": 63,
         "column": 12
       }
     },

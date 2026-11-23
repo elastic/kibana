@@ -13,7 +13,10 @@
  * See `affected-packages/README.md`.
  */
 
-import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
+import {
+  createGitChangedContent,
+  expandWithImplicitConsumers,
+} from './scout_implicit_consumers.ts';
 import type { ScoutLog } from './scout_log.ts';
 import { getAffectedProjectsMoon, queryMoonTestSelection } from '#pipeline-utils';
 
@@ -45,7 +48,8 @@ export function computeMoonShadow({
     const moonAffectedModules = expandWithImplicitConsumers(
       getAffectedProjectsMoon(mergeBase, true),
       gitChangedFiles,
-      log
+      log,
+      createGitChangedContent(mergeBase)
     );
     const scoutTaskSelection = queryMoonTestSelection([...gitChangedFiles], 'scout-tests');
 

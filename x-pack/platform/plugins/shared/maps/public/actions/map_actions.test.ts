@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint @typescript-eslint/no-var-requires: 0 */
+/* eslint-disable @kbn/compat/typescript-no-var-requires */
 
 jest.mock('../selectors/map_selectors', () => ({}));
 jest.mock('../reducers/non_serializable_instances', () => ({}));
