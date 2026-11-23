@@ -61,8 +61,15 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience =>
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, productDocBase, analytics, genAiSettingsApi, notifications } =
-    services;
+  const {
+    application,
+    http,
+    productDocBase,
+    analytics,
+    genAiSettingsApi,
+    notifications,
+    settings,
+  } = services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -88,7 +95,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
     chatExperienceField?.savedValue ??
     chatExperienceField?.defaultValue ??
-    AIChatExperience.Agent;
+    settings.client.get(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
   const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
   const hasAgentBuilderPrivileges = application.capabilities.agentBuilder?.manageAgents === true;
 
@@ -360,16 +367,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
           {hasAgentBuilderPrivileges && <AgentBuilderTracingSection />}
 
-          {!isLoading &&
-            !loadError &&
-            isAgentExperience &&
-            (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
-              <>
-                <EuiSpacer size="l" />
+          {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
+            <>
+              <EuiSpacer size="l" />
 
-                <DocumentationSection productDocBase={productDocBase} />
-              </>
-            )}
+              <DocumentationSection productDocBase={productDocBase} />
+            </>
+          )}
 
           {showAnonymizationProfilesSection && (
             <>

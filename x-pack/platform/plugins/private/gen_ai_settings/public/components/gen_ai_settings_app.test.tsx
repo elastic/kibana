@@ -94,6 +94,7 @@ describe('GenAiSettingsApp', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    coreStart.settings.client.get.mockReset();
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -491,27 +492,42 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
 
-      // Settings fields load asynchronously; until then `currentChatExperience` falls back to Agent.
       await waitFor(() => {
         expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
       });
     });
 
-    it('hides Documentation section when the setting definitions fail to load', async () => {
-      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
-      coreStart.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
+    describe('when the setting definitions fail to load', () => {
+      const renderWithLoadError = async (savedChatExperience: AIChatExperience) => {
+        mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+        coreStart.settings.client.get.mockImplementation((key: string, defaultOverride?: unknown) =>
+          key === AI_CHAT_EXPERIENCE_TYPE ? savedChatExperience : defaultOverride
+        );
+        coreStart.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
 
-      renderComponent(
-        {},
-        {},
-        new QueryClient({
-          logger: { log: () => {}, warn: () => {}, error: () => {} },
-          defaultOptions: { queries: { retry: false } },
-        })
-      );
+        renderComponent(
+          {},
+          {},
+          new QueryClient({
+            logger: { log: () => {}, warn: () => {}, error: () => {} },
+            defaultOptions: { queries: { retry: false } },
+          })
+        );
 
-      expect(await screen.findByTestId('genAiSettingsLoadError')).toBeInTheDocument();
-      expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+        expect(await screen.findByTestId('genAiSettingsLoadError')).toBeInTheDocument();
+      };
+
+      it('shows Documentation section when the saved chat experience is Agent', async () => {
+        await renderWithLoadError(AIChatExperience.Agent);
+
+        expect(screen.getByTestId('documentationSection')).toBeInTheDocument();
+      });
+
+      it('hides Documentation section when the saved chat experience is Classic', async () => {
+        await renderWithLoadError(AIChatExperience.Classic);
+
+        expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+      });
     });
 
     it('shows Documentation section when chat experience is Agent', async () => {
