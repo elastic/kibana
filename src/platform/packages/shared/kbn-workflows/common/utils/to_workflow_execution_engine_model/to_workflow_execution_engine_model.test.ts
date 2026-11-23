@@ -73,4 +73,23 @@ describe('toWorkflowExecutionEngineModel', () => {
       spaceId: 'default',
     });
   });
+
+  it('passes through the template origin and omits null template fields', () => {
+    expect(
+      toWorkflowExecutionEngineModel({
+        ...baseSource,
+        templateSlug: 'custom',
+        templateVersion: null,
+        templateOrigin: 'import',
+      })
+    ).toEqual({
+      id: 'wf-1',
+      name: 'Test Workflow',
+      enabled: true,
+      definition: baseSource.definition,
+      yaml: 'name: Test Workflow',
+      templateSlug: 'custom',
+      templateOrigin: 'import',
+    });
+  });
 });

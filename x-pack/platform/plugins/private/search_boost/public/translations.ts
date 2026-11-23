@@ -7,10 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../common/types';
+import type { ManagedProfileName } from '../common/managed_profiles';
+import { isManagedProfileName } from '../common/managed_profiles';
 
 export const SEARCH_BOOST_PAGE_DESCRIPTION = i18n.translate('xpack.searchBoost.page.description', {
   defaultMessage:
-    'Balance search performance and cost for the indices and data streams in this project.',
+    'Project-wide defaults determine the search resources allocated to your indices and data streams. Create boost rules to override those defaults with a different boost profile for specific indices or data streams.',
 });
 
 export const MATCHING_INDICES_TITLE = i18n.translate('xpack.searchBoost.matchingIndicesTitle', {
@@ -72,12 +74,161 @@ export const getHiddenDataStreams = (count: number) =>
     values: { count },
   });
 
+export const LOADING_LABEL = i18n.translate('xpack.searchBoost.page.loading', {
+  defaultMessage: 'Loading boost settings…',
+});
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.searchBoost.page.loadErrorTitle', {
+  defaultMessage: 'Unable to load boost settings',
+});
+
+export const TRY_AGAIN_LABEL = i18n.translate('xpack.searchBoost.page.tryAgain', {
+  defaultMessage: 'Try again',
+});
+export const PROJECT_DEFAULTS_TITLE = i18n.translate('xpack.searchBoost.projectDefaults.title', {
+  defaultMessage: 'Project defaults',
+});
+
 export const PROFILE_TYPE_LABELS: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.searchBoost.profileType.indices', { defaultMessage: 'Indices' }),
   data_streams: i18n.translate('xpack.searchBoost.profileType.dataStreams', {
     defaultMessage: 'Data streams',
   }),
 };
+
+const DEFAULT_RULE_TIP_MESSAGES: Readonly<Record<BoostProfileType, (ruleName: string) => string>> =
+  {
+    indices: (ruleName) =>
+      i18n.translate('xpack.searchBoost.projectDefaults.indicesRuleTip', {
+        defaultMessage:
+          'Sets the boost profile of the default rule "{ruleName}", which applies to every index no other rule targets.',
+        values: { ruleName },
+      }),
+    data_streams: (ruleName) =>
+      i18n.translate('xpack.searchBoost.projectDefaults.dataStreamsRuleTip', {
+        defaultMessage:
+          'Sets the boost profile of the default rule "{ruleName}", which applies to every data stream no other rule targets.',
+        values: { ruleName },
+      }),
+  };
+
+export const getDefaultRuleTip = (type: BoostProfileType, ruleName: string): string =>
+  DEFAULT_RULE_TIP_MESSAGES[type](ruleName);
+
+const DEFAULT_RULE_TIP_LABELS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.searchBoost.projectDefaults.indicesRuleTipLabel', {
+    defaultMessage: 'About the default for indices',
+  }),
+  data_streams: i18n.translate('xpack.searchBoost.projectDefaults.dataStreamsRuleTipLabel', {
+    defaultMessage: 'About the default for data streams',
+  }),
+};
+
+export const getDefaultRuleTipLabel = (type: BoostProfileType): string =>
+  DEFAULT_RULE_TIP_LABELS[type];
+
+export const EDIT_BUTTON_LABEL = i18n.translate('xpack.searchBoost.projectDefaults.editButton', {
+  defaultMessage: 'Edit',
+});
+
+const EDIT_PROJECT_DEFAULT_LABELS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.searchBoost.projectDefaults.indicesEditLabel', {
+    defaultMessage: 'Edit the project default for indices',
+  }),
+  data_streams: i18n.translate('xpack.searchBoost.projectDefaults.dataStreamsEditLabel', {
+    defaultMessage: 'Edit the project default for data streams',
+  }),
+};
+
+export const getEditProjectDefaultLabel = (type: BoostProfileType): string =>
+  EDIT_PROJECT_DEFAULT_LABELS[type];
+
+interface ManagedProfileMessage {
+  label: string;
+  description: string;
+}
+
+const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfileMessage>> = {
+  default_indices: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.defaultIndices.label', {
+      defaultMessage: 'Default',
+    }),
+    description: i18n.translate('xpack.searchBoost.managedProfile.defaultIndices.description', {
+      defaultMessage:
+        'Consistently low average latency, scaling to high query throughput as load grows.',
+    }),
+  },
+  data_streams_1d: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.last1DayDataStreams.label', {
+      defaultMessage: 'Last 1 day',
+    }),
+    description: i18n.translate(
+      'xpack.searchBoost.managedProfile.last1DayDataStreams.description',
+      {
+        defaultMessage: 'Only the most recent day of each data stream is kept search\u2011ready.',
+      }
+    ),
+  },
+  data_streams_3d: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.last3DaysDataStreams.label', {
+      defaultMessage: 'Last 3 days',
+    }),
+    description: i18n.translate(
+      'xpack.searchBoost.managedProfile.last3DaysDataStreams.description',
+      {
+        defaultMessage: 'The most recent 3 days of each data stream are kept search\u2011ready.',
+      }
+    ),
+  },
+  default_data_streams_7d: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.last7DaysDataStreams.label', {
+      defaultMessage: 'Last 7 days',
+    }),
+    description: i18n.translate(
+      'xpack.searchBoost.managedProfile.last7DaysDataStreams.description',
+      {
+        defaultMessage: 'The most recent week of each data stream is kept search\u2011ready.',
+      }
+    ),
+  },
+};
+
+/** Label and description of an Elastic-managed profile, or `undefined` for any other profile name. */
+export const getManagedProfileMessage = (profileName: string): ManagedProfileMessage | undefined =>
+  isManagedProfileName(profileName) ? MANAGED_PROFILE_MESSAGES[profileName] : undefined;
+
+export const CUSTOM_PROFILE_DESCRIPTION = i18n.translate(
+  'xpack.searchBoost.projectDefaults.customProfile',
+  {
+    defaultMessage: 'Using a selected custom boost profile.',
+  }
+);
+
+export const getViewProfileLabel = (profileName: string): string =>
+  i18n.translate('xpack.searchBoost.projectDefaults.viewProfile', {
+    defaultMessage: 'View boost profile "{profileName}"',
+    values: { profileName },
+  });
+
+const SHOW_DEFAULT_MATCHES_A11Y_LABELS: Readonly<
+  Record<BoostProfileType, (count: number) => string>
+> = {
+  indices: (count) =>
+    i18n.translate('xpack.searchBoost.projectDefaults.indicesShowMatches', {
+      defaultMessage:
+        '{count, plural, one {# index} other {# indices}}. Show what the default for indices matches',
+      values: { count },
+    }),
+  data_streams: (count) =>
+    i18n.translate('xpack.searchBoost.projectDefaults.dataStreamsShowMatches', {
+      defaultMessage:
+        '{count, plural, one {# data stream} other {# data streams}}. Show what the default for data streams matches',
+      values: { count },
+    }),
+};
+
+export const getShowDefaultMatchesA11yLabel = (type: BoostProfileType, count: number): string =>
+  SHOW_DEFAULT_MATCHES_A11Y_LABELS[type](count);
 
 export const formatTargetCount = (type: BoostProfileType, count: number): string =>
   type === 'data_streams'
@@ -121,6 +272,15 @@ export const DUPLICATE_LABEL = i18n.translate('xpack.searchBoost.actions.duplica
 export const DELETE_LABEL = i18n.translate('xpack.searchBoost.actions.delete', {
   defaultMessage: 'Delete',
 });
+
+export const CANCEL_BUTTON_LABEL = i18n.translate('xpack.searchBoost.flyout.cancelButton', {
+  defaultMessage: 'Cancel',
+});
+
+export const SAVE_CHANGES_BUTTON_LABEL = i18n.translate(
+  'xpack.searchBoost.flyout.saveChangesButton',
+  { defaultMessage: 'Save changes' }
+);
 
 export const PROFILE_NAME_LABEL = i18n.translate('xpack.searchBoost.profileName', {
   defaultMessage: 'Profile name',

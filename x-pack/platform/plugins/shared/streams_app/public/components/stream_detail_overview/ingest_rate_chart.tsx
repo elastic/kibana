@@ -51,7 +51,7 @@ import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { OverviewTimeFilter } from './overview_time_filter';
 import { IngestChartStatistics, type IngestChartTotals } from './ingest_chart_statistics';
 
-function getChartTimeZone(uiSettings: IUiSettingsClient) {
+export function getChartTimeZone(uiSettings: IUiSettingsClient) {
   const kibanaTimeZone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
   if (!kibanaTimeZone || kibanaTimeZone === 'Browser') {
     return 'local';

@@ -1,12 +1,12 @@
 {
-  "sha1": "52f951d7feb7833198b203a3fd6724032f9e8347",
+  "sha1": "e6a0a083eb7fd3620c33855a433cea8d0126830c",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "e66cc9bfbd9ee66-1ee1a6fa01b4fd7",
-      "title": "Setup shared data and feature flags for SLO API tests",
+      "id": "e66cc9bfbd9ee66-b315cc1a9906479",
+      "title": "Setup shared data for SLO API tests",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2241,8 +2241,8 @@
       }
     },
     {
-      "id": "46bd35f0297462e-c09d29a96b51851",
-      "title": "Teardown shared data and feature flags for SLO API tests",
+      "id": "46bd35f0297462e-e784fb7b42412e6",
+      "title": "Teardown shared data for SLO API tests",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
