@@ -39287,7 +39287,6 @@
     "xpack.lens.config.collapseAriaLabel": "Réduire",
     "xpack.lens.config.configFlyoutCallout": "Affichage d'une partie limitée des champs disponibles. Ajoutez-en plus depuis le panneau de configuration.",
     "xpack.lens.config.conversionResultColumnLabel": "Résultat",
-    "xpack.lens.config.convertToEsqlLabel": "Convertir en ES|QL",
     "xpack.lens.config.convertToEsqlLayerName": "Couche {layerId}",
     "xpack.lens.config.convertToEsqlTooltip": "Convertir la visualisation en ES|QL",
     "xpack.lens.config.editLabel": "Modifier la configuration",

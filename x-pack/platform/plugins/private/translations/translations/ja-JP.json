@@ -39451,7 +39451,6 @@
     "xpack.lens.config.collapseAriaLabel": "折りたたみ",
     "xpack.lens.config.configFlyoutCallout": "使用可能なフィールドの一部を表示します。構成パネルからその他の項目を追加します。",
     "xpack.lens.config.conversionResultColumnLabel": "結果",
-    "xpack.lens.config.convertToEsqlLabel": "ES|QLに変換する",
     "xpack.lens.config.convertToEsqlLayerName": "レイヤー {layerId}",
     "xpack.lens.config.convertToEsqlTooltip": "可視化をES|QLに変換",
     "xpack.lens.config.editLabel": "構成の編集",

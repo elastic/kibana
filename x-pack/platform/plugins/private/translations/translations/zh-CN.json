@@ -39438,7 +39438,6 @@
     "xpack.lens.config.collapseAriaLabel": "折叠",
     "xpack.lens.config.configFlyoutCallout": "正在显示有限数量的可用字段。从配置面板添加更多字段。",
     "xpack.lens.config.conversionResultColumnLabel": "结果",
-    "xpack.lens.config.convertToEsqlLabel": "转换为 ES|QL",
     "xpack.lens.config.convertToEsqlLayerName": "层 {layerId}",
     "xpack.lens.config.convertToEsqlTooltip": "将可视化转换为 ES|QL",
     "xpack.lens.config.editLabel": "编辑配置",
