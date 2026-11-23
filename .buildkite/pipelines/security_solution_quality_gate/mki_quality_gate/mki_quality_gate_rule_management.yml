@@ -1,3 +1,7 @@
+env:
+  REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+  PREPEND_FAILURE_TITLE: '[MKI][QA][Quality Gate]'
+
 steps:
   - group: 'Cypress MKI - Rule Management'
     key: cypress_test_rule_management

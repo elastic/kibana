@@ -1,3 +1,10 @@
+notify:
+  - slack:
+      channels:
+        - '#kibana-mission-control'
+      message: ':rotating_light: *Security Solution MKI Quality Gate - Rule Management* failed in QA, ahead of Kibana serverless release promotion. <${BUILDKITE_BUILD_URL}|Build #${BUILDKITE_BUILD_NUMBER}>'
+    if: build.env("KIBANA_MKI_QUALITY_GATE") == "1" && build.state == "failed"
+
 steps:
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_image_metadata.sh
     label: "Upload runtime info"
