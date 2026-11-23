@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { omit } from 'lodash';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -262,7 +263,9 @@ export function WebApplicationsTable({
 }) {
   const { application } = useKibanaServices();
   const router = useDigitalExperienceRouter();
-  const listQuery = useListQuery();
+  const fullListQuery = useListQuery();
+  // The Mobile tab's filter doesn't apply to web applications, so their links leave it out.
+  const listQuery = useMemo(() => omit(fullListQuery, 'platformFilter'), [fullListQuery]);
   const formatters = useFormatters();
 
   const columns = useMemo<Array<EuiBasicTableColumn<ApplicationRow>>>(() => {

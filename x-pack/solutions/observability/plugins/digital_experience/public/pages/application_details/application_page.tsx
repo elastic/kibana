@@ -191,7 +191,9 @@ export function ApplicationPage({
 
   const renderOverview = () => {
     if (isMobile) {
-      return withPagePadding(<MobileOverview serviceName={serviceName} />);
+      // A new one per application, so its badges, filter options and Compare state never show the
+      // previous application's while the new one loads.
+      return withPagePadding(<MobileOverview key={serviceName} serviceName={serviceName} />);
     }
     return source === APPLICATION_SOURCE.otel ? (
       withPagePadding(<OtelOverview serviceName={serviceName} />)

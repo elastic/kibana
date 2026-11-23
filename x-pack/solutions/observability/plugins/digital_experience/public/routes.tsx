@@ -22,7 +22,12 @@ import { ApplicationPage } from './pages/application_details/application_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';
 import { SessionDetailPage } from './pages/session_detail/session_detail_page';
 import { overviewQueryProps } from './utils/overview_filters_query';
-import { sessionsListQueryRt } from './utils/sessions_list_query';
+import { boundedParamRt, sessionsListQueryRt } from './utils/sessions_list_query';
+import {
+  MAX_ENVIRONMENT_LENGTH,
+  MAX_OS_NAME_LENGTH,
+  MAX_RELEASE_LENGTH,
+} from '../common/filter_lengths';
 
 function ApplicationRoute({ tab }: { tab: ApplicationTabId }) {
   const {
@@ -56,7 +61,8 @@ const digitalExperienceRoutes = {
       query: t.partial({
         rangeFrom: t.string,
         rangeTo: t.string,
-        environment: t.string,
+        // Bounded as the routes' validation, so the router drops a value they would reject.
+        environment: boundedParamRt(MAX_ENVIRONMENT_LENGTH),
         sourceFilter: applicationSourceRt,
         platformFilter: mobilePlatformRt,
         // The list's tab, and the page of the application a link opens: the mobile one or not.
@@ -72,8 +78,11 @@ const digitalExperienceRoutes = {
           path: t.type({ serviceName: t.string }),
           query: t.intersection([
             t.type({ source: applicationSourceRt }),
-            // The mobile page's OS and release filters.
-            t.partial({ osName: t.string, release: t.string }),
+            // The mobile page's OS and release filters, bounded as the KPI route's validation.
+            t.partial({
+              osName: boundedParamRt(MAX_OS_NAME_LENGTH),
+              release: boundedParamRt(MAX_RELEASE_LENGTH),
+            }),
           ]),
         }),
         // Links without a source open the Classic Overview.

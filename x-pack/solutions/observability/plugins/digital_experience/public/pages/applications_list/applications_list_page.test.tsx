@@ -325,6 +325,37 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
   });
 
+  it("ignores the web source filter of a URL on the Mobile tab: the Web count and the mobile links", async () => {
+    // E.g. a shared link, or the way back from an application, with both tabs' filters.
+    mockApplicationType('mobile');
+    mockSourceFilter('classic');
+    respondWith([app({ serviceName: 'app-a', source: 'classic' }), webApp(), mobileApp()]);
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceMobileApplicationsTable');
+    expect(screen.getByTestId('digitalExperienceApplicationTypeTab-web')).toHaveTextContent('Web2');
+    expect(screen.getByTestId('digitalExperienceMobileApplicationLink')).not.toHaveAttribute(
+      'href',
+      expect.stringContaining('sourceFilter')
+    );
+  });
+
+  it('ignores the mobile platform filter of a URL on the Web tab: the Mobile count and the web links', async () => {
+    mockApplicationType('web');
+    mockPlatformFilter('ios');
+    respondWith([webApp(), mobileApp(), mobileApp('trailmap-android', ['android'])]);
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceApplicationsTable');
+    expect(screen.getByTestId('digitalExperienceApplicationTypeTab-mobile')).toHaveTextContent(
+      'Mobile2'
+    );
+    expect(screen.getByTestId('digitalExperienceApplicationLink')).not.toHaveAttribute(
+      'href',
+      expect.stringContaining('platformFilter')
+    );
+  });
+
   it('keeps the type in the URL when there are tabs', async () => {
     mockApplicationType('mobile');
     respondWith([webApp(), mobileApp()]);

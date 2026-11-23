@@ -15,24 +15,50 @@ import { percentagePointsLabel } from '../labels';
  */
 export type ChangeUnit = 'relative' | 'percentagePoints';
 
-const withSign = (formatted: string, change: number): string =>
-  change > 0 ? `+${formatted}` : formatted;
+/** Which way a change goes as shown: `0` when it rounds to nothing, e.g. 99.9999% to 99.9995%. */
+export type ChangeDirection = -1 | 0 | 1;
+
+export interface FormattedChange {
+  /** E.g. "+20%", "-1.5 pp" or "0 pp". */
+  readonly label: string;
+  readonly direction: ChangeDirection;
+}
+
+type SignedFormatters = Pick<Formatters, 'formatSignedNumber' | 'formatSignedPercent'>;
+
+/** The change as `format` shows it, and its direction: none when it shows as 0, as its color. */
+const toSigned = (
+  format: (change: number) => string,
+  change: number
+): { text: string; direction: ChangeDirection } => {
+  const text = format(change);
+  if (text === format(0)) {
+    return { text, direction: 0 };
+  }
+  return { text, direction: change > 0 ? 1 : -1 };
+};
 
 const relativeChange = ({ value, previous }: ComparedValue): number | null =>
   value !== null && previous !== null && previous !== 0 ? (value - previous) / previous : null;
 
-/** The signed change of a value against the previous period, e.g. "+20%" or "-1.5 pp"; `null` when unknown. */
+/** The signed change of a value against the previous period and its direction; `null` when unknown. */
 export const formatChange = (
   compared: ComparedValue,
   unit: ChangeUnit,
-  { formatNumber, formatPercent }: Pick<Formatters, 'formatNumber' | 'formatPercent'>
-): string | null => {
+  { formatSignedNumber, formatSignedPercent }: SignedFormatters
+): FormattedChange | null => {
   if (unit === 'percentagePoints') {
     const { delta } = compared;
-    return delta === null
-      ? null
-      : percentagePointsLabel(withSign(formatNumber(delta * 100), delta));
+    if (delta === null) {
+      return null;
+    }
+    const { text, direction } = toSigned(formatSignedNumber, delta * 100);
+    return { label: percentagePointsLabel(text), direction };
   }
   const change = relativeChange(compared);
-  return change === null ? null : withSign(formatPercent(change), change);
+  if (change === null) {
+    return null;
+  }
+  const { text, direction } = toSigned(formatSignedPercent, change);
+  return { label: text, direction };
 };

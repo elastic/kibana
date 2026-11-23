@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { omit } from 'lodash';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -74,7 +75,7 @@ const renderCrashFree = (formatters: Formatters) => (compared: ComparedValue) =>
   const change = formatChange(compared, 'percentagePoints', formatters);
   return (
     <span data-test-subj="digitalExperienceMobileCrashFree">
-      {change === null ? formatted : valueWithChangeLabel(formatted, change)}
+      {change === null ? formatted : valueWithChangeLabel(formatted, change.label)}
     </span>
   );
 };
@@ -94,7 +95,9 @@ export function MobileApplicationsTable({
 }) {
   const { application } = useKibanaServices();
   const router = useDigitalExperienceRouter();
-  const listQuery = useListQuery();
+  const fullListQuery = useListQuery();
+  // The Web tab's filter doesn't apply to mobile applications, so their links leave it out.
+  const listQuery = useMemo(() => omit(fullListQuery, 'sourceFilter'), [fullListQuery]);
   const formatters = useFormatters();
   const { formatNumber } = formatters;
 

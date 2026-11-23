@@ -75,6 +75,34 @@ describe('toEnvironments', () => {
     ).toEqual(['production', 'staging', 'ENVIRONMENT_NOT_DEFINED']);
   });
 
+  it.each([
+    ['an empty environment name', { 'resource.attributes.deployment.environment.name': '' }],
+    ['an empty service environment', { 'service.environment': '' }],
+    [
+      'both empty',
+      { 'service.environment': '', 'resource.attributes.deployment.environment.name': '' },
+    ],
+  ])(
+    'lists no "Not defined" for %s, which the KPI filters treat as indexed, so it would match nothing',
+    (_, fields) => {
+      expect(toEnvironments(environmentRows([{ docs: 2, ...fields }]))).toEqual([]);
+    }
+  );
+
+  it('lists "Not defined" for null fields, as the response sends a field no index maps', () => {
+    expect(
+      toEnvironments(
+        environmentRows([
+          {
+            docs: 1,
+            'service.environment': null,
+            'resource.attributes.deployment.environment.name': null,
+          },
+        ])
+      )
+    ).toEqual(['ENVIRONMENT_NOT_DEFINED']);
+  });
+
   it('lists "Not defined" for APM\'s sentinel, as the KPI filter matches it', () => {
     expect(
       toEnvironments(

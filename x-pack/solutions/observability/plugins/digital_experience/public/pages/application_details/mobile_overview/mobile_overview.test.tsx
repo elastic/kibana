@@ -15,16 +15,20 @@ import { useApiClient } from '../../../hooks/use_api_client';
 import { useDigitalExperienceParams } from '../../../hooks/use_digital_experience_params';
 import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useEnvironment } from '../../../hooks/use_environment';
-import { useFormatters } from '../../../hooks/use_formatters';
+import { createFormatters, useFormatters } from '../../../hooks/use_formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
+import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import { MobileOverview } from './mobile_overview';
 
 jest.mock('../../../hooks/use_api_client');
 jest.mock('../../../hooks/use_digital_experience_params');
 jest.mock('../../../hooks/use_discover_href');
 jest.mock('../../../hooks/use_environment');
-jest.mock('../../../hooks/use_formatters');
+jest.mock('../../../hooks/use_formatters', () => ({
+  ...jest.requireActual('../../../hooks/use_formatters'),
+  useFormatters: jest.fn(),
+}));
 jest.mock('../../../hooks/use_time_range');
 jest.mock('../../../hooks/use_update_url_query');
 jest.mock('../../../components/time_range_picker', () => ({ TimeRangePicker: () => null }));
@@ -87,12 +91,7 @@ beforeEach(() => {
   jest
     .mocked(useEnvironment)
     .mockReturnValue({ environment: undefined, setEnvironment: jest.fn() });
-  jest.mocked(useFormatters).mockReturnValue({
-    formatNumber: String,
-    formatPercent: (share) => `${Math.round(share * 100)}%`,
-    formatDate: String,
-    timeZone: 'UTC',
-  });
+  jest.mocked(useFormatters).mockReturnValue(createFormatters(createUiSettingsMock()));
   // Like the hook, no link without a query.
   jest
     .mocked(useDiscoverHref)
@@ -365,6 +364,10 @@ describe('MobileOverview', () => {
 
       expect(await screen.findByTestId('digitalExperienceMobileNoMatches')).toHaveTextContent(
         'No mobile data matches the filters'
+      );
+      // It only knows the filtered query found nothing, not that the app has data otherwise.
+      expect(screen.getByTestId('digitalExperienceMobileNoMatches')).not.toHaveTextContent(
+        'This application has mobile data'
       );
       expect(screen.queryByTestId('digitalExperienceMobileEmpty')).toBeNull();
       expect(screen.queryByTestId('digitalExperienceMobileAndroidDocsLink')).toBeNull();

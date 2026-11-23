@@ -62,9 +62,16 @@ jest.mock('../reports/reports_tab', () => {
     },
   };
 });
-jest.mock('./mobile_overview/mobile_overview', () => ({
-  MobileOverview: () => <div data-test-subj="mobileOverview" />,
-}));
+jest.mock('./mobile_overview/mobile_overview', () => {
+  const { useState } = jest.requireActual<typeof import('react')>('react');
+  return {
+    // Shows the application it was mounted for, as its state would: a new mount reads the new one.
+    MobileOverview: ({ serviceName }: { serviceName: string }) => {
+      const [mountedFor] = useState(serviceName);
+      return <div data-test-subj="mobileOverview">{mountedFor}</div>;
+    },
+  };
+});
 jest.mock('../sessions/sessions_tab', () => {
   return {
     SessionsTab: ({ serviceName }: { serviceName: string }) => {
@@ -347,6 +354,24 @@ describe('ApplicationPage', () => {
       expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).not.toBeInTheDocument();
     }
   );
+
+  it("mounts a new mobile Overview per application, so none shows the previous one's state", () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+    const page = (serviceName: string) => (
+      <ApplicationPage
+        serviceName={serviceName}
+        source="otel"
+        applicationType="mobile"
+        selectedTab="overview"
+      />
+    );
+
+    const { rerender } = render(page('shop-mobile'));
+    expect(screen.getByTestId('mobileOverview')).toHaveTextContent('shop-mobile');
+
+    rerender(page('trailmap-android'));
+    expect(screen.getByTestId('mobileOverview')).toHaveTextContent('trailmap-android');
+  });
 
   it('never redirects an EDOT Browser application', () => {
     useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);

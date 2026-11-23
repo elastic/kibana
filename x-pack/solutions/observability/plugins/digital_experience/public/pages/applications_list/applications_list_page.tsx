@@ -265,8 +265,6 @@ export function ApplicationsListPage() {
   // Serverless has no ux plugin and no Classic RUM data; known on the first render, so the filter
   // row doesn't change once the data loads.
   const canFilterBySource = ux !== undefined;
-  // A source in the URL is ignored where the filter isn't shown, so it can't hide every row.
-  const selectedSource = canFilterBySource ? sourceFilter : undefined;
   const mobileAvailability = response?.mobileAvailability ?? 'complete';
   const hasWebApplications = response?.applications.some(isWebApplication) ?? false;
   const hasMobileApplications = response?.applications.some(isMobileApplication) ?? false;
@@ -291,15 +289,20 @@ export function ApplicationsListPage() {
     (response !== undefined && applicationType !== undefined && applicationType !== typeWithData);
   const selectedType = applicationType ?? typeWithData;
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
+  // A filter in the URL is ignored where its control isn't shown, so it can't hide rows, narrow the
+  // other tab's count or follow its links: the source only on the Web tab (and not on serverless),
+  // the platform only on the Mobile tab, whatever a shared link or a link back carries.
+  const selectedSource = canFilterBySource && !isMobileTab ? sourceFilter : undefined;
+  const selectedPlatform = isMobileTab ? platformFilter : undefined;
 
   const mobileItems = useMemo(
     () =>
       mobileApplicationsMatching({
         applications: response?.applications ?? [],
         search,
-        platform: platformFilter,
+        platform: selectedPlatform,
       }),
-    [response, platformFilter, search]
+    [response, selectedPlatform, search]
   );
 
   const items = useMemo(

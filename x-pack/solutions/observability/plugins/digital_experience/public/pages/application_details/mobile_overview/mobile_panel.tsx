@@ -15,6 +15,7 @@ import { KpiPanel } from '../../../components/kpi_panel';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { NOT_ENOUGH_DATA_LABEL } from '../../../labels';
 import { formatChange } from '../../../utils/compared_value';
+import type { ChangeDirection } from '../../../utils/compared_value';
 import type { ChangeUnit } from '../../../utils/compared_value';
 
 export interface MobilePanelProps {
@@ -32,14 +33,15 @@ export interface MobilePanelProps {
   'data-test-subj': string;
 }
 
+/** Neutral for a change that reads as none once rounded, so "0%" is never red or green. */
 const changeColor = (
-  delta: number | null,
+  direction: ChangeDirection,
   higherIsBetter: boolean | undefined
 ): EuiBadgeProps['color'] => {
-  if (delta === null || delta === 0 || higherIsBetter === undefined) {
+  if (direction === 0 || higherIsBetter === undefined) {
     return 'hollow';
   }
-  return delta > 0 === higherIsBetter ? 'success' : 'danger';
+  return direction > 0 === higherIsBetter ? 'success' : 'danger';
 };
 
 /**
@@ -76,10 +78,10 @@ export function MobilePanel({
           {change !== null && (
             <EuiFlexItem grow={false}>
               <EuiBadge
-                color={changeColor(value?.delta ?? null, higherIsBetter)}
+                color={changeColor(change.direction, higherIsBetter)}
                 data-test-subj={`${dataTestSubj}Change`}
               >
-                {change}
+                {change.label}
               </EuiBadge>
             </EuiFlexItem>
           )}

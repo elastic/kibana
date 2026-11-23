@@ -65,10 +65,13 @@ export const toReleases = (rows: ReleaseRow[]): string[] =>
 export const toRelease = (release: string | null | undefined): string | null =>
   accepted([release ?? null], MAX_RELEASE_LENGTH)[0] ?? null;
 
-/** "Not defined" as the KPI filter (`withEnvironment`) applies it: APM's sentinel, or neither field. */
+/**
+ * "Not defined" as the KPI filters (`withEnvironment`, `environmentNotDefinedFilter`) apply it:
+ * APM's sentinel, or neither field indexed. An indexed `""` is a value to them, not a missing one.
+ */
 const isEnvironmentNotDefined = (row: EnvironmentRow): boolean =>
   row[MOBILE_FIELDS.environment] === ENVIRONMENT_NOT_DEFINED_VALUE ||
-  (!row[MOBILE_FIELDS.environment] && !row[MOBILE_FIELDS.environmentName]);
+  (row[MOBILE_FIELDS.environment] == null && row[MOBILE_FIELDS.environmentName] == null);
 
 /**
  * The environments of rows grouped by both environment fields, "Not defined" included when a row

@@ -209,7 +209,7 @@ const NO_MATCHES_TITLE = i18n.translate('xpack.digitalExperience.mobile.noMatche
 
 const NO_MATCHES_BODY = i18n.translate('xpack.digitalExperience.mobile.noMatches.body', {
   defaultMessage:
-    'This application has mobile data, but none for the selected environment, OS and release. Clear the filters, or try a wider time range.',
+    'No mobile data for this application matches the selected environment, OS and release. Clear the filters, or try a wider time range.',
 });
 
 const ClearFiltersButton = ({ onClear }: { onClear: () => void }) => (
