@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import React, { Suspense } from 'react';
+import { render, screen } from '@testing-library/react';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 
 import { upsellingPages, upsellingSections } from './upsellings';
+import { registerUpsellings } from './register_upsellings';
+import { mockServices } from '../common/services/__mocks__/services.mock';
 import { getEnabledProductFeatures } from '../../common/pli/pli_features';
 import { ProductLine, ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
@@ -98,4 +102,26 @@ describe('Endpoint policy upselling', () => {
       );
     }
   );
+
+  it('renders the registered policy protections upsell for Security Essentials only', async () => {
+    registerUpsellings([securityEssentials], mockServices);
+
+    const ProtectionsUpsell = mockServices.securitySolution
+      .getUpselling()
+      .getSectionsValue()
+      .get('endpointPolicyProtections');
+
+    expect(ProtectionsUpsell).toBeDefined();
+    if (!ProtectionsUpsell) {
+      return;
+    }
+
+    render(
+      <Suspense fallback={null}>
+        <ProtectionsUpsell />
+      </Suspense>
+    );
+
+    expect(await screen.findByTestId('endpointPolicy-protectionsLockedCard')).toBeInTheDocument();
+  });
 });
