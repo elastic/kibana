@@ -69,12 +69,18 @@ export class AccountScope {
     scope
       .bind(KnowledgeIndicators)
       .toConstantValue(this.significantEvents.getKnowledgeIndicatorReader({ spaceId: space }));
-    // The rules are the account's: Alerting v2 runs them with its API key.
-    scope.bind(DetectionRulesClient).toConstantValue(
-      await this.alerting.getRulesClientWithRequestInSpace(accountRequest, space, {
-        app: 'nightshift',
-      })
-    );
+    try {
+      // The rules are the account's: Alerting v2 runs them with its API key.
+      scope.bind(DetectionRulesClient).toConstantValue(
+        await this.alerting.getRulesClientWithRequestInSpace(accountRequest, space, {
+          app: 'nightshift',
+        })
+      );
+    } catch (error) {
+      // The caller only gets a scope to release once it is built.
+      await scope.unbindAllAsync();
+      throw error;
+    }
 
     return scope;
   }
