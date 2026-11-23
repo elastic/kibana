@@ -30,8 +30,13 @@ interface UseAppMenuDataResult {
 export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAppMenuDataResult => {
   const allTabs = useInternalStateSelector(selectAllTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
-    useCurrentTabMenuActions({ currentDataView });
+  const {
+    canSwitchLanguageMode,
+    isDataViewMode,
+    isSwitchToClassicDisabled,
+    openInspector,
+    switchLanguageMode,
+  } = useCurrentTabMenuActions({ currentDataView });
 
   const getTopTabMenuItems = useCallback<NonNullable<UnifiedTabsProps['getTopTabMenuItems']>>(
     (item) => {
@@ -81,6 +86,11 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
         ];
       }
 
+      // The tab menu cannot disable an item. Hide Classic until a data view exists.
+      if (isSwitchToClassicDisabled) {
+        return [];
+      }
+
       return [
         {
           'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
@@ -92,7 +102,14 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
         },
       ];
     },
-    [allTabs, canSwitchLanguageMode, currentTabId, isDataViewMode, switchLanguageMode]
+    [
+      allTabs,
+      canSwitchLanguageMode,
+      currentTabId,
+      isDataViewMode,
+      isSwitchToClassicDisabled,
+      switchLanguageMode,
+    ]
   );
 
   const topNavMenuItems = useTopNavMenuItems();

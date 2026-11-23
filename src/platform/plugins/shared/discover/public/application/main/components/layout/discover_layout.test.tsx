@@ -26,7 +26,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import * as savedSearchUrlConflictCallout from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
@@ -39,6 +39,9 @@ const setup = async ({
   isEsqlEnabled = false,
   esqlQuery,
   hasEnterpriseLicense = true,
+  hasESData = true,
+  solutionNavId,
+  navLinks,
   dataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
@@ -52,6 +55,9 @@ const setup = async ({
   /** Puts Discover in ES|QL mode, with this query. */
   esqlQuery?: string;
   hasEnterpriseLicense?: boolean;
+  hasESData?: boolean;
+  solutionNavId?: string;
+  navLinks?: Record<string, boolean>;
   dataMainMsg?: DataMainMsg;
 }) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
@@ -60,6 +66,18 @@ const setup = async ({
   const originalGetImplementation = getUiSettingsMock.getMockImplementation();
 
   services.profilesManager = profilesManagerMock;
+  if (solutionNavId) {
+    services.core.chrome.getActiveSolutionNavId$.mockReturnValue(
+      new BehaviorSubject(solutionNavId)
+    );
+    jest.mocked(services.core.chrome.getActiveSolutionNavId).mockReturnValue(solutionNavId);
+  }
+  if (navLinks) {
+    services.capabilities.navLinks = navLinks;
+    services.application.getUrlForApp.mockImplementation(
+      (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+    );
+  }
   services.licensing = {
     license$: of({ isActive: true, hasAtLeast: () => hasEnterpriseLicense }),
   } as unknown as LicensingPluginStart;
@@ -124,6 +142,12 @@ const setup = async ({
   });
   dataStateContainer.data$.main$.next(dataMainMsg);
 
+  if (!hasESData) {
+    toolkit.internalState.dispatch(
+      internalStateActions.setInitializationState({ hasESData: false, hasDataView: false })
+    );
+  }
+
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
       <RootDragDropProvider>
@@ -179,6 +203,146 @@ describe('Discover component', () => {
     expect(screen.queryByTestId('dscHideTableButton')).toBeInTheDocument();
     expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
   }, 10000);
+
+  test('shows an inline empty state when the project has no data', async () => {
+    await setup({
+      dataView: dataViewWithTimefieldMock,
+      hasESData: false,
+      dataMainMsg: {
+        fetchStatus: FetchStatus.UNINITIALIZED,
+        foundDocuments: false,
+      },
+    });
+
+    expect(screen.getByTestId('discoverOnboardingEmptyState')).toBeVisible();
+    expect(screen.getByText('No data yet')).toBeVisible();
+    expect(
+      screen.getByText(
+        "We didn't find data in this project. You might still have data in another system. Ask your admin to check."
+      )
+    ).toBeVisible();
+    expect(screen.queryByTestId('discoverUninitialized')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('queryInEsqlButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscHideSidebarButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscShowSidebarButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+  });
+
+  test('shows the empty state instead of the initial loading indicator', async () => {
+    await setup({
+      dataView: dataViewWithTimefieldMock,
+      hasESData: false,
+      dataMainMsg: {
+        fetchStatus: FetchStatus.LOADING,
+        foundDocuments: false,
+      },
+    });
+
+    expect(screen.getByTestId('discoverOnboardingEmptyState')).toBeVisible();
+    expect(screen.queryByTestId('loadingSpinner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscShowSidebarButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscHideSidebarButton')).not.toBeInTheDocument();
+  });
+
+  test('offers the solution actions the user is allowed to open', async () => {
+    await setup({
+      dataView: dataViewWithTimefieldMock,
+      hasESData: false,
+      solutionNavId: 'security',
+      navLinks: { integrations: true, home: true },
+      dataMainMsg: {
+        fetchStatus: FetchStatus.UNINITIALIZED,
+        foundDocuments: false,
+      },
+    });
+
+    expect(screen.getByTestId('discoverOnboardingAddIntegrations')).toHaveAttribute(
+      'href',
+      '/app/integrations/browse'
+    );
+    expect(screen.getByTestId('discoverOnboardingTrySampleData')).toHaveAttribute(
+      'href',
+      '/app/home#/tutorial_directory/sampleData'
+    );
+    expect(screen.getByTestId('discoverOnboardingAddIntegrations')).toHaveTextContent('Add data');
+  });
+
+  test('shows results instead of the empty state once documents are found', async () => {
+    await setup({
+      dataView: dataViewWithTimefieldMock,
+      hasESData: false,
+    });
+
+    expect(screen.queryByTestId('discoverOnboardingEmptyState')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discoverDocumentsTable')).toBeInTheDocument();
+  });
+
+  test('shows no results when a query runs and finds nothing', async () => {
+    await setup({
+      dataView: dataViewWithTimefieldMock,
+      hasESData: false,
+      dataMainMsg: {
+        fetchStatus: FetchStatus.COMPLETE,
+        foundDocuments: false,
+      },
+    });
+
+    expect(screen.getByTestId('discoverNoResults')).toBeVisible();
+    expect(screen.queryByTestId('discoverOnboardingEmptyState')).not.toBeInTheDocument();
+  });
+
+  test('shows the empty state when ES|QL reports a missing index and the project has no data', async () => {
+    await setup({
+      dataView: dataViewWithTimefieldMock,
+      hasESData: false,
+      isEsqlEnabled: true,
+      esqlQuery: 'FROM logs-*',
+      dataMainMsg: {
+        fetchStatus: FetchStatus.ERROR,
+        foundDocuments: false,
+        error: new Error(
+          'verification_exception: Found 1 problem\nline 1:6: Unknown index [logs-*]'
+        ),
+      },
+    });
+
+    expect(screen.getByTestId('discoverOnboardingEmptyState')).toBeVisible();
+    expect(screen.queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
+  });
+
+  test('keeps the error when a missing index is queried and the project has data', async () => {
+    await setup({
+      dataView: dataViewWithTimefieldMock,
+      hasESData: true,
+      isEsqlEnabled: true,
+      esqlQuery: 'FROM missing-*',
+      dataMainMsg: {
+        fetchStatus: FetchStatus.ERROR,
+        foundDocuments: false,
+        error: new Error('Unknown index [missing-*]'),
+      },
+    });
+
+    expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverOnboardingEmptyState')).not.toBeInTheDocument();
+  });
+
+  test('keeps a query error that is not a missing source', async () => {
+    await setup({
+      dataView: dataViewWithTimefieldMock,
+      hasESData: false,
+      isEsqlEnabled: true,
+      esqlQuery: 'FROM logs-* | STATS',
+      dataMainMsg: {
+        fetchStatus: FetchStatus.ERROR,
+        foundDocuments: false,
+        error: new Error('parsing_exception: mismatched input'),
+      },
+    });
+
+    expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverOnboardingEmptyState')).not.toBeInTheDocument();
+  });
 
   test('uninitialized classic mode offers switching to ES|QL', async () => {
     const user = userEvent.setup();

@@ -174,6 +174,19 @@ const waitForLoad = () => {
   return waitFor(() => expect(screen.queryByLabelText('Loading')).not.toBeInTheDocument());
 };
 
+const OpenedWithoutDataProbe = () => {
+  const query = useAppStateSelector((state) => state.query);
+  const skipInitialFetch = useCurrentTabSelector((state) => Boolean(state.skipInitialFetch));
+
+  return (
+    <div
+      data-test-subj="discover-main-app"
+      data-esql={isOfAggregateQueryType(query) ? query.esql : ''}
+      data-skip-initial-fetch={String(skipInitialFetch)}
+    />
+  );
+};
+
 const createUrlStateWithQuery = async (query: Query | AggregateQuery) => {
   const stateStorageContainer = createKbnUrlStateStorage({
     useHash: false,
@@ -364,6 +377,103 @@ describe('DiscoverMainRoute', () => {
     });
 
     expect(screen.getByTestId('discover-main-app')).toBe(editor);
+  });
+
+  test('opens ES|QL with the editor when an empty project has ES|QL enabled', async () => {
+    const getSettingMock = jest.mocked(discoverServiceMock.uiSettings.get);
+    const getSetting = getSettingMock.getMockImplementation();
+
+    getSettingMock.mockImplementation((key, defaultOverride) => {
+      if (key === ENABLE_ESQL) return true;
+      return getSetting?.(key, defaultOverride);
+    });
+    jest.mocked(DiscoverMainApp).mockImplementation(() => <OpenedWithoutDataProbe />);
+
+    try {
+      setupComponent({ hasESData: false, hasDataView: false });
+      await waitForLoad();
+
+      const editor = screen.getByTestId('discover-main-app');
+      expect(editor).toBeVisible();
+      expect(editor).toHaveAttribute('data-esql', '');
+      expect(editor).toHaveAttribute('data-skip-initial-fetch', 'true');
+      expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+    } finally {
+      getSettingMock.mockImplementation(getSetting);
+    }
+  });
+
+  test('leaves the ES|QL editor empty when an empty project opens', async () => {
+    const getSettingMock = jest.mocked(discoverServiceMock.uiSettings.get);
+    const getSetting = getSettingMock.getMockImplementation();
+    const getIsEsqlDefaultMock = jest.mocked(
+      discoverServiceMock.discoverFeatureFlags.getIsEsqlDefault
+    );
+    const getIsEsqlDefault = getIsEsqlDefaultMock.getMockImplementation();
+
+    getSettingMock.mockImplementation((key, defaultOverride) => {
+      if (key === ENABLE_ESQL) return true;
+      if (key === DEFAULT_ESQL_QUERY_SETTING) return 'FROM logs-* | LIMIT 10';
+      return getSetting?.(key, defaultOverride);
+    });
+    getIsEsqlDefaultMock.mockImplementation(() => true);
+    mockRootProfileState = {
+      ...defaultRootProfileState,
+      getDefaultEsqlQuery: () => ({ query: 'FROM logs-* | LIMIT 10' }),
+    };
+    jest.mocked(DiscoverMainApp).mockImplementation(() => <OpenedWithoutDataProbe />);
+
+    try {
+      const stateStorageContainer = await createUrlStateWithQuery({
+        esql: 'FROM logs-* | LIMIT 10',
+      });
+      setupComponent({ hasESData: false, hasDataView: false, stateStorageContainer });
+      await waitForLoad();
+
+      expect(screen.getByTestId('discover-main-app')).toHaveAttribute('data-esql', '');
+      expect(screen.getByTestId('discover-main-app')).toHaveAttribute(
+        'data-skip-initial-fetch',
+        'true'
+      );
+    } finally {
+      getSettingMock.mockImplementation(getSetting);
+      getIsEsqlDefaultMock.mockImplementation(getIsEsqlDefault);
+    }
+  });
+
+  test('leaves the ES|QL editor empty on the no-data screen when a data view exists', async () => {
+    const getSettingMock = jest.mocked(discoverServiceMock.uiSettings.get);
+    const getSetting = getSettingMock.getMockImplementation();
+    const getIsEsqlDefaultMock = jest.mocked(
+      discoverServiceMock.discoverFeatureFlags.getIsEsqlDefault
+    );
+    const getIsEsqlDefault = getIsEsqlDefaultMock.getMockImplementation();
+
+    getSettingMock.mockImplementation((key, defaultOverride) => {
+      if (key === ENABLE_ESQL) return true;
+      if (key === DEFAULT_ESQL_QUERY_SETTING) return 'FROM logs-* | LIMIT 10';
+      return getSetting?.(key, defaultOverride);
+    });
+    getIsEsqlDefaultMock.mockImplementation(() => true);
+    mockRootProfileState = {
+      ...defaultRootProfileState,
+      getDefaultEsqlQuery: () => ({ query: 'FROM logs-* | LIMIT 10' }),
+    };
+    jest.mocked(DiscoverMainApp).mockImplementation(() => <OpenedWithoutDataProbe />);
+
+    try {
+      setupComponent({ hasESData: false, hasDataView: true });
+      await waitForLoad();
+
+      expect(screen.getByTestId('discover-main-app')).toHaveAttribute('data-esql', '');
+      expect(screen.getByTestId('discover-main-app')).toHaveAttribute(
+        'data-skip-initial-fetch',
+        'true'
+      );
+    } finally {
+      getSettingMock.mockImplementation(getSetting);
+      getIsEsqlDefaultMock.mockImplementation(getIsEsqlDefault);
+    }
   });
 
   test('renders no data page when hasESData=false & hasDataView=false', async () => {

@@ -96,14 +96,17 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
 };
 
 describe('useTopNavLinks', () => {
-  const setup = async (hookAttrs: Partial<UseTopNavLinksParams> = {}) => {
-    const services = hookAttrs.services ?? createTestServices();
+  const setup = async (
+    hookAttrs: Partial<UseTopNavLinksParams> & { hasDataView?: boolean } = {}
+  ) => {
+    const { hasDataView = true, ...linksParams } = hookAttrs;
+    const services = linksParams.services ?? createTestServices();
     const toolkit = getDiscoverInternalStateMock({ services });
-    const testDataView = hookAttrs.dataView ?? dataViewMock;
+    const testDataView = linksParams.dataView ?? dataViewMock;
 
     await toolkit.initializeTabs();
 
-    if (hookAttrs.isEsqlMode) {
+    if (linksParams.isEsqlMode) {
       toolkit.internalState.dispatch(
         toolkit.injectCurrentTab(internalStateActions.setAppState)({
           appState: { query: { esql: 'FROM test-index' } },
@@ -115,6 +118,12 @@ describe('useTopNavLinks', () => {
       tabId: toolkit.getCurrentTab().id,
     });
 
+    if (!hasDataView) {
+      toolkit.internalState.dispatch(
+        internalStateActions.setInitializationState({ hasESData: false, hasDataView: false })
+      );
+    }
+
     return renderHook(
       () =>
         useTopNavLinks({
@@ -124,9 +133,9 @@ describe('useTopNavLinks', () => {
           isEsqlMode: false,
           adHocDataViews: [],
           persistedDiscoverSession: undefined,
-          ...hookAttrs,
-          onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
-          onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? jest.fn(),
+          ...linksParams,
+          onOpenSaveModal: linksParams.onOpenSaveModal ?? jest.fn(),
+          onOpenSaveAsModal: linksParams.onOpenSaveAsModal ?? jest.fn(),
         }),
       {
         wrapper: ({ children }) => (
@@ -168,8 +177,25 @@ describe('useTopNavLinks', () => {
 
       expect(switchLanguageModeItem).toBeDefined();
       expect(switchLanguageModeItem?.label).toBe('Switch to Classic');
+      expect(switchLanguageModeItem?.disableButton).toBe(false);
       expect(switchLanguageModeItem?.tooltipContent).toBe(
         'Search your data with data views and KQL in Classic Discover'
+      );
+    });
+
+    it('disables switch to classic when the project has no data view', async () => {
+      const appMenuConfig = await setup({
+        isEsqlMode: true,
+        hasDataView: false,
+      });
+
+      const switchLanguageModeItem = appMenuConfig.items?.find(
+        (item) => item.testId === 'select-classic-mode-btn'
+      );
+
+      expect(switchLanguageModeItem?.disableButton).toBe(true);
+      expect(switchLanguageModeItem?.tooltipContent).toBe(
+        'Create a data view to switch to Classic'
       );
     });
   });

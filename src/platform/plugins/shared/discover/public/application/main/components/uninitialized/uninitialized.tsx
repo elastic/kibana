@@ -9,6 +9,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataSource } from '@kbn/data-source';
 import { getRecommendedQueriesTemplates, shouldBeQuotedSource } from '@kbn/esql-language';
@@ -21,9 +22,11 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../state_management/redux';
+import { DiscoverFederatedDataHint } from '../onboarding/discover_federated_data_hint';
 import { RecommendedQueries } from './recommended_queries';
 import { selectRecommendedQueries } from './select_recommended_queries';
 import { useExtensionQueries } from './use_extension_queries';
+import { useRecommendationSource } from './use_recommendation_source';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 
 // Cluster and selector separators are valid unquoted, so only the other special characters force quotes.
@@ -37,6 +40,24 @@ const getSources = (indexPattern: string) =>
     .filter(Boolean)
     .map(quoteSourceIfNeeded)
     .join(',');
+
+const fillResultsArea = css({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  minHeight: 0,
+  width: '100%',
+});
+
+const centerInResultsArea = css({
+  alignItems: 'center',
+  display: 'flex',
+  flex: '1 1 auto',
+  justifyContent: 'center',
+  minHeight: 0,
+  overflow: 'auto',
+  width: '100%',
+});
 
 const getSourceCommand = (dataSource: DataSource): string => {
   const query =
@@ -59,14 +80,26 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   const dispatch = useInternalStateDispatch();
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
 
-  // The new ES|QL tab inherits the data source of the previous tab, which gives us a source.
+  // The new ES|QL tab inherits the data source of the previous tab.
+  // A data view such as logs-* matches nothing when the only data is a federated dataset,
+  // so recommendations then read that dataset and skip queries that need an index.
   const indexPattern = currentDataSource.title;
-  const timeField = currentDataSource.timeFieldName;
-  const sources = indexPattern ? getSources(indexPattern) : undefined;
-  const sourceCommand = useMemo(() => getSourceCommand(currentDataSource), [currentDataSource]);
+  const {
+    source: recommendationSource,
+    isResolved: isRecommendationSourceResolved,
+    isFederatedOnly,
+  } = useRecommendationSource(indexPattern);
+  const showFederatedCallout =
+    isRecommendationSourceResolved && isFederatedOnly && Boolean(recommendationSource);
+  const timeField = isFederatedOnly ? undefined : currentDataSource.timeFieldName;
+  const sources = recommendationSource ? getSources(recommendationSource) : undefined;
+  const sourceCommand = getSourceCommand(currentDataSource);
   const { queries: extensionQueries, isLoading: isLoadingExtensionQueries } = useExtensionQueries({
-    sourceQuery: sources ? `${sourceCommand} ${sources}` : undefined,
-    isEnabled: isEsqlMode,
+    sourceQuery:
+      isRecommendationSourceResolved && sources && !isFederatedOnly
+        ? `${sourceCommand} ${sources}`
+        : undefined,
+    isEnabled: isEsqlMode && isRecommendationSourceResolved && !isFederatedOnly,
   });
   const recommendedQueries = useMemo(
     () =>
@@ -75,8 +108,9 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
         staticQueries: sources
           ? getRecommendedQueriesTemplates({ fromCommand: `FROM ${sources}`, timeField })
           : [],
+        federatedOnly: isFederatedOnly,
       }),
-    [extensionQueries, sources, timeField]
+    [extensionQueries, isFederatedOnly, sources, timeField]
   );
   const onRunQuery = useCallback(
     (query: string) => {
@@ -142,15 +176,22 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   );
 
   if (!isEsqlMode) {
-    return startSearchingPrompt;
+    return <div css={[fillResultsArea, centerInResultsArea]}>{startSearchingPrompt}</div>;
   }
 
   return (
-    <div data-test-subj="discoverUninitialized">
-      <RecommendedQueries
-        queries={isLoadingExtensionQueries ? [] : recommendedQueries}
-        onRunQuery={onRunQuery}
-      />
+    <div css={fillResultsArea} data-test-subj="discoverUninitialized">
+      {showFederatedCallout && recommendationSource ? (
+        <DiscoverFederatedDataHint source={recommendationSource} />
+      ) : null}
+      <div css={centerInResultsArea}>
+        <RecommendedQueries
+          queries={
+            !isRecommendationSourceResolved || isLoadingExtensionQueries ? [] : recommendedQueries
+          }
+          onRunQuery={onRunQuery}
+        />
+      </div>
     </div>
   );
 };

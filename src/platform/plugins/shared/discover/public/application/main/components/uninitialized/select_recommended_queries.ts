@@ -11,10 +11,23 @@ import type { QueryTemplate } from '@kbn/esql-language';
 
 export const MAX_RECOMMENDED_QUERIES = 6;
 
+/** KQL and unmapped fields need an Elasticsearch index, so a federated dataset cannot run them. */
+const needsIndex = (query: QueryTemplate) => /KQL\s*\(|unmapped_fields/i.test(query.queryString);
+
 export const selectRecommendedQueries = ({
   extensionQueries,
   staticQueries,
+  federatedOnly = false,
 }: {
   extensionQueries: readonly QueryTemplate[];
   staticQueries: readonly QueryTemplate[];
-}): QueryTemplate[] => [...extensionQueries, ...staticQueries].slice(0, MAX_RECOMMENDED_QUERIES);
+  federatedOnly?: boolean;
+}): QueryTemplate[] => {
+  // Solution extensions target indices such as metrics-* and logs-*.
+  const extensions = federatedOnly ? [] : extensionQueries;
+  const templates = federatedOnly
+    ? staticQueries.filter((query) => !needsIndex(query))
+    : staticQueries;
+
+  return [...extensions, ...templates].slice(0, MAX_RECOMMENDED_QUERIES);
+};

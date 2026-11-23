@@ -353,12 +353,16 @@ describe('tab_state_data_view actions', () => {
       expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(
         dataViewMockWithTimeField
       );
+      internalState.dispatch(
+        internalStateActions.setInitializationState({ hasESData: true, hasDataView: false })
+      );
       await internalState.dispatch(
         internalStateActions.onDataViewCreated({
           tabId,
           nextDataView: dataViewComplexMock,
         })
       );
+      expect(internalState.getState().initializationState.hasDataView).toBe(true);
       expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
       );
@@ -374,12 +378,16 @@ describe('tab_state_data_view actions', () => {
         .mockImplementationOnce((id) =>
           id === dataViewAdHoc.id ? Promise.resolve(dataViewAdHoc) : Promise.reject()
         );
+      internalState.dispatch(
+        internalStateActions.setInitializationState({ hasESData: true, hasDataView: false })
+      );
       await internalState.dispatch(
         internalStateActions.onDataViewCreated({
           tabId,
           nextDataView: dataViewAdHoc,
         })
       );
+      expect(internalState.getState().initializationState.hasDataView).toBe(false);
       // Verify the ad-hoc data view was added to the runtime state
       const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
       expect(adHocDataViews.map((dv) => dv.id)).toContain(dataViewAdHoc.id);

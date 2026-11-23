@@ -130,6 +130,30 @@ describe('useAppMenuData', () => {
     );
   });
 
+  it('omits "Switch to classic" when the project has no data view', async () => {
+    const { toolkit, hook } = await setup();
+
+    await act(async () => {
+      toolkit.internalState.dispatch(
+        internalStateActions.transitionFromDataViewToESQL({
+          tabId: toolkit.getCurrentTab().id,
+          dataView: dataViewMock,
+        })
+      );
+      toolkit.internalState.dispatch(
+        internalStateActions.setInitializationState({ hasESData: false, hasDataView: false })
+      );
+    });
+
+    const items = hook.result.current.getAdditionalTabMenuItems?.(toolkit.getCurrentTab());
+
+    expect(items).not.toContainEqual(
+      expect.objectContaining({
+        'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
+      })
+    );
+  });
+
   it('hides "Switch to ES|QL" until a data view is available', async () => {
     const { toolkit, hook } = await setup({ dataView: null });
     const items = hook.result.current.getAdditionalTabMenuItems?.(toolkit.getCurrentTab());

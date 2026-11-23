@@ -28,8 +28,8 @@ import type { QueryTemplate } from '@kbn/esql-language';
 
 const RUN_BUTTON_CLASS = 'discoverRecommendedQuery__run';
 
-// Share of the viewport the section takes, below and from the EUI `xl` breakpoint.
-const SECTION_VIEWPORT_SHARE = { default: 85, wide: 75 };
+// Share of the results area the section takes, below and from the EUI `xl` breakpoint.
+const SECTION_WIDTH = { default: '85%', wide: '75%' };
 
 const cardStyles = css`
   .${RUN_BUTTON_CLASS} {
@@ -131,13 +131,14 @@ export const RecommendedQueries = ({ queries, onRunQuery }: RecommendedQueriesPr
         paddingInline: euiTheme.size.l,
         boxSizing: 'border-box',
         minWidth: 0,
-        width: `${SECTION_VIEWPORT_SHARE.default}vw`,
+        width: SECTION_WIDTH.default,
         maxWidth: '100%',
         [`@media (max-width: ${euiTheme.breakpoint.m - 1}px)`]: {
           paddingTop: euiTheme.size.l,
+          width: '100%',
         },
         [`@media (min-width: ${euiTheme.breakpoint.xl}px)`]: {
-          width: `${SECTION_VIEWPORT_SHARE.wide}vw`,
+          width: SECTION_WIDTH.wide,
         },
       }}
     >

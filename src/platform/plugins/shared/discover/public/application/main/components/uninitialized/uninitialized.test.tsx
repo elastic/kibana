@@ -11,6 +11,7 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ENABLE_ESQL, getEditorExtensions } from '@kbn/esql-utils';
+import { DATASETS_ROUTE } from '@kbn/esql-types';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -105,6 +106,66 @@ describe('DiscoverUninitialized', () => {
     expect(getEditorExtensionsMock).not.toHaveBeenCalled();
   });
 
+  it('keeps index queries out of the recommendations when the only data is federated', async () => {
+    const services = createDiscoverServicesMock();
+    services.dataViews.hasData.hasESData = jest.fn().mockResolvedValue(false);
+    services.http.get = jest.fn(async (path: string) => {
+      if (path === DATASETS_ROUTE) {
+        return { datasets: [{ name: 'btc_blocks', data_source: 'aws', resource: 's3://blocks' }] };
+      }
+      return {};
+    });
+    const getUiSettingsMock = jest.mocked(services.uiSettings.get);
+    const originalGetImplementation = getUiSettingsMock.getMockImplementation();
+    getUiSettingsMock.mockImplementation((key, defaultOverride) => {
+      if (key === ENABLE_ESQL) return true;
+      return originalGetImplementation?.(key, defaultOverride);
+    });
+
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    await toolkit.initializeTabs();
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: {
+          dataSource: createEsqlDataSource(),
+          query: { esql: '' },
+        },
+      })
+    );
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+    toolkit.internalState.dispatch(
+      internalStateActions.setDataView({
+        tabId: toolkit.getCurrentTab().id,
+        dataView: dataViewWithTimefieldMock,
+      })
+    );
+
+    await act(async () => {
+      render(
+        <DiscoverToolkitTestProvider toolkit={toolkit}>
+          <DiscoverUninitialized onRefresh={jest.fn()} />
+        </DiscoverToolkitTestProvider>
+      );
+    });
+
+    expect(await screen.findByTestId('discoverFederatedDataHint')).toHaveTextContent(
+      'You can still query federated data, starting with btc_blocks'
+    );
+    expect(await screen.findByText('Aggregate with STATS')).toBeVisible();
+    expect(screen.getByText('Create a conditional with CASE')).toBeVisible();
+    expect(screen.queryByText('Search all fields')).not.toBeInTheDocument();
+    expect(screen.queryByText('Load unmapped fields')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discoverRecommendedQueries').textContent).toContain(
+      'FROM btc_blocks'
+    );
+    expect(screen.getByTestId('discoverRecommendedQueries').textContent).not.toContain('KQL(');
+    expect(getEditorExtensionsMock).not.toHaveBeenCalled();
+  });
+
   it('shows recommended queries built from the inherited source in ES|QL mode', async () => {
     await setup({ isEsqlMode: true });
 
@@ -113,6 +174,7 @@ describe('DiscoverUninitialized', () => {
     expect(screen.getAllByTestId('discoverRecommendedQueryRun')).toHaveLength(6);
     expect(screen.getAllByText(/FROM/).length).toBeGreaterThan(0);
     expect(screen.queryByTestId('refreshDataButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discoverFederatedDataHint')).not.toBeInTheDocument();
   });
 
   it('requests the extensions for the inherited source and the active solution', async () => {

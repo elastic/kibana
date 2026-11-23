@@ -242,10 +242,16 @@ export const onDataViewCreated: InternalStateThunkActionCreator<
   [TabActionPayload<{ nextDataView: DataView }>],
   Promise<void>
 > = ({ tabId, nextDataView }) =>
-  async function onDataViewCreatedThunkFn(dispatch) {
+  async function onDataViewCreatedThunkFn(dispatch, getState) {
     if (!nextDataView.isPersisted()) {
       dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
     } else {
+      dispatch(
+        internalStateActions.setInitializationState({
+          ...getState().initializationState,
+          hasDataView: true,
+        })
+      );
       await dispatch(internalStateActions.loadDataViewList());
     }
     if (nextDataView.id) {
