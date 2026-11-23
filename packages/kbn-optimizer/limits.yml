@@ -6,12 +6,12 @@ pageLoadAssetSize:
   agentBuilderPlatform: 27400
   agentBuilderVisualizations: 7356
   agentBuilderWorkflows: 24405
-  agentContextLayer: 10146
+  agentContextLayer: 2194
   aiAssistantManagementSelection: 11569
   aiops: 18400
   alerting: 22371
   alertingVTwo: 56591
-  apm: 59600
+  apm: 66875
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -37,7 +37,7 @@ pageLoadAssetSize:
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8661
-  data: 516784
+  data: 516608
   dataFederation: 7106
   dataQuality: 11469
   datasetQuality: 49315
@@ -59,12 +59,12 @@ pageLoadAssetSize:
   embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
-  entityStore: 17200
+  entityStore: 19313
   esql: 29469
   esqlDataGrid: 10209
-  esUiShared: 112884
+  esUiShared: 112709
   evals: 6117
-  eventAnnotation: 22334
+  eventAnnotation: 22242
   eventAnnotationListing: 13164
   exploratoryView: 45042
   expressionGauge: 15748
@@ -73,13 +73,13 @@ pageLoadAssetSize:
   expressionMetricVis: 18100
   expressionPartitionVis: 29826
   expressions: 104955
-  expressionTagcloud: 14009
+  expressionTagcloud: 14001
   expressionXY: 45000
   features: 4141
   feedback: 7642
   fieldFormats: 64634
   fieldsMetadata: 4901
-  files: 6037
+  files: 6035
   filesManagement: 5208
   fileUpload: 22957
   fleet: 239000
@@ -120,8 +120,8 @@ pageLoadAssetSize:
   logstash: 15882
   maintenanceWindows: 8775
   management: 14304
-  maps: 36005
-  mapsEms: 6734
+  maps: 35949
+  mapsEms: 6721
   metricsDataAccess: 44950
   ml: 99842
   mockIdpPlugin: 7463
@@ -130,7 +130,7 @@ pageLoadAssetSize:
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
-  observability: 120410
+  observability: 120215
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
@@ -138,9 +138,9 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 14161
   observabilityShared: 82578
-  osquery: 51100
+  osquery: 56912
   painlessLab: 6299
-  presentationUtil: 8391
+  presentationUtil: 8345
   productDocBase: 6769
   productIntercept: 9860
   profiling: 20716
@@ -155,7 +155,7 @@ pageLoadAssetSize:
   savedObjectsFinder: 4306
   savedObjectsManagement: 22273
   savedObjectsTagging: 23144
-  savedObjectsTaggingOss: 2163
+  savedObjectsTaggingOss: 2159
   savedSearch: 11000
   screenshotMode: 2351
   screenshotting: 3252
