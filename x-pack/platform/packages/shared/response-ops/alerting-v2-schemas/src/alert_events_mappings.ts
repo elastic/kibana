@@ -51,5 +51,6 @@ export const ALERT_EVENTS_MAPPINGS: MappingsDefinition = {
     },
     space_id: { type: 'keyword' },
     severity: { type: 'keyword' }, // info | low | medium | high | critical
+    reason: { type: 'keyword' },
   },
 };

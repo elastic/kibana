@@ -55,6 +55,7 @@ This stream is the durable history of rule evaluation.
 | `alert.status_count` | `long` | Consecutive count within the current alert status. |
 | `episode.id`, `episode.status`, `episode.status_count` | `alias` | Aliases of the `alert.*` fields, so queries on the pre-v8 names keep working. Aliases are not stored in `_source` and cannot be written. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
+| `reason` | `keyword` | Optional. The rule's `reason` template rendered against the query row. Only set on `breached` events built from a query row, at most 1,024 characters. |
 
 Writers:
 

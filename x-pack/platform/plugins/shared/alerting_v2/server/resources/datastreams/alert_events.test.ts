@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { signalEventStatusSchema } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EVENTS_MAPPINGS,
+  MAX_REASON_TEMPLATE_LENGTH,
+  signalEventStatusSchema,
+} from '@kbn/alerting-v2-schemas';
 import {
   alertEventSchema,
   alertEventStatus,
@@ -28,6 +32,10 @@ describe('getAlertEventsResourceDefinition', () => {
 
   it('manages its lifecycle so retention changes reach existing data streams', () => {
     expect(getAlertEventsResourceDefinition().manageLifecycle).toBe(true);
+  });
+
+  it('maps the rendered reason as a keyword', () => {
+    expect(ALERT_EVENTS_MAPPINGS.properties?.reason).toEqual({ type: 'keyword' });
   });
 
   it('sets data_retention when a retention is provided', () => {
@@ -95,6 +103,14 @@ describe('buildRuleEventDocument', () => {
     ).toEqual({ id: 'episode-1', status: 'pending', status_count: 2 });
   });
 
+  it('passes reason through when provided', () => {
+    expect(buildRuleEventDocument(baseParams)).not.toHaveProperty('reason');
+
+    expect(buildRuleEventDocument({ ...baseParams, reason: 'CPU on host-a is high' }).reason).toBe(
+      'CPU on host-a is high'
+    );
+  });
+
   it('passes severity through when provided', () => {
     expect(buildRuleEventDocument(baseParams)).not.toHaveProperty('severity');
 
@@ -103,6 +119,27 @@ describe('buildRuleEventDocument', () => {
 });
 
 describe('alertEventSchema', () => {
+  const eventWithReason = (reason: string) => ({
+    '@timestamp': '2026-07-01T12:00:00.000Z',
+    group_hash: 'group-1',
+    data: {},
+    status: 'breached' as const,
+    source: 'internal',
+    type: 'alert' as const,
+    space_id: 'default',
+    reason,
+  });
+
+  it('accepts a reason up to the template limit and rejects a longer one', () => {
+    expect(
+      alertEventSchema.safeParse(eventWithReason('a'.repeat(MAX_REASON_TEMPLATE_LENGTH))).success
+    ).toBe(true);
+    expect(
+      alertEventSchema.safeParse(eventWithReason('a'.repeat(MAX_REASON_TEMPLATE_LENGTH + 1)))
+        .success
+    ).toBe(false);
+  });
+
   it('validates an external event document with no rule and a vendor source', () => {
     const externalEvent = {
       '@timestamp': '2026-07-01T12:00:00.000Z',
