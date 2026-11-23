@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorDrift, DriftReportEntry } from './detect_drift';
+import type { ConnectorDrift, DriftReportEntry, SpecChange } from './detect_drift';
 import { DRIFT_ISSUE_LABEL } from './issue_marker';
 import { drifted, healthy } from './drift_fixtures';
 import { renderDriftIssue } from './issue';
@@ -268,12 +268,73 @@ describe('surfaceDrift', () => {
 // Sentry's spec moved `/api/0` from its paths into its server URL, which an overlay correction
 
 describe('renderRefreshPr', () => {
-  it('lists the changes per connector', () => {
-    expect(
-      renderRefreshPr([
-        refreshable,
-        { ...refreshable, connector: '.moved', sources: {}, operationsChanged: true },
-      ])
-    ).toContain('- main: added `title` (`response-optional-property-added`)');
+  const changed = (connector: string, changes: SpecChange[]): ConnectorDrift => ({
+    ...refreshable,
+    connector,
+    sources: { main: { status: 'changed', changes } },
+  });
+  const added = (operation: string, text: string): SpecChange => ({
+    kind: 'non-breaking',
+    id: 'response-optional-property-added',
+    text,
+    operation,
+  });
+
+  it('groups the changes of a connector by rule, with the operations and one example', () => {
+    const body = renderRefreshPr([
+      changed('.other', [
+        added('GET /a', 'added `title`'),
+        added('GET /b', 'added `name`'),
+        added('GET /a', 'added `id`'),
+      ]),
+      { ...refreshable, connector: '.moved', sources: {}, operationsChanged: true },
+    ]);
+
+    expect(body).toContain(
+      '- `response-optional-property-added` ×3 on `GET /a`, `GET /b`, e.g. main: added `title`'
+    );
+    expect(body).toContain('### `.moved`\n\n- The actions call other operations.');
+  });
+
+  it('names at most three operations per rule and counts the rest', () => {
+    const body = renderRefreshPr([
+      changed(
+        '.other',
+        ['/a', '/b', '/c', '/d', '/e'].map((path) => added(`GET ${path}`, 'added `x`'))
+      ),
+    ]);
+
+    expect(body).toContain('on `GET /a`, `GET /b`, `GET /c` and 2 more,');
+  });
+
+  it('cuts the example of a change with a long schema path', () => {
+    const body = renderRefreshPr([
+      changed('.other', [added('GET /a', `added ${'x/'.repeat(2000)}`)]),
+    ]);
+
+    expect(body.length).toBeLessThan(1000);
+    expect(body).toContain('…');
+  });
+
+  it('stays under the limit GitHub puts on a description, naming the connectors left out', () => {
+    const connectors = Array.from({ length: 60 }, (_, index) => `.connector${index}`);
+    const body = renderRefreshPr(
+      connectors.map((connector) =>
+        changed(
+          connector,
+          Array.from({ length: 200 }, (_, rule) => ({
+            kind: 'non-breaking' as const,
+            id: `rule-${rule}`,
+            text: `added ${'y'.repeat(400)}`,
+            operation: `GET /${rule}`,
+          }))
+        )
+      )
+    );
+
+    expect(body.length).toBeLessThan(65_536);
+    expect(body).toContain('### `.connector0`');
+    expect(body).toMatch(/### \d+ more connectors\n\nThe changes of `\.connector\d+`/);
+    expect(body).toContain("don't fit in a pull request description");
   });
 });
