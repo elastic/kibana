@@ -23,6 +23,21 @@ describe('Put cribl routing pipeline tests', () => {
     });
   });
 
+  it('uses the dataset from the index template patterns when available', () => {
+    const req = buildPipelineRequest(
+      [
+        { dataId: 'otelSource', datastream: 'logs-claude_cowork.events' },
+        { dataId: 'criblSource2', datastream: 'logs-destination2' },
+      ],
+      new Map([['logs-claude_cowork.events', ['logs-claude_cowork.events.otel-*']]])
+    );
+
+    expect(req.processors?.map((processor) => processor.reroute?.dataset)).toEqual([
+      'claude_cowork.events.otel',
+      'destination2',
+    ]);
+  });
+
   it('defaults namespace to "default" when namespace is undefined', () => {
     const req = buildPipelineRequest(routeEntries);
 

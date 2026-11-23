@@ -10,12 +10,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
+import { getAgentPolicySavedObjectType } from '../agent_policy';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
@@ -24,7 +25,7 @@ import {
   removeVersionSuffixFromPolicyId,
   buildPolicyBaseIdsWithFallbackEsFilter,
 } from '../../../common/services/version_specific_policies_utils';
-import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENTS_INDEX } from '../../constants';
 import {
   FleetError,
   isESClientError,
@@ -257,21 +258,66 @@ export async function getAgentsByKuery(
     filters.push(kuery);
   }
 
-  // Hides agents enrolled in agentless policies by excluding the first 1000 agentless policy IDs
-  // from the search. This limitation is to avoid hitting the `max_clause_count` limit.
-  // In the future, we should hopefully be able to filter agentless agents using metadata:
-  // https://github.com/elastic/elastic-agent/issues/7946
+  // Hides agents enrolled in agentless policies by excluding their policy IDs from the search.
+  // The exclusion is built as an ES DSL `must_not` (using `terms` queries) rather than a KQL
+  // string so that the clause count stays constant (~4 clauses) regardless of how many policy
+  // IDs are in the list.
+  //
+  // The lookup must use an unscoped SO client with spaceId '*' because .fleet-agents is not
+  // space-partitioned: an agent enrolled against a policy in space-a is still returned by
+  // space-b's agents query. Using a space-scoped client would miss agentless policies created
+  // in other spaces, leaving their agents in the list. Without spaceId '*', the namespaces
+  // filter defaults to the caller's space and excludes cross-space policies.
+  //
+  // fetchAllAgentPolicyIds paginates through all results so deployments with more than
+  // SO_SEARCH_LIMIT agentless policies across spaces are not silently truncated. Collection
+  // is capped at ES_MAX_TERMS_COUNT (the Elasticsearch index.max_terms_count default) because
+  // buildPolicyBaseIdsWithFallbackEsFilter puts the array in a terms query; exceeding the limit
+  // would make showAgentless=false requests fail with an ES error. If the cap is hit the
+  // remaining agentless agents will not be filtered — the warning log makes this observable.
+  const ES_MAX_TERMS_COUNT = 65536;
+  let agentlessExcludeFilter: ReturnType<typeof buildPolicyBaseIdsWithFallbackEsFilter> | null =
+    null;
   if (showAgentless === false) {
-    const agentlessPolicies = await agentPolicyService.list(soClient, {
-      perPage: 1000,
-      kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
-    });
-    if (agentlessPolicies.items.length > 0) {
-      filters.push(
-        `NOT policy_id: (${agentlessPolicies.items
-          .map((policy) => `"${escapeQuotes(policy.id)}"`)
-          .join(' or ')})`
-      );
+    const internalSoClientWithoutSpaceExtension =
+      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const agentlessPolicyIdPages = await agentPolicyService.fetchAllAgentPolicyIds(
+      internalSoClientWithoutSpaceExtension,
+      {
+        spaceId: '*',
+        kuery: `${await getAgentPolicySavedObjectType()}.supports_agentless:true`,
+      }
+    );
+    const agentlessPolicyIds: string[] = [];
+    let truncated = false;
+    for await (const pageOfIds of agentlessPolicyIdPages) {
+      const remaining = ES_MAX_TERMS_COUNT - agentlessPolicyIds.length;
+      if (remaining <= 0) {
+        truncated = true;
+        break;
+      }
+      agentlessPolicyIds.push(...pageOfIds.slice(0, remaining));
+      if (agentlessPolicyIds.length >= ES_MAX_TERMS_COUNT) {
+        truncated = true;
+        break;
+      }
+    }
+    if (truncated) {
+      appContextService
+        .getLogger()
+        .warn(
+          `showAgentless=false: found more than ${ES_MAX_TERMS_COUNT} agentless policies across all spaces. ` +
+            `Only the first ${ES_MAX_TERMS_COUNT} are excluded from the agents list; agentless agents ` +
+            `enrolled against the remaining policies will not be filtered.`
+        );
+    }
+    if (agentlessPolicyIds.length > 0) {
+      // Use the policy_base_id-with-fallback ES DSL filter so agents whose policy_id carries a
+      // version suffix (e.g. "<uuid>#9.6") are still excluded. The fallback branch covers
+      // agents enrolled by an older fleet-server that did not yet write policy_base_id.
+      // Using buildPolicyBaseIdsWithFallbackEsFilter (terms queries) rather than the KQL
+      // equivalent keeps the clause count at ~4 instead of ~2N.
+      agentlessExcludeFilter = buildPolicyBaseIdsWithFallbackEsFilter(agentlessPolicyIds);
     }
   }
 
@@ -344,7 +390,16 @@ export async function getAgentsByKuery(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort,
-      query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
+      query: (() => {
+        const baseQuery = kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
+        if (!agentlessExcludeFilter) return baseQuery;
+        return {
+          bool: {
+            ...(baseQuery ? { filter: [baseQuery] } : {}),
+            must_not: [agentlessExcludeFilter],
+          },
+        };
+      })(),
       ...(currentPitId
         ? {
             pit: {
@@ -594,6 +649,8 @@ async function _filterAgents(
     perPage?: number;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
+    /** When true, omit namespace filtering so agents from all spaces are matched. */
+    skipNamespaceFilter?: boolean;
   } = {}
 ): Promise<{
   agents: Agent[];
@@ -601,9 +658,16 @@ async function _filterAgents(
   page: number;
   perPage: number;
 }> {
-  const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
+  const {
+    page = 1,
+    perPage = 20,
+    sortField = 'enrolled_at',
+    sortOrder = 'desc',
+    skipNamespaceFilter,
+  } = options;
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
-  const currentSpaceId = getCurrentNamespace(soClient);
+  // Pass undefined when skipNamespaceFilter is set so addNamespaceFilteringToQuery skips the filter.
+  const currentSpaceId = skipNamespaceFilter ? undefined : getCurrentNamespace(soClient);
 
   let res;
   try {
@@ -639,7 +703,8 @@ async function _filterAgents(
 export async function getAgentsById(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  agentIds: string[]
+  agentIds: string[],
+  options?: { skipNamespaceFilter?: boolean }
 ): Promise<Array<Agent | { id: string; notFound: true }>> {
   if (!agentIds.length) {
     return [];
@@ -664,6 +729,7 @@ export async function getAgentsById(
     };
     const { agents } = await _filterAgents(esClient, soClient, idsQuery, {
       perPage: batch.length,
+      skipNamespaceFilter: options?.skipNamespaceFilter,
     });
     for (const agent of agents) {
       agentsById.set(agent.id, agent);

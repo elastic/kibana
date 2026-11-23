@@ -157,6 +157,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/lens-common'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod

@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { DslQuery } from '@kbn/es-query';
 import { calculateRateTimeranges } from '../utils';
 export const createRateAggsBucketScript = (
   timeframe: { start: number; end: number },
@@ -34,34 +35,39 @@ export const createRateAggsBuckets = (
   timeframe: { start: number; end: number },
   id: string,
   timeFieldName: string,
-  field: string
+  field: string,
+  filterQuery?: DslQuery
 ) => {
   const { firstBucketRange, secondBucketRange } = calculateRateTimeranges({
     to: timeframe.end,
     from: timeframe.start,
   });
 
+  // Combines the time range of each window with the metric's KQL filter, when there is one
+  const withMetricFilter = (rangeQuery: DslQuery) =>
+    filterQuery ? { bool: { must: [rangeQuery, filterQuery] } } : rangeQuery;
+
   return {
     [`${id}_first_bucket`]: {
-      filter: {
+      filter: withMetricFilter({
         range: {
           [timeFieldName]: {
             gte: moment(firstBucketRange.from).toISOString(),
             lt: moment(firstBucketRange.to).toISOString(),
           },
         },
-      },
+      }),
       aggs: { maxValue: { max: { field } } },
     },
     [`${id}_second_bucket`]: {
-      filter: {
+      filter: withMetricFilter({
         range: {
           [timeFieldName]: {
             gte: moment(secondBucketRange.from).toISOString(),
             lt: moment(secondBucketRange.to).toISOString(),
           },
         },
-      },
+      }),
       aggs: { maxValue: { max: { field } } },
     },
   };

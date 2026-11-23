@@ -81,7 +81,7 @@ export const snapshot: Command = {
 
     if (options.docker) {
       throw createCliError(
-        `The --docker flag has been removed from 'es snapshot'. Use 'yarn es docker --snapshot' instead.`
+        `The --docker flag has been removed from 'es snapshot'. Use 'pnpm es docker --snapshot' instead.`
       );
     } else if (options['download-only']) {
       await cluster.downloadSnapshot({

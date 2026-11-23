@@ -37,6 +37,7 @@ import {
 } from '../common/set_workflow_status_handler';
 import {
   buildRuntimeMappingsFromFieldTypes,
+  mergeBulkCloseRuntimeMappings,
   MAX_RUNTIME_FIELDS_PER_REQUEST,
 } from './bulk_close_runtime_mappings';
 
@@ -133,17 +134,50 @@ export const setSignalsStatusRoute = (
               getIndexPattern,
             });
           } else {
-            const { conflicts, query, runtime_fields: runtimeFields } = request.body;
+            const {
+              conflicts,
+              query: rawQuery,
+              runtime_fields: runtimeFields,
+              runtime_mappings: passthroughRuntimeMappings,
+            } = request.body;
 
-            const runtimeFieldCount = runtimeFields ? Object.keys(runtimeFields).length : 0;
-            if (runtimeFieldCount > MAX_RUNTIME_FIELDS_PER_REQUEST) {
+            // The schema documents `maxProperties: 100` on both runtime_fields
+            // and runtime_mappings, but the generated Zod schema doesn't carry
+            // that constraint — enforce the combined count here so one request
+            // can't schedule unbounded runtime-script work on the
+            // `_update_by_query`. Use the union of keys (a Set) rather than
+            // summing the two counts so a key present in both params is counted
+            // once — the merge step lets passthrough win on collision, so the
+            // effective number of runtime mappings sent to ES is the union size.
+            const runtimeFieldUnion = new Set([
+              ...Object.keys(runtimeFields ?? {}),
+              ...Object.keys(passthroughRuntimeMappings ?? {}),
+            ]);
+            if (runtimeFieldUnion.size > MAX_RUNTIME_FIELDS_PER_REQUEST) {
               return siemResponse.error({
                 statusCode: 400,
-                body: `runtime_fields is limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldCount}`,
+                body: `runtime_fields and runtime_mappings combined are limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldUnion.size} unique field names`,
               });
             }
 
-            const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
+            // The schema validates `query` only as an open object (the route
+            // is intentionally permissive about DSL shape); narrow it to the
+            // ES DSL type once at the boundary so internal helpers stay
+            // strictly typed against `QueryDslQueryContainer`.
+            const query = rawQuery as estypes.QueryDslQueryContainer;
+
+            // Merge the two runtime-field inputs:
+            //   runtime_fields: name → type map; server synthesises a _source reader per entry.
+            //     Used by the exceptions flyout when closing by a rule-source runtime field.
+            //   runtime_mappings: full mapping (type + script + format) forwarded verbatim.
+            //     Used by the alerts table when closing with a data-view runtime field, so the
+            //     caller's Painless script is preserved and ES evaluates it at query time rather
+            //     than falling back to a _source read.
+            // Passthrough entries win on key collision (they carry real semantics).
+            const runtimeMappings = mergeBulkCloseRuntimeMappings(
+              buildRuntimeMappingsFromFieldTypes(runtimeFields),
+              passthroughRuntimeMappings
+            );
 
             const body = await updateSignalsStatusByQuery(
               status,
