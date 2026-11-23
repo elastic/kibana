@@ -100,10 +100,12 @@ export interface GetSavedObjectFromSourceOptions {
 /**
  * Gets a saved object from a raw ES document.
  *
- * @param registry
- * @param type
- * @param id
- * @param doc
+ * @param registry The saved object type registry.
+ * @param type The saved object type.
+ * @param id The saved object ID.
+ * @param doc The raw document, with its sequence number and primary term if Elasticsearch returned them.
+ * @param options `migrationVersionCompatibility`, and `includeAcl`, which keeps the stored ACL in the
+ *   result. See {@link projectAcl}.
  *
  * @internal
  */
