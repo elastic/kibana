@@ -58,8 +58,19 @@ function getQueryParam(url: string) {
   return '';
 }
 
+const SettingsLoadError = ({ error, onRetry }: { error: Error; onRetry: () => void }) => (
+  <SettingDefinitionsLoadError
+    error={error}
+    onRetry={onRetry}
+    title={i18nTexts.loadErrorTitle}
+    data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR}
+  />
+);
+
 const SettingsBody = ({
   isLoading,
+  loadError,
+  onRetry,
   selectedTab,
   selectedTabId,
   query,
@@ -69,6 +80,8 @@ const SettingsBody = ({
   canSaveSpaceSettings,
 }: {
   isLoading: boolean;
+  loadError?: Error;
+  onRetry: () => void;
   selectedTab: SettingsTabs[string];
   selectedTabId: string;
   query: Query;
@@ -85,6 +98,10 @@ const SettingsBody = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
+  }
+
+  if (loadError) {
+    return <SettingsLoadError error={loadError} onRetry={onRetry} />;
   }
 
   if (!selectedTab.fields.length) {
@@ -151,15 +168,18 @@ export const SettingsApplication = () => {
     globalAllFields,
     globalFilteredFields,
     isLoading,
-    error: loadError,
+    spaceError,
+    globalError,
     retry,
   } = useScopeFields({ query, includeGlobal: canShowGlobalSettings });
 
   const [requestedTabId, setRequestedTabId] = useState(SPACE_SETTINGS_TAB_ID);
 
   // Only enable the Global settings tab if global settings can be shown and there are any global
-  // settings. Whether there are any is unknown until the settings load, so keep the tab until then.
-  const globalTabEnabled = canShowGlobalSettings && (isLoading || globalAllFields.length > 0);
+  // settings. Whether there are any is unknown until they load, so keep the tab until then, and
+  // keep it to show the error if they fail to load.
+  const globalTabEnabled =
+    canShowGlobalSettings && (isLoading || !!globalError || globalAllFields.length > 0);
 
   const tabs: SettingsTabs = {
     [SPACE_SETTINGS_TAB_ID]: {
@@ -194,17 +214,12 @@ export const SettingsApplication = () => {
     </EuiText>
   );
 
-  if (loadError) {
+  if (spaceError) {
     return (
       <div>
         {title}
         <EuiSpacer size="m" />
-        <SettingDefinitionsLoadError
-          error={loadError}
-          onRetry={retry}
-          title={i18nTexts.loadErrorTitle}
-          data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR}
-        />
+        <SettingsLoadError error={spaceError} onRetry={retry} />
       </div>
     );
   }
@@ -245,6 +260,8 @@ export const SettingsApplication = () => {
       <EuiSpacer size="xl" />
       <SettingsBody
         isLoading={isLoading}
+        loadError={selectedTabId === GLOBAL_SETTINGS_TAB_ID ? globalError : undefined}
+        onRetry={retry}
         selectedTab={selectedTab}
         selectedTabId={selectedTabId}
         query={query}

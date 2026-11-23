@@ -20,8 +20,8 @@ import { useFields } from './use_fields';
  * @param options.includeGlobal When false, global settings are not fetched, and the global field
  * collections are empty.
  * @returns An object with the all and filtered {@link FieldDefinition} arrays for each scope, a
- * loading flag, the error if either scope failed to load, and a function that fetches the failed
- * scopes again.
+ * loading flag, the error of each scope that failed to load, and a function that fetches the
+ * failed scopes again.
  */
 export const useScopeFields = ({
   query,
@@ -35,7 +35,8 @@ export const useScopeFields = ({
   globalAllFields: FieldDefinition[];
   globalFilteredFields: FieldDefinition[];
   isLoading: boolean;
-  error?: Error;
+  spaceError?: Error;
+  globalError?: Error;
   retry: () => void;
 } => {
   const {
@@ -68,7 +69,8 @@ export const useScopeFields = ({
     globalAllFields,
     globalFilteredFields,
     isLoading: spaceLoading || globalLoading,
-    error: spaceError ?? globalError,
+    spaceError,
+    globalError,
     retry,
   };
 };

@@ -198,6 +198,38 @@ describe('Settings application', () => {
     expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeNull();
   });
 
+  it('keeps the space settings and shows the error in the Global tab when only the global settings fail to load', async () => {
+    const services: SettingsApplicationServices = {
+      ...createSettingsApplicationServicesMock(true),
+      metadataClient: {
+        getAll: (scope: UiSettingsScope) =>
+          scope === 'global'
+            ? Promise.reject(new Error('Internal Server Error'))
+            : Promise.resolve(getSettingsMock()),
+      },
+    };
+
+    const { findByTestId, getByTestId, queryByTestId } = render(
+      wrap(<SettingsApplication />, services)
+    );
+
+    for (const category of spaceCategories) {
+      expect(
+        await findByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)
+      ).toBeInTheDocument();
+    }
+    expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR)).toBeNull();
+
+    act(() => {
+      fireEvent.click(getByTestId(`${DATA_TEST_SUBJ_PREFIX_TAB}-${GLOBAL_SETTINGS_TAB_ID}`));
+    });
+
+    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR)).toHaveTextContent(
+      'Internal Server Error'
+    );
+    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeInTheDocument();
+  });
+
   it('fetches the failed settings again when retrying from the error callout', async () => {
     const client = uiSettingsServiceMock.createStartContract();
     client.getAll.mockReturnValue({
