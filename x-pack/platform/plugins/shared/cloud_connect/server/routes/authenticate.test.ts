@@ -541,7 +541,14 @@ describe('Authentication Routes', () => {
     });
 
     it('should not report request setup errors as unreachable', async () => {
-      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue({
+      // validateApiKeyScope never rejects, so exercise the route's catch block through a
+      // later Cloud API call instead
+      mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
+        isClusterScoped: true,
+        hasValidScope: true,
+        clusterId: 'cluster-123',
+      });
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue({
         isAxiosError: true,
         code: 'ERR_BAD_REQUEST',
         message: 'Unsupported protocol ftp:',
@@ -554,6 +561,39 @@ describe('Authentication Routes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: { message: 'An error occurred while authenticating with Cloud Connect' },
+      });
+    });
+
+    it('should return 502 with CLOUD_API_UNREACHABLE when a gateway returns 504', async () => {
+      mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
+        isClusterScoped: false,
+        hasValidScope: true,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getCurrentClusterData } = require('../lib/cluster_info');
+      getCurrentClusterData.mockResolvedValue({});
+      mockCloudConnectInstance.onboardClusterWithKeyGeneration.mockRejectedValue({
+        isAxiosError: true,
+        message: 'Request failed with status code 504',
+        request: {},
+        response: { status: 504 },
+        config: {
+          baseURL: 'https://cloud.elastic.co/api/v1',
+          url: '/cloud-connected/clusters?create_api_key=true',
+        },
+      });
+
+      mockRequest = { body: { apiKey: 'some-key' } };
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 502,
+        body: {
+          message:
+            'https://cloud.elastic.co/api/v1/cloud-connected/clusters?create_api_key=true returned HTTP 504. Elastic Cloud or a proxy between Kibana and Elastic Cloud may be unavailable. Try again later, and check the proxy if it keeps happening.',
+          attributes: { code: 'CLOUD_API_UNREACHABLE' },
+        },
       });
     });
 

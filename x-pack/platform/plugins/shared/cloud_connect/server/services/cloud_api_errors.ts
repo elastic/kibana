@@ -26,6 +26,23 @@ export const isProxyAuthenticationError = (error: unknown): error is AxiosError 
   axios.isAxiosError(error) && error.response?.status === 407;
 
 /**
+ * True when follow-redirects gave up after too many redirects. Axios reports this with a
+ * `request` and no `response`, like a network failure, but something did answer. The Cloud
+ * API doesn't redirect in a loop, so a proxy or captive portal is the likely cause.
+ */
+export const isTooManyRedirectsError = (error: unknown): error is AxiosError =>
+  axios.isAxiosError(error) && error.code === 'ERR_FR_TOO_MANY_REDIRECTS';
+
+const UPSTREAM_UNAVAILABLE_STATUSES = [502, 503, 504];
+
+/**
+ * True for 502/503/504. These can come from Elastic Cloud itself or from a gateway in
+ * between, and either way they say nothing about the API key.
+ */
+export const isUpstreamUnavailableError = (error: unknown): error is AxiosError =>
+  axios.isAxiosError(error) && UPSTREAM_UNAVAILABLE_STATUSES.includes(error.response?.status ?? 0);
+
+/**
  * Short description of an error for log lines, e.g. `ECONNRESET: socket hang up` or
  * `HTTP 401: Request failed with status code 401`. The logger doesn't print error meta
  * by default, so the cause has to be in the message itself.
@@ -39,16 +56,11 @@ export const describeCloudApiError = (error: unknown): string => {
 };
 
 /**
- * Full URL of the request that failed, falling back to the given URL when axios didn't
- * record one.
+ * Full URL of the request that failed, resolved the same way axios resolved it, falling back
+ * to the given URL when axios didn't record one.
  */
-export const getCloudApiErrorUrl = (error: AxiosError, fallbackUrl: string): string => {
-  const { baseURL = '', url } = error.config ?? {};
-  if (!url) {
-    return fallbackUrl;
-  }
-  return /^https?:\/\//.test(url) ? url : `${baseURL}${url}`;
-};
+export const getCloudApiErrorUrl = (error: AxiosError, fallbackUrl: string): string =>
+  error.config?.url ? axios.getUri(error.config) : fallbackUrl;
 
 export const getCloudApiUnreachableMessage = (url: string): string =>
   i18n.translate('xpack.cloudConnect.server.cloudApiUnreachableMessage', {
@@ -64,6 +76,20 @@ export const getCloudApiProxyAuthenticationMessage = (url: string): string =>
     values: { url },
   });
 
+export const getCloudApiTooManyRedirectsMessage = (url: string): string =>
+  i18n.translate('xpack.cloudConnect.server.cloudApiTooManyRedirectsMessage', {
+    defaultMessage:
+      'The request to {url} kept redirecting (too many redirects). A proxy or captive portal between Kibana and Elastic Cloud may be intercepting the request.',
+    values: { url },
+  });
+
+export const getCloudApiUpstreamUnavailableMessage = (url: string, status: number): string =>
+  i18n.translate('xpack.cloudConnect.server.cloudApiUpstreamUnavailableMessage', {
+    defaultMessage:
+      '{url} returned HTTP {status}. Elastic Cloud or a proxy between Kibana and Elastic Cloud may be unavailable. Try again later, and check the proxy if it keeps happening.',
+    values: { url, status },
+  });
+
 export const getCloudApiUnauthorizedMessage = (url: string): string =>
   i18n.translate('xpack.cloudConnect.server.cloudApiUnauthorizedMessage', {
     defaultMessage:
@@ -72,18 +98,28 @@ export const getCloudApiUnauthorizedMessage = (url: string): string =>
   });
 
 /**
- * Message for a Cloud API error that means Elastic Cloud was never reached (network
- * failure or proxy authentication), or `undefined` for any other error.
+ * Message for a Cloud API error that says nothing about the API key because Elastic Cloud
+ * couldn't be reached or couldn't answer (network failure, redirect loop, proxy
+ * authentication, 502/503/504), or `undefined` for any other error.
  */
 export const getCloudApiUnreachableErrorMessage = (
   error: unknown,
   fallbackUrl: string
 ): string | undefined => {
+  if (isTooManyRedirectsError(error)) {
+    return getCloudApiTooManyRedirectsMessage(getCloudApiErrorUrl(error, fallbackUrl));
+  }
   if (isCloudApiNetworkError(error)) {
     return getCloudApiUnreachableMessage(getCloudApiErrorUrl(error, fallbackUrl));
   }
   if (isProxyAuthenticationError(error)) {
     return getCloudApiProxyAuthenticationMessage(getCloudApiErrorUrl(error, fallbackUrl));
+  }
+  if (isUpstreamUnavailableError(error)) {
+    return getCloudApiUpstreamUnavailableMessage(
+      getCloudApiErrorUrl(error, fallbackUrl),
+      error.response!.status
+    );
   }
   return undefined;
 };

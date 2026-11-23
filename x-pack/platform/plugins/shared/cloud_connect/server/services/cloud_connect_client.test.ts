@@ -93,6 +93,60 @@ describe('CloudConnectClient', () => {
       });
     });
 
+    it('reports a redirect loop separately from a network failure', async () => {
+      mockGet.mockRejectedValue(
+        createAxiosError({
+          code: 'ERR_FR_TOO_MANY_REDIRECTS',
+          message: 'Maximum number of redirects exceeded',
+          request: {},
+        })
+      );
+
+      const result = await client.validateApiKeyScope('some-key');
+
+      expect(result.errorCode).toBe(CLOUD_API_UNREACHABLE);
+      expect(result.errorMessage).toBe(
+        `The request to ${VALIDATE_URL} kept redirecting (too many redirects). A proxy or captive portal between Kibana and Elastic Cloud may be intercepting the request.`
+      );
+    });
+
+    it.each([502, 503, 504])(
+      'reports HTTP %i as unreachable, not as a key problem',
+      async (status) => {
+        mockGet.mockRejectedValue(
+          createAxiosError({
+            message: `Request failed with status code ${status}`,
+            request: {},
+            response: { status },
+          })
+        );
+
+        const result = await client.validateApiKeyScope('some-key');
+
+        expect(result.errorCode).toBe(CLOUD_API_UNREACHABLE);
+        expect(result.errorMessage).toBe(
+          `${VALIDATE_URL} returned HTTP ${status}. Elastic Cloud or a proxy between Kibana and Elastic Cloud may be unavailable. Try again later, and check the proxy if it keeps happening.`
+        );
+      }
+    );
+
+    it('resolves the endpoint like axios does, even with an uppercase scheme', async () => {
+      const upperClient = new CloudConnectClient(logger, 'HTTPS://cloud.elastic.co/api/v1');
+      const url = 'HTTPS://cloud.elastic.co/api/v1/saas/user?show_role_assignments=true';
+      mockGet.mockRejectedValue(
+        createAxiosError({
+          code: 'ENOTFOUND',
+          message: 'getaddrinfo ENOTFOUND cloud.elastic.co',
+          request: {},
+          config: { baseURL: 'HTTPS://cloud.elastic.co/api/v1', url },
+        })
+      );
+
+      const result = await upperClient.validateApiKeyScope('some-key');
+
+      expect(result.errorMessage).toContain(`Kibana couldn't reach ${url}.`);
+    });
+
     it('reports a proxy authentication failure (407) as unreachable', async () => {
       mockGet.mockRejectedValue(
         createAxiosError({
