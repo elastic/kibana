@@ -50,3 +50,52 @@ describe('Cloud Defend integration upselling', () => {
     }
   );
 });
+
+describe('Endpoint policy upselling', () => {
+  const securityEssentials = {
+    product_line: ProductLine.security,
+    product_tier: ProductTier.essentials,
+  } as const;
+
+  it.each([
+    ['Security Essentials only', [securityEssentials], false, false],
+    [
+      'Security Essentials with Endpoint Essentials',
+      [
+        securityEssentials,
+        { product_line: ProductLine.endpoint, product_tier: ProductTier.essentials },
+      ],
+      true,
+      false,
+    ],
+    [
+      'Security Essentials with Endpoint Complete',
+      [
+        securityEssentials,
+        { product_line: ProductLine.endpoint, product_tier: ProductTier.complete },
+      ],
+      true,
+      true,
+    ],
+  ] as const)(
+    'gates policy protections and protection updates for %s',
+    (_name, productTypes, protectionsEnabled, protectionUpdatesEnabled) => {
+      const enabledProductFeatures = getEnabledProductFeatures([...productTypes]);
+      const protectionsUpsell = upsellingSections.find(
+        ({ id }) => id === 'endpointPolicyProtections'
+      );
+      const protectionUpdatesUpsell = upsellingSections.find(
+        ({ id }) => id === 'endpoint_protection_updates'
+      );
+
+      expect(protectionsUpsell?.pli).toBe(ProductFeatureKey.endpointPolicyProtections);
+      expect(protectionUpdatesUpsell?.pli).toBe(ProductFeatureKey.endpointProtectionUpdates);
+      expect(enabledProductFeatures.includes(ProductFeatureKey.endpointPolicyProtections)).toBe(
+        protectionsEnabled
+      );
+      expect(enabledProductFeatures.includes(ProductFeatureKey.endpointProtectionUpdates)).toBe(
+        protectionUpdatesEnabled
+      );
+    }
+  );
+});
