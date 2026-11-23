@@ -11,7 +11,7 @@ import {
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import { SCENARIOS, waitForTransformPropagation } from './endpoint_data';
+import { SCENARIOS, seedScenario, waitForTransformPropagation } from './endpoint_data';
 
 describe('waitForTransformPropagation', () => {
   it('counts only united docs that endpoint lookups can see', async () => {
@@ -50,6 +50,34 @@ describe('waitForTransformPropagation', () => {
         ]),
       },
     });
+  });
+});
+
+// The `metadata_united` transform only processes changes to its sync field.
+// A seeded host without `updated_at` on either doc is merged when some other
+// change advances the transform, and often from one side only.
+describe('endpoint_data seeded documents', () => {
+  it('stamps `updated_at` on the metadata and agent docs the host is merged from', async () => {
+    const create = jest.fn().mockResolvedValue({ result: 'created' });
+    const index = jest.fn().mockResolvedValue({ result: 'created' });
+    const clients = {
+      esClient: { create },
+      internalEsClient: { index },
+    } as unknown as Parameters<typeof seedScenario>[0];
+
+    await seedScenario(clients, {
+      agentId: 'eval-agent-era-1',
+      hostName: 'era-seed-test-host',
+      os: { name: 'Windows', version: '11' },
+      policyName: 'era-seed-test-policy',
+      policyStatus: 'success',
+      policyId: 'era-seed-test-policy-id',
+    });
+
+    const metadataDoc = create.mock.calls[0][0].document;
+    const agentDoc = index.mock.calls[0][0].document;
+    expect(metadataDoc.updated_at).toEqual(metadataDoc['@timestamp']);
+    expect(agentDoc.updated_at).toEqual(agentDoc['@timestamp']);
   });
 });
 

@@ -357,6 +357,12 @@ const createIsolationActionResponseDocument = ({
   },
 });
 
+/**
+ * Writes one host as Endpoint and Fleet would: a metadata doc and an agent doc
+ * sharing `agent.id`. Both carry `updated_at` because the `metadata_united`
+ * transform syncs on that field; without it the lookups only see the host once
+ * an unrelated change advances the transform, often merged from one side only.
+ */
 export async function seedScenario(clients: SeedClients, scenario: EndpointScenario) {
   const now = new Date().toISOString();
   const {
@@ -398,6 +404,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       },
       elastic: { agent: { id: agentId } },
       labels: { manual_eval_host: hostName },
+      updated_at: now,
     },
   });
 
@@ -425,6 +432,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       ...(agentPackages ? { packages: agentPackages } : {}),
       policy_revision_idx: 1,
       policy_id: policyId,
+      updated_at: now,
     },
   });
 
