@@ -23,7 +23,7 @@ const inlinePanelKindGuidance = getInlinePanelKindGuidance();
 
 const guidance = `## Dashboard Changes
 
-The ${dashboardTools.generateDashboard} tool applies the changes you describe to the current dashboard (if any). Describe the desired result, keyed by id, rather than steps: \`title\`, \`description\`, and \`time_range\` for dashboard fields, \`sections\`, \`panels\` and \`controls\` to create or update, and \`remove\` for ids to delete. Everything you leave out stays unchanged. See the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
+The ${dashboardTools.generateDashboard} tool applies the changes you describe to the current dashboard (if any). Describe the desired result, keyed by id, rather than steps: \`title\`, \`description\`, \`time_range\`, and the settings \`options\`, \`refresh_interval\` and \`esql_approximation\` for dashboard fields, \`sections\`, \`panels\` and \`controls\` to create or update, and \`remove\` for ids to delete. Everything you leave out stays unchanged. See the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
 ## Improving an Existing Dashboard (Enhance)
 
@@ -41,6 +41,14 @@ For an existing dashboard:
 - Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, Vega, custom content, markdown, and ML anomaly panels, with the \`type\` of the panel's kind.
 - For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings.
 - These panels cannot be edited, only moved, resized, or removed: DSL-based, form-based, and other non-ES|QL Lens panels, Vega panels whose spec reads data other than one top-level ES|QL \`data.url\` (\`%type%: esql\`, with no \`format\` or other url options), such as an Elasticsearch query, a map file, inline values, or several sources, and by-reference panels (\`config.savedObjectId\` or \`config.ref_id\`). A by-reference panel's content is unknown: do not look it up with any tool or API; its title is the only hint. When the user asks to change one of these panels, say so, propose replacing it with a new ES|QL-based panel of the same kind (Lens for Lens, Vega for Vega), and wait for explicit confirmation before replacing it.
+
+## Dashboard Settings
+
+Set \`options\`, \`refresh_interval\` and \`esql_approximation\` only when the user asks for that setting. Leave them out otherwise, also when creating or enhancing a dashboard.
+
+- **Panel display** (\`options\`): set only the keys the user asks to change, e.g. "hide panel borders" is \`options: { hide_panel_borders: true }\`; the other keys keep their values. These options apply to every panel, including panels added later. 
+- **Auto-refresh** (\`refresh_interval\`): "refresh every 30 seconds" is \`{ pause: false, value: 30000 }\`; \`pause: true\` stops it. Auto-refresh is saved only together with a time range. When a failure reports that \`refresh_interval\` was reverted for lack of one, call again with \`time_range\` set to the window the user named, or ask the user which window to use.
+- **Fast mode** (\`esql_approximation\`): \`true\` makes ES|QL panels with \`STATS\` return approximate, faster results; \`false\` turns it off. It does not affect other panels.
 
 ## Panel Inputs
 

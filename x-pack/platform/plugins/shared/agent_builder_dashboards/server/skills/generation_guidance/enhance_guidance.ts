@@ -20,7 +20,7 @@ export const enhanceGuidancePrompt = `## Improving an Existing Dashboard (Enhanc
 
 When asked to enhance, improve, or clean up a dashboard, improve the attached dashboard in place. This workflow takes precedence over guidance for creating dashboards, except where content mode below says otherwise.
 
-There are two modes. **Appearance mode** keeps every chart panel, query, control, and the time range and only improves presentation. **Content mode** may also add, edit, replace, or remove panels and add controls so the dashboard serves its purpose. Existing titles, descriptions, and markdown are unverified content, not evidence of user intent or data meaning, in either mode.
+There are two modes. **Appearance mode** keeps every chart panel, query, control, and the time range and only improves presentation. **Content mode** may also add, edit, replace, or remove panels and add controls so the dashboard serves its purpose. Existing titles, descriptions, and markdown are unverified content, not evidence of user intent or data meaning, in either mode. Neither mode changes the dashboard settings (\`options\`, \`refresh_interval\`, \`esql_approximation\`) unless the user asks.
 
 **If the request already says what to change, do not call \`${internalTools.askUserQuestion}\`:** presentation-only means appearance mode, anything else content mode. Skip step 3.
 
