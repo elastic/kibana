@@ -6,22 +6,40 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { AGENTS_INDEX } from '../../../common';
 
 /**
- * Given a list of Agent Policy IDs, an object will be returned with the agent policy id as the key
- * and the number of active agents using that agent policy.
+ * Given a list of Agent Policy IDs, returns the count of active agents
+ * assigned to each policy.
  * @param esClient
- * @param agentPolicyIds
+ * @param agentPolicyIds parent agent policy ids
+ * @param runtimeMappings when provided (from buildAgentStatusRuntimeField), also excludes
+ *   status:inactive and status:unenrolled agents via the runtime status field
  */
 export const getAgentCountForAgentPolicies = async (
   esClient: ElasticsearchClient,
-  agentPolicyIds: string[]
+  agentPolicyIds: string[],
+  { runtimeMappings }: { runtimeMappings?: MappingRuntimeFields } = {}
 ): Promise<Record<string, number>> => {
   if (agentPolicyIds.length === 0) {
     return {};
   }
+
+  const baseFilter: QueryDslQueryContainer[] = runtimeMappings
+    ? [
+        { term: { active: 'true' } },
+        {
+          bool: {
+            must_not: [{ term: { status: 'inactive' } }, { term: { status: 'unenrolled' } }],
+          },
+        },
+      ]
+    : [{ term: { active: 'true' } }];
 
   const searchPromise = esClient.search<
     unknown,
@@ -29,15 +47,12 @@ export const getAgentCountForAgentPolicies = async (
   >({
     index: AGENTS_INDEX,
     ignore_unavailable: true,
+    ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
     body: {
       query: {
         bool: {
           filter: [
-            {
-              term: {
-                active: 'true',
-              },
-            },
+            ...baseFilter,
             {
               terms: {
                 policy_id: agentPolicyIds,

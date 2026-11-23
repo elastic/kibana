@@ -18,6 +18,11 @@ const QUERY_INDEX = {
   DURATION_SUMMARY_NOT_SUPPORTED: 1,
 } as const;
 
+// A msearch entry carries no `hits` when its sub-query fails, which leaves the
+// document count unknown rather than zero.
+const getTotalHits = (response?: { hits?: { total?: { value?: number } } }): number | undefined =>
+  response?.hits?.total?.value;
+
 export interface DocumentSourcesRequest {
   apmEventClient: APMEventClient;
   start: number;
@@ -128,17 +133,24 @@ const getDocumentTypesInfo = async ({
   const allResponses = (await apmEventClient.msearch('get_document_availability', ...allSearches))
     .responses;
 
-  const hasAnyLegacyDocuments = sourceRequests.some(
-    ({ documentType, rollupInterval }, index) =>
-      isLegacyDocType(documentType, rollupInterval) &&
-      allResponses[index + QUERY_INDEX.DURATION_SUMMARY_NOT_SUPPORTED].hits.total.value > 0
-  );
+  // An unknown count is assumed to be legacy documents, so that duration summary
+  // fields are not read from data that may not have them.
+  const hasAnyLegacyDocuments = sourceRequests.some(({ documentType, rollupInterval }, index) => {
+    if (!isLegacyDocType(documentType, rollupInterval)) {
+      return false;
+    }
+    const totalHits = getTotalHits(
+      allResponses[index + QUERY_INDEX.DURATION_SUMMARY_NOT_SUPPORTED]
+    );
+    return totalHits === undefined || totalHits > 0;
+  });
 
   return sourceRequests.map(({ documentType, rollupInterval, ...queries }) => {
     const numberOfQueries = Object.values(queries).filter(Boolean).length;
     // allResponses is sorted by the order of the requests in sourceRequests
     const docTypeResponses = allResponses.splice(0, numberOfQueries);
-    const hasDocs = docTypeResponses[QUERY_INDEX.DOCUMENT_TYPE].hits.total.value > 0;
+    // An unknown count means the source cannot be confirmed to hold documents.
+    const hasDocs = (getTotalHits(docTypeResponses[QUERY_INDEX.DOCUMENT_TYPE]) ?? 0) > 0;
     // can only use >=8.7 document types (ServiceTransactionMetrics or TransactionMetrics with 10m and 60m intervals)
     // if there are no legacy documents
     const canUseContinousRollupDocs = hasDocs && !hasAnyLegacyDocuments;

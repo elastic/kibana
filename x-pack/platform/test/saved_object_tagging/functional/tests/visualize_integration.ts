@@ -158,7 +158,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);
 
-        expect(await tagModal.isOpened()).to.be(true);
+        await retry.waitFor('tag modal to open', () => tagModal.isOpened());
 
         await tagModal.fillForm(
           {

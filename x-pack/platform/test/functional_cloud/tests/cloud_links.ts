@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Open connection details overlay.
         await PageObjects.common.clickAndValidate(
           'connectionDetailsHelpLink',
-          'deploymentDetailsModal'
+          'connectionDetailsModalTitle'
         );
 
         const esUrlRow = await find.byCssSelector('[data-test-subj="connectionDetailsEsUrl"]');
@@ -86,13 +86,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.clickAndValidate('helpMenuButton', 'connectionDetailsHelpLink');
         await PageObjects.common.clickAndValidate(
           'connectionDetailsHelpLink',
-          'deploymentDetailsModal'
+          'connectionDetailsModalTitle'
         );
 
         // Navigate to the "API key" tab.
         await PageObjects.common.clickAndValidate(
           'connectionDetailsTabBtn-apiKeys',
-          'connectionDetailsApiKeyForm'
+          'connectionDetailsApiKeyConfigForm'
         );
 
         // Select the input form.

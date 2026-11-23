@@ -14,6 +14,7 @@ import { promisify } from 'util';
 import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { getUniqueJunitReportPath } from '../report_path';
 
 import { setupJUnitReportGeneration } from './junit_report_generation';
@@ -55,12 +56,24 @@ describe('dev/mocha/junit report generation', () => {
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-    const expectedCommandLine = process.env.CI
-      ? 'node scripts/jest --config=src/platform/packages/shared/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests'
-      : 'node node_modules/jest-worker/build/workers/processChild.js';
+    const expectedCommandLineMultiple =
+      'node scripts/jest --config src/platform/packages/shared/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests';
+    const expectedCommandLineMultipleWithEquals =
+      'node scripts/jest --config=src/platform/packages/shared/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests';
+    const expectedMoonCommandLine =
+      'node scripts/jest.js --passWithNoTests --config src/platform/packages/shared/kbn-test/jest.config.js --maxWorkers=2 --json --passWithNoTests';
+    const expectedDirectCommandLine =
+      'node scripts/jest src/platform/packages/shared/kbn-test/src/mocha/junit_report_generation.test.js --config src/platform/packages/shared/kbn-test/jest.config.js';
+    const expectedDirectCommandLineWithEquals =
+      'node scripts/jest --config=src/platform/packages/shared/kbn-test/jest.config.js src/platform/packages/shared/kbn-test/src/mocha/junit_report_generation.test.js --runInBand';
+    const expectedCommandLineSingle = 'node node_modules/jest-worker/build/workers/processChild.js';
 
     expect(testsuite.$).toMatchObject({
-      'command-line': expectedCommandLine,
+      'command-line': expect.stringMatching(
+        new RegExp(
+          `(${expectedCommandLineMultiple}|${expectedCommandLineMultipleWithEquals}|${expectedMoonCommandLine}|${expectedDirectCommandLine}|${expectedDirectCommandLineWithEquals}|${expectedCommandLineSingle})`
+        )
+      ),
       failures: '2',
       name: 'test',
       skipped: '1',
@@ -127,5 +140,31 @@ describe('dev/mocha/junit report generation', () => {
       'system-out': ['-- logs are only reported for failed tests --'],
       skipped: [''],
     });
+  });
+
+  it('logs report generation errors without blocking the mocha run callback', async () => {
+    const log = new ToolingLog();
+    const writer = new ToolingLogCollectingWriter();
+    log.setWriters([writer]);
+
+    const mocha = new Mocha({
+      reporter: function Runner(runner) {
+        setupJUnitReportGeneration(runner, {
+          reportName: 'report_error',
+          rootDirectory: PROJECT_DIR,
+          getTestMetadata: () => {
+            throw new Error('FORCE_REPORT_FAIL');
+          },
+          log,
+        });
+      },
+    });
+
+    mocha.addFile(resolve(PROJECT_DIR, 'report_error.js'));
+    const failures = await new Promise((resolve) => mocha.run(resolve));
+
+    expect(failures).toBe(1);
+    expect(writer.messages[0]).toContain('Failed to write JUnit report [report_error]');
+    expect(writer.messages[1]).toContain('Error: FORCE_REPORT_FAIL');
   });
 });

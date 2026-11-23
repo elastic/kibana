@@ -132,7 +132,10 @@ export interface ArchiveEntry {
 }
 
 export interface ArchiveIterator {
-  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  traverseEntries: (
+    onEntry: (entry: ArchiveEntry) => Promise<void>,
+    readBuffer?: (path: string) => boolean
+  ) => Promise<void>;
   getPaths: () => Promise<string[]>;
 }
 
@@ -418,7 +421,6 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
   [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
-  [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
 }

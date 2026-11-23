@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ErrorInfo, FC, ReactElement } from 'react';
+import React, { ErrorInfo, ReactElement } from 'react';
 import { withState, withHandlers, lifecycle, mapProps, compose } from 'react-recompose';
 import PropTypes from 'prop-types';
 import { omit } from 'lodash';
@@ -22,14 +22,13 @@ interface Props {
 type ComponentProps = Pick<Props, 'children' | 'errorInfo' | 'resetErrorState' | 'error'>;
 type ChildrenProps = Omit<ComponentProps, 'children'>;
 
-const ErrorBoundaryComponent: FC<ComponentProps> = (props) => {
+const ErrorBoundaryComponent: CanvasFunctionComponent<ComponentProps> = (props) => {
   const { children, ...rest } = props;
   return <>{children(rest)}</>;
 };
 
 ErrorBoundaryComponent.propTypes = {
   children: PropTypes.func.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
   error: PropTypes.object,
   errorInfo: PropTypes.object,
   resetErrorState: PropTypes.func.isRequired,

@@ -119,6 +119,7 @@ actions:
                 $ref: "../examples/copy_saved_objects_request2.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -143,6 +144,7 @@ actions:
                 $ref: "../examples/resolve_copy_saved_objects_request2.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -159,6 +161,27 @@ actions:
             examples:
               disableLegacyURLRequestExample1:
                 $ref: "../examples/disable_legacy_url_request1.yaml"
+      responses:
+        204:
+          description: 'Indicates a successful call.'
+  - target: "$.paths['/api/spaces/_get_shareable_references']['post']"
+    description: "Add 200 description to get shareable references API"
+    update:
+      responses:
+        200:
+          description: 'Indicates a successful call.'
+  - target: "$.paths['/api/actions']['get']"
+    description: "Add 200 description to list actions API"
+    update:
+      responses:
+        200:
+          description: 'OK: A successful request.'
+  - target: "$.paths['/api/actions/list_action_types']['get']"
+    description: "Add 200 description to list action types API"
+    update:
+      responses:
+        200:
+          description: 'OK: A successful request.'
   - target: "$.paths['/api/spaces/_update_objects_spaces']['post']"
     description: "Add example to update saved object spaces API"
     update:
@@ -170,6 +193,7 @@ actions:
                 $ref: "../examples/update_saved_objects_spaces_request1.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:

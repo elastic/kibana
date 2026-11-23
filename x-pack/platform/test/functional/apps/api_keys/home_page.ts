@@ -91,7 +91,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+        await clearAllApiKeys(es, log);
+        await browser.refresh();
       });
 
       after(async () => {
@@ -146,7 +147,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+        await clearAllApiKeys(es, log);
+        await browser.refresh();
       });
 
       after(async () => {
@@ -256,7 +258,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+        await clearAllApiKeys(es, log);
+        await browser.refresh();
       });
 
       after(async () => {
@@ -410,6 +413,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('one by one', async () => {
+        await pageObjects.apiKeys.clickOnTableCreateApiKey();
+        await pageObjects.apiKeys.setApiKeyName('api key 2');
+        await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
+        await ensureApiKeysExist(['api key 1', 'api key 2']);
+
         await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
         expect(await pageObjects.apiKeys.getApiKeysFirstPromptTitle()).to.be(
           'Create your first API key'

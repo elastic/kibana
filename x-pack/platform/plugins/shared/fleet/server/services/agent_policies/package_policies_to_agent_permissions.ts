@@ -16,6 +16,8 @@ import {
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
 } from '../../../common/constants';
 
+import { appContextService } from '../app_context';
+
 import { getNormalizedDataStreams } from '../../../common/services';
 
 import type {
@@ -29,7 +31,11 @@ import { PackagePolicyRequestError } from '../../errors';
 import type { PackagePolicy } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
 
+import { getRoleDescriptorNames } from './role_descriptor_name';
+
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
+
+export const PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES = new Set(['monitor']);
 
 export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'auto_configure',
@@ -51,6 +57,8 @@ export const AGENTLESS_INDEX_PERMISSIONS = [
   'view_index_metadata',
 ];
 
+type PermissionEntry = [packagePolicyId: string, descriptor: SecurityRoleDescriptor | undefined];
+
 export function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
   agentPolicyNamespace: string,
@@ -67,7 +75,7 @@ export function storedPackagePoliciesToAgentPermissions(
     return;
   }
 
-  const permissionEntries = packagePolicies.map((packagePolicy) => {
+  const permissionEntries = packagePolicies.map((packagePolicy): PermissionEntry => {
     if (!packagePolicy.package) {
       throw new PackagePolicyRequestError(
         `No package for package policy ${packagePolicy.name ?? packagePolicy.id}`
@@ -161,9 +169,18 @@ export function storedPackagePoliciesToAgentPermissions(
 
     let clusterRoleDescriptor = {};
     const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
-    if (cluster.length > 0) {
+    const validCluster = cluster.filter((p) => PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES.has(p));
+    const invalidCluster = cluster.filter((p) => !PACKAGE_POLICY_ALLOWED_CLUSTER_PRIVILEGES.has(p));
+    if (invalidCluster.length) {
+      appContextService
+        .getLogger()
+        .warn(
+          `Ignoring invalid or forbidden cluster privilege(s) in package policy "${packagePolicy.id}": ${invalidCluster}`
+        );
+    }
+    if (validCluster.length > 0) {
       clusterRoleDescriptor = {
-        cluster,
+        cluster: validCluster,
       };
     }
     // namespace is either the package policy's or the agent policy one
@@ -174,7 +191,20 @@ export function storedPackagePoliciesToAgentPermissions(
     });
   });
 
-  return Object.fromEntries(permissionEntries);
+  // Package policies without data streams have no descriptor to send to ES.
+  const entriesWithPermissions = permissionEntries.filter(
+    (entry): entry is [string, SecurityRoleDescriptor] => entry[1] !== undefined
+  );
+
+  // The package policy ID becomes the role descriptor name of the output API key. It can be set
+  // by API callers, so make sure one ID that ES rejects cannot block the whole agent policy.
+  const roleDescriptorNames = getRoleDescriptorNames(
+    entriesWithPermissions.map(([packagePolicyId]) => packagePolicyId)
+  );
+
+  return Object.fromEntries(
+    entriesWithPermissions.map(([, descriptor], index) => [roleDescriptorNames[index], descriptor])
+  );
 }
 
 export interface DataStreamMeta {

@@ -6,15 +6,12 @@
  */
 
 import { getTaskTypeGroup } from './get_task_type_group';
+import { TaskTypeGroup } from '../../task';
 
 describe('getTaskTypeGroup', () => {
-  test('should correctly group based on task type prefix', () => {
-    expect(getTaskTypeGroup('alerting:abc')).toEqual('alerting');
-    expect(getTaskTypeGroup('actions:def')).toEqual('actions');
-  });
-
-  test('should return undefined if no match', () => {
-    expect(getTaskTypeGroup('alerting-abc')).toBeUndefined();
-    expect(getTaskTypeGroup('fooalertingbar')).toBeUndefined();
+  test('should return taskTypeGroup when it is one of the accepted values', () => {
+    expect(getTaskTypeGroup('alerting')).toEqual(TaskTypeGroup.Alerting);
+    expect(getTaskTypeGroup('actions')).toEqual(TaskTypeGroup.Actions);
+    expect(getTaskTypeGroup('custom_group')).toBeUndefined();
   });
 });

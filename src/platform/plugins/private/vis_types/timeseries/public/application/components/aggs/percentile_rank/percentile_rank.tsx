@@ -42,7 +42,7 @@ import { PercentileHdr } from '../percentile_hdr';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 
-interface PercentileRankAggProps {
+export interface PercentileRankAggProps {
   disableDelete: boolean;
   fields: Record<string, SanitizedFieldType[]>;
   indexPattern: IndexPatternValue;

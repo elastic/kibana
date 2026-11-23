@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
@@ -24,13 +24,12 @@ interface Props {
   argType: string;
 }
 
-export const FunctionUnknown: FunctionComponent<Props> = ({ argType }) => (
+export const FunctionUnknown: CanvasFunctionComponent<Props> = ({ argType }) => (
   <div className="canvasFunctionForm canvasFunctionForm--unknown-expression">
     {strings.getUnknownArgumentTypeErrorMessage(argType)}
   </div>
 );
 
 FunctionUnknown.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   argType: PropTypes.string,
 };

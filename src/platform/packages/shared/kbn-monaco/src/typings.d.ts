@@ -11,3 +11,23 @@
 declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
 declare module 'monaco-editor/esm/vs/basic-languages/css/css';
 declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+
+declare module 'monaco-editor/esm/vs/platform/actions/common/actions.js' {
+  export interface MenuItem {
+    command?: {
+      id: string;
+      title: string | { value: string; original: string };
+    };
+    when?: {
+      serialize(): string;
+    };
+  }
+
+  export const MenuId: {
+    EditorContext: unknown;
+  };
+
+  export const MenuRegistry: {
+    getMenuItems(menuId: unknown): MenuItem[];
+  };
+}

@@ -30,7 +30,7 @@ const exampleAssignment = (
         }
       : {
           type: 'colorCode',
-          colorCode: faker.internet.color(),
+          colorCode: faker.color.rgb({ format: 'hex' }),
         };
 
   return {

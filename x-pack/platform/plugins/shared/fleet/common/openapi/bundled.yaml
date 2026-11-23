@@ -1846,10 +1846,12 @@ paths:
                 agents:
                   oneOf:
                     - type: string
+                      maxLength: 500000
                       description: 'KQL query string, leave empty to action all agents'
                     - type: array
                       items:
                         type: string
+                        maxLength: 512
                       description: list of agent IDs
               required:
                 - policy_id
@@ -1886,10 +1888,12 @@ paths:
                 agents:
                   oneOf:
                     - type: string
+                      maxLength: 500000
                       description: 'KQL query string, leave empty to action all agents'
                     - type: array
                       items:
                         type: string
+                        maxLength: 512
                       description: list of agent IDs
                 revoke:
                   type: boolean
@@ -1939,10 +1943,12 @@ paths:
                 agents:
                   oneOf:
                     - type: string
+                      maxLength: 500000
                       description: 'KQL query string, leave empty to action all agents'
                     - type: array
                       items:
                         type: string
+                        maxLength: 512
                       description: list of agent IDs
                 tagsToAdd:
                   type: array
@@ -2049,10 +2055,12 @@ paths:
                 agents:
                   oneOf:
                     - type: string
+                      maxLength: 500000
                       description: 'KQL query string, leave empty to action all agents'
                     - type: array
                       items:
                         type: string
+                        maxLength: 512
                       description: list of agent IDs
                 additional_metrics:
                   type: array
@@ -4647,10 +4655,12 @@ components:
         agents:
           oneOf:
             - type: string
+              maxLength: 500000
               description: 'KQL query string, leave empty to action all agents'
             - type: array
               items:
                 type: string
+                maxLength: 512
               description: list of agent IDs
         force:
           type: boolean
@@ -4903,9 +4913,11 @@ components:
         overrides:
           type: object
           description: >-
-            Override settings that are defined in the agent policy. Input
-            settings cannot be overridden. The override option should be used
-            only in unusual circumstances and not as a routine procedure.
+            Override settings that are defined in the agent policy. Input,
+            output permissions and OpenTelemetry collector settings (receivers,
+            exporters, processors, connectors, extensions, service) cannot be
+            overridden. The override option should be used only in unusual
+            circumstances and not as a routine procedure.
           nullable: true
         advanced_settings:
           type: object

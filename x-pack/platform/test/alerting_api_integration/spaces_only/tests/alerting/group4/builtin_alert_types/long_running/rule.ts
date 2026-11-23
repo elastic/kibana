@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
@@ -82,7 +82,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(status).to.eql(200);
 
       // no alerts should exist
-      const alertDocs = await queryForAlertDocs<Alert>();
+      const alertDocs = await queryForAlertDocs<Alert>(ruleId);
       expect(alertDocs.length).to.eql(0);
 
       expect(errorStatuses.length).to.be.greaterThan(0);
@@ -133,7 +133,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const alertDocs = await queryForAlertDocs<Alert>();
+        const alertDocs = await queryForAlertDocs<Alert>(ruleId);
         // expect 1 alert for each execution that didn't time out
         expect(alertDocs.length).to.eql(3);
 
@@ -169,7 +169,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const alertDocs = await queryForAlertDocs<Alert>();
+        const alertDocs = await queryForAlertDocs<Alert>(ruleId);
         // expect 1 alert for each execution bc we're writing alerts even if the rule times out
         expect(alertDocs.length).to.eql(4);
 
@@ -211,10 +211,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       return ruleId;
     }
 
-    async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
+    async function queryForAlertDocs<T>(ruleId: string): Promise<Array<SearchHit<T>>> {
       const searchResult = await es.search({
         index: alertsAsDataIndex,
-        query: { match_all: {} },
+        query: { term: { [ALERT_RULE_UUID]: ruleId } },
       });
       return searchResult.hits.hits as Array<SearchHit<T>>;
     }

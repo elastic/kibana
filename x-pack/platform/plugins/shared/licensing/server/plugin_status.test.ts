@@ -58,6 +58,25 @@ describe('getPluginStatus$', () => {
     });
   });
 
+  it('remains unavailable until Elasticsearch provides a license', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const missingLicense = licenseMock.createLicenseMock();
+      missingLicense.isAvailable = false;
+      const validLicense = licenseMock.createLicenseMock();
+
+      const license$ = hot<ILicense>('--a--b', {
+        a: missingLicense,
+        b: validLicense,
+      });
+      const stop$ = hot<void>('');
+
+      expectObservable(getPluginStatus$(license$, stop$)).toBe('--c--d', {
+        c: unavailableStatus,
+        d: availableStatus,
+      });
+    });
+  });
+
   it('can emit `available` after `unavailable`', () => {
     getTestScheduler().run(({ expectObservable, hot }) => {
       const errorLicense = licenseMock.createLicenseMock();

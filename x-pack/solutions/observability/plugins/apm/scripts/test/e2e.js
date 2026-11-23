@@ -24,15 +24,15 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const e2eDir = path.join(__dirname, '../../ftr_e2e');
+const e2eDir = path.join(__dirname, '../../../apm-ftr-e2e');
 
 function runTests() {
   const mode = argv.open ? 'open' : 'run';
   const isHeaded = mode === 'run' && argv.headed ? ':headed' : '';
 
-  console.log(`Running e2e tests: "yarn cypress:${mode}${isHeaded}"`);
+  console.log(`Running e2e tests: "pnpm cypress:${mode}${isHeaded}"`);
 
-  return childProcess.spawnSync('yarn', [`cypress:${mode}${isHeaded}`], {
+  return childProcess.spawnSync('pnpm', [`cypress:${mode}${isHeaded}`], {
     cwd: e2eDir,
     encoding: 'utf8',
     stdio: 'inherit',

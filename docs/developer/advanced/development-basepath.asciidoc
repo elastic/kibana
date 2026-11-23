@@ -11,7 +11,7 @@ If you want to turn off the basepath when in development mode, start {kib} with 
 
 [source,bash]
 ----
-yarn start --no-base-path
+pnpm start --no-base-path
 ----
 
 

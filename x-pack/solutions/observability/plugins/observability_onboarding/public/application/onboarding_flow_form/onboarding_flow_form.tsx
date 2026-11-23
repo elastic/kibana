@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';

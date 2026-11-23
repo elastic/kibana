@@ -1028,6 +1028,29 @@ describe('getFullAgentPolicy', () => {
       },
     });
   });
+
+  describe('overrides', () => {
+    it('ignores stored overrides with denied keys and keeps the allowed ones', async () => {
+      // The warning for ignored keys is logged through appContextService.
+      appContextService.start(createAppContextStartContractMock());
+      mockAgentPolicy({
+        revision: 1,
+        overrides: {
+          receivers: { 'filelog/x': { include: ['/etc/hosts'] } },
+          'extensions.pprof.save_to_file': '/tmp/x',
+          service: { pipelines: {} },
+          'agent.logging.level': 'debug',
+        },
+      });
+      const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+      expect(agentPolicy).not.toHaveProperty('receivers');
+      expect(agentPolicy).not.toHaveProperty('service');
+      expect(agentPolicy).not.toHaveProperty('extensions.pprof.save_to_file');
+      expect(agentPolicy).not.toHaveProperty(['extensions.pprof.save_to_file']);
+      expect(agentPolicy).toHaveProperty(['agent.logging.level'], 'debug');
+    });
+  });
 });
 
 describe('getFullMonitoringSettings', () => {

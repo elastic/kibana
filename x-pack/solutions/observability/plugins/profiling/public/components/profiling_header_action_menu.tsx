@@ -34,7 +34,12 @@ export function ProfilingHeaderActionMenu() {
         <EuiHeaderLink
           color="text"
           onClick={() => {
-            const query = qs.parse(window.location.search);
+            // query-string 9 types array entries as nullable, which url.format() does not accept.
+            // These params are always single string values, so keep the 6.x typing.
+            const query = qs.parse(window.location.search) as Record<
+              string,
+              string | string[] | null | undefined
+            >;
             const storageExplorerURL = url.format({
               pathname: '/storage-explorer',
               query: {

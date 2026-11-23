@@ -78,15 +78,30 @@ describe('validate params', () => {
   test('should validate and throw error when params are invalid', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: types that failed validation:
+      - [0.subAction]: expected value to equal [validChannelId]
+      - [1.subActionParams.text]: expected value of type [string] but got [undefined]
+      - [2.subAction]: expected value to equal [postBlockkit]"
+    `);
+
+    expect(() => {
+      validateParams(connectorType, { subAction: 'random' }, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: types that failed validation:
+      - [0.subAction]: expected value to equal [validChannelId]
+      - [1.subAction]: expected value to equal [postMessage]
+      - [2.subAction]: expected value to equal [postBlockkit]"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: types that failed validation:
+      - [0.subAction]: expected value to equal [validChannelId]
+      - [1.subActionParams.text]: expected value of type [string] but got [undefined]
+      - [2.subAction]: expected value to equal [postBlockkit]"
+    `);
   });
 
   test('should validate and pass when channels is used as a valid params for post message', () => {
@@ -128,6 +143,19 @@ describe('validate params', () => {
     ).toEqual({
       subAction: 'validChannelId',
       subActionParams: { channelId: 'KJHGFD867' },
+    });
+  });
+
+  test('should default a missing subAction to postMessage', () => {
+    expect(
+      validateParams(
+        connectorType,
+        { subActionParams: { channels: ['general'], text: 'a text' } },
+        { configurationUtilities }
+      )
+    ).toEqual({
+      subAction: 'postMessage',
+      subActionParams: { channels: ['general'], text: 'a text' },
     });
   });
 });
@@ -211,6 +239,56 @@ describe('execute', () => {
     );
   });
 
+  test('should execute postMessage when subAction is omitted and params are validated', async () => {
+    requestMock.mockImplementation(() => ({
+      data: {
+        ok: true,
+        message: { text: 'some text' },
+        channel: 'general',
+      },
+    }));
+
+    const params = validateParams(
+      connectorType,
+      { subActionParams: { channels: ['general'], text: 'some text' } },
+      { configurationUtilities }
+    ) as PostMessageParams;
+
+    const response = await connectorType.executor({
+      actionId: SLACK_API_CONNECTOR_ID,
+      services,
+      config: {},
+      secrets: { token: 'some token' },
+      params,
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock).toHaveBeenCalledWith({
+      axios,
+      configurationUtilities,
+      headers,
+      logger: mockedLogger,
+      method: 'post',
+      url: 'https://slack.com/api/chat.postMessage',
+      data: { channel: 'general', text: 'some text' },
+      connectorUsageCollector,
+    });
+
+    expect(response).toEqual({
+      actionId: SLACK_API_CONNECTOR_ID,
+      data: {
+        channel: 'general',
+        message: {
+          text: 'some text',
+        },
+        ok: true,
+      },
+      status: 'ok',
+    });
+  });
+
   test('should fail if subAction is not postMessage/postBlockkit/validChannelId', async () => {
     requestMock.mockImplementation(() => ({
       data: {
@@ -252,6 +330,22 @@ describe('execute', () => {
       variables
     ) as PostMessageParams;
     expect(params.subActionParams.text).toBe('some text `*foo*`');
+  });
+
+  test('renders parameter templates as postMessage when subAction is omitted', async () => {
+    const paramsWithTemplates = {
+      subActionParams: { text: 'some text {{injected}}', channels: ['general'] },
+    };
+    const variables = { injected: '*foo*' };
+    const params = connectorType.renderParameterTemplates!(
+      mockedLogger,
+      paramsWithTemplates as PostMessageParams,
+      variables
+    ) as PostMessageParams;
+    expect(params).toEqual({
+      subAction: 'postMessage',
+      subActionParams: { channels: ['general'], text: 'some text `*foo*`' },
+    });
   });
 
   test('renders parameter templates as expected for postBlockkit', async () => {

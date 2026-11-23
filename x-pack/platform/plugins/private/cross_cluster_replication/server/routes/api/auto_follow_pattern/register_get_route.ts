@@ -20,7 +20,7 @@ export const registerGetRoute = ({
   lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
-    id: schema.string(),
+    id: schema.string({ maxLength: 1000 }),
   });
 
   router.get(
@@ -48,7 +48,6 @@ export const registerGetRoute = ({
         const autoFollowPattern = result.patterns[0];
 
         return response.ok({
-          // @ts-expect-error Once #98266 is merged, test this again.
           body: deserializeAutoFollowPattern(autoFollowPattern),
         });
       } catch (error) {

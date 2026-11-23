@@ -683,19 +683,24 @@ export function dataFrameAnalyticsRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-        try {
-          const { analyticsId } = request.params;
-          const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(client);
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlSavedObjectService, request, response }) => {
+          try {
+            const { analyticsId } = request.params;
+            const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(
+              client,
+              mlSavedObjectService
+            );
 
-          const results = await getAnalyticsAuditMessages(analyticsId);
-          return response.ok({
-            body: results,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+            const results = await getAnalyticsAuditMessages(analyticsId);
+            return response.ok({
+              body: results,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      })
+      )
     );
 
   router.versioned

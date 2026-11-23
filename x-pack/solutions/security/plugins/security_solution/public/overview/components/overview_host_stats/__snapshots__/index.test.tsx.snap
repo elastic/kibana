@@ -2,7 +2,7 @@
 
 exports[`Overview Host Stat Data rendering it renders the default OverviewHostStats 1`] = `
 <div
-  class="css-yrm4o9-HostStatsContainer e9fdr4h4"
+  class="css-d62ms-HostStatsContainer eq3q3gl0"
   data-test-subj="overview-hosts-stats"
 >
   <hr
@@ -53,7 +53,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -71,7 +71,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    class="css-1272s1i-ProgressContainer e1b5w38h0"
                   >
                     <progress
                       aria-hidden="false"
@@ -99,7 +99,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         class="euiAccordion__children emotion-euiAccordion__children"
       >
         <div
-          class="css-16yqqti-AccordionContent e9fdr4h0"
+          class="css-16yqqti-AccordionContent eq3q3gl4"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
@@ -111,18 +111,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Audit
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-auditbeatAuditd"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -140,7 +140,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -164,18 +164,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   File Integrity Module
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-auditbeatFIM"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -193,7 +193,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -217,18 +217,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Login
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-auditbeatLogin"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -246,7 +246,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -270,18 +270,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Package
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-auditbeatPackage"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -299,7 +299,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -323,18 +323,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Process
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-auditbeatProcess"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -352,7 +352,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -376,18 +376,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   User
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-auditbeatUser"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -405,7 +405,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -471,7 +471,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -489,7 +489,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    class="css-1272s1i-ProgressContainer e1b5w38h0"
                   >
                     <progress
                       aria-hidden="false"
@@ -517,7 +517,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         class="euiAccordion__children emotion-euiAccordion__children"
       >
         <div
-          class="css-16yqqti-AccordionContent e9fdr4h0"
+          class="css-16yqqti-AccordionContent eq3q3gl4"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
@@ -529,18 +529,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   DNS
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-endgameDns"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -558,7 +558,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -582,18 +582,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   File
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-endgameFile"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -611,7 +611,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -635,18 +635,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Image Load
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-endgameImageLoad"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -664,7 +664,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -688,18 +688,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Network
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-endgameNetwork"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -717,7 +717,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -741,18 +741,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Process
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-endgameProcess"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -770,7 +770,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -794,18 +794,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Registry
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-endgameRegistry"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -823,7 +823,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -847,18 +847,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Security
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-endgameSecurity"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -876,7 +876,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -942,7 +942,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -960,7 +960,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    class="css-1272s1i-ProgressContainer e1b5w38h0"
                   >
                     <progress
                       aria-hidden="false"
@@ -988,7 +988,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         class="euiAccordion__children emotion-euiAccordion__children"
       >
         <div
-          class="css-16yqqti-AccordionContent e9fdr4h0"
+          class="css-16yqqti-AccordionContent eq3q3gl4"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
@@ -1000,18 +1000,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   System Module
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-filebeatSystemModule"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -1029,7 +1029,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -1095,7 +1095,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -1113,7 +1113,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    class="css-1272s1i-ProgressContainer e1b5w38h0"
                   >
                     <progress
                       aria-hidden="false"
@@ -1141,7 +1141,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         class="euiAccordion__children emotion-euiAccordion__children"
       >
         <div
-          class="css-16yqqti-AccordionContent e9fdr4h0"
+          class="css-16yqqti-AccordionContent eq3q3gl4"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
@@ -1153,18 +1153,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Security
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-winlogbeatSecurity"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -1182,7 +1182,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
@@ -1206,18 +1206,18 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                 class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                  class="css-10s1bcn-MoveItLeftTitle eq3q3gl1"
                 >
                   Microsoft-Windows-Sysmon/Operational
                 </div>
               </div>
             </div>
             <div
-              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              class="euiFlexItem eq3q3gl3 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
               data-test-subj="host-stat-winlogbeatMWSysmonOperational"
             >
               <div
-                class="css-kme1xc-MoveItLeft e9fdr4h2"
+                class="css-kme1xc-MoveItLeft eq3q3gl2"
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
@@ -1235,7 +1235,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                      class="css-1272s1i-ProgressContainer e1b5w38h0"
                     >
                       <progress
                         aria-hidden="false"
