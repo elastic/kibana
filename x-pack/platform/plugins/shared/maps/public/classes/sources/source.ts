@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { ReactElement } from 'react';
+import type { KeysOfUnion } from 'type-fest';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import type { IField } from '../fields/field';
 import type { FieldFormatter, LAYER_TYPE } from '../../../common/constants';
@@ -33,8 +34,9 @@ import type {
 import type { IStyle } from '../styles/style';
 import type { LICENSED_FEATURES } from '../../licensed_features';
 
-// SourceDescriptor is not used here because it includes a loose catch-all member that widens keyof to string
-type EditableSourceDescriptor =
+// Not SourceDescriptor: its union includes a loose `{ type: string; [k: string]: unknown }`
+// member whose keyof is `string`, which would widen SourcePropName to any string.
+type KnownSourceDescriptor =
   | EMSFileSourceDescriptor
   | EMSTMSSourceDescriptor
   | KibanaTilemapSourceDescriptor
@@ -47,10 +49,7 @@ type EditableSourceDescriptor =
   | ESSearchSourceDescriptor
   | ESQLSourceDescriptor;
 
-// keyof on a union only returns shared keys, distribute to get keys from any source descriptor
-type KeysOfUnion<T> = T extends unknown ? keyof T : never;
-
-export type SourcePropName = KeysOfUnion<EditableSourceDescriptor>;
+export type SourcePropName = KeysOfUnion<KnownSourceDescriptor>;
 
 export type OnSourceChangeArgs = {
   propName: SourcePropName;
