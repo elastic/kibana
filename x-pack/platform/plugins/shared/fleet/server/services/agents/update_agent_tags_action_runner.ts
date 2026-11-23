@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { KueryNode } from '@kbn/es-query';
+import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
 
@@ -30,6 +31,12 @@ import {
 } from './actions';
 import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateByQueryAndWait } from './update_by_query_task';
+
+/**
+ * How many times the update of a batch is run when it keeps being cancelled for running too long.
+ * It stops there, as a batch that is too slow twice is not going to get through on a third try.
+ */
+const UPDATE_BY_QUERY_MAX_ATTEMPTS = 2;
 
 type TagsMatch = 'yes' | 'no' | 'unknown';
 
@@ -224,18 +231,16 @@ export async function updateTagsBatch(
       `Agents to update tags in batch: ${agentIds.length}, tagsToAdd: ${options.tagsToAdd}, tagsToRemove: ${options.tagsToRemove}`
     );
 
-  let res;
-  try {
-    res = await updateByQueryAndWait(esClient, {
-      query: {
-        terms: {
-          _id: agentIds,
-        },
+  const request: UpdateByQueryRequest = {
+    query: {
+      terms: {
+        _id: agentIds,
       },
-      index: AGENTS_INDEX,
-      refresh: true,
-      script: {
-        source: `
+    },
+    index: AGENTS_INDEX,
+    refresh: true,
+    script: {
+      source: `
       if (ctx._source.tags == null) {
         ctx._source.tags = [];
       }
@@ -253,35 +258,48 @@ export async function updateTagsBatch(
 
       ctx._source.updated_at = params.updatedAt;
       `,
-        lang: 'painless',
-        params: {
-          tagsToAdd: uniq(options.tagsToAdd),
-          tagsToRemove: uniq(options.tagsToRemove),
-          updatedAt: new Date().toISOString(),
-        },
+      lang: 'painless',
+      params: {
+        tagsToAdd: uniq(options.tagsToAdd),
+        tagsToRemove: uniq(options.tagsToRemove),
+        updatedAt: new Date().toISOString(),
       },
-      conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
-    });
-  } catch (error) {
-    // a FleetError has no enumerable fields, JSON.stringify would drop its message
-    const details = error instanceof FleetError ? error.message : JSON.stringify(error);
-    throw new FleetError('Caught error while batch updating tags: ' + details.slice(0, 1000));
+    },
+    conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
+  };
+
+  // The update is cancelled when it runs for too long, and then it has updated some of the agents.
+  // Which of them a retry selected by the action's kuery would leave out depends on that kuery,
+  // and for one that mixes the tags with other clauses it is only some of them. So the same agents
+  // are updated again, which updates all of them, and counts each of them once. What the
+  // cancelled run did is not recorded.
+  let res;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      res = await updateByQueryAndWait(esClient, request);
+    } catch (error) {
+      // a FleetError has no enumerable fields, JSON.stringify would drop its message
+      const details = error instanceof FleetError ? error.message : JSON.stringify(error);
+      throw new FleetError('Caught error while batch updating tags: ' + details.slice(0, 1000));
+    }
+
+    if (!res.canceled) {
+      break;
+    }
+
+    const cancelled = `Update by query cancelled (${res.canceled}) after updating ${
+      res.updated ?? 0
+    } of ${res.total ?? 'an unknown number of'} agents`;
+    if (attempt >= UPDATE_BY_QUERY_MAX_ATTEMPTS) {
+      throw new UpdateByQueryCancelledError(`${cancelled}, giving up after ${attempt} attempts`);
+    }
+    appContextService
+      .getLogger()
+      .warn(`${cancelled}, running it again for the same ${agentIds.length} agents`);
   }
 
   if (appContextService.getLogger().isLevelEnabled('debug')) {
     appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
-  }
-
-  const cancelledMessage = () =>
-    `Update by query cancelled (${res.canceled}) after updating ${res.updated ?? 0} of ${
-      res.total ?? 'an unknown number of'
-    } agents, retrying`;
-
-  if (res.canceled && !options.retrySkipsUpdated) {
-    // Nothing is recorded for a cancelled update whose retry goes through these agents again: it
-    // updates and records every one of them, so recording the ones updated here would count them
-    // twice. The update is the same for an agent that was already updated.
-    throw new UpdateByQueryCancelledError(cancelledMessage());
   }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
@@ -290,10 +308,7 @@ export async function updateTagsBatch(
   const updatedCount = res.updated ?? 0;
   const updatedIds = getUuidArray(updatedCount);
 
-  // The agents that failed were not changed, so the retry of a cancelled update goes through them
-  // again and records each with the result it has. Recording the failure now as well would report
-  // an agent that the retry updated as failed.
-  const failures = res.canceled ? [] : res.failures ?? [];
+  const failures = res.failures ?? [];
   const failureCount = failures.length;
 
   const isLastRetry = options.retryCount === MAX_RETRY_COUNT;
@@ -374,12 +389,6 @@ export async function updateTagsBatch(
         .debug(`action conflict result wrote on ${versionConflictCount} agents`);
     }
     throw new FleetVersionConflictError(`Version conflict of ${versionConflictCount} agents`);
-  }
-
-  if (res.canceled) {
-    // The update was cancelled for running too long. The agents it did update are recorded above,
-    // and the retry selects the rest, because the agents that were updated no longer match.
-    throw new UpdateByQueryCancelledError(cancelledMessage());
   }
 
   return { actionId, updated: res.updated, took: res.took };

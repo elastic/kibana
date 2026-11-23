@@ -101,9 +101,9 @@ const toUpdateByQueryResponse = (
  * update is waited for instead of lost. Reading the task is retried on transient errors.
  *
  * A task that runs past `maxDurationMs` is cancelled. The documents it already updated stay
- * updated, and a retry that selects documents by what the update changed would skip them, so the
- * cancelled task is followed until it stops and its partial outcome is returned with `canceled`
- * set. The caller records that outcome, then retries the rest.
+ * updated, so the cancelled task is followed until it stops and its partial outcome is returned
+ * with `canceled` set, for the caller to decide what to do with it: a retry that selects documents
+ * by what the update changed would skip the ones that were updated.
  */
 export async function updateByQueryAndWait(
   esClient: ElasticsearchClient,
