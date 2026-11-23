@@ -1238,6 +1238,33 @@ export class ProposalsService {
     return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
   }
 
+  /** Deletes every proposal of a conversation that no longer exists. */
+  async deleteByConversation(conversationId: string, spaceId: string): Promise<void> {
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1000,
+      query: {
+        bool: {
+          filter: toFilterClauses(
+            { conversationId, excludeSuperseded: false, excludeExpired: false },
+            spaceId
+          ),
+        },
+      },
+    });
+    const ids = response.hits.hits.flatMap(({ _id }) => (_id === undefined ? [] : [_id]));
+
+    await asyncMapWithLimit(ids, 10, async (id) => {
+      try {
+        await this.deps.storage.delete({ id });
+      } catch (error) {
+        this.deps.logger.warn(
+          `Could not delete proposal [${id}] of deleted conversation [${conversationId}]: ${error}`
+        );
+      }
+    });
+  }
+
   /** Resolves any proposal in a revision chain to its live revision using the root ID. */
   async getLatestRevision(
     id: string,

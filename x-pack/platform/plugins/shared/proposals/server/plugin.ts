@@ -94,6 +94,18 @@ export class ProposalsPlugin
       logger: this.logger,
     });
 
+    agentBuilder.conversations.onConversationDeleted(
+      async (_request, { conversationId, spaceId }) => {
+        try {
+          await this.requireProposalsService().deleteByConversation(conversationId, spaceId);
+        } catch (error) {
+          this.logger.warn(
+            `Could not delete the proposals of deleted conversation [${conversationId}]: ${error}`
+          );
+        }
+      }
+    );
+
     // Lets an agent propose an action in its own conversation through the gate workflow.
     // Registered in setup but run only after start, so the service is resolved per call.
     agentBuilder.tools.register(

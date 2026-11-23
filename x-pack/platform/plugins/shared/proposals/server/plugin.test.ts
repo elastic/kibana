@@ -58,6 +58,7 @@ const setupPlugin = () => {
     attachments: { registerType: jest.fn() },
     tools: { register: jest.fn() },
     skills: { register: jest.fn() },
+    conversations: { onConversationDeleted: jest.fn() },
   };
 
   plugin.setup(

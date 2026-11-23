@@ -265,6 +265,13 @@ export interface ConversationsSetup {
    * performed it. Without a matching opt-in, the trigger is never emitted.
    */
   enableUpdatedTrigger(optIn: ConversationUpdatedOptIn): void;
+  /** Registers a listener run after a conversation is deleted; it never fails the delete. */
+  onConversationDeleted(
+    listener: (
+      request: KibanaRequest,
+      payload: { conversationId: string; spaceId: string }
+    ) => void | Promise<void>
+  ): void;
 }
 
 /**

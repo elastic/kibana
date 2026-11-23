@@ -23,6 +23,16 @@ export interface ConversationAttachmentEventsPayload {
   events: AttachmentTimelineEvent[];
 }
 
+export interface ConversationDeletedPayload {
+  conversationId: string;
+  spaceId: string;
+}
+
+type ConversationDeletedListener = (
+  request: KibanaRequest,
+  payload: ConversationDeletedPayload
+) => void | Promise<void>;
+
 type MetadataPatchedListener = (
   request: KibanaRequest,
   payload: ConversationMetadataPatchedPayload
@@ -49,6 +59,8 @@ export interface ConversationEventBus {
   emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void;
   onConversationUpdated(listener: ConversationUpdatedListener): void;
   emitConversationUpdated(request: KibanaRequest, payload: ConversationUpdatedTriggerEvent): void;
+  onConversationDeleted(listener: ConversationDeletedListener): void;
+  emitConversationDeleted(request: KibanaRequest, payload: ConversationDeletedPayload): void;
 }
 
 /**
@@ -60,6 +72,7 @@ export interface ScopedConversationEventEmitter {
   emitMetadataPatched(payload: ConversationMetadataPatchedPayload): void;
   emitAttachmentEvents(payload: ConversationAttachmentEventsPayload): void;
   emitConversationUpdated(payload: ConversationUpdatedTriggerEvent): void;
+  emitConversationDeleted?(payload: ConversationDeletedPayload): void;
 }
 
 export const createScopedConversationEventEmitter = (
@@ -69,6 +82,7 @@ export const createScopedConversationEventEmitter = (
   emitMetadataPatched: (payload) => bus.emitMetadataPatched(request, payload),
   emitAttachmentEvents: (payload) => bus.emitAttachmentEvents(request, payload),
   emitConversationUpdated: (payload) => bus.emitConversationUpdated(request, payload),
+  emitConversationDeleted: (payload) => bus.emitConversationDeleted(request, payload),
 });
 
 export const createConversationEventBus = (): ConversationEventBus =>
@@ -78,6 +92,7 @@ class ConversationEventBusImpl implements ConversationEventBus {
   private readonly metadataPatchedListeners: MetadataPatchedListener[] = [];
   private readonly attachmentEventsListeners: AttachmentEventsListener[] = [];
   private readonly conversationUpdatedListeners: ConversationUpdatedListener[] = [];
+  private readonly conversationDeletedListeners: ConversationDeletedListener[] = [];
 
   onMetadataPatched(listener: MetadataPatchedListener): void {
     this.metadataPatchedListeners.push(listener);
@@ -106,6 +121,18 @@ class ConversationEventBusImpl implements ConversationEventBus {
   emitConversationUpdated(request: KibanaRequest, payload: ConversationUpdatedTriggerEvent): void {
     for (const listener of this.conversationUpdatedListeners) {
       listener(request, payload);
+    }
+  }
+
+  onConversationDeleted(listener: ConversationDeletedListener): void {
+    this.conversationDeletedListeners.push(listener);
+  }
+
+  emitConversationDeleted(request: KibanaRequest, payload: ConversationDeletedPayload): void {
+    for (const listener of this.conversationDeletedListeners) {
+      void Promise.resolve()
+        .then(() => listener(request, payload))
+        .catch(() => {});
     }
   }
 }

@@ -2644,6 +2644,61 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('deleteByConversation', () => {
+    it('deletes every proposal of the conversation, whatever its status', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: {
+          hits: [
+            searchHit(baseDocument(), 'proposal-1'),
+            searchHit({ ...baseDocument(), status: 'succeeded' }, 'proposal-2'),
+          ],
+          total: { value: 2 },
+        },
+      });
+      const { service } = createService(storage);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID);
+
+      const { query } = storage.search.mock.calls[0][0];
+      expect(query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: SPACE_ID } },
+          { term: { conversationId: 'conversation-1' } },
+        ])
+      );
+      expect(storage.delete).toHaveBeenCalledTimes(2);
+      expect(storage.delete).toHaveBeenCalledWith({ id: 'proposal-1' });
+      expect(storage.delete).toHaveBeenCalledWith({ id: 'proposal-2' });
+    });
+
+    it('deletes nothing when the conversation has no proposals', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID);
+
+      expect(storage.delete).not.toHaveBeenCalled();
+    });
+
+    it('keeps deleting the rest when one delete fails', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: {
+          hits: [searchHit(baseDocument(), 'proposal-1'), searchHit(baseDocument(), 'proposal-2')],
+          total: { value: 2 },
+        },
+      });
+      storage.delete.mockRejectedValueOnce(new Error('boom'));
+      const { service, logger } = createService(storage);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID);
+
+      expect(storage.delete).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('proposal-1'));
+    });
+  });
+
   describe('countPendingByConversationIds', () => {
     it('counts pending, unexpired proposals per conversation in one aggregation', async () => {
       const storage = createStorage();
