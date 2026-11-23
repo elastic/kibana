@@ -25,7 +25,6 @@ import type {
 } from './evaluators/types';
 import type { EvaluateFn } from './evaluation/create_evaluate_contract';
 import type { OnlineScoreService } from './storage/scores/online_score_service';
-import type { PinnedBaselineService } from './storage/baselines/pinned_baseline_service';
 import type { EvalsTaskProvider } from './task_providers/types';
 
 export interface EvalsPluginSetup {
@@ -101,7 +100,6 @@ export interface EvalsRouteHandlerContext {
   onlineScoreService: OnlineScoreService;
   evaluatorDefinitionService: EvaluatorDefinitionService;
   evaluatorRegistry: EvaluatorRegistry;
-  pinnedBaselineService: PinnedBaselineService;
 }
 
 export type EvalsRequestHandlerContext = CustomRequestHandlerContext<{

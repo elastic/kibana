@@ -7,10 +7,7 @@
 
 import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
 import type { MappingsDefinition } from '@kbn/es-mappings';
-import { EvaluationIndices } from '@kbn/evals-common';
-import { evaluationsDataStreamMappings } from '../scores/scores_index_template';
-
-const scoreMappingProperties = (evaluationsDataStreamMappings as { properties: object }).properties;
+import { EvaluationIndices, evaluationScoreMappingProperties } from '@kbn/evals-common';
 
 /**
  * Holds two document kinds, discriminated by `doc_kind`: one `pointer` per pin (the
@@ -21,7 +18,9 @@ const scoreMappingProperties = (evaluationsDataStreamMappings as { properties: o
  */
 const pinnedBaselinesMappings = {
   properties: {
-    ...scoreMappingProperties,
+    // The score mapping properties come from the contract package, so snapshotted score
+    // documents are indexed exactly as the evals plugin's scores data stream indexes them.
+    ...evaluationScoreMappingProperties,
     doc_kind: { type: 'keyword' },
     baseline: {
       type: 'object',

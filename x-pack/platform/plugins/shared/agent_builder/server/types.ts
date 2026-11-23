@@ -37,6 +37,7 @@ import type {
   AgentBuilderSmlPluginStart,
 } from '@kbn/agent-builder-sml-plugin/server';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
+import type { EvalsPluginStart } from '@kbn/evals-plugin/server';
 
 export type {
   AgentBuilderPluginSetup,
@@ -89,4 +90,6 @@ export interface AgentBuilderStartDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   files: FilesStart;
   isomer: IsomerPluginStart;
+  /** Present when the evals plugin is enabled; its score services exist only in `full` mode. */
+  evals?: EvalsPluginStart;
 }

@@ -37,8 +37,6 @@ import { DatasetService } from './storage/datasets/dataset_service';
 import { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
 import { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import { evaluationsDataStreamDefinition } from './storage/scores/scores_index_template';
-import { PinnedBaselineService } from './storage/baselines/pinned_baseline_service';
-import { pinnedBaselinesDataStreamDefinition } from './storage/baselines/pinned_baselines_index_template';
 import { OnlineScoreService } from './storage/scores/online_score_service';
 import { onlineScoresDataStreamDefinition } from './storage/scores/online_scores_index_template';
 import { createTaskProviderRegistry } from './task_providers/registry';
@@ -57,7 +55,6 @@ export class EvalsPlugin
   private evaluationScoreService?: EvaluationScoreService;
   private evaluatorDefinitionService?: EvaluatorDefinitionService;
   private onlineScoreService?: OnlineScoreService;
-  private pinnedBaselineService?: PinnedBaselineService;
   private started = false;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
@@ -157,7 +154,6 @@ export class EvalsPlugin
     taskProviderRegistry: TaskProviderRegistry
   ) {
     coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
-    coreSetup.dataStreams.registerDataStream(pinnedBaselinesDataStreamDefinition);
     coreSetup.dataStreams.registerDataStream(onlineScoresDataStreamDefinition);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
@@ -174,7 +170,6 @@ export class EvalsPlugin
           !this.datasetService ||
           !this.evaluationScoreService ||
           !this.onlineScoreService ||
-          !this.pinnedBaselineService ||
           !this.evaluatorDefinitionService
         ) {
           throw new Error('Evals storage services have not been initialized');
@@ -185,7 +180,6 @@ export class EvalsPlugin
           evaluationScoreService: this.evaluationScoreService,
           onlineScoreService: this.onlineScoreService,
           evaluatorDefinitionService: this.evaluatorDefinitionService,
-          pinnedBaselineService: this.pinnedBaselineService,
           evaluatorRegistry,
         };
       }
@@ -323,7 +317,6 @@ export class EvalsPlugin
       evaluatorRegistry.isBuiltIn
     );
     this.onlineScoreService = new OnlineScoreService(this.logger, coreStart.dataStreams);
-    this.pinnedBaselineService = new PinnedBaselineService(this.logger, coreStart.dataStreams);
 
     return {
       datasetService: this.datasetService,

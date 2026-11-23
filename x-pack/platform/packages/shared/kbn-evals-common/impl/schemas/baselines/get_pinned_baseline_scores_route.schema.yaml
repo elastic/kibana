@@ -3,7 +3,7 @@ info:
   title: Get Pinned Evaluation Baseline Scores API endpoint
   version: '1'
 paths:
-  /internal/evals/baselines/{baselineId}/scores:
+  /internal/agent_builder/evals/baselines/{baselineId}/scores:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]

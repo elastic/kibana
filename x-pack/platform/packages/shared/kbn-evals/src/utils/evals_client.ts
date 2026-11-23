@@ -15,9 +15,6 @@ import {
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
-  EVALS_BASELINES_PIN_URL,
-  EVALS_BASELINES_LATEST_URL,
-  EVALS_BASELINE_SCORES_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL,
@@ -30,9 +27,6 @@ import {
   GetEvaluationExperimentExampleDetailsResponse,
   GetEvaluationExperimentScoresResponse,
   GetEvaluationExperimentsResponse,
-  GetLatestPinnedBaselineResponse,
-  GetPinnedBaselineScoresResponse,
-  PinEvaluationBaselineResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
@@ -43,7 +37,6 @@ import {
   type DatasetMaturity,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
-  type PinnedBaseline,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
 import { getStatusCode } from './retry_utils';
@@ -311,69 +304,6 @@ export class EvalsClient {
       );
       return [];
     }
-  }
-
-  /**
-   * Pins an execution's scores as the regression baseline for its (suite, task model):
-   * the server snapshots them into the pinned-baselines index, outside score retention.
-   * Throws on failure so a scheduled baseline run goes red instead of silently not pinning.
-   */
-  async pinBaseline({
-    suiteId,
-    executionId,
-    reason,
-    pinnedBy,
-  }: {
-    suiteId: string;
-    executionId: string;
-    reason?: string;
-    pinnedBy?: string;
-  }): Promise<PinnedBaseline> {
-    const response = await this.kbnClient.request({
-      path: this.path(EVALS_BASELINES_PIN_URL),
-      method: 'POST',
-      body: {
-        suite_id: suiteId,
-        execution_id: executionId,
-        ...(reason != null && { reason }),
-        ...(pinnedBy != null && { pinned_by: pinnedBy }),
-      },
-      headers: VERSIONED_HEADERS,
-    });
-    return PinEvaluationBaselineResponse.parse(getResponseData(response)).baseline;
-  }
-
-  async findLatestPinnedBaseline({
-    suiteId,
-    taskModelId,
-  }: {
-    suiteId: string;
-    taskModelId?: string;
-  }): Promise<PinnedBaseline | undefined> {
-    // Errors (routes not deployed, auth, 5xx) must propagate: swallowing them would make
-    // a broken lookup indistinguishable from the genuine "nothing pinned yet" null.
-    const response = await this.kbnClient.request({
-      path: this.path(EVALS_BASELINES_LATEST_URL),
-      method: 'GET',
-      query: {
-        suite_id: suiteId,
-        ...(taskModelId && { model_id: taskModelId }),
-      },
-      headers: VERSIONED_HEADERS,
-    });
-    const { baseline } = GetLatestPinnedBaselineResponse.parse(getResponseData(response));
-    return baseline ?? undefined;
-  }
-
-  async getPinnedBaselineScores(baselineId: string): Promise<EvaluationScoreDocument[]> {
-    const response = await this.kbnClient.request({
-      path: this.path(
-        EVALS_BASELINE_SCORES_URL.replace('{baselineId}', encodeURIComponent(baselineId))
-      ),
-      method: 'GET',
-      headers: VERSIONED_HEADERS,
-    });
-    return GetPinnedBaselineScoresResponse.parse(getResponseData(response)).scores;
   }
 
   /** Reads complete per-example score evidence from the run's home Space. */

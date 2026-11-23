@@ -243,11 +243,6 @@ EOF
       # most suite/model combinations through without per-suite special-casing.
       timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-${EVAL_SUITE_STEP_TIMEOUT:-120}}"
 
-      # The reason is free-form prose going into a double-quoted YAML scalar that
-      # buildkite-agent interpolates on upload: escape backslashes, quotes and `$`
-      # (as `$$`), and flatten newlines, or the upload fails or substitutes env vars.
-      eval_pin_baseline_reason_yaml="$(printf '%s' "${EVAL_PIN_BASELINE_REASON:-}" | tr '\r\n' '  ' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\$/$$/g')"
-
       fanout_step_keys=()
       fanout_connector_ids=()
       # Each matrix row is one step, a JSON object { connectorId, shardId, specFiles }. shardId is ""
@@ -301,8 +296,6 @@ EOF
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
           EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
           EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
-          EVAL_PIN_BASELINE: "${EVAL_PIN_BASELINE:-}"
-          EVAL_PIN_BASELINE_REASON: "${eval_pin_baseline_reason_yaml}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
@@ -721,41 +714,4 @@ run_eval_suite() {
 }
 
 run_eval_suite
-
-# Scheduled baseline runs (EVAL_PIN_BASELINE=1, e.g. the monthly regression baseline
-# pipeline) pin this run's scores as the new baseline for the suite/model after the run
-# succeeds. PR runs never set this: they only compare against the pinned baseline.
-pin_baseline() {
-  if [[ "${EVAL_PIN_BASELINE:-}" != "1" ]]; then
-    return 0
-  fi
-  if [[ -z "${EVAL_PROJECT:-}" ]]; then
-    echo "EVAL_PIN_BASELINE=1 requires a per-connector step (EVAL_PROJECT); skipping pin."
-    return 0
-  fi
-  # Shards of one suite/model share a composite execution ID but run as independent
-  # steps, so a per-shard pin could publish a partial execution as the baseline (and a
-  # successful shard would pin even when a sibling shard failed).
-  if [[ -n "${EVAL_SHARD_ID:-}" ]]; then
-    echo "Baseline pinning is not supported for sharded suites; skipping pin for shard ${EVAL_SHARD_ID}."
-    return 0
-  fi
-
-  local composite=""
-  if command -v buildkite-agent >/dev/null 2>&1; then
-    composite="$(buildkite-agent meta-data get "kbn-evals:execution-id:${EVAL_SUITE_ID}:${EVAL_PROJECT}" 2>/dev/null || true)"
-  fi
-  if [[ -z "$composite" ]]; then
-    echo "No execution ID recorded for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; cannot pin baseline."
-    return 1
-  fi
-
-  echo "--- Pinning baseline for ${EVAL_SUITE_ID}/${EVAL_PROJECT}: ${composite}"
-  node scripts/evals pin-baseline \
-    --suite "$EVAL_SUITE_ID" \
-    --execution-id "$composite" \
-    --reason "${EVAL_PIN_BASELINE_REASON:-scheduled baseline run}"
-}
-
-pin_baseline
 

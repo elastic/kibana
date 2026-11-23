@@ -28,6 +28,7 @@ import { registerInternalExecutionRoutes } from './internal/executions';
 import { registerAccessPrincipalsRoutes } from './internal/access_principals';
 import { registerWorkspaceFileRoutes } from './internal/workspace_files';
 import { registerSpaceSettingsRoutes } from './internal/space_settings';
+import { registerEvalBaselineRoutes } from './internal/eval_baselines';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
@@ -52,4 +53,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerAccessPrincipalsRoutes(dependencies);
   registerWorkspaceFileRoutes(dependencies);
   registerSpaceSettingsRoutes(dependencies);
+  registerEvalBaselineRoutes(dependencies);
 };
