@@ -25,18 +25,11 @@ const scheme = (id: string, scopes: string[]) =>
       .join(', ')}]\` was ${id.endsWith('-added') ? 'added to' : 'removed from'} the API`
   );
 
-// What the cell has for the response or the request: the lines of the fields that changed.
+// What the cell has for an area: its heading and the lines of what changed.
 const object = (area: string, ...lines: string[]): string[] => [
   `**${area}**`,
   '```diff',
   ...lines,
-  '```',
-];
-// A list under its heading, a blank line between the sections of its diff block.
-const list = (area: string, ...sections: string[][]): string[] => [
-  `**${area}**`,
-  '```diff',
-  ...sections.flatMap((lines, index) => (index === 0 ? lines : ['', ...lines])),
   '```',
 ];
 const areas = (...parts: string[][]): string[] =>
@@ -344,7 +337,7 @@ describe('describeChanges', () => {
       areas(
         object('Response', '- count: integer'),
         object('Request', '- alertId (query parameter)', '- limit: integer'),
-        list('Schemas', ['removed', '- statusGroupFilter'])
+        object('Schemas', '- statusGroupFilter')
       )
     );
   });
@@ -356,14 +349,27 @@ describe('describeChanges', () => {
         scheme('api-security-added', ['cloud-platform']),
         scheme('api-security-added', ['bigquery']),
       ])
-    ).toEqual(list('Auth scopes', ['removed', '- container'], ['added', '+ bigquery']));
+    ).toEqual(object('Auth scopes', '- container', '+ bigquery'));
     expect(
       describeChanges([
         scheme('api-security-removed', ['cloud-platform', 'container']),
         scheme('api-security-added', ['cloud-platform']),
         scheme('api-security-added', ['container']),
       ])
-    ).toEqual(list('Auth scopes', ['! same scopes, reordered']));
+    ).toEqual(object('Auth scopes', '! same scopes, reordered'));
+  });
+
+  it('counts the scopes left out of a long list as added', () => {
+    const lines = describeChanges([
+      scheme(
+        'api-security-added',
+        ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'].map(
+          (scope) => `scope-${scope}`
+        )
+      ),
+    ]);
+
+    expect(lines.slice(-3)).toEqual(['+ scope-j', '  … and 2 more added', '```']);
   });
 
   it('names new error responses', () => {
@@ -374,7 +380,7 @@ describe('describeChanges', () => {
           'added the non-success response with the status `422`'
         ),
       ])
-    ).toEqual(list('Error responses', ['added', '+ 422']));
+    ).toEqual(object('Error responses', '+ 422'));
   });
 
   it('keeps the rule of a change it has no words for', () => {
@@ -384,7 +390,7 @@ describe('describeChanges', () => {
         change('something-new', 'y'),
         change('other-rule', 'z'),
       ])
-    ).toEqual(list('Other', ['changed', '! something-new ×2', '! other-rule']));
+    ).toEqual(object('Other', '! something-new ×2', '! other-rule'));
   });
 
   it.each([

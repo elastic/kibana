@@ -46,9 +46,6 @@ const AREAS = [
 
 type Area = (typeof AREAS)[number];
 
-/** These are shown as the object they describe; the other areas as lists. */
-const isObjectArea = (area: Area): boolean => area === 'Response' || area === 'Request';
-
 interface Entry {
   readonly area: Area;
   readonly sign: Sign;
@@ -286,13 +283,12 @@ interface FixedPart {
 }
 
 /**
- * A list of fields, of which `shown` are written out, under a title unless the area is an object.
+ * A list of fields, of which `shown` are written out.
  * Each is the lines of the diff for one field: a line, or for a field that changed its type the
  * line it had and the line it has.
  */
 export interface ListPart {
   readonly kind: 'list';
-  readonly title?: string;
   readonly sign: Sign;
   readonly items: ReadonlyArray<readonly string[]>;
   /** What the fields are, for the line that counts the ones left out. */
@@ -305,7 +301,6 @@ export type ChangePart = FixedPart | ListPart;
 /** The changes in one place (response, request, …): a heading and the parts of its diff block. */
 export interface ChangeArea {
   readonly heading: string;
-  readonly continuous: boolean;
   readonly parts: readonly ChangePart[];
 }
 
@@ -349,13 +344,11 @@ const listPart = (area: Area, sign: Sign, entries: readonly Entry[]): ListPart =
   const items = [...fields.values()]
     .sort((a, b) => byText(a.name, b.name) || byText(a.type ?? '', b.type ?? ''))
     .map((field) => linesOf(sign, field));
-  const object = isObjectArea(area);
   return {
     kind: 'list',
-    ...(object ? {} : { title: SIGN_WORDS[sign] }),
     sign,
     items,
-    moreLabel: object || sign === '!' ? SIGN_WORDS[sign] : area.toLowerCase(),
+    moreLabel: SIGN_WORDS[sign],
     shown: Math.min(items.length, DEFAULT_NAMES_SHOWN),
   };
 };
@@ -367,22 +360,16 @@ export const partLines = (part: ChangePart): string[] => {
   }
   const more = part.items.length - part.shown;
   return [
-    ...(part.title === undefined ? [] : [part.title]),
     ...part.items.slice(0, part.shown).flat(),
     ...(more > 0 ? [`  … and ${more} more ${part.moreLabel}`] : []),
   ];
 };
 
-/**
- * The lines of an area: its bold heading, then one diff block. The response and the request have
- * their lines one after the other; the other areas have their parts a blank line apart.
- */
-export const areaLines = ({ heading, continuous, parts }: ChangeArea): string[] => [
+/** The lines of an area: its bold heading, then one diff block with the lines of its parts. */
+export const areaLines = ({ heading, parts }: ChangeArea): string[] => [
   heading,
   '```diff',
-  ...(continuous
-    ? parts.flatMap(partLines)
-    : parts.flatMap((part, index) => (index === 0 ? partLines(part) : ['', ...partLines(part)]))),
+  ...parts.flatMap(partLines),
   '```',
   '',
 ];
@@ -413,11 +400,9 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
         : [
             {
               heading,
-              continuous: false,
               parts: [
                 fixed(
                   [...otherRules.values()].reduce((total, count) => total + count, 0),
-                  'changed',
                   ...[...otherRules.entries()].map(
                     ([id, count]) => `! ${id}${count > 1 ? ` ×${count}` : ''}`
                   )
@@ -427,7 +412,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
           ];
     }
     if (area === 'Auth scopes' && regrouped) {
-      return [{ heading, continuous: false, parts: [fixed(0, '! same scopes, reordered')] }];
+      return [{ heading, parts: [fixed(0, '! same scopes, reordered')] }];
     }
     const ofArea = entries.filter((entry) => entry.area === area);
     if (ofArea.length === 0) {
@@ -436,7 +421,6 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
     return [
       {
         heading,
-        continuous: isObjectArea(area),
         parts: SIGNS.flatMap((sign) => {
           const withSign = ofArea.filter((entry) => entry.sign === sign);
           return withSign.length === 0 ? [] : [listPart(area, sign, withSign)];
