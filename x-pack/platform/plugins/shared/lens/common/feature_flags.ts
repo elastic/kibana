@@ -127,7 +127,7 @@ function getFeatureFlagFn(
 export function getLensFeatureFlagDefaults(isDev: boolean = false): LensFeatureFlags {
   return Object.entries(lensFeatureFlags).reduce((acc, [k, flag]) => {
     const key = k as keyof typeof lensFeatureFlags;
-    acc[key] = (isDev && 'devFallback' in flag ? flag.devFallback : flag.fallback);
+    acc[key] = isDev && 'devFallback' in flag ? flag.devFallback : flag.fallback;
     return acc;
   }, {} as LensFeatureFlags);
 }
