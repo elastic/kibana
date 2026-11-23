@@ -43,8 +43,40 @@ import { updateByQueryAndWait } from './update_by_query_task';
  */
 const UPDATE_BY_QUERY_MAX_ATTEMPTS = 2;
 
-/** The node of a wildcard in a kuery, which `@kbn/es-query` does not export the type of. */
-type WildcardNode = Parameters<typeof nodeTypes.wildcard.test>[0];
+/** What stands for a `*` in the value of the wildcard of a kuery. */
+const WILDCARD_SYMBOL = nodeTypes.wildcard.buildNode('*').value;
+
+/**
+ * Whether a tag matches the wildcard of a kuery, without a regular expression. The one of
+ * `nodeTypes.wildcard.test` has a greedy repetition for every `*`, and on a tag that does not match
+ * it tries the ways to share the tag out between them: a pattern with a few of them, and a tag of
+ * a few hundred characters, both given by the caller, can take it a very long time, in the process
+ * that serves every request. Here the pieces between the `*` are looked for in order, each as early
+ * as it is found, which is enough for a pattern of nothing else, and takes time in proportion to
+ * the size of the tag and the pattern.
+ */
+const tagMatchesWildcard = (wildcard: KueryNode, tag: string): boolean => {
+  const parts = String(wildcard.value).split(WILDCARD_SYMBOL);
+  const first = parts[0];
+  if (parts.length === 1) {
+    return tag === first;
+  }
+  const last = parts[parts.length - 1];
+  if (first.length + last.length > tag.length || !tag.startsWith(first) || !tag.endsWith(last)) {
+    return false;
+  }
+  // what lies between the start and the end that are matched already
+  const end = tag.length - last.length;
+  let position = first.length;
+  for (const part of parts.slice(1, -1)) {
+    const found = tag.indexOf(part, position);
+    if (found === -1 || found + part.length > end) {
+      return false;
+    }
+    position = found + part.length;
+  }
+  return true;
+};
 
 /** The tag a clause of a kuery is about, when it is `tags:<tag>` for one whole tag. */
 const tagOfClause = (node: KueryNode): string | undefined => {
@@ -131,9 +163,7 @@ const clauseUpdatedAgentsMeet = (
         // matches it: adding `prod*` makes the agent match `tags:prod*`, which is what a tag with
         // a wildcard in it does to the clause `updateAgentTags` adds. For a tag the update removes
         // it settles nothing, as the agent can have another tag that matches.
-        return [...tagsToAdd].some((tag) => nodeTypes.wildcard.test(value as WildcardNode, tag))
-          ? node
-          : undefined;
+        return [...tagsToAdd].some((tag) => tagMatchesWildcard(value, tag)) ? node : undefined;
       }
       const tag = tagOfClause(node);
       return tag !== undefined && tagsToAdd.has(tag) ? node : undefined;

@@ -709,6 +709,13 @@ describe('update_agent_tags', () => {
       [['prod*'], [], '(NOT (tags:prod*))', true],
       [['prod*'], [], '((namespaces:"default")) AND (NOT (tags:prod*))', true],
       [['prod*', 'web'], [], 'NOT tags:prod*', true],
+      // where the wildcard is, and how the pieces between the stars have to follow each other
+      [['web-prod'], [], 'NOT tags:*-prod', true],
+      [['production'], [], 'NOT tags:p*d*n', true],
+      [['acb'], [], 'NOT tags:a*b*c', false],
+      [['aba'], [], 'NOT tags:ab*ba', false],
+      [['abba'], [], 'NOT tags:ab*ba', true],
+      [['anything'], [], 'NOT tags:*', true],
       // a wildcard that none of the tags the update adds matches settles nothing
       [['staging'], [], 'NOT tags:prod*', false],
       [['x'], ['prod*'], 'NOT tags:prod*', false],
@@ -748,6 +755,26 @@ describe('update_agent_tags', () => {
         expect(updatedAgentsClause(tagsToAdd, tagsToRemove, kuery) !== undefined).toBe(expected);
       }
     );
+  });
+
+  describe('a wildcard that would make a regular expression backtrack', () => {
+    it('should be settled quickly, for a pattern with many stars and a long tag that does not match', () => {
+      // `a*a*a*a*a*a*a*a*b` against a tag of 250 `a`: a regular expression with a greedy repetition for
+      // every star tries a number of ways to share the tag out that no process should wait for
+      const tag = 'a'.repeat(250);
+      const started = Date.now();
+
+      const clause = updatedAgentsClause([tag], [], 'NOT tags:a*a*a*a*a*a*a*a*b');
+
+      expect(clause).toBeUndefined();
+      expect(Date.now() - started).toBeLessThan(500);
+    });
+
+    it('should still match a tag that does match it', () => {
+      const tag = `${'a'.repeat(250)}b`;
+
+      expect(updatedAgentsClause([tag], [], 'NOT tags:a*a*a*a*a*a*a*a*b')).toBeDefined();
+    });
   });
 
   describe('the clause that updatedAgentsClause returns', () => {
