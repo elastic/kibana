@@ -853,21 +853,112 @@ describe('update_agent_tags', () => {
         esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 2, total: 2 } as any);
       });
 
-      it('should only update agents that are in the space of the caller', async () => {
+      // what the query selects, for a few agents: it is the query that is run by Elasticsearch
+      const selects = (query: any, agent: { id: string; namespaces?: string[] }): boolean => {
+        if (query.terms) {
+          return query.terms._id.includes(agent.id);
+        }
+        if (query.term) {
+          return (agent.namespaces ?? []).includes(Object.values(query.term)[0] as string);
+        }
+        if (query.exists) {
+          return (agent.namespaces ?? []).length > 0;
+        }
+        const { filter = [], should = [], must_not: mustNot } = query.bool;
+        const mustNotQueries = mustNot === undefined ? [] : [].concat(mustNot);
+        return (
+          filter.every((q: any) => selects(q, agent)) &&
+          (should.length === 0 || should.some((q: any) => selects(q, agent))) &&
+          !mustNotQueries.some((q: any) => selects(q, agent))
+        );
+      };
+      const agentsOf = {
+        'in the space': { id: 'agent1', namespaces: ['myspace'] },
+        'in the space and another': { id: 'agent2', namespaces: ['other', 'myspace'] },
+        'in another space': { id: 'agent3', namespaces: ['other'] },
+        'in all spaces': { id: 'agent4', namespaces: ['*'] },
+        'in no space': { id: 'agent5' },
+        'in no space, as an empty list': { id: 'agent6', namespaces: [] },
+        'in the default space': { id: 'agent7', namespaces: ['default'] },
+      };
+      const idsOf = (query: any) =>
+        Object.values(agentsOf)
+          .filter((agent) => selects(query, agent))
+          .map(({ id }) => id);
+
+      it('should only update agents that are in the space of the caller, or in all spaces', async () => {
         await batch('myspace');
 
-        const filter = queryOf(0).bool.filter;
-        expect(filter[0]).toEqual({ terms: { _id: ['agent1', 'agent2'] } });
-        expect(JSON.stringify(filter[1])).toContain('myspace');
-        expect(JSON.stringify(filter[1])).toContain('namespaces');
+        expect(queryOf(0)).toEqual({
+          bool: {
+            filter: [
+              { terms: { _id: ['agent1', 'agent2'] } },
+              {
+                bool: {
+                  should: [{ term: { namespaces: 'myspace' } }, { term: { namespaces: '*' } }],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        });
       });
 
-      it('should include the agents of all spaces and without one in the default space', async () => {
-        await batch('default');
+      it('should select the agents of the space and of all spaces among the ids, and no others', async () => {
+        const ids = Object.values(agentsOf).map(({ id }) => id);
+        await updateTagsBatch(
+          soClient,
+          esClient,
+          ids.map((id) => ({ id } as Agent)),
+          {},
+          { tagsToAdd: ['new'], tagsToRemove: [], total: ids.length, spaceId: 'myspace' }
+        );
 
-        const namespaceFilter = JSON.stringify(queryOf(0).bool.filter[1]);
-        expect(namespaceFilter).toContain('default');
-        expect(namespaceFilter).toContain('namespaces');
+        // in the space, in it and another, and in all spaces: not another space, none, or default
+        expect(idsOf(queryOf(0))).toEqual(['agent1', 'agent2', 'agent4']);
+      });
+
+      it('should select the agents of the default space, of all spaces, and of none, in the default space', async () => {
+        const ids = Object.values(agentsOf).map(({ id }) => id);
+        await updateTagsBatch(
+          soClient,
+          esClient,
+          ids.map((id) => ({ id } as Agent)),
+          {},
+          { tagsToAdd: ['new'], tagsToRemove: [], total: ids.length, spaceId: 'default' }
+        );
+
+        expect(queryOf(0).bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              { term: { namespaces: 'default' } },
+              { term: { namespaces: '*' } },
+              { bool: { must_not: { exists: { field: 'namespaces' } } } },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+        // not the agents of another space, which an agent in all spaces or in none is not
+        expect(idsOf(queryOf(0))).toEqual(['agent4', 'agent5', 'agent6', 'agent7']);
+      });
+
+      it('should not narrow the update by space when the spaces are not enabled', async () => {
+        jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+        await batch('myspace');
+
+        expect(queryOf(0)).toEqual({ terms: { _id: ['agent1', 'agent2'] } });
+      });
+
+      it('should take a space id that looks like something else as the name of a space', async () => {
+        await batch('null');
+
+        expect(queryOf(0).bool.filter[1]).toEqual({
+          bool: {
+            should: [{ term: { namespaces: 'null' } }, { term: { namespaces: '*' } }],
+            minimum_should_match: 1,
+          },
+        });
       });
 
       it('should check the space again when the update is run again after being cancelled', async () => {
@@ -896,7 +987,10 @@ describe('update_agent_tags', () => {
         await batch('myspace');
 
         expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
-        expect(JSON.stringify(queryOf(1).bool.filter[1])).toContain('myspace');
+        expect(queryOf(1)).toEqual(queryOf(0));
+        expect(queryOf(1).bool.filter[1].bool.should[0]).toEqual({
+          term: { namespaces: 'myspace' },
+        });
       });
     });
 
