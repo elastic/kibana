@@ -127,8 +127,9 @@
     "default": {
       "apiVersion": "2024.12",
       "fetchedAt": "2026-11-23T00:00:00.000Z",
-      "format": "openapi",
-      "url": "https://developer.sophos.com/intro"
+      "format": "html-reference",
+      "url": "https://developer.sophos.com/docs/common-v1/1/overview",
+      "note": "Sophos does not publish a downloadable OpenAPI spec. This URL is the human-readable API reference; see snapshots/README.md."
     }
   },
   "unmatched": {

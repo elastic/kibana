@@ -571,14 +571,8 @@ describe('actOnAlertsBulk', () => {
 
   it('iterates over all IDs and returns successCount + failureCount', async () => {
     const client = makeClient();
-    // First whoami call succeeds, then one per actOnAlert
-    client.get
-      .mockResolvedValueOnce({
-        data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } },
-      })
-      .mockResolvedValue({
-        data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } },
-      });
+    // whoami is resolved once before the loop
+    stubWhoami(client);
     client.request
       .mockResolvedValueOnce({ data: { result: 'success' } }) // ALERT_ID succeeds
       .mockRejectedValueOnce(
@@ -774,7 +768,9 @@ describe('getTamperProtection', () => {
         url: `${DATA_REGION}/endpoint/v1/endpoints/${ENDPOINT_ID}/tamper-protection`,
       })
     );
-    expect(result).toEqual(tamperData);
+    // Recovery password must be stripped — it is an endpoint credential
+    expect(result).toEqual({ enabled: true });
+    expect(result).not.toHaveProperty('password');
   });
 });
 
@@ -834,6 +830,16 @@ describe('listBlockedItems', () => {
 describe('addBlockedItem', () => {
   const SHA256 = 'a'.repeat(64);
 
+  it('accepts input without optional comment', () => {
+    const result = AddBlockedItemInputSchema.safeParse({ sha256: SHA256 });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts input with optional comment', () => {
+    const result = AddBlockedItemInputSchema.safeParse({ sha256: SHA256, comment: 'block it' });
+    expect(result.success).toBe(true);
+  });
+
   it('POSTs sha256 to /endpoint/v1/settings/blocked-items', async () => {
     const client = makeClient();
     stubWhoami(client);
@@ -874,6 +880,23 @@ describe('addBlockedItem', () => {
 // ---------------------------------------------------------------------------
 
 describe('addAllowedItem', () => {
+  it('accepts input without optional comment', () => {
+    const result = AddAllowedItemInputSchema.safeParse({
+      type: 'path',
+      properties: { path: '/usr/bin/example' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts input with optional comment', () => {
+    const result = AddAllowedItemInputSchema.safeParse({
+      type: 'path',
+      properties: { path: '/usr/bin/example' },
+      comment: 'allow it',
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('POSTs to /endpoint/v1/settings/allowed-items', async () => {
     const client = makeClient();
     stubWhoami(client);
@@ -987,7 +1010,7 @@ describe('listDetections', () => {
         params: expect.objectContaining({ pageSize: 10 }),
       })
     );
-    expect(result).toEqual({ items: [{ id: 'det-1' }] });
+    expect(result).toEqual({ items: [{ id: 'det-1' }], runId: RUN_ID });
   });
 
   it('throws when submit returns no runId', async () => {

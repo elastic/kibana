@@ -75,7 +75,7 @@ The Sophos Central connector exposes the following actions:
 :   Trigger an on-demand malware scan on one or more endpoints. The scan runs asynchronously; the action returns a scan ID immediately. Accepts 1 to 500 endpoint UUIDs.
 
 `getTamperProtection`
-:   Read the tamper protection status and recovery password for an endpoint. A disabled state is a risk signal.
+:   Read the tamper protection status for an endpoint. A disabled state is a risk signal. The recovery password is not returned.
 
 `updateTamperProtection` _(not yet available)_
 :   Enable or disable tamper protection for an endpoint. Optionally regenerate the recovery password. Only use after analyst approval.
@@ -86,11 +86,11 @@ The Sophos Central connector exposes the following actions:
 `addBlockedItem`
 :   Add a SHA-256 file hash to the tenant's global blocked list. If the hash is already blocked the action returns a soft success.
 
-`addAllowedItem`
-:   Add an item to the tenant's global allowed list. Supported types: `path`, `sha256`, `certificateSigner`, `posixPath`.
+`addAllowedItem` _(not yet available)_
+:   Add an item to the tenant's global allowed list. Supported types: `path`, `sha256`, `certificateSigner`, `posixPath`. Only use after analyst approval — adding an allowed item relaxes protection across the tenant.
 
 `deleteBlockedItem` _(not yet available)_
 :   Remove a blocked item from the tenant's global blocked list by its item ID. Deletion is permanent.
 
 `listDetections`
-:   Query XDR detections (requires XDR licence). The connector submits the query, polls until it completes (up to 90 s), and returns a paginated page of results.
+:   Query XDR detections (requires XDR licence). On the first call the connector submits the query, polls until it completes (up to 90 s), and returns the first page of results along with `runId`. To fetch subsequent pages, pass the same `runId` with the desired `page` number — the connector skips submission and returns results directly.

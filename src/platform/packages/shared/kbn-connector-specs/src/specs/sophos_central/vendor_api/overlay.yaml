@@ -3,45 +3,45 @@ info:
   title: Sophos Central API corrections
   version: 1.0.0
 actions:
-  - target: $.paths['/common/v1/alerts'].get.parameters
+  # Alerts endpoint: severity, product, category accept repeated query keys
+  - target: $.paths['/common/v1/alerts'].get.parameters[?(@.name=='severity')].schema
     description: >-
       The Sophos Common API v1 alerts endpoint accepts repeated query parameters
-      for severity, product and category (e.g. ?severity=high&severity=medium).
-      The published spec models these as single strings; this overlay corrects
-      them to arrays.
+      for severity (e.g. ?severity=high&severity=medium). The published spec
+      models it as a single string; this overlay corrects it to an array.
     update:
-      - name: severity
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-      - name: product
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-      - name: category
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
+      type: array
+      items:
+        type: string
 
-  - target: $.paths['/endpoint/v1/endpoints'].get.parameters
+  - target: $.paths['/common/v1/alerts'].get.parameters[?(@.name=='product')].schema
+    description: >-
+      Correct product parameter to array type for repeated query keys.
+    update:
+      type: array
+      items:
+        type: string
+
+  - target: $.paths['/common/v1/alerts'].get.parameters[?(@.name=='category')].schema
+    description: >-
+      Correct category parameter to array type for repeated query keys.
+    update:
+      type: array
+      items:
+        type: string
+
+  # Endpoints listing: healthStatus accepts repeated query keys
+  - target: $.paths['/endpoint/v1/endpoints'].get.parameters[?(@.name=='healthStatus')].schema
     description: >-
       The Sophos Endpoint API v1 endpoints listing accepts repeated query
       parameters for healthStatus (e.g. ?healthStatus=bad&healthStatus=suspicious).
       The published spec models it as a single string.
     update:
-      - name: healthStatus
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
+      type: array
+      items:
+        type: string
 
+  # Isolation endpoint: undocumented comment field
   - target: $.paths['/endpoint/v1/endpoints/isolation'].post.requestBody.content['application/json'].schema
     description: >-
       The isolation endpoint uses `enabled: true` for isolate and `enabled: false`

@@ -210,7 +210,8 @@ function throwApiError(err: unknown, fallback: string): never {
     }
     throw wrapped;
   }
-  throw err instanceof Error ? err : new Error(fallback);
+  const original = err instanceof Error ? err.message : String(err);
+  throw new Error(`${fallback}: ${original}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -314,19 +315,21 @@ export const SophosCentral: ConnectorSpec = {
     '',
     '### IOC management',
     '- Call `addBlockedItem` with a SHA-256 hash to add a file to the tenant-wide block list.',
-    '- Call `addAllowedItem` with type and properties to add a path, hash, certificate signer, or POSIX path to the allow list.',
     '- Call `listBlockedItems` to audit the current block list.',
     '',
     '### Tamper protection',
-    '- Call `getTamperProtection` to check whether tamper protection is enabled and get the recovery password.',
+    '- Call `getTamperProtection` to check whether tamper protection is enabled. A disabled state is a risk signal.',
     '',
     '### XDR detections (requires XDR licence)',
     '- Call `listDetections` to query XDR detections. The connector submits the query asynchronously, ' +
-      'polls until complete (up to 90 s), and returns paginated results.',
+      'polls until complete (up to 90 s), and returns paginated results with a `runId`.',
+    '- To fetch the next page, call `listDetections` again with the same `runId` and increment `page`. ' +
+      'This reuses the original query run without resubmitting.',
     '',
     '### Pagination',
     '- `listAlerts` and `listEndpoints` use cursor pagination: pass the returned `pages.nextKey` as `pageFromKey` to get the next page.',
-    '- `listBlockedItems` and `listDetections` use page-number pagination: increment `page` until `page > pages.total`.',
+    '- `listBlockedItems` uses page-number pagination: increment `page` until `page > pages.total`.',
+    '- `listDetections` returns a `runId`: pass it back with the desired `page` to paginate the same query run.',
   ].join('\n'),
 
   actions: {
@@ -410,19 +413,31 @@ export const SophosCentral: ConnectorSpec = {
         'Rate limit: 100 calls/min — keep batches under 50 during peak hours.',
       input: ActOnAlertsBulkInputSchema,
       handler: async (ctx, input: ActOnAlertsBulkInput) => {
+        // Resolve tenant and region once before iterating over IDs
+        const { tenantId, dataRegion } = await whoami(ctx);
         const results: Array<{ alertId: string; status: string; error?: string }> = [];
         let successCount = 0;
         let failureCount = 0;
 
         for (const alertId of input.ids) {
           try {
-            await request(ctx, 'POST', `/common/v1/alerts/${alertId}/actions`, {
-              data: {
-                action: input.action,
-                ...(input.message !== undefined && { message: input.message }),
+            await withRetry(
+              async () => {
+                const response = await ctx.client.request({
+                  method: 'POST',
+                  url: `${dataRegion}/common/v1/alerts/${alertId}/actions`,
+                  headers: { 'X-Tenant-ID': tenantId },
+                  data: {
+                    action: input.action,
+                    ...(input.message !== undefined && { message: input.message }),
+                  },
+                  timeout: 30_000,
+                });
+                return response.data;
               },
-              idempotent: false,
-            });
+              3,
+              false
+            );
             results.push({ alertId, status: 'success' });
             successCount++;
           } catch (err) {
@@ -583,17 +598,21 @@ export const SophosCentral: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Read the tamper protection status and recovery password for a Sophos Central ' +
-        'endpoint. The recovery password is needed to disable tamper protection from the ' +
-        'endpoint console. A disabled state (`enabled: false`) is a risk signal.',
+        'Read the tamper protection status for a Sophos Central endpoint. ' +
+        'A disabled state (`enabled: false`) is a risk signal. ' +
+        'The recovery password is not returned to agents.',
       input: GetTamperProtectionInputSchema,
       handler: async (ctx, input: GetTamperProtectionInput) => {
         try {
-          return await request(
+          const data = await request<Record<string, unknown>>(
             ctx,
             'GET',
             `/endpoint/v1/endpoints/${input.endpointId}/tamper-protection`
           );
+          // Strip the recovery password — it is an endpoint credential
+          // that must not be exposed in Agent Builder tool context.
+          const { password: _password, ...safe } = data;
+          return safe;
         } catch (err) {
           throwApiError(err, `Failed to get tamper protection for endpoint ${input.endpointId}`);
         }
@@ -684,7 +703,7 @@ export const SophosCentral: ConnectorSpec = {
     },
 
     addAllowedItem: {
-      isTool: true,
+      isTool: false,
       scope: 'write',
       description:
         "Add an item to the Sophos Central tenant's global allowed list. " +
@@ -742,79 +761,91 @@ export const SophosCentral: ConnectorSpec = {
       scope: 'read',
       description:
         'Query XDR detections for the Sophos Central tenant (requires XDR licence). ' +
-        'The connector submits the query, polls until it completes (up to 90 s), and ' +
-        'returns a paginated page of results. Increment `page` to retrieve further pages.',
+        'On the first call the connector submits the query, polls until it completes ' +
+        '(up to 90 s), and returns the first page of results along with `runId`. ' +
+        'To fetch subsequent pages, pass the same `runId` with the desired `page` — ' +
+        'the connector skips submission and returns results directly.',
       input: ListDetectionsInputSchema,
       handler: async (ctx, input: ListDetectionsInput) => {
         const { tenantId, dataRegion } = await whoami(ctx);
         const headers = { 'X-Tenant-ID': tenantId };
 
-        // Step 1: submit the detection query
-        const submitRes = await ctx.client.request<{
-          id?: string;
-          runId?: string;
-          result?: string;
-        }>({
-          method: 'POST',
-          url: `${dataRegion}/detections/v1/queries/detections`,
-          headers,
-          data: {
-            ...(input.severity?.length && { severity: input.severity }),
-            ...(input.type?.length && { type: input.type }),
-            ...(input.category?.length && { category: input.category }),
-            ...(input.from && { from: input.from }),
-            ...(input.to && { to: input.to }),
-          },
-          timeout: 30_000,
-        });
+        let runId = input.runId;
 
-        // The API returns `id` (not `runId`)
-        const runId = submitRes.data?.id ?? submitRes.data?.runId;
         if (!runId) {
-          throw new Error('Sophos Central listDetections: submit did not return a query id');
-        }
-
-        // If the submit itself already reports a terminal state, check it now
-        const submitResult = submitRes.data?.result;
-        if (submitResult === 'notAvailable') {
-          throw new Error(
-            'Sophos Central listDetections: XDR detections are not available for this tenant. ' +
-              'An XDR licence is required.'
-          );
-        }
-
-        // Step 2: poll until terminal state
-        const TERMINAL = new Set(['succeeded', 'canceled', 'failed', 'notAvailable', 'timedOut']);
-        const pollTimeoutMs = 90_000;
-        const pollIntervalMs = 5_000;
-        const deadline = Date.now() + pollTimeoutMs;
-
-        let runState = '';
-        while (!TERMINAL.has(runState)) {
-          if (Date.now() > deadline) {
-            throw new Error(
-              'Sophos Central listDetections: query run did not complete within 90 seconds'
-            );
-          }
-          await sleep(pollIntervalMs);
-          if (Date.now() > deadline) {
-            throw new Error(
-              'Sophos Central listDetections: query run did not complete within 90 seconds'
-            );
-          }
-          const pollRes = await ctx.client.request<{ result?: string; status?: string }>({
-            method: 'GET',
-            url: `${dataRegion}/detections/v1/queries/detections/${runId}`,
+          // Step 1: submit the detection query
+          const submitRes = await ctx.client.request<{
+            id?: string;
+            runId?: string;
+            result?: string;
+          }>({
+            method: 'POST',
+            url: `${dataRegion}/detections/v1/queries/detections`,
             headers,
+            data: {
+              ...(input.severity?.length && { severity: input.severity }),
+              ...(input.type?.length && { type: input.type }),
+              ...(input.category?.length && { category: input.category }),
+              ...(input.from && { from: input.from }),
+              ...(input.to && { to: input.to }),
+            },
             timeout: 30_000,
           });
-          runState = pollRes.data?.result ?? pollRes.data?.status ?? '';
-        }
 
-        if (runState !== 'succeeded') {
-          throw new Error(
-            `Sophos Central listDetections: query run ended with state "${runState}"`
-          );
+          runId = submitRes.data?.id ?? submitRes.data?.runId;
+          if (!runId) {
+            throw new Error('Sophos Central listDetections: submit did not return a query id');
+          }
+
+          // If the submit itself already reports a terminal state, check it now
+          const submitResult = submitRes.data?.result;
+          if (submitResult === 'notAvailable') {
+            throw new Error(
+              'Sophos Central listDetections: XDR detections are not available for this tenant. ' +
+                'An XDR licence is required.'
+            );
+          }
+
+          // Step 2: poll until terminal state
+          const TERMINAL = new Set([
+            'succeeded',
+            'canceled',
+            'failed',
+            'notAvailable',
+            'timedOut',
+          ]);
+          const pollTimeoutMs = 90_000;
+          const pollIntervalMs = 5_000;
+          const deadline = Date.now() + pollTimeoutMs;
+
+          let runState = '';
+          while (!TERMINAL.has(runState)) {
+            const remaining = deadline - Date.now();
+            if (remaining <= 0) {
+              throw new Error(
+                'Sophos Central listDetections: query run did not complete within 90 seconds'
+              );
+            }
+            await sleep(Math.min(pollIntervalMs, remaining));
+            if (Date.now() > deadline) {
+              throw new Error(
+                'Sophos Central listDetections: query run did not complete within 90 seconds'
+              );
+            }
+            const pollRes = await ctx.client.request<{ result?: string; status?: string }>({
+              method: 'GET',
+              url: `${dataRegion}/detections/v1/queries/detections/${runId}`,
+              headers,
+              timeout: Math.min(30_000, Math.max(1_000, deadline - Date.now())),
+            });
+            runState = pollRes.data?.result ?? pollRes.data?.status ?? '';
+          }
+
+          if (runState !== 'succeeded') {
+            throw new Error(
+              `Sophos Central listDetections: query run ended with state "${runState}"`
+            );
+          }
         }
 
         // Step 3: retrieve results page
@@ -829,7 +860,7 @@ export const SophosCentral: ConnectorSpec = {
           timeout: 30_000,
         });
 
-        return resultsRes.data;
+        return { ...resultsRes.data, runId };
       },
     },
   },
