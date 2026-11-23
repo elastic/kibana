@@ -14,6 +14,7 @@ import {
   getEuidCompositeQuery,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
+  getResolutionScoreESQLByRange,
 } from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
@@ -142,6 +143,90 @@ describe('Calculate risk scores with ESQL', () => {
       expect(renameIndex).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
     });
 
+    it("selects a page of resolution groups by target range and this run's lookup rows", () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { lower: 'user:target-a', upper: 'user:target-m' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        '| WHERE calculation_run_id == "run-1" AND resolution_target_id > "user:target-a" AND resolution_target_id <= "user:target-m"'
+      );
+      expect(query).not.toContain('resolution_target_id IN (');
+      expect(query).toContain('BY resolution_target_id');
+      expect(query.indexOf('| RENAME @timestamp as time')).toBeLessThan(
+        query.indexOf('| LOOKUP JOIN')
+      );
+    });
+
+    it('omits the lower bound on the first page of resolution groups', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { upper: 'user:target-m' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        '| WHERE calculation_run_id == "run-1" AND resolution_target_id <= "user:target-m"'
+      );
+      expect(query).not.toContain('resolution_target_id >');
+    });
+
+    it("keeps only this run's lookup rows, so a previous run's leftover rows form no groups", () => {
+      // The lookup index is pruned after scoring, so while a run scores, a target whose aliases
+      // have all moved elsewhere still has the row the previous run wrote for it.
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { upper: 'user:target-m' },
+        'run-2',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('| WHERE calculation_run_id == "run-2" AND');
+      expect(query).not.toContain('resolution_target_id IS NOT NULL');
+    });
+
+    it('escapes quote and backslash characters in resolution target bounds', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { lower: 'user:with"quote', upper: 'user:with\\slash' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('resolution_target_id > "user:with\\"quote"');
+      expect(query).toContain('resolution_target_id <= "user:with\\\\slash"');
+    });
+
+    it('throws when resolution target bounds contain a control character', () => {
+      expect(() =>
+        getResolutionScoreESQLByRange(
+          EntityType.user,
+          { lower: 'user:target-a', upper: 'user:bad\u000A' },
+          'run-1',
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
+    });
+
     it('escapes quote and backslash characters in resolution target ID list', () => {
       const query = getResolutionScoreESQLByIds(
         EntityType.user,
@@ -204,6 +289,41 @@ describe('Calculate risk scores with ESQL', () => {
           '.alerts-security.alerts-default'
         )
       ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it.each([
+      ['whitespace/METADATA injection', '.alerts-security.alerts-default METADATA _index'],
+      ['pipe injection', '.alerts-security.alerts-default | LIMIT 0'],
+      ['comment injection', '.alerts-security.alerts-default,zz* | LIMIT 0 //'],
+      [
+        'report payload A',
+        '.alerts-security.alerts-alpha,.alerts-security.alerts-beta,zz* METADATA _index,/* * */_source',
+      ],
+    ])('throws when the source index is not a valid index expression (%s)', (_label, index) => {
+      const message = `Risk scoring source index ${index} is not a valid index expression`;
+
+      expect(() =>
+        getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500, index)
+      ).toThrow(message);
+      expect(() =>
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: 'host:zuzanna' },
+          10000,
+          3500,
+          index
+        )
+      ).toThrow(message);
+      expect(() =>
+        getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          10000,
+          3500,
+          index,
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow(message);
     });
 
     it('ranks risk inputs by the numeric risk score in every scoring query', () => {

@@ -324,14 +324,9 @@ export class GisPageObject extends FtrService {
   // Please keep in mind when udpating, removing or adding to this method
   // upgrade needs to be tested too
   async clearLegendTooltip() {
-    // The tooltip renders instantly when present, so use a short timeout: this is an
-    // absence probe called many times per hook, and a long timeout burns hook budget.
-    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`);
-    if (isTooltipOpen) {
-      await this.testSubjects.click(`layerTocTooltip`);
-      // Wait for tooltip to go away
-      await this.common.sleep(1000);
-    }
+    // The pointer is parked on layerTocTooltip's anchor, so unhover it instead of probing.
+    await this.testSubjects.moveMouseTo('globalQueryBar');
+    await this.testSubjects.missingOrFail('layerTocTooltip');
   }
 
   // This method is also used by upgrade testing which is not part of PR testing
@@ -519,10 +514,8 @@ export class GisPageObject extends FtrService {
   async setLayerQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapLayerPanelOpenFilterEditorButton');
-    const filterEditorContainer = await this.testSubjects.find('mapFilterEditor');
-    const queryBarInFilterEditor = await this.testSubjects.findDescendant(
-      'queryInput',
-      filterEditorContainer
+    const queryBarInFilterEditor = await this.find.displayedByCssSelector(
+      '[data-test-subj="mapFilterEditor"] [data-test-subj="queryInput"]'
     );
     await queryBarInFilterEditor.click();
     const input = await this.find.activeElement();

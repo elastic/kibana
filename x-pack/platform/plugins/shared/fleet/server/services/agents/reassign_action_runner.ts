@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Agent } from '../../types';
 
 import {
+  AgentAlreadyAssignedError,
   AgentReassignmentError,
   AgentlessAgentRestrictionError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -30,6 +31,24 @@ import { BulkActionTaskType } from './bulk_action_types';
 export class ReassignActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     return await reassignBatch(this.esClient, this.actionParams! as any, agents, {});
+  }
+
+  /**
+   * `reassignBatch` throws when no agent in the batch can be reassigned — every one is already on
+   * the target policy, hosted, or agentless-restricted. `AgentAlreadyAssignedError` extends
+   * `AgentReassignmentError`, so this covers both.
+   */
+  protected isBatchWithoutActionableAgents(error: Error): boolean {
+    return error instanceof AgentReassignmentError;
+  }
+
+  /**
+   * `AgentAlreadyAssignedError` is the one `reassignBatch` raises when every agent in the batch is
+   * on the target policy already, which is where this action's own change can come back at it.
+   * The wider `AgentReassignmentError` covers managed agents too, which it can never reassign.
+   */
+  protected isAlreadyInRequestedState(error: Error): boolean {
+    return error instanceof AgentAlreadyAssignedError;
   }
 
   protected getTaskType() {
@@ -67,7 +86,7 @@ export async function reassignBatch(
 
   const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
     if (agent.policy_id === options.newAgentPolicyId) {
-      errors[agent.id] = new AgentReassignmentError(
+      errors[agent.id] = new AgentAlreadyAssignedError(
         `Agent ${agent.id} is already assigned to agent policy ${options.newAgentPolicyId}`
       );
     } else if (isHostedAgent(restrictions, agent)) {
@@ -95,6 +114,10 @@ export async function reassignBatch(
     appContextService
       .getLogger()
       .debug('No agents to update, skipping agent update and action creation');
+    const errorList = Object.values(errors);
+    if (errorList.length > 0 && errorList.every((e) => e instanceof AgentAlreadyAssignedError)) {
+      throw new AgentAlreadyAssignedError('No agents to reassign, all agents are already assigned');
+    }
     throw new AgentReassignmentError('No agents to reassign, already assigned or managed agents');
   }
 

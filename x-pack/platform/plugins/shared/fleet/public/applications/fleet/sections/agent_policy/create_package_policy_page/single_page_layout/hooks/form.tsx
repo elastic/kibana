@@ -412,6 +412,7 @@ export function useOnSubmit({
               defaultPolicyData,
               'name',
               'description',
+              'condition',
               'namespace',
               'policy_ids',
               'output_id',

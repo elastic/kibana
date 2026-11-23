@@ -163,24 +163,19 @@ export class ESQLService extends FtrService {
   }
 
   public async openEsqlControlFlyout(query: string) {
-    await this.retry.waitFor('control flyout to open', async () => {
-      await this.typeEsqlEditorQuery(query);
-      await this.selectEsqlSuggestionByLabel('Create control');
+    await this.typeEsqlEditorQuery(query);
+    await this.selectEsqlSuggestionByLabel('Create control');
 
-      return await this.testSubjects.exists('create_esql_control_flyout');
-    });
+    await this.testSubjects.existOrFail('create_esql_control_flyout', { timeout: 20_000 });
   }
 
   public async createEsqlControl(query: string) {
     await this.waitESQLEditorLoaded();
     await this.openEsqlControlFlyout(query);
 
-    await this.retry.waitFor('ES|QL control flyout to close after saving the control', async () => {
-      await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
-      await this.testSubjects.click('saveEsqlControlsFlyoutButton');
-      const flyoutOpen = await this.testSubjects.exists('create_esql_control_flyout');
-      return !flyoutOpen;
-    });
+    await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
+    await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+    await this.testSubjects.missingOrFail('create_esql_control_flyout', { timeout: 20_000 });
 
     await this.waitESQLEditorLoaded();
   }

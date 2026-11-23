@@ -1,5 +1,5 @@
 {
-  "sha1": "f188cee7f2e4962b8af8e316332dda3ca8c0ac81",
+  "sha1": "6a5da7380b3a489c1e2bb6cbf5e432f542968b36",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -17,8 +17,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/agent_mode_complete_flow.spec.ts",
-        "line": 33,
-        "column": 14
+        "line": 29,
+        "column": 33
       }
     },
     {
@@ -34,8 +34,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/agent_mode_complete_flow.spec.ts",
-        "line": 54,
-        "column": 14
+        "line": 46,
+        "column": 15
       }
     },
     {
@@ -53,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/agent_nav_button.no_ab_privilege.spec.ts",
-        "line": 35,
-        "column": 14
+        "line": 31,
+        "column": 33
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/ai_assistant_visibility.no_assistant_privilege.spec.ts",
-        "line": 41,
-        "column": 14
+        "line": 36,
+        "column": 33
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/ai_assistant_visibility.spec.ts",
-        "line": 27,
-        "column": 14
+        "line": 21,
+        "column": 7
       }
     },
     {
@@ -101,8 +101,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/documentation_section.spec.ts",
-        "line": 33,
-        "column": 14
+        "line": 29,
+        "column": 33
       }
     },
     {
@@ -120,8 +120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/page_display.no_ab_privilege.spec.ts",
-        "line": 28,
-        "column": 14
+        "line": 26,
+        "column": 7
       }
     },
     {
@@ -139,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/page_display.no_assistant_privilege.spec.ts",
-        "line": 35,
-        "column": 14
+        "line": 31,
+        "column": 33
       }
     },
     {
@@ -158,8 +158,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/page_display.spec.ts",
-        "line": 28,
-        "column": 14
+        "line": 26,
+        "column": 7
       }
     },
     {
@@ -171,8 +171,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.no_ab_privilege.spec.ts",
-        "line": 28,
-        "column": 14
+        "line": 21,
+        "column": 25
       }
     },
     {
@@ -184,8 +184,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.no_assistant_privilege.spec.ts",
-        "line": 27,
-        "column": 14
+        "line": 20,
+        "column": 25
       }
     },
     {
@@ -198,8 +198,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.spec.ts",
-        "line": 29,
-        "column": 14
+        "line": 22,
+        "column": 25
       }
     },
     {
@@ -212,8 +212,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.observability.spec.ts",
-        "line": 32,
-        "column": 14
+        "line": 24,
+        "column": 25
       }
     },
     {
@@ -226,8 +226,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.observability.spec.ts",
-        "line": 58,
-        "column": 14
+        "line": 45,
+        "column": 9
       }
     },
     {
@@ -240,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.search.spec.ts",
-        "line": 32,
-        "column": 14
+        "line": 24,
+        "column": 25
       }
     },
     {
@@ -254,8 +254,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.security.spec.ts",
-        "line": 32,
-        "column": 14
+        "line": 24,
+        "column": 25
       }
     },
     {
@@ -268,8 +268,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.security.spec.ts",
-        "line": 58,
-        "column": 14
+        "line": 45,
+        "column": 9
       }
     }
   ]

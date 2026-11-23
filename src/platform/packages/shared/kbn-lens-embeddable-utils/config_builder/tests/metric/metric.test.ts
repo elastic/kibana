@@ -12,7 +12,7 @@ import type { MetricVisualizationState, TermsIndexPatternColumn } from '@kbn/len
 
 import { validator } from '../utils/validator';
 import { DEFAULT_LAYER_ID } from '../../constants';
-import type { MetricConfig } from '../../schema/charts/metric';
+import { metricConfigSchema, type MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -341,6 +341,47 @@ describe('Metric', () => {
 
       expect(visualization.density).toBe('default');
       expect(apiOutput.styling?.density).toBe('default');
+    });
+  });
+
+  describe('secondary metric label placement', () => {
+    const getConfigWithSecondaryLabel = (
+      label: NonNullable<NonNullable<MetricConfig['styling']>['secondary']>['label']
+    ) =>
+      ({
+        ...baseMetric,
+        metrics: [
+          ...baseMetric.metrics,
+          {
+            type: 'secondary',
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        styling: { secondary: { label } },
+      } satisfies MetricConfig);
+
+    const convert = (config: MetricConfig) => {
+      const builder = new LensConfigBuilder();
+      return builder.toAPIFormat(builder.fromAPIFormat(config)) as MetricConfig;
+    };
+
+    it('should keep the default placement of a visible label after schema validation', () => {
+      const apiOutput = convert(getConfigWithSecondaryLabel({ visible: true }));
+      const validated = metricConfigSchema.validate(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+      expect(validated.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+    });
+
+    it('should not add a placement after schema validation when the label is hidden', () => {
+      const apiOutput = convert(
+        getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
+      );
+      const validated = metricConfigSchema.validate(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+      expect(validated.styling?.secondary?.label).toEqual({ visible: false });
     });
   });
 

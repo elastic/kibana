@@ -28,7 +28,7 @@ const allLayersPresent: LayerPresence = { hasBars: true, hasLines: true, hasArea
 describe('XY Appearances Transforms', () => {
   it('should return empty state when given empty API config', () => {
     const apiConfig: XYConfig['styling'] = {};
-    const result = convertStylingToStateFormat(apiConfig);
+    const result = convertStylingToStateFormat(apiConfig, allLayersPresent);
     expect(result).toEqual({});
   });
 
@@ -125,19 +125,21 @@ describe('XY Appearances Transforms', () => {
   });
 
   it('should negate partial_buckets.visible when converting to hideEndzones', () => {
-    const hidden = convertStylingToStateFormat({
-      overlays: { partial_buckets: { visible: false } },
-    });
+    const hidden = convertStylingToStateFormat(
+      { overlays: { partial_buckets: { visible: false } } },
+      allLayersPresent
+    );
     expect(hidden.hideEndzones).toBe(true);
 
-    const shown = convertStylingToStateFormat({
-      overlays: { partial_buckets: { visible: true } },
-    });
+    const shown = convertStylingToStateFormat(
+      { overlays: { partial_buckets: { visible: true } } },
+      allLayersPresent
+    );
     expect(shown.hideEndzones).toBe(false);
   });
 
   it('should omit hideEndzones when partial_buckets is absent', () => {
-    const result = convertStylingToStateFormat({});
+    const result = convertStylingToStateFormat({}, allLayersPresent);
     expect(result.hideEndzones).toBeUndefined();
   });
 
@@ -179,7 +181,7 @@ describe('XY Appearances Transforms', () => {
       areas: { fill_opacity: 0.5 },
       fitting: { type: 'linear', emphasize: true, extend: 'zero' },
     };
-    const state = convertStylingToStateFormat(original);
+    const state = convertStylingToStateFormat(original, allLayersPresent);
     const result = convertStylingToAPIFormat(state, allLayersPresent);
 
     expect(result.overlays?.partial_buckets).toEqual(original.overlays?.partial_buckets);
@@ -206,7 +208,7 @@ describe('XY Appearances Transforms', () => {
       endValue: 'Zero' as const,
     };
     const api = convertStylingToAPIFormat(original, allLayersPresent);
-    const result = convertStylingToStateFormat(api);
+    const result = convertStylingToStateFormat(api, allLayersPresent);
 
     expect(result.valueLabels).toBe(original.valueLabels);
     expect(result.curveType).toBe(original.curveType);
@@ -219,4 +221,64 @@ describe('XY Appearances Transforms', () => {
     expect(result.emphasizeFitting).toBe(original.emphasizeFitting);
     expect(result.endValue).toBe(original.endValue);
   });
+
+  it('should not store fitting when converting a bar-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      { fitting: { type: 'linear', emphasize: true, extend: 'zero' } },
+      { hasBars: true, hasLines: false, hasAreas: false }
+    );
+    expect(result).not.toHaveProperty('fittingFunction');
+    expect(result).not.toHaveProperty('emphasizeFitting');
+    expect(result).not.toHaveProperty('endValue');
+  });
+
+  it.each<[string, LayerPresence]>([
+    ['line layers', { hasBars: false, hasLines: true, hasAreas: false }],
+    ['area layers', { hasBars: false, hasLines: false, hasAreas: true }],
+    ['area and bar layers', { hasBars: true, hasLines: false, hasAreas: true }],
+  ])(
+    'should store fitting when converting an API config with %s to state',
+    (_name, layerPresence) => {
+      const result = convertStylingToStateFormat(
+        { fitting: { type: 'linear', emphasize: true, extend: 'zero' } },
+        layerPresence
+      );
+      expect(result.fittingFunction).toBe('Linear');
+      expect(result.emphasizeFitting).toBe(true);
+      expect(result.endValue).toBe('Zero');
+    }
+  );
+
+  it('should not store bar settings when converting a line-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      { bars: { minimum_height: 3, data_labels: { visible: true } } },
+      { hasBars: false, hasLines: true, hasAreas: false }
+    );
+    expect(result).not.toHaveProperty('minBarHeight');
+    expect(result).not.toHaveProperty('valueLabels');
+  });
+
+  it('should not store bar settings when converting an area-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      { bars: { minimum_height: 3, data_labels: { visible: true } } },
+      { hasBars: false, hasLines: false, hasAreas: true }
+    );
+    expect(result).not.toHaveProperty('minBarHeight');
+    expect(result).not.toHaveProperty('valueLabels');
+  });
+
+  it.each<[string, LayerPresence]>([
+    ['bar layers', { hasBars: true, hasLines: false, hasAreas: false }],
+    ['line and bar layers', { hasBars: true, hasLines: true, hasAreas: false }],
+  ])(
+    'should store bar settings when converting an API config with %s to state',
+    (_name, layerPresence) => {
+      const result = convertStylingToStateFormat(
+        { bars: { minimum_height: 3, data_labels: { visible: true } } },
+        layerPresence
+      );
+      expect(result.minBarHeight).toBe(3);
+      expect(result.valueLabels).toBe('show');
+    }
+  );
 });

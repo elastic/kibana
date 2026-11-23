@@ -46,6 +46,15 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
       return testSubjects.findAll('infraRenderNameButton');
     },
 
+    // Opening the popover starts a views refetch, so the flyout can still paint the previous list.
+    async ensureManageViewsEntriesCount(count: number) {
+      await this.clickManageViewsButton();
+      await retry.tryForTime(config.get('timeouts.try'), async () => {
+        const views = await testSubjects.findAll('infraRenderNameButton');
+        expect(views.length).to.equal(count);
+      });
+    },
+
     clickUpdateViewButton() {
       return testSubjects.click('savedViews-updateView');
     },
