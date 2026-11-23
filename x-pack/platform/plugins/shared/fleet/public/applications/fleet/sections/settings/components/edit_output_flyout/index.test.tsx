@@ -2516,6 +2516,28 @@ describe('EditOutputFlyout', () => {
         expect(payload.secrets).toBeUndefined();
       });
 
+      it('should restore the saved credential when a blank replacement is discarded', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.click(utils.getByText('Replace Credential'));
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'none' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'auth_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'otlp output updated' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.auth).toEqual({ type: 'auth_header', scheme: 'bearer_token' });
+        expect(payload.secrets).toBeUndefined();
+      });
+
       it('should reject a custom header that gRPC cannot send as metadata', async () => {
         const { utils } = renderFlyout(otlpOutputWithAuth);
         fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
