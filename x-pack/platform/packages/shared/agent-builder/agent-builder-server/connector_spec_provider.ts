@@ -94,10 +94,7 @@ export const createPackageConnectorSpecProvider = (): ConnectorSpecProvider => {
 
 /** The slice of the actions plugin start contract that serves summaries without a request. */
 export interface SpecActionsStart {
-  listTypes(
-    featureId?: string,
-    options?: { includeSpecSummary?: boolean; typeId?: string }
-  ): Array<{ specSummary?: ConnectorSpecInfo }>;
+  listTypes(): Array<{ id: string; specSummary?: ConnectorSpecInfo }>;
 }
 
 /** The slice of `ActionsClient` that serves each action's input schema and the skill text. */
@@ -112,12 +109,9 @@ const createActionsStartConnectorSpecSummaryProvider = (
   actionsStart: SpecActionsStart
 ): ConnectorSpecSummaryProvider => ({
   getSpec: (connectorTypeId) =>
-    actionsStart.listTypes(undefined, { includeSpecSummary: true, typeId: connectorTypeId })[0]
-      ?.specSummary,
+    actionsStart.listTypes().find(({ id }) => id === connectorTypeId)?.specSummary,
   listSpecs: () =>
-    actionsStart
-      .listTypes(undefined, { includeSpecSummary: true })
-      .flatMap(({ specSummary }) => (specSummary ? [specSummary] : [])),
+    actionsStart.listTypes().flatMap(({ specSummary }) => (specSummary ? [specSummary] : [])),
 });
 
 /** Provider backed by the actions plugin, so catalog types resolve like in-tree ones. */

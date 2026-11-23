@@ -37,7 +37,7 @@ export interface ActionType {
   description?: string;
   isExperimental?: boolean;
   isTestable?: boolean;
-  /** Only on spec-backed types, and only when listed with `includeSpecSummary`. */
+  /** Only on spec-backed types. */
   specSummary?: ConnectorSpecSummary;
 }
 

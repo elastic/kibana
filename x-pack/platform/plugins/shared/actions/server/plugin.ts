@@ -209,14 +209,7 @@ export interface PluginStartContract {
 
   getAllTypes: ActionTypeRegistry['getAllTypes'];
 
-  /**
-   * Lists action types without a request. `includeSpecSummary` attaches the spec data of
-   * spec-backed types; `typeId` limits the list to that one type.
-   */
-  listTypes(
-    featureId?: string,
-    options?: { includeSpecSummary?: boolean; typeId?: string }
-  ): ReturnType<ActionTypeRegistry['list']>;
+  listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
@@ -929,8 +922,8 @@ export class ActionsPlugin
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
-      listTypes: (featureId, options) => {
-        return this.actionTypeRegistry!.list({ featureId, exposeValidation: true, ...options });
+      listTypes: (featureId?: string) => {
+        return this.actionTypeRegistry!.list({ featureId, exposeValidation: true });
       },
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);

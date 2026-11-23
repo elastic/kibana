@@ -20,11 +20,8 @@ const packageProvider = createPackageConnectorSpecProvider();
 
 /** Serves the package provider's data the way the actions plugin's start contract and client do. */
 const actionsStart: SpecActionsStart = {
-  listTypes: (_featureId, options) =>
-    packageProvider
-      .listSpecs()
-      .filter(({ id }) => !options?.typeId || id === options.typeId)
-      .map((specSummary) => ({ specSummary })),
+  listTypes: () =>
+    packageProvider.listSpecs().map((specSummary) => ({ id: specSummary.id, specSummary })),
 };
 
 const actionsClient: jest.Mocked<SpecActionsClient> = {

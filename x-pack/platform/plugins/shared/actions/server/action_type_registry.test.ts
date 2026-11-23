@@ -1027,7 +1027,7 @@ describe('actionTypeRegistry', () => {
     });
   });
 
-  describe('list() with includeSpecSummary', () => {
+  describe('list() with spec-backed types', () => {
     const spec = {
       metadata: {
         id: 'spec-backed',
@@ -1051,7 +1051,7 @@ describe('actionTypeRegistry', () => {
     };
 
     it('attaches a summary to spec-backed types only', () => {
-      const types = setup().list({ includeSpecSummary: true });
+      const types = setup().list();
 
       expect(types.find(({ id }) => id === 'spec-backed')?.specSummary).toEqual(
         expect.objectContaining({
@@ -1061,13 +1061,6 @@ describe('actionTypeRegistry', () => {
         })
       );
       expect(types.find(({ id }) => id === 'stack-type')?.specSummary).toBeUndefined();
-    });
-
-    it('limits the list to typeId', () => {
-      const types = setup().list({ includeSpecSummary: true, typeId: 'spec-backed' });
-
-      expect(types.map(({ id }) => id)).toEqual(['spec-backed']);
-      expect(types[0].specSummary).toBeDefined();
     });
   });
 

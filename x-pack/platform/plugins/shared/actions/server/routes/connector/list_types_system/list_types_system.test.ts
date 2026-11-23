@@ -256,4 +256,23 @@ describe('listTypesWithSystemRoute', () => {
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
+
+  it('does not expose the spec summary the registry attaches to spec-backed types', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    listTypesWithSystemRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce([
+      { ...createMockConnectorType({ id: '1' }), specSummary: { id: '1', displayName: 'Spec' } },
+    ] as never);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    const result = await handler(context, req, res);
+
+    expect(JSON.stringify(result)).not.toMatch(/spec_?summary/i);
+  });
 });
