@@ -124,6 +124,41 @@ describe('ToolbarSelector', () => {
     expect(screen.getByTestId('toolbarSelectorSearchSelectorSearch')).toBeInTheDocument();
   });
 
+  it('publishes the search term only once the option list has been filtered by it', async () => {
+    const user = userEvent.setup();
+    render(
+      <ToolbarSelector
+        data-test-subj="toolbarSelectorCommittedTerm"
+        buttonLabel="Search"
+        options={options}
+        searchable={true}
+        singleSelection={true}
+        optionMatcher={({ option, normalizedSearchValue }) =>
+          option.label.toLowerCase().includes(normalizedSearchValue.toLowerCase())
+        }
+      />
+    );
+
+    await user.click(screen.getByTestId('toolbarSelectorCommittedTermButton'));
+
+    expect(screen.getByTestId('toolbarSelectorCommittedTermSelectable')).toHaveAttribute(
+      'data-search-term',
+      ''
+    );
+
+    fireEvent.change(screen.getByTestId('toolbarSelectorCommittedTermSelectorSearch'), {
+      target: { value: 'Option 2' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('toolbarSelectorCommittedTermSelectable')).toHaveAttribute(
+        'data-search-term',
+        'Option 2'
+      );
+    });
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+  });
+
   it('renders with searchable enabled and multi selection and preserves previously selected options', async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();

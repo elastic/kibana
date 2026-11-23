@@ -65,6 +65,17 @@ export class AlertTriage {
     return this.suppressWhere(this.dispatchable, suppressionFor);
   }
 
+  /**
+   * Remove matching alerts from both sets, so the tick writes no record for
+   * them (e.g. alerts deferred to the next tick).
+   */
+  public dropWhere(predicate: (alert: Alert) => boolean): AlertTriage {
+    return new AlertTriage(
+      this.dispatchable.filter((alert) => !predicate(alert)),
+      this.suppressed.filter((alert) => !predicate(alert))
+    );
+  }
+
   /** Replace each dispatchable alert 1:1 (e.g. `data` enrichment). */
   public mapDispatchable(fn: (alert: Alert) => Alert): AlertTriage {
     return new AlertTriage(this.dispatchable.map(fn), this.suppressed);
@@ -72,14 +83,6 @@ export class AlertTriage {
 
   public hasDispatchable(): boolean {
     return this.dispatchable.length > 0;
-  }
-
-  public dispatchableAlertIds(): string[] {
-    const ids = new Set<string>();
-    for (const alert of this.dispatchable) {
-      ids.add(alert.alert_id);
-    }
-    return Array.from(ids);
   }
 
   public dispatchableRuleIds(): RuleId[] {

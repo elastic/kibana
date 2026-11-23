@@ -400,6 +400,14 @@ describe('DispatchStep', () => {
     expect(getExecutionIds(result, 'g0')).toEqual(['exec-1']);
     expect(getExecutionIds(result, 'g2')).toEqual(['exec-3']);
     expect(getScheduledGroupCount(result)).toBe(2);
+    const failures = getFailures(result);
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toMatchObject({
+      actionGroupId: 'g1',
+      workflowId: 'workflow-1',
+      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+      message: 'network timeout',
+    });
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
     expect(mockLogger.error).toHaveBeenCalledWith('network timeout', expect.anything());
   });

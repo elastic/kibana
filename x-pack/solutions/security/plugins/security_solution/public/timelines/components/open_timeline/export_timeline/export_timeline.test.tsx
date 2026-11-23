@@ -12,9 +12,7 @@ import { mockSelectedTimeline } from './mocks';
 import * as i18n from '../translations';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -46,7 +44,6 @@ describe('TimelineDownloader', () => {
   (useAppToasts as jest.Mock).mockReturnValue({ addSuccess: mockAddSuccess });
   (exportSelectedTimeline as jest.Mock).mockReturnValue(new Blob());
 
-  let wrapper: ReactWrapper;
   const exportedIds = ['baa20980-6301-11ea-9223-95b6d4dd806c'];
   const defaultTestProps = {
     exportedIds,
@@ -70,7 +67,7 @@ describe('TimelineDownloader', () => {
         ...defaultTestProps,
         exportedIds: undefined,
       };
-      wrapper = mount(<TimelineDownloader {...testProps} />);
+      render(<TimelineDownloader {...testProps} />);
       expect(downloadBlob).toHaveBeenCalledTimes(0);
     });
 
@@ -79,7 +76,7 @@ describe('TimelineDownloader', () => {
         ...defaultTestProps,
         isEnableDownloader: false,
       };
-      wrapper = mount(<TimelineDownloader {...testProps} />);
+      render(<TimelineDownloader {...testProps} />);
       expect(downloadBlob).toHaveBeenCalledTimes(0);
     });
   });
@@ -90,11 +87,9 @@ describe('TimelineDownloader', () => {
         ...defaultTestProps,
         selectedItems: mockSelectedTimeline,
       };
-      wrapper = mount(<TimelineDownloader {...testProps} />);
+      render(<TimelineDownloader {...testProps} />);
 
       await waitFor(() => {
-        wrapper.update();
-
         expect(downloadBlob).toHaveBeenCalledTimes(1);
       });
     });
@@ -104,11 +99,9 @@ describe('TimelineDownloader', () => {
         ...defaultTestProps,
       };
 
-      wrapper = mount(<TimelineDownloader {...testProps} />);
+      render(<TimelineDownloader {...testProps} />);
 
       await waitFor(() => {
-        wrapper.update();
-
         expect(mockAddSuccess.mock.calls[0][0].title).toEqual(
           i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportedIds.length)
         );
@@ -121,11 +114,9 @@ describe('TimelineDownloader', () => {
       };
       (useParams as jest.Mock).mockReturnValue({ tabName: 'template' });
 
-      wrapper = mount(<TimelineDownloader {...testProps} />);
+      render(<TimelineDownloader {...testProps} />);
 
       await waitFor(() => {
-        wrapper.update();
-
         expect(mockAddSuccess.mock.calls[0][0].title).toEqual(
           i18n.SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES(exportedIds.length)
         );

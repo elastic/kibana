@@ -368,6 +368,50 @@ export const findAgentActionIds = async (
 };
 
 /**
+ * Parent and per-query action ids of every osquery action created since `since` for any of
+ * `agentIds`. A teardown fallback for dispatches a failed test could not register: `since` (taken
+ * in `beforeAll`) keeps it to this run's actions.
+ */
+export const findActionIdsSince = async (
+  systemEs: Client,
+  agentIds: string[],
+  since: string
+): Promise<string[]> => {
+  await systemEs.indices.refresh({ index: OSQUERY_ACTIONS_INDEX }, { ignore: [404] });
+  const ids = new Set<string>();
+  let searchAfter: estypes.SortResults | undefined;
+  while (true) {
+    const result = await systemEs.search<{
+      action_id: string;
+      queries?: Array<{ action_id?: string }>;
+    }>({
+      index: OSQUERY_ACTIONS_INDEX,
+      ignore_unavailable: true,
+      size: 100,
+      query: {
+        bool: {
+          filter: [{ terms: { agents: agentIds } }, { range: { '@timestamp': { gte: since } } }],
+        },
+      },
+      sort: [{ action_id: 'asc' }],
+      search_after: searchAfter,
+      _source: ['action_id', 'queries.action_id'],
+    });
+    const { hits } = result.hits;
+    for (const { _source: source } of hits) {
+      if (!source) continue;
+      ids.add(source.action_id);
+      source.queries?.forEach(({ action_id: queryActionId }) => {
+        if (queryActionId) ids.add(queryActionId);
+      });
+    }
+
+    if (hits.length < 100) return [...ids];
+    searchAfter = hits[hits.length - 1].sort;
+  }
+};
+
+/**
  * Creates a space for a test that changes space-wide state, such as loading the Elastic prebuilt
  * packs, so it never touches packs that already exist in other spaces. Deleting the space
  * (`deleteTestSpace`) removes every saved object the test created in it.

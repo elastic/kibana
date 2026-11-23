@@ -47,6 +47,7 @@ export interface Run {
   triggeredBy?: string;
   executedBy?: string;
   executedByDisplayName?: string;
+  runsAsServiceAccount?: boolean;
   title?: string;
   message?: string;
   investigationId?: string;

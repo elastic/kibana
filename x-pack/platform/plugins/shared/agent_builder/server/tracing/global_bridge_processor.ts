@@ -6,20 +6,20 @@
  */
 
 import type { Context } from '@opentelemetry/api';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { ReadableSpan, Span, SpanProcessor } from '@opentelemetry/sdk-trace';
 
 /**
  * Forwards inference provider spans to the global LateBindingSpanProcessor,
  * so they flow to Langfuse, Phoenix, and OTLP exporters configured globally.
  */
-export class GlobalBridgeProcessor implements tracing.SpanProcessor {
-  constructor(private readonly globalProcessor: tracing.SpanProcessor) {}
+export class GlobalBridgeProcessor implements SpanProcessor {
+  constructor(private readonly globalProcessor: SpanProcessor) {}
 
-  onStart(span: tracing.Span, parentContext: Context): void {
+  onStart(span: Span, parentContext: Context): void {
     this.globalProcessor.onStart(span, parentContext);
   }
 
-  onEnd(span: tracing.ReadableSpan): void {
+  onEnd(span: ReadableSpan): void {
     this.globalProcessor.onEnd(span);
   }
 

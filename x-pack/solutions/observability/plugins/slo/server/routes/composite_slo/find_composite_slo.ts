@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import { findCompositeSLOParamsSchema, findCompositeSLOResponseSchema } from '@kbn/slo-schema';
 import { findCompositeSlo } from '../../services/composites/find_composite_slo';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
@@ -18,6 +18,9 @@ export const findCompositeSLORoute = createCompositeSloServerRoute({
     },
   },
   params: findCompositeSLOParamsSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => findCompositeSLOResponseSchema },
+  },
   handler: async ({ params, logger, request, getScopedClients }) => {
     const { scopedClusterClient, compositeRepository, spaceId } = await getScopedClients({
       request,

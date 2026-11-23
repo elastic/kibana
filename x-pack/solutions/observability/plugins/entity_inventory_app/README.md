@@ -8,7 +8,7 @@ The time range picker is limited to the last 3 days. Set `xpack.entityInventoryA
 
 ## Results table
 
-The app loads `GET /internal/entity_inventory/types` once per app mount (`EntityTypesProvider`, again on a reload or a retry, not on a page change). Each page renders one collapsible section per entity type of the page, in response order, titled by the type's `name`. Each section requests its own `_list` by type id and has its own loading, error and empty states; the header counts the listed entities, with a `+` when the list is truncated. The Hosts and Kubernetes pages list `host` and `k8s.deployment` today. All resources lists every type of the `types` response.
+The app loads `GET /internal/entity_inventory/types` once per app mount (`EntityTypesProvider`, again on a reload or a retry, not on a page change). Each page renders one collapsible section per entity type of the page, in response order, titled by the type's `name`. Each section requests its own `_list` by type id once it is in view or within 200px of the edge of the area the page scrolls in (always, where the browser has no `IntersectionObserver`), and not before: until then it shows the loading skeleton and no count. A loaded list is kept when the section scrolls away. A change of the time range, or a refresh, refetches the sections near the viewport; a section that is away from it, loaded or not, catches up when it comes back. Each section has its own loading, error and empty states; the header counts the listed entities, with a `+` when the list is truncated. The Hosts and Kubernetes pages list `host` and `k8s.deployment` today. All resources lists every type of the `types` response.
 
 The states, from the top of the results area down:
 
