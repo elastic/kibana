@@ -96,8 +96,8 @@ describe('AlertingRuleReconciler', () => {
       enabled: true,
       tags: [
         MANAGED_RULE_TAG,
-        'detection_engine:strategy:known_failures',
-        'detection_engine:source:source-1',
+        'nightshift:detection_engine:strategy:known_failures',
+        'nightshift:detection_engine:source:source-1',
       ],
     });
   });

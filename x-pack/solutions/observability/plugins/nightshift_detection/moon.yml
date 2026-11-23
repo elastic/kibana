@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/core-pricing-common'
   - '@kbn/core-test-helpers-kbn-server'
-  - '@kbn/i18n'
   - '@kbn/licensing-plugin'
   - '@kbn/lock-manager'
   - '@kbn/nightshift-shared'
