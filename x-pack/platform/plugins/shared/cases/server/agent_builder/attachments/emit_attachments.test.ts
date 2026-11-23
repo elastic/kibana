@@ -11,7 +11,7 @@ import {
   emitCaseAttachment,
   emitFromStepResult,
   injectAttachmentIds,
-  pendingAttachmentUpdateLocks,
+  pendingCaseEmitLocks,
   toCaseAttachmentData,
 } from './emit_attachments';
 import { createCaseAttachmentType } from './case_attachment_type';
@@ -270,17 +270,13 @@ describe('emitCaseAttachment', () => {
     expect(active[0].versions).toHaveLength(2);
   });
 
-  it('adds only one attachment when parallel tool calls emit the same new case through distinct forToolCall views', async () => {
-    // run_tool.ts hands each tool call `manager.forToolCall(toolCallId)`: a distinct object over
-    // the one shared conversation state.
+  it('surfaces one added and one updated change when parallel emits race on the same new case', async () => {
+    // run_tool.ts hands every tool call of a round the same conversation state manager.
     const manager = buildRealManager();
-    const toolCallA = manager.forToolCall('tool-call-a');
-    const toolCallB = manager.forToolCall('tool-call-b');
-    expect(toolCallA).not.toBe(toolCallB);
 
     const [first, second] = await Promise.all([
-      emitCaseAttachment(toolCallA, toCaseAttachmentData(buildCase('c1'))),
-      emitCaseAttachment(toolCallB, {
+      emitCaseAttachment(manager, toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(manager, {
         ...toCaseAttachmentData(buildCase('c1')),
         total_observables: 2,
       }),
@@ -292,7 +288,6 @@ describe('emitCaseAttachment', () => {
     expect(active[0].id).toBe(first);
     expect(active[0].versions).toHaveLength(2);
     expect(active[0].versions[1].data).toMatchObject({ id: 'c1', total_observables: 2 });
-    // The duplicate that lost the race is gone from the state and never surfaced as a change.
     expect(manager.getAll()).toHaveLength(1);
     expect(manager.drainChanges().map(({ kind, attachment_id: id }) => ({ kind, id }))).toEqual([
       { kind: 'added', id: first },
@@ -300,15 +295,12 @@ describe('emitCaseAttachment', () => {
     ]);
   });
 
-  it('keeps one attachment per case when several tool calls emit several cases in parallel', async () => {
+  it('keeps one attachment per case when several emits for several cases run in parallel', async () => {
     const manager = buildRealManager();
 
     const ids = await Promise.all(
-      ['c1', 'c2', 'c1', 'c2', 'c1'].map((caseId, index) =>
-        emitCaseAttachment(
-          manager.forToolCall(`tool-call-${index}`),
-          toCaseAttachmentData(buildCase(caseId))
-        )
+      ['c1', 'c2', 'c1', 'c2', 'c1'].map((caseId) =>
+        emitCaseAttachment(manager, toCaseAttachmentData(buildCase(caseId)))
       )
     );
 
@@ -324,8 +316,8 @@ describe('emitCaseAttachment', () => {
     const conversationB = buildRealManager();
 
     const [idA, idB] = await Promise.all([
-      emitCaseAttachment(conversationA.forToolCall('a'), toCaseAttachmentData(buildCase('c1'))),
-      emitCaseAttachment(conversationB.forToolCall('b'), toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(conversationA, toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(conversationB, toCaseAttachmentData(buildCase('c1'))),
     ]);
 
     expect(idA).not.toBe(idB);
@@ -333,21 +325,22 @@ describe('emitCaseAttachment', () => {
     expect(conversationB.getActive().map(({ id }) => id)).toEqual([idB]);
     expect(conversationA.getActive()[0].versions).toHaveLength(1);
     expect(conversationB.getActive()[0].versions).toHaveLength(1);
+    expect(pendingCaseEmitLocks()).toBe(0);
   });
 
-  it('updates the existing attachment, carrying url and totalAttachments, when a later tool call emits the case', async () => {
+  it('updates the existing attachment, carrying url and totalAttachments, when later emits run in parallel', async () => {
     const manager = buildRealManager();
-    await emitCaseAttachment(manager.forToolCall('a'), {
+    await emitCaseAttachment(manager, {
       ...toCaseAttachmentData(buildCase('c1'), 'https://example.com/case/c1'),
       totalAttachments: 3,
     });
 
     await Promise.all([
-      emitCaseAttachment(manager.forToolCall('b'), {
+      emitCaseAttachment(manager, {
         ...toCaseAttachmentData(buildCase('c1')),
         total_observables: 2,
       }),
-      emitCaseAttachment(manager.forToolCall('c'), {
+      emitCaseAttachment(manager, {
         ...toCaseAttachmentData(buildCase('c1')),
         total_observables: 3,
       }),
@@ -373,11 +366,11 @@ describe('emitCaseAttachment', () => {
     });
 
     await Promise.all([
-      emitCaseAttachment(manager.forToolCall('write-step'), {
+      emitCaseAttachment(manager, {
         ...toCaseAttachmentData(buildCase('c1')),
         totalAttachments: 5,
       }),
-      emitCaseAttachment(manager.forToolCall('read-step'), {
+      emitCaseAttachment(manager, {
         ...toCaseAttachmentData(buildCase('c1')),
         total_observables: 2,
       }),
@@ -399,11 +392,11 @@ describe('emitCaseAttachment', () => {
     });
 
     await Promise.all([
-      emitCaseAttachment(manager.forToolCall('read-step'), {
+      emitCaseAttachment(manager, {
         ...toCaseAttachmentData(buildCase('c1')),
         total_observables: 2,
       }),
-      emitCaseAttachment(manager.forToolCall('write-step'), {
+      emitCaseAttachment(manager, {
         ...toCaseAttachmentData(buildCase('c1')),
         totalAttachments: 5,
       }),
@@ -412,23 +405,22 @@ describe('emitCaseAttachment', () => {
     expect(getLatestVersion(manager.getActive()[0])?.data).toMatchObject({ totalAttachments: 5 });
   });
 
-  it('releases the per-attachment lock when an update fails and leaves no entries behind', async () => {
+  it('releases the per-case lock when an update fails and leaves no entries behind', async () => {
     const manager = buildRealManager();
     const { id } = await manager.add({
       type: CASE_ATTACHMENT_TYPE,
       data: { ...toCaseAttachmentData(buildCase('c1')), totalAttachments: 3 },
     });
-    const failing = manager.forToolCall('failing');
-    jest.spyOn(failing, 'update').mockRejectedValueOnce(new Error('boom'));
+    jest.spyOn(manager, 'update').mockRejectedValueOnce(new Error('boom'));
 
     const results = await Promise.allSettled([
-      emitCaseAttachment(failing, toCaseAttachmentData(buildCase('c1'))),
-      emitCaseAttachment(manager.forToolCall('ok'), {
+      emitCaseAttachment(manager, toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(manager, {
         ...toCaseAttachmentData(buildCase('c1')),
         totalAttachments: 5,
       }),
     ]);
-    const later = await emitCaseAttachment(manager.forToolCall('later'), {
+    const later = await emitCaseAttachment(manager, {
       ...toCaseAttachmentData(buildCase('c1')),
       total_observables: 4,
     });
@@ -439,27 +431,24 @@ describe('emitCaseAttachment', () => {
       total_observables: 4,
       totalAttachments: 5,
     });
-    expect(pendingAttachmentUpdateLocks()).toBe(0);
+    expect(pendingCaseEmitLocks()).toBe(0);
   });
 
-  it('does not block later emits for the case when an add through another tool call view failed', async () => {
+  it('does not block later emits for the case when a parallel add failed', async () => {
     const manager = buildRealManager();
-    const failing = manager.forToolCall('failing');
-    jest.spyOn(failing, 'add').mockRejectedValueOnce(new Error('boom'));
+    jest.spyOn(manager, 'add').mockRejectedValueOnce(new Error('boom'));
 
     const results = await Promise.allSettled([
-      emitCaseAttachment(failing, toCaseAttachmentData(buildCase('c1'))),
-      emitCaseAttachment(manager.forToolCall('ok'), toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(manager, toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(manager, toCaseAttachmentData(buildCase('c1'))),
     ]);
     const [rejected, fulfilled] = results;
-    const later = await emitCaseAttachment(
-      manager.forToolCall('later'),
-      toCaseAttachmentData(buildCase('c1'))
-    );
+    const later = await emitCaseAttachment(manager, toCaseAttachmentData(buildCase('c1')));
 
     expect(rejected.status).toBe('rejected');
     expect(fulfilled.status).toBe('fulfilled');
     expect(manager.getActive().map(({ id }) => id)).toEqual([later]);
+    expect(pendingCaseEmitLocks()).toBe(0);
   });
 
   it('still emits for the same case after a parallel emit failed', async () => {
