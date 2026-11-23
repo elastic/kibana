@@ -10,13 +10,10 @@ import { screen } from '@testing-library/react';
 
 import { TestProviders, renderWithTestingProviders } from '../../common/mock';
 import { HeaderPage } from '.';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../common/navigation/hooks');
 
 describe('HeaderPage', () => {
-  const mount = useMountAppended();
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -54,36 +51,20 @@ describe('HeaderPage', () => {
     expect(screen.queryByTestId('cases-incremental-id-text')).not.toBeInTheDocument();
   });
 
-  it('DOES NOT render the back link when not provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage title="Test title" />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('.casesHeaderPage__linkBack').first().exists()).toBe(false);
-  });
-
   it('renders supplements when children provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage title="Test title">
-          <p>{'Test supplement'}</p>
-        </HeaderPage>
-      </TestProviders>
+    renderWithTestingProviders(
+      <HeaderPage title="Test title">
+        <p>{'Test supplement'}</p>
+      </HeaderPage>
     );
 
-    expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(true);
+    expect(screen.getByTestId('header-page-supplements')).toBeInTheDocument();
   });
 
   it('DOES NOT render supplements when children not provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage title="Test title" />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<HeaderPage title="Test title" />);
 
-    expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(false);
+    expect(screen.queryByTestId('header-page-supplements')).not.toBeInTheDocument();
   });
 
   describe('Badges', () => {

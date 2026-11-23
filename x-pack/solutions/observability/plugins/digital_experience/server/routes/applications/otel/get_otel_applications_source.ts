@@ -11,7 +11,7 @@ import { SESSIONS_LOOKBACK_DAYS, type SessionsSettings } from '../../../../commo
 import { createDigitalExperienceTracedEsClient } from '../../../lib/create_digital_experience_traced_es_client';
 import { describeError, isAccessDenied } from '../../../lib/helpers/errors';
 import type { SessionsReadableCache } from '../../../services/sessions/sessions_readable';
-import type { SourceApplications } from '../types';
+import type { WebSourceApplications } from '../types';
 import type { GetOtelApplicationsParams } from './get_otel_applications';
 import { getOtelApplications } from './get_otel_applications';
 import { getSessionsApplications } from './get_sessions_applications';
@@ -58,7 +58,7 @@ const sessionsCoverTimeRange = async (
  */
 export const getOtelApplicationsFromBestSource = async (
   params: GetOtelApplicationsFromBestSourceParams
-): Promise<SourceApplications> => {
+): Promise<WebSourceApplications> => {
   const { taskManager, sessionsSettings, sessionsReadable, logger, ...searchParams } = params;
   const { esClient, signal, start, end, environment, histogram } = searchParams;
 

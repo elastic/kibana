@@ -15,6 +15,10 @@ import { defineInferenceSettingsRoutes } from './routes/inference_settings';
 import { defineInferenceFeaturesRoutes } from './routes/inference_features';
 import { defineInferenceConnectorsRoute } from './routes/inference_connectors';
 import { defineRegionPolicyRoutes } from './routes/region_policy';
+import {
+  defineTestInferenceEndpointRoute,
+  type GetInferenceClient,
+} from './routes/test_inference_endpoint';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
 import type { ResolvedInferenceEndpoints } from './types';
 import { APIRoutes } from './types';
@@ -28,6 +32,7 @@ export function defineRoutes({
   getForFeature,
   getConnectorList,
   getConnectorById,
+  getInferenceClient,
 }: {
   logger: Logger;
   router: IRouter;
@@ -35,10 +40,12 @@ export function defineRoutes({
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
   getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
   getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+  getInferenceClient: GetInferenceClient;
 }) {
   defineInferenceSettingsRoutes({ logger, router, featureRegistry, getConnectorById });
   defineInferenceFeaturesRoutes({ logger, router, featureRegistry });
   defineRegionPolicyRoutes({ logger, router });
+  defineTestInferenceEndpointRoute({ logger, router, getInferenceClient });
   defineInferenceConnectorsRoute({
     logger,
     router,

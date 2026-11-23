@@ -15,8 +15,8 @@ import {
   type SessionsStatus,
 } from '../../../../common/sessions';
 import type {
-  ApplicationSummary,
   ApplicationsResponse,
+  WebApplicationSummary,
 } from '../../../../common/types/applications';
 import { deleteSessionsData, runSessionsTask } from '../../common/fixtures/sessions_data';
 import { findApplication, testData } from '../fixtures';
@@ -167,7 +167,7 @@ const totalOf = (trend: ApplicationsResponse['sessionsOverTime']) =>
  * The row without what only one source has: the order of its environments, which the sources list
  * by their own counts, and the sessions, which only the sessions index counts.
  */
-const comparable = (application?: ApplicationSummary) =>
+const comparable = (application?: WebApplicationSummary) =>
   application && {
     ...application,
     sessions: null,
