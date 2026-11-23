@@ -16,7 +16,8 @@ import { initializeDataControlManager } from './data_control_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
-import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
+import { EsqlSource } from '@kbn/data-source';
+import type { FilterableSource } from '@kbn/data-source';
 
 const mockGetESQLSingleColumnValues = jest.fn();
 jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
@@ -30,10 +31,6 @@ jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
   return { getESQLSingleColumnValues: fn };
 });
 
-jest.mock('../utils/get_data_view_id_from_esql_query', () => ({
-  getDataViewIdFromESQLQuery: jest.fn().mockResolvedValue('myDataViewId'),
-}));
-
 const mockResolveControlSource = jest.fn();
 jest.mock('../utils/control_source', () => {
   const actual = jest.requireActual('../utils/control_source');
@@ -45,6 +42,19 @@ jest.mock('../utils/control_source', () => {
 });
 
 describe('initializeDataControlManager', () => {
+  const esqlFilterableSource: FilterableSource = {
+    kind: 'esql',
+    id: 'esqlDatasetId',
+    title: 'logs-*',
+    fields: [],
+    getFieldByName: (name: string) => ({ name, type: 'string' }),
+    isTimeBased: () => false,
+  };
+  const mockForDataset = jest.spyOn(EsqlSource, 'forDataset').mockResolvedValue({
+    kind: 'esql',
+    toFilterableSource: async () => esqlFilterableSource,
+  } as unknown as EsqlSource);
+
   afterEach(() => {
     mockResolveControlSource.mockReset();
   });
@@ -59,16 +69,6 @@ describe('initializeDataControlManager', () => {
   };
 
   dataViewsService.get = async (id: string): Promise<DataView> => {
-    if (id === 'esqlDatasetId') {
-      return {
-        kind: 'esql',
-        id,
-        title: 'logs-*,logs=archive',
-        fields: [],
-        getFieldByName: (name: string) => ({ name, type: 'string' }),
-        isTimeBased: () => false,
-      } as unknown as DataView;
-    }
     if (id !== 'myDataViewId' && id !== 'noFormatterSourceId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
@@ -359,7 +359,7 @@ describe('initializeDataControlManager', () => {
 
       expect(dataControlManager.api.fieldName$.value).toBe('myFieldName');
       expect(dataControlManager.api.field$.value?.name).toBe('myFieldName');
-      expect(dataControlManager.api.dataSources$.value?.[0].id).toBe('myDataViewId');
+      expect(dataControlManager.api.dataSources$.value?.[0].id).toBe('esqlDatasetId');
       expect(dataControlManager.api.dataViewId$.value).toBe('');
     });
 
@@ -437,7 +437,6 @@ describe('initializeDataControlManager', () => {
 
     it('is the query of the user, never a generated one, when the values come from a query', async () => {
       // A saved control has the query and no data view or field: they are derived from the query
-      (getDataViewIdFromESQLQuery as jest.Mock).mockResolvedValue('esqlDatasetId');
       mockGetESQLSingleColumnValues.mockResolvedValue({
         values: [],
         column: { name: 'myFieldName', type: 'keyword' },
@@ -453,25 +452,27 @@ describe('initializeDataControlManager', () => {
         esql_query: 'FROM logs-* | STATS BY myFieldName',
       };
 
-      try {
-        const manager = await initializeDataControlManager({
-          controlId: 'myControlId',
-          controlType: 'myControlType',
-          state: serializedState,
-          editorStateManager: initializeStateManager({}, {}),
-          parentApi: {},
-          typeDisplayName: 'My Control Type',
-        });
+      const manager = await initializeDataControlManager({
+        controlId: 'myControlId',
+        controlType: 'myControlType',
+        state: serializedState,
+        editorStateManager: initializeStateManager({}, {}),
+        parentApi: { projectRouting$: new BehaviorSubject<string | undefined>('_alias:*') },
+        typeDisplayName: 'My Control Type',
+      });
 
-        expect(await planOf(manager)).toEqual({
-          fetchMode: 'esql',
+      expect(await planOf(manager)).toEqual({
+        fetchMode: 'esql',
+        query: 'FROM logs-* | STATS BY myFieldName',
+      });
+      expect(manager.api.dataSources$.value).toEqual([esqlFilterableSource]);
+      expect(manager.api.blockingError$.value).toBeUndefined();
+      expect(mockForDataset).toHaveBeenCalledWith(
+        expect.objectContaining({
           query: 'FROM logs-* | STATS BY myFieldName',
-        });
-        expect(manager.api.dataSources$.value?.[0].id).toBe('esqlDatasetId');
-        expect(manager.api.blockingError$.value).toBeUndefined();
-      } finally {
-        (getDataViewIdFromESQLQuery as jest.Mock).mockResolvedValue('myDataViewId');
-      }
+          projectRouting: '_alias:*',
+        })
+      );
     });
 
     it('is not known while the data source cannot be loaded', async () => {

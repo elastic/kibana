@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { ControlValuesSource } from '@kbn/controls-constants';
+import { EsqlSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { dataViewsService } from '../../services/kibana_services';
-import { getDataViewIdFromESQLQuery } from './get_data_view_id_from_esql_query';
+import { coreServices, dataViewsService } from '../../services/kibana_services';
 import { resolveControlSource, toControlSourceDescriptor } from './control_source';
-
-jest.mock('./get_data_view_id_from_esql_query', () => ({
-  getDataViewIdFromESQLQuery: jest.fn(),
-}));
 
 describe('control source', () => {
   const dataView = { id: 'myDataViewId' } as DataView;
+  const esqlSource = { kind: 'esql' } as EsqlSource;
+  const mockForDataset = jest.spyOn(EsqlSource, 'forDataset');
 
   beforeEach(() => {
+    jest.clearAllMocks();
     dataViewsService.get = jest.fn().mockResolvedValue(dataView);
-    (getDataViewIdFromESQLQuery as jest.Mock).mockResolvedValue('myDataViewId');
+    mockForDataset.mockResolvedValue(esqlSource);
   });
 
   it('describes a field control by its data view and a query control by its query', () => {
@@ -47,16 +47,21 @@ describe('control source', () => {
 
     expect(source.kind === 'index-pattern' && source.getDataView()).toBe(dataView);
     expect(dataViewsService.get).toHaveBeenCalledWith('myDataViewId');
-    expect(getDataViewIdFromESQLQuery).not.toHaveBeenCalled();
+    expect(mockForDataset).not.toHaveBeenCalled();
   });
 
-  it('resolves a query to what the query reads', async () => {
-    const parentApi = {};
-    await resolveControlSource({ kind: 'esql', query: 'FROM logs | STATS BY os' }, { parentApi });
+  it('resolves a query to an ES|QL source of what it reads, with no data view', async () => {
+    const parentApi = { projectRouting$: new BehaviorSubject<string | undefined>('_alias:*') };
 
-    expect(getDataViewIdFromESQLQuery).toHaveBeenCalledWith('FROM logs | STATS BY os', {
-      parentApi,
+    expect(
+      await resolveControlSource({ kind: 'esql', query: 'FROM logs | STATS BY os' }, { parentApi })
+    ).toBe(esqlSource);
+    expect(mockForDataset).toHaveBeenCalledWith({
+      query: 'FROM logs | STATS BY os',
+      http: coreServices.http,
+      projectRouting: '_alias:*',
     });
+    expect(dataViewsService.get).not.toHaveBeenCalled();
   });
 
   it('fails for a query control without a query', async () => {

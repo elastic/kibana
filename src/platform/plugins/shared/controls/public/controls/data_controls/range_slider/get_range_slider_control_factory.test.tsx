@@ -23,6 +23,7 @@ import { rangeSliderControlSchema, type RangeSliderControlState } from '@kbn/con
 import { ControlValuesSource } from '@kbn/controls-constants';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
+import { EsqlSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 const mockGetESQLResults = jest.fn();
@@ -96,7 +97,18 @@ describe('RangeSliderControlApi', () => {
     } as unknown as DataView;
   });
 
-  dataViewsService.find = jest.fn().mockResolvedValue([{ id: 'myDataViewId' }]);
+  const esqlField = { name: 'myFieldName', type: 'number', aggregatable: true, searchable: true };
+  jest.spyOn(EsqlSource, 'forDataset').mockResolvedValue({
+    kind: 'esql',
+    toFilterableSource: async () => ({
+      kind: 'esql',
+      id: 'esqlDatasetId',
+      title: 'bytes-*',
+      fields: [esqlField],
+      getFieldByName: (name: string) => (name === esqlField.name ? esqlField : undefined),
+      isTimeBased: () => false,
+    }),
+  } as unknown as EsqlSource);
 
   beforeEach(() => {
     totalResults = DEFAULT_TOTAL_RESULTS;

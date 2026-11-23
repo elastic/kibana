@@ -2123,7 +2123,6 @@
     "controls.createControlAction.tooltip": "Fügen Sie eine Steuerung zu Ihrem Dashboard hinzu.",
     "controls.dataControl.creationError": "Um ein Steuerelement zu erstellen, müssen sowohl die Data View als auch das Feld definiert werden.",
     "controls.dataControl.creationErrorESQL": "Eine Wert-Abfrage muss definiert werden, um eine Kontrolle zu erstellen.",
-    "controls.dataControl.esqlDataViewDeriveFailed": "Aus der ES|QL-Abfrage konnte keine Datenansicht abgeleitet werden",
     "controls.dataControl.esqlMissingQuery": "Bei der Variablensteuerung fehlt eine Abfrage",
     "controls.dataControl.fieldNotFound": "Feld konnte nicht gefunden werden: {fieldName}",
     "controls.displaySettingsPopover.applyButton": "Anwenden",

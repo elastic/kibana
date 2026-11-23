@@ -595,7 +595,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     // the control already exists with the expected type, so just update it
                     onUpdate(transformedState ?? editorState);
                   }
-                  onSave(isESQLValuesSource ? selectedDataView?.id : editorState.data_view_id);
+                  // the source of a query is not a data view that a next control can start from
+                  onSave(selectedDataView?.id);
                 }}
               >
                 {DataControlEditorStrings.manageControl.getSaveChangesTitle()}

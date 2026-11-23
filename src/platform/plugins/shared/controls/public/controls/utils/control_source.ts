@@ -9,11 +9,11 @@
 
 import { ControlValuesSource } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
-import { DataViewSource } from '@kbn/data-source';
+import { DataViewSource, EsqlSource } from '@kbn/data-source';
 import type { DataSource } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
-import { dataViewsService } from '../../services/kibana_services';
-import { getDataViewIdFromESQLQuery } from './get_data_view_id_from_esql_query';
+import { apiPublishesProjectRouting } from '@kbn/presentation-publishing';
+import { coreServices, dataViewsService } from '../../services/kibana_services';
 
 /** What a control reads its values from, as chosen by the user. */
 export type ControlSourceDescriptor =
@@ -58,7 +58,7 @@ export const isSameValuesSourceSelection = (
   b: ValuesSourceSelection
 ): boolean => isSameControlSource(a.source, b.source) && a.fieldName === b.fieldName;
 
-/** The data source a control reads its values from. */
+/** The data source a control reads its values from: a data view, or what an ES|QL query reads. */
 export const resolveControlSource = async (
   descriptor: ControlSourceDescriptor,
   { parentApi }: { parentApi?: unknown } = {}
@@ -73,13 +73,11 @@ export const resolveControlSource = async (
       })
     );
   }
-  const dataViewId = await getDataViewIdFromESQLQuery(descriptor.query, { parentApi });
-  if (!dataViewId) {
-    throw new Error(
-      i18n.translate('controls.dataControl.esqlDataViewDeriveFailed', {
-        defaultMessage: 'Could not derive a data view from the ES|QL query',
-      })
-    );
-  }
-  return new DataViewSource(await dataViewsService.get(dataViewId));
+  return EsqlSource.forDataset({
+    query: descriptor.query,
+    http: coreServices.http,
+    projectRouting: apiPublishesProjectRouting(parentApi)
+      ? parentApi.projectRouting$.value
+      : undefined,
+  });
 };
