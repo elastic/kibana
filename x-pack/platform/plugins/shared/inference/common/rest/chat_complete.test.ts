@@ -45,6 +45,24 @@ describe('createChatCompleteRestApi', () => {
     expect(JSON.parse((callBody as any[])[1].body as string)).toEqual(params);
   });
 
+  it('forwards a positive maxTokens and drops an invalid one', async () => {
+    http.fetch.mockResolvedValue({});
+
+    await chatComplete({
+      connectorId: 'my-connector',
+      messages: [{ role: MessageRole.User, content: 'question' }],
+      maxTokens: 16000,
+    });
+    expect(JSON.parse(http.fetch.mock.lastCall![1].body as string).maxTokens).toBe(16000);
+
+    await chatComplete({
+      connectorId: 'my-connector',
+      messages: [{ role: MessageRole.User, content: 'question' }],
+      maxTokens: -1,
+    });
+    expect(JSON.parse(http.fetch.mock.lastCall![1].body as string)).not.toHaveProperty('maxTokens');
+  });
+
   it('calls http.fetch with the right parameters when stream is true', async () => {
     const params = {
       connectorId: 'my-connector',

@@ -109,6 +109,11 @@ export const UnifiedChatCompleteParamsSchema = lazySchema(() =>
            */
           max_tokens: z.coerce.number().optional(),
           /**
+           * Upper bound on generated tokens, including reasoning tokens.
+           * OpenAI reasoning models (o-series, gpt-5) reject `max_tokens` and require this field.
+           */
+          max_completion_tokens: z.coerce.number().optional(),
+          /**
            * Developer-defined tags and values used for filtering completions in the
            * [dashboard](https://platform.openai.com/chat-completions).
            */

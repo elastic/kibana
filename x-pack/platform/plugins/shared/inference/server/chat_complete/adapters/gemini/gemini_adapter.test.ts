@@ -137,6 +137,38 @@ describe('geminiAdapter', () => {
       );
     });
 
+    it('forwards `maxTokens` as maxOutputTokens', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxTokens: 16000,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'invokeAIRaw',
+          subActionParams: expect.objectContaining({ maxOutputTokens: 16000 }),
+        })
+      );
+    });
+
+    it('omits maxOutputTokens when maxTokens is not set, so the provider default applies', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke.mock.calls[0][0].subActionParams).not.toHaveProperty(
+        'maxOutputTokens'
+      );
+    });
+
     it('forwards only connector-supported telemetry metadata', () => {
       geminiAdapter
         .chatComplete({

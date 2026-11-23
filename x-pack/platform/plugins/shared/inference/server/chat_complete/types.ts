@@ -49,6 +49,11 @@ export type InferenceAdapterChatCompleteOptions = {
   system?: string;
   functionCalling?: FunctionCallingMode;
   temperature?: number;
+  /**
+   * Maximum number of tokens the model may generate.
+   * Adapters omit this from the connector request when it is unset.
+   */
+  maxTokens?: number;
   reasoning?: ChatCompletionReasoning;
   modelName?: string;
   abortSignal?: AbortSignal;

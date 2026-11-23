@@ -102,6 +102,30 @@ describe('inferenceEndpointAdapter', () => {
       });
       expect(body).not.toHaveProperty('messages');
       expect(body).not.toHaveProperty('tools');
+      expect(body).not.toHaveProperty('max_tokens');
+    });
+
+    it('forwards maxTokens on a template request', async () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: 'ok' } })), logger)
+      );
+
+      const response$ = inferenceEndpointAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [{ role: MessageRole.User, content: 'should not be sent' }],
+        maxTokens: 16000,
+        template: {
+          id: '.attack-discovery',
+          version: 1,
+          variables: { phase: 'generate' },
+        },
+      });
+
+      await lastValueFrom(response$.pipe(toArray()));
+
+      const body = executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
+      expect(body.max_tokens).toBe(16000);
+      expect(body).not.toHaveProperty('messages');
     });
 
     it('emits chunk events', async () => {
@@ -437,6 +461,71 @@ describe('inferenceEndpointAdapter', () => {
           }),
         })
       );
+    });
+
+    it('forwards maxTokens as max_tokens', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxTokens: 16000,
+          modelName: 'gpt-4o',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            max_tokens: 16000,
+          }),
+        })
+      );
+    });
+
+    it('sends max_completion_tokens when the endpoint model is gpt-5', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxTokens: 16000,
+          modelName: 'gpt-5',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            max_completion_tokens: 16000,
+          }),
+        })
+      );
+      const body = executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
+      expect(body).not.toHaveProperty('max_tokens');
+    });
+
+    it('omits max_tokens when maxTokens is not set, so the provider default applies', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'gpt-4o',
+        })
+        .subscribe(noop);
+
+      const body = executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
+      expect(body).not.toHaveProperty('max_tokens');
     });
 
     it('defaults reasoning effort to none when native tools are present and the model requires it', () => {

@@ -33,7 +33,11 @@ jest.mock('@kbn/workflows-extensions/server', () => ({
 }));
 
 import { AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE } from '../../../../common/steps/ai';
-import { aiPromptStepDefinition } from './step';
+import {
+  aiPromptStepDefinition,
+  MAX_TOKENS_EXHAUSTED_WITH_REASONING_MESSAGE,
+  MAX_TOKENS_INVALID_MESSAGE,
+} from './step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
 type ContextManager = StepHandlerContext<any>['contextManager'];
@@ -514,6 +518,116 @@ describe('aiPromptStepDefinition', () => {
         mockContext.config = { ...mockContext.config, 'aggregate-by': 'alertzero_parent' };
 
         await expect(handler(mockContext)).rejects.toThrow(AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE);
+        expect(mockInference.getChatModel).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('max-tokens', () => {
+      beforeEach(() => {
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok' });
+      });
+
+      it('passes max-tokens to the chat model so the connector can raise the output limit', async () => {
+        mockContext.config = { ...mockContext.config, 'max-tokens': 16000 };
+
+        await handler(mockContext);
+
+        expect(mockInference.getChatModel.mock.calls[0][0].chatModelOptions.maxTokens).toBe(16000);
+      });
+
+      it('coerces a rendered numeric string so a template can set the limit', async () => {
+        mockContext.config = { ...mockContext.config, 'max-tokens': '16000' };
+
+        await handler(mockContext);
+
+        expect(mockInference.getChatModel.mock.calls[0][0].chatModelOptions.maxTokens).toBe(16000);
+      });
+
+      it('rejects a max-tokens value that is not a positive integer', async () => {
+        mockContext.config = { ...mockContext.config, 'max-tokens': 'nope' };
+
+        await expect(handler(mockContext)).rejects.toThrow(MAX_TOKENS_INVALID_MESSAGE);
+        expect(mockInference.getChatModel).not.toHaveBeenCalled();
+      });
+
+      it('forwards reasoning-level together with max-tokens', async () => {
+        mockChatModel.getConnector = jest.fn().mockReturnValue({
+          type: InferenceConnectorType.OpenAI,
+          name: 'gpt',
+          connectorId: 'test-connector-id',
+          config: {},
+          capabilities: {},
+          isInferenceEndpoint: false,
+          isPreconfigured: false,
+        });
+        mockContext.config = {
+          ...mockContext.config,
+          'max-tokens': 16000,
+          'reasoning-level': 'low',
+        };
+
+        await handler(mockContext);
+
+        expect(mockInference.getChatModel.mock.calls[0][0].chatModelOptions).toEqual(
+          expect.objectContaining({
+            maxTokens: 16000,
+            reasoning: { effort: 'low' },
+          })
+        );
+      });
+
+      it('fails when reasoning is on and the model returns an empty answer', async () => {
+        mockChatModel.getConnector = jest.fn().mockReturnValue({
+          type: InferenceConnectorType.OpenAI,
+          name: 'gpt',
+          connectorId: 'test-connector-id',
+          config: {},
+          capabilities: {},
+          isInferenceEndpoint: false,
+          isPreconfigured: false,
+        });
+        mockChatModel.invoke.mockResolvedValue({ content: '  ' });
+        mockContext.config = {
+          ...mockContext.config,
+          'max-tokens': 16000,
+          'reasoning-level': 'high',
+        };
+
+        await expect(handler(mockContext)).rejects.toThrow(
+          MAX_TOKENS_EXHAUSTED_WITH_REASONING_MESSAGE
+        );
+      });
+
+      it('omits maxTokens when max-tokens is not set, so the provider default applies', async () => {
+        await handler(mockContext);
+
+        expect(mockInference.getChatModel.mock.calls[0][0].chatModelOptions).not.toHaveProperty(
+          'maxTokens'
+        );
+      });
+
+      it('forwards max-tokens on the template path and skips the messages path', async () => {
+        const chatComplete = jest.fn().mockResolvedValue({
+          content: 'template response',
+          tokens: { prompt: 3, completion: 4, total: 7 },
+        });
+        (mockInference as any).getClient = jest.fn().mockReturnValue({
+          getConnectorById: jest.fn().mockResolvedValue({
+            metadata: { capabilities: { templates: { policy: 'required' } } },
+          }),
+          chatComplete,
+        });
+        mockContext.config = { ...mockContext.config, 'max-tokens': 16000 };
+        mockContext.input = {
+          prompt: 'classify these alerts',
+          template_id: '.alert-triage',
+          template_version: 1,
+          template_variables: { alerts_text: 'classify these alerts' },
+        };
+
+        await handler(mockContext);
+
+        expect(chatComplete).toHaveBeenCalledWith(expect.objectContaining({ maxTokens: 16000 }));
         expect(mockInference.getChatModel).not.toHaveBeenCalled();
       });
     });

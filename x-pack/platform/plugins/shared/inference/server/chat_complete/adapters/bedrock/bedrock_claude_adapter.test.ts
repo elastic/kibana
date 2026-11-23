@@ -159,6 +159,56 @@ Human:`,
       );
     });
 
+    it('forwards `maxTokens` for buffered (converse) requests', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxTokens: 16000,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'converse',
+          subActionParams: expect.objectContaining({ maxTokens: 16000 }),
+        })
+      );
+    });
+
+    it('forwards `maxTokens` for streaming (converseStream) requests', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxTokens: 16000,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'converseStream',
+          subActionParams: expect.objectContaining({ maxTokens: 16000 }),
+        })
+      );
+    });
+
+    it('omits maxTokens when it is not set, so the provider default applies', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke.mock.calls[0][0].subActionParams).not.toHaveProperty('maxTokens');
+    });
+
     it('correctly format tools', () => {
       bedrockClaudeAdapter
         .chatComplete({

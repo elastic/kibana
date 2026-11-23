@@ -8,7 +8,12 @@
 import { filter, map, tap, defer } from 'rxjs';
 import type { ToolChoice } from '@aws-sdk/client-bedrock-runtime';
 import type { Message } from '@kbn/inference-common';
-import { MessageRole, createInferenceInternalError, ToolChoiceType } from '@kbn/inference-common';
+import {
+  MessageRole,
+  createInferenceInternalError,
+  normalizeMaxTokens,
+  ToolChoiceType,
+} from '@kbn/inference-common';
 import { toUtf8 } from '@smithy/util-utf8';
 import type {
   ConverseResponse,
@@ -38,6 +43,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     toolChoice,
     tools,
     temperature = 0,
+    maxTokens,
     modelName,
     logger,
     abortSignal,
@@ -46,6 +52,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     maxContentLength,
     stream = false,
   }) => {
+    const normalizedMaxTokens = normalizeMaxTokens(maxTokens);
     const noToolUsage = toolChoice === ToolChoiceType.none;
     const hasToolUseMessages = messages.some(
       (m) =>
@@ -91,6 +98,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)
         ? { maxContentLength }
         : {}),
+      ...(normalizedMaxTokens !== undefined ? { maxTokens: normalizedMaxTokens } : {}),
     };
 
     const connectorResult$ = defer(async () => {

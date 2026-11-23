@@ -544,6 +544,61 @@ describe('openAIAdapter', () => {
       expect(getRequest().body.temperature).toBe(0.7);
     });
 
+    it('forwards maxTokens as max_tokens', () => {
+      openAIAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxTokens: 16000,
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body.max_tokens).toBe(16000);
+    });
+
+    it('omits max_tokens when maxTokens is not set, so the provider default applies', () => {
+      openAIAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body).not.toHaveProperty('max_tokens');
+      expect(getRequest().body).not.toHaveProperty('max_completion_tokens');
+    });
+
+    it('sends max_completion_tokens for reasoning models that reject max_tokens', () => {
+      openAIAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'gpt-5',
+          maxTokens: 16000,
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body.max_completion_tokens).toBe(16000);
+      expect(getRequest().body).not.toHaveProperty('max_tokens');
+    });
+
+    it('omits a non-positive maxTokens value', () => {
+      openAIAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxTokens: -1,
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body).not.toHaveProperty('max_tokens');
+      expect(getRequest().body).not.toHaveProperty('max_completion_tokens');
+    });
+
     it('propagates the modelName parameter', () => {
       openAIAdapter
         .chatComplete({

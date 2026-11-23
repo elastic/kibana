@@ -54,6 +54,7 @@ export function registerChatCompleteRoute({
       modelName,
       retryConfiguration,
       temperature,
+      maxTokens,
       metadata,
     } = request.body;
 
@@ -70,6 +71,7 @@ export function registerChatCompleteRoute({
       modelName,
       retryConfiguration,
       temperature,
+      maxTokens,
       metadata,
     });
   }

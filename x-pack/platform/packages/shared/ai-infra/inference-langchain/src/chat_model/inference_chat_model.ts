@@ -46,6 +46,7 @@ import {
   isToolValidationError,
   getConnectorDefaultModel,
   getConnectorProvider,
+  normalizeMaxTokens,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';
@@ -86,6 +87,11 @@ export interface InferenceChatModelBaseParams extends BaseChatModelParams {
   connector: InferenceConnector;
   functionCallingMode?: FunctionCallingMode;
   temperature?: number;
+  /**
+   * Maximum number of tokens the model may generate.
+   * Omitted from the chat completion request when unset.
+   */
+  maxTokens?: number;
   model?: string;
   signal?: AbortSignal;
   timeout?: number;
@@ -103,6 +109,11 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   tools?: BindToolsInput[];
   tool_choice?: ToolChoice;
   temperature?: number;
+  /**
+   * Maximum number of tokens the model may generate.
+   * Overrides the constructor value for this call. Omitted when unset.
+   */
+  maxTokens?: number;
   model?: string;
   timeout?: number;
   cacheControl?: ChatCompleteCacheControl;
@@ -150,6 +161,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   private readonly telemetryMetadata?: ConnectorTelemetryMetadata;
 
   protected temperature?: number;
+  protected maxTokens?: number;
   protected functionCallingMode?: FunctionCallingMode;
   protected maxRetries?: number;
   protected model?: string;
@@ -170,6 +182,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.telemetryMetadata = args.telemetryMetadata;
 
     this.temperature = args.temperature;
+    this.maxTokens = args.maxTokens;
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
     this.signal = args.signal;
@@ -192,6 +205,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       'tools',
       'tool_choice',
       'temperature',
+      'maxTokens',
       'model',
       'cacheControl',
       'sessionId',
@@ -252,10 +266,13 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
     const resolvedToolChoice = options.tool_choice ?? 'auto';
 
+    const maxTokens = normalizeMaxTokens(options.maxTokens ?? this.maxTokens);
+
     const params = {
       functionCalling: options.functionCallingMode ?? this.functionCallingMode,
       modelName: options.model ?? this.model,
       temperature: options.temperature ?? this.temperature,
+      ...(maxTokens !== undefined ? { maxTokens } : {}),
       // OpenAI tool-calling params are only valid when tools are present. Many OpenAI-compatible
       // endpoints reject `tool_choice` when no tools are provided and/or reject empty tools lists.
       // Only forward tool params when we actually have tools.

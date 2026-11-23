@@ -11,6 +11,11 @@ import type { ChatCompletionReasoning } from '@kbn/inference-common';
 export type OpenAIRequest = Omit<OpenAI.ChatCompletionCreateParams, 'model'> & {
   model?: string;
   /**
+   * Output cap for OpenAI reasoning models, which reject `max_tokens`.
+   * Declared here so the field is kept when the installed OpenAI SDK types omit it.
+   */
+  max_completion_tokens?: number;
+  /**
    * Elasticsearch unified chat completion reasoning config (not OpenAI's `reasoning_effort`).
    * Forwarded to `_inference/chat_completion` for provider translation.
    */
