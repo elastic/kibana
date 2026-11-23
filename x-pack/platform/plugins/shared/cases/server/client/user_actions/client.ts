@@ -8,6 +8,7 @@
 import type {
   CaseUserActionsDeprecatedResponse,
   CaseDeltaResponse,
+  CaseDeltaSummaryResponse,
   CaseViewedResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
@@ -28,6 +29,7 @@ import type {
 } from './types';
 import { find } from './find';
 import { getDelta, recordView } from './delta';
+import { summarizeCaseDelta } from './delta_summary';
 import type { CasesClient } from '../client';
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
@@ -50,6 +52,10 @@ export interface UserActionsSubClient {
    * Counts the user actions by other users since the user's window start, grouped by category
    */
   getDelta(params: UserActionGet): Promise<CaseDeltaResponse>;
+  /**
+   * Summarizes the delta with the default AI model. Cites the delta items as sources
+   */
+  summarizeDelta(params: UserActionGet): Promise<CaseDeltaSummaryResponse>;
   /**
    * Records that the user opened the case and returns the start of the "what is new" window
    */
@@ -74,6 +80,7 @@ export const createUserActionsSubClient = (
     stats: (params) => getStats(params, casesClient, clientArgs),
     getDelta: (params) => getDelta(params, casesClient, clientArgs),
     recordView: (params) => recordView(params, casesClient, clientArgs),
+    summarizeDelta: (params) => summarizeCaseDelta(params, casesClient, clientArgs),
     getUsers: (params) => getUsers(params, casesClient, clientArgs),
   };
 

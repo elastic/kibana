@@ -137,6 +137,7 @@ export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_DELTA_URL = `${CASES_INTERNAL_URL}/{case_id}/delta` as const;
 export const INTERNAL_CASE_DELTA_VIEWED_URL = `${INTERNAL_CASE_DELTA_URL}/_viewed` as const;
+export const INTERNAL_CASE_DELTA_SUMMARY_URL = `${INTERNAL_CASE_DELTA_URL}/_summary` as const;
 export const MAX_LAST_VIEWED_ENTRIES = 200 as const;
 export const MAX_LAST_VIEWED_KEY_LENGTH = 300 as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =

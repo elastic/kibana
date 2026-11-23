@@ -25,6 +25,7 @@ import type { UserActionGet, UserActionRecordView } from './types';
 const EMPTY_DELTA = {
   counts: { alerts: 0, comments: 0, changes: 0, evidence: 0 },
   items: [],
+  aiSummaryAvailable: false,
 } as const;
 
 const getUserKey = ({ profile_uid: profileUid, username }: User): string | null =>
@@ -70,6 +71,7 @@ export const getDelta = async (
   const {
     services: { userActionService, lastViewedService },
     authorization,
+    deltaSummarizer,
     logger,
     user,
   } = clientArgs;
@@ -105,13 +107,13 @@ export const getDelta = async (
       userActions.map((so) => ({ owner: so.attributes.owner, id: so.id }))
     );
 
-    return decodeOrThrowZod(CaseDeltaResponseSchema)({
-      since,
-      ...summarizeDelta(
-        userActions.map(({ id, attributes }) => ({ ...attributes, id })),
-        user
-      ),
-    });
+    const { counts, items } = summarizeDelta(
+      userActions.map(({ id, attributes }) => ({ ...attributes, id })),
+      user
+    );
+    const aiSummaryAvailable = items.length > 0 && (await deltaSummarizer?.isAvailable()) === true;
+
+    return decodeOrThrowZod(CaseDeltaResponseSchema)({ since, counts, items, aiSummaryAvailable });
   } catch (error) {
     throw createCaseError({
       message: `Failed to compute delta for case id: ${caseId}: ${error}`,

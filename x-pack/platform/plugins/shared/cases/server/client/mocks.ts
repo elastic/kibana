@@ -159,6 +159,7 @@ const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
     getUsers: jest.fn(),
     getDelta: jest.fn(),
     recordView: jest.fn(),
+    summarizeDelta: jest.fn(),
   });
 };
 

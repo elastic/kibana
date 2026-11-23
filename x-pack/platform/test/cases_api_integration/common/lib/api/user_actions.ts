@@ -8,12 +8,14 @@
 import {
   getCaseDeltaUrl,
   getCaseDeltaViewedUrl,
+  getCaseDeltaSummaryUrl,
   getCaseUserActionStatsUrl,
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
 import { CASE_FIND_USER_ACTIONS_URL } from '@kbn/cases-plugin/common/constants';
 import type {
   CaseDeltaResponse,
+  CaseDeltaSummaryResponse,
   CaseUserActionStatsResponse,
   CaseViewedResponse,
   GetCaseUsersResponse,
@@ -137,4 +139,24 @@ export const recordCaseView = async ({
     .expect(expectedHttpCode);
 
   return viewed;
+};
+
+export const summarizeCaseDelta = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseDeltaSummaryResponse> => {
+  const { body: summary } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseDeltaSummaryUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return summary;
 };

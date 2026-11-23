@@ -42,6 +42,7 @@ describe('user actions delta', () => {
         since: null,
         counts: { alerts: 0, comments: 0, changes: 0, evidence: 0 },
         items: [],
+        aiSummaryAvailable: false,
       });
       expect(userActionService.finder.findAll).not.toHaveBeenCalled();
     });
@@ -87,6 +88,50 @@ describe('user actions delta', () => {
       await expect(getDelta({ caseId: 'case-1' }, client, clientArgs)).rejects.toThrow(
         'Failed to compute delta for case id: case-1'
       );
+    });
+  });
+
+  describe('getDelta AI summary availability', () => {
+    const summarizer = { isAvailable: jest.fn(), complete: jest.fn() };
+    const args = { ...clientArgs, deltaSummarizer: summarizer } as unknown as typeof clientArgs;
+
+    beforeEach(() => {
+      lastViewedService.getSeenAt.mockResolvedValue(since);
+      userActionService.finder.findAll = jest
+        .fn()
+        .mockResolvedValue([userActionSO('by-sam', { username: 'sam', profile_uid: 'u_sam' })]);
+    });
+
+    it('is available when there are new items and a model', async () => {
+      summarizer.isAvailable.mockResolvedValue(true);
+
+      const result = await getDelta({ caseId: 'case-1' }, client, args);
+
+      expect(result.aiSummaryAvailable).toBe(true);
+    });
+
+    it('is not available without a model', async () => {
+      summarizer.isAvailable.mockResolvedValue(false);
+
+      const result = await getDelta({ caseId: 'case-1' }, client, args);
+
+      expect(result.aiSummaryAvailable).toBe(false);
+    });
+
+    it('is not available, and does not look for a model, when nothing is new', async () => {
+      summarizer.isAvailable.mockClear();
+      userActionService.finder.findAll = jest.fn().mockResolvedValue([]);
+
+      const result = await getDelta({ caseId: 'case-1' }, client, args);
+
+      expect(result.aiSummaryAvailable).toBe(false);
+      expect(summarizer.isAvailable).not.toHaveBeenCalled();
+    });
+
+    it('is not available when the AI summary is off', async () => {
+      const result = await getDelta({ caseId: 'case-1' }, client, clientArgs);
+
+      expect(result.aiSummaryAvailable).toBe(false);
     });
   });
 

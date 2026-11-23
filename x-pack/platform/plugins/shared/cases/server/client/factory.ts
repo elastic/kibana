@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
   KibanaRequest,
   SavedObjectsServiceStart,
@@ -53,6 +54,8 @@ import {
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
+import type { DeltaSummarizer } from '../services/delta_summary/summarizer';
+import { createDeltaSummarizer } from '../services/delta_summary/summarizer';
 import type { CasesClient } from '.';
 import { createCasesClient } from '.';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
@@ -89,6 +92,7 @@ interface CasesClientFactoryArgs {
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
   config: ConfigType;
+  inference?: InferenceServerStart;
   casesEventBus?: CasesEventBus;
   closeReasonValidator?: (
     closeReason: string,
@@ -237,7 +241,15 @@ export class CasesClientFactory {
       request,
       closeReasonValidator: boundCloseReasonValidator,
       clientSource,
+      deltaSummarizer: this.createDeltaSummarizer(request),
     };
+  }
+
+  private createDeltaSummarizer(request: KibanaRequest): DeltaSummarizer | undefined {
+    const { inference, config } = this.options ?? {};
+    return inference != null && config?.deltaView.aiSummary.enabled
+      ? createDeltaSummarizer({ inference, request, logger: this.logger })
+      : undefined;
   }
 
   private validateInitialization(): asserts this is this & { options: CasesClientFactoryArgs } {

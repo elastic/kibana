@@ -57,7 +57,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
       resetPageDelayMs: 0,
     },
     templates: { enabled: true },
-    deltaView: { enabled: true },
+    deltaView: { enabled: true, aiSummary: { enabled: false } },
     runWorkflows: { enabled: true },
     attachments: { enabled: true },
     chat: { enabled: true },
@@ -239,6 +239,9 @@ describe('Cases Plugin', () => {
               "enabled": true,
             },
             "deltaView": Object {
+              "aiSummary": Object {
+                "enabled": false,
+              },
               "enabled": true,
             },
             "enabled": true,

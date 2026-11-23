@@ -179,6 +179,11 @@ export const ConfigSchema = schema.object({
   // The `cases-last-viewed` saved object type is always registered.
   deltaView: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
+    // Not exposed to the browser: the delta response tells the UI if a summary is available.
+    // Needs the `inference` plugin and a default connector (for example the EIS default).
+    aiSummary: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
 });

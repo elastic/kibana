@@ -45,6 +45,23 @@ export const CaseDeltaResponseSchema = lazySchema(() =>
     since: z.string().nullable(),
     counts: CaseDeltaCountsSchema,
     items: z.array(CaseDeltaItemSchema),
+    /** True when the AI summary is enabled and a model is available for the user. */
+    aiSummaryAvailable: z.boolean(),
+  })
+);
+
+export const CaseDeltaSummarySourceSchema = lazySchema(() =>
+  z.object({
+    /** The number the summary uses to cite the item, as in `[2]`. */
+    index: z.number(),
+    item: CaseDeltaItemSchema,
+  })
+);
+
+export const CaseDeltaSummaryResponseSchema = lazySchema(() =>
+  z.object({
+    summary: z.string(),
+    sources: z.array(CaseDeltaSummarySourceSchema),
   })
 );
 
@@ -58,4 +75,6 @@ export type DeltaCategory = (typeof DeltaCategories)[keyof typeof DeltaCategorie
 export type CaseDeltaItem = z.infer<typeof CaseDeltaItemSchema>;
 export type CaseDeltaCounts = z.infer<typeof CaseDeltaCountsSchema>;
 export type CaseDeltaResponse = z.infer<typeof CaseDeltaResponseSchema>;
+export type CaseDeltaSummarySource = z.infer<typeof CaseDeltaSummarySourceSchema>;
+export type CaseDeltaSummaryResponse = z.infer<typeof CaseDeltaSummaryResponseSchema>;
 export type CaseViewedResponse = z.infer<typeof CaseViewedResponseSchema>;

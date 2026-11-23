@@ -514,6 +514,7 @@ export class CasePlugin
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
+      inference: plugins.inference,
       casesEventBus: this.casesEventBus,
       closeReasonValidator:
         this.closeReasonValidators.size > 0

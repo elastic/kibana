@@ -33,6 +33,12 @@ describe('config validation', () => {
           "chat": Object {
             "enabled": true,
           },
+          "deltaView": Object {
+            "aiSummary": Object {
+              "enabled": false,
+            },
+            "enabled": true,
+          },
           "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
@@ -195,6 +201,21 @@ describe('config validation', () => {
     it('allows templates.enabled to be set to false explicitly', () => {
       const config = ConfigSchema.validate({ templates: { enabled: false } });
       expect(config.templates.enabled).toBe(false);
+    });
+
+    it('sets deltaView.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.deltaView.enabled).toBe(true);
+    });
+
+    it('sets deltaView.aiSummary.enabled default to false', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.deltaView.aiSummary.enabled).toBe(false);
+    });
+
+    it('allows deltaView.aiSummary.enabled to be set to true explicitly', () => {
+      const config = ConfigSchema.validate({ deltaView: { aiSummary: { enabled: true } } });
+      expect(config.deltaView.aiSummary.enabled).toBe(true);
     });
 
     it('sets runWorkflows.enabled default to true', () => {

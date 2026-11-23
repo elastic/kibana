@@ -21,6 +21,7 @@ import {
   deleteAllCaseItems,
   getCaseDelta,
   recordCaseView,
+  summarizeCaseDelta,
   updateCase,
 } from '../../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -50,6 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
         since: null,
         counts: { alerts: 0, comments: 0, changes: 0, evidence: 0 },
         items: [],
+        aiSummaryAvailable: false,
       });
     });
 
@@ -157,6 +159,35 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(
         (await getCaseDelta({ supertest, caseId: theCase.id, auth: as(superUser) })).counts.comments
       ).to.be(0);
+    });
+
+    describe('AI summary', () => {
+      it('is not available and has no route while the AI summary is off', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest(), 200, as(superUser));
+        await recordCaseView({
+          supertest,
+          caseId: theCase.id,
+          markSeen: true,
+          auth: as(superUser),
+        });
+        await createComment({
+          supertest,
+          caseId: theCase.id,
+          params: postCommentUserReq,
+          auth: as(secOnly),
+        });
+
+        const delta = await getCaseDelta({ supertest, caseId: theCase.id, auth: as(superUser) });
+
+        expect(delta.items.length).to.be(1);
+        expect(delta.aiSummaryAvailable).to.be(false);
+        await summarizeCaseDelta({
+          supertest,
+          caseId: theCase.id,
+          expectedHttpCode: 404,
+          auth: as(superUser),
+        });
+      });
     });
 
     describe('rbac', () => {
