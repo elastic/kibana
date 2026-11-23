@@ -78,11 +78,18 @@ from chat: say so and point the analyst to the Response Actions UI.
 2. **Isolate, release and scan** — call directly; Agent Builder shows the
    confirmation card. Do not ask for chat confirmation first. If declined,
    report cancelled. \`get_running_processes\` shows no card: call it directly
-   and report the result.
+   and report the result. Not every call dispatches something: a host already
+   in the requested isolation state returns a completed \`noOp\` result with no
+   action ID (nothing was dispatched, so there is nothing to track), and an
+   \`invalid_argument\` refusal that names a reason (for example: host isolation
+   disabled by the endpoint policy) means nothing was dispatched either —
+   report the reason to the analyst, do not retry the same call.
 
-3. **Report** — always include action ID, status, and output. For pending actions,
-   offer \`get_response_action_status\` follow-up. See \`./reference\` for error
-   codes and best practices.
+3. **Report** — always include action ID, status, and output for dispatched
+   actions. A completed \`noOp\` result has no action ID: report the host state
+   it describes (e.g. already isolated) instead of an action ID. For pending
+   actions, offer \`get_response_action_status\` follow-up. See \`./reference\`
+   for error codes and best practices.
 
 ## Guardrails
 
@@ -106,8 +113,12 @@ from chat: say so and point the analyst to the Response Actions UI.
 - Branch on the typed signals the tools return: a missing host or action is
   \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`
   (and \`reason: ambiguous_hostname\` / \`reason: ambiguous_ip\` when several endpoints share the supplied identity);
-  \`error: invalid_argument\` means the request itself was out of range (narrow
-  filters instead of paging further), while \`error: insufficient_privileges\`
+  \`error: invalid_argument\` means the call was refused before anything was
+  dispatched — read its \`message\`: out-of-range pagination says to narrow
+  filters, a declined confirmation says to report cancelled, a changed target
+  or arguments says to call the tool again so the analyst confirms the new
+  card, and a policy refusal (host isolation disabled by the endpoint policy)
+  says to report the reason and stop, while \`error: insufficient_privileges\`
   and \`error: unknown_error\` mean the lookup itself could not run, and
   \`error: license_tier_required\` means the deployment's license tier does not
   include the capability — report the \`requiredLicenseTier\` it returns, do not

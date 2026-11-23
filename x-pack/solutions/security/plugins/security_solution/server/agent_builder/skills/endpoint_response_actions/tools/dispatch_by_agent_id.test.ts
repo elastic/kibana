@@ -390,6 +390,94 @@ describe.each(CASES)(
       }
     );
 
+    itGated(
+      'does not dispatch when the replayed scan path differs from the confirmed one',
+      async () => {
+        // `path` is the argument that decides what the endpoint scans, so a
+        // resumed call swapping it must not inherit the approval — the card
+        // the analyst saw named the other path.
+        const tool = build(service);
+        const pathA = 'path' in extraParams ? (extraParams.path as string) : undefined;
+        if (!pathA) return;
+
+        await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+        expect(toolCallState.value).toEqual(
+          expect.objectContaining({
+            kind: 'confirmed',
+            args: expect.objectContaining({ path: pathA }),
+          })
+        );
+
+        const out = results(
+          await runApproved(tool, { agentId: 'agent-b', ...extraParams, path: '/tmp/other' })
+        );
+
+        expect(out[0].type).toBe('error');
+        const data = out[0].data as Record<string, unknown>;
+        expect(data.error).toBe('invalid_argument');
+        expect(data.message).toEqual(
+          expect.stringContaining('differ from the ones the analyst confirmed')
+        );
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    itGated(
+      'refuses when the privilege is revoked between the card and the approved resume',
+      async () => {
+        // The recheck after approval is the part that catches a role change
+        // while the card sat waiting: the call must not dispatch.
+        const tool = build(service);
+        service.getEndpointAuthz = jest
+          .fn()
+          .mockResolvedValueOnce(getEndpointAuthzInitialStateMock({}))
+          .mockResolvedValue(getEndpointAuthzInitialStateMock({ [privilege]: false }));
+
+        await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+
+        const out = results(await runApproved(tool, { agentId: 'agent-b', ...extraParams }));
+
+        expect(out[0].type).toBe('error');
+        expect((out[0].data as Record<string, unknown>).error).toBe('insufficient_privileges');
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    itGated(
+      'reports the no-op instead of dispatching when the host already reached the requested state while the card waited',
+      async () => {
+        // Between the card and the approval another path isolated (or
+        // released) the host: the resume must report the no-op, not dispatch
+        // a second action toward a state the host is already in.
+        if (action !== 'isolate' && action !== 'unisolate') return;
+        const tool = build(service);
+        const isolated = action === 'isolate';
+
+        await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+
+        getHostMetadataList.mockResolvedValue({
+          data: [
+            {
+              host: { hostname: 'dup-host' },
+              metadata: {
+                agent: { id: 'agent-b' },
+                elastic: { agent: { id: 'agent-b' } },
+                Endpoint: { state: { isolation: isolated } },
+              },
+              host_status: 'healthy',
+            },
+          ],
+          total: 1,
+        });
+
+        const out = results(await runApproved(tool, { agentId: 'agent-b', ...extraParams }));
+
+        expect(out[0].type).not.toBe('error');
+        expect(out[0].data).toMatchObject({ noOp: true, isolated });
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
     it('dispatches when the replayed arguments are the ones that were confirmed', async () => {
       const tool = build(service);
 

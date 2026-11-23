@@ -436,10 +436,11 @@ const isHostIsolationDisabled = async (
   request: DispatchRequest,
   target: DispatchTarget
 ): Promise<boolean> => {
-  // This setting exists only in the Linux policy schema. Unknown, Windows,
-  // and macOS platforms must not be refused based on a sibling Linux block.
+  // This setting exists only in the Linux policy schema and only governs the
+  // two isolation actions. Unknown, Windows, and macOS platforms must not be
+  // refused based on a sibling Linux block.
   if (
-    request.action !== 'isolate' ||
+    (request.action !== 'isolate' && request.action !== 'unisolate') ||
     target.endpoint.platform !== 'linux' ||
     !target.endpoint.policyId
   ) {
@@ -456,10 +457,16 @@ const isHostIsolationDisabled = async (
     spaceId: request.context.spaceId,
   });
   const policyValue = items[0]?.inputs?.[0]?.config?.policy?.value as
-    | { linux?: { advanced?: { host_isolation?: { allowed?: boolean } } } }
+    | { linux?: { advanced?: { host_isolation?: { allowed?: boolean | string } } } }
     | undefined;
+  const allowed = policyValue?.linux?.advanced?.host_isolation?.allowed;
 
-  return policyValue?.linux?.advanced?.host_isolation?.allowed === false;
+  // The advanced-policy settings UI stores what was typed into a text field,
+  // so `allowed` can arrive as the string "false" as well as the boolean
+  // false (the schema registry keys carry no type constraint). Both mean the
+  // policy refuses isolation — and per the setting's documentation, with it
+  // off an isolated host refuses to release too, so both directions check.
+  return allowed === false || allowed === 'false';
 };
 
 const getIsolationState = async (
@@ -560,9 +567,10 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return { kind: 'result', result: mismatchResult(mismatch) };
   }
 
-  // Both checks run before the card, so the analyst is never asked to approve
-  // an isolation the endpoint will refuse or one that would change nothing.
-  // A confirmed call re-enters here too, so the state is re-read at dispatch.
+  // The policy check runs before the card, so the analyst is never asked to
+  // approve an isolation the endpoint will refuse. A confirmed call re-enters
+  // here too, so the policy is re-read at dispatch; the already-in-state
+  // no-op below re-reads the isolation state itself, after the card.
   if (await isHostIsolationDisabled(request, target)) {
     return {
       kind: 'result',
@@ -573,16 +581,6 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     };
   }
 
-  if (request.action === 'isolate' || request.action === 'unisolate') {
-    const isolated = await getIsolationState(request, target.endpoint.agentId);
-    if (
-      (request.action === 'isolate' && isolated === true) ||
-      (request.action === 'unisolate' && isolated === false)
-    ) {
-      return { kind: 'result', result: isolationNoOpResult(request.action, target) };
-    }
-  }
-
   if (!confirmation) {
     return { kind: 'ready', target };
   }
@@ -591,14 +589,38 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return { kind: 'result', result: unidentifiableCallResult(request.action) };
   }
 
-  // The confirmation is asked here, after every refusal check above, so an
-  // analyst is never shown an approve button for a call that cannot succeed.
-  // The dispatch is held to what the card showed: the agent id and arguments
-  // recorded when it was built.
   const promptId = `${request.action}.confirm.${context.callContext.toolCallId}`;
   const { status } = context.prompts.checkConfirmationStatus(promptId);
 
+  // Returns the isolation action when the host is already in the state that
+  // action asks for — so the caller can complete as a no-op — and `undefined`
+  // otherwise. Read-only actions and a host in the opposite state never no-op.
+  const requestedStateAlreadyReached = async (): Promise<'isolate' | 'unisolate' | undefined> => {
+    if (request.action !== 'isolate' && request.action !== 'unisolate') {
+      return undefined;
+    }
+    const isolated = await getIsolationState(request, target.endpoint.agentId);
+    if (
+      (request.action === 'isolate' && isolated === true) ||
+      (request.action === 'unisolate' && isolated === false)
+    ) {
+      return request.action;
+    }
+    return undefined;
+  };
+
   if (status === ConfirmationStatus.unprompted) {
+    // First call: a host already in the requested state completes as a no-op
+    // before the card, so the analyst is never asked to approve a no-op.
+    const noOpAction = await requestedStateAlreadyReached();
+    if (noOpAction) {
+      return { kind: 'result', result: isolationNoOpResult(noOpAction, target) };
+    }
+
+    // The confirmation is asked here, after every refusal check above, so an
+    // analyst is never shown an approve button for a call that cannot succeed.
+    // The dispatch is held to what the card showed: the agent id and arguments
+    // recorded when it was built.
     recordConfirmation(request, target);
     return {
       kind: 'result',
@@ -642,6 +664,17 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
       kind: 'result',
       result: changedArgsResult(differingArgNames(approved.args, request.args)),
     };
+  }
+
+  // A confirmed resume re-reads the state here rather than before the
+  // confirmation checks: a declined card or a mismatched target must report
+  // what the analyst actually did, not a no-op that hides it. A resume that
+  // passed every check can still complete as a no-op — the host reached the
+  // requested state through another path while the card sat waiting, and
+  // dispatching again would change nothing.
+  const resumedNoOpAction = await requestedStateAlreadyReached();
+  if (resumedNoOpAction) {
+    return { kind: 'result', result: isolationNoOpResult(resumedNoOpAction, target) };
   }
 
   return { kind: 'ready', target };

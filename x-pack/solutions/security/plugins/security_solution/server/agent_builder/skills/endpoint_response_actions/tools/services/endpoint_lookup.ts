@@ -611,6 +611,19 @@ export function createEndpointLookupService(
       return { kind: 'not_found' } as const;
     }
 
+    // Dispatch resolves on the origin project: linked projects only widen the
+    // ambiguity set, and a host found there alone cannot be dispatched to from
+    // here (the response-actions client goes through origin Fleet). Origin
+    // presence is therefore checked before ambiguity is reported, matching the
+    // hostname rule: no origin match means `not_found`, never a choice among
+    // agents this project cannot act on.
+    if (
+      dispatchMode &&
+      !distinct.some((c) => origin.candidates.some((o) => o.agentId === c.agentId))
+    ) {
+      return { kind: 'not_found' } as const;
+    }
+
     if (metadata.truncated || distinct.length > 1) {
       return {
         kind: 'ambiguous' as const,
@@ -625,10 +638,6 @@ export function createEndpointLookupService(
     }
 
     const chosen = distinct[0];
-    // A host only a linked project has cannot be dispatched to from here.
-    if (dispatchMode && !origin.candidates.some((c) => c.agentId === chosen.agentId)) {
-      return { kind: 'not_found' } as const;
-    }
     return {
       kind: 'found' as const,
       endpoint: {

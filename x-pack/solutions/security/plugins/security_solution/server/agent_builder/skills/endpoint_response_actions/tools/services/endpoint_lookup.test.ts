@@ -343,6 +343,96 @@ describe('createEndpointLookupService', () => {
     expect(candidates.map((c) => c.agentId).sort()).toEqual(['linked-agent', 'origin-agent']);
   });
 
+  it('dispatch mode reports not_found for a shared IP when no origin candidate holds it', async () => {
+    // The IP analogue of the hostname rule above: two linked projects share
+    // the address and the origin project holds no candidate for it. Ambiguity
+    // would offer the analyst a choice of agents this project cannot dispatch
+    // to (the response-actions client goes through origin Fleet), so the
+    // answer is `not_found`, matching hostname dispatch.
+    const scoped = { isCpsRead: () => true };
+    const getHostMetadataList = jest.fn(async (_query: unknown, passedScoped?: unknown) => {
+      if (passedScoped) {
+        return {
+          data: [
+            {
+              host_status: HostStatus.HEALTHY,
+              metadata: {
+                elastic: { agent: { id: 'linked-a' } },
+                host: { hostname: 'linked-a-host', name: 'linked-a-host' },
+              },
+            },
+            {
+              host_status: HostStatus.HEALTHY,
+              metadata: {
+                elastic: { agent: { id: 'linked-b' } },
+                host: { hostname: 'linked-b-host', name: 'linked-b-host' },
+              },
+            },
+          ],
+          total: 2,
+        };
+      }
+      return { data: [], total: 0 };
+    });
+    const { lookup } = buildService({
+      resolutionMode: 'dispatch',
+      scoped,
+      listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+      getHostMetadataList,
+    });
+
+    const result = await lookup.resolveByIp('10.0.0.9');
+
+    expect(result).toEqual({ kind: 'not_found' });
+  });
+
+  it('dispatch mode reports ambiguity for a shared IP when the origin holds one of the candidates', async () => {
+    // Origin holds one agent on the address and a linked project another:
+    // dispatch stays origin-only, and the linked machine widens the ambiguity
+    // set exactly as it does for hostnames.
+    const scoped = { isCpsRead: () => true };
+    const getHostMetadataList = jest.fn(async (_query: unknown, passedScoped?: unknown) => {
+      if (passedScoped) {
+        return {
+          data: [
+            {
+              host_status: HostStatus.HEALTHY,
+              metadata: {
+                elastic: { agent: { id: 'linked-agent' } },
+                host: { hostname: 'linked-host', name: 'linked-host' },
+              },
+            },
+          ],
+          total: 1,
+        };
+      }
+      return {
+        data: [
+          {
+            host_status: HostStatus.HEALTHY,
+            metadata: {
+              elastic: { agent: { id: 'origin-agent' } },
+              host: { hostname: 'origin-host', name: 'origin-host' },
+            },
+          },
+        ],
+        total: 1,
+      };
+    });
+    const { lookup } = buildService({
+      resolutionMode: 'dispatch',
+      scoped,
+      listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+      getHostMetadataList,
+    });
+
+    const result = await lookup.resolveByIp('10.0.0.9');
+
+    expect(result.kind).toBe('ambiguous');
+    const candidates = (result as { candidates: Array<{ agentId: string }> }).candidates;
+    expect(candidates.map((c) => c.agentId).sort()).toEqual(['linked-agent', 'origin-agent']);
+  });
+
   it('reports ambiguity when two online agents share the hostname', async () => {
     // Two distinct live machines can legitimately share a hostname. Silently
     // picking one would report — or isolate — the wrong host.

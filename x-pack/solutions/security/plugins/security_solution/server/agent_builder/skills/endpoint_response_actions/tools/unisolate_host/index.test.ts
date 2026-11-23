@@ -155,6 +155,62 @@ describe('unisolateHostTool', () => {
       expect(card.message).toContain('my-host');
       expect(card.message).toContain('agent-123');
     });
+
+    it('refuses release before the card when the Linux policy disables host isolation', async () => {
+      // Per the setting's documentation, with host isolation disabled an
+      // isolated host also refuses to release: the analyst must not be asked
+      // to approve a release the endpoint will reject.
+      const release = jest.fn();
+      const listPackagePolicies = jest.fn().mockResolvedValue({
+        items: [
+          {
+            inputs: [
+              {
+                config: {
+                  policy: {
+                    value: { linux: { advanced: { host_isolation: { allowed: false } } } },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      });
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: {
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [
+              {
+                id: 'agent-123',
+                status: 'online',
+                packages: ['endpoint'],
+                policy_id: 'agent-policy-1',
+                local_metadata: { host: { os: { platform: 'linux' } } },
+              },
+            ],
+          }),
+        },
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        getSoClient: jest.fn().mockReturnValue({}),
+        packagePolicy: { list: listPackagePolicies },
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ release } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { card, result } = await confirmThenHandle(
+        unisolateHostTool(mockEndpointAppContextService),
+        { hostName: 'my-host' }
+      );
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(card).toBeUndefined();
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
+      expect(data).toMatchObject({ error: 'invalid_argument' });
+      expect(data.message).toContain('disabled by the endpoint policy');
+      expect(release).not.toHaveBeenCalled();
+      expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
+    });
   });
 
   describe('handler', () => {

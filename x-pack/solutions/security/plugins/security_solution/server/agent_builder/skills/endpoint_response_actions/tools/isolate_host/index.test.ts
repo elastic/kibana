@@ -251,6 +251,63 @@ describe('isolateHostTool', () => {
       expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
     });
 
+    it('refuses the same way when the policy stores the setting as the string "false"', async () => {
+      // The advanced-policy settings UI saves what was typed into a text
+      // field, so `allowed` can arrive as a string; the refusal must not
+      // depend on the saved type.
+      const isolate = jest.fn();
+      const listPackagePolicies = jest.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'endpoint-policy-1',
+            inputs: [
+              {
+                config: {
+                  policy: {
+                    value: { linux: { advanced: { host_isolation: { allowed: 'false' } } } },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      });
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: {
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [
+              {
+                id: 'agent-123',
+                status: 'online',
+                packages: ['endpoint'],
+                policy_id: 'agent-policy-1',
+                local_metadata: { host: { os: { platform: 'linux' } } },
+              },
+            ],
+          }),
+        },
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        getSoClient: jest.fn().mockReturnValue({}),
+        packagePolicy: { list: listPackagePolicies },
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { card, result } = await confirmThenHandle(
+        isolateHostTool(mockEndpointAppContextService),
+        { hostName: 'my-host' }
+      );
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(card).toBeUndefined();
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
+      expect(data).toMatchObject({ error: 'invalid_argument' });
+      expect(data.message).toContain('disabled by the endpoint policy');
+      expect(isolate).not.toHaveBeenCalled();
+      expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
+    });
+
     it('refuses an IP-resolved Linux endpoint before confirmation and dispatch when its policy disables isolation', async () => {
       const isolate = jest.fn();
       jest
