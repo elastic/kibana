@@ -220,7 +220,9 @@ describe('fieldTypeOf', () => {
           'response-property-enum-value-added',
           'added the new `default` enum value to the `mode` response property for the response status `200`'
         ),
-        { current: documentOf({ properties: { mode: { type: 'string', enum: ['a', 'default'] } } }) }
+        {
+          current: documentOf({ properties: { mode: { type: 'string', enum: ['a', 'default'] } } }),
+        }
       )
     ).toBe('a | default');
   });
