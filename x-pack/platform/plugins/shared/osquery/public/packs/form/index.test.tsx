@@ -256,6 +256,97 @@ describe('PackForm', () => {
     expect(mockUpdateAsync).not.toHaveBeenCalled();
   });
 
+  it('is clean again after undoing an edit on a pack whose shared shards were normalized', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 0 },
+        },
+        groupsByPackagePolicyId: {
+          integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] },
+        },
+        groupIdByPolicyId: { A: 'integration', B: 'integration' },
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const onDirtyStateChange = jest.fn();
+    const { container } = renderWithContext(
+      <PackForm
+        editMode
+        onDirtyStateChange={onDirtyStateChange}
+        defaultValue={{
+          saved_object_id: 'normalized-pack',
+          id: 'normalized-pack',
+          name: 'normalized-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A', 'B'],
+          // Loads as one integration row at 50, so the shards normalize to {A: 50, B: 50}.
+          shards: { A: 10, B: 50 },
+        }}
+      />
+    );
+
+    const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
+    fireEvent.change(nameInput, { target: { value: 'renamed' } });
+    await waitFor(() => expect(onDirtyStateChange).toHaveBeenLastCalledWith(true));
+    fireEvent.change(nameInput, { target: { value: 'normalized-pack' } });
+    await waitFor(() => expect(onDirtyStateChange).toHaveBeenLastCalledWith(false));
+  });
+
+  it('ignores a stored shard of an agent policy that is not a target', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 0 },
+        },
+        groupsByPackagePolicyId: {
+          integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] },
+        },
+        groupIdByPolicyId: { A: 'integration', B: 'integration' },
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'api-pack',
+          id: 'api-pack',
+          name: 'api-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          // Set through the API: the server only applies shards of targeted policies, so
+          // Fleet runs A's 25 and B's 90 is never used.
+          policy_ids: ['A'],
+          shards: { A: 25, B: 90 },
+        }}
+      />
+    );
+
+    expect(within(getByTestId('packShardsForm-0')).getByRole('spinbutton')).toHaveValue(25);
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(['A']);
+    expect(mockUpdateAsync.mock.calls[0][0].shards).toEqual({ A: 25 });
+  });
+
   it('sets 25% for a shared integration and submits member shards', async () => {
     mockUseAgentPolicies.mockReturnValue({
       data: {

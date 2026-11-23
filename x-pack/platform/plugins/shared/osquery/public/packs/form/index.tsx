@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, isEmpty, map, omit, reduce } from 'lodash';
+import { filter, isEmpty, map, omit, pickBy, reduce } from 'lodash';
 import type { EuiAccordionProps, EuiStepsProps } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -230,7 +230,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         : legacyPayload),
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
-      shards: omit(payload.shards, '*') ?? {},
+      // The server only targets `policy_ids`; a shard keyed by any other agent policy is
+      // never applied. Drop it, or the form would treat it as a target and save it as one.
+      shards: pickBy(
+        omit(payload.shards, '*') ?? {},
+        (_, policyId) => !payload.policy_ids || payload.policy_ids.includes(policyId)
+      ),
       schedule: deserializedSchedule,
       min_osquery_version: payloadMinOsqueryVersion ? [payloadMinOsqueryVersion] : [],
       result_type: payloadResultType ?? '',

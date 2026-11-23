@@ -42,7 +42,10 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
 
   const hideConfirmationModal = useCallback(() => setConfirmationModal(false), []);
 
-  const { data } = useAgentPolicies();
+  const { data, isFetched: agentPoliciesFetched, isError: agentPoliciesError } = useAgentPolicies();
+  // The shared-integration groups come from this query; until it answers, the delivered
+  // set (and with it the need for a confirmation) is unknown.
+  const agentPoliciesLoading = !agentPoliciesFetched && !agentPoliciesError;
 
   // Fleet delivers a pack to every agent policy of a shared integration, so
   // expand the saved targets by their group. `effective_policy_ids` alone is
@@ -102,12 +105,14 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   }, [hideConfirmationModal, item, mutateAsync]);
 
   const handleToggleActiveClick = useCallback(() => {
-    if (agentCount) {
+    // If the agent policies could not be loaded, ask anyway: the pack may reach agents
+    // through a shared integration we cannot see.
+    if (agentCount || (agentPoliciesError && item.policy_ids.length > 0)) {
       return setConfirmationModal(true);
     }
 
     handleToggleActive();
-  }, [agentCount, handleToggleActive]);
+  }, [agentCount, agentPoliciesError, handleToggleActive, item.policy_ids.length]);
 
   const hasNoPolicies = item.policy_ids.length === 0;
   const zeroPolicyGuardActive = hasNoPolicies && !item.enabled;
@@ -115,7 +120,9 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const euiSwitch = (
     <EuiSwitch
       checked={!!item.enabled}
-      disabled={!permissions.writePacks || isLoading || zeroPolicyGuardActive}
+      disabled={
+        !permissions.writePacks || isLoading || agentPoliciesLoading || zeroPolicyGuardActive
+      }
       showLabel={false}
       aria-label={item.name}
       label=""
@@ -137,7 +144,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       ) : (
         euiSwitch
       )}
-      {confirmationModal && agentCount && (
+      {confirmationModal && (agentCount > 0 || agentPoliciesError) && (
         <ConfirmDeployAgentPolicyModal
           onConfirm={handleToggleActive}
           onCancel={hideConfirmationModal}

@@ -2402,6 +2402,16 @@ describe('resolveSharedIntegrationOverdelivery', () => {
     ).toEqual([]);
   });
 
+  test('does not warn for disabled integrations or inputs, which Fleet does not deliver', () => {
+    const disabled = {
+      ...targetingPackagePolicy('off', ['A', 'B']),
+      enabled: false,
+    } as PackagePolicy;
+    const inputOff = targetingPackagePolicy('input-off', ['C', 'D']);
+    (inputOff.inputs[0] as { enabled?: boolean }).enabled = false;
+    expect(resolveSharedIntegrationOverdelivery(['A', 'C'], [disabled, inputOff])).toEqual([]);
+  });
+
   test('also warns for integrations the request writes beyond the saved targets', () => {
     const drifted = targetingPackagePolicy('drifted', ['C', 'D'], { 'space--pack': {} });
     expect(
@@ -2553,6 +2563,35 @@ describe('computeEffectivePolicyIds', () => {
         ['tricky-id', []],
       ])
     );
+  });
+
+  test('credits a legacy bare key to the space the package policy declares', async () => {
+    const integration = {
+      ...targetingPackagePolicy('security-integration', ['A'], { 'it-hygiene': {} }),
+      spaceIds: ['security'],
+    } as PackagePolicy;
+    expect(
+      await computeEffectivePolicyIds(
+        [{ id: 'pack-id', name: 'it-hygiene' }],
+        'security',
+        [integration],
+        lookup
+      )
+    ).toEqual(new Map([['pack-id', ['A']]]));
+  });
+
+  test('matches a block by pack_id even under a stale key after a failed rename', async () => {
+    const integration = targetingPackagePolicy('shared', ['A', 'B'], {
+      'default--old-name': { pack_id: 'pack-id', pack_name: 'old-name' },
+    });
+    expect(
+      await computeEffectivePolicyIds(
+        [{ id: 'pack-id', name: 'new-name' }],
+        'default',
+        [integration],
+        lookup
+      )
+    ).toEqual(new Map([['pack-id', ['A', 'B']]]));
   });
 
   test('falls back to the key for legacy blocks without pack_id', async () => {

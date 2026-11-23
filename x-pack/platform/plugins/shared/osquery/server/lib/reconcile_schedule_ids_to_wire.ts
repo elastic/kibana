@@ -10,7 +10,7 @@ import { get, isEqual, unset } from 'lodash';
 import { produce } from 'immer-v9';
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { packSavedObjectType } from '../../common/types';
 import type { PackSavedObject } from '../common/types';
@@ -26,81 +26,10 @@ import {
   makePackKey,
   PACK_KEY_SEPARATOR,
   removePackFromPolicy,
+  resolveBlockSpaceAndName,
   toPackExecutionDefaults,
 } from '../routes/pack/utils';
 import { escapeFilterValue } from '../routes/utils/generate_copy_name';
-
-/**
- * Resolve a pack block's space and name together, from evidence only.
- *
- * `spaceIds` is authoritative when Fleet populates it, but it is only populated
- * once space awareness is fully on — it needs `useSpaceAwareness` AND
- * `use_space_awareness_migration_status === 'success'`, and every Fleet read
- * gates it as `isSpacesEnabled ? spaceIds : undefined`. osquery, meanwhile, keys
- * pack blocks off the *Kibana* active space, which is independent of Fleet's
- * migration state. So a pre-migration policy can carry a `security--mypack`
- * block with `spaceIds: undefined`, and assuming `default` is wrong twice over:
- * the pack-SO lookup either misses (permanent non-repair) or hits a namesake
- * pack in `default` and writes `default--mypack` beside the untouched
- * `security--mypack` — `removePackFromPolicy` only unsets the canonical and bare
- * keys — leaving the agent running a DUPLICATED schedule, worse than the bug
- * this task repairs.
- *
- * The key is the only remaining evidence in that state, but it must never be
- * SPLIT: both halves can contain `--` (space ids admit `-` — the Spaces UI
- * slugifies "Prod - EU" to `prod---eu` — and pack names are unbounded), and
- * since `makePackKey` round-trips a mis-split silently overwrites the block with
- * another pack's queries. Instead the block's own `pack_name` pins the boundary
- * exactly: the space is whatever prefix makes `makePackKey(pack_name, prefix)`
- * reproduce the key — no guessing, and correct for `--` on either side. Only a
- * legacy block that predates `pack_name` has no such anchor; that case is
- * flagged `ambiguous` for the caller to resolve against real pack SOs.
- *
- * Writing through a key-derived space is safe: namespace-agnostic SOs (what a
- * pre-migration policy is) update from any scoped client, since
- * `preflightCheckNamespacesForUpdate` skips non-multi-namespace types.
- */
-const resolveBlockSpaceAndName = (
-  packagePolicy: PackagePolicy,
-  packKey: string,
-  blockPackName: string | undefined
-): { spaceId: string; packName: string; ambiguous?: boolean } => {
-  const declared = packagePolicy.spaceIds?.[0];
-  // `ALL_SPACES_ID` collapses to the default space, mirroring Fleet's own
-  // `getValidSpaceId`. Left verbatim it would scope the write client to the
-  // literal space `*` and write a junk `*--name` key.
-  if (declared && declared !== ALL_SPACES_ID) {
-    return { spaceId: declared, packName: blockPackName ?? stripSpacePrefix(packKey, declared) };
-  }
-
-  if (blockPackName) {
-    // `pack_name` pins the boundary: recover the space as the exact prefix that
-    // rebuilds this key, so `--` in either half is handled without splitting.
-    const suffix = `${PACK_KEY_SEPARATOR}${blockPackName}`;
-    if (packKey.endsWith(suffix)) {
-      const prefix = packKey.slice(0, -suffix.length);
-      if (prefix.length) {
-        return { spaceId: prefix, packName: blockPackName };
-      }
-    }
-
-    // Bare (unprefixed) key, or a key that disagrees with `pack_name`: nothing
-    // ties the block to another space, so the default space is the only guess.
-    return { spaceId: DEFAULT_SPACE_ID, packName: blockPackName };
-  }
-
-  // Legacy block with no `pack_name`: nothing pins the boundary, so the split is
-  // genuinely ambiguous (`prod---eu--my--pack` fits space `prod---eu`/name
-  // `my--pack` as well as space `prod`/name `-eu--my--pack`). Default to the
-  // whole key as a bare name in the default space — the overwhelmingly common
-  // shape — but flag it so the caller can probe the alternatives against real
-  // pack SOs instead of committing to a blind split.
-  return {
-    spaceId: DEFAULT_SPACE_ID,
-    packName: packKey,
-    ambiguous: packKey.includes(PACK_KEY_SEPARATOR),
-  };
-};
 
 /**
  * Every (spaceId, packName) split a legacy `pack_name`-less key could mean, most
@@ -146,13 +75,6 @@ const resolvePackBlockIdentity = (
     packKey,
     typeof blockPackName === 'string' && blockPackName.length ? blockPackName : undefined
   );
-};
-
-/** Strip a `${spaceId}--` prefix only for the space the block resolved to. */
-const stripSpacePrefix = (packKey: string, spaceId: string): string => {
-  const prefix = `${spaceId}${PACK_KEY_SEPARATOR}`;
-
-  return packKey.startsWith(prefix) ? packKey.slice(prefix.length) : packKey;
 };
 
 /**

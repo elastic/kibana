@@ -37,6 +37,7 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
     watch: watchRoot,
     register: registerRoot,
     setValue: setValueRoot,
+    resetField: resetFieldRoot,
     formState: { errors: errorsRoot },
   } = useFormContext();
   const { data: { agentPoliciesById, groupsByPackagePolicyId } = {} } = useAgentPolicies();
@@ -87,10 +88,11 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
       // Collapsing per-policy shards of a shared integration to one row is a
       // display normalization, not a user edit: the server already writes the
       // max shard per integration (resolveSharedPackagePolicyShard, where a
-      // targeted member without a shard counts as 100), so keep the form
-      // pristine instead of flagging unsaved changes on open.
+      // targeted member without a shard counts as 100), so make it the field's
+      // new baseline: the form stays pristine on open, and undoing another edit
+      // later does not leave it dirty against the pre-normalization value.
       if (!deepEqual(normalizedShards, rootShards)) {
-        setValueRoot('shards', normalizedShards, { shouldDirty: false });
+        resetFieldRoot('shards', { defaultValue: normalizedShards });
       }
     }
   }, [
@@ -99,7 +101,7 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
     rootShards,
     shardsArrayState.isDirty,
     reset,
-    setValueRoot,
+    resetFieldRoot,
   ]);
 
   useEffect(() => {

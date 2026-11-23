@@ -26,7 +26,7 @@ import {
 import moment from 'moment-timezone';
 import { satisfies } from 'semver';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
@@ -910,6 +910,85 @@ export const PACK_KEY_SEPARATOR = '--';
 export const makePackKey = (packName: string, spaceId: string) =>
   `${spaceId}${PACK_KEY_SEPARATOR}${packName}`;
 
+/** Strip a `${spaceId}--` prefix only for the space the block resolved to. */
+export const stripSpacePrefix = (packKey: string, spaceId: string): string => {
+  const prefix = `${spaceId}${PACK_KEY_SEPARATOR}`;
+
+  return packKey.startsWith(prefix) ? packKey.slice(prefix.length) : packKey;
+};
+
+/**
+ * Resolve a pack block's space and name together, from evidence only.
+ *
+ * `spaceIds` is authoritative when Fleet populates it, but it is only populated
+ * once space awareness is fully on — it needs `useSpaceAwareness` AND
+ * `use_space_awareness_migration_status === 'success'`, and every Fleet read
+ * gates it as `isSpacesEnabled ? spaceIds : undefined`. osquery, meanwhile, keys
+ * pack blocks off the *Kibana* active space, which is independent of Fleet's
+ * migration state. So a pre-migration policy can carry a `security--mypack`
+ * block with `spaceIds: undefined`, and assuming `default` is wrong twice over:
+ * the pack-SO lookup either misses (permanent non-repair) or hits a namesake
+ * pack in `default` and writes `default--mypack` beside the untouched
+ * `security--mypack` — `removePackFromPolicy` only unsets the canonical and bare
+ * keys — leaving the agent running a DUPLICATED schedule, worse than the bug
+ * this task repairs.
+ *
+ * The key is the only remaining evidence in that state, but it must never be
+ * SPLIT: both halves can contain `--` (space ids admit `-` — the Spaces UI
+ * slugifies "Prod - EU" to `prod---eu` — and pack names are unbounded), and
+ * since `makePackKey` round-trips a mis-split silently overwrites the block with
+ * another pack's queries. Instead the block's own `pack_name` pins the boundary
+ * exactly: the space is whatever prefix makes `makePackKey(pack_name, prefix)`
+ * reproduce the key — no guessing, and correct for `--` on either side. Only a
+ * legacy block that predates `pack_name` has no such anchor; that case is
+ * flagged `ambiguous` for the caller to resolve against real pack SOs.
+ *
+ * Writing through a key-derived space is safe: namespace-agnostic SOs (what a
+ * pre-migration policy is) update from any scoped client, since
+ * `preflightCheckNamespacesForUpdate` skips non-multi-namespace types.
+ */
+export const resolveBlockSpaceAndName = (
+  packagePolicy: PackagePolicy,
+  packKey: string,
+  blockPackName: string | undefined
+): { spaceId: string; packName: string; ambiguous?: boolean } => {
+  const declared = packagePolicy.spaceIds?.[0];
+  // `ALL_SPACES_ID` collapses to the default space, mirroring Fleet's own
+  // `getValidSpaceId`. Left verbatim it would scope the write client to the
+  // literal space `*` and write a junk `*--name` key.
+  if (declared && declared !== ALL_SPACES_ID) {
+    return { spaceId: declared, packName: blockPackName ?? stripSpacePrefix(packKey, declared) };
+  }
+
+  if (blockPackName) {
+    // `pack_name` pins the boundary: recover the space as the exact prefix that
+    // rebuilds this key, so `--` in either half is handled without splitting.
+    const suffix = `${PACK_KEY_SEPARATOR}${blockPackName}`;
+    if (packKey.endsWith(suffix)) {
+      const prefix = packKey.slice(0, -suffix.length);
+      if (prefix.length) {
+        return { spaceId: prefix, packName: blockPackName };
+      }
+    }
+
+    // Bare (unprefixed) key, or a key that disagrees with `pack_name`: nothing
+    // ties the block to another space, so the default space is the only guess.
+    return { spaceId: DEFAULT_SPACE_ID, packName: blockPackName };
+  }
+
+  // Legacy block with no `pack_name`: nothing pins the boundary, so the split is
+  // genuinely ambiguous (`prod---eu--my--pack` fits space `prod---eu`/name
+  // `my--pack` as well as space `prod`/name `-eu--my--pack`). Default to the
+  // whole key as a bare name in the default space — the overwhelmingly common
+  // shape — but flag it so the caller can probe the alternatives against real
+  // pack SOs instead of committing to a blind split.
+  return {
+    spaceId: DEFAULT_SPACE_ID,
+    packName: packKey,
+    ambiguous: packKey.includes(PACK_KEY_SEPARATOR),
+  };
+};
+
 /**
  * Drain ALL osquery package policies via keyset `fetchAllItems`. Shared by the
  * create/delete/update routes and the reconciler; replaces the offset-capped
@@ -1066,6 +1145,8 @@ export const resolveSharedIntegrationOverdelivery = (
 
   for (const packagePolicy of writtenPackagePolicies.values()) {
     if (!satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')) continue;
+    // Fleet does not deliver disabled integrations or inputs, so nobody receives the pack.
+    if (packagePolicy.enabled === false || packagePolicy.inputs?.[0]?.enabled === false) continue;
 
     const additionalPolicyIds = [...new Set(packagePolicy.policy_ids)]
       .filter((id) => !selectedPolicyIds.has(id))
@@ -1087,11 +1168,12 @@ export const resolveSharedIntegrationOverdelivery = (
  * Computes live pack owners in one wire scan, filtering them through the caller's
  * space-scoped client. Returns a map keyed by pack saved-object id.
  *
- * A block belongs to a pack only when its key is one this pack writes (`<space>--<name>`,
- * or the bare name in the default space, the same rule `reconcileScheduleIdsToWire`
- * applies) AND, when the block carries `pack_id`, that id is the pack's. Key equality
- * alone is not identity: pack names may contain `--`, so pack `foo` in the default
- * space and a pack named `default--foo` share the key `default--foo`.
+ * Block ownership follows the reconciler (`resolveBlockSpaceAndName`), never the key
+ * string alone, since pack names may contain `--`:
+ * - a block with `pack_id` belongs to that pack, whatever its key (a rename whose Fleet
+ *   write failed still carries the old key), as long as it resolves to this space;
+ * - a legacy block without `pack_id` is resolved to a space and name from `pack_name`,
+ *   the package policy's `spaceIds`, or the key, and matched by name.
  */
 export const computeEffectivePolicyIds = async (
   packs: Array<{ id: string; name: string }>,
@@ -1105,15 +1187,11 @@ export const computeEffectivePolicyIds = async (
     agentPolicyService: Pick<AgentPolicyServiceInterface, 'getByIds'>;
   }
 ): Promise<Map<string, string[]>> => {
-  const matchesBareKey = spaceId === DEFAULT_SPACE_ID;
-  const packIdsByKey = new Map<string, string[]>();
-  const addKey = (key: string, packId: string) =>
-    packIdsByKey.set(key, [...(packIdsByKey.get(key) ?? []), packId]);
   const ownersByPackId = new Map<string, Set<string>>();
+  const packIdsByName = new Map<string, string[]>();
   for (const { id, name } of packs) {
     ownersByPackId.set(id, new Set());
-    addKey(makePackKey(name, spaceId), id);
-    if (matchesBareKey) addKey(name, id);
+    packIdsByName.set(name, [...(packIdsByName.get(name) ?? []), id]);
   }
 
   for (const packagePolicy of packagePolicies) {
@@ -1121,13 +1199,31 @@ export const computeEffectivePolicyIds = async (
     // pack blocks are never delivered.
     const input = packagePolicy.inputs?.[0];
     if (packagePolicy.enabled === false || input?.enabled === false) continue;
-    const blocks: Record<string, { pack_id?: unknown }> =
+    const blocks: Record<string, { pack_id?: unknown; pack_name?: unknown }> =
       input?.config?.osquery?.value?.packs ?? {};
     for (const [packKey, block] of Object.entries(blocks)) {
       const blockPackId = typeof block?.pack_id === 'string' ? block.pack_id : undefined;
-      for (const packId of packIdsByKey.get(packKey) ?? []) {
-        // Legacy blocks written before `pack_id` existed fall back to the key alone.
-        if (blockPackId && blockPackId !== packId) continue;
+      const blockPackName = typeof block?.pack_name === 'string' ? block.pack_name : undefined;
+      const resolved = resolveBlockSpaceAndName(packagePolicy, packKey, blockPackName);
+
+      let matchedPackIds: string[] = [];
+      if (blockPackId) {
+        if (resolved.spaceId === spaceId && ownersByPackId.has(blockPackId)) {
+          matchedPackIds = [blockPackId];
+        }
+      } else {
+        const names = new Set<string>();
+        if (resolved.spaceId === spaceId) names.add(resolved.packName);
+        // Legacy `<space>--<name>` key with neither `pack_id` nor `pack_name`: the split
+        // is ambiguous, so also accept this space's prefix as a reading of it.
+        if (resolved.ambiguous && stripSpacePrefix(packKey, spaceId) !== packKey) {
+          names.add(stripSpacePrefix(packKey, spaceId));
+        }
+
+        matchedPackIds = [...names].flatMap((name) => packIdsByName.get(name) ?? []);
+      }
+
+      for (const packId of matchedPackIds) {
         for (const policyId of packagePolicy.policy_ids ?? []) {
           ownersByPackId.get(packId)?.add(policyId);
         }

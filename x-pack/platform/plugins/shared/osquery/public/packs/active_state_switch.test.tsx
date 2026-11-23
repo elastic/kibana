@@ -32,8 +32,11 @@ jest.mock('../common/lib/kibana', () => ({
   }),
 }));
 
+const mockAgentPoliciesQueryState = { isFetched: true, isError: false };
+
 jest.mock('../agent_policies/use_agent_policies', () => ({
   useAgentPolicies: () => ({
+    ...mockAgentPoliciesQueryState,
     data: {
       agentPoliciesById: {
         'policy-with-agents': { id: 'policy-with-agents', agents: 3 },
@@ -103,6 +106,8 @@ const renderSwitch = (item: PackSavedObject & { policy_ids: string[] }) =>
 
 describe('ActiveStateSwitch', () => {
   beforeEach(() => {
+    mockAgentPoliciesQueryState.isFetched = true;
+    mockAgentPoliciesQueryState.isError = false;
     mockWritePacks = true;
     mockMutateAsync.mockClear();
     mockAddSuccess.mockClear();
@@ -196,6 +201,27 @@ describe('ActiveStateSwitch', () => {
       expect(
         screen.getByText(/This action will update 3 agent policies affecting 7 agents/)
       ).toBeInTheDocument();
+    });
+
+    it('keeps the toggle disabled until the agent policies have loaded', () => {
+      mockAgentPoliciesQueryState.isFetched = false;
+      renderSwitch(basePack({ enabled: false, policy_ids: ['shared-empty'] }));
+
+      const toggle = screen.getByRole('switch');
+      expect(toggle).toBeDisabled();
+      fireEvent.click(toggle);
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('asks for confirmation when the agent policies failed to load', () => {
+      mockAgentPoliciesQueryState.isFetched = false;
+      mockAgentPoliciesQueryState.isError = true;
+      renderSwitch(basePack({ enabled: false, policy_ids: ['unknown-policy'] }));
+
+      fireEvent.click(screen.getByRole('switch'));
+
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(screen.getAllByText('Save and deploy changes').length).toBeGreaterThan(0);
     });
 
     it('keeps counts unchanged for an unshared pack', () => {
