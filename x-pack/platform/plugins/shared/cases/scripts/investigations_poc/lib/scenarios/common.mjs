@@ -923,6 +923,10 @@ export const profileUids = async (codes) => [...new Set(await Promise.all(codes.
  */
 export const tasksStep = async (ctx, { actor, createdAt, extras = {} }) => {
   const tasks = ctx.d.state.tasks;
+  // The scenario's tasks are its template's procedure list (the first list linked to the template), customised by the
+  // story. They carry that list's id, as tasks added by applying a list do, so "Apply task list" shows it as applied.
+  const procedureListId = (await resolveType(ctx.d.state.procType)).task_list_ids?.[0] ?? null;
+  if (!procedureListId) log(`  WARNING: ${ctx.sc.invId}: the ${ctx.d.state.procType} template has no linked task list. Run: node setup.mjs`);
   const dueIso = (offset) => (offset === undefined ? null : new Date(ctx.clock.realNow + offset).toISOString());
   const entries = [];
   for (const t of tasks) {
@@ -937,6 +941,7 @@ export const tasksStep = async (ctx, { actor, createdAt, extras = {} }) => {
       priority: taskPriorityOf(t),
       assignees: await profileUids(assigneeCodes),
       due_date: status === 'open' || status === 'in_progress' ? dueIso(extra.due) : null,
+      template_id: procedureListId,
     };
     if (t.auto) {
       task.auto =
@@ -981,6 +986,7 @@ export const tasksStep = async (ctx, { actor, createdAt, extras = {} }) => {
             assignees: await profileUids(sub.assignees ?? []),
             due_date: dueIso(sub.due),
             parent_task_id: ctx.taskId[t.id],
+            template_id: procedureListId,
           },
           created_at: createdAt,
         },
