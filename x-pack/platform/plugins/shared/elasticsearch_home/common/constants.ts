@@ -7,6 +7,9 @@
 
 export const PLUGIN_ID = 'elasticsearchHome';
 
+/** Gates the home page with integrated onboarding for the hosts that render it. Defaults to off. */
+export const INTEGRATED_ONBOARDING_FEATURE_FLAG = 'elasticsearchHome.integratedOnboarding.enabled';
+
 /**
  * Elasticsearch currently reports dense vector `value_count` as 0 on stateless
  * (https://github.com/elastic/elasticsearch/pull/158563), so this stat is

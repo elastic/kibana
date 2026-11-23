@@ -1,0 +1,226 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        saveTurnRequestExample:
+          summary: "Save a turn of a session"
+          description: "Example request to save one turn: the user's question, a tool call that fails, and the final answer. The tool event's `result` and `duration_ms` are stored as sent."
+          value:
+            session_id: 3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43
+            ai_index_ids:
+              - ops-memory
+            events:
+              - id: evt-001
+                type: user
+                turn_id: turn-1
+                event_at: "2026-11-16T09:58:00.000Z"
+                seq: 1
+                content: Why is checkout latency up since this morning?
+              - id: evt-002
+                type: assistant
+                turn_id: turn-1
+                event_at: "2026-11-16T09:58:02.000Z"
+                seq: 2
+                tool_calls:
+                  - id: call-1
+                    name: search_logs
+                    args:
+                      index: logs-checkout*
+                      since: now-6h
+              - id: evt-003
+                type: tool
+                turn_id: turn-1
+                event_at: "2026-11-16T09:58:32.000Z"
+                seq: 3
+                tool_call_id: call-1
+                tool_name: search_logs
+                status: failed
+                result: Search timed out after 30 seconds
+                duration_ms: 30000
+              - id: evt-004
+                type: assistant
+                turn_id: turn-1
+                event_at: "2026-11-16T09:58:35.000Z"
+                seq: 4
+                content: The log search timed out, so I could not confirm it from the logs. The checkout-service deploy at 08:40 is the most likely cause. Check its connection pool settings, or roll it back.
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          saveTurnResponseExample:
+            summary: "Every event saved"
+            description: "Each event was saved, in request order"
+            value:
+              results:
+                - id: evt-001
+                  status: created
+                - id: evt-002
+                  status: created
+                - id: evt-003
+                  status: created
+                - id: evt-004
+                  status: created
+          failedEventResponseExample:
+            summary: "An event failed"
+            description: "Three events were saved. The last one could not be embedded and can be resent."
+            value:
+              results:
+                - id: evt-001
+                  status: created
+                - id: evt-002
+                  status: created
+                - id: evt-003
+                  status: created
+                - id: evt-004
+                  status: failed
+                  error: Exception when running inference id [.elser-2-elasticsearch] on field [content.semantic_text]
+  403:
+    content:
+      application/json:
+        examples:
+          aiIndexNotWritableExample:
+            summary: "An AI index the caller cannot write to"
+            description: "The caller lacks the Elasticsearch `write` privilege on an AI index's backing index"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "AI index 'ops-memory' is not writable. Writing to it needs the Elasticsearch 'write' privilege on its backing index."
+          noUserProfileExample:
+            summary: "No user to attribute the events to"
+            description: "`user_id` is missing and the caller has no user profile"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.
+          manageMemoryRequiredExample:
+            summary: "Another user without manage memory"
+            description: "`user_id` names another user and the caller lacks `contextEngine:manage_memory`"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: Acting on the memory of another user requires the [contextEngine:manage_memory] privilege.
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+          memoryDisabledExample:
+            summary: "Memory turned off"
+            description: "Context Engine memory is turned off"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Context Engine memory is turned off.
+          aiIndexNotFoundExample:
+            summary: "Unknown AI index"
+            description: "An AI index in `ai_index_ids` does not exist in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: AI index 'ops-memory' not found
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "https://${KIBANA_URL}/api/context_engine/memory/_save_event" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -H "kbn-xsrf: true" \
+        -d '{
+          "session_id": "3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43",
+          "ai_index_ids": ["ops-memory"],
+          "events": [
+            {
+              "id": "evt-001",
+              "type": "user",
+              "turn_id": "turn-1",
+              "event_at": "2026-11-16T09:58:00.000Z",
+              "seq": 1,
+              "content": "Why is checkout latency up since this morning?"
+            },
+            {
+              "id": "evt-002",
+              "type": "assistant",
+              "turn_id": "turn-1",
+              "event_at": "2026-11-16T09:58:02.000Z",
+              "seq": 2,
+              "tool_calls": [
+                { "id": "call-1", "name": "search_logs", "args": { "index": "logs-checkout*", "since": "now-6h" } }
+              ]
+            },
+            {
+              "id": "evt-003",
+              "type": "tool",
+              "turn_id": "turn-1",
+              "event_at": "2026-11-16T09:58:32.000Z",
+              "seq": 3,
+              "tool_call_id": "call-1",
+              "tool_name": "search_logs",
+              "status": "failed",
+              "result": "Search timed out after 30 seconds",
+              "duration_ms": 30000
+            },
+            {
+              "id": "evt-004",
+              "type": "assistant",
+              "turn_id": "turn-1",
+              "event_at": "2026-11-16T09:58:35.000Z",
+              "seq": 4,
+              "content": "The log search timed out, so I could not confirm it from the logs. The checkout-service deploy at 08:40 is the most likely cause. Check its connection pool settings, or roll it back."
+            }
+          ]
+        }'
+  - lang: Console
+    source: |
+      POST kbn:/api/context_engine/memory/_save_event
+      {
+        "session_id": "3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43",
+        "ai_index_ids": ["ops-memory"],
+        "events": [
+          {
+            "id": "evt-001",
+            "type": "user",
+            "turn_id": "turn-1",
+            "event_at": "2026-11-16T09:58:00.000Z",
+            "seq": 1,
+            "content": "Why is checkout latency up since this morning?"
+          },
+          {
+            "id": "evt-002",
+            "type": "assistant",
+            "turn_id": "turn-1",
+            "event_at": "2026-11-16T09:58:02.000Z",
+            "seq": 2,
+            "tool_calls": [
+              { "id": "call-1", "name": "search_logs", "args": { "index": "logs-checkout*", "since": "now-6h" } }
+            ]
+          },
+          {
+            "id": "evt-003",
+            "type": "tool",
+            "turn_id": "turn-1",
+            "event_at": "2026-11-16T09:58:32.000Z",
+            "seq": 3,
+            "tool_call_id": "call-1",
+            "tool_name": "search_logs",
+            "status": "failed",
+            "result": "Search timed out after 30 seconds",
+            "duration_ms": 30000
+          },
+          {
+            "id": "evt-004",
+            "type": "assistant",
+            "turn_id": "turn-1",
+            "event_at": "2026-11-16T09:58:35.000Z",
+            "seq": 4,
+            "content": "The log search timed out, so I could not confirm it from the logs. The checkout-service deploy at 08:40 is the most likely cause. Check its connection pool settings, or roll it back."
+          }
+        ]
+      }

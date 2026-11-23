@@ -8,8 +8,6 @@
 import type { Attributes } from '@opentelemetry/api';
 import { context, propagation, TraceFlags } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import { resources, tracing as elasticTracing } from '@elastic/opentelemetry-node/sdk';
 import {
   BAGGAGE_TRACKING_BEACON_KEY,
   BAGGAGE_TRACKING_BEACON_VALUE,
@@ -31,14 +29,22 @@ import {
   SPACE_ID_BAGGAGE_KEY,
   setPrivacySettingsOnContext,
 } from './agent_builder_context';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace';
+import type { ReadableSpan, Span, SpanExporter, SpanProcessor } from '@opentelemetry/sdk-trace';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+
+jest.mock('@opentelemetry/sdk-trace', () => ({
+  ...jest.requireActual('@opentelemetry/sdk-trace'),
+  BatchSpanProcessor: jest.fn(),
+}));
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
-const emptyResource = resources.resourceFromAttributes({});
+const emptyResource = resourceFromAttributes({});
 
 describe('AgentBuilderSpanProcessor', () => {
   let contextManager: AsyncLocalStorageContextManager;
-  const mockBatch: tracing.SpanProcessor = {
+  const mockBatch: SpanProcessor = {
     onStart: jest.fn(),
     onEnd: jest.fn(),
     forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
@@ -50,9 +56,7 @@ describe('AgentBuilderSpanProcessor', () => {
     context.setGlobalContextManager(contextManager);
     contextManager.enable();
 
-    jest
-      .spyOn(elasticTracing, 'BatchSpanProcessor')
-      .mockReturnValue(mockBatch as elasticTracing.BatchSpanProcessor);
+    jest.mocked(BatchSpanProcessor).mockReturnValue(mockBatch as BatchSpanProcessor);
 
     (mockBatch.onStart as jest.Mock).mockClear();
     (mockBatch.onEnd as jest.Mock).mockClear();
@@ -100,17 +104,14 @@ describe('AgentBuilderSpanProcessor', () => {
     return propagation.setBaggage(context.active(), baggage);
   }
 
-  function createMockSpan(
-    scopeName: string,
-    name = 'test-span'
-  ): tracing.Span & tracing.ReadableSpan {
+  function createMockSpan(scopeName: string, name = 'test-span'): Span & ReadableSpan {
     const spanCtx = {
       traceId: 't'.repeat(32),
       spanId: 's'.repeat(16),
       traceFlags: TraceFlags.NONE,
     };
     const attributes: Attributes = {};
-    const span: tracing.Span & tracing.ReadableSpan = {
+    const span: Span & ReadableSpan = {
       name,
       kind: 0,
       startTime: [0, 0],
@@ -145,7 +146,7 @@ describe('AgentBuilderSpanProcessor', () => {
     return span;
   }
 
-  function createExporter(): tracing.SpanExporter {
+  function createExporter(): SpanExporter {
     return {
       export: jest.fn(),
       shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
@@ -156,8 +157,8 @@ describe('AgentBuilderSpanProcessor', () => {
   function exportWith(
     settings: Partial<TracingPrivacySettings>,
     attrs: Attributes = {},
-    options?: { spaceId?: string; name?: string; events?: tracing.ReadableSpan['events'] }
-  ): tracing.ReadableSpan {
+    options?: { spaceId?: string; name?: string; events?: ReadableSpan['events'] }
+  ): ReadableSpan {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
       scheduledDelayMillis: 1,
@@ -173,7 +174,7 @@ describe('AgentBuilderSpanProcessor', () => {
     }
     processor.onEnd(span);
     const calls = (mockBatch.onEnd as jest.Mock).mock.calls;
-    return calls[calls.length - 1][0] as tracing.ReadableSpan;
+    return calls[calls.length - 1][0] as ReadableSpan;
   }
 
   it('onStart marks agent builder inference spans with attribute when enabled', () => {
@@ -382,7 +383,7 @@ describe('AgentBuilderSpanProcessor', () => {
     function processAndGetExported(
       settings: Partial<TracingPrivacySettings>,
       extraAttrs?: Attributes
-    ): tracing.ReadableSpan {
+    ): ReadableSpan {
       return exportWith(settings, {
         [GenAISemanticConventions.GenAISystemInstructions]: systemInstructions,
         [GenAISemanticConventions.GenAIInputMessages]: inputMessages,
@@ -391,7 +392,7 @@ describe('AgentBuilderSpanProcessor', () => {
       });
     }
 
-    function parseAttr<T>(exported: tracing.ReadableSpan, key: string): T {
+    function parseAttr<T>(exported: ReadableSpan, key: string): T {
       return JSON.parse(exported.attributes[key] as string) as T;
     }
 

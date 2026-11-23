@@ -931,6 +931,38 @@ describe('WorkflowCrudService', () => {
           }),
         })
       );
+      const [{ document }] = client.index.mock.calls[0];
+      expect(document).not.toHaveProperty('templateSlug');
+      expect(document).not.toHaveProperty('templateOrigin');
+    });
+
+    it('stores the template origin of a workflow created from a template', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.createWorkflow({ yaml: validYaml }, 'default', request, {
+        templateOrigin: {
+          templateSlug: 'triage-alerts',
+          templateVersion: '1.2.0',
+          templateOrigin: 'install',
+        },
+      });
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            templateSlug: 'triage-alerts',
+            templateVersion: '1.2.0',
+            templateOrigin: 'install',
+          }),
+        })
+      );
+      expect(result).toMatchObject({
+        templateSlug: 'triage-alerts',
+        templateVersion: '1.2.0',
+        templateOrigin: 'install',
+      });
     });
 
     it('logs workflow create to change history after a successful index', async () => {
