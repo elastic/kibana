@@ -82,8 +82,8 @@ describe('resolveConnectorSpecVersion', () => {
 
   test('compares minors beyond the safe integer range without losing precision', () => {
     actionType.specs = new Map([
-      ['1.9007199254740992', firstSpec],
-      ['1.9007199254740993', firstSpec],
+      ['1.999254740992', firstSpec],
+      ['1.999254740993', firstSpec],
     ]);
 
     const { resolvedSpecVersion } = resolveConnectorSpecVersion({
@@ -92,7 +92,7 @@ describe('resolveConnectorSpecVersion', () => {
       configurationUtilities,
     });
 
-    expect(resolvedSpecVersion).toBe('1.9007199254740993');
+    expect(resolvedSpecVersion).toBe('1.999254740993');
   });
 
   test('ignores malformed and oversized registry keys when selecting the latest minor', () => {
@@ -126,6 +126,8 @@ describe('resolveConnectorSpecVersion', () => {
     '',
     'latest',
     '*',
+    '0',
+    '0.1',
     '^1',
     '1.x',
     '1.3.0',

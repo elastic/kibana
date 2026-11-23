@@ -37,14 +37,26 @@ export const registerSiemWorkflowMigrationsStatsRoute = (
       withLicense(
         withExistingMigration(
           async (
-            _context,
+            context,
             req,
             res
           ): Promise<IKibanaResponse<GetWorkflowMigrationStatsResponse>> => {
-            logger.debug(
-              `Workflow migration stats are not implemented (${req.params.migration_id})`
-            );
-            return res.noContent();
+            const migrationId = req.params.migration_id;
+            try {
+              const ctx = await context.resolve(['securitySolution']);
+              const workflowMigrationsClient =
+                ctx.securitySolution.siemMigrations.getWorkflowsClient();
+
+              const stats = await workflowMigrationsClient.task.getStats(migrationId);
+
+              if (stats.items.total === 0) {
+                return res.noContent();
+              }
+              return res.ok({ body: stats });
+            } catch (err) {
+              logger.error(err);
+              return res.badRequest({ body: err.message });
+            }
           }
         )
       )

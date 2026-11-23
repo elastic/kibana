@@ -20,6 +20,10 @@ jest.mock(
     useWorkflowEsqlCallbacks: () => ({}),
   })
 );
+const mockLookupServiceAccount = jest.fn();
+jest.mock('../../../entities/service_accounts', () => ({
+  useServiceAccountDirectory: () => ({ lookup: mockLookupServiceAccount }),
+}));
 jest.mock('./property_handlers/use_get_property_handler', () => ({
   useGetPropertyHandler: () => () => undefined,
 }));
@@ -56,5 +60,18 @@ describe('useWorkflowYamlValidationContext', () => {
       returnedOutputNames: ['severity'],
     });
     expect(result.current.registry.getCalledWorkflowOutputs?.('missing')).toBeUndefined();
+  });
+
+  it('gives the run_as check the service account directory lookup', () => {
+    jest.mocked(useKibana).mockReturnValue({
+      services: {
+        application: { getUrlForApp: jest.fn(() => 'https://example.test') },
+        workflowsExtensions: {},
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    const { result } = renderHook(() => useWorkflowYamlValidationContext());
+
+    expect(result.current.lookupServiceAccount).toBe(mockLookupServiceAccount);
   });
 });

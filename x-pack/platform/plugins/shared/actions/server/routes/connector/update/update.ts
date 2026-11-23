@@ -101,8 +101,7 @@ export const updateConnectorRoute = (
               }),
               {
                 includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
-                includeSpecVersionField:
-                  actionsConfigUtils.isCatalogEnabled() && actions.isCatalogFeatureFlagEnabled(),
+                includeSpecVersionField: actionsConfigUtils.isCatalogEnabled(),
               }
             ),
           });

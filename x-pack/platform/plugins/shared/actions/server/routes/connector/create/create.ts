@@ -80,10 +80,10 @@ export const createConnectorRoute = (
             action,
             options: req.params,
           });
+
           const body = transformConnectorResponseV1(resp, {
             includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
-            includeSpecVersionField:
-              actionsConfigUtils.isCatalogEnabled() && actions.isCatalogFeatureFlagEnabled(),
+            includeSpecVersionField: actionsConfigUtils.isCatalogEnabled(),
           });
 
           return res.ok({

@@ -104,7 +104,11 @@ describe('toStartSubjects', () => {
         type: 'slack_thread',
         id: 'slack:T1:C1:1.1',
         triggerType: 'automatic',
-        slack: { channel: 'C1', thread_ts: '1.1' },
+        slack: {
+          channel: 'C1',
+          thread_ts: '1.1',
+          permalink: 'https://app.slack.com/client/T1/C1/thread/C1-1.1',
+        },
       },
     ]);
     expect(toSubjectKeys(subjects, 'inv-1')).toEqual([
@@ -132,7 +136,11 @@ describe('toStartSubjects', () => {
         id: 'relay-key',
         triggerType: 'automatic',
         summary: 'Disk full',
-        slack: { channel: 'C1', thread_ts: '1.1' },
+        slack: {
+          channel: 'C1',
+          thread_ts: '1.1',
+          permalink: 'https://app.slack.com/client/T1/C1/thread/C1-1.1',
+        },
       },
     ]);
   });

@@ -39,7 +39,11 @@ export const getAllConnectorsRoute = (
           request: {},
           response: {
             200: {
-              body: () => getGetAllConnectorsResponseSchemaV1(includeInboundEventsField, includeSpecVersionField),
+              body: () =>
+                getGetAllConnectorsResponseSchemaV1(
+                  includeInboundEventsField,
+                  includeSpecVersionField
+                ),
               description: 'Indicates a successful call.',
             },
             403: {

@@ -67,7 +67,7 @@ const specVersionResponseField = {
     schema.string({
       meta: {
         description:
-          'The read-only exact major.minor schema version pinned to the connector. Present for versioned connector types.',
+          'The exact major.minor schema version pinned to the connector. Present for versioned connector types.',
       },
     })
   ),

@@ -21,7 +21,9 @@ const ALL_CAPABILITIES = {
   alerting_v2_execution_history: { read: true, all: true },
 };
 
+let mockCapabilities: Record<string, Record<string, boolean>> = ALL_CAPABILITIES;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
+let mockCanReadConnectors = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const actual = jest.requireActual('react');
@@ -32,16 +34,24 @@ jest.mock('@kbn/core-di-browser', () => {
     Context: actual.createContext(undefined),
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
-        return new ActualUserCapabilities({ capabilities: ALL_CAPABILITIES });
+        return new ActualUserCapabilities({ capabilities: mockCapabilities });
       }
       if (token === 'uiSettings') {
         return { get: () => mockAlertingV2ExperimentalFeaturesEnabled };
+      }
+      if (token === 'application') {
+        return { capabilities: { actions: { show: mockCanReadConnectors } } };
       }
       return {};
     },
     CoreStart: (key: string) => key,
   };
 });
+
+const mockUseBreadcrumbs = jest.fn();
+jest.mock('../hooks/use_breadcrumbs', () => ({
+  useBreadcrumbs: (...args: unknown[]) => mockUseBreadcrumbs(...args),
+}));
 
 jest.mock('../pages/rules_list_page/rules_list_page', () => ({
   RulesListPage: () => <div data-test-subj="rulesListPage">rules</div>,
@@ -77,6 +87,10 @@ jest.mock('../pages/action_policy_form_page/action_policy_form_page', () => ({
 
 jest.mock('../pages/execution_history_page/execution_history_page', () => ({
   ExecutionHistoryPage: () => <div data-test-subj="executionHistoryPage">history</div>,
+}));
+
+jest.mock('../pages/imports_page/imports_page', () => ({
+  ImportsPage: () => <div data-test-subj="importsPage">imports</div>,
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -151,6 +165,7 @@ describe('composable pages', () => {
   let AlertingV2EpisodesPage: React.ComponentType<InternalPageProps>;
   let AlertingV2ActionPoliciesPage: React.ComponentType<InternalPageProps>;
   let AlertingV2ExecutionHistoryPage: React.ComponentType<InternalPageProps>;
+  let AlertingV2ImportsPage: React.ComponentType<InternalPageProps>;
 
   beforeAll(async () => {
     const mod = await import('./composable_pages');
@@ -159,6 +174,7 @@ describe('composable pages', () => {
     AlertingV2EpisodesPage = mod.AlertingV2EpisodesPage;
     AlertingV2ActionPoliciesPage = mod.AlertingV2ActionPoliciesPage;
     AlertingV2ExecutionHistoryPage = mod.AlertingV2ExecutionHistoryPage;
+    AlertingV2ImportsPage = mod.AlertingV2ImportsPage;
   });
 
   describe('AlertingV2RulesPage', () => {
@@ -335,6 +351,53 @@ describe('composable pages', () => {
         <AlertingV2ExecutionHistoryPage {...defaultProps()} />
       );
       expect(screen.getByTestId('executionHistoryPage')).toBeInTheDocument();
+    });
+
+    it('ImportsPage renders when parent route matches', () => {
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+      expect(screen.getByTestId('importsPage')).toBeInTheDocument();
+    });
+
+    it('ImportsPage renders for a user who can read alerts but has no rules access', () => {
+      mockCapabilities = {
+        ...ALL_CAPABILITIES,
+        alerting_v2_rules: { read: false, all: false },
+        alerting_v2_alerts: { read: true, all: false },
+      };
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.getByTestId('importsPage')).toBeInTheDocument();
+      mockCapabilities = ALL_CAPABILITIES;
+    });
+
+    it('ImportsPage asks for alerts access when the user cannot read alerts', () => {
+      mockCapabilities = { ...ALL_CAPABILITIES, alerting_v2_alerts: { read: false, all: false } };
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertingRequiredPrivilege-alerting_v2_alerts')
+      ).toBeInTheDocument();
+      mockCapabilities = ALL_CAPABILITIES;
+    });
+
+    it('ImportsPage asks for connector access when the user cannot read connectors', () => {
+      mockCanReadConnectors = false;
+      mockUseBreadcrumbs.mockClear();
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingRequiredPrivilege-actions')).toBeInTheDocument();
+      expect(mockUseBreadcrumbs).toHaveBeenCalledWith('imports_list');
+      mockCanReadConnectors = true;
+    });
+
+    it('ImportsPage redirects away when experimental features are disabled', () => {
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+      renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
+
+      expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
+      mockAlertingV2ExperimentalFeaturesEnabled = true;
     });
   });
 });
