@@ -156,6 +156,10 @@ import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
+import {
+  validateNoTraversalInCompiledIds,
+  validateNoTraversalInIdOverrides,
+} from './package_policies/validate_no_traversal_ids';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -324,6 +328,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
+    validateNoTraversalInIdOverrides(enrichedPackagePolicy);
     let inputs = getInputsWithStreamIds(enrichedPackagePolicy, packagePolicyId);
 
     // Make sure the associated package is installed
@@ -572,6 +577,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const packagePolicyId = packagePolicy.id ?? uuidv4();
         const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
 
+        validateNoTraversalInIdOverrides(packagePolicy);
         let inputs = getInputsWithStreamIds(packagePolicy, packagePolicyId);
 
         // eslint-disable-next-line prefer-const
@@ -718,6 +724,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
 
+    validateNoTraversalInIdOverrides(packagePolicy);
     let inputs = getInputsWithStreamIds(packagePolicy, packagePolicy.id);
     const { id, ...pkgPolicyWithoutId } = packagePolicy;
 
@@ -1023,6 +1030,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // eslint-disable-next-line prefer-const
     let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+    validateNoTraversalInIdOverrides(restOfPackagePolicy);
     let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
@@ -1264,6 +1272,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
         }
 
+        validateNoTraversalInIdOverrides(restOfPackagePolicy);
         let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
 
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
@@ -2563,7 +2572,13 @@ export async function _compilePackagePolicyInputs(
     };
   });
 
-  return Promise.all(inputsPromises);
+  const compiledInputs = await Promise.all(inputsPromises);
+
+  // Template output (e.g. from user-supplied yaml vars) is spread over the validated
+  // input/stream ids when the full agent policy is built, so reject traversal sequences here.
+  validateNoTraversalInCompiledIds(compiledInputs);
+
+  return compiledInputs;
 }
 
 async function _compilePackagePolicyInput(

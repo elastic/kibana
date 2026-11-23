@@ -45,8 +45,6 @@ fileGroups:
     - src/painless/autocomplete_definitions/score.json
     - src/painless/autocomplete_definitions/string_script_field_script_field.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks:
   build-webpack:
     command: pnpm

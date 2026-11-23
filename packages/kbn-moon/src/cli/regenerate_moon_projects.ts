@@ -30,7 +30,6 @@ import {
   filterPackages,
   readFile,
   readJsonWithComments,
-  resolveFirstExisting,
   sortObjectByKeyPriority,
   writeYaml,
   yamlMatchesFile,
@@ -86,10 +85,9 @@ export function regenerateMoonProjects() {
     const allPackages = getPackages(REPO_ROOT);
     const packages: Package[] = filter?.length ? filterPackages(allPackages, filter) : allPackages;
     const packageIds = packages.map((pkg) => pkg.name);
+    const packageDirs = allPackages.map((pkg) => pkg.normalizedRepoRelativeDir);
 
-    const nestedProjects = findNestedProjects(
-      allPackages.map((pkg) => pkg.normalizedRepoRelativeDir)
-    );
+    const nestedProjects = findNestedProjects(packageDirs);
     if (nestedProjects.length > 0) {
       throw createFailError(
         `Moon projects must not be nested inside other projects:\n  ${nestedProjects.join('\n  ')}`
@@ -111,7 +109,7 @@ export function regenerateMoonProjects() {
 
       applyPackageJsonSettings(projectConfig, pathInPackage('package.json'));
 
-      applyJestTaskConfig(projectConfig);
+      applyTestTaskTags(projectConfig, packageDirs);
 
       projectConfig = applyDevOverrides(
         projectConfig,
@@ -285,25 +283,44 @@ function applyTsConfigSettings(
   }
 }
 
-function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
+function applyTestTaskTags(projectConfig: MoonProjectConfig, packageDirs: readonly string[]) {
   if (!hasSourceRoot(projectConfig)) {
-    logger.warning('Skipping jest task config - no sourceRoot found in project config');
+    logger.warning('Skipping test task tags - no sourceRoot found in project config');
     return;
   }
 
-  const jestConfigName = resolveFirstExisting(
-    projectConfig.project.sourceRoot,
-    MOON_CONST.JEST_CONFIG_FILES
-  );
+  const sourceRoot = projectConfig.project.sourceRoot;
+  const nestedDirs = packageDirs
+    .filter((dir) => dir.startsWith(`${sourceRoot}/`))
+    .map((dir) => path.posix.relative(sourceRoot, dir));
+  const nestedExclusions = nestedDirs.map((dir) => `!${dir}/**/*`);
+  const isNestedProjectFile = (filePath: string) =>
+    nestedDirs.some((dir) => filePath === dir || filePath.startsWith(`${dir}/`));
+  const hasConfig = (pattern: string) =>
+    fs.globSync(pattern, {
+      cwd: sourceRoot,
+      exclude: (filePath) => filePath.includes('__fixtures__') || isNestedProjectFile(filePath),
+    }).length > 0;
+  if (nestedExclusions.length > 0) {
+    projectConfig.fileGroups = {
+      ...projectConfig.fileGroups,
+      jestConfigs: ['**/jest.config.{js,cjs,json}', '!**/__fixtures__/**', ...nestedExclusions],
+      jestIntegrationConfigs: [
+        '**/jest.integration.config.{js,cjs,json}',
+        '!**/__fixtures__/**',
+        ...nestedExclusions,
+      ],
+      scoutConfigs: ['**/test/scout*/**/*playwright.config.ts', ...nestedExclusions],
+    };
+  }
+  const tags = [
+    hasConfig('**/jest.config.{js,cjs,json}') && MOON_CONST.TAG_JEST_UNIT,
+    hasConfig('**/jest.integration.config.{js,cjs,json}') && MOON_CONST.TAG_JEST_INTEGRATION,
+    hasConfig('**/test/scout*/**/*playwright.config.ts') && MOON_CONST.TAG_SCOUT,
+  ].filter((tag): tag is string => Boolean(tag));
 
-  if (!jestConfigName) {
-    logger.warning(
-      `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.sourceRoot}`
-    );
-  } else {
-    projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
-
-    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
+  if (tags.length > 0) {
+    projectConfig.tags = [...new Set([...(projectConfig.tags || []), ...tags])];
   }
 }
 
