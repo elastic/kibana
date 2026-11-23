@@ -107,6 +107,14 @@ export async function fetchSampleDocuments({
       getEsqlColumnSchema({ esClient, index, signal: samplingSignal }),
       { index, samplingTimeoutMs, query: 'Column probe' }
     );
+    // A wildcard that matches no index yet probes as zero columns. That is missing data, not a
+    // query without @timestamp, so it gets the same answer as a missing concrete index.
+    if (columns.length === 0) {
+      throw new StatusError(
+        `There are no documents to sample: no index behind [${index}] exists yet.`,
+        400
+      );
+    }
     // Every arm filters on @timestamp. Sources saved before the source API required it can still
     // lack one; tell the user why instead of failing each arm on "Unknown column".
     const timestampProblem = getTimestampColumnProblem(columns);

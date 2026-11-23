@@ -132,6 +132,30 @@ describe('fetchSampleDocuments', () => {
     expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
   });
 
+  it('rejects with a 400 about missing data, not the query, when a wildcard matches no index yet', async () => {
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([]);
+
+    await expect(
+      fetchSampleDocuments({
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        index: 'logs.test-default',
+        start: 100,
+        end: 200,
+        features: [],
+        logger,
+        size: 5,
+        entityFilteredRatio: 0,
+        diverseRatio: 0,
+        maxEntityFilters: 10,
+        samplingTimeoutMs: 30_000,
+        iteration: 1,
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: 'There are no documents to sample: no index behind [logs.test-default] exists yet.',
+    });
+  });
+
   it('rejects with a 400 that explains the missing index when nothing exists to sample', async () => {
     getEsqlColumnSchemaMock.mockRejectedValueOnce(
       new Error(

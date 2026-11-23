@@ -97,7 +97,7 @@ const validateSourceQueryRoute = createNightshiftSourcesServerRoute({
     access: 'internal',
     summary: 'Validate a nightshift source query',
     description:
-      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A structurally invalid query comes back with `valid: false` and the reason.',
+      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A structurally invalid query, or one whose output has no `@timestamp` date column, comes back with `valid: false` and the reason.',
   },
   security: {
     authz: {
