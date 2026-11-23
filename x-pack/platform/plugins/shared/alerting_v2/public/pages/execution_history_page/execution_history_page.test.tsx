@@ -312,9 +312,7 @@ describe('ExecutionHistoryPage', () => {
     mockFetchResult();
     renderPage();
 
-    expect(mockAppHeader).toHaveBeenLastCalledWith(
-      expect.not.objectContaining({ sticky: false })
-    );
+    expect(mockAppHeader).toHaveBeenLastCalledWith(expect.not.objectContaining({ sticky: false }));
   });
 
   it('switches the Documentation link when changing tabs', async () => {
