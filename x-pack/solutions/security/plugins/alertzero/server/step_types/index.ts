@@ -33,11 +33,17 @@ export const registerStepDefinitions = ({
   readProposals: NonNullable<SummarizeInvestigationStepDependencies['readProposals']>;
   workers?: readonly WorkerServerDefinition[];
 }): void => {
-  const { getConversations, getProposalsPlugin, logger } = context;
+  const { assertStarted, getConversations, getProposalsPlugin, logger } = context;
   workflowsExtensions.registerStepDefinition(
     getResolveProposalsStepDefinition({
-      getProposalsService: () => getProposalsPlugin().getProposalsService(),
-      getProposalPrivileges: () => getProposalsPlugin().getProposalPrivileges(),
+      getProposalsService: () => {
+        assertStarted();
+        return getProposalsPlugin().getProposalsService();
+      },
+      getProposalPrivileges: () => {
+        assertStarted();
+        return getProposalsPlugin().getProposalPrivileges();
+      },
       getConversations,
       logger,
     })

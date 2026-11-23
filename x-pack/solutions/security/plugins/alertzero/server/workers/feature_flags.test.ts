@@ -64,4 +64,19 @@ describe('createWorkerFeatureFlagValues', () => {
       'Feature flag alertzero.exampleMode is not declared by any AlertZero Worker'
     );
   });
+
+  it('rejects two declarations of one flag with different fallbacks', () => {
+    expect(() =>
+      createWorkerFeatureFlagValues([BOOLEAN_FLAG, { key: BOOLEAN_FLAG.key, fallback: 'on' }])
+    ).toThrow('AlertZero Workers declare feature flag alertzero.example with different fallbacks');
+  });
+
+  it('follows a flag two Workers declare the same way once', () => {
+    const { featureFlags } = createFeatureFlags();
+    const values = createWorkerFeatureFlagValues([BOOLEAN_FLAG, { ...BOOLEAN_FLAG }]);
+
+    values.followCoreFeatureFlags(featureFlags);
+
+    expect(featureFlags.getBooleanValue$).toHaveBeenCalledTimes(1);
+  });
 });

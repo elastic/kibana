@@ -11,7 +11,16 @@ import {
 } from '@kbn/alertzero-common';
 import { createWorkerServerContextMock } from '../workers/worker_server_context.mock';
 import type { WorkerServerDefinition, WorkerStepDefinition } from '../workers';
+import { getResolveProposalsStepDefinition } from './resolve_proposals';
 import { registerStepDefinitions } from '.';
+
+jest.mock('./resolve_proposals', () => {
+  const actual = jest.requireActual('./resolve_proposals');
+  return {
+    ...actual,
+    getResolveProposalsStepDefinition: jest.fn(actual.getResolveProposalsStepDefinition),
+  };
+});
 
 const registeredIds = (registerStepDefinition: jest.Mock): string[] =>
   registerStepDefinition.mock.calls.map(([definition]) => definition.id);
@@ -59,5 +68,33 @@ describe('registerStepDefinitions', () => {
 
     const ids = registeredIds(registerStepDefinition);
     expect(ids.filter((id, index) => ids.indexOf(id) !== index)).toEqual([]);
+  });
+
+  it('keeps resolve_proposals off the proposals plugin until AlertZero has finished starting', () => {
+    const proposalsService = {};
+    const context = createWorkerServerContextMock({
+      getProposalsPlugin: jest.fn(
+        () =>
+          ({
+            getProposalsService: () => proposalsService,
+            getProposalPrivileges: jest.fn(),
+          } as never)
+      ),
+    });
+    registerStepDefinitions({
+      workflowsExtensions: { registerStepDefinition: jest.fn() },
+      context,
+      resolveChatModel: jest.fn(),
+      readProposals: jest.fn(),
+    });
+    const [deps] = jest.mocked(getResolveProposalsStepDefinition).mock.lastCall ?? [];
+    if (!deps) throw new Error('getResolveProposalsStepDefinition was not called');
+
+    expect(() => deps.getProposalsService()).toThrow('not started');
+    expect(() => deps.getProposalPrivileges()).toThrow('not started');
+    expect(context.getProposalsPlugin).not.toHaveBeenCalled();
+
+    jest.mocked(context.assertStarted).mockImplementation(() => undefined);
+    expect(deps.getProposalsService()).toBe(proposalsService);
   });
 });

@@ -21,9 +21,15 @@ export interface WorkerFeatureFlagValues {
 export const createWorkerFeatureFlagValues = (
   flags: readonly WorkerFeatureFlag[]
 ): WorkerFeatureFlagValues => {
-  const values = new Map<string, boolean | string>(
-    flags.map(({ key, fallback }) => [key, fallback])
-  );
+  const values = new Map<string, boolean | string>();
+  for (const { key, fallback } of flags) {
+    const declared = values.get(key);
+    if (declared !== undefined && declared !== fallback) {
+      throw new Error(`AlertZero Workers declare feature flag ${key} with different fallbacks`);
+    }
+    values.set(key, fallback);
+  }
+  const followedFlags = [...values].map(([key, fallback]) => ({ key, fallback }));
 
   return {
     get: <T extends boolean | string>({ key }: WorkerFeatureFlag<T>): T => {
@@ -36,7 +42,7 @@ export const createWorkerFeatureFlagValues = (
     },
     followCoreFeatureFlags: (featureFlags) => {
       const subscription = new Subscription();
-      for (const { key, fallback } of flags) {
+      for (const { key, fallback } of followedFlags) {
         const storeLatestValue = (value: boolean | string) => {
           values.set(key, value);
         };

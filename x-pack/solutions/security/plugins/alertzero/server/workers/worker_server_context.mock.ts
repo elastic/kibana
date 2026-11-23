@@ -33,6 +33,7 @@ export const createWorkerServerContextMock = (
   getWorkflowsManagement: jest.fn(() => undefined),
   getInternalEsClient: jest.fn(notStarted),
   isContextEngineEnabled: jest.fn(async () => false),
+  assertStarted: jest.fn(notStarted),
   getFeatureFlag: jest.fn(
     createWorkerFeatureFlagValues(
       WORKER_SERVER_DEFINITIONS.flatMap(({ featureFlags = [] }) => featureFlags)

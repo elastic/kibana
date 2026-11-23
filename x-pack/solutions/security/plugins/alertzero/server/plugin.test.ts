@@ -548,6 +548,23 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(stringFlag$.observed).toBe(false);
     });
 
+    it('keeps the Worker context unstarted when start returns early', () => {
+      const getStepDefinitions = jest.spyOn(alertTriageServerDefinition, 'getStepDefinitions');
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      setupWithSteps(plugin, {
+        registerManagedWorkflowOwner: jest.fn(),
+        registerStepDefinition: jest.fn(),
+      });
+      const [[context]] = getStepDefinitions.mock.calls;
+
+      expect(() => context.assertStarted()).toThrow('AlertZero has not finished starting');
+      plugin.start(coreMock.createStart(), {} as never);
+      expect(() => context.assertStarted()).toThrow('AlertZero has not finished starting');
+
+      plugin.stop();
+      getStepDefinitions.mockRestore();
+    });
+
     it('hands a flag value that changes after start to the Worker steps', () => {
       const getStepDefinitions = jest.spyOn(alertTriageServerDefinition, 'getStepDefinitions');
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));

@@ -139,6 +139,8 @@ export class AlertZeroPlugin
     WORKER_SERVER_DEFINITIONS.flatMap(({ featureFlags = [] }) => featureFlags)
   );
   private workerFeatureFlagValuesSubscription?: Subscription;
+  /** Set at the end of `start`, which returns early when a required plugin or service accounts are missing. */
+  private startFinished = false;
   private readonly workerContext: WorkerServerContext;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
@@ -173,6 +175,11 @@ export class AlertZeroPlugin
       getWorkflowsManagement: () => this.workflowsManagementApi,
       getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
+      assertStarted: () => {
+        if (!this.startFinished) {
+          throw new Error('AlertZero has not finished starting');
+        }
+      },
       getFeatureFlag: (flag) => this.workerFeatureFlagValues.get(flag),
     };
   }
@@ -343,7 +350,10 @@ export class AlertZeroPlugin
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
       getAgentBuilderAttachments: () => this.requireAgentBuilderAttachments(),
-      getHuntServices: () => huntServices,
+      getHuntServices: () => {
+        this.workerContext.assertStarted();
+        return huntServices;
+      },
       getScanFailuresService: () => this.requireScanFailuresService(),
       getThreatIntelSupplyService: () => this.threatIntelSupplyService,
       isServerless: this.isServerless,
@@ -464,6 +474,7 @@ export class AlertZeroPlugin
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
 
     this.mitreDataClient = plugins.mitreAttack?.getMitreDataClient?.();
+    this.startFinished = true;
 
     return this.alertZeroStartContract();
   }

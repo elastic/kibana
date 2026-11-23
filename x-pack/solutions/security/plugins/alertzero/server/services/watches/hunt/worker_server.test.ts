@@ -49,5 +49,22 @@ describe('continuousThreatHuntServerDefinition', () => {
     await expect(deps.isContextEngineEnabled(request)).resolves.toBe(true);
     expect(context.isContextEngineEnabled).toHaveBeenCalledWith(request);
     expect(deps.logger).toBe(context.logger);
+
+    deps.getResolveHostEnrollment?.('default', esClient as never);
+    expect(context.getFleetAgentService).toHaveBeenCalled();
+  });
+
+  it('keeps Hunt services unavailable until AlertZero has finished starting', () => {
+    const context = createWorkerServerContextMock();
+    continuousThreatHuntServerDefinition.getStepDefinitions?.(context);
+    const [deps] = jest.mocked(getPackageReportStepDefinition).mock.lastCall ?? [];
+    if (!deps) throw new Error('getPackageReportStepDefinition was not called');
+
+    expect(() => deps.getHuntServices()).toThrow('not started');
+
+    jest.mocked(context.assertStarted).mockImplementation(() => undefined);
+    expect(deps.getHuntServices()).toEqual(
+      expect.objectContaining({ getInference: expect.any(Function) })
+    );
   });
 });

@@ -19,7 +19,10 @@ export const continuousThreatHuntServerDefinition: WorkerServerDefinition = {
       getPackageReportStepDefinition({
         getActionsService: context.getActionsService,
         getConversations: context.getConversations,
-        getHuntServices: () => huntServices,
+        getHuntServices: () => {
+          context.assertStarted();
+          return huntServices;
+        },
         getResolveHostEnrollment: makeScopedResolveHostEnrollment(
           context.getFleetAgentService,
           context.logger

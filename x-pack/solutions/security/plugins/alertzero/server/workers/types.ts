@@ -46,6 +46,11 @@ export interface WorkerServerContext {
   getInternalEsClient: () => ElasticsearchClient;
   /** The space-scoped Context Engine advanced setting, read for the request's own space. */
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
+  /**
+   * Throws until `start` has finished, which it does not when a required plugin or service
+   * accounts are missing. A step that must not run in that state calls it first.
+   */
+  assertStarted: () => void;
   /** The latest value of a declared flag. Throws for a flag no Worker declares. */
   getFeatureFlag: <T extends boolean | string>(flag: WorkerFeatureFlag<T>) => T;
 }
