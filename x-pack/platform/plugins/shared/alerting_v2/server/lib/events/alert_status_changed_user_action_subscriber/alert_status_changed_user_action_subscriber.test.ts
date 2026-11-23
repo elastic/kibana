@@ -333,15 +333,20 @@ describe('AlertStatusChangedUserActionSubscriber', () => {
     });
 
     it('skips only the events of the unreadable rule', async () => {
-      rulesClient.getRules.mockImplementation(async ([id]) =>
-        id === 'rule-1'
-          ? { items: [rule], errors: [] }
-          : { items: [], errors: [{ id, error: { code: 'RULE_NOT_FOUND', message: 'gone' } }] }
-      );
+      rulesClient.getRules.mockImplementation(async (ids) => ({
+        items: ids.includes('rule-1') ? [rule] : [],
+        errors: ids
+          .filter((id) => id !== 'rule-1')
+          .map((id) => ({ id, error: { code: 'RULE_NOT_FOUND', message: 'gone' } })),
+      }));
 
-      await dispatch(deactivated({ ruleId: 'deleted-rule', episodeId: 'episode-2' }));
-      await dispatch(deactivated());
+      // Dispatched together, so both events share one flush and one rule lookup.
+      await Promise.all([
+        dispatch(deactivated({ ruleId: 'deleted-rule', episodeId: 'episode-2' })),
+        dispatch(deactivated()),
+      ]);
 
+      expect(rulesClient.getRules.mock.calls).toEqual([[['deleted-rule', 'rule-1']]]);
       expect(published()).toEqual([deactivatedPayload()]);
       expectPublishFailedWarning({ rule_id: 'deleted-rule' });
     });
