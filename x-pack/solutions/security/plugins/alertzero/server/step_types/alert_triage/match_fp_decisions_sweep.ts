@@ -381,23 +381,22 @@ export const createDecisionSweep = ({
 
   /**
    * Closes the alerts of each approved decision. A decision whose verdict could not be read closes
-   * nothing, and is counted as a failed close. A decision already known to have a conflicting
-   * verdict was not part of the lookup, so a failed lookup does not count it, and it is still
-   * blocked as usual.
+   * nothing, and is counted as a failed close, not as deferred: it is not handed on, so the work
+   * deadline cannot count it a second time. A decision already known to have a conflicting verdict
+   * was not part of the lookup, so a failed lookup does not count it, and it is still blocked as
+   * usual.
    */
   const close = async (byDecision: Map<string, string[]>) => {
     const unread = [...byDecision.keys()].filter((id) => !conflicting.has(id));
-    let verdictsRead = true;
+    let toHandle = byDecision;
     try {
       await loadConflicts(unread);
     } catch (error) {
-      verdictsRead = false;
       unread.forEach(countCloseFailure);
       warn('Could not read the verdicts of the decision keys; nothing is closed', error);
+      toHandle = new Map([...byDecision].filter(([id]) => conflicting.has(id)));
     }
-    await eachDecision(byDecision, async (id, alertIds) => {
-      if (verdictsRead || conflicting.has(id)) await closeDecision(id, alertIds);
-    });
+    await eachDecision(toHandle, closeDecision);
   };
 
   // --- Dismissed decisions: keep the alerts out of analysis ---

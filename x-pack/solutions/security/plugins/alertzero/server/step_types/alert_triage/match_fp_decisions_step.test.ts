@@ -1441,6 +1441,32 @@ describe('triage match decisions step in on mode', () => {
       );
     });
 
+    it('does not count a decision as deferred when its verdict lookup fails after the work deadline', async () => {
+      const { run, callKibanaApi, closes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+      });
+      const inner = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (params.path.endsWith('/signals/search') && params.body?.aggs) {
+            // The lookup starts in time, takes longer than the budget, and then fails.
+            jest.setSystemTime(NOW + DECISION_MATCH_WORK_BUDGET_MS + 1);
+            throw new Error('es down');
+          }
+          return inner(params);
+        }
+      );
+
+      const { output } = await run();
+
+      // The decision is a failed close. It would have been skipped with time left, so the deadline
+      // deferred nothing.
+      expect(closes()).toEqual([]);
+      expect(output).toEqual(expect.objectContaining({ close_failures: 1, deferred: 0 }));
+    });
+
     it('counts a decision once in the deferred decisions when it is deferred in the close and in the shadow tags', async () => {
       // One key, two alerts: the trusted one is closed, the untrusted one is only tagged.
       const library = (trusted: boolean) => ({
