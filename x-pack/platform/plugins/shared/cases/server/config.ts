@@ -177,7 +177,7 @@ export const ConfigSchema = schema.object({
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Proof-of-concept Unified Investigation View: its own indices, routes and app.
   investigations: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     // Lets seed scripts set historical times and actors. Never enable outside local development.
     allowBackdate: schema.boolean({ defaultValue: false }),
   }),

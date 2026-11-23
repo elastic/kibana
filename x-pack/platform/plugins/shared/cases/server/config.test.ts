@@ -133,7 +133,7 @@ describe('config validation', () => {
           },
           "investigations": Object {
             "allowBackdate": false,
-            "enabled": false,
+            "enabled": true,
           },
           "markdownPlugins": Object {
             "lens": true,
