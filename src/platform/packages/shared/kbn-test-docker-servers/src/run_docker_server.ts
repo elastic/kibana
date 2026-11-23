@@ -154,9 +154,11 @@ async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string>
       '-dit',
       '--name',
       identity.name,
+      args || [],
+      // after the caller's args: docker keeps the last value of a duplicate label key, and the
+      // cleanup must find this attempt's label on the container
       '--label',
       identity.label,
-      args || [],
       // loopback only: Kibana on this host is the only client, nothing else needs the registry
       '-p',
       `127.0.0.1:${port}:${portInContainer}`,

@@ -163,11 +163,11 @@ describe('runDockerServer', () => {
     expect(runArgs.slice(0, 2)).toEqual(['run', '-dit']);
     expect(runArgs[2]).toBe('--name');
     expect(runArgs[3]).toMatch(/^test-registry-6104-[0-9a-f]{8}$/);
-    expect(runArgs[4]).toBe('--label');
-    expect(runArgs[5]).toMatch(/^kbn-test-docker-server=[0-9a-f-]{36}$/);
-    expect(runArgs.slice(6)).toEqual([
-      '-e',
-      'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+    // the caller's args, then our label (docker keeps the last value of a duplicate key)
+    expect(runArgs.slice(4, 6)).toEqual(['-e', 'EPR_REQUIRE_PACKAGE_SIGNATURES=false']);
+    expect(runArgs[6]).toBe('--label');
+    expect(runArgs[7]).toMatch(/^kbn-test-docker-server=[0-9a-f-]{36}$/);
+    expect(runArgs.slice(8)).toEqual([
       '-p',
       '127.0.0.1:6104:8080',
       'docker.elastic.co/package-registry/distribution:lite',
@@ -314,8 +314,11 @@ describe('runDockerServer', () => {
     docker.psOutput = 'created-1\n';
 
     await expect(runDockerServer(server, { log })).rejects.toThrow('already listening on port');
-    const [psArgs] = dockerCall(docker.calls, 'ps');
-    expect(psArgs[3]).toMatch(/^label=kbn-test-docker-server=[0-9a-f-]{36}$/);
+    // the cleanup looks up exactly the label this attempt passed to `docker run`
+    const [runArgs] = dockerCall(docker.calls, 'run');
+    const label = runArgs[runArgs.indexOf('--label') + 1];
+    expect(label).toMatch(/^kbn-test-docker-server=[0-9a-f-]{36}$/);
+    expect(dockerCall(docker.calls, 'ps')).toEqual([['ps', '-aq', '--filter', `label=${label}`]]);
     expect(dockerCall(docker.calls, 'rm')).toEqual([['rm', '-f', 'created-1']]);
   });
 
