@@ -27,13 +27,13 @@ No body and no parameters. It returns one entry per registered definition that h
       "columns": [
         { "name": "entity.id", "kind": "id", "label": "ID" },
         { "name": "kubernetes.namespace", "kind": "identity", "label": "Namespace" },
-        { "name": "kubernetes.deployment.name", "kind": "identity" },
+        { "name": "kubernetes.deployment.name", "kind": "identity", "label": "Deployment" },
         { "name": "k8s.cluster.name", "kind": "attribute", "label": "Cluster" },
-        { "name": "k8s.deployment.available", "kind": "attribute" },
-        { "name": "k8s.deployment.desired", "kind": "attribute" },
-        { "name": "k8s.deployment.paused", "kind": "attribute" },
-        { "name": "k8s.deployment.label.app", "kind": "attribute" },
-        { "name": "k8s.deployment.uid", "kind": "attribute" },
+        { "name": "k8s.deployment.available", "kind": "attribute", "label": "Available replicas" },
+        { "name": "k8s.deployment.desired", "kind": "attribute", "label": "Desired replicas" },
+        { "name": "k8s.deployment.paused", "kind": "attribute", "label": "Paused" },
+        { "name": "k8s.deployment.label.app", "kind": "attribute", "label": "App" },
+        { "name": "k8s.deployment.uid", "kind": "attribute", "label": "UID" },
         { "name": "last_seen", "kind": "last_seen", "label": "Last seen" }
       ],
       "suggestedFilters": ["k8s.cluster.name", "kubernetes.namespace"],
@@ -43,7 +43,12 @@ No body and no parameters. It returns one entry per registered definition that h
           "filter": "metricset.name == \"state_deployment\""
         },
         { "indexPattern": "metrics-k8sclusterreceiver.otel-*" }
-      ]
+      ],
+      "category": "kubernetes",
+      "icon": "logoKubernetes",
+      "nameFields": ["kubernetes.deployment.name"],
+      "defaultColumns": ["kubernetes.namespace", "k8s.cluster.name", "k8s.deployment.available", "last_seen"],
+      "badgeColumns": ["k8s.cluster.name"]
     }
   ]
 }

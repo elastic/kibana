@@ -29,6 +29,16 @@ describe('registered entity definitions', () => {
     expect(result.data?.dynamic).toEqual(definition.dynamic);
   });
 
+  it.each(cases)('%s declares a category, an icon and name fields', (_type, definition) => {
+    expect(definition.dynamic?.category).toEqual(expect.any(String));
+    expect(definition.dynamic?.icon).toEqual(expect.any(String));
+    expect(definition.dynamic?.nameFields?.length).toBeGreaterThan(0);
+  });
+
+  it('names a k8s.deployment by its deployment name, not by its first identity field (the namespace)', () => {
+    expect(k8sDeploymentDefinition.dynamic?.nameFields).toEqual(['kubernetes.deployment.name']);
+  });
+
   it.each(cases)('%s is managed by this plugin', (_type, definition) => {
     expect(definition.managedBy).toEqual(MANAGED_BY);
   });
