@@ -25,7 +25,7 @@ export type DispatchActionName = 'isolate' | 'unisolate' | 'scan' | 'running-pro
  * agent ID and retry") is something the schema can actually carry out.
  */
 export const IP_DESCRIPTION =
-  'The exact IPv4 or IPv6 address the analyst gave. Use it only when they gave no hostname or agent ID; shared addresses return an ambiguity result instead of selecting a host.';
+  'The exact IPv4 or IPv6 address the analyst gave. Pass it whenever they gave one, including alongside an agent ID (the tool checks that both name the same host); use it as the only identifier only when they gave no hostname or agent ID. Shared addresses return an ambiguity result instead of selecting a host.';
 
 export const hostTargetFields = (hostNameDescription: string) => ({
   hostName: z

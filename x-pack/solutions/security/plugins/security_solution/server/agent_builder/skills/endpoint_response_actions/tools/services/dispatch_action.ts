@@ -20,7 +20,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
-import { getActionList } from '../../../../../endpoint/services/actions';
+import { getActionListByStatus } from '../../../../../endpoint/services/actions';
 import {
   formatForConfirmationCard,
   canonicalizeIp,
@@ -348,20 +348,22 @@ export const findHostNameMismatch = (
 /** Renders hostnames for the analyst-facing refusal text. */
 const quotedNames = (names: string[]) => names.map((name) => `'${name}'`).join(', ');
 
-const mismatchResult = (mismatch: HostNameMismatch) =>
+const mismatchResult = (mismatch: HostNameMismatch, agentId: string) =>
   responseActionErrorResult(
     'invalid_argument',
     `The supplied hostName '${
       mismatch.providedHostName
     }' is not a hostname of the supplied agentId (known: ${quotedNames(
       mismatch.knownHostNames
-    )}), so the target is ambiguous. Call the tool again with the agentId alone (or with one of those hostnames).`
+    )}), so the target is ambiguous and nothing was dispatched. Ask the analyst which host they meant, showing both the hostName '${
+      mismatch.providedHostName
+    }' and the agent ID ${agentId}, and do not call the tool again until they answer.`
   );
 
 const ipMismatchResult = (ip: string, agentId: string) =>
   responseActionErrorResult(
     'invalid_argument',
-    `The supplied ip '${ip}' is not an address the endpoint with agent ID ${agentId} could be confirmed to use, so the target is ambiguous. Call the tool again with the agentId alone (or with the ip alone).`
+    `The supplied ip '${ip}' is not an address the endpoint with agent ID ${agentId} could be confirmed to use, so the target is ambiguous and nothing was dispatched. Ask the analyst which host they meant, showing both the ip '${ip}' and the agent ID ${agentId}, and do not call the tool again until they answer.`
   );
 
 /**
@@ -508,16 +510,15 @@ const getIsolationState = async (
   return data?.[0]?.metadata?.Endpoint?.state?.isolation;
 };
 
-const PENDING_ISOLATION_LOOKUP_SIZE = 10;
-
 /**
  * Whether an unexpired isolate or release is still waiting on this agent. The
  * metadata isolation state only reflects actions that already completed, so a
  * host with a queued isolate still reads as "not isolated" there — and the
  * queued action will change that when the host next checks in.
  *
- * Only the newest unexpired actions are read: an unexpired window holds a
- * handful per agent. A failed read counts as pending — the caller then shows
+ * The status filter runs over the agent's unexpired isolate and release
+ * actions before paging, so a pending action is found however many completed
+ * ones sit in front of it. A failed read counts as pending — the caller then shows
  * the normal confirmation card instead of failing the whole call, and the
  * analyst still sees what is about to be sent.
  */
@@ -526,20 +527,17 @@ const hasPendingIsolationAction = async (
   agentId: string
 ): Promise<boolean> => {
   try {
-    const { data } = await getActionList({
+    const { data } = await getActionListByStatus({
       spaceId: request.context.spaceId,
       endpointService: request.endpointAppContextService,
       unExpiredOnly: true,
       elasticAgentIds: [agentId],
       commands: ['isolate', 'unisolate'],
-      pageSize: PENDING_ISOLATION_LOOKUP_SIZE,
+      statuses: ['pending'],
+      pageSize: 1,
     });
 
-    return data.some(
-      (action) =>
-        (action.command === 'isolate' || action.command === 'unisolate') &&
-        action.agentState?.[agentId]?.isCompleted !== true
-    );
+    return data.length > 0;
   } catch (error) {
     request.context.logger.warn(
       `Could not read pending isolation actions for agent [${agentId}]: ${
@@ -642,7 +640,7 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
 
   const mismatch = findHostNameMismatch(params.hostName, target.endpoint);
   if (mismatch) {
-    return { kind: 'result', result: mismatchResult(mismatch) };
+    return { kind: 'result', result: mismatchResult(mismatch, target.endpoint.agentId) };
   }
 
   if (ipMismatch && params.ip) {

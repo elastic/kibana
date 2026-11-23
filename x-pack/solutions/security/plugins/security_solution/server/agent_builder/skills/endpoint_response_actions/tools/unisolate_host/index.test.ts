@@ -26,7 +26,7 @@ jest.mock('../../../../../endpoint/services/actions', () => {
   return {
     ...original,
     getActionDetailsById: jest.fn(),
-    getActionList: jest.fn().mockResolvedValue({ data: [] }),
+    getActionListByStatus: jest.fn().mockResolvedValue({ data: [] }),
   };
 });
 

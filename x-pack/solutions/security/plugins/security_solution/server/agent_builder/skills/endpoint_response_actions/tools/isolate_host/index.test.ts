@@ -17,7 +17,10 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
-import { getActionDetailsById, getActionList } from '../../../../../endpoint/services/actions';
+import {
+  getActionDetailsById,
+  getActionListByStatus,
+} from '../../../../../endpoint/services/actions';
 import { ISOLATE_TOOL_ID } from '../..';
 import { isolateHostTool } from '.';
 
@@ -26,12 +29,12 @@ jest.mock('../../../../../endpoint/services/actions', () => {
   return {
     ...original,
     getActionDetailsById: jest.fn(),
-    getActionList: jest.fn().mockResolvedValue({ data: [] }),
+    getActionListByStatus: jest.fn().mockResolvedValue({ data: [] }),
   };
 });
 
 const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
-const mockGetActionList = getActionList as jest.Mock;
+const mockGetActionListByStatus = getActionListByStatus as jest.Mock;
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 
@@ -100,7 +103,7 @@ describe('isolateHostTool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetActionList.mockResolvedValue({ data: [] });
+    mockGetActionListByStatus.mockResolvedValue({ data: [] });
     mockGetActionDetailsById.mockImplementation((_service, _spaceId, actionId) =>
       Promise.resolve({
         id: actionId,
@@ -774,7 +777,7 @@ describe('isolateHostTool', () => {
     it('shows the normal card, without an error, when the pending-action lookup fails', async () => {
       stubFleetAgent({ id: 'agent-123', status: 'online', packages: ['endpoint'] });
       stubMetadata([metadataEntry('agent-123', true)]);
-      mockGetActionList.mockRejectedValue(new Error('search unavailable'));
+      mockGetActionListByStatus.mockRejectedValue(new Error('search unavailable'));
       const isolate = jest.fn().mockResolvedValue({ id: 'action-1' });
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => ({ isolate } as never)
@@ -841,7 +844,7 @@ describe('isolateHostTool', () => {
     it('still asks for confirmation when a queued release is pending on an isolated-looking host', async () => {
       stubFleetAgent({ id: 'agent-123', status: 'online', packages: ['endpoint'] });
       stubMetadata([metadataEntry('agent-123', true)]);
-      mockGetActionList.mockResolvedValue({
+      mockGetActionListByStatus.mockResolvedValue({
         data: [
           {
             command: 'unisolate',
@@ -855,11 +858,12 @@ describe('isolateHostTool', () => {
       });
 
       expect(card).toMatchObject({ color: 'danger' });
-      expect(mockGetActionList).toHaveBeenCalledWith(
+      expect(mockGetActionListByStatus).toHaveBeenCalledWith(
         expect.objectContaining({
           unExpiredOnly: true,
           elasticAgentIds: ['agent-123'],
           commands: ['isolate', 'unisolate'],
+          statuses: ['pending'],
         })
       );
     });
@@ -889,6 +893,10 @@ describe('isolateHostTool', () => {
       expect(card).toBeUndefined();
       expect(data).toMatchObject({ error: 'invalid_argument' });
       expect(data.message).toContain("ip '10.0.0.7'");
+      expect(data.message).toContain('agent ID agent-other');
+      expect(data.message).toContain('nothing was dispatched');
+      expect(data.message).toContain('do not call the tool again until they answer');
+      expect(data.message).not.toContain('alone');
       expect(isolate).not.toHaveBeenCalled();
     });
 

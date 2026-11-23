@@ -105,7 +105,7 @@ from chat: say so and point the analyst to the Response Actions UI.
   and scan pause for the analyst's confirmation first; until then say the action
   is awaiting confirmation, and if declined report it as cancelled.
 - Call the isolate, release, scan or running-processes tool directly with the
-  hostname the analyst gave (or \`ip\` when they gave only an exact IP, no hostname or agent ID). The tool resolves the host itself and returns \`reason: endpoint_not_found\` or
+  hostname the analyst gave. Pass the \`ip\` they gave whenever they gave one, including alongside an agent ID (the tool checks that the two name the same host); use \`ip\` as the only identifier only when they gave no hostname or agent ID. The tool resolves the host itself and returns \`reason: endpoint_not_found\` or
   \`reason: ambiguous_hostname\` or \`reason: ambiguous_ip\` instead of acting on a guess, so no
   \`get_endpoint_status\` pre-check is needed. On either ambiguity result, ask which
   agent ID is meant, then call the same tool again with that \`agentId\`; never
@@ -115,7 +115,9 @@ from chat: say so and point the analyst to the Response Actions UI.
   (and \`reason: ambiguous_hostname\` / \`reason: ambiguous_ip\` when several endpoints share the supplied identity);
   \`error: invalid_argument\` means the call was refused before anything was
   dispatched — read its \`message\`: out-of-range pagination says to narrow
-  filters, a declined confirmation says to report cancelled, a changed target
+  filters, a hostname or ip that does not belong to the supplied agent ID says
+  to show the analyst both identifiers and ask which host they meant, with no
+  retry until they answer, a declined confirmation says to report cancelled, a changed target
   or arguments says to call the tool again so the analyst confirms the new
   card, and a policy refusal (host isolation disabled by the endpoint policy)
   says to report the reason and stop, while \`error: insufficient_privileges\`
