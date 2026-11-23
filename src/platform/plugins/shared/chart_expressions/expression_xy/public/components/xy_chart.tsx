@@ -107,7 +107,6 @@ import {
   getOriginalAxisPosition,
   getMaximumFractionDigits,
   mapAnnotationClickEvents,
-  getLayerBucketEnd,
 } from '../helpers';
 import { getXDomain, getXValues, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -1170,9 +1169,6 @@ export function XYChart({
                 yAxesConfiguration={yAxesConfiguration}
                 dataLayers={dataLayers}
                 defaultXScaleType={defaultXScaleType}
-                getLayerBucketEnd={(layer) =>
-                  getLayerBucketEnd(data.datatableUtilities, layer, timeZone)
-                }
               />
             ) : null}
             {referenceLineLayers.length ? (

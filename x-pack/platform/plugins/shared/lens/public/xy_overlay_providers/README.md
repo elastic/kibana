@@ -111,10 +111,7 @@ the coordinates with `xAccessor` and `yAccessor`. Each accessor is a column name
 values that need converting. On time charts `x` must be a timestamp in milliseconds, so ES|QL dates,
 which are ISO strings, need a function such as `(row) => Date.parse(String(row['@timestamp']))`.
 Points are bound to the Y axis of the layer they were fetched for, and use the same X and Y scales as
-the layer. The overlay is dropped if that layer isn't drawn or has a categorical X axis. On histogram
-layers, such as date histograms, each point moves to the start of the bucket that contains it, so
-the bars keep their width. Points outside every drawn bucket, such as points in an empty bucket or
-before the first bucket, are dropped. `onPointClick` still gets the original row.
+the layer. The overlay is dropped if that layer isn't drawn or has a categorical X axis.
 
 Lens draws at most 1,000 points per overlay. Extra points are dropped, and the chart shows a warning
 badge. Query only what you plan to draw.

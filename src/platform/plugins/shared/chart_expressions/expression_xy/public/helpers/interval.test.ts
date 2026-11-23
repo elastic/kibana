@@ -10,7 +10,7 @@
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import type { DataLayerConfig, XYChartProps } from '../../common';
 import { sampleArgs } from '../../common/test_utils';
-import { calculateMinInterval, getLayerBucketEnd } from './interval';
+import { calculateMinInterval } from './interval';
 
 describe('calculateMinInterval', () => {
   const datatableUtilities = createDatatableUtilitiesMock();
@@ -107,60 +107,5 @@ describe('calculateMinInterval', () => {
     xyProps.args.minTimeBarInterval = '1h';
     const result = await calculateMinInterval(datatableUtilities, xyProps);
     expect(result).toEqual(60 * 60 * 1000);
-  });
-});
-
-describe('getLayerBucketEnd', () => {
-  const datatableUtilities = createDatatableUtilitiesMock();
-
-  const createLayer = (bucket?: { interval: number; unit?: string }) => {
-    const layer = sampleArgs().args.layers[0] as DataLayerConfig;
-    layer.table.columns[2].meta = {
-      type: bucket?.unit ? 'date' : 'number',
-      ...(bucket ? { esMeta: { bucket } } : {}),
-    };
-    return layer;
-  };
-
-  const getEnd = (layer: DataLayerConfig, bucketStart: string, timeZone = 'UTC') => {
-    const bucketEnd = getLayerBucketEnd(datatableUtilities, layer, timeZone);
-    return bucketEnd && new Date(bucketEnd(Date.parse(bucketStart))).toISOString();
-  };
-
-  it('ends calendar months on the first day of the next month', () => {
-    const layer = createLayer({ interval: 1, unit: 'month' });
-    expect(getEnd(layer, '2026-02-01T00:00:00.000Z')).toBe('2026-03-01T00:00:00.000Z');
-    expect(getEnd(layer, '2026-03-01T00:00:00.000Z')).toBe('2026-04-01T00:00:00.000Z');
-  });
-
-  it('follows DST changes in the chart time zone', () => {
-    const layer = createLayer({ interval: 1, unit: 'day' });
-    expect(getEnd(layer, '2026-03-28T23:00:00.000Z', 'Europe/Rome')).toBe(
-      '2026-03-29T22:00:00.000Z'
-    );
-  });
-
-  it('follows the time zone the buckets were computed in over the display time zone', () => {
-    const layer = sampleArgs().args.layers[0] as DataLayerConfig;
-    layer.table.columns[2].meta = {
-      type: 'date',
-      source: 'esaggs',
-      sourceParams: {
-        type: 'date_histogram',
-        params: { used_interval: '1d', used_time_zone: 'UTC' },
-      },
-    };
-    expect(getEnd(layer, '2026-03-29T00:00:00.000Z', 'Europe/Rome')).toBe(
-      '2026-03-30T00:00:00.000Z'
-    );
-  });
-
-  it('adds the interval of numeric buckets', () => {
-    const bucketEnd = getLayerBucketEnd(datatableUtilities, createLayer({ interval: 5 }), 'UTC');
-    expect(bucketEnd?.(10)).toBe(15);
-  });
-
-  it('returns undefined when the X column has no known interval', () => {
-    expect(getLayerBucketEnd(datatableUtilities, createLayer(), 'UTC')).toBeUndefined();
   });
 });

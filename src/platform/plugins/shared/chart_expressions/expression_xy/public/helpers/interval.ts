@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
-import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
+import type { XYChartProps } from '../../common';
 import { isTimeChart } from '../../common/helpers';
 import { getFilteredLayers } from './layers';
 import { isDataLayer, getDataLayers } from './visualization';
@@ -46,29 +45,3 @@ export function calculateMinInterval(
   if (!intervalDuration) return;
   return intervalDuration.as('milliseconds');
 }
-
-/**
- * Returns a function computing where a bucket of the layer's X column ends, or `undefined` when the column has no known interval.
- * Date intervals follow the calendar in the time zone the buckets were computed in, `timeZone` when the column doesn't say,
- * so months, years and days across DST changes get their actual length.
- */
-export const getLayerBucketEnd = (
-  datatableUtilities: DatatableUtilitiesService,
-  { xAccessor, table }: CommonXYDataLayerConfig,
-  timeZone: string
-): ((bucketStart: number) => number) | undefined => {
-  const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : undefined;
-  if (!xColumn) {
-    return undefined;
-  }
-  const dateMeta = datatableUtilities.getDateHistogramMeta(xColumn, { timeZone });
-  const dateDuration = dateMeta?.interval ? search.aggs.parseInterval(dateMeta.interval) : null;
-  if (dateDuration) {
-    const bucketTimeZone = dateMeta?.timeZone ?? timeZone;
-    return (bucketStart) => moment.tz(bucketStart, bucketTimeZone).add(dateDuration).valueOf();
-  }
-  const numberInterval = datatableUtilities.getNumberHistogramInterval(xColumn);
-  return typeof numberInterval === 'number'
-    ? (bucketStart) => bucketStart + numberInterval
-    : undefined;
-};
