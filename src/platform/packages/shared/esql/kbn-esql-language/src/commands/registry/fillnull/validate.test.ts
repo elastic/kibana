@@ -17,6 +17,67 @@ const check = (query: string, errors: string[] = []) =>
 describe('FILLNULL validation', () => {
   describe('unmapped targets', () => {
     it.each(['load', 'load_all', 'nullify'])(
+      'does not load missing metadata to satisfy a pattern under %s',
+      async (strategy) => {
+        const { validate: validateQuery } = await setup();
+        const { errors } = await validateQuery(
+          `SET unmapped_fields="${strategy}"; FROM index | FILLNULL "x" ON _ind*, _index`
+        );
+        expect(errors).toEqual([
+          expect.objectContaining({ text: 'Unknown column "_ind*"' }),
+          expect.objectContaining({ text: 'Unknown column "_index"' }),
+        ]);
+      }
+    );
+
+    it('accepts metadata explicitly included in the input', async () => {
+      const { expectErrors: expectQueryErrors } = await setup();
+      await expectQueryErrors(
+        'SET unmapped_fields="load"; FROM index METADATA _index | FILLNULL "x" ON _ind*, _index',
+        []
+      );
+    });
+
+    it.each([
+      'extra_*name*, other_extra_name',
+      '*extra_*name, extra_name_suffix',
+      '`extra_*`name*, extra_othername',
+    ])('rejects a nonmatching same-list target: %s', async (targets) => {
+      const { validate: validateQuery } = await setup();
+      const { errors } = await validateQuery(
+        `SET unmapped_fields="load"; FROM index | FILLNULL "x" ON ${targets}`
+      );
+      expect(errors).toEqual([expect.objectContaining({ code: 'unknownColumn' })]);
+    });
+
+    it.each([
+      'extra_*name*, extra_name_suffix',
+      '*extra_*name, other_extra_name',
+      '`extra_*`name*, `extra_*name_suffix`',
+    ])('accepts a matching same-list target: %s', async (targets) => {
+      const { validate: validateQuery } = await setup();
+      const { errors } = await validateQuery(
+        `SET unmapped_fields="load"; FROM index | FILLNULL "x" ON ${targets}`
+      );
+      expect(errors).toEqual([]);
+    });
+
+    it('anchors patterns when matching existing input columns', async () => {
+      const { expectErrors: expectQueryErrors } = await setup();
+      await expectQueryErrors('ROW other_extra_name = "x" | FILLNULL "x" ON extra_*name*', [
+        'Unknown column "extra_*name*"',
+      ]);
+    });
+
+    it('does not load metadata mentioned later to satisfy a pattern', async () => {
+      const { validate: validateQuery } = await setup();
+      const { errors } = await validateQuery(
+        'SET unmapped_fields="load"; FROM index | FILLNULL "x" ON _ind* | WHERE _index IS NOT NULL'
+      );
+      expect(errors).toEqual([expect.objectContaining({ text: 'Unknown column "_ind*"' })]);
+    });
+
+    it.each(['load', 'load_all', 'nullify'])(
       'accepts patterns matching exact targets in the same ON list under %s',
       async (strategy) => {
         const { validate: validateQuery } = await setup();

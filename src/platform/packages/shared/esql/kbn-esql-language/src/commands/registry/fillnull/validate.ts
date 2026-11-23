@@ -10,13 +10,28 @@ import { isColumn, isParamLiteral, isParametrized, Walker } from '@elastic/esql'
 import type { ESQLAst, ESQLAstAllCommands, ESQLAstFillNullCommand } from '@elastic/esql/types';
 import type { ESQLMessage } from '../../definitions/types';
 import { validateColumnForCommand } from '../../definitions/utils/validation/column';
-import { columnIsPresent, getColumnExists, getColumnName } from '../../definitions/utils/columns';
+import { getColumnName } from '../../definitions/utils/columns';
+import { escapeRegExp } from '../../definitions/utils/regex';
+import { METADATA_FIELDS, CPS_METADATA_FIELDS } from '../options/metadata/fields';
 import { errors } from '../../definitions/utils/errors';
 import { isUnmappedFieldsStrategy, UnmappedFieldsStrategy } from '../types';
 import type { ICommandContext } from '../types';
 
 // Stars inside quoted identifiers are literal field-name characters.
 const hasWildcard = (text: string): boolean => text.replace(/`(?:``|[^`])*`/g, '').includes('*');
+const metadataFields = new Set([...METADATA_FIELDS, ...CPS_METADATA_FIELDS]);
+
+const getPatternMatcher = (text: string): RegExp => {
+  const parts = text.match(/`(?:``|[^`])*`|\*|[^`*]+/g) ?? [];
+  const pattern = parts
+    .map((part) => {
+      if (part === '*') return '.*';
+      const literal = part.startsWith('`') ? part.slice(1, -1).replace(/``/g, '`') : part;
+      return escapeRegExp(literal);
+    })
+    .join('');
+  return new RegExp(`^${pattern}$`, 's');
+};
 
 export const validate = (
   command: ESQLAstAllCommands,
@@ -32,7 +47,13 @@ export const validate = (
       return [];
     }
 
-    if (hasWildcard(field.text) && !getColumnExists(field, context)) {
+    const fieldName = getColumnName(field);
+    if (metadataFields.has(fieldName) && !context.columns.has(fieldName)) {
+      return [errors.unknownColumn(field)];
+    }
+
+    const matcher = hasWildcard(field.text) ? getPatternMatcher(field.text) : undefined;
+    if (matcher && ![...context.columns.keys()].some((name) => matcher.test(name))) {
       const canLoadFields =
         isUnmappedFieldsStrategy(context.unmappedFieldsStrategy) &&
         context.unmappedFieldsStrategy !== UnmappedFieldsStrategy.DEFAULT;
@@ -44,10 +65,11 @@ export const validate = (
               .filter(isColumn)
               .filter((column) => !isParametrized(column) && !hasWildcard(column.text))
               .map(getColumnName)
+              .filter((name) => !metadataFields.has(name))
           )
         : new Set<string>();
 
-      if (!columnIsPresent(field, loadableNames)) {
+      if (![...loadableNames].some((name) => matcher.test(name))) {
         return [errors.unknownColumn(field)];
       }
     }
