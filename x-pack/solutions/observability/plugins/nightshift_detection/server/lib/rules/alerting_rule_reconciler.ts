@@ -20,6 +20,7 @@ import {
   getManagedRuleName,
   getManagedRuleTags,
   getOwningStrategy,
+  getWatchedSource,
 } from './rule_identity';
 import { DetectionRulesClient } from './rules_client_token';
 
@@ -33,6 +34,12 @@ export interface StrategyAlertingRule {
 export interface StrategyError {
   strategy: string;
   message: string;
+}
+
+/** A source a strategy cannot watch for now; its rules stay as they are. */
+export interface SkippedSource {
+  strategy: string;
+  source_id: string;
 }
 
 /** What one reconciliation changed, and what it could not. */
@@ -54,6 +61,11 @@ interface DesiredRule {
   id: string;
   enabled: boolean;
   data: CreateRuleData;
+}
+
+/** Why Alerting refused a rule for the schedule budget, once it has in a run. */
+interface ScheduleBudget {
+  refusal?: string;
 }
 
 /** What the reconciler will do, worked out from what exists and what is wanted. */
@@ -89,10 +101,14 @@ const toDesiredRule = ({
   };
 };
 
+const toSourceKey = ({ strategy, source_id: sourceId }: SkippedSource) =>
+  JSON.stringify([strategy, sourceId]);
+
 /**
  * Works out the changes that take the managed rules to the desired ones. Pure, so every case is
  * tested without a rules client.
- * - A rule nobody wants is deleted, unless its strategy failed: that strategy keeps what it owns.
+ * - A rule nobody wants is deleted, unless its strategy failed or skipped its source: those rules
+ *   stay as they are until the strategy can tell again what it wants.
  * - A wanted rule that is missing is created, enabled only when wanted enabled and not paused.
  * - A rule whose `enabled` differs is toggled; `paused` turns every rule off.
  * - A query is never edited: a changed query has a new id, so the old rule goes and a new one comes.
@@ -102,11 +118,13 @@ const planRuleChanges = ({
   desired,
   paused,
   failedStrategies,
+  skippedSources,
 }: {
   existing: ManagedRule[];
   desired: DesiredRule[];
   paused: boolean;
   failedStrategies: Set<string>;
+  skippedSources: Set<string>;
 }): RuleChanges => {
   const desiredById = new Map(desired.map((rule) => [rule.id, rule]));
   const existingById = new Map(existing.map((rule) => [rule.id, rule]));
@@ -114,7 +132,14 @@ const planRuleChanges = ({
 
   const kept = existing.filter((rule) => {
     const owner = getOwningStrategy(rule.tags);
-    return desiredById.has(rule.id) || (owner !== undefined && failedStrategies.has(owner));
+    const source = getWatchedSource(rule.tags);
+    return (
+      desiredById.has(rule.id) ||
+      (owner !== undefined &&
+        (failedStrategies.has(owner) ||
+          (source !== undefined &&
+            skippedSources.has(toSourceKey({ strategy: owner, source_id: source })))))
+    );
   });
   const keptIds = new Set(kept.map(({ id }) => id));
 
@@ -132,20 +157,42 @@ const planRuleChanges = ({
     toDisable: kept
       .filter((rule) => {
         const wanted = desiredById.get(rule.id);
-        // A failed strategy's rules keep their state, unless the space is paused.
+        // A failed strategy's or skipped source's rules keep their state, unless the space is paused.
         return rule.enabled && (paused || (wanted !== undefined && !shouldRun(wanted)));
       })
       .map(({ id }) => id),
   };
 };
 
-/** Whether Alerting refused a create because the space's schedule budget is spent. */
-const isScheduleLimitError = (error: unknown): boolean =>
+/** The Alerting error code a refused request carries, if any. */
+const getAlertingErrorCode = (error: unknown): string | undefined =>
   isBoom(error) &&
   typeof error.data === 'object' &&
   error.data !== null &&
   'code' in error.data &&
-  error.data.code === ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED;
+  typeof error.data.code === 'string'
+    ? error.data.code
+    : undefined;
+
+/**
+ * Errors Alerting answers a whole create request with although they come from some of its rules: a
+ * schedule budget the request does not fit, or rule data that fails validation. A chunk refused with
+ * one is split, so the rules that are fine are still created.
+ */
+const SPLITTABLE_CREATE_ERRORS = new Set<string>([
+  ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+  ALERTING_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
+  ALERTING_ERROR_CODES.INVALID_RULE_DATA,
+]);
+
+/**
+ * Delete errors that still leave the rule gone: it was gone already, or Alerting deleted it but its
+ * executor task lingers, which Alerting logs and halts itself.
+ */
+const TOLERATED_DELETE_ERRORS = new Set<string>([
+  ALERTING_ERROR_CODES.RULE_NOT_FOUND,
+  ALERTING_ERROR_CODES.TASK_MANAGER_DRIFT,
+]);
 
 /**
  * Keeps the space's managed Alerting v2 rules equal to what the strategies want. Every chunk of
@@ -177,11 +224,13 @@ export class AlertingRuleReconciler {
     desired,
     paused,
     strategyErrors,
+    skippedSources,
   }: {
     spaceId: string;
     desired: StrategyAlertingRule[];
     paused: boolean;
     strategyErrors: StrategyError[];
+    skippedSources: SkippedSource[];
   }): Promise<ReconcileRulesResult> {
     const result: ReconcileRulesResult = {
       created: 0,
@@ -202,6 +251,7 @@ export class AlertingRuleReconciler {
       desired: desired.map((rule) => toDesiredRule({ spaceId, rule })),
       paused,
       failedStrategies: new Set(strategyErrors.map(({ strategy }) => strategy)),
+      skippedSources: new Set(skippedSources.map(toSourceKey)),
     });
 
     // 3 to 5. Sequential: deleting before creating is what frees the schedule budget.
@@ -249,13 +299,11 @@ export class AlertingRuleReconciler {
     // One chunk at a time, so a failure is reported against the rules of its own chunk.
     for (const batch of chunk(ids, MAX_BULK_ITEMS)) {
       try {
-        const { errors } = await run(batch);
-        // A rule already gone is what a delete wanted.
+        const { affected_count: affectedCount, errors } = await run(batch);
         const failed = errors.filter(
-          ({ error }) =>
-            operation !== 'delete' || error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND
+          ({ error }) => operation !== 'delete' || !TOLERATED_DELETE_ERRORS.has(error.code)
         );
-        changed += batch.length - errors.length;
+        changed += affectedCount;
         result.failures.push(
           ...failed.map(({ id, error }) => ({ rule_id: id, operation, message: error.message }))
         );
@@ -276,38 +324,79 @@ export class AlertingRuleReconciler {
     result: ReconcileRulesResult;
     rules: DesiredRule[];
   }): Promise<void> {
+    const budget: ScheduleBudget = {};
+
     // One chunk at a time, so a failure is reported against the rules of its own chunk.
     for (const batch of chunk(rules, MAX_BULK_ITEMS)) {
-      try {
-        const { items, errors } = await this.rulesClient.bulkCreateRules({
-          items: batch.map(({ id, enabled, data }) => ({ ...data, id, enabled })),
-        });
-        result.created += items.length;
-        // A rule another run created in between is what this one wanted.
-        result.failures.push(
-          ...errors
-            .filter(({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS)
-            .map(({ index, error }) => ({
-              rule_id: batch[index].id,
-              operation: 'create' as const,
-              message: error.message,
-            }))
-        );
-      } catch (error) {
-        if (isScheduleLimitError(error)) {
-          result.skipped.push(
-            ...batch.map(({ id }) => ({ rule_id: id, reason: getErrorMessage(error) }))
-          );
-          continue;
-        }
-        result.failures.push(
-          ...batch.map(({ id }) => ({
-            rule_id: id,
+      await this.createBatch({ result, batch, budget });
+    }
+  }
+
+  /**
+   * Creates a chunk of rules. A chunk Alerting refuses as a whole for some of its rules is split in
+   * halves until those rules are alone, so the rest are still created. Once a single rule does not
+   * fit the schedule budget, the enabled rules after it are skipped without asking: the budget only
+   * shrinks within a run, and asking for each would scan the cluster's schedules every time.
+   */
+  private async createBatch({
+    result,
+    batch,
+    budget,
+  }: {
+    result: ReconcileRulesResult;
+    batch: DesiredRule[];
+    budget: ScheduleBudget;
+  }): Promise<void> {
+    const { refusal } = budget;
+    const toCreate = refusal === undefined ? batch : batch.filter(({ enabled }) => !enabled);
+    if (refusal !== undefined) {
+      result.skipped.push(
+        ...batch
+          .filter(({ enabled }) => enabled)
+          .map(({ id }) => ({ rule_id: id, reason: refusal }))
+      );
+    }
+    if (toCreate.length === 0) {
+      return;
+    }
+
+    try {
+      const { items, errors } = await this.rulesClient.bulkCreateRules({
+        items: toCreate.map(({ id, enabled, data }) => ({ ...data, id, enabled })),
+      });
+      result.created += items.length;
+      // A rule another run created in between is what this one wanted.
+      result.failures.push(
+        ...errors
+          .filter(({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS)
+          .map(({ index, error }) => ({
+            rule_id: toCreate[index].id,
             operation: 'create' as const,
-            message: getErrorMessage(error),
+            message: error.message,
           }))
-        );
+      );
+    } catch (error) {
+      const code = getAlertingErrorCode(error);
+
+      if (toCreate.length > 1 && code !== undefined && SPLITTABLE_CREATE_ERRORS.has(code)) {
+        const middle = Math.ceil(toCreate.length / 2);
+        await this.createBatch({ result, batch: toCreate.slice(0, middle), budget });
+        await this.createBatch({ result, batch: toCreate.slice(middle), budget });
+        return;
       }
+      if (code === ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED) {
+        const reason = getErrorMessage(error);
+        budget.refusal = reason;
+        result.skipped.push(...toCreate.map(({ id }) => ({ rule_id: id, reason })));
+        return;
+      }
+      result.failures.push(
+        ...toCreate.map(({ id }) => ({
+          rule_id: id,
+          operation: 'create' as const,
+          message: getErrorMessage(error),
+        }))
+      );
     }
   }
 }

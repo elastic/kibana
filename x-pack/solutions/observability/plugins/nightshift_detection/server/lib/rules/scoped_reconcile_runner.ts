@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setTimeout as sleep } from 'timers/promises';
 import { inject, injectable, optional } from 'inversify';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { Logger as CoreLogger, PluginSetup } from '@kbn/core-di';
@@ -18,6 +19,7 @@ import type { ResourceContext } from '../strategies/types';
 import {
   AlertingRuleReconciler,
   type ReconcileRulesResult,
+  type SkippedSource,
   type StrategyAlertingRule,
   type StrategyError,
 } from './alerting_rule_reconciler';
@@ -29,8 +31,10 @@ import { SpaceRulesLock } from './space_rules_lock';
  * run when a newer change comes in, but the cancelled run's call keeps the lock until it finishes,
  * and it may have read the knowledge before that change. Waiting it out lets the newer run read
  * what is there now instead of answering busy and leaving the change for the six-hour schedule.
+ * About four minutes: with the workflow's 30-second settle, it fits its five-minute timeout, and a
+ * large reconciliation can hold the lock past the two minutes of Kibana's default socket timeout.
  */
-const LOCK_WAIT_ATTEMPTS = 6;
+const LOCK_WAIT_ATTEMPTS = 24;
 const LOCK_WAIT_INTERVAL_MS = 10_000;
 
 /** What a `_reconcile` call did: the reconciliation, or nothing because another one holds the space. */
@@ -66,6 +70,9 @@ export class ScopedReconcileRunner {
   }): Promise<ReconcileRulesResponse> {
     // An attempt at a time: each one waits for the previous holder to let go.
     for (let attempt = 1; ; attempt++) {
+      if (abortSignal.aborted) {
+        return { status: 'busy' };
+      }
       const outcome = await this.lock.run({
         spaceId,
         callback: () => this.reconcile({ accountRequest, spaceId, abortSignal }),
@@ -74,10 +81,11 @@ export class ScopedReconcileRunner {
       if (outcome.ran) {
         return { status: 'completed', ...outcome.result };
       }
-      if (attempt === LOCK_WAIT_ATTEMPTS || abortSignal.aborted) {
+      if (attempt === LOCK_WAIT_ATTEMPTS) {
         return { status: 'busy' };
       }
-      await new Promise((resolve) => setTimeout(resolve, LOCK_WAIT_INTERVAL_MS));
+      // Rejects once the call is aborted, which ends the wait.
+      await sleep(LOCK_WAIT_INTERVAL_MS, undefined, { signal: abortSignal }).catch(() => {});
     }
   }
 
@@ -106,12 +114,12 @@ export class ScopedReconcileRunner {
         knowledge: scope.get(KnowledgeIndicators),
         cpsEnabled: this.cps?.getCpsEnabled() ?? false,
       };
-      const { desired, strategyErrors } = await this.collectDesiredRules(context);
+      const { desired, strategyErrors, skippedSources } = await this.collectDesiredRules(context);
 
-      // Phase 2 never pauses: the maintenance state is wired in nightshift-program#2086.
+      // Never paused yet: nothing sets the space's maintenance state so far.
       return await scope
         .get(AlertingRuleReconciler)
-        .reconcile({ spaceId, desired, paused: false, strategyErrors });
+        .reconcile({ spaceId, desired, paused: false, strategyErrors, skippedSources });
     } finally {
       try {
         await scope.unbindAllAsync();
@@ -122,11 +130,14 @@ export class ScopedReconcileRunner {
   }
 
   /** Every strategy's alerting rules; a strategy that throws is reported and keeps what it owns. */
-  private async collectDesiredRules(
-    context: ResourceContext
-  ): Promise<{ desired: StrategyAlertingRule[]; strategyErrors: StrategyError[] }> {
+  private async collectDesiredRules(context: ResourceContext): Promise<{
+    desired: StrategyAlertingRule[];
+    strategyErrors: StrategyError[];
+    skippedSources: SkippedSource[];
+  }> {
     const desired: StrategyAlertingRule[] = [];
     const strategyErrors: StrategyError[] = [];
+    const skippedSources: SkippedSource[] = [];
 
     await Promise.all(
       this.catalog.list().map(async (strategy) => {
@@ -146,6 +157,12 @@ export class ScopedReconcileRunner {
                 .join('; ')}`
             );
           }
+          skippedSources.push(
+            ...result.skipped.map(({ source_id: sourceId }) => ({
+              strategy: descriptor.id,
+              source_id: sourceId,
+            }))
+          );
           // Every resource is an alerting rule while that is the only kind.
           desired.push(
             ...result.resources.map((resource) => ({
@@ -159,6 +176,6 @@ export class ScopedReconcileRunner {
       })
     );
 
-    return { desired, strategyErrors };
+    return { desired, strategyErrors, skippedSources };
   }
 }

@@ -127,6 +127,7 @@ export type DesiredResource = AlertingRuleResource;
 /** The resources a strategy needs, and the sources it cannot watch. */
 export interface DesiredResources {
   resources: DesiredResource[];
+  /** Sources the strategy cannot watch for now. Their existing rules stay as they are. */
   skipped: Array<{ source_id: string; reason: string }>;
 }
 

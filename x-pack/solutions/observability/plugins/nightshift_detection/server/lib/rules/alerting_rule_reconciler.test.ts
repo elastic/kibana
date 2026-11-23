@@ -64,13 +64,17 @@ const setUp = (options?: ConstructorParameters<typeof InMemoryRulesClient>[0]) =
   );
   const reconcile = (
     desired: StrategyAlertingRule[],
-    { paused = false, failed = [] as string[] } = {}
+    { paused = false, failed = [] as string[], skippedSources = [] as string[] } = {}
   ) =>
     reconciler.reconcile({
       spaceId: SPACE_ID,
       desired,
       paused,
       strategyErrors: failed.map((strategy) => ({ strategy, message: 'boom' })),
+      skippedSources: skippedSources.map((sourceId) => ({
+        strategy: STRATEGY.id,
+        source_id: sourceId,
+      })),
     });
 
   return { rulesClient, reconcile };
@@ -164,6 +168,18 @@ describe('AlertingRuleReconciler', () => {
     expect(rulesClient.rules.has(getRuleId(rule))).toBe(true);
   });
 
+  it('keeps the rule of a source its strategy skipped, as it is', async () => {
+    const { rulesClient, reconcile } = setUp();
+    const rule = createRule();
+    await reconcile([rule]);
+
+    await expect(reconcile([], { skippedSources: ['source-1'] })).resolves.toMatchObject({
+      deleted: 0,
+      disabled: 0,
+    });
+    expect(rulesClient.rules.get(getRuleId(rule))?.enabled).toBe(true);
+  });
+
   it('reports rules refused for the schedule budget as skipped, not failed', async () => {
     const { reconcile } = setUp({ maxEnabledRules: 0 });
 
@@ -173,6 +189,33 @@ describe('AlertingRuleReconciler', () => {
       { rule_id: getRuleId(createRule()), reason: 'Too many schedules' },
     ]);
     expect(result.failures).toEqual([]);
+  });
+
+  it('creates as many rules of a chunk as the schedule budget fits, and skips the rest', async () => {
+    const rules = Array.from({ length: 100 }, (_, index) =>
+      createRule({ sourceId: `source-${index}` })
+    );
+    const { reconcile } = setUp({ maxEnabledRules: 40 });
+
+    const result = await reconcile(rules);
+
+    expect(result.created).toBe(40);
+    expect(result.skipped).toHaveLength(60);
+    expect(result.failures).toEqual([]);
+  });
+
+  it('creates the rest of a chunk Alerting refuses for one invalid rule', async () => {
+    const rules = Array.from({ length: 100 }, (_, index) =>
+      createRule({ sourceId: `source-${index}` })
+    );
+    const { reconcile } = setUp({ invalidRuleIds: new Set([getRuleId(rules[42])]) });
+
+    const result = await reconcile(rules);
+
+    expect(result.created).toBe(99);
+    expect(result.failures).toEqual([
+      { rule_id: getRuleId(rules[42]), operation: 'create', message: 'Invalid rule data' },
+    ]);
   });
 
   it('applies the other chunks when one chunk fails', async () => {
