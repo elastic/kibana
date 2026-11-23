@@ -690,6 +690,8 @@ it.each([
 });
 
 describe('automation budget enforcement before dispatch', () => {
+  beforeEach(() => jest.mocked(notifyInvestigationLimitReached).mockClear());
+
   const input = { automation_id: 'a1', subject_type: 'manual', message: 'Review errors.' };
   const setup = (limit: number, used: number) => {
     const soClient = savedObjectsClientMock.create();

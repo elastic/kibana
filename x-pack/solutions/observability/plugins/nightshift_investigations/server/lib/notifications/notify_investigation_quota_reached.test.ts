@@ -188,7 +188,7 @@ describe('notifyInvestigationLimitReached', () => {
 
   it('logs a failed delivery and still posts to the other channels', async () => {
     const { execute, notify } = setup();
-    execute.mockRejectedValueOnce(new Error('channel_not_found'));
+    execute.mockResolvedValueOnce({ status: 'error', serviceMessage: 'channel_not_found' });
 
     await expect(
       notify(
