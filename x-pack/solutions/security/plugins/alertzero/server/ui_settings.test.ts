@@ -27,7 +27,7 @@ describe('registerUiSettings', () => {
         value: false,
         scope: 'namespace',
         category: ['securitySolution'],
-        solutionViews: ['security'],
+        solutionViews: ['security', 'classic'],
         technicalPreview: true,
         requiresPageReload: true,
       })

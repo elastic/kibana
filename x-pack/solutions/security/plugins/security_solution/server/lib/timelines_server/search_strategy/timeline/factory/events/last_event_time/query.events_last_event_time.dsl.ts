@@ -9,7 +9,7 @@ import type { ISearchRequestParams } from '@kbn/search-types';
 import type { TimelineEventsLastEventTimeRequestOptions } from '@kbn/securitysolution-timeline-search-strategy';
 import { LastEventIndexKey } from '@kbn/securitysolution-timeline-search-strategy';
 
-import { assertUnreachable } from '@kbn/timelines-plugin/common/utility_types';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
 
 interface EventIndices {
   [key: string]: string[];

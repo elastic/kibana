@@ -19,7 +19,7 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
-} from '@kbn/timelines-plugin/public';
+} from '../../../../../../common/utils/accessibility';
 import type { RowRenderer } from '../../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';

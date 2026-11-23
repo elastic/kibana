@@ -11,7 +11,7 @@ import type {
   EventHit,
   TimelineEventsDetailsStrategyResponse,
 } from '@kbn/securitysolution-timeline-search-strategy';
-import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common/utils/get_timeline_fields_data_from_hit';
+import { getTimelineFieldsDataFromHit } from '../../../../../../../../common/utils/get_timeline_fields_data_from_hit';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { TimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
