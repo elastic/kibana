@@ -188,21 +188,22 @@ describe('notifyInvestigationLimitReached', () => {
 
   it('logs a failed delivery and still posts to the other channels', async () => {
     const { execute, notify } = setup();
-    execute.mockResolvedValueOnce({ status: 'error', serviceMessage: 'channel_not_found' });
+    execute
+      .mockResolvedValueOnce({ status: 'error', serviceMessage: 'channel_not_found' })
+      .mockRejectedValueOnce(new Error('unauthorized'));
 
     await expect(
       notify(
-        [
-          { connectorId: 'slack-connector', channel: 'C1' },
-          { connectorId: 'slack-connector', channel: 'C2' },
-        ],
+        ['C1', 'C2', 'C3'].map((channel) => ({ connectorId: 'slack-connector', channel })),
         { type: 'quota', deniedBy: 'automatic' }
       )
     ).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('channel_not_found'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('unauthorized'));
     expect(execute.mock.calls.map(([{ params }]) => params.subActionParams.channel)).toEqual([
       'C1',
       'C2',
+      'C3',
     ]);
   });
 
