@@ -17,7 +17,7 @@ import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../../ai_index_created_location_state';
 import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
-import { getSetupWizardStorageKey, readSetupWizardStoredValue } from '../../utils/setup_wizard';
+import { readSetupWizardStoredValue, writeSetupWizardStoredValue } from '../../utils/setup_wizard';
 import { CreateAiIndexModal } from './create_ai_index_modal';
 
 jest.mock('../../hooks/use_memory_enabled', () => ({
@@ -156,7 +156,7 @@ describe('CreateAiIndexModal', () => {
 
   it('forgets the setup wizard state of an older AI index with the same id', async () => {
     const storageKey = { basePath: '', aiIndexId: VALID_ID };
-    window.localStorage.setItem(getSetupWizardStorageKey(storageKey), JSON.stringify('closed'));
+    writeSetupWizardStoredValue(storageKey, 'closed');
     const services = coreMock.createStart();
     services.http.post.mockResolvedValue({});
 

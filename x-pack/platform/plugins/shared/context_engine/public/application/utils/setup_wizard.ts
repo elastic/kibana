@@ -18,19 +18,23 @@ export type SetupWizardStoredValue = SetupWizardStepId | 'closed';
 
 export type SetupWizardDoneSteps = Readonly<Record<SetupWizardStepId, boolean>>;
 
-const SETUP_WIZARD_STORAGE_KEY_PREFIX = 'contextEngine.setupWizard';
+/**
+ * The one local storage key of the wizard. Its value is an object with one entry per AI index, e.g.
+ * `{ "/kd-many": "sources", "/s/marketing/kd-many": "closed" }`.
+ */
+export const SETUP_WIZARD_STORAGE_KEY = 'contextEngine.setupWizard';
 
 /**
- * Local storage key of one AI index's wizard state. AI index ids are unique per space only, so the
- * key also holds the space, as the base path (`/s/<space>` outside the default space).
+ * Entry of one AI index in the stored object. AI index ids are unique per space only, so the entry
+ * also holds the space, as the base path (`/s/<space>` outside the default space).
  */
-export const getSetupWizardStorageKey = ({
+export const getSetupWizardEntryKey = ({
   basePath,
   aiIndexId,
 }: {
   basePath: string;
   aiIndexId: string;
-}): string => `${SETUP_WIZARD_STORAGE_KEY_PREFIX}:${basePath}:${aiIndexId}`;
+}): string => `${basePath}/${aiIndexId}`;
 
 const isSetupWizardStepId = (value: unknown): value is SetupWizardStepId =>
   SETUP_WIZARD_STEP_IDS.some((stepId) => stepId === value);
@@ -112,29 +116,76 @@ export const getSetupWizardView = ({
   return { show: true, steps, initialStep: storedStep ?? firstNotDone };
 };
 
-type SetupWizardStorageKeyParams = Parameters<typeof getSetupWizardStorageKey>[0];
+type SetupWizardEntryKeyParams = Parameters<typeof getSetupWizardEntryKey>[0];
+
+type SetupWizardRecord = Readonly<Record<string, SetupWizardStoredValue>>;
 
 /*
  * The wizard's only state store: local storage. The React app reads it live (see
  * `subscribeSetupWizardStorage`), so nothing is kept twice. When local storage is missing or blocked
- * (private mode, policies), values live in memory instead: the wizard still works, it only forgets
- * the step on refresh.
+ * (private mode, policies), the object lives in memory instead: the wizard still works, it only
+ * forgets the step on refresh.
  */
-const memoryFallback = new Map<string, string>();
+let memoryFallback: SetupWizardRecord | undefined;
 const listeners = new Set<() => void>();
 
 const notifyListeners = (): void => listeners.forEach((listener) => listener());
 
-const readRaw = (key: string): string | null => {
-  const fallback = memoryFallback.get(key);
-  if (fallback !== undefined) {
-    return fallback;
-  }
+const removeStoredRecord = (): void => {
   try {
-    return window.localStorage.getItem(key);
+    window.localStorage.removeItem(SETUP_WIZARD_STORAGE_KEY);
   } catch {
-    return null;
+    // Nothing to remove when local storage is blocked.
   }
+};
+
+/** Keeps the entries with a known value. A malformed object is deleted, so it can't break setup. */
+const parseRecord = (raw: string): SetupWizardRecord => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    parsed = undefined;
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    removeStoredRecord();
+    return {};
+  }
+  const record: Record<string, SetupWizardStoredValue> = {};
+  Object.entries(parsed).forEach(([entryKey, value]) => {
+    const storedValue = parseSetupWizardStoredValue(value);
+    if (storedValue !== undefined) {
+      record[entryKey] = storedValue;
+    }
+  });
+  return record;
+};
+
+const readRecord = (): SetupWizardRecord => {
+  if (memoryFallback !== undefined) {
+    return memoryFallback;
+  }
+  let raw: string | null = null;
+  try {
+    raw = window.localStorage.getItem(SETUP_WIZARD_STORAGE_KEY);
+  } catch {
+    raw = null;
+  }
+  return raw === null ? {} : parseRecord(raw);
+};
+
+const writeRecord = (record: SetupWizardRecord): void => {
+  try {
+    if (Object.keys(record).length === 0) {
+      window.localStorage.removeItem(SETUP_WIZARD_STORAGE_KEY);
+    } else {
+      window.localStorage.setItem(SETUP_WIZARD_STORAGE_KEY, JSON.stringify(record));
+    }
+    memoryFallback = undefined;
+  } catch {
+    memoryFallback = record;
+  }
+  notifyListeners();
 };
 
 /** Calls `listener` when a wizard value changes, in this tab or in another one. */
@@ -148,42 +199,23 @@ export const subscribeSetupWizardStorage = (listener: () => void): (() => void) 
 };
 
 export const readSetupWizardStoredValue = (
-  keyParams: SetupWizardStorageKeyParams
-): SetupWizardStoredValue | undefined => {
-  const raw = readRaw(getSetupWizardStorageKey(keyParams));
-  if (raw === null) {
-    return undefined;
-  }
-  try {
-    return parseSetupWizardStoredValue(JSON.parse(raw));
-  } catch {
-    return undefined;
-  }
-};
+  entryKeyParams: SetupWizardEntryKeyParams
+): SetupWizardStoredValue | undefined => readRecord()[getSetupWizardEntryKey(entryKeyParams)];
 
 export const writeSetupWizardStoredValue = (
-  keyParams: SetupWizardStorageKeyParams,
+  entryKeyParams: SetupWizardEntryKeyParams,
   value: SetupWizardStoredValue
 ): void => {
-  const key = getSetupWizardStorageKey(keyParams);
-  const raw = JSON.stringify(value);
-  try {
-    window.localStorage.setItem(key, raw);
-    memoryFallback.delete(key);
-  } catch {
-    memoryFallback.set(key, raw);
-  }
-  notifyListeners();
+  writeRecord({ ...readRecord(), [getSetupWizardEntryKey(entryKeyParams)]: value });
 };
 
 /** Forgets the wizard state, so a new AI index that reuses an old id starts setup fresh. */
-export const removeSetupWizardStoredValue = (keyParams: SetupWizardStorageKeyParams): void => {
-  const key = getSetupWizardStorageKey(keyParams);
-  memoryFallback.delete(key);
-  try {
-    window.localStorage.removeItem(key);
-  } catch {
-    // Nothing to remove when local storage is blocked.
+export const removeSetupWizardStoredValue = (entryKeyParams: SetupWizardEntryKeyParams): void => {
+  const entryKey = getSetupWizardEntryKey(entryKeyParams);
+  const record = readRecord();
+  if (!(entryKey in record)) {
+    return;
   }
-  notifyListeners();
+  const { [entryKey]: _removed, ...rest } = record;
+  writeRecord(rest);
 };

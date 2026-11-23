@@ -11,7 +11,7 @@ import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import {
-  getSetupWizardStorageKey,
+  SETUP_WIZARD_STORAGE_KEY,
   readSetupWizardStoredValue,
   writeSetupWizardStoredValue,
 } from '../utils/setup_wizard';
@@ -119,7 +119,10 @@ describe('useSetupWizard', () => {
     const { result } = renderSetupWizard();
 
     act(() => {
-      window.localStorage.setItem(getSetupWizardStorageKey(storageKey), JSON.stringify('describe'));
+      window.localStorage.setItem(
+        SETUP_WIZARD_STORAGE_KEY,
+        JSON.stringify({ '/my-ai-index': 'describe' })
+      );
       window.dispatchEvent(new StorageEvent('storage'));
     });
 

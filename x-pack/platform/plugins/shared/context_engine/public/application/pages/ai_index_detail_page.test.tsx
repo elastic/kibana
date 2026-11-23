@@ -36,7 +36,7 @@ import {
 } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
-import { getSetupWizardStorageKey } from '../utils/setup_wizard';
+import { SETUP_WIZARD_STORAGE_KEY } from '../utils/setup_wizard';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 
@@ -227,8 +227,8 @@ const renderWithProviders = (
 
 const closeSetupWizard = () => {
   window.localStorage.setItem(
-    getSetupWizardStorageKey({ basePath: '', aiIndexId: aiIndex.id }),
-    JSON.stringify('closed')
+    SETUP_WIZARD_STORAGE_KEY,
+    JSON.stringify({ '/my-ai-index': 'closed' })
   );
 };
 
@@ -298,8 +298,8 @@ describe('AiIndexDetailPage', () => {
 
     it('opens the step saved in local storage after a refresh', async () => {
       window.localStorage.setItem(
-        getSetupWizardStorageKey({ basePath: '', aiIndexId: aiIndex.id }),
-        JSON.stringify('describe')
+        SETUP_WIZARD_STORAGE_KEY,
+        JSON.stringify({ '/my-ai-index': 'describe' })
       );
       const services = createServices();
       services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
@@ -319,11 +319,9 @@ describe('AiIndexDetailPage', () => {
       await waitFor(() =>
         expect(screen.queryByTestId('contextSetupWizard')).not.toBeInTheDocument()
       );
-      expect(
-        window.localStorage.getItem(
-          getSetupWizardStorageKey({ basePath: '', aiIndexId: aiIndex.id })
-        )
-      ).toBe(JSON.stringify('closed'));
+      expect(JSON.parse(window.localStorage.getItem(SETUP_WIZARD_STORAGE_KEY) ?? '')).toEqual({
+        '/my-ai-index': 'closed',
+      });
     });
 
     it('shows the wizard instead of the AI index created callout', async () => {

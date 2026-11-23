@@ -9,7 +9,7 @@ import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import type { SetupWizardDoneSteps } from './setup_wizard';
 import {
   getSetupWizardDoneSteps,
-  getSetupWizardStorageKey,
+  SETUP_WIZARD_STORAGE_KEY,
   getSetupWizardSteps,
   getSetupWizardView,
   isDreamingSetUp,
@@ -176,24 +176,32 @@ describe('setup wizard storage', () => {
     window.localStorage.clear();
   });
 
-  it('keeps the same AI index id apart in different spaces', () => {
-    expect(getSetupWizardStorageKey({ basePath: '', aiIndexId: 'support' })).not.toBe(
-      getSetupWizardStorageKey({ basePath: '/s/marketing', aiIndexId: 'support' })
-    );
+  const readStoredObject = () =>
+    JSON.parse(window.localStorage.getItem(SETUP_WIZARD_STORAGE_KEY) ?? 'null');
 
+  it('keeps every AI index in one object, with the space in each entry', () => {
+    writeSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' }, 'sources');
     writeSetupWizardStoredValue({ basePath: '/s/marketing', aiIndexId: 'support' }, 'closed');
 
-    expect(readSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' })).toBeUndefined();
+    expect(readStoredObject()).toEqual({
+      '/support': 'sources',
+      '/s/marketing/support': 'closed',
+    });
+    expect(readSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' })).toBe('sources');
     expect(readSetupWizardStoredValue({ basePath: '/s/marketing', aiIndexId: 'support' })).toBe(
       'closed'
     );
   });
 
-  it('removes the stored value', () => {
+  it('removes one entry, and the whole key with the last one', () => {
     writeSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' }, 'sources');
-    removeSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' });
+    writeSetupWizardStoredValue({ basePath: '', aiIndexId: 'billing' }, 'closed');
 
-    expect(readSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' })).toBeUndefined();
+    removeSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' });
+    expect(readStoredObject()).toEqual({ '/billing': 'closed' });
+
+    removeSetupWizardStoredValue({ basePath: '', aiIndexId: 'billing' });
+    expect(window.localStorage.getItem(SETUP_WIZARD_STORAGE_KEY)).toBeNull();
   });
 
   it('keeps the value in memory when local storage is blocked', () => {
@@ -209,12 +217,26 @@ describe('setup wizard storage', () => {
     expect(readSetupWizardStoredValue({ basePath: '', aiIndexId: 'blocked' })).toBeUndefined();
   });
 
-  it('ignores a value it cannot read', () => {
+  it.each([
+    ['not JSON', '{not json'],
+    ['not an object', '"sources"'],
+    ['an array', '["sources"]'],
+  ])('deletes a stored value that is %s', (_label, raw) => {
+    window.localStorage.setItem(SETUP_WIZARD_STORAGE_KEY, raw);
+
+    expect(readSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' })).toBeUndefined();
+    expect(window.localStorage.getItem(SETUP_WIZARD_STORAGE_KEY)).toBeNull();
+  });
+
+  it('ignores an entry with an unknown value and drops it on the next write', () => {
     window.localStorage.setItem(
-      getSetupWizardStorageKey({ basePath: '', aiIndexId: 'support' }),
-      '{not json'
+      SETUP_WIZARD_STORAGE_KEY,
+      JSON.stringify({ '/support': 'step-9', '/billing': 'closed' })
     );
 
     expect(readSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' })).toBeUndefined();
+
+    writeSetupWizardStoredValue({ basePath: '', aiIndexId: 'orders' }, 'sources');
+    expect(readStoredObject()).toEqual({ '/billing': 'closed', '/orders': 'sources' });
   });
 });
