@@ -24824,6 +24824,7 @@ paths:
                       required:
                         - source
                         - message
+                    maxItems: 100
                     type: array
                 required:
                   - status
@@ -26009,6 +26010,7 @@ paths:
                       required:
                         - source
                         - message
+                    maxItems: 100
                     type: array
                 required:
                   - status
@@ -26059,6 +26061,7 @@ paths:
                       required:
                         - source
                         - message
+                    maxItems: 100
                     type: array
                 required:
                   - status
