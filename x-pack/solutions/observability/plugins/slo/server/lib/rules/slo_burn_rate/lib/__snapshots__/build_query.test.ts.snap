@@ -216,7 +216,7 @@ Object {
         },
       },
       "composite": Object {
-        "size": 10000,
+        "size": 1000,
         "sources": Array [
           Object {
             "instanceId": Object {
@@ -477,7 +477,7 @@ Object {
         },
       },
       "composite": Object {
-        "size": 10000,
+        "size": 1000,
         "sources": Array [
           Object {
             "instanceId": Object {
