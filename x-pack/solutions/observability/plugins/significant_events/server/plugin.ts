@@ -128,6 +128,7 @@ import {
 } from './agent_builder/agents/ki_query_generation';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
+import { createEnqueueSourceReconciliation } from './lib/workflows/create_enqueue_source_reconciliation';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
@@ -158,6 +159,8 @@ export class SignificantEventsPlugin
   private kibanaVersion: string;
   private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
+  /** The latest managed resource install, so source changes can wait for it. */
+  private managedResourcesInstall: Promise<void> = Promise.resolve();
   private maintenanceService?: SignificantEventsMaintenanceService;
   constructor(context: PluginInitializerContext) {
     this.isDev = context.env.mode.dev;
@@ -592,16 +595,29 @@ export class SignificantEventsPlugin
       : undefined;
     plugins.nightshiftSources.onSourceChange(
       createSourceChangeListener({
-        enqueueReconciliation: async ({ sourceId, sourceSlug, request }) => {
-          if (!sourceReconciliation) {
-            throw new Error('Workflows management is required to reconcile source knowledge');
-          }
-          await sourceReconciliation.execute({
-            executionSpaceId: request.spaceId,
-            inputs: { sourceId, sourceSlug },
-            request,
-          });
-        },
+        enqueueReconciliation: createEnqueueSourceReconciliation({
+          whenInstalled: () => this.managedResourcesInstall,
+          isAvailable: async () => {
+            const [, pluginsStart] = await core.getStartServices();
+            return this.server
+              ? isSignificantEventsAvailable({
+                  server: this.server,
+                  licensing: pluginsStart.licensing,
+                })
+              : false;
+          },
+          execute: async ({ sourceId, sourceSlug, request }) => {
+            if (!sourceReconciliation) {
+              throw new Error('Workflows management is required to reconcile source knowledge');
+            }
+            await sourceReconciliation.execute({
+              executionSpaceId: request.spaceId,
+              inputs: { sourceId, sourceSlug },
+              request,
+            });
+          },
+          logger: this.logger,
+        }),
         ensurePeriodicReconciliation: async (request) => {
           // Keep periodic repair available even when continuous onboarding is switched off.
           if ((await this.maintenanceService?.getState({ request })) !== 'paused') {
@@ -858,9 +874,12 @@ export class SignificantEventsPlugin
     }
   }
 
-  private async ensureSignificantEventsInstalled(
-    isAvailable: () => Promise<boolean>
-  ): Promise<void> {
+  private ensureSignificantEventsInstalled(isAvailable: () => Promise<boolean>): Promise<void> {
+    this.managedResourcesInstall = this.installManagedResources(isAvailable);
+    return this.managedResourcesInstall;
+  }
+
+  private async installManagedResources(isAvailable: () => Promise<boolean>): Promise<void> {
     if (!(await isAvailable())) {
       this.logger.debug(
         'significantEvents: availability flag disabled, skipping managed resource installation'
