@@ -503,34 +503,28 @@ function normalizeOasMetaExtensions(
 }
 
 /**
- * For `z.discriminatedUnion` schemas, auto-generate an OAS discriminator
- * with property name and (when every variant has a stable component name) a
- * mapping.  Returns `null` for non-discriminated schemas.
+ * For `z.discriminatedUnion` schemas, auto-generate an OAS discriminator whose
+ * mapping covers every variant. OAS 3.0 resolves discriminator values only to
+ * named schemas, so returns `null` unless every variant has a stable component
+ * name and a required discriminator property.
  */
 function buildAutoDiscriminator(schema: z.ZodType): OasMetaExtensions | null {
   const { discriminator: key, options } = (schema as any)._zod?.def ?? {};
   if (typeof key !== 'string' || !Array.isArray(options)) return null;
 
   const mapping: Record<string, string> = {};
-  let allNamed = true;
 
   for (const opt of options) {
     const name = getStableComponentName(opt);
-    if (!name) {
-      allNamed = false;
-      continue;
-    }
-    const litValues = opt._zod?.def?.shape?.[key]?._zod?.def?.values;
-    if (Array.isArray(litValues) && litValues.length === 1) {
-      mapping[String(litValues[0])] = `#/components/schemas/${name}`;
+    const values: z.core.util.PropValues[string] | undefined = opt._zod?.propValues?.[key];
+    if (!name || !values?.size || values.has(undefined)) return null;
+
+    for (const value of values) {
+      mapping[String(value)] = `#/components/schemas/${name}`;
     }
   }
 
-  const disc: OpenAPIV3.DiscriminatorObject = { propertyName: key };
-  if (allNamed && Object.keys(mapping).length > 0) {
-    disc.mapping = mapping;
-  }
-  return { discriminator: disc };
+  return { discriminator: { propertyName: key, mapping } };
 }
 
 /**
