@@ -9,6 +9,7 @@ import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
 import type { monaco } from '@kbn/monaco';
 import { createWorkflowContextRegistry } from '../../../../../common/lib/create_workflow_context_registry';
+import { useSecretNames } from '../../../../entities/secrets/model/use_secret_names';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';
 import { getCalledWorkflowOutputs } from '../../../../entities/workflows/store/workflow_detail/utils/get_called_workflow_outputs';
@@ -25,6 +26,9 @@ export const useWorkflowYamlCompletionProvider = (): monaco.languages.Completion
   const editorState = useSelector(selectDetail);
   const editorStateRef = useRef<WorkflowDetailState>(editorState);
   editorStateRef.current = editorState;
+  const secretNames = useSecretNames();
+  const secretNamesRef = useRef(secretNames);
+  secretNamesRef.current = secretNames;
 
   // Independent from the validator's instance — completion and validation
   // each subscribe to the licensing/sources callbacks separately. Kept in a
@@ -60,7 +64,8 @@ export const useWorkflowYamlCompletionProvider = (): monaco.languages.Completion
       () => editorStateRef.current,
       getKqlServices,
       getPropertyHandler,
-      getEsqlServices
+      getEsqlServices,
+      () => secretNamesRef.current
     );
   }, [getPropertyHandler, registry, services.fieldFormats, services.kql]);
 

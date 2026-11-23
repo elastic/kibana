@@ -147,7 +147,8 @@ export function getCompletionItemProvider(
   getState: () => WorkflowDetailState,
   getKqlServices?: () => WorkflowKqlCompletionServices,
   getPropertyHandler?: GetStepPropertyHandler,
-  getEsqlServices?: () => WorkflowEsqlCompletionServices
+  getEsqlServices?: () => WorkflowEsqlCompletionServices,
+  getSecretNames?: () => ReadonlySet<string> | undefined
 ): monaco.languages.CompletionItemProvider {
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
@@ -161,6 +162,7 @@ export function getCompletionItemProvider(
         model,
         position,
         completionContext,
+        secretNames: getSecretNames?.(),
       });
       if (!autocompleteContext) {
         return {

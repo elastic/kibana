@@ -14,6 +14,7 @@ import {
   collectAllVariables,
   createStepContextResolver,
   validateLiquidYamlScalars,
+  validateSecretReferences,
   validateVariables as validateVariablesInternal,
 } from '@kbn/workflows-yaml';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
@@ -36,6 +37,8 @@ export interface RunWorkflowYamlValidationsParams {
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph;
   workflowDefinition?: WorkflowYaml;
+  /** Names of the secrets of the space. Omitted when they are not known: names are then not checked. */
+  secretNames?: ReadonlySet<string>;
 }
 
 /**
@@ -54,6 +57,7 @@ export function runWorkflowYamlValidations({
   workflowLookup,
   workflowGraph,
   workflowDefinition,
+  secretNames,
 }: RunWorkflowYamlValidationsParams): YamlValidationResult[] {
   const stepContext =
     workflowGraph && workflowDefinition
@@ -93,6 +97,12 @@ export function runWorkflowYamlValidations({
         yamlDocument,
         yamlString
       ),
+      ...validateSecretReferences({
+        variableItems,
+        workflowDefinition,
+        workflowGraph,
+        secretNames,
+      }),
       ...liquidScalarResults.filter((result) => result.owner === 'variable-validation'),
       ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
     );

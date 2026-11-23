@@ -17,11 +17,13 @@ import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
 import type { CalledWorkflowOutputs, WorkflowContextRegistry } from '@kbn/workflows-yaml';
 import {
+  findMisplacedSecretReferences,
   InvalidYamlSchemaError,
   InvalidYamlSyntaxError,
   isDynamicValue,
   isRecord,
   parseWorkflowYamlToJSON,
+  SECRET_NOT_ALLOWED_MESSAGE,
   validateLiquidTemplate,
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
@@ -114,6 +116,20 @@ const withCalledWorkflowOutputs = async (
     return { registry, notCheckedReason: CALLED_WORKFLOW_OUTPUTS_NOT_CHECKED };
   }
 };
+
+// Always on, unlike the variable rules: a secret in a place where the engine does not resolve
+// it renders as empty at run time, so the workflow is stored as invalid instead.
+const collectMisplacedSecretDiagnostics = (
+  workflowDefinition: WorkflowYaml,
+  workflowGraph: WorkflowGraph
+): WorkflowDiagnostic[] =>
+  findMisplacedSecretReferences({ workflowDefinition, workflowGraph }).map(({ name, path }) => ({
+    severity: 'error',
+    message: `${SECRET_NOT_ALLOWED_MESSAGE} (secrets.${name} at ${path.join('.')})`,
+    source: 'secrets',
+    path: [...path],
+    ruleId: 'secretNotAllowed',
+  }));
 
 export async function validateWorkflowYaml(
   yaml: string,
@@ -212,6 +228,10 @@ export async function validateWorkflowYaml(
       const message =
         isGraphBuildError(error) || error instanceof Error ? error.message : String(error);
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
+    }
+
+    if (workflowGraph) {
+      diagnostics.push(...collectMisplacedSecretDiagnostics(parsedWorkflow, workflowGraph));
     }
 
     for (const occurrence of collectIgnoredKibanaFetcherOccurrences(parsedWorkflow.steps)) {

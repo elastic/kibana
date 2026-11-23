@@ -17,6 +17,7 @@ import { extendWithPathSpecificContext } from '../context/get_context_for_path';
 import { getNearestStepPath } from '../context/get_nearest_step_path';
 import type { StepContextResolver } from '../context/step_context_resolver';
 import { getValueAtYamlPath } from '../context/get_value_at_yaml_path';
+import { isSecretReference } from '../secrets/secret_references';
 
 export function validateVariables(
   stepContext: StepContextResolver,
@@ -32,6 +33,10 @@ export function validateVariables(
   const fullContextCache = new Map<string, typeof DynamicStepContextSchema>();
 
   for (const variableItem of variableItems) {
+    // Secrets are not part of the step context: `validateSecretReferences` checks them.
+    if (isSecretReference(variableItem.key)) {
+      continue;
+    }
     const { yamlPath: path, offset } = variableItem;
 
     const nearestStepPath = getNearestStepPath(path);

@@ -77,6 +77,18 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'warning';
     values: { propertyPath: string };
   };
+  /** A secret is referenced where the execution engine does not resolve secrets. */
+  secretNotAllowed: {
+    owner: 'secret-validation';
+    defaultSeverity: 'error';
+    values: { name: string };
+  };
+  /** A secret is referenced by a name that no secret of the space has. */
+  unknownSecret: {
+    owner: 'secret-validation';
+    defaultSeverity: 'warning';
+    values: { name: string };
+  };
   /** A `{% for %}` collection path that does not resolve to something iterable. */
   invalidCollectionPath: {
     owner: 'variable-validation';
@@ -278,6 +290,8 @@ export const WORKFLOW_VALIDATION_RULES: {
   variablePathParseError: { owner: 'variable-validation', defaultSeverity: 'error' },
   invalidVariableReference: { owner: 'variable-validation', defaultSeverity: 'error' },
   unknownVariableType: { owner: 'variable-validation', defaultSeverity: 'warning' },
+  secretNotAllowed: { owner: 'secret-validation', defaultSeverity: 'error' },
+  unknownSecret: { owner: 'secret-validation', defaultSeverity: 'warning' },
   invalidCollectionPath: { owner: 'variable-validation', defaultSeverity: 'error' },
   invalidForeachParameter: { owner: 'variable-validation', defaultSeverity: 'warning' },
 

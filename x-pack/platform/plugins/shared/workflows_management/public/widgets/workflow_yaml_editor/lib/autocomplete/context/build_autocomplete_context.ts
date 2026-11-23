@@ -14,8 +14,12 @@ import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { LineParseResult, WorkflowContextRegistry } from '@kbn/workflows-yaml';
-import { getContextSchemaForPath, parseLineForCompletion } from '@kbn/workflows-yaml';
-import type { z } from '@kbn/zod/v4';
+import {
+  getContextSchemaForPath,
+  isSecretAllowedAtPath,
+  parseLineForCompletion,
+} from '@kbn/workflows-yaml';
+import { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
@@ -61,13 +65,14 @@ function resolveContextSchemaForAutocomplete(
   yamlDocument: Document,
   absoluteOffset: number,
   lineParseResult: LineParseResult | null,
-  yamlSource: string
+  yamlSource: string,
+  secretNames: ReadonlySet<string> | undefined
 ): { contextSchema: z.ZodType; contextScopedToPath: string | null } {
   let contextSchema: z.ZodType = DynamicStepContextSchema;
   let contextScopedToPath: string | null = null;
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = getContextSchemaForPath(
+    const pathSchema = getContextSchemaForPath(
       registry,
       workflowDefinition,
       workflowGraph,
@@ -76,6 +81,15 @@ function resolveContextSchemaForAutocomplete(
       absoluteOffset,
       yamlSource
     );
+    // Secrets are only suggested where they can be used, so that a suggestion is never an error.
+    const canUseSecrets =
+      secretNames !== undefined &&
+      isSecretAllowedAtPath({ workflowDefinition, workflowGraph, path });
+    contextSchema = canUseSecrets
+      ? pathSchema.extend({
+          secrets: z.object(Object.fromEntries([...secretNames].map((name) => [name, z.string()]))),
+        })
+      : pathSchema;
   }
 
   if (lineParseResult?.fullKey) {
@@ -110,6 +124,8 @@ export interface BuildAutocompleteContextParams {
   model: monaco.editor.ITextModel;
   position: monaco.Position;
   completionContext: monaco.languages.CompletionContext;
+  /** The names of the secrets of the space, when they could be listed. */
+  secretNames?: ReadonlySet<string>;
 }
 
 export function buildAutocompleteContext({
@@ -118,6 +134,7 @@ export function buildAutocompleteContext({
   model,
   position,
   completionContext,
+  secretNames,
 }: BuildAutocompleteContextParams): AutocompleteContext | null {
   // derived from workflow state
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
@@ -161,7 +178,8 @@ export function buildAutocompleteContext({
     yamlDocument,
     absoluteOffset,
     parseResult,
-    yamlSource
+    yamlSource,
+    secretNames
   );
 
   // Check if we're actually inside a liquid block

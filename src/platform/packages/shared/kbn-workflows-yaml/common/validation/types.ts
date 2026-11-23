@@ -117,6 +117,10 @@ interface YamlValidationResultServiceAccount extends YamlValidationDiagnosticBas
   owner: 'service-account-validation';
 }
 
+export interface YamlValidationResultSecret extends YamlValidationDiagnosticBase {
+  owner: 'secret-validation';
+}
+
 interface YamlValidationResultJsonSchemaDefault extends YamlValidationDiagnosticBase {
   owner: 'json-schema-default-validation';
 }
@@ -176,6 +180,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'liquid-template-validation',
   'connector-id-validation',
   'service-account-validation',
+  'secret-validation',
   'json-schema-default-validation',
   'step-property-validation',
   'workflow-inputs-validation',
@@ -206,6 +211,7 @@ export type YamlValidationDiagnostic =
   | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
   | YamlValidationResultServiceAccount
+  | YamlValidationResultSecret
   | YamlValidationResultJsonSchemaDefault
   | YamlValidationResultStepPropertyError
   | YamlValidationResultWorkflowInputsError

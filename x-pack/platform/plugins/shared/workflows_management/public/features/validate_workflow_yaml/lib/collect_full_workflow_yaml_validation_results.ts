@@ -44,6 +44,8 @@ export interface WorkflowYamlValidationContext {
   isManaged: boolean;
   /** Omitted where no service account directory is available; the `run_as` check then skips. */
   lookupServiceAccount?: ServiceAccountLookup;
+  /** Names of the secrets of the space. Omitted when they are not known: names are then not checked. */
+  secretNames?: ReadonlySet<string>;
 }
 
 export interface CollectFullWorkflowYamlValidationResultsParams {
@@ -81,6 +83,7 @@ export async function collectFullWorkflowYamlValidationResults({
     getPropertyHandler,
     esqlCallbacks,
     signal,
+    secretNames,
   } = context;
 
   const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
@@ -98,6 +101,7 @@ export async function collectFullWorkflowYamlValidationResults({
     workflowLookup,
     workflowGraph,
     workflowDefinition,
+    secretNames,
   });
 
   const asyncValidations: Array<Promise<YamlValidationResult[]>> = [];

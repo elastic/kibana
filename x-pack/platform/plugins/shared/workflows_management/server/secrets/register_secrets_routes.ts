@@ -14,11 +14,10 @@ import {
   secretNameParamsSchema,
 } from './route_schemas';
 import { SECRETS_LIST_SECURITY, SECRETS_MANAGE_SECURITY } from './route_security';
+import type { WorkflowSecretsListResponse } from '../../common/lib/secrets/api';
+import { WORKFLOW_SECRET_ROUTE, WORKFLOW_SECRETS_ROUTE } from '../../common/lib/secrets/api';
 import { withAvailabilityCheck } from '../api/routes/utils/with_availability_check';
 import type { WorkflowsRouter } from '../types';
-
-const SECRETS_PATH = '/internal/workflows/secrets';
-const SECRET_PATH = `${SECRETS_PATH}/{name}`;
 
 export interface SecretsRouteDependencies {
   router: WorkflowsRouter;
@@ -38,7 +37,7 @@ export const registerSecretsRoutes = ({
 }: SecretsRouteDependencies): void => {
   router.get(
     {
-      path: SECRETS_PATH,
+      path: WORKFLOW_SECRETS_ROUTE,
       security: SECRETS_LIST_SECURITY,
       options: { access: 'internal' },
       validate: false,
@@ -46,7 +45,8 @@ export const registerSecretsRoutes = ({
     withAvailabilityCheck(async (_context, request, response) => {
       try {
         const client = await getSecretsClient(request);
-        return response.ok({ body: { secrets: await client.list() } });
+        const body: WorkflowSecretsListResponse = { secrets: await client.list() };
+        return response.ok({ body });
       } catch (error) {
         return handleSecretsRouteError({ response, error });
       }
@@ -55,7 +55,7 @@ export const registerSecretsRoutes = ({
 
   router.post(
     {
-      path: SECRETS_PATH,
+      path: WORKFLOW_SECRETS_ROUTE,
       security: SECRETS_MANAGE_SECURITY,
       options: { access: 'internal' },
       validate: { body: createSecretBodySchema },
@@ -72,7 +72,7 @@ export const registerSecretsRoutes = ({
 
   router.put(
     {
-      path: SECRET_PATH,
+      path: WORKFLOW_SECRET_ROUTE,
       security: SECRETS_MANAGE_SECURITY,
       options: { access: 'internal' },
       validate: { params: secretNameParamsSchema, body: replaceSecretBodySchema },
@@ -90,7 +90,7 @@ export const registerSecretsRoutes = ({
 
   router.delete(
     {
-      path: SECRET_PATH,
+      path: WORKFLOW_SECRET_ROUTE,
       security: SECRETS_MANAGE_SECURITY,
       options: { access: 'internal' },
       validate: { params: secretNameParamsSchema },

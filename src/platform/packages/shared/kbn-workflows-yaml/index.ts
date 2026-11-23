@@ -108,6 +108,13 @@ export type { ValidationBudget } from './common/validation/budget';
 // Variable validation rules (the `variable-validation` rule group)
 export { collectAllVariables } from './common/validation/variables/collect_all_variables';
 export { validateVariables } from './common/validation/variables/validate_variables';
+export {
+  findMisplacedSecretReferences,
+  isSecretAllowedAtPath,
+  SECRET_NOT_ALLOWED_MESSAGE,
+  validateSecretReferences,
+} from './common/validation/secrets/secret_references';
+export type { MisplacedSecretReference } from './common/validation/secrets/secret_references';
 export { validateLiquidYamlScalars } from './common/validation/variables/validate_liquid_yaml_scalars';
 export { validateLiquidForLoopCollections } from './common/validation/variables/validate_liquid_for_loop_collections';
 
