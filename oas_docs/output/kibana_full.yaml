@@ -24498,6 +24498,8 @@ paths:
 
         Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists.
 
+        Each ES|QL source added also gets an index metadata automation, installed as a separate workflow and attached to the AI Index as the calling user, who needs the workflow create and update privileges for it; removing the source deletes the workflow, which needs the delete privilege. The save succeeds whether or not that works. When an automation could not be installed or removed, the response lists it under `warnings`.
+
         Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
 
         **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
@@ -24794,6 +24796,35 @@ paths:
                     enum:
                       - created
                     type: string
+                  warnings:
+                    description: Things the save was meant to do beyond storing the AI Index that did not happen, such as installing the index metadata automation of an ES|QL source. The AI Index was saved either way. Missing when nothing went wrong.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        message:
+                          description: What did not happen for the source, and why.
+                          type: string
+                        source:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              description: '`esql` for an ES|QL query, or `connector` for a data connector.'
+                              enum:
+                                - esql
+                                - connector
+                              type: string
+                            value:
+                              description: An ES|QL query for `esql`, or a connector ID for `connector`.
+                              type: string
+                          required:
+                            - type
+                            - value
+                      required:
+                        - source
+                        - message
+                    type: array
                 required:
                   - status
           description: The AI Index was created.
@@ -25643,6 +25674,8 @@ paths:
 
         Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.
 
+        Each ES|QL source added also gets an index metadata automation, installed as a separate workflow and attached to the AI Index as the calling user, who needs the workflow create and update privileges for it; removing the source deletes the workflow, which needs the delete privilege. The save succeeds whether or not that works. When an automation could not be installed or removed, the response lists it under `warnings`.
+
         Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
 
         **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
@@ -25929,6 +25962,16 @@ paths:
                   summary: AI Index updated
                   value:
                     status: updated
+                putAiIndexUpdatedWithWarningsExample:
+                  description: The AI Index was replaced, but the index metadata automation of one of its ES|QL sources could not be installed
+                  summary: AI Index updated, with a warning
+                  value:
+                    status: updated
+                    warnings:
+                      - message: No index matching support-cases-* was found, or you do not have read access to it.
+                        source:
+                          type: esql
+                          value: FROM support-cases-* | LIMIT 100
               schema:
                 additionalProperties: false
                 description: Confirms that the AI Index was updated.
@@ -25938,6 +25981,35 @@ paths:
                     enum:
                       - updated
                     type: string
+                  warnings:
+                    description: Things the save was meant to do beyond storing the AI Index that did not happen, such as installing the index metadata automation of an ES|QL source. The AI Index was saved either way. Missing when nothing went wrong.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        message:
+                          description: What did not happen for the source, and why.
+                          type: string
+                        source:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              description: '`esql` for an ES|QL query, or `connector` for a data connector.'
+                              enum:
+                                - esql
+                                - connector
+                              type: string
+                            value:
+                              description: An ES|QL query for `esql`, or a connector ID for `connector`.
+                              type: string
+                          required:
+                            - type
+                            - value
+                      required:
+                        - source
+                        - message
+                    type: array
                 required:
                   - status
           description: The AI Index was updated.
@@ -25959,6 +26031,35 @@ paths:
                     enum:
                       - created
                     type: string
+                  warnings:
+                    description: Things the save was meant to do beyond storing the AI Index that did not happen, such as installing the index metadata automation of an ES|QL source. The AI Index was saved either way. Missing when nothing went wrong.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        message:
+                          description: What did not happen for the source, and why.
+                          type: string
+                        source:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              description: '`esql` for an ES|QL query, or `connector` for a data connector.'
+                              enum:
+                                - esql
+                                - connector
+                              type: string
+                            value:
+                              description: An ES|QL query for `esql`, or a connector ID for `connector`.
+                              type: string
+                          required:
+                            - type
+                            - value
+                      required:
+                        - source
+                        - message
+                    type: array
                 required:
                   - status
           description: The AI Index was created.
