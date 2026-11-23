@@ -371,6 +371,16 @@ describe('fieldTypeOf', () => {
         { current: document }
       )
     ).toBe('SlotContentId');
+    expect(
+      fieldTypesOf(
+        change(
+          'response-property-discriminator-mapping-added',
+          'added `#Key` discriminator mapping keys to the `payload/items/allOf[subschema #1: base]` response property for the response status `200`',
+          'GET /payloads'
+        ),
+        { current: document }
+      ).owner
+    ).toBe('payload/items');
   });
 
   it('finds a parameter whose new enum value looks like a location', () => {

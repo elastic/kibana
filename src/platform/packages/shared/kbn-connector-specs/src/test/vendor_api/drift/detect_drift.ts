@@ -63,6 +63,11 @@ export interface SpecChange {
   readonly type?: string;
   /** What the type was in the committed snapshot, for a field that was there before. */
   readonly typeBefore?: string;
+  /**
+   * For keys added to an `allOf` part, such as the base type a chat extends, the path of the field
+   * the part is of as the snapshot resolves it, '' for the body itself.
+   */
+  readonly owner?: string;
 }
 
 export interface SourceDrift {

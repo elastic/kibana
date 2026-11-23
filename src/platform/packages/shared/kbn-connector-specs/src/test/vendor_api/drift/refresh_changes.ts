@@ -421,17 +421,27 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
       // Keys added to a part of the field, such as the base type a chat extends, say what that part
       // may be elsewhere in the API, not what the field holds: they go in brackets, by the part.
       const part = baseNameOf(partOf);
+      // The owner as the snapshot resolves it, else as the text reads; only the schema tells a
+      // property named `items` from an array's items.
+      const resolved = change.owner;
+      const unselected = (path: string): string =>
+        path.replace(/(?:allOf|oneOf|anyOf)\[[^\]]*\]/g, '').replace(/\/{2,}/g, '/');
       // Only parts left once the owner's selectors go: the part is of the body itself.
       const ofBody =
-        owner
-          .replace(/(?:allOf|oneOf|anyOf)\[[^\]]*\]/g, '')
-          .replace(/(^|\/)items(?=\/|$)/g, '')
-          .replace(/\//g, '') === '';
+        resolved === undefined
+          ? unselected(owner)
+              .replace(/(^|\/)items(?=\/|$)/g, '')
+              .replace(/\//g, '') === ''
+          : unselected(resolved).replace(/\//g, '') === '';
+      const ownerName =
+        resolved !== undefined && /(^|\/)items\/?$/.test(unselected(resolved))
+          ? 'items'
+          : fieldName;
       return [
         {
           area: entryArea,
           sign: '!',
-          name: ofBody ? (entryArea === 'Request' ? REQUEST_BODY : RESPONSE_BODY) : fieldName,
+          name: ofBody ? (entryArea === 'Request' ? REQUEST_BODY : RESPONSE_BODY) : ownerName,
           type,
           typeBefore: change.typeBefore,
           details: [
@@ -528,8 +538,8 @@ export interface ListPart {
   readonly items: ReadonlyArray<readonly string[]>;
   /** What the fields are, for the line that counts the ones left out. */
   readonly moreLabel: string;
-  /** How many changes the items stand for, when one can stand for several (`×2`). */
-  readonly count?: number;
+  /** How many changes each item stands for, when one can stand for several (`×2`). */
+  readonly weights?: readonly number[];
   shown: number;
 }
 
@@ -639,11 +649,17 @@ const listPart = (area: Area, sign: Sign, entries: readonly Entry[]): ListPart =
 // A line break in a vendor's value would end the diff line, and a line of backticks the block.
 const oneLine = (line: string): string => line.replace(/\r\n|\r|\n/g, '\\n');
 
+/** The changes the items of a list from `from` on stand for. */
+const weightOf = ({ items, weights }: ListPart, from: number): number =>
+  weights === undefined
+    ? items.length - from
+    : weights.slice(from).reduce((total, weight) => total + weight, 0);
+
 export const partLines = (part: ChangePart): string[] => {
   if (part.kind === 'fixed') {
     return part.lines.map(oneLine);
   }
-  const more = part.items.length - part.shown;
+  const more = weightOf(part, part.shown);
   return [
     ...part.items.slice(0, part.shown).flat().map(oneLine),
     ...(more > 0 ? [`  … and ${more} more ${part.moreLabel}`] : []),
@@ -688,7 +704,9 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
     if (area === 'Other') {
       const counted = ([label, count]: [string, number]) =>
         `! ${label}${count > 1 ? ` ×${count}` : ''}`;
-      const texts = [...otherTexts.entries()].sort(([a], [b]) => byText(a, b)).map(counted);
+      const sortedTexts = [...otherTexts.entries()].sort(([a], [b]) => byText(a, b));
+      const texts = sortedTexts.map(counted);
+      const textCounts = sortedTexts.map(([, count]) => count);
       const parts: ChangePart[] = [
         ...(otherRules.size === 0
           ? []
@@ -705,7 +723,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
                 kind: 'list' as const,
                 sign: '!' as const,
                 items: texts.map((line) => [line]),
-                count: [...otherTexts.values()].reduce((total, count) => total + count, 0),
+                weights: textCounts,
                 moreLabel: SIGN_WORDS['!'],
                 shown: Math.min(texts.length, DEFAULT_NAMES_SHOWN),
               },
@@ -737,10 +755,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
  * many media types or paths through a shared schema `oasdiff` reported it for.
  */
 export const countChanges = ({ parts }: ChangeArea): number =>
-  parts.reduce(
-    (total, part) => total + (part.kind === 'list' ? part.count ?? part.items.length : part.count),
-    0
-  );
+  parts.reduce((total, part) => total + (part.kind === 'list' ? weightOf(part, 0) : part.count), 0);
 
 /** The markdown describing the changes to one endpoint, with the default number of names. */
 export const describeChanges = (changes: readonly SpecChange[]): string[] => {

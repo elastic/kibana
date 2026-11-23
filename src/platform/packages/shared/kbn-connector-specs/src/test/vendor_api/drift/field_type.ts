@@ -264,22 +264,28 @@ const isFieldRemoval = (id: string): boolean =>
 const lengthened = (type: string): string =>
   type.length > MAX_TYPE_LENGTH ? `${type.slice(0, MAX_TYPE_LENGTH - 1)}…` : type;
 
-const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string | undefined => {
+interface Lookup {
+  readonly type?: string;
+  /** For keys added to an `allOf` part, the path of what the part is of: '' for the body. */
+  readonly owner?: string;
+}
+
+const lookupIn = ({ id, text, operation }: SpecChange, document: unknown): Lookup => {
   if (operation === undefined || !isRecord(document) || !isRecord(document.paths)) {
-    return undefined;
+    return {};
   }
   const separator = operation.indexOf(' ');
   const pathItem = document.paths[operation.slice(separator + 1)];
   const spec = isRecord(pathItem) ? pathItem[operation.slice(0, separator).toLowerCase()] : null;
   if (!isRecord(spec)) {
-    return undefined;
+    return {};
   }
   const names = quoted(text);
 
   if (/parameter/.test(id)) {
     const parameter = requestParameterOf(text);
     if (parameter === undefined) {
-      return undefined;
+      return {};
     }
     // The operation's own parameters override those of its path.
     const parameters = [
@@ -293,13 +299,13 @@ const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string 
         candidate.name === parameter.name
     );
     return isRecord(found) && found.schema !== undefined
-      ? lengthened(typeOf(document, found.schema))
-      : undefined;
+      ? { type: lengthened(typeOf(document, found.schema)) }
+      : {};
   }
 
   // A response header is not in the body, where a property of the same name may be.
   if (/^response-.*header/.test(id)) {
-    return undefined;
+    return {};
   }
   const root = id.startsWith('response-')
     ? schemaOfContent(document, responseOf(spec.responses, text), text)
@@ -307,7 +313,7 @@ const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string 
     ? schemaOfContent(document, spec.requestBody, text)
     : undefined;
   if (root === undefined) {
-    return undefined;
+    return {};
   }
   const ofPart = /discriminator-mapping/.test(id) && ownerOfPart(names[1] ?? '') !== undefined;
   let field = fieldPathOf(id, names);
@@ -321,7 +327,7 @@ const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string 
   }
   const node = field === undefined ? root : walk(document, root, splitPath(field));
   if (node === undefined) {
-    return undefined;
+    return {};
   }
   // A new enum value or variant is about what the field is made of, so a named schema is shown
   // by its values or variants; keys added to a part of it leave the field's own name.
@@ -329,7 +335,10 @@ const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string 
     !ofPart && (/-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id))
       ? deref(document, node)
       : node;
-  return lengthened(typeOf(document, shown));
+  return {
+    type: lengthened(typeOf(document, shown)),
+    ...(ofPart ? { owner: field ?? '' } : {}),
+  };
 };
 
 // A field that is new, or gone, has no type on the other side.
@@ -345,13 +354,15 @@ const isFieldAddition = (id: string): boolean =>
 export const fieldTypesOf = (
   change: SpecChange,
   { committed, current }: SnapshotDocuments
-): { type?: string; typeBefore?: string } => {
-  const type = typeIn(change, isFieldRemoval(change.id) ? committed : current);
-  const typeBefore =
-    isFieldRemoval(change.id) || isFieldAddition(change.id) ? undefined : typeIn(change, committed);
+): { type?: string; typeBefore?: string; owner?: string } => {
+  const after = lookupIn(change, isFieldRemoval(change.id) ? committed : current);
+  const before =
+    isFieldRemoval(change.id) || isFieldAddition(change.id) ? {} : lookupIn(change, committed);
+  const owner = after.owner ?? before.owner;
   return {
-    ...(type === undefined ? {} : { type }),
-    ...(typeBefore === undefined ? {} : { typeBefore }),
+    ...(after.type === undefined ? {} : { type: after.type }),
+    ...(before.type === undefined ? {} : { typeBefore: before.type }),
+    ...(owner === undefined ? {} : { owner }),
   };
 };
 

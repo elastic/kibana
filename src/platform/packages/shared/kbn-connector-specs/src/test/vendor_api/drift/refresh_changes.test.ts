@@ -717,6 +717,35 @@ describe('describeChanges', () => {
     ).toEqual(object('Response', '- value: A[]', '+ value: B[] (base: + Key)'));
   });
 
+  it('names a property called `items` by it when the snapshot says it is one', () => {
+    const keys = (path: string, owner: string): SpecChange => ({
+      ...change(
+        'response-property-discriminator-mapping-added',
+        `added \`#Key\` discriminator mapping keys to the \`${path}\` response property`,
+        'Slot',
+        'Slot'
+      ),
+      owner,
+    });
+
+    expect(
+      describeChanges([
+        keys('payload/items/allOf[subschema #1: base]', 'payload/items'),
+        keys('items/allOf[subschema #1: base]', 'items'),
+      ])
+    ).toEqual(object('Response', '! items: Slot (base: + Key)'));
+  });
+
+  it('counts the repeats of the GraphQL or MCP texts it leaves out', () => {
+    const texts = Array.from({ length: 11 }, (_, index) =>
+      change('FIELD_ADDED', `Field "Board.f${String(index).padStart(2, '0')}" was added.`)
+    );
+    const repeated = change('FIELD_ADDED', 'Field "Board.f11" was added.');
+    const lines = describeChanges([...texts, ...Array.from({ length: 5 }, () => repeated)]);
+
+    expect(lines.slice(-2)).toEqual(['  … and 6 more changed', '```']);
+  });
+
   it('keeps the text of a GraphQL or MCP change it has no words for', () => {
     expect(
       describeChanges([
