@@ -15,6 +15,7 @@ import type {
   AiIndexSource,
   AiIndexTrace,
 } from '../../common/http_api/ai_indices';
+import type { AiIndexDreamingConfig, DreamingEntities } from '../../common/dreaming';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
 
@@ -61,6 +62,7 @@ const storageSettings = {
           allowed_actions: types.keyword({}),
         },
       }),
+      dreaming: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -68,8 +70,7 @@ const storageSettings = {
 interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
-  // Optional for backward compatibility with entries written before memory
-  // support existed; absence is treated as enabled (`true`) on read.
+  dreaming?: AiIndexDreamingConfig;
   memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
@@ -83,8 +84,23 @@ interface AiIndexDocumentFields {
   traces?: AiIndexTrace[];
 }
 
+/** A dreaming config as stored; its entities may hold relationship `edges`, dropped on read. */
+export type StoredDreamingConfig = Omit<AiIndexDreamingConfig, 'entities'> & {
+  entities?:
+    | (DreamingEntities & {
+        edges?: Array<{
+          type: string;
+          source: string;
+          target: string;
+          description?: string;
+        }> | null;
+      })
+    | null;
+};
+
 /** What the index may hold: pre-upgrade documents predate `id` and `space`. */
-export interface StoredAiIndexDocument extends AiIndexDocumentFields {
+export interface StoredAiIndexDocument extends Omit<AiIndexDocumentFields, 'dreaming'> {
+  dreaming?: StoredDreamingConfig;
   // The logical id was the ES `_id` before ids became a field.
   id?: string;
   // The space was implicitly default before space support existed.

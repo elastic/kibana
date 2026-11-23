@@ -36,6 +36,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { GapBase } from '../../application/gaps/types';
 import { gapReasonType } from '../../../common/constants';
+import { CLOUD_API_KEY_AUTH_ERROR_GUIDANCE } from '../cloud_api_key_auth_error_guidance';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -527,6 +528,20 @@ describe('AlertingEventLogger', () => {
         },
         message: 'rule failed!',
       });
+    });
+
+    test('should prepend remediation guidance when the error reports a cloud API key auth failure', () => {
+      mockEventLoggerStartTiming();
+
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.setExecutionFailed(
+        'rule failed!',
+        'security_exception: failed to authenticate cloud API key: [0xD38358]'
+      );
+
+      expect(alertingEventLogger.getEvent()?.error?.message).toBe(
+        `${CLOUD_API_KEY_AUTH_ERROR_GUIDANCE} security_exception: failed to authenticate cloud API key: [0xD38358]`
+      );
     });
 
     test('should update execute event correctly for backfill executions if error occurs after rule data is set', () => {
