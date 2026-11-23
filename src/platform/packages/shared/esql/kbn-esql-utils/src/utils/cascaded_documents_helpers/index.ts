@@ -367,6 +367,28 @@ export interface CascadeQueryArgs {
   nodeAggregatedValues?: NodeAggregatedValues;
 }
 
+interface LeafOperationArgs
+  extends Pick<CascadeQueryArgs, 'esqlVariables' | 'nodeAggregatedValues'> {
+  editorQuery: EsqlQuery;
+  dataViewFields: DataView['fields'];
+  operatingStatsCommandIndex: number;
+  /**
+   * summary of the stats command driving the cascade experience, it declares the aggregates displayed for the node
+   */
+  operatingStatsCommandSummary: StatsCommandSummary;
+}
+
+interface StatsByColumnLeafOperationArgs extends LeafOperationArgs {
+  columnNode: FieldSummary;
+  operationValue: unknown;
+}
+
+interface StatsByCategorizeLeafOperationArgs
+  extends Omit<LeafOperationArgs, 'nodeAggregatedValues'>,
+    Pick<CascadeQueryArgs, 'nodePathMap'> {
+  categorizeCommandNode: FieldSummary;
+}
+
 /**
  * Constructs a cascade query from the provided query, based on the node type, node path and node path map.
  */
@@ -479,7 +501,6 @@ export const constructCascadeQuery = ({
             dataViewFields: dataView.fields,
             esqlVariables,
             nodePathMap,
-            nodeAggregatedValues,
           });
         }
         default: {
@@ -493,28 +514,6 @@ export const constructCascadeQuery = ({
     throw new Error('Group node operations are not yet supported');
   }
 };
-
-interface LeafOperationArgs {
-  editorQuery: EsqlQuery;
-  operatingStatsCommandIndex: number;
-  /**
-   * summary of the stats command driving the cascade experience, it declares the aggregates displayed for the node
-   */
-  operatingStatsCommandSummary: StatsCommandSummary;
-  dataViewFields: DataView['fields'];
-  esqlVariables: ESQLControlVariable[] | undefined;
-  nodeAggregatedValues: NodeAggregatedValues | undefined;
-}
-
-interface StatsByColumnLeafOperationArgs extends LeafOperationArgs {
-  columnNode: FieldSummary;
-  operationValue: unknown;
-}
-
-interface StatsByCategorizeLeafOperationArgs extends LeafOperationArgs {
-  categorizeCommandNode: FieldSummary;
-  nodePathMap: Record<string, string>;
-}
 
 /**
  * @description adds a where command with current value for a matched column option as a side-effect on the passed query,
