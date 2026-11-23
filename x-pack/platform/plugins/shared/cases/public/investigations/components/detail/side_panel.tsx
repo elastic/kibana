@@ -22,6 +22,7 @@ import { ICONS } from '../../icons';
 import type { TabId } from '../tabs/tab_props';
 import { ExternalTicketCard } from '../external_ticket';
 import { AtAGlanceCard, useMessageCount } from './at_a_glance_card';
+import { DescriptionCard } from './description_card';
 import { FieldsCard } from './fields_card';
 import { RecentActivityCard } from './recent_activity_card';
 import { RelatedCard } from './related_card';
@@ -140,6 +141,9 @@ export const SidePanel: React.FC<SidePanelProps> = ({
           <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
               <AtAGlanceCard record={record} onNavigateTab={onNavigateTab} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DescriptionCard record={record} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FieldsCard record={record} />

@@ -22,9 +22,25 @@ export const LAST_ACTIVITY = i18n.translate('xpack.cases.investigations.overview
   defaultMessage: 'Last activity',
 });
 
-export const WHAT_THIS_IS = i18n.translate('xpack.cases.investigations.overview.whatThisIs', {
-  defaultMessage: 'What this is',
+export const AGENT_SUMMARY = i18n.translate('xpack.cases.investigations.overview.agentSummary', {
+  defaultMessage: 'Agent summary',
 });
+
+export const SUMMARY_EMPTY_AGENT = i18n.translate(
+  'xpack.cases.investigations.overview.summaryEmptyAgent',
+  {
+    defaultMessage:
+      'The agent has not written a summary yet. The description is in the Context panel.',
+  }
+);
+
+export const SUMMARY_EMPTY_NO_AGENT = i18n.translate(
+  'xpack.cases.investigations.overview.summaryEmptyNoAgent',
+  {
+    defaultMessage:
+      'This investigation has no agent, so there is no summary. The description is in the Context panel.',
+  }
+);
 
 export const ACTIVITY_LINK = i18n.translate('xpack.cases.investigations.overview.activityLink', {
   defaultMessage: 'Activity',

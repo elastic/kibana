@@ -101,7 +101,7 @@ export const StateCard: React.FC<StateCardProps> = ({ record, onNavigateTab, onO
   const claims = counters.claims_by_status;
   const tasksTotal = counters.tasks - counters.tasks_skipped;
   const outcome = record.close_outcome;
-  const description = record.summary || record.description;
+  const summary = record.summary?.trim() ?? '';
   const waitingParts = [
     counters.proposals_pending > 0
       ? i18n.WAITING_PROPOSALS(counters.proposals_pending, counters.proposals_pending_disruptive)
@@ -192,8 +192,14 @@ export const StateCard: React.FC<StateCardProps> = ({ record, onNavigateTab, onO
           gap: ${euiTheme.size.base} ${euiTheme.size.xl};
         `}
       >
-        <StateCell label={i18n.WHAT_THIS_IS} wide testSubj="investigationStateWhatThisIs">
-          <MarkdownRenderer textSize="s">{description}</MarkdownRenderer>
+        <StateCell label={i18n.AGENT_SUMMARY} wide testSubj="investigationStateWhatThisIs">
+          {summary.length > 0 ? (
+            <MarkdownRenderer textSize="s">{summary}</MarkdownRenderer>
+          ) : (
+            <EuiText size="s" color="subdued" data-test-subj="investigationStateSummaryEmpty">
+              <p>{record.ai_enabled ? i18n.SUMMARY_EMPTY_AGENT : i18n.SUMMARY_EMPTY_NO_AGENT}</p>
+            </EuiText>
+          )}
           <EuiFlexGroup gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               {link(

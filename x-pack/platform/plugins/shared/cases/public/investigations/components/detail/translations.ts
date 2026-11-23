@@ -521,3 +521,54 @@ export const TAGS_TOO_MANY = (max: number) =>
 export const TAGS_SAVED = i18n.translate('xpack.cases.investigations.detail.tagsSaved', {
   defaultMessage: 'Tags updated.',
 });
+
+export const DESCRIPTION_TITLE = i18n.translate(
+  'xpack.cases.investigations.detail.descriptionTitle',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const DESCRIPTION_EDIT = i18n.translate(
+  'xpack.cases.investigations.detail.descriptionEdit',
+  {
+    defaultMessage: 'Edit description',
+  }
+);
+
+export const DESCRIPTION_SAVE = i18n.translate(
+  'xpack.cases.investigations.detail.descriptionSave',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const DESCRIPTION_CANCEL = i18n.translate(
+  'xpack.cases.investigations.detail.descriptionCancel',
+  { defaultMessage: 'Cancel' }
+);
+
+export const DESCRIPTION_SAVED = i18n.translate(
+  'xpack.cases.investigations.detail.descriptionSaved',
+  {
+    defaultMessage: 'Description saved',
+  }
+);
+
+export const DESCRIPTION_EMPTY = i18n.translate(
+  'xpack.cases.investigations.detail.descriptionEmpty',
+  {
+    defaultMessage: 'No description yet.',
+  }
+);
+
+export const DESCRIPTION_REQUIRED = i18n.translate(
+  'xpack.cases.investigations.detail.descriptionRequired',
+  { defaultMessage: 'A description is required.' }
+);
+
+export const DESCRIPTION_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.cases.investigations.detail.descriptionTooLong', {
+    defaultMessage: 'The description is too long. The maximum length is {max} characters.',
+    values: { max },
+  });
