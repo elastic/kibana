@@ -514,6 +514,7 @@ export const EpisodesTable = ({
             agentBuilder: services.agentBuilder,
             data: services.data,
             http: services.http,
+            notifications: services.notifications,
             expressions: services.expressions,
             userProfile: services.userProfile,
             spaces: services.spaces,

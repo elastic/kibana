@@ -8,7 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { buildEpisodeEventsEsqlQuery } from '../queries/episode_events_query';
+import { buildEpisodeEventsWithTotalCountQuery } from '@kbn/alerting-v2-common-queries';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
@@ -47,10 +47,16 @@ describe('useFetchEpisodeEventsQuery', () => {
     expect(runEsqlAsyncSearchMock).not.toHaveBeenCalled();
   });
 
-  it('loads object rows from async ES|QL search', async () => {
+  it('loads object rows and the total event count from async ES|QL search', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
-      columns: [{ name: 'episode.status', type: 'keyword' }],
-      values: [[ALERT_EPISODE_STATUS.ACTIVE]],
+      columns: [
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'total_event_count', type: 'long' },
+      ],
+      values: [
+        [ALERT_EPISODE_STATUS.ACTIVE, 1500],
+        [ALERT_EPISODE_STATUS.RECOVERING, 1500],
+      ],
     });
 
     const episodeId = 'ep-1';
@@ -69,12 +75,37 @@ describe('useFetchEpisodeEventsQuery', () => {
       expect.objectContaining({
         data,
         params: expect.objectContaining({
-          query: buildEpisodeEventsEsqlQuery(DEFAULT_SPACE_ID, episodeId).print('basic'),
+          query: buildEpisodeEventsWithTotalCountQuery(DEFAULT_SPACE_ID, episodeId).print('basic'),
           time_zone: 'UTC',
         }),
       })
     );
 
-    expect(result.current.data).toEqual([{ 'episode.status': ALERT_EPISODE_STATUS.ACTIVE }]);
+    expect(result.current.data).toEqual({
+      eventRows: [
+        { 'episode.status': ALERT_EPISODE_STATUS.ACTIVE, total_event_count: 1500 },
+        { 'episode.status': ALERT_EPISODE_STATUS.RECOVERING, total_event_count: 1500 },
+      ],
+      totalEventCount: 1500,
+    });
+  });
+
+  it('reports a total of 0 when the episode has no events', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [{ name: 'total_event_count', type: 'long' }],
+      values: [],
+    });
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeEventsQuery({
+          episodeId: 'ep-1',
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual({ eventRows: [], totalEventCount: 0 });
   });
 });

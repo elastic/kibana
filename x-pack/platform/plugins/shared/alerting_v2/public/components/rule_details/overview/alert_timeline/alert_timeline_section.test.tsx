@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
+import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertTimelineSection } from './alert_timeline_section';
@@ -64,6 +65,7 @@ jest.mock('@kbn/alerting-v2-browser-shared', () => ({
 const mockServices: Record<string, unknown> = {
   data: {},
   share: {},
+  spaces: { getActiveSpace$: () => of({ id: 'space-1' }) },
   application: { capabilities: {}, navigateToUrl: jest.fn() },
   uiSettings: { get: jest.fn(() => 'Browser') },
   http: { basePath: { prepend: (path: string) => path } },
@@ -73,6 +75,11 @@ const mockServices: Record<string, unknown> = {
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
   useService: (token: string) => mockServices[token],
+}));
+
+jest.mock('@kbn/core-di', () => ({
+  ...jest.requireActual('@kbn/core-di'),
+  PluginStart: (key: string) => key,
 }));
 
 const successResult = {
@@ -106,6 +113,13 @@ describe('AlertTimelineSection', () => {
     expect(screen.getByTestId('ruleAlertTimelineSection')).toBeInTheDocument();
     expect(screen.getByTestId('alertTimelineDatePicker')).toBeInTheDocument();
     expect(screen.getByTestId('alertTimelineSectionEmpty')).toBeInTheDocument();
+  });
+
+  it('scopes the rule events to the active space', () => {
+    renderSection();
+    expect(mockUseFetchRuleEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'space-1' })
+    );
   });
 
   it('shows the loading state while fetching', () => {

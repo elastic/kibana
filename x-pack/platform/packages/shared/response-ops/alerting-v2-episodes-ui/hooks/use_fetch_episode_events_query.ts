@@ -8,8 +8,11 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { rowsFromEsql } from '@kbn/alerting-v2-common-queries';
-import { buildEpisodeEventsEsqlQuery } from '../queries/episode_events_query';
+import {
+  buildEpisodeEventsWithTotalCountQuery,
+  rowsFromEsql,
+  type EpisodeEventRow,
+} from '@kbn/alerting-v2-common-queries';
 import { QUERY_STALE_TIME } from '../constants';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
@@ -20,8 +23,16 @@ export interface UseFetchEpisodeEventsQueryOptions {
   services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
 }
 
+export interface EpisodeEvents {
+  /** The returned events, oldest first; cut off at the ES|QL result limit. */
+  eventRows: EpisodeEventRow[];
+  /** Number of events in the whole episode, including any that were cut off. */
+  totalEventCount: number;
+}
+
 /**
- * Loads all `.rule-events` rows for an episode (sorted ascending by @timestamp).
+ * Loads all `.rule-events` rows for an episode (sorted ascending by @timestamp)
+ * together with the episode's total event count.
  */
 export const useFetchEpisodeEventsQuery = ({
   episodeId,
@@ -32,16 +43,18 @@ export const useFetchEpisodeEventsQuery = ({
 
   return useQuery({
     queryKey: queryKeys.episodeEvents(spaceId, episodeId ?? ''),
-    queryFn: ({ signal }) => {
-      const query = buildEpisodeEventsEsqlQuery(spaceId, episodeId!);
-      return runEsqlAsyncSearch({
+    queryFn: async ({ signal }): Promise<EpisodeEvents> => {
+      const query = buildEpisodeEventsWithTotalCountQuery(spaceId, episodeId!);
+      const raw = await runEsqlAsyncSearch({
         data,
         params: {
           query: query.print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
-      }).then((raw) => rowsFromEsql(query, raw));
+      });
+      const eventRows = rowsFromEsql(query, raw);
+      return { eventRows, totalEventCount: eventRows[0]?.total_event_count ?? 0 };
     },
     enabled: Boolean(episodeId),
     staleTime: QUERY_STALE_TIME,

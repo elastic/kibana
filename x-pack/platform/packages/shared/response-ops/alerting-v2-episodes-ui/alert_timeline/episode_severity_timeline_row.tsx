@@ -122,6 +122,7 @@ export const EpisodeSeverityTimelineRow = ({
               <SeverityHeatmapHoverSummary
                 severityLabel={getEpisodeSeverityLabel(transition.severity)}
                 timestamp={formatTimestamp(transition.x, timeZone)}
+                showClickHint={onTransitionClick !== undefined}
               />
             );
           }}

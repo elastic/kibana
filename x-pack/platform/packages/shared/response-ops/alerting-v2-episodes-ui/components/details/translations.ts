@@ -32,6 +32,18 @@ export const ALERT_TIMELINE_SEVERITY_LANE_LABEL = i18n.translate(
   { defaultMessage: 'Severity' }
 );
 
+export const getAlertTimelineCollapsedWarning = (eventLimit: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.alertTimeline.collapsedWarning', {
+    defaultMessage:
+      'Severity and status changes are collapsed for alerts with over {eventLimit} events',
+    values: { eventLimit },
+  });
+
+export const ALERT_TIMELINE_COLLAPSED_WARNING_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.collapsedWarningAriaLabel',
+  { defaultMessage: 'Collapsed events warning' }
+);
+
 /** --- Overview list --- */
 export const OVERVIEW_LIST_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.overviewListSection.loadError',

@@ -15,6 +15,23 @@ export const RELATED_EPISODES_LOAD_ERROR = i18n.translate(
   }
 );
 
+export const COLLAPSED_EVENTS_FETCH_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.collapsedEvents.fetchErrorToastTitle',
+  {
+    defaultMessage: 'Could not load the full history for this alert',
+  }
+);
+
+export const getCollapsedEventsFetchErrorToastMessage = (
+  shownEventCount: number,
+  totalEventCount: number
+): string =>
+  i18n.translate('xpack.alertingV2EpisodesUi.collapsedEvents.fetchErrorToastMessage', {
+    defaultMessage:
+      'The timeline shows {shownEventCount} of {totalEventCount} events, so the latest status and severity may be missing.',
+    values: { shownEventCount, totalEventCount },
+  });
+
 /** Fetch error toast title per surface, naming the failing alerting system. */
 export const EPISODES_FETCH_ERROR_TOAST_TITLE: Record<
   EpisodeFetchErrorSurface,

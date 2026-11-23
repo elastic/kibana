@@ -47,6 +47,28 @@ describe('deriveEpisodeSeverityTimelineData', () => {
     ]);
   });
 
+  it('ends on the severity it resumed after a single-event phase', () => {
+    // Collapsed rows swept for a still-open alert: critical is seen once inside a high run,
+    // so the sweep emits critical and then high at the same instant.
+    const result = deriveEpisodeSeverityTimelineData(
+      [
+        event('2024-01-01T00:00:00.000Z', 'high'),
+        event('2024-01-01T00:04:00.000Z', 'critical'),
+        event('2024-01-01T00:04:00.000Z', 'high'),
+      ],
+      Date.parse('2024-01-01T00:10:00.000Z')
+    );
+
+    // The single-event critical phase has no width, so high runs on through now.
+    expect(result.segments).toEqual([
+      expect.objectContaining({
+        severity: EpisodeSeverity.High,
+        x0Ms: Date.parse('2024-01-01T00:00:00.000Z'),
+        x1Ms: Date.parse('2024-01-01T00:10:00.000Z'),
+      }),
+    ]);
+  });
+
   it('leaves gaps for events without a supported severity', () => {
     expect(
       deriveEpisodeSeverityTimelineData(

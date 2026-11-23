@@ -33,6 +33,7 @@ export const ruleOverviewQueryKeys = {
   timelineSummary: (ruleId: string, windowStartMs: number, windowEndMs: number) =>
     [...ruleOverviewQueryKeys.all, 'timeline-summary', ruleId, windowStartMs, windowEndMs] as const,
   episodePhases: (
+    spaceId: string,
     ruleId: string,
     windowStartMs: number,
     windowEndMs: number,
@@ -41,6 +42,7 @@ export const ruleOverviewQueryKeys = {
     [
       ...ruleOverviewQueryKeys.all,
       'episode-phases',
+      spaceId,
       ruleId,
       windowStartMs,
       windowEndMs,

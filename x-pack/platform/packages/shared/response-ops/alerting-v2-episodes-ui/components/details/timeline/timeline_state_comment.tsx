@@ -14,10 +14,13 @@ import * as i18n from './translations';
 
 export interface AlertEpisodeTimelineStateCommentProps {
   entry: StateChangeEntry;
+  /** Hides the "after N events" text, which is not per change once phases are collapsed. */
+  hideEventCount?: boolean;
 }
 
 export const AlertEpisodeTimelineStateComment = ({
   entry,
+  hideEventCount = false,
 }: AlertEpisodeTimelineStateCommentProps) => {
   const isInitial = entry.prevStatus === undefined;
   const verb = isInitial ? i18n.STARTED_EPISODE_AS : i18n.CHANGED_STATUS_TO;
@@ -42,7 +45,7 @@ export const AlertEpisodeTimelineStateComment = ({
           <EuiFlexItem grow={false}>
             <AlertEpisodeStatusBadge status={entry.newStatus} />
           </EuiFlexItem>
-          {entry.prevStatus !== undefined && (
+          {entry.prevStatus !== undefined && !hideEventCount && (
             <EuiFlexItem grow={false}>
               {i18n.getAfterNEventsLabel(
                 entry.prevEventCount,

@@ -12,12 +12,20 @@ import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { StateChangeEntry } from './entries';
 import { AlertEpisodeTimelineStateComment } from './timeline_state_comment';
 
-const renderComment = (entry: StateChangeEntry) =>
+const renderComment = (entry: StateChangeEntry, hideEventCount?: boolean) =>
   render(
     <I18nProvider>
-      <AlertEpisodeTimelineStateComment entry={entry} />
+      <AlertEpisodeTimelineStateComment entry={entry} hideEventCount={hideEventCount} />
     </I18nProvider>
   );
+
+const changedEntry: StateChangeEntry = {
+  kind: 'state_change',
+  timestamp: '2026-07-02T10:00:00.000Z',
+  newStatus: ALERT_EPISODE_STATUS.ACTIVE,
+  prevStatus: ALERT_EPISODE_STATUS.PENDING,
+  prevEventCount: 5,
+};
 
 describe('AlertEpisodeTimelineStateComment', () => {
   it('renders the initial-status sentence with the new status badge', () => {
@@ -34,16 +42,18 @@ describe('AlertEpisodeTimelineStateComment', () => {
   });
 
   it('renders the changed-status sentence with the after-N-events label', () => {
-    renderComment({
-      kind: 'state_change',
-      timestamp: '2026-07-02T10:00:00.000Z',
-      newStatus: ALERT_EPISODE_STATUS.ACTIVE,
-      prevStatus: ALERT_EPISODE_STATUS.PENDING,
-      prevEventCount: 5,
-    });
+    renderComment(changedEntry);
 
     expect(screen.getByText('changed the status to')).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.getByText(/after 5 pending events/i)).toBeInTheDocument();
+  });
+
+  it('hides the after-N-events label when the event count is hidden', () => {
+    renderComment(changedEntry, true);
+
+    expect(screen.getByText('changed the status to')).toBeInTheDocument();
+    expect(screen.queryByText(/after 5 pending events/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
   });
 });

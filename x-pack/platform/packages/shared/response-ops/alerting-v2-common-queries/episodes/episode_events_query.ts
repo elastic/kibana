@@ -44,6 +44,10 @@ export interface BuildEpisodeEventsQueryOptions {
   limit?: number;
 }
 
+export interface EpisodeEventWithTotalCountRow extends EpisodeEventRow {
+  total_event_count: number;
+}
+
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
  */
@@ -78,3 +82,16 @@ export const buildEpisodeEventsQuery = (
 
   return asTypedEsqlQuery<EpisodeEventRow>(built.keep(...ALERT_EPISODE_EVENT_FIELDS));
 };
+
+/**
+ * ES|QL query returning all events for a single alert episode, oldest first, each
+ * carrying the episode's total event count. The total is aggregated before the
+ * implicit result limit applies, so it exceeds the returned rows when they were cut off.
+ */
+export const buildEpisodeEventsWithTotalCountQuery = (
+  spaceId: string,
+  episodeId: string
+): TypedEsqlQuery<EpisodeEventWithTotalCountRow> =>
+  asTypedEsqlQuery<EpisodeEventWithTotalCountRow>(
+    buildEpisodeEventsQuery(spaceId, episodeId).pipe`INLINE STATS total_event_count = COUNT(*)`
+  );

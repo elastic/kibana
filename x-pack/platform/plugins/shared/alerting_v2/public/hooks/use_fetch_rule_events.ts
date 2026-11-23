@@ -16,6 +16,7 @@ import {
   type AlertTimelinePhaseRow,
   type AlertTimelineSummary,
 } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
+import { buildCollapsedStatusPhasesQuery } from '@kbn/alerting-v2-common-queries';
 import { ruleOverviewQueryKeys } from '../queries/alert_series_activity/query_keys';
 import {
   buildTopNSeriesQuery,
@@ -26,7 +27,6 @@ import {
   MAX_ALERTS_PER_LANE,
   type AlertSelectionRow,
 } from '../queries/alert_series_activity/alert_selection_query';
-import { buildAlertPhasesQuery } from '../queries/alert_series_activity/alert_phases_query';
 import {
   buildAlertStartsQuery,
   type AlertStartRow,
@@ -55,6 +55,7 @@ export interface UseFetchRuleEventsOptions {
   groupingFields?: readonly string[];
   /** Max alerts drawn per series (lane). Defaults to {@link MAX_ALERTS_PER_LANE}. */
   perLaneLimit?: number;
+  spaceId: string | undefined;
   data: DataPublicPluginStart;
 }
 
@@ -64,6 +65,7 @@ export const useFetchRuleEvents = ({
   windowEndMs,
   groupingFields = [],
   perLaneLimit = MAX_ALERTS_PER_LANE,
+  spaceId,
   data,
 }: UseFetchRuleEventsOptions) => {
   const enabled = Boolean(ruleId) && windowEndMs > windowStartMs;
@@ -139,21 +141,23 @@ export const useFetchRuleEvents = ({
 
   const phasesQuery = useQuery({
     queryKey: ruleOverviewQueryKeys.episodePhases(
+      spaceId ?? '',
       ruleId ?? '',
       windowStartMs,
       windowEndMs,
       selectedAlertIds
     ),
-    enabled: phasesEnabled,
+    // Wait for the active space so phases are never fetched for the wrong one.
+    enabled: phasesEnabled && spaceId !== undefined,
     refetchOnWindowFocus: false,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildAlertPhasesQuery({
+          query: buildCollapsedStatusPhasesQuery({
+            spaceId: spaceId ?? '',
             ruleId: ruleId!,
-            windowStartMs,
-            windowEndMs,
+            window: { startMs: windowStartMs, endMs: windowEndMs },
             alertIds: selectedAlertIds,
           }).print('basic'),
           time_zone: 'UTC',

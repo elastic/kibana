@@ -12,12 +12,20 @@ import { EpisodeSeverity } from '../../severity/severity_utils';
 import type { SeverityChangeEntry } from './entries';
 import { AlertEpisodeTimelineSeverityComment } from './timeline_severity_comment';
 
-const renderComment = (entry: SeverityChangeEntry) =>
+const renderComment = (entry: SeverityChangeEntry, hideEventCount?: boolean) =>
   render(
     <I18nProvider>
-      <AlertEpisodeTimelineSeverityComment entry={entry} />
+      <AlertEpisodeTimelineSeverityComment entry={entry} hideEventCount={hideEventCount} />
     </I18nProvider>
   );
+
+const changedEntry: SeverityChangeEntry = {
+  kind: 'severity_change',
+  timestamp: '2026-07-02T10:00:00.000Z',
+  newSeverity: EpisodeSeverity.Critical,
+  prevSeverity: EpisodeSeverity.High,
+  prevEventCount: 3,
+};
 
 describe('AlertEpisodeTimelineSeverityComment', () => {
   it('renders the initial-severity sentence with the new severity badge', () => {
@@ -34,16 +42,18 @@ describe('AlertEpisodeTimelineSeverityComment', () => {
   });
 
   it('renders the changed-severity sentence with the after-N-events label', () => {
-    renderComment({
-      kind: 'severity_change',
-      timestamp: '2026-07-02T10:00:00.000Z',
-      newSeverity: EpisodeSeverity.Critical,
-      prevSeverity: EpisodeSeverity.High,
-      prevEventCount: 3,
-    });
+    renderComment(changedEntry);
 
     expect(screen.getByText('changed the severity to')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-critical')).toBeInTheDocument();
     expect(screen.getByText(/after 3 high events/i)).toBeInTheDocument();
+  });
+
+  it('hides the after-N-events label when the event count is hidden', () => {
+    renderComment(changedEntry, true);
+
+    expect(screen.getByText('changed the severity to')).toBeInTheDocument();
+    expect(screen.queryByText(/after 3 high events/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')).not.toBeInTheDocument();
   });
 });

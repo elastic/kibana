@@ -15,10 +15,13 @@ import * as i18n from './translations';
 
 export interface AlertEpisodeTimelineSeverityCommentProps {
   entry: SeverityChangeEntry;
+  /** Hides the "after N events" text, which is not per change once phases are collapsed. */
+  hideEventCount?: boolean;
 }
 
 export const AlertEpisodeTimelineSeverityComment = ({
   entry,
+  hideEventCount = false,
 }: AlertEpisodeTimelineSeverityCommentProps) => {
   const isInitial = entry.prevSeverity === undefined;
   const verb = isInitial ? i18n.SET_SEVERITY_TO : i18n.CHANGED_SEVERITY_TO;
@@ -43,7 +46,7 @@ export const AlertEpisodeTimelineSeverityComment = ({
           <EuiFlexItem grow={false}>
             <AlertEpisodeSeverityBadge severity={entry.newSeverity} />
           </EuiFlexItem>
-          {entry.prevSeverity !== undefined && (
+          {entry.prevSeverity !== undefined && !hideEventCount && (
             <EuiFlexItem grow={false}>
               {i18n.getAfterNEventsLabel(
                 entry.prevEventCount,
