@@ -1095,6 +1095,7 @@
     "servicenow_search.work_note_added",
     "significant-events.eventCreated",
     "significant-events.eventStatusChanged",
+    "significant-events.knowledgeIndicatorsChanged",
     "slack2.app_mention",
     "slack2.channel_created",
     "slack2.file_public",
@@ -1109,11 +1110,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "664787052b70ed2601fc7c7cb367e17996616817956cd672242468d8e0b8fa63"
+      "sha256": "ee6589e0ed4fdb9d9b956996472514642a898ed5edf30e000f5f9dbc38756400"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "1f4a80974ae9cda7074c5522451e84b9f4d6a49679fb7b1bf38d646f72e512b6"
+      "sha256": "6b075a35e8479cd3114245ee64ec477b466c75f69ca9c8339dd42ba97ed407c3"
     }
   }
 }
