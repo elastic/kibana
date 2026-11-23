@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-security/ui';
 import {
   createEsqlSourceIndex,
   deleteEsqlSourceIndex,
+  esqlSecondarySourceIndexName,
   esqlSourceIndexName,
   getEsqlRuleQuery,
   getEsqlStatsQuery,
@@ -26,6 +27,7 @@ spaceTest.describe(
   () => {
     spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
       await createEsqlSourceIndex(esClient, esqlSourceIndexName(scoutSpace.id));
+      await createEsqlSourceIndex(esClient, esqlSecondarySourceIndexName(scoutSpace.id));
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -38,6 +40,7 @@ spaceTest.describe(
 
     spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
       await deleteEsqlSourceIndex(esClient, esqlSourceIndexName(scoutSpace.id));
+      await deleteEsqlSourceIndex(esClient, esqlSecondarySourceIndexName(scoutSpace.id));
     });
 
     spaceTest(
@@ -63,6 +66,28 @@ spaceTest.describe(
         await expect(
           ruleDetailsPage.detailValue(ruleDetailsPage.definitionSection, 'ES|QL query')
         ).toHaveText(editedQuery);
+      }
+    );
+
+    spaceTest(
+      'moves the rule to another data source and shows the new query on the details page',
+      async ({ apiServices, pageObjects, scoutSpace }) => {
+        const { esqlRuleForm, ruleEditPage, ruleDetailsPage } = pageObjects;
+        const movedQuery = getEsqlRuleQuery(esqlSecondarySourceIndexName(scoutSpace.id));
+        const { id } = await apiServices.detectionRule.createEsqlRule({
+          ...ESQL_RULE,
+          enabled: false,
+          query: getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id)),
+        });
+
+        await ruleEditPage.navigate(id);
+        await esqlRuleForm.setQueryAndWaitToSettle(movedQuery);
+        await ruleEditPage.save();
+
+        await expect(ruleEditPage.ruleDetailsAboutSection).toBeVisible();
+        await expect(
+          ruleDetailsPage.detailValue(ruleDetailsPage.definitionSection, 'ES|QL query')
+        ).toHaveText(movedQuery);
       }
     );
 

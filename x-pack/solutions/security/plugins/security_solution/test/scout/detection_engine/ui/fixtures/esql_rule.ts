@@ -15,6 +15,10 @@ import type { EsClient } from '@kbn/scout-security';
 export const esqlSourceIndexName = (spaceId: string): string =>
   `auditbeat-scout-esql-rule-${spaceId.replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
 
+/** A second source index of the space, for tests that move a rule to another data source. */
+export const esqlSecondarySourceIndexName = (spaceId: string): string =>
+  `${esqlSourceIndexName(spaceId)}-secondary`;
+
 /** A source name that no index matches. */
 export const MISSING_ESQL_SOURCE = 'auditbeat-scout-esql-rule-missing-source';
 

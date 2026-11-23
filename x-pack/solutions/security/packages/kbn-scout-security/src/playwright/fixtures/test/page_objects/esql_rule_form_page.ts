@@ -15,12 +15,14 @@ import { dismissProjectPickerTour } from './helpers/dismiss_project_picker_tour'
 /** One attempt to pick options before the selection is retried. */
 const OPTION_ATTEMPT_TIMEOUT_MS = 5_000;
 
-const CONTINUE_SELECTOR = '[data-test-subj="define-continue"]';
+/** "Continue" of the Define step when creating a rule, "Save changes" when editing one. */
+const SUBMIT_BUTTON_SELECTOR =
+  '[data-test-subj="define-continue"], [data-test-subj="ruleEditSubmitButton"]';
 
 type ComboBox = ReturnType<ScoutPage['components']['comboBox']>;
 
-/** Window flag that records whether "Continue" was disabled since the observer was installed. */
-type ContinueWindow = Window & { __esqlContinueWasDisabled?: boolean };
+/** Window flag that records whether the button was disabled since the observer was installed. */
+type SubmitButtonWindow = Window & { __esqlSubmitButtonWasDisabled?: boolean };
 
 /** Same derivation as the form, which treats a query the parser cannot read as having no index. */
 const getIndexPattern = (query: string): string => {
@@ -100,12 +102,13 @@ export class EsqlRuleFormPage {
   }
 
   /**
-   * Replaces the query and waits for the Define step to settle. About 300 ms after the index
-   * pattern of the query changes, the form resolves the data view again. "Continue" is disabled
-   * until it is done, and a click that lands in that window is ignored. The window lasts from tens
-   * of milliseconds to over a second, depending on the load of the machine. Polling the button can
-   * miss a short window, therefore we use an observer in the page to record this behaviour.
-   * The wait only applies when the index pattern changes. Otherwise "Continue" stays enabled.
+   * Replaces the query and waits for the form to settle. About 300 ms after the index pattern of
+   * the query changes, the form resolves the data view again. "Continue" (or "Save changes" when
+   * editing a rule) is disabled until it is done, and a click that lands in that window is ignored.
+   * The window lasts from tens of milliseconds to over a second, depending on the load of the
+   * machine. Polling the button can miss a short window, therefore we use an observer in the page
+   * to record this behaviour. The wait only applies when the index pattern changes. Otherwise the
+   * button stays enabled.
    */
   async setQueryAndWaitToSettle(query: string): Promise<void> {
     const previousQuery = await this.esqlEditor.getQuery();
@@ -116,28 +119,28 @@ export class EsqlRuleFormPage {
       return;
     }
 
-    await this.runAndWaitForContinueToBeEnabled(() => this.setQuery(query));
+    await this.runAndWaitForSubmitButtonToBeEnabled(() => this.setQuery(query));
   }
 
-  private async runAndWaitForContinueToBeEnabled(action: () => Promise<void>): Promise<void> {
-    await this.recordWhenContinueIsDisabled();
+  private async runAndWaitForSubmitButtonToBeEnabled(action: () => Promise<void>): Promise<void> {
+    await this.recordWhenSubmitButtonIsDisabled();
     await action();
-    await this.waitForContinueToBeEnabledAgain();
+    await this.waitForSubmitButtonToBeEnabledAgain();
   }
 
   /**
-   * Installs an observer in the page that remembers that "Continue" was disabled. The observer sees
-   * windows that polling from the test can miss.
+   * Installs an observer in the page that remembers that the submit button was disabled. The
+   * observer sees windows that polling from the test can miss.
    */
-  private async recordWhenContinueIsDisabled(): Promise<void> {
+  private async recordWhenSubmitButtonIsDisabled(): Promise<void> {
     await this.page.evaluate((selector) => {
-      const continueWindow: ContinueWindow = window;
-      continueWindow.__esqlContinueWasDisabled = false;
+      const buttonWindow: SubmitButtonWindow = window;
+      buttonWindow.__esqlSubmitButtonWasDisabled = false;
 
       const observer = new MutationObserver(() => {
         const button = document.querySelector<HTMLButtonElement>(selector);
         if (button?.disabled) {
-          continueWindow.__esqlContinueWasDisabled = true;
+          buttonWindow.__esqlSubmitButtonWasDisabled = true;
         }
       });
       observer.observe(document, {
@@ -146,19 +149,19 @@ export class EsqlRuleFormPage {
         attributes: true,
         attributeFilter: ['disabled'],
       });
-    }, CONTINUE_SELECTOR);
+    }, SUBMIT_BUTTON_SELECTOR);
   }
 
-  private async waitForContinueToBeEnabledAgain(): Promise<void> {
+  private async waitForSubmitButtonToBeEnabledAgain(): Promise<void> {
     await this.page.waitForFunction(
       (selector) => {
         const button = document.querySelector<HTMLButtonElement>(selector);
         return (
-          (window as ContinueWindow).__esqlContinueWasDisabled === true &&
+          (window as SubmitButtonWindow).__esqlSubmitButtonWasDisabled === true &&
           button?.disabled === false
         );
       },
-      CONTINUE_SELECTOR,
+      SUBMIT_BUTTON_SELECTOR,
       { timeout: DATA_LOAD_TIMEOUT_MS }
     );
   }
