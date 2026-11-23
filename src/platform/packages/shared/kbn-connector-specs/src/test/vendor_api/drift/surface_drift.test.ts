@@ -320,8 +320,11 @@ describe('renderRefreshPr', () => {
         '</td>',
         '<td>',
         '',
+        'Response fields',
+        '',
+        '**added**',
         '```diff',
-        '+ response field title',
+        '+ title',
         '```',
         '',
         '</td>',
@@ -333,7 +336,7 @@ describe('renderRefreshPr', () => {
         '</tr>',
       ].join('\n')
     );
-    expect(body).toContain('+ response field name\n```');
+    expect(body).toContain('+ name\n```');
     expect(body).toContain('`listB`');
   });
 
@@ -356,7 +359,9 @@ describe('renderRefreshPr', () => {
       ]),
     ]);
 
-    expect(body).toContain('```diff\n! deprecated old\n+ response field title\n```');
+    expect(body).toContain(
+      '**added**\n```diff\n+ title\n```\n\n**changed**\n```diff\n! old (deprecated)\n```'
+    );
   });
 
   it('names an endpoint no action is recorded on with a dash, and keeps unlocated changes last', () => {

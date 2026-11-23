@@ -19,16 +19,22 @@ const scheme = (id: string, scopes: string[]) =>
       .join(', ')}]\` was ${id.endsWith('-added') ? 'added to' : 'removed from'} the API`
   );
 
+const diff = (...lines: string[]): string[] => ['```diff', ...lines, '```', ''];
+
 describe('describeChanges', () => {
-  it('describes the changes to a GKE endpoint as a diff, most important first', () => {
+  it('groups the changes by where they are, then by removed, added and changed', () => {
     const lines = describeChanges([
       change(
         'response-optional-property-added',
         'added the optional property `clusters/items/addonsConfig/wizSensorConfig` to the response with the `200` status'
       ),
       change(
-        'response-optional-property-added',
-        'added the optional property `clusters/items/networkConfig/ambientNetworkingConfig` to the response with the `200` status'
+        'response-optional-property-removed',
+        'removed the optional property `custom_attributes/key` from the response with the `200` status'
+      ),
+      change(
+        'response-property-type-changed',
+        "the `custom_attributes` response's property `type` changed from `object` to `string` for status `200`"
       ),
       change(
         'response-property-deprecated',
@@ -44,26 +50,76 @@ describe('describeChanges', () => {
     ]);
 
     expect(lines).toEqual([
-      '! deprecated clusters/securityPostureConfig/vulnerabilityMode',
-      '+ enum value MIGRATE_TO_ADVANCED_DATAPATH on clusters/networkConfig/datapathProvider',
-      '+ response field clusters/addonsConfig/wizSensorConfig',
-      '+ response field clusters/networkConfig/ambientNetworkingConfig',
-      '  auth scopes regrouped, same scopes',
+      'Response fields',
+      '',
+      '**removed**',
+      ...diff('- custom_attributes/key'),
+      '**added**',
+      ...diff('+ clusters/addonsConfig/wizSensorConfig'),
+      '**changed**',
+      ...diff(
+        '! clusters/securityPostureConfig/vulnerabilityMode (deprecated)',
+        '! custom_attributes (object → string)'
+      ),
+      'Enum values',
+      '',
+      '**added**',
+      ...diff('+ MIGRATE_TO_ADVANCED_DATAPATH (clusters/networkConfig/datapathProvider)'),
+      'Auth scopes',
+      '',
+      'regrouped, same scopes',
     ]);
   });
 
-  it('shows the first three names of a kind and counts the rest', () => {
+  it('shows the first three names of a section and counts the rest', () => {
     const lines = describeChanges(
-      ['a', 'b', 'c', 'd', 'e'].map((name) =>
+      ['e', 'a', 'd', 'b', 'c'].map((name) =>
         change('response-optional-property-added', `added the optional property \`${name}\``)
       )
     );
 
+    expect(lines).toEqual(
+      [
+        'Response fields',
+        '',
+        '**added**',
+        ...diff('+ a', '+ b', '+ c', '  … and 2 more response fields'),
+      ].slice(0, -1)
+    );
+  });
+
+  it('counts the rest of the changed fields as changed', () => {
+    const lines = describeChanges(
+      ['a', 'b', 'c', 'd'].map((name) =>
+        change(
+          'response-property-became-required',
+          `the response property \`${name}\` became required`
+        )
+      )
+    );
+
+    expect(lines.join('\n')).toContain('! c (now required)\n  … and 1 more changed');
+  });
+
+  it('puts every change of a field on one line', () => {
+    const lines = describeChanges([
+      change(
+        'request-parameter-min-length-set',
+        'for the `query` request parameter `branch`, the minLength was set to `1`'
+      ),
+      change(
+        'request-parameter-became-not-nullable',
+        'the `query` request parameter `branch` became not nullable'
+      ),
+    ]);
+
     expect(lines).toEqual([
-      '+ response field a',
-      '+ response field b',
-      '+ response field c',
-      '  … and 2 more response fields',
+      'Request parameters',
+      '',
+      '**changed**',
+      '```diff',
+      '! branch (minLength set to 1, no longer nullable)',
+      '```',
     ]);
   });
 
@@ -83,42 +139,53 @@ describe('describeChanges', () => {
         ),
       ])
     ).toEqual([
-      '+ auth scope bigquery',
-      '+ auth scope pipeline:write',
-      '- auth scope container',
-      '- auth scope pipeline',
+      'Auth scopes',
+      '',
+      '**removed**',
+      ...diff('- container', '- pipeline'),
+      '**added**',
+      '```diff',
+      '+ bigquery',
+      '+ pipeline:write',
+      '```',
     ]);
   });
 
   it('names a field once, whatever media types the change was reported for', () => {
-    expect(
-      describeChanges(
-        ['application/json', 'application/cbor', 'application/x-amz-json-1.1'].map((type) =>
-          change(
-            'response-optional-property-added',
-            `added the optional property \`DocumentIdentifiers/items/CloudProviders\` to the response with the \`200\` status (media type: ${type})`
-          )
+    const lines = describeChanges(
+      ['application/json', 'application/cbor', 'application/x-amz-json-1.1'].map((type) =>
+        change(
+          'response-optional-property-added',
+          `added the optional property \`DocumentIdentifiers/items/CloudProviders\` to the response with the \`200\` status (media type: ${type})`
         )
       )
-    ).toEqual(['+ response field DocumentIdentifiers/CloudProviders']);
+    );
+
+    expect(lines.filter((line) => line.startsWith('+'))).toEqual([
+      '+ DocumentIdentifiers/CloudProviders',
+    ]);
   });
 
   it('says whether what was removed was in the request or the response', () => {
-    expect(
-      describeChanges([
-        change('request-property-removed', 'removed the request property `query/limit`'),
-        change(
-          'response-optional-property-removed',
-          'removed the optional property `count` from the response with the `200` status'
-        ),
-        change('request-parameter-removed', 'deleted the `query` request parameter `alertId`'),
-        change('api-schema-removed', 'removed the schema `statusGroupFilter`'),
-      ])
-    ).toEqual([
-      '- request field query/limit',
-      '- request parameter alertId',
-      '- response field count',
-      '- schema statusGroupFilter',
+    const lines = describeChanges([
+      change('request-property-removed', 'removed the request property `query/limit`'),
+      change(
+        'response-optional-property-removed',
+        'removed the optional property `count` from the response with the `200` status'
+      ),
+      change('request-parameter-removed', 'deleted the `query` request parameter `alertId`'),
+      change('api-schema-removed', 'removed the schema `statusGroupFilter`'),
+    ]);
+
+    expect(lines.filter((line) => !line.startsWith('`') && /^[A-Z-]/.test(line))).toEqual([
+      'Response fields',
+      '- count',
+      'Request fields',
+      '- query/limit',
+      'Request parameters',
+      '- alertId',
+      'Schemas',
+      '- statusGroupFilter',
     ]);
   });
 
@@ -130,7 +197,9 @@ describe('describeChanges', () => {
           'added the new optional `query` request parameter `preferFieldAssociatedErrors`'
         ),
       ])
-    ).toEqual(['+ request parameter preferFieldAssociatedErrors']);
+    ).toEqual(
+      ['Request parameters', '', '**added**', ...diff('+ preferFieldAssociatedErrors')].slice(0, -1)
+    );
   });
 
   it('counts schema variants instead of naming them', () => {
@@ -149,26 +218,58 @@ describe('describeChanges', () => {
           'added `#microsoft.graph.x` discriminator mapping keys to the `y` response property'
         ),
       ])
-    ).toEqual(['! schema variants changed (2)']);
+    ).toEqual(['Schema variants', '', '**changed**', '```diff', '! 2 changes', '```']);
   });
 
-  it('names new error responses and type or constraint changes', () => {
+  it('names new error responses', () => {
     expect(
       describeChanges([
         change(
           'response-non-success-status-added',
           'added the non-success response with the status `422`'
         ),
-        change(
-          'request-parameter-became-nullable',
-          'the `query` request parameter `order_by` became nullable'
-        ),
-        change(
-          'request-property-min-set',
-          "the `page_size` request property's min was set to `1.00`"
-        ),
       ])
-    ).toEqual(['! changed order_by', '! changed page_size', '+ error response 422']);
+    ).toEqual(['Error responses', '', '**added**', '```diff', '+ 422', '```']);
+  });
+
+  it.each([
+    [
+      'response-property-type-specialized',
+      "the `x` response's property `type` was narrowed from `any` to `object` for status `200`",
+      '! x (any → object)',
+    ],
+    [
+      'request-property-default-value-changed',
+      'the `x` request property default value changed from `false` to `true`',
+      '! x (default false → true)',
+    ],
+    [
+      'response-property-became-optional',
+      'the response property `x` became optional for the status `200`',
+      '! x (now optional)',
+    ],
+    [
+      'request-property-became-nullable',
+      'the request property `x` became nullable',
+      '! x (now nullable)',
+    ],
+    [
+      'response-property-list-of-types-narrowed',
+      'response property `x` list-of-types was narrowed by removing types `null` from media type `application/json` of response `200`',
+      '! x (no longer null)',
+    ],
+    [
+      'request-property-min-set',
+      "the `x` request property's min was set to `1.00`",
+      '! x (min set to 1.00)',
+    ],
+    [
+      'response-property-max-items-unset',
+      "the `x` response property's maxItems was unset from `1` for the response status `200`",
+      '! x (maxItems unset)',
+    ],
+  ])('says what changed about a field: %s', (id, text, expected) => {
+    expect(describeChanges([change(id, text)])).toContain(expected);
   });
 
   it('keeps the rule of a change it has no words for', () => {
@@ -178,31 +279,31 @@ describe('describeChanges', () => {
         change('something-new', 'y'),
         change('other-rule', 'z'),
       ])
-    ).toEqual(['! something-new ×2', '! other-rule']);
+    ).toEqual(['Other', '', '**changed**', '```diff', '! something-new ×2', '! other-rule', '```']);
   });
 
   it('cuts a long path at its start, keeping the field', () => {
-    const [line] = describeChanges([
+    const line = describeChanges([
       change(
         'response-optional-property-added',
         `added the optional property \`${'section/'.repeat(20)}finalField\` to the response`
       ),
-    ]);
+    ]).find((found) => found.startsWith('+'));
 
-    expect(line).toMatch(/^\+ response field ….*section\/finalField$/);
-    expect(line.length).toBeLessThan(110);
+    expect(line).toMatch(/^\+ ….*section\/finalField$/);
+    expect(line?.length).toBeLessThan(90);
   });
 
   it('keeps an enum value whole when the field it is on is long', () => {
-    const [line] = describeChanges([
+    const line = describeChanges([
       change(
         'response-property-enum-value-added',
         `added the new \`SPECIFIC\` enum value to the \`${'section/'.repeat(
           20
         )}driver\` response property`
       ),
-    ]);
+    ]).find((found) => found.startsWith('+'));
 
-    expect(line).toMatch(/^\+ enum value SPECIFIC on ….*section\/driver$/);
+    expect(line).toMatch(/^\+ SPECIFIC \(….*section\/driver\)$/);
   });
 });

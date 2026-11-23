@@ -84,7 +84,7 @@ const isFailed = (entry: DriftReportEntry): entry is FailedDrift => 'error' in e
 
 // GitHub rejects a pull request body over 65,536 characters. A Microsoft Graph connector alone
 // can report thousands of changes, each naming a schema path of up to 2.7 KB.
-const MAX_REFRESH_PR_BODY_LENGTH = 60_000;
+const MAX_REFRESH_PR_BODY_LENGTH = 63_000;
 const MAX_ENDPOINTS_PER_CONNECTOR = 20;
 const NO_ENDPOINT = '—';
 
@@ -123,7 +123,7 @@ const changesTable = (drift: ConnectorDrift): string[] => {
         '<tr>',
         ...[
           [endpoint === NO_ENDPOINT ? NO_ENDPOINT : code(endpoint)],
-          ['```diff', ...describeChanges(group), '```'],
+          describeChanges(group),
           [actions.length > 0 ? listed(actions.map(code)) : NO_ENDPOINT],
         ].flatMap((cellLines) => ['<td>', '', ...cellLines, '', '</td>']),
         '</tr>',
@@ -145,7 +145,7 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
   const intro = [
     'Refreshes the `vendor_api` artifacts of connectors whose vendor specs changed without breaking them, as found by the weekly vendor API drift check (`node scripts/connector_vendor_api --drift`). The actions pass against the latest specs.',
     '',
-    'Each table lists the endpoints that changed, what changed on each as a diff (`+` added, `-` removed, `!` changed or deprecated), and the actions that call them. The drift report attached to the build lists every change.',
+    'Each table lists the endpoints that changed, what changed on each, as diffs of what was removed, added or changed, and the actions that call them. The drift report attached to the build lists every change.',
     '',
   ].join('\n');
 
