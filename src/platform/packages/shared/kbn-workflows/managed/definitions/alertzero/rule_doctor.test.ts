@@ -186,6 +186,21 @@ describe('rule doctor review', () => {
       expect(streak(['success', 'failure'])).toBe('0');
       expect(streak([])).toBe('0');
     });
+
+    it('counts the runs that reported a gap', () => {
+      const gap = '6 minutes (360000ms) were not queried between this rule execution and the last';
+      const gaps = (messages: string[]) =>
+        render(review.step('match_message').with?.gap_runs, {
+          steps: {
+            fetch_run_log: {
+              output: { data: messages.map((message) => ({ outcome: { message } })) },
+            },
+          },
+        });
+
+      expect(gaps([gap, 'Unknown column [a]', gap])).toBe('2');
+      expect(gaps([])).toBe('0');
+    });
   });
 
   describe('classify', () => {
@@ -207,15 +222,21 @@ describe('rule doctor review', () => {
   });
 
   describe('gate', () => {
-    const proceed = (cause: string, streak: number) =>
+    const proceed = (cause: string, streak: number, gaps = 0) =>
       render((review.step('gate').with?.proceed as string).slice(1), {
         consts,
-        steps: { classify: { output: { cause, failure_streak: streak } } },
+        steps: { classify: { output: { cause, failure_streak: streak, gap_runs: gaps } } },
       });
 
     it('reviews cluster trouble only after several failures in a row', () => {
       expect(proceed('cluster_health', 2)).toBe('false');
       expect(proceed('cluster_health', 3)).toBe('true');
+    });
+
+    // One gap is downtime: the next run reports the rule's real problem.
+    it('reviews a run gap only when it repeats', () => {
+      expect(proceed('execution_gap', 1, 1)).toBe('false');
+      expect(proceed('execution_gap', 2, 2)).toBe('true');
     });
 
     it('lets every other cause through at once', () => {

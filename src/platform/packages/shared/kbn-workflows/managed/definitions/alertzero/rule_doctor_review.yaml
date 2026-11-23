@@ -82,6 +82,8 @@ consts:
   fresh_within: 24h
   run_log_size: 5
   cluster_failures_in_a_row: 3
+  # One gap is downtime; the rule's look-back is too short only when gaps repeat.
+  gap_runs_needed: 2
   # The only causes where turning the rule off can be right: it can never find data.
   disable_causes: ",no_index,no_data,no_threat_index,no_data_view,"
   # A dismissal for one of these reasons leaves the rule alone for 30 days.
@@ -185,6 +187,11 @@ steps:
         {%- if run.outcome.status == 'failure' -%}{%- assign streak = streak | plus: 1 -%}{%- else -%}{%- assign done = true -%}{%- endif -%}
         {%- endif -%}
         {%- endfor -%}{{ streak }}
+      gap_runs: >-
+        {%- assign gaps = 0 -%}
+        {%- for run in steps.fetch_run_log.output.data -%}
+        {%- if run.outcome.message contains 'were not queried between this rule execution' -%}{%- assign gaps = gaps | plus: 1 -%}{%- endif -%}
+        {%- endfor -%}{{ gaps }}
 
   # Kibana checks a rule's indices with the rule's API key, and a key that cannot
   # see an index reports no matching index at all. Finding events here, as the
@@ -218,6 +225,7 @@ steps:
       visible_indices: "{{ steps.visible_indices.output.aggregations.indices.buckets | map: 'key' | join: ', ' }}"
       key_owner: "{{ steps.fetch_rule_key.output.api_key_owner | default: steps.fetch_rule.output.updated_by }}"
       failure_streak: "${{ steps.match_message.output.failure_streak | plus: 0 }}"
+      gap_runs: "${{ steps.match_message.output.gap_runs | plus: 0 }}"
       # A warning means the rule still runs, which changes how the problem is put.
       warned: "${{ steps.fetch_rule.output.execution_summary.last_execution.status == 'partial failure' }}"
 
@@ -277,7 +285,8 @@ steps:
         {%- endfor -%}
 
   # Cluster trouble mostly clears by itself, so it gets a review only once the rule
-  # failed several runs in a row. A rule whose fix was dismissed as an accepted
+  # failed several runs in a row. A single run gap is downtime and hides the rule's
+  # real problem, which the next run reports, so a gap needs to repeat. A rule whose fix was dismissed as an accepted
   # risk or handled elsewhere, or whose review was declined at the entry gate, is
   # left alone for a while. Every other cause goes ahead.
   - name: gate
@@ -288,7 +297,9 @@ steps:
       proceed: >-
         ${{ steps.recall_decisions.output.paused_until == blank
           and (steps.classify.output.cause != 'cluster_health'
-            or steps.classify.output.failure_streak >= consts.cluster_failures_in_a_row) }}
+            or steps.classify.output.failure_streak >= consts.cluster_failures_in_a_row)
+          and (steps.classify.output.cause != 'execution_gap'
+            or steps.classify.output.gap_runs >= consts.gap_runs_needed) }}
 
   # One plain sentence per cause, shared by the agent prompt and the proposal.
   - name: describe_symptom
