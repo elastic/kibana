@@ -28,6 +28,7 @@ const fetchAlert = fetchClassicAlertById as jest.MockedFunction<typeof fetchClas
 const present = {} as never;
 
 const episodeServices: SubjectServices = {
+  application: present,
   http: present,
   uiSettings: present,
   userProfile: present,
