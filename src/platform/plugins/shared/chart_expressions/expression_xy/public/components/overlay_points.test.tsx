@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { act, renderHook } from '@testing-library/react';
+import { act, render, renderHook } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import {
+  BubbleSeries,
   Position,
   ScaleType,
   type GeometryValue,
@@ -24,8 +27,14 @@ import {
   getClickedOverlayPoint,
   getOverlaySeriesConfigs,
   getOverlaySpecId,
+  OverlayPoints,
   useOverlays,
 } from './overlay_points';
+
+jest.mock('@elastic/charts', () => ({
+  ...jest.requireActual('@elastic/charts'),
+  BubbleSeries: jest.fn(() => null),
+}));
 
 const point = { trace_id: 'trace-1', '@timestamp': 1000, value: 42 };
 
@@ -94,6 +103,40 @@ describe('overlay points', () => {
         yScaleType: ScaleType.Linear,
       },
     ]);
+  });
+
+  it('draws points at their own X values on histogram layers', () => {
+    const sameBucketPoints = [
+      { '@timestamp': 1000, value: 1 },
+      { '@timestamp': 1001, value: 2 },
+    ];
+    const histogramLayer = createLayer({
+      isHistogram: true,
+      table: {
+        type: 'datatable',
+        rows: [{ timestamp: 1000 }, { timestamp: 301000 }],
+        columns: [
+          { id: 'timestamp', name: 'timestamp', meta: { type: 'date' } },
+          { id: 'avg', name: 'avg', meta: { type: 'number', params: { id: 'number' } } },
+        ],
+      },
+    });
+
+    render(
+      <EuiThemeProvider>
+        <OverlayPoints
+          overlays={[{ ...overlay, data: sameBucketPoints }]}
+          yAxesConfiguration={yAxesConfiguration}
+          dataLayers={[histogramLayer]}
+          defaultXScaleType={XScaleTypes.TIME}
+        />
+      </EuiThemeProvider>
+    );
+
+    expect(jest.mocked(BubbleSeries)).toHaveBeenCalledWith(
+      expect.objectContaining({ data: sameBucketPoints, xAccessor: '@timestamp' }),
+      expect.anything()
+    );
   });
 
   it('follows the scale type of the Y axis', () => {
