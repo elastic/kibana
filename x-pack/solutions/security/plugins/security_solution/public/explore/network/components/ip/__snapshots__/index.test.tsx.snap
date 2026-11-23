@@ -2,7 +2,7 @@
 
 exports[`Port renders correctly against snapshot 1`] = `
 <button
-  class="euiLink emotion-euiLink-primary"
+  class="euiLink emotion-euiLink-text"
   data-test-subj="network-details"
   type="button"
 >

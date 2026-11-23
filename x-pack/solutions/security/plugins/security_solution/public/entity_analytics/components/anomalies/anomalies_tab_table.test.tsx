@@ -82,6 +82,7 @@ const makeAnomaly = (overrides: Partial<AnomalySummaryEntry> = {}): AnomalySumma
   partitionFieldValue: null,
   recordScore: 75,
   recordId: 'record-1',
+  entityId: 'user:alice',
   timestamp: '2024-01-15T10:00:00.000Z',
   actual: [100],
   typical: [10],

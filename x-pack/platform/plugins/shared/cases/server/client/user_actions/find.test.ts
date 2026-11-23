@@ -23,7 +23,7 @@ describe('findUserActions', () => {
       await expect(
         // @ts-expect-error: excess attribute
         find({ caseId: 'test-case', params: { foo: 'bar' } }, client, clientArgs)
-      ).rejects.toThrow('invalid keys "foo"');
+      ).rejects.toThrow('Excess keys are not allowed');
     });
 
     it(`throws when trying to fetch more than ${MAX_DOCS_PER_PAGE} items`, async () => {
@@ -856,6 +856,72 @@ describe('findUserActions', () => {
       );
 
       expect(result.total).toBe(1);
+    });
+
+    // ── workflow user-action search (finding 4) ───────────────────────────────
+
+    it('matches workflow user action by workflow name', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'workflow',
+          payload: {
+            workflow: { id: 'wf-1', name: 'Enrich IPs', executionId: 'exec-1' },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: 'Enrich IPs' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
+
+    it('matches workflow user action by observable value for observable origin', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'workflow',
+          payload: {
+            workflow: { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' },
+            origin: { type: 'cases.observable', id: 'obs-1', value: '192.168.1.1' },
+          },
+        }),
+      ]);
+
+      const result = await find(
+        { caseId: 'test-case', params: { search: '192.168.1.1' } },
+        client,
+        clientArgs
+      );
+
+      expect(result.total).toBe(1);
+    });
+
+    it('does not match workflow user action by workflow id or executionId', async () => {
+      clientArgs.services.userActionService.finder.findAll = jest.fn().mockResolvedValue([
+        createMockUserActionSO({
+          type: 'workflow',
+          payload: {
+            workflow: { id: 'wf-opaque-id', name: 'My Workflow', executionId: 'exec-opaque-id' },
+          },
+        }),
+      ]);
+
+      const resultById = await find(
+        { caseId: 'test-case', params: { search: 'wf-opaque-id' } },
+        client,
+        clientArgs
+      );
+      expect(resultById.total).toBe(0);
+
+      const resultByExecId = await find(
+        { caseId: 'test-case', params: { search: 'exec-opaque-id' } },
+        client,
+        clientArgs
+      );
+      expect(resultByExecId.total).toBe(0);
     });
   });
 

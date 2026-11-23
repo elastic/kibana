@@ -111,6 +111,7 @@ it('constructs RspackOptimizer with expected options and a CLI-formatted log', a
     cache: true,
     dist: true,
     examples: true,
+    devOnly: true,
     pluginPaths: ['/some/dir'],
     pluginScanDirs: ['/some-scan-path'],
     allowlistPluginGroups: undefined,

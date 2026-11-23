@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { parse as yamlParse } from 'yaml';
 import { UpdateFieldDefinitionInputSchema } from '../../../../common/types/domain/field_definition/v1';
 import { INTERNAL_FIELD_DEFINITION_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { validateFieldDefinitionYaml } from './validate_field_definition_input';
 
 /**
  * PUT /internal/cases/field-definitions/{field_definition_id}
@@ -39,13 +39,9 @@ export const putFieldDefinitionRoute = createCasesRoute({
       }
       const input = parseResult.data;
 
-      // Validate that the definition YAML is valid
-      try {
-        yamlParse(input.definition);
-      } catch (yamlError) {
-        return response.badRequest({
-          body: { message: `Invalid YAML definition: ${yamlError}` },
-        });
+      const definitionValidation = validateFieldDefinitionYaml(input.definition);
+      if (!definitionValidation.valid) {
+        return response.badRequest({ body: { message: definitionValidation.message } });
       }
 
       const updated = await casesClient.fieldDefinitions.updateFieldDefinition(

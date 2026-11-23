@@ -33,6 +33,11 @@ export const OUTPUT_MESSAGES = Object.freeze({
       defaultMessage: `{command} failed`,
       values: { command },
     }),
+  wasCanceled: (command: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.item.wasCanceled', {
+      defaultMessage: `{command} was canceled`,
+      values: { command },
+    }),
   expandSection: {
     placedAt: i18n.translate(
       'xpack.securitySolution.responseActionsList.list.item.expandSection.placedAt',
@@ -124,9 +129,6 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: `Response actions history : {hostname}`,
       values: { hostname },
     }),
-  pageSubTitle: i18n.translate('xpack.securitySolution.responseActionsList.list.pageSubTitle', {
-    defaultMessage: 'View the history of response actions performed on hosts.',
-  }),
   fetchError: i18n.translate('xpack.securitySolution.responseActionsList.list.errorMessage', {
     defaultMessage: 'Error while retrieving response actions',
   }),
@@ -259,6 +261,25 @@ export const UX_MESSAGES = Object.freeze({
       'xpack.securitySolution.responseActionsList.action.cancelActionModalHostSelectorCounter',
       { defaultMessage: '{selected} of {total}', values: { selected, total } }
     ),
+  cancelActionModalLoadingCapabilities: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalLoadingCapabilities',
+    {
+      defaultMessage: 'Checking host support for cancel',
+    }
+  ),
+  cancelActionModalHostUnsupportedTooltip: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalHostUnsupportedTooltip',
+    {
+      defaultMessage: 'This host is running an agent version that does not support cancel',
+    }
+  ),
+  cancelActionModalAllHostsUnsupported: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalAllHostsUnsupported',
+    {
+      defaultMessage:
+        'None of the hosts with a pending action are running an agent version that supports cancel.',
+    }
+  ),
 });
 
 export const FILTER_NAMES = Object.freeze({

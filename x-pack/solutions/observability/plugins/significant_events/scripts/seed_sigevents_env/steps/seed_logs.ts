@@ -14,7 +14,7 @@ import { incidentAt, makePhaseContext } from '@kbn/synthtrace/src/scenarios/sige
 import { timerange } from '@kbn/synthtrace-client';
 import { METRIC_SERIES_MAX_WRITE_DELAY } from '../../../server/lib/significant_events/rules/metric_series_contract';
 import { getDurationMinutes } from '../../../server/lib/significant_events/rules/schedule';
-import type { SeedContext } from '../types';
+import type { SeedBaseContext } from '../types';
 
 const TICK_MS = 60_000;
 /** Baseline window before the failure injection phase, in minutes. */
@@ -22,7 +22,7 @@ const BASELINE_MINUTES = 30;
 const RELIABLE_HORIZON_PADDING_MINUTES = 1;
 
 export async function seedLogs(
-  ctx: SeedContext,
+  ctx: SeedBaseContext,
   esClient: Client,
   log: ToolingLog
 ): Promise<{

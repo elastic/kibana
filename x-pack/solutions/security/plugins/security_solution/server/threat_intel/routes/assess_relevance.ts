@@ -6,8 +6,11 @@
  */
 
 import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_THREAT_INTEL_ASSESS_RELEVANCE_TELEMETRY_PLUGIN_ID,
+} from '@kbn/alertzero-common';
+import {
   ASSESS_RELEVANCE_API_PATH,
-  THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
   assessRelevanceBodySchema,
   assessRelevanceResponseSchema,
   ASSESS_RELEVANCE_MAX_BODY_BYTES,
@@ -51,7 +54,8 @@ export const registerAssessRelevanceRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+          telemetryPluginId: ALERTZERO_THREAT_INTEL_ASSESS_RELEVANCE_TELEMETRY_PLUGIN_ID,
           logger,
         });
         if (!modelOutcome.ok) {

@@ -16,16 +16,32 @@ import {
   createPostDynamicSettingsRoute,
   DynamicSettingsSchema,
 } from './dynamic_settings';
+import { DefaultRuleService } from '../default_alerts/default_alert_service';
 import type { RouteContext } from '../types';
 import {
   REBALANCE_SHARDS_ENABLED_STATE_KEY,
   REBALANCE_SHARDS_TASK_ID,
 } from '../../tasks/rebalance_shards_enabled';
 
-const buildServer = () =>
+const buildSecurity = (hasAllRequested = true) => {
+  const globally = jest.fn().mockResolvedValue({ hasAllRequested });
+  return {
+    globally,
+    security: {
+      authz: {
+        mode: { useRbacForRequest: jest.fn().mockReturnValue(true) },
+        actions: { api: { get: (operation: string) => `api:${operation}` } },
+        checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally }),
+      },
+    },
+  };
+};
+
+const buildServer = (hasAllRequested = true) =>
   ({
     logger: loggerMock.create(),
     pluginsStart: { taskManager: taskManagerMock.createStart() },
+    security: buildSecurity(hasAllRequested).security,
   } as unknown as RouteContext['server']);
 
 const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext =>
@@ -82,9 +98,9 @@ describe('dynamic settings routes', () => {
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
       const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
-        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false },
-      });
+      (server.pluginsStart.taskManager.get as jest.Mock)
+        .mockResolvedValueOnce({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true } })
+        .mockResolvedValue({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false } });
 
       const clearShardConditions = jest.fn();
       const route = createPostDynamicSettingsRoute();
@@ -111,6 +127,78 @@ describe('dynamic settings routes', () => {
       expect(result).toMatchObject({ rebalancePrivateLocationShardsEnabled: false });
     });
 
+    describe('default rule actions', () => {
+      const setUp = (body: Record<string, unknown>) => {
+        jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
+          ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
+          defaultConnectors: ['old'],
+        });
+        jest
+          .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+          .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+        const server = buildServer();
+        (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+          state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
+        });
+        return buildRouteContext({ server, request: { body } as never, context: {} as never });
+      };
+
+      it('refreshes default rule actions with the stored previous connectors when connectors change', async () => {
+        const refresh = jest
+          .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
+          .mockResolvedValue();
+
+        await createPostDynamicSettingsRoute().handler(setUp({ defaultConnectors: ['new'] }));
+
+        expect(refresh).toHaveBeenCalledWith(
+          expect.objectContaining({ defaultConnectors: ['new'] }),
+          ['old']
+        );
+      });
+
+      it('does not refresh default rules when connectors and email are unchanged', async () => {
+        const refresh = jest
+          .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
+          .mockResolvedValue();
+
+        await createPostDynamicSettingsRoute().handler(setUp({ certAgeThreshold: 100 }));
+
+        expect(refresh).not.toHaveBeenCalled();
+      });
+
+      it('does not persist settings when refreshing rules fails so the save can be retried', async () => {
+        jest
+          .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
+          .mockRejectedValue(new Error('forbidden'));
+        const routeContext = setUp({ defaultConnectors: ['new'] });
+
+        await expect(createPostDynamicSettingsRoute().handler(routeContext)).rejects.toThrow(
+          'forbidden'
+        );
+        expect(syntheticsSettingsModule.setSyntheticsDynamicSettings).not.toHaveBeenCalled();
+      });
+    });
+
+    it('ignores privateLocationsSyncInterval from older clients', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      jest
+        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+      const server = buildServer();
+
+      const route = createPostDynamicSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server,
+          request: { body: { privateLocationsSyncInterval: 10 } } as never,
+        })
+      );
+
+      expect(server.pluginsStart.taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+
     it('does not clear pins when turning shard rebalance on', async () => {
       jest
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
@@ -119,9 +207,9 @@ describe('dynamic settings routes', () => {
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
       const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
-        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
-      });
+      (server.pluginsStart.taskManager.get as jest.Mock)
+        .mockResolvedValueOnce({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false } })
+        .mockResolvedValue({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true } });
       const clearShardConditions = jest.fn();
 
       const route = createPostDynamicSettingsRoute();
@@ -181,40 +269,93 @@ describe('dynamic settings routes', () => {
       );
       expect(result).toMatchObject({ status: 409 });
     });
+  });
 
-    it('returns 409 when the sync interval does not persist on the task', async () => {
+  describe('cluster-wide settings privilege', () => {
+    const mockSettingsSO = () => {
       jest
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      jest
+      return jest
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
-      const server = buildServer();
+    };
+    const buildForbidden = () =>
+      jest.fn((opts: { body: { message: string } }) => ({ status: 403, ...opts }));
+
+    it('returns 403 without writes when rebalancing changes and the user lacks the global privilege', async () => {
+      const body = { rebalancePrivateLocationShardsEnabled: false };
+      const setSpy = mockSettingsSO();
+      const forbidden = buildForbidden();
+      const server = buildServer(false);
       (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
         schedule: { interval: '5m' },
+        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
       });
-      const conflict = jest.fn((opts: { body: { message: string } }) => ({
-        status: 409,
-        ...opts,
-      }));
 
       const route = createPostDynamicSettingsRoute();
       const result = await route.handler(
         buildRouteContext({
           server,
-          response: { conflict } as never,
-          request: { body: { privateLocationsSyncInterval: 10 } } as never,
+          response: { forbidden } as never,
+          request: { body } as never,
         })
       );
 
-      expect(conflict).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: expect.objectContaining({
-            message: expect.stringMatching(/sync task is currently running/i),
-          }),
+      expect(result).toMatchObject({ status: 403 });
+      expect(setSpy).not.toHaveBeenCalled();
+      expect(server.pluginsStart.taskManager.bulkUpdateState).not.toHaveBeenCalled();
+      expect(server.pluginsStart.taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+
+    it('allows saving space settings that echo unchanged cluster-wide values', async () => {
+      const setSpy = mockSettingsSO();
+      const forbidden = buildForbidden();
+      const server = buildServer(false);
+      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+        schedule: { interval: '5m' },
+        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
+      });
+
+      const route = createPostDynamicSettingsRoute();
+      const result = await route.handler(
+        buildRouteContext({
+          server,
+          response: { forbidden } as never,
+          request: {
+            body: {
+              certAgeThreshold: 100,
+              privateLocationsSyncInterval: 5,
+              rebalancePrivateLocationShardsEnabled: true,
+            },
+          } as never,
         })
       );
-      expect(result).toMatchObject({ status: 409 });
+
+      expect(forbidden).not.toHaveBeenCalled();
+      expect(setSpy.mock.calls[0][1].certAgeThreshold).toBe(100);
+      expect(server.security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ certAgeThreshold: 100 });
+    });
+
+    it('checks the private location write privilege globally', async () => {
+      mockSettingsSO();
+      const { security, globally } = buildSecurity(true);
+      const server = { ...buildServer(), security } as unknown as RouteContext['server'];
+      (server.pluginsStart.taskManager.get as jest.Mock)
+        .mockResolvedValueOnce({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true } })
+        .mockResolvedValue({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false } });
+
+      const route = createPostDynamicSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server,
+          request: { body: { rebalancePrivateLocationShardsEnabled: false } } as never,
+        })
+      );
+
+      expect(globally).toHaveBeenCalledWith({ kibana: ['api:private-location-write'] });
+      expect(server.pluginsStart.taskManager.bulkUpdateState).toHaveBeenCalled();
     });
   });
 

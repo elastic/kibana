@@ -8,7 +8,9 @@
  */
 
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/common';
+import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
@@ -69,23 +71,19 @@ describe('EmbeddableEditorService', () => {
     ...overrides,
   });
 
-  const createByValueState = (
-    overrides: Partial<SavedSearchByValueAttributes> = {}
-  ): SavedSearchByValueAttributes => ({
-    title: 'Saved search',
+  const createByValueTab = (): DiscoverSessionApiEmbeddableTab => ({
+    type: DiscoverTabType.Default,
+    data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs | KEEP message' },
+    column_order: ['message'],
     sort: [],
-    columns: [],
-    description: '',
-    grid: {},
-    hideChart: false,
-    hideTable: false,
-    isTextBasedQuery: false,
-    kibanaSavedObjectMeta: {
-      searchSourceJSON: '{}',
-    },
-    tabs: [],
-    ...overrides,
   });
+
+  const getSearchPackageState = (embeddableStateTransfer: EmbeddableStateTransfer) => {
+    const { lastCall } = jest.mocked(embeddableStateTransfer.navigateToWithEmbeddablePackages).mock;
+
+    return lastCall?.[1]?.state.find(({ type }) => type === SEARCH_EMBEDDABLE_TYPE)
+      ?.serializedState;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -135,6 +133,22 @@ describe('EmbeddableEditorService', () => {
     expect(service.isEmbeddedEditor()).toBe(false);
   });
 
+  it('treats an editor opened with only dashboard controls as by-reference', () => {
+    const incomingState = createIncomingState({
+      originatingPath: '/app/dashboards',
+      embeddableId: 'panel-1',
+      valueInput: {
+        discoverSessionTab: undefined,
+        dashboardControlGroupState: mockControlState,
+      },
+    });
+    const { service } = createService({ incomingState });
+
+    expect(service.isEmbeddedEditor()).toBe(true);
+    expect(service.isByValueEditor()).toBe(false);
+    expect(service.getByValueTab()).toBeUndefined();
+  });
+
   it('navigates back with no serialized state for cancel', () => {
     const incomingState = createIncomingState({
       originatingPath: '/app/dashboards#/edit',
@@ -179,8 +193,170 @@ describe('EmbeddableEditorService', () => {
     );
   });
 
+  it('sends only the controls missing from the originating dashboard when saving the session', () => {
+    const controlGroupState: ControlPanelsState<OptionsListESQLControlState> = {
+      discoverHostPanel: {
+        ...mockControlState.panel1,
+        variable_name: 'host.name',
+        title: 'Updated host name',
+      },
+      discoverServicePanel: {
+        ...mockControlState.panel1,
+        variable_name: 'service.name',
+        title: 'Service name',
+      },
+    };
+    const incomingState = createIncomingState({
+      originatingPath: '/app/dashboards#/view/dashboard-1',
+      embeddableId: 'panel-1',
+      valueInput: {
+        discoverSessionTab: undefined,
+        dashboardControlGroupState: {
+          dashboardHostPanel: {
+            ...mockControlState.panel1,
+            variable_name: 'host.name',
+            title: 'Original host name',
+          },
+        },
+      },
+    });
+    const { service, embeddableStateTransfer } = createService({ incomingState });
+
+    service.transferBackToEditor(TransferAction.SaveSession, { state: { controlGroupState } });
+
+    expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+      'dashboard',
+      {
+        path: '/app/dashboards#/view/dashboard-1',
+        state: [
+          {
+            type: ESQL_CONTROL,
+            serializedState: controlGroupState.discoverServicePanel,
+            embeddableId: 'discoverServicePanel',
+          },
+          {
+            type: SEARCH_EMBEDDABLE_TYPE,
+            serializedState: {},
+            embeddableId: 'panel-1',
+          },
+        ],
+      }
+    );
+  });
+
+  it('filters SaveByReference controls only when targeting the originating dashboard', () => {
+    const controlGroupState: ControlPanelsState<OptionsListESQLControlState> = {
+      discoverHostPanel: {
+        ...mockControlState.panel1,
+        variable_name: 'host.name',
+        title: 'Host name',
+      },
+      discoverServicePanel: {
+        ...mockControlState.panel1,
+        variable_name: 'service.name',
+        title: 'Service name',
+      },
+    };
+    const incomingState = createIncomingState({
+      originatingPath: '#/view/dashboard-1',
+      embeddableId: 'panel-1',
+      valueInput: {
+        discoverSessionTab: undefined,
+        dashboardControlGroupState: {
+          dashboardHostPanel: {
+            ...mockControlState.panel1,
+            variable_name: 'host.name',
+            title: 'Original host name',
+          },
+        },
+      },
+    });
+    const { service, embeddableStateTransfer } = createService({ incomingState });
+    const expectedSearchPackage = {
+      type: SEARCH_EMBEDDABLE_TYPE,
+      serializedState: { ref_id: 'saved-search-1', overrides: {} },
+      embeddableId: undefined,
+    };
+
+    service.transferBackToEditor(TransferAction.SaveByReference, {
+      app: 'dashboard',
+      path: '#/view/dashboard-1',
+      newPanel: true,
+      state: { savedObjectId: 'saved-search-1', controlGroupState },
+    });
+
+    expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenLastCalledWith(
+      'dashboard',
+      {
+        path: '#/view/dashboard-1',
+        state: [
+          {
+            type: ESQL_CONTROL,
+            serializedState: controlGroupState.discoverServicePanel,
+            embeddableId: 'discoverServicePanel',
+          },
+          expectedSearchPackage,
+        ],
+      }
+    );
+
+    service.transferBackToEditor(TransferAction.SaveByReference, {
+      app: 'dashboard',
+      path: '#/view/dashboard-2',
+      newPanel: true,
+      state: { savedObjectId: 'saved-search-1', controlGroupState },
+    });
+
+    expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenLastCalledWith(
+      'dashboard',
+      {
+        path: '#/view/dashboard-2',
+        state: [
+          ...Object.values(controlGroupState).map((serializedState) => ({
+            type: ESQL_CONTROL,
+            serializedState,
+            embeddableId: undefined,
+          })),
+          expectedSearchPackage,
+        ],
+      }
+    );
+  });
+
+  it.each(['#/view/dashboard-1', '#/create'])(
+    'transfers standalone session controls to %s for destination reconciliation',
+    (path) => {
+      const { service, embeddableStateTransfer } = createService();
+
+      service.transferBackToEditor(TransferAction.SaveByReference, {
+        app: 'dashboards',
+        path,
+        state: { savedObjectId: 'saved-search-1', controlGroupState: mockControlState },
+      });
+
+      expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+        'dashboards',
+        {
+          path,
+          state: [
+            {
+              type: ESQL_CONTROL,
+              serializedState: mockControlState.panel1,
+              embeddableId: undefined,
+            },
+            {
+              type: SEARCH_EMBEDDABLE_TYPE,
+              serializedState: { ref_id: 'saved-search-1', overrides: {} },
+              embeddableId: undefined,
+            },
+          ],
+        }
+      );
+    }
+  );
+
   it('serializes by-value state and control packages when navigating back to the editor', () => {
-    const byValueState = createByValueState();
+    const tab = createByValueTab();
     const controlGroupState: ControlPanelsState<OptionsListESQLControlState> = {
       controlA: {
         ...mockControlState.panel1,
@@ -202,7 +378,7 @@ describe('EmbeddableEditorService', () => {
 
     service.transferBackToEditor(TransferAction.SaveByValue, {
       state: {
-        byValueState,
+        tab,
         controlGroupState,
       },
     });
@@ -224,18 +400,40 @@ describe('EmbeddableEditorService', () => {
           },
           {
             type: SEARCH_EMBEDDABLE_TYPE,
-            serializedState: {
-              attributes: byValueState,
-            },
+            serializedState: { tabs: [tab] },
             embeddableId: 'panel-42',
           },
         ],
       }
     );
+    // Dashboard merges the package into the panel state, so an undefined title would clear it
+    expect(getSearchPackageState(embeddableStateTransfer)).toStrictEqual({ tabs: [tab] });
+  });
+
+  it('sends the title and description chosen for a new by-value panel', () => {
+    const tab = createByValueTab();
+    const { service, embeddableStateTransfer } = createService();
+
+    service.transferBackToEditor(TransferAction.SaveByValue, {
+      app: 'dashboards',
+      path: '#/create',
+      state: {
+        tab,
+        title: 'Table title',
+        description: '',
+        controlGroupState: undefined,
+      },
+    });
+
+    expect(getSearchPackageState(embeddableStateTransfer)).toStrictEqual({
+      title: 'Table title',
+      description: '',
+      tabs: [tab],
+    });
   });
 
   it('reuses dashboard panel ids for SaveByValue controls with duplicate variables', () => {
-    const byValueState = createByValueState();
+    const tab = createByValueTab();
     const controlGroupState: ControlPanelsState<OptionsListESQLControlState> = {
       discoverControlA: {
         ...mockControlState.panel1,
@@ -282,7 +480,7 @@ describe('EmbeddableEditorService', () => {
 
     service.transferBackToEditor(TransferAction.SaveByValue, {
       state: {
-        byValueState,
+        tab,
         controlGroupState,
       },
     });
@@ -309,9 +507,7 @@ describe('EmbeddableEditorService', () => {
           },
           {
             type: SEARCH_EMBEDDABLE_TYPE,
-            serializedState: {
-              attributes: byValueState,
-            },
+            serializedState: { tabs: [tab] },
             embeddableId: 'panel-42',
           },
         ],

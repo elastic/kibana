@@ -99,29 +99,80 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
     });
   });
 
-  it('should use status of the first attack', () => {
-    const testProps = {
-      ...defaultProps,
-      attacksWithWorkflowStatus: [
-        {
-          attackId: 'attack-1',
-          relatedAlertIds: ['alert-1'],
-          workflowStatus: 'open' as const,
-        },
-        {
-          attackId: 'attack-2',
-          relatedAlertIds: ['alert-2'],
-          workflowStatus: 'closed' as const,
-        },
-      ],
-    };
+  describe('currentStatus', () => {
+    const attack = (attackId: string, workflowStatus?: 'open' | 'acknowledged' | 'closed') => ({
+      attackId,
+      relatedAlertIds: [`alert-${attackId}`],
+      workflowStatus,
+    });
 
-    renderHook(() => useAttackWorkflowStatusContextMenuItems(testProps), { wrapper });
+    const renderWithAttacks = (attacksWithWorkflowStatus: Array<ReturnType<typeof attack>>) =>
+      renderHook(
+        () =>
+          useAttackWorkflowStatusContextMenuItems({ ...defaultProps, attacksWithWorkflowStatus }),
+        { wrapper }
+      );
 
-    expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledWith({
-      onWorkflowStatusUpdate: mockOnSuccess,
-      currentStatus: 'open',
-      telemetrySource: 'attacks_page_group_take_action',
+    it('should pass the shared status when every attack has the same status', () => {
+      renderWithAttacks([attack('attack-1', 'closed'), attack('attack-2', 'closed')]);
+
+      expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledWith({
+        onWorkflowStatusUpdate: mockOnSuccess,
+        currentStatus: 'closed',
+        telemetrySource: 'attacks_page_group_take_action',
+      });
+    });
+
+    it('should pass the status of a single attack', () => {
+      renderWithAttacks([attack('attack-1', 'acknowledged')]);
+
+      expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledWith({
+        onWorkflowStatusUpdate: mockOnSuccess,
+        currentStatus: 'acknowledged',
+        telemetrySource: 'attacks_page_group_take_action',
+      });
+    });
+
+    it('should pass undefined when the statuses differ, regardless of order', () => {
+      renderWithAttacks([attack('attack-1', 'closed'), attack('attack-2', 'open')]);
+      renderWithAttacks([attack('attack-2', 'open'), attack('attack-1', 'closed')]);
+
+      expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledTimes(2);
+      mockUseBulkAttackWorkflowStatusItems.mock.calls.forEach(([props]) => {
+        expect(props?.currentStatus).toBeUndefined();
+      });
+    });
+
+    it('should pass undefined when a later attack has an unknown status', () => {
+      renderWithAttacks([attack('attack-1', 'open'), attack('attack-2', undefined)]);
+
+      expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledWith(
+        expect.objectContaining({ currentStatus: undefined })
+      );
+    });
+
+    it('should pass undefined when the first attack has an unknown status', () => {
+      renderWithAttacks([attack('attack-1', undefined), attack('attack-2', 'open')]);
+
+      expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledWith(
+        expect.objectContaining({ currentStatus: undefined })
+      );
+    });
+
+    it('should pass undefined when every attack has an unknown status', () => {
+      renderWithAttacks([attack('attack-1', undefined), attack('attack-2', undefined)]);
+
+      expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledWith(
+        expect.objectContaining({ currentStatus: undefined })
+      );
+    });
+
+    it('should pass undefined for an empty selection', () => {
+      renderWithAttacks([]);
+
+      expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledWith(
+        expect.objectContaining({ currentStatus: undefined })
+      );
     });
   });
 

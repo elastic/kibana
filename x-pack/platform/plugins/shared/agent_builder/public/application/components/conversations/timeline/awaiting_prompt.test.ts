@@ -89,37 +89,17 @@ describe('findAwaitingPromptEventId', () => {
     expect(result).toBeUndefined();
   });
 
-  it('returns the pause when resume ended in abort (pause still waits for an answer)', () => {
+  it('returns undefined when resume ended in abort (the answered prompt is consumed)', () => {
     const result = findAwaitingPromptEventId([
       pauseEvent(),
       promptResponse(),
       resumeStarted(),
       resumeAborted(),
     ]);
-    expect(result).toBe(PAUSE_EVENT_ID);
-  });
-
-  it('returns undefined when a retry answer follows an aborted resume (retry in progress)', () => {
-    const retryPromptResponse: TimelineDisplayEvent = createPromptResponseEvent({
-      id: `${ROUND_ID}::prompt_response::2`,
-      data: {
-        prompt_requested_event_id: PAUSE_EVENT_ID,
-        responses: { 'prompt-1': { allow: true } },
-      },
-    }) as TimelineDisplayEvent;
-
-    const result = findAwaitingPromptEventId([
-      pauseEvent(),
-      promptResponse(),
-      resumeStarted(),
-      resumeAborted(),
-      retryPromptResponse,
-    ]);
-
     expect(result).toBeUndefined();
   });
 
-  it('returns the pause after retry: second prompt_response + aborted second resume', () => {
+  it('returns undefined for a second answer whose resume also aborted (prompt stays consumed)', () => {
     const secondPromptResponseId = `${ROUND_ID}::prompt_response::2`;
     const secondResumeId = `${ROUND_ID}::execution::2`;
 
@@ -157,6 +137,6 @@ describe('findAwaitingPromptEventId', () => {
       secondResumeAborted,
     ]);
 
-    expect(result).toBe(PAUSE_EVENT_ID);
+    expect(result).toBeUndefined();
   });
 });

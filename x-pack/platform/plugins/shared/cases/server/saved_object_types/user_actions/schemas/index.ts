@@ -12,3 +12,7 @@ export {
   userActionCreateSchema as userActionCreateSchemaV2,
   userActionForwardCompatibilitySchema as userActionForwardCompatibilitySchemaV2,
 } from './v2';
+export {
+  userActionCreateSchema as userActionCreateSchemaV3,
+  userActionForwardCompatibilitySchema as userActionForwardCompatibilitySchemaV3,
+} from './v3';

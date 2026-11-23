@@ -8,8 +8,7 @@
 import {
   splitQuery,
   guessRecoveryBlock,
-  discoverQueryToComposed,
-  resolveUnifiedAlertApplyQuery,
+  discoverQueryToRuleQuery,
   splitResultToRuleQuery,
 } from './use_heuristic_split';
 
@@ -206,15 +205,15 @@ describe('splitQuery', () => {
 
 // ── guessRecoveryBlock ────────────────────────────────────────────────────────
 
-describe('discoverQueryToComposed', () => {
+describe('discoverQueryToRuleQuery', () => {
   it('splits a WHERE clause into base and breach segment', () => {
-    const result = discoverQueryToComposed('FROM logs-* | WHERE status == "error" | LIMIT 10');
+    const result = discoverQueryToRuleQuery('FROM logs-* | WHERE status == "error" | LIMIT 10');
     expect(result.base).toBe('FROM logs-*');
     expect(result.breach.segment).toContain('WHERE');
   });
 
   it('leaves breach segment empty when query has no WHERE', () => {
-    const result = discoverQueryToComposed('FROM logs-* | LIMIT 10');
+    const result = discoverQueryToRuleQuery('FROM logs-* | LIMIT 10');
     expect(result.base).toBe('FROM logs-* | LIMIT 10');
     expect(result.breach.segment).toBe('');
   });
@@ -272,26 +271,22 @@ describe('guessRecoveryBlock', () => {
 // ── splitResultToRuleQuery ──────────────────────────────────────────────────
 
 describe('splitResultToRuleQuery', () => {
-  it('returns a composed query with outcome "success" when base and alert are found', () => {
+  it('returns outcome "success" when base and alert are found', () => {
     const { query, outcome } = splitResultToRuleQuery(
       'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
     );
 
     expect(outcome).toBe('success');
-    expect(query.format).toBe('composed');
-    if (query.format !== 'composed') throw new Error('expected composed');
     expect(query.base).toContain('STATS');
     expect(query.breach.segment).toContain('WHERE count > 100');
   });
 
-  it('returns composed with an empty segment and outcome "no_alert_condition" when there is no WHERE', () => {
+  it('returns an empty segment and outcome "no_alert_condition" when there is no WHERE', () => {
     const fullQuery = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
     const { query, outcome } = splitResultToRuleQuery(fullQuery);
 
     expect(outcome).toBe('no_alert_condition');
-    expect(query.format).toBe('composed');
-    if (query.format !== 'composed') throw new Error('expected composed');
-    // Whole pipeline stays in base; empty segment is rejected at save for alerts.
+    // Whole pipeline stays in base; an empty segment drops `breach` at save.
     expect(query.base).toBe(fullQuery);
     expect(query.breach.segment).toBe('');
   });
@@ -300,8 +295,6 @@ describe('splitResultToRuleQuery', () => {
     const { query, outcome } = splitResultToRuleQuery('   ');
 
     expect(outcome).toBe('empty');
-    expect(query.format).toBe('composed');
-    if (query.format !== 'composed') throw new Error('expected composed');
     expect(query.base).toBe('');
     expect(query.breach.segment).toBe('');
   });
@@ -311,62 +304,23 @@ describe('splitResultToRuleQuery', () => {
     const { query, outcome } = splitResultToRuleQuery('| WHERE count > 100');
 
     expect(outcome).toBe('split_failed');
-    expect(query.format).toBe('composed');
-    if (query.format !== 'composed') throw new Error('expected composed');
     expect(query.base).toBe('');
     expect(query.breach.segment).toContain('WHERE count > 100');
+  });
+
+  it('produces only base and breach — recovery is no longer part of the query', () => {
+    const { query } = splitResultToRuleQuery('FROM logs-* | STATS c = COUNT(*) | WHERE c > 1');
+    expect(Object.keys(query).sort()).toEqual(['base', 'breach']);
   });
 
   it('never produces a duplicated base when re-applied to its own joined output', () => {
     const first = splitResultToRuleQuery(
       'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100'
     );
-    if (first.query.format !== 'composed') throw new Error('expected composed');
     const joined = `${first.query.base}\n${first.query.breach.segment}`;
     const second = splitResultToRuleQuery(joined);
 
-    expect(second.query.format).toBe('composed');
-    if (second.query.format !== 'composed') throw new Error('expected composed');
     expect(second.query.base).toBe(first.query.base);
     expect(second.query.breach.segment).toBe(first.query.breach.segment);
-  });
-});
-
-// ── resolveUnifiedAlertApplyQuery ───────────────────────────────────────────
-
-describe('resolveUnifiedAlertApplyQuery', () => {
-  const recoverySegment = { segment: '| WHERE count < 100' };
-  const recoveryQuery = { query: 'FROM logs-* | WHERE count < 100' };
-
-  it('preserves composed recovery when split stays composed', () => {
-    const sandbox = {
-      format: 'composed' as const,
-      base: 'FROM logs-*',
-      breach: { segment: '| WHERE count > 100' },
-      recovery: recoverySegment,
-    };
-    const split = {
-      format: 'composed' as const,
-      base: 'FROM logs-*',
-      breach: { segment: '| WHERE count > 100' },
-    };
-    expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual({
-      ...split,
-      recovery: recoverySegment,
-    });
-  });
-
-  it('does not carry standalone recovery onto the composed split result', () => {
-    const sandbox = {
-      format: 'standalone' as const,
-      breach: { query: 'FROM logs-*' },
-      recovery: recoveryQuery,
-    };
-    const split = {
-      format: 'composed' as const,
-      base: 'FROM logs-*',
-      breach: { segment: '| WHERE count > 100' },
-    };
-    expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual(split);
   });
 });

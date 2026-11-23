@@ -9,7 +9,6 @@ import React from 'react';
 import { act, render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
 import { createMockLocators, ListPageTestProviders } from '../../../test_utils/test_providers';
 import { ActionPoliciesTable } from './action_policies_table';
@@ -34,6 +33,12 @@ const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all:
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
+let mockIsLicenseValid = true;
+
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -68,11 +73,22 @@ jest.mock('@kbn/core-di-browser', () => {
           get: (id: string) =>
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
+              : id === 'alerting:v2:experimentalFeatures'
+              ? mockAlertingV2ExperimentalFeaturesEnabled
               : undefined,
         };
       }
       if (token === 'userProfile') {
         return { bulkGet: mockBulkGet };
+      }
+      if (token === 'docLinks') {
+        return {
+          links: {
+            alerting: {
+              manageActionPolicies: 'https://docs.test/manage-action-policies',
+            },
+          },
+        };
       }
       return {};
     },
@@ -167,20 +183,13 @@ jest.mock('../../../components/action_policy/details_flyout/action_policy_detail
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
-  version: 'WzEsMV0=',
   name: 'Policy One',
   description: 'Policy description',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
-  matcher: null,
-  group_by: null,
-  grouping_mode: null,
-  throttle: { strategy: undefined, interval: null },
-  snoozed_until: null,
-  auth: { owner: 'elastic', created_by_user: false },
-  created_by: 'elastic_profile_uid',
+  created_by: { profile_uid: 'elastic_profile_uid' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'elastic_profile_uid',
+  updated_by: { profile_uid: 'elastic_profile_uid' },
   updated_at: '2026-01-02T03:04:05.000Z',
   ...overrides,
 });
@@ -198,6 +207,8 @@ describe('ActionPoliciesTable', () => {
     mockCapabilities = WRITE_CAPABILITIES;
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
+    mockIsLicenseValid = true;
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -223,21 +234,24 @@ describe('ActionPoliciesTable', () => {
     });
   });
 
-  it('renders the experimental badge in the page header', async () => {
-    renderTable();
-
-    await waitFor(() =>
-      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
-        'Action Policies'
-      )
-    );
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   it('renders the create button when policies exist and the user can write', async () => {
     renderTable();
 
     await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
+  });
+
+  it('still shows create-with-agent controls when experimental features are disabled', async () => {
+    mockExperimentalFeaturesEnabled = false;
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderTable();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
+    await waitFor(() =>
+      expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeEnabled()
+    );
   });
 
   it('navigates to create action policy when the header create button is clicked', async () => {
@@ -413,14 +427,7 @@ describe('ActionPoliciesTable', () => {
 
   describe('Enabled column switch', () => {
     const getSwitch = () => screen.getByRole('switch', { name: /policy one enabled/i });
-
-    it('renders checked when the policy is enabled', async () => {
-      renderTable();
-
-      await waitFor(() => expect(getSwitch()).toBeChecked());
-    });
-
-    it('renders unchecked when the policy is disabled', async () => {
+    const mockDisabledPolicy = () =>
       mockFindItems.mockResolvedValue({
         items: [
           {
@@ -432,6 +439,15 @@ describe('ActionPoliciesTable', () => {
         ],
         total: 1,
       });
+
+    it('renders checked when the policy is enabled', async () => {
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeChecked());
+    });
+
+    it('renders unchecked when the policy is disabled', async () => {
+      mockDisabledPolicy();
       renderTable();
 
       await waitFor(() => expect(getSwitch()).not.toBeChecked());
@@ -449,17 +465,7 @@ describe('ActionPoliciesTable', () => {
     });
 
     it('calls enablePolicy when toggled on', async () => {
-      mockFindItems.mockResolvedValue({
-        items: [
-          {
-            ...createPolicy({ enabled: false }),
-            title: 'Policy One',
-            updatedAt: new Date('2026-01-02T03:04:05.000Z'),
-            policy: createPolicy({ enabled: false }),
-          },
-        ],
-        total: 1,
-      });
+      mockDisabledPolicy();
       const user = userEvent.setup();
       renderTable();
 
@@ -475,6 +481,25 @@ describe('ActionPoliciesTable', () => {
       renderTable();
 
       await waitFor(() => expect(getSwitch()).toBeDisabled());
+    });
+
+    it('is disabled on a disabled policy when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      mockDisabledPolicy();
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeDisabled());
+    });
+
+    it('still allows disabling an enabled policy when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      const user = userEvent.setup();
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeEnabled());
+      await user.click(getSwitch());
+
+      expect(mockDisableActionPolicy).toHaveBeenCalledWith('policy-1', expect.anything());
     });
   });
 
@@ -504,6 +529,15 @@ describe('ActionPoliciesTable', () => {
       await waitFor(() =>
         expect(mockFindItems.mock.calls.length).toBeGreaterThan(findItemsCallsBeforeSuccess)
       );
+    });
+
+    it('disables bulk enable when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      renderTable();
+
+      await selectAllAndOpenMenu();
+
+      expect(await screen.findByTestId('bulkEnableActionPolicies')).toBeDisabled();
     });
 
     it('refetches the list after a bulk action that has no confirmation step', async () => {
@@ -540,6 +574,9 @@ describe('ActionPoliciesTable', () => {
       });
       expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument();
       expect(screen.getByTestId('createActionPolicyWithAgentCard')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('createActionPolicyWithAgentExperimentalBadge')
+      ).not.toBeInTheDocument();
     });
 
     it('hides the header create button in the empty state', async () => {
@@ -547,6 +584,16 @@ describe('ActionPoliciesTable', () => {
 
       await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
       expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
+    });
+
+    it('still shows the empty-state create-with-agent card when experimental features are disabled', async () => {
+      mockExperimentalFeaturesEnabled = false;
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+      renderTable();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('createActionPolicyWithAgentCard')).toBeInTheDocument()
+      );
     });
 
     it('navigates to the create form from the empty state create-policy card', async () => {
@@ -578,7 +625,6 @@ describe('ActionPoliciesTable', () => {
 
     it('disables the empty state agent card when agent builder is not available', async () => {
       mockAgentBuilderShow = false;
-      mockExperimentalFeaturesEnabled = false;
       renderTable();
 
       await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
@@ -587,6 +633,24 @@ describe('ActionPoliciesTable', () => {
       expect(agentCard).toHaveAttribute('aria-disabled', 'true');
 
       fireEvent.click(agentCard);
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('disables both create cards and shows the license callout when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      renderTable();
+
+      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+
+      const createCard = screen.getByTestId('createActionPolicyCard');
+      const agentCard = screen.getByTestId('createActionPolicyWithAgentCard');
+      expect(createCard).toHaveAttribute('aria-disabled', 'true');
+      expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(createCard);
+      fireEvent.click(agentCard);
+      expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
       expect(mockNavigateToApp).not.toHaveBeenCalled();
     });
   });

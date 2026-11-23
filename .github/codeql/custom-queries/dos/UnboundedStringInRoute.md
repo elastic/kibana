@@ -27,16 +27,27 @@ Always specify a maximum length constraint when using string schemas to validate
 
 ### Choosing a max length
 
-Consider these common categories:
+Prefer the built-in semantic string helpers in `@kbn/config-schema` and `@kbn/zod`:
 
-| Use case | Suggested max length |
-|----------|---------------------|
-| Identifiers (IDs, keys, slugs) | 100-256 |
-| Names, titles | 256-512 |
-| Descriptions, comments | 1,000-10,000 |
-| Search queries, filters | 256-1,024 |
-| Free-text body content | 10,000-100,000 |
-| URLs | 2,048-4,096 |
+| Helper | Minimum length | Maximum length |
+| --- | ---: | ---: |
+| `savedObjectId` | 1 | 512 |
+| `savedObjectType` | 1 | 256 |
+| `savedObjectVersion` | 1 | 256 |
+| `spaceId` | 1 | 512 |
+| `displayName` | 1 | 1,024 |
+| `description` | 0 | 10,000 |
+| `searchFilter` | 0 | 10,000 |
+| `aggregation` | 0 | 100,000 |
+| `querySortField` | 0 | 256 |
+| `urlString` | 1 | 2,048 |
+| `pemCertificate` | 1 | 262,144 |
+| `version` | 1 | 256 |
+
+For example, use `schema.savedObjectId()` or Zod's `savedObjectId()`.
+Helpers accept explicit overrides when an existing route requires a different
+bound. For fields without a matching semantic helper, use `boundedString({ maxLength })`,
+which requires an explicit limit.
 
 ### Route as a simple proxy to Elasticsearch API
 
@@ -142,12 +153,22 @@ const goodSchema = z.object({
 
 Because reporting is scoped to strings that reach a route's request validation, false positives are rare — response schemas and other data-at-rest schemas are not flagged. Conversely, a request schema assembled through deep cross-file composition may occasionally be missed rather than mis-reported.
 
-To suppress a legitimate false positive, add a `codeql[...]` comment on the line above the flagged call:
+For legitimately unbounded strings, replace string suppression comments with an
+explicit escape hatch and a nonempty reason:
 
-```javascript
-// codeql[js/kibana/unbounded-string-in-schema] not reached by untrusted request input
-schema.string()
+```typescript
+schema.unboundedString({ reason: 'Size is enforced upstream' });
+
+// Zod (also exported from @kbn/zod/v4)
+import { unboundedString } from '@kbn/zod';
+unboundedString({ reason: 'Size is enforced upstream' });
 ```
+
+The query treats these library exports as intentional data-flow barriers, including
+aliased imports. Reporting helpers (`schema.savedObjectId.warn()`,
+`savedObjectId.warn()` or `boundedString.warn({ maxLength, label })`) are also intentional barriers: they report
+length violations without rejecting them during adoption. Unrelated functions
+with the same names do not suppress alerts.
 
 If a route-registration or schema-composition pattern is not recognized (causing either a false positive or a missed request schema), prefer extending the query's reachability model over scattering per-line suppressions.
 

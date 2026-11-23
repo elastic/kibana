@@ -15,8 +15,3 @@ export interface SignificantEventsToolUsage {
   get_stream_features: ToolUsage;
   add_queries: ToolUsage;
 }
-
-export const createDefaultSignificantEventsToolUsage = (): SignificantEventsToolUsage => ({
-  get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
-  add_queries: { calls: 0, failures: 0, latency_ms: 0 },
-});

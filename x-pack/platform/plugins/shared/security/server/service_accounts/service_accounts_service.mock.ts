@@ -12,9 +12,26 @@ import type { ServiceAccountsServiceStart } from './types';
 export const serviceAccountsServiceMock = {
   createStart: (): jest.MockedObjectDeep<ServiceAccountsServiceStart> => ({
     backend: {
+      type: 'uiam',
       create: jest.fn().mockResolvedValue({
         id: 'mock-service-account-id',
         name: 'mock-service-account-name',
+        roles: ['viewer'],
+      }),
+      list: jest.fn().mockResolvedValue({ serviceAccounts: [] }),
+      get: jest.fn().mockResolvedValue({
+        id: 'mock-service-account-id',
+        name: 'mock-service-account-name',
+        roles: [],
+        enabled: true,
+        assumable: true,
+        createdBy: { type: 'user' as const, username: 'mock-user-id' },
+      }),
+      getSummary: jest.fn().mockResolvedValue({
+        id: 'mock-service-account-id',
+        name: 'mock-service-account-name',
+        enabled: true,
+        assumable: true,
       }),
       createFakeRequest: jest.fn().mockImplementation(async () =>
         httpServerMock.createFakeKibanaRequest({
@@ -22,7 +39,21 @@ export const serviceAccountsServiceMock = {
         })
       ),
       reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
+      refreshFakeRequestBeforeUse: jest.fn().mockResolvedValue(null),
       releaseFakeRequest: jest.fn(),
+      getFakeRequestPrincipal: jest.fn().mockReturnValue(null),
+      delete: jest.fn().mockResolvedValue({ warnings: [] }),
+    },
+    management: {
+      listWorkloads: jest.fn().mockResolvedValue([]),
+      countBoundWorkloads: jest.fn().mockResolvedValue(new Map()),
+      summarizeBoundWorkloads: jest.fn().mockResolvedValue({
+        total: 0,
+        serviceAccounts: 0,
+        byWorkload: [],
+        byBinderType: { user: 0, api_key: 0, service_account: 0 },
+      }),
+      delete: jest.fn().mockResolvedValue({ deleted: true, warnings: [] }),
     },
     workloads: {
       bindWorkload: jest.fn().mockResolvedValue({
@@ -40,6 +71,7 @@ export const serviceAccountsServiceMock = {
       }),
       unbindWorkload: jest.fn().mockResolvedValue(true),
       getBinding: jest.fn().mockResolvedValue(null),
+      getServiceAccountSummary: jest.fn().mockResolvedValue(null),
       withScopedRequest: jest.fn().mockImplementation(async (_pluginId, _params, fn) =>
         fn(
           httpServerMock.createFakeKibanaRequest({

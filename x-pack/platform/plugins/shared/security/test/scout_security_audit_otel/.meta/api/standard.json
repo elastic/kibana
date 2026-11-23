@@ -1,5 +1,5 @@
 {
-  "sha1": "22e677931a4351884c41dabd060af2c74784e896",
+  "sha1": "f32fbaaa1a2ccb1f7d0f920d74580630c25a9e13",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 70,
+        "line": 72,
         "column": 47
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 135,
+        "line": 137,
         "column": 18
       }
     },
@@ -70,8 +70,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 179,
+        "line": 181,
         "column": 9
+      }
+    },
+    {
+      "id": "a5ae4211fe333e4-50463082c36fec5",
+      "title": "Audit log — OTel field shape (Serverless) http_request: logged for a route with minimal authentication, without user.domain",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
+        "line": 234,
+        "column": 18
       }
     },
     {
@@ -84,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 232,
+        "line": 262,
         "column": 18
       }
     },
@@ -98,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 276,
-        "column": 28
+        "line": 301,
+        "column": 49
       }
     }
   ]

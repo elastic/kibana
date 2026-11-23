@@ -4,9 +4,9 @@
     - 'src/platform/packages/shared/deeplinks/workflows/**/*.*'
     - 'src/platform/packages/shared/kbn-workflows/**/*.*'
     - 'src/platform/packages/shared/kbn-workflows-ui/**/*.*'
-    - 'src/platform/plugins/shared/workflows_execution_engine/**/*.*'
-    - 'src/platform/plugins/shared/workflows_extensions/**/*.*'
-    - 'src/platform/plugins/shared/workflows_management/**/*.*'
+    - 'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.*'
+    - 'x-pack/platform/plugins/shared/workflows_extensions/**/*.*'
+    - 'x-pack/platform/plugins/shared/workflows_management/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/**/*.*'
@@ -24,7 +24,7 @@
 - 'Feature:ExpressionLanguage':
     - 'src/platform/plugins/shared/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
-- 'Team:obs-signals-logs':
+- 'Team:obs-signals-rum':
     - 'x-pack/solutions/observability/plugins/ux/**/*.*'
 - 'Team:obs-signals-traces':
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'

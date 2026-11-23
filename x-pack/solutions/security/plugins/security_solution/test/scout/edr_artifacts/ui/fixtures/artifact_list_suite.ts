@@ -34,9 +34,14 @@ const STATEFUL_ONLY_REASON =
  * spec file that already owns that agnostic list id so WRITE create cannot
  * race NONE / READ empty-state assertions.
  *
+ * `beforeAll` / `afterEach` wipe the whole agnostic list, which spaces do not
+ * isolate. Only use this suite when no other spec file writes to the list;
+ * otherwise use `describeArtifactListPageItemScoped`, which deletes only the
+ * items it created (blocklists do, since their operator suites have their
+ * own spec files).
+ *
  * Does not port the Cypress SIEM version matrix — that belongs in API
- * `role_migrations`. Field-operator form coverage stays in leftover
- * `*.cy.ts` list CRUD specs until those migrate.
+ * `role_migrations`.
  */
 export const describeArtifactListPage = (
   artifact: ArtifactTabCase,

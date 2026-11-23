@@ -5,23 +5,39 @@
  * 2.0.
  */
 
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
-import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
-import type { EventClient } from '../../../lib/significant_events/events';
+import type {
+  SignificantEventCloseReason,
+  SignificantEventManualStatus,
+} from '@kbn/significant-events-schema';
+import type {
+  RuleEventsClient,
+  UpdateEventStatusResult,
+} from '../../../lib/significant_events/events/rule_events_client';
+import { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 
 export async function updateEventStatusToolHandler({
-  eventClient,
-  eventUuid,
+  eventSearchClient,
+  eventId,
   status,
+  closeReason,
+  assessmentNote,
+  workflowExecutionId,
 }: {
-  eventClient: EventClient;
-  eventUuid: string;
-  status: SignificantEventStatus;
-}): Promise<{
-  event_uuid: string;
-  updated: number;
-  ignored: number;
-  status: SignificantEventStatus;
-}> {
-  return updateSignificantEventStatus({ eventClient, eventUuid, status });
+  eventSearchClient: RuleEventsClient;
+  eventId: string;
+  status: SignificantEventManualStatus;
+  closeReason?: SignificantEventCloseReason;
+  assessmentNote?: string;
+  workflowExecutionId?: string;
+}): Promise<{ event_id: string } & UpdateEventStatusResult> {
+  const result = await eventSearchClient.updateEventStatus({
+    eventId,
+    change: StatusChange.byOperator(status),
+    actor: 'agent_tool',
+    closeReason,
+    assessmentNote,
+    workflowExecutionId,
+  });
+
+  return { event_id: eventId, ...result };
 }

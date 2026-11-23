@@ -29,16 +29,13 @@
       "searchprofiler",
       "security",
       "serverless",
-      "searchHomepage",
       "share",
       "visualizations",
     ],
     "optionalPlugins": [
       "agentBuilder",
       "indexManagement",
-      "contentConnectors",
       "searchInferenceEndpoints",
-      "searchPlayground",
       "workflowsManagement",
     ],
     "requiredBundles": [

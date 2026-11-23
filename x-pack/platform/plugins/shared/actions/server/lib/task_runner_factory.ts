@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { brandSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -87,7 +87,7 @@ export class TaskRunnerFactory {
       attempts: taskInstance.attempts,
     };
     const actionExecutionId = executionUuid;
-    const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
+    const actionTaskExecutorParams = brandActionTaskExecutorParams(taskInstance.params);
 
     return {
       async run() {
@@ -247,7 +247,24 @@ export class TaskRunnerFactory {
   }
 }
 
-function getFakeRequest(apiKey: string | undefined, spaceId: string, uiamApiKeyExternal?: boolean) {
+function brandActionTaskExecutorParams(
+  params: RunContext['taskInstance']['params']
+): ActionTaskExecutorParams {
+  const { spaceId, actionTaskParamsId } = params as {
+    spaceId: string;
+    actionTaskParamsId: string;
+  };
+  return {
+    spaceId: brandSpaceId(spaceId),
+    actionTaskParamsId,
+  };
+}
+
+function getFakeRequest(
+  apiKey: string | undefined,
+  spaceId: SpaceId,
+  uiamApiKeyExternal?: boolean
+) {
   const requestHeaders: Headers = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
@@ -255,7 +272,7 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string, uiamApiKeyE
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    spaceId: brandSpaceId(spaceId),
+    spaceId,
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);

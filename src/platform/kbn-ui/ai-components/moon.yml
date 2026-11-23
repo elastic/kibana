@@ -30,6 +30,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+    - '!packaging/target/**/*'
+    - '!packaging/example/**/*'
 tasks: {}

@@ -26,7 +26,9 @@ export const updatePipeline = async ({
   connectorId,
   pipeline,
 }: PostPipelineArgs): Promise<PostPipelineResponse> => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/pipeline`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/pipeline`;
 
   await HttpLogic.values.http.put(route, {
     body: JSON.stringify(pipeline),

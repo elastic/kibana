@@ -127,7 +127,10 @@ describe('Fleet server hosts secrets', () => {
         },
       });
       expect(res.secretReferences).toEqual([{ id: expect.anything() }, { id: expect.anything() }]);
-      expect(res.secretsToDelete).toEqual([{ id: undefined }, { id: undefined }]);
+      expect(res.secretsToDelete).toEqual([
+        { id: undefined, path: 'secrets.ssl.key' },
+        { id: undefined, path: 'secrets.ssl.es_key' },
+      ]);
       expect(esClientMock.transport.request.mock.calls).toEqual([
         [
           {
@@ -177,7 +180,10 @@ describe('Fleet server hosts secrets', () => {
         esClient: esClientMock,
       });
       expect(res.secretReferences).toEqual([]);
-      expect(res.secretsToDelete).toEqual([{ id: 'key1' }, { id: 'key2' }]);
+      expect(res.secretsToDelete).toEqual([
+        { id: 'key1', path: 'secrets.ssl.key' },
+        { id: 'key2', path: 'secrets.ssl.es_key' },
+      ]);
       expect(res.fleetServerHostUpdate.secrets?.ssl?.key).toBeNull();
       expect(res.fleetServerHostUpdate.secrets?.ssl?.es_key).toBeNull();
       expect(esClientMock.transport.request.mock.calls).toEqual([]);
@@ -199,7 +205,7 @@ describe('Fleet server hosts secrets', () => {
         esClient: esClientMock,
       });
       expect(res.secretReferences).toEqual([{ id: 'key2' }]);
-      expect(res.secretsToDelete).toEqual([{ id: 'key1' }]);
+      expect(res.secretsToDelete).toEqual([{ id: 'key1', path: 'secrets.ssl.key' }]);
       expect(res.fleetServerHostUpdate.secrets?.ssl?.key).toBeNull();
       expect(res.fleetServerHostUpdate.secrets?.ssl?.es_key).toEqual({ id: 'key2' });
       expect(esClientMock.transport.request.mock.calls).toEqual([]);

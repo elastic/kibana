@@ -9,7 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { API_VERSIONS, ALERTZERO_WATCHES_URL, buildWatchUrl } from '@kbn/alertzero-common';
 import type { GetWatchResponse, ListWatchesResponse } from '@kbn/alertzero-common';
-import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
+import { retryOnTransientError } from './retry_on_transient_error';
 import { queryKeys } from '../query_keys';
 
 export const useWatches = () => {

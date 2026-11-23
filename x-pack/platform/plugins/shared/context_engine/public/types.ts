@@ -6,6 +6,7 @@
  */
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -47,6 +48,7 @@ export type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
 export interface SuggestAutomationParams {
   aiIndex: GetAiIndexResponse;
+  spaceId: string;
   onSaved: () => void;
 }
 
@@ -80,6 +82,7 @@ export interface ContextEngineStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  cloud?: CloudStart;
   console?: ConsolePluginStart;
   spaces?: SpacesPluginStart;
 }

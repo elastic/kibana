@@ -14,17 +14,23 @@ import {
   generateFakeToolCallId,
 } from '@kbn/agent-builder-genai-utils/langchain/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import type { SerializedExecutionError } from '@kbn/agent-builder-common';
+import type {
+  ExecutionAbortReason,
+  ExecutionInterruption,
+  SerializedExecutionError,
+} from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
+import {
+  getEventActorDisplayName,
+  type BackgroundExecutionState,
+  type EventActor,
+  type DeliveredMessageStep,
+  type SubagentRosterEntry,
+} from '@kbn/agent-builder-common/chat';
 import type { HandoverParams } from '../types';
-
-/** Number of most recent research cycles whose tool results are never compacted in-flight. */
-export const PRESERVED_RECENT_CYCLES = 2;
-
-export const IN_FLIGHT_TOKEN_THRESHOLD = 50_000;
 
 export const createCycleLimitSystemMessage = (cycle: number): BaseMessage => {
   return createUserMessage(`<system-notice>
@@ -125,8 +131,9 @@ export const EXECUTION_FAILED_NOTICE_MAX_LENGTH = 500;
 
 /**
  * System notice telling the model that a previous attempt to answer failed and produced no
- * response. The error text is untrusted (it may echo tool or model output): it is XML-escaped by
- * `generateXmlTree` and bounded to {@link EXECUTION_FAILED_NOTICE_MAX_LENGTH}.
+ * response; the steps rendered before it were completed and are kept. The error text is untrusted
+ * (it may echo tool or model output): it is XML-escaped by `generateXmlTree` and bounded to
+ * {@link EXECUTION_FAILED_NOTICE_MAX_LENGTH}.
  */
 export const formatExecutionFailedNotice = (error: SerializedExecutionError): string => {
   const bounded = (text: string) =>
@@ -146,7 +153,7 @@ export const formatExecutionFailedNotice = (error: SerializedExecutionError): st
       {
         tagName: 'message',
         children: [
-          "The agent's attempt to answer the previous message failed. No response was produced.",
+          "The agent's attempt to answer the previous message failed. The steps above were completed; no response was produced.",
         ],
       },
       {
@@ -158,29 +165,166 @@ export const formatExecutionFailedNotice = (error: SerializedExecutionError): st
   });
 };
 
-export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
-  const { status, execution_id: executionId } = execution;
+/**
+ * System notice for a run that was cancelled. Neutral wording: `aborted_by.source` may be a user
+ * (`api`), a timeout / shutdown (`task_manager`) or a parent execution (`caller`).
+ */
+export const formatExecutionAbortedNotice = (abortedBy?: ExecutionAbortReason): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          'The previous execution was interrupted before the agent finished. The steps above were completed; no response was produced.',
+        ],
+      },
+      ...(abortedBy ? [{ tagName: 'interruption', attributes: { source: abortedBy.source } }] : []),
+    ],
+  });
 
-  const outcome = execution.error
-    ? {
-        message: 'A background agent execution has failed.',
-        detail: { tagName: 'error', children: [execution.error.message] },
-      }
-    : {
-        message: 'A background agent execution has completed.',
-        detail: { tagName: 'result', children: [execution.response?.message ?? 'No response'] },
-      };
+/** The notice that stands in for the assistant answer of an interrupted round. */
+export const formatInterruptionNotice = (interruption: ExecutionInterruption): string =>
+  interruption.type === 'failed'
+    ? formatExecutionFailedNotice(interruption.error)
+    : formatExecutionAbortedNotice(interruption.aborted_by);
 
+/**
+ * The notice that stands in for the assistant answer of a round still waiting on the user. The
+ * question text comes from the model: it is XML-escaped by `generateXmlTree`.
+ */
+export const formatAwaitingPromptNotice = (questions: string[]): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          'The agent paused this round to wait for user input, and the user has not answered. The steps above were completed; tool calls waiting for a confirmation did not run, and no response was produced.',
+        ],
+      },
+      ...(questions.length > 0
+        ? [
+            {
+              tagName: 'unanswered_questions',
+              children: questions.map((question) => ({
+                tagName: 'question',
+                children: [question],
+              })),
+            },
+          ]
+        : []),
+    ],
+  });
+
+/**
+ * The text of a finished background sub-agent's report: what a running parent is told, and what
+ * a wake stores as the agent's message.
+ */
+export const describeFinishedExecution = ({
+  executionId,
+  agentId,
+  status,
+  response,
+  error,
+}: {
+  executionId: string;
+  agentId?: string;
+  status: ExecutionStatus;
+  response?: string;
+  error?: string;
+}): string => {
+  const agent = agentId ? ` (agent ${agentId})` : '';
+  const header = `Background sub-agent execution ${executionId}${agent} finished with status ${status}.`;
+  if (error) {
+    return `${header}\n\nError: ${error}`;
+  }
+  if (status === ExecutionStatus.completed) {
+    return `${header}\n\nResult:\n${response ?? 'No response'}`;
+  }
+  return header;
+};
+
+export const formatDeliveredMessageNotice = (step: DeliveredMessageStep): string => {
+  const who = step.is_run_owner
+    ? 'the user who started this run'
+    : `another participant (${getEventActorDisplayName(step.author)})`;
+  const arrival = step.after_answer
+    ? `while you were writing the answer above, at cycle ${step.cycle}`
+    : step.tool_call_group_id
+    ? `after the tool calls that just returned, at cycle ${step.cycle}`
+    : `before the first model call of this run`;
   return generateXmlTree({
     tagName: 'system_notice',
     children: [
-      { tagName: 'message', children: [outcome.message] },
-      { tagName: 'execution-id', children: [executionId] },
-      { tagName: 'status', children: [status] },
-      outcome.detail,
+      {
+        tagName: 'message',
+        children: [
+          `A message from ${who} arrived during this run, ${arrival}.` +
+            (step.after_answer
+              ? ' The user has seen that answer. Respond to the message and continue from the answer; do not repeat it.'
+              : ''),
+        ],
+      },
+      { tagName: 'user_message', children: [step.message] },
     ],
   });
 };
+
+/** A steer the run it was sent to never read, rendered as history: what was said, not a request to act on now. */
+export const formatUnreadSteerNotice = ({
+  actor,
+  message,
+}: {
+  actor: EventActor;
+  message: string;
+}): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          `A message from ${getEventActorDisplayName(
+            actor
+          )} sent during an earlier run, which ended before reading it. It was never acted on; it is here as earlier context.`,
+        ],
+      },
+      { tagName: 'user_message', children: [message] },
+    ],
+  });
+
+/**
+ * A background sub-agent's report as a notice to the model, in one shape whether the parent was
+ * running when it finished or woken by it: never a user turn.
+ */
+export const formatBackgroundReportNotice = ({
+  agentId,
+  report,
+}: {
+  agentId?: string;
+  report: string;
+}): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      { tagName: 'message', children: ['A background agent has reported back.'] },
+      ...(agentId ? [{ tagName: 'agent-id', children: [agentId] }] : []),
+      { tagName: 'report', children: [report] },
+    ],
+  });
+
+export const formatSystemNotice = (execution: BackgroundExecutionState): string =>
+  formatBackgroundReportNotice({
+    agentId: execution.agent_id,
+    report: describeFinishedExecution({
+      executionId: execution.execution_id,
+      agentId: execution.agent_id,
+      status: execution.status,
+      response: execution.response?.message,
+      error: execution.error?.message,
+    }),
+  });
 
 /**
  * Render the active persistent sub-agent roster as a system notice.

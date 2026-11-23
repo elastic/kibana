@@ -103,43 +103,49 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
     expect(filter).toContain('"space_id":["{{ variables.spaceId }}","*"]');
   });
 
-  it('holds the evidence script in a data.set step as a block scalar', () => {
-    const scriptStep = findStepByName(workflow.steps, 'set_evidence_script');
-    expect(scriptStep).toBeDefined();
-    const source = scriptStep?.with?.evidence_script;
-    expect(typeof source).toBe('string');
-    // The per-space dedupe guard. A Liquid-mangled body would lose this.
-    expect(source as string).toContain('instanceof List');
-    // Liquid must not consume any of the script source.
-    expect(source as string).not.toContain('{{');
-    expect(source as string).not.toContain('{%');
+  it('matches alert indicator references with a regexp in object form', () => {
+    const step = findStepByName(workflow.steps, 'count_all_layer1_hits') as {
+      with?: {
+        query?: {
+          bool?: {
+            filter?: Array<{
+              nested?: {
+                path?: string;
+                query?: { regexp?: Record<string, { value?: string }> };
+              };
+            }>;
+          };
+        };
+      };
+    };
+    const nested = step.with?.query?.bool?.filter?.find(
+      (clause) => clause.nested?.path === 'threat.enrichments'
+    )?.nested;
+    expect(nested?.query?.regexp?.['threat.enrichments.indicator.reference']?.value).toBe(
+      "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
+    );
   });
 
-  // evidence is shared with Hunt Watch's writer, which sets a disjoint set
-  // of keys (last_hunt_*, corroborated_rank_score) on the same per-space element.
-  it('only assigns alert_hits keys, never the whole matched element', () => {
-    const source = findStepByName(workflow.steps, 'set_evidence_script')?.with
-      ?.evidence_script as string;
-    expect(source).toMatch(/evidence\[i\]\.alert_hits\s*=/);
-    expect(source).toMatch(/evidence\[i\]\.alert_hits_total\s*=/);
-    // A wholesale `evidence[i] = ...` replace would erase Hunt Watch's
-    // last_hunt_*/corroborated_rank_score keys on that same per-space element.
-    expect(source).not.toMatch(/evidence\[i\]\s*=\s*[^.]/);
-    expect(source).not.toContain('last_hunt');
-  });
+  // The scripted per-space upsert (evidence keying, alert_hits-only assignment) moved into
+  // write_attribution_evidence.test.ts alongside the internal-user write it now requires --
+  // `.kibana-threat-reports` is plugin-owned and hidden, so a plain `elasticsearch.update` step
+  // here would run as whichever identity enabled this workflow and 403 for every non-superuser.
 
-  it('writes via elasticsearch.update, not bulk', () => {
-    // Bulk API rejects scripted updates on indices that contain semantic_text
-    // fields (the reports index does). The Update API accepts them.
+  it('writes via an internal route, not a direct elasticsearch step', () => {
     const writeStep = findStepByName(workflow.steps, 'write_evidence');
-    expect(writeStep?.type).toBe('elasticsearch.update');
+    expect(writeStep?.type).toBe('kibana.request');
     expect(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW.yaml).not.toContain('elasticsearch.bulk');
   });
 
-  describe('write_evidence renders a scripted per-space upsert', () => {
+  it('is space-addressed rather than an unconditional default-space call', () => {
+    const writeStep = findStepByName(workflow.steps, 'write_evidence');
+    expect(writeStep?.with?.path).toBe(
+      '/s/{{ workflow.spaceId }}/internal/threat_intel/attribute_alerts_evidence'
+    );
+  });
+
+  describe('write_evidence renders the attribution-evidence request', () => {
     const engine = createWorkflowLiquidEngine();
-    const evidenceScript = findStepByName(workflow.steps, 'set_evidence_script')?.with
-      ?.evidence_script as string;
     const writeStep = findStepByName(workflow.steps, 'write_evidence');
 
     const context = {
@@ -147,41 +153,134 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
         layer1_count: 3,
         layer2_count: 4,
         spaceId: 'space-a',
-        evidence_script: evidenceScript,
       },
+      workflow: { spaceId: 'space-a' },
       foreach: { item: { _id: 'report-1', _index: '.kibana-threat-reports' } },
       now: '2024-06-01T00:00:00.000Z',
     };
 
-    it('renders index, id, retry_on_conflict, and script params', () => {
+    it('renders index, id, and the precomputed evidence fields', () => {
       expect(writeStep).toBeDefined();
       const rendered = renderValueRecursively(engine, writeStep?.with, context) as {
-        index: string;
-        id: string;
-        retry_on_conflict: number;
-        script: { lang: string; source: string; params: Record<string, unknown> };
-        upsert?: unknown;
-        doc?: unknown;
+        method: string;
+        path: string;
+        body: {
+          index: string;
+          id: string;
+          window: string;
+          computedAt: string;
+          iocMatchHits: number;
+          techniqueOverlapHits: number;
+          alertHitsTotal: number;
+        };
       };
 
-      expect(rendered.index).toBe('.kibana-threat-reports');
-      expect(rendered.id).toBe('report-1');
-      // Cross-space concurrency on shared global docs; concurrency.key only
-      // serializes runs within a space.
-      expect(rendered.retry_on_conflict).toBe(3);
-      expect(rendered.doc).toBeUndefined();
-      expect(rendered.upsert).toBeUndefined();
-      expect(rendered.script.lang).toBe('painless');
-      expect(rendered.script.source).toBe(evidenceScript);
-      expect(rendered.script.source).toContain('instanceof List');
-      expect(rendered.script.params).toEqual({
-        space_id: 'space-a',
+      expect(rendered.method).toBe('POST');
+      expect(rendered.path).toBe('/s/space-a/internal/threat_intel/attribute_alerts_evidence');
+      expect(rendered.body).toEqual({
+        index: '.kibana-threat-reports',
+        id: 'report-1',
         window: '7d',
-        computed_at: '2024-06-01T00:00:00.000Z',
-        ioc_match_hits: 3,
-        technique_overlap_hits: 4,
-        alert_hits_total: 7,
+        computedAt: '2024-06-01T00:00:00.000Z',
+        iocMatchHits: 3,
+        techniqueOverlapHits: 4,
+        alertHitsTotal: 7,
       });
+    });
+  });
+
+  describe('layer 2 technique matching', () => {
+    const engine = createWorkflowLiquidEngine();
+    const TECHNIQUE_FIELD = 'kibana.alert.rule.threat.technique.id';
+    const SUBTECHNIQUE_FIELD = 'kibana.alert.rule.threat.technique.subtechnique.id';
+
+    const backfillStep = findStepByName(workflow.steps, 'backfill_each_report');
+    const captureStep = findStepByName(workflow.steps, 'capture_report_ref');
+    const layer2Step = findStepByName(workflow.steps, 'layer2_search');
+    const hitCountsStep = findStepByName(workflow.steps, 'capture_hit_counts');
+
+    const lookup = (field: string) => ({
+      terms: {
+        [field]: {
+          index: '.kibana-threat-reports',
+          id: 'report-1',
+          path: 'extracted.behaviors.technique_id',
+        },
+      },
+    });
+
+    const parentOnlyClause = (parent: string) => ({
+      bool: {
+        filter: [{ term: { [TECHNIQUE_FIELD]: parent } }],
+        must_not: [{ prefix: { [SUBTECHNIQUE_FIELD]: `${parent}.` } }],
+      },
+    });
+
+    const renderTechniqueClauses = (source: Record<string, unknown>): string => {
+      const rendered = renderValueRecursively(engine, captureStep?.with, {
+        foreach: { item: { _id: 'report-1', _index: '.kibana-threat-reports', _source: source } },
+      }) as { technique_clauses: string };
+      return rendered.technique_clauses;
+    };
+
+    const withBehaviors = (ids: string[]) => ({
+      extracted: { behaviors: ids.map((technique_id) => ({ technique_id })) },
+    });
+
+    const lookups = [lookup(TECHNIQUE_FIELD), lookup(SUBTECHNIQUE_FIELD)];
+
+    it.each([
+      [
+        'a mix of sub-techniques, parents, and blanks',
+        withBehaviors(['T1059.004', 'T1059.001', 'T1566', '', 'T1003.001']),
+        [...lookups, parentOnlyClause('T1059'), parentOnlyClause('T1003')],
+      ],
+      ['parent ids and blanks only', withBehaviors(['T1059', '']), lookups],
+      ['no behaviors', withBehaviors([]), lookups],
+      ['no extracted block', {}, lookups],
+    ])('builds the technique clauses for %s', (_name, source, expected) => {
+      expect(JSON.parse(renderTechniqueClauses(source))).toEqual(expected);
+    });
+
+    it('treats an id as data, so it cannot add a clause', () => {
+      const parsed = JSON.parse(renderTechniqueClauses(withBehaviors(['T1"x.y'])));
+      expect(parsed).toEqual([...lookups, parentOnlyClause('T1"x')]);
+    });
+
+    it('renders the query the layer 2 search sends', () => {
+      const techniqueClauses = renderTechniqueClauses(
+        withBehaviors(['T1059.004', 'T1059.001', 'T1566', '', 'T1003.001'])
+      );
+      const rendered = renderValueRecursively(engine, layer2Step?.with, {
+        variables: { spaceId: 'space-a', technique_clauses: techniqueClauses },
+        foreach: { item: { _id: 'report-1', _index: '.kibana-threat-reports' } },
+      });
+
+      expect(rendered).toEqual({
+        index: '.alerts-security.alerts-space-a',
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { range: { '@timestamp': { gte: 'now-7d' } } },
+              { term: { 'kibana.space_ids': 'space-a' } },
+            ],
+            must_not: [{ term: { 'kibana.alert.rule.type': 'threat_match' } }],
+            should: [...lookups, parentOnlyClause('T1059'), parentOnlyClause('T1003')],
+            minimum_should_match: 1,
+          },
+        },
+      });
+    });
+
+    it('counts each report with a single search and reads its one total', () => {
+      const searches = (backfillStep as WorkflowStep).steps?.filter(
+        (step) => step.type === 'elasticsearch.search'
+      );
+      expect(searches?.map((step) => step.name)).toEqual(['layer2_search']);
+      expect(hitCountsStep?.with?.layer2_count).toBe(
+        '${{ steps.layer2_search.output.hits.total.value | default: 0 }}'
+      );
     });
   });
 });

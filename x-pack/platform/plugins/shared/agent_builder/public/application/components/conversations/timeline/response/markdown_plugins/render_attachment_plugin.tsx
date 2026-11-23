@@ -9,9 +9,7 @@ import React from 'react';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
-  ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
-import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   renderAttachmentElement,
   type RenderAttachmentElementAttributes,
@@ -20,6 +18,7 @@ import type { AttachmentsService } from '../../../../../../services';
 import { createTagParser } from './utils';
 import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
 import { AttachmentLoadingSkeleton } from '../attachments/attachment_loading_skeleton';
+import { getScreenContext, toInlineAttachment } from '../attachments/to_inline_attachment_props';
 
 interface ResolveAttachmentVersionParams {
   explicitVersion: string | number | undefined;
@@ -76,19 +75,6 @@ export const renderAttachmentTagParser = createTagParser({
   }),
 });
 
-const getScreenContext = (
-  conversationAttachments?: VersionedAttachment[]
-): ScreenContextAttachmentData | undefined => {
-  const screenContextAttachment = conversationAttachments?.find(
-    (att) => att.type === AttachmentType.screenContext
-  );
-  if (!screenContextAttachment) {
-    return undefined;
-  }
-  const latest = getLatestVersion(screenContextAttachment);
-  return latest?.data as ScreenContextAttachmentData | undefined;
-};
-
 interface RenderAttachmentRendererProps {
   attachmentsService: AttachmentsService;
   conversationAttachments?: VersionedAttachment[];
@@ -134,30 +120,15 @@ export const createRenderAttachmentRenderer = ({
       return null;
     }
 
-    const versionData = attachment.versions.find((v) => v.version === versionToUse);
+    const inlineAttachment = toInlineAttachment(attachment, versionToUse);
 
-    if (!versionData) {
+    if (!inlineAttachment) {
       return null;
     }
 
-    const previousVersionData = attachment.versions.find((v) => v.version === versionToUse - 1);
-
     return (
       <InlineAttachmentWithActions
-        attachment={{
-          id: attachment.id,
-          type: attachment.type,
-          data: versionData.data,
-          hidden: attachment.hidden,
-          origin: attachment.origin,
-          versionData: {
-            version: versionToUse,
-            versionCount: attachment.versions.length,
-            createdAt: versionData.created_at,
-            originSyncedAt: attachment.origin_snapshot_at,
-            previousVersionData: previousVersionData?.data,
-          },
-        }}
+        attachment={inlineAttachment}
         conversationId={conversationId}
         attachmentsService={attachmentsService}
         isSidebar={isSidebar}

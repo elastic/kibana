@@ -8,12 +8,10 @@
 import {
   ChatEventType,
   ConversationRoundStepType,
-  TODOS_UPDATED_UI_EVENT,
   ToolResultType,
   type ChatAgentEvent,
   type ConversationRoundStep,
   type ReasoningStep,
-  type TodosStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { createRootStateChunkEvent } from '../../../test_utils/graph_stream';
@@ -33,23 +31,19 @@ const reasoning = (text: string): ReasoningStep => ({
   type: ConversationRoundStepType.reasoning,
   reasoning: text,
 });
-const todos = (id: string): TodosStep => ({
-  type: ConversationRoundStepType.updateTodos,
-  todos: [{ content: id, status: 'pending' }],
-});
 const result = (id: string) => ({ tool_result_id: id, type: ToolResultType.other, data: {} });
 const progressEvent = (toolCallId: string, message: string): ChatAgentEvent => ({
   type: ChatEventType.toolProgress,
   data: { tool_call_id: toolCallId, message },
 });
-const todosUiEvent = (ids: string[]): ChatAgentEvent =>
+const otherUiEvent = (): ChatAgentEvent =>
   ({
     type: ChatEventType.toolUi,
     data: {
-      tool_id: 'todo_write',
+      tool_id: 'some_tool',
       tool_call_id: 'c1',
-      custom_event: TODOS_UPDATED_UI_EVENT,
-      data: { todos: ids.map((id) => ({ content: id, status: 'pending' })) },
+      custom_event: 'some_ui_event',
+      data: {},
     },
   } as ChatAgentEvent);
 
@@ -62,7 +56,7 @@ const stateChunk = (
 
 describe('projectExecutionSteps', () => {
   it('owns every step of a fresh execution, including seeded pre-execution steps', () => {
-    const steps = [reasoning('compaction-ish'), toolCall('c1'), todos('carried')];
+    const steps = [reasoning('compaction-ish'), toolCall('c1')];
     expect(projectExecutionSteps({ steps, renderState: {} })).toEqual(steps);
   });
 
@@ -96,20 +90,6 @@ describe('projectExecutionSteps', () => {
     ]);
   });
 
-  it('includes a rewritten todos step but not an untouched inherited one', () => {
-    const inherited = { steps: [reasoning('r'), todos('a')], pendingToolCallIds: [] };
-    expect(projectExecutionSteps({ steps: inherited.steps, renderState: {}, inherited })).toEqual(
-      []
-    );
-    expect(
-      projectExecutionSteps({
-        steps: applyStepUpdates(inherited.steps, [stepUpdates.setTodos(todos('b'))]),
-        renderState: {},
-        inherited,
-      })
-    ).toEqual([todos('b')]);
-  });
-
   it('still projects a seed-pending call that stayed pending (re-prompted)', () => {
     const inherited = { steps: [toolCall('pending')], pendingToolCallIds: ['pending'] };
     expect(projectExecutionSteps({ steps: inherited.steps, renderState: {}, inherited })).toEqual([
@@ -123,7 +103,7 @@ describe('projectExecutionSteps', () => {
       prompt_id: id,
       questions: [{ question: 'q', options: [{ label: 'a' }], multi_select: false }],
     });
-    const inherited = { steps: [question('q1'), todos('t')], pendingToolCallIds: [] };
+    const inherited = { steps: [question('q1')], pendingToolCallIds: [] };
     const steps = applyStepUpdates(inherited.steps, [stepUpdates.upsertQuestion(question('q2'))]);
     expect(projectExecutionSteps({ steps, renderState: {}, inherited })).toEqual([question('q2')]);
   });
@@ -179,6 +159,7 @@ describe('RunTracker', () => {
       toolRenderState: { c0: { toolName: 'x', kind: 'server' } },
       currentCycle: 0,
       errorCount: 0,
+      pendingToolCallIds: [],
     });
     expect(() => tracker.finalState()).toThrow(/without streaming any state/);
 
@@ -193,8 +174,42 @@ describe('RunTracker', () => {
       toolRenderState: { c1: { toolName: 'x', kind: 'server' } },
       currentCycle: 0,
       errorCount: 0,
+      pendingToolCallIds: [],
     });
     expect(tracker.finalState()).toBe(tracker.latestState());
+  });
+
+  it('exposes pendingToolCallIds on the latest snapshot', () => {
+    const tracker = new RunTracker({ graphName: GRAPH });
+    tracker.seed({ steps: [] });
+    tracker.observeGraphEvent(
+      createRootStateChunkEvent(GRAPH, { steps: [toolCall('tc1')], pendingToolCallIds: ['tc1'] })
+    );
+    expect(tracker.latestState().pendingToolCallIds).toEqual(['tc1']);
+  });
+
+  it('seeds pendingToolCallIds from the inherited pending calls until the first chunk', () => {
+    const tracker = new RunTracker({ graphName: GRAPH });
+    tracker.seed({
+      steps: [toolCall('tc1')],
+      inherited: { steps: [toolCall('tc1')], pendingToolCallIds: ['tc1'] },
+    });
+    expect(tracker.latestState().pendingToolCallIds).toEqual(['tc1']);
+
+    tracker.observeGraphEvent(stateChunk([toolCall('tc1', [result('r1')])]));
+    expect(tracker.latestState().pendingToolCallIds).toEqual([]);
+  });
+
+  it('rejects a chunk without pendingToolCallIds as malformed', () => {
+    const tracker = new RunTracker({ graphName: GRAPH });
+    tracker.seed({ steps: [reasoning('seeded')] });
+    tracker.observeGraphEvent({
+      ...stateChunk([toolCall('c1')]),
+      data: {
+        chunk: { steps: [toolCall('c1')], toolRenderState: {}, currentCycle: 0, errorCount: 0 },
+      },
+    });
+    expect(tracker.latestState().steps).toEqual([reasoning('seeded')]);
   });
 
   it('ignores stream chunks that are not the root state of this run', () => {
@@ -270,19 +285,10 @@ describe('RunTracker', () => {
     });
   });
 
-  it('buffers the latest todos payload, consumes it once, and applies an unconsumed write', () => {
+  it('ignores tool UI events that are not progress', () => {
     const tracker = new RunTracker({ graphName: GRAPH });
     tracker.seed({ steps: [] });
-    expect(tracker.consumeTodosWrite()).toBeUndefined();
-    tracker.recordEvent(todosUiEvent(['a']));
-    tracker.recordEvent(todosUiEvent(['b']));
-    // unconsumed (e.g. the tool node failed right after todo_write): the projection carries it
-    expect(tracker.executionProjection().at(-1)).toMatchObject({
-      type: ConversationRoundStepType.updateTodos,
-      todos: [{ content: 'b' }],
-    });
-    expect(tracker.consumeTodosWrite()).toEqual([{ content: 'b', status: 'pending' }]);
-    expect(tracker.consumeTodosWrite()).toBeUndefined();
+    tracker.recordEvent(otherUiEvent());
     expect(tracker.executionProjection()).toEqual([]);
   });
 
@@ -308,6 +314,7 @@ describe('RunTracker', () => {
         toolRenderState: { b1: { toolName: 'browser_x', kind: 'browser' } },
         currentCycle: 1,
         errorCount: 0,
+        pendingToolCallIds: [],
       })
     ).toEqual([toolCall('pending', [result('r1')])]);
   });

@@ -6,10 +6,10 @@
  */
 
 import { UserActionTypes } from '../action/v1';
-import { ObservablesUserActionPayloadRt, ObservablesUserActionRt } from './v1';
+import { ObservablesUserActionPayloadSchema, ObservablesUserActionSchema } from './v1';
 
 describe('Observables', () => {
-  describe('ObservablesUserActionPayloadRt', () => {
+  describe('ObservablesUserActionPayloadSchema', () => {
     const defaultRequest = {
       observables: {
         count: 1,
@@ -18,35 +18,31 @@ describe('Observables', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = ObservablesUserActionPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = ObservablesUserActionPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = ObservablesUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('strips unknown fields', () => {
+      const result = ObservablesUserActionPayloadSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
       });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from observables', () => {
-      const query = ObservablesUserActionPayloadRt.decode({
+    it('strips unknown fields from observables', () => {
+      const result = ObservablesUserActionPayloadSchema.safeParse({
         observables: { ...defaultRequest.observables, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
-  describe('ObservablesUserActionRt', () => {
+
+  describe('ObservablesUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.observables,
       payload: {
@@ -58,33 +54,25 @@ describe('Observables', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = ObservablesUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = ObservablesUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = ObservablesUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = ObservablesUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = ObservablesUserActionRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = ObservablesUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

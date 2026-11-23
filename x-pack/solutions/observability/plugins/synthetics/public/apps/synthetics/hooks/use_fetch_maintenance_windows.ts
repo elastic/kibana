@@ -15,9 +15,10 @@ import type {
 
 export type { SyntheticsMaintenanceWindow, SyntheticsMaintenanceWindowsResult };
 
-// Maintenance windows change on a schedule (minutes to hours) and, for private locations,
-// only take effect on the sync interval (5 minutes by default), so there is no value in
-// polling more frequently than that.
+export const MAINTENANCE_WINDOWS_QUERY_KEY = ['synthetics', 'maintenanceWindows'];
+
+// Maintenance windows change on a schedule (minutes to hours). 5m is frequent
+// enough to refresh the callout without polling the MW API constantly.
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 /**
@@ -28,7 +29,7 @@ const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
  */
 export const useFetchMaintenanceWindows = () => {
   return useQuery(
-    ['synthetics', 'maintenanceWindows'],
+    MAINTENANCE_WINDOWS_QUERY_KEY,
     ({ signal }) =>
       apiService.get<SyntheticsMaintenanceWindowsResult>(
         SYNTHETICS_API_URLS.MAINTENANCE_WINDOWS,

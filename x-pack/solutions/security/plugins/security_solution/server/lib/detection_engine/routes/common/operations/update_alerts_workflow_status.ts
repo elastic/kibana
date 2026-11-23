@@ -16,6 +16,12 @@ import {
 
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import type { SetAlertsStatusByIds } from '../../../../../../common/api/detection_engine/signals';
+import {
+  auditAlertUpdateFailure,
+  auditAlertUpdateIntent,
+  auditAlertUpdateResponseFailure,
+  auditAlertWorkflowStatusChange,
+} from './audit_alert_updates';
 
 interface UpdateAlertsWorkflowStatusArgs {
   context: SecuritySolutionRequestHandlerContext;
@@ -39,18 +45,37 @@ export const updateAlertsWorkflowStatus = async ({
   const core = await context.core;
   const user = core.security.authc.getCurrentUser();
   const esClient = core.elasticsearch.client.asCurrentUser;
+  const auditLogger = (await context.securitySolution).getAuditLogger();
+  const target = { ids };
 
-  return esClient.updateByQuery({
-    index,
-    refresh: true,
-    script: getUpdateAlertsWorkflowStatusScript(status, user, reason),
-    query: {
-      bool: {
-        filter: { terms: { _id: ids } },
+  auditAlertUpdateIntent(auditLogger, target);
+
+  try {
+    const response = await esClient.updateByQuery({
+      index,
+      refresh: true,
+      script: getUpdateAlertsWorkflowStatusScript(status, user, reason),
+      query: {
+        bool: {
+          filter: { terms: { _id: ids } },
+        },
       },
-    },
-    ignore_unavailable: true,
-  });
+      ignore_unavailable: true,
+    });
+
+    const partialFailure = auditAlertUpdateResponseFailure(auditLogger, target, response);
+    if (!partialFailure) {
+      auditAlertWorkflowStatusChange(auditLogger, status, response.updated);
+    }
+    return response;
+  } catch (error) {
+    auditAlertUpdateFailure(
+      auditLogger,
+      target,
+      error instanceof Error ? error : new Error(String(error))
+    );
+    throw error;
+  }
 };
 
 export const getUpdateAlertsWorkflowStatusScript = (

@@ -74,12 +74,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
           />
         </Route>
         <Route path={tabPath(HostsTableType.risk)}>
-          <RiskDetailsTabBody
-            {...tabProps}
-            riskEntity={EntityType.host}
-            entityName={detailName}
-            entityId={entityId}
-          />
+          <RiskDetailsTabBody {...tabProps} riskEntity={EntityType.host} entityId={entityId} />
         </Route>
         <Route path={tabPath(HostsTableType.sessions)}>
           <SessionsTabBody {...tabProps} />

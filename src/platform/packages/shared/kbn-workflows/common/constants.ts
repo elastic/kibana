@@ -12,6 +12,13 @@
  */
 export const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
 
+export const WORKFLOW_RUN_NAME_MAX_LENGTH = 1024;
+
+/**
+ * Longer substring patterns can be too complex for the `wildcard` field to determinize.
+ */
+export const WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH = 128;
+
 /**
  * UI Setting ID for enabling / disabling the workflows management UI
  */
@@ -37,8 +44,22 @@ export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStats
 export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
 
 /**
+ * How a workflow was created from a Workflow Template library template:
+ * `install` (setup form), `import` (template file upload) or `remix`
+ * (Remix with AI, saved from the editor).
+ */
+export const WORKFLOW_TEMPLATE_ORIGINS = ['install', 'import', 'remix'] as const;
+
+/** Template slug stored when the source template is not in the library catalog. */
+export const CUSTOM_WORKFLOW_TEMPLATE_SLUG = 'custom';
+
+/** Template slug stored when no catalog was available to check the source template against. */
+export const UNRESOLVED_WORKFLOW_TEMPLATE_SLUG = 'unresolved';
+
+/**
  * Global Advanced Setting gating the global Workflow Executions view
  * (`/app/workflows/executions`) and the execution flyout on workflow detail.
+ * Enabled by default; operators can turn it off in kibana.yml.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
  * readable from any browser plugin that consumes the workflows UI without
@@ -90,6 +111,17 @@ export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
 
 /**
+ * Why the workflow editor cannot apply changes. The editor sends it on the
+ * `workflow.yaml` attachment so the agent does not offer edits the user cannot save.
+ */
+export const WORKFLOW_EDITOR_READ_ONLY_REASONS = [
+  'executions_tab',
+  'managed',
+  'no_permission',
+] as const;
+export type WorkflowEditorReadOnlyReason = (typeof WORKFLOW_EDITOR_READ_ONLY_REASONS)[number];
+
+/**
  * UI event broadcast on the agent builder events bus when a workflow YAML
  * attachment is created or modified by an agent tool.
  */
@@ -100,3 +132,16 @@ export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
  * trigger node. Matches `HIGHLIGHTED_STEP_TRIGGER` in workflows_management.
  */
 export const WORKFLOW_GRAPH_FOCUS_TRIGGER = '__trigger';
+
+/**
+ * Maximum number of alerts or documents a single run-workflow selection may carry.
+ *
+ * Sized against the 10 MB budget the server holds the expanded event to: a full selection fits
+ * when documents average under about 20 KB, which covers typical alerts and events. Unusually
+ * large documents can still exceed the budget, which the server rejects after expansion with a
+ * 400. Selections travel as `(id, index)` pairs, so a full selection of real pairs (64-character
+ * alert ids, index names around 60 characters) stays near 75 KB, well inside Kibana's default
+ * 1 MB `server.maxPayload`. The server enforces the count during trigger preprocessing and the UI
+ * reads the same number to disable a run on a larger selection.
+ */
+export const MAX_RUN_WORKFLOW_DOCS = 500;

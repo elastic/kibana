@@ -873,10 +873,10 @@ describe('expiresAt', () => {
 
   const v3BaseYaml = v4BaseYaml.replace('version: 4', 'version: 3');
 
-  it('normalises a bare expiresAt date to start-of-day UTC on v4', () => {
+  it('keeps a bare expiresAt date as YYYY-MM-DD on v4', () => {
     const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31'`;
     const [result] = parseHealthDiagnosticQueries(yaml);
-    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T00:00:00.000Z' });
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
   });
 
   it('leaves expiresAt undefined when absent on v4', () => {
@@ -897,22 +897,22 @@ describe('expiresAt', () => {
     expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
   });
 
-  it('preserves the exact instant of a full ISO datetime string', () => {
+  it('truncates a full ISO datetime string to its date', () => {
     const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31T23:59:59Z'`;
     const [result] = parseHealthDiagnosticQueries(yaml);
-    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T23:59:59.000Z' });
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
   });
 
-  it('accepts an ISO datetime with a timezone offset and normalises it to UTC', () => {
+  it('accepts an ISO datetime with a timezone offset and truncates it to its date', () => {
     const yaml = `${v4BaseYaml}\nexpiresAt: '2099-12-31T23:59:59+01:00'`;
     const [result] = parseHealthDiagnosticQueries(yaml);
-    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T22:59:59.000Z' });
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
   });
 
   it('accepts an unquoted YAML date (parsed as Date object by the YAML library)', () => {
     const yaml = `${v4BaseYaml}\nexpiresAt: 2099-12-31`;
     const [result] = parseHealthDiagnosticQueries(yaml);
-    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31T00:00:00.000Z' });
+    expect(result).toMatchObject({ kind: 'index', expiresAt: '2099-12-31' });
   });
 
   it('produces invalid_descriptor when expiresAt is used on a v3 descriptor', () => {
@@ -984,22 +984,80 @@ describe('v4 API descriptors', () => {
     expect((result as { encryptDocument?: boolean }).encryptDocument).toBeUndefined();
   });
 
-  it('normalises a bare expiresAt date to start-of-day UTC', () => {
+  it('keeps a bare expiresAt date as YYYY-MM-DD', () => {
     const yaml = [...apiBase, 'filterlist: {}', "expiresAt: '2099-12-31'"].join('\n');
     const [result] = parseHealthDiagnosticQueries(yaml);
-    expect(result).toMatchObject({ kind: 'api', expiresAt: '2099-12-31T00:00:00.000Z' });
+    expect(result).toMatchObject({ kind: 'api', expiresAt: '2099-12-31' });
   });
 
-  it('accepts an ISO datetime with a timezone offset and normalises it to UTC', () => {
+  it('accepts an ISO datetime with a timezone offset and truncates it to its date', () => {
     const yaml = [...apiBase, 'filterlist: {}', "expiresAt: '2099-12-31T23:59:59+01:00'"].join(
       '\n'
     );
     const [result] = parseHealthDiagnosticQueries(yaml);
-    expect(result).toMatchObject({ kind: 'api', expiresAt: '2099-12-31T22:59:59.000Z' });
+    expect(result).toMatchObject({ kind: 'api', expiresAt: '2099-12-31' });
   });
 
   it('produces invalid_descriptor for a date with a trailing suffix', () => {
     const yaml = [...apiBase, 'filterlist: {}', "expiresAt: '2099-12-31-typo'"].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+});
+
+describe('stackVersions', () => {
+  const v4BaseYaml = [
+    'version: 4',
+    'id: q',
+    'name: Q',
+    'type: DSL',
+    'query: \'{"match_all":{}}\'',
+    "scheduleCron: '0 */1 * * *'",
+    'enabled: true',
+    'index: logs-*',
+    'filterlist:',
+    '  user.name: keep',
+  ].join('\n');
+
+  const v3BaseYaml = v4BaseYaml.replace('version: 4', 'version: 3');
+
+  const apiBase = [
+    'version: 4',
+    'id: api-q',
+    'name: API Q',
+    'type: API',
+    'api: _cat/tasks',
+    "scheduleCron: '0 */1 * * *'",
+    'enabled: true',
+    'filterlist: {}',
+  ];
+
+  it('preserves a valid node-semver range on a v4 index descriptor', () => {
+    const yaml = `${v4BaseYaml}\nstackVersions: '>=8.17.7 <9.0.0 || >=9.4.0'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', stackVersions: '>=8.17.7 <9.0.0 || >=9.4.0' });
+  });
+
+  it('preserves a valid node-semver range on a v4 API descriptor', () => {
+    const yaml = [...apiBase, "stackVersions: '>=9.4.0'"].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'api', stackVersions: '>=9.4.0' });
+  });
+
+  it('leaves stackVersions undefined when absent on v4', () => {
+    const [result] = parseHealthDiagnosticQueries(v4BaseYaml);
+    expect(result).toMatchObject({ kind: 'index' });
+    expect((result as { stackVersions?: string }).stackVersions).toBeUndefined();
+  });
+
+  it('produces invalid_descriptor for a syntactically invalid range', () => {
+    const yaml = `${v4BaseYaml}\nstackVersions: 'not a range'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('produces invalid_descriptor when stackVersions is used on a v3 descriptor', () => {
+    const yaml = `${v3BaseYaml}\nstackVersions: '>=9.4.0'`;
     const [result] = parseHealthDiagnosticQueries(yaml);
     expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
   });

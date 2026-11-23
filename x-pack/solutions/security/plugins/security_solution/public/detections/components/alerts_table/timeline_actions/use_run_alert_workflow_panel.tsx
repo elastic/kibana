@@ -16,10 +16,20 @@ import {
 } from '@kbn/workflows-ui';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentWorkflowTarget } from '@kbn/cases-plugin/public';
+import {
+  useCaseAttachmentWorkflowRouting,
+  useCaseAttachmentWorkflowRun,
+} from '@kbn/cases-plugin/public';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
+import {
+  getRunWorkflowTelemetry,
+  type RunWorkflowTelemetrySurface,
+} from '../../../../common/lib/telemetry/run_workflow_telemetry';
 
 // Server-side: include managed workflows tagged for the rule_action selector (e.g. the alert
 // analysis workflow). Module-scoped so the object reference is stable across renders.
@@ -44,10 +54,62 @@ export interface AlertWorkflowsPanelProps {
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /**
+   * When set, the panel was opened from a single-alert row action. The executor routes through
+   * the Cases API with a `cases.attachment` origin so the run appears in the case activity feed.
+   * Absent for bulk actions (even a single-alert bulk selection uses `cases.attachments`).
+   * Outside a case the value is ignored — the panel falls back to the generic Workflows API.
+   * Inside a case where Cases runs are unavailable, the menu hooks do not render this panel.
+   */
+  originAlertId?: string;
+  /**
+   * The case attachment type the ids in `alertIds` are stored as. Defaults to the alert type;
+   * surfaces that reuse this panel for another document kind — the attacks table, for instance —
+   * must declare their own type, otherwise the Cases API looks the ids up against the wrong
+   * attachments and reports that they do not belong to the case.
+   */
+  attachmentType?: string;
+  /** Surface reported with the run telemetry outside a case. Defaults to `alert`. */
+  telemetrySurface?: Extract<RunWorkflowTelemetrySurface, 'alert' | 'attack'>;
+  /** Reports the run as a bulk run outside a case. Bulk actions set it. */
+  isBulk?: boolean;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
-export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkflowsPanelProps) => {
+export const AlertWorkflowsPanel = ({
+  alertIds,
+  onClose,
+  onExecute,
+  originAlertId,
+  attachmentType = SECURITY_ALERT_ATTACHMENT_TYPE,
+  telemetrySurface = 'alert',
+  isBulk = false,
+}: AlertWorkflowsPanelProps) => {
+  // When rendered inside a case's attachment surface, route through the Cases API so the run
+  // is authorized, audited, and recorded in the case activity feed. Outside a case the panel
+  // falls back to its built-in executor (generic Workflows API) when `runWorkflow` is undefined.
+  const target = useMemo(
+    (): CaseAttachmentWorkflowTarget =>
+      originAlertId !== undefined
+        ? { attachmentId: originAlertId }
+        : { attachmentIds: alertIds.map(({ _id }) => _id) },
+    [alertIds, originAlertId]
+  );
+  const fallbackTelemetry = useMemo(
+    () =>
+      getRunWorkflowTelemetry({
+        surface: telemetrySurface,
+        isBulk,
+        itemCount: alertIds.length,
+      }),
+    [alertIds.length, isBulk, telemetrySurface]
+  );
+  const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
+    attachmentType,
+    target,
+    fallbackTelemetry,
+  });
+
   const inputs = useMemo(
     () => ({
       event: {
@@ -61,6 +123,9 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
   return (
     <RunWorkflowPanel
       inputs={inputs}
+      runWorkflow={runWorkflow}
+      showSuccessToast={showSuccessToast}
+      telemetry={telemetry}
       visibility={ALERT_WORKFLOW_VISIBILITY}
       sortWorkflow={sortAlertWorkflow}
       filterWorkflow={isAlertWorkflow}
@@ -93,9 +158,11 @@ export const useRunAlertWorkflowPanel = ({
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite } = useAlertsPrivileges();
+  // Inside a case, only offer the action when the run can be recorded on the case.
+  const caseRouting = useCaseAttachmentWorkflowRouting();
   const canRunWorkflow = useMemo(
-    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,
-    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
+    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow && caseRouting !== 'unavailable',
+    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow, caseRouting]
   );
 
   const runWorkflowMenuItem: AlertTableContextMenuItem[] = useMemo(
@@ -122,6 +189,7 @@ export const useRunAlertWorkflowPanel = ({
           <AlertWorkflowsPanel
             alertIds={[{ _id: ecsRowData._id, _index: ecsRowData._index ?? '' }]}
             onClose={closePopover}
+            originAlertId={ecsRowData._id}
           />
         ),
       },

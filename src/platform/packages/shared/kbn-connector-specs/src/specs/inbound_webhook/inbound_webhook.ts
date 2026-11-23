@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { inboundWebhookReceived } from '@kbn/connector-topics';
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import type { ConnectorSpec } from '../../connector_spec';
-import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
+import {
+  toConnectorSpecEvent,
+  type ConnectorIngressContext,
+  type HandleEventsResult,
+} from '../../connector_spec_events';
 import {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
-  INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
   INBOUND_WEBHOOK_RECEIVED_EVENT_KEY,
   MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './constants';
-import { InboundWebhookReceivedEventSchema } from './types';
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -61,7 +64,7 @@ const handleInboundWebhookEvents = async (
     type: 'emit',
     events: [
       {
-        eventId: INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
+        eventId: inboundWebhookReceived.name,
         correlationKey,
         payload: {
           body: ctx.rawBody,
@@ -74,10 +77,10 @@ const handleInboundWebhookEvents = async (
 export const InboundWebhook: ConnectorSpec = {
   metadata: {
     id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
-    displayName: i18n.translate('core.kibanaConnectorSpecs.inboundWebhook.metadata.displayName', {
+    displayName: i18n.translate('connectorSpecs.inboundWebhook.metadata.displayName', {
       defaultMessage: 'Inbound Webhook',
     }),
-    description: i18n.translate('core.kibanaConnectorSpecs.inboundWebhook.metadata.description', {
+    description: i18n.translate('connectorSpecs.inboundWebhook.metadata.description', {
       defaultMessage: 'Receive HTTP events into Kibana workflows via a public ingest URL.',
     }),
     icon: 'plugs',
@@ -91,8 +94,7 @@ export const InboundWebhook: ConnectorSpec = {
     types: ['none'],
   },
 
-  // ingestTokenHash is factory-injected for every spec with events.
-  schema: z.object({}),
+  schema: lazySchema(() => z.object({})),
 
   actions: {},
 
@@ -103,19 +105,14 @@ export const InboundWebhook: ConnectorSpec = {
 
   events: {
     definitions: {
-      [INBOUND_WEBHOOK_RECEIVED_EVENT_KEY]: {
-        eventId: INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
-        title: i18n.translate('core.kibanaConnectorSpecs.inboundWebhook.events.received.title', {
+      [INBOUND_WEBHOOK_RECEIVED_EVENT_KEY]: toConnectorSpecEvent(inboundWebhookReceived, {
+        title: i18n.translate('connectorSpecs.inboundWebhook.events.received.title', {
           defaultMessage: 'Received',
         }),
-        description: i18n.translate(
-          'core.kibanaConnectorSpecs.inboundWebhook.events.received.description',
-          {
-            defaultMessage: 'An HTTP payload was accepted on the ingest URL for this connector.',
-          }
-        ),
-        eventSchema: InboundWebhookReceivedEventSchema,
-      },
+        description: i18n.translate('connectorSpecs.inboundWebhook.events.received.description', {
+          defaultMessage: 'An HTTP payload was accepted on the ingest URL for this connector.',
+        }),
+      }),
     },
     handleEvents: handleInboundWebhookEvents,
   },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   AttachmentTypeDefinition,
   AttachmentFormatContext,
@@ -24,116 +24,134 @@ export const SIEM_READINESS_ATTACHMENT_ID = 'security.siem_readiness';
 
 // ---- Shared sub-schemas ----
 
-const affectedRuleSchema = z.object({
-  id: z.string().max(100),
-  name: z.string().max(500),
-});
+const affectedRuleSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(100),
+    name: z.string().max(500),
+  })
+);
 
-const affectedTacticSchema = z.object({
-  id: z.string().max(20),
-  name: z.string().max(200),
-  totalRules: z.number(),
-  affectedRulesCount: z.number(),
-});
+const affectedTacticSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(20),
+    name: z.string().max(200),
+    totalRules: z.number(),
+    affectedRulesCount: z.number(),
+  })
+);
 
-const recommendedActionSchema = z.object({
-  label: z.string().max(200),
-  href: z.string().max(2048),
-});
+const recommendedActionSchema = lazySchema(() =>
+  z.object({
+    label: z.string().max(200),
+    href: z.string().max(2048),
+  })
+);
 
-const actionableFindingSchema = z.object({
-  category: z.string().max(100).optional(),
-  severity: z.enum(['CRITICAL', 'WARNING', 'INFORMATIONAL']),
-  message: z.string().max(5000),
-  resource: z.string().max(500),
-  affectedRules: z.array(affectedRuleSchema).optional(),
-  affectedTactics: z.array(affectedTacticSchema).optional(),
-  affectedPlatform: z.string().max(200).optional(),
-  recommendedActions: z.array(recommendedActionSchema).optional(),
-  blastRadiusStatus: z.enum(['healthy', 'partial', 'unavailable']).optional(),
-});
+const actionableFindingSchema = lazySchema(() =>
+  z.object({
+    category: z.string().max(100).optional(),
+    severity: z.enum(['CRITICAL', 'WARNING', 'INFORMATIONAL']),
+    message: z.string().max(5000),
+    resource: z.string().max(500),
+    affectedRules: z.array(affectedRuleSchema).optional(),
+    affectedTactics: z.array(affectedTacticSchema).optional(),
+    affectedPlatform: z.string().max(200).optional(),
+    recommendedActions: z.array(recommendedActionSchema).optional(),
+    blastRadiusStatus: z.enum(['healthy', 'partial', 'unavailable']).optional(),
+  })
+);
 
 // ---- Coverage ----
 
-export const siemReadinessCoverageDataSchema = securityAttachmentDataSchema.extend({
-  dimension: z.literal('coverage'),
-  status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string().max(8000),
-  items: z.array(
-    z.object({
-      category: z.string().max(100),
-      indices: z.array(z.object({ indexName: z.string().max(500), docs: z.number() })),
-    })
-  ),
-  actionableFindings: z.array(actionableFindingSchema),
-});
+export const siemReadinessCoverageDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    dimension: z.literal('coverage'),
+    status: z.enum(['healthy', 'actionsRequired', 'noData']),
+    summary: z.string().max(8000),
+    items: z.array(
+      z.object({
+        category: z.string().max(100),
+        indices: z.array(z.object({ indexName: z.string().max(500), docs: z.number() })),
+      })
+    ),
+    actionableFindings: z.array(actionableFindingSchema),
+  })
+);
 
 // ---- Quality ----
 
-export const siemReadinessQualityDataSchema = securityAttachmentDataSchema.extend({
-  dimension: z.literal('quality'),
-  status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string().max(8000),
-  items: z.array(
-    z.object({
-      indexName: z.string().max(500),
-      incompatibleFieldCount: z.number(),
-      totalFieldCount: z.number(),
-      ecsFieldCount: z.number(),
-      checkedAt: z.number(),
-    })
-  ),
-  actionableFindings: z.array(actionableFindingSchema),
-});
+export const siemReadinessQualityDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    dimension: z.literal('quality'),
+    status: z.enum(['healthy', 'actionsRequired', 'noData']),
+    summary: z.string().max(8000),
+    items: z.array(
+      z.object({
+        indexName: z.string().max(500),
+        incompatibleFieldCount: z.number(),
+        totalFieldCount: z.number(),
+        ecsFieldCount: z.number(),
+        checkedAt: z.number(),
+      })
+    ),
+    actionableFindings: z.array(actionableFindingSchema),
+  })
+);
 
 // ---- Continuity ----
 
-export const siemReadinessContinuityDataSchema = securityAttachmentDataSchema.extend({
-  dimension: z.literal('continuity'),
-  status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string().max(8000),
-  items: z.array(
-    z.object({
-      name: z.string().max(500),
-      indices: z.array(z.string().max(500)),
-      docsCount: z.number(),
-      failedDocsCount: z.number(),
-      statsAvailable: z.boolean(),
-      categories: z.array(z.string().max(100)).optional(),
-    })
-  ),
-  actionableFindings: z.array(actionableFindingSchema),
-});
+export const siemReadinessContinuityDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    dimension: z.literal('continuity'),
+    status: z.enum(['healthy', 'actionsRequired', 'noData']),
+    summary: z.string().max(8000),
+    items: z.array(
+      z.object({
+        name: z.string().max(500),
+        indices: z.array(z.string().max(500)),
+        docsCount: z.number(),
+        failedDocsCount: z.number(),
+        statsAvailable: z.boolean(),
+        categories: z.array(z.string().max(100)).optional(),
+      })
+    ),
+    actionableFindings: z.array(actionableFindingSchema),
+  })
+);
 
 // ---- Retention ----
 
-export const siemReadinessRetentionDataSchema = securityAttachmentDataSchema.extend({
-  dimension: z.literal('retention'),
-  status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string().max(8000),
-  items: z.array(
-    z.object({
-      indexName: z.string().max(500),
-      isDataStream: z.boolean(),
-      retentionType: z.enum(['ilm', 'dsl']).nullable(),
-      retentionPeriod: z.string().max(50).nullable(),
-      retentionDays: z.number().nullable(),
-      policyName: z.string().max(500).nullable(),
-      status: z.enum(['healthy', 'non-compliant']),
-      categories: z.array(z.string().max(100)).optional(),
-    })
-  ),
-  actionableFindings: z.array(actionableFindingSchema),
-});
+export const siemReadinessRetentionDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    dimension: z.literal('retention'),
+    status: z.enum(['healthy', 'actionsRequired', 'noData']),
+    summary: z.string().max(8000),
+    items: z.array(
+      z.object({
+        indexName: z.string().max(500),
+        isDataStream: z.boolean(),
+        retentionType: z.enum(['ilm', 'dsl']).nullable(),
+        retentionPeriod: z.string().max(50).nullable(),
+        retentionDays: z.number().nullable(),
+        policyName: z.string().max(500).nullable(),
+        status: z.enum(['healthy', 'non-compliant']),
+        categories: z.array(z.string().max(100)).optional(),
+      })
+    ),
+    actionableFindings: z.array(actionableFindingSchema),
+  })
+);
 
 // ---- Union schema ----
 
-export const siemReadinessAttachmentDataSchema = z.discriminatedUnion('dimension', [
-  siemReadinessCoverageDataSchema,
-  siemReadinessQualityDataSchema,
-  siemReadinessContinuityDataSchema,
-  siemReadinessRetentionDataSchema,
-]);
+export const siemReadinessAttachmentDataSchema = lazySchema(() =>
+  z.discriminatedUnion('dimension', [
+    siemReadinessCoverageDataSchema,
+    siemReadinessQualityDataSchema,
+    siemReadinessContinuityDataSchema,
+    siemReadinessRetentionDataSchema,
+  ])
+);
 
 export type SiemReadinessAttachmentData = z.infer<typeof siemReadinessAttachmentDataSchema>;
 

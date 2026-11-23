@@ -1,5 +1,5 @@
 {
-  "sha1": "de9c0427941201a2a2b78ebc53001b34e8583360",
+  "sha1": "4b6f03c2d8a2eb05e124e110cecfb0c936819ab4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -84,8 +84,22 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/recently_accessed.spec.ts",
-        "line": 50,
+        "line": 57,
         "column": 28
+      }
+    },
+    {
+      "id": "6fe77ca3288ac4f-c3c2d99f4ccd8f1",
+      "title": "recently accessed hover list shows the full long title in a tooltip on hover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/recently_accessed.spec.ts",
+        "line": 97,
+        "column": 24
       }
     }
   ]

@@ -13,6 +13,10 @@ import {
 } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import {
+  isNightshiftSupportedSpace,
+  NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
+} from '@kbn/nightshift-shared';
 import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
 import { pollUntil } from './poll_until';
 
@@ -41,13 +45,16 @@ export interface SignificantEventsScheduledWorkflowsService {
    *   new cadence and batch values, preserving enablement.
    * - Disabling disables both workflows, cancels non-terminal scheduled
    *   wrapper executions in that space, and uninstalls the per-space dynamic
-   *   workflow instances.
+   *   workflow instances. `skipExecutionDrain` only disables scheduling, so a
+   *   source delete is not blocked on in-flight runs and does not force-delete
+   *   a workflow that still has one.
    */
   ensureWorkflow(params: {
     enabled: boolean;
     request: KibanaRequest;
     spaceId: string;
     config: SignificantEventsScheduledWorkflowsConfig;
+    skipExecutionDrain?: boolean;
   }): Promise<void>;
 }
 
@@ -75,11 +82,13 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   const getNonTerminalExecutions = async ({
     documentId,
     spaceId,
+    request,
   }: {
     documentId: string;
     spaceId: string;
+    request: KibanaRequest;
   }) => {
-    const { results, total } = await managementApi.getWorkflowExecutions(
+    const { results, total } = await managementApi.getClient(request).getWorkflowExecutions(
       {
         workflowId: documentId,
         statuses: [...NonTerminalExecutionStatuses],
@@ -99,7 +108,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
     request: KibanaRequest;
   }) => {
-    const { results } = await getNonTerminalExecutions({ documentId, spaceId });
+    const { results } = await getNonTerminalExecutions({ documentId, spaceId, request });
     if (results.length === 0) {
       return;
     }
@@ -114,7 +123,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
 
     await pollUntil(
-      () => getNonTerminalExecutions({ documentId, spaceId }),
+      () => getNonTerminalExecutions({ documentId, spaceId, request }),
       ({ total }) => total === 0
     );
   };
@@ -165,7 +174,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     request: KibanaRequest;
     spaceId: string;
   }) => {
-    const existing = await managementApi.getWorkflow(documentId, spaceId);
+    const existing = await managementApi.getClient(request).getWorkflow(documentId, spaceId);
 
     if (!existing) {
       if (enabled) {
@@ -242,18 +251,38 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   };
 
   return {
-    async ensureWorkflow({ enabled, request, spaceId, config }) {
-      const client = await getManagedWorkflowsClient();
+    async ensureWorkflow({ enabled, request, spaceId, config, skipExecutionDrain = false }) {
+      // Installing enabled workflows binds work to a space, and Nightshift only runs in the
+      // default one. Disabling stays allowed everywhere, so a space set up on an earlier build
+      // can still be taken down.
+      if (enabled && !isNightshiftSupportedSpace(spaceId)) {
+        log.warn(
+          `Not installing the scheduled Significant Events discovery workflows in space ${spaceId}: ${NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE}`
+        );
+        return;
+      }
 
       if (enabled) {
+        const client = await getManagedWorkflowsClient();
         await installOrUpdate({ client, spaceId, config });
         await setAllEnabled({ enabled: true, request, spaceId });
         log.info(`Enabled scheduled Significant Events discovery workflows in space ${spaceId}`);
         return;
       }
 
+      // Stop scheduling new runs. Leave the documents in place when a source delete
+      // must not wait on in-flight work: uninstall force-deletes them and fails
+      // while an execution is still running.
       await setAllEnabled({ enabled: false, request, spaceId });
+      if (skipExecutionDrain) {
+        log.info(
+          `Disabled scheduled Significant Events discovery workflow scheduling in space ${spaceId}`
+        );
+        return;
+      }
+
       await cancelRunningScheduledExecutions({ request, spaceId });
+      const client = await getManagedWorkflowsClient();
       await uninstallScheduledWorkflows({ client, spaceId });
       log.info(
         `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`

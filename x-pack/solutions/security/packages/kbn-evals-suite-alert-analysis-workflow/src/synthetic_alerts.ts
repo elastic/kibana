@@ -64,7 +64,7 @@ const ts = (offsetMinutes: number): string => {
   return d.toISOString();
 };
 
-interface BuildAlertParams {
+export interface BuildAlertParams {
   id: string;
   index: number;
   ruleName: string;
@@ -200,7 +200,7 @@ const buildNoiseEnvelope = (id: string, timestamp: string): Record<string, unkno
 // Rule identity shared by every synthetic alert. `rule_type_id`/`consumer`/`producer` mirror a
 // SIEM query rule so the run route resolves a registered rule type when building the event. The
 // noise envelope is spread first so the per-alert signal fields below always win on any overlap.
-const buildDoc = ({
+export const buildDoc = ({
   id,
   index,
   ruleName,

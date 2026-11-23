@@ -7,6 +7,7 @@
 
 import type { UseMutationResult, UseQueryResult } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
@@ -19,6 +20,7 @@ import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
+import { ENTITY_GRID_QUERY_KEY } from '../home/entities_grid/common';
 import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
 
 const ASSET_CRITICALITY_KEY = 'ASSET_CRITICALITY';
@@ -52,15 +54,17 @@ export const useAssetCriticalityFetchList = ({
   idField,
   idValues,
   skip = false,
+  executionContext,
 }: {
   idField: string;
   idValues: string[];
   skip?: boolean;
+  executionContext?: KibanaExecutionContext;
 }) => {
   const { fetchAssetCriticalityList } = useEntityAnalyticsRoutes();
   return useQuery<FindAssetCriticalityRecordsResponse>({
     queryKey: [ASSET_CRITICALITY_LIST_KEY],
-    queryFn: () => fetchAssetCriticalityList({ idField, idValues }),
+    queryFn: () => fetchAssetCriticalityList({ idField, idValues, context: executionContext }),
     enabled: !skip && idValues.length > 0,
   });
 };
@@ -69,10 +73,13 @@ export const useAssetCriticalityData = ({
   entity,
   enabled = true,
   onChange,
+  executionContext,
 }: {
   entity: Entity;
   enabled?: boolean;
   onChange?: () => void;
+  /** Applied to the GET only; the create/delete mutation is not tagged. */
+  executionContext?: KibanaExecutionContext;
 }): State => {
   const QC = useQueryClient();
   const QUERY_KEY = [ASSET_CRITICALITY_KEY, entity.name];
@@ -86,6 +93,7 @@ export const useAssetCriticalityData = ({
       fetchAssetCriticality({
         idField: EntityTypeToIdentifierField[entity.type],
         idValue: entity.name,
+        context: executionContext,
       }),
     retry: (failureCount, error) => error.body.statusCode === 404 && failureCount > 0,
     enabled,
@@ -121,6 +129,7 @@ export const useAssetCriticalityData = ({
       // the Entity Store — such as the threat hunting leads cards — needs a
       // refetch rather than relying on its own cache TTL.
       QC.invalidateQueries({ queryKey: [ENTITY_STORE_ENTITIES_LIST] });
+      QC.invalidateQueries({ queryKey: [ENTITY_GRID_QUERY_KEY] });
       onChange?.();
     },
   });

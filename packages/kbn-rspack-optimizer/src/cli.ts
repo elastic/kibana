@@ -16,6 +16,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 import { KIBANA_GROUPS, type KibanaGroup } from '@kbn/projects-solutions-groups';
 import { runBuild, type BuildOptions } from './run_build';
+import { runSharedBuild } from './run_shared_build';
 import { reportOptimizerTimings } from './report_optimizer_timings';
 import {
   validateLimitsForAllBundles,
@@ -47,6 +48,11 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --dist to have no value');
       }
 
+      const sharedOnly = flags['shared-only'] ?? false;
+      if (typeof sharedOnly !== 'boolean') {
+        throw createFlagError('expected --shared-only to have no value');
+      }
+
       const examples = flags.examples ?? false;
       if (typeof examples !== 'boolean') {
         throw createFlagError('expected --examples to have no value');
@@ -57,8 +63,12 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --test-plugins to have no value');
       }
 
-      // cache and hmr are declared as positive booleans defaulting to true.
+      // dev-only, cache and hmr are declared as positive booleans defaulting to true.
       // getopts interprets --no-cache as cache=false and --no-hmr as hmr=false.
+      // dev-only defaults to true because a source server started in dev mode without the
+      // optimizer (scripts/functional_tests, --no-optimizer) discovers devOnly plugins, and the
+      // UI fails to load without their bundles.
+      const devOnly = flags['dev-only'] as boolean;
       const cache = flags.cache as boolean;
       const hmr = flags.hmr as boolean;
 
@@ -145,6 +155,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           repoRoot: REPO_ROOT,
           examples: false,
           testPlugins: false,
+          devOnly: false,
         });
         const pluginIds = ['core', ...allPlugins.filter((p) => !p.ignoreMetrics).map((p) => p.id)];
         validateLimitsForAllBundles(log, pluginIds, limitsPath);
@@ -169,6 +180,30 @@ export function runRspackCli(options: CliOptions = {}): void {
         typeof flags['output-root'] === 'string' && flags['output-root'].length > 0
           ? Path.resolve(flags['output-root'])
           : REPO_ROOT;
+
+      if (sharedOnly) {
+        const result = await runSharedBuild({
+          repoRoot: REPO_ROOT,
+          outputRoot,
+          watch,
+          dist,
+          log,
+        });
+        if (result.close) {
+          addCleanupTask(() => {
+            result.close?.().catch(() => {});
+          });
+        }
+        if (result.success) {
+          await result.done;
+        } else if (result.done) {
+          log.error('Shared frontend build failed — waiting for changes to fix errors...');
+          await result.done;
+        } else {
+          throw new Error(`Shared frontend build failed: ${result.errors?.join(', ')}`);
+        }
+        return;
+      }
 
       const inspectWorkers = flags['inspect-workers'] as boolean;
 
@@ -206,6 +241,7 @@ export function runRspackCli(options: CliOptions = {}): void {
         cache,
         examples: effectiveExamples,
         testPlugins: effectiveTestPlugins,
+        devOnly: devOnly && !updateLimits,
         allowlistPluginGroups,
         themeTags: themes,
         log,
@@ -252,6 +288,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           'dist',
           'examples',
           'test-plugins',
+          'dev-only',
           'cache',
           'hmr',
           'profile',
@@ -259,6 +296,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           'update-limits',
           'validate-limits',
           'inspect-workers',
+          'shared-only',
         ],
         string: [
           'themes',
@@ -276,6 +314,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           dist: false,
           examples: false,
           'test-plugins': false,
+          'dev-only': true,
           cache: true,
           hmr: true,
           profile: false,
@@ -288,6 +327,9 @@ export function runRspackCli(options: CliOptions = {}): void {
             --dist                    Build for distribution (minified, no source maps)
             --examples                Include example plugins
             --test-plugins            Include test plugins
+            --shared-only             Build only shared frontend bundles
+            --no-dev-only             Exclude devOnly plugins (included by default, even with --dist;
+                                      node scripts/build always excludes them)
             --themes <tags>           Comma-separated theme tags to build (default: all)
             --plugin-groups <groups>  Comma-separated plugin groups to build (default: all).
                                       Mirrors the server's plugins.allowlistPluginGroups setting.

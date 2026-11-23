@@ -9,6 +9,7 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+  ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
 import {
   alertingGlobalAdvancedSettings,
@@ -35,9 +36,22 @@ describe('registerAlertingAdvancedSettings', () => {
     );
   });
 
-  it('registers the global setting in the Alerting V2 category', () => {
+  it('registers the global setting in the Alerting category', () => {
     expect(alertingGlobalAdvancedSettings[ALERTING_V2_ENABLED_SETTING_ID]).toEqual(
-      expect.objectContaining({ category: ['alertingV2'] })
+      expect.objectContaining({ category: ['alerting'] })
     );
+  });
+
+  it('enables the global setting by default and does not mark it experimental', () => {
+    const setting = alertingGlobalAdvancedSettings[ALERTING_V2_ENABLED_SETTING_ID];
+
+    expect(setting.value).toBe(true);
+    expect(setting).not.toHaveProperty('experimental');
+  });
+
+  it('does not mark the V1 Observability alerts table setting experimental', () => {
+    expect(
+      alertingSpaceAdvancedSettings[ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID]
+    ).not.toHaveProperty('experimental');
   });
 });

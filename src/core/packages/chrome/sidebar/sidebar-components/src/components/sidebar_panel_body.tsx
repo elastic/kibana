@@ -40,7 +40,9 @@ export const SidebarBody: FC<SidebarBodyProps> = ({ children, scrollable = false
     <EuiPanel
       {...(scrollable && { tabIndex: 0, role: 'region', 'aria-label': sidebarContentLabel })}
       css={bodyStyles(scrollable)}
+      hasBorder={false}
       hasShadow={false}
+      borderRadius="none"
       paddingSize="none"
       data-test-subj="sidebarBody"
     >

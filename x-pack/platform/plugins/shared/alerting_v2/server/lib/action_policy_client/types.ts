@@ -12,13 +12,12 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 
 export interface UpdateActionPolicyParams {
+  id: string;
   data: UpdateActionPolicyData;
-  options: { id: string; version: string };
 }
 
 export interface CreateActionPolicyParams {
   data: CreateActionPolicyDataInput;
-  options?: { id?: string };
 }
 
 export interface SnoozeActionPolicyParams {
@@ -46,8 +45,8 @@ export type FindActionPoliciesSortField = 'name' | 'createdAt' | 'updatedAt';
 export interface FindActionPoliciesArgs {
   page?: number;
   perPage?: number;
+  filter?: string;
   search?: string;
-  enabled?: boolean;
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }
@@ -60,5 +59,10 @@ export interface FindActionPoliciesResponse {
 }
 
 export interface MatchActionPoliciesParams {
-  ruleTags?: string[];
+  routingTags?: string[];
+}
+
+export interface GetRoutingTagsParams {
+  search?: string;
+  policiesPerTag: number;
 }

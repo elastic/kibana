@@ -6,13 +6,17 @@ exports[`Title it renders title 1`] = `
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
+  -webkit-text-decoration: inherit;
+  text-decoration: inherit;
+  -webkit-text-decoration-thickness: inherit;
+  text-decoration-thickness: inherit;
   text-overflow: ellipsis;
   vertical-align: top;
   white-space: nowrap;
 }
 
 <h1
-  class="euiTitle css-1tgxtfm-Header-euiTitle-l ex2433o0"
+  class="euiTitle css-5v94va-Header-euiTitle-l ex2433o0"
   data-test-subj="header-page-title"
 >
   <span

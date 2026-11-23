@@ -29,7 +29,6 @@ export const apiTest = baseApiTest.extend<{}, ShardingAgentE2eWorkerFixtures>({
         runId,
         agentCount: 2,
         agentImage: 'agent',
-        isAgentSharding: true,
       });
       await use(stack);
       await stop();

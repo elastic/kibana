@@ -13,6 +13,7 @@ export type {
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
   UnifiedHistogramFetchParamsExternal,
+  UnifiedHistogramLensActionsOptions,
 } from './types';
 export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
 
@@ -38,3 +39,4 @@ export {
 export type { UnifiedHistogramState } from './services/state_service';
 
 export { canImportVisContext } from './utils/external_vis_context';
+export { resolveBreakdownField } from './utils/resolve_breakdown_field';

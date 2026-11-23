@@ -366,13 +366,7 @@ export class SavedMap {
   }
 
   public hasSaveAndReturnConfig(): boolean {
-    return Boolean(
-      this._originatingApp &&
-        this._originatingPath &&
-        // TODO remove this check in editors (lens does this too)
-        // instead, embeddable state transform should provide hasSaveAndReturnConfig
-        !this._originatingPath.includes('/list/')
-    );
+    return Boolean(this._originatingApp && this._originatingPath);
   }
 
   public getTitle(): string {

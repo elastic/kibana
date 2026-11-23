@@ -16,7 +16,7 @@ import { syncState } from '@kbn/kibana-utils-plugin/public';
 import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabActionPayload, InternalStateThunkActionCreator } from '../internal_state';
 import { selectTab, selectTabAppState } from '../selectors';
-import { selectTabRuntimeState } from '../runtime_state';
+import { getDataViewIdOfSource, selectTabRuntimeState } from '../runtime_state';
 import { addLog } from '../../../../../utils/add_log';
 import { internalStateActions } from '..';
 import { type DiscoverAppState } from '../types';
@@ -31,6 +31,7 @@ import { createUrlSyncObservables } from '../../utils/create_url_sync_observable
 import { createTabPersistableStateObservable } from '../../utils/create_tab_persistable_state_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
 import { getFieldsToReset } from '../../utils/profile_app_state_defaults';
+import { isReplayedLoad } from '../../utils/is_replayed_load';
 import {
   createDataViewDataSource,
   DataSourceType,
@@ -70,21 +71,23 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     };
 
     const initializeUrlTracking = () => {
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
 
       const subscription = combineLatest([
-        currentDataView$,
+        currentDataSource$,
         appState$.pipe(startWith(getAppState())),
-      ]).subscribe(([dataView, appState]) => {
-        if (!dataView?.id) {
+      ]).subscribe(([dataSource, appState]) => {
+        if (!dataSource) {
           return;
         }
 
+        const dataViewId = getDataViewIdOfSource(dataSource);
+
         const dataViewSupportsTracking =
           // Disable for ad hoc data views, since they can't be restored after a page refresh
-          dataView.isPersisted() ||
+          dataSource.isPersisted() ||
           // Unless it's a default profile data view, which can be restored on refresh
-          getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
+          getState().defaultProfileAdHocDataViewIds.includes(dataViewId) ||
           // Or we're in ES|QL mode, in which case we don't care about the data view
           isOfAggregateQueryType(appState.query);
 
@@ -127,13 +130,16 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       );
 
       const { data } = services;
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-      const currentDataView = currentDataView$.getValue();
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const currentDataSource = currentDataSource$.getValue();
+      const currentDataViewId = currentDataSource
+        ? getDataViewIdOfSource(currentDataSource)
+        : undefined;
       const appState = getAppState();
       const setDataViewFromSavedSearch =
         !appState.dataSource ||
         (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
-          appState.dataSource.dataViewId !== currentDataView?.id);
+          appState.dataSource.dataViewId !== currentDataViewId);
 
       if (setDataViewFromSavedSearch) {
         // used data view is different from the given by url/state which is invalid
@@ -141,8 +147,8 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
           internalStateActions.updateAppState({
             tabId,
             appState: {
-              dataSource: currentDataView?.id
-                ? createDataViewDataSource({ dataViewId: currentDataView.id })
+              dataSource: currentDataViewId
+                ? createDataViewDataSource({ dataViewId: currentDataViewId })
                 : undefined,
             },
           })
@@ -271,13 +277,21 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         runtimeStateManager,
       }),
       {
-        isDisabled: () =>
-          services.capabilities.discover_v2.storeSearchSession
+        isDisabled: () => {
+          // The config outlives the tab until the next tab enables storage, e.g. after "New"
+          const dataRequestParams = getCurrentTab()?.dataRequestParams;
+
+          if (dataRequestParams && isReplayedLoad(dataRequestParams)) {
+            return { disabled: true, reasonText: '' };
+          }
+
+          return services.capabilities.discover_v2.storeSearchSession
             ? { disabled: false }
             : {
                 disabled: true,
                 reasonText: noSearchSessionStorageCapabilityMessage,
-              },
+              };
+        },
       }
     );
 

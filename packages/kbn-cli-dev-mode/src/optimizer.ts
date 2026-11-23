@@ -74,6 +74,7 @@ export class Optimizer {
             cache: options.cache,
             dist: options.dist,
             examples: options.runExamples,
+            devOnly: true,
             pluginPaths: options.pluginPaths,
             pluginScanDirs: options.pluginScanDirs,
             allowlistPluginGroups: options.allowlistPluginGroups,

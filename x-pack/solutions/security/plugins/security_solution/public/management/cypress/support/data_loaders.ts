@@ -8,6 +8,7 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
+import AdmZip from 'adm-zip';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -15,17 +16,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 // This is a Cypress module and only used by Cypress, so disabling "should" be safe
 // eslint-disable-next-line import/no-nodejs-modules
 import { mkdir } from 'node:fs/promises';
-import type { HostVmExecResponse } from '../../../../scripts/endpoint/common/types';
-import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
-import {
-  deleteIndexedEndpointHeartbeats,
-  indexEndpointHeartbeats,
-} from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
-import {
-  getHostVmClient,
-  createVm,
-  generateVmName,
-} from '../../../../scripts/endpoint/common/vm_services';
+import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 import { setupStackServicesUsingCypressConfig } from './common';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
@@ -47,12 +38,6 @@ import {
   startEndpointHost,
   stopEndpointHost,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
-import type { IndexedEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import {
-  deleteIndexedEndpointPolicyResponse,
-  indexEndpointPolicyResponse,
-} from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type { HostPolicyResponse } from '../../../../common/endpoint/types';
 import type {
   HostActionResponse,
   IndexEndpointHostsCyTaskOptions,
@@ -60,7 +45,6 @@ import type {
   CreateUserAndRoleCyTaskOptions,
   LogItTaskOptions,
   CaptureHostVmAgentDiagnosticsOptions,
-  ExecuteCommandOnHostOptions,
 } from '../types';
 import type {
   DeletedIndexedEndpointRuleAlerts,
@@ -75,17 +59,9 @@ import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_d
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
 import {
-  installSentinelOneAgent,
-  S1Client,
-} from '../../../../scripts/endpoint/sentinelone_host/common';
-import {
-  addSentinelOneIntegrationToAgentPolicy,
   deleteAgentPolicy,
-  fetchAgentPolicyEnrollmentKey,
-  getOrCreateDefaultAgentPolicy,
   setAgentLoggingLevel,
 } from '../../../../scripts/endpoint/common/fleet_services';
-import { startElasticAgentWithDocker } from '../../../../scripts/endpoint/common/elastic_agent_service';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   deleteIndexedFleetEndpointPolicies,
@@ -250,20 +226,6 @@ export const dataLoaders = (
       });
     },
 
-    indexEndpointHeartbeats: async (options: { count?: number; unbilledCount?: number }) => {
-      const { esClient, log } = await setupStackServicesUsingCypressConfig(config);
-      return (await indexEndpointHeartbeats(esClient, log, options.count, options.unbilledCount))
-        .data;
-    },
-
-    deleteIndexedEndpointHeartbeats: async (
-      data: IndexedEndpointHeartbeats['data']
-    ): Promise<null> => {
-      const { esClient } = await stackServicesPromise;
-      await deleteIndexedEndpointHeartbeats(esClient, data);
-      return null;
-    },
-
     indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {
       const { esClient, log, kbnClient } = await stackServicesPromise;
       return (
@@ -281,20 +243,6 @@ export const dataLoaders = (
     ): Promise<DeletedIndexedEndpointRuleAlerts> => {
       const { esClient, log } = await stackServicesPromise;
       return deleteIndexedEndpointRuleAlerts(esClient, data, log);
-    },
-
-    indexEndpointPolicyResponse: async (
-      policyResponse: HostPolicyResponse
-    ): Promise<IndexedEndpointPolicyResponse> => {
-      const { esClient } = await stackServicesPromise;
-      return indexEndpointPolicyResponse(esClient, policyResponse);
-    },
-
-    deleteIndexedEndpointPolicyResponse: async (
-      indexedData: IndexedEndpointPolicyResponse
-    ): Promise<null> => {
-      const { esClient } = await stackServicesPromise;
-      return deleteIndexedEndpointPolicyResponse(esClient, indexedData).then(() => null);
     },
 
     sendHostActionResponse: async (data: HostActionResponse): Promise<null> => {
@@ -355,81 +303,6 @@ export const dataLoadersForRealEndpoints = (
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
 
   on('task', {
-    createSentinelOneHost: async () => {
-      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
-        throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
-      }
-
-      const { log } = await stackServicesPromise;
-      const s1Client = new S1Client({
-        url: process.env.CYPRESS_SENTINELONE_URL,
-        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
-        log,
-      });
-
-      const vmName = generateVmName('sentinelone');
-
-      const hostVm = await createVm({
-        type: 'multipass',
-        name: vmName,
-        log,
-        memory: '2G',
-        disk: '10G',
-      });
-
-      const s1Info = await installSentinelOneAgent({
-        hostVm,
-        log,
-        s1Client,
-      });
-
-      // wait 30s before running malicious action
-      await new Promise((resolve) => setTimeout(resolve, 30000));
-
-      // nslookup triggers an alert on S1
-      await getHostVmClient(vmName).exec('nslookup amazon.com');
-
-      log.info(`Done!
-
-${hostVm.info()}
-
-SentinelOne Agent Status:
-${s1Info.status}
-`);
-
-      return hostVm;
-    },
-
-    createSentinelOneAgentPolicy: async () => {
-      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
-        throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
-      }
-
-      const { log, kbnClient } = await stackServicesPromise;
-      const agentPolicyId = (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
-
-      await addSentinelOneIntegrationToAgentPolicy({
-        kbnClient,
-        log,
-        agentPolicyId,
-        consoleUrl: process.env.CYPRESS_SENTINELONE_URL,
-        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
-      });
-
-      const enrollmentToken = await fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId);
-
-      const elasticAgent = await startElasticAgentWithDocker({
-        kbnClient,
-        logger: log,
-        enrollmentToken,
-      });
-
-      return {
-        ...elasticAgent,
-        policyId: agentPolicyId,
-      };
-    },
-
     deleteAgentPolicy: async (agentPolicyId: string) => {
       const { kbnClient } = await stackServicesPromise;
 
@@ -514,19 +387,6 @@ ${s1Info.status}
       return null;
     },
 
-    uploadFileToEndpoint: async ({
-      hostname,
-      srcPath,
-      destPath = '.',
-    }: {
-      hostname: string;
-      srcPath: string;
-      destPath: string;
-    }): Promise<null> => {
-      await getHostVmClient(hostname).transfer(srcPath, destPath);
-      return null;
-    },
-
     installPackagesOnEndpoint: async ({
       hostname,
       packages,
@@ -545,18 +405,17 @@ ${s1Info.status}
       return null;
     },
 
-    readZippedFileContentOnEndpoint: async ({
-      hostname,
+    readZippedFileContent: async ({
       path,
       password,
     }: {
-      hostname: string;
       path: string;
       password?: string;
     }): Promise<string> => {
-      return (
-        await getHostVmClient(hostname).exec(`unzip -p ${password ? `-P ${password} ` : ''}${path}`)
-      ).stdout;
+      return new AdmZip(path)
+        .getEntries()
+        .map((entry) => entry.getData(password).toString('utf8'))
+        .join('');
     },
 
     stopEndpointHost: async (hostName) => {
@@ -627,33 +486,6 @@ ${s1Info.status}
 `);
         return { filePath: response.filePath };
       });
-    },
-
-    /**
-     * Runs a command on the given hostname, which is expected to be a hostname running on a vm.
-     *
-     * IMPORTANT: command execution failures on the host will NOT cause this task to fail/throw.
-     *            Ensure that the `stderr` is checked if wanting to determine success/failure of
-     *            command execution on the host machine.
-     * @param options
-     * @param options.hostname
-     * @param command.command
-     */
-    executeCommandOnHost: async ({
-      hostname,
-      command,
-    }: ExecuteCommandOnHostOptions): Promise<HostVmExecResponse> => {
-      const { log } = await stackServicesPromise;
-      return getHostVmClient(hostname)
-        .exec(command)
-        .catch((e) => {
-          log.warning(`command [${command}] execution on host [${hostname}] failed: ${e}]`);
-          return {
-            stdout: '',
-            stderr: e.message,
-            exitCode: 1,
-          };
-        });
     },
   });
 };

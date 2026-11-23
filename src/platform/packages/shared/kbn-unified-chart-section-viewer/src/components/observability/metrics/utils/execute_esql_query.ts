@@ -8,10 +8,10 @@
  */
 
 import type { Filter, TimeRange } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -29,8 +29,9 @@ import { getMetricsExecutionContext } from './execution_context';
 export interface ExecuteEsqlParams {
   esqlQuery: string;
   search: ISearchGeneric;
+  sessionId?: string;
   signal?: AbortSignal;
-  dataView: DataView;
+  timeFieldName?: string;
   timeRange?: TimeRange;
   filters?: Filter[];
   variables?: ESQLControlVariable[];
@@ -41,6 +42,8 @@ export interface ExecuteEsqlParams {
    * error telemetry filterable by the same profile.
    */
   profileId: string;
+  /** Names the request in the APM `page` label. Defaults to the metrics info fetch. */
+  executionContextName?: MetricsExecutionContextName;
 }
 
 export const fetchEsqlResponseOrThrow = async (
@@ -57,7 +60,7 @@ export const fetchEsqlResponseOrThrow = async (
 
 export interface ExecuteEsqlResult<TDocument> {
   documents: TDocument[];
-  rawResponse: object;
+  rawResponse: ESQLSearchResponse & { requestParams: ESQLSearchParams };
   requestParams: { query: string; filter?: object };
 }
 
@@ -68,18 +71,20 @@ export interface ExecuteEsqlResult<TDocument> {
 export async function executeEsqlQuery<TDocument extends object = Record<string, unknown>>({
   esqlQuery,
   search,
+  sessionId,
   signal,
-  dataView,
+  timeFieldName,
   timeRange,
   filters = [],
   variables,
   uiSettings,
   profileId,
+  executionContextName = MetricsExecutionContextName.METRICS_INFO,
 }: ExecuteEsqlParams): Promise<ExecuteEsqlResult<TDocument>> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
-    timeRange && dataView?.timeFieldName
-      ? getTime(dataView, timeRange, { fieldName: dataView.timeFieldName })
+    timeRange && timeFieldName
+      ? getTime(undefined, timeRange, { fieldName: timeFieldName })
       : undefined;
   const filtersWithTime = [...(timeFilter ? [timeFilter] : []), ...filters];
   const filter =
@@ -90,15 +95,14 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
   const { response, params } = await fetchEsqlResponseOrThrow({
     esqlQuery,
     search,
+    sessionId,
     signal,
     filter,
     timeRange,
     variables,
-    ...getMetricsExecutionContext(
-      MetricsExecutionContextAction.FETCH,
-      MetricsExecutionContextName.METRICS_INFO,
-      { profile_id: profileId }
-    ),
+    ...getMetricsExecutionContext(MetricsExecutionContextAction.FETCH, executionContextName, {
+      profile_id: profileId,
+    }),
   });
 
   return {

@@ -18,6 +18,8 @@ import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  SteerConversationRequestBody,
+  SteerConversationResponse,
   UpdateConversationAccessControlRequestBody,
   UpdateConversationAccessControlResponse,
 } from '../../../common/http_api/conversations';
@@ -105,6 +107,22 @@ export class ConversationsService {
     );
   }
 
+  async steer({
+    conversationId,
+    message,
+    eventId,
+  }: {
+    conversationId: string;
+    message: string;
+    eventId: string;
+  }) {
+    const body: SteerConversationRequestBody = { message, event_id: eventId };
+    return await this.http.post<SteerConversationResponse>(
+      buildPath(`${internalApiPath}/conversations/{conversationId}/_steer`, { conversationId }),
+      { body: JSON.stringify(body) }
+    );
+  }
+
   async updateReadStatus({
     conversationId,
     read,
@@ -120,22 +138,22 @@ export class ConversationsService {
 
   async submitRoundFeedback({
     conversationId,
-    roundId,
+    executionId,
     vote,
     chips,
     comment,
   }: {
     conversationId: string;
-    roundId: string;
+    executionId: string;
     vote: 'up' | 'down' | null;
     chips?: FeedbackChipId[];
     comment?: string;
   }): Promise<void> {
     await this.http.post(
-      buildPath(`${internalApiPath}/conversations/{conversationId}/rounds/{roundId}/_feedback`, {
-        conversationId,
-        roundId,
-      }),
+      buildPath(
+        `${internalApiPath}/conversations/{conversationId}/executions/{executionId}/_feedback`,
+        { conversationId, executionId }
+      ),
       { body: JSON.stringify({ vote, chips, comment }) }
     );
   }

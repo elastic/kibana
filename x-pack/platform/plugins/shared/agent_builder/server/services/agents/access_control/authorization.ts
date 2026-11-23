@@ -173,6 +173,49 @@ export const canChangeAgentAccessControl = (
 };
 
 /**
+ * Checks whether the caller can change the agent's auto-approved APIs.
+ *
+ * This requires admin, owner, or Manager access. Only admins can change them on the default agent.
+ */
+export const canConfigureAgentApprovals = (
+  args: AgentAuthzArgs & { agentId?: string }
+): boolean => {
+  const role = getEffectiveAgentRole(args);
+  if (args.agentId === agentBuilderDefaultAgentId) {
+    return role === 'admin';
+  }
+  return role === 'admin' || role === 'owner' || role === AgentAccessControlRole.Manager;
+};
+
+/**
+ * Checks whether the caller can bind, replace or remove the agent's service account.
+ *
+ * Core refuses a binding without the `manage_security` cluster privilege, so the same bar applies
+ * here on top of agent write access. The default agent cannot be bound.
+ */
+export const canConfigureAgentExecutionIdentity = (
+  args: AgentAuthzArgs & { agentId?: string }
+): boolean =>
+  args.agentId !== agentBuilderDefaultAgentId &&
+  hasAgentWriteAccess(args) &&
+  args.currentUser?.canManageSecurity === true;
+
+/**
+ * Checks whether the agent's binding allows the caller to edit it at all.
+ *
+ * Every edit of a bound agent directs its service account, so editing one requires the same
+ * `manage_security` privilege as the binding. Unbound agents are unaffected.
+ */
+export const canEditBoundAgent = ({
+  boundServiceAccountId,
+  currentUser,
+}: {
+  /** Service account the agent runs as, when it is bound to one. */
+  boundServiceAccountId?: string;
+  currentUser?: CurrentUser | null;
+}): boolean => boundServiceAccountId === undefined || currentUser?.canManageSecurity === true;
+
+/**
  * Checks whether the caller can read and list the agent.
  */
 export const hasAgentReadAccess = (args: AgentAuthzArgs): boolean =>

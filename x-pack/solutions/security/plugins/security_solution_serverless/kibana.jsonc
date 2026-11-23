@@ -23,6 +23,12 @@
       "discover",
       "navigation"
     ],
-    "optionalPlugins": ["securitySolutionEss", "automaticImport", "usageApi", "workflowsManagement"]
+    "optionalPlugins": [
+      "securitySolutionEss",
+      "automaticImport",
+      "usageApi",
+      "workflowsManagement",
+      "alertzero"
+    ]
   }
 }

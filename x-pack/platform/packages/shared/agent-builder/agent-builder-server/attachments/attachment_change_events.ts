@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { TimelineEventType } from '@kbn/agent-builder-common';
+import { ATTACHMENT_EVENT_FORMAT, TimelineEventType } from '@kbn/agent-builder-common';
 import type {
   AttachmentEventSource,
   AttachmentTimelineEvent,
@@ -17,10 +17,12 @@ import type { AttachmentChange } from './attachment_state_manager';
 export interface AttachmentChangesToEventsOptions {
   source: AttachmentEventSource;
   actor: EventActor;
-  /** Defaults to false. Ignored for deletions. */
+  /** Defaults to false. Ignored for deletions and restores. */
   render_inline?: boolean;
   /** Set for changes made inside an agent run. */
   execution_id?: string;
+  /** The content event the changes belong to: the run's trigger, or the message they were sent with. */
+  trigger_event_id?: string;
   /** Defaults to now. */
   created_at?: string;
 }
@@ -35,6 +37,7 @@ export const attachmentChangesToEvents = (
     actor,
     render_inline: renderInline = false,
     execution_id: executionId,
+    trigger_event_id: triggerEventId,
     created_at: createdAt = new Date().toISOString(),
   }: AttachmentChangesToEventsOptions
 ): AttachmentTimelineEvent[] => {
@@ -42,9 +45,19 @@ export const attachmentChangesToEvents = (
     actor,
     created_at: createdAt,
     ...(executionId !== undefined ? { execution_id: executionId } : {}),
+    ...(triggerEventId !== undefined ? { trigger_event_id: triggerEventId } : {}),
   };
 
   return changes.map((change): AttachmentTimelineEvent => {
+    const common = {
+      attachment_id: change.attachment_id,
+      attachment_type: change.attachment_type,
+      source,
+      format: ATTACHMENT_EVENT_FORMAT,
+      ...(change.tool_call_id !== undefined ? { tool_call_id: change.tool_call_id } : {}),
+      ...(change.hidden ? { hidden: true } : {}),
+    };
+    const described = change.description !== undefined ? { description: change.description } : {};
     switch (change.kind) {
       case 'added':
         return {
@@ -52,11 +65,10 @@ export const attachmentChangesToEvents = (
           id: uuidv4(),
           type: TimelineEventType.attachmentAdded,
           data: {
-            attachment_id: change.attachment_id,
-            attachment_type: change.attachment_type,
+            ...common,
+            ...described,
             current_version: change.current_version,
             render_inline: renderInline,
-            source,
           },
         };
       case 'updated':
@@ -65,12 +77,11 @@ export const attachmentChangesToEvents = (
           id: uuidv4(),
           type: TimelineEventType.attachmentUpdated,
           data: {
-            attachment_id: change.attachment_id,
-            attachment_type: change.attachment_type,
+            ...common,
+            ...described,
             previous_version: change.previous_version,
             current_version: change.current_version,
             render_inline: renderInline,
-            source,
           },
         };
       case 'deleted':
@@ -78,12 +89,14 @@ export const attachmentChangesToEvents = (
           ...envelope,
           id: uuidv4(),
           type: TimelineEventType.attachmentDeleted,
-          data: {
-            attachment_id: change.attachment_id,
-            attachment_type: change.attachment_type,
-            hard_delete: change.hard_delete,
-            source,
-          },
+          data: { ...common, hard_delete: change.hard_delete },
+        };
+      case 'restored':
+        return {
+          ...envelope,
+          id: uuidv4(),
+          type: TimelineEventType.attachmentRestored,
+          data: { ...common, ...described, current_version: change.current_version },
         };
     }
   });

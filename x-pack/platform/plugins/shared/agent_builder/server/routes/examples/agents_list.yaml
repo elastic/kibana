@@ -16,6 +16,7 @@ responses:
                 permissions:
                   update_agent: false
                   update_access_control: false
+                  update_approvals: false
                 configuration:
                   tools:
                   - tool_ids:
@@ -42,6 +43,7 @@ responses:
                 permissions:
                   update_agent: true
                   update_access_control: true
+                  update_approvals: true
                 configuration:
                   instructions: You are a custom agent that wants to help searching data using all
                     indices starting with prefix "content-".

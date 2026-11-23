@@ -6,19 +6,24 @@
  */
 
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   ImpactConflictError,
   ImpactInvalidRequestError,
   ImpactNotFoundError,
 } from '../services/errors';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 
 export const handleRouteError = (
   error: unknown,
   response: KibanaResponseFactory,
   logger: Logger
 ) => {
-  if (error instanceof ImpactNotFoundError) {
+  if (error instanceof ImpactNotFoundError || isConversationNotFoundError(error)) {
     return response.notFound({ body: { message: error.message } });
+  }
+  if (error instanceof InvestigationsForbiddenError) {
+    return response.forbidden({ body: { message: error.message } });
   }
   if (error instanceof ImpactInvalidRequestError) {
     return response.badRequest({ body: { message: error.message } });

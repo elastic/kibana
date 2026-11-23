@@ -39,7 +39,20 @@ export interface ScoutServerConfig {
     ssl: boolean;
     secureFiles?: string[];
   };
-  esServerlessOptions?: { uiam: boolean; uiamOAuth?: boolean; cps?: boolean };
+  esServerlessOptions?: {
+    uiam: boolean;
+    uiamOAuth?: boolean;
+    /** ISO-8601 lifetime of UIAM ephemeral tokens, from PT1M to PT5M (UIAM defaults to PT5M). */
+    uiamEphemeralTokenExpiration?: string;
+    /** ISO-8601 lifetime of UIAM session access tokens, at least PT1M (UIAM defaults to PT1H). */
+    uiamAccessTokenExpiration?: string;
+    cps?: boolean;
+    /**
+     * Extra host IP to publish the serverless ES port on. Docker otherwise
+     * binds loopback only, which an Endpoint VM cannot reach.
+     */
+    host?: string;
+  };
   kbnTestServer: {
     env: any;
     buildArgs: string[];

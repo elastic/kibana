@@ -38,11 +38,12 @@ describe('bindServices - Elasticsearch client routing', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
   beforeEach(() => {
-    container = new Container();
+    container = new Container({ defaultScope: 'Singleton' });
     elasticsearch = elasticsearchServiceMock.createStart();
     request = httpServerMock.createKibanaRequest();
 
     container.bind(CoreStart('elasticsearch')).toConstantValue(elasticsearch);
+    container.bind(CoreStart('featureFlags')).toConstantValue(coreMock.createStart().featureFlags);
     container.bind(Request).toConstantValue(request);
     container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
     container
@@ -94,7 +95,7 @@ describe('bindServices - Elasticsearch client routing', () => {
 
 describe('bindServices - SpaceUiSettingsClientToken', () => {
   it('scopes the client to the request, not the internal repository', async () => {
-    const container = new Container();
+    const container = new Container({ defaultScope: 'Singleton' });
     const request = httpServerMock.createKibanaRequest();
     const uiSettings = uiSettingsServiceMock.createStartContract();
     const scopedSoClient = savedObjectsClientMock.create();

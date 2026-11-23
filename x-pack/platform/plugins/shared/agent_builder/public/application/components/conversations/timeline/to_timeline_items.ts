@@ -6,28 +6,87 @@
  */
 
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { TimelineEventType } from '@kbn/agent-builder-common';
+import type { ConversationEvent, UserMessageEvent } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  analyzeSteers,
+  isActivityEvent,
+  isCurrentFormatAttachmentEvent,
+  isExecutionTerminalEvent,
+  isSteerMessageEvent,
+  isTimelineEvent,
+} from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
-import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
-import type { ExecutionAccumulator, TimelineItem, UserEntry } from './types';
+import {
+  EXECUTION_STREAMING_EVENT_TYPE,
+  isTimelineDisplayEvent,
+} from '../../../../services/events';
+import type {
+  ExecutionAccumulator,
+  GroupedItem,
+  SteerState,
+  UnresolvedAttachmentItem,
+  UnresolvedCustomEventItem,
+  UserEntry,
+} from './types';
 import { accumulatorToItem, foldAttachmentRefs } from './timeline_item_utils';
 import { findAwaitingPromptEventId } from './awaiting_prompt';
 import { answersByPromptId, withQuestionAnswers } from './prompt_answers';
 import { resolvedToolCallIds, isSupersededToolCallStep } from './tool_call_steps';
 import { resumeToOriginalExecutionId } from './execution_chains';
+import {
+  agentRefsByExecutionId,
+  attachmentEventToRef,
+  inputRefsByMessageId,
+} from './attachment_event_refs';
+
+/** Read steers render inside their turn; unread steers remain standalone. */
+const steerPlacement = (events: TimelineDisplayEvent[]) => {
+  const { read, over } = analyzeSteers(events);
+  const started = new Set<string>();
+  const ended = new Set<string>();
+  for (const event of events) {
+    if (!event.execution_id) continue;
+    if (event.type === TimelineEventType.executionStarted) started.add(event.execution_id);
+    if (isExecutionTerminalEvent(event)) ended.add(event.execution_id);
+  }
+  return {
+    hasLiveExecution: [...started].some((executionId) => !ended.has(executionId)),
+    carriedByStep: (eventId: string) => read.has(eventId),
+    // The run the steer was sent to is over without having read it.
+    unread: (event: UserMessageEvent) =>
+      event.data.steer !== undefined && over.has(event.data.steer.execution_id),
+  };
+};
 
 export const groupTimelineEvents = (
-  events: TimelineDisplayEvent[],
+  events: ConversationEvent[],
   eventsById: Map<string, TimelineDisplayEvent>,
   /** Id of the locally-built user message that has no saved twin yet. */
   pendingUserMessageId?: string
-): TimelineItem[] => {
-  const awaitingPromptEventId = findAwaitingPromptEventId(events);
-  const answers = answersByPromptId(events);
-  const resolvedToolCalls = resolvedToolCallIds(events);
-  const resumeLinks = resumeToOriginalExecutionId(events, eventsById);
+): GroupedItem[] => {
+  // The run-shaped helpers only understand built-in events; narrow once, up front.
+  const displayEvents = events.filter(isTimelineDisplayEvent);
+  const awaitingPromptEventId = findAwaitingPromptEventId(displayEvents);
+  const steers = steerPlacement(displayEvents);
+  // A steer its run ended without reading carries no status: nothing is going to happen to it.
+  const steerStateOf = (event: UserMessageEvent): SteerState | undefined =>
+    steers.unread(event)
+      ? undefined
+      : awaitingPromptEventId
+      ? 'before_pause'
+      : steers.hasLiveExecution
+      ? 'waiting'
+      : undefined;
+  const answers = answersByPromptId(displayEvents);
+  const resolvedToolCalls = resolvedToolCallIds(displayEvents);
+  const resumeLinks = resumeToOriginalExecutionId(displayEvents, eventsById);
+  const inputRefs = inputRefsByMessageId(displayEvents);
+  const agentRefs = agentRefsByExecutionId(displayEvents, resumeLinks);
 
-  const ordered: Array<UserEntry | ExecutionAccumulator> = [];
+  const ordered: Array<
+    UserEntry | UnresolvedAttachmentItem | UnresolvedCustomEventItem | ExecutionAccumulator
+  > = [];
   const accMap = new Map<string, ExecutionAccumulator>();
   const seenAttachmentRefs = new Map<string, AttachmentVersionRef>();
 
@@ -45,6 +104,7 @@ export const groupTimelineEvents = (
         triggerEventId,
         steps: [],
         attachmentRefs: Array.from(seenAttachmentRefs.values()),
+        agentAttachmentRefs: agentRefs.get(canonicalId) ?? [],
       };
       accMap.set(canonicalId, acc);
       ordered.push(acc);
@@ -53,20 +113,74 @@ export const groupTimelineEvents = (
   };
 
   for (const event of events) {
+    if (isActivityEvent(event) && !isTimelineEvent(event)) {
+      continue;
+    }
+    if (!isTimelineDisplayEvent(event)) {
+      // Whether the type has a UI here is the resolve step's call.
+      ordered.push({ kind: 'customEvent', key: event.id, event });
+      continue;
+    }
     switch (event.type) {
-      case TimelineEventType.userMessage:
+      case TimelineEventType.userMessage: {
         foldAttachmentRefs(seenAttachmentRefs, event.data.attachment_refs);
+        const isSteer = isSteerMessageEvent(event);
+        // Avoid rendering the message twice.
+        if (isSteer && steers.carriedByStep(event.id)) {
+          break;
+        }
+        const steerState = isSteer ? steerStateOf(event) : undefined;
+        const attachmentRefs = [
+          ...(event.data.attachment_refs ?? []),
+          ...(inputRefs.get(event.id) ?? []),
+        ];
         ordered.push({
           kind: 'userMessage',
           key: event.id,
           event,
+          ...(attachmentRefs.length > 0 ? { attachmentRefs } : {}),
           ...(event.id === pendingUserMessageId ? { isPending: true } : {}),
+          ...(steerState ? { steerState } : {}),
         });
+        break;
+      }
+
+      case TimelineEventType.agentMessage:
+        ordered.push({ kind: 'agentMessage', key: event.id, event });
         break;
 
       case TimelineEventType.promptResponse:
         foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
         break;
+
+      case TimelineEventType.attachmentAdded:
+      case TimelineEventType.attachmentUpdated:
+      case TimelineEventType.attachmentDeleted:
+      case TimelineEventType.attachmentRestored: {
+        const ref = isCurrentFormatAttachmentEvent(event) ? attachmentEventToRef(event) : undefined;
+        if (ref) {
+          foldAttachmentRefs(seenAttachmentRefs, [ref]);
+          // A turn's own events land after it started: refresh its snapshot so its response
+          // resolves them.
+          const acc = event.execution_id
+            ? accMap.get(resumeLinks.get(event.execution_id) ?? event.execution_id)
+            : undefined;
+          if (acc) {
+            acc.attachmentRefs = Array.from(seenAttachmentRefs.values());
+          }
+        }
+        // Only the server's explicit ask to show the attachment becomes an item. Whether the
+        // attachment still exists and can draw is the resolve step's call.
+        if (
+          (event.type === TimelineEventType.attachmentAdded ||
+            event.type === TimelineEventType.attachmentUpdated) &&
+          event.data.render_inline &&
+          !event.data.hidden
+        ) {
+          ordered.push({ kind: 'attachment', key: event.id, event });
+        }
+        break;
+      }
 
       case TimelineEventType.executionStarted: {
         if (!event.execution_id) break;
@@ -102,15 +216,9 @@ export const groupTimelineEvents = (
       case TimelineEventType.executionAborted: {
         if (!event.execution_id) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        const openPause = awaitingPromptEventId ? eventsById.get(awaitingPromptEventId) : undefined;
-        const openPauseExecutionId = openPause?.execution_id
-          ? resumeLinks.get(openPause.execution_id) ?? openPause.execution_id
-          : undefined;
-        acc.terminal =
-          openPause?.type === TimelineEventType.executionTerminated &&
-          openPauseExecutionId === acc.executionId
-            ? openPause
-            : event;
+        // An interrupted resume ends the turn: the answer already closed the prompt, so the
+        // interruption is the terminal the user sees, not the pause.
+        acc.terminal = event;
         break;
       }
 
@@ -120,18 +228,18 @@ export const groupTimelineEvents = (
   }
 
   return ordered.map(
-    (entry): TimelineItem =>
+    (entry): GroupedItem =>
       'executionId' in entry ? accumulatorToItem(entry, eventsById, awaitingPromptEventId) : entry
   );
 };
 
 /** Groups a timeline - saved events, live events, or both merged - into renderable items. */
 export const buildItems = (
-  events: TimelineDisplayEvent[],
+  events: ConversationEvent[],
   pendingUserMessageId?: string
-): TimelineItem[] =>
+): GroupedItem[] =>
   groupTimelineEvents(
     events,
-    new Map(events.map((event) => [event.id, event])),
+    new Map(events.filter(isTimelineDisplayEvent).map((event) => [event.id, event])),
     pendingUserMessageId
   );

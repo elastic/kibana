@@ -8,7 +8,6 @@
 import React from 'react';
 import { screen, cleanup, act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -31,6 +30,8 @@ import { forceHTMLElementOffsetWidth } from '../../../../components/effected_pol
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { getArtifactListPageRenderingSetup } from '../../../../components/artifact_list_page/mocks';
+import { WORKFLOW_INSIGHTS_UPDATE_ROUTE } from '../../../../../../common/endpoint/constants';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/containers/source');
@@ -216,6 +217,70 @@ describe('Trusted apps form', () => {
     cleanup();
   });
 
+  it('should switch an insight trusted app to advanced mode and save in basic mode', async () => {
+    const setup = getArtifactListPageRenderingSetup();
+    setup.setExperimentalFlag({ trustedAppsAdvancedMode: true });
+    setup.coreStart.http.put.mockResolvedValue({});
+    const insightItem = {
+      comments: [],
+      description: 'Incompatible antivirus application',
+      entries: [
+        {
+          field: 'process.executable.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'C:\\Antivirus\\antivirus.exe',
+        },
+      ],
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+      name: 'Antivirus trusted app',
+      namespace_type: 'agnostic',
+      tags: ['policy:all'],
+      type: 'simple',
+      os_types: [OperatingSystem.WINDOWS],
+    } satisfies ArtifactFormComponentProps['item'];
+    const backUrl = '/endpoint-details';
+    setup.history.push('somepage?show=create', {
+      insight: { id: 'insight-id', back_url: backUrl, item: insightItem },
+    });
+    renderResult = setup.renderArtifactListPage({ ArtifactFormComponent: TrustedAppsForm });
+
+    expect(await renderResult.findByDisplayValue(insightItem.name)).toBeInTheDocument();
+    expect(renderResult.getByDisplayValue(insightItem.description)).toBeInTheDocument();
+    expect(renderResult.getByDisplayValue(insightItem.entries[0].value)).toBeInTheDocument();
+
+    await userEvent.click(getAdvancedModeToggle());
+
+    await waitFor(() =>
+      expect(renderResult.getByTestId('exceptionsBuilderWrapper')).toBeInTheDocument()
+    );
+
+    await userEvent.click(getBasicModeToggle());
+    expect(renderResult.getByDisplayValue(insightItem.entries[0].value)).toBeInTheDocument();
+
+    setTextFieldValue(getNameField(), 'Edited antivirus trusted app');
+    await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+
+    await waitFor(() => {
+      expect(setup.mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled();
+      expect(setup.coreStart.http.put).toHaveBeenCalledWith(
+        WORKFLOW_INSIGHTS_UPDATE_ROUTE.replace('{insightId}', 'insight-id'),
+        { version: '1', body: JSON.stringify({ action: { type: 'remediated' } }) }
+      );
+      expect(setup.coreStart.application.navigateToUrl).toHaveBeenCalledWith(backUrl);
+    });
+    const savedItem = JSON.parse(
+      setup.mockedApi.responseProvider.trustedAppCreate.mock.calls[0][0].body as string
+    );
+    expect(savedItem).toEqual(
+      expect.objectContaining({
+        ...insightItem,
+        name: 'Edited antivirus trusted app',
+      })
+    );
+    expect(savedItem).not.toHaveProperty('meta');
+  }, 15000);
+
   it('should display form submission errors', () => {
     const message = 'oh oh - failed';
     formProps.error = new Error(message) as IHttpFetchError;
@@ -243,8 +308,7 @@ describe('Trusted apps form', () => {
     });
 
     it('should default OS to Windows', () => {
-      // Note: the trailing `, ` comes from screen-reader-only text
-      expect(getOsField().textContent).toEqual('Windows, ');
+      expect(getOsField().textContent).toEqual('Windows');
     });
 
     it('should allow user to select between 3 OSs', () => {
@@ -293,10 +357,13 @@ describe('Trusted apps form', () => {
       expect(formProps.onChange).toHaveBeenCalledWith(expected);
     });
 
-    it('should correctly change OS', async () => {
-      await userEvent.click(getOsField());
-      await waitForEuiPopoverOpen();
-      await userEvent.click(screen.getByRole('option', { name: 'Linux' }));
+    it('should correctly change OS', () => {
+      act(() => {
+        fireEvent.click(getOsField());
+      });
+      act(() => {
+        fireEvent.click(screen.getByRole('option', { name: 'Linux' }));
+      });
       const expected = createOnChangeArgs({
         item: createItem({ os_types: [OperatingSystem.LINUX] }),
       });

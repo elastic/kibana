@@ -46,6 +46,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     backHref,
     badges,
     menu,
+    runWorkflowModal,
     isDeleteModalVisible,
     setIsDeleteModalVisible,
     onConfirmDeletion,
@@ -82,6 +83,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
         metadata={metadata}
       />
       {closeCaseModal}
+      {runWorkflowModal}
       {isDeleteModalVisible && (
         <ConfirmDeleteCaseModal
           totalCasesToBeDeleted={1}
@@ -89,7 +91,9 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
           onConfirm={onConfirmDeletion}
         />
       )}
-      {settingsAnchor && permissions.update && hasCaseSettings && (
+      {/* Mounted only while open: `EuiWrappingPopover` creates its portal next to the anchor on mount, so
+       reusing it for a new anchor (e.g. a remounted "More" button) would move that anchor off the page. */}
+      {isSettingsOpen && settingsAnchor && permissions.update && hasCaseSettings && (
         <CaseSettingsPopover
           syncAlerts={caseData.settings.syncAlerts}
           onSyncAlertsChange={onSyncAlertsChanged}

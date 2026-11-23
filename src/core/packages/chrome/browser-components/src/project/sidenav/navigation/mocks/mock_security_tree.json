@@ -165,7 +165,7 @@
               "id": "coverage-overview",
               "href": "/jom/app/security/rules_coverage_overview",
               "path": "securityGroup:rules.node-1.coverage-overview",
-              "title": "MITRE ATT&CK® Coverage",
+              "title": "MITRE coverage",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"

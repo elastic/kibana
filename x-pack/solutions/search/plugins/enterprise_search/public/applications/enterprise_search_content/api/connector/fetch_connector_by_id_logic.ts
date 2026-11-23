@@ -21,7 +21,7 @@ export interface FetchConnectorByIdApiLogicResponse {
 export const fetchConnectorById = async ({
   connectorId,
 }: FetchConnectorByIdApiLogicArgs): Promise<FetchConnectorByIdApiLogicResponse> => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(connectorId)}`;
   const response = await HttpLogic.values.http.get<FetchConnectorByIdApiLogicResponse>(route);
   return response;
 };

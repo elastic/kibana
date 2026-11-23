@@ -10,6 +10,7 @@
 import { registerBundleRoutesMock } from './core_app.test.mocks';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import type { Request } from '@hapi/hapi';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -67,6 +68,29 @@ describe('CoreApp', () => {
   });
 
   describe('Dynamic Config feature', () => {
+    const persistedAttributes = (flagValue: boolean) => ({
+      'feature_flags.overrides': { 'my-feature-flag': flagValue },
+    });
+
+    const startWithDynamicConfig = async () => {
+      const routerMock = mockRouter.create();
+      internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+
+      coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
+      const localCoreApp = new CoreAppsService(coreContext);
+      await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+
+      const internalCoreStart = coreInternalLifecycleMock.createInternalStart();
+      localCoreApp.start(internalCoreStart);
+
+      return {
+        repository: internalCoreStart.savedObjects.createInternalRepository.mock.results[0].value,
+        settingsHandler: routerMock.versioned.getRoute('put', '/internal/core/_settings').versions[
+          '1'
+        ].handler,
+      };
+    };
+
     describe('`/internal/core/_settings` route', () => {
       it('is not registered by default', async () => {
         const routerMock = mockRouter.create();
@@ -127,6 +151,46 @@ describe('CoreApp', () => {
         expect(repository.get).toHaveBeenCalledWith(
           'dynamic-config-overrides',
           'dynamic-config-overrides'
+        );
+      });
+
+      it('applies the persisted document when no local write raced the read', async () => {
+        const { repository } = await startWithDynamicConfig();
+        repository.get.mockResolvedValue({
+          version: 'WzEsMV0=',
+          attributes: persistedAttributes(true),
+        });
+
+        await jest.advanceTimersByTimeAsync(0);
+
+        expect(coreContext.configService.setDynamicConfigOverrides).toHaveBeenCalledWith(
+          persistedAttributes(true)
+        );
+      });
+
+      it('discards a persisted document that a local `_settings` write raced', async () => {
+        const { repository, settingsHandler } = await startWithDynamicConfig();
+        let resolveRead: (doc: unknown) => void = () => {};
+        repository.get.mockReturnValue(
+          new Promise((resolve) => {
+            resolveRead = resolve;
+          })
+        );
+
+        // The poller's read is now in flight, holding the document the write below replaces.
+        await jest.advanceTimersByTimeAsync(0);
+
+        const newOverrides = persistedAttributes(false);
+        await settingsHandler(
+          {} as unknown as RequestHandlerContext,
+          httpServerMock.createKibanaRequest({ body: newOverrides }),
+          httpServerMock.createResponseFactory()
+        );
+        resolveRead({ version: 'WzEsMV0=', attributes: persistedAttributes(true) });
+        await jest.advanceTimersByTimeAsync(0);
+
+        expect(coreContext.configService.setDynamicConfigOverrides).toHaveBeenLastCalledWith(
+          newOverrides
         );
       });
     });
@@ -319,8 +383,8 @@ describe('CoreApp', () => {
       await coreApp.preboot(internalCorePreboot, prebootUIPlugins);
 
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledTimes(
-        // Twice for all UI plugins + core's UI asset routes + @elastic/charts assets
-        prebootUIPlugins.public.size * 2 + 3
+        // Two shared plugin routes + core's UI asset routes + @elastic/charts assets
+        5
       );
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
         '/static-assets-path/ui/{path*}',
@@ -335,20 +399,12 @@ describe('CoreApp', () => {
         expect.any(String)
       );
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets-path/some-plugin/{path*}',
-        expect.any(String)
+        '/static-assets-path/plugins/{pluginName}/assets/{path*}',
+        expect.any(Function)
       );
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/some-plugin/assets/{path*}', // legacy
-        expect.any(String)
-      );
-      expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets-path/some-plugin-2/{path*}',
-        expect.any(String)
-      );
-      expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
-        '/plugins/some-plugin-2/assets/{path*}', // legacy
-        expect.any(String)
+        '/plugins/{pluginName}/assets/{path*}', // legacy
+        expect.any(Function)
       );
     });
 
@@ -471,8 +527,8 @@ describe('CoreApp', () => {
     await coreApp.setup(internalCoreSetup, uiPlugins);
 
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledTimes(
-      // Twice for all _internal_ UI plugins + core's UI asset routes + @elastic/charts assets
-      uiPlugins.internal.size * 2 + 3
+      // Two shared plugin routes + core's UI asset routes + @elastic/charts assets
+      5
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
       '/static-assets-path/ui/{path*}',
@@ -487,29 +543,25 @@ describe('CoreApp', () => {
       expect.any(String)
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/static-assets-path/some-plugin/{path*}',
-      expect.any(String)
+      '/static-assets-path/plugins/{pluginName}/assets/{path*}',
+      expect.any(Function)
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/plugins/some-plugin/assets/{path*}', // legacy
-      expect.any(String)
-    );
-    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/static-assets-path/some-plugin-2/{path*}',
-      expect.any(String)
-    );
-    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/plugins/some-plugin-2/assets/{path*}', // legacy
-      expect.any(String)
+      '/plugins/{pluginName}/assets/{path*}', // legacy
+      expect.any(Function)
     );
 
-    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/static-assets-path/some-plugin-3-internal/{path*}',
-      expect.any(String)
+    const pluginRoutes = internalCoreSetup.http.registerStaticDir.mock.calls.filter(([path]) =>
+      path.includes('{pluginName}')
     );
-    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/plugins/some-plugin-3-internal/assets/{path*}', // legacy
-      expect.any(String)
-    );
+    const requestFor = (pluginName: string) => ({ params: { pluginName } } as unknown as Request);
+    for (const [, resolveDir] of pluginRoutes) {
+      if (typeof resolveDir !== 'function') {
+        throw new Error('Plugin asset route must resolve its directory from the request');
+      }
+      expect(resolveDir(requestFor('some-plugin'))).toBe('/foo');
+      expect(resolveDir(requestFor('some-plugin-3-internal'))).toBe('/foo-internal');
+      expect(resolveDir(requestFor('unknown'))).toMatchObject({ output: { statusCode: 404 } });
+    }
   });
 });

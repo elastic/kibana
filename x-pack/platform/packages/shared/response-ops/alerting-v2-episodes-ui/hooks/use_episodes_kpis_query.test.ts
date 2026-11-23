@@ -16,6 +16,7 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 import { useEpisodesKpisQuery } from './use_episodes_kpis_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeSourceKpis } from '../types/episode_data_source';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
@@ -23,8 +24,14 @@ import { useSpaceId } from './use_space_id';
 
 jest.mock('../utils/execute_esql_query');
 jest.mock('./use_space_id');
+// The first ES|QL composer call costs ~1s locally and several seconds under CI load.
+jest.mock('../queries/episodes_query', () => ({
+  ...jest.requireActual('../queries/episodes_query'),
+  buildEpisodesKpisQuery: jest.fn(() => 'FROM .alerts | STATS alerts_count = COUNT(*)'),
+}));
 
 const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
+const mockBuildEpisodesKpisQuery = jest.mocked(buildEpisodesKpisQuery);
 const mockUseSpaceId = jest.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
 
@@ -55,14 +62,17 @@ const mockKpisRow = {
   snoozed: 0,
 };
 
-const createWrapper = (dataSource?: ReturnType<typeof createTestEpisodeSource>) => {
+const createWrapper = (
+  dataSource?: ReturnType<typeof createTestEpisodeSource>,
+  queryV2Source = true
+) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return ({ children }: { children: React.ReactNode }) => {
     const qcProvider = React.createElement(QueryClientProvider, { client: queryClient }, children);
-    return dataSource
-      ? React.createElement(EpisodeDataSourceProvider, { dataSource }, qcProvider)
+    return dataSource || !queryV2Source
+      ? React.createElement(EpisodeDataSourceProvider, { dataSource, queryV2Source }, qcProvider)
       : qcProvider;
   };
 };
@@ -185,8 +195,7 @@ describe('useEpisodesKpisQuery', () => {
     );
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalled());
-    const queryArg = mockExecuteEsqlQuery.mock.calls[0][0].query;
-    expect(queryArg).toContain('specific-user-uid');
+    expect(mockBuildEpisodesKpisQuery).toHaveBeenCalledWith('default', 'specific-user-uid', {});
   });
 
   it('still fetches KPIs when the user has no profile', async () => {
@@ -327,6 +336,45 @@ describe('useEpisodesKpisQuery', () => {
       snoozed: 1,
     });
     expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
+  });
+
+  it('skips the v2 query and returns source-only KPIs when queryV2Source is false', async () => {
+    const { result } = renderHook(
+      () =>
+        useEpisodesKpisQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+        }),
+      {
+        wrapper: createWrapper(
+          sourceWithKpis(
+            jest.fn().mockResolvedValue({
+              alerts_count: 10,
+              firing_rules: 3,
+              assigned_to_me: 0,
+              unassigned: 10,
+              acknowledged: 2,
+              snoozed: 1,
+            })
+          ),
+          false
+        ),
+      }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current.sourceErrors).toEqual([]);
+    expect(result.current.data).toEqual({
+      alertsCount: 10,
+      firingRules: 3,
+      assignedToMe: 0,
+      unassigned: 10,
+      acknowledged: 2,
+      snoozed: 1,
+    });
   });
 
   it('returns v2-only KPIs when a source does not implement KPIs', async () => {

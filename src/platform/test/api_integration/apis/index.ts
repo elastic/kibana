@@ -12,16 +12,10 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', () => {
     loadTestFile(require.resolve('./custom_integration'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./data_view_field_editor'));
-    loadTestFile(require.resolve('./data_views'));
+    // general (cookies) migrated to Scout: src/core/packages/core/test/scout/api/tests/cookies.spec.ts
     loadTestFile(require.resolve('./event_annotations'));
-    loadTestFile(require.resolve('./kql_telemetry'));
     loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./saved_queries'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./short_url'));
+    // short_url migrated to Scout: src/platform/plugins/shared/share/test/scout/api/tests/*_short_url.spec.ts
     // suggestions migrated to Scout: src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions*.spec.ts
     // status migrated to Scout: src/core/test/scout/api/tests/status.spec.ts
     loadTestFile(require.resolve('./stats'));

@@ -18,6 +18,10 @@ const DECLINED = i18n.translate('xpack.alertzero.proposalOutcome.declined', {
   defaultMessage: 'Declined',
 });
 
+const FAILED = i18n.translate('xpack.alertzero.proposalOutcome.failed', {
+  defaultMessage: 'Failed',
+});
+
 const approvedBy = (name: string) =>
   i18n.translate('xpack.alertzero.proposalOutcome.approvedBy', {
     defaultMessage: 'Approved by {name}',
@@ -38,16 +42,18 @@ export const proposalOutcome = ({
   decision,
   decidedBy,
   status,
-  expired,
 }: ProposalItem): string | undefined => {
   // Nobody answered, so there is no decision to attribute.
   if (!decision) {
-    return status === 'expired' || expired ? EXPIRED : undefined;
+    return status === 'expired' ? EXPIRED : undefined;
   }
 
   // Nothing writes a synthetic system user, so an unattributed approval is the only
   // signal that a policy approved it. An unattributed dismissal is not its mirror —
   // that is a decline whose decider could not be resolved — so it stays Declined.
+  // A failed run is reported as such whoever approved it: the approval did not take effect.
+  if (decision === 'approved' && status === 'failed') return FAILED;
+
   const name = decidedBy?.fullName ?? decidedBy?.username;
   if (!name) {
     return decision === 'approved' ? AUTO : DECLINED;

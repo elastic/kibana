@@ -41,7 +41,7 @@ interface CasesListProps {
   selectedFields: CasesColumnSelection[];
   selectedCases: CaseUI[];
   onSelectionChange: (theCase: CaseUI, isSelected: boolean) => void;
-  isSelectable: boolean;
+  isSelectable: (theCase: CaseUI) => boolean;
 }
 
 export const CasesList: React.FC<CasesListProps> = React.memo(
@@ -153,7 +153,7 @@ export const CasesList: React.FC<CasesListProps> = React.memo(
                 selectedFields={selectedFields}
                 isSelected={selectedCaseIds.has(theCase.id)}
                 hasSelection={hasSelection}
-                isSelectable={isSelectable}
+                isSelectable={isSelectable(theCase)}
                 onSelectionChange={onSelectionChange}
               />
             </EuiFlexItem>

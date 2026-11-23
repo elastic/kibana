@@ -9,7 +9,12 @@ import { type IEventLogger } from '@kbn/event-log-plugin/server';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import type { ErrorCategory } from '@kbn/discoveries-schemas';
 
-import { ATTACK_DISCOVERY_EVENT_PROVIDER } from './constants';
+import {
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
+  ATTACK_DISCOVERY_EVENT_PROVIDER,
+  ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG,
+} from './constants';
+import { isServiceAccountUser } from './is_service_account_user';
 
 const MAX_LENGTH = 1024;
 
@@ -284,6 +289,11 @@ export const writeAttackDiscoveryEvent = async ({
   const workflowReference =
     Object.keys(referenceData).length > 0 ? JSON.stringify(referenceData) : undefined;
 
+  // Dismissal is never tagged, so it only hides a generation for the principal who dismissed it
+  const isServiceAccountGeneration =
+    action !== ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED &&
+    isServiceAccountUser(authenticatedUser);
+
   const attackDiscoveryEvent = {
     '@timestamp': new Date().toISOString(),
     event: {
@@ -317,7 +327,11 @@ export const writeAttackDiscoveryEvent = async ({
       space_ids: [spaceId], // The Kibana space ID
     },
     message,
-    tags: ['securitySolution', 'attackDiscovery'],
+    tags: [
+      'securitySolution',
+      'attackDiscovery',
+      ...(isServiceAccountGeneration ? [ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG] : []),
+    ],
     user: {
       name: authenticatedUser.username, // only user.name is supported
     },

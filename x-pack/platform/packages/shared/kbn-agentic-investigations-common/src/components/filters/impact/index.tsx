@@ -6,3 +6,5 @@
  */
 
 export { Impact } from './impact';
+export { useEntityFilter } from './use_entity_filter';
+export type { ImpactPill, PagedImpactPills } from './impact_pills';

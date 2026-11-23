@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import {
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-  type ManagedWorkflowId,
-  type TemplatedManagedWorkflowId,
-} from '@kbn/workflows/managed';
+import { type ManagedWorkflowId, type TemplatedManagedWorkflowId } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { GLOBAL_CORE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
@@ -27,23 +20,6 @@ const WORKFLOWS_TO_INSTALL: Array<{
     workflowId,
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   })),
-  // Installed in the default space (not global) so its scheduled executions
-  // are stored alongside the onboarding executions it triggers.
-  {
-    workflowId: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-    spaceId: DEFAULT_SPACE_ID,
-  },
-  // Installed disabled in the default space (streams/KIs are global); enabled on
-  // demand by SyncWorkflowService.ensureEnabled from the extraction path, which
-  // schedules its trigger. Restorable + `enabled: false` YAML => installed disabled.
-  {
-    workflowId: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-    spaceId: DEFAULT_SPACE_ID,
-  },
-  {
-    workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-  },
 ];
 
 export const installWorkflows = async ({ client }: { client: PluginScopedManagedWorkflowsApi }) => {

@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { UnifiedHistogramBucketInterval } from '../../../types';
 
 export const useTimeRange = ({
@@ -21,16 +22,16 @@ export const useTimeRange = ({
   bucketInterval,
   timeRange: { from, to },
   timeInterval,
-  isPlainRecord,
-  timeField,
+  dataSource,
 }: {
   uiSettings: IUiSettingsClient;
   bucketInterval?: UnifiedHistogramBucketInterval;
   timeRange: TimeRange;
   timeInterval?: string;
-  isPlainRecord?: boolean;
-  timeField?: string;
+  dataSource: DataSource;
 }) => {
+  const isEsql = dataSource.kind === 'esql';
+  const timeField = dataSource.timeFieldName;
   const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
 
   const toMoment = useCallback(
@@ -47,7 +48,7 @@ export const useTimeRange = ({
   );
 
   const timeRangeText = useMemo(() => {
-    if (!timeField && isPlainRecord) {
+    if (!timeField && isEsql) {
       return '';
     }
 
@@ -56,7 +57,7 @@ export const useTimeRange = ({
       to: dateMath.parse(to, { roundUp: true }),
     };
 
-    const intervalText = Boolean(isPlainRecord)
+    const intervalText = isEsql
       ? ''
       : i18n.translate('unifiedHistogram.histogramTimeRangeIntervalDescription', {
           defaultMessage: '(interval: {value})',
@@ -77,7 +78,7 @@ export const useTimeRange = ({
         });
 
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`.trim();
-  }, [bucketInterval?.description, from, isPlainRecord, timeField, timeInterval, to, toMoment]);
+  }, [bucketInterval?.description, from, isEsql, timeField, timeInterval, to, toMoment]);
 
   const { euiTheme } = useEuiTheme();
   const timeRangeCss = css`

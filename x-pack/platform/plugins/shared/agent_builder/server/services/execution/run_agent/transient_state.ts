@@ -5,16 +5,32 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  AttachmentTimelineEvent,
+  CompactionSummary,
+  CompactionTrigger,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolCallWithIntent } from '@kbn/agent-builder-genai-utils/langchain';
 
 /** What the research model decided on its last turn; drives routing out of `researchAgent`. */
 export type ResearchOutcome =
-  | { type: 'tool_calls'; toolCalls: ToolCallWithReasoning[]; toolCallGroupId: string }
+  | { type: 'tool_calls'; toolCalls: ToolCallWithIntent[]; toolCallGroupId: string }
   | { type: 'handover'; message: string; forceful: boolean }
-  | { type: 'retry_error'; error: AgentBuilderAgentExecutionError };
+  | { type: 'retry_error'; error: AgentBuilderAgentExecutionError }
+  /** The prompt exceeded the context window; routes to a forced compaction before retrying. */
+  | { type: 'context_length_error'; error: AgentBuilderAgentExecutionError };
+
+/** A compaction decided by `contextManagement`, executed by `compactContext`. */
+export interface CompactionRequest {
+  trigger: CompactionTrigger;
+  /** Max tokens of completed cycles kept verbatim before the current one. */
+  tailCapTokens: number;
+  /** Input tokens that motivated the compaction, when known. */
+  tokensBefore: number;
+}
 
 /** What the structured answer model produced on its last turn. */
 export type AnswerOutcome =
@@ -67,8 +83,8 @@ export const mergeToolRenderState = (
 /** A recoverable model error surfaced to the model on the next turn, positioned among the steps. */
 export interface RetryNotice {
   phase: 'research' | 'answer';
-  /** Number of non-todos steps that existed when the error occurred; the notice renders after that many steps. */
-  afterNonTodosStepCount: number;
+  /** Number of steps that existed when the error occurred; the notice renders after that many steps. */
+  afterStepCount: number;
   error: AgentBuilderAgentExecutionError;
 }
 
@@ -78,9 +94,15 @@ export interface RetryNotice {
  * down to the step renderer.
  */
 export interface CurrentRun {
+  /** The round the steps belong to, which scopes their tool call ids. */
+  roundId: string;
   steps: ConversationRoundStep[];
   cycleLimit: number;
   renderState: ToolRenderStateMap;
   pendingToolCallIds: string[];
   retryNotices: RetryNotice[];
+  /** The summary the context is currently rendered with; its cursor decides what stays verbatim. */
+  compactionSummary?: CompactionSummary;
+  /** Attachment events of the run (a resume: plus the paused round's), placed at their anchors. */
+  attachmentEvents?: AttachmentTimelineEvent[];
 }

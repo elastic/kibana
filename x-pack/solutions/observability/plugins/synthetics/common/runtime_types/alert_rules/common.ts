@@ -5,29 +5,15 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import type { OverviewPingCodec } from '../monitor_management/synthetics_overview_status';
+import type { SchemaOutput } from '../schema_output';
+import type { OverviewPing } from '../monitor_management/synthetics_overview_status';
+import type {
+  SyntheticsCommonStateCodec,
+  SyntheticsMonitorStatusAlertStateCodec,
+} from '../schemas/alert_rules_common';
 
-export const SyntheticsCommonStateCodec = t.intersection([
-  t.partial({
-    firstTriggeredAt: t.string,
-    lastTriggeredAt: t.string,
-    lastResolvedAt: t.string,
-    meta: t.record(t.string, t.unknown),
-    idWithLocation: t.string,
-  }),
-  t.type({
-    firstCheckedAt: t.string,
-    lastCheckedAt: t.string,
-    isTriggered: t.boolean,
-  }),
-]);
-
-export type SyntheticsCommonState = t.TypeOf<typeof SyntheticsCommonStateCodec>;
-
-export const SyntheticsMonitorStatusAlertStateCodec = t.type({});
-
-export type SyntheticsMonitorStatusAlertState = t.TypeOf<
+export type SyntheticsCommonState = SchemaOutput<typeof SyntheticsCommonStateCodec>;
+export type SyntheticsMonitorStatusAlertState = SchemaOutput<
   typeof SyntheticsMonitorStatusAlertStateCodec
 >;
 
@@ -37,7 +23,7 @@ export interface AlertStatusMetaData {
   status: string;
   locationId: string;
   timestamp: string;
-  latestPing: t.TypeOf<typeof OverviewPingCodec>;
+  latestPing: OverviewPing;
   checks: {
     downWithinXChecks: number;
     down: number;
@@ -92,7 +78,7 @@ export interface AlertPendingStatusMetaData {
   locationId: string;
   monitorInfo: MissingPingMonitorInfo;
   timestamp?: string;
-  latestPing?: t.TypeOf<typeof OverviewPingCodec>;
+  latestPing?: OverviewPing;
   pendingCount?: number;
 }
 

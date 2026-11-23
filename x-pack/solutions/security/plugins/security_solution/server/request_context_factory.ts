@@ -21,7 +21,6 @@ import type { EndpointAppContextService } from './endpoint/endpoint_app_context_
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import type { ProductFeaturesService } from './lib/product_features_service';
@@ -150,7 +149,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {
         if (!endpointAuthz) {
-          // eslint-disable-next-line require-atomic-updates
+          // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
           endpointAuthz = await endpointAppContextService.getEndpointAuthz(request);
         }
 
@@ -207,7 +206,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           productFeaturesService,
           license: licensing.license,
           analytics: core.analytics,
-          userProfile: coreStart.userProfile,
           logger: options.logger,
         });
       }),
@@ -255,17 +253,6 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getInternalFleetServices: memoize(() => endpointAppContextService.getInternalFleetServices()),
 
-      getRiskEngineDataClient: memoize(
-        () =>
-          new RiskEngineDataClient({
-            logger: options.logger,
-            kibanaVersion: options.kibanaVersion,
-            esClient: coreContext.elasticsearch.client.asCurrentUser,
-            soClient: coreContext.savedObjects.client,
-            namespace: getSpaceId(),
-            auditLogger: getAuditLogger(),
-          })
-      ),
       getRiskScoreDataClient: memoize(
         () =>
           new RiskScoreDataClient({

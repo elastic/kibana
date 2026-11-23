@@ -25,8 +25,8 @@ export const THREAT_INTEL_READ_AUTHZ = {
  * `RULES_API_ALL` as the closest existing "can change detection" privilege.
  *
  * This is interim. A dedicated `threat-intel-read` / `threat-intel-all`
- * sub-feature is the right long-term model and needs to be decided before the
- * `threatIntelSupplyEnabled` flag is removed.
+ * sub-feature is the right long-term model (Security Solution privileges,
+ * independent of the `xpack.alertzero.enabled` enablement gate).
  */
 export const THREAT_INTEL_WRITE_AUTHZ = {
   requiredPrivileges: [{ allRequired: ['securitySolution', RULES_API_ALL] }],

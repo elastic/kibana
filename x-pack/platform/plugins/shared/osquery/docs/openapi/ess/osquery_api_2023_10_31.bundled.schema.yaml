@@ -55,13 +55,13 @@ paths:
             example: elastic,admin
             type: string
         - description: Comma-separated list of source types to include. Valid values are
-            `live`, `rule`, and `scheduled`.
+            `live`, `rule`, `scheduled`, and `workflow`.
           in: query
           name: sourceFilters
           required: false
           schema:
             description: Comma-separated list of source types to include. Valid values are
-              `live`, `rule`, and `scheduled`.
+              `live`, `rule`, `scheduled`, and `workflow`.
             example: live,scheduled
             type: string
         - description: The start of the time range filter (ISO 8601).
@@ -293,6 +293,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/FindLiveQueryDetailsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: >
+            No live query with this `id` exists in the current space. Live
+            queries issued from another space also return 404.
       summary: Get live query details
       tags:
         - Security Osquery API
@@ -375,6 +392,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetLiveQueryResultsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+                queryActionNotFound:
+                  summary: The id/actionId pair refers to different queries
+                  value:
+                    message: Live query action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: >
+            Either no live query with this `id` exists in the current space
+            (`Action not found`; live queries issued from another space also
+            return 404), or it has no query whose `action_id` matches
+            `{actionId}` (`Live query action not found`).
       summary: Get live query results
       tags:
         - Security Osquery API
@@ -1847,7 +1887,7 @@ components:
         interval:
           $ref: '#/components/schemas/PackInterval'
         min_osquery_version:
-          $ref: '#/components/schemas/MinOsqueryVersion'
+          $ref: '#/components/schemas/MinOsqueryVersionInput'
         name:
           $ref: '#/components/schemas/PackName'
         platform:
@@ -1855,7 +1895,7 @@ components:
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
-          $ref: '#/components/schemas/ObjectQueries'
+          $ref: '#/components/schemas/ObjectQueriesInput'
         result_type:
           $ref: '#/components/schemas/ResultType'
         rrule_schedule:
@@ -2329,6 +2369,28 @@ components:
             expiration:
               format: date-time
               type: string
+            origin:
+              description: What started the live query. Absent for live queries started from
+                the UI, the API or a rule.
+              type: object
+              properties:
+                run_id:
+                  description: The workflow execution (run) ID that made the request.
+                  type: string
+                type:
+                  description: The kind of origin. `workflow` means a workflow run made the
+                    request.
+                  enum:
+                    - workflow
+                  type: string
+                verified:
+                  description: Whether Kibana verified that the run exists and made the request.
+                    Always `false` for now.
+                  type: boolean
+              required:
+                - type
+                - run_id
+                - verified
             pack_id:
               type: string
             pack_name:
@@ -3074,6 +3136,11 @@ components:
               additionalProperties: true
               description: ECS mapping configuration used for the query.
               type: object
+            originVerified:
+              description: Set on `Workflow` rows only. Whether Kibana verified that the
+                workflow run made the request. Always `false` until workflow
+                runs can be verified.
+              type: boolean
             queriesTotal:
               description: The total number of sub-queries in the live action.
               type: integer
@@ -3084,10 +3151,13 @@ components:
               description: The saved query ID, if the live query was based on a saved query.
               type: string
             source:
-              description: Whether this was a manually run live query or triggered by a rule.
+              description: Whether the live query was run manually, by a rule, or by a
+                workflow. `Workflow` comes from an unverified request header and
+                is for display only.
               enum:
                 - Live
                 - Rule
+                - Workflow
               type: string
             sourceType:
               description: Identifies this as a live query history row.
@@ -3107,18 +3177,32 @@ components:
             - sourceType
             - source
     MinOsqueryVersion:
-      description: Minimum osquery version required to run this pack or query.
-        Formatted as a semver string, e.g. `"5.10.0"`.
+      description: Minimum osquery version required to run this pack or query, e.g.
+        `"5.10.0"`.
       example: 5.10.0
       maxLength: 64
       minLength: 1
       type: string
-    MinOsqueryVersionOrUndefined:
-      $ref: '#/components/schemas/MinOsqueryVersion'
+    MinOsqueryVersionInput:
+      description: Minimum osquery version required to run this pack or query.
+        Formatted as a numeric version string, e.g. `"5.10.0"`. Non-numeric
+        values (e.g. `"latest"`) are rejected.
+      example: 5.10.0
+      maxLength: 64
+      minLength: 1
+      pattern: ^\d+(\.\d+){0,2}$
+      type: string
+    MinOsqueryVersionInputOrUndefined:
+      $ref: '#/components/schemas/MinOsqueryVersionInput'
       nullable: true
     ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/ObjectQueriesItem'
+      description: An object of queries.
+      type: object
+    ObjectQueriesInput:
+      additionalProperties:
+        $ref: '#/components/schemas/ObjectQueriesItemInput'
       description: An object of queries.
       type: object
     ObjectQueriesItem:
@@ -3157,6 +3241,42 @@ components:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
           $ref: '#/components/schemas/VersionOrUndefined'
+    ObjectQueriesItemInput:
+      type: object
+      properties:
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/QueryEnabled'
+        id:
+          $ref: '#/components/schemas/QueryId'
+        interval:
+          description: >
+            Interval for this query, in seconds. Overrides the pack's `interval`
+            when this query also has `schedule_type: interval`. If you send
+            `interval` without `schedule_type: interval`, Kibana removes it when
+            saving, and the query uses the pack's `interval` instead. Ignored
+            when the pack's `schedule_type` is `rrule`.
+          nullable: true
+          type: integer
+        platform:
+          $ref: '#/components/schemas/PlatformOrUndefined'
+        query:
+          $ref: '#/components/schemas/Query'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        result_type:
+          $ref: '#/components/schemas/ResultType'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+        saved_query_id:
+          $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+        version:
+          $ref: '#/components/schemas/PackQueryVersionInputOrUndefined'
     PackDescription:
       description: The pack description.
       example: Pack description
@@ -3194,6 +3314,18 @@ components:
     PackPlatformOrUndefined:
       $ref: '#/components/schemas/PackPlatform'
       nullable: true
+    PackQueryVersionInput:
+      description: Uses the Osquery versions greater than or equal to the specified
+        version string. Formatted as a numeric version string, e.g. `"5.10.0"`,
+        or an empty string to inherit the pack's `min_osquery_version` (no
+        constraint if the pack has none). Non-numeric values (e.g. `"latest"`)
+        are rejected.
+      example: 5.10.0
+      maxLength: 64
+      pattern: ^(\d+(\.\d+){0,2})?$
+      type: string
+    PackQueryVersionInputOrUndefined:
+      $ref: '#/components/schemas/PackQueryVersionInput'
     PageOrUndefined:
       description: The page number to return. The default is 1.
       example: 1
@@ -3513,7 +3645,7 @@ components:
         interval:
           $ref: '#/components/schemas/PackIntervalOrUndefined'
         min_osquery_version:
-          $ref: '#/components/schemas/MinOsqueryVersionOrUndefined'
+          $ref: '#/components/schemas/MinOsqueryVersionInputOrUndefined'
         name:
           $ref: '#/components/schemas/PackName'
         platform:
@@ -3521,7 +3653,7 @@ components:
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
-          $ref: '#/components/schemas/ObjectQueries'
+          $ref: '#/components/schemas/ObjectQueriesInput'
         result_type:
           $ref: '#/components/schemas/ResultTypeOrUndefined'
         rrule_schedule:

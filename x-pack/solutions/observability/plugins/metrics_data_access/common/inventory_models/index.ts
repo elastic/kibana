@@ -15,7 +15,7 @@ import { awsS3 } from './aws_s3';
 import { awsRDS } from './aws_rds';
 import { awsSQS } from './aws_sqs';
 import { container } from './container';
-import type { InventoryItemType } from './types';
+import type { DataSchemaFormat, InventoryItemType, InventoryModelFields } from './types';
 export { metrics } from './metrics';
 
 const catalog = {
@@ -58,17 +58,23 @@ export const getFieldByType = (type: InventoryItemType) => {
   }
 };
 
-export const findInventoryFields = (type: InventoryItemType) => {
+export const findInventoryFields = (
+  type: InventoryItemType,
+  schema?: DataSchemaFormat
+): InventoryModelFields => {
   const inventoryModel = findInventoryModel(type);
+  const schemaSpecific = schema ? inventoryModel.schemaFields?.[schema] : undefined;
+  if (schemaSpecific) {
+    return schemaSpecific;
+  }
   if (LEGACY_TYPES.includes(type)) {
     const id = getFieldByType(type) || inventoryModel.fields.id;
     return {
       ...inventoryModel.fields,
       id,
     };
-  } else {
-    return inventoryModel.fields;
   }
+  return inventoryModel.fields;
 };
 
 export const isBasicMetricAgg = (

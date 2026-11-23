@@ -14,10 +14,13 @@ export const UNCATEGORIZED_MODULE_ID = '[uncategorized]';
 export const CRITICAL_FILES_JEST_UNIT_TESTS = [
   'scripts/jest.js',
   'scripts/jest_all.js',
+  'scripts/moon_jest.js',
+  'scripts/moon_test_configs.js',
+  'packages/kbn-moon/src/test_config_selection.ts',
+  '.moon/tasks/jest-unit-tests.yml',
   'package.json',
   'pnpm-lock.yaml',
   'tsconfig.json',
-  '.node-version',
   '.nvmrc',
   'src/setup_node_env/**/*',
   'packages/kbn-babel-preset/**/*',
@@ -33,10 +36,12 @@ export const CRITICAL_FILES_JEST_UNIT_TESTS = [
 export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   'scripts/jest_integration.js',
   'scripts/jest_all.js',
+  'scripts/moon_test_configs.js',
+  'packages/kbn-moon/src/test_config_selection.ts',
+  '.moon/tasks/jest-integration-tests.yml',
   'package.json',
   'pnpm-lock.yaml',
   'tsconfig.json',
-  '.node-version',
   '.nvmrc',
   'src/setup_node_env/**/*',
   'packages/kbn-babel-preset/**/*',
@@ -49,10 +54,12 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
 ];
 
 // Integration configs that snapshot a global registry (rule-type params, connector types, task
-// types) fed by downstream plugins. Those publishers sit upstream of these configs, so
-// includeDownstream never marks them affected — they must run regardless of the graph. Keep tiny.
+// types, config keys exposed to the browser) fed by downstream plugins. Those publishers sit upstream
+// of these configs, so includeDownstream never marks them affected — they must run regardless of the
+// graph. Keep tiny.
 export const ALWAYS_RUN_JEST_INTEGRATION_CONFIGS = [
   'x-pack/platform/plugins/shared/alerting/jest.integration.config.js',
   'x-pack/platform/plugins/shared/actions/jest.integration.config.js',
   'x-pack/platform/plugins/shared/task_manager/jest.integration.config.js',
+  'src/core/packages/core/server/integration_tests/exposed_config_keys/jest.integration.config.js',
 ];

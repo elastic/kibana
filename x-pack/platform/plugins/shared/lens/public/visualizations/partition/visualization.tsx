@@ -16,7 +16,8 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { AccessorConfig, FormatFactory } from '@kbn/visualization-ui-components';
-import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
@@ -47,7 +48,7 @@ import { suggestions } from './suggestions';
 import { PartitionChartsMeta, visualizationTypes } from './partition_charts_meta';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
-import { checkTableForContainsSmallValues } from './render_helpers';
+import { checkTableForContainsSmallValues, stripUnsupportedLegendStats } from './render_helpers';
 import type { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
@@ -158,10 +159,14 @@ export const getPieVisualization = ({
     return PartitionChartsMeta[state.shape] ?? PartitionChartsMeta.pie;
   },
 
-  switchVisualizationType: (visualizationTypeId, state) => ({
-    ...state,
-    shape: visualizationTypeId as LensPartitionVisualizationState['shape'],
-  }),
+  switchVisualizationType: (visualizationTypeId, state) => {
+    const shape = visualizationTypeId as LensPartitionVisualizationState['shape'];
+    return {
+      ...state,
+      shape,
+      layers: state.layers.map((layer) => stripUnsupportedLegendStats(layer, shape)),
+    };
+  },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 

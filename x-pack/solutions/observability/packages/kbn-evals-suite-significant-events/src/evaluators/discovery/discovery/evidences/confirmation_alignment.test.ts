@@ -23,7 +23,7 @@ const evaluate = (
 const detection = (ruleUuid: string, verdict: SignalVerdict = 'confirms'): SignalEntry => ({
   type: 'detection',
   metadata: { rule_uuid: ruleUuid, detection_id: '1', change_point_type: 'spike', p_value: 0.01 },
-  stream_name: 'logs',
+  source_id: 'logs',
   description: 'test detection',
   verdict,
 });

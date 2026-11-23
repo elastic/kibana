@@ -233,7 +233,6 @@ describe('xy_visualization', () => {
                         "type": "other",
                       },
                     ],
-                    "touched": false,
                   },
                 ],
               },
@@ -251,7 +250,6 @@ describe('xy_visualization', () => {
             "position": "bottom",
           },
           "preferredSeriesType": "bar_stacked",
-          "title": "Empty XY chart",
           "valueLabels": "hide",
         }
       `);
@@ -2364,6 +2362,30 @@ describe('xy_visualization', () => {
         ).toBeTruthy();
       });
 
+      it('should not restrict to static value only for form-based charts', () => {
+        expect(
+          xyVisualization.getConfiguration({
+            state: getStateWithBaseReferenceLine(),
+            frame,
+            layerId: 'referenceLine',
+          }).groups[0].staticValueOnly
+        ).toBe(false);
+      });
+
+      it('should restrict to static value only on ES|QL charts', () => {
+        frame.datasourceLayers = {
+          first: createMockDatasource('textBased').publicAPIMock,
+          referenceLine: mockDatasource.publicAPIMock,
+        };
+        expect(
+          xyVisualization.getConfiguration({
+            state: getStateWithBaseReferenceLine(),
+            frame,
+            layerId: 'referenceLine',
+          }).groups[0].staticValueOnly
+        ).toBe(true);
+      });
+
       it('should return no referenceLine groups for a empty data layer', () => {
         const state = getStateWithBaseReferenceLine();
         (state.layers[0] as XYDataLayerConfig).accessors = [];
@@ -2723,6 +2745,28 @@ describe('xy_visualization', () => {
             triggerIconType: 'custom',
           },
         ]);
+        expect(config.groups[0].supportsMoreColumns).toBe(true);
+      });
+
+      it('prevents adding annotations when a data layer is not time-based', () => {
+        const state = getStateWithAnnotationLayer();
+        state.layers.splice(1, 0, {
+          layerId: 'second',
+          layerType: layerTypes.DATA,
+          seriesType: 'area',
+          splitAccessors: undefined,
+          xAccessor: 'not-date',
+          accessors: ['c'],
+        });
+        frame.datasourceLayers.second = mockDatasource.publicAPIMock;
+
+        const config = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'annotations',
+        });
+
+        expect(config.groups[0].supportsMoreColumns).toBe(false);
       });
     });
 
@@ -2893,6 +2937,48 @@ describe('xy_visualization', () => {
   });
 
   describe('#getUserMessages', () => {
+    it.each([
+      {
+        description: 'multiple rows',
+        rows: [{ threshold: 10 }, { threshold: 20 }],
+        expectedWarningId: 'xy_esql_reference_multiple_rows',
+      },
+      {
+        description: 'no numeric value',
+        rows: [{ threshold: null }],
+        expectedWarningId: 'xy_esql_reference_invalid_value',
+      },
+    ])(
+      'warns when an ES|QL reference query returns $description',
+      ({ rows, expectedWarningId }) => {
+        const frame = createMockFramePublicAPI();
+        const datasource = createMockDatasource();
+        datasource.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+        frame.datasourceLayers = { reference: datasource.publicAPIMock };
+        frame.activeData = {
+          reference: {
+            type: 'datatable',
+            columns: [{ id: 'threshold', name: 'threshold', meta: { type: 'number' } }],
+            rows,
+          },
+        };
+        const state = {
+          ...exampleState(),
+          layers: [
+            { layerId: 'reference', layerType: 'referenceLine' as const, accessors: ['threshold'] },
+          ],
+        };
+        expect(xyVisualization.getUserMessages!(state, { frame })).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              uniqueId: expectedWarningId,
+              severity: 'warning',
+            }),
+          ])
+        );
+      }
+    );
+
     describe('errors', () => {
       let mockDatasource: ReturnType<typeof createMockDatasource>;
       let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -4236,6 +4322,35 @@ describe('xy_visualization', () => {
         ).toBeTruthy();
       });
 
+      it('should not show save to library action for annotations on an ES|QL chart', () => {
+        const annotationLayer: XYByValueAnnotationLayerConfig = {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2],
+          ignoreGlobalFilters: true,
+          indexPatternId: 'myIndexPattern',
+        };
+        const esqlFrame = createMockFramePublicAPI();
+        esqlFrame.datasourceLayers = {
+          first: { datasourceId: 'textBased' } as DatasourcePublicAPI,
+        };
+
+        const actions = xyVisualization.getSupportedActionsForLayer?.(
+          'annotation',
+          { ...exampleState(), layers: [annotationLayer] },
+          jest.fn(),
+          jest.fn(),
+          true,
+          esqlFrame
+        );
+
+        expect(
+          actions?.some(
+            (action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary'
+          )
+        ).toBeFalsy();
+      });
+
       describe('by-ref layer', () => {
         const annotationLayer: XYByReferenceAnnotationLayerConfig = {
           annotationGroupId: 'some-group',
@@ -4390,6 +4505,33 @@ describe('xy_visualization', () => {
             layerId: 'annotation',
           })
         ).toEqual({ data: true, appearance: false });
+      });
+
+      it('should expose no data settings for an annotation layer on an ES|QL chart', () => {
+        const baseState = exampleState();
+        expect(
+          xyVisualization.hasLayerSettings?.({
+            state: {
+              ...baseState,
+              layers: [
+                ...baseState.layers,
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
+                  indexPatternId: 'myIndexPattern',
+                },
+              ],
+            },
+            frame: createMockFramePublicAPI({
+              datasourceLayers: {
+                first: createMockDatasource('textBased').publicAPIMock,
+              },
+            }),
+            layerId: 'annotation',
+          })
+        ).toEqual({ data: false, appearance: false });
       });
     });
   });
@@ -4655,13 +4797,13 @@ describe('xy_visualization', () => {
     });
 
     describe('areaFill defaulting', () => {
-      it('applies the solid default when an area layer is introduced', () => {
+      it('applies the default area fill when an area layer is introduced', () => {
         const state = exampleState();
         (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
         expect(state.areaFill).toBeUndefined();
         const newState = xyVisualization.switchVisualizationType!('area', state);
         expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
-        expect(newState.areaFill).toEqual('solid');
+        expect(newState.areaFill).toEqual('gradient');
       });
 
       it('preserves an existing areaFill when switching area subtypes', () => {

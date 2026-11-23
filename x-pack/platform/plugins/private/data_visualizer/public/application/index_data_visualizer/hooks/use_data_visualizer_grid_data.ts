@@ -63,14 +63,22 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   seed: '',
   probability: 0,
 };
-export const useDataVisualizerGridData = (
+export const useDataVisualizerGridData = ({
+  input,
+  dataVisualizerListState,
+  savedRandomSamplerPreference,
+  onUpdate,
+  projectRouting,
+  isInteractive = true,
+}: {
   // Data view is required for non-ES|QL queries like kuery or lucene
-  input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>,
-  dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
-  savedRandomSamplerPreference?: RandomSamplerOption,
-  onUpdate?: (params: Dictionary<unknown>) => void,
-  projectRouting?: string
-) => {
+  input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>;
+  dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>;
+  savedRandomSamplerPreference?: RandomSamplerOption;
+  onUpdate?: (params: Dictionary<unknown>) => void;
+  projectRouting?: string;
+  isInteractive?: boolean;
+}) => {
   const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
   const { services } = useDataVisualizerKibana();
   const { uiSettings, data, security, executionContext, analytics, cps } = services;
@@ -317,7 +325,8 @@ export const useDataVisualizerGridData = (
     false,
     fieldStatsRequest,
     lastRefresh,
-    dataVisualizerListState.probability
+    dataVisualizerListState.probability,
+    input.requestCancellationManager
   );
   const configsWithoutStats = useMemo(() => {
     if (overallStatsProgress.loaded < 100) return;
@@ -357,7 +366,8 @@ export const useDataVisualizerGridData = (
     fieldStatsRequest,
     configsWithoutStats,
     dataVisualizerListState,
-    probability
+    probability,
+    input.requestCancellationManager
   );
 
   const combinedProgress = useMemo(
@@ -605,7 +615,7 @@ export const useDataVisualizerGridData = (
   // Inject custom action column for the index based visualizer
   // Hide the column completely if no access to any of the plugins
   const extendedColumns = useMemo(() => {
-    if (!input.dataView) return undefined;
+    if (!isInteractive || !input.dataView) return undefined;
     const actions = getActions(
       input.dataView,
       services,
@@ -626,10 +636,19 @@ export const useDataVisualizerGridData = (
     };
 
     return [actionColumn];
-  }, [input.dataView, services, searchQueryLanguage, searchString, input.allowEditDataView]);
+  }, [
+    isInteractive,
+    input.dataView,
+    services,
+    searchQueryLanguage,
+    searchString,
+    input.allowEditDataView,
+  ]);
 
   return {
     progress: combinedProgress,
+    // The table shouldn't keep showing a loading state for a cancelled fetch
+    cancelled: Boolean(overallStatsProgress.cancelled || strategyResponse.progress.cancelled),
     overallStatsProgress,
     configs,
     fieldsCount: configs.length,

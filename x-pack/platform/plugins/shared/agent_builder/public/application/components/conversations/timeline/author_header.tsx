@@ -79,6 +79,12 @@ const AuthorOrigin: React.FC<{ origin: ConversationRoundOrigin }> = ({ origin })
   );
 };
 
+const AuthorLabel: React.FC<{ label: string }> = ({ label }) => {
+  const euiThemeContext = useEuiTheme();
+
+  return <span css={authorDetailItemStyles(euiThemeContext)}>{label}</span>;
+};
+
 const AuthorTime: React.FC<{ startedAt: string }> = ({ startedAt }) => {
   const euiThemeContext = useEuiTheme();
   const m = moment(startedAt).locale(i18n.getLocale());
@@ -97,6 +103,7 @@ const AuthorTime: React.FC<{ startedAt: string }> = ({ startedAt }) => {
 interface AuthorHeaderProps {
   name?: string;
   showAgentBadge?: boolean;
+  label?: string;
   origin?: ConversationRoundOrigin;
   startedAt: string;
 }
@@ -104,6 +111,7 @@ interface AuthorHeaderProps {
 export const AuthorHeader: React.FC<AuthorHeaderProps> = ({
   name,
   showAgentBadge = false,
+  label,
   origin,
   startedAt,
 }) => {
@@ -131,6 +139,12 @@ export const AuthorHeader: React.FC<AuthorHeaderProps> = ({
           <>
             <AuthorName name={name} />
             {showAgentBadge && <AgentBadge />}
+            <AuthorSeparator />
+          </>
+        )}
+        {label && (
+          <>
+            <AuthorLabel label={label} />
             <AuthorSeparator />
           </>
         )}

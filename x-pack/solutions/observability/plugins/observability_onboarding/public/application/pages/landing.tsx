@@ -12,7 +12,10 @@ import React, { useCallback } from 'react';
 import { useSearchParams } from '@kbn/shared-ux-router';
 import { useHistory } from 'react-router-dom';
 import type { ObservabilityOnboardingAppServices } from '../..';
-import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
+import {
+  ADD_DATA_PAGE_V2_ENABLED_DEFAULT,
+  IS_ADD_DATA_PAGE_V2_ENABLED,
+} from '../../../common/feature_flags';
 import { AddDataSearchBar, DocsLinksSection } from '../add_data_grid';
 import { CollectionChooser } from '../add_data_page/collection_chooser';
 import { FleetCardsProvider } from '../add_data_page/fleet_cards_provider';
@@ -99,7 +102,10 @@ export const LandingPage = () => {
   const {
     services: { featureFlags },
   } = useKibana<ObservabilityOnboardingAppServices>();
-  const isAddDataPageV2Enabled = featureFlags.useBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
+  const isAddDataPageV2Enabled = featureFlags.useBooleanValue(
+    IS_ADD_DATA_PAGE_V2_ENABLED,
+    ADD_DATA_PAGE_V2_ENABLED_DEFAULT
+  );
 
   if (isAddDataPageV2Enabled) {
     return <AddDataPageV2 />;

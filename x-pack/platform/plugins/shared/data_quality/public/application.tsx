@@ -11,7 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { KbnUrlStateStorageFromRouterProvider } from './utils/kbn_url_state_context';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';

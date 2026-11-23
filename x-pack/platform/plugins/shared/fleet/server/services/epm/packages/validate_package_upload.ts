@@ -11,9 +11,12 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import { parse } from 'yaml';
 
 import { ElasticsearchAssetType } from '../../../../common';
 import type { Installation } from '../../../../common';
+import type { ArchiveIterator } from '../../../../common/types';
 import {
   dataStreamUsesOtelInput,
   getRegistryDataStreamAssetBaseName,
@@ -25,6 +28,11 @@ import { appContextService } from '../../app_context';
 import { airGappedUtils } from '../airgapped';
 import { getPathParts } from '../archive';
 import { isTopLevelPipeline } from '../elasticsearch/ingest_pipeline/helpers';
+import { isRemoteIndexExpression } from '../elasticsearch/transform/ccs_transform_source';
+import {
+  getDestinationIndexAliases,
+  isTransform,
+} from '../elasticsearch/transform/transform_utils';
 import * as Registry from '../registry';
 
 import { getBundledPackageByName } from './bundled_packages';
@@ -40,6 +48,7 @@ interface UploadDataStream {
   hidden?: boolean;
   dataset_is_prefix?: boolean;
   streams?: Array<{ input?: string }>;
+  use_otel_suffix?: boolean;
   elasticsearch?: {
     privileges?: { cluster?: string[]; indices?: string[] };
     dynamic_dataset?: boolean;
@@ -70,12 +79,14 @@ const FORBIDDEN_ARCHIVE_TYPES = new Set<string>([
 export async function validatePackageUpload({
   packageInfo,
   paths,
+  archiveIterator,
   installedPkg,
   savedObjectsClient,
   esClient,
 }: {
   packageInfo: UploadPackageInfo;
   paths: string[];
+  archiveIterator: ArchiveIterator;
   installedPkg?: SavedObject<Installation>;
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -85,6 +96,16 @@ export async function validatePackageUpload({
   if (appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
     return;
   }
+
+  // Subject to the escape hatch above, like every other check here. Registry-authored packages
+  // legitimately source dot-prefixed indices — `ti_greynoise` and `ti_google_threat_intelligence`
+  // read `.alerts-security.alerts-*` — and their maintainers upload those archives from
+  // elastic-package stacks, which set this flag. Keeping the check unconditional would break
+  // that workflow with no override. The control this check backstops, binding transform identity
+  // to the installing user, has no escape hatch and holds on those stacks too; this is defense in
+  // depth against a Fleet admin later re-binding a deferred transform through the reauthorize
+  // flow, so a stack that has explicitly opted out of upload validation can opt out of it.
+  await assertNoRestrictedTransformIndices(paths, archiveIterator);
 
   assertValidUploadPackageName(packageInfo.name);
   assertNoForbiddenArchiveAssets(paths);
@@ -129,6 +150,156 @@ function assertNoForbiddenArchiveAssets(paths: string[]): void {
       );
     }
   }
+}
+
+/**
+ * Reduce an index expression to the bare index/alias patterns so a prefix check cannot be
+ * evaded. One expression can carry several comma-separated patterns; `-` marks an exclusion,
+ * `<...>` wraps date math, and `<cluster>:<index>` targets a remote cluster — each can still
+ * name a restricted index on this cluster. Whitespace is stripped after every prefix because
+ * the prefix test only means something against a trimmed name.
+ */
+function normalizeIndexExpressions(expression: string): string[] {
+  return expression
+    .split(',')
+    .map((pattern) => {
+      let normalized = pattern.trim();
+      while (normalized.startsWith('-')) {
+        normalized = normalized.slice(1).trim();
+      }
+      if (isRemoteIndexExpression(normalized)) {
+        normalized = normalized.slice(normalized.indexOf(':') + 1).trim();
+      }
+      if (normalized.startsWith('<')) {
+        normalized = normalized.slice(1).trim();
+      }
+      return normalized;
+    })
+    .filter((pattern) => pattern.length > 0);
+}
+
+/**
+ * Parse a transform spec every way the installer might. The yml install path parses with the
+ * `yaml` package and the legacy path parses with `JSON.parse`, and the two disagree: `yaml`
+ * rejects a duplicate map key that `JSON.parse` silently resolves to the last value. Screening
+ * every result that parses means the validator can never see less than the installer will.
+ *
+ * Returns an empty array only when neither parser accepts the file, which the caller treats as
+ * a rejection rather than a skip — the installer parses these same files unconditionally and
+ * would throw on them anyway, and skipping is how a parser differential becomes a bypass.
+ */
+function parseTransformSpecs(buffer: Buffer): unknown[] {
+  const raw = buffer.toString('utf-8');
+  const parsed: unknown[] = [];
+
+  try {
+    parsed.push(parse(raw));
+  } catch {
+    // Not valid YAML; JSON.parse may still accept it.
+  }
+
+  try {
+    parsed.push(JSON.parse(raw));
+  } catch {
+    // Not valid JSON; the YAML result above may still cover it.
+  }
+
+  return parsed;
+}
+
+function collectTransformIndexExpressions(content: unknown): string[] {
+  if (!content || typeof content !== 'object') {
+    return [];
+  }
+
+  const { source, dest } = content as {
+    source?: { index?: unknown };
+    dest?: { index?: unknown; aliases?: unknown };
+  };
+
+  const expressions: string[] = [];
+  const push = (value: unknown) => {
+    if (typeof value === 'string' && value.length > 0) {
+      expressions.push(value);
+    }
+  };
+
+  const sourceIndex = source?.index;
+  if (Array.isArray(sourceIndex)) {
+    sourceIndex.forEach(push);
+  } else {
+    push(sourceIndex);
+  }
+
+  push(dest?.index);
+
+  // Resolve aliases with the installer's own helper rather than re-reading `dest.aliases` here.
+  // It accepts three shapes — an array, a bare string, and an object keyed by alias name — and
+  // screening only the array form would let `aliases: ".hidden"` or `aliases: { ".hidden": {} }`
+  // through upload validation and still be installed as a dot-prefixed alias.
+  getDestinationIndexAliases(dest?.aliases).forEach(({ alias }) => push(alias));
+
+  return expressions;
+}
+
+/**
+ * Uploaded packages must not ship transforms that read from or write to a system/restricted
+ * index. Transforms are the one package asset that keeps executing against Elasticsearch after
+ * installation, so a caller-authored transform pointed at `.fleet-policies` is a path to
+ * disclosing and rewriting Agent policies in Spaces the uploader cannot reach. Transform
+ * identity is separately bound to the installing user (see `install_source.ts`); this check
+ * also stops such a transform from being installed in a deferred state and later started with
+ * a Fleet admin's credentials through the reauthorize flow.
+ *
+ * Paths come from the same `isTransform` predicate the installer uses, so an archive cannot
+ * place a transform where this check does not look but the installer still picks it up. Every
+ * such file is parsed — including `manifest.yml` and `fields/*.yml` — and we key off the
+ * presence of `source`/`dest` rather than the filename, which covers both the yml spec and the
+ * legacy `*.json` spec without assuming a naming convention.
+ */
+async function assertNoRestrictedTransformIndices(
+  paths: string[],
+  archiveIterator: ArchiveIterator
+): Promise<void> {
+  const transformSpecPaths = paths.filter(isTransform);
+  if (transformSpecPaths.length === 0) {
+    return;
+  }
+
+  const transformSpecPathSet = new Set(transformSpecPaths);
+  await archiveIterator.traverseEntries(
+    async ({ path, buffer }) => {
+      if (!buffer) {
+        return;
+      }
+
+      const contents = parseTransformSpecs(buffer);
+      if (contents.length === 0) {
+        throw new PackageInvalidArchiveError(
+          i18n.translate('xpack.fleet.packageUpload.unparsableTransformSpec', {
+            defaultMessage:
+              'Uploaded package contains a transform asset in "{path}" that could not be parsed as YAML or JSON.',
+            values: { path },
+          })
+        );
+      }
+
+      for (const content of contents) {
+        for (const expression of collectTransformIndexExpressions(content)) {
+          if (normalizeIndexExpressions(expression).some((pattern) => pattern.startsWith('.'))) {
+            throw new PackageInvalidArchiveError(
+              i18n.translate('xpack.fleet.packageUpload.restrictedTransformIndex', {
+                defaultMessage:
+                  'Uploaded package contains a transform in "{path}" that targets the restricted index "{index}". Transforms in uploaded packages cannot read from or write to system indices.',
+                values: { path, index: expression },
+              })
+            );
+          }
+        }
+      }
+    },
+    (path) => transformSpecPathSet.has(path)
+  );
 }
 
 function assertValidUploadDataStreams(dataStreams: UploadDataStream[]): void {
@@ -312,6 +483,15 @@ async function assertNoUnownedLiveDataStreams(
   esClient: ElasticsearchClient,
   installedPkg?: SavedObject<Installation>
 ): Promise<void> {
+  // Data streams created before the package was installed carry no `_meta.package.name`
+  // (Elasticsearch copies template `_meta` only at creation), so a stream whose current
+  // index template was installed by this package is also treated as owned.
+  const installedTemplateIds = new Set(
+    (installedPkg?.attributes.installed_es ?? [])
+      .filter((asset) => asset.type === ElasticsearchAssetType.indexTemplate)
+      .map((asset) => asset.id)
+  );
+
   for (const dataStream of packageInfo.data_streams ?? []) {
     const matching = await fetchMatchingLiveDataStreams(
       esClient,
@@ -324,33 +504,72 @@ async function assertNoUnownedLiveDataStreams(
     }
 
     if (!installedPkg) {
-      throw existingLiveDataStreamError(dataStream.dataset, matching[0].name);
+      throw unownedLiveDataStreamError({
+        dataset: dataStream.dataset,
+        dataStreamName: matching[0].name,
+        packageName: packageInfo.name,
+        reason: i18n.translate('xpack.fleet.packageUpload.unownedDataStreamReason.firstInstall', {
+          defaultMessage: 'the package is not installed yet, so it did not create this data stream',
+        }),
+      });
     }
 
-    const unowned = matching.find(
-      (liveStream) => ownedPackageName(liveStream) !== installedPkg.attributes.name
-    );
+    for (const liveStream of matching) {
+      const owner = ownedPackageName(liveStream);
 
-    if (!unowned) {
-      continue;
+      if (owner === installedPkg.attributes.name) {
+        continue;
+      }
+
+      if (owner !== undefined) {
+        throw unownedLiveDataStreamError({
+          dataset: dataStream.dataset,
+          dataStreamName: liveStream.name,
+          packageName: installedPkg.attributes.name,
+          reason: i18n.translate('xpack.fleet.packageUpload.unownedDataStreamReason.otherOwner', {
+            defaultMessage: 'its _meta.package.name is "{owner}"',
+            values: { owner },
+          }),
+        });
+      }
+
+      if (liveStream.template && installedTemplateIds.has(liveStream.template)) {
+        continue;
+      }
+
+      throw unownedLiveDataStreamError({
+        dataset: dataStream.dataset,
+        dataStreamName: liveStream.name,
+        packageName: installedPkg.attributes.name,
+        reason: i18n.translate(
+          'xpack.fleet.packageUpload.unownedDataStreamReason.foreignTemplate',
+          {
+            defaultMessage:
+              'it has no _meta.package.name and uses index template "{template}", which this package did not install',
+            values: { template: liveStream.template },
+          }
+        ),
+      });
     }
-
-    throw existingLiveDataStreamError(dataStream.dataset, unowned.name);
   }
 }
 
-function existingLiveDataStreamError(
-  dataset: string,
-  dataStreamName: string
-): PackageInvalidArchiveError {
+function unownedLiveDataStreamError({
+  dataset,
+  dataStreamName,
+  packageName,
+  reason,
+}: {
+  dataset: string;
+  dataStreamName: string;
+  packageName: string;
+  reason: string;
+}): PackageInvalidArchiveError {
   return new PackageInvalidArchiveError(
-    i18n.translate('xpack.fleet.packageUpload.existingDataStream', {
+    i18n.translate('xpack.fleet.packageUpload.unownedDataStream', {
       defaultMessage:
-        'A matching live data stream "{dataStreamName}" already exists for dataset "{dataset}" and must be migrated or removed before uploading a new package.',
-      values: {
-        dataset,
-        dataStreamName,
-      },
+        'Data stream "{dataStreamName}" matches dataset "{dataset}" but is not owned by package "{packageName}": {reason}. Uploaded packages cannot take over existing data streams. To avoid this, use a different dataset name. Deleting the existing data stream also deletes its backing indices and all data stored in them, so only do that if the data is no longer needed.',
+      values: { dataStreamName, dataset, packageName, reason },
     })
   );
 }
@@ -394,6 +613,7 @@ function isOtelUploadDataStream(
       })),
     },
     {
+      use_otel_suffix: dataStream.use_otel_suffix,
       streams: (dataStream.streams ?? []).map((stream) => ({
         input: stream.input ?? '',
         title: '',
@@ -406,7 +626,7 @@ async function fetchMatchingLiveDataStreams(
   esClient: ElasticsearchClient,
   pattern: string,
   dataset: string
-): Promise<Array<{ name: string; _meta?: Record<string, unknown> }>> {
+): Promise<IndicesDataStream[]> {
   try {
     const body = await esClient.indices.getDataStream({
       name: pattern,

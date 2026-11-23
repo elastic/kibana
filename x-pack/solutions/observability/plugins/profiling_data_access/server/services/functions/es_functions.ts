@@ -16,7 +16,12 @@ import {
 } from '@kbn/observability-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
-import type { AggregationField, ESTopNFunctions, TopNFunctions } from '@kbn/profiling-utils';
+import type {
+  AggregationField,
+  ESTopNFunctions,
+  ProfilingSchema,
+  TopNFunctions,
+} from '@kbn/profiling-utils';
 import { convertTonsToKgs } from '@kbn/profiling-utils';
 import type { RegisterServicesParams } from '../register_services';
 import { percentToFactor } from '../../utils/percent_to_factor';
@@ -30,6 +35,8 @@ export interface FetchFunctionsParams {
   aggregationFields?: AggregationField[];
   limit?: number;
   totalSeconds: number;
+  abortSignal?: AbortSignal;
+  schema?: ProfilingSchema;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -44,6 +51,8 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
     aggregationFields,
     limit,
     totalSeconds,
+    abortSignal,
+    schema,
   }: FetchFunctionsParams) => {
     const [
       co2PerKWH,
@@ -64,7 +73,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
       core.uiSettings.client.get<boolean>(profilingShowErrorFrames),
     ]);
 
-    const profilingEsClient = createProfilingEsClient({ esClient });
+    const profilingEsClient = createProfilingEsClient({ esClient, abortSignal });
 
     const esTopNFunctions = await profilingEsClient.topNFunctions({
       sampleSize: targetSampleSize,
@@ -81,6 +90,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
       costPervCPUPerHour,
       azureCostDiscountRate: percentToFactor(azureCostDiscountRate),
       durationSeconds: totalSeconds,
+      schema,
     });
 
     return transformToKibanaTopNFunction(esTopNFunctions);

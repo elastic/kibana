@@ -136,6 +136,38 @@ const stripInheritedScheduleFields = (
 };
 
 /**
+ * Whether the pack carries a real, user-chosen schedule rather than the
+ * interval default the client synthesizes so a legacy pack has something to
+ * render. An rrule schedule only ever comes from an explicit pack-level
+ * choice, so it counts on its own.
+ */
+const hasRealPackSchedule = (packSchedule: UsePackQueryFormProps['packSchedule']): boolean =>
+  packSchedule?.schedule_type === 'rrule' || !!packSchedule?.hasExplicitSchedule;
+
+/**
+ * Whether an overriding query's stored mode disagrees with its pack's. A
+ * per-query override changes schedule details, never the mode (D11) — a
+ * disagreement means the stored override is stale, the same one the server's
+ * `stripPriorModePerQueryFields` drops on a pack mode change. Not gated on a
+ * real pack schedule: bare legacy intervals carry no `schedule_type`, and a
+ * legacy pack whose query does carry one is rejected by the server anyway.
+ */
+const hasStaleOverrideMode = (
+  packSchedule: UsePackQueryFormProps['packSchedule'],
+  queryScheduleType: ScheduleType | undefined
+): boolean =>
+  queryScheduleType !== undefined &&
+  packSchedule?.schedule_type !== undefined &&
+  packSchedule.schedule_type !== queryScheduleType;
+
+const hasUsableScheduleOverride = (
+  payload: PackSOQueryFormData | undefined,
+  packSchedule: UsePackQueryFormProps['packSchedule']
+): boolean =>
+  payload?.schedule_type !== undefined &&
+  !hasStaleOverrideMode(packSchedule, payload.schedule_type);
+
+/**
  * Resolve the schedule a non-override query inherits. Inheriting is only
  * meaningful when the pack schedule is a real one — either the pack SO
  * actually persisted an interval schedule (`hasExplicitSchedule`) or the pack
@@ -147,10 +179,7 @@ export const resolveInheritedScheduleInput = (
   packSchedule: UsePackQueryFormProps['packSchedule'],
   queryInterval: number | undefined
 ): DeserializeScheduleInput => {
-  const inheritsRealPackSchedule =
-    packSchedule?.schedule_type === 'rrule' || !!packSchedule?.hasExplicitSchedule;
-
-  if (inheritsRealPackSchedule) {
+  if (hasRealPackSchedule(packSchedule)) {
     return {
       schedule_type: packSchedule?.schedule_type,
       interval: packSchedule?.interval,
@@ -167,15 +196,18 @@ export const resolveInheritedScheduleInput = (
  * pack's synthesized default never clobbers the query's own interval).
  * Reused for both `defaultValues.schedule` and `originalStartDate` so they
  * can't diverge.
+ *
+ * An override whose stored mode is stale is treated as no override at all:
+ * the query inherits, matching what the server does on a pack mode change,
+ * so the form never holds a mode the pack does not use (D11).
  */
 const deserializeQuerySchedule = (
   payload: PackSOQueryFormData | undefined,
   packSchedule?: UsePackQueryFormProps['packSchedule']
 ): ScheduleFormData => {
-  const hasOverride = payload?.schedule_type !== undefined;
   const queryInterval = payload?.interval ? parseInt(payload.interval, 10) : undefined;
 
-  return hasOverride
+  return hasUsableScheduleOverride(payload, packSchedule)
     ? deserializeSchedule({
         schedule_type: payload?.schedule_type,
         interval: queryInterval,
@@ -314,11 +346,12 @@ export const resolveExecutionDefaultFormValues = (
 const deserializer = (
   payload: PackSOQueryFormData,
   deserializedSchedule: ScheduleFormData,
+  packSchedule?: UsePackQueryFormProps['packSchedule'],
   packMinOsqueryVersion?: string,
   packResultType?: ResultType,
   packPlatform?: string
 ): PackQueryFormData => {
-  const hasOverride = payload.schedule_type !== undefined;
+  const hasOverride = hasUsableScheduleOverride(payload, packSchedule);
   const queryInterval = payload.interval ? parseInt(payload.interval, 10) : undefined;
   const executionDefaults = resolveExecutionDefaultFormValues(
     payload,
@@ -472,6 +505,10 @@ const serializer = (
   }
 
   const serialized = serializeSchedule(schedule);
+  // Defensive: the deserializer turns a stale-mode override off on open, and
+  // the locked selector cannot change the mode. Kept so a caller that mutates
+  // form state directly still cannot emit the mixed-mode pack that halts
+  // osquerybeat.
   if (!isSameScheduleMode(packSchedule?.schedule_type, serialized.schedule_type)) {
     return stripInheritedScheduleFields(base, packSchedule?.schedule_type, hasExplicitPackSchedule);
   }
@@ -525,6 +562,7 @@ export const usePackQueryForm = ({
         ? deserializer(
             defaultValue,
             deserializedSchedule,
+            packSchedule,
             packMinOsqueryVersion,
             packResultType,
             packPlatform

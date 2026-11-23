@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { isInternalURL } from '@kbn/std';
 
-import type { AuthenticationProviderOptions } from './base';
+import type { AuthenticationOptions, AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider, ELASTIC_CLOUD_SSO_REALM_NAME } from './base';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -236,15 +236,23 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
 
   /**
    * Performs SAML request authentication.
+   * During session renewal, ignore the expired token that Core put in the Authorization header.
+   * Use the supplied session and contact Elasticsearch, even on minimal-authentication routes.
+   * The request headers stay unchanged.
    * @param request Request instance.
    * @param [session] Optional session object associated with the provider.
+   * @param [options] Explicit session reauthentication controls.
    */
-  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
+  public async authenticate(
+    request: KibanaRequest,
+    session?: SessionValue<ProviderState> | null,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}`
     );
 
-    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+    if (!options?.reauthenticate && HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
@@ -259,12 +267,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
 
     let authenticationResult = AuthenticationResult.notHandled();
     if (session) {
-      authenticationResult = await this.authenticateViaState(request, session);
+      authenticationResult = await this.authenticateViaState(request, session, options);
       if (
         authenticationResult.failed() &&
         Tokens.isAccessTokenExpiredError(authenticationResult.error)
       ) {
-        authenticationResult = await this.authenticateViaRefreshToken(request, session);
+        authenticationResult = await this.authenticateViaRefreshToken(request, session, options);
       }
     }
 
@@ -488,7 +496,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
       this.logger.debug(`Login was performed with requestId: ${inResponseToRequestId}`);
 
       if (stateRequestIds.length && inResponseToRequestId) {
-        redirectURLForRequestId = stateRequestIdMap[inResponseToRequestId].redirectURL;
+        redirectURLForRequestId = this.getInternalRedirectURL(
+          request,
+          stateRequestIdMap[inResponseToRequestId].redirectURL
+        );
       } else {
         this.logger.info(
           'No requestId found in SAML response or state does not contain requestId.'
@@ -616,8 +627,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
    * @param session Session object associated with the provider.
+   * @param [options] Reauthentication options forwarded to full backend credential validation.
    */
-  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
+  private async authenticateViaState(
+    request: KibanaRequest,
+    session: SessionValue<ProviderState>,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug('Trying to authenticate via state.');
 
     const { accessToken } = session.state;
@@ -631,7 +647,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
       : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() };
 
     try {
-      const user = await this.getUser(request, authHeaders, session);
+      const user = await this.getUser(request, authHeaders, session, options);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
@@ -649,10 +665,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
    * authenticate user with it.
    * @param request Request instance.
    * @param session Session object associated with the provider.
+   * @param [options] Requires a full authentication check after UIAM token renewal.
    */
   private async authenticateViaRefreshToken(
     request: KibanaRequest,
-    session: SessionValue<ProviderState>
+    session: SessionValue<ProviderState>,
+    options?: AuthenticationOptions
   ) {
     this.logger.debug('Trying to refresh access token.');
 
@@ -674,7 +692,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
         const uiamAuthenticatedUser = await this.getUser(
           request,
           this.options.uiam.getAuthenticationHeaders(accessToken)!,
-          session
+          session,
+          options
         );
 
         this.logger.debug('SAML provider successfully refreshed tokens via UIAM service.');
@@ -908,7 +927,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
     if (originalURLHash != null) {
       return this.authenticateViaHandshake(
         request,
-        `${this.options.getRequestOriginalURL(request)}${originalURLHash}`,
+        this.getRequestOriginalURLWithHash(request, originalURLHash),
         session
       );
     }

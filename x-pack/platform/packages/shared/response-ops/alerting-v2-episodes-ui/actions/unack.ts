@@ -31,7 +31,7 @@ export const createUnackAction = (
           http,
           eps.map(
             (ep): BulkUnackEpisodeActionItem => ({
-              episode_id: ep['episode.id'],
+              alert_id: ep['episode.id'],
             })
           )
         ),

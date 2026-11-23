@@ -9,7 +9,9 @@
     "server/**/*.json",
     "common/**/*",
     "test/scout/**/*",
-    "test/scout_uiam_local/**/*"
+    "test/scout_service_accounts/**/*",
+    "test/scout_uiam_local/**/*",
+    "test/scout_task_manager_claim_nudge/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

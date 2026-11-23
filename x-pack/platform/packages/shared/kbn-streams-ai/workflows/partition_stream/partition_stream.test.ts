@@ -39,7 +39,6 @@ describe('partitionStream', () => {
   } as unknown as ElasticsearchClient;
   const mockInferenceClient = {} as BoundInferenceClient;
   const mockSignal = new AbortController().signal;
-  const mockGetFeatures = jest.fn().mockResolvedValue([]);
 
   const createMockDefinition = (
     routing: Streams.WiredStream.Definition['ingest']['wired']['routing'] = []
@@ -67,7 +66,6 @@ describe('partitionStream', () => {
     start: 1000,
     end: 2000,
     signal: mockSignal,
-    getFeatures: mockGetFeatures,
   };
 
   const createMockAnalysis = () => ({

@@ -5,26 +5,17 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { AlertTimelineStatusDot } from '../../alert_timeline/alert_timeline_status_dot';
 
 export interface AlertEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
+  children?: React.ReactNode;
+  'data-test-subj'?: string;
 }
-
-/** Colors shared between the status badge and the status filter's dot indicator. */
-export const EPISODE_STATUS_BADGE_COLORS: Record<
-  AlertEpisodeStatus,
-  NonNullable<EuiBadgeProps['color']>
-> = {
-  [ALERT_EPISODE_STATUS.ACTIVE]: 'danger',
-  [ALERT_EPISODE_STATUS.RECOVERING]: 'primary',
-  [ALERT_EPISODE_STATUS.PENDING]: 'warning',
-  [ALERT_EPISODE_STATUS.INACTIVE]: 'success',
-};
 
 const STATUS_LABELS: Record<AlertEpisodeStatus, string> = {
   [ALERT_EPISODE_STATUS.ACTIVE]: i18n.translate(
@@ -61,9 +52,35 @@ export const getEpisodeStatusBadgeLabel = (status: AlertEpisodeStatus): string =
   });
 
 /**
- * Renders a badge indicating the status of an alerting episode.
+ * Lifecycle-colored dot and status label, for hosts that already own the hollow badge chrome.
+ * Draws the dot directly instead of using EuiHealth, whose dot glyph is inset within a 16px icon
+ * box and shifts the badge content off-center.
  */
-export function AlertEpisodeStatusBadge({ status }: AlertEpisodeStatusBadgeProps) {
-  const color = EPISODE_STATUS_BADGE_COLORS[status] ?? 'hollow';
-  return <EuiBadge color={color}>{getEpisodeStatusBadgeLabel(status)}</EuiBadge>;
+export function AlertEpisodeStatusHealth({
+  status,
+  children,
+}: Pick<AlertEpisodeStatusBadgeProps, 'status' | 'children'>) {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}>
+      <AlertTimelineStatusDot status={status} data-test-subj="alertEpisodeStatusDot" />
+      {children ?? getEpisodeStatusBadgeLabel(status)}
+    </span>
+  );
+}
+
+/**
+ * Renders a hollow badge with a Lifecycle-colored health dot for an alerting episode status.
+ */
+export function AlertEpisodeStatusBadge({
+  status,
+  children,
+  'data-test-subj': dataTestSubj,
+}: AlertEpisodeStatusBadgeProps) {
+  return (
+    <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+      <AlertEpisodeStatusHealth status={status}>{children}</AlertEpisodeStatusHealth>
+    </EuiBadge>
+  );
 }

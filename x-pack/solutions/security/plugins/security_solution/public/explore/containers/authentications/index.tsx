@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 import type { UserAuthenticationsRequestOptionsInput } from '../../../../common/api/search_strategy';
 import type {
@@ -45,6 +46,7 @@ interface UseAuthentications {
   skip: boolean;
   stackByField: AuthStackByField;
   startDate: string;
+  executionContext?: KibanaExecutionContext;
 }
 
 export const useAuthentications = ({
@@ -56,6 +58,7 @@ export const useAuthentications = ({
   skip,
   stackByField,
   startDate,
+  executionContext,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
   const [authenticationsRequest, setAuthenticationsRequest] =
     useState<UserAuthenticationsRequestOptionsInput | null>(null);
@@ -95,6 +98,7 @@ export const useAuthentications = ({
     },
     errorMessage: i18n.FAIL_AUTHENTICATIONS,
     abort: skip,
+    executionContext,
   });
 
   const authenticationsResponse = useMemo(

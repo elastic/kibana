@@ -16,10 +16,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type { PublishesUnifiedSearch, ViewMode } from '@kbn/presentation-publishing';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import {
   apiHasExecutionContext,
   fetch$,
+  getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -107,6 +110,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const interval = new BehaviorSubject<number | undefined>(undefined);
 
+      const requestCancellationManager = new RequestCancellationManager();
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const rendered$ = new BehaviorSubject<boolean>(false);
       subscriptions.add(
@@ -193,7 +197,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         filters$,
         interval,
         setInterval: (v) => interval.next(v),
-        dataViews$: buildDataViewPublishingApi(
+        dataSources$: buildDataViewPublishingApi(
           {
             anomalyDetectorService: services[2].anomalyDetectorService,
             dataViewsService: services[1].data.dataViews,
@@ -203,13 +207,20 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         ),
         dataLoading$,
         rendered$,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          dataLoading$.next(false);
+        },
       });
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
         api,
         chartWidth$.asObservable(),
         dataLoading$,
         blockingError$,
-        anomalySwimLaneServices
+        anomalySwimLaneServices,
+        requestCancellationManager
       );
 
       subscriptions.add(
@@ -226,6 +237,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             api.updatePagination({ fromPage: 1 });
           })
       );
+
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
 
       return {
         api,
@@ -252,14 +265,15 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             subscriptions.unsubscribe();
           });
 
-          const [fromPage, perPage, swimlaneType, swimlaneData, error, isLoading] =
+          const [fromPage, perPage, swimlaneType, swimlaneData, error, isLoading, viewMode] =
             useBatchedPublishingSubjects(
               api.fromPage,
               api.perPage,
               api.swimlaneType,
               swimLaneData$,
               blockingError$,
-              dataLoading$
+              dataLoading$,
+              viewMode$
             );
           const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
@@ -315,7 +329,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                       }
                       onResize={(size) => chartWidth$.next(size)}
                       selection={selectedCells}
-                      onCellsSelection={onCellsSelection}
+                      onCellsSelection={
+                        viewMode === 'non-interactive' ? undefined : onCellsSelection
+                      }
                       onPaginationChange={(update) => {
                         if (update.fromPage) {
                           api.updatePagination({ fromPage: update.fromPage });
@@ -346,6 +362,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                           rendered$.next(true);
                         }
                       }}
+                      isInteractive={viewMode !== 'non-interactive'}
                     />
                   )}
                 </div>

@@ -49,7 +49,7 @@ describe('extractDiscoveriesFromToolCall', () => {
         results: [
           {
             data: {
-              results: [{ index: 0, event_id: 'event-1', event_uuid: 'uuid-1', written: true }],
+              results: [{ index: 0, event_id: 'event-1', written: true }],
             },
           },
         ],
@@ -68,7 +68,7 @@ describe('extractDiscoveriesFromToolCall', () => {
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-bulk',
         params: {
-          items: [{ title: 'Persisted event', status: 'open' }, { title: 'Failed event' }],
+          items: [{ title: 'Persisted event', status: 'active' }, { title: 'Failed event' }],
         },
         results: [
           {
@@ -96,13 +96,83 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
   });
 
+  it('takes the status and severity the tool decided, since the agent sends neither', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-decided',
+        params: { items: [{ title: 'Breach' }, { title: 'Unchanged', event_id: 'event-2' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  written: true,
+                  status: 'active',
+                  severity: 'high',
+                },
+                {
+                  index: 1,
+                  event_id: 'event-2',
+                  written: false,
+                  reason: 'unchanged_outcome',
+                  status: 'recovering',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractSignificantEventsFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-1', status: 'active', severity: 'high' }),
+    ]);
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-1', status: 'active' }),
+      expect.objectContaining({ event_id: 'event-2', status: 'recovering' }),
+    ]);
+  });
+
+  it('does not treat an unknown event id failure as a produced discovery', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-unknown-id',
+        params: {
+          items: [{ event_id: 'unknown-id', title: 'Rejected continuation', status: 'open' }],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'unknown-id',
+                  written: false,
+                  reason: 'unknown_event_id',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
+  });
+
   it('treats existing_active_event and unchanged_outcome as produced discoveries', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-dedup',
-        params: { items: [{ title: 'Existing episode', status: 'open' }] },
+        params: { items: [{ title: 'Existing episode', status: 'active' }] },
         results: [
           {
             data: {
@@ -124,7 +194,7 @@ describe('extractDiscoveriesFromToolCall', () => {
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-noop',
         params: {
-          items: [{ event_id: 'event-stable', title: 'Unchanged continuation', status: 'open' }],
+          items: [{ event_id: 'event-stable', title: 'Unchanged continuation', status: 'active' }],
         },
         results: [
           {
@@ -149,17 +219,47 @@ describe('extractDiscoveriesFromToolCall', () => {
     ]);
   });
 
+  it('does not treat a rule_held_by_event skip as a produced discovery', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-rule-held',
+        params: { items: [{ event_id: 'event-target', title: 'Held rule', status: 'active' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-target',
+                  written: false,
+                  skipped: true,
+                  reason: 'rule_held_by_event',
+                  existing_event_id: 'event-holder',
+                  held_rules: [{ rule_uuid: 'rule-a', event_id: 'event-holder' }],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
+  });
+
   it('extracts events from live Agent Builder underscore tool ids', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
         tool_id: 'platform_sig_events_events_write',
         tool_call_id: 'ew-underscore',
-        params: { items: [{ title: 'Live event', status: 'open' }] },
+        params: { items: [{ title: 'Live event', status: 'active' }] },
         results: [
           {
             data: {
-              results: [{ index: 0, event_uuid: 'uuid-1', event_id: 'event-1', written: true }],
+              results: [{ index: 0, event_id: 'event-1', written: true }],
             },
           },
         ],
@@ -224,7 +324,7 @@ describe('extractRequestedEventIdsFromToolCall', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-new',
-        params: { items: [{ status: 'open' }] },
+        params: { items: [{ status: 'active' }] },
         results: [
           {
             data: {
@@ -232,7 +332,6 @@ describe('extractRequestedEventIdsFromToolCall', () => {
                 {
                   index: 0,
                   event_id: 'handler-generated',
-                  event_uuid: 'uuid-1',
                   written: true,
                 },
               ],
@@ -245,7 +344,7 @@ describe('extractRequestedEventIdsFromToolCall', () => {
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-continuation',
         params: {
-          items: [{ event_id: 'agent-selected', status: 'open' }],
+          items: [{ event_id: 'agent-selected', status: 'active' }],
         },
         results: [
           {
@@ -254,7 +353,6 @@ describe('extractRequestedEventIdsFromToolCall', () => {
                 {
                   index: 0,
                   event_id: 'agent-selected',
-                  event_uuid: 'uuid-2',
                   written: true,
                 },
               ],
@@ -275,9 +373,9 @@ describe('extractRequestedEventIdsFromToolCall', () => {
         tool_call_id: 'ew-bulk',
         params: {
           items: [
-            { status: 'open' },
-            { event_id: 'event-A', status: 'open' },
-            { event_id: 'event-B', status: 'open' },
+            { status: 'active' },
+            { event_id: 'event-A', status: 'active' },
+            { event_id: 'event-B', status: 'active' },
           ],
         },
         results: [
@@ -287,19 +385,16 @@ describe('extractRequestedEventIdsFromToolCall', () => {
                 {
                   index: 0,
                   event_id: 'handler-generated',
-                  event_uuid: 'uuid-0',
                   written: true,
                 },
                 {
                   index: 1,
                   event_id: 'event-A',
-                  event_uuid: 'uuid-1',
                   written: true,
                 },
                 {
                   index: 2,
                   event_id: 'event-B',
-                  event_uuid: 'uuid-2',
                   written: true,
                 },
               ],
@@ -325,11 +420,11 @@ describe('extractWriteItemsFromToolCall', () => {
             {
               event_id: 'event-1',
               causal_features: [
-                { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+                { feature_id: 'ledgerwriter', name: 'ledgerwriter', source_id: 'logs' },
               ],
               blast_radius: [],
             },
-            { status: 'dismissed', causal_features: [], blast_radius: [] },
+            { status: 'inactive', causal_features: [], blast_radius: [] },
           ],
         },
       },
@@ -338,12 +433,10 @@ describe('extractWriteItemsFromToolCall', () => {
     expect(extractWriteItemsFromToolCall(steps)).toEqual([
       {
         event_id: 'event-1',
-        causal_features: [
-          { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
-        ],
+        causal_features: [{ feature_id: 'ledgerwriter', name: 'ledgerwriter', source_id: 'logs' }],
         blast_radius: [],
       },
-      { status: 'dismissed', causal_features: [], blast_radius: [] },
+      { status: 'inactive', causal_features: [], blast_radius: [] },
     ]);
   });
 });
@@ -356,7 +449,7 @@ describe('extractSignificantEventsFromToolCall', () => {
         type: 'tool_call',
         tool_id: 'other-tool',
         tool_call_id: 'ew-1',
-        params: { status: 'open' },
+        params: { status: 'active' },
       },
     ];
     expect(extractSignificantEventsFromToolCall(steps)).toEqual([]);
@@ -370,8 +463,8 @@ describe('extractSignificantEventsFromToolCall', () => {
         tool_call_id: 'ew-bulk',
         params: {
           items: [
-            { event_id: 'event-1', status: 'open' },
-            { event_id: 'event-2', status: 'open' },
+            { event_id: 'event-1', status: 'active' },
+            { event_id: 'event-2', status: 'active' },
           ],
         },
         results: [
@@ -381,7 +474,6 @@ describe('extractSignificantEventsFromToolCall', () => {
                 {
                   index: 0,
                   event_id: 'event-1',
-                  event_uuid: 'uuid-1',
                   written: true,
                 },
                 { index: 1, event_id: 'event-2', written: false, reason: 'bulk_error' },
@@ -394,7 +486,7 @@ describe('extractSignificantEventsFromToolCall', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-retry',
-        params: { items: [{ event_id: 'event-2', status: 'open' }] },
+        params: { items: [{ event_id: 'event-2', status: 'active' }] },
         results: [
           {
             data: {
@@ -402,7 +494,6 @@ describe('extractSignificantEventsFromToolCall', () => {
                 {
                   index: 0,
                   event_id: 'event-2',
-                  event_uuid: 'uuid-2',
                   written: true,
                 },
               ],
@@ -413,8 +504,8 @@ describe('extractSignificantEventsFromToolCall', () => {
     ];
 
     expect(extractSignificantEventsFromToolCall(steps)).toEqual([
-      expect.objectContaining({ event_id: 'event-1', event_uuid: 'uuid-1' }),
-      expect.objectContaining({ event_id: 'event-2', event_uuid: 'uuid-2' }),
+      expect.objectContaining({ event_id: 'event-1' }),
+      expect.objectContaining({ event_id: 'event-2' }),
     ]);
     expect(extractSignificantEventsFromToolCall(steps)[0]).not.toHaveProperty('written');
   });
@@ -427,8 +518,8 @@ describe('extractSignificantEventsFromToolCall', () => {
         tool_call_id: 'ew-reordered',
         params: {
           items: [
-            { event_id: 'event-1', status: 'open' },
-            { event_id: 'event-2', status: 'open' },
+            { event_id: 'event-1', status: 'active' },
+            { event_id: 'event-2', status: 'active' },
           ],
         },
         results: [
@@ -438,13 +529,11 @@ describe('extractSignificantEventsFromToolCall', () => {
                 {
                   index: 1,
                   event_id: 'event-2',
-                  event_uuid: 'uuid-2',
                   written: true,
                 },
                 {
                   index: 0,
                   event_id: 'event-1',
-                  event_uuid: 'uuid-1',
                   written: true,
                 },
               ],

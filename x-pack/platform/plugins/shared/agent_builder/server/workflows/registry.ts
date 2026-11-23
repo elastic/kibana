@@ -7,17 +7,19 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ConversationClient } from '../services/conversation';
 import type { AgentRegistry } from '../services/agents';
 import { getConversationMetadataStepDefinition } from './steps/get_conversation_metadata';
 import { updateConversationMetadataStepDefinition } from './steps/update_conversation_metadata';
 import { createConversationStepDefinition } from './steps/create_conversation';
 import { addConversationEventStepDefinition } from './steps/add_conversation_event';
+import { addUserMessageStepDefinition } from './steps/add_user_message';
 
 export interface ConversationStepDeps {
   getConversationClient: (request: KibanaRequest) => Promise<ConversationClient>;
   getAgentRegistry: (request: KibanaRequest) => Promise<AgentRegistry>;
-  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>;
+  getExecutionService: () => AgentExecutionService;
 }
 
 type ConversationStepFactory = (deps: ConversationStepDeps) => ServerStepDefinition;
@@ -31,4 +33,5 @@ export const conversationStepRegistry: ConversationStepFactory[] = [
   updateConversationMetadataStepDefinition,
   createConversationStepDefinition,
   addConversationEventStepDefinition,
+  addUserMessageStepDefinition,
 ];

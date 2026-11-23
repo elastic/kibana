@@ -130,7 +130,7 @@ describe('EpisodeAssigneePanel', () => {
 
     // EuiSelectable renders the message twice: once visibly, once in its live region.
     const [message] = await screen.findAllByTestId('alertingV2EditEpisodeAssigneeEmptyList');
-    expect(message).toHaveTextContent('The selected episodes do not have any assigned users');
+    expect(message).toHaveTextContent('The selected alerts do not have any assigned users');
   });
   it('lists suggested users before anything is typed', async () => {
     mockSuggest.mockResolvedValue([mockJoana, mockAnt]);

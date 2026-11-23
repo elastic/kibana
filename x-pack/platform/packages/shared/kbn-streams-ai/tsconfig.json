@@ -20,7 +20,6 @@
     "@kbn/core",
     "@kbn/streamlang",
     "@kbn/streams-schema",
-    "@kbn/significant-events-schema",
     "@kbn/inference-common",
     "@kbn/zod",
     "@kbn/inference-prompt-utils",
@@ -28,6 +27,5 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/apm-utils",
     "@kbn/i18n",
-    "@kbn/nightshift-ai",
   ]
 }

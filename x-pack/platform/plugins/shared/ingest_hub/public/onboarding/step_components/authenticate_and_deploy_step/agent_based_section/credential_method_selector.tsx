@@ -9,18 +9,45 @@ import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CloudOnboardingDeploymentAuthMethod } from '@kbn/fleet-plugin/public';
 
 // ── Credential method type ────────────────────────────────────────────────────
 
 export type AgentCredentialMethod =
-  | 'direct_access_keys'
+  | 'static_keys'
   | 'temporary_keys'
   | 'shared_credentials'
   | 'assume_role';
 
+/**
+ * Maps an agent credential method to its SO authMethod value.
+ * All agent methods now match the SO literals directly — no conversion needed.
+ * identity_federation is a managed-integration-only method, so it falls back to static_keys.
+ */
+export function toSOAuthMethod(
+  method: AgentCredentialMethod | undefined
+): CloudOnboardingDeploymentAuthMethod {
+  if (method === undefined) return 'static_keys';
+  return method;
+}
+
+/**
+ * Inverse of toSOAuthMethod — used when hydrating session storage on resume.
+ * identity_federation is MI-only, so it maps to static_keys.
+ * undefined → 'static_keys' (safe default).
+ */
+export function fromSOAuthMethod(
+  authMethod: CloudOnboardingDeploymentAuthMethod | undefined
+): AgentCredentialMethod {
+  if (authMethod === 'identity_federation' || authMethod === undefined) {
+    return 'static_keys';
+  }
+  return authMethod as AgentCredentialMethod;
+}
+
 export const CREDENTIAL_OPTIONS = [
   {
-    value: 'direct_access_keys' as AgentCredentialMethod,
+    value: 'static_keys' as AgentCredentialMethod,
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.credentialMethod.directAccessKeys',
       { defaultMessage: 'Direct access keys' }

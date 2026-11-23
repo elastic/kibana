@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import type { UserMessageEvent } from '@kbn/agent-builder-common';
+import { useMemo, useRef } from 'react';
+import type { ConversationEvent, UserMessageEvent } from '@kbn/agent-builder-common';
 import {
   TimelineEventType,
   EventActorType,
   TimelineTriggerType,
-  isTimelineEvent,
+  isAttachmentEvent,
 } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 import type { OptimisticAttachments } from '../../../utils/build_optimistic_attachments';
 import { useConversation } from '../../../hooks/use_conversation';
 import { useLiveEvents } from '../../../hooks/use_live_events';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useStreamRecord } from '../../../context/streaming/streaming_context';
 import { buildItems } from './to_timeline_items';
+import { resolveTimelineItems } from './resolve_timeline_items';
+import { reuseUnchangedItems } from './reuse_unchanged_items';
 import type { TimelineItem } from './types';
 
 const PENDING_USER_MESSAGE_ID = 'pending::user_message';
@@ -37,13 +40,23 @@ const startsARunTriggeredByAUserMessage = (event: TimelineDisplayEvent): boolean
 const savedUserMessageId = (liveEvents: TimelineDisplayEvent[]): string | undefined =>
   liveEvents.filter(startsARunTriggeredByAUserMessage).at(-1)?.trigger_event_id;
 
-const isSentMessageStillMissingItsRefs = (
-  event: TimelineDisplayEvent,
-  sentMessageId: string
+const isUserMessageEvent = (event: ConversationEvent): event is UserMessageEvent =>
+  event.type === TimelineEventType.userMessage;
+
+const isSentMessageStillMissingItsAttachments = (
+  event: ConversationEvent,
+  sentMessageId: string,
+  events: ConversationEvent[]
 ): event is UserMessageEvent =>
   event.id === sentMessageId &&
-  event.type === TimelineEventType.userMessage &&
-  !event.data.attachment_refs?.length;
+  isUserMessageEvent(event) &&
+  !event.data.attachment_refs?.length &&
+  !events.some(
+    (candidate) =>
+      isAttachmentEvent(candidate) &&
+      candidate.data.source === 'chat_input' &&
+      candidate.trigger_event_id === sentMessageId
+  );
 
 const withStagedAttachments = (
   event: UserMessageEvent,
@@ -61,6 +74,8 @@ export const useTimelineItems = (): TimelineItem[] => {
   const conversationId = useConversationId();
   const { conversation } = useConversation();
   const liveEvents = useLiveEvents();
+  const { attachmentsService, conversationEventsService } = useAgentBuilderServices();
+  const conversationAttachments = conversation?.attachments;
 
   const { pendingMessage, pendingAttachments } = useStreamRecord(conversationId);
   const startedUserMessageId = savedUserMessageId(liveEvents);
@@ -84,8 +99,7 @@ export const useTimelineItems = (): TimelineItem[] => {
     [pendingMessage, pendingAttachments, pendingUserMessageId]
   );
 
-  const savedEvents = conversation?.events;
-  const docEvents = useMemo(() => savedEvents?.filter(isTimelineEvent), [savedEvents]);
+  const docEvents = conversation?.events;
   // Once the saved twin is in the cache the message is no longer pending, even though the local
   // copy still exists.
   const isPendingUnsaved =
@@ -95,7 +109,7 @@ export const useTimelineItems = (): TimelineItem[] => {
     // The saved copy wins: every live event gets a saved twin with the same id after the refetch,
     // so the live list stops mattering on its own. Saved events keep their order; live-only events
     // belong to the run in flight, so they go last.
-    const byId = new Map<string, TimelineDisplayEvent>(
+    const byId = new Map<string, ConversationEvent>(
       (docEvents ?? []).map((event) => [event.id, event])
     );
     // The message goes in before the live events: it is what started the run they describe.
@@ -111,19 +125,35 @@ export const useTimelineItems = (): TimelineItem[] => {
     if (!pendingAttachments) {
       return [...byId.values()];
     }
-    return [...byId.values()].map((event) =>
-      isSentMessageStillMissingItsRefs(event, pendingUserMessageId)
+    const merged = [...byId.values()];
+    return merged.map((event) =>
+      isSentMessageStillMissingItsAttachments(event, pendingUserMessageId, merged)
         ? withStagedAttachments(event, pendingAttachments)
         : event
     );
   }, [docEvents, liveEvents, pendingUserMessage, pendingUserMessageId, pendingAttachments]);
 
   const items = useMemo(
-    () => buildItems(events, isPendingUnsaved ? pendingUserMessageId : undefined),
-    [events, isPendingUnsaved, pendingUserMessageId]
+    () =>
+      resolveTimelineItems(
+        buildItems(events, isPendingUnsaved ? pendingUserMessageId : undefined),
+        {
+          attachments: conversationAttachments,
+          attachmentsService,
+          conversationEventsService,
+        }
+      ),
+    [
+      events,
+      isPendingUnsaved,
+      pendingUserMessageId,
+      conversationAttachments,
+      attachmentsService,
+      conversationEventsService,
+    ]
   );
 
-  return useMemo(() => {
+  const withAwaitingTurn = useMemo(() => {
     if (!awaitingRunStart) {
       return items;
     }
@@ -138,4 +168,10 @@ export const useTimelineItems = (): TimelineItem[] => {
     };
     return [...items, awaitingTurn];
   }, [items, awaitingRunStart]);
+
+  const previousItems = useRef<TimelineItem[]>([]);
+  return useMemo(() => {
+    previousItems.current = reuseUnchangedItems(previousItems.current, withAwaitingTurn);
+    return previousItems.current;
+  }, [withAwaitingTurn]);
 };

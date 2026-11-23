@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, of, type Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  filter,
+  map,
+  of,
+  type Observable,
+} from 'rxjs';
 
 import type {
   HasLastSavedChildState,
@@ -20,6 +28,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { type DashboardBackupState } from '../services/dashboard_backup_service';
 import type { initializeApproximationManager } from './approximation_manager';
+import type { ChangeSourceTracker } from './change_source_tracker';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
@@ -40,6 +49,7 @@ export function initializeUnsavedChangesManager({
   approximationManager,
   setState,
   onSave$,
+  changeSourceTracker,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -52,6 +62,7 @@ export function initializeUnsavedChangesManager({
   approximationManager: ReturnType<typeof initializeApproximationManager>;
   setState: (state: DashboardState) => Promise<void>;
   onSave$: PublishesOnSave['onSave$'];
+  changeSourceTracker: ChangeSourceTracker;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -82,7 +93,10 @@ export function initializeUnsavedChangesManager({
   );
 
   const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
-    .pipe(debounceTime(DEBOUNCE_TIME))
+    .pipe(
+      debounceTime(DEBOUNCE_TIME),
+      filter(([viewMode]) => viewMode !== 'non-interactive') // don't track unsaved changes in non-interactive mode
+    )
     .subscribe(([viewMode, dashboardChanges]) => {
       const hasUnsavedChanges = Object.keys(dashboardChanges ?? {}).length > 0;
 
@@ -92,10 +106,13 @@ export function initializeUnsavedChangesManager({
 
       if (storeUnsavedChanges) {
         const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
+        const hasEditsToBackUp = Object.keys(restOfDashboardChanges).length > 0;
+        const changedByToBackUp = changeSourceTracker.getUnsavedSources();
         const dashboardBackupState: DashboardBackupState = {
           // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
           viewMode,
           ...restOfDashboardChanges,
+          ...(hasEditsToBackUp && changedByToBackUp.length > 0 && { changedBy: changedByToBackUp }),
         };
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
@@ -107,6 +124,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
+        changeSourceTracker.resetToSaved();
         await setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,

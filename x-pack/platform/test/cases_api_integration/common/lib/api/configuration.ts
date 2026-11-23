@@ -71,7 +71,8 @@ export const getConfigurationOutput = (update = false, overwrite = {}): Partial<
       : null,
     customFields: [],
     observableTypes: [],
-    extractObservables: true,
+    extractObservables: false,
+    workflowTags: [],
     ...overwrite,
   };
 };

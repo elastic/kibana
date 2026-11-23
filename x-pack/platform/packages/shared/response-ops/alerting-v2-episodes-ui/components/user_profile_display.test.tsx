@@ -64,6 +64,45 @@ describe('UserProfileDisplay', () => {
     expect(await screen.findByText('jdoe')).toBeInTheDocument();
   });
 
+  it('prefers the full name over the username', async () => {
+    mockBulkGet.mockResolvedValue([
+      {
+        uid: 'u-1',
+        user: { username: '3939329098', full_name: 'Joana Cardoso', email: 'joana@example.com' },
+        data: {},
+      },
+    ] as never);
+
+    render(
+      <I18nProvider>
+        <UserProfileDisplay userProfileUid="u-1" userProfile={mockUserProfile} />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByText('Joana Cardoso')).toBeInTheDocument();
+    expect(screen.queryByText('3939329098')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the email when there is no full name', async () => {
+    mockBulkGet.mockResolvedValue([
+      {
+        uid: 'u-1',
+        user: { username: '3939329098', email: 'joana@example.com' },
+        data: {},
+      },
+    ] as never);
+
+    render(
+      <I18nProvider>
+        <UserProfileDisplay userProfileUid="u-1" userProfile={mockUserProfile} />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByText('joana@example.com')).toBeInTheDocument();
+  });
+
   it('can keep the unknown-user tooltip out of the tab order', async () => {
     mockBulkGet.mockResolvedValue([]);
 

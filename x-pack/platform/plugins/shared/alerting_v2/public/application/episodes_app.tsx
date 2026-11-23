@@ -9,11 +9,18 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useRouteMatch } from 'react-router-dom';
-import { AlertEpisodesListPage } from '../pages/alert_episodes_list_page/alert_episodes_list_page';
-import { EpisodeDetailsPage } from '../pages/episode_details_page/episode_details_page';
+import { AlertsListPage } from '../pages/alert_episodes_list_page/alerts_list_page';
+import {
+  EpisodeDetailsPage,
+  type EpisodeDetailsPageProps,
+} from '../pages/episode_details_page/episode_details_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
-export const EpisodesApp = () => {
+export type EpisodesAppProps = EpisodeDetailsPageProps;
+
+export const EpisodesApp = ({
+  useAdditionalEpisodeDetailsHeaderMenuItems,
+}: EpisodesAppProps = {}) => {
   const { path } = useRouteMatch();
   const base = path.endsWith('/') ? path.slice(0, -1) : path;
   return (
@@ -25,10 +32,12 @@ export const EpisodesApp = () => {
     >
       <Routes>
         <Route exact path={path}>
-          <AlertEpisodesListPage />
+          <AlertsListPage />
         </Route>
         <Route path={`${base}/:episodeId`}>
-          <EpisodeDetailsPage />
+          <EpisodeDetailsPage
+            useAdditionalEpisodeDetailsHeaderMenuItems={useAdditionalEpisodeDetailsHeaderMenuItems}
+          />
         </Route>
       </Routes>
     </RequireAlertingPrivilege>

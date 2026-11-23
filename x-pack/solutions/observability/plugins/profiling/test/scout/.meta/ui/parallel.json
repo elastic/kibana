@@ -1,5 +1,5 @@
 {
-  "sha1": "7225db96775fde484e6e368432d07265e3c5ec8b",
+  "sha1": "993a540ea93354623e764f5f4082caf4d1f8e259",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 5,
+        "line": 6,
         "column": 1
+      }
+    },
+    {
+      "id": "c649c775b388af1-8f5df355442d174",
+      "title": "Add data page switches between the OpenTelemetry and Universal Profiling instructions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/add_data/add_data.spec.ts",
+        "line": 17,
+        "column": 20
       }
     },
     {
@@ -224,8 +238,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 21,
+        "line": 19,
+        "column": 5
+      }
+    },
+    {
+      "id": "24e91bc4697a2cc-a4f4995d739e7c8",
+      "title": "Profiling schema selector keeps the selected schema while moving across the profiling sections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
+        "line": 22,
         "column": 8
+      }
+    },
+    {
+      "id": "24e91bc4697a2cc-bd5e314c3c11812",
+      "title": "Profiling schema selector recovers from a selected schema without data by selecting another schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
+        "line": 74,
+        "column": 14
       }
     },
     {
@@ -266,8 +308,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 14,
+        "line": 15,
         "column": 20
+      }
+    },
+    {
+      "id": "98843aa33e8d554-ae6e48a8d1f4eff",
+      "title": "Storage explorer page remembers that the OpenTelemetry callout was dismissed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
+        "line": 17,
+        "column": 28
       }
     },
     {
@@ -280,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 16,
-        "column": 28
+        "line": 34,
+        "column": 18
       }
     },
     {
@@ -294,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 21,
-        "column": 49
+        "line": 39,
+        "column": 13
       }
     },
     {
@@ -308,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 29,
-        "column": 5
+        "line": 45,
+        "column": 11
       }
     },
     {

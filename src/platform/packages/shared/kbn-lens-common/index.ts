@@ -141,6 +141,7 @@ export type {
   TimeScaleIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
@@ -177,6 +178,7 @@ export type {
   RegisterLibraryAnnotationGroupFunction,
   AxesSettingsConfig,
   LensEditContextMapping,
+  DefaultVisualizationOverrides,
 } from './visualizations/types';
 export type {
   LensDatatableSortingState,
@@ -349,11 +351,14 @@ export {
   ROW_HEIGHT_LINES_KEYS,
   LEGACY_SINGLE_ROW_HEIGHT_MODE,
   LENS_DATATABLE_DEFAULT_COLOR_STEPS,
+  LENS_DATATABLE_PAGE_SIZE_OPTIONS,
+  LENS_DATATABLE_DEFAULT_PAGE_SIZE,
 } from './visualizations/datatable/constants';
 export {
   LENS_GAUGE_ID,
   LENS_GAUGE_DEFAULT_COLOR_STEPS,
   GAUGE_SHAPES,
+  LENS_GAUGE_DEFAULT_SHAPE,
   GAUGE_TICKS_POSITIONS,
   GAUGE_LABEL_MAJOR_MODES,
   GAUGE_CENTRAL_MAJOR_MODES,
@@ -413,6 +418,7 @@ export {
   YAxisModes,
   SeriesTypes,
   AvailableReferenceLineIcons,
+  LENS_XY_HIDE_ENDZONES_DEFAULT,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';
@@ -471,7 +477,9 @@ export { convertToAbsoluteDateRange } from './esql/date_range';
 export type { EsqlConversionFailureReason } from './esql/to_esql_failure_reasons';
 export {
   esqlConversionFailureReasonMessages,
+  esqlConversionFailureTitle,
   getFailureTooltip,
+  getFailureTooltipText,
 } from './esql/to_esql_failure_reasons';
 export type { CreateEsAggsIdMapEntryParams } from './esql/create_es_aggs_id_map_entry';
 export type { GetDefaultLabelFn } from './esql/operations';

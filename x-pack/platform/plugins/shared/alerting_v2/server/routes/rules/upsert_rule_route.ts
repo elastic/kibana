@@ -9,10 +9,10 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import {
-  createRuleDataSchema,
+  putRuleDataSchema,
   errorResponseSchema,
   ruleResponseSchema,
-  type CreateRuleData,
+  type PutRuleData,
 } from '@kbn/alerting-v2-schemas';
 
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -36,14 +36,15 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Create or replace a rule',
     description:
-      'Creates a rule with the given identifier, or fully replaces it if one already exists.',
+      'Creates a rule with the given identifier, or replaces its definition if one already exists.',
     oasOperationObject: upsertRuleOasExamples,
   } as const;
   static schemas = {
     request: {
-      body: createRuleDataSchema,
+      body: putRuleDataSchema,
       params: ruleIdParamsSchema,
     },
     response: {
@@ -74,7 +75,7 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
       unknown,
-      CreateRuleData
+      PutRuleData
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {

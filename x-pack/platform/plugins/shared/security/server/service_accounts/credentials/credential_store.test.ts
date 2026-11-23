@@ -98,6 +98,87 @@ describe('ServiceAccountCredentialStore', () => {
     });
   });
 
+  describe('#findExisting', () => {
+    const OTHER_ACCOUNT_ID = 'kibana/other';
+
+    /** A stored credential as the plain (undecrypted) read reports it. */
+    const found = (serviceAccountId: string) => ({
+      type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+      id: getCredentialId(serviceAccountId),
+      references: [],
+      attributes: { serviceAccountId },
+    });
+
+    it('reports the accounts a credential is on file for, without decrypting', async () => {
+      client.bulkGet.mockResolvedValue({
+        saved_objects: [found(SERVICE_ACCOUNT_ID), found(OTHER_ACCOUNT_ID)],
+      });
+
+      const existing = await store.findExisting([SERVICE_ACCOUNT_ID, OTHER_ACCOUNT_ID]);
+
+      expect(existing).toEqual(new Set([SERVICE_ACCOUNT_ID, OTHER_ACCOUNT_ID]));
+      expect(encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    // `fields: []` would read as "no filtering" and hand back the whole document, so the token
+    // would ride along on every list. One cheap field is what keeps the ciphertext out.
+    it('names a field so the encrypted token stays out of the response', async () => {
+      client.bulkGet.mockResolvedValue({ saved_objects: [found(SERVICE_ACCOUNT_ID)] });
+
+      await store.findExisting([SERVICE_ACCOUNT_ID]);
+
+      expect(client.bulkGet).toHaveBeenCalledWith([
+        {
+          type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+          id: getCredentialId(SERVICE_ACCOUNT_ID),
+          fields: ['serviceAccountId'],
+        },
+      ]);
+    });
+
+    it('leaves out accounts that have no credential', async () => {
+      client.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(SERVICE_ACCOUNT_ID),
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+          },
+          found(OTHER_ACCOUNT_ID),
+        ],
+      });
+
+      const existing = await store.findExisting([SERVICE_ACCOUNT_ID, OTHER_ACCOUNT_ID]);
+
+      expect(existing.has(SERVICE_ACCOUNT_ID)).toBe(false);
+      expect(existing.has(OTHER_ACCOUNT_ID)).toBe(true);
+    });
+
+    it('does not touch the client for an empty page', async () => {
+      await expect(store.findExisting([])).resolves.toEqual(new Set());
+
+      expect(client.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('rejects when a document fails to read for any other reason', async () => {
+      client.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(SERVICE_ACCOUNT_ID),
+            error: { statusCode: 500, error: 'Internal Server Error', message: 'shard failure' },
+          },
+        ],
+      });
+
+      // Absent means Kibana holds nothing, which a caller acts on. A document it could not read
+      // is not that, so it must not resolve quietly.
+      await expect(store.findExisting([SERVICE_ACCOUNT_ID])).rejects.toThrow(
+        /credential of service account \[kibana\/nightshift-relay\].*shard failure/
+      );
+    });
+  });
+
   describe('#getDecrypted', () => {
     it('returns the decrypted attributes', async () => {
       encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({

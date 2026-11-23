@@ -39,9 +39,11 @@ export const buildSpaceFilterTerms = (
 
 /**
  * Whether the current space may toggle a source document.
- * Space-owned legacy rows are mutable only in their owning space. Global (`*`)
- * catalog rows are mutable only from the default space so other spaces cannot
- * disable shared feeds.
+ * Space-owned rows are mutable only in their owning space. Global (`*`) catalog
+ * rows are not mutable via this API: flipping `enabled` on a shared feed
+ * affects every space, and the route's space-scoped write privilege does not
+ * grant that. Cluster-wide admin toggle for seeded feeds is the privileges
+ * follow-up; until then the seeded catalog stays at its seeded `enabled` state.
  */
 export const canMutateSourceInSpace = (
   sourceSpaceId: string | undefined,
@@ -49,7 +51,7 @@ export const canMutateSourceInSpace = (
 ): boolean => {
   const ownerSpaceId = sourceSpaceId ?? GLOBAL_SPACE_ID;
   if (ownerSpaceId === GLOBAL_SPACE_ID) {
-    return requestSpaceId === 'default';
+    return false;
   }
   return ownerSpaceId === requestSpaceId;
 };

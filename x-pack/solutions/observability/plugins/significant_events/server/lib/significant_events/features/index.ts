@@ -26,8 +26,9 @@ export {
   MAX_INFERENCE_DOCUMENT_FIELDS,
   MAX_INFERENCE_FIELD_NAME_LENGTH,
   compactInferenceDocuments,
-  prepareInferredSampling,
-} from './prepare_inferred_sampling';
+} from '@kbn/nightshift-ai';
+export { prepareInferredSampling } from './prepare_inferred_sampling';
+export { MAX_ENTITY_FILTERS } from './get_entity_filters';
 export type { PrepareInferredSamplingResult } from './prepare_inferred_sampling';
 
 export { identifyComputedFeatures } from './identify_computed_features';

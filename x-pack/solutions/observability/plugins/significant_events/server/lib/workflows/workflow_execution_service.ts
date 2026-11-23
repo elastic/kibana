@@ -6,17 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type {
   WorkflowExecutionListItemDto,
   WorkflowExecutionCollapseField,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
 } from '@kbn/workflows';
-import type {
-  WorkflowsManagementApi,
-  WorkflowsServerPluginSetup,
-} from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
@@ -32,9 +29,13 @@ export interface WorkflowExecutionQueryParams {
 }
 
 interface WorkflowExecutionGetParams {
+  request: KibanaRequest;
   id: string;
   spaceId: string;
-  options?: Parameters<WorkflowsManagementApi['getWorkflowExecution']>[2];
+  options?: Omit<
+    Parameters<WorkflowsServerPluginSetup['management']['getWorkflowExecution']>[2],
+    'request'
+  >;
 }
 
 interface WorkflowExecutionCancelParams {
@@ -48,6 +49,12 @@ interface WorkflowExecutionCancelParams {
  * `TInput` types the inputs passed to `execute`; the cast to
  * `Record<string, unknown>` for the underlying API is done internally.
  */
+/** Whether the execution started before the given ISO time. */
+export const isStartedBefore = (
+  execution: Pick<WorkflowExecutionListItemDto, 'startedAt'>,
+  isoTime: string
+): boolean => Date.parse(execution.startedAt) < Date.parse(isoTime);
+
 export class WorkflowExecutionService<TInput extends object = {}> {
   private readonly managementApi: WorkflowsServerPluginSetup['management'];
   private readonly workflowId: string;
@@ -134,15 +141,23 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   }
 
   async getStatus({
+    request,
     spaceId,
     queryParams,
+    ignoreStartedBefore,
   }: {
+    request: KibanaRequest;
     spaceId: string;
     queryParams?: WorkflowExecutionQueryParams;
+    /** ISO time; a last execution that started earlier counts as no execution. */
+    ignoreStartedBefore?: string;
   }): Promise<SignificantEventsWorkflowStatusResult> {
-    const lastExecution = await this.getLastExecution(spaceId, queryParams);
+    const lastExecution = await this.getLastExecution(spaceId, request, queryParams);
 
-    if (!lastExecution) {
+    if (
+      !lastExecution ||
+      (ignoreStartedBefore !== undefined && isStartedBefore(lastExecution, ignoreStartedBefore))
+    ) {
       return { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null };
     }
 
@@ -165,7 +180,9 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     inputs?: TInput;
     request: KibanaRequest;
   }): Promise<string> {
-    const workflow = await this.managementApi.getWorkflow(this.workflowId, this.workflowSpaceId);
+    const workflow = await this.managementApi
+      .getClient(request)
+      .getWorkflow(this.workflowId, this.workflowSpaceId);
 
     if (!workflow || !workflow.definition) {
       throw new Error(`Workflow ${this.workflowId} not found`);
@@ -179,6 +196,55 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     );
   }
 
+  /** Cancels all active executions, including runs hidden behind newer skipped duplicates. */
+  async cancelActive(args: {
+    spaceId: string;
+    request: KibanaRequest;
+    concurrencyGroupKey: string;
+  }): Promise<string | null> {
+    const { executions, failures } = await this.cancelActiveExecutions(args);
+    if (failures.length > 0) {
+      throw failures[0];
+    }
+    return executions[0]?.id ?? null;
+  }
+
+  /**
+   * Like {@link cancelActive}, and returns the executions it asked to stop together with the cancel
+   * failures instead of throwing. A cancel can throw after the engine already marked the run (the
+   * wake task of a run that is mid-step is busy, say), so the caller needs the executions to act on
+   * them before it rethrows.
+   */
+  async cancelActiveExecutions({
+    spaceId,
+    request,
+    concurrencyGroupKey,
+  }: {
+    spaceId: string;
+    request: KibanaRequest;
+    concurrencyGroupKey: string;
+  }): Promise<{ executions: WorkflowExecutionListItemDto[]; failures: unknown[] }> {
+    const { results } = await this.getExecutions(
+      {
+        concurrencyGroupKey,
+        statuses: [...NonTerminalExecutionStatuses],
+        size: 10_000,
+      },
+      spaceId,
+      request
+    );
+    const active = results.filter((execution) => !isTerminalStatus(execution.status));
+    const outcomes = await Promise.allSettled(
+      active.map(({ id }) => this.cancelExecution({ id, spaceId, request }))
+    );
+    return {
+      executions: active,
+      failures: outcomes.flatMap((outcome) =>
+        outcome.status === 'rejected' ? [outcome.reason] : []
+      ),
+    };
+  }
+
   async cancelLatest({
     spaceId,
     request,
@@ -190,6 +256,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   }): Promise<string | null> {
     const lastExecution = await this.getLastExecution(
       spaceId,
+      request,
       concurrencyGroupKey !== undefined ? { concurrencyGroupKey } : undefined
     );
 
@@ -201,26 +268,31 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     return null;
   }
 
-  async getExecutions(params: WorkflowExecutionQueryParams, spaceId: string) {
-    return this.managementApi.getWorkflowExecutions(
-      { workflowId: this.workflowId, ...params },
-      spaceId
-    );
+  async getExecutions(
+    params: WorkflowExecutionQueryParams,
+    spaceId: string,
+    request: KibanaRequest
+  ) {
+    return this.managementApi
+      .getClient(request)
+      .getWorkflowExecutions({ workflowId: this.workflowId, ...params }, spaceId);
   }
 
   async getLastExecution(
     spaceId: string,
+    request: KibanaRequest,
     queryParams?: WorkflowExecutionQueryParams
   ): Promise<WorkflowExecutionListItemDto | null> {
     const { results } = await this.getExecutions(
       { sortField: 'createdAt', sortOrder: 'desc', ...queryParams, size: 1 },
-      spaceId
+      spaceId,
+      request
     );
     return results[0] ?? null;
   }
 
-  async getExecution({ id, spaceId, options }: WorkflowExecutionGetParams) {
-    return this.managementApi.getWorkflowExecution(id, spaceId, options);
+  async getExecution({ id, spaceId, options, request }: WorkflowExecutionGetParams) {
+    return this.managementApi.getWorkflowExecution(id, spaceId, { ...options, request });
   }
 
   async cancelExecution({ id, spaceId, request }: WorkflowExecutionCancelParams): Promise<void> {

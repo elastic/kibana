@@ -43,6 +43,7 @@ export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
+    'setPersistedDiscoverSession',
     'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
@@ -80,7 +81,7 @@ export {
   selectHasUnsavedChanges,
   searchSourceComparator,
   selectTabSavedSearch,
-  selectTabSavedSearchByValueAttributes,
+  selectTabEmbeddableTab,
 } from './selectors';
 
 export {
@@ -92,6 +93,7 @@ export {
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  setTabChartBreakdownFieldNames,
   selectDataSourceProfileId,
   selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,
@@ -105,7 +107,12 @@ export {
   RuntimeStateProvider,
   RuntimeStateManagerProvider,
   useRuntimeStateManager,
+  getDataViewIdOfSource,
+  pinDataViewOfSource,
+  getDataViewOfSource,
+  getTabDataView,
   useCurrentDataView,
+  useCurrentDataSource,
   useAdHocDataViews,
 } from './runtime_state';
 

@@ -11,6 +11,7 @@ import { useConversationContext } from '../context/conversation/conversation_con
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId, useConversation } from './use_conversation';
 import { useConnectorSelection } from './chat/use_connector_selection';
+import { useAgentModel } from './agents/use_agent_model';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 
 /**
@@ -33,7 +34,11 @@ export const useConversationStream = () => {
   const agentId = useAgentId();
   const { conversation } = useConversation();
   const { attachments, resetAttachments, browserApiTools, onSubmit } = useConversationContext();
-  const { selectedConnector: connectorId } = useConnectorSelection();
+  const { selectedConnector } = useConnectorSelection();
+  const { isLocked: isModelSetByAgent } = useAgentModel(agentId);
+
+  // An explicit connector overrides the agent's own model server-side.
+  const connectorId = isModelSetByAgent ? undefined : selectedConnector;
 
   const { activeStreams, mutateSendMessage, mutateResumeRound, cancelStream } =
     useStreamingContext();
@@ -50,9 +55,12 @@ export const useConversationStream = () => {
     ({
       message,
       conversationId: targetConversationId,
+      onRejected,
     }: {
       message: string;
       conversationId: string;
+      /** Handles a request the server rejected before running anything; see `SendMessageVars`. */
+      onRejected?: (error: unknown) => boolean;
     }) => {
       if (!agentId) {
         throw new Error('agentId is required to send a message');
@@ -67,6 +75,7 @@ export const useConversationStream = () => {
         conversationAttachments: conversation?.attachments,
         resetAttachments,
         browserApiTools,
+        ...(onRejected ? { onRejected } : {}),
       });
     },
     [

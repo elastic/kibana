@@ -69,6 +69,9 @@
     "script": ".buildkite/scripts/steps/checks/native_modules.sh"
   },
   {
+    "script": ".buildkite/scripts/steps/checks/server_import_graph.sh"
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh"
   },
   {
@@ -83,7 +86,14 @@
     "mayChangeFiles": true
   },
   {
+    "script": ".buildkite/scripts/steps/checks/sync_pull_request_fragments.sh",
+    "mayChangeFiles": true
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/buildkite_unit_tests.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/buildkite_typecheck.sh"
   },
   {
     "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"

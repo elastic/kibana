@@ -14,7 +14,9 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiText,
+  EuiTextBlockTruncate,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
@@ -102,14 +104,44 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
         .map(({ id, description }) => ({
           key: id,
           label: id,
-          append: description ? (
-            <EuiText size="xs" color="subdued">
-              {description}
-            </EuiText>
-          ) : undefined,
+          value: description,
           'data-test-subj': `agentBuilderAiIndexOption-${id}`,
         })),
     [aiIndices, inheritedIdSet]
+  );
+
+  const renderOption = useCallback(
+    (
+      { label, value: description }: EuiComboBoxOptionOption<string>,
+      searchValue: string,
+      contentClassName: string
+    ) => (
+      <EuiFlexGroup direction="column" gutterSize="xs" className={contentClassName}>
+        <EuiText size="s">
+          <strong>
+            <EuiTextBlockTruncate
+              lines={2}
+              title={label}
+              data-test-subj={`agentBuilderAiIndexOptionName-${label}`}
+            >
+              <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+            </EuiTextBlockTruncate>
+          </strong>
+        </EuiText>
+        {description && (
+          <EuiText size="xs" color="subdued">
+            <EuiTextBlockTruncate
+              lines={2}
+              title={description}
+              data-test-subj={`agentBuilderAiIndexOptionDescription-${label}`}
+            >
+              <EuiHighlight search={searchValue}>{description}</EuiHighlight>
+            </EuiTextBlockTruncate>
+          </EuiText>
+        )}
+      </EuiFlexGroup>
+    ),
+    []
   );
 
   // Configured but not listed for this user: deleted, unreadable, or not registered in this space.
@@ -208,6 +240,8 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
             options={options}
             selectedOptions={selectedOptions}
             onChange={handleChange}
+            renderOption={renderOption}
+            rowHeight="auto"
             isLoading={isLoading}
             isDisabled={isFormDisabled}
             data-test-subj="agentBuilderAdditionalAiIndices"

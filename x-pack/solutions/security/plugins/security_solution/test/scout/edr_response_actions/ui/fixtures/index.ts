@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest as spaceBaseTest, tags } from '@kbn/scout-security';
+import { spaceTest as spaceBaseTest } from '@kbn/scout-security';
 import type {
   ScoutPage,
   SecurityPageObjects,
@@ -31,4 +31,4 @@ export const spaceTest = spaceBaseTest.extend<
   },
 });
 
-export { tags };
+export { tags } from '@kbn/scout-security';

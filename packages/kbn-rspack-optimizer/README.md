@@ -43,7 +43,7 @@ The optimizer uses a **unified single-compilation** model:
 
 2. **Entry generation** creates `target/.rspack-entry-wrappers/kibana-unified-entry.js` which synchronously imports core and asynchronously imports all plugins via `import()`.
 
-3. **Single RSPack invocation** compiles everything together. Shared dependencies (React, EUI, lodash, etc.) are **externalized** -- they are provided at runtime by `@kbn/ui-shared-deps-npm` and `@kbn/ui-shared-deps-src`, which are built separately by webpack and served as `<script>` tags before `kibana.bundle.js`.
+3. **One Rspack MultiCompiler** builds the npm DLL, Monaco workers, source shared dependencies, the Vega sandbox iframe bundle, and Kibana in dependency order. Shared dependencies remain externalized and are served as `<script>` tags before `kibana.bundle.js`.
 
 4. **Chunk splitting** is handled automatically by RSPack's `splitChunks` configuration. Heavy vendor libraries (maplibre-gl, ace-builds, vega, etc.) are split into separate async chunks. Common code used by 3+ plugins is also extracted.
 
@@ -76,6 +76,8 @@ Build Options:
   --dist                    Build for distribution (minified, no source maps)
   --examples                Include example plugins
   --test-plugins            Include test plugins
+  --no-dev-only             Exclude devOnly plugins (included by default, even with --dist;
+                            node scripts/build always excludes them)
   --themes <tags>           Comma-separated theme tags to build (default: all)
   --output-root <dir>       Output root directory (default: repo root)
   --no-cache                Disable filesystem caching
@@ -244,3 +246,4 @@ if (result.success) {
 |----------|-------------|
 | `KBN_HMR=false` | Disable HMR (alternative to `--no-hmr`) |
 | `KBN_HMR_PORT=5678` | Override the HMR SSE server port (default: 5678) |
+| `KBN_HMR_HOST=0.0.0.0` | Bind address of the HMR SSE server (default: `127.0.0.1`). Set it when the browser reaches Kibana over a LAN, VPN, VM or container address; the client connects to the HMR port on the same hostname it loaded Kibana from. |

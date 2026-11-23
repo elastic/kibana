@@ -13,6 +13,7 @@ import type { InternalApplicationStart } from '@kbn/core-application-browser-int
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 export interface ChromeComponentsDeps {
   application: Pick<
@@ -22,13 +23,14 @@ export interface ChromeComponentsDeps {
   http: Pick<HttpStart, 'basePath' | 'getLoadingCount$'>;
   docLinks: DocLinksStart;
   customBranding: Pick<CustomBrandingStart, 'customBranding$'>;
+  notifications: Pick<NotificationsStart, 'screenReader'>;
 }
 
 const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null);
 
 /**
  * Provides `ChromeComponentsDeps` to all context-aware Chrome components
- * (`ClassicHeader`, `ChromeNextGlobalHeader`, `GridLayoutProjectSideNav`,
+ * (`ClassicHeader`, `ChromeHeader`, `GridLayoutProjectSideNav`,
  * `HeaderTopBanner`, `ChromelessHeader`, `Sidebar`).
  *
  * The layout layer passes whole service contracts (narrowed via `Pick`) and wraps the

@@ -11,7 +11,7 @@ import { resolve } from 'path';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import type { Config, Build } from '../../lib';
+import type { Config, Build, Platform } from '../../lib';
 import { exec } from '../../lib';
 
 export async function runFpm(
@@ -19,15 +19,14 @@ export async function runFpm(
   log: ToolingLog,
   build: Build,
   type: 'rpm' | 'deb',
-  architecture: 'arm64' | 'x64',
+  platform: Platform,
   pkgSpecificFlags: string[]
 ) {
-  const linux = config.getPlatform('linux', architecture);
   const version = config.getBuildVersion();
 
   const resolveWithTrailingSlash = (...paths: string[]) => `${resolve(...paths)}/`;
 
-  const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(linux, ...paths);
+  const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(platform, ...paths);
 
   const pickLicense = () => {
     return type === 'rpm' ? 'Elastic License' : 'Elastic-License';

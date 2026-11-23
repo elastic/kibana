@@ -97,7 +97,7 @@ describe('findRulesSkill', () => {
     expect(skill.content).toMatch(/alert-analysis/);
     expect(skill.content).toMatch(/detection-rule-edit/);
     expect(skill.content).toMatch(/threat-hunting/);
-    expect(skill.content).toMatch(/rule-management/);
+    expect(skill.content).toMatch(/rule-authoring/);
   });
 
   it('content advertises the read-only action limitations', () => {
@@ -245,6 +245,15 @@ describe('findRulesSchema', () => {
     );
   });
 
+  it('accepts ATLAS technique IDs and rejects malformed ones', () => {
+    expect(findRulesSchema.safeParse({ mitreTechnique: 'AML.T0044' }).success).toBe(true);
+    expect(findRulesSchema.safeParse({ mitreTechnique: 'AML.T0024.002' }).success).toBe(true);
+    expect(findRulesSchema.safeParse({ mitreTechnique: 'AML.X1' }).success).toBe(false);
+    expect(findRulesSchema.safeParse({ mitreTechnique: 'AML.' }).success).toBe(false);
+    expect(findRulesSchema.safeParse({ mitreTechnique: 'AML.T12' }).success).toBe(false);
+    expect(findRulesSchema.safeParse({ mitreTechnique: 'AML.TA0000' }).success).toBe(false);
+  });
+
   it('rejects unknown parameters', () => {
     expect(findRulesSchema.safeParse({ nameContains: 'PowerShell' }).success).toBe(false);
     expect(findRulesSchema.safeParse({ tagDiscovery: true }).success).toBe(false);
@@ -341,6 +350,18 @@ describe('buildToolFilter', () => {
   it('builds mitreTechnique clause for subtechnique ID', () => {
     expect(buildToolFilter({ mitreTechnique: 'T1059.001' })).toContain(
       'alert.attributes.params.threat.technique.subtechnique.id: "T1059.001"'
+    );
+  });
+
+  it('routes ATLAS technique, subtechnique and tactic IDs to the right fields', () => {
+    expect(buildToolFilter({ mitreTechnique: 'AML.T0044' })).toContain(
+      'alert.attributes.params.threat.technique.id: "AML.T0044"'
+    );
+    expect(buildToolFilter({ mitreTechnique: 'AML.T0024.002' })).toContain(
+      'alert.attributes.params.threat.technique.subtechnique.id: "AML.T0024.002"'
+    );
+    expect(buildToolFilter({ mitreTactic: 'AML.TA0000' })).toContain(
+      'alert.attributes.params.threat.tactic.id: "AML.TA0000"'
     );
   });
 

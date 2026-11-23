@@ -18,44 +18,10 @@ const requestedPrompts = (event: TimelineDisplayEvent): PromptRequest[] => {
   return outcome.type === 'prompt_requested' ? outcome.prompts : [];
 };
 
-const RESUME_TERMINAL_TYPES: ReadonlySet<string> = new Set([
-  TimelineEventType.executionTerminated,
-  TimelineEventType.executionFailed,
-  TimelineEventType.executionAborted,
-]);
-
 /**
- * True when this answer settles the pause: its resume has not started yet (optimistic answer),
- * is still running, or ended with `execution_terminated`. An answer whose resume ended in
- * `execution_failed`/`execution_aborted` leaves the pause open — the server keeps the round
- * `awaiting_prompt` and expects a new answer.
- */
-const answerSettlesPrompt = (events: TimelineDisplayEvent[], answeringEventId: string): boolean => {
-  const resumeExecution = events.find(
-    (event) => event.trigger_event_id === answeringEventId && event.execution_id !== undefined
-  );
-  if (!resumeExecution) {
-    return true;
-  }
-  let resumeTerminal: TimelineDisplayEvent | undefined;
-  for (const event of events) {
-    if (
-      event.execution_id === resumeExecution.execution_id &&
-      RESUME_TERMINAL_TYPES.has(event.type)
-    ) {
-      resumeTerminal = event;
-    }
-  }
-  return !resumeTerminal || resumeTerminal.type === TimelineEventType.executionTerminated;
-};
-
-/**
- * The id of the `execution_terminated` event whose prompts the conversation is waiting on right
- * now, or undefined when nothing is pending.
- *
- * The pause is the last `execution_terminated` event (`execution_failed`/`execution_aborted`
- * are ignored — an interrupted resume never owns the pause, mirroring the server's
- * `lastTerminatedExecutionIndex`). It is closed when any of its answers settles it.
+ * Id of the `execution_terminated` event with an unanswered prompt, or undefined when there is
+ * none. A single `prompt_response` closes the prompt for good, even when the resume it triggered
+ * fails or is aborted: the server then marks the round `completed`, so we never re-ask.
  */
 export const findAwaitingPromptEventId = (events: TimelineDisplayEvent[]): string | undefined => {
   let pauseEvent: TimelineDisplayEvent | undefined;
@@ -72,8 +38,7 @@ export const findAwaitingPromptEventId = (events: TimelineDisplayEvent[]): strin
   const isClosed = events.some(
     (event) =>
       event.type === TimelineEventType.promptResponse &&
-      event.data.prompt_requested_event_id === promptRequestedEventId &&
-      answerSettlesPrompt(events, event.id)
+      event.data.prompt_requested_event_id === promptRequestedEventId
   );
   return isClosed ? undefined : promptRequestedEventId;
 };

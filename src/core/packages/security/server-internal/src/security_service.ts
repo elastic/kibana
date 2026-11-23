@@ -9,7 +9,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { CoreSecurityDelegateContract, FakeRequestEnricher } from '@kbn/core-security-server';
+import type {
+  CoreSecurityDelegateContract,
+  CoreSecurityDelegateHandle,
+  FakeRequestEnricher,
+} from '@kbn/core-security-server';
 import type { Observable, Subscription } from 'rxjs';
 import type { Config } from '@kbn/config';
 import { isFipsEnabled, checkFipsConfig } from './fips/fips';
@@ -21,6 +25,7 @@ import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 import { createCoreUiamService } from './uiam';
 import { WorkloadTypeRegistry } from './workload_type_registry';
+import { createBoundWorkloadResolver } from './resolve_bound_workloads';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
@@ -52,16 +57,32 @@ export class SecurityService
     const config = this.getConfig();
     const securityConfig: SecurityServiceConfigType | undefined = config.get(['xpack', 'security']);
     const elasticsearchConfig: PKCS12ConfigType = config.get(['elasticsearch']);
-    const serverConfig: PKCS12ConfigType = config.get(['server']);
+    const serverConfig: PKCS12ConfigType & { basePath?: string } = config.get(['server']);
 
     checkFipsConfig(securityConfig, elasticsearchConfig, serverConfig, this.log);
 
+    // The HTTP service sets up after this one, so the base path comes from the same raw setting the
+    // HTTP service reads, which its config schema has already validated.
+    const serverBasePath = serverConfig?.basePath ?? '';
+
     return {
-      registerSecurityDelegate: (api) => {
+      registerSecurityDelegate: (api): CoreSecurityDelegateHandle => {
         if (this.securityApi) {
           throw new Error('security API can only be registered once');
         }
         this.securityApi = api;
+
+        return {
+          serviceAccounts: {
+            getWorkloadTypeName: (pluginId, workloadType) =>
+              this.workloadTypes.get(pluginId, workloadType)?.name,
+            resolveBoundWorkloads: createBoundWorkloadResolver({
+              registry: this.workloadTypes,
+              serverBasePath,
+              logger: this.log.get('service-accounts'),
+            }),
+          },
+        };
       },
       acquireFakeRequestEnricher: (): FakeRequestEnricher => {
         if (this.fakeRequestEnricherAcquired) {

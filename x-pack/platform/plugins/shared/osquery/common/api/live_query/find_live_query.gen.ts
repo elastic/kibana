@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import { ECSMappingOrUndefined } from '../model/schema/common_attributes.gen';
 
@@ -75,8 +75,8 @@ export const FindLiveQueryResponse = lazySchema(() =>
               _source: z
                 .object({
                   action_id: z.string().optional(),
-                  expiration: z.string().datetime().optional(),
-                  '@timestamp': z.string().datetime().optional(),
+                  expiration: isoDateTime().optional(),
+                  '@timestamp': isoDateTime().optional(),
                   agents: z.array(z.string()).optional(),
                   user_id: z.string().optional(),
                   pack_id: z.string().optional(),
@@ -121,8 +121,8 @@ export const FindLiveQueryDetailsResponse = lazySchema(() =>
     data: z
       .object({
         action_id: z.string().optional(),
-        expiration: z.string().datetime().optional(),
-        '@timestamp': z.string().datetime().optional(),
+        expiration: isoDateTime().optional(),
+        '@timestamp': isoDateTime().optional(),
         agents: z.array(z.string()).optional(),
         user_id: z.string().optional(),
         user_profile_uid: z.string().optional(),
@@ -130,6 +130,34 @@ export const FindLiveQueryDetailsResponse = lazySchema(() =>
         pack_name: z.string().optional(),
         prebuilt_pack: z.boolean().optional(),
         tags: z.array(z.string()).optional(),
+        /**
+         * What started the live query. Absent for live queries started from the UI, the API or a rule.
+         */
+        origin: z
+          .object({
+            /**
+             * The kind of origin. `workflow` means a workflow run made the request.
+             */
+            type: z
+              .literal('workflow')
+              .describe('The kind of origin. `workflow` means a workflow run made the request.'),
+            /**
+             * The workflow execution (run) ID that made the request.
+             */
+            run_id: z.string().describe('The workflow execution (run) ID that made the request.'),
+            /**
+             * Whether Kibana verified that the run exists and made the request. Always `false` for now.
+             */
+            verified: z
+              .boolean()
+              .describe(
+                'Whether Kibana verified that the run exists and made the request. Always `false` for now.'
+              ),
+          })
+          .optional()
+          .describe(
+            'What started the live query. Absent for live queries started from the UI, the API or a rule.'
+          ),
         /**
          * Global status of the live query (completed, running).
          */

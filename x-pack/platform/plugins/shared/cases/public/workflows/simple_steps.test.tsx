@@ -15,8 +15,10 @@ import {
   removeTagsStepDefinition,
   assignCaseStepDefinition,
   closeCaseStepDefinition,
+  deleteAttachmentsStepDefinition,
   deleteCasesStepDefinition,
   deleteObservableStepDefinition,
+  bulkDeleteObservablesStepDefinition,
   findSimilarCasesStepDefinition,
   findCasesStepDefinition,
   getAllAttachmentsStepDefinition,
@@ -56,7 +58,9 @@ describe('new cases public step definitions', () => {
     getAllAttachmentsStepDefinition,
     updateObservableStepDefinition,
     deleteObservableStepDefinition,
+    bulkDeleteObservablesStepDefinition,
     getCasesStepDefinition,
+    deleteAttachmentsStepDefinition,
   ];
 
   it.each(steps)('returns expected metadata for %s', (definition) => {
