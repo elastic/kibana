@@ -8,7 +8,8 @@
 import {
   parseIntervalMinutes,
   parseRelativeFromMinutes,
-  validateAbsoluteSignalWindow,
+  validateIsoDate,
+  validateNonBlank,
   validateFeedbackAnalysisInterval,
   validateRelativeSignalWindow,
   validateSignalWindowCoversInterval,
@@ -74,13 +75,24 @@ describe('validateRelativeSignalWindow', () => {
   });
 });
 
-describe('validateAbsoluteSignalWindow', () => {
+describe('validateNonBlank', () => {
+  it('accepts strings with non-whitespace characters', () => {
+    expect(validateNonBlank('abc')).toBeUndefined();
+    expect(validateNonBlank(' a ')).toBeUndefined();
+  });
+
+  it.each(['', ' ', '\t\n'])('rejects %j', (value) => {
+    expect(validateNonBlank(value)).toBe('must not be blank');
+  });
+});
+
+describe('validateIsoDate', () => {
   it('accepts an ISO date', () => {
-    expect(validateAbsoluteSignalWindow('2026-01-31T00:00:00.000Z')).toBeUndefined();
+    expect(validateIsoDate('2026-01-31T00:00:00.000Z')).toBeUndefined();
   });
 
   it('rejects an unparseable date', () => {
-    expect(validateAbsoluteSignalWindow('last tuesday')).toMatch(/ISO 8601/);
+    expect(validateIsoDate('last tuesday')).toMatch(/ISO 8601/);
   });
 });
 

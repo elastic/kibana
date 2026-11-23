@@ -31,6 +31,8 @@ export class InMemoryRulesClient {
       failCreateOf?: Map<string, string>;
       /** Creates refused for the schedule budget once this many rules are enabled. */
       maxEnabledRules?: number;
+      /** Ids Alerting finds invalid: like Alerting, a request with one of them is refused whole. */
+      invalidRuleIds?: Set<string>;
     } = {}
   ) {}
 
@@ -60,6 +62,9 @@ export class InMemoryRulesClient {
     const failure = ids.map((id) => this.options.failCreateOf?.get(id)).find(Boolean);
     if (failure) {
       throw new Error(failure);
+    }
+    if (ids.some((id) => this.options.invalidRuleIds?.has(id))) {
+      throw badRequest('Invalid rule data', { code: ALERTING_ERROR_CODES.INVALID_RULE_DATA });
     }
 
     const enabledAfter =

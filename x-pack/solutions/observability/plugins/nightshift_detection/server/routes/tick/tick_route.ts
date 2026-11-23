@@ -55,33 +55,15 @@ export class TickRoute extends BaseEngineRoute<DetectionEngineTickBody> {
   }
 
   protected async execute(): Promise<IKibanaResponse> {
-    const spaceId = this.getSpaceId();
-
-    // Another account's workflow must not run this space's engine; a user's call is allowed.
-    await this.account.assertServiceAccountActsForSpace({ request: this.request, spaceId });
-
-    // The run stops when the caller goes away, so a cancelled workflow does not leave a tick running.
-    const controller = new AbortController();
-    const subscription = this.request.events.aborted$.subscribe(() =>
-      controller.abort('the request was aborted')
-    );
-
-    try {
-      const result = await this.account.asDetectionEngineAccount({
-        request: this.request,
-        spaceId,
-        fn: (accountRequest) =>
-          this.tick.run({
-            accountRequest,
-            spaceId,
-            skipBacklog: this.request.body.skip_backlog,
-            abortSignal: controller.signal,
-          }),
-      });
-
-      return this.ctx.response.ok({ body: result });
-    } finally {
-      subscription.unsubscribe();
-    }
+    return this.runAsAccount({
+      account: this.account,
+      fn: ({ accountRequest, spaceId, abortSignal }) =>
+        this.tick.run({
+          accountRequest,
+          spaceId,
+          skipBacklog: this.request.body.skip_backlog,
+          abortSignal,
+        }),
+    });
   }
 }

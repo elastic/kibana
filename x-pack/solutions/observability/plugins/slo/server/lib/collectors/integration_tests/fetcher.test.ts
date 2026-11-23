@@ -148,7 +148,7 @@ describe('SLO usage collector fetcher', () => {
       overrides: Partial<CompositeSLODefinition>,
       namespace?: string
     ) => {
-      const toStore: StoredCompositeSLODefinition = storedCompositeSloDefinitionSchema.parse(
+      const toStore: StoredCompositeSLODefinition = storedCompositeSloDefinitionSchema.encode(
         createCompositeSlo(overrides)
       );
       await compositeSoClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore, {

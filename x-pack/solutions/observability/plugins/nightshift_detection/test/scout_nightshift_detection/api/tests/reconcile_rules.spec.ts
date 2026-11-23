@@ -51,7 +51,7 @@ apiTest.describe(
       }
     );
 
-    // Proves the detection account can list and delete the space's managed rules (D4). No strategy
+    // Proves the detection account can list and delete the space's managed rules. No strategy
     // wants a rule yet, so a managed rule of a strategy that no longer exists must go.
     apiTest('deletes a managed rule no strategy wants, as the account', async ({ apiClient }) => {
       const headers = { ...COMMON_HEADERS, ...cookieHeader };

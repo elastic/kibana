@@ -566,15 +566,21 @@ export const useEvaluationExperimentScores = (experimentId: string, executionId?
 export const useCompareExperiments = (
   type: 'experiment' | 'execution',
   baselineId: string,
-  targetId: string
+  targetId: string,
+  repetitionPolicy?: string
 ) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.experiments.compare(type, baselineId, targetId),
+    queryKey: queryKeys.experiments.compare(type, baselineId, targetId, repetitionPolicy),
     queryFn: async (): Promise<CompareExperimentsResponse> => {
       return services.http!.get<CompareExperimentsResponse>(EVALS_EXPERIMENTS_COMPARE_URL, {
-        query: { type, baseline_id: baselineId, target_id: targetId },
+        query: {
+          type,
+          baseline_id: baselineId,
+          target_id: targetId,
+          repetition_policy: repetitionPolicy,
+        },
         version: API_VERSIONS.internal.v1,
       });
     },
