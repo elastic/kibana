@@ -13,7 +13,7 @@ import { recoveryReferenceDataSchema, renderEarlierRounds } from './reference_da
 import { recoveryEvidenceFamiliesJudge } from './evidence_families';
 import { recoveryRootCauseEvidenceJudge } from './root_cause_evidence';
 import { CAUSAL_STRATEGY_IDS, applyCitationRule } from './strategies';
-import { TAG_PATTERN } from '../../score_tags';
+import { ALLOWED_SCORE_TAGS } from '../../score_tags';
 
 const round: EvidenceRound = {
   input: { message: 'An alert in this investigation has recovered.' },
@@ -161,7 +161,7 @@ describe('nightshift_recovery_causal_checklist', () => {
     expect(tags).toHaveLength(CAUSAL_STRATEGY_IDS.length);
     expect(tags).toContain('strategy:alert_record:ran');
     expect(tags).toContain('strategy:refire_check:not_run');
-    expect(tags.every((tag) => TAG_PATTERN.test(tag))).toBe(true);
+    expect(tags.every((tag) => ALLOWED_SCORE_TAGS.has(tag))).toBe(true);
     expect(JSON.stringify(tags)).not.toContain('customer');
   });
 

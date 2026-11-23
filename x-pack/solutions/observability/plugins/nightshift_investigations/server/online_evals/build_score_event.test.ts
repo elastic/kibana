@@ -113,7 +113,7 @@ describe('buildOnlineEvalScoreEvent', () => {
     expect(event.scores[1]).not.toHaveProperty('explanation');
   });
 
-  it('sends tags with a known prefix even when explanations are off, and drops anything else, such as a well-shaped tag with an unknown prefix', () => {
+  it('sends only tags from the allowed set even when explanations are off, and drops anything else, such as a well-shaped tag that is not in it', () => {
     const event = buildOnlineEvalScoreEvent({
       metadata,
       results: [
@@ -128,6 +128,7 @@ describe('buildOnlineEvalScoreEvent', () => {
                 'Not A Keyword',
                 'a customer said this',
                 'service:checkout-prod',
+                'strategy:alert_record:maybe',
                 'strategy',
                 42,
               ],
