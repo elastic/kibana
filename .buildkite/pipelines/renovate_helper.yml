@@ -4,28 +4,15 @@ agents:
   imageProject: elastic-images-prod
   machineType: n2-standard-2
 steps:
-  - group: 'Renovate PR opened or comment'
-    if: build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && ((build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'opened') || (build.env('GITHUB_PR_EVENT_TYPE') == 'issue_comment' && build.env('GITHUB_PR_EVENT_ACTION') == 'created'))
-
-    steps:
-      - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
-        label: 'Run Renovate helper'
-        key: renovate_helper
-        timeout_in_minutes: 20
-        retry:
-          automatic:
-            - exit_status: '*'
-              limit: 1
-
-      - wait: ~
-
-      - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
-        label: 'Trigger Kibana PR pipeline'
-        key: trigger_pr_opened
-        timeout_in_minutes: 10
-        agents:
-          image: family/kibana-minimal-ubuntu-2604
-        retry:
-          automatic:
-            - exit_status: '*'
-              limit: 1
+  # Runs on Renovate PRs for events sent by Renovate (opened, pushes) and for the "run renovate helper" comment.
+  # Everyone else's pushes, including the helper's own fix commits, are built by the PR bot; running here
+  # would trigger a duplicate kibana-pull-request build.
+  - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
+    if: build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && (build.env('GITHUB_PR_TRIGGER_USER') == 'elastic-renovate-prod[bot]' || build.env('GITHUB_PR_EVENT_TYPE') == 'issue_comment')
+    label: 'Run Renovate helper'
+    key: renovate_helper
+    timeout_in_minutes: 20
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
