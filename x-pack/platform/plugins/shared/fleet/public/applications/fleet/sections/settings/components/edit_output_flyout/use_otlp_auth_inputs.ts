@@ -60,13 +60,15 @@ export function useOtlpAuthInputs(
   );
 
   // the credential row is removed while no authentication is selected, and shows the saved
-  // credential when it is back: a replacement entered before must not be saved unseen
-  const { cancelEdit: cancelCredentialEdit } = otlpAuthCredentialInput;
+  // credential when it is back: a replacement entered before must not be saved unseen. Only an
+  // entered value is dropped, so that an output that is not edited stays unchanged.
+  const { cancelEdit: cancelCredentialEdit, value: credentialValue } = otlpAuthCredentialInput;
+  const hasEnteredCredential = typeof credentialValue === 'string' && credentialValue !== '';
   useEffect(() => {
-    if (otlpAuthTypeInput.value === OTLP_AUTH_TYPE_NONE) {
+    if (otlpAuthTypeInput.value === OTLP_AUTH_TYPE_NONE && hasEnteredCredential) {
       cancelCredentialEdit();
     }
-  }, [otlpAuthTypeInput.value, cancelCredentialEdit]);
+  }, [otlpAuthTypeInput.value, hasEnteredCredential, cancelCredentialEdit]);
 
   return {
     otlpAuthTypeInput,
@@ -125,9 +127,9 @@ export const validateOtlpAuthInputs = (inputs: OtlpAuthInputs, protocol: string)
  */
 export function buildOtlpAuth(
   inputs: OtlpAuthInputs,
-  { enabled, hasStoredAuth }: { enabled: boolean; hasStoredAuth: boolean }
+  { hasStoredAuth }: { hasStoredAuth: boolean }
 ): Pick<NewOtlpOutput, 'auth' | 'secrets'> {
-  if (!enabled || !isOtlpAuthSelected(inputs)) {
+  if (!isOtlpAuthSelected(inputs)) {
     return hasStoredAuth ? { auth: null } : {};
   }
 

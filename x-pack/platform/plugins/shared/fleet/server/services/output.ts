@@ -192,7 +192,8 @@ export function withRemovedOtlpHeaders(
 
 /**
  * The exporter an output has once an update is saved. The update is merged into the saved
- * exporter, unless it changes the protocol: the settings of the previous protocol are removed.
+ * exporter, unless it changes the protocol: the settings of the previous protocol are removed,
+ * the shared headers are kept.
  */
 function getMergedOtlpExporter(
   update: OtlpExporterConfig | undefined,
@@ -201,15 +202,13 @@ function getMergedOtlpExporter(
   if (!update) {
     return stored;
   }
+  // headers replace the stored ones, which are kept when they are left out, also by an update
+  // that changes the protocol: they are shared by both protocols
+  const headers = update.headers !== undefined ? update.headers : stored?.headers;
   if (!stored || update.protocol !== stored.protocol) {
-    return update;
+    return { ...update, headers } as Partial<OtlpExporterConfig>;
   }
-  return {
-    ...stored,
-    ...update,
-    // headers replace the stored ones
-    headers: update.headers !== undefined ? update.headers : stored.headers,
-  } as Partial<OtlpExporterConfig>;
+  return { ...stored, ...update, headers } as Partial<OtlpExporterConfig>;
 }
 
 /** Drops the headers that an update removed, which the saved object keeps as `null`. */

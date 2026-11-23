@@ -63,12 +63,14 @@ export const OtlpSelectSetting: React.FunctionComponent<{
   input: ReturnType<typeof useInput>;
   testSubj: string;
   options: Array<{ value: string; text: string }>;
-}> = ({ label, helpText, input, testSubj, options }) => (
-  <EuiFormRow fullWidth label={label} helpText={helpText}>
+  error?: string;
+}> = ({ label, helpText, input, testSubj, options, error }) => (
+  <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={!!error} error={error}>
     <EuiSelect
       fullWidth
       data-test-subj={`settingsOutputsFlyout.${testSubj}`}
       {...input.props}
+      isInvalid={!!error}
       options={options}
     />
   </EuiFormRow>

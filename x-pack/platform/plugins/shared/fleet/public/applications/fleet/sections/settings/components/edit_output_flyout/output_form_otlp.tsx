@@ -18,7 +18,7 @@ import { OtlpDefaultHint, OtlpSpecLinks } from './otlp_spec';
 import { OtlpSelectSetting, OtlpTextSetting } from './otlp_setting_fields';
 import { OtlpHeaders } from './output_form_otlp_headers';
 import { OtlpAuthentication } from './output_form_otlp_auth';
-import { isOtlpAuthAvailable } from './use_otlp_auth_inputs';
+import { isOtlpAuthAvailable, isOtlpAuthSelected } from './use_otlp_auth_inputs';
 import { OtlpGrpcSettings } from './output_form_otlp_grpc';
 import { OtlpHttpSettings } from './output_form_otlp_http';
 
@@ -87,7 +87,10 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
 }) => {
   const isGrpc = isOtlpGrpc(inputs);
   const { cloud } = useStartServices();
-  const showAuth = isOtlpAuthAvailable(getOtlpInputEndpoints(inputs), cloud?.managedOtlp?.url);
+  const isAuthAvailable = isOtlpAuthAvailable(
+    getOtlpInputEndpoints(inputs),
+    cloud?.managedOtlp?.url
+  );
 
   return (
     <>
@@ -144,7 +147,10 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
       />
       <OtlpHeaders inputs={inputs} />
       <EuiSpacer size="m" />
-      {showAuth && <OtlpAuthentication inputs={inputs} />}
+      {/* an authentication that is kept for the managed OTLP endpoint stays shown, to be removed */}
+      {(isAuthAvailable || isOtlpAuthSelected(inputs)) && (
+        <OtlpAuthentication inputs={inputs} isManagedEndpoint={!isAuthAvailable} />
+      )}
       {isGrpc ? <OtlpGrpcSettings inputs={inputs} /> : <OtlpHttpSettings inputs={inputs} />}
       <EuiSpacer size="m" />
     </>

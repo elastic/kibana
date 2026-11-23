@@ -104,7 +104,7 @@ const kafkaSectionsLabels = ['Partitioning', 'Topics', 'Headers', 'Compression',
 const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
 describe('EditOutputFlyout', () => {
-  const mockStartServices = (isServerlessEnabled?: boolean) => {
+  const mockStartServices = (isServerlessEnabled?: boolean, managedOtlpUrl?: string) => {
     mockUseStartServices.mockReturnValue({
       notifications: {
         toasts: {
@@ -121,6 +121,7 @@ describe('EditOutputFlyout', () => {
       },
       cloud: {
         isServerlessEnabled,
+        ...(managedOtlpUrl ? { managedOtlp: { url: managedOtlpUrl } } : {}),
       },
     });
   };
@@ -2448,6 +2449,49 @@ describe('EditOutputFlyout', () => {
         const payload = mockSendPutOutput.mock.calls[0][1] as any;
         expect(payload.auth).toEqual({ type: 'auth_header', scheme: 'bearer_token' });
         expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should keep Save disabled for an output that is not edited', () => {
+        expect(
+          renderFlyout(otlpOutputWithAuth).utils.getByTestId('saveApplySettingsBtn')
+        ).toBeDisabled();
+      });
+
+      it('should keep Save disabled for an output without authentication that is not edited', () => {
+        expect(renderFlyout(otlpOutput).utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
+      });
+
+      it('should require removing the authentication when a signal is sent to the managed OTLP endpoint', async () => {
+        mockStartServices(false, 'https://managed-otlp.ingest.elastic.cloud');
+        const { utils } = renderFlyout({
+          ...otlpOutputWithAuth,
+          otlp_exporter: {
+            protocol: 'http/protobuf',
+            endpoint: 'https://collector.example.com:4318',
+          },
+        } as Output);
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.otlpLogsEndpointToggle'));
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpLogsEndpointInput'), {
+          target: { value: 'https://managed-otlp.ingest.elastic.cloud/v1/logs' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText(/The managed OTLP endpoint is authenticated by Fleet/)
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'none' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        expect((mockSendPutOutput.mock.calls[0][1] as any).auth).toBeNull();
       });
 
       it('should drop a replacement credential when the authentication is turned off and on', async () => {

@@ -118,6 +118,7 @@ import {
   buildOtlpAuth,
   getSelectedOtlpAuthHeaderName,
   isOtlpAuthAvailable,
+  isOtlpAuthSelected,
   useOtlpAuthInputs,
   validateOtlpAuthInputs,
 } from './use_otlp_auth_inputs';
@@ -932,8 +933,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return [
         nameInputValid,
         validateOtlpInputs(otlpInputs),
-        !isOtlpAuthEnabled ||
-          validateOtlpAuthInputs(otlpAuthInputs, otlpInputs.otlpProtocolInput.value),
+        // an authentication that is kept for the managed OTLP endpoint has to be removed explicitly
+        isOtlpAuthEnabled
+          ? validateOtlpAuthInputs(otlpAuthInputs, otlpInputs.otlpProtocolInput.value)
+          : !isOtlpAuthSelected(otlpAuthInputs),
       ].every(Boolean);
     }
     if (isLogstash) {
@@ -1131,7 +1134,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               ...(output && isOtlpAuthDisabled
                 ? {}
                 : buildOtlpAuth(otlpAuthInputs, {
-                    enabled: isOtlpAuthEnabled,
                     hasStoredAuth: !!(output && isOtlpOutput(output) && output.auth),
                   })),
             } as NewOtlpOutput;
@@ -1427,7 +1429,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isOtlpExporterDisabled,
     otlpAuthInputs,
     isOtlpAuthDisabled,
-    isOtlpAuthEnabled,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,

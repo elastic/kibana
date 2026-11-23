@@ -323,6 +323,18 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-otlp-output-with-headers'): {
+        return mockOutputSO('existing-otlp-output-with-headers', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+            headers: { Authorization: 'Basic abc' },
+          },
+        });
+      }
+
       case outputIdToUuid('existing-otlp-output-with-auth'): {
         return mockOutputSO('existing-otlp-output-with-auth', {
           type: 'otlp',
@@ -604,6 +616,18 @@ function getMockedEncryptedSoClient() {
           type: 'remote_elasticsearch',
           is_default: false,
           secrets: { service_token: { id: 'service-token-secret-id' } },
+        });
+      }
+
+      case outputIdToUuid('existing-otlp-output-with-headers'): {
+        return mockOutputSO('existing-otlp-output-with-headers', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+            headers: { Authorization: 'Basic abc' },
+          },
         });
       }
 
@@ -5400,6 +5424,24 @@ describe('Output Service', () => {
           ).rejects.toThrow(
             'secrets.auth.credential must be a new value, or the reference to the credential of this output'
           );
+        });
+
+        it('rejects a stored header that the authentication sets when the protocol changes', async () => {
+          await expect(
+            outputService.update(
+              getMockedSoClient({}),
+              esClientMock,
+              'existing-otlp-output-with-headers',
+              {
+                otlp_exporter: {
+                  endpoint: 'https://otel.example.com:4318',
+                  protocol: 'http/protobuf',
+                },
+                auth: { type: 'auth_header', scheme: 'bearer_token' },
+                secrets: { auth: { credential: 'my-token' } },
+              }
+            )
+          ).rejects.toThrow('otlp_exporter.headers cannot contain the "Authorization" header');
         });
 
         it('rejects an authentication on an output that is not an OTLP output', async () => {

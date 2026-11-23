@@ -47,9 +47,11 @@ const AUTH_SCHEME_OPTIONS = [
  * The authentication of the OTLP output. It is not shown for the managed OTLP endpoint, which
  * Fleet authenticates with an API key of its own.
  */
-export const OtlpAuthentication: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
-  inputs,
-}) => {
+export const OtlpAuthentication: React.FunctionComponent<{
+  inputs: OutputFormInputsType;
+  /** Whether the output sends data to the managed OTLP endpoint, which has no authentication. */
+  isManagedEndpoint: boolean;
+}> = ({ inputs, isManagedEndpoint }) => {
   const isCustomHeader = inputs.otlpAuthTypeInput.value === otlpAuthType.CustomHeader;
 
   return (
@@ -78,6 +80,14 @@ export const OtlpAuthentication: React.FunctionComponent<{ inputs: OutputFormInp
         input={inputs.otlpAuthTypeInput}
         testSubj="otlpAuthTypeInput"
         options={AUTH_TYPE_OPTIONS}
+        error={
+          isManagedEndpoint && isOtlpAuthSelected(inputs)
+            ? i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpAuthManagedEndpointError', {
+                defaultMessage:
+                  'The managed OTLP endpoint is authenticated by Fleet. Select None to remove this authentication, or use another endpoint.',
+              })
+            : undefined
+        }
       />
       {isOtlpAuthSelected(inputs) && (
         <>
