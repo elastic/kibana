@@ -133,22 +133,19 @@ export async function fetchSampleDocuments({
       // Every arm filters on @timestamp. A narrowed probe drops unmapped columns, so a missing one
       // looks the same for a source with data but no @timestamp (saved before the source API
       // required it) and for a wildcard with no index yet. Only the first is the source's fault.
-      const timestampProblem = getTimestampColumnProblem(columns);
-      if (timestampProblem) {
+      if (getTimestampColumnProblem(columns)) {
         const isTimestampUnmapped = !columns.some(({ name }) => name === SOURCE_TIMESTAMP_FIELD);
         // The full schema is the one thing that tells them apart: nothing resolves behind a
         // wildcard with no index, while an index without @timestamp still reports its columns,
         // whatever the source's WHERE matches. It is wide, but only runs on a source that is
         // already wrong.
-        if (
-          isTimestampUnmapped &&
-          (
-            await withSamplingErrorContext(
+        const fullColumns = isTimestampUnmapped
+          ? await withSamplingErrorContext(
               getEsqlColumnSchema({ esClient, index, signal: samplingSignal }),
               { index, samplingTimeoutMs, query: 'Column probe' }
             )
-          ).length === 0
-        ) {
+          : columns;
+        if (isTimestampUnmapped && fullColumns.length === 0) {
           // A source with no index yet, which create accepts: an empty sample lets the workflow
           // end on its "no documents" skip instead of failing the run.
           logger.debug(() => `Nothing resolves behind [${index}] yet; nothing to sample.`);
@@ -159,7 +156,12 @@ export async function fetchSampleDocuments({
             hasFilteredDocuments: false,
           };
         }
-        throw new StatusError(`Cannot sample [${index}]: ${timestampProblem}`, 400);
+        // The later answer wins: an index created between the two probes shows up in the full
+        // schema with a valid @timestamp, and then there is nothing to reject.
+        const fullTimestampProblem = getTimestampColumnProblem(fullColumns);
+        if (fullTimestampProblem) {
+          throw new StatusError(`Cannot sample [${index}]: ${fullTimestampProblem}`, 400);
+        }
       }
     }
 

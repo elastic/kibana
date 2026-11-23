@@ -162,6 +162,30 @@ describe('fetchSampleDocuments', () => {
     expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
   });
 
+  it('samples normally when the first index appears between the two column probes', async () => {
+    getEsqlColumnSchemaMock
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([TIMESTAMP_COLUMN, { name: 'message', type: 'text' }]);
+    getSampleDocumentsEsqlMock.mockResolvedValueOnce({ hits: [createHit('random-1')], total: 1 });
+
+    const result = await fetchSampleDocuments({
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [],
+      logger,
+      size: 5,
+      entityFilteredRatio: 0,
+      diverseRatio: 0,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
+  });
+
   it('rejects with a 400 that explains the missing index when nothing exists to sample', async () => {
     getEsqlColumnSchemaMock.mockRejectedValueOnce(
       new Error(
