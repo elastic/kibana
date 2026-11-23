@@ -158,11 +158,11 @@ export const DECISION_CAP_WINDOW_MS = 24 * 60 * 60 * 1000;
 export const DECISION_AUTO_CLOSE_SEVERITIES: readonly string[] = ['low', 'medium'];
 
 /**
- * The trust flag of the signer, per key kind that names one. Such a key leaves out the file hash, and
- * a subject name alone can be copied into a forged certificate, so `on` acts on a match only when
- * the signer is trusted.
+ * The trust flag of the signer, per key kind that `on` can act on and that names one. Such a key
+ * leaves out the file hash, and a subject name alone can be copied into a forged certificate, so
+ * `on` acts on a match only when the signer is trusted. A process key is not here: `on` holds every
+ * process key in shadow.
  */
 export const DECISION_SIGNER_TRUST_FIELDS: Readonly<Record<string, string>> = {
-  process: 'process.code_signature.trusted',
   library: 'dll.code_signature.trusted',
 } satisfies Partial<Record<Kind, string>>;

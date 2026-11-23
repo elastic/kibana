@@ -67,6 +67,8 @@ const setup = ({
   acknowledgedEarly = [],
   acknowledgedDuringTag = [],
   revokedAfterWrite = [],
+  expiredAfterWrite = [],
+  unreadableAfterWrite = [],
   conflictingVerdicts = [],
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
@@ -100,6 +102,10 @@ const setup = ({
   acknowledgedDuringTag?: string[];
   /** Decisions a revoke deletes after the sweep has written to their alerts: the first read still finds them in force. */
   revokedAfterWrite?: string[];
+  /** Decisions that expire after the sweep has written to their alerts. */
+  expiredAfterWrite?: string[];
+  /** Decisions whose read after the sweep's writes fails. */
+  unreadableAfterWrite?: string[];
   /** Decisions whose key has a true positive or inconclusive verdict. */
   conflictingVerdicts?: string[];
 }) => {
@@ -191,10 +197,16 @@ const setup = ({
     const current = decisions[id];
     if (current === undefined) throw Object.assign(new Error('not found'), { statusCode: 404 });
     reads.set(id, (reads.get(id) ?? 0) + 1);
+    const afterWrite = reads.get(id)! > 1;
+    if (afterWrite && unreadableAfterWrite.includes(id)) throw new Error('es down');
+    const deleted = { ...current, governance: { lifecycle: { status: 'deleted' } } };
+    const expired = { ...current, expires_at: new Date(NOW - 1000).toISOString() };
     return {
       _source:
-        revokedDuringSweep.includes(id) || (revokedAfterWrite.includes(id) && reads.get(id)! > 1)
-          ? { ...current, governance: { lifecycle: { status: 'deleted' } } }
+        revokedDuringSweep.includes(id) || (afterWrite && revokedAfterWrite.includes(id))
+          ? deleted
+          : afterWrite && expiredAfterWrite.includes(id)
+          ? expired
           : current,
     };
   });
@@ -1013,6 +1025,136 @@ describe('triage match decisions step in on mode', () => {
     });
   });
 
+  describe('when the sweep cannot finish a write cycle', () => {
+    const dismissed = () => decisionId('do_not_propose', hashOf('C:\\x.exe'));
+
+    it('keeps what it closed, and its notes, when the decision only expired after the closes', async () => {
+      const { run, closes, tags, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+        expiredAfterWrite: [idOf('C:\\x.exe')],
+      });
+
+      const { output } = await run();
+
+      // An expiry is not a revoke: the closes were made while the decision was in force.
+      expect(closes().map(({ status }) => status)).toEqual(['closed']);
+      expect(tags()).toHaveLength(1);
+      expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+      expect(output).toEqual(expect.objectContaining({ closed: 1 }));
+    });
+
+    it('keeps the dismissal tags and notes when the decision only expired after the tags', async () => {
+      const id = dismissed();
+      const { run, tags, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: { [id]: stored('do_not_propose') },
+        expiredAfterWrite: [id],
+      });
+
+      const { output } = await run();
+
+      expect(tags()).toHaveLength(1);
+      expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+      expect(output).toEqual(expect.objectContaining({ skipped: 1 }));
+    });
+
+    it('keeps what it closed and notes it when the decision cannot be read again', async () => {
+      const { run, closes, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+        unreadableAfterWrite: [idOf('C:\\x.exe')],
+      });
+
+      const { output } = await run();
+
+      // The tag stays on the alert, so a revoke still finds it.
+      expect(closes().map(({ status }) => status)).toEqual(['closed']);
+      expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+      expect(output).toEqual(expect.objectContaining({ closed: 1 }));
+    });
+
+    it('counts a failure and writes no note when the undo of a revoked close fails', async () => {
+      const { run, callKibanaApi, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+        revokedAfterWrite: [idOf('C:\\x.exe')],
+      });
+      const inner = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          // The reopen is the status call that asks for `open`.
+          if (params.path.endsWith('/signals/status') && params.body?.status === 'open') {
+            throw new Error('reopen failed');
+          }
+          return inner(params);
+        }
+      );
+
+      const { output } = await run();
+
+      expect(notes()).toEqual([]);
+      expect(output).toEqual(expect.objectContaining({ close_failures: 1 }));
+    });
+
+    it('takes the dismissal tags off a revoked decision in chunks, however many alerts it tagged', async () => {
+      const id = dismissed();
+      const ids = Array.from({ length: TAG_CHUNK_SIZE + 1 }, (_unused, i) => `s${i}`);
+      const { run, tags, notes } = setup({
+        mode: 'on',
+        alerts: ids.map((alertId): [string, Record<string, unknown>] => [
+          alertId,
+          source('C:\\x.exe'),
+        ]),
+        decisions: { [id]: stored('do_not_propose') },
+        revokedAfterWrite: [id],
+      });
+
+      const { output } = await run();
+
+      const removals = tags().filter(({ tags: change }) => change.tags_to_add.length === 0);
+      expect(removals.flatMap(({ ids: removed }) => removed)).toEqual(ids);
+      expect(Math.max(...removals.map(({ ids: removed }) => removed.length))).toBeLessThanOrEqual(
+        TAG_CHUNK_SIZE
+      );
+      expect(notes()).toEqual([]);
+      expect(output).toEqual(expect.objectContaining({ skipped: 0 }));
+    });
+
+    it('does not count or note a revoked dismissal whose tags could not be taken off', async () => {
+      const id = dismissed();
+      const { run, callKibanaApi, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: { [id]: stored('do_not_propose') },
+        revokedAfterWrite: [id],
+      });
+      const inner = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (
+            params.path.endsWith('/signals/tags') &&
+            params.body?.tags.tags_to_add.length === 0 &&
+            params.body?.tags.tags_to_remove.includes('az:inconclusive')
+          ) {
+            throw new Error('untag failed');
+          }
+          return inner(params);
+        }
+      );
+
+      const { output } = await run();
+
+      // A failed undo must not read as "kept out of analysis" for a decision that was taken back.
+      expect(notes()).toEqual([]);
+      expect(output).toEqual(expect.objectContaining({ skipped: 0, tag_failures: 1 }));
+    });
+  });
+
   it('closes nothing for an approved decision whose key has a later true positive or inconclusive verdict', async () => {
     const { run, tags, closes, notes } = setup({
       mode: 'on',
@@ -1027,7 +1169,13 @@ describe('triage match decisions step in on mode', () => {
     const { output } = await run();
 
     expect(closes()).toEqual([]);
-    expect(tags()).toEqual([]);
+    // Tagged as in shadow, so the shadow data still shows what the decision would have closed.
+    expect(tags()).toEqual([
+      {
+        ids: ['a', 'b'],
+        tags: { tags_to_add: [`az:would_close:${idOf('C:\\x.exe')}`], tags_to_remove: [] },
+      },
+    ]);
     expect(notes()).toEqual([]);
     expect(output).toEqual(
       expect.objectContaining({ closed: 0, blocked_by_verdict: 2, close_failures: 0 })

@@ -609,14 +609,15 @@ describe('fetchDecisionCandidates', () => {
     expect(after).toBeUndefined();
   });
 
-  it("fetches the signers' trust flags, without which `on` would hold every signed match", async () => {
+  it("fetches the library signer's trust flag, without which `on` would hold every signed library match", async () => {
     const { run: fetch, callKibanaApi } = run([]);
 
     await fetch();
 
-    expect(callKibanaApi.mock.calls[0][0].body._source).toEqual(
-      expect.arrayContaining(['process.code_signature.trusted', 'dll.code_signature.trusted'])
-    );
+    const { _source: fields } = callKibanaApi.mock.calls[0][0].body;
+    expect(fields).toContain('dll.code_signature.trusted');
+    // `on` holds every process key in shadow, so its trust flag is not read.
+    expect(fields).not.toContain('process.code_signature.trusted');
   });
 
   const fullPage = (timestampOf: (i: number) => number) =>
