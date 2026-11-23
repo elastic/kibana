@@ -93,9 +93,23 @@ const tidy = (path: string): string => {
   return shorter === '' ? path : shorter;
 };
 
-// A long path is cut at its start: its end is the field.
 const shortName = (name: string): string =>
   name.length > MAX_NAME_LENGTH ? `…${name.slice(-(MAX_NAME_LENGTH - 1))}` : name;
+
+/**
+ * The field a path ends in, `document/children/componentProperties/additionalProperties/value` as
+ * `value`: the type says what it is, and the path only says where it sits in a schema that is
+ * often shared. A map's values keep the name of the map (`labels/additionalProperties`).
+ */
+const fieldOf = (path: string): string => {
+  const segments = tidy(path).split('/');
+  const last = segments[segments.length - 1];
+  const name =
+    last === 'additionalProperties' && segments.length > 1
+      ? `${segments[segments.length - 2]}/additionalProperties`
+      : last;
+  return shortName(name);
+};
 
 const scopeName = (scope: string): string => scope.slice(scope.lastIndexOf('/') + 1);
 
@@ -218,7 +232,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
       {
         area: id.startsWith('request-') ? 'Request' : 'Response',
         sign: '!',
-        name: body ? RESPONSE_BODY : shortName(tidy(second)),
+        name: body ? RESPONSE_BODY : fieldOf(second),
         type,
         // A type that was cut may have lost the value or variant that changed.
         details: type === undefined || type.includes('…') ? [`${added ? '+' : '-'} ${what}`] : [],
@@ -234,7 +248,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
     {
       area,
       sign,
-      name: shortName(tidy(name)),
+      name: fieldOf(name),
       type,
       details: [location, ...details].filter((detail): detail is string => detail !== undefined),
     },
@@ -294,24 +308,21 @@ interface Field {
   readonly details: Set<string>;
 }
 
-/** One line per field: its name and type, then in brackets what changed about it. */
+/** One line per field of a name and type: then in brackets what changed about it. */
 const lineOf = ({ name, type, details }: Field): string =>
   `${name}${type === undefined ? '' : `: ${type}`}${
     details.size > 0 ? ` (${[...details].sort(byLocationFirst).join(', ')})` : ''
   }`;
 
 const listPart = (area: Area, sign: Sign, entries: readonly Entry[]): ListPart => {
-  // A field that several changes are about is one line, with the type and all the details.
+  // A field that several changes are about is one line, with all their details.
   const fields = new Map<string, Field>();
   for (const { name, type, details } of entries) {
-    const known = fields.get(name);
-    const field: Field = {
-      name,
-      type: known?.type ?? type,
-      details: known?.details ?? new Set<string>(),
-    };
+    // Fields of the same name and type, wherever they sit, are one line.
+    const key = `${name}\u0000${type ?? ''}`;
+    const field: Field = fields.get(key) ?? { name, type, details: new Set<string>() };
     details.forEach((detail) => field.details.add(detail));
-    fields.set(name, field);
+    fields.set(key, field);
   }
   const names = [...fields.values()].map(lineOf).sort(byText);
   const object = isObjectArea(area);

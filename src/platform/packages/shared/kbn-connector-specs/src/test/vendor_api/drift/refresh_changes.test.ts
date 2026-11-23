@@ -72,10 +72,10 @@ describe('describeChanges', () => {
     expect(lines).toEqual(
       object(
         'Response',
-        '- custom_attributes/key: string',
-        '+ style/fontVariantPosition: NORMAL | SUPER | SUB',
-        '! children/value: boolean | string | SlotContentId',
-        '! securityPostureConfig/vulnerabilityMode: string (deprecated)'
+        '- key: string',
+        '+ fontVariantPosition: NORMAL | SUPER | SUB',
+        '! value: boolean | string | SlotContentId',
+        '! vulnerabilityMode: string (deprecated)'
       )
     );
   });
@@ -108,7 +108,7 @@ describe('describeChanges', () => {
           'BOOLEAN | TEXT | SLOT'
         ),
       ])
-    ).toEqual(object('Response', '! children/type: BOOLEAN | TEXT | SLOT'));
+    ).toEqual(object('Response', '! type: BOOLEAN | TEXT | SLOT'));
     expect(
       describeChanges([
         change(
@@ -131,7 +131,7 @@ describe('describeChanges', () => {
     ).toEqual(
       object(
         'Response',
-        '! networkConfig/datapathProvider: UNSPECIFIED | LEGACY_DATAPATH | ADVANCED_DATAPATH | MIGRATE_T… (+ MIGRATE_TO_ADVANCED_DATAPATH)'
+        '! datapathProvider: UNSPECIFIED | LEGACY_DATAPATH | ADVANCED_DATAPATH | MIGRATE_T… (+ MIGRATE_TO_ADVANCED_DATAPATH)'
       )
     );
   });
@@ -154,12 +154,8 @@ describe('describeChanges', () => {
       ])
     ).toEqual(
       areas(
-        object(
-          'Response',
-          '! (response body) (- Q1)',
-          '! value/resource (+ microsoft.graph.group)'
-        ),
-        object('Request', '! query/source (+ A, B, C and 1 more)')
+        object('Response', '! (response body) (- Q1)', '! resource (+ microsoft.graph.group)'),
+        object('Request', '! source (+ A, B, C and 1 more)')
       )
     );
   });
@@ -225,7 +221,7 @@ describe('describeChanges', () => {
       )
     );
 
-    expect(lines).toEqual(object('Response', '+ DocumentIdentifiers/CloudProviders: string'));
+    expect(lines).toEqual(object('Response', '+ CloudProviders: string'));
   });
 
   it('says whether what was removed was in the request or the response', () => {
@@ -243,7 +239,7 @@ describe('describeChanges', () => {
     expect(lines).toEqual(
       areas(
         object('Response', '- count: integer'),
-        object('Request', '- alertId (query)', '- query/limit: integer'),
+        object('Request', '- alertId (query)', '- limit: integer'),
         list('Schemas', ['removed', '- statusGroupFilter'])
       )
     );
@@ -327,16 +323,46 @@ describe('describeChanges', () => {
     expect(describeChanges([change(id, text)])).toContain(expected);
   });
 
-  it('cuts a long path at its start, keeping the field', () => {
-    const line = describeChanges([
+  it('names a field by its own name, wherever it sits in the schema', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-optional-property-added',
+          `added the optional property \`${'section/'.repeat(
+            20
+          )}finalField\` to the response with the \`200\` status`,
+          'string'
+        ),
+      ])
+    ).toEqual(object('Response', '+ finalField: string'));
+  });
+
+  it('keeps the name of a map for the values it holds', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-optional-property-added',
+          'added the optional property `a/labels/additionalProperties` to the response with the `200` status',
+          'string'
+        ),
+      ])
+    ).toEqual(object('Response', '+ labels/additionalProperties: string'));
+  });
+
+  it('shows fields of the same name and type once, and those of another type apart', () => {
+    const added = (path: string, type: string) =>
       change(
         'response-optional-property-added',
-        `added the optional property \`${'section/'.repeat(20)}finalField\` to the response`,
-        'string'
-      ),
-    ]).find((found) => found.startsWith('+'));
+        `added the optional property \`${path}\` to the response with the \`200\` status`,
+        type
+      );
 
-    expect(line).toMatch(/^\+ ….*section\/finalField: string$/);
-    expect(line?.length).toBeLessThan(100);
+    expect(
+      describeChanges([
+        added('a/style/value', 'string'),
+        added('b/other/value', 'string'),
+        added('c/value', 'integer'),
+      ])
+    ).toEqual(object('Response', '+ value: integer', '+ value: string'));
   });
 });
