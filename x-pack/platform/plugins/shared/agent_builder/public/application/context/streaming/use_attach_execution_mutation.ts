@@ -25,6 +25,7 @@ import { createConversationActions } from '../conversation/use_conversation_acti
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { isDetached, isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import type { StreamOwner } from './types';
 import { findAwaitingPromptEventId } from '../../components/conversations/timeline/awaiting_prompt';
 import { mergeEventsById } from '../../components/conversations/timeline/merge_events';
 
@@ -35,7 +36,7 @@ export interface AttachExecutionVars {
 
 export interface AttachExecutionMutationBindings {
   conversationStreamService: ConversationStreamService;
-  clearActiveStream: (conversationId: string) => void;
+  clearActiveStream: (conversationId: string, streamId: string) => void;
   markStreamStarted: (conversationId: string) => void;
 }
 
@@ -51,7 +52,7 @@ export const useAttachExecutionMutation = ({
 
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.attachExecution,
-    mutationFn: async (vars: AttachExecutionVars) => {
+    mutationFn: async (vars: AttachExecutionVars & StreamOwner) => {
       const streamActions = createConversationActions({
         conversationId: vars.conversationId,
         queryClient,
@@ -136,7 +137,7 @@ export const useAttachExecutionMutation = ({
             ),
         });
       } finally {
-        clearActiveStream(vars.conversationId);
+        clearActiveStream(vars.conversationId, vars.streamId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);
         }
