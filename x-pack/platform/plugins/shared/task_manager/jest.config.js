@@ -9,10 +9,6 @@ module.exports = {
   preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/task_manager'],
-  testPathIgnorePatterns: [
-    '<rootDir>/x-pack/platform/plugins/shared/task_manager/server/integration_tests/',
-    '<rootDir>/x-pack/platform/plugins/shared/task_manager/server/registry_checks/',
-  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/task_manager',
   coverageReporters: ['text', 'html'],

@@ -7,8 +7,8 @@
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ActionTypeRegistry } from '../action_type_registry';
-import { setupTestServers } from '../integration_tests/lib';
-import { connectorTypes } from '../integration_tests/mocks/connector_types';
+import { setupTestServers } from './lib';
+import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionTypeConfig, Services } from '../types';
