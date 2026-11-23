@@ -91,6 +91,7 @@ interface ProcessorListProps {
   onMove: (from: number, to: number) => void;
   onCommit: (processor: DraftProcessor, options?: { unchecked?: boolean }) => void;
   onCancel: () => void;
+  onChange: () => void;
 }
 
 /** The processing steps in order, reordered by dragging like the processing tab's steps. */
@@ -114,6 +115,7 @@ export function ProcessorList({
   onMove,
   onCommit,
   onCancel,
+  onChange,
 }: ProcessorListProps) {
   const keys = useMemo(() => steps.map(({ key }) => key), [steps]);
   useListReorderMonitor(keys, onMove);
@@ -131,6 +133,7 @@ export function ProcessorList({
           componentIds={componentIds}
           onCommit={onCommit}
           onCancel={onCancel}
+          onChange={onChange}
         />
       </ProcessorBlock>
     </EuiFlexItem>
@@ -170,6 +173,7 @@ export function ProcessorList({
                     componentIds={componentIds}
                     onCommit={onCommit}
                     onCancel={onCancel}
+                    onChange={onChange}
                     onDelete={() => onDelete(step.key)}
                   />
                 ) : (

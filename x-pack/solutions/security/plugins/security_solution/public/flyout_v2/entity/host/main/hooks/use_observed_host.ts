@@ -28,7 +28,7 @@ import {
   getEntityGroupRecords,
   isEntityGroupView,
   mergeEntityGroupDetails,
-} from '../../../../../flyout/entity_details/shared/entity_store_group_utils';
+} from '../../../shared/utils/entity_store_group_utils';
 import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';

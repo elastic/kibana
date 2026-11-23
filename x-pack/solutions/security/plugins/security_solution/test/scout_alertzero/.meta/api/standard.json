@@ -1,5 +1,5 @@
 {
-  "sha1": "6fff365b25138154c54f6846e5d3ef3fa0b44e42",
+  "sha1": "a0ec03b949439d3159a675b675b8eac8b9f33cb2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -114,6 +114,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
         "line": 181,
         "column": 17
+      }
+    },
+    {
+      "id": "fee0ad2838f6d0b-f57530a36a3e5ae",
+      "title": "Hunt Watch - scope check with nothing searchable in the default data view still blocks the sweep at the gate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_index_scope_nothing_searchable.spec.ts",
+        "line": 48,
+        "column": 32
+      }
+    },
+    {
+      "id": "0248eca7be0cdde-ce94fda2a0eff91",
+      "title": "Hunt Watch - scope check with unreadable names in the default data view hunts the readable names and records the rest, with the real service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_index_scope_unreadable_pattern.spec.ts",
+        "line": 59,
+        "column": 21
       }
     },
     {

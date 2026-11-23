@@ -20,7 +20,8 @@ export const createWorkflowClients = (
   managementApi: WorkflowsServerPluginSetup['management'] | undefined,
   telemetry: EbtTelemetryClient,
   logger: Logger,
-  getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>
+  getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>,
+  releaseExtractionQuota: (args: { date: string }) => Promise<void>
 ): WorkflowClients => {
   if (!managementApi) {
     return { streamsKIsOnboardingClient: undefined, significantEventsDiscoveryClient: undefined };
@@ -32,6 +33,7 @@ export const createWorkflowClients = (
       telemetry,
       logger,
       getSourcesClient,
+      releaseExtractionQuota,
     }),
     significantEventsDiscoveryClient: new SignificantEventsDiscoveryClient({ managementApi }),
   };
