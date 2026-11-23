@@ -370,6 +370,19 @@ describe('BurnRateRuleExecutor', () => {
       });
     });
 
+    it('reports the alert limit is not reached when no instance breaches', async () => {
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['host'] });
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      mockEvaluation(esClientMock, ruleParams, []);
+      alertsClientMock.getAlertLimitValue.mockReturnValue(1000);
+
+      await executeRule(ruleParams);
+
+      expect(alertsClientMock.report).not.toHaveBeenCalled();
+      expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(false);
+    });
+
     it('does not schedule an alert when the candidates long windows burn rates are below the threshold', async () => {
       const slo = createSLO({ objective: { target: 0.9 } });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });

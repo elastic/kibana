@@ -274,9 +274,10 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
               alertsClient.setAlertData({ id: alertId, context });
             }
           }
-
-          alertsClient.setAlertLimitReached(hasReachedLimit);
         }
+
+        // The framework requires the limit to be reported once its value has been requested.
+        alertsClient.setAlertLimitReached(hasReachedLimit);
 
         const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
