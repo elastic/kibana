@@ -145,10 +145,19 @@ export async function fetchSampleDocuments({
               { index, samplingTimeoutMs, query: 'Column probe' }
             )
           : columns;
-        if (isTimestampUnmapped && fullColumns.length === 0) {
+        if (
+          isTimestampUnmapped &&
+          fullColumns.length === 0 &&
+          !(await withSamplingErrorContext(
+            hasAnyDocument({ esClient, index, signal: samplingSignal }),
+            { index, samplingTimeoutMs, query: 'Column probe' }
+          ))
+        ) {
           // A source with no index yet, which create accepts: an empty sample lets the workflow
-          // end on its "no documents" skip instead of failing the run.
-          logger.debug(() => `Nothing resolves behind [${index}] yet; nothing to sample.`);
+          // end on its "no documents" skip instead of failing the run. An empty schema alone is
+          // not enough, since an index that holds documents but maps no field reports it too:
+          // that one is an invalid source and falls through to the 400.
+          logger.debug(() => `No documents behind [${index}] yet; nothing to sample.`);
           return {
             documents: [],
             totalFilters: features.length,
@@ -420,6 +429,24 @@ async function fetchEntityFilteredDocuments({
     abortSignal,
   });
 }
+
+/** One cheap `LIMIT 1` count: tells a view with no data yet apart from one that has documents. */
+const hasAnyDocument = async ({
+  esClient,
+  index,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  signal: AbortSignal;
+}): Promise<boolean> => {
+  const response = (await esClient.esql.query(
+    { query: esql.from([index]).limit(1).pipe`STATS total = COUNT(*)`.print('basic') },
+    { signal }
+  )) as unknown as { values: unknown[][] };
+  const total = response.values[0]?.[0];
+  return typeof total === 'number' && total > 0;
+};
 
 const getFilterFields = (filter: EntityFilter): string[] =>
   isEntityValuesFilter(filter)

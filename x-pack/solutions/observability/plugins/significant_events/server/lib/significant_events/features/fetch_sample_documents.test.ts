@@ -35,6 +35,11 @@ const getRandomCall = () =>
 
 const TIMESTAMP_COLUMN = { name: '@timestamp', type: 'date' };
 
+const COUNT_RESPONSE = (total: number) => ({
+  columns: [{ name: 'total', type: 'long' }],
+  values: [[total]],
+});
+
 const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
   _index: '',
   _id: id,
@@ -138,9 +143,10 @@ describe('fetchSampleDocuments', () => {
   });
 
   it('returns an empty sample without sampling when a wildcard matches no index yet', async () => {
-    // Nothing resolves behind the wildcard: not even the full schema has a column.
+    // Nothing resolves behind the wildcard: not even the full schema has a column, and no rows.
     getEsqlColumnSchemaMock.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResponse(COUNT_RESPONSE(0));
 
     const result = await fetchSampleDocuments({
       esClient,
@@ -160,6 +166,35 @@ describe('fetchSampleDocuments', () => {
     expect(result.documents).toEqual([]);
     expect(getSampleDocumentsEsqlMock).not.toHaveBeenCalled();
     expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects with a 400 a source whose index holds documents but maps no field', async () => {
+    // An empty schema looks like a missing index; only the row count shows the documents.
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResponse(COUNT_RESPONSE(2));
+
+    await expect(
+      fetchSampleDocuments({
+        esClient,
+        index: 'logs.test-default',
+        start: 100,
+        end: 200,
+        features: [],
+        logger,
+        size: 5,
+        entityFilteredRatio: 0,
+        diverseRatio: 0,
+        maxEntityFilters: 10,
+        samplingTimeoutMs: 30_000,
+        iteration: 1,
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message:
+        'Cannot sample [logs.test-default]: The query must return a [@timestamp] column. Nightshift reads every source over time windows on it.',
+    });
+    expect(getSampleDocumentsEsqlMock).not.toHaveBeenCalled();
   });
 
   it('samples normally when the first index appears between the two column probes', async () => {
