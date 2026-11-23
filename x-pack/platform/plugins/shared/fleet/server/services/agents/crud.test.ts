@@ -225,6 +225,20 @@ describe('Agents CRUD test', () => {
       const calledQuery = searchMock.mock.calls.at(-1)[0].query;
       expect(JSON.stringify(calledQuery)).not.toContain('finance');
     });
+
+    it('should search free text terms in the kuery on agent fields only', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: { tags: { buckets: [] } },
+      });
+
+      await getAgentTags(soClientMock, esClientMock, { showInactive: true, kuery: 'host*' });
+
+      const serializedQuery = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
+      expect(serializedQuery).not.toMatch(/"query_string":\{"query"/);
+      expect(serializedQuery).toContain(
+        '{"query_string":{"fields":["local_metadata.host.hostname"],"query":"host*"}}'
+      );
+    });
   });
 
   describe('filterAgentIdsByNamespace', () => {
@@ -840,6 +854,37 @@ describe('Agents CRUD test', () => {
         expect(query.bool.filter[0].bool.should[0].match).toEqual({
           'identifying_attributes.service.name': 'agent1',
         });
+      });
+    });
+
+    describe('free text kuery', () => {
+      beforeEach(() => {
+        searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
+      });
+
+      it('should search free text terms on agent fields only', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.id:agent1 and host*',
+        });
+
+        const serializedQuery = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
+        expect(serializedQuery).not.toContain('multi_match');
+        expect(serializedQuery).not.toMatch(/"query_string":\{"query"/);
+        expect(serializedQuery).toContain(
+          '{"query_string":{"fields":["local_metadata.host.hostname"],"query":"host*"}}'
+        );
+      });
+
+      it('should search a plain free text term on agent fields only', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'my-host',
+        });
+
+        const serializedQuery = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
+        expect(serializedQuery).not.toContain('multi_match');
+        expect(serializedQuery).toContain('{"match":{"local_metadata.host.hostname":"my-host"}}');
       });
     });
 

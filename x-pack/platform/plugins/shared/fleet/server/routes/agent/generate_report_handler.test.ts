@@ -85,7 +85,7 @@ const expectedNamespacesFilterQuery = {
 const expectedAgentIdFilterQuery = {
   bool: {
     filter: [
-      // Space filter comes first (spaceFilter is prepended to the _joinFilters array)
+      // Space filter comes first (spaceFilter is prepended to the _joinAgentFilters array)
       expectedNamespacesFilterQuery,
       {
         bool: {
@@ -123,13 +123,13 @@ const expectedAgentIdFilterQuery = {
   },
 };
 
-// _joinFilters parses each input string into its own AST node before AND-joining them.
+// _joinAgentFilters parses each input string into its own AST node before AND-joining them.
 // 'status:online AND policy_id:policy1' is parsed as a single and-node, so the outer
 // bool.filter has exactly 2 members: [namespaceFilter, andNode(status, policy_id)].
 const expectedKueryFilterQuery = {
   bool: {
     filter: [
-      // Space filter comes first (spaceFilter is prepended to the _joinFilters array)
+      // Space filter comes first (spaceFilter is prepended to the _joinAgentFilters array)
       expectedNamespacesFilterQuery,
       // The user kuery 'status:online AND policy_id:policy1' is parsed as one AST node
       // whose inner AND is represented as a nested bool.filter.
@@ -416,7 +416,7 @@ describe('generateReportHandler', () => {
       await generateReportHandler(mockContext, mockRequest, mockResponse);
 
       const query = getFilterQuery();
-      // When space awareness is off, _joinFilters receives only the user kuery (no space filter),
+      // When space awareness is off, _joinAgentFilters receives only the user kuery (no space filter),
       // and returns it as a single node. The result must not be wrapped in a bool.filter
       // (which would indicate a spurious extra filter was applied), and the query must be
       // defined (i.e. the handler did not short-circuit).
@@ -428,6 +428,20 @@ describe('generateReportHandler', () => {
       expect(query.bool?.filter).toBeUndefined();
       expect(Array.isArray(query.bool?.should)).toBe(true);
       expect((query.bool?.should as unknown[]).length).toBe(2);
+    });
+
+    it('free text terms in the agents kuery are searched on agent fields only', async () => {
+      mockRequest = httpServerMock.createKibanaRequest({
+        body: { ...baseRequestBodyMock, agents: 'host*' },
+      });
+
+      await generateReportHandler(mockContext, mockRequest, mockResponse);
+
+      const serializedQuery = JSON.stringify(getFilterQuery());
+      expect(serializedQuery).not.toMatch(/"query_string":\{"query"/);
+      expect(serializedQuery).toContain(
+        '{"query_string":{"fields":["local_metadata.host.hostname"],"query":"host*"}}'
+      );
     });
 
     it('KQL metacharacters in array agent ids are escaped, not injected', async () => {

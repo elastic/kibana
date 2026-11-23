@@ -274,6 +274,25 @@ describe('getAgentStatusForAgentPolicy', () => {
       })
     );
   });
+
+  it('searches free text terms in the filter kuery on agent fields only', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: { status: { buckets: [] } },
+      }),
+    };
+    const soClient = {
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+    };
+
+    await getAgentStatusForAgentPolicy(esClient as any, soClient as any, undefined, 'host*');
+
+    const serializedQuery = JSON.stringify(esClient.search.mock.calls[0][0].query);
+    expect(serializedQuery).not.toMatch(/"query_string":\{"query"/);
+    expect(serializedQuery).toContain(
+      '{"query_string":{"fields":["local_metadata.host.hostname"],"query":"host*"}}'
+    );
+  });
 });
 
 describe('getIncomingDataByAgentsId', () => {
