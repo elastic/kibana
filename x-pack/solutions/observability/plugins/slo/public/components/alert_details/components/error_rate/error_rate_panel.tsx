@@ -133,7 +133,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                             {
                               defaultMessage: 'Alert when > {threshold}x',
                               values: {
-                                threshold: numeral(actionGroupWindow!.burnRateThreshold).format(
+                                threshold: numeral(actionGroupWindow?.burnRateThreshold).format(
                                   '0.[00]'
                                 ),
                               },
@@ -152,7 +152,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
               slo={slo}
               dataTimeRange={dataTimeRange}
               alertTimeRange={alertTimeRange}
-              threshold={actionGroupWindow!.burnRateThreshold}
+              threshold={actionGroupWindow?.burnRateThreshold}
               variant="danger"
             />
           </EuiFlexItem>

@@ -437,7 +437,10 @@ export class TaskRunner<
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const alerts = alertsClient.getRawAlertInstancesForState(true);
+      // Do not drop recovered alerts from task state unless AAD was persisted
+      // with tracked: false for those same ids.
+      const shouldOptimizeTaskState = this.shouldLogAndScheduleActionsForAlerts();
+      const alerts = alertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
       alertsToReturn = alerts.rawActiveAlerts;
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
     }
@@ -541,6 +544,7 @@ export class TaskRunner<
         name: runRuleParams.rule.name,
         consumer: runRuleParams.rule.consumer,
         revision: runRuleParams.rule.revision,
+        tags: runRuleParams.rule.tags,
       });
 
       // Set rule monitoring data
@@ -671,7 +675,16 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    this.logger = createTaskRunnerLogger({ logger: this.logger, tags: [ruleId, this.ruleType.id] });
+    this.logger = createTaskRunnerLogger({
+      logger: this.logger,
+      labels: {
+        ruleId,
+        ruleType: this.ruleType.id,
+        spaceId,
+        executionId: this.executionId,
+        taskInstanceId: this.taskInstance.id,
+      },
+    });
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;
@@ -721,7 +734,7 @@ export class TaskRunner<
           .join(',');
         const errorMessage = `Executing Rule ${this.ruleType.id}:${ruleId} has resulted in the following error(s): ${lasRunErrorMessages}`;
         this.logger.error(errorMessage, {
-          tags: [this.ruleType.id, ruleId, 'rule-run-failed', `${errorSource}-error`],
+          tags: ['rule-run-failed', `${errorSource}-error`],
         });
         return {
           taskRunError: createTaskRunError(new Error(errorMessage), errorSource),
@@ -745,7 +758,7 @@ export class TaskRunner<
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
             this.logger.debug(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
+              tags: ['rule-run-failed', errorSourceTag],
             });
           } else {
             const error = this.stackTraceLog ? this.stackTraceLog.message : err;
@@ -754,7 +767,7 @@ export class TaskRunner<
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
             this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
+              tags: ['rule-run-failed', errorSourceTag],
               error: { stack_trace: stack },
             });
           }

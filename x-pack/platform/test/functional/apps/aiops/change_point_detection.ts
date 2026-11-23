@@ -29,10 +29,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
-    // Dismiss any flyout left open by a failed test so it can't intercept
-    // clicks in the following tests, keeping the tests independent.
+    // Dismiss any flyout and clear any row selection left behind by a failed test, so they
+    // can't intercept or disable clicks in the following tests, keeping the tests independent.
     afterEach(async () => {
       await aiops.changePointDetectionPage.ensureFlyoutClosed();
+      await aiops.changePointDetectionPage.ensureNoChangePointsSelected();
     });
 
     it(`loads the change point detection page`, async () => {
@@ -140,9 +141,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await tableService.selectAllRows();
       await aiops.changePointDetectionPage.viewSelected();
       await aiops.changePointDetectionPage.assertDetailedView(5);
-      await aiops.changePointDetectionPage.closeFlyout();
-      // deselect
-      await tableService.selectAllRows();
     });
 
     it('supports a quick filter actions', async () => {

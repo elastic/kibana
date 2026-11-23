@@ -24,7 +24,8 @@ import {
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
-import { execPromise, getPlaywrightGrepTag, withKibanaBabelRegister } from '../utils';
+import { getPlaywrightLimitOptions } from '../tags';
+import { execFilePromise, getPlaywrightGrepTag, withKibanaBabelRegister } from '../utils';
 import type { RunTestsOptions } from './flags';
 
 export const getPlaywrightProject = (
@@ -82,9 +83,7 @@ export async function hasTestsInPlaywrightConfig(
 ): Promise<number> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    const validationCmd = [cmd, ...cmdArgs, '--list'].join(' ');
-
-    const result = await execPromise(validationCmd, {
+    const result = await execFilePromise(cmd, [...cmdArgs, '--list'], {
       env: withKibanaBabelRegister({
         ...process.env,
         SCOUT_REPORTER_ENABLED: 'false',
@@ -196,12 +195,23 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     );
   }
 
+  const { grepInvert: pwGrepInvert } = getPlaywrightLimitOptions(options.targetAttributes);
+
+  if (options.targetAttributes.length > 0) {
+    log.info(
+      `scout: Test target attributes: ${options.targetAttributes.join(
+        ', '
+      )}; tests limited to other attributes will be skipped`
+    );
+  }
+
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
     ...(pwTestFiles.length ? pwTestFiles : []),
     `--config=${pwConfigPath}`,
     `--grep=${pwGrepTag}`,
+    ...(pwGrepInvert ? [`--grep-invert=${pwGrepInvert}`] : []),
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
     ...(options.repeatEach ? [`--repeat-each=${options.repeatEach}`] : []),
@@ -214,6 +224,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       SCOUT_TARGET_LOCATION: options.testTarget.location,
       SCOUT_TARGET_ARCH: options.testTarget.arch,
       SCOUT_TARGET_DOMAIN: options.testTarget.domain,
+      SCOUT_TARGET_ATTRIBUTES: options.targetAttributes.join(','),
       SCOUT_RUN_COMMAND: scoutRunCommandForReporting,
     };
 
@@ -250,6 +261,7 @@ export async function runPlaywrightTestCheck(log: ToolingLog) {
     SCOUT_TARGET_LOCATION: 'local',
     SCOUT_TARGET_ARCH: 'stateful',
     SCOUT_TARGET_DOMAIN: 'classic',
+    SCOUT_REPORTER_ENABLED: 'false',
   };
 
   await withProcRunner(log, async (procs) => {

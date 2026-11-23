@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { MwsCalloutContent } from './mws_callout_content';
+import { MwsAgentVersionCallout } from './mws_agent_version_callout';
+import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
@@ -14,14 +16,21 @@ import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../.
 export const MonitorMWsCallout = () => {
   const { monitor } = useSelectedMonitor();
   const { data } = useFetchMaintenanceWindows();
+  const { outdatedLocationIds } = useOutdatedMwAgentLocationIds();
 
-  const activeMWs = getActiveMaintenanceWindows(
-    data?.maintenanceWindows,
-    monitor?.[ConfigKey.MAINTENANCE_WINDOWS]
-  );
+  const monitorMWIds = monitor?.[ConfigKey.MAINTENANCE_WINDOWS] ?? [];
+  const activeMWs = getActiveMaintenanceWindows(data?.maintenanceWindows, monitorMWIds);
+
+  const hasOutdatedAgent =
+    monitorMWIds.length > 0 &&
+    (monitor?.locations ?? []).some((location) => outdatedLocationIds.has(location.id));
 
   if (activeMWs.length) {
-    return <MwsCalloutContent activeMWs={activeMWs} />;
+    return <MwsCalloutContent activeMWs={activeMWs} hasOutdatedAgent={hasOutdatedAgent} />;
+  }
+
+  if (hasOutdatedAgent) {
+    return <MwsAgentVersionCallout />;
   }
 
   return null;

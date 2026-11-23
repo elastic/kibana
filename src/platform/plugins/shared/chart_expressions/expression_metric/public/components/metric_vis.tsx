@@ -150,8 +150,10 @@ export const MetricVis = ({
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
     const hasDynamicColoring = config.metric.palette?.params && value != null;
+    // Only finite numeric values can use palette bounds: the NaN fallback for empty results
+    // has no backing data row, so resolving its maximum dimension would throw.
     const tileColor =
-      config.metric.palette?.params && typeof value === 'number'
+      config.metric.palette?.params && typeof value === 'number' && Number.isFinite(value)
         ? getColor(
             value,
             config.metric.palette,

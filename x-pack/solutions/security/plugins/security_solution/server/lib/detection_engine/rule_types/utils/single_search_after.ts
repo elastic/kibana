@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { performance } from 'perf_hooks';
 import type {
@@ -13,7 +14,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { SignalSource, LoggedRequestsConfig } from '../types';
-import { createErrorsFromShard, makeFloatString } from './utils';
+import { createErrorsFromShard, createWarningsFromClusters, makeFloatString } from './utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -38,6 +39,7 @@ export const singleSearchAfter = async <
   searchResult: ESSearchResponse<SignalSource, TSearchRequest>;
   searchDuration: string;
   searchErrors: string[];
+  searchWarnings: string[];
   loggedRequests?: RulePreviewLoggedRequest[];
 }> => {
   return withSecuritySpan('singleSearchAfter', async () => {
@@ -53,6 +55,10 @@ export const singleSearchAfter = async <
 
       const searchErrors = createErrorsFromShard({
         errors: nextSearchAfterResult._shards.failures ?? [],
+      });
+      const searchWarnings = createWarningsFromClusters({
+        clusters: nextSearchAfterResult._clusters,
+        shardErrors: searchErrors,
       });
 
       if (loggedRequestsConfig) {
@@ -70,10 +76,18 @@ export const singleSearchAfter = async <
         searchResult: nextSearchAfterResult,
         searchDuration: makeFloatString(end - start),
         searchErrors,
+        searchWarnings,
         loggedRequests,
       };
     } catch (exc) {
-      ruleExecutionLogger.error(`Searching events operation failed: ${exc}`);
+      if (isMaximumResponseSizeExceededError(exc)) {
+        // callers may recover from this error by reducing the search page size,
+        // so leave it to them to decide whether it's an error or a warning
+        ruleExecutionLogger.debug(`Searching events operation failed: ${exc}`);
+      } else {
+        ruleExecutionLogger.error(`Searching events operation failed: ${exc}`);
+      }
+
       throw exc;
     }
   });

@@ -158,6 +158,13 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
   }
 
+  public async pressDelete(times: number = 1) {
+    const textArea = await this.getTextArea();
+    for (let i = 0; i < times; i++) {
+      await textArea.pressKeys(Key.DELETE);
+    }
+  }
+
   public async pressCtrlSpace() {
     const textArea = await this.getTextArea();
     await textArea.pressKeys([
@@ -256,7 +263,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isPlayButtonVisible() {
-    return await this.testSubjects.exists('sendRequestButton');
+    return await this.testSubjects.waitForExists('sendRequestButton');
   }
 
   public async clickCopyOutput() {
@@ -264,19 +271,14 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickClearInput() {
-    const hasClearButton = await this.testSubjects.exists('clearConsoleInput');
-
-    if (hasClearButton) {
-      await this.testSubjects.click('clearConsoleInput');
-    }
+    await this.testSubjects.click('clearConsoleInput');
+    await this.retry.waitFor('console input to be empty', async () => {
+      return (await this.getEditorText()).trim() === '';
+    });
   }
 
   public async clickClearOutput() {
-    const hasClearButton = await this.testSubjects.exists('clearConsoleOutput');
-
-    if (hasClearButton) {
-      await this.testSubjects.click('clearConsoleOutput');
-    }
+    await this.testSubjects.click('clearConsoleOutput');
   }
 
   public async clickExportButton() {
@@ -382,6 +384,11 @@ export class ConsolePageObject extends FtrService {
     });
 
     await this.testSubjects.click('addNewVariableButton');
+
+    await this.retry.waitFor(`variable \${${name}} to appear in the table`, async () => {
+      const variables = await this.getVariables();
+      return variables.some((variable) => variable.name === `\${${name}}`);
+    });
   }
 
   public async removeVariables() {
@@ -466,8 +473,14 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickContextMenu() {
-    const contextMenu = await this.testSubjects.find('toggleConsoleMenu');
-    await contextMenu.click();
+    if (await this.isContextMenuOpen()) return;
+    await this.retry.tryForTime(5000, async () => {
+      const contextMenu = await this.testSubjects.find('toggleConsoleMenu', 1000);
+      await contextMenu.scrollIntoViewIfNecessary();
+      await contextMenu.moveMouseTo();
+      await contextMenu.click();
+      await this.testSubjects.existOrFail('consoleMenu', { timeout: 1500 });
+    });
   }
 
   public async isContextMenuOpen() {
@@ -545,8 +558,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async loadRequestFromHistory(index: number, andExcute: boolean = false) {
-    const historyItem = await this.testSubjects.find(`historyItem-${index}`);
-    await historyItem.click();
+    await this.testSubjects.click(`historyItem-${index}`);
 
     if (andExcute) {
       await this.testSubjects.click('consoleHistoryAddAndRunButton');

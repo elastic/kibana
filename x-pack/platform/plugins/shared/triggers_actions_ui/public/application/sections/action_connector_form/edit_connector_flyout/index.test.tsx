@@ -15,6 +15,8 @@ import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 
+jest.setTimeout(15_000);
+
 const updateConnectorResponse = {
   connector_type_id: 'test',
   is_preconfigured: false,

@@ -9,10 +9,12 @@ import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
+import { toBulkCloseRuntimeMappings } from '../../../common/components/toolbar/bulk_actions/runtime_mappings_for_bulk_close';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import type { AlertWorkflowStatus } from '../../../common/types';
@@ -21,7 +23,7 @@ import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
-interface UseBulkAlertActionItemsArgs {
+export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
   tableId: TableId;
   /* start time being passed to the Events Table */
@@ -29,21 +31,32 @@ interface UseBulkAlertActionItemsArgs {
   /* End Time of the table being passed to the Events Table */
   to: string;
   /* Sourcerer Scope Id*/
-  scopeId: SourcererScopeName;
+  scopeId?: SourcererScopeName;
   /* filter of the Alerts Query*/
   filters: Filter[];
   refetch?: () => void;
+  /* Runtime mappings from the active data view, forwarded to bulk-close so unmapped fields can be resolved */
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 export const useBulkAlertActionItems = ({
-  scopeId,
   filters,
   from,
   to,
   refetch: refetchProp,
+  runtimeMappings,
 }: UseBulkAlertActionItemsArgs) => {
   const { hasIndexWrite } = useAlertsPrivileges();
   const { startTransaction } = useStartTransaction();
+
+  // Convert data view runtime mappings to the narrower shape the route accepts,
+  // preserving each field's type and Painless script so the close query can
+  // evaluate scripted fields at query time rather than falling back to a
+  // _source read (which misses scripted/computed values entirely).
+  const bulkCloseRuntimeMappings = useMemo(
+    () => toBulkCloseRuntimeMappings(runtimeMappings),
+    [runtimeMappings]
+  );
 
   const { addSuccess, addError, addWarning } = useAppToasts();
 
@@ -120,6 +133,10 @@ export const useBulkAlertActionItems = ({
             status,
             query,
             signalIds: ids,
+            // runtimeMappings is only used by the query path (select-all). When ids is
+            // defined the by-IDs path is taken and this prop is ignored — that path
+            // doesn't send a filter query, so runtime mappings aren't needed.
+            runtimeMappings: bulkCloseRuntimeMappings,
           });
 
           setAlertLoading(false);
@@ -151,6 +168,7 @@ export const useBulkAlertActionItems = ({
       from,
       to,
       refetchProp,
+      bulkCloseRuntimeMappings,
     ]
   );
 

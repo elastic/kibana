@@ -13,7 +13,7 @@ import os from 'os';
 import crypto from 'crypto';
 
 import chalk from 'chalk';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { installArchive } from './install_archive';

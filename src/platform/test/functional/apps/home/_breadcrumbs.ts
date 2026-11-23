@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'home']);
   const deployment = getService('deployment');
+  const retry = getService('retry');
 
   describe('Breadcrumbs', function describeIndexTests() {
     it('Home page should render breadcrumbs', async () => {
@@ -46,11 +47,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const firstBreadcrumb = await testSubjects.getVisibleText('breadcrumb first');
-      const lastBreadcrumb = await testSubjects.getVisibleText('breadcrumb last');
-
-      expect(firstBreadcrumb).to.be('Integrations');
-      expect(lastBreadcrumb).to.be(tutorialId.toUpperCase());
+      await retry.try(async () => {
+        expect(await testSubjects.getVisibleText('breadcrumb first')).to.be('Integrations');
+        expect(await testSubjects.getVisibleText('breadcrumb last')).to.be('APM');
+      });
     });
 
     // The getting started page is only rendered on cloud, and therefore the tests are only run on cloud

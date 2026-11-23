@@ -402,7 +402,12 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
-  const bulkActions = useBulkActionsByTableType(tableType, finalBoolQuery, refreshAlertsTable);
+  const bulkActions = useBulkActionsByTableType(
+    tableType,
+    finalBoolQuery,
+    refreshAlertsTable,
+    runtimeMappings
+  );
 
   useEffect(() => {
     if (isDataTableInitialized) return;

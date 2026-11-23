@@ -31,13 +31,13 @@ The server side also exposes a function ([link](https://github.com/elastic/kiban
 
 Another part of the guided onboarding code is in the home plugin where the code for the landing page ([link](https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/home/public/application/components/guided_onboarding)) is situated. The landing page can be found under `/app/home#/getting_started` and there is some logic ([link](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/home/public/application/components/home.tsx#L200)) that redirects the user to the landing page when the deployment is new (i.e. there is no data in the deployment). Some of the static components for the landing page were extracted to the `kbn-guided-onboarding` package ([link](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-guided-onboarding)).
 
-When starting Kibana with `yarn start --run-examples` the `guided_onboarding_example` plugin ([link](https://github.com/elastic/kibana/tree/main/examples/guided_onboarding_example)) can be found under `/app/guidedOnboardingExample`. This page displays the current state of the guided onboarding and allows setting the state to any point in the guide. Otherwise, it can be difficult and time consuming to reach a specific step in a production guide during dev work. The example plugin also registers a config for a test guide that can be completed on the pages of the example plugin. The test guide is also used for unit and functional tests of the guided onboarding plugin.
+When starting Kibana with `pnpm start --run-examples` the `guided_onboarding_example` plugin ([link](https://github.com/elastic/kibana/tree/main/examples/guided_onboarding_example)) can be found under `/app/guidedOnboardingExample`. This page displays the current state of the guided onboarding and allows setting the state to any point in the guide. Otherwise, it can be difficult and time consuming to reach a specific step in a production guide during dev work. The example plugin also registers a config for a test guide that can be completed on the pages of the example plugin. The test guide is also used for unit and functional tests of the guided onboarding plugin.
 
 ## Development
 
 1. Guided onboarding is only enabled on cloud. Update your `kibana.dev.yml` file with `xpack.cloud.id: 'testID'` to imitate the Cloud environment.
 
-2. Start Kibana with the example plugins enabled: `yarn start --run-examples`.
+2. Start Kibana with the example plugins enabled: `pnpm start --run-examples`.
 
 3. Navigate to `/app/home#/getting_started` to view the onboarding landing page and start a guide. Alternatively, you can also start a guide within the guided onboarding example plugin at `/app/guidedOnboardingExample`. The example plugin includes a sample guide that showcases the framework's capabilities. It also provides a form to dynamically start a guide at a specific step.
 

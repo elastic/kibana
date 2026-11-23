@@ -9,7 +9,8 @@
     // advantage of the fact that TS doesn't know the types of that code and
     // gives us `any`. Once that code is converted to .ts we can remove this
     // and allow TS to infer types from any JS file imported.
-    "allowJs": false
+    "allowJs": false,
+    "strictFunctionTypes": false
   },
   "include": [
     "*.ts",

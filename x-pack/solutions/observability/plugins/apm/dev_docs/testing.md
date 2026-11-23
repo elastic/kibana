@@ -134,7 +134,7 @@ node x-pack/solutions/observability/plugins/apm/scripts/test/dat --runner --stat
 
 ## E2E Tests (Cypress)
 
-The E2E tests are located in [`x-pack/solutions/observability/plugins/apm/ftr_e2e`](../ftr_e2e).
+The E2E tests are located in [`x-pack/solutions/observability/plugins/apm-ftr-e2e`](../../apm-ftr-e2e).
 
 Tests run on buildkite PR pipeline are parallelized (8 parallel jobs) and are orchestrated by the Cypress dashboard service. It can be configured in [.buildkite/pipelines/pull_request/apm_cypress.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/apm_cypress.yml) with the property `parallelism`.
 
@@ -145,7 +145,7 @@ Tests run on buildkite PR pipeline are parallelized (8 parallel jobs) and are or
     ...
 ```
 
-[Test tips and best practices](../ftr_e2e/README.md)
+[Test tips and best practices](../../apm-ftr-e2e/README.md)
 
 #### Start Cypress dashboard
 
@@ -208,7 +208,7 @@ node scripts/functional_test_runner --config=x-pack/test_serverless/api_integrat
 ### Start
 
 ```
-yarn storybook apm
+pnpm storybook apm
 ```
 
 All files with a .stories.tsx extension will be loaded. You can access the development environment at http://localhost:9001.

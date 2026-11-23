@@ -336,10 +336,9 @@ describe('AttackDiscovery', () => {
     });
   });
 
-  describe('when connectors are configured, connectorId is undefined, and didInitialFetch is false', () => {
-    // At least two connectors are required for this scenario,
-    // because a single connector will be automatically selected,
-    // which will set connectorId to a non-undefined value:
+  describe('when multiple connectors are configured, none was previously selected, and didInitialFetch is false', () => {
+    // At least two connectors are required for this scenario, to distinguish
+    // "auto-select the first connector" from the single-connector auto-select case:
     const multipleMockConnectors: unknown[] = [
       {
         id: 'mock-connector-1',
@@ -356,10 +355,10 @@ describe('AttackDiscovery', () => {
     beforeEach(() => {
       (useLoadConnectors as jest.Mock).mockReturnValue({
         isFetched: true,
-        data: multipleMockConnectors, // <-- multiple connectors, so none are auto-selected
+        data: multipleMockConnectors, // <-- multiple connectors, none previously selected
       });
 
-      (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]); // <-- connectorId is undefined
+      (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]); // <-- no cached connectorId
 
       (useAttackDiscovery as jest.Mock).mockReturnValue({
         approximateFutureTime: null,
@@ -386,8 +385,14 @@ describe('AttackDiscovery', () => {
       );
     });
 
-    it('does NOT render the animated logo, because connectorId is undefined', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
+    it('defaults to the first (highest-priority) connector when none is selected', () => {
+      const lastCallArgs = (useAttackDiscovery as jest.Mock).mock.calls.at(-1)?.[0];
+
+      expect(lastCallArgs.connectorId).toBe('mock-connector-1');
+    });
+
+    it('renders the animated logo, because the first connector is automatically selected', () => {
+      expect(screen.getByTestId('animatedLogo')).toBeInTheDocument();
     });
 
     it('does NOT render the summary', () => {
@@ -398,8 +403,8 @@ describe('AttackDiscovery', () => {
       expect(screen.queryByTestId('loadingCallout')).toBeNull();
     });
 
-    it('renders the empty prompt', () => {
-      expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
+    it('does NOT render the empty prompt', () => {
+      expect(screen.queryByTestId('emptyPrompt')).toBeNull();
     });
 
     it('does NOT render attack discoveries', () => {
@@ -408,6 +413,47 @@ describe('AttackDiscovery', () => {
 
     it('does NOT render the upgrade call to action', () => {
       expect(screen.queryByTestId('upgrade')).toBeNull();
+    });
+  });
+
+  describe('when multiple connectors are configured and a connectorId is already selected', () => {
+    const multipleMockConnectors: unknown[] = [
+      {
+        id: 'mock-connector-1',
+        name: 'OpenAI connector 1',
+        actionTypeId: '.gen-ai',
+      },
+      {
+        id: 'mock-connector-2',
+        name: 'OpenAI connector 2',
+        actionTypeId: '.gen-ai',
+      },
+    ];
+
+    beforeEach(() => {
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: multipleMockConnectors,
+      });
+
+      // <-- an existing selection should never be overridden:
+      (useLocalStorage as jest.Mock).mockReturnValue(['mock-connector-2', jest.fn()]);
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+    });
+
+    it('does not override an existing selected connectorId', () => {
+      const lastCallArgs = (useAttackDiscovery as jest.Mock).mock.calls.at(-1)?.[0];
+
+      expect(lastCallArgs.connectorId).toBe('mock-connector-2');
     });
   });
 

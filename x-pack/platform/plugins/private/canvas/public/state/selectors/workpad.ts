@@ -399,7 +399,6 @@ export function getNodesForPage(
     return elements.map((el) => omit(el, ['ast']));
   }
 
-  // @ts-expect-error All of this AST business needs to be cleaned up.
   return elements.map(appendAst);
 }
 

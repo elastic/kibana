@@ -214,11 +214,11 @@ Both the validation and autocomplete engine are covered by extensive suites of t
 
 #### Running the tests
 
-All the tests can be run using the `yarn jest:tests src/platform/packages/shared/kbn-esql-validation-autocomplete/path/to/test/file` command at the root of the repository.
+All the tests can be run using the `pnpm test:jest src/platform/packages/shared/kbn-esql-validation-autocomplete/path/to/test/file` command at the root of the repository.
 
 To run all autocomplete and validation tests you can specifically run
 
-`yarn test:jest src/platform/packages/shared/kbn-esql-validation-autocomplete/`
+`pnpm test:jest src/platform/packages/shared/kbn-esql-validation-autocomplete/`
 
 #### Ongoing refactor
 

@@ -40,19 +40,19 @@ download_tmp_artifact kibana-default.tar.gz "${OUTPUT_DIR}/" "${KIBANA_BUILD_ID:
 echo "--- Adding commit info"
 echo "${BUILDKITE_COMMIT}" > "${OUTPUT_DIR}/KIBANA_COMMIT_HASH"
 
-echo "--- Activating service-account for gsutil to access gs://kibana-performance"
+echo "--- Activating service-account for gcloud storage to access gs://kibana-performance"
 .buildkite/scripts/common/activate_service_account.sh gs://kibana-performance
 
 echo "--- Uploading ${OUTPUT_REL} dir to ${GCS_BUCKET}"
 cd "${OUTPUT_DIR}/.."
-gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
+gcloud storage cp --recursive "${BUILD_ID}" "${GCS_BUCKET}"
 cd -
 
 if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
   echo "--- Promoting '${BUILD_ID}' dataset to LATEST"
   cd "${OUTPUT_DIR}/.."
   echo "${BUILD_ID}" > latest
-  gsutil cp latest "${GCS_BUCKET}"
+  gcloud storage cp latest "${GCS_BUCKET}"
   cd -
 else
   echo "--- Skipping promotion of dataset to LATEST"

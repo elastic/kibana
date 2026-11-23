@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiButton,
@@ -74,7 +74,7 @@ export interface Props {
   onAddAsset: (file: File) => Promise<void | string>;
 }
 
-export const AssetManager: FC<Props> = (props) => {
+export const AssetManager: CanvasFunctionComponent<Props> = (props) => {
   const { assets, onClose, onAddAsset } = props;
   const [isLoading, setIsLoading] = useState(false);
 
@@ -174,7 +174,6 @@ export const AssetManager: FC<Props> = (props) => {
 };
 
 AssetManager.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   assets: PropTypes.arrayOf(PropTypes.object).isRequired,
   onClose: PropTypes.func.isRequired,
   onAddAsset: PropTypes.func.isRequired,

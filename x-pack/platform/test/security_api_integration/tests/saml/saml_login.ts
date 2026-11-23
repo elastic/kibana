@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
@@ -218,6 +218,36 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(parseCookie(cookies[0])!);
       });
 
+      describe('with URL hash fragment', () => {
+        async function loginWithURLHash(urlHash: string) {
+          const handshakeResponse = await supertest
+            .get(`/abc/xyz/handshake?one=two three&auth_url_hash=${encodeURIComponent(urlHash)}`)
+            .expect(302);
+
+          const samlAuthenticationResponse = await supertest
+            .post('/api/security/saml/callback')
+            .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+            .send({
+              SAMLResponse: await createSAMLResponse({
+                inResponseTo: await getSAMLRequestId(handshakeResponse.headers.location),
+              }),
+            })
+            .expect(302);
+
+          return samlAuthenticationResponse.headers.location;
+        }
+
+        it('should redirect user to the URL with an empty hash fragment', async () => {
+          expect(await loginWithURLHash('')).to.be('/abc/xyz/handshake?one=two+three');
+        });
+
+        for (const urlHash of ['some-fragment', '/some-path']) {
+          it(`should ignore URL hash fragment that does not start with "#" ("${urlHash}")`, async () => {
+            expect(await loginWithURLHash(urlHash)).to.be('/abc/xyz/handshake?one=two+three');
+          });
+        }
+      });
+
       it('should succeed in case of IdP initiated login', async () => {
         // Don't pass handshake cookie and don't include `inResponseTo` into SAML response to simulate IdP initiated login.
         const samlAuthenticationResponse = await supertest
@@ -392,7 +422,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
+          .get(`/api/security/logout?${queryString.stringify(logoutRequest, { sort: false })}`)
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -421,7 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should invalidate access token on IdP initiated logout even if there is no Kibana session', async () => {
         const logoutRequest = await createLogoutRequest({ sessionIndex: idpSessionIndex });
         const logoutResponse = await supertest
-          .get(`/api/security/logout?${stringify(logoutRequest, { sort: false })}`)
+          .get(`/api/security/logout?${queryString.stringify(logoutRequest, { sort: false })}`)
           .expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
@@ -806,7 +836,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/saml.log');
+      const logFilePath = resolve(
+        __dirname,
+        '../../../../test_plugins/security_api_integration/packages/helpers/audit/saml.log'
+      );
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {
@@ -847,8 +880,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'success' } },
+          { event: { action: 'user_logout', outcome: 'unknown' } },
+        ]);
 
         expect(auditEvents).to.have.length(2);
 
@@ -885,8 +920,9 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(401);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'failure' } },
+        ]);
 
         expect(auditEvents).to.have.length(1);
         expect(auditEvents[0]).to.be.ok();

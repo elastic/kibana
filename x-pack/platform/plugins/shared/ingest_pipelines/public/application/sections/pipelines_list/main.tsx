@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Location } from 'history';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -42,7 +42,7 @@ import { getErrorText } from '../utils';
 import { PipelineFlyout } from './pipeline_flyout';
 
 const getPipelineNameFromLocation = (location: Location) => {
-  const { pipeline } = parse(location.search.substring(1));
+  const { pipeline } = queryString.parse(location.search.substring(1));
   return pipeline;
 };
 

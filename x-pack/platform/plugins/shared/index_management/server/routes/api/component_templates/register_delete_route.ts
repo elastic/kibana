@@ -11,7 +11,7 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
-  names: schema.string(),
+  names: schema.string({ maxLength: 10000 }),
 });
 
 export const registerDeleteRoute = ({

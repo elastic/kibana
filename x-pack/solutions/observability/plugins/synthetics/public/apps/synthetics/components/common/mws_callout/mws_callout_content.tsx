@@ -9,8 +9,15 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SyntheticsMaintenanceWindow } from '../../../hooks';
 import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
+import { MwsAgentVersionWarningLine } from './mws_agent_version_warning_line';
 
-export const MwsCalloutContent = ({ activeMWs }: { activeMWs: SyntheticsMaintenanceWindow[] }) => {
+export const MwsCalloutContent = ({
+  activeMWs,
+  hasOutdatedAgent = false,
+}: {
+  activeMWs: SyntheticsMaintenanceWindow[];
+  hasOutdatedAgent?: boolean;
+}) => {
   if (activeMWs.length) {
     return (
       <>
@@ -38,6 +45,7 @@ export const MwsCalloutContent = ({ activeMWs }: { activeMWs: SyntheticsMaintena
               {index !== activeMWs.length - 1 ? <span>, </span> : <span>.</span>}
             </span>
           ))}
+          {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>

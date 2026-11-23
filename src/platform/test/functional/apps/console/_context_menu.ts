@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open context menu', async () => {
       expect(await PageObjects.console.isContextMenuOpen()).to.be(false);
       await PageObjects.console.clickContextMenu();
-      expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
+      await testSubjects.existOrFail('consoleMenu');
     });
 
     it('should have options to copy as, open documentation, and auto indent', async () => {

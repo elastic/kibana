@@ -212,6 +212,7 @@ export class ActionsPlugin
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
+  private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOCanEncrypt?: boolean;
@@ -297,6 +298,7 @@ export class ActionsPlugin
     this.actionTypeRegistry = actionTypeRegistry;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
+    this.spaces = plugins.spaces;
 
     setupSavedObjects(
       core.savedObjects,
@@ -680,6 +682,7 @@ export class ActionsPlugin
       request,
       authorizationMode,
       authorization: this.security?.authz,
+      spaces: this.spaces?.spacesService,
     });
   };
 

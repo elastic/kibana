@@ -199,11 +199,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             // now check if the provided function has no incompatibility tooltip
             for (const supportedOp of supportedOperations) {
-              expect(
-                testSubjects.exists(`lns-indexPatternDimension-${supportedOp.name} incompatible`, {
-                  timeout: 500,
-                })
-              ).to.eql(supportedOp[fieldType]);
+              await testSubjects.missingOrFail(
+                `lns-indexPatternDimension-${supportedOp.name} incompatible`
+              );
             }
 
             for (const supportedOp of supportedOperations) {
@@ -242,11 +240,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // now check if the provided function has the incompatibility tooltip
             for (const unsupportedOp of unsupportedOperatons) {
               expect(
-                testSubjects.exists(
-                  `lns-indexPatternDimension-${unsupportedOp.name} incompatible`,
-                  {
-                    timeout: 500,
-                  }
+                await testSubjects.waitForExists(
+                  `lns-indexPatternDimension-${unsupportedOp.name} incompatible`
                 )
               ).to.eql(!unsupportedOp[fieldType]);
             }
@@ -409,9 +404,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
+              await testSubjects.exists(`lns-indexPatternDimension-average incompatible`)
             ).to.eql(false);
             await lens.closeDimensionEditor();
           });
@@ -496,7 +489,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         runTestsForEachScenario(tsdbConvertedToStream, 'tsdb', (indexes) => {
-          it('should keep TSDB restrictions only if a tsdb stream is in the dataView mix', async () => {
+          it('should allow average for a downgraded counter field', async () => {
             await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
               operation: 'date_histogram',
@@ -510,11 +503,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               keepOpen: true,
             });
 
-            expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
-            ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
+            await testSubjects.missingOrFail('lns-indexPatternDimension-average incompatible');
             await lens.closeDimensionEditor();
           });
 

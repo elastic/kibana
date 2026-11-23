@@ -122,7 +122,7 @@ describe('Mappings editor: point datatype', () => {
       await showAdvancedSettings();
 
       // Enable the meta parameter and add value
-      toggleFormRow('metaParameter');
+      await toggleFormRow('metaParameter');
       await act(async () => {
         updateJsonEditor('metaParameterEditor', metaParameter.meta);
       });
@@ -152,7 +152,7 @@ describe('Mappings editor: point datatype', () => {
       await showAdvancedSettings();
 
       // Enable the meta parameter
-      toggleFormRow('metaParameter');
+      await toggleFormRow('metaParameter');
 
       // Save the field and close the flyout without adding any values to meta parameter
       await updateFieldAndCloseFlyout();

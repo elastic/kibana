@@ -18,7 +18,10 @@ export default function ({ getService }: FtrProviderContext) {
   const { username, password } = getService('config').get('servers.kibana');
 
   describe('Audit Log', function () {
-    const logFilePath = Path.resolve(__dirname, '../../plugins/audit_log/audit.log');
+    const logFilePath = Path.resolve(
+      __dirname,
+      '../../../../test_plugins/security_api_integration/plugins/audit_log/audit.log'
+    );
     const logFile = new FileWrapper(logFilePath, retry);
 
     beforeEach(async () => {
@@ -27,12 +30,22 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
-      await logFile.isWritten(7500);
-      const content = await logFile.readJSON();
+      // Wait until all three expected events are confirmed on disk before reading.
+      // The saved_object_find event is emitted last (one per returned object, after
+      // the route handler completes), so it is the most likely event to be absent
+      // when a size-stability heuristic exits too early.
+      const content = await logFile.waitForAuditEvents([
+        { event: { action: 'http_request' }, url: { path: '/audit_log' } },
+        {
+          event: { action: 'saved_object_create' },
+          kibana: { saved_object: { type: 'dashboard' } },
+        },
+        { event: { action: 'saved_object_find' }, kibana: { saved_object: { type: 'dashboard' } } },
+      ]);
 
       const httpEvent = content.find(
         (c) => c.event.action === 'http_request' && c.url.path === '/audit_log'
-      );
+      )!;
       expect(httpEvent).to.be.ok();
       expect(httpEvent.trace.id).to.be.ok();
 
@@ -43,8 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const createEvent = content.find(
         (c) =>
-          c.event.action === 'saved_object_create' && c.kibana.saved_object.type === 'dashboard'
-      );
+          c.event.action === 'saved_object_create' && c.kibana.saved_object?.type === 'dashboard'
+      )!;
 
       expect(createEvent).to.be.ok();
       expect(createEvent.trace.id).to.be.ok();
@@ -55,8 +68,8 @@ export default function ({ getService }: FtrProviderContext) {
       // "epm - packages", the other is by the user for a dashboard (this is the one we are
       // concerned with).
       const findEvent = content.find(
-        (c) => c.event.action === 'saved_object_find' && c.kibana.saved_object.type === 'dashboard'
-      );
+        (c) => c.event.action === 'saved_object_find' && c.kibana.saved_object?.type === 'dashboard'
+      )!;
       expect(findEvent).to.be.ok();
       expect(findEvent.trace.id).to.be.ok();
       expect(findEvent.user.name).to.be(username);
@@ -75,10 +88,11 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username, password },
         })
         .expect(200);
-      await logFile.isWritten();
-      const content = await logFile.readJSON();
+      const content = await logFile.waitForAuditEvents([
+        { event: { action: 'user_login', outcome: 'success' } },
+      ]);
 
-      const loginEvent = content.find((c) => c.event.action === 'user_login');
+      const loginEvent = content.find((c) => c.event.action === 'user_login')!;
       expect(loginEvent).to.be.ok();
       expect(loginEvent.event.outcome).to.be('success');
       expect(loginEvent.trace.id).to.be.ok();
@@ -99,10 +113,11 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username, password: 'invalid_password' },
         })
         .expect(401);
-      await logFile.isWritten();
-      const content = await logFile.readJSON();
+      const content = await logFile.waitForAuditEvents([
+        { event: { action: 'user_login', outcome: 'failure' } },
+      ]);
 
-      const loginEvent = content.find((c) => c.event.action === 'user_login');
+      const loginEvent = content.find((c) => c.event.action === 'user_login')!;
       expect(loginEvent).to.be.ok();
       expect(loginEvent.event.outcome).to.be('failure');
       expect(loginEvent.trace.id).to.be.ok();

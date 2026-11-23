@@ -76,7 +76,7 @@ describe('Mappings editor: version datatype', () => {
     await showAdvancedSettings();
 
     // Enable the meta parameter and provide a valid object
-    toggleFormRow('metaParameter');
+    await toggleFormRow('metaParameter');
     await act(async () => {
       updateJsonEditor('metaParameterEditor', metaParameter.meta);
     });

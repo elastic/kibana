@@ -29,7 +29,13 @@ import * as Registry from '../registry';
 
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
-import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
+import {
+  getInstalledPackages,
+  getInstallationObject,
+  getPackageInfo,
+  getPackages,
+  getPackageUsageStats,
+} from './get';
 
 jest.mock('../registry');
 jest.mock('../../settings');
@@ -1122,6 +1128,53 @@ owner: elastic`,
 
         expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('and invoking getInstallationObject()', () => {
+    it('returns undefined when the package saved object is missing', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(
+        getInstallationObject({ savedObjectsClient: soClient, pkgName: 'nginx' })
+      ).resolves.toBeUndefined();
+    });
+
+    it('returns undefined for unexpected saved object errors by default', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(new Error('so unavailable'));
+
+      await expect(
+        getInstallationObject({ savedObjectsClient: soClient, pkgName: 'nginx' })
+      ).resolves.toBeUndefined();
+    });
+
+    it('propagates unexpected saved object errors when failOnUnexpectedError is true', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const error = new Error('so unavailable');
+      soClient.get.mockRejectedValue(error);
+
+      await expect(
+        getInstallationObject({
+          savedObjectsClient: soClient,
+          pkgName: 'nginx',
+          failOnUnexpectedError: true,
+        })
+      ).rejects.toBe(error);
+    });
+
+    it('still treats 404 as not installed when failOnUnexpectedError is true', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(
+        getInstallationObject({
+          savedObjectsClient: soClient,
+          pkgName: 'nginx',
+          failOnUnexpectedError: true,
+        })
+      ).resolves.toBeUndefined();
     });
   });
 });

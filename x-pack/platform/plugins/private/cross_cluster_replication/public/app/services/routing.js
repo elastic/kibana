@@ -9,7 +9,7 @@
  * This file based on guidance from https://github.com/elastic/eui/blob/main/wiki/consuming-eui/react-router.md
  */
 
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const queryParamsFromObject = (params, encodeParams = false) => {
@@ -17,7 +17,7 @@ const queryParamsFromObject = (params, encodeParams = false) => {
     return;
   }
 
-  const paramsStr = stringify(params, { sort: false, encode: encodeParams });
+  const paramsStr = queryString.stringify(params, { sort: false, encode: encodeParams });
   return `?${paramsStr}`;
 };
 

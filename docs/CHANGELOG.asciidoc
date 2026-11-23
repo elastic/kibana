@@ -10,6 +10,13 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.26>>
+* <<release-notes-8.19.25>>
+* <<release-notes-8.19.24>>
+* <<release-notes-8.19.23>>
+* <<release-notes-8.19.22>>
+* <<release-notes-8.19.21>>
+* <<release-notes-8.19.20>>
 * <<release-notes-8.19.19>>
 * <<release-notes-8.19.18>>
 * <<release-notes-8.19.17>>
@@ -125,6 +132,258 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.26]]
+== {kib} 8.19.26
+
+The 8.19.26 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.19.26]]
+=== Enhancements
+Elastic Observability solution::
+* Show the **Can run tests manually** and **Can manage rules** sub-feature privileges as selected when you grant a role **All** privileges for Synthetics. Effective permissions don't change ({kibana-pull}302481[#302481]).
+
+[float]
+[[fixes-v8.19.26]]
+=== Fixes
+Alerting::
+* Fix bulk untracking of alerts also untracking alerts of rule types you aren't authorized for, when the alerts belong to more than 10 rule types ({kibana-pull}304048[#304048]).
+// Dashboards and Visualizations::
+// !!DEFERRED!! Not on the 8.19 branch (backport failed with merge conflicts, as of 2026-11-19). Re-verify against the next BC.
+// * Fix the **Dark** and **Dark blue** basemaps in Maps missing the dots that mark cities and towns at low zoom levels ({kibana-pull}305973[#305973]).
+Data ingestion and Fleet::
+* Fix the {fleet} agent policy update API letting you change a policy's ID. A request body `id` that differs from the policy you're updating now returns a `400` error instead of being saved and returned as the policy ID ({kibana-pull}303513[#303513]).
+* Fix {fleet} agent policy `overrides` accepting OpenTelemetry collector settings, such as `receivers`, `exporters`, `processors`, `connectors`, `extensions`, and `service`. Requests that set them return a `400` error, and values already stored in a policy are left out of the policy that {fleet} sends to agents. If you preconfigure agent policies in `kibana.yml`, remove these settings from their `overrides`. To configure collectors, use an OpenTelemetry integration ({kibana-pull}305925[#305925]).
+* Fix agent policies failing to apply when an integration policy ID contains characters that {es} rejects in role descriptor names, such as IDs generated for Synthetics project monitors ({kibana-pull}303384[#303384]).
+// !!DEFERRED!! Not in the latest BC (8.19.26-3fbb154a, built from 0baf8aa3); the backport merged after the BC was cut. Re-verify against the next BC.
+// * Fix uploading a new version of an installed custom package failing when a data stream created before the package was installed uses the package's index template. The error for a data stream that the package doesn't own now names the stream and the supported options ({kibana-pull}306214[#306214]).
+Data management::
+* Fix the **Auto-follow patterns** page failing to load, with an "Error loading auto-follow patterns" message, when an auto-follow pattern created through the {es} API has no `follow_index_pattern` ({kibana-pull}303787[#303787]).
+* Fix the **Create pipeline from CSV** file picker showing the file upload size limit, which is 500 MB by default, when {kib} can't parse CSV files larger than 10 MB. The picker now shows the 10 MB limit, and processing a larger file shows a "File too large" error ({kibana-pull}301246[#301246]).
+Discover::
+* Fix the "No matching data view" error in the **Surrounding documents** and **Single document** views when you use a default data view, such as **All logs**, and the page reloads, for example after you change the theme ({kibana-pull}304432[#304432]).
+Elastic Observability solution::
+* Fix APM service dashboards and service metrics dashboards crashing the page with an `Embeddable has been destroyed` error ({kibana-pull}302552[#302552]).
+* Fix the Synthetics APIs that run a monitor test manually running tests on Elastic managed locations for users who lack permission to use them. The APIs now return a `403` error, like the disabled **Run test manually** option in the UI ({kibana-pull}302483[#302483]).
+* Fix Synthetics monitor status rule notifications showing the wrong time when you pass `context.checkedAt` to `FormatDate`. This happens when the date format has no timezone offset, which is the default, and the {kib} server timezone differs from the `dateFormat:tz` setting. Use the new `context.timestamp` action variable, an ISO 8601 time, with `FormatDate` instead ({kibana-pull}302776[#302776]).
+// !!DEFERRED!! Not on the 8.19 branch (backport failed with merge conflicts, as of 2026-11-19). Re-verify against the next BC.
+// * Fix grouped Metric threshold and Custom threshold rules not raising a no-data alert for a group that stops reporting when the rule runs much less often than its time window, for example a 5-minute check interval with a 1-minute window ({kibana-pull}303559[#303559]).
+Elastic Security solution::
+For the Elastic Security 8.19.26 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+// Elasticsearch solution::
+// !!DEFERRED!! Not on the 8.19 branch (backport failed with merge conflicts, as of 2026-11-19). Re-verify against the next BC before publishing.
+// * Fix deleted content connectors remaining in the connectors list ({kibana-pull}290859[#290859]).
+Kibana platform::
+* Fix the **Change password** form resetting while you fill it in, which discarded the password you had typed and made the change fail with an `Invalid password.` error ({kibana-pull}301119[#301119]).
+Machine Learning::
+* Fix the trained model pipeline simulation having no limit on the number of sample documents or the size of the response. It now accepts at most 100 documents and returns a `413` error when the {es} response exceeds 10 MB ({kibana-pull}304271[#304271]).
+
+[[release-notes-8.19.25]]
+== {kib} 8.19.25
+
+The 8.19.25 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.25]]
+=== Fixes
+Alerting::
+* Fix the rules list failing to load when {kib} can't read the parameters of one rule. The list now shows the other rules and a warning that names the rules that couldn't be loaded ({kibana-pull}300110[#300110]).
+Data ingestion and Fleet::
+* Fix the full agent policy APIs returning policy details without checking for Integrations read access. `GET /api/fleet/agent_policies/<agentPolicyId>/full` and `GET /api/fleet/agent_policies/<agentPolicyId>/download` now require read access to Agent policies and Integrations, and the **View policy**, **View agent policy**, and **Run standalone** options are turned off without it ({kibana-pull}301951[#301951]).
+* Fix {fleet} bulk agent action APIs not validating the `agents` input consistently. Invalid input now returns a `400` error instead of running the action. A KQL query can reference only agent fields and is limited to 500,000 characters, and each agent ID is limited to 512 characters ({kibana-pull}299837[#299837]).
+* Fix integration upgrades failing with a `400` error from a proxy in front of {es} when the data stream namespace contains non-ASCII characters ({kibana-pull}301496[#301496]).
+Data management::
+* Fix creating and fetching {data-sources} with `allowNoIndex: true` that target a nonexistent remote cluster failing with a `400` error ({kibana-pull}299790[#299790]).
+Elastic Security solution::
+For the Elastic Security 8.19.25 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Kibana platform::
+* Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty ({kibana-pull}301845[#301845]).
+
+[[release-notes-8.19.24]]
+== {kib} 8.19.24
+
+The 8.19.24 release includes the following enhancements and fixes.
+
+IMPORTANT: The 8.19.24 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[enhancement-v8.19.24]]
+=== Enhancements
+Elasticsearch solution::
+* Clarify in the Salesforce connector's document-level security tooltip that access applies per object type, not per record ({kibana-pull}297728[#297728]).
+
+[float]
+[[fixes-v8.19.24]]
+=== Fixes
+Alerting::
+* Fix rules creating duplicate alerts, and leaving the original alerts active, when a rule run stops before it saves its state ({kibana-pull}293521[#293521]).
+* Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents their completed run from being recorded ({kibana-pull}295415[#295415]).
+Dashboards and Visualizations::
+* Fix Lens metric panels failing to render when filters return no results and dynamic coloring uses a maximum dimension ({kibana-pull}297429[#297429]).
+Data ingestion and Fleet::
+* Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause ({kibana-pull}300189[#300189]).
+* Fix {fleet} running {es} transforms from uploaded integration packages with {kib}'s internal system identity. Transforms in uploaded packages now run as the user who installed the package ({kibana-pull}297771[#297771]).
+Data management::
+* Fix the runtime field editor discarding the script when you change the field type to or from `composite` ({kibana-pull}299025[#299025]).
+* Fix the runtime field preview not showing a field's custom label, and the preview row disappearing while documents load ({kibana-pull}299810[#299810]).
+* Fix saved object labels showing "index patterns" instead of "data views" when you copy a dashboard that references data views in another space ({kibana-pull}297621[#297621]).
+Discover::
+* Fix field type icons staying stale in the field list when you recreate an index with a different mapping type for an existing field ({kibana-pull}301198[#301198]).
+* Fix the **Url** field formatter adding an extra `/app` segment to relative URLs that start with a slash when {kib} runs behind a base path or in a custom space ({kibana-pull}299116[#299116]).
+Elastic Security solution::
+For the Elastic Security 8.19.24 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Elasticsearch solution::
+* Fix content connector indexes created from {kib} failing to ingest documents with large numeric IDs by mapping the document `id` field as `keyword` ({kibana-pull}297711[#297711]).
+* Fix the **Rule ID**, **Metadata field**, and **Values** tooltips on the query rules **Create rule** page not being announced by screen readers in Chrome with VoiceOver ({kibana-pull}295021[#295021]).
+Kibana platform::
+* Fix tag filters in listing pages, such as the dashboards list, returning no results when a tag name contains an ampersand (`&`) ({kibana-pull}297231[#297231]).
+* Fix Permissions-Policy violation reports reaching the configured reporting endpoint only for the last directive. Reports for every directive now reach it ({kibana-pull}299786[#299786]).
+* Fix the Analytics overview page showing the **Ingest your data** section when you can't add data or upload files ({kibana-pull}297717[#297717]).
+* Fix paging through the API keys list showing the same API key on more than one page, or leaving a key out ({kibana-pull}296117[#296117]).
+Machine Learning::
+* Fix the data frame analytics audit messages API returning messages for jobs that don't exist in the current {kib} space ({kibana-pull}297821[#297821]).
+* Fix the {esql} field statistics table being left empty when you change the query or time range while statistics are still loading ({kibana-pull}298642[#298642]).
+* Fix streaming {infer} connector requests returning no content when `elasticsearch.compression` is enabled ({kibana-pull}290381[#290381]).
+
+[[release-notes-8.19.23]]
+== {kib} 8.19.23
+
+The 8.19.23 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.23]]
+=== Fixes
+Alerting::
+* Fix forced rule runs and schedule changes being silently dropped when you request them while the rule is finishing a run ({kibana-pull}293492[#293492]).
+* Fix Jira Service Management and Opsgenie connector actions failing when the rendered alert message exceeds 130 characters. The connectors now truncate the message instead ({kibana-pull}291698[#291698]).
+Data ingestion and Fleet::
+* Fix the {fleet} output edit flyout freezing or showing no counts when thousands of agent policies use the output ({kibana-pull}291972[#291972]).
+* Fix installed integration icons rendering as black shapes ({kibana-pull}293176[#293176]).
+Elastic Observability solution::
+* Fix the APM high-cardinality warning linking to outdated troubleshooting docs. The link now opens the APM common problems page ({kibana-pull}290815[#290815]) ({kibana-pull}292214[#292214]).
+Elastic Security solution::
+For the Elastic Security 8.19.23 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Elasticsearch solution::
+* Add an **Expand site group members** toggle to SharePoint Online connectors for compact document-level security ({kibana-pull}288070[#288070]).
+* Add a **Sync all mail folders** option to the Outlook connector ({kibana-pull}291396[#291396]).
+Kibana platform::
+* Fix {kib} shutting down when the product documentation installer downloads a corrupt or incomplete artifact ({kibana-pull}291142[#291142]).
+Machine Learning::
+* Fix the anomaly detection bucket span estimation API accepting an unlimited number of detectors, which could exhaust {kib} server resources ({kibana-pull}291203[#291203]).
+* Fix the field statistics flyout in the anomaly detection job wizard closing on its own while the wizard validates the job ({kibana-pull}292297[#292297]).
+
+[[release-notes-8.19.22]]
+== {kib} 8.19.22
+
+The 8.19.22 release includes the following fixes.
+
+IMPORTANT: The 8.19.22 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/t/kibana-8-19-22-9-4-7-9-5-4-security-update-esa-2026-187/390860[security advisory] for more details.
+
+[float]
+[[fixes-v8.19.22]]
+=== Fixes
+Alerting::
+* Fix alerting resource installation using unbounded concurrency, which could exhaust {kib} heap when many contexts and namespaces install at once ({kibana-pull}287643[#287643]).
+* Fix the email connector HTTP test sending caller-supplied subject and message content. The test now sends fixed content ({kibana-pull}288664[#288664]).
+Dashboards and Visualizations::
+* Increase the TinyMath expression length limit so longer visualization formulas no longer fail ({kibana-pull}290314[#290314]).
+* Fix Canvas functions API creating data tables with more than 50 columns per row ({kibana-pull}287935[#287935]).
+Data ingestion and Fleet::
+* Fix deleting a managed integration policy leaving the agent listed as active ({kibana-pull}290181[#290181]).
+* Fix Elastic Defend metadata transforms accumulating as duplicates in {es} across stack upgrades ({kibana-pull}288379[#288379]) ({kibana-pull}288902[#288902]).
+* Fix comment-only values in {fleet} agent policy advanced YAML settings leaving agents stuck on an outdated policy ({kibana-pull}288430[#288430]).
+Data management::
+* Fix Index Management moving component templates listed in `ignore_missing_component_templates` to the end of `composed_of` when you edit or clone an index template ({kibana-pull}290171[#290171]).
+Developer tools::
+* Fix Console treating request-like lines inside an unterminated triple-quoted string as standalone requests ({kibana-pull}287547[#287547]).
+* Fix Console body autocomplete preferring a same-name global rule over an explicit field rule ({kibana-pull}286703[#286703]).
+Elastic Observability solution::
+* Add a confirmation modal in Synthetics **Alerting defaults** settings when disabling an active default status or TLS rule. Custom synthetics rules are not affected ({kibana-pull}287914[#287914]).
+* Add a **Can manage rules** Synthetics sub-feature privilege so users with Synthetics **Read** can create and manage Synthetics and Uptime alert rules without monitor write access ({kibana-pull}289952[#289952]).
+* Add a **Can run tests manually** Synthetics sub-feature privilege so users with Synthetics **Read** can run a test without monitor write access ({kibana-pull}282149[#282149]).
+* Fix Custom threshold and Metric threshold grouped alerts recovering when **If there is no data** is set to **Do nothing** ({kibana-pull}289623[#289623]).
+* Fix Observability AI Assistant hanging on **Help me understand this alert** for custom threshold alerts that have no entity filters ({kibana-pull}290244[#290244]).
+* Fix a 500 error when hovering over AWS RDS instances in the **Infrastructure Inventory** map tooltip, caused by unquoted ARN identifiers containing `:` characters being misinterpreted as KQL field-value separators ({kibana-pull}288209[#288209]).
+* Fix Synthetics global parameters shared across all spaces being dropped from private location monitor configurations during all-spaces sync ({kibana-pull}282575[#282575]).
+Elastic Security solution::
+For the Elastic Security 8.19.22 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Elasticsearch solution::
+* Add an **Expand role members** toggle to ServiceNow connectors for compact document-level security ({kibana-pull}288071[#288071]).
+Kibana platform::
+* Hide the **Activate user** action on deactivated users when you have read-only access ({kibana-pull}289801[#289801]).
+* Fix PKI authentication sessions being invalidated when in-flight HTTP/2 requests are canceled, which logged you out. This affects deployments with `server.protocol: http2` ({kibana-pull}285153[#285153]).
+* Fix {kib} failing to start when the file-based audit log appender cannot write. {kib} reports a degraded state instead ({kibana-pull}282347[#282347]).
+* Fix a failed audit log write after startup crashing {kib}. {kib} now reports a degraded state and turns the audit logger off instead ({kibana-pull}287360[#287360]).
+
+[[release-notes-8.19.21]]
+== {kib} 8.19.21
+
+The 8.19.21 release includes the following breaking changes and fixes.
+
+[IMPORTANT]
+====
+The 8.19.21 release contains fixes for potential security vulnerabilities.
+For details, go to the https://discuss.elastic.co/c/announcements/security-announcements/31[security announcements].
+====
+
+[float]
+[[breaking-changes-v8.19.21]]
+=== Breaking changes
+The email connector now verifies TLS certificates on HTTPS proxies by default. Connections to hosts with self-signed, expired, or hostname-mismatched certificates that previously succeeded will now fail. 
+
+To keep the previous behavior on the proxy connection, set `xpack.actions.ssl.proxyVerificationMode` to `none`. 
+
+Per-host `xpack.actions.customHostSettings` (custom CA or relaxed hostname) does not apply to the proxy connection. Only self-managed deployments that route email through an HTTPS proxy are affected ({kibana-pull}283150[#283150]).
+
+[float]
+[[fixes-v8.19.21]]
+=== Fixes
+Alerting::
+* Fix alert suppression for alerts stored with nested `_source` fields to prevent creating duplicate alerts instead of updating existing ones ({kibana-pull}282192[#282192]).
+Data ingestion and Fleet::
+* Fix {fleet} to ignore cluster privileges other than `monitor` in package manifests when applying permissions to agent API keys ({kibana-pull}286084[#286084]).
+* Fix {fleet} Kafka output to accept custom multi-field format strings entered directly in the Dynamic Topic field instead of producing an invalid topic expression ({kibana-pull}285581[#285581]).
+Developer tools::
+* Fix duplicate Cut, Copy, and Paste actions in the Console context menu ({kibana-pull}286704[#286704]).
+* Fix Console autocomplete inserting boolean and numeric values as quoted strings instead of JSON primitives ({kibana-pull}286699[#286699]).
+* Fix Console body autocomplete failing after closed triple-quoted string values ({kibana-pull}286695[#286695]).
+* Fix Console autocomplete not triggering at request body positions, and correct template expansion and text corruption bugs when accepting suggestions ({kibana-pull}284530[#284530]).
+* Fix Console incorrectly showing autocomplete suggestions inside non-query triple-quoted strings ({kibana-pull}282424[#282424]).
+Elastic Observability solution::
+* Add a warning in the Synthetics UI when a private-location agent is too old to support maintenance windows ({kibana-pull}285327[#285327]).
+* Fix custom threshold rate aggregation to correctly alert when a counter increases from 0 ({kibana-pull}283973[#283973]).
+Elastic Security solution::
+For the Elastic Security 8.19.21 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Elasticsearch solution::
+* Fix query rule set and rule ID validation to reject invalid characters before sending requests to {es} ({kibana-pull}276710[#276710]).
+Machine Learning::
+* Fix the trained model testing endpoint to require admin-level permissions and run inference as the requesting user ({kibana-pull}282002[#282002]).
+
+[[release-notes-8.19.20]]
+== {kib} 8.19.20
+
+The 8.19.20 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.20]]
+=== Fixes
+Data ingestion and Fleet::
+* Fix Kafka outputs incorrectly accepting a proxy configuration, which Kafka doesn't support ({kibana-pull}282313[#282313]).
+* Fix preconfigured Fleet proxies being rewritten on every {kib} startup even when unchanged, which needlessly incremented dependent agent policies ({kibana-pull}281059[#281059]).
+* Fix Fleet package policy bulk creation to store secrets in the secrets index instead of inline on the saved object, matching the existing create, update, and bulk update behavior ({kibana-pull}282213[#282213]).
+* Fix the create enrollment API key request to preserve an existing expiration value when creating the key in {es} security ({kibana-pull}281324[#281324]).
+Data management::
+* Fix ILM Explain in Index Management to include hidden and system indices when filtering by lifecycle phase ({kibana-pull}282137[#282137]).
+* Fix Cross-Cluster Replication to clear selected follower indices after a pause, resume, or unfollow action, so the Manage menu reflects the updated state ({kibana-pull}273576[#273576]).
+Elastic Observability solution::
+* Fix the Synthetics monitors overview failing to load maintenance window status for users with read-only access ({kibana-pull}281894[#281894]).
+Elastic Security solution::
+For the Elastic Security 8.19.20 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Machine Learning::
+* Fix the trained model infer, update, and stop APIs to prevent a deployment ID from being used to access a different trained model ({kibana-pull}280511[#280511]).
+* Fix the annotation and anomaly result search APIs to enforce job-level space access checks, and require a job ID on anomaly searches to prevent bypassing those checks ({kibana-pull}277197[#277197]).
+* Fix {ml} saved objects APIs to accept any one of the anomaly detection, data frame analytics, or trained models privileges instead of requiring all three, and correctly check trained models access when removing a saved object from a space ({kibana-pull}276936[#276936]).
 
 [[release-notes-8.19.19]]
 == {kib} 8.19.19

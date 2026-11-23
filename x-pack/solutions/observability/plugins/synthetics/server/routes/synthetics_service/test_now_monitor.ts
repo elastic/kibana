@@ -15,6 +15,8 @@ import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { getMonitorNotFoundResponse } from './service_errors';
+import { MONITOR_RUN_MANUALLY_API } from '../../feature';
+import { validatePermissions } from '../monitor_cruds/edit_monitor';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'POST',
@@ -28,7 +30,13 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
     const { monitorId } = routeContext.request.params;
     return triggerTestNow(monitorId, routeContext);
   },
-  writeAccess: true,
+  // Running a monitor is read-plus-execute (it never mutates the monitor SO), so it
+  // does not require `uptime-write`. Instead it needs EITHER `uptime-write` (so existing
+  // write users keep working, non-breaking) OR the `monitor-run-manually` sub-feature privilege,
+  // which grants manual runs to an otherwise read-only role.
+  writeAccess: false,
+  anyRequiredPrivileges: ['uptime-write', MONITOR_RUN_MANUALLY_API],
+  options: { availability: { since: '8.19.0' } },
 });
 
 export const triggerTestNow = async (
@@ -45,6 +53,16 @@ export const triggerTestNow = async (
 
   try {
     const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
+
+    // Running on Elastic managed locations requires the same privilege as creating or editing
+    // a monitor there, so `monitor-run-manually` alone cannot bypass it.
+    const permissionError = await validatePermissions(
+      routeContext,
+      normalizedMonitor.attributes.locations
+    );
+    if (permissionError) {
+      return response.forbidden({ body: { message: permissionError } });
+    }
 
     const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } =
       normalizedMonitor.attributes;

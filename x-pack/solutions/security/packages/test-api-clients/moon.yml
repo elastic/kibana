@@ -28,12 +28,14 @@ dependsOn:
   - '@kbn/osquery-plugin'
   - '@kbn/tooling-log'
   - '@kbn/fleet-plugin'
+  - '@kbn/scout'
 tags:
   - shared-common
   - package
   - dev
   - group-security
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'

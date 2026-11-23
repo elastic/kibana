@@ -126,6 +126,7 @@ export interface ReindexOperation {
   backupSettings?: {
     'index.number_of_replicas'?: number;
     'index.refresh_interval'?: number;
+    'index.lifecycle.skip'?: boolean;
   };
 
   /**

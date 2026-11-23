@@ -8,12 +8,15 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { MwsCalloutContent } from './mws_callout_content';
+import { MwsAgentVersionCallout } from './mws_agent_version_callout';
+import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 import { selectOverviewStatus } from '../../../state/overview_status';
 import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
 
 export const MonitorsMWsCallout = () => {
   const { allConfigs } = useSelector(selectOverviewStatus);
   const { data } = useFetchMaintenanceWindows();
+  const { outdatedLocationIds } = useOutdatedMwAgentLocationIds();
 
   const monitorMWIds = [
     ...new Set(allConfigs?.flatMap((config) => config.maintenanceWindows ?? [])),
@@ -21,8 +24,19 @@ export const MonitorsMWsCallout = () => {
 
   const activeMWs = getActiveMaintenanceWindows(data?.maintenanceWindows, monitorMWIds);
 
+  const hasOutdatedAgent =
+    outdatedLocationIds.size > 0 &&
+    (allConfigs ?? []).some(
+      (config) =>
+        (config.maintenanceWindows?.length ?? 0) > 0 && outdatedLocationIds.has(config.locationId)
+    );
+
   if (activeMWs.length) {
-    return <MwsCalloutContent activeMWs={activeMWs} />;
+    return <MwsCalloutContent activeMWs={activeMWs} hasOutdatedAgent={hasOutdatedAgent} />;
+  }
+
+  if (hasOutdatedAgent) {
+    return <MwsAgentVersionCallout />;
   }
 
   return null;
