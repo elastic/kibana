@@ -1670,23 +1670,23 @@ describe('actions schemas', () => {
       }
     );
 
-    it('should reject `export` together with `paths`', () => {
+    it('should accept `export` together with `paths`', () => {
       expect(() => {
         EndpointActionGetFileSchema.body.validate({
           agent_type: 'endpoint',
           endpoint_ids: ['endpoint_id'],
           parameters: { paths: ['/one', '/two'], export: 'azure-1' },
         });
-      }).toThrow('[parameters.export]: export supports a single path');
+      }).not.toThrow();
     });
 
-    it('should reject `export` together with a single-entry `paths`', () => {
+    it('should accept `export` together with a single-entry `paths`', () => {
       expect(() => {
         EndpointActionGetFileSchema.body.validate({
           endpoint_ids: ['endpoint_id'],
           parameters: { paths: ['/one'], export: 'azure-1' },
         });
-      }).toThrow('[parameters.export]: export supports a single path');
+      }).not.toThrow();
     });
 
     it('should accept `export` together with `path`', () => {
