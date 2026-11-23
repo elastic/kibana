@@ -22,6 +22,7 @@ import type { EndpointAuthz } from '../../../../../../common/endpoint/types/auth
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import {
   formatForConfirmationCard,
+  formatHostForConfirmationCard,
   licenseLimitOf,
   licenseTierRequiredResult,
   licenseUnavailableResult,
@@ -150,7 +151,10 @@ const stableArgsKey = (args: DispatchConfirmationArgs | undefined): string =>
   JSON.stringify(
     Object.entries(args ?? {})
       .filter(([, value]) => value !== undefined)
-      .sort(([a], [b]) => a.localeCompare(b))
+      // Code-unit order, not a locale collation: this is an equality key read
+      // back by a later execution of the tool, and must not depend on the
+      // host locale.
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
   );
 
 /**
@@ -166,6 +170,24 @@ const differingArgNames = (
   return [...names].filter(
     (name) => (confirmed?.[name] ?? undefined) !== (supplied?.[name] ?? undefined)
   );
+};
+
+/**
+ * The LangChain adapter reports `unknown` as the tool call id when the model
+ * provider returned none. An approval cannot be bound to a call that has no
+ * identity — every such call would share one prompt id and one state slot —
+ * so no card is shown and nothing can be dispatched.
+ */
+const unidentifiableCallResult = (action: DispatchActionName) =>
+  responseActionErrorResult(
+    'invalid_argument',
+    `No confirmation card was shown for "${action}": this tool call carries no unique id, so an approval could not be bound to it.`
+  );
+
+/** A tool call the adapter left without an id (`unknown`) cannot hold an approval. */
+const hasUsableToolCallId = (context: ToolHandlerContext): boolean => {
+  const toolCallId = context.callContext?.toolCallId;
+  return typeof toolCallId === 'string' && toolCallId.length > 0 && toolCallId !== 'unknown';
 };
 
 /**
@@ -565,6 +587,10 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return { kind: 'ready', target };
   }
 
+  if (!hasUsableToolCallId(context)) {
+    return { kind: 'result', result: unidentifiableCallResult(request.action) };
+  }
+
   // The confirmation is asked here, after every refusal check above, so an
   // analyst is never shown an approve button for a call that cannot succeed.
   // The dispatch is held to what the card showed: the agent id and arguments
@@ -580,7 +606,9 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
         id: promptId,
         title: confirmation.title,
         message: `${confirmation.describe(
-          `**${target.hostLabel} (agent ID ${target.endpoint.agentId})**`
+          `**${formatHostForConfirmationCard(
+            target.hostLabel
+          )} (agent ID ${formatHostForConfirmationCard(target.endpoint.agentId)})**`
         )}${analystCommentNote(confirmation.comment)}`,
         confirm_text: confirmation.confirmText,
         cancel_text: i18n.translate(

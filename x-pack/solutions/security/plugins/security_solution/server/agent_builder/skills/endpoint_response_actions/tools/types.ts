@@ -87,39 +87,30 @@ export const MAX_AGENT_STATE_ENTRIES = MAX_OUTPUT_AGENTS;
  */
 export const MAX_AGENT_STATE_TOTAL_CHARS = 24_000;
 
-// Code points that are invisible or misleading when rendered inside the
-// confirmation card's Markdown code span: control characters (C0, DEL, C1 — a
-// newline inside a code span renders as a space, so `/tmp/a\nb` would display
-// as `/tmp/a b` while the real path is what gets dispatched), bidi controls
-// (RTLO U+202E can visually reverse a filename — a spoofing vector on an
-// approval card), zero-width characters, and the backtick that would break the
-// code span itself. Everything else — including backslashes in Windows paths —
-// is left exactly as typed.
-const INVISIBLE_PATH_CODE_POINTS = new Set<number>([
-  0x200e,
-  0x200f, // LRM, RLM
-  ...range(0x202a, 0x202e), // bidi LRE..PDF, incl. RTLO
-  ...range(0x2066, 0x2069), // bidi LRI..PDI
-  0x200b,
-  0x200c,
-  0x200d, // zero-width space, ZWNJ, ZWJ
-  0xfeff, // BOM / zero-width no-break space
-]);
+// Code points that are invisible or misleading when rendered in the
+// confirmation card's Markdown: control characters (C0, DEL, C1 — a newline
+// renders as a space or a line break, so `/tmp/a\nb` would display as `/tmp/a b`
+// while the real path is what gets dispatched), bidi controls (RTLO U+202E can
+// visually reverse a filename — a spoofing vector on an approval card),
+// zero-width and joiner characters, and the Unicode tag block (U+E0000–E007F,
+// which can encode hidden ASCII). Everything else — including backslashes in
+// Windows paths — is left exactly as typed.
+//
+// Matched by Unicode property so the list cannot drift from the database:
+// `Cf` covers the bidi controls, zero-width characters, variation selectors
+// and tags; `Default_Ignorable_Code_Point` adds the ones reserved to stay
+// invisible in future versions.
+const MISLEADING_CODE_POINTS = /[\p{Cc}\p{Cf}\p{Default_Ignorable_Code_Point}\p{Zl}\p{Zp}]/u;
 
-function range(from: number, to: number): number[] {
-  return Array.from({ length: to - from + 1 }, (_, i) => from + i);
-}
+const isMisleadingCodePoint = (cp: number): boolean =>
+  MISLEADING_CODE_POINTS.test(String.fromCodePoint(cp));
 
-function isControlCodePoint(cp: number): boolean {
-  return cp <= 0x1f || cp === 0x7f || (cp >= 0x80 && cp <= 0x9f);
-}
-
-function escapeForCodeSpan(cp: number): string {
+const escapeForCodeSpan = (cp: number): string => {
   if (cp === 0x0a) return '\\n';
   if (cp === 0x0d) return '\\r';
   if (cp === 0x09) return '\\t';
   return `\\u{${cp.toString(16).toUpperCase().padStart(4, '0')}}`;
-}
+};
 
 /**
  * Renders model-authored free text (scan paths, action comments) inside the
@@ -133,17 +124,59 @@ export function formatForConfirmationCard(value: string): string {
   let formatted = '';
   for (const ch of value) {
     const cp = ch.codePointAt(0) ?? ch.charCodeAt(0);
-    if (
-      isControlCodePoint(cp) ||
-      cp === 0x60 /* backtick breaks the code span */ ||
-      INVISIBLE_PATH_CODE_POINTS.has(cp)
-    ) {
+    if (isMisleadingCodePoint(cp) || cp === 0x60 /* backtick breaks the code span */) {
       formatted += escapeForCodeSpan(cp);
     } else {
       formatted += ch;
     }
   }
   return `"${formatted}"`;
+}
+
+// Markdown characters that could change how the card renders when a value is
+// placed inside the bold span: emphasis, code, strikethrough, links,
+// autolinks, tables and `&` (a character reference such as `&#x202E;` would be
+// decoded by the renderer, visually reintroducing a code point the predicate
+// above refuses). The value is not inside a code span there, so each is
+// backslash-escaped and shown literally.
+const MARKDOWN_STRUCTURE = new Set<number>([
+  0x2a, // *
+  0x5f, // _
+  0x60, // `
+  0x7e, // ~
+  0x5b, // [
+  0x5d, // ]
+  0x3c, // <
+  0x3e, // >
+  0x7c, // |
+  0x5c, // backslash, so an escaped sequence cannot be forged
+  0x26, // &, so a character reference cannot be decoded into one
+]);
+
+/**
+ * Renders an endpoint-reported value (the hostname or agent id resolved for the
+ * target) inside the card's bold label. Unlike {@link formatForConfirmationCard}
+ * this is not a code span: a host is shown in bold so it reads as the heading
+ * of the card, and the value itself comes from the endpoint (`host.name`,
+ * `host.hostname`) rather than the model — a machine can legitimately be named
+ * `web-01** [approved by CISO]`, and an unescaped name would restructure the
+ * approval card. Markdown structure is escaped with a backslash and every
+ * misleading code point is shown as an escape, so the label the analyst reads
+ * is the exact name that will be acted on.
+ */
+export function formatHostForConfirmationCard(value: string): string {
+  let formatted = '';
+  for (const ch of value) {
+    const cp = ch.codePointAt(0) ?? ch.charCodeAt(0);
+    if (isMisleadingCodePoint(cp)) {
+      formatted += escapeForCodeSpan(cp);
+    } else if (MARKDOWN_STRUCTURE.has(cp)) {
+      formatted += `\\${ch}`;
+    } else {
+      formatted += ch;
+    }
+  }
+  return formatted;
 }
 
 /**

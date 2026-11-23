@@ -9,6 +9,7 @@ import {
   buildResponseActionComment,
   endpointNotFoundData,
   formatForConfirmationCard,
+  formatHostForConfirmationCard,
   insufficientPrivilegesResult,
   licenseLimitOf,
   licenseTierRequiredResult,
@@ -280,10 +281,121 @@ describe('formatForConfirmationCard', () => {
     expect(formatForConfirmationCard('/tmp/a`b')).toBe('"/tmp/a\\u{0060}b"');
   });
 
+  it('escapes the default-ignorable and tag code points that render as nothing', () => {
+    // Unicode tag characters spell hidden ASCII; a host name or comment
+    // carrying them reads as one string and records another.
+    expect(formatForConfirmationCard(`a\u{e0061}\u{e0062}b`)).toBe('"a\\u{E0061}\\u{E0062}b"');
+    expect(formatForConfirmationCard(`a\u{fe0f}b`)).toBe('"a\\u{FE0F}b"');
+    expect(formatForConfirmationCard(`a\u{00ad}b`)).toBe('"a\\u{00AD}b"');
+    // Line and paragraph separators still break the line in some renderers.
+    expect(formatForConfirmationCard(`a\u{2028}b`)).toBe('"a\\u{2028}b"');
+    expect(formatForConfirmationCard(`a\u{2029}b`)).toBe('"a\\u{2029}b"');
+    expect(formatForConfirmationCard(`a\u{2060}b`)).toBe('"a\\u{2060}b"');
+    // Arabic letter mark: a bidi control outside the U+202A–U+202E range.
+    expect(formatForConfirmationCard(`a\u{061c}b`)).toBe('"a\\u{061C}b"');
+    expect(formatForConfirmationCard(`a\u{3164}b`)).toBe('"a\\u{3164}b"');
+    expect(formatForConfirmationCard(`a\u{115f}b`)).toBe('"a\\u{115F}b"');
+  });
+
+  it('escapes every format and default-ignorable code point, not a hand-kept subset', () => {
+    // Ranges an earlier enumerated list missed. Each is invisible when
+    // rendered, so unescaped it would let the displayed text differ from the
+    // text that is recorded.
+    const previouslyMissed = [
+      0x0600, // Arabic number sign
+      0x070f, // Syriac abbreviation mark
+      0x0890, // Arabic pound mark above
+      0x08e2, // Arabic disambiguation mark bottom
+      0x180b, // Mongolian free variation selector
+      0x2065, // reserved
+      0x206a, // deprecated format character
+      0xfff0, // reserved
+      0x110bd, // Kaithi number sign
+      0x13430, // Egyptian hierograph format character
+      0x1d173, // musical symbol begin beam
+      0xe0080, // reserved tag
+      0xe01f0, // reserved variation selector
+    ];
+    for (const cp of previouslyMissed) {
+      expect(formatForConfirmationCard(`a${String.fromCodePoint(cp)}b`)).toBe(
+        `"a\\u{${cp.toString(16).toUpperCase().padStart(4, '0')}}b"`
+      );
+    }
+  });
+
+  it('leaves visible, non-ASCII text exactly as typed', () => {
+    // Only invisible or misleading code points are escaped. Combining marks
+    // are part of the letter they follow, and escaped they would make a
+    // legitimate non-ASCII hostname unreadable.
+    expect(formatForConfirmationCard('café')).toBe('"café"');
+    expect(formatForConfirmationCard('z\u0301')).toBe('"z\u0301"');
+    expect(formatForConfirmationCard('主机')).toBe('"主机"');
+    expect(formatForConfirmationCard('Δelta')).toBe('"Δelta"');
+  });
+
   it('renders a forged multi-line comment as one escaped line', () => {
     expect(formatForConfirmationCard('x"\n\n---\n\n**Correction:** stale label')).toBe(
       '"x"\\n\\n---\\n\\n**Correction:** stale label"'
     );
+  });
+});
+
+describe('formatHostForConfirmationCard', () => {
+  it('shows an ordinary hostname unchanged', () => {
+    expect(formatHostForConfirmationCard('web-01')).toBe('web-01');
+    expect(formatHostForConfirmationCard('db.example.internal')).toBe('db.example.internal');
+  });
+
+  it('keeps characters that are legal in a hostname and harmless in Markdown', () => {
+    // An underscore only opens emphasis around word boundaries in CommonMark,
+    // but it is escaped rather than reasoned about: the label must not depend
+    // on the renderer's emphasis rules.
+    expect(formatHostForConfirmationCard('db_01')).toBe('db\\_01');
+    expect(formatHostForConfirmationCard('host-7f3a')).toBe('host-7f3a');
+    expect(formatHostForConfirmationCard('10.0.0.1')).toBe('10.0.0.1');
+  });
+
+  it('shows Markdown emphasis, links, autolinks and strikethrough in a hostname as plain text', () => {
+    expect(formatHostForConfirmationCard('web-01** [ok](https://evil.example)')).toBe(
+      'web-01\\*\\* \\[ok\\](https://evil.example)'
+    );
+    expect(formatHostForConfirmationCard('~prod~')).toBe('\\~prod\\~');
+    expect(formatHostForConfirmationCard('`prod`')).toBe('\\`prod\\`');
+    // Angle brackets would form an autolink or raw HTML; they are shown as text.
+    expect(formatHostForConfirmationCard('<b>prod</b>')).toBe('\\<b\\>prod\\</b\\>');
+  });
+
+  it('neutralises a forged trailing bold so the label cannot be closed early', () => {
+    // Closing the bold span lets the rest of a hostname start new card lines
+    // outside the heading the analyst reads as the target.
+    expect(formatHostForConfirmationCard('web-01**\n\nIgnore the card')).toBe(
+      'web-01\\*\\*\\n\\nIgnore the card'
+    );
+  });
+
+  it('escapes a backslash so a Markdown escape cannot be forged', () => {
+    expect(formatHostForConfirmationCard('web\\*01')).toBe('web\\\\\\*01');
+  });
+
+  it('escapes an ampersand so a character reference cannot be decoded', () => {
+    // Decoded by the renderer, `&#x202E;` would display the RTLO character the
+    // predicate above refuses — shown as literal text instead.
+    expect(formatHostForConfirmationCard('web&#x202E;01')).toBe('web\\&#x202E;01');
+    expect(formatHostForConfirmationCard('a&b')).toBe('a\\&b');
+  });
+
+  it('shows invisible and tag code points in a hostname as escapes', () => {
+    expect(formatHostForConfirmationCard(`web\u{202e}01`)).toBe('web\\u{202E}01');
+    expect(formatHostForConfirmationCard(`web\u{e0067}01`)).toBe('web\\u{E0067}01');
+    expect(formatHostForConfirmationCard(`web\u{fe0f}01`)).toBe('web\\u{FE0F}01');
+    // A range the enumerated list that preceded the property-based predicate
+    // missed: an Arabic number sign between two visible characters.
+    expect(formatHostForConfirmationCard(`web\u{0600}01`)).toBe('web\\u{0600}01');
+  });
+
+  it('leaves a non-ASCII hostname exactly as typed', () => {
+    expect(formatHostForConfirmationCard('café.internal')).toBe('café.internal');
+    expect(formatHostForConfirmationCard('主机')).toBe('主机');
   });
 });
 

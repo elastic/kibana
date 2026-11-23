@@ -621,6 +621,83 @@ describe.each(CASES)(
       }
     );
 
+    // The LangChain adapter reports `unknown` as the tool call id when the
+    // model provider returned none. Every such call would share one prompt id
+    // and one state slot, so an approval for one could be read as an approval
+    // for another: no card, and no dispatch even if a confirmation is on file.
+    itGated(
+      'shows no card and dispatches nothing when the tool call has no usable id',
+      async () => {
+        const tool = build(service);
+        const unidentified = {
+          ...mockContext,
+          callContext: { ...mockContext.callContext, toolCallId: 'unknown' },
+        } as unknown as ToolHandlerContext;
+
+        const prompted = await tool.handler({ agentId: 'agent-b', ...extraParams }, unidentified);
+        expect(isToolHandlerInterruptReturn(prompted)).toBe(false);
+        expect(mockAskForConfirmation).not.toHaveBeenCalled();
+
+        // An approval on file for that id must not authorise the call either.
+        const out = results(
+          await tool.handler({ agentId: 'agent-b', ...extraParams }, unidentified)
+        );
+
+        expect(out[0].type).toBe('error');
+        expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
+        expect((out[0].data as Record<string, unknown>).message).toEqual(
+          expect.stringContaining('no unique id')
+        );
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    // The hostname is endpoint-reported (`host.name`, `host.hostname`), not
+    // model-authored: a machine can be named anything, and the card places the
+    // name in a bold span, so an unescaped name would restructure the approval
+    // card the analyst is asked to trust.
+    itGated(
+      'shows an endpoint-reported hostname that carries Markdown as plain text, not as structure',
+      async () => {
+        getAgent.mockResolvedValue({
+          id: 'agent-b',
+          status: 'online',
+          packages: ['endpoint'],
+          local_metadata: {
+            host: { name: 'web-01** [approved by CISO](https://evil.example)' },
+          },
+        });
+        getHostMetadataList.mockResolvedValue({
+          data: [{ host: { hostname: 'web-01** [approved by CISO](https://evil.example)' } }],
+          total: 1,
+        });
+        const tool = build(service);
+
+        const card = await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+
+        expect(card.message).toContain('web-01\\*\\* \\[approved by CISO\\]');
+        expect(card.message).not.toContain('[approved by CISO](');
+        expect(card.message).not.toContain('** [');
+      }
+    );
+
+    itGated(
+      'binds the confirmation to the tool call id, so a resumed call dispatches under the same id',
+      async () => {
+        const tool = build(service);
+
+        const out = results(
+          await confirmThenDispatch(tool, { agentId: 'agent-b', ...extraParams })
+        );
+
+        expect(mockAskForConfirmation.mock.calls[0][0]).toMatchObject({
+          id: `${action}.confirm.call-test-1`,
+        });
+        expect(client[clientMethod]).toHaveBeenCalledTimes(1);
+        expect(out[0].type).not.toBe('error');
+      }
+    );
+
     it.each(['user', 'mcp', 'unknown'] as const)(
       'refuses a %s call source without dispatching, so the confirmation gate cannot be bypassed',
       async (callSource) => {
