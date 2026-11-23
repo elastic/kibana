@@ -13,7 +13,10 @@ import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-c
 
 export type { InferenceTaskType, InferenceConnector };
 
-/** The task types a feature can use: Elasticsearch has `decision`, which its client's types lack. */
+/**
+ * The task types a feature can use: Elasticsearch has `decision`, which its client's types lack.
+ * Remove `| 'decision'` once `InferenceTaskType` from `@elastic/elasticsearch` includes it.
+ */
 export type InferenceFeatureTaskType = InferenceTaskType | 'decision';
 
 export interface RecommendedEndpoint {
