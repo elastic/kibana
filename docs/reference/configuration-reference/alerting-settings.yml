@@ -264,8 +264,6 @@ groups:
           - {{kib}} accepts no events for any connector.
           - **Receive events** doesn't appear.
           - The Inbound Webhook connector type isn't available.
-
-          Restart {{kib}} after you change this setting.
         datatype: bool
         default: true
         applies_to:
