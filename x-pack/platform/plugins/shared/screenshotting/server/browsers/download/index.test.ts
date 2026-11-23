@@ -7,8 +7,9 @@
 
 import type { PackageInfo } from '@kbn/screenshotting-server';
 import { ChromiumArchivePaths } from '@kbn/screenshotting-server';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { access, readdir } from 'fs/promises';
-import mockFs from 'mock-fs';
+import { tmpdir } from 'os';
 import path from 'path';
 import { download } from '.';
 import { sha256 } from './checksum';
@@ -17,12 +18,22 @@ import { fetch } from './fetch';
 jest.mock('./checksum');
 jest.mock('./fetch');
 
+const writeEmptyFiles = (filePaths: string[]) => {
+  for (const filePath of filePaths) {
+    mkdirSync(path.dirname(filePath), { recursive: true });
+    writeFileSync(filePath, '');
+  }
+};
+
 describe('ensureDownloaded', () => {
+  let archivesPath: string;
   let paths: ChromiumArchivePaths;
   let pkg: PackageInfo;
 
   beforeEach(() => {
+    archivesPath = mkdtempSync(path.join(tmpdir(), 'screenshotting-download-'));
     paths = new ChromiumArchivePaths();
+    jest.replaceProperty(paths, 'archivesPath', archivesPath);
     pkg = paths.find('linux', 'x64') as PackageInfo;
 
     (sha256 as jest.MockedFunction<typeof sha256>).mockImplementation(
@@ -36,12 +47,10 @@ describe('ensureDownloaded', () => {
         paths.packages.find((packageInfo) => paths.resolvePath(packageInfo) === packagePath)
           ?.archiveChecksum ?? 'some-sha256'
     );
-
-    mockFs();
   });
 
   afterEach(() => {
-    mockFs.restore();
+    rmSync(archivesPath, { recursive: true, force: true });
     jest.resetAllMocks();
   });
 
@@ -49,10 +58,7 @@ describe('ensureDownloaded', () => {
     const unexpectedPath1 = `${paths.archivesPath}/unexpected1`;
     const unexpectedPath2 = `${paths.archivesPath}/unexpected2`;
 
-    mockFs({
-      [unexpectedPath1]: 'test',
-      [unexpectedPath2]: 'test',
-    });
+    writeEmptyFiles([unexpectedPath1, unexpectedPath2]);
 
     await download(paths, pkg);
 
@@ -74,11 +80,7 @@ describe('ensureDownloaded', () => {
 
   describe('when archives are already present', () => {
     beforeEach(() => {
-      mockFs(
-        Object.fromEntries(
-          paths.packages.map((packageInfo) => [paths.resolvePath(packageInfo), ''])
-        )
-      );
+      writeEmptyFiles(paths.packages.map((packageInfo) => paths.resolvePath(packageInfo)));
     });
 
     it('should not download again', async () => {

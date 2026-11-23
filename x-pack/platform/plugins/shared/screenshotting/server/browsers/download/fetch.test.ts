@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import mockFs from 'mock-fs';
 import axios from 'axios';
 import { createHash } from 'crypto';
+import { mkdtempSync, rmSync } from 'fs';
 import { readFile } from 'fs/promises';
-import { resolve as resolvePath } from 'path';
+import { tmpdir } from 'os';
+import { join, resolve as resolvePath } from 'path';
 import { Readable } from 'stream';
 import { fetch } from './fetch';
 
-const TEMP_DIR = resolvePath(__dirname, '__tmp__');
-const TEMP_FILE = resolvePath(TEMP_DIR, 'foo/bar/download');
-
 describe('fetch', () => {
+  let tempDir: string;
+  let tempFile: string;
+
   beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'screenshotting-fetch-'));
+    tempFile = resolvePath(tempDir, 'foo/bar/download');
     jest.spyOn(axios, 'request').mockResolvedValue({
       data: new Readable({
         read() {
@@ -26,25 +29,23 @@ describe('fetch', () => {
         },
       }),
     });
-
-    mockFs();
   });
 
   afterEach(() => {
-    mockFs.restore();
+    rmSync(tempDir, { recursive: true, force: true });
     jest.resetAllMocks();
   });
 
   test('downloads the url to the path', async () => {
-    await fetch('url', TEMP_FILE);
+    await fetch('url', tempFile);
 
-    await expect(readFile(TEMP_FILE, 'utf8')).resolves.toBe('foobar');
+    await expect(readFile(tempFile, 'utf8')).resolves.toBe('foobar');
   });
 
   test('returns the sha1 hex hash of the http body', async () => {
     const hash = createHash('sha256').update('foobar').digest('hex');
 
-    await expect(fetch('url', TEMP_FILE)).resolves.toEqual(hash);
+    await expect(fetch('url', tempFile)).resolves.toEqual(hash);
   });
 
   test('throws if request emits an error', async () => {
@@ -52,6 +53,6 @@ describe('fetch', () => {
       throw new Error('foo');
     });
 
-    await expect(fetch('url', TEMP_FILE)).rejects.toThrow('foo');
+    await expect(fetch('url', tempFile)).rejects.toThrow('foo');
   });
 });
