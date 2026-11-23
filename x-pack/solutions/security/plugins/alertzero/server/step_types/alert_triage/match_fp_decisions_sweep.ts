@@ -161,9 +161,13 @@ export const createDecisionSweep = ({
    * closes that gap: either the decision is still in force, and then the revoke has not deleted it
    * yet and will find these alerts, or it is gone, and the caller puts back what it wrote. A
    * decision that only lapsed (expired) keeps what it did while it was in force. A read that fails
-   * counts as `active`: the tags stay, so running the revoke finds the alerts.
+   * answers `unknown`: the tags stay, and the caller counts the failure, because nothing checks
+   * again and a revoke that already ran would not find these alerts.
    */
-  const statusAfterWrite = async (id: string, what: string): Promise<DecisionStatus> => {
+  const statusAfterWrite = async (
+    id: string,
+    what: string
+  ): Promise<DecisionStatus | 'unknown'> => {
     try {
       const status = await statusOf(id);
       if (status === 'gone') {
@@ -171,8 +175,11 @@ export const createDecisionSweep = ({
       }
       return status;
     } catch (error) {
-      warn(`Could not read decision ${id} again after the sweep ${what}`, error);
-      return 'active';
+      warn(
+        `Could not read decision ${id} again after the sweep ${what}; if it was revoked, run the revoke again`,
+        error
+      );
+      return 'unknown';
     }
   };
 
@@ -206,7 +213,9 @@ export const createDecisionSweep = ({
   /** A decision with a conflicting verdict closes nothing: its matches are tagged, as in shadow. */
   const blockByVerdict = async (id: string, alertIds: string[]) => {
     totals.blocked_by_verdict += alertIds.length;
-    logger.info(`Decision ${id} has a conflicting verdict on its key: its matches go to analysis`);
+    // At debug: a blocked decision is seen again by every sweep until its verdict goes away, and
+    // `blocked_by_verdict` already counts it.
+    logger.debug(`Decision ${id} has a conflicting verdict on its key: its matches go to analysis`);
     await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, new Map([[id, alertIds]]));
   };
 
@@ -295,7 +304,10 @@ export const createDecisionSweep = ({
    */
   const settleClosed = async (id: string, tagged: string[], progress: CloseProgress) => {
     const { closedIds, unknownIds, counted } = progress;
-    if ((await statusAfterWrite(id, 'closed its alerts')) !== 'gone') {
+    const status = await statusAfterWrite(id, 'closed its alerts');
+    if (status !== 'gone') {
+      // The closes stay, and so do their notes, but a check that could not be made is a failure.
+      if (status === 'unknown') totals.close_failures++;
       if (closedIds.length > 0) queueNotes(id, closedIds, 'closed');
       return;
     }
@@ -326,7 +338,7 @@ export const createDecisionSweep = ({
     let tagged: string[] = [];
     try {
       if ((await statusOf(id)) !== 'active') {
-        logger.info(`Decision ${id} was revoked or expired during the sweep: it closes nothing`);
+        logger.debug(`Decision ${id} was revoked or expired during the sweep: it closes nothing`);
         return;
       }
       if (conflicting.has(id)) return await blockByVerdict(id, alertIds);
@@ -368,7 +380,9 @@ export const createDecisionSweep = ({
    * meanwhile, the tags are taken off. Otherwise the alerts are counted and get their notes.
    */
   const settleSkipped = async (id: string, kept: string[], skipTags: string[]) => {
-    if ((await statusAfterWrite(id, 'tagged its alerts')) !== 'gone') {
+    const status = await statusAfterWrite(id, 'tagged its alerts');
+    if (status !== 'gone') {
+      if (status === 'unknown') totals.tag_failures++;
       totals.skipped += kept.length;
       queueNotes(id, kept, 'skipped');
       return;
@@ -390,7 +404,7 @@ export const createDecisionSweep = ({
     const kept: string[] = [];
     try {
       if ((await statusOf(id)) !== 'active') {
-        logger.info(`Decision ${id} was revoked or expired during the sweep: it skips nothing`);
+        logger.debug(`Decision ${id} was revoked or expired during the sweep: it skips nothing`);
         return;
       }
       for (const chunk of chunked(allowed)) {

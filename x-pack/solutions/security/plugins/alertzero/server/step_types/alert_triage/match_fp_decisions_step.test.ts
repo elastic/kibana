@@ -228,7 +228,7 @@ const setup = ({
         getFakeRequest: () => ({}),
         getScopedEsClient: () => ({ mget, get }),
       },
-      logger: { warn: jest.fn(), info: jest.fn() },
+      logger: { warn: jest.fn(), info: jest.fn(), debug: jest.fn() },
     } as unknown as StepHandlerContext<unknown, unknown>);
   const closes = () =>
     callKibanaApi.mock.calls
@@ -1071,10 +1071,27 @@ describe('triage match decisions step in on mode', () => {
 
       const { output } = await run();
 
-      // The tag stays on the alert, so a revoke still finds it.
+      // The tag stays on the alert, so a revoke still finds it. The check that could not be made is
+      // a failure in the output, because nothing checks again.
       expect(closes().map(({ status }) => status)).toEqual(['closed']);
       expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
-      expect(output).toEqual(expect.objectContaining({ closed: 1 }));
+      expect(output).toEqual(expect.objectContaining({ closed: 1, close_failures: 1 }));
+    });
+
+    it('counts a failure when the decision cannot be read again after the dismissal tags, and keeps them', async () => {
+      const id = dismissed();
+      const { run, tags, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: { [id]: stored('do_not_propose') },
+        unreadableAfterWrite: [id],
+      });
+
+      const { output } = await run();
+
+      expect(tags()).toHaveLength(1);
+      expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+      expect(output).toEqual(expect.objectContaining({ skipped: 1, tag_failures: 1 }));
     });
 
     it('counts a failure and writes no note when the undo of a revoked close fails', async () => {
@@ -1156,7 +1173,7 @@ describe('triage match decisions step in on mode', () => {
     });
 
     it('takes back from the total no more than the closes of the revoked decision, so other decisions keep theirs', async () => {
-      const [idA, idB] = [idOf('C:\\a.exe'), idOf('C:\\b.exe')];
+      const idB = idOf('C:\\b.exe');
       const { run, callKibanaApi } = setup({
         mode: 'on',
         alerts: [
@@ -1187,7 +1204,6 @@ describe('triage match decisions step in on mode', () => {
 
       const { output } = await run();
 
-      expect(idA).not.toEqual(idB);
       // Decision A closed 2 alerts and keeps them. The 3 alerts B reopens were never counted.
       expect(output).toEqual(expect.objectContaining({ closed: 2, close_failures: 1 }));
     });
