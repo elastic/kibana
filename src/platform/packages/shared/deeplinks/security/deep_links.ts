@@ -126,6 +126,7 @@ export enum SecurityPageName {
    * external links
    */
   externalLinkAgentBuilder = 'external_link-agent_builder',
+  externalLinkAlertZero = 'external_link-alertzero',
   externalLinkDiscover = 'external_link-discover',
   externalLinkWorkflows = 'external_link-workflows',
 

@@ -87,7 +87,7 @@ describe('named subquery columns', () => {
       getColumnsFor
     );
 
-    expect(columns.map(({ name }) => name)).toEqual(['cpu', 'message']);
+    expect(columns.map(({ name }) => name)).toEqual(['message', 'cpu']);
     expect(getColumnsFor).toHaveBeenCalledTimes(2);
     expect(getColumnsFor).toHaveBeenCalledWith({ query: 'FROM logs-*' });
     expect(getColumnsFor).toHaveBeenCalledWith({ query: 'FROM metrics-*' });

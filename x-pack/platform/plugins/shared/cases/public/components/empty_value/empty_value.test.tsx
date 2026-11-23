@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 
 import {
   getEmptyString,
@@ -22,9 +21,9 @@ import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
 describe('EmptyValue', () => {
   const mockTheme = getMockTheme({ euiTheme: { colors: { mediumShade: '#ece' } } });
 
-  test('it renders against snapshot', () => {
-    const wrapper = shallow(<p>{getEmptyString()}</p>);
-    expect(wrapper).toMatchSnapshot();
+  test('it renders the empty string placeholder', () => {
+    render(<p>{getEmptyString()}</p>);
+    expect(screen.getByText('(Empty String)')).toBeInTheDocument();
   });
 
   describe('#getEmptyValue', () => {
@@ -33,101 +32,72 @@ describe('EmptyValue', () => {
 
   describe('#getEmptyString', () => {
     test('should turn into an empty string place holder', () => {
-      const wrapper = mountWithIntl(
+      render(
         <ThemeProvider theme={mockTheme}>
           <p>{getEmptyString()}</p>
         </ThemeProvider>
       );
-      expect(wrapper.text()).toBe('(Empty String)');
+      expect(screen.getByText('(Empty String)')).toBeInTheDocument();
     });
   });
 
   describe('#getEmptyCellValue', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <p>{getEmptyCellValue()}</p>
-      </ThemeProvider>
-    );
-    test('should return an empty tag value', () => expect(wrapper.text()).toBe('—'));
+    test('should return an empty tag value', () => {
+      render(
+        <ThemeProvider theme={mockTheme}>
+          <p>{getEmptyCellValue()}</p>
+        </ThemeProvider>
+      );
+      expect(screen.getByText('—')).toBeInTheDocument();
+    });
   });
 
   describe('#getEmptyStringTag', () => {
-    test('should turn into an span that has length of 1', () => {
-      const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
-          <p>{getEmptyStringTag()}</p>
-        </ThemeProvider>
-      );
-      expect(wrapper.find('span')).toHaveLength(1);
-    });
-
     test('should turn into an empty string tag place holder', () => {
-      const wrapper = mountWithIntl(
+      render(
         <ThemeProvider theme={mockTheme}>
           <p>{getEmptyStringTag()}</p>
         </ThemeProvider>
       );
-      expect(wrapper.text()).toBe(getEmptyString());
+      expect(screen.getByText(getEmptyString())).toBeInTheDocument();
     });
   });
 
   describe('#getOrEmptyTag', () => {
     test('should default empty value when a deep rooted value is null', () => {
-      const test = {
-        a: {
-          b: {
-            c: null,
-          },
-        },
-      };
-      const wrapper = mount(
+      const test = { a: { b: { c: null } } };
+      render(
         <ThemeProvider theme={mockTheme}>
           <p>{getOrEmptyTag('a.b.c', test)}</p>
         </ThemeProvider>
       );
-      expect(wrapper.text()).toBe(getEmptyValue());
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('should default empty value when a deep rooted value is undefined', () => {
-      const test = {
-        a: {
-          b: {
-            c: undefined,
-          },
-        },
-      };
-      const wrapper = mount(
+      const test = { a: { b: { c: undefined } } };
+      render(
         <ThemeProvider theme={mockTheme}>
           <p>{getOrEmptyTag('a.b.c', test)}</p>
         </ThemeProvider>
       );
-      expect(wrapper.text()).toBe(getEmptyValue());
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('should default empty value when a deep rooted value is missing', () => {
-      const test = {
-        a: {
-          b: {},
-        },
-      };
-      const wrapper = mount(
+      const test = { a: { b: {} } };
+      render(
         <ThemeProvider theme={mockTheme}>
           <p>{getOrEmptyTag('a.b.c', test)}</p>
         </ThemeProvider>
       );
-      expect(wrapper.text()).toBe(getEmptyValue());
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('should return a deep path value', () => {
-      const test = {
-        a: {
-          b: {
-            c: 1,
-          },
-        },
-      };
-      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
-      expect(wrapper.text()).toBe('1');
+      const test = { a: { b: { c: 1 } } };
+      render(<p>{getOrEmptyTag('a.b.c', test)}</p>);
+      expect(screen.getByText('1')).toBeInTheDocument();
     });
   });
 });

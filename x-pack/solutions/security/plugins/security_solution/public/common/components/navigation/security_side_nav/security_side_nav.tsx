@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import {
+  ALERTZERO_APP_ID,
   LinkCategoryType,
   SecurityGroupName,
   SecurityPageName,
@@ -100,6 +101,10 @@ const useSolutionSideNavItems = (
   const navLinks = useNavLinks();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
   const { application } = useKibana().services;
+  const applications = useObservable(application.applications$);
+  // The AlertZero app is only in the Classic nav while its setting, space, license and privileges allow it.
+  const isAlertZeroVisible =
+    applications?.get(ALERTZERO_APP_ID)?.visibleIn.includes('classicSideNav') === true;
 
   const classicFooterItems = useMemo((): SolutionSideNavItem[] | null => {
     const flatNavLinks = flattenNavigationLinks(navLinks);
@@ -226,6 +231,16 @@ const useSolutionSideNavItems = (
     // External app links — hrefs are built via getUrlForApp so basePath and active
     // space are automatically prepended (handles e.g. /s/my-space/app/discover).
     const externalLinks: SolutionSideNavItem[] = [
+      ...(isAlertZeroVisible
+        ? [
+            {
+              id: SecurityPageName.externalLinkAlertZero,
+              label: i18nStrings.alertZero.title,
+              href: application.getUrlForApp(ALERTZERO_APP_ID),
+              position: SolutionSideNavItemPosition.top,
+            },
+          ]
+        : []),
       // Agent builder for AI agent chat and not classic AI experience
       ...(chatExperience === AIChatExperience.Agent
         ? [
@@ -264,7 +279,14 @@ const useSolutionSideNavItems = (
     ];
 
     return [...externalLinks, ...bodyItems, ...(classicFooterItems ? classicFooterItems : [])];
-  }, [application, chatExperience, navLinks, getSecuritySolutionLinkProps, classicFooterItems]);
+  }, [
+    application,
+    chatExperience,
+    isAlertZeroVisible,
+    navLinks,
+    getSecuritySolutionLinkProps,
+    classicFooterItems,
+  ]);
 
   return sideNavItems;
 };
