@@ -13,7 +13,6 @@ export const FEATURE_PRIVILEGES = ['none', 'read', 'all'] as const;
 export type FeaturePrivilege = (typeof FEATURE_PRIVILEGES)[number];
 
 interface EndpointListRoleOptions {
-  readonly policyManagement: FeaturePrivilege;
   /** Kibana feature `fleetv2` (Fleet). */
   readonly fleet: FeaturePrivilege;
   /** Kibana feature `fleet` (Integrations). */
@@ -21,11 +20,10 @@ interface EndpointListRoleOptions {
 }
 
 /**
- * Security `all` with the endpoint list, a given Endpoint policy management privilege, and the
- * given Fleet and Integrations privileges, in every space.
+ * Security `all` with the endpoint list and the given Fleet and Integrations privileges, in every
+ * space.
  */
 export const getEndpointListRole = ({
-  policyManagement,
   fleet,
   integrations,
 }: EndpointListRoleOptions): KibanaRole => ({
@@ -34,11 +32,7 @@ export const getEndpointListRole = ({
     {
       base: [],
       feature: {
-        [SECURITY_FEATURE_ID]: [
-          'all',
-          'endpoint_list_all',
-          `policy_management_${policyManagement}`,
-        ],
+        [SECURITY_FEATURE_ID]: ['all', 'endpoint_list_all'],
         fleet: [integrations],
         fleetv2: [fleet],
       },
