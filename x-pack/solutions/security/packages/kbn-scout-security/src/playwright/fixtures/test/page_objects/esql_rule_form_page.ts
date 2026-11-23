@@ -116,8 +116,12 @@ export class EsqlRuleFormPage {
       return;
     }
 
+    await this.runAndWaitForContinueToBeEnabled(() => this.setQuery(query));
+  }
+
+  private async runAndWaitForContinueToBeEnabled(action: () => Promise<void>): Promise<void> {
     await this.recordWhenContinueIsDisabled();
-    await this.setQuery(query);
+    await action();
     await this.waitForContinueToBeEnabledAgain();
   }
 
