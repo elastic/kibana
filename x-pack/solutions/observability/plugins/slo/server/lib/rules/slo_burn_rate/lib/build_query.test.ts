@@ -103,13 +103,14 @@ describe('buildCandidatesQuery()', () => {
     expect(aggs.instances.composite.size).toBe(EVALUATION_PAGE_SIZE);
   });
 
-  it('should only return the instance keys and the after key', () => {
+  it('should only return the instance keys, the after key and the search time', () => {
     const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
     const rule = createBurnRateRule(slo);
 
     const { filter_path: filterPath } = buildCandidatesQuery(STARTED_AT, slo, rule);
 
     expect(filterPath).toEqual([
+      'took',
       'aggregations.instances.after_key',
       'aggregations.instances.buckets.key',
     ]);

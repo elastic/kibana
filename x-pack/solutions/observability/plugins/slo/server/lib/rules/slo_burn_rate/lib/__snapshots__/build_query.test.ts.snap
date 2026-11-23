@@ -230,6 +230,7 @@ Object {
     },
   },
   "filter_path": Array [
+    "took",
     "aggregations.instances.after_key",
     "aggregations.instances.buckets.key",
   ],
@@ -495,6 +496,7 @@ Object {
     },
   },
   "filter_path": Array [
+    "took",
     "aggregations.instances.after_key",
     "aggregations.instances.buckets.key",
   ],
