@@ -17,39 +17,14 @@ import type {
   Attribution,
   DataFilters,
   DataRequestMeta,
-  EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor,
-  ESGeoGridSourceDescriptor,
-  ESGeoLineSourceDescriptor,
-  ESPewPewSourceDescriptor,
-  ESQLSourceDescriptor,
-  ESSearchSourceDescriptor,
-  KibanaTilemapSourceDescriptor,
+  DiscriminatedSourceDescriptor,
   StyleDescriptor,
   Timeslice,
-  TiledSingleLayerVectorSourceDescriptor,
-  WMSSourceDescriptor,
-  XYZTMSSourceDescriptor,
 } from '../../../common/descriptor_types';
 import type { IStyle } from '../styles/style';
 import type { LICENSED_FEATURES } from '../../licensed_features';
 
-// Not SourceDescriptor: its union includes a loose `{ type: string; [k: string]: unknown }`
-// member whose keyof is `string`, which would widen SourcePropName to any string.
-type KnownSourceDescriptor =
-  | EMSFileSourceDescriptor
-  | EMSTMSSourceDescriptor
-  | KibanaTilemapSourceDescriptor
-  | WMSSourceDescriptor
-  | XYZTMSSourceDescriptor
-  | TiledSingleLayerVectorSourceDescriptor
-  | ESGeoGridSourceDescriptor
-  | ESGeoLineSourceDescriptor
-  | ESPewPewSourceDescriptor
-  | ESSearchSourceDescriptor
-  | ESQLSourceDescriptor;
-
-export type SourcePropName = KeysOfUnion<KnownSourceDescriptor>;
+export type SourcePropName = KeysOfUnion<DiscriminatedSourceDescriptor>;
 
 export type OnSourceChangeArgs = {
   propName: SourcePropName;
