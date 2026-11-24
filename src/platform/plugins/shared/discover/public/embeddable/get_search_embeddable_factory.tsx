@@ -113,7 +113,7 @@ export const getSearchEmbeddableFactory = ({
 
       const tabs = [...(runtimeState.tabs ?? [])];
 
-      const defaultState = { selected_tab_id: tabs[0]?.id };
+      const defaultState: { selected_tab_id?: string } = { selected_tab_id: tabs[0]?.id };
 
       /** All other state */
       const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -214,6 +214,7 @@ export const getSearchEmbeddableFactory = ({
 
           latestRuntimeState = nextRuntimeState;
           tabs.splice(0, tabs.length, ...(nextRuntimeState.tabs ?? []));
+          defaultState.selected_tab_id = tabs[0]?.id;
           selectedTabId$.next(nextRuntimeState.selectedTabId);
           await searchEmbeddable.reinitializeState(nextRuntimeState);
           inlineEditingApi.stopInlineEditing();

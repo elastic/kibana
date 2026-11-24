@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -48,6 +48,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
 jest.mock('./utils/serialization_utils', () => ({
+  ...jest.requireActual('./utils/serialization_utils'),
   deserializeState: jest.fn(),
 }));
 
@@ -517,6 +518,47 @@ describe('saved search embeddable', () => {
 
         expect(api.savedSearch$.getValue().tabTypeState).toEqual(tabTypeState);
         await waitOneTick(); // let the refetch triggered above settle before the next test
+      });
+
+      it('has no unsaved changes when a reset shows the new first tab of the session', async () => {
+        const tab = { id: 'tab-1', label: 'Tab 1' };
+        const newFirstTab = { id: 'new-tab', label: 'New tab' };
+        const lastSavedState = { ref_id: 'id', overrides: {} };
+        const parentApi = {
+          ...mockedDashboardApi,
+          lastSavedStateForChild$: () => new BehaviorSubject(lastSavedState),
+          getLastSavedStateForChild: () => lastSavedState,
+        };
+        runtimeState = getInitialRuntimeState({
+          partialState: { savedObjectId: 'id', selectedTabId: tab.id, tabs: [tab] },
+        });
+
+        const { api } = await factory.buildEmbeddable({
+          initializeDrilldownsManager,
+          initialState: lastSavedState,
+          finalizeApi: (apiRegistration) => ({
+            ...finalizeApiMock(apiRegistration),
+            applySerializedState: apiRegistration.applySerializedState,
+            parentApi,
+          }),
+          uuid,
+          parentApi,
+        });
+        await waitOneTick();
+
+        runtimeState = getInitialRuntimeState({
+          partialState: {
+            savedObjectId: 'id',
+            selectedTabId: newFirstTab.id,
+            tabs: [newFirstTab, tab],
+          },
+        });
+        await act(async () => {
+          await api.applySerializedState(lastSavedState);
+        });
+
+        expect(await firstValueFrom(api.hasUnsavedChanges$)).toBe(false);
+        await waitOneTick();
       });
     });
 
