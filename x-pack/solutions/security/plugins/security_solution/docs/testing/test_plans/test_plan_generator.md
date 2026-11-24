@@ -30,7 +30,7 @@ Before starting, make sure you have:
 
 ## Step 1 — Generate a GitHub Personal Access Token (optional)
 
-You only need this token if you enable the GitHub MCP server. The `gh` CLI gets its own token from the browser login in Step 4, so you can skip to Step 2.
+You only need this token if you enable the GitHub MCP server, or if you pass a token to `gh` through `GH_TOKEN`. Otherwise the `gh` CLI gets its own token from the browser login in Step 4, so you can skip to Step 2. For the GitHub MCP's `mcp.json` entry, see [GitHub MCP shows as disconnected in Cursor](#github-mcp-shows-as-disconnected-in-cursor).
 
 1. Go to [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Click **"Generate new token (classic)"**
@@ -41,9 +41,9 @@ You only need this token if you enable the GitHub MCP server. The `gh` CLI gets 
 
 > ⚠️ Keep this token private. Never commit it to a repository.
 
-### Authorize the token for the Elastic organization (required)
+### Authorize the token for the Elastic organization
 
-This step is critical. Without it, all GitHub API calls to `elastic` repositories will fail with a `403 SAML enforcement` error.
+If you created a token, authorize it for the `elastic` org. Without this, every call it makes to `elastic` repositories fails with a `403 SAML enforcement` error.
 
 1. On the [tokens page](https://github.com/settings/tokens), find your newly created token
 2. Click **"Configure SSO"** next to it
