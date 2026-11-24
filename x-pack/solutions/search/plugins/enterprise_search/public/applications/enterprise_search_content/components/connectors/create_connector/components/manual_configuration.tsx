@@ -128,7 +128,7 @@ POST /_security/api_key
   }
 }
 
-# 🔧 Configure your connector
+# 🔧 Configure your content crawler
 # NOTE: Configuration keys differ per service type.
 PUT _connector/${rawName}/_configuration
 {
@@ -137,7 +137,7 @@ ${dynamicConfigValues}
   }
 }
 
-# 🔌 Verify your connector is connected
+# 🔌 Verify your content crawler is connected
 GET _connector/${rawName}
 
 # 🔄 Sync data

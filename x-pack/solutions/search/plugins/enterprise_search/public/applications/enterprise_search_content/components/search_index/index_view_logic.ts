@@ -171,7 +171,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
           i18n.translate(
             'xpack.enterpriseSearch.content.searchIndex.index.recheckSuccess.message',
             {
-              defaultMessage: 'Your connector has been rechecked.',
+              defaultMessage: 'Your content crawler has been rechecked.',
             }
           )
         );

@@ -43,7 +43,7 @@ describe('Enterprise Search - connectors search provider', () => {
     id: connectorNameMap[name].name,
     score: 90,
     title: connectorNameMap[name].name,
-    type: 'Connector',
+    type: 'Content crawler',
     url: {
       path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/${connectorNameMap[name].id}`,
       prependBasePath: true,

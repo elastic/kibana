@@ -90,7 +90,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
               'xpack.enterpriseSearch.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.description',
               {
                 defaultMessage:
-                  'Setting up the agentless infrastructure to run the connector. This process may take up to one minute.',
+                  'Setting up the agentless infrastructure to run the content crawler. This process may take up to one minute.',
               }
             )}
           />
@@ -152,13 +152,13 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
                   const confirmResponse = await overlays?.openConfirm(
                     i18n.translate('xpack.enterpriseSearch.configureConnector.unsavedPrompt.body', {
                       defaultMessage:
-                        'You are still editing connector configuration, are you sure you want to continue without saving? You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
+                        'You are still editing content crawler configuration, are you sure you want to continue without saving? You can complete the setup later in the content crawler configuration page, but this guided flow offers more help.',
                     }),
                     {
                       title: i18n.translate(
                         'xpack.enterpriseSearch.configureConnector.unsavedPrompt.title',
                         {
-                          defaultMessage: 'Connector configuration is not saved',
+                          defaultMessage: 'Content crawler configuration is not saved',
                         }
                       ),
                       cancelButtonText: i18n.translate(

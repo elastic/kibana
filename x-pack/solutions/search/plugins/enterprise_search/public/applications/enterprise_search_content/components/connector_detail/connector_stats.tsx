@@ -182,7 +182,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
           title={i18n.translate(
             'xpack.enterpriseSearch.connectors.connectorStats.h4.connectorLabel',
             {
-              defaultMessage: 'Connector',
+              defaultMessage: 'Content crawler',
             }
           )}
           content={
@@ -231,7 +231,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                           content={i18n.translate(
                             'xpack.enterpriseSearch.connectors.connectorStats.copyConnectorIdButton',
                             {
-                              defaultMessage: 'Copy Connector ID',
+                              defaultMessage: 'Copy Content Crawler ID',
                             }
                           )}
                           disableScreenReaderOutput
@@ -243,7 +243,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                             aria-label={i18n.translate(
                               'xpack.enterpriseSearch.connectors.connectorStats.copyConnectorIdButton',
                               {
-                                defaultMessage: 'Copy Connector ID',
+                                defaultMessage: 'Copy Content Crawler ID',
                               }
                             )}
                             data-test-subj="copyConnectorIdButton"
@@ -428,7 +428,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                     {i18n.translate(
                       'xpack.enterpriseSearch.connectorStats.elasticConnectorsButton',
                       {
-                        defaultMessage: 'Elastic Connectors',
+                        defaultMessage: 'Elastic Content Crawlers',
                       }
                     )}
                   </EuiButtonEmpty>

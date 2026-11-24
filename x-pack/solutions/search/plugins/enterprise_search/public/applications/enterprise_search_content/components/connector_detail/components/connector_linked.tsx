@@ -16,13 +16,14 @@ export const ConnectorLinked: React.FC = () => {
       title={i18n.translate(
         'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.connectorLinked.callout.title',
         {
-          defaultMessage: 'Connector connected',
+          defaultMessage: 'Content crawler connected',
         }
       )}
       text={i18n.translate(
         'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.connectorLinked.callout.description',
         {
-          defaultMessage: 'Congratulations. Looks like your connector is deployed and connected.',
+          defaultMessage:
+            'Congratulations. Looks like your content crawler is deployed and connected.',
         }
       )}
     />

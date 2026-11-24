@@ -161,12 +161,12 @@ export const CreateConnector: React.FC = () => {
     http,
     messageText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.body', {
       defaultMessage:
-        'Your connector is created but missing some details. You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
+        'Your content crawler is created but missing some details. You can complete the setup later in the content crawler configuration page, but this guided flow offers more help.',
     }),
     navigateToUrl: application.navigateToUrl,
     openConfirm: overlays?.openConfirm ?? (() => Promise.resolve(false)),
     titleText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.title', {
-      defaultMessage: 'Your connector is not fully configured',
+      defaultMessage: 'Your content crawler is not fully configured',
     }),
   });
 
@@ -175,7 +175,7 @@ export const CreateConnector: React.FC = () => {
       pageChrome={[
         ...connectorsBreadcrumbs,
         i18n.translate('xpack.enterpriseSearch.createConnector..breadcrumb', {
-          defaultMessage: 'New connector',
+          defaultMessage: 'New content crawler',
         }),
       ]}
       pageViewTelemetry="create_connector"
@@ -183,7 +183,7 @@ export const CreateConnector: React.FC = () => {
       appHeader={
         <AppHeader
           title={i18n.translate('xpack.enterpriseSearch.createConnector..title', {
-            defaultMessage: 'Create a connector',
+            defaultMessage: 'Create a content crawler',
           })}
           description={i18n.translate('xpack.enterpriseSearch.createConnector.description', {
             defaultMessage:
@@ -192,7 +192,7 @@ export const CreateConnector: React.FC = () => {
           back={{
             href: getEnterpriseSearchContentUrl(CONNECTORS_PATH),
             label: i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
-              defaultMessage: 'Connectors',
+              defaultMessage: 'Content crawlers',
             }),
           }}
         />
@@ -242,7 +242,7 @@ export const CreateConnector: React.FC = () => {
                       {selectedConnector?.name}
                       {i18n.translate(
                         'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
-                        { defaultMessage: ' connector reference' }
+                        { defaultMessage: ' content crawler reference' }
                       )}
                     </EuiLink>
                   </p>
@@ -255,7 +255,7 @@ export const CreateConnector: React.FC = () => {
                 <EuiFormRow
                   label={i18n.translate(
                     'xpack.enterpriseSearch.createConnector.euiFormRow.connectorLabel',
-                    { defaultMessage: 'Connector' }
+                    { defaultMessage: 'Content crawler' }
                   )}
                 >
                   <EuiSuperSelect

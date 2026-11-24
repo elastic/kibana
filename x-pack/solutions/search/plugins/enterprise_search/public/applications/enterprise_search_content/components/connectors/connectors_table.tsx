@@ -65,7 +65,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
             name: i18n.translate(
               'xpack.enterpriseSearch.content.connectors.connectorTable.columns.connectorName',
               {
-                defaultMessage: 'Connector name',
+                defaultMessage: 'Content crawler name',
               }
             ),
             render: (connector: ConnectorViewItem) => (
@@ -115,7 +115,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
             name: i18n.translate(
               'xpack.enterpriseSearch.content.connectors.connectorTable.columns.type',
               {
-                defaultMessage: 'Connector type',
+                defaultMessage: 'Content crawler type',
               }
             ),
             render: (serviceType: string) => <ConnectorType serviceType={serviceType} />,
@@ -141,14 +141,14 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     {
       actions: [
         {
-          description: 'Delete this connector',
+          description: 'Delete this content crawler',
           icon: 'trash',
           isPrimary: false,
           name: (connector) =>
             i18n.translate(
               'xpack.enterpriseSearch.content.connectors.connectorTable.column.actions.deleteIndex',
               {
-                defaultMessage: 'Delete connector {connectorName}',
+                defaultMessage: 'Delete content crawler {connectorName}',
                 values: { connectorName: connector.name },
               }
             ),
@@ -165,7 +165,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
               )
             : i18n.translate(
                 'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
-                { defaultMessage: 'View this connector' }
+                { defaultMessage: 'View this content crawler' }
               ),
           enabled: (connector) =>
             !!connector.index_name && (!isCrawler || !!indexManagementLocator),
@@ -219,13 +219,13 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           tableLayout="fixed"
           tableCaption={i18n.translate(
             'xpack.enterpriseSearch.connectorsTable.table.availableConnectorsTableCaption',
-            { defaultMessage: 'Available connectors table' }
+            { defaultMessage: 'Available content crawlers table' }
           )}
           loading={isLoading}
           noItemsMessage={
             <EuiText aria-live="polite" size="s">
               {i18n.translate('xpack.enterpriseSearch.connectorsTable.table.noResultsMessage', {
-                defaultMessage: 'No connectors found',
+                defaultMessage: 'No content crawlers found',
               })}
             </EuiText>
           }

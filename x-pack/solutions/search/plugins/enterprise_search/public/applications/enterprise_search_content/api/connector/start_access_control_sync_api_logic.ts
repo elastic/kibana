@@ -30,7 +30,7 @@ export const StartAccessControlSyncApiLogic = createApiLogic(
         'xpack.enterpriseSearch.content.searchIndex.index.accessControlSyncSuccess.message',
         {
           defaultMessage:
-            'Successfully scheduled an access control sync, waiting for a connector to pick it up',
+            'Successfully scheduled an access control sync, waiting for a content crawler to pick it up',
         }
       ),
   }

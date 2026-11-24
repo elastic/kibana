@@ -40,7 +40,7 @@ export function getConnectorsSearchResultProvider(
               score,
               title: name,
               type: i18n.translate('xpack.enterpriseSearch.searchConnectorProvider.type.name', {
-                defaultMessage: 'Connector',
+                defaultMessage: 'Content crawler',
               }),
               url: {
                 path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/${id}`,

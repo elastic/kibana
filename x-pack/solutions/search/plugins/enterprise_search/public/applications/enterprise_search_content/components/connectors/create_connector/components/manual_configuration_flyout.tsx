@@ -123,7 +123,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                     {i18n.translate(
                       'xpack.enterpriseSearch.createConnector.manualConfiguration.connectorName',
                       {
-                        defaultMessage: 'Connector',
+                        defaultMessage: 'Content crawler',
                       }
                     )}
                   </h3>
@@ -133,7 +133,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                   fullWidth
                   label={i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
-                    { defaultMessage: 'Connector name' }
+                    { defaultMessage: 'Content crawler name' }
                   )}
                 >
                   <EuiFieldText
@@ -153,7 +153,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                       'xpack.enterpriseSearch.createConnector.manualConfiguration.p.connectorNameDescription',
                       {
                         defaultMessage:
-                          "You'll be redirected to the connector page to complete your configuration.",
+                          "You'll be redirected to the content crawler page to complete your configuration.",
                       }
                     )}
                   </p>
@@ -210,7 +210,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.createConnector.manualConfiguration.p.youCanAlsoUseLabel"
-                  defaultMessage="You can also use the {cliLink} to create and manage connectors. The following command creates a new connector using the {myIndex} index. Configuration is defined in your {configFile} file."
+                  defaultMessage="You can also use the {cliLink} to create and manage content crawlers. The following command creates a new content crawler using the {myIndex} index. Configuration is defined in your {configFile} file."
                   values={{
                     cliLink: (
                       <EuiLink

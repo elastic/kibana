@@ -21,7 +21,7 @@ export const getConnectorLastSeenError = (connector: Connector): string => {
     'xpack.enterpriseSearch.content.searchIndices.connectorStatus.lastSeenError.label',
     {
       defaultMessage:
-        'Your connector has not checked in for over 30 minutes. (last_seen: {lastSeen})',
+        'Your content crawler has not checked in for over 30 minutes. (last_seen: {lastSeen})',
       values: { lastSeen: connector.last_seen },
     }
   );
@@ -58,7 +58,7 @@ export function connectorStatusToText(connector: Connector): string {
   if (isLastSeenOld(connector) || connectorStatus === ConnectorStatus.ERROR) {
     return i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.connectorStatus.connectorFailure.label',
-      { defaultMessage: 'Connector Failure' }
+      { defaultMessage: 'Content Crawler Failure' }
     );
   }
   if (!hasIndexName) {

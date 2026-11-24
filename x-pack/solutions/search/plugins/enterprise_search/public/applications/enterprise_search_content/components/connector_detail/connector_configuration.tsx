@@ -107,11 +107,11 @@ export const ConnectorConfiguration: React.FC = () => {
                 {connector.is_native
                   ? i18n.translate(
                       'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.nativeConnector',
-                      { defaultMessage: 'Elastic managed connector' }
+                      { defaultMessage: 'Elastic managed content crawler' }
                     )
                   : i18n.translate(
                       'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.connectorClient',
-                      { defaultMessage: 'Self-managed connector' }
+                      { defaultMessage: 'Self-managed content crawler' }
                     )}
               </EuiBadge>
             </EuiFlexItem>

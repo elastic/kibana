@@ -105,7 +105,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
             message: i18n.translate(
               'xpack.enterpriseSearch.server.routes.addConnector.connectorExistsError',
               {
-                defaultMessage: 'Connector or index already exists',
+                defaultMessage: 'Content crawler or index already exists',
               }
             ),
             response,
@@ -167,7 +167,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
               'xpack.enterpriseSearch.server.routes.connectors.statusTransitionError',
               {
                 defaultMessage:
-                  'Connector sync job cannot be cancelled. Connector is already cancelled or not in a cancelable state.',
+                  'Content crawler sync job cannot be cancelled. Content crawler is already cancelled or not in a cancelable state.',
               }
             ),
             response,
@@ -803,7 +803,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
             message: i18n.translate(
               'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
               {
-                defaultMessage: 'Connector with id {connectorId} is not found.',
+                defaultMessage: 'Content crawler with id {connectorId} is not found.',
                 values: { connectorId },
               }
             ),
@@ -948,7 +948,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
             message: i18n.translate(
               'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
               {
-                defaultMessage: 'Connector with id {connectorId} is not found.',
+                defaultMessage: 'Content crawler with id {connectorId} is not found.',
                 values: { connectorId },
               }
             ),
@@ -1025,7 +1025,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
             message: i18n.translate(
               'xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
-                defaultMessage: 'Cannot find a unique connector name',
+                defaultMessage: 'Cannot find a unique content crawler name',
               }
             ),
             response,
@@ -1070,7 +1070,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
             message: i18n.translate(
               'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
               {
-                defaultMessage: 'Connector with id {connectorId} is not found.',
+                defaultMessage: 'Content crawler with id {connectorId} is not found.',
                 values: { connectorId },
               }
             ),
@@ -1086,7 +1086,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
               'xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
                 defaultMessage:
-                  'Failed to fetch agentless deployment details: This action is only supported for Elastic-managed connectors.',
+                  'Failed to fetch agentless deployment details: This action is only supported for Elastic-managed content crawlers.',
               }
             ),
             response,

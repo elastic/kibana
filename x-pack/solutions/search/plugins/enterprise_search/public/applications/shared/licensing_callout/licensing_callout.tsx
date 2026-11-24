@@ -29,7 +29,7 @@ export const LicensingCallout: React.FC<{ feature: LICENSING_FEATURE }> = ({ fea
       'xpack.enterpriseSearch.content.licensingCallout.nativeConnector.contentOne',
       {
         defaultMessage:
-          'Built-in connectors require a Platinum license or higher and are not available to Standard license self-managed deployments. You need to upgrade to use this feature.',
+          'Built-in content crawlers require a Platinum license or higher and are not available to Standard license self-managed deployments. You need to upgrade to use this feature.',
       }
     ),
     [LICENSING_FEATURE.CRAWLER]: i18n.translate(
@@ -74,7 +74,7 @@ export const LicensingCallout: React.FC<{ feature: LICENSING_FEATURE }> = ({ fea
       'xpack.enterpriseSearch.content.licensingCallout.contentTwo',
       {
         defaultMessage:
-          "Did you know that built-in connectors are available with a Standard Elastic Cloud license? Elastic Cloud gives you the flexibility to run where you want. Deploy our managed service on Google Cloud, Microsoft Azure, or Amazon Web Services, and we'll handle the maintenance and upkeep for you.",
+          "Did you know that built-in content crawlers are available with a Standard Elastic Cloud license? Elastic Cloud gives you the flexibility to run where you want. Deploy our managed service on Google Cloud, Microsoft Azure, or Amazon Web Services, and we'll handle the maintenance and upkeep for you.",
       }
     ),
     [LICENSING_FEATURE.CRAWLER]: i18n.translate(

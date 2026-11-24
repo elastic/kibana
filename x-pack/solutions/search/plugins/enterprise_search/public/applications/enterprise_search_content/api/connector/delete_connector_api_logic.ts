@@ -47,7 +47,7 @@ export const DeleteConnectorApiLogic = createApiLogic(
       i18n.translate(
         'xpack.enterpriseSearch.content.connectors.deleteConnector.successToast.title',
         {
-          defaultMessage: 'The connector {connectorName} was successfully deleted',
+          defaultMessage: 'The content crawler {connectorName} was successfully deleted',
           values: {
             connectorName,
           },

@@ -147,7 +147,7 @@ export const SearchIndexPipelines: React.FC = () => {
               'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.description',
               {
                 defaultMessage:
-                  'The custom pipeline for this index has been deleted. This may affect connector data ingestion. Its configuration will need to be reverted to the default pipeline settings.',
+                  'The custom pipeline for this index has been deleted. This may affect content crawler data ingestion. Its configuration will need to be reverted to the default pipeline settings.',
               }
             )}
             actionProps={{
