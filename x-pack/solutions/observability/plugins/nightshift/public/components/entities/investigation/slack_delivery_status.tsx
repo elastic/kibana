@@ -25,8 +25,9 @@ import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-invest
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { slackDeliveriesQueryKey } from '../../../data/query_keys';
 import {
-  formatChannelValue,
+  formatChannelLabel,
   useAllRelayAppBindingsWithHttp,
+  useAvailableChannelsWithHttp,
 } from '../../../data/relay_apps/use_relay_app_bindings';
 
 const endpoint = 'GET /internal/nightshift/investigations/{id}/slack_deliveries';
@@ -86,14 +87,14 @@ const viewerReasonLabels = {
   channel_not_connected: i18n.translate(
     'xpack.nightshift.slackDelivery.askAdminToConnectChannelDescription',
     {
-      defaultMessage: 'Ask a Nightshift admin to connect this channel in Slack settings.',
+      defaultMessage: 'Ask a nightshift admin to connect this channel in Slack settings.',
     }
   ),
   app_disconnected: i18n.translate(
     'xpack.nightshift.slackDelivery.askAdminToReconnectAppDescription',
     {
       defaultMessage:
-        'Ask a Nightshift admin to reconnect the Elastic Slack app in Slack settings.',
+        'Ask a nightshift admin to reconnect the Elastic Slack app in Slack settings.',
     }
   ),
 };
@@ -102,11 +103,25 @@ const otherReasonLabels = {
   rate_limited: i18n.translate('xpack.nightshift.slackDelivery.rateLimitedMessage', {
     defaultMessage: 'Slack rate-limited this notification.',
   }),
+  start_rate_limited: i18n.translate('xpack.nightshift.slackDelivery.startRateLimitedDescription', {
+    defaultMessage:
+      'Slack rate-limited the start notification. The findings could not be posted without a thread.',
+  }),
+  thread_missing: i18n.translate('xpack.nightshift.slackDelivery.missingThreadDescription', {
+    defaultMessage: 'The findings could not be posted because there was no Slack thread to update.',
+  }),
   thread_unconfirmed: i18n.translate('xpack.nightshift.slackDelivery.threadUnconfirmedMessage', {
     defaultMessage:
       'Check the channel for the earlier message. Slack did not confirm its delivery.',
   }),
 };
+
+const channelWasDisconnected = i18n.translate(
+  'xpack.nightshift.slackDelivery.channelWasDisconnectedDescription',
+  {
+    defaultMessage: 'This channel was not connected when delivery was attempted.',
+  }
+);
 
 const failedMessage = i18n.translate('xpack.nightshift.slackDelivery.failedMessage', {
   defaultMessage: 'Check the Slack connector and its access to this channel.',
@@ -132,14 +147,19 @@ export const SlackDeliveryStatus = ({
   const { euiTheme } = useEuiTheme();
   const { data, error, isError, isFetching, refetch } = useQuery({
     queryKey: slackDeliveriesQueryKey(investigationId, executionId),
-    queryFn: ({ signal }) =>
-      investigationsClient.fetch(endpoint, {
+    queryFn: async ({ signal }) => {
+      const result = await investigationsClient.fetch(endpoint, {
         params: {
           path: { id: investigationId },
           ...(executionId && { query: { executionId } }),
         },
         signal: signal ?? null,
-      }),
+      });
+      if (!Array.isArray(result?.deliveries)) {
+        throw new Error('Invalid Slack delivery status response');
+      }
+      return result;
+    },
     retry: false,
     // Dispatch, investigation completion, and the failure sweep can record receipts at different times.
     refetchInterval: (result, query) => {
@@ -148,10 +168,21 @@ export const SlackDeliveryStatus = ({
     },
   });
   const inaccessible = isInaccessible(error);
-  const { bindings } = useAllRelayAppBindingsWithHttp(
+  const { bindings, isLoading: isLoadingBindings } = useAllRelayAppBindingsWithHttp(
     http,
     !inaccessible && !!data?.deliveries.length
   );
+  const canLookUpDisconnectedChannels =
+    Boolean(settingsHref) &&
+    !inaccessible &&
+    !isLoadingBindings &&
+    data?.deliveries.some(
+      ({ channel, reason, status }) =>
+        status === 'failed' &&
+        reason === 'channel_not_connected' &&
+        !bindings.some((binding) => binding.channel === channel)
+    ) === true;
+  const { channels } = useAvailableChannelsWithHttp(http, canLookUpDisconnectedChannels);
   if (inaccessible || (!data?.deliveries.length && !isError)) return null;
 
   const reasonLabels = {
@@ -178,8 +209,19 @@ export const SlackDeliveryStatus = ({
         </h3>
       </EuiTitle>
       {data?.deliveries.map(({ id, channel, phase, status, reason, attemptedAt }) => {
+        const binding = bindings.find((entry) => entry.channel === channel);
+        const available = canLookUpDisconnectedChannels
+          ? channels.find((entry) => entry.channel === channel)
+          : undefined;
+        const channelLabel = binding
+          ? formatChannelLabel(binding)
+          : available
+          ? `#${available.displayName}`
+          : channel;
+        const channelReconnected = reason === 'channel_not_connected' && binding != null;
         const needsSettings =
           status === 'failed' &&
+          !channelReconnected &&
           (reason === 'channel_not_connected' || reason === 'app_disconnected');
         return (
           <EuiFlexGroup
@@ -192,7 +234,7 @@ export const SlackDeliveryStatus = ({
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <strong>{formatChannelValue(channel, bindings)}</strong>
+                    <strong>{channelLabel}</strong>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -215,7 +257,9 @@ export const SlackDeliveryStatus = ({
             {(status === 'failed' || status === 'unconfirmed') && (
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  {reason
+                  {channelReconnected
+                    ? channelWasDisconnected
+                    : reason
                     ? reasonLabels[reason]
                     : status === 'failed'
                     ? failedMessage

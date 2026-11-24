@@ -164,7 +164,13 @@ export function useAvailableChannels(): UseAvailableChannels {
   const {
     services: { http },
   } = useKibana();
+  return useAvailableChannelsWithHttp(http);
+}
 
+export function useAvailableChannelsWithHttp(
+  http: HttpStart,
+  enabled = true
+): UseAvailableChannels {
   // Not cached: the Relay lists from Slack on each call, and a channel was likely just invited.
   const query = useQuery<SlackAppAvailableChannelsResponse, Error>({
     queryKey: RELAY_APP_AVAILABLE_CHANNELS_QUERY_KEY,
@@ -173,11 +179,12 @@ export function useAvailableChannels(): UseAvailableChannels {
     retry: false,
     cacheTime: 0,
     refetchOnWindowFocus: false,
+    enabled,
   });
 
   return {
     channels: query.data?.channels ?? EMPTY_AVAILABLE_CHANNELS,
-    isLoading: query.isLoading,
+    isLoading: query.isLoading && enabled,
     isError: query.isError,
     isTruncated: query.data?.truncated ?? false,
   };

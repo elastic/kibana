@@ -94,11 +94,50 @@ it.each(['sent', 'failed'] as const)(
     });
     expect((await call()).deliveries).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: checkout.id, status: followUpStatus, reason: undefined }),
+        expect.objectContaining({
+          id: checkout.id,
+          status: followUpStatus,
+          reason: followUpStatus === 'failed' ? 'thread_missing' : undefined,
+        }),
       ])
     );
   }
 );
+
+it.each([
+  {
+    error: 'Slack rate-limited this request. Try again shortly.',
+    reason: 'start_rate_limited',
+  },
+  {
+    error: 'Relay request to /v1/slack/trigger failed with status 500',
+    reason: 'thread_missing',
+  },
+])('explains findings blocked by a failed start ($reason)', async ({ error, reason }) => {
+  const { client, call } = setup();
+  const routing = await client.initialize('shared-child', NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, [
+    { type: 'slack', connector_id: 'slack', params: { channel: '#ops' } },
+  ]);
+  const [ops] = routing.destinations;
+  await client.claim('shared-child', ops.id, 'started', 'ops-start', true);
+  await client.record('ops-start', { status: 'failed', error });
+  await client.selectTerminalPhase('shared-child', 'completed');
+  await client.claim('shared-child', ops.id, 'completed', 'ops-result', false);
+  await client.record('ops-result', { status: 'failed', error: MISSING_NOTIFICATION_THREAD });
+
+  for (const executionId of [undefined, 'bound-parent']) {
+    expect((await call(executionId)).deliveries).toEqual([
+      {
+        id: ops.id,
+        channel: '#ops',
+        attemptedAt: expect.any(String),
+        phase: 'completed',
+        status: 'failed',
+        reason,
+      },
+    ]);
+  }
+});
 
 it('shows a recent claim as sending until an uncertain outcome is recorded or the claim ages out', async () => {
   jest.useFakeTimers();

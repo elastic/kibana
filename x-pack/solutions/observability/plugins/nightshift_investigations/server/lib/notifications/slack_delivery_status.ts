@@ -19,6 +19,8 @@ type DeliveryReason =
   | 'channel_not_connected'
   | 'app_disconnected'
   | 'rate_limited'
+  | 'start_rate_limited'
+  | 'thread_missing'
   | 'thread_unconfirmed';
 
 const getDeliveryReason = (error: string | undefined): DeliveryReason | undefined => {
@@ -74,6 +76,7 @@ const getAttemptReason = (
     );
     const reason = getDeliveryReason(started?.error);
     if (reason === 'channel_not_connected' || reason === 'app_disconnected') return reason;
+    return reason === 'rate_limited' ? 'start_rate_limited' : 'thread_missing';
   }
   return getDeliveryReason(attempt.error);
 };
