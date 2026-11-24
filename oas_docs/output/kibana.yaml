@@ -2696,7 +2696,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a conversation by ID. This action cannot be undone. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        Delete a conversation by ID, along with any proposals attached to it, including their decision and action history. This action cannot be undone. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: delete-agent-builder-conversations-conversation-id
       parameters:
         - description: A required header to protect against CSRF attacks
