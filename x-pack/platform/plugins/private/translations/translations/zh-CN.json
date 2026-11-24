@@ -32559,8 +32559,6 @@
     "xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip": "Elastic 代理集成需要代理策略的所有权限和集成的所有权限。请联系您的管理员。",
     "xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip": "要添加 Elastic 代理集成，必须启用安全功能并具有 Fleet 的所有权限。请联系您的管理员。",
     "xpack.fleet.epm.addPackagePolicyButtonText": "添加 {packageName}",
-    "xpack.fleet.epm.agentlessFilter.label": "仅限托管集成",
-    "xpack.fleet.epm.agentlessFilter.tooltip": "托管集成在 Elastic Cloud 中运行，无需您部署 Elastic Agents",
     "xpack.fleet.epm.assetGroupTitle": "{assetType} 资产",
     "xpack.fleet.epm.assets.alertingEngineClassicBadgeAriaLabel": "经典规则",
     "xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel": "经典",

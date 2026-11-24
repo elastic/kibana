@@ -32432,8 +32432,6 @@
     "xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip": "Les intégrations Elastic Agent requièrent de disposer de tous les privilèges pour les stratégies d'agent et de tous les privilèges pour les intégrations. Contactez votre administrateur.",
     "xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip": "Pour ajouter des intégrations Elastic Agent, vous devez avoir activé Security et disposer de tous les privilèges pour Fleet. Contactez votre administrateur.",
     "xpack.fleet.epm.addPackagePolicyButtonText": "Ajouter {packageName}",
-    "xpack.fleet.epm.agentlessFilter.label": "Uniquement les intégrations gérées",
-    "xpack.fleet.epm.agentlessFilter.tooltip": "Les intégrations gérées s'exécutent dans Elastic Cloud sans avoir à déployer des Elastic Agents",
     "xpack.fleet.epm.assetGroupTitle": "Ressources {assetType}",
     "xpack.fleet.epm.assets.alertingEngineClassicBadgeAriaLabel": "Règles classiques",
     "xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel": "Classique",

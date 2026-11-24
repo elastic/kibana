@@ -32563,8 +32563,6 @@
     "xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip": "Elasticエージェント統合には、エージェントポリシーの「すべて」権限と統合の「すべて」権限が必要です。管理者にお問い合わせください。",
     "xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip": "Elasticエージェント統合を追加するには、セキュリティを有効にし、Fleetの「すべて」権限が必要です。管理者にお問い合わせください。",
     "xpack.fleet.epm.addPackagePolicyButtonText": "{packageName}の追加",
-    "xpack.fleet.epm.agentlessFilter.label": "マネージド統合のみ",
-    "xpack.fleet.epm.agentlessFilter.tooltip": "マネージド統合はElastic Cloudで実行され、Elastic Agentsをデプロイする必要はありません",
     "xpack.fleet.epm.assetGroupTitle": "{assetType}アセット",
     "xpack.fleet.epm.assets.alertingEngineClassicBadgeAriaLabel": "クラシックルール",
     "xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel": "クラシック",

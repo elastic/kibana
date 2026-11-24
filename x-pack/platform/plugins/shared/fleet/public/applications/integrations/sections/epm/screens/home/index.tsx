@@ -19,7 +19,7 @@ import {
   INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM,
 } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
-import { ExperimentalFeaturesService, isPackageUpdatable } from '../../../../services';
+import { isPackageUpdatable } from '../../../../services';
 import { InstalledIntegrationsPage } from '../installed_integrations';
 import { BrowseIntegrationsPage } from '../browse_integrations';
 import {
@@ -31,8 +31,6 @@ import {
 } from '../../../../hooks';
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
-
-import { AvailablePackages } from './available_packages';
 
 export { mapToCard, type IntegrationCardItem } from './card_utils';
 
@@ -139,19 +137,13 @@ export const EPMHomePage: React.FC = () => {
         </DefaultLayout>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
-        {ExperimentalFeaturesService.get().newBrowseIntegrationUx ? (
-          <DefaultLayout
-            section="browse"
-            noSpacerInContent={true}
-            notificationsBySection={notificationsBySection}
-          >
-            <BrowseIntegrationsPage prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
-          </DefaultLayout>
-        ) : (
-          <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-            <AvailablePackages prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
-          </DefaultLayout>
-        )}
+        <DefaultLayout
+          section="browse"
+          noSpacerInContent={true}
+          notificationsBySection={notificationsBySection}
+        >
+          <BrowseIntegrationsPage prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
+        </DefaultLayout>
       </Route>
     </Routes>
   );

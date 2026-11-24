@@ -32494,8 +32494,6 @@
     "xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip": "Elastic Agent-Integrationen erfordern die Berechtigung „Alle“ für Agenten-Richtlinien und die Berechtigung „Alle“ für Integrationen. Wenden Sie sich an Ihren Administrator.",
     "xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip": "Um Elastic Agent-Integrationen hinzuzufügen, muss die Sicherheit aktiviert sein und Sie müssen über die Berechtigung „Alle“ für Fleet verfügen. Wenden Sie sich an Ihren Admin.",
     "xpack.fleet.epm.addPackagePolicyButtonText": "{packageName} hinzufügen",
-    "xpack.fleet.epm.agentlessFilter.label": "Nur verwaltete Integrationen",
-    "xpack.fleet.epm.agentlessFilter.tooltip": "Verwaltete Integrationen laufen in Elastic Cloud, ohne dass Sie Elastic Agents bereitstellen müssen",
     "xpack.fleet.epm.assetGroupTitle": "{assetType} Vermögenswerte",
     "xpack.fleet.epm.assets.alertingEngineClassicBadgeAriaLabel": "Classic-Regeln",
     "xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel": "Classic",

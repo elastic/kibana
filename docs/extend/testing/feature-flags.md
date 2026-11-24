@@ -73,16 +73,20 @@ For sequential suites you can enable flags in `beforeAll` and reset them in `aft
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
+test.describe('My feature', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings({
-      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: true },
+      'feature_flags.overrides': {
+        'my-plugin.my-feature-flag': true,
+      },
     });
   });
 
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
-      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: false },
+      'feature_flags.overrides': {
+        'my-plugin.my-feature-flag': false,
+      },
     });
   });
 
