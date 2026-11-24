@@ -59,7 +59,7 @@ describe('buildReinforcementPrompt', () => {
     expect(message).toContain(scripts.followupExtend);
   });
 
-  it('never asks a follow-up to reinforce a path as causal', () => {
+  it('does not ask a follow-up to reinforce a path as causal unless its cause was confirmed', () => {
     const message = buildReinforcementPrompt({
       ...base,
       turnKind: 'feedback_reinforcement',
@@ -67,6 +67,18 @@ describe('buildReinforcementPrompt', () => {
     });
 
     expect(message).not.toContain(scripts.reinforce);
+  });
+
+  it('asks a follow-up whose causal check confirmed the cause to reinforce the causal path', () => {
+    const message = buildReinforcementPrompt({
+      ...base,
+      turnKind: 'feedback_reinforcement',
+      trees: [tree({ version: 3 })],
+      causalConfirmed: true,
+    });
+
+    expect(message).toContain(scripts.reinforce);
+    expect(message).not.toContain(scripts.followupExtend);
   });
 
   // The investigation reaches the agent as conversation history, not inside this message.

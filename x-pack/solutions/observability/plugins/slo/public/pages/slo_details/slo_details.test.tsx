@@ -7,7 +7,7 @@
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
@@ -51,7 +51,7 @@ jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_delete_slo_instance');
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;

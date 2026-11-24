@@ -36,10 +36,14 @@ import {
   getTargetedIndexCount,
 } from './destination_grid_cell';
 import { DestinationIndicesTable } from './destination_indices_table';
+import { RemoteElasticsearchDestinationDetails } from './remote_elasticsearch_destination_details';
 import { S3DestinationDetails } from './s3_destination_details';
 import type { DestinationDetailActorRef } from './state_machines/destination_detail_state_machine';
-import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
-import type { DestinationViewModel } from './types';
+import type {
+  ResolvedIndicesError,
+  ResolvedIndicesStatus,
+} from './state_machines/destinations_state_machine';
+import { REMOTE_ELASTICSEARCH_TYPE, type DestinationViewModel } from './types';
 
 export type DestinationsGridStatus = 'loading' | 'ready' | 'unavailable';
 export { getDestinationSortableValue };
@@ -84,8 +88,9 @@ interface DestinationsGridProps {
   destinations: DestinationViewModel[];
   resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
   resolvedIndicesStatus: ResolvedIndicesStatus;
-  resolvedIndicesError?: string;
+  resolvedIndicesError?: ResolvedIndicesError;
   destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
+  sourceConnectedDestinationIds: ReadonlySet<string>;
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
   onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
   hasActiveFilters: boolean;
@@ -96,11 +101,12 @@ interface DestinationsGridProps {
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
   onSortingChange: (columns: EuiDataGridSorting['columns']) => void;
   onShowOnCanvas: (destination: DestinationViewModel) => void;
-  onRequestDelete: (destination: DestinationViewModel) => void;
+  /** Omitted for users who cannot edit the unit, which hides deletion. */
+  onRequestDelete?: (destination: DestinationViewModel) => void;
 }
 
 const getExpandAriaLabel = ({ name, type }: DestinationViewModel, isExpanded: boolean) => {
-  if (type === 's3') {
+  if (type !== 'elasticsearch') {
     return isExpanded
       ? i18n.translate('xpack.streams.destinations.table.collapseDetailsAriaLabel', {
           defaultMessage: 'Collapse details for {name}',
@@ -129,6 +135,7 @@ export const DestinationsGrid = ({
   resolvedIndicesStatus,
   resolvedIndicesError,
   destinationDetailRefs,
+  sourceConnectedDestinationIds,
   onShowDestinationDetail,
   onHideDestinationDetail,
   hasActiveFilters,
@@ -187,6 +194,7 @@ export const DestinationsGrid = ({
       resolvedIndicesStatus={resolvedIndicesStatus}
       resolvedIndicesError={resolvedIndicesError}
       destinationDetailRefs={destinationDetailRefs}
+      sourceConnectedDestinationIds={sourceConnectedDestinationIds}
       onShowDestinationDetail={onShowDestinationDetail}
       onHideDestinationDetail={onHideDestinationDetail}
       hasActiveFilters={hasActiveFilters}
@@ -207,8 +215,9 @@ interface DestinationsGridBodyContextValue {
   expandedDestinationIds: ReadonlySet<string>;
   resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
   resolvedIndicesStatus: ResolvedIndicesStatus;
-  resolvedIndicesError?: string;
+  resolvedIndicesError?: ResolvedIndicesError;
   destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
+  sourceConnectedDestinationIds: ReadonlySet<string>;
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
   onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
 }
@@ -238,6 +247,7 @@ const DestinationsGridBody = ({
     resolvedIndicesStatus,
     resolvedIndicesError,
     destinationDetailRefs,
+    sourceConnectedDestinationIds,
     onShowDestinationDetail,
     onHideDestinationDetail,
   } = context;
@@ -289,6 +299,8 @@ const DestinationsGridBody = ({
             >
               {destination.type === 's3' ? (
                 <S3DestinationDetails destination={destination} />
+              ) : destination.type === REMOTE_ELASTICSEARCH_TYPE ? (
+                <RemoteElasticsearchDestinationDetails destination={destination} />
               ) : (
                 <DeferredMount>
                   <DestinationIndicesTable
@@ -296,6 +308,8 @@ const DestinationsGridBody = ({
                     indices={resolvedIndicesByDestination.get(destination.id) ?? NO_INDICES}
                     indicesStatus={resolvedIndicesStatus}
                     indicesError={resolvedIndicesError}
+                    hasConnectedSource={sourceConnectedDestinationIds.has(destination.id)}
+                    showMapLink
                     destinationDetailRef={destinationDetailRefs.get(destination.id)}
                     onShowDestinationDetail={onShowDestinationDetail}
                     onHideDestinationDetail={onHideDestinationDetail}
@@ -324,6 +338,7 @@ const DestinationsGridTable = ({
   resolvedIndicesStatus,
   resolvedIndicesError,
   destinationDetailRefs,
+  sourceConnectedDestinationIds,
   onShowDestinationDetail,
   onHideDestinationDetail,
   hasActiveFilters,
@@ -407,7 +422,7 @@ const DestinationsGridTable = ({
               buttonTestSubj="streamsDestinationRowActionsButton"
               deleteTestSubj="streamsDestinationDeleteAction"
               onShowOnCanvas={() => onShowOnCanvas(destination)}
-              onDelete={() => onRequestDelete(destination)}
+              onDelete={onRequestDelete ? () => onRequestDelete(destination) : undefined}
             />
           ) : null;
         },
@@ -439,6 +454,7 @@ const DestinationsGridTable = ({
       resolvedIndicesStatus,
       resolvedIndicesError,
       destinationDetailRefs,
+      sourceConnectedDestinationIds,
       onShowDestinationDetail,
       onHideDestinationDetail,
     }),
@@ -449,6 +465,7 @@ const DestinationsGridTable = ({
       resolvedIndicesStatus,
       resolvedIndicesError,
       destinationDetailRefs,
+      sourceConnectedDestinationIds,
       onShowDestinationDetail,
       onHideDestinationDetail,
     ]

@@ -8,7 +8,7 @@
  */
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
-import { createAwsJsonService } from './aws_json';
+import { createAwsJsonService, isAwsJsonDocument, toAwsJsonDocument } from './aws_json';
 import type { SmithyModel } from '.';
 
 const NS = 'example.metrics';
@@ -97,6 +97,13 @@ describe('AWS JSON services from Smithy models', () => {
       body: JSON.stringify(body),
     });
 
+  it('says it answers the hosts of its services, whose requests all go to the root path', () => {
+    const { answers } = createEmulatorFetch({ specs: { metrics: model } });
+
+    expect(answers('POST', new URL(`${ORIGIN}/`))).toBe(true);
+    expect(answers('POST', new URL('https://other.example/'))).toBe(false);
+  });
+
   it('routes requests by X-Amz-Target and answers with the output shape', async () => {
     const { fetch, calls } = createEmulatorFetch({ specs: { metrics: model } });
 
@@ -113,10 +120,33 @@ describe('AWS JSON services from Smithy models', () => {
         request: `POST ${ORIGIN}/`,
         operation: 'GetMetricData',
         matched: { method: 'post', path: '/GetMetricData', source: 'metrics' },
+        responseSource: 'generated',
         status: 200,
         requestViolations: [],
         responseViolations: [],
       },
+    ]);
+  });
+
+  it('serves the OpenAPI document of the model, as snapshots store it, the same way', async () => {
+    const document = JSON.parse(JSON.stringify(toAwsJsonDocument(model)));
+    const { fetch, calls } = createEmulatorFetch({ specs: { metrics: document } });
+
+    const response = await send(fetch, 'Metrics_20240101.GetMetricData', {
+      MetricName: 'CPUUtilization',
+      Period: 60,
+    });
+
+    expect(isAwsJsonDocument(document)).toBe(true);
+    expect(document['x-amz-json']).toEqual({
+      version: '1.0',
+      targetPrefix: 'Metrics_20240101',
+      endpointPrefix: 'metrics',
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ Values: [0], Timestamp: 0 });
+    expect(calls.map(({ matched, status }) => ({ matched, status }))).toEqual([
+      { matched: { method: 'post', path: '/GetMetricData', source: 'metrics' }, status: 200 },
     ]);
   });
 

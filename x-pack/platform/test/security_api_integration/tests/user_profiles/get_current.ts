@@ -9,6 +9,7 @@ import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/ap
 import { expect } from 'expect';
 import type { Cookie } from 'tough-cookie';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -27,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     async function login() {
       const response = await supertestWithoutAuth
         .post('/internal/security/login')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxx')
         .send({
           providerType: 'basic',
@@ -67,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie!.cookieString())
         .send({
-          avatar: { initials: 'some-initials', color: '#f3f3f3' },
+          avatar: { initials: 'SI', color: '#f3f3f3' },
           userSettings: { darkMode: 'dark', contrastMode: 'high' },
         })
         .expect(200);
@@ -125,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
             "avatar": Object {
               "color": "#f3f3f3",
               "imageUrl": null,
-              "initials": "some-initials",
+              "initials": "SI",
             },
             "userSettings": Object {
               "contrastMode": "high",
@@ -227,7 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
             "avatar": Object {
               "color": "#f3f3f3",
               "imageUrl": null,
-              "initials": "some-initials",
+              "initials": "SI",
             },
             "userSettings": Object {
               "contrastMode": "high",
@@ -327,7 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
             "avatar": Object {
               "color": "#f3f3f3",
               "imageUrl": null,
-              "initials": "some-initials",
+              "initials": "SI",
             },
             "userSettings": Object {
               "contrastMode": "high",

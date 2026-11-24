@@ -8,6 +8,7 @@
 import { badRequest, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { getUserDisplayName } from '@kbn/user-profile-components/server';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
@@ -33,11 +34,6 @@ const runtimeSchema = z.object({
   dedupeWindowSeconds: z.number().int().min(0).optional(),
   overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
 });
-
-// A username can be an opaque id (for example on Cloud), so prefer a name a person recognizes.
-const getAuthorName = (
-  user: { username: string; full_name?: string; email?: string } | null
-): string | undefined => user?.full_name?.trim() || user?.email?.trim() || user?.username;
 
 export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/automations',
@@ -67,6 +63,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     params,
     getAutomationsSoClient,
     getWorkflowsManagement,
+    isUniversalAlertingAvailable,
     getInvestigatorServiceAccountService,
     context,
   }) => {
@@ -78,6 +75,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     const coreContext = await context.core;
     const spaceId = coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
+    const user = coreContext.security.authc.getCurrentUser();
     // Before any write: refuses callers who could not write the bound workflow.
     const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
       request,
@@ -89,7 +87,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       name: params.body.name,
       description: params.body.description,
       tags: params.body.tags,
-      author: getAuthorName(coreContext.security.authc.getCurrentUser()),
+      author: user ? getUserDisplayName(user) : undefined,
       automationType: params.body.automationType ?? 'custom',
       isEnabled: params.body.isEnabled ?? false,
       trigger: params.body.trigger,
@@ -113,6 +111,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
         automationId: created.id,
         automation: attributes,
         serviceAccountId,
+        universalAlerts: isUniversalAlertingAvailable(),
       });
       const workflow = await workflowsManagement.management.createWorkflow(
         { yaml },

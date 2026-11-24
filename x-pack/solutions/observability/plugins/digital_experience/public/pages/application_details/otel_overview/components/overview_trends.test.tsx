@@ -8,24 +8,33 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { BrushEndListener, SettingsProps } from '@elastic/charts';
+import type { BrushEndListener, RectAnnotationProps, SettingsProps } from '@elastic/charts';
+import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
 import { OverviewTrends } from './overview_trends';
 
 const mockBrushEndListeners: BrushEndListener[] = [];
+const mockShadedZones: RectAnnotationProps['dataValues'][] = [];
+const mockXDomains: SettingsProps['xDomain'][] = [];
 
-// jsdom draws no canvas to drag over, so the test calls the listener each chart registers.
+// jsdom draws no canvas to drag over, so the test calls the listener each chart registers, and
+// reads the zones `Endzones` hands to the annotation and the domain each chart is drawn over.
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
   const { createElement } = jest.requireActual('react');
   return {
     ...actual,
+    RectAnnotation: (props: RectAnnotationProps) => {
+      mockShadedZones.push(props.dataValues);
+      return null;
+    },
     Settings: (props: SettingsProps) => {
       if (props.onBrushEnd) {
         mockBrushEndListeners.push(props.onBrushEnd);
       }
+      mockXDomains.push(props.xDomain);
       return createElement(actual.Settings, props);
     },
   };
@@ -34,20 +43,29 @@ jest.mock('@elastic/charts', () => {
 jest.mock('../../../../hooks/use_kibana_services');
 
 const POINTS: OverviewTrendPoint[] = [
-  { timestamp: 1_000, pageLoads: 2, loadTimeP75Ms: 1500.5 },
-  { timestamp: 2_000, pageLoads: 0, loadTimeP75Ms: null },
+  { timestamp: 1_000, pageLoads: 2, loadTimePercentileMs: 1500.5 },
+  { timestamp: 2_000, pageLoads: 0, loadTimePercentileMs: null },
 ];
+
+// The buckets of `POINTS` are one second wide, so this range matches their edges.
+const MATCHING_RANGE = { start: 1_000, end: 3_000 };
 
 const renderTrends = (
   points: OverviewTrendPoint[] = POINTS,
   isLoading = false,
-  onTimeRangeSelect = jest.fn()
+  onTimeRangeSelect = jest.fn(),
+  percentile: OverviewPercentile = 75,
+  onPercentileChange = jest.fn(),
+  range = MATCHING_RANGE
 ) =>
   render(
     <OverviewTrends
       points={points}
+      histogram={{ interval: { value: 1, unit: 's' }, ...range }}
       pageLoads={points.reduce((sum, { pageLoads }) => sum + pageLoads, 0)}
-      loadTimeP75Ms={1500.5}
+      loadTimePercentileMs={1500.5}
+      percentile={percentile}
+      onPercentileChange={onPercentileChange}
       isLoading={isLoading}
       onTimeRangeSelect={onTimeRangeSelect}
     />,
@@ -65,6 +83,7 @@ const hasChart = (panel: HTMLElement) => within(panel).queryByRole('graphics-doc
 
 beforeEach(() => {
   mockBrushEndListeners.length = 0;
+  mockShadedZones.length = 0;
   window.localStorage.clear();
   jest.mocked(useKibanaServices).mockReturnValue({
     uiSettings: createUiSettingsMock(),
@@ -86,15 +105,33 @@ describe('OverviewTrends', () => {
     expect(loadTimeChart()).toHaveTextContent('Load time (p75)1.50 s');
   });
 
+  it('names the percentile in the load time, and offers the others', () => {
+    const onPercentileChange = jest.fn();
+    renderTrends(POINTS, false, jest.fn(), 95, onPercentileChange);
+
+    expect(loadTimeChart()).toHaveTextContent('Load time (p95)1.50 s');
+    const select = screen.getByTestId('digitalExperienceOverviewPercentile');
+    expect(select).toHaveValue('95');
+    expect(
+      within(select)
+        .getAllByRole('option')
+        .map((option) => option.textContent)
+    ).toEqual(['p50', 'p75', 'p90', 'p95', 'p99']);
+
+    fireEvent.change(select, { target: { value: '50' } });
+
+    expect(onPercentileChange).toHaveBeenCalledWith(50);
+  });
+
   it('says when there are no page loads in the time range', () => {
-    renderTrends([{ timestamp: 1_000, pageLoads: 0, loadTimeP75Ms: null }]);
+    renderTrends([{ timestamp: 1_000, pageLoads: 0, loadTimePercentileMs: null }]);
 
     expect(within(pageLoadsChart()).getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     expect(within(loadTimeChart()).getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('draws the page loads even when nothing was timed, and says no load time was reported', () => {
-    renderTrends([{ timestamp: 1_000, pageLoads: 3, loadTimeP75Ms: null }]);
+    renderTrends([{ timestamp: 1_000, pageLoads: 3, loadTimePercentileMs: null }]);
 
     expect(hasChart(pageLoadsChart())).toBe(true);
     expect(within(loadTimeChart()).getByText(NO_LOAD_TIMES_MESSAGE)).toBeInTheDocument();
@@ -123,6 +160,46 @@ describe('OverviewTrends', () => {
 
     renderTrends();
     expect(screen.getByRole('button', { name: 'Bar' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  // As in Lens: bars shade from the range's edges, areas take whole buckets outside their domain,
+  // which draws nothing.
+  it.each([
+    [
+      'area',
+      { min: 1_000, max: 3_000, minInterval: 1_000 },
+      [{ coordinates: { x1: 1_000 } }, { coordinates: { x0: 3_000 } }],
+    ],
+    [
+      'bar',
+      { min: 1_000, max: 2_000, minInterval: 1_000 },
+      [{ coordinates: { x1: 1_500 } }, { coordinates: { x0: 2_500 } }],
+    ],
+  ])(
+    'marks the partial first and last buckets of both %s charts as Lens does',
+    (chartType, xDomain, zones) => {
+      window.localStorage.setItem(
+        'xpack.digitalExperience.overview.trendChartType',
+        JSON.stringify(chartType)
+      );
+      renderTrends(POINTS, false, jest.fn(), 75, jest.fn(), { start: 1_500, end: 2_500 });
+
+      expect(mockShadedZones.slice(-2)).toEqual([zones, zones]);
+      expect(mockXDomains.slice(-2)).toEqual([
+        expect.objectContaining(xDomain),
+        expect.objectContaining(xDomain),
+      ]);
+    }
+  );
+
+  it('shades nothing on bars when the range matches the bucket edges', () => {
+    window.localStorage.setItem(
+      'xpack.digitalExperience.overview.trendChartType',
+      JSON.stringify('bar')
+    );
+    renderTrends();
+
+    expect(mockShadedZones.slice(-2)).toEqual([[], []]);
   });
 
   it('shows the loading state of both charts, not their values or empty message', () => {

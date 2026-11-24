@@ -48,7 +48,7 @@ export class SendActionPolicyTestRoute extends BaseAlertingRoute {
     access: 'internal' as const,
     summary: 'Send a test notification of an action policy',
     description:
-      'Builds a test notification of an action policy from synthetic alerts, and runs each selected destination workflow as a workflow test run of the current user. Nothing is written to the alert actions and the policy execution history is unchanged.',
+      'Sends a test payload of an action policy to each selected destination workflow, as a workflow test run of the current user. Nothing is written to the alert actions and the policy execution history is unchanged.',
   } as const;
   static schemas = {
     request: {
@@ -64,7 +64,7 @@ export class SendActionPolicyTestRoute extends BaseAlertingRoute {
       400: {
         body: () => errorResponseSchema,
         description:
-          'Indicates invalid parameters, or destinations that do not belong to the policy.',
+          'Indicates invalid parameters, an invalid payload, or destinations that do not belong to the policy.',
       },
       403: {
         body: () => errorResponseSchema,
@@ -94,10 +94,10 @@ export class SendActionPolicyTestRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { seed, destination_ids: destinationIds } = this.request.body;
+    const { payload, destination_ids: destinationIds } = this.request.body;
     const result = await this.actionPolicyTestService.send({
       policyId: this.request.params.id,
-      seed,
+      payload,
       destinationIds,
     });
     return this.ctx.response.ok({ body: result });

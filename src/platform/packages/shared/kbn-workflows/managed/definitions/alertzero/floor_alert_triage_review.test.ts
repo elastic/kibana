@@ -294,6 +294,72 @@ describe('floor_alert_triage_review — live revision', () => {
   });
 });
 
+describe('floor_alert_triage_review — decisions', () => {
+  const approval = () => stepByName('store_fp_decisions_after_approval');
+  const dismissal = () => stepByName('store_fp_decisions_after_dismissal');
+
+  it('stores decisions after an approval and after a dismissal, with the same step', () => {
+    expect(approval()?.type).toBe('alertzero.triage.storeFpDecisions');
+    expect(dismissal()?.type).toBe('alertzero.triage.storeFpDecisions');
+    expect(approval()?.with?.outcome).toBe('approved');
+    expect(dismissal()?.with?.outcome).toBe('dismissed');
+  });
+
+  it('does not fail a finished approval or dismissal when the store fails', () => {
+    expect(approval()?.['on-failure']?.continue).toBe(true);
+    expect(dismissal()?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('runs inside the approved and dismissed branches only', () => {
+    const inBranch = (branch: string) =>
+      flatten(stepByName(branch)?.steps ?? []).map(({ name }) => name);
+    expect(inBranch('handle_approved')).toContain('store_fp_decisions_after_approval');
+    expect(inBranch('handle_dismissed')).toContain('store_fp_decisions_after_dismissal');
+    expect(inBranch('handle_expired')).not.toEqual(
+      expect.arrayContaining(['store_fp_decisions_after_approval'])
+    );
+  });
+
+  it('stores the alerts of the live revision, and nothing when the live revision could not be read', () => {
+    for (const step of [approval(), dismissal()]) {
+      expect(step?.with?.alert_ids).toBe('${{ variables.live_alert_ids }}');
+      expect(step?.if).toBe('${{ steps.get_live_revision.error == blank }}');
+    }
+  });
+
+  it('passes the autonomy, defaulting to manual, so a supervised approval stores nothing', () => {
+    const expr = approval()?.with?.autonomy as string;
+    expect(evalExpr(expr, { inputs: { autonomy: 'supervised' } })).toBe('supervised');
+    expect(evalExpr(expr, { inputs: {} })).toBe('manual');
+  });
+
+  it('names the proposal, the Investigation and the approver in the decision', () => {
+    const inputs = { conversation_id: 'conversation-1' };
+    const steps = {
+      create_fp_proposal: { output: { proposalId: 'proposal-1' } },
+      get_proposal: { output: { decidedBy: { username: 'analyst' } } },
+    };
+    const context = { inputs, steps };
+    expect(renderString(approval()?.with?.proposal_id as string, context)).toBe('proposal-1');
+    expect(renderString(approval()?.with?.investigation_id as string, context)).toBe(
+      'conversation-1'
+    );
+    expect(renderString(approval()?.with?.approver as string, context)).toBe('analyst');
+    // The step reads the space from the run, so no input can point it at another space.
+    expect(approval()?.with).not.toHaveProperty('space_id');
+  });
+
+  it('stores the dismissal after the re-tag, before the Investigation closes', () => {
+    const names = flatten(stepByName('handle_dismissed')?.steps ?? []).map(({ name }) => name);
+    expect(names.indexOf('store_fp_decisions_after_dismissal')).toBeGreaterThan(
+      names.indexOf('retag_dismissed_alerts')
+    );
+    expect(names.indexOf('store_fp_decisions_after_dismissal')).toBeLessThan(
+      names.indexOf('close_investigation_after_dismissal')
+    );
+  });
+});
+
 // `kibana.SetAlertTags` validates its body: both lists are required, even when one is empty. A call
 // that only adds a tag fails with HTTP 400 at run time, and `continue: true` hides it.
 describe('floor_alert_triage_review — kibana.SetAlertTags calls', () => {
@@ -466,9 +532,13 @@ describe('floor_alert_triage_review — post_comment_outcome_dismissed', () => {
     expect(comment).not.toContain('Rationale');
   });
 
-  it('names the decider when decidedBy is present', () => {
-    const comment = renderDismissedComment({ decidedBy: { username: 'analyst1' } });
-    expect(comment).toContain('@analyst1');
+  // On serverless an API key can be the decider, and its username is not readable. The proposal
+  // card already shows who decided, so the comment does not repeat it.
+  it('does not name the decider, even when decidedBy is present', () => {
+    const comment = renderDismissedComment({ decidedBy: { username: 'kcoM-oC2SUmTy-Gcu7F5zw' } });
+    expect(comment).not.toContain('kcoM-oC2SUmTy-Gcu7F5zw');
+    expect(comment).not.toContain(' by @');
+    expect(comment).toContain('Proposal dismissed (reason:');
   });
 
   it('claims every FP candidate was re-tagged when no per-alert retag failed', () => {
@@ -621,74 +691,70 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(retag?.with?.exclude_alert_ids).toBe('${{ variables.live_alert_ids }}');
   });
 
-  it('reports a failed sweep of the leftovers in the count and the comment', () => {
+  // The proposal card shows who approved and the Investigation shows what closed, so the approved
+  // branch posts a comment only when the leftovers sweep did not finish.
+  it('counts a failed sweep of the leftovers and comments only when it failed', () => {
+    const step = stepByName('post_comment_retag_incomplete_approved');
     const expr = stepByName('record_approved_retag_failures')?.with?.failed_retag_count as string;
     expect(evalExpr(expr, { steps: { retag_approved_leftovers: { output: { failed: 3 } } } })).toBe(
       3
     );
-    const template = (stepByName('post_comment_outcome_approved')?.with as { message: string })
-      .message;
-    const render = (context: Record<string, unknown>) =>
-      renderString(template, {
-        variables: { fp_candidate_count: 2, failed_retag_count: 0 },
-        ...context,
-      });
-    expect(
-      render({ steps: { retag_approved_leftovers: { error: { message: 'x' } }, get_proposal: {} } })
-    ).toContain('did not fully succeed');
-    expect(
-      render({
-        steps: {
-          retag_approved_leftovers: { output: { matched: 0, failed: 0 } },
-          get_proposal: {},
-        },
-      })
-    ).not.toContain('did not fully succeed');
+    expect(branchStepNames('handle_approved')).toContain('post_comment_retag_incomplete_approved');
+    expect(stepByName('post_comment_outcome_approved')).toBeUndefined();
+    expect((step?.with as { message: string }).message).toContain('did not fully succeed');
+
+    const shouldPost = (steps: Record<string, unknown>, failedRetagCount: number) =>
+      evalExpr(step?.if as string, { steps, variables: { failed_retag_count: failedRetagCount } });
+    expect(shouldPost({ retag_approved_leftovers: { error: { message: 'x' } } }, 0)).toBe(true);
+    expect(shouldPost({ retag_approved_leftovers: { output: { failed: 2 } } }, 2)).toBe(true);
+    expect(shouldPost({ retag_approved_leftovers: { output: { failed: 0 } } }, 0)).toBe(false);
   });
 
-  // The close sets `false_positive`, so a live alert closed with another reason was closed by an
-  // analyst before the approval. Searching the live ids only keeps an analyst's revision out.
-  it('counts live alerts an analyst closed first by their close reason', () => {
+  // The approval closes the Investigation as a false positive, so an analyst's earlier closure
+  // must be visible there. The proposal API does not expose the close output, so a search counts
+  // the live alerts closed with another reason.
+  it('tells the Investigation how many alerts an analyst had already closed, only when some were', () => {
     const search = stepByName('count_analyst_closed');
-
-    expect(branchStepNames('handle_approved')).toContain('count_analyst_closed');
+    const step = stepByName('post_comment_already_closed_approved');
+    expect(branchStepNames('handle_approved')).toEqual(
+      expect.arrayContaining(['count_analyst_closed', 'post_comment_already_closed_approved'])
+    );
     expect(search?.type).toBe('elasticsearch.search');
-    expect(search?.with).toMatchObject({
-      index: '.alerts-security.alerts-{{ workflow.spaceId }}',
-      size: 0,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: [
-            { terms: { _id: '${{ variables.live_alert_ids }}' } },
-            { term: { 'kibana.alert.workflow_status': 'closed' } },
-          ],
-          must_not: [{ term: { 'kibana.alert.workflow_reason': 'false_positive' } }],
-        },
+    expect(search?.['on-failure']?.continue).toBe(true);
+    // Each clause matters: dropping the id filter counts the whole space, dropping `closed` counts
+    // open alerts, and moving `false_positive` out of `must_not` counts the wrong alerts.
+    expect(search?.with?.query).toEqual({
+      bool: {
+        filter: [
+          { terms: { _id: '${{ variables.live_alert_ids }}' } },
+          { term: { 'kibana.alert.workflow_status': 'closed' } },
+        ],
+        must_not: [{ term: { 'kibana.alert.workflow_reason': 'false_positive' } }],
       },
     });
-  });
 
-  it.each([
-    [
-      'some alerts were closed by an analyst first',
-      { output: { hits: { total: { value: 2 } } } },
-      true,
-    ],
-    ['the search reports none', { output: { hits: { total: { value: 0 } } } }, false],
-    ['the search failed', { error: { message: 'x' } }, false],
-  ])('posts the already-closed sentence only when %s', (_scenario, searchResult, posted) => {
-    const template = (stepByName('post_comment_outcome_approved')?.with as { message: string })
-      .message;
-    const rendered = renderString(template, {
-      variables: { fp_candidate_count: 3, failed_retag_count: 0 },
-      steps: { count_analyst_closed: searchResult, retag_approved_leftovers: {}, get_proposal: {} },
-    });
-    const sentence = 'Alerts an analyst had already closed kept their original reason.';
+    const shouldPost = (total?: number) =>
+      evalExpr(step?.if as string, {
+        steps: {
+          count_analyst_closed:
+            total === undefined
+              ? { error: { message: 'x' } }
+              : { output: { hits: { total: { value: total } } } },
+        },
+      });
+    expect(shouldPost(2)).toBe(true);
+    expect(shouldPost(0)).toBe(false);
+    // A failed search leaves the comment out instead of failing the run.
+    expect(shouldPost(undefined)).toBe(false);
 
-    expect(rendered).toContain('3 alerts are now closed.');
-    expect(rendered.includes(sentence)).toBe(posted);
-    expect(rendered.includes('already closed')).toBe(posted);
+    const render = (closed: number, total: number) =>
+      renderString((step?.with as { message: string }).message, {
+        steps: { count_analyst_closed: { output: { hits: { total: { value: closed } } } } },
+        variables: { fp_candidate_count: total },
+      }).replace(/\s+/g, ' ');
+    expect(render(2, 5)).toContain('2 of 5 alerts were already closed by an analyst');
+    expect(render(1, 1)).toContain('1 of 1 alert was already closed by an analyst');
+    expect(render(2, 5)).not.toContain('@');
   });
 
   it('re-tags by the proposal tag and by id, in every outcome that uses the live revision', () => {

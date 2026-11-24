@@ -1,5 +1,5 @@
 {
-  "sha1": "5124dd4e15104dc82a7abc65c29080e9c35a7540",
+  "sha1": "3394d006a472b7c602d20ae41886f9aa11b8aa52",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 87,
-        "column": 13
+        "line": 75,
+        "column": 48
       }
     },
     {
@@ -112,24 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 105,
-        "column": 7
-      }
-    },
-    {
-      "id": "d87fd2b522244fa-a1e6bc31b5d265e",
-      "title": "Dataset quality details integrations hides the dashboards action and links to the overview of a package without dashboards",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 128,
-        "column": 9
+        "line": 80,
+        "column": 24
       }
     },
     {
@@ -144,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 157,
-        "column": 9
+        "line": 113,
+        "column": 15
       }
     },
     {
@@ -160,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
-        "line": 173,
-        "column": 9
+        "line": 133,
+        "column": 10
       }
     },
     {
@@ -176,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
-        "line": 126,
-        "column": 25
+        "line": 149,
+        "column": 73
       }
     },
     {
@@ -192,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
-        "line": 148,
-        "column": 15
+        "line": 175,
+        "column": 10
       }
     },
     {
@@ -208,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
-        "line": 158,
-        "column": 11
+        "line": 184,
+        "column": 13
       }
     },
     {
@@ -224,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
-        "line": 175,
-        "column": 88
+        "line": 199,
+        "column": 9
       }
     },
     {
@@ -240,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
-        "line": 193,
-        "column": 94
+        "line": 217,
+        "column": 7
       }
     },
     {

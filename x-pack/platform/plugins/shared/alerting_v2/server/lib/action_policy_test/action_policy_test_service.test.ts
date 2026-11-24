@@ -12,7 +12,12 @@ import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionPolicyClient } from '../action_policy_client';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
-import { MOCK_KIBANA_BASE_URL } from '../dispatcher/fixtures/test_utils';
+import {
+  createActionGroup,
+  createAlert,
+  MOCK_KIBANA_BASE_URL,
+} from '../dispatcher/fixtures/test_utils';
+import { toWorkflowPayload } from '../dispatcher/workflow_payload';
 import { createMockEbtService } from '../services/ebt_service/ebt_service.mock';
 import { createMockLicenseService } from '../services/license_service/license_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
@@ -21,6 +26,14 @@ import { ACTION_POLICY_TEST_SENT_EBT_EVENT_TYPE } from '../telemetry/action_poli
 import { ActionPolicyTestService } from './action_policy_test_service';
 
 const SPACE_ID = 'team-a';
+
+const PAYLOAD = toWorkflowPayload(
+  createActionGroup({
+    spaceId: SPACE_ID,
+    alerts: [createAlert({ space_id: SPACE_ID, severity: 'high' })],
+    rules: { 'rule-1': { name: 'Rule 1', grouping_fields: [] } },
+  })
+);
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
@@ -197,7 +210,7 @@ describe('ActionPolicyTestService', () => {
   });
 
   describe('send', () => {
-    it('runs one workflow test run per selected destination as the current user, in the policy space', async () => {
+    it('runs one workflow test run per selected destination with the given payload, as the current user, in the policy space', async () => {
       const { service, workflowsManagement, request } = setup();
       workflowsManagement.testWorkflow
         .mockResolvedValueOnce('execution-1')
@@ -205,31 +218,19 @@ describe('ActionPolicyTestService', () => {
 
       const result = await service.send({
         policyId: 'policy-1',
-        seed: 5,
+        payload: PAYLOAD,
         destinationIds: ['workflow-1', 'workflow-2'],
       });
 
-      const preview = await service.preview({ policyId: 'policy-1', seed: 5 });
-      const [previewPayload] = preview.groups;
-
-      // The payload sent is the previewed one; only `last_event_timestamp` is rebuilt as now.
-      const { alerts: previewAlerts, ...previewGroup } = previewPayload;
       expect(workflowsManagement.testWorkflow).toHaveBeenCalledTimes(2);
       for (const workflowId of ['workflow-1', 'workflow-2']) {
         expect(workflowsManagement.testWorkflow).toHaveBeenCalledWith({
           workflowId,
-          inputs: { payload: expect.objectContaining(previewGroup) },
+          inputs: { payload: PAYLOAD },
           spaceId: SPACE_ID,
           request,
         });
       }
-      const [[{ inputs }]] = workflowsManagement.testWorkflow.mock.calls;
-      expect(inputs.payload.alerts).toEqual(
-        (previewAlerts as Array<Record<string, unknown>>).map((alert) => ({
-          ...alert,
-          last_event_timestamp: expect.any(String),
-        }))
-      );
       expect(result).toEqual({
         results: [
           { workflow_id: 'workflow-1', workflow_execution_id: 'execution-1' },
@@ -245,7 +246,7 @@ describe('ActionPolicyTestService', () => {
 
       await service.send({
         policyId: 'policy-1',
-        seed: 5,
+        payload: PAYLOAD,
         destinationIds: ['workflow-2', 'workflow-2'],
       });
 
@@ -263,7 +264,7 @@ describe('ActionPolicyTestService', () => {
 
       const result = await service.send({
         policyId: 'policy-1',
-        seed: 5,
+        payload: PAYLOAD,
         destinationIds: ['workflow-1', 'workflow-2'],
       });
 
@@ -277,7 +278,7 @@ describe('ActionPolicyTestService', () => {
       const { service, workflowsManagement } = setup();
 
       const error = await service
-        .send({ policyId: 'policy-1', seed: 5, destinationIds: ['workflow-1', 'other'] })
+        .send({ policyId: 'policy-1', payload: PAYLOAD, destinationIds: ['workflow-1', 'other'] })
         .catch((e) => e);
 
       expect(Boom.isBoom(error)).toBe(true);
@@ -289,36 +290,26 @@ describe('ActionPolicyTestService', () => {
       expect(workflowsManagement.testWorkflow).not.toHaveBeenCalled();
     });
 
-    it('sends a policy whose matcher has a KQL expression', async () => {
-      const { service, workflowsManagement } = setup({
-        policy: createPolicy({ matcher: { tags: ['prod'], expression: 'severity: critical' } }),
-      });
-      workflowsManagement.testWorkflow.mockResolvedValue('execution-1');
-
-      await service.send({ policyId: 'policy-1', seed: 5, destinationIds: ['workflow-1'] });
-
-      expect(workflowsManagement.testWorkflow).toHaveBeenCalledTimes(1);
-    });
-
     it('rejects when the license does not support action policies', async () => {
       const { service, licenseService, workflowsManagement } = setup();
       licenseService.assertActionPoliciesLicense.mockRejectedValue(Boom.forbidden('license'));
 
       await expect(
-        service.send({ policyId: 'policy-1', seed: 5, destinationIds: ['workflow-1'] })
+        service.send({ policyId: 'policy-1', payload: PAYLOAD, destinationIds: ['workflow-1'] })
       ).rejects.toThrow('license');
       expect(workflowsManagement.testWorkflow).not.toHaveBeenCalled();
     });
 
-    it('reports one telemetry event per send', async () => {
+    it('reports one telemetry event per send, counting the alerts of the payload', async () => {
       const { service, workflowsManagement, ebtService } = setup();
       workflowsManagement.testWorkflow
         .mockResolvedValueOnce('execution-1')
         .mockRejectedValueOnce(new Error('boom'));
+      const [alert] = PAYLOAD.alerts;
 
       await service.send({
         policyId: 'policy-1',
-        seed: 5,
+        payload: { ...PAYLOAD, alerts: [alert, alert] },
         destinationIds: ['workflow-1', 'workflow-2'],
       });
 
@@ -328,7 +319,7 @@ describe('ActionPolicyTestService', () => {
         space_id: SPACE_ID,
         grouping_mode: 'per_alert',
         matcher_type: 'none',
-        alert_count: 1,
+        alert_count: 2,
         destination_count: 2,
         failed_count: 1,
       });

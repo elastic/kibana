@@ -22,3 +22,5 @@ export type {
 } from './types';
 
 export { SharedGlobalConfigKeys } from './shared_global_config';
+
+export type { PluginInitialization } from './plugin_initialization';

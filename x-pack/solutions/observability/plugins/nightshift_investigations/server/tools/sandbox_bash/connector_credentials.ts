@@ -19,6 +19,9 @@ export type ResolvedSandboxCredentials = Awaited<
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
 
+// Actions framework settings that say nothing about how to reach the service.
+const NON_ENV_CONFIG_KEYS: ReadonlySet<string> = new Set(['selectedActions']);
+
 export interface ConnectorCredentialEnv {
   /** Environment variables to inject into the command. */
   env: Record<string, string>;
@@ -26,6 +29,8 @@ export interface ConnectorCredentialEnv {
   secretValues: string[];
   /** Header env keys the credential proxy may only send to the connector's hosts. */
   secretEnvKeys: SecretEnvKey[];
+  /** Connector hosts allowed for the command, even when no auth headers are needed. */
+  allowedHosts: string[];
 }
 
 export type ConnectorCredentialResolution = ConnectorCredentialEnv | { errorMessage: string };
@@ -148,6 +153,7 @@ export const buildConnectorEnv = ({
   const secretValues: string[] = [];
 
   for (const [key, value] of Object.entries(config)) {
+    if (NON_ENV_CONFIG_KEYS.has(key)) continue;
     const envValue = toEnvValue(value);
     if (envValue !== undefined) env[`${CONNECTOR_ENV_PREFIX}CONFIG_${toEnvKey(key)}`] = envValue;
   }
@@ -169,7 +175,7 @@ export const buildConnectorEnv = ({
     .filter((key) => key.startsWith(`${CONNECTOR_ENV_PREFIX}HEADER_`))
     .map((key) => ({ key, allowed_hosts: [...hosts] }));
 
-  return { env, secretValues: [...new Set(secretValues)], secretEnvKeys };
+  return { env, secretValues: [...new Set(secretValues)], secretEnvKeys, allowedHosts: [...hosts] };
 };
 
 /**

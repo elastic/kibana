@@ -27,7 +27,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const oidcJWKSPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
-  const oidcIdPPlugin = resolve(__dirname, './plugins/oidc_provider');
+  const oidcIdPPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/plugins/oidc_provider'
+  );
 
   const pkiKibanaCAPath = require.resolve(
     '@kbn/security-api-integration-helpers/pki/kibana_ca.crt'

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { monitorCreateSchema, monitorForwardCompatibilitySchema } from './monitor_attribute_schema';
 import { attributesToIncludeInAAD } from './synthetics_monitor_config';
 import { monitorConfigMappings } from './monitor_mappings';
+import { scheduleIntervalModelVersion } from './schedule_model_version';
 import { legacySyntheticsMonitorTypeSingle } from '../../../common/types/saved_objects';
 import { LegacyConfigKey, secretKeys } from '../../../common/constants/monitor_management';
 import { monitorMigrations } from '../migrations/monitors';
@@ -82,6 +83,7 @@ export const getLegacySyntheticsMonitorSavedObjectType = (
           forwardCompatibility: monitorForwardCompatibilitySchema,
         },
       },
+      '4': scheduleIntervalModelVersion,
     },
   };
 };

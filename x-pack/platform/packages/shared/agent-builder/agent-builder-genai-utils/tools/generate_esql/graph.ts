@@ -22,6 +22,7 @@ import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
 import {
   extractEsqlQueries,
   executeEsql,
+  isEsqlExecutionTimeoutError,
   validateEsqlQuery,
   buildEsqlParams,
   buildTimeSeriesTimeRangeFilter,
@@ -69,6 +70,7 @@ const StateAnnotation = Annotation.Root({
   disableNamedParams: Annotation<boolean | undefined>(),
   timeRange: Annotation<TimeRange>(),
   esqlVariables: Annotation<ESQLControlVariable[] | undefined>(),
+  executionTimeoutMs: Annotation<number | undefined>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
@@ -339,6 +341,7 @@ export const createNlToEsqlGraph = ({
             }
           : {}),
         includeFrozen,
+        timeoutMs: state.executionTimeoutMs,
         esClient,
       });
       action = {
@@ -353,6 +356,7 @@ export const createNlToEsqlGraph = ({
         success: false,
         query,
         error: e.message,
+        ...(isEsqlExecutionTimeoutError(e) ? { timedOut: true } : {}),
       };
     }
 
@@ -361,12 +365,25 @@ export const createNlToEsqlGraph = ({
     };
   };
 
+  /**
+   * A timed-out query is too expensive rather than wrong, so the regular fixer loop would mostly
+   * resubmit it and wait the full deadline each time. One regeneration is allowed (it covers a
+   * transient slow cluster as well as a genuinely narrower query); a second timeout ends the call.
+   */
+  const timeoutRetriesExhausted = (state: StateType): boolean =>
+    state.actions.filter((action) => isExecuteQueryAction(action) && action.timedOut).length > 1;
+
   const branchAfterQueryExecution = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
     if (!isExecuteQueryAction(lastAction)) {
       throw new Error(`Last action is not an execute_query action`);
     }
-    if (lastAction.success || state.currentTry >= state.maxRetries || joinTargetRejected(state)) {
+    if (
+      lastAction.success ||
+      state.currentTry >= state.maxRetries ||
+      joinTargetRejected(state) ||
+      (lastAction.timedOut && timeoutRetriesExhausted(state))
+    ) {
       return 'finalize';
     }
     return 'generate_esql';

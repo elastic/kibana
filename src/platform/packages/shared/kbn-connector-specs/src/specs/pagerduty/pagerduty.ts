@@ -18,6 +18,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { pagerdutySkillFile } from './skills/pagerduty_skill';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   AcknowledgeIncidentInput,
@@ -289,7 +290,7 @@ export const PagerdutyConnector: ConnectorSpec = {
         const response = await ctx.client.get(`${PAGERDUTY_REST_API_BASE_URL}/services`, {
           params,
           headers: { Accept: PD_ACCEPT_HEADER },
-          paramsSerializer: { indexes: null },
+          paramsSerializer: { indexes: false },
         });
         return response.data;
       },
@@ -562,8 +563,12 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
   },
 
+  skillFiles: [pagerdutySkillFile],
+
   skill: [
     '## PagerDuty Connector Usage Guide',
+    '',
+    'If the `/connector-pagerduty` skill is available, prefer it for on-call by schedule name, incident, escalation policy and user lookups: its workflows return compact results that fit the context window. The steps below work without it.',
     '',
     '### Identifying the Authenticated User',
     '',

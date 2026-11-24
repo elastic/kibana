@@ -6,19 +6,53 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import type { SessionsStatus } from '../../../../common/sessions';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import {
+  ALL_SESSIONS_INDEX_PATTERN,
+  type SessionsSetUpBlocker,
+  type SessionsStatus,
+} from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
+import type { Formatters } from '../../../hooks/use_formatters';
+import { httpErrorMessage } from '../../../utils/http_error_message';
 
-const ASK_ADMIN_TEXT = i18n.translate('xpack.digitalExperience.sessions.status.askAdminText', {
+const SET_UP_BY_OTHERS_TEXT = i18n.translate(
+  'xpack.digitalExperience.sessions.status.setUpByOthersText',
+  {
+    defaultMessage:
+      'They are set up automatically when someone who can read your EDOT Browser data in full and write to the {sessionsIndex} indices opens Digital Experience.',
+    values: { sessionsIndex: ALL_SESSIONS_INDEX_PATTERN },
+  }
+);
+
+const SET_UP_BLOCKED_TEXT: Record<SessionsSetUpBlocker, string> = {
+  taskManager: i18n.translate('xpack.digitalExperience.sessions.status.setUpBlocked.taskManager', {
+    defaultMessage:
+      'They cannot be set up: Kibana needs the Task Manager plugin, which builds them in the background.',
+  }),
+  encryptionKey: i18n.translate(
+    'xpack.digitalExperience.sessions.status.setUpBlocked.encryptionKey',
+    {
+      defaultMessage:
+        'They cannot be set up until {setting} is set in kibana.yml, so Kibana can store the API key they are built with.',
+      values: { setting: 'xpack.encryptedSavedObjects.encryptionKey' },
+    }
+  ),
+};
+
+/** Who sets sessions up, for a user who can't: or why nobody can. */
+export const setUpByOthersText = (setUpBlocker: SessionsSetUpBlocker | null): string =>
+  setUpBlocker ? SET_UP_BLOCKED_TEXT[setUpBlocker] : SET_UP_BY_OTHERS_TEXT;
+
+const ASK_MANAGER_TEXT = i18n.translate('xpack.digitalExperience.sessions.status.askManagerText', {
   defaultMessage:
-    'Ask an administrator with the Manage sessions privilege of Digital Experience to set them up.',
+    'An administrator with the Manage session summaries privilege of Digital Experience in all spaces can turn them back on.',
 });
 
-const EnableError = ({ error }: { error: Error }) => (
+export const EnableError = ({ error }: { error: Error }) => (
   <>
     <EuiSpacer size="m" />
     <KbnDangerCallout
@@ -28,20 +62,32 @@ const EnableError = ({ error }: { error: Error }) => (
       title={i18n.translate('xpack.digitalExperience.sessions.status.enableErrorTitle', {
         defaultMessage: 'Could not set up sessions',
       })}
-      text={error.message}
+      text={httpErrorMessage(error)}
     />
   </>
 );
 
-interface EnableProps {
+export interface EnableProps {
+  /** The user can set sessions up, or give them a working key again: the status's `canEnable`. */
+  canEnable: boolean;
+  /** The user can turn sessions off and back on. */
   canManage: boolean;
   onEnable: () => void;
   enabling: boolean;
   enableError: Error | undefined;
 }
 
-/** Sessions aren't set up yet: a button to set them up, or who to ask. */
-export function EnableSessionsPrompt({ canManage, onEnable, enabling, enableError }: EnableProps) {
+/**
+ * Sessions aren't set up yet: a button to try again when setting them up failed, or who sets them
+ * up.
+ */
+export function EnableSessionsPrompt({
+  canEnable,
+  onEnable,
+  enabling,
+  enableError,
+  setUpBlocker,
+}: Omit<EnableProps, 'canManage'> & { setUpBlocker: SessionsSetUpBlocker | null }) {
   return (
     <EuiEmptyPrompt
       data-test-subj="digitalExperienceSessionsNotEnabled"
@@ -58,15 +104,15 @@ export function EnableSessionsPrompt({ canManage, onEnable, enabling, enableErro
           <p>
             {i18n.translate('xpack.digitalExperience.sessions.status.notEnabledDescription', {
               defaultMessage:
-                'Sessions group the page views, clicks and errors of each visit to your applications. A background transform builds them from your EDOT Browser data, reading it with the access of whoever sets them up.',
+                'Sessions group the page views, clicks and errors of each visit to your applications. A background task builds them from your EDOT Browser data every minute, with an API key granted on behalf of whoever sets them up, so they hold only what that user can read.',
             })}
           </p>
-          {!canManage && <p>{ASK_ADMIN_TEXT}</p>}
+          {!canEnable && <p>{setUpByOthersText(setUpBlocker)}</p>}
           {enableError && <EnableError error={enableError} />}
         </>
       }
       actions={
-        canManage ? (
+        canEnable ? (
           <EuiButton
             data-test-subj="digitalExperienceSessionsEnable"
             {...getEbtProps({
@@ -88,54 +134,33 @@ export function EnableSessionsPrompt({ canManage, onEnable, enabling, enableErro
 }
 
 /**
- * Sessions are set up but need attention: an update to this Kibana version or configuration, or a
- * failing or lagging transform. Nothing shows when they're healthy.
+ * Sessions are set up but need attention: they were turned off, their API key no longer works, the
+ * last run of the summaries task failed, or it is behind. Nothing shows when they're healthy.
  */
 export function SessionsStatusCallout({
   status,
+  canEnable,
   canManage,
   onEnable,
   enabling,
   enableError,
 }: EnableProps & { status: SessionsStatus }) {
-  // Set up by a newer Kibana (a rollback, or an older node in a rolling upgrade): this one can't
-  // update them, and their summaries may not match what it reads.
-  if (status.installedVersion !== null && status.installedVersion > status.currentVersion) {
+  if (status.disabled) {
     return (
       <>
         <KbnWarningCallout
-          data-test-subj="digitalExperienceSessionsNewerVersion"
+          data-test-subj="digitalExperienceSessionsDisabled"
           size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.newerVersionTitle', {
-            defaultMessage: 'Sessions were set up by a newer version of Kibana',
-          })}
-          text={
-            status.reason ??
-            i18n.translate('xpack.digitalExperience.sessions.status.newerVersionDescription', {
-              defaultMessage: 'Upgrade Kibana to manage sessions.',
-            })
-          }
-        />
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
-  if (status.needsUpdate) {
-    return (
-      <>
-        <KbnWarningCallout
-          data-test-subj="digitalExperienceSessionsNeedUpdate"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateTitle', {
-            defaultMessage: 'Sessions need an update',
+          title={i18n.translate('xpack.digitalExperience.sessions.status.disabledTitle', {
+            defaultMessage: 'Sessions are turned off',
           })}
           text={
             <p>
-              {i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateDescription', {
+              {i18n.translate('xpack.digitalExperience.sessions.status.disabledDescription', {
                 defaultMessage:
-                  'Sessions were set up by an earlier version or with other settings, so new sessions may be missing or incomplete until they are updated.',
+                  'No new sessions are built; the sessions built before they were turned off are kept.',
               })}{' '}
-              {canManage ? null : ASK_ADMIN_TEXT}
+              {canManage ? null : ASK_MANAGER_TEXT}
             </p>
           }
           actionProps={
@@ -143,8 +168,51 @@ export function SessionsStatusCallout({
               ? {
                   primary: {
                     children: i18n.translate(
-                      'xpack.digitalExperience.sessions.status.updateButtonLabel',
-                      { defaultMessage: 'Update sessions' }
+                      'xpack.digitalExperience.sessions.status.turnOnButtonLabel',
+                      { defaultMessage: 'Turn sessions on' }
+                    ),
+                    'data-test-subj': 'digitalExperienceSessionsTurnOn',
+                    ...getEbtProps({
+                      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.ENABLE_SESSIONS,
+                      element: SESSIONS_EBT_ELEMENTS.TURN_ON,
+                    }),
+                    isLoading: enabling,
+                    onClick: onEnable,
+                  },
+                }
+              : undefined
+          }
+        />
+        {enableError && <EnableError error={enableError} />}
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
+  if (status.apiKeyInvalid) {
+    return (
+      <>
+        <KbnWarningCallout
+          data-test-subj="digitalExperienceSessionsApiKeyInvalid"
+          size="s"
+          title={i18n.translate('xpack.digitalExperience.sessions.status.apiKeyInvalidTitle', {
+            defaultMessage: 'Sessions are not being updated',
+          })}
+          text={
+            <p>
+              {i18n.translate('xpack.digitalExperience.sessions.status.apiKeyInvalidDescription', {
+                defaultMessage:
+                  'The API key sessions are built with was invalidated or has expired, so new sessions are missing until they are set up again.',
+              })}{' '}
+              {canEnable ? null : setUpByOthersText(status.setUpBlocker)}
+            </p>
+          }
+          actionProps={
+            canEnable
+              ? {
+                  primary: {
+                    children: i18n.translate(
+                      'xpack.digitalExperience.sessions.status.setUpAgainButtonLabel',
+                      { defaultMessage: 'Set up sessions again' }
                     ),
                     'data-test-subj': 'digitalExperienceSessionsUpdate',
                     ...getEbtProps({
@@ -174,11 +242,22 @@ export function SessionsStatusCallout({
             defaultMessage: 'Sessions are not being updated',
           })}
           text={
-            status.reason ??
-            i18n.translate('xpack.digitalExperience.sessions.status.degradedDescription', {
-              defaultMessage:
-                'The sessions transform failed, so new sessions are missing. Check the transform in Stack Management.',
-            })
+            // The message is filled in only for users who may see Elasticsearch details. The
+            // others are pointed at someone who can, not at logs they usually cannot read.
+            status.lastError?.message
+              ? i18n.translate('xpack.digitalExperience.sessions.status.degradedReason', {
+                  defaultMessage: 'The task that builds sessions failed: {error}',
+                  values: { error: status.lastError.message },
+                })
+              : canManage
+              ? i18n.translate('xpack.digitalExperience.sessions.status.degradedDescription', {
+                  defaultMessage:
+                    'The task that builds sessions failed, so new sessions are missing. Check the Kibana server logs.',
+                })
+              : i18n.translate('xpack.digitalExperience.sessions.status.degradedAskAdmin', {
+                  defaultMessage:
+                    'The task that builds sessions failed, so new sessions are missing. An administrator with the Manage session summaries privilege can see why.',
+                })
           }
         />
         <EuiSpacer size="m" />
@@ -204,5 +283,65 @@ export function SessionsStatusCallout({
       </>
     );
   }
-  return null;
+  // A failed setup with nothing else to show.
+  return enableError ? (
+    <>
+      <EnableError error={enableError} />
+      <EuiSpacer size="m" />
+    </>
+  ) : null;
+}
+
+/** Up to when events are in the sessions, once they're built. */
+export function SessionsFreshness({
+  status,
+  formatters: { formatDate },
+}: {
+  status: SessionsStatus;
+  formatters: Formatters;
+}) {
+  if (status.rebuilding || !status.summarizedUntil) {
+    return null;
+  }
+  return (
+    <EuiText size="xs" color="subdued" data-test-subj="digitalExperienceSessionsFreshness">
+      {i18n.translate('xpack.digitalExperience.sessions.status.freshness', {
+        defaultMessage: 'Includes events up to {time}',
+        values: { time: formatDate(status.summarizedUntil) },
+      })}
+    </EuiText>
+  );
+}
+
+/**
+ * The time range starts before the sessions are built from, so that part may miss sessions: the
+ * task builds only the lookback, though it doesn't delete what it built before.
+ */
+export function SessionsRetentionCallout({
+  retentionDays,
+  rangeStart,
+  formatters: { formatDate },
+}: {
+  retentionDays: number;
+  rangeStart: number;
+  formatters: Formatters;
+}) {
+  const earliest = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  if (rangeStart >= earliest) {
+    return null;
+  }
+  return (
+    <>
+      <KbnInfoCallout
+        data-test-subj="digitalExperienceSessionsRetention"
+        size="s"
+        title={i18n.translate('xpack.digitalExperience.sessions.status.retentionTitle', {
+          defaultMessage:
+            'Sessions are built from the last {days} days of data, so this time range may be missing sessions before {earliest}.',
+          values: { days: retentionDays, earliest: formatDate(earliest) },
+        })}
+      />
+      <EuiSpacer size="m" />
+    </>
+  );
 }

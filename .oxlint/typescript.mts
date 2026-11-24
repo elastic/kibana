@@ -42,7 +42,6 @@ export const typescriptRules: DummyRuleMap = {
   '@typescript-eslint/no-namespace': 'error',
   // '@typescript-eslint/no-undef': 'error',
   // '@typescript-eslint/no-unsafe-function-type': 'error',
-  // '@typescript-eslint/no-var-requires': 'error',
   // '@typescript-eslint/no-wrapper-object-types': 'error',
   '@typescript-eslint/prefer-function-type': 'error',
   '@typescript-eslint/unified-signatures': 'error',
@@ -79,6 +78,7 @@ export const typescriptOverrides: OxlintOverride[] = [
         'error',
         { default: ['public-static-field', 'static-field', 'instance-field'] },
       ],
+      '@kbn/compat/typescript-no-var-requires': 'error',
       '@kbn/compat/typescript-naming-convention': [
         'error',
         {
@@ -157,6 +157,19 @@ export const typescriptOverrides: OxlintOverride[] = [
           modifiers: ['requiresQuotes'],
         },
       ],
+      '@kbn/compat/import-order': [
+        'error',
+        { groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']] },
+      ],
+      '@kbn/compat/eslint-no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSEnumDeclaration[const=true]',
+          message: 'Do not use `const` with enum declarations',
+        },
+      ],
+      '@kbn/compat/eslint-no-undef-init': 'error',
+      '@kbn/compat/eslint-spaced-comment': ['error', 'always', { exceptions: ['/'] }],
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       'max-classes-per-file': ['error', 1],
       'no-bitwise': 'error',

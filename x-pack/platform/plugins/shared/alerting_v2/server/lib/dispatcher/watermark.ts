@@ -14,8 +14,10 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  * - Aborted (the tick stopped in any step, or DispatchStep left groups unattempted),
  *   commit_failed (an alert action write failed), or inline_stats_too_large (scan query
  *   rejected): no advance.
+ * - Deferred (a step left alerts for the next tick): advance to the truncation edge, even
+ *   on no_actions.
  * - No actions: window fully consumed. Advance to windowEnd.
- * - Truncated (row count === ESQL_QUERY_ROW_LIMIT): advance to the last fetched
+ * - Truncated (row count === `dispatcher.run.alerts.max`): advance to the last fetched
  *   alert's timestamp (the truncation edge); the deferred tail is re-read next tick.
  * - All other outcomes (no_alerts, normal completion): advance to windowEnd.
  *
@@ -48,6 +50,10 @@ export const computeNextWatermark = ({
     //     pre-fetch escape hatch can eventually force-advance. Do NOT fall through to the
     //     no_alerts path — that would advance to windowEnd on the first hit.
     nextWatermark = eventWatermark;
+  } else if (finalState.scan?.deferred) {
+    // A step deferred alerts to the next tick (HydrateAlertDataStep budget). They have no record,
+    // so even a no_actions tick must stop at the edge: windowEnd could skip them past the overlap.
+    nextWatermark = finalState.scan.truncationEdge() ?? eventWatermark;
   } else if (haltReason === 'no_actions') {
     // All alerts were filtered (e.g. maintenance window) — window fully consumed.
     // Must be checked before the truncated branch: a truncated batch where all

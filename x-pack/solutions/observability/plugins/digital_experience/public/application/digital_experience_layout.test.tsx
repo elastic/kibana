@@ -13,6 +13,7 @@ import { useListQuery } from '../hooks/use_list_query';
 import { useDigitalExperienceRouter } from '../hooks/use_digital_experience_router';
 import { useSyncTimeRange } from '../hooks/use_time_range';
 import { digitalExperienceRouter } from '../routes';
+import { SessionsStatusProvider } from './sessions_status_provider';
 
 jest.mock('@kbn/typed-react-router-config', () => ({
   ...jest.requireActual('@kbn/typed-react-router-config'),
@@ -52,12 +53,15 @@ describe('DigitalExperienceLayout', () => {
     ]);
   });
 
-  it('renders the pages once the URL has a valid time range', () => {
-    expect(render()).not.toBeNull();
+  it('renders the pages once the URL has a valid time range, with the sessions status', () => {
+    const layout = render();
+
+    expect(layout.type).toBe(SessionsStatusProvider);
+    expect(layout.props.children).not.toBeNull();
   });
 
-  it('renders nothing while the time range is put into the URL', () => {
-    expect(render(undefined, false)).toBeNull();
+  it('renders no page while the time range is put into the URL', () => {
+    expect(render(undefined, false).props.children).toBeNull();
   });
 
   it("keeps the list's filters in the breadcrumbs, in the URL's sorted order", () => {

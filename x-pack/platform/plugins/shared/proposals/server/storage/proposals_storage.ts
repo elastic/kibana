@@ -25,6 +25,8 @@ const storageSettings = {
       // Shapes vary per action workflow and are never the query surface.
       // Flattened keeps them queryable-enough without a per-action mapping.
       actionInput: types.flattened({}),
+      // The action workflow's own run, for linking to it. Never queried.
+      actionExecutionId: types.keyword({ index: false }),
 
       status: types.keyword({}),
       // Absent while awaiting, which is what `must_not exists` filters on.
@@ -38,6 +40,8 @@ const storageSettings = {
       impact: types.keyword({}),
       confidence: types.keyword({}),
       category: types.keyword({}),
+      // Absent on every document written before the flag existed, which readers treat as `false`.
+      skipDiscardReason: types.boolean({}),
       origin: types.keyword({}),
       expiresAt: types.date({}),
 
@@ -72,6 +76,9 @@ const storageSettings = {
       executionError: types.text({}),
       previousExecutionError: types.text({}),
 
+      // Absent on every document written before gateless proposals existed,
+      // which the readers treat as `workflow`.
+      gate: types.keyword({}),
       workflowExecutionId: types.keyword({}),
       gateReleasedAt: types.date({}),
 

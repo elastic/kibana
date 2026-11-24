@@ -1,5 +1,5 @@
+@openfeature/ofrep-web-provider
 cbor2
-@launchdarkly/js-client-sdk
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm
@@ -76,3 +76,9 @@ bump-cli
 @oxlint/plugins
 @types/mssql
 monaco-marker-data-provider
+@opentelemetry/core
+@opentelemetry/resources
+@opentelemetry/sdk-metrics
+@opentelemetry/sdk-trace
+tabbable
+@opentelemetry/otlp-grpc-exporter-base

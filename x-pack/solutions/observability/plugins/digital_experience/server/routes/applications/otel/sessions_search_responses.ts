@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CoreWebVital } from '../../../../common/core_web_vitals';
+import type { PercentilesAggregation, TermsAggregation } from '../../../lib/helpers/aggregations';
+
+// The aggregations `sessions_search_requests.ts` asks for, by the same names.
+
+interface SumAggregation {
+  value: number;
+}
+
+/** One vital in `sessionsSearch`: the sums of its sample counts. */
+export interface SessionsVitalBucket {
+  samples: SumAggregation;
+  good: SumAggregation;
+  needsImprovement: SumAggregation;
+}
+
+/** One application in `sessionsSearch`. */
+export type SessionsBucket = Record<CoreWebVital, SessionsVitalBucket> & {
+  key: string;
+  /** The sessions of the application that started in the time range. */
+  startedSessions: { doc_count: number };
+  environments: TermsAggregation;
+  pageLoads: SumAggregation;
+  jsErrors: SumAggregation;
+  httpRequests: SumAggregation;
+  failedHttpRequests: SumAggregation;
+  lastSeen: { value: number | null };
+};
+
+/** `sessionsSearch`: the applications and the page loads over time in the selected environment. */
+export interface SessionsAggregations {
+  environments: TermsAggregation;
+  environmentNotDefined: { doc_count: number };
+  inEnvironment: {
+    applications: { buckets: SessionsBucket[] };
+    /** Only the sessions that started in the time range. */
+    startedInRange: {
+      pageLoadsOverTime: {
+        // The sessions that started in the bucket, and the page loads they hold.
+        buckets: Array<{ key: number; doc_count: number; pageLoads: SumAggregation }>;
+      };
+    };
+  };
+}
+
+/** One application in `sessionsVitalsSearch`: the p75 of each vital. */
+export type SessionsVitalsBucket = Record<CoreWebVital, PercentilesAggregation> & { key: string };
+
+/** `sessionsVitalsSearch`: the applications in the selected environment. */
+export interface SessionsVitalsAggregations {
+  applications: { buckets: SessionsVitalsBucket[] };
+}
