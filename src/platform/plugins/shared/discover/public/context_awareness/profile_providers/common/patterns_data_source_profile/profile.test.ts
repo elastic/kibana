@@ -12,6 +12,8 @@ import type {
   UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { EsqlSource } from '@kbn/data-source';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
@@ -47,6 +49,42 @@ const getConfiguration = (
 };
 
 describe('Patterns numeric column widths', () => {
+  it('compacts an aliased SPARKLINE result through the double-to-number type mapping', async () => {
+    const query =
+      'FROM logs-sparkline-width | STATS trend = SPARKLINE(bytes) BY category = CATEGORIZE(message)';
+    const provider = createPatternsDataSourceProfileProvider({
+      ...createProfileProviderSharedServicesMock(),
+      aiops: undefined,
+    });
+    const resolution = await provider.resolve({
+      rootContext: { profileId: 'default-root-profile', solutionType: SolutionType.Default },
+      dataSource: createEsqlDataSource(),
+      query: { esql: query },
+    });
+    const accessor = provider.profile.getColumnsConfiguration;
+    if (!resolution.isMatch || !accessor) {
+      throw new Error('Expected Patterns profile');
+    }
+    expect(resolution.context.sparklineColumns).toEqual(['trend']);
+
+    const http = httpServiceMock.createStartContract();
+    http.post.mockResolvedValue({
+      columns: [
+        { name: 'trend', esType: 'double' },
+        { name: 'category', esType: 'keyword' },
+      ],
+    });
+    const source = await EsqlSource.create({ query, http, resolveTimeField: false });
+    expect(source.getColumn('trend')).toMatchObject({ type: 'number', esType: 'double' });
+
+    const configuration = accessor(() => ({}), {
+      context: resolution.context,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+    })({ columns: ['trend', 'category'], dataSource: source });
+    expect(configuration.trend({ column: { id: 'trend' } }).initialWidth).toBe(150);
+    expect(configuration.category).toBeUndefined();
+  });
+
   it('does not compact numbers when the pattern alias was overwritten with a number', async () => {
     const provider = createPatternsDataSourceProfileProvider({
       ...createProfileProviderSharedServicesMock(),
