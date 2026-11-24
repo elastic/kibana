@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  DiscoverSessionApiEmbeddableOverrides,
-  DiscoverSessionApiEmbeddableTab,
+import {
+  discoverSessionApiEmbeddableByReferenceConfigSchema,
+  type DiscoverSessionApiEmbeddableOverrides,
+  type DiscoverSessionApiEmbeddableTab,
 } from '@kbn/as-code-discover-schema';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -33,21 +34,14 @@ import type { SearchEmbeddableSerializedAttributes, SearchEmbeddableSessionTab }
 
 type TableSettings = DiscoverSessionApiEmbeddableOverrides;
 
-// Lists every table setting a panel can change, so a new one cannot be left out of comparisons
-const TABLE_SETTING_COMPARATORS: StateComparators<TableSettings> = {
-  column_order: 'deepEquality',
-  column_settings: 'deepEquality',
-  sort: 'deepEquality',
-  density: 'referenceEquality',
-  header_row_height: 'referenceEquality',
-  row_height: 'referenceEquality',
-  rows_per_page: 'referenceEquality',
-  sample_size: 'referenceEquality',
-  documents_display_mode: 'referenceEquality',
-  hide_nulls: 'referenceEquality',
-  wrap_lines: 'referenceEquality',
-  default_rendered_nodes: 'referenceEquality',
-};
+const TABLE_SETTING_KEYS = discoverSessionApiEmbeddableByReferenceConfigSchema.shape.overrides
+  .unwrap()
+  .keyof().options;
+
+// Keys come from the overrides schema, so every table setting a panel can change is compared
+const TABLE_SETTING_COMPARATORS = Object.fromEntries(
+  TABLE_SETTING_KEYS.map((key) => [key, 'deepEquality'])
+) as StateComparators<TableSettings>;
 
 // Missing column order, column settings and sort show the same table as empty ones
 const TABLE_SETTING_DEFAULTS: TableSettings = { column_order: [], column_settings: {}, sort: [] };

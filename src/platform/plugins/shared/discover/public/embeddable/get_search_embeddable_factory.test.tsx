@@ -15,7 +15,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import type { PresentationContainer } from '@kbn/presentation-publishing';
+import {
+  apiPublishesUnsavedChanges,
+  type PresentationContainer,
+} from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
@@ -557,7 +560,10 @@ describe('saved search embeddable', () => {
           await api.applySerializedState(lastSavedState);
         });
 
-        expect(await firstValueFrom(api.hasUnsavedChanges$)).toBe(false);
+        const hasUnsavedChanges = apiPublishesUnsavedChanges(api)
+          ? await firstValueFrom(api.hasUnsavedChanges$)
+          : undefined;
+        expect(hasUnsavedChanges).toBe(false);
         await waitOneTick();
       });
     });

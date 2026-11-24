@@ -38,8 +38,6 @@ import type {
 } from '../../../common/embeddable/types';
 
 describe('Serialization utils', () => {
-  const uuid = 'mySearchEmbeddable';
-
   const dataViewId = dataViewMock.id ?? 'test-id';
 
   const mockedSavedSearchAttributes: SearchEmbeddableByValueState['attributes'] = {
