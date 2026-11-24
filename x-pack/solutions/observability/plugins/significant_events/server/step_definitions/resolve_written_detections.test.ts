@@ -6,8 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { MAX_BATCH_ENTRIES } from '../../common/workflows/steps/resolve_written_detections';
 import {
-  MAX_RUN_VERSIONS,
   resolveStampRules,
   resolveWrittenDetectionsStepDefinition,
 } from './resolve_written_detections';
@@ -117,7 +117,7 @@ describe('resolveWrittenDetectionsStepDefinition handler', () => {
     expect(RuleEventsClient).toHaveBeenCalledWith({ esClient, space: 'execution-space' });
     expect(findDetectionsWrittenByRun).toHaveBeenCalledWith({
       workflowExecutionId: 'execution-1',
-      limit: MAX_RUN_VERSIONS,
+      limit: MAX_BATCH_ENTRIES,
     });
     expect(output).toEqual({
       stamp_rule_uuids: ['rule-a', 'rule-b'],

@@ -10,6 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { BatchEntry } from './detection_batch';
 import {
+  MAX_BATCH_ENTRIES,
   resolveWrittenDetectionsInputSchema,
   resolveWrittenDetectionsOutputSchema,
 } from '../../common/workflows/steps/resolve_written_detections';
@@ -17,8 +18,6 @@ import {
   RuleEventsClient,
   type WrittenDetectionPair,
 } from '../lib/significant_events/events/rule_events_client';
-
-export const MAX_RUN_VERSIONS = 1_000;
 
 interface ResolveStampRulesParams {
   batch: readonly BatchEntry[];
@@ -91,7 +90,7 @@ export const resolveWrittenDetectionsStepDefinition = ({ logger }: { logger: Log
       try {
         ({ pairs: runWrittenPairs, truncated } = await ruleEventsClient.findDetectionsWrittenByRun({
           workflowExecutionId,
-          limit: MAX_RUN_VERSIONS,
+          limit: MAX_BATCH_ENTRIES,
         }));
       } catch (error) {
         logger.warn(
@@ -103,7 +102,7 @@ export const resolveWrittenDetectionsStepDefinition = ({ logger }: { logger: Log
 
       if (truncated) {
         logger.warn(
-          `resolveWrittenDetections reached the ${MAX_RUN_VERSIONS} event version limit for ${workflowExecutionId}`
+          `resolveWrittenDetections reached the ${MAX_BATCH_ENTRIES} event version limit for ${workflowExecutionId}`
         );
       }
 
