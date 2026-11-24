@@ -52,6 +52,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   RESET_TUNING_DOCUMENT: 'resetTuningDocument',
   RESUME_DETECTION_ENGINE: 'resumeDetectionEngine',
   RETRY_INVESTIGATIONS: 'retryInvestigations',
+  REFRESH_SLACK_DELIVERY_STATUS: 'refreshSlackDeliveryStatus',
   CANCEL_SANDBOX_ALLOWLIST: 'cancelSandboxAllowlist',
   SAVE_SANDBOX_ALLOWLIST: 'saveSandboxAllowlist',
   SAVE_AND_ENABLE_AUTOMATION: 'saveAndEnableAutomation',

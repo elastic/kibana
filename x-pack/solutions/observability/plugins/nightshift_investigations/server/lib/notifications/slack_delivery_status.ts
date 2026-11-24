@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { notificationPhaseSchema } from './notification_routing';
+import { MISSING_NOTIFICATION_THREAD, notificationPhaseSchema } from './notification_routing';
 import type {
   NotificationAttempt,
   NotificationPhase,
   NotificationRouting,
 } from './notification_routing';
 import { readSlackNotificationParams } from './slack_notification';
+
+const SENDING_WINDOW_MS = 30_000;
 
 type DeliveryReason =
   | 'channel_not_connected'
@@ -39,10 +41,42 @@ export interface SlackDeliveryStatus {
   id: string;
   channel: string;
   phase?: NotificationPhase;
-  status: 'sent' | 'failed' | 'unconfirmed';
+  status: 'sent' | 'failed' | 'sending' | 'unconfirmed';
   attemptedAt: string;
   reason?: DeliveryReason;
 }
+
+const getAttemptStatus = (
+  { status, error, attempted_at: attemptedAt }: NotificationAttempt,
+  now: number
+): SlackDeliveryStatus['status'] => {
+  if (status === 'sent' || status === 'failed') return status;
+  // A claim is stored before sending. Give it a bounded window to gain an outcome.
+  const age = now - Date.parse(attemptedAt);
+  if (status === 'unconfirmed' && error === undefined && age >= 0 && age < SENDING_WINDOW_MS) {
+    return 'sending';
+  }
+  return 'unconfirmed';
+};
+
+const getAttemptReason = (
+  attempt: NotificationAttempt,
+  attempts: NotificationAttempt[]
+): DeliveryReason | undefined => {
+  if (attempt.status === 'sent') return;
+  if (attempt.status === 'failed' && attempt.error === MISSING_NOTIFICATION_THREAD) {
+    const started = attempts.find(
+      (entry) =>
+        entry.execution_id === attempt.execution_id &&
+        entry.destination_id === attempt.destination_id &&
+        entry.phase === 'started' &&
+        entry.status === 'failed'
+    );
+    const reason = getDeliveryReason(started?.error);
+    if (reason === 'channel_not_connected' || reason === 'app_disconnected') return reason;
+  }
+  return getDeliveryReason(attempt.error);
+};
 
 /** Projects recorded Slack outcomes without exposing connector diagnostics. */
 export const getSlackDeliveryStatus = (
@@ -64,20 +98,20 @@ export const getSlackDeliveryStatus = (
       latest.set(attempt.destination_id, attempt);
     }
   }
+  const now = Date.now();
   return routing.destinations.flatMap(({ id, type, params }): SlackDeliveryStatus[] => {
     const attempt = latest.get(id);
     const channel = type === 'slack' && readSlackNotificationParams(params)?.channel;
     if (!channel || !attempt) return [];
-    const { status, error, attempted_at: attemptedAt } = attempt;
     const phase = notificationPhaseSchema.safeParse(attempt.phase);
     return [
       {
         id,
         channel,
         phase: phase.success ? phase.data : undefined,
-        status: status === 'sent' || status === 'failed' ? status : 'unconfirmed',
-        attemptedAt,
-        reason: status === 'sent' ? undefined : getDeliveryReason(error),
+        status: getAttemptStatus(attempt, now),
+        attemptedAt: attempt.attempted_at,
+        reason: getAttemptReason(attempt, routing.attempts),
       },
     ];
   });

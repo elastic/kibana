@@ -41,6 +41,7 @@ describe('startNightshiftServices', () => {
       } as never,
       chrome: {} as never,
       application: { capabilities: {} } as never,
+      http: {} as never,
       focusedSignificantEventService: new FocusedSignificantEventService(),
       onAvailabilityChange,
     });
@@ -70,6 +71,7 @@ describe('startNightshiftServices', () => {
       } as never,
       chrome: {} as never,
       application: { capabilities: {} } as never,
+      http: {} as never,
       focusedSignificantEventService: new FocusedSignificantEventService(),
       onAvailabilityChange,
     });

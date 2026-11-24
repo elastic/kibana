@@ -12,6 +12,8 @@ import { defineInvestigationAttachment } from '@kbn/agentic-investigations-plugi
 import { investigationNotificationDestinationSchema } from '../../../common';
 
 export const NOTIFICATION_ROUTING_ATTACHMENT_TYPE = 'nightshift.notification_routing';
+export const MISSING_NOTIFICATION_THREAD = 'No confirmed notification thread is available';
+
 export const notificationPhaseSchema = lazySchema(() =>
   z.enum(['started', 'completed', 'failed', 'timed_out'])
 );

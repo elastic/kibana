@@ -17,13 +17,17 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isHttpFetchError } from '@kbn/core-http-browser';
+import { isHttpFetchError, type HttpStart } from '@kbn/core-http-browser';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { slackDeliveriesQueryKey } from '../../../data/query_keys';
+import {
+  formatChannelValue,
+  useAllRelayAppBindingsWithHttp,
+} from '../../../data/relay_apps/use_relay_app_bindings';
 
 const endpoint = 'GET /internal/nightshift/investigations/{id}/slack_deliveries';
 const isInaccessible = (error: unknown): boolean =>
@@ -45,6 +49,9 @@ const phaseLabels = {
 };
 
 const statusLabels = {
+  sending: i18n.translate('xpack.nightshift.slackDelivery.sendingStatusLabel', {
+    defaultMessage: 'Sending',
+  }),
   sent: i18n.translate('xpack.nightshift.slackDelivery.sentStatusLabel', {
     defaultMessage: 'Delivered',
   }),
@@ -56,9 +63,14 @@ const statusLabels = {
   }),
 };
 
-const statusColors = { sent: 'success', failed: 'danger', unconfirmed: 'warning' } as const;
+const statusColors = {
+  sending: 'default',
+  sent: 'success',
+  failed: 'danger',
+  unconfirmed: 'warning',
+} as const;
 
-const reasonLabels = {
+const settingsReasonLabels = {
   channel_not_connected: i18n.translate(
     'xpack.nightshift.slackDelivery.channelDisconnectedMessage',
     {
@@ -68,6 +80,25 @@ const reasonLabels = {
   app_disconnected: i18n.translate('xpack.nightshift.slackDelivery.appDisconnectedMessage', {
     defaultMessage: 'Reconnect the Elastic Slack app in Slack settings.',
   }),
+};
+
+const viewerReasonLabels = {
+  channel_not_connected: i18n.translate(
+    'xpack.nightshift.slackDelivery.askAdminToConnectChannelDescription',
+    {
+      defaultMessage: 'Ask a Nightshift admin to connect this channel in Slack settings.',
+    }
+  ),
+  app_disconnected: i18n.translate(
+    'xpack.nightshift.slackDelivery.askAdminToReconnectAppDescription',
+    {
+      defaultMessage:
+        'Ask a Nightshift admin to reconnect the Elastic Slack app in Slack settings.',
+    }
+  ),
+};
+
+const otherReasonLabels = {
   rate_limited: i18n.translate('xpack.nightshift.slackDelivery.rateLimitedMessage', {
     defaultMessage: 'Slack rate-limited this notification.',
   }),
@@ -86,18 +117,20 @@ const unconfirmedMessage = i18n.translate('xpack.nightshift.slackDelivery.unconf
 });
 
 export const SlackDeliveryStatus = ({
+  http,
   investigationsClient,
   investigationId,
   executionId,
   settingsHref,
 }: {
+  http: HttpStart;
   investigationsClient: NightshiftInvestigationsPublicStart['investigationsClient'];
   investigationId: string;
   executionId?: string;
   settingsHref?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { data, error, isError } = useQuery({
+  const { data, error, isError, isFetching, refetch } = useQuery({
     queryKey: slackDeliveriesQueryKey(investigationId, executionId),
     queryFn: ({ signal }) =>
       investigationsClient.fetch(endpoint, {
@@ -109,9 +142,22 @@ export const SlackDeliveryStatus = ({
       }),
     retry: false,
     // Dispatch, investigation completion, and the failure sweep can record receipts at different times.
-    refetchInterval: (_data, query) => (isInaccessible(query.state.error) ? false : 30_000),
+    refetchInterval: (result, query) => {
+      if (isInaccessible(query.state.error)) return false;
+      return result?.deliveries.some(({ status }) => status === 'sending') ? 5_000 : 30_000;
+    },
   });
-  if (isInaccessible(error) || (!data?.deliveries.length && !isError)) return null;
+  const inaccessible = isInaccessible(error);
+  const { bindings } = useAllRelayAppBindingsWithHttp(
+    http,
+    !inaccessible && !!data?.deliveries.length
+  );
+  if (inaccessible || (!data?.deliveries.length && !isError)) return null;
+
+  const reasonLabels = {
+    ...(settingsHref ? settingsReasonLabels : viewerReasonLabels),
+    ...otherReasonLabels,
+  };
 
   return (
     <section data-test-subj="nightshiftSlackDeliveryStatus">
@@ -146,7 +192,7 @@ export const SlackDeliveryStatus = ({
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <strong>{channel}</strong>
+                    <strong>{formatChannelValue(channel, bindings)}</strong>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -166,7 +212,7 @@ export const SlackDeliveryStatus = ({
                 />
               </EuiText>
             </EuiFlexItem>
-            {status !== 'sent' && (
+            {(status === 'failed' || status === 'unconfirmed') && (
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
                   {reason
@@ -203,7 +249,21 @@ export const SlackDeliveryStatus = ({
           <FormattedMessage
             id="xpack.nightshift.slackDelivery.unavailableMessage"
             defaultMessage="Slack delivery status is unavailable."
-          />
+          />{' '}
+          <EuiLink
+            data-test-subj="nightshiftSlackDeliveryRefreshStatus"
+            disabled={isFetching}
+            onClick={() => void refetch()}
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.REFRESH_SLACK_DELIVERY_STATUS,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SLACK_DELIVERY_STATUS,
+            })}
+          >
+            <FormattedMessage
+              id="xpack.nightshift.slackDelivery.refreshStatusButtonLabel"
+              defaultMessage="Refresh status"
+            />
+          </EuiLink>
         </EuiText>
       )}
     </section>

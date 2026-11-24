@@ -107,7 +107,13 @@ export function useAllRelayAppBindings(): UseAllRelayAppBindings {
   const {
     services: { http },
   } = useKibana();
+  return useAllRelayAppBindingsWithHttp(http);
+}
 
+export function useAllRelayAppBindingsWithHttp(
+  http: HttpStart,
+  enabled = true
+): UseAllRelayAppBindings {
   const query = useQuery({
     queryKey: [...RELAY_APP_BINDINGS_QUERY_KEY, 'all'],
     queryFn: async ({ signal }) => {
@@ -129,11 +135,12 @@ export function useAllRelayAppBindings(): UseAllRelayAppBindings {
       return { bindings, isComplete: !cursor };
     },
     ...BINDINGS_QUERY_OPTIONS,
+    enabled,
   });
 
   return {
     bindings: query.data?.bindings ?? EMPTY_BINDINGS,
-    isLoading: query.isLoading,
+    isLoading: query.isLoading && enabled,
     isError: query.isError,
     isComplete: query.data?.isComplete ?? true,
   };

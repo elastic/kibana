@@ -166,6 +166,7 @@ export class NightshiftPlugin
           context: this.context,
           chrome: coreStart.chrome,
           application: coreStart.application,
+          http: coreStart.http,
           focusedSignificantEventService: this.focusedSignificantEventService,
           onAvailabilityChange: (isAvailable) => {
             this.isSignificantEventsAvailable = isAvailable;

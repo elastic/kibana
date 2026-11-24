@@ -122,11 +122,12 @@ const OpenInvestigationButton = ({ investigationId }: { investigationId: string 
 };
 
 const RunSlackDeliveryStatus = ({ investigationId, investigationExecutionId }: Run) => {
-  const { application, nightshiftInvestigations } = useKibana().services;
+  const { application, http, nightshiftInvestigations } = useKibana().services;
   if (!investigationId || !investigationExecutionId || !nightshiftInvestigations) return null;
   const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
   return (
     <SlackDeliveryStatus
+      http={http}
       investigationsClient={nightshiftInvestigations.investigationsClient}
       investigationId={investigationId}
       executionId={investigationExecutionId}
@@ -221,13 +222,13 @@ export const RunDetail = ({
                 { title: labels.automation, description: automationName },
               ]}
             />
-            <RunSlackDeliveryStatus {...run} />
             {run.investigationId && (
               <>
                 <EuiHorizontalRule margin="m" />
                 <OpenInvestigationButton investigationId={run.investigationId} />
               </>
             )}
+            <RunSlackDeliveryStatus {...run} />
           </>
         )}
       </div>

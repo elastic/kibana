@@ -10,6 +10,7 @@ import type {
   AppUpdater,
   ApplicationStart,
   ChromeStart,
+  HttpStart,
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
@@ -33,6 +34,7 @@ export const startNightshiftServices = ({
   context,
   chrome,
   application,
+  http,
   focusedSignificantEventService,
   onAvailabilityChange,
 }: {
@@ -41,6 +43,7 @@ export const startNightshiftServices = ({
   context: PluginInitializerContext;
   chrome: ChromeStart;
   application: ApplicationStart;
+  http: HttpStart;
   focusedSignificantEventService: FocusedSignificantEventService;
   onAvailabilityChange: (isAvailable: boolean) => void;
 }): Subscription => {
@@ -61,6 +64,7 @@ export const startNightshiftServices = ({
             React.Suspense,
             { fallback: null },
             React.createElement(LazySlackDeliveryStatus, {
+              http,
               investigationId,
               investigationsClient: nightshiftInvestigations.investigationsClient,
               settingsHref,

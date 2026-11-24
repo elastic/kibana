@@ -23,7 +23,7 @@ import type {
   NotificationRouting,
   NotificationDestination,
 } from './notification_routing';
-import { notificationPhaseSchema } from './notification_routing';
+import { MISSING_NOTIFICATION_THREAD, notificationPhaseSchema } from './notification_routing';
 
 export interface DeliverInvestigationNotificationsResult {
   sent: number;
@@ -148,7 +148,7 @@ const prepareDestinationDelivery = async (
   if (uncertainRoot) {
     diagnostic = 'A previous root delivery is unconfirmed; automatic thread creation is blocked';
   } else if (!createsRoot && !threadTs) {
-    diagnostic = 'No confirmed notification thread is available';
+    diagnostic = MISSING_NOTIFICATION_THREAD;
   }
 
   // The terminal phase edits the started message, so the thread keeps a single message.
