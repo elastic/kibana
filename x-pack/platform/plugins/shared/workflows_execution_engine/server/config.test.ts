@@ -36,29 +36,12 @@ const applyConfigDeprecations = (settings: Record<string, unknown>) => {
 };
 
 describe('workflows execution engine config deprecations', () => {
-  it('warns and removes eviction.minPayloadSize', () => {
-    const { messages, migrated } = applyConfigDeprecations({
-      workflowsExecutionEngine: {
-        eviction: {
-          maxCacheSize: '50mb',
-          minPayloadSize: '100mb',
-        },
-      },
-    });
-
-    expect(migrated.workflowsExecutionEngine.eviction).toEqual({
-      maxCacheSize: '50mb',
-    });
-    expect(messages).toEqual([
-      'workflowsExecutionEngine.eviction.minPayloadSize is not used. Output retention is controlled by workflowsExecutionEngine.eviction.maxCacheSize.',
-    ]);
-  });
-
-  it('leaves a config that does not set minPayloadSize unchanged', () => {
+  it('leaves eviction.minPayloadSize in place', () => {
     const settings = {
       workflowsExecutionEngine: {
         eviction: {
           maxCacheSize: '50mb',
+          minPayloadSize: '100kb',
         },
       },
     };

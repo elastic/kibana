@@ -8,8 +8,8 @@
 /**
  * Step IO heap gauges:
  *   1. empty outputs → average_memory
- *   2. output > 20% admit → average_memory + io_retention_budget (logged separately)
- *   3. output < 20% admit → average_memory + io_retention_budget (logged separately);
+ *   2. output > minPayloadSize → average_memory + io_retention_budget (logged separately)
+ *   3. output ≤ minPayloadSize → average_memory + io_retention_budget (logged separately);
  *      early consumers also rehydrate after LRU eviction
  *
  * Mock artefacts that would fake a leak:
@@ -30,19 +30,17 @@ const STEP_COUNT = 100;
 const LRU_PRODUCER_COUNT = 50;
 const LRU_EARLY_CONSUMER_COUNT = 10;
 
-/** Matches StepIoService.CACHED_OUTPUT_FRACTION. */
-const ADMIT_FRACTION = 0.2;
-
-/** 10KB Step IO retention budget → admit threshold 2KB. */
+/** Test LRU budget (product default is 10mb; kept small so eviction is observable). */
 const IO_RETENTION_BUDGET_BYTES = 10_000;
-const ADMIT_THRESHOLD_BYTES = Math.floor(IO_RETENTION_BUDGET_BYTES * ADMIT_FRACTION);
+/** Matches `eviction.minPayloadSize` default — per-entry admit cap. */
+const ADMIT_THRESHOLD_BYTES = 10 * 1024;
 
 /**
- * Over-admit payload: must exceed the 20% threshold (never enters LRU).
+ * Over-admit payload: larger than minPayloadSize (never enters LRU).
  * Sized so N×payload ≫ engine noise, so unbounded retention would fail the ceiling.
  */
 const OVER_ADMIT_OUTPUT_BYTES = 50_000;
-/** Under-admit payload: fits under the 20% threshold (eligible for LRU). */
+/** Under-admit payload: at most minPayloadSize (eligible for LRU). */
 const UNDER_ADMIT_OUTPUT_BYTES = 1_000;
 
 /**
@@ -164,6 +162,7 @@ const leafStepsNamed = (
 const applyBudget = (fixture: WorkflowRunFixture): void => {
   (fixture.configMock as Record<string, unknown>).eviction = {
     maxCacheSize: new ByteSizeValue(IO_RETENTION_BUDGET_BYTES),
+    minPayloadSize: new ByteSizeValue(ADMIT_THRESHOLD_BYTES),
   };
 };
 
@@ -233,7 +232,7 @@ describe('StepIoService (LRU): memory consumption', () => {
     expect(averageMemory).toBeLessThan(HEAP_NOISE_BYTES * 10);
   });
 
-  it(`reports average_memory and io_retention_budget when each output > 20% admit threshold`, async () => {
+  it(`reports average_memory and io_retention_budget when each output > minPayloadSize`, async () => {
     expect(OVER_ADMIT_OUTPUT_BYTES).toBeGreaterThan(ADMIT_THRESHOLD_BYTES);
     const unboundedIoBytes = STEP_COUNT * OVER_ADMIT_OUTPUT_BYTES;
     const ceiling = expectedCeiling(averageMemory);
@@ -284,7 +283,7 @@ describe('StepIoService (LRU): memory consumption', () => {
     expect(used).toBeLessThan(unboundedIoBytes);
   });
 
-  it(`reports average_memory and io_retention_budget when each output < 20% admit threshold`, async () => {
+  it(`reports average_memory and io_retention_budget when each output ≤ minPayloadSize`, async () => {
     expect(UNDER_ADMIT_OUTPUT_BYTES).toBeLessThanOrEqual(ADMIT_THRESHOLD_BYTES);
     expect(LRU_PRODUCER_COUNT * UNDER_ADMIT_OUTPUT_BYTES).toBeGreaterThan(
       IO_RETENTION_BUDGET_BYTES

@@ -16,7 +16,11 @@ const ref = (executionId: string): StepIoRef => ({ executionId, contextId: execu
 const readOutputs = (service: StepIoService, ids: string[]) =>
   service.readBatch({ type: 'output', refs: ids.map(ref) });
 
-const buildService = (maxBytes: number, docs: Array<{ id: string; output: unknown }>) => {
+const buildService = (
+  maxBytes: number,
+  docs: Array<{ id: string; output: unknown }>,
+  maxEntryBytes: number = Infinity
+) => {
   const stepRepository = {
     getStepExecutionsByIds: jest.fn().mockResolvedValue(docs),
   } as unknown as jest.Mocked<StepExecutionRepository>;
@@ -24,12 +28,15 @@ const buildService = (maxBytes: number, docs: Array<{ id: string; output: unknow
     setStepIo: jest.fn(),
     getStepIo: jest.fn().mockReturnValue(undefined),
   } as unknown as jest.Mocked<WorkflowExecutionState>;
-  return { service: new StepIoService({ stepRepository, state, maxBytes }), stepRepository };
+  return {
+    service: new StepIoService({ stepRepository, state, maxBytes, maxEntryBytes }),
+    stepRepository,
+  };
 };
 
 describe('StepIoService cache budget', () => {
   it('returns every output and keeps only what fits in the LRU', async () => {
-    // {"v":"a"} is 9 bytes, exactly 20% of a 45-byte budget. Six of them exceed it.
+    // {"v":"a"} is 9 bytes; six of them exceed a 45-byte cache budget.
     const output = { v: 'a' };
     const docs = ['a', 'b', 'c', 'd', 'e', 'f'].map((id) => ({ id, output }));
     const { service, stepRepository } = buildService(45, docs);
@@ -53,9 +60,9 @@ describe('StepIoService cache budget', () => {
     expect(refetched.length).toBeLessThan(docs.length);
   });
 
-  it('does not cache an output larger than 20% of the budget', async () => {
+  it('does not cache an output larger than minPayloadSize', async () => {
     const output = { v: 'a'.repeat(30) };
-    const { service, stepRepository } = buildService(45, [{ id: 'a', output }]);
+    const { service, stepRepository } = buildService(10_000, [{ id: 'a', output }], 9);
 
     expect((await readOutputs(service, ['a'])).get('a')).toEqual(output);
 

@@ -176,6 +176,7 @@ export async function setupDependencies(
     stepRepository: stepExecutionRepository,
     state: workflowExecutionState,
     maxBytes: config.eviction.maxCacheSize.getValueInBytes(),
+    maxEntryBytes: config.eviction.minPayloadSize.getValueInBytes(),
     logger,
   });
 

@@ -44,6 +44,11 @@ export interface StepIoServiceInit {
   state: WorkflowExecutionState;
   /** Maximum total byte size for the output LRU cache. `Infinity` disables eviction entirely. */
   maxBytes?: number;
+  /**
+   * Maximum byte size of a single output that may enter the LRU
+   * (`eviction.minPayloadSize`). `Infinity` admits any size that fits the budget.
+   */
+  maxEntryBytes?: number;
   logger?: Logger;
 }
 
@@ -85,20 +90,24 @@ export const composeStepIoCacheKey = (
  * `readBatch` is the only fetch. Flush is `WorkflowExecutionState`'s responsibility.
  */
 export class StepIoService implements StepIoWriter, StepIoLifecycle {
-  /** An output is cached only when it is at most this fraction of the cache budget. */
-  private static readonly CACHED_OUTPUT_FRACTION = 0.2;
   private readonly stepRepository: StepExecutionRepository;
   private readonly state: WorkflowExecutionState;
   private readonly cache: StepIoCache;
-  private readonly maxBytes: number;
+  private readonly maxEntryBytes: number;
   /** Execution-wide sizes of outputs written with a measured byte count, for telemetry. */
   private readonly measuredSizes = new Map<string, number>();
   private measuredTotalBytes = 0;
 
-  constructor({ stepRepository, state, maxBytes = Infinity, logger }: StepIoServiceInit) {
+  constructor({
+    stepRepository,
+    state,
+    maxBytes = Infinity,
+    maxEntryBytes = Infinity,
+    logger,
+  }: StepIoServiceInit) {
     this.stepRepository = stepRepository;
     this.state = state;
-    this.maxBytes = maxBytes;
+    this.maxEntryBytes = maxEntryBytes;
     this.cache = new StepIoCache(maxBytes, logger);
   }
 
@@ -153,15 +162,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
   }
 
-  /** True when `bytes` is small enough to take a slot in the output cache. */
+  /** True when `bytes` is at most `eviction.minPayloadSize` (or uncapped). */
   private outputFitsCache(bytes: number | undefined): boolean {
-    if (!Number.isFinite(this.maxBytes)) {
-      return true;
-    }
     if (bytes === undefined) {
       return false;
     }
-    return bytes <= this.maxBytes * StepIoService.CACHED_OUTPUT_FRACTION;
+    if (!Number.isFinite(this.maxEntryBytes)) {
+      return true;
+    }
+    return bytes <= this.maxEntryBytes;
   }
 
   // ----- Telemetry ----------------------------------------------------------

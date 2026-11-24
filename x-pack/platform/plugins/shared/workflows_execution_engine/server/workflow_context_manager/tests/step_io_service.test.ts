@@ -394,8 +394,7 @@ describe('StepIoService', () => {
     });
 
     it('keeps an output a sibling cached during the fetch when this batch evicts it', async () => {
-      // 9 bytes is 20% of a 45-byte budget, so the sibling copy is admitted.
-      // Five more 9-byte inserts then push it out of the cache.
+      // 9-byte entries fit under an uncapped admit rule; five more push the first out of a 45-byte LRU.
       const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 45 });
       const others = ['b', 'c', 'd', 'e', 'f'].map(
         (id) => ({ id, output: { v: 'b' } } as unknown as EsWorkflowStepExecution)
