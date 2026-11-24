@@ -109,7 +109,9 @@ export const createDecisionSweep = ({
    * Counts that are about decisions count each decision once for the whole sweep, whatever the
    * number of pages, phases or steps in which it fails.
    */
-  const countOncePerDecision = (counter: 'close_failures' | 'unsettled_decisions' | 'deferred') => {
+  const countOncePerDecision = (
+    counter: 'close_failures' | 'tag_failures' | 'unsettled_decisions' | 'deferred'
+  ) => {
     const seen = new Set<string>();
     return (id: string) => {
       if (seen.has(id)) return;
@@ -118,6 +120,7 @@ export const createDecisionSweep = ({
     };
   };
   const countCloseFailure = countOncePerDecision('close_failures');
+  const countTagFailure = countOncePerDecision('tag_failures');
   const countUnsettled = countOncePerDecision('unsettled_decisions');
   const countDeferred = countOncePerDecision('deferred');
   /** Alerts each decision may still close today. Read once per decision, then counted down. */
@@ -204,7 +207,7 @@ export const createDecisionSweep = ({
     try {
       await tagInChunks(write, { alertIds, add: [`${prefix}${id}`], remove: [] });
     } catch (error) {
-      totals.tag_failures++;
+      countTagFailure(id);
       warn(`Could not tag the alerts of decision ${id}`, error);
     }
   };
@@ -464,7 +467,7 @@ export const createDecisionSweep = ({
         );
       }
     } catch (error) {
-      totals.tag_failures++;
+      countTagFailure(id);
       warn(`Could not tag the alerts of decision ${id}`, error);
     }
     // What a failed chunk had tagged before it stays out of analysis and gets its note.

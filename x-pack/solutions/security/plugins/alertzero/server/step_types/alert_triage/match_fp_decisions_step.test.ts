@@ -1473,6 +1473,28 @@ describe('triage match decisions step in on mode', () => {
       expect(output).toEqual(expect.objectContaining({ close_failures: 1 }));
     });
 
+    it('counts a decision once in the failed tags when its tags fail on either page', async () => {
+      const { run, callKibanaApi, tags } = setup({
+        mode: 'shadow',
+        alerts: [],
+        decisions: approved('C:\\x.exe'),
+      });
+      twoPages(callKibanaApi);
+      const paged = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (params.path.endsWith('/signals/tags')) throw new Error('tag failed');
+          return paged(params);
+        }
+      );
+
+      const { output } = await run();
+
+      // Both pages tried to tag, and both failed: the count is one because it is per decision.
+      expect(tags().flatMap(({ ids }) => ids)).toEqual(['a', 'b']);
+      expect(output).toEqual(expect.objectContaining({ tag_failures: 1 }));
+    });
+
     it('counts only the decisions a failed verdict lookup was for, and still blocks a decision known to conflict', async () => {
       // Page one finds that decision X has a verdict. On page two the lookup fails: X is not part of
       // it, Y is.

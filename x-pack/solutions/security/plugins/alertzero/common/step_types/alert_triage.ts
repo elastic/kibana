@@ -528,7 +528,11 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
     capped: z
       .number()
       .describe('Matches left for the normal path because the decision reached its daily cap.'),
-    close_failures: z.number().describe('Decisions whose alerts could not all be closed.'),
+    close_failures: z
+      .number()
+      .describe(
+        'Approved decisions whose alerts could not all be closed, or that could not be read before the close. Each decision counts once.'
+      ),
     notes_missing: z
       .number()
       .describe(
@@ -565,7 +569,9 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
       ),
     tag_failures: z
       .number()
-      .describe('Tag updates that failed. Those alerts match again next sweep.'),
+      .describe(
+        'Decisions whose alerts could not all be tagged, or, for a dismissal, that could not be read before the tags. Each decision counts once. Those alerts match again next sweep.'
+      ),
   })
 );
 
