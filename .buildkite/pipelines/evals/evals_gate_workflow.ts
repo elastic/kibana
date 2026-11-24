@@ -32,6 +32,8 @@ import {
 
 const SUITES_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 const COMMENT_MARKER = '<!-- evals-gate-comment -->';
+// The workflow comments with GITHUB_TOKEN, which posts as this bot.
+const GATE_COMMENT_AUTHOR = 'github-actions[bot]';
 const ERROR_DESCRIPTION = 'Evals gate errored, not enforced (see the workflow logs)';
 const MAX_LISTED_FILES = 20;
 const GATED_BASE_BRANCH = 'main';
@@ -89,6 +91,17 @@ const withRenames = (files: Array<{ filename: string; previous_filename?: string
   files.flatMap(({ filename, previous_filename: previousFilename }) =>
     previousFilename ? [filename, previousFilename] : [filename]
   );
+
+/**
+ * The gate's own comment among a PR's comments. The author is matched too, so a comment that only
+ * quotes the marker is never edited or deleted.
+ */
+export const findGateCommentId = (
+  comments: ReadonlyArray<{ id: number; body?: string | null; user?: { login: string } | null }>
+): number | undefined =>
+  comments.find(
+    ({ body, user }) => user?.login === GATE_COMMENT_AUTHOR && body?.includes(COMMENT_MARKER)
+  )?.id;
 
 /** Implements `GateApi` with the Octokit client `actions/github-script` provides. */
 export const createGateApi = (
@@ -179,7 +192,7 @@ export const createGateApi = (
       issue_number: prNumber,
       per_page: 100,
     });
-    return comments.find(({ body }) => body?.includes(COMMENT_MARKER))?.id;
+    return findGateCommentId(comments);
   },
   upsertComment: async (prNumber, commentId, body) => {
     if (commentId) {

@@ -13,6 +13,7 @@
 //   regression_gate.ts args <suite-id> <connector-id>   print the `compare` gate flags, one per line
 //   regression_gate.ts pending <suite-id>               post a pending kibana-evals/<suite> status
 //   regression_gate.ts pending-runnable <pr-labels>     post it for every gated suite the labels run
+//   regression_gate.ts fail-runnable <pr-labels>        post an inconclusive verdict for each of them
 //   regression_gate.ts post <suite-id> <verdict-file>   post the verdict as kibana-evals/<suite>
 
 import Fs from 'fs';
@@ -61,7 +62,7 @@ const postPending = (suiteId: string): Promise<void> =>
 const main = async (): Promise<void> => {
   if (!command || target === undefined) {
     throw new Error(
-      'Usage: regression_gate.ts <args|pending|pending-runnable|post> <target> [arg]'
+      'Usage: regression_gate.ts <args|pending|pending-runnable|fail-runnable|post> <target> [arg]'
     );
   }
 
@@ -71,6 +72,18 @@ const main = async (): Promise<void> => {
     for (const { id, regressionGate } of getRunnableEvalSuites(target)) {
       if (regressionGate) {
         await postPending(id);
+      }
+    }
+    return;
+  }
+
+  // The trigger step's error trap posts this on its final attempt, which can fail before any suite
+  // was marked as started (e.g. while resolving the labels). `error` is inconclusive, so it never
+  // blocks; without it the gate would wait for a verdict that never comes.
+  if (command === 'fail-runnable') {
+    for (const { id, regressionGate } of getRunnableEvalSuites(target)) {
+      if (regressionGate) {
+        await postStatus(id, 'error', 'the eval trigger failed');
       }
     }
     return;

@@ -21,14 +21,16 @@ on:
 
 permissions: {}
 
+# PR and eval status events for one head commit share a group, so the newest run cancels an older
+# one and the last status posted always comes from the freshest read of labels and verdicts.
 # Workflow-level concurrency also applies to runs whose job is skipped, so every unrelated status
-# event gets its own group; sharing one per SHA would let them cancel an in-progress verdict run.
+# event gets its own group instead; otherwise it could cancel an in-progress run.
 concurrency:
   group: >-
     evals-gate-${{
-      github.event.pull_request.number
+      github.event.pull_request.head.sha
       || ((github.event.context == 'kibana-evals' || startsWith(github.event.context, 'kibana-evals/'))
-        && format('status-{0}', github.event.sha))
+        && github.event.sha)
       || format('ignored-{0}', github.run_id)
     }}
   cancel-in-progress: true
