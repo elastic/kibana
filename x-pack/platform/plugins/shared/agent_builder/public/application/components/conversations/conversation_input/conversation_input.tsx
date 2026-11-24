@@ -233,6 +233,13 @@ const anotherUsersRunPlaceholder = i18n.translate(
       'Only the person whose message started this run can send it messages. Wait for it to finish.',
   }
 );
+const publicConversationRunPlaceholder = i18n.translate(
+  'xpack.agentBuilder.conversationInput.textArea.publicConversationRunPlaceholder',
+  {
+    defaultMessage:
+      "Messages can't be sent to a running agent in a public conversation. Wait for it to finish.",
+  }
+);
 
 const getMessageEditorAriaLabel = ({
   isNewConversation,
@@ -363,10 +370,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
   const { sendSteer, steerIfBusy, isUnansweredSteer, isSending: isSendingSteer } = useSendSteer();
-  // The server admits steers from the user whose message started the run only, so the composer
-  // does not offer them to anyone else. Drafting stays possible.
-  const canSteerRun = useCanSteerRun();
-  const canSteer = canCancel && Boolean(conversationId) && !isAwaitingPrompt && canSteerRun;
+  // The server refuses steers in public conversations and from anyone but the user whose message
+  // started the run, so the composer does not offer them either. Drafting stays possible.
+  const steerEligibility = useCanSteerRun();
+  const canSteer =
+    canCancel && Boolean(conversationId) && !isAwaitingPrompt && steerEligibility.canSteer;
   // Never mode posts to the team instead of steering, attachments included.
   const willSteer = canSteer && triggerMode !== ChatTriggerMode.Never;
 
@@ -420,8 +428,10 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     ? disabledPlaceholder(agentId)
     : isBoundAgentForbidden
     ? labels.executionIdentity.chatForbiddenPlaceholder
-    : isResponseLoading && !canSteerRun
-    ? anotherUsersRunPlaceholder
+    : isResponseLoading && !steerEligibility.canSteer
+    ? steerEligibility.reason === 'public_conversation'
+      ? publicConversationRunPlaceholder
+      : anotherUsersRunPlaceholder
     : enabledPlaceholder;
 
   const editorContainerStyles = css`

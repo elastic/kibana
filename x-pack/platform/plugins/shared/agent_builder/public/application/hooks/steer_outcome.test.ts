@@ -63,7 +63,11 @@ describe('steerErrorOutcome', () => {
 
   it.each([
     [AgentBuilderErrorCode.conversationAwaitingPrompt, 409, /waiting for your answer/],
-    [AgentBuilderErrorCode.conversationNotSteerable, 409, /whose message started this run/],
+    [
+      AgentBuilderErrorCode.conversationNotSteerable,
+      409,
+      /the conversation is public, or someone else's message started it/,
+    ],
     [AgentBuilderErrorCode.tooManyPendingSteers, 429, /up to 5 messages/],
   ] as const)('explains a %s refusal', (code, status, title) => {
     expect(steerErrorOutcome(httpError({ status, code }))).toEqual({

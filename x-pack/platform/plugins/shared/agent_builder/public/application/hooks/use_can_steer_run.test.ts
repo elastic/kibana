@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
 import {
+  ConversationAccessControlMode,
   EventActorType,
   TimelineEventType,
   type ConversationEvent,
@@ -53,12 +54,16 @@ const arrange = ({
   saved = [],
   live = [],
   uid = 'me',
+  accessMode = ConversationAccessControlMode.Private,
 }: {
   saved?: ConversationEvent[];
   live?: ConversationEvent[];
   uid?: string | null;
+  accessMode?: ConversationAccessControlMode;
 }) => {
-  mockedUseConversation.mockReturnValue({ conversation: { events: saved } } as never);
+  mockedUseConversation.mockReturnValue({
+    conversation: { events: saved, access_control: { access_mode: accessMode, entries: [] } },
+  } as never);
   mockedUseLiveEvents$.mockReturnValue(of(live as TimelineDisplayEvent[]));
   mockedUseCurrentUser.mockReturnValue({
     currentUser: uid === null ? null : ({ uid } as never),
@@ -71,17 +76,19 @@ describe('useCanSteerRun', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('allows a steer when no run has started', () => {
-    expect(arrange({ saved: [ask('a1', someoneElse)] })).toBe(true);
+    expect(arrange({ saved: [ask('a1', someoneElse)] })).toEqual({ canSteer: true });
   });
 
   it('allows the user whose message started the latest run', () => {
-    expect(arrange({ saved: [ask('a1', me), started('s1', 'r1::execution', 'a1')] })).toBe(true);
+    expect(arrange({ saved: [ask('a1', me), started('s1', 'r1::execution', 'a1')] })).toEqual({
+      canSteer: true,
+    });
   });
 
   it('refuses anyone else', () => {
-    expect(arrange({ saved: [ask('a1', someoneElse), started('s1', 'r1::execution', 'a1')] })).toBe(
-      false
-    );
+    expect(
+      arrange({ saved: [ask('a1', someoneElse), started('s1', 'r1::execution', 'a1')] })
+    ).toEqual({ canSteer: false, reason: 'another_users_run' });
   });
 
   it('judges by the latest run, not an earlier one', () => {
@@ -94,7 +101,7 @@ describe('useCanSteerRun', () => {
           started('s2', 'r2::execution', 'a2'),
         ],
       })
-    ).toBe(false);
+    ).toEqual({ canSteer: false, reason: 'another_users_run' });
   });
 
   it('reads a start that only the live stream holds against the saved trigger', () => {
@@ -103,16 +110,27 @@ describe('useCanSteerRun', () => {
         saved: [ask('a1', someoneElse)],
         live: [started('s1', 'r1::execution', 'a1')],
       })
-    ).toBe(false);
+    ).toEqual({ canSteer: false, reason: 'another_users_run' });
   });
 
   it('allows a steer while the trigger of the latest run is not in the timeline yet', () => {
-    expect(arrange({ live: [started('s1', 'r1::execution', 'a-pending')] })).toBe(true);
+    expect(arrange({ live: [started('s1', 'r1::execution', 'a-pending')] })).toEqual({
+      canSteer: true,
+    });
+  });
+
+  it('refuses everyone in a public conversation, the sender included', () => {
+    expect(
+      arrange({
+        saved: [ask('a1', me), started('s1', 'r1::execution', 'a1')],
+        accessMode: ConversationAccessControlMode.Public,
+      })
+    ).toEqual({ canSteer: false, reason: 'public_conversation' });
   });
 
   it('leaves the decision to the server without a current user', () => {
     expect(
       arrange({ saved: [ask('a1', someoneElse), started('s1', 'r1::execution', 'a1')], uid: null })
-    ).toBe(true);
+    ).toEqual({ canSteer: true });
   });
 });

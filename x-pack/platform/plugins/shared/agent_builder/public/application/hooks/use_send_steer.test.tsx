@@ -166,7 +166,10 @@ describe('useSendSteer', () => {
 
   it.each([
     [AgentBuilderErrorCode.conversationAwaitingPrompt, /waiting for your answer/],
-    [AgentBuilderErrorCode.conversationNotSteerable, /whose message started this run/],
+    [
+      AgentBuilderErrorCode.conversationNotSteerable,
+      /the conversation is public, or someone else's message started it/,
+    ],
     [AgentBuilderErrorCode.tooManyPendingSteers, /up to 5 messages/],
   ] as const)('keeps the text and explains a %s refusal', async (code, title) => {
     steer.mockRejectedValue(steerRefusal(code));

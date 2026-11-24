@@ -299,7 +299,7 @@ describe('ConversationInput', () => {
     mockedUseIsSharedConversation.mockReturnValue(false);
     mockedUseExperimentalFeatures.mockReturnValue(false);
     mockedUseIsAwaitingPrompt.mockReturnValue(false);
-    mockedUseCanSteerRun.mockReturnValue(true);
+    mockedUseCanSteerRun.mockReturnValue({ canSteer: true });
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
       attachments: [],
@@ -442,7 +442,7 @@ describe('ConversationInput', () => {
     });
 
     it('does not offer a steer to anyone else, and says why', () => {
-      mockedUseCanSteerRun.mockReturnValue(false);
+      mockedUseCanSteerRun.mockReturnValue({ canSteer: false, reason: 'another_users_run' });
       mockedUseConversationStream.mockReturnValue(runningStream);
 
       renderInput(<ConversationInput />);
@@ -458,8 +458,23 @@ describe('ConversationInput', () => {
       expect(editorController.clear).not.toHaveBeenCalled();
     });
 
+    it('does not offer a steer in a public conversation, and says why', () => {
+      mockedUseCanSteerRun.mockReturnValue({ canSteer: false, reason: 'public_conversation' });
+      mockedUseConversationStream.mockReturnValue(runningStream);
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.queryByTestId('mock-submit-while-running')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mock-message-editor-placeholder')).toHaveTextContent(
+        "Messages can't be sent to a running agent in a public conversation"
+      );
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      expect(mockSendSteer).not.toHaveBeenCalled();
+      expect(submitMessage).not.toHaveBeenCalled();
+    });
+
     it('shows the usual placeholder once that run is over', () => {
-      mockedUseCanSteerRun.mockReturnValue(false);
+      mockedUseCanSteerRun.mockReturnValue({ canSteer: false, reason: 'another_users_run' });
 
       renderInput(<ConversationInput />);
 

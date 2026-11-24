@@ -10,6 +10,7 @@ import { distinctUntilChanged, map } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import {
   TimelineEventType,
+  isPublicConversation,
   isTimelineEvent,
   runTriggerEvent,
   type ConversationEvent,
@@ -30,12 +31,17 @@ const latestRunSenderId = (events: ConversationEvent[]): string | undefined => {
   return undefined;
 };
 
+export type SteerEligibility =
+  | { canSteer: true }
+  | { canSteer: false; reason: 'public_conversation' | 'another_users_run' };
+
 /**
- * Whether the current user may steer the run the conversation shows: the server admits only the
- * user whose message started it. True while that user is unknown, as for a run whose start has not
- * reached the timeline yet, so the server has the last word.
+ * Whether the current user may steer the run the conversation shows. The server refuses every
+ * steer in a public conversation, and elsewhere admits only the user whose message started the
+ * run. That user counts as the current one while unknown, as for a run whose start has not reached
+ * the timeline yet, so the server has the last word.
  */
-export const useCanSteerRun = (): boolean => {
+export const useCanSteerRun = (): SteerEligibility => {
   const { conversation } = useConversation();
   const liveEvents$ = useLiveEvents$();
   const { currentUser } = useCurrentUser();
@@ -53,5 +59,11 @@ export const useCanSteerRun = (): boolean => {
   }, [docEvents, liveEvents$]);
   const senderId = useObservable(senderId$, undefined);
 
-  return senderId === undefined || !currentUser || senderId === currentUser.uid;
+  if (isPublicConversation(conversation?.access_control)) {
+    return { canSteer: false, reason: 'public_conversation' };
+  }
+  if (senderId === undefined || !currentUser || senderId === currentUser.uid) {
+    return { canSteer: true };
+  }
+  return { canSteer: false, reason: 'another_users_run' };
 };

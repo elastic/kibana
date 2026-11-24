@@ -6737,10 +6737,25 @@ describe('ConversationClient', () => {
           { source: 'http_api' }
         );
 
-      it('admits a steer in a public conversation from the user whose message started the run', async () => {
+      it('refuses a steer in a public conversation, also from the user whose message started the run', async () => {
         mockGetDocumentResponse(
           documentWithHolder('e1', {
             accessMode: ConversationAccessControlMode.Public,
+            events: [userMessage, startedFromUserMessage],
+          })
+        );
+        liveHolder();
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isConversationNotSteerableError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('admits a steer in a private conversation from the user whose message started the run', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder('e1', {
+            accessMode: ConversationAccessControlMode.Private,
             events: [userMessage, startedFromUserMessage],
           })
         );
