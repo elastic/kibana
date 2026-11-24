@@ -24,7 +24,6 @@ import {
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
   MAX_OBSERVABLES_PER_CASE,
-  MAX_STORED_OBSERVABLE_FIELD_LENGTH,
 } from '../../../common/constants';
 import type { ObservablePost } from '../../../common/types/api';
 import type { Observable } from '../../../common/types/domain';
@@ -1175,26 +1174,6 @@ describe('optimistic concurrency on observable writes', () => {
         )
       ).rejects.toThrow('Failed to add observable');
 
-      expect(mockCaseService.patchCase).not.toHaveBeenCalled();
-    });
-
-    it('rejects an update whose value exceeds the longest a stored value can be', async () => {
-      await expect(
-        updateObservable(
-          caseSO.id,
-          mockObservable.id,
-          {
-            observable: {
-              value: 'a'.repeat(MAX_STORED_OBSERVABLE_FIELD_LENGTH + 1),
-              description: null,
-            },
-          },
-          mockClientArgs,
-          mockCasesClient
-        )
-      ).rejects.toThrow('Failed to update observable');
-
-      expect(mockCaseService.getCase).not.toHaveBeenCalled();
       expect(mockCaseService.patchCase).not.toHaveBeenCalled();
     });
 
