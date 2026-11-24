@@ -77,7 +77,7 @@ const aiIndexBody = {
   description: 'AI index created by the Scout API test suite',
   dest: dataStreamDest(DEST.dataStream),
   automations: [{ type: 'workflow', value: 'scout-automation' }],
-  sources: [{ type: 'esql', value: `FROM ${DEST.dataStream} | LIMIT 1` }],
+  sources: [{ type: 'esql', value: 'FROM logs | LIMIT 1' }],
   traces: [],
 };
 
@@ -895,7 +895,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     async ({ apiClient }) => {
       const id = AI_INDEX.sourceRejectPut;
       const path = aiIndexPath(id);
-      const sources = [{ type: 'esql', value: `FROM ${DEST.dataStream}` }];
+      const sources = [{ type: 'esql', value: 'FROM logs' }];
 
       await apiTest.step('creates an AI index with a valid ES|QL source', async () => {
         const response = await apiClient.post(COLLECTION, {

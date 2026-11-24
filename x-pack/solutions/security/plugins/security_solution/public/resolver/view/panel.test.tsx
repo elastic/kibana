@@ -8,6 +8,7 @@
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
+import { fireEvent } from '@testing-library/react';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
@@ -98,8 +99,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           const titleWrapper = simulator().testSubject('resolver:node-detail:title');
           const titleIconWrapper = simulator().testSubject('resolver:node-detail:title-icon');
           return {
-            title: titleWrapper.exists() ? titleWrapper.text() : null,
-            titleIcon: titleIconWrapper.exists() ? titleIconWrapper.text() : null,
+            title: titleWrapper.length ? titleWrapper[0].textContent : null,
+            titleIcon: titleIconWrapper.length ? titleIconWrapper[0].textContent : null,
             detailEntries: simulator().nodeDetailEntries(),
           };
         })
@@ -114,7 +115,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         simulator().map(() => {
           const titleWrapper = simulator().testSubject('resolver:node-detail:title');
           return {
-            wordBreaks: titleWrapper.find('wbr').length,
+            wordBreaks: titleWrapper[0]?.querySelectorAll('wbr').length ?? 0,
           };
         })
       ).toYieldEqualTo({
@@ -176,7 +177,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
       const nodeLinks = await simulator().resolve('resolver:node-list:node-link:title');
       expect(nodeLinks).toBeTruthy();
       if (nodeLinks) {
-        nodeLinks.first().simulate('click', { button: 0 });
+        fireEvent.click(nodeLinks[0], { button: 0 });
       }
     });
     it('should show the details for the first node', async () => {
@@ -201,7 +202,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         );
 
         if (nodeEventsListLink) {
-          nodeEventsListLink.simulate('click', { button: 0 });
+          fireEvent.click(nodeEventsListLink[0], { button: 0 });
         }
       });
       it('should show a link to view 2 registry events', async () => {
@@ -213,8 +214,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             const link = simulator().testSubject('resolver:panel:node-events:event-type-link');
             for (let index = 0; index < type.length; index++) {
               typesAndCounts.push({
-                type: type.at(index).text(),
-                link: link.at(index).text(),
+                type: type[index].textContent,
+                link: link[index].textContent,
               });
             }
             return typesAndCounts;
@@ -238,11 +239,11 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
       describe('and when the user clicks the registry events link', () => {
         beforeEach(async () => {
           const link = await simulator().resolve('resolver:panel:node-events:event-type-link');
-          const first = link?.first();
+          const first = link?.[0];
           expect(first).toBeTruthy();
 
           if (first) {
-            first.simulate('click', { button: 0 });
+            fireEvent.click(first, { button: 0 });
           }
         });
         it('should show links to two events', async () => {
@@ -258,11 +259,11 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             const link = await simulator().resolve(
               'resolver:panel:node-events-in-category:event-link'
             );
-            const first = link?.first();
+            const first = link?.[0];
             expect(first).toBeTruthy();
 
             if (first) {
-              first.simulate('click', { button: 0 });
+              fireEvent.click(first, { button: 0 });
             }
           });
           it('should show the event detail view', async () => {
@@ -279,7 +280,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           'resolver:node-detail:breadcrumbs:node-list-link'
         );
         if (nodeListLink) {
-          nodeListLink.simulate('click', { button: 0 });
+          fireEvent.click(nodeListLink[0], { button: 0 });
         }
       });
       it('should show the list of nodes with links to each node', async () => {
@@ -287,7 +288,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           simulator().map(() => {
             return simulator()
               .testSubject('resolver:node-list:node-link:title')
-              .map((node) => node.text());
+              .map((node) => node.textContent);
           })
         ).toYieldEqualTo([
           'c.ext',

@@ -18,20 +18,11 @@ project:
   sourceRoot: x-pack/solutions/security/plugins/timelines
 dependsOn:
   - '@kbn/core'
-  - '@kbn/es-query'
-  - '@kbn/securitysolution-t-grid'
-  - '@kbn/securitysolution-timeline-common'
-  - '@kbn/securitysolution-timeline-components'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/i18n-react'
-  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod
   - group-security
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*

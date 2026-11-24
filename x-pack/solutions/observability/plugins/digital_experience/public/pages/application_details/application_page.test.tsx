@@ -55,6 +55,13 @@ jest.mock('../network/network_tab', () => {
     },
   };
 });
+jest.mock('../reports/reports_tab', () => {
+  return {
+    ReportsTab: () => {
+      return <div data-test-subj="reportsTab" />;
+    },
+  };
+});
 jest.mock('../sessions/sessions_tab', () => {
   return {
     SessionsTab: ({ serviceName }: { serviceName: string }) => {
@@ -82,6 +89,7 @@ beforeEach(() => {
     overviewPath: '/my-app?source=classic',
     errorsHref: '/errors-href',
     networkHref: '/network-href',
+    reportsHref: '/reports-href',
     sessionsHref: () => '/sessions-href',
     sessionHref: () => '/session-href',
   });
@@ -230,7 +238,7 @@ describe('ApplicationPage', () => {
     expect(screen.queryByTestId('digitalExperienceOverviewEmpty')).not.toBeInTheDocument();
   });
 
-  it('links the Overview, Sessions, Errors and Network tabs of an EDOT Browser application', () => {
+  it('links the Overview, Sessions, Errors, Network and Reports tabs of an EDOT Browser application', () => {
     useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
 
     render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
@@ -245,12 +253,19 @@ describe('ApplicationPage', () => {
       'digitalExperienceTab-sessions',
       'digitalExperienceTab-errors',
       'digitalExperienceTab-network',
+      'digitalExperienceTab-reports',
     ]);
     expect(
       tabs.map((tab) => {
         return tab.getAttribute('href');
       })
-    ).toEqual(['/overview-href', '/sessions-href', '/errors-href', '/network-href']);
+    ).toEqual([
+      '/overview-href',
+      '/sessions-href',
+      '/errors-href',
+      '/network-href',
+      '/reports-href',
+    ]);
   });
 
   it('renders the errors of the application on the Errors tab', () => {
@@ -278,7 +293,19 @@ describe('ApplicationPage', () => {
     ]);
   });
 
-  it.each(['errors', 'network'] as const)(
+  it('renders the report templates on the Reports tab', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="reports" />);
+
+    expect(screen.getByTestId('reportsTab')).toBeInTheDocument();
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([
+      { text: 'my-app', href: '/overview-href' },
+      { text: 'Reports' },
+    ]);
+  });
+
+  it.each(['errors', 'network', 'reports'] as const)(
     'replaces the %s route of a Classic RUM application with its Overview',
     (tab) => {
       useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
