@@ -103,8 +103,9 @@ describe('createAwaitExecutionsStepDefinition', () => {
     stepExecutions = [];
     stepOutputs = {};
     awaitScopeStack = [];
-    readBatch = jest.fn(async ({ refs }: { refs: Array<{ executionId: string }> }) =>
-      new Map(refs.map(({ executionId }) => [executionId, stepOutputs[executionId]]))
+    readBatch = jest.fn(
+      async ({ refs }: { refs: Array<{ executionId: string }> }) =>
+        new Map(refs.map(({ executionId }) => [executionId, stepOutputs[executionId]]))
     );
 
     const readExecutions = async (ids: string[]) =>
