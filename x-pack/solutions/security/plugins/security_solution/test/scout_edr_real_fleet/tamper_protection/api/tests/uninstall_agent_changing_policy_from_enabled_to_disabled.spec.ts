@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/api';
-import { apiTest } from '../fixtures';
+import { apiTest, getReassignPolicy } from '../fixtures';
 import { INVALID_TOKEN_MESSAGE, TEST_TIMEOUT_MS, UNINSTALLED_MESSAGE } from '../fixtures/constants';
 import { reassignAgent, waitForAgentOnPolicy } from '../fixtures/fleet_agent';
 import { getElasticInstallState, uninstallAgent } from '../fixtures/host_agent_commands';
@@ -27,7 +27,8 @@ apiTest.describe(
       'rejects an uninstall without a token, then accepts it once the agent is on the unprotected policy',
       async ({ apiClient, log, agentPolicies, enrolledHost, requestHeaders }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
-        const { first: protectedPolicy, second: unprotectedPolicy } = agentPolicies;
+        const { first: protectedPolicy } = agentPolicies;
+        const unprotectedPolicy = getReassignPolicy(agentPolicies);
         const { agentId, hostname } = enrolledHost;
 
         await apiTest.step('the agent applies the protected policy', async () => {

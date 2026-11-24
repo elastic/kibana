@@ -22,7 +22,6 @@ apiTest.describe(
       agentPolicyOptions: {
         namePrefix: 'tamper-unenroll-enabled',
         firstProtected: true,
-        secondProtected: true,
       },
     });
 

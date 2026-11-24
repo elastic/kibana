@@ -27,15 +27,16 @@ export type { EnrolledHost, EndpointAgentPolicy };
 export interface EndpointAgentPolicies {
   /** The policy the host enrolls on. */
   first: EndpointAgentPolicy;
-  /** The policy the host is reassigned to. */
-  second: EndpointAgentPolicy;
+  /** The policy the host is reassigned to; created only when `secondProtected` is set. */
+  second?: EndpointAgentPolicy;
 }
 
 interface AgentPolicyOptions {
   /** Policies are named `<namePrefix>-a-<timestamp>` and `<namePrefix>-b-<timestamp>`. */
   namePrefix: string;
   firstProtected: boolean;
-  secondProtected: boolean;
+  /** Omit it when the spec does not reassign the agent, so no second policy is created. */
+  secondProtected?: boolean;
 }
 
 interface TamperProtectionTestFixtures {
@@ -62,6 +63,14 @@ const createAgentPolicy = (
   isProtected
     ? createProtectedEndpointPolicy(kbnClient, log, name)
     : createUnprotectedEndpointPolicy(kbnClient, log, name);
+
+/** The policy the host is reassigned to. Throws when the spec did not ask for a second policy. */
+export const getReassignPolicy = ({ second }: EndpointAgentPolicies): EndpointAgentPolicy => {
+  if (!second) {
+    throw new Error('Set `secondProtected` in `agentPolicyOptions` to create the reassign policy');
+  }
+  return second;
+};
 
 export const apiTest = baseApiTest.extend<
   TamperProtectionTestFixtures,
@@ -116,12 +125,14 @@ export const apiTest = baseApiTest.extend<
           `${namePrefix}-a-${suffix}`,
           firstProtected
         );
-        created.second = await createAgentPolicy(
-          kbnClient,
-          log,
-          `${namePrefix}-b-${suffix}`,
-          secondProtected
-        );
+        if (secondProtected !== undefined) {
+          created.second = await createAgentPolicy(
+            kbnClient,
+            log,
+            `${namePrefix}-b-${suffix}`,
+            secondProtected
+          );
+        }
 
         await use({ first: created.first, second: created.second });
       } finally {

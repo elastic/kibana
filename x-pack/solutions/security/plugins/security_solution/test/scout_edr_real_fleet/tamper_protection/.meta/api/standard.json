@@ -1,5 +1,5 @@
 {
-  "sha1": "1823e4696316aefcb655f4edbbe5c3f154a92f5c",
+  "sha1": "99e35039313a0fdf181034d5139cd7e7cef311a2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/unenroll_agent_with_tamper_protection_enabled.spec.ts",
-        "line": 27,
+        "line": 26,
         "column": 7
       }
     },
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_with_tamper_protection_disabled.spec.ts",
-        "line": 25,
+        "line": 23,
         "column": 7
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_with_tamper_protection_enabled.spec.ts",
-        "line": 25,
+        "line": 23,
         "column": 7
       }
     }

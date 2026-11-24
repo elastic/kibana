@@ -15,12 +15,10 @@ apiTest.describe(
   'Uninstall an agent enrolled on a tamper protected policy',
   { tag: ['@local-stateful-classic'] },
   () => {
-    // `agentPolicies` always creates two policies; this test only uses the one the host enrolls on.
     apiTest.use({
       agentPolicyOptions: {
         namePrefix: 'tamper-enabled',
         firstProtected: true,
-        secondProtected: true,
       },
     });
 
