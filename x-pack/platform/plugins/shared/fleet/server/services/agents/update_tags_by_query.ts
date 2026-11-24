@@ -80,7 +80,10 @@ export interface UpdateOutcome {
   response: UpdateByQueryTaskResponse;
   /** How many of the distinct agents of the batch `response` is the result for. */
   agentsCovered: number;
-  /** Set when a chunk was incomplete too: `response` is then of the chunks before it. */
+  /**
+   * Set when a chunk was incomplete too: `response` is then of the chunks before it, and has what
+   * that chunk updated before it stopped, which `agentsCovered` does not count.
+   */
   stoppedBy?: UpdateByQueryIncompleteError;
 }
 
@@ -135,8 +138,23 @@ const combine = (
 });
 
 /**
+ * What a chunk that was cut short is known to have done: the agents it updated, which stay updated.
+ * Its failures and version conflicts are not counted, as those agents were not changed and the retry
+ * of the action runs them again, and its total is of the agents it got to.
+ */
+const withUpdatedOf = (
+  response: UpdateByQueryTaskResponse,
+  chunk: UpdateByQueryTaskResponse
+): UpdateByQueryTaskResponse => ({
+  ...response,
+  took: (response.took ?? 0) + (chunk.took ?? 0),
+  updated: (response.updated ?? 0) + (chunk.updated ?? 0),
+});
+
+/**
  * Updates the agents a chunk at a time, and stops at the first chunk that is incomplete, keeping
- * what the chunks before it did: that is known exactly.
+ * what the chunks before it did, and what it updated before it stopped: that is known exactly, and
+ * the retry of the action may not select those agents again.
  */
 const updateInChunks = async (
   esClient: ElasticsearchClient,
@@ -164,7 +182,7 @@ const updateInChunks = async (
           );
       }
       return {
-        response,
+        response: withUpdatedOf(response, chunk),
         agentsCovered,
         stoppedBy: new UpdateByQueryIncompleteError(
           `${describeIncomplete(chunk)}, giving up after running it again in chunks`
@@ -187,10 +205,10 @@ const updateInChunks = async (
  * are updated again, which updates all of them and counts each of them once, a chunk at a time and
  * each with the time limit of an update of its own, as the whole batch was too slow for one.
  *
- * If a chunk is incomplete too, what the chunks before it did is returned with `stoppedBy` set, for
- * the caller to record before it throws. That is only for a batch the action retries
- * (`retriedByAction`): agents given by id have no action to retry, so the request just fails, and
- * with no chunk through there is nothing to record.
+ * If a chunk is incomplete too, what the chunks before it did, and what it updated before it
+ * stopped, is returned with `stoppedBy` set, for the caller to record before it throws. That is only
+ * for a batch the action retries (`retriedByAction`): agents given by id have no action to retry, so
+ * the request just fails. With no agent updated at all there is nothing to record either.
  */
 export async function updateAgentsTags(
   esClient: ElasticsearchClient,
@@ -221,7 +239,8 @@ export async function updateAgentsTags(
     );
   const outcome = await updateInChunks(esClient, distinctAgentIds, requestFor, actionId);
 
-  if (outcome.stoppedBy && (!retriedByAction || outcome.agentsCovered === 0)) {
+  const nothingToRecord = outcome.agentsCovered === 0 && (outcome.response.updated ?? 0) === 0;
+  if (outcome.stoppedBy && (!retriedByAction || nothingToRecord)) {
     throw outcome.stoppedBy;
   }
   return outcome;

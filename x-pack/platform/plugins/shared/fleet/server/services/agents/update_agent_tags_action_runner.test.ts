@@ -76,10 +76,11 @@ describe('UpdateAgentTagsActionRunner', () => {
       UpdateByQueryIncompleteError
     );
 
-    // the 1000 agents of the first chunk, which the retry may not select again. This is not what
-    // happens for agents given by id, which have no action to retry: the runner is told it retries.
+    // the 1000 agents of the first chunk and the 3 that the second updated before it was cancelled,
+    // which the retry may not select again. This is not what happens for agents given by id, which
+    // have no action to retry: the runner is told it retries.
     expect(esClient.create).toHaveBeenCalledTimes(1);
-    expect(recordedAction().agents).toHaveLength(1000);
+    expect(recordedAction().agents).toHaveLength(1003);
   });
 
   it('should record the batch in the space and with the total of the action', async () => {

@@ -550,14 +550,15 @@ describe('update_agent_tags', () => {
       });
 
       describe('one of which is cancelled too', () => {
-        it('should record what the chunks before it did, and fail for the retry of the action', async () => {
+        it('should record what the chunks before it did, and what it updated, and fail for the retry of the action', async () => {
           scriptRuns({ 0: CANCELLED, 2: CANCELLED });
 
           await expect(batch(agentsOf(2500))).rejects.toBeInstanceOf(UpdateByQueryIncompleteError);
 
-          // the 1000 agents of the first chunk, which the retry of the action may not select again
+          // the 1000 agents of the first chunk, and the 3 that the second updated before it was
+          // cancelled: the retry of the action may not select them again
           expect(esClient.create).toHaveBeenCalledTimes(1);
-          expect(recordedAgents()).toHaveLength(1000);
+          expect(recordedAgents()).toHaveLength(1003);
           // and the agents of the chunks that were not gone through are not taken for skipped ones
           expect(errorsRecorded()).toEqual([]);
         });
@@ -567,17 +568,43 @@ describe('update_agent_tags', () => {
 
           await expect(batch(agentsOf(2500))).rejects.toBeInstanceOf(FleetVersionConflictError);
 
-          // the first two chunks: 999 + 998 updated and 1 that failed, and 2 conflicts to retry
-          expect(recordedAgents()).toHaveLength(1998);
+          // the first two chunks: 999 + 998 updated and 1 that failed, and 2 conflicts to retry, and
+          // the 3 that the third chunk updated before it was cancelled
+          expect(recordedAgents()).toHaveLength(2001);
           expect(errorsRecorded()).toEqual([['agent3', 'failed in the first chunk']]);
         });
 
-        it('should record nothing when it is the first chunk', async () => {
+        it('should record what it updated before it stopped, when it is the first chunk', async () => {
           scriptRuns({ 0: CANCELLED, 1: CANCELLED });
 
           await expect(batch(agentsOf(2500))).rejects.toBeInstanceOf(UpdateByQueryIncompleteError);
 
+          // none of the chunks went through, and the 3 agents it updated are not selected by the
+          // retry of the action again, if its kuery leaves out the agents it updated
+          expect(esClient.create).toHaveBeenCalledTimes(1);
+          expect(recordedAgents()).toHaveLength(3);
+          expect(errorsRecorded()).toEqual([]);
+        });
+
+        it('should record nothing when it updated nothing before it stopped', async () => {
+          scriptRuns({ 0: CANCELLED, 1: TIMED_OUT });
+
+          await expect(batch(agentsOf(2500))).rejects.toBeInstanceOf(UpdateByQueryIncompleteError);
+
           expect(esClient.create).not.toHaveBeenCalled();
+        });
+
+        it('should not record the failures of the chunk, as the retry of the action runs them again', async () => {
+          scriptRuns({
+            0: CANCELLED,
+            1: { updated: 999 },
+            2: { ...CANCELLED, failures: [failure('agent1500', 'failed in the cancelled chunk')] },
+          });
+
+          await expect(batch(agentsOf(2500))).rejects.toBeInstanceOf(UpdateByQueryIncompleteError);
+
+          expect(recordedAgents()).toHaveLength(1002);
+          expect(errorsRecorded()).toEqual([]);
         });
       });
     });

@@ -220,7 +220,9 @@ describe('updateAgentsTags', () => {
       const outcome = await update(idsOf(2500));
 
       expect(idsOfRuns().map((ids) => ids.length)).toEqual([2500, 1000, 1000]);
-      expect(outcome.response).toEqual(expect.objectContaining({ total: 1000, updated: 1000 }));
+      // the 1000 agents of the first chunk and the 3 that the second updated before it was cancelled,
+      // which the total of the chunks does not have, nor the agents covered
+      expect(outcome.response).toEqual(expect.objectContaining({ total: 1000, updated: 1003 }));
       expect(outcome.agentsCovered).toEqual(1000);
       expect(outcome.stoppedBy).toBeInstanceOf(UpdateByQueryIncompleteError);
       expect(outcome.stoppedBy?.message).toMatch(
@@ -239,7 +241,29 @@ describe('updateAgentsTags', () => {
     });
   });
 
-  it('should fail when the first chunk is incomplete, as there is nothing to keep', async () => {
+  it('should keep what the first chunk updated before it was incomplete, with no chunk through', async () => {
+    jest
+      .mocked(updateByQueryAndWait)
+      .mockResolvedValueOnce(CANCELLED)
+      .mockResolvedValueOnce(CANCELLED);
+
+    const outcome = await update(idsOf(2500));
+
+    expect(outcome.agentsCovered).toEqual(0);
+    expect(outcome.response).toEqual(expect.objectContaining({ total: 0, updated: 3 }));
+    expect(outcome.stoppedBy).toBeInstanceOf(UpdateByQueryIncompleteError);
+  });
+
+  it('should fail when the agents are given by id, whatever the chunk updated', async () => {
+    jest
+      .mocked(updateByQueryAndWait)
+      .mockResolvedValueOnce(CANCELLED)
+      .mockResolvedValueOnce(CANCELLED);
+
+    await expect(update(idsOf(2500), false)).rejects.toBeInstanceOf(UpdateByQueryIncompleteError);
+  });
+
+  it('should fail when the first chunk updated nothing before it was incomplete, as there is nothing to keep', async () => {
     jest
       .mocked(updateByQueryAndWait)
       .mockResolvedValueOnce(CANCELLED)

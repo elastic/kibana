@@ -166,8 +166,8 @@ export async function updateTagsBatch(
   }
 
   if (stoppedBy) {
-    // What the chunks before the one that was incomplete did is recorded, and the batch is retried
-    // by the action for the rest. The retry restarts behind the kuery of the action and is not told
+    // What the chunks before the one that was incomplete did, and what it updated before it
+    // stopped, is recorded, and the batch is retried by the action for the rest. The retry restarts behind the kuery of the action and is not told
     // what is recorded, and there is a cost either way, so this is a choice:
     //
     // - For an update whose kuery leaves out the agents it updated, like `tags:old` for the removal
