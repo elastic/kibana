@@ -45,27 +45,20 @@ export const isLensAttributesPanel = (
  * For Lens panels with internal attributes format, converts to API format.
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
-  // Normalize a by-value legacy-vis (`visualization`) Vega panel to the future
-  // native `vega` API shape (`config.spec`). Temporary bridge that pairs with the
-  // expansion in `from_attachment`; remove once the native vega API ships.
-  // Panel-level settings (title, description, hide_*, drilldowns, …) live beside
-  // `savedVis` and must be preserved — same pattern as Lens below.
+  // Read a by-value legacy-vis (`visualization`) Vega panel as a native `vega` panel,
+  // until the dashboard migrates these panels on read.
   if (panel.type === VISUALIZE_EMBEDDABLE_TYPE) {
     const vega = extractVegaSpecFromSavedVis(panel.config);
     if (vega) {
-      const { savedVis: _savedVis, ...restConfig } = (panel.config ?? {}) as {
-        savedVis?: unknown;
-      } & Record<string, unknown>;
+      const { savedVis: _savedVis, ...restConfig } = panel.config as Record<string, unknown>;
       return {
         type: VEGA_VIS_TYPE,
         id: panel.id ?? '',
         config: {
+          title: vega.title,
+          description: vega.description,
           ...restConfig,
-          spec: vega.spec,
-          // Prefer panel-level title/description (manual edits); fall back to savedVis.
-          title: typeof restConfig.title === 'string' ? restConfig.title : vega.title,
-          description:
-            typeof restConfig.description === 'string' ? restConfig.description : vega.description,
+          spec: { format: 'hjson', value: vega.spec },
         },
         grid: panel.grid,
       };

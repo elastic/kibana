@@ -145,7 +145,7 @@ describe('createVisPanelResolver', () => {
     );
   });
 
-  it('creates a Vega panel in the attachment API shape (config.spec) when type is "vega"', async () => {
+  it('creates a native Vega panel when type is "vega"', async () => {
     const spec = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json"}';
     mockedBuildVegaConfig.mockResolvedValue({
       spec,
@@ -166,7 +166,7 @@ describe('createVisPanelResolver', () => {
       type: 'success',
       panelContent: {
         type: VEGA_VIS_TYPE,
-        config: { spec, title: 'Requests by host' },
+        config: { spec: { format: 'hjson', value: spec }, title: 'Requests by host' },
       },
       authoringNote: 'Created a bar chart of requests by host with a concise title.',
     });
@@ -210,7 +210,7 @@ describe('createVisPanelResolver', () => {
       existingPanel: {
         id: 'panel-1',
         type: VEGA_VIS_TYPE,
-        config: { spec: existingSpec },
+        config: { spec: { format: 'json', value: JSON.parse(existingSpec) } },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
     });
@@ -219,7 +219,7 @@ describe('createVisPanelResolver', () => {
       type: 'success',
       panelContent: {
         type: VEGA_VIS_TYPE,
-        config: { spec: nextSpec },
+        config: { spec: { format: 'hjson', value: nextSpec } },
       },
       authoringNote: 'Changed the panel to a line chart.',
     });
@@ -240,7 +240,7 @@ describe('createVisPanelResolver', () => {
       existingPanel: {
         id: 'panel-1',
         type: VEGA_VIS_TYPE,
-        config: { spec: '{"mark":"bar"}' },
+        config: { spec: { format: 'hjson', value: '{"mark":"bar"}' } },
         grid: { w: 24, h: 10, x: 0, y: 0 },
       },
     });

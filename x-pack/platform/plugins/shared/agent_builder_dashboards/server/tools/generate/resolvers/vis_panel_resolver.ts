@@ -12,12 +12,12 @@ import {
 } from '@kbn/agent-builder-visualizations-server';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   getErrorMessage,
+  getVegaSpecText,
   type PanelContentAttempt,
   type VisPanelResolutionRequest,
 } from '@kbn/dashboard-agent-authoring';
@@ -30,12 +30,6 @@ export interface VisPanelResolverDeps {
   esClient: IScopedClusterClient;
 }
 
-/** Pull the serialized Vega spec out of an existing Vega panel's attachment config. */
-const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined => {
-  const spec = (existingPanel?.config as { spec?: unknown } | undefined)?.spec;
-  return typeof spec === 'string' ? spec : undefined;
-};
-
 /**
  * Resolves Lens and Vega panel requests for dashboard authoring's
  * `ResolvePanelContent` seam (see `panel_resolver.ts`).
@@ -43,7 +37,7 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  * Builds inline visualization panel content from natural language / ES|QL using
  * Kibana plumbing (model provider, ES client, the visualization builders). It
  * resolves to a Lens panel (`buildLensConfig`) or, when the caller asks
- * for Vega, a `vega` panel carrying a serialized Vega-Lite spec in its config
+ * for Vega, a native `vega` panel carrying the Vega-Lite spec in its config
  * (`buildVegaConfig`), and returns it to dashboard authoring through the type-agnostic
  * {@link PanelContentAttempt} contract.
  *
@@ -75,7 +69,7 @@ export const createVisPanelResolver = ({
           nlQuery,
           index,
           esql,
-          existingSpec: getExistingVegaSpec(existingPanel),
+          existingSpec: getVegaSpecText(existingPanel?.config?.spec),
           preserveESQL,
           chartType,
           modelProvider,
@@ -84,15 +78,11 @@ export const createVisPanelResolver = ({
           esClient,
         });
 
-        // Store the (future) native Vega API shape in the attachment: a `vega`
-        // panel whose `config.spec` is the serialized spec. A temporary converter
-        // expands this to the legacy-vis embeddable when the dashboard is
-        // materialized for rendering.
         return {
           type: 'success',
           panelContent: {
             type: VEGA_VIS_TYPE,
-            config: { spec, ...(title ? { title } : {}) },
+            config: { spec: { format: 'hjson', value: spec }, ...(title ? { title } : {}) },
           },
           ...(authoringNote ? { authoringNote } : {}),
         };

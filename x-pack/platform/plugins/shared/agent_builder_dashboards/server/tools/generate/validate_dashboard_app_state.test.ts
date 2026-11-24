@@ -103,8 +103,10 @@ describe('createDashboardAppStateValidator', () => {
       ]);
     });
 
-    it('does not validate vega panels', () => {
-      expect(validatePanel({ spec: '{}' }, 'vega')).toEqual([]);
+    it('validates vega panels with the vega schema', () => {
+      expect(validatePanel({ content: 1 }, 'vega')).toEqual([
+        'config.content: Invalid input: expected string, received number',
+      ]);
     });
 
     it('validates lens panels with the dashboard application lens schema', () => {

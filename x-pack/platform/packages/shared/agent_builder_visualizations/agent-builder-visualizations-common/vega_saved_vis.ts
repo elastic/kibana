@@ -7,19 +7,11 @@
 
 /**
  * The `vega` type string — both the `savedVis.type` Kibana's legacy-vis
- * embeddable renders and the panel `type` for a Vega panel in the (future)
- * dashboard API / attachment shape. Until the native vega embeddable API ships,
- * a temporary converter maps the attachment shape to the legacy-vis embeddable
- * (see `agent-builder-dashboards-common/converters`).
+ * embeddable renders and the native `vega` dashboard panel type.
  */
 export const VEGA_VIS_TYPE = 'vega';
 
-/**
- * Canonical Vega config carried by Agent Builder attachments. This is the
- * shared "future native Vega API" payload used by both surfaces — the standalone
- * visualization attachment (`visualization`) and the dashboard Vega panel
- * (`config`) — so a single {@link buildVegaSavedVis} transform can render either.
- */
+/** Vega config carried by the standalone visualization attachment (`visualization`). */
 export interface VegaConfig {
   /** The serialized Vega/Vega-Lite spec. */
   spec: string;
@@ -30,7 +22,7 @@ export interface VegaConfig {
 /**
  * The by-value `savedVis` shape a Kibana legacy-vis (`visualization`) embeddable
  * expects for a Vega/Vega-Lite spec. Kept minimal (no persisted saved object) so
- * the same spec can be rendered inline in chat and embedded in a dashboard panel.
+ * the spec can be rendered inline in chat.
  */
 interface VegaSavedVis {
   title: string;
@@ -41,11 +33,7 @@ interface VegaSavedVis {
   data: { aggs: unknown[]; searchSource: Record<string, unknown> };
 }
 
-/**
- * Build the by-value `savedVis` for a Vega/Vega-Lite spec. Shared by the browser
- * inline renderer and the server dashboard-panel converter so both surfaces embed
- * an identical legacy-vis embeddable for the same spec.
- */
+/** Build the by-value `savedVis` the inline chat renderer embeds for a Vega/Vega-Lite spec. */
 export const buildVegaSavedVis = ({
   spec,
   title = '',
