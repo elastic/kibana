@@ -19,7 +19,7 @@ interface DetailsNotFoundProps {
 export const DetailsNotFound = ({ title, backLabel, backLinkProps }: DetailsNotFoundProps) => (
   <EuiEmptyPrompt
     iconType="magnify"
-    title={<h2>{title}</h2>}
+    title={<h1>{title}</h1>}
     body={NOT_FOUND_BODY}
     actions={
       <EuiButton {...backLinkProps} data-test-subj="searchBoostNotFoundBack">

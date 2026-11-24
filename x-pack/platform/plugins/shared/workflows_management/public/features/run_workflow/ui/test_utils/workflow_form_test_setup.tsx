@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 interface MockQuery {
@@ -22,6 +22,7 @@ interface MockSearchBarProps {
   onQueryChange?: (params: { query: MockQuery; dateRange: MockDateRange }) => void;
   onQuerySubmit?: (params: { query: MockQuery; dateRange: MockDateRange }) => void;
   query?: MockQuery;
+  draft?: { query?: MockQuery };
   dateRangeFrom?: string;
   dateRangeTo?: string;
 }
@@ -38,18 +39,28 @@ export const createMockSearchBar = () => {
     onQueryChange,
     onQuerySubmit,
     query,
+    draft,
     dateRangeFrom = 'now-15m',
     dateRangeTo = 'now',
   }: MockSearchBarProps) => {
     const dateRange: MockDateRange = { from: dateRangeFrom, to: dateRangeTo };
+    const [draftText, setDraftText] = useState(draft?.query?.query ?? query?.query ?? '');
+
+    const [previousQuery, setPreviousQuery] = useState(query);
+
+    if (query !== previousQuery) {
+      setPreviousQuery(query);
+      setDraftText(query?.query ?? '');
+    }
 
     return (
       <div data-test-subj="search-bar">
         <input
           data-test-subj="query-input"
-          value={query?.query || ''}
+          value={draftText}
           onChange={(e) => {
             const target = e.target as HTMLInputElement;
+            setDraftText(target.value);
             onQueryChange?.({
               query: { query: target.value, language: 'kuery' },
               dateRange,
@@ -70,7 +81,7 @@ export const createMockSearchBar = () => {
           data-test-subj="mock-search-bar-submit"
           onClick={() =>
             onQuerySubmit?.({
-              query: { query: query?.query ?? '', language: 'kuery' },
+              query: { query: draftText, language: 'kuery' },
               dateRange,
             })
           }
@@ -237,6 +248,7 @@ export const createIndexFormKibanaMocks = () => {
       update: jest.fn(),
       length: 0,
       filter: jest.fn().mockReturnValue([]),
+      find: jest.fn().mockReturnValue(undefined),
     },
   });
 
