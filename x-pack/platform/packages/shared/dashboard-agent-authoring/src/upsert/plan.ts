@@ -7,11 +7,15 @@
 
 import { upperFirst } from 'lodash';
 import { validate as isUuid } from 'uuid';
-import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type {
+  AttachmentPanel,
+  DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
 import { getIndexedIds, type DashboardIndex } from '../dashboard_state';
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import type { PlannedControl } from '../controls';
 import { planPanelContent, type PanelContentSource } from '../panels';
+import { planSyncOptions } from '../settings';
 import type { DashboardFailure } from '../utils';
 import type { DashboardUpsert, UpsertPanelItem, UpsertSectionItem } from './schema';
 
@@ -421,14 +425,17 @@ const planPanels = ({
 };
 
 /**
- * Decides which changes of the call can be applied, checking every id against the original
- * dashboard only, so the result does not depend on the order the changes are applied in.
+ * Decides which changes of the call can be applied, checking every id and the sync options
+ * against the original dashboard only, so the result does not depend on the order the changes are
+ * applied in.
  */
 export const planUpsert = ({
   original,
+  originalOptions,
   upsert,
 }: {
   original: DashboardIndex;
+  originalOptions: DashboardAttachmentData['options'];
   upsert: DashboardUpsert;
 }): UpsertPlan => {
   const {
@@ -452,13 +459,14 @@ export const planUpsert = ({
     conflictingIds: validItems.conflictingIds,
   });
   const plannedPanels = planPanels({ original, panels: placement.panels });
+  const syncOptions = planSyncOptions({ originalOptions, requestedOptions: options });
 
   return {
     metadata: {
       title,
       description,
       time_range: timeRange,
-      options,
+      options: syncOptions.options,
       refresh_interval: refreshInterval,
       esql_approximation: esqlApproximation,
     },
@@ -472,6 +480,11 @@ export const planUpsert = ({
       ...[...sections, ...panels, ...controls].flatMap(({ id }) => id ?? []),
       ...remove,
     ]),
-    failures: [...validItems.failures, ...placement.failures, ...plannedPanels.failures],
+    failures: [
+      ...validItems.failures,
+      ...placement.failures,
+      ...plannedPanels.failures,
+      ...(syncOptions.failure ? [syncOptions.failure] : []),
+    ],
   };
 };

@@ -17,7 +17,6 @@ import type {
   ResolveEsqlControlColumnType,
 } from '../types';
 import type { PanelAuthoringNote, PanelHeightHint } from '../resolve_panel';
-import { planSyncOptions } from '../settings';
 import type { DashboardFailure } from '../utils';
 import { discardInvalidChanges, type DashboardValidator } from '../validate_dashboard';
 import { applyPlan } from './apply';
@@ -100,7 +99,7 @@ export const executeDashboardUpsert = async ({
     dashboardData ?? { title: 'User Dashboard', description: undefined, panels: [] }
   );
   const original = indexDashboard(originalDashboardData);
-  const plan = planUpsert({ original, upsert });
+  const plan = planUpsert({ original, originalOptions: originalDashboardData.options, upsert });
   const { panels, controls, failures } = await resolvePlan({
     panels: plan.panels,
     controls: plan.controls,
@@ -123,13 +122,9 @@ export const executeDashboardUpsert = async ({
     requestedPanels: upsert.panels ?? [],
     resolvedPanels: panels,
   });
-  const { options, failure: syncOptionsFailure } = planSyncOptions({
-    originalOptions: originalDashboardData.options,
-    requestedOptions: plan.metadata.options,
-  });
   const nextDashboardData = applyPlan({
     dashboardData: originalDashboardData,
-    changes: { ...plan, metadata: { ...plan.metadata, options }, newSections, panels, controls },
+    changes: { ...plan, newSections, panels, controls },
   });
 
   const validationResult = validator
@@ -147,7 +142,6 @@ export const executeDashboardUpsert = async ({
       ...plan.failures,
       ...failures,
       ...emptySectionFailures,
-      ...(syncOptionsFailure ? [syncOptionsFailure] : []),
       ...reportUnderPlannedIdentifiers(validationResult.failures, controls),
     ],
     panelAuthoringNotes: panels.flatMap(({ id, authoringNote }): PanelAuthoringNote[] =>
