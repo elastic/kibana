@@ -19,20 +19,36 @@ import type {
 
 const FROM_STEPS_PROP = 'with.from-steps';
 
+interface AncestorSlot {
+  ancestorId: string;
+  /** The branch of the ancestor the walked step sits in. */
+  branchKey?: string;
+}
+
+/**
+ * The ancestors of a step, closest first. Stops on a repeated ID: a draft can name a nested step
+ * like its untyped parent, which makes the lookup point the step back at itself.
+ */
+const getAncestorSlots = (step: StepInfo, workflowLookup: WorkflowLookup): AncestorSlot[] => {
+  const slots: AncestorSlot[] = [];
+  const visited = new Set<string>([step.stepId]);
+  let current: StepInfo | undefined = step;
+  while (current?.parentStepId !== undefined && !visited.has(current.parentStepId)) {
+    visited.add(current.parentStepId);
+    slots.push({ ancestorId: current.parentStepId, branchKey: current.branchKey });
+    current = workflowLookup.steps[current.parentStepId];
+  }
+  return slots;
+};
+
 const isAncestorOf = (
   candidateAncestorId: string,
   step: StepInfo,
   workflowLookup: WorkflowLookup
-): boolean => {
-  let parentStepId = step.parentStepId;
-  while (parentStepId !== undefined) {
-    if (parentStepId === candidateAncestorId) {
-      return true;
-    }
-    parentStepId = workflowLookup.steps[parentStepId]?.parentStepId;
-  }
-  return false;
-};
+): boolean =>
+  getAncestorSlots(step, workflowLookup).some(
+    ({ ancestorId }) => ancestorId === candidateAncestorId
+  );
 
 const BRANCHING_STEP_TYPES: ReadonlySet<string> = new Set(['parallel', 'if', 'switch']);
 
@@ -45,29 +61,24 @@ const findSplittingStep = (
   awaitStep: StepInfo,
   workflowLookup: WorkflowLookup
 ): StepInfo | undefined => {
-  const referencedBranchByAncestor = new Map<string, string | undefined>();
-  for (
-    let step: StepInfo | undefined = referencedStep;
-    step?.parentStepId !== undefined;
-    step = workflowLookup.steps[step.parentStepId]
-  ) {
-    referencedBranchByAncestor.set(step.parentStepId, step.branchKey);
+  const referencedBranchByAncestor = new Map(
+    getAncestorSlots(referencedStep, workflowLookup).map(({ ancestorId, branchKey }) => [
+      ancestorId,
+      branchKey,
+    ])
+  );
+  const commonSlot = getAncestorSlots(awaitStep, workflowLookup).find(({ ancestorId }) =>
+    referencedBranchByAncestor.has(ancestorId)
+  );
+  if (!commonSlot) {
+    return undefined;
   }
 
-  for (
-    let step: StepInfo | undefined = awaitStep;
-    step?.parentStepId !== undefined;
-    step = workflowLookup.steps[step.parentStepId]
-  ) {
-    if (referencedBranchByAncestor.has(step.parentStepId)) {
-      const commonStep = workflowLookup.steps[step.parentStepId];
-      const isSplit =
-        BRANCHING_STEP_TYPES.has(commonStep?.stepType ?? '') &&
-        referencedBranchByAncestor.get(step.parentStepId) !== step.branchKey;
-      return isSplit ? commonStep : undefined;
-    }
-  }
-  return undefined;
+  const commonStep = workflowLookup.steps[commonSlot.ancestorId];
+  const isSplit =
+    BRANCHING_STEP_TYPES.has(commonStep?.stepType ?? '') &&
+    referencedBranchByAncestor.get(commonSlot.ancestorId) !== commonSlot.branchKey;
+  return isSplit ? commonStep : undefined;
 };
 
 const startsExecutions = (stepId: string, workflowLookup: WorkflowLookup): boolean =>

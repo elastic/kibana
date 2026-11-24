@@ -206,6 +206,23 @@ describe('validateAwaitExecutionsReferences', () => {
     });
   });
 
+  it('does not hang when a draft step is nested under an untyped step with the same name', () => {
+    expect(
+      validate(`steps:
+  - name: start
+    steps:
+      - name: start
+        type: workflow.executeAsync
+        with:
+          workflow-id: child
+  - name: join
+    type: workflow.awaitExecutions
+    with:
+      from-steps: [start]
+`)
+    ).toEqual([]);
+  });
+
   it('ignores explicit execution IDs', () => {
     expect(
       validate(`steps:
