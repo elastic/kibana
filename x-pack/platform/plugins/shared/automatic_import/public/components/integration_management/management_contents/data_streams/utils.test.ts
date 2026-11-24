@@ -31,8 +31,9 @@ describe('data stream utils', () => {
       expect(getIconFromType('long')).toBe('tokenNumber');
     });
 
-    it('should return tokenNumber for float type', () => {
+    it('should return tokenNumber for float and double types', () => {
       expect(getIconFromType('float')).toBe('tokenNumber');
+      expect(getIconFromType('double')).toBe('tokenNumber');
     });
 
     it('should return tokenDate for date type', () => {
@@ -88,10 +89,10 @@ describe('data stream utils', () => {
       expect(getFieldType(-100)).toBe('long');
     });
 
-    it('should return "float" for decimal numbers', () => {
-      expect(getFieldType(3.14)).toBe('float');
-      expect(getFieldType(0.5)).toBe('float');
-      expect(getFieldType(-2.5)).toBe('float');
+    it('should return "double" for decimal numbers', () => {
+      expect(getFieldType(3.14)).toBe('double');
+      expect(getFieldType(0.5)).toBe('double');
+      expect(getFieldType(-2.5)).toBe('double');
     });
 
     it('should return "boolean" for boolean values', () => {
@@ -99,16 +100,18 @@ describe('data stream utils', () => {
       expect(getFieldType(false)).toBe('boolean');
     });
 
-    it('should return the type of the first populated element for arrays', () => {
+    it('should return the type that accepts every populated element for arrays', () => {
       expect(getFieldType([1, 2, 3])).toBe('long');
       expect(getFieldType(['a', 'b'])).toBe('string');
       expect(getFieldType([null, '192.0.2.1'])).toBe('ip');
-      expect(getFieldType([[1.5], [2]])).toBe('float');
+      expect(getFieldType([1, 2.5])).toBe('double');
+      expect(getFieldType([[1.5], [2]])).toBe('double');
+      expect(getFieldType([443, 'tcp'])).toBe('string');
     });
 
-    it('should return "null" for empty arrays', () => {
-      expect(getFieldType([])).toBe('null');
-      expect(getFieldType([null])).toBe('null');
+    it('should return "string" for empty arrays, as they are mapped as keyword', () => {
+      expect(getFieldType([])).toBe('string');
+      expect(getFieldType([null])).toBe('string');
     });
 
     it('should return "object" for objects', () => {

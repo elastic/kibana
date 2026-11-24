@@ -208,11 +208,48 @@ describe('fields', () => {
       expect(fields.map((f) => f.name)).toEqual(['rules.name', 'rules.zone']);
     });
 
-    it('keeps the first element type when array elements disagree', async () => {
+    it('maps a field as keyword when array elements disagree on its type', async () => {
       const docs = [{ rules: [{ id: 22 }, { id: 'abc' }] }];
       const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
-      expect(fields).toEqual([{ name: 'rules.id', type: 'long', is_ecs: false }]);
+      expect(fields).toEqual([{ name: 'rules.id', type: 'keyword', is_ecs: false }]);
+    });
+
+    it('maps a field as double when whole and decimal numbers mix', async () => {
+      const docs = [
+        { my_app: { ratio: 3 }, rules: [{ score: 1 }, { score: 0.5 }] },
+        { my_app: { ratio: 3.14 } },
+      ];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toEqual([
+        { name: 'my_app.ratio', type: 'double', is_ecs: false },
+        { name: 'rules.score', type: 'double', is_ecs: false },
+      ]);
+    });
+
+    it('types a field from both a plain value and an array in other samples', async () => {
+      const docs = [
+        { my_tag: 'x', my_score: [1] },
+        { my_tag: [1], my_score: 1.5 },
+      ];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toEqual([
+        { name: 'my_tag', type: 'keyword', is_ecs: false },
+        { name: 'my_score', type: 'double', is_ecs: false },
+      ]);
+    });
+
+    it('types arrays of values from every element', async () => {
+      const docs = [{ my_ids: [1, 2.5], my_ports: [443, 'tcp'], my_nested: [[1], [2.5]] }];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toEqual([
+        { name: 'my_ids', type: 'double', is_ecs: false },
+        { name: 'my_ports', type: 'keyword', is_ecs: false },
+        { name: 'my_nested', type: 'double', is_ecs: false },
+      ]);
     });
 
     it('prefers objects over scalars when array elements disagree', async () => {

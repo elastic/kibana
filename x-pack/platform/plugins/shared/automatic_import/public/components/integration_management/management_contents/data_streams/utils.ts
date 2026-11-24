@@ -7,7 +7,7 @@
 
 import type { EuiTokenProps } from '@elastic/eui';
 import ipaddr from 'ipaddr.js';
-import { mergeObjectElements } from '../../../../../common';
+import { mergeObjectElements, mergeValueTypes } from '../../../../../common';
 
 const TYPE_TO_ICON_MAP: Record<string, EuiTokenProps['iconType']> = {
   string: 'tokenString',
@@ -15,6 +15,7 @@ const TYPE_TO_ICON_MAP: Record<string, EuiTokenProps['iconType']> = {
   number: 'tokenNumber',
   long: 'tokenNumber',
   float: 'tokenNumber',
+  double: 'tokenNumber',
   date: 'tokenDate',
   ip: 'tokenIP',
   geo_point: 'tokenGeo',
@@ -39,10 +40,14 @@ export const isValidIp = (value: string): boolean => {
 
 export const getFieldType = (value: unknown): string => {
   if (value === null || value === undefined) return 'null';
-  if (typeof value === 'number') return Number.isInteger(value) ? 'long' : 'float';
+  if (typeof value === 'number') return Number.isInteger(value) ? 'long' : 'double';
   if (typeof value === 'boolean') return 'boolean';
   if (Array.isArray(value)) {
-    return getFieldType(value.find((element) => element != null));
+    const elementTypes = value
+      .flat(Infinity)
+      .filter((element) => element != null)
+      .map(getFieldType);
+    return mergeValueTypes(elementTypes, 'string');
   }
   if (typeof value === 'object') return 'object';
   if (typeof value === 'string') {

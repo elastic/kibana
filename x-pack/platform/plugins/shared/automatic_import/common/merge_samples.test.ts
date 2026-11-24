@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mergeObjectElements, mergeSamples } from './merge_samples';
+import { mergeObjectElements, mergeSamples, mergeValueTypes } from './merge_samples';
 
 describe('mergeSamples', () => {
   it('returns empty object for empty input', () => {
@@ -39,6 +39,17 @@ describe('mergeSamples', () => {
     expect(result.status).toBe('ok');
   });
 
+  it('prefers a decimal over a whole number', () => {
+    expect(mergeSamples([{ score: 3 }, { score: 3.14 }])).toEqual({ score: 3.14 });
+    expect(mergeSamples([{ score: 3.14 }, { score: 3 }])).toEqual({ score: 3.14 });
+  });
+
+  it('keeps a string when values have different types', () => {
+    expect(mergeSamples([{ port: 443 }, { port: 'tcp' }])).toEqual({ port: 'tcp' });
+    expect(mergeSamples([{ port: 'tcp' }, { port: 443 }])).toEqual({ port: 'tcp' });
+    expect(mergeSamples([{ flag: 1 }, { flag: true }])).toEqual({ flag: '1' });
+  });
+
   it('fills empty values from later docs', () => {
     const docs = [{ status: null }, { status: 'active' }];
     const result = mergeSamples(docs);
@@ -56,10 +67,13 @@ describe('mergeSamples', () => {
     expect(result.tags).toEqual(['web', 'prod', 'staging']);
   });
 
-  it('replaces a scalar with a later array', () => {
-    const docs = [{ tags: 'web' }, { tags: ['staging'] }];
-    const result = mergeSamples(docs);
-    expect(result.tags).toEqual(['staging']);
+  it('combines a plain value and an array under the same key, in either order', () => {
+    expect(mergeSamples([{ tags: 'web' }, { tags: ['staging'] }])).toEqual({
+      tags: ['web', 'staging'],
+    });
+    expect(mergeSamples([{ tags: ['staging'] }, { tags: 'web' }])).toEqual({
+      tags: ['staging', 'web'],
+    });
   });
 
   it('keeps a value when a later doc has an empty array', () => {
@@ -109,8 +123,28 @@ describe('mergeObjectElements', () => {
     });
   });
 
+  it('prefers a decimal over a whole number across elements', () => {
+    expect(mergeObjectElements([{ score: 1 }, { score: 0.5 }])).toEqual({ score: 0.5 });
+  });
+
   it('returns undefined when the array has no object elements', () => {
     expect(mergeObjectElements([])).toBeUndefined();
     expect(mergeObjectElements(['a', 1, null, [{ nested: true }]])).toBeUndefined();
+  });
+});
+
+describe('mergeValueTypes', () => {
+  it('returns the type all values share', () => {
+    expect(mergeValueTypes(['long', 'long'], 'keyword')).toBe('long');
+  });
+
+  it('returns double for whole and decimal numbers', () => {
+    expect(mergeValueTypes(['long', 'double', 'long'], 'keyword')).toBe('double');
+  });
+
+  it('returns the fallback type for other mixes or no values', () => {
+    expect(mergeValueTypes(['long', 'keyword'], 'keyword')).toBe('keyword');
+    expect(mergeValueTypes(['long', 'boolean'], 'string')).toBe('string');
+    expect(mergeValueTypes([], 'keyword')).toBe('keyword');
   });
 });

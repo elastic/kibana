@@ -6,7 +6,12 @@
  */
 
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import { isUnsafeProperty, mergeObjectElements, mergeSamples } from '../../../common';
+import {
+  isUnsafeProperty,
+  mergeObjectElements,
+  mergeSamples,
+  mergeValueTypes,
+} from '../../../common';
 import type { FieldMapping } from '../../agents/state';
 import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
 
@@ -33,7 +38,11 @@ const collectFields = (obj: unknown, parentPath: string): RawField[] => {
     if (mergedElements) {
       return collectFields(mergedElements, parentPath);
     }
-    return [{ name: parentPath, type: determineType(obj.find((element) => element != null)) }];
+    const elementTypes = obj
+      .flat(Infinity)
+      .filter((element) => element != null)
+      .map(determineType);
+    return [{ name: parentPath, type: mergeValueTypes(elementTypes, 'keyword') }];
   }
 
   const fields: RawField[] = [];
