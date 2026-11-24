@@ -90,6 +90,7 @@ describe('importConfigModelVersions', () => {
       ['a missing type', { type: undefined }],
       ['an unknown kind', { kind: 'rule' }],
       ['a missing connector id', { connector_id: undefined }],
+      ['a missing version', { version: undefined }],
       ['an empty tags array', { metadata: { name: 'Import', tags: [] } }],
       [
         'more than 100 routing tags',
