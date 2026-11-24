@@ -32,6 +32,7 @@ import {
   checkKafkaOAuth2Allowed,
 } from './outputs/helpers';
 import { outputSavedObjectToOutput, withRemovedOtlpHeaders } from './output';
+import { OutputResponseSchema, UpdateOutputSchema } from '../types/models/output';
 import {
   extractAndWriteOutputSecrets,
   extractAndUpdateOutputSecrets,
@@ -6357,6 +6358,31 @@ describe('Output Service', () => {
         },
       } as any);
       expect((outputSavedObjectToOutput(optedOut) as any).otlp_exporter.sending_queue).toBeNull();
+    });
+
+    it('should read an OTLP queue whose batch was reset as an output that can be sent back', () => {
+      // what an update with `batch: {}` writes over a stored batch
+      const so = mockOutputSO('output-test', {
+        type: 'otlp',
+        is_default: false,
+        is_default_monitoring: false,
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'collector.example.com:4317',
+          sending_queue: {
+            sizer: 'items',
+            queue_size: 10_000,
+            batch: { sizer: null, min_size: null },
+          },
+        },
+      } as any);
+
+      const output = outputSavedObjectToOutput(so) as any;
+
+      expect(() => OutputResponseSchema.validate({ item: output })).not.toThrow();
+      expect(() =>
+        UpdateOutputSchema.validate({ type: 'otlp', otlp_exporter: output.otlp_exporter })
+      ).not.toThrow();
     });
 
     it.each([

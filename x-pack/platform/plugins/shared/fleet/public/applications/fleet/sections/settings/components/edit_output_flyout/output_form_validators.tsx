@@ -850,7 +850,8 @@ export function validateOtlpPositiveDuration(value: string) {
   if (error) {
     return error;
   }
-  if (value?.trim() && !parseOtlpDurationNs(value)) {
+  // the collector truncates a duration to whole nanoseconds, so less than 1ns is zero
+  if (value?.trim() && (parseOtlpDurationNs(value) ?? 0) < 1) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpPositiveDurationInvalid', {
         defaultMessage: 'Specify a duration longer than zero, such as {examples}',
