@@ -29,7 +29,10 @@ describe('getExportProviderFieldErrors', () => {
   it.each([
     'https://myaccount.blob.core.windows.net',
     'https://myaccount.blob.core.windows.net/',
-    'https://localhost:10000/myaccount/my-container',
+    'https://myaccount.blob.core.usgovcloudapi.net',
+    'https://myaccount.blob.core.chinacloudapi.cn',
+    'https://MYACCOUNT.BLOB.CORE.WINDOWS.NET',
+    'https://myaccount.blob.core.windows.net:443/my-container',
   ])('returns no errors for a valid service_url %s', (serviceUrl) => {
     expect(getExportProviderFieldErrors({ ...validProvider, service_url: serviceUrl }, [])).toEqual(
       {}
@@ -292,6 +295,26 @@ describe('getExportProviderFieldErrors', () => {
       expect(
         getExportProviderFieldErrors({ ...validProvider, service_url: serviceUrl }, [])
       ).toEqual({ service_url: 'invalid_format' });
+    });
+
+    it.each([
+      ['a non-Azure host', 'https://example.com'],
+      ['the Azure Storage emulator', 'https://localhost:10000/myaccount/my-container'],
+      ['a look-alike suffix', 'https://blob.core.windows.net.evil.com'],
+      ['a suffix without a dot before it', 'https://evilblob.core.windows.net'],
+      ['the bare suffix', 'https://blob.core.windows.net'],
+      ['a trailing dot', 'https://myaccount.blob.core.windows.net.'],
+      ['another Azure Storage service', 'https://myaccount.file.core.windows.net'],
+    ])('is not_azure_blob_host for %s', (_desc, serviceUrl) => {
+      expect(
+        getExportProviderFieldErrors({ ...validProvider, service_url: serviceUrl }, [])
+      ).toEqual({ service_url: 'not_azure_blob_host' });
+    });
+
+    it('is not_https before the host check', () => {
+      expect(
+        getExportProviderFieldErrors({ ...validProvider, service_url: 'http://example.com' }, [])
+      ).toEqual({ service_url: 'not_https' });
     });
 
     it('is valid at exactly 2048 characters', () => {
