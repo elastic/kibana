@@ -149,6 +149,7 @@
     "@kbn/recently-accessed",
     "@kbn/crypto-browser",
     "@kbn/usage-collection-plugin",
+    "@kbn/ols",
   ],
   "exclude": ["target/**/*"]
 }
