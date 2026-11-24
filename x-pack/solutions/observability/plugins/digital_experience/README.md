@@ -403,8 +403,8 @@ Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcr
   titled after the application (and environment), then opens the saved dashboard. It keeps the
   panels and sections with the application and environment in their ES|QL; the native panel
   isn't part of it. Saved while the per-session panels read the summaries, it keeps reading them
-  for any time range, which its description says: older ranges than the summaries keep, or
-  sessions turned off, have no sessions there.
+  for any time range, which its description says: ranges older than the summaries keep have no
+  sessions there, and once sessions are turned off they stop updating.
 - **Queries:** every panel filters on the application and, unless all environments are picked, the
   environment, in the ES|QL `WHERE` (escaped); the time range goes through the dashboard. The field
   names are shared with the summary query (`common/otel_source_fields.ts`) and the event names come
