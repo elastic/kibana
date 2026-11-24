@@ -1,0 +1,38 @@
+{
+  "exposure": "open",
+  "id": "investigations.appendWorkflowExecutionId",
+  "input": {
+    "properties": {
+      "conversationId": {
+        "description": "Investigation conversation ID.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "workflowExecutionId": {
+        "description": "Workflow execution to append.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "conversationId",
+      "workflowExecutionId"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "workflowExecutionId": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "workflowExecutionId"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

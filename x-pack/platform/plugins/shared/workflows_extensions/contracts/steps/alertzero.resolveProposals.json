@@ -1,0 +1,214 @@
+{
+  "exposure": "open",
+  "id": "alertzero.resolveProposals",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "properties": {
+          "actionInput": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema2"
+              }
+            ],
+            "description": "Action input; its target fields decide which live Proposals count as the same."
+          },
+          "actionWorkflowId": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema0"
+              }
+            ],
+            "description": "Catalog action workflow id."
+          },
+          "comment": {
+            "maxLength": 8192,
+            "type": "string"
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "actionWorkflowId"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "properties": {
+      "investigationConversationId": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The Investigation this run would raise its Proposals on."
+      },
+      "proposals": {
+        "description": "What this run wants to propose.",
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "maxItems": 50,
+        "type": "array"
+      }
+    },
+    "required": [
+      "investigationConversationId",
+      "proposals"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "properties": {
+      "alreadyOpenCount": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "converged": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "note": {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            "outcome": {
+              "enum": [
+                "revised",
+                "already_mentioned",
+                "not_revisable",
+                "too_long",
+                "revision_limit",
+                "failed"
+              ],
+              "type": "string"
+            },
+            "ownerConversationId": {
+              "type": "string"
+            },
+            "proposalId": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "note",
+            "outcome",
+            "ownerConversationId",
+            "proposalId"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "existingProposalCount": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "expectedProposalCount": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "mintSuppression": {
+        "enum": [
+          "none",
+          "check_failed"
+        ],
+        "type": "string"
+      },
+      "proposals": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "actionInput": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema0"
+                }
+              ],
+              "description": "Action input; its target fields decide which live Proposals count as the same."
+            },
+            "actionWorkflowId": {
+              "description": "Catalog action workflow id.",
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "comment": {
+              "maxLength": 8192,
+              "type": "string"
+            },
+            "confidence": {
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ],
+              "type": "string"
+            },
+            "proposalId": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            },
+            "subjectKey": {
+              "type": "string"
+            },
+            "title": {
+              "maxLength": 256,
+              "type": "string"
+            }
+          },
+          "required": [
+            "actionWorkflowId",
+            "proposalId",
+            "subjectKey"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "alreadyOpenCount",
+      "converged",
+      "existingProposalCount",
+      "expectedProposalCount",
+      "mintSuppression",
+      "proposals"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

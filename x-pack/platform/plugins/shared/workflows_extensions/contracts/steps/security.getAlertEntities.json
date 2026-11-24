@@ -1,0 +1,138 @@
+{
+  "exposure": "open",
+  "id": "security.getAlertEntities",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "maxItems": 3,
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema2": {
+        "enum": [
+          "host",
+          "user",
+          "service"
+        ],
+        "type": "string"
+      },
+      "__schema3": {
+        "maximum": 100,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "properties": {
+      "alert_ids": {
+        "description": "IDs of the detection alerts, in the current space, to resolve entities from",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "minItems": 1,
+        "type": "array"
+      },
+      "entity_types": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "default": [
+          "host",
+          "user"
+        ],
+        "description": "Entity types to resolve (default: host, user)"
+      },
+      "max_entities": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "default": 50,
+        "description": "The most entities to return, most-alerted first (default: 50, max: 100)"
+      }
+    },
+    "required": [
+      "alert_ids"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Entity Store entity id",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema1"
+              }
+            ],
+            "description": "Display name, taken from the entity’s most recent alert; absent if it has none"
+          },
+          "type": {
+            "enum": [
+              "host",
+              "user",
+              "service"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "entities": {
+        "description": "The entities, most-alerted first, ties broken by id",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "total": {
+        "description": "How many distinct entities the alerts reference",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "truncated": {
+        "description": "Whether `entities` holds fewer than `total`",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "entities",
+      "total",
+      "truncated"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -1,0 +1,205 @@
+{
+  "exposure": "open",
+  "id": "nightshift.onlineEvals.score",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "properties": {
+          "name": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "version": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "maxLength": 100,
+        "type": "string"
+      },
+      "__schema2": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema3": {
+        "enum": [
+          "start_api",
+          "automation",
+          "slack",
+          "alert_recovery"
+        ],
+        "type": "string"
+      },
+      "__schema4": {
+        "maxLength": 256,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alert_rule_type": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Rule type of the alert that was investigated."
+      },
+      "entry_point": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "How the scored run started."
+      },
+      "evaluator_set": {
+        "description": "Name of the evaluator set, such as `reference_free`, for dashboards.",
+        "maxLength": 100,
+        "minLength": 1,
+        "type": "string"
+      },
+      "evaluators": {
+        "description": "The evaluators to run.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 5,
+        "minItems": 1,
+        "type": "array"
+      },
+      "graded_report": {
+        "description": "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored. `pre_recovery`, the report just before an alert recovery, isn't supported yet.",
+        "enum": [
+          "first_round",
+          "pre_recovery",
+          "current"
+        ],
+        "type": "string"
+      },
+      "investigation_ended_at": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "When the scored investigation run ended, set by the investigation workflow when it hands off to scoring."
+      },
+      "investigation_execution_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "The investigation workflow run that was scored."
+      },
+      "investigation_id": {
+        "description": "The investigation the round belongs to.",
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "investigation_started_at": {
+        "description": "When the scored investigation run started.",
+        "maxLength": 100,
+        "type": "string"
+      },
+      "round_id": {
+        "description": "The round to score, from `classifyRound`.",
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "round_kind": {
+        "description": "What kind of round it is, from `classifyRound`.",
+        "enum": [
+          "initial",
+          "follow_up",
+          "alert_recovery"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "evaluator_set",
+      "evaluators",
+      "graded_report",
+      "investigation_id",
+      "investigation_started_at",
+      "round_id",
+      "round_kind"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "number"
+      },
+      "__schema1": {
+        "type": "number"
+      },
+      "__schema2": {
+        "type": "number"
+      },
+      "__schema3": {
+        "enum": [
+          "evals_unavailable",
+          "paused",
+          "scoring_failed"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "evaluator_count": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Evaluators the event reports."
+      },
+      "failed_count": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Evaluators that failed."
+      },
+      "scored": {
+        "description": "Whether a score event was sent.",
+        "type": "boolean"
+      },
+      "skip_reason": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Why nothing was scored."
+      },
+      "skipped_count": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Evaluators the round didn't have evidence for."
+      }
+    },
+    "required": [
+      "scored"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

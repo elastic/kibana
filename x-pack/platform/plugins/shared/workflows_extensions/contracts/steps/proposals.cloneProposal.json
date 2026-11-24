@@ -1,0 +1,42 @@
+{
+  "exposure": "open",
+  "id": "proposals.cloneProposal",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "executionError": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Why the original failed, recorded on it alongside the supersession."
+      },
+      "proposalId": {
+        "description": "Proposal to supersede.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "proposalId"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "proposalId": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "proposalId"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

@@ -1,0 +1,1503 @@
+{
+  "exposure": "open",
+  "id": "cases.updateObservable",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 500,
+        "nullable": true,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "case_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "description": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Observable description. Pass null to clear."
+      },
+      "observable_id": {
+        "maxLength": 500,
+        "minLength": 1,
+        "type": "string"
+      },
+      "value": {
+        "maxLength": 500,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "case_id",
+      "observable_id",
+      "value"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "uid": {
+            "description": "A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uid"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema10": {
+        "type": "string"
+      },
+      "__schema11": {
+        "additionalProperties": false,
+        "nullable": true,
+        "properties": {
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "full_name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "profile_uid": {
+            "type": "string"
+          },
+          "username": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ],
+        "type": "object"
+      },
+      "__schema12": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema13"
+          }
+        ],
+        "nullable": true
+      },
+      "__schema13": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "full_name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "profile_uid": {
+            "type": "string"
+          },
+          "username": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ],
+        "type": "object"
+      },
+      "__schema14": {
+        "type": "string"
+      },
+      "__schema15": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema16"
+          }
+        ],
+        "description": "The type of issue.",
+        "nullable": true
+      },
+      "__schema16": {
+        "type": "string"
+      },
+      "__schema17": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema18"
+          }
+        ],
+        "description": "The key of the parent issue, when the issue type is sub-task.",
+        "nullable": true
+      },
+      "__schema18": {
+        "type": "string"
+      },
+      "__schema19": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema20"
+          }
+        ],
+        "description": "The priority of the issue.",
+        "nullable": true
+      },
+      "__schema2": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "alertId": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "created_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "created_by": {
+                "additionalProperties": false,
+                "properties": {
+                  "email": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "full_name": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "profile_uid": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "full_name",
+                  "username"
+                ],
+                "type": "object"
+              },
+              "id": {
+                "type": "string"
+              },
+              "index": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "owner": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema3"
+                  }
+                ]
+              },
+              "pushed_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "pushed_by": {
+                "additionalProperties": false,
+                "nullable": true,
+                "properties": {
+                  "email": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "full_name": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "profile_uid": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "full_name",
+                  "username"
+                ],
+                "type": "object"
+              },
+              "rule": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema4"
+                      }
+                    ],
+                    "description": "The rule identifier."
+                  },
+                  "name": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema5"
+                      }
+                    ],
+                    "description": "The rule name."
+                  }
+                },
+                "type": "object"
+              },
+              "type": {
+                "enum": [
+                  "alert"
+                ],
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "updated_by": {
+                "additionalProperties": false,
+                "nullable": true,
+                "properties": {
+                  "email": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "full_name": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "profile_uid": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "full_name",
+                  "username"
+                ],
+                "type": "object"
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "created_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "created_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema6"
+                  }
+                ]
+              },
+              "eventId": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "id": {
+                "type": "string"
+              },
+              "index": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "owner": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema3"
+                  }
+                ]
+              },
+              "pushed_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "pushed_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema11"
+                  }
+                ]
+              },
+              "type": {
+                "enum": [
+                  "event"
+                ],
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "updated_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema12"
+                  }
+                ]
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "comment": {
+                "type": "string"
+              },
+              "created_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "created_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema6"
+                  }
+                ]
+              },
+              "id": {
+                "type": "string"
+              },
+              "owner": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema3"
+                  }
+                ]
+              },
+              "pushed_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "pushed_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema11"
+                  }
+                ]
+              },
+              "type": {
+                "enum": [
+                  "user"
+                ],
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "updated_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema12"
+                  }
+                ]
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "__schema20": {
+        "type": "string"
+      },
+      "__schema21": {
+        "additionalProperties": false,
+        "properties": {
+          "issueTypes": {
+            "description": "The type of incident.",
+            "items": {
+              "$ref": "#/definitions/__schema22"
+            },
+            "type": "array"
+          },
+          "severityCode": {
+            "description": "The severity code of the incident.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "issueTypes",
+          "severityCode"
+        ],
+        "type": "object"
+      },
+      "__schema22": {
+        "type": "string"
+      },
+      "__schema23": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema24"
+          }
+        ],
+        "description": "The category of the incident.",
+        "nullable": true
+      },
+      "__schema24": {
+        "type": "string"
+      },
+      "__schema25": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema26"
+          }
+        ],
+        "description": "The effect an incident had on business.",
+        "nullable": true
+      },
+      "__schema26": {
+        "type": "string"
+      },
+      "__schema27": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema28"
+          }
+        ],
+        "description": "The severity of the incident.",
+        "nullable": true
+      },
+      "__schema28": {
+        "type": "string"
+      },
+      "__schema29": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema30"
+          }
+        ],
+        "description": "The subcategory of the incident.",
+        "nullable": true
+      },
+      "__schema3": {
+        "enum": [
+          "cases",
+          "observability",
+          "securitySolution"
+        ],
+        "type": "string"
+      },
+      "__schema30": {
+        "type": "string"
+      },
+      "__schema31": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema32"
+          }
+        ],
+        "description": "The extent to which the incident resolution can be delayed.",
+        "nullable": true
+      },
+      "__schema32": {
+        "type": "string"
+      },
+      "__schema33": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema34"
+          }
+        ],
+        "description": "The category of the incident.",
+        "nullable": true
+      },
+      "__schema34": {
+        "type": "string"
+      },
+      "__schema35": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema36"
+          }
+        ],
+        "description": "Indicates whether cases will send a comma-separated list of destination IPs.",
+        "nullable": true
+      },
+      "__schema36": {
+        "type": "boolean"
+      },
+      "__schema37": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema38"
+          }
+        ],
+        "description": "Indicates whether cases will send a comma-separated list of malware hashes.",
+        "nullable": true
+      },
+      "__schema38": {
+        "type": "boolean"
+      },
+      "__schema39": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema40"
+          }
+        ],
+        "description": "Indicates whether cases will send a comma-separated list of malware URLs.",
+        "nullable": true
+      },
+      "__schema4": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema40": {
+        "type": "boolean"
+      },
+      "__schema41": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema42"
+          }
+        ],
+        "description": "The priority of the issue.",
+        "nullable": true
+      },
+      "__schema42": {
+        "type": "string"
+      },
+      "__schema43": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema44"
+          }
+        ],
+        "description": "Indicates whether cases will send a comma-separated list of source IPs.",
+        "nullable": true
+      },
+      "__schema44": {
+        "type": "boolean"
+      },
+      "__schema45": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema46"
+          }
+        ],
+        "description": "The subcategory of the incident.",
+        "nullable": true
+      },
+      "__schema46": {
+        "type": "string"
+      },
+      "__schema47": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema48"
+          }
+        ],
+        "description": "The case identifier for Swimlane connectors.",
+        "nullable": true
+      },
+      "__schema48": {
+        "type": "string"
+      },
+      "__schema49": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "key": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema50"
+                }
+              ],
+              "description": "The unique identifier for the custom field. The key value must exist in the case configuration settings.\n"
+            },
+            "type": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema51"
+                }
+              ],
+              "description": "The custom field type. It must match the type specified in the case configuration settings.\n"
+            },
+            "value": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema52"
+                }
+              ],
+              "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n"
+            }
+          },
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema5": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema50": {
+        "type": "string"
+      },
+      "__schema51": {
+        "enum": [
+          "text",
+          "toggle"
+        ],
+        "type": "string"
+      },
+      "__schema52": {
+        "anyOf": [
+          {
+            "maxLength": 160,
+            "minLength": 1,
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "__schema53": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "__schema54": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "properties": {},
+        "type": "object"
+      },
+      "__schema55": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "nullable": true,
+        "type": "integer"
+      },
+      "__schema56": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "When the observable was created.",
+            "format": "date-time",
+            "maxLength": 64,
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+            "type": "string"
+          },
+          "description": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema57"
+              }
+            ],
+            "description": "An optional description for the observable.",
+            "nullable": true
+          },
+          "id": {
+            "description": "The observable identifier.",
+            "type": "string"
+          },
+          "typeKey": {
+            "description": "The observable type key.",
+            "type": "string"
+          },
+          "updatedAt": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema58"
+              }
+            ],
+            "description": "When the observable was last updated.",
+            "nullable": true
+          },
+          "value": {
+            "description": "The observable value.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdAt",
+          "description",
+          "id",
+          "typeKey",
+          "updatedAt",
+          "value"
+        ],
+        "type": "object"
+      },
+      "__schema57": {
+        "type": "string"
+      },
+      "__schema58": {
+        "format": "date-time",
+        "maxLength": 64,
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+        "type": "string"
+      },
+      "__schema59": {
+        "type": "boolean"
+      },
+      "__schema6": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "full_name": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "profile_uid": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "username": {
+            "$ref": "#/definitions/__schema9"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ],
+        "type": "object"
+      },
+      "__schema60": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "__schema61": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "__schema7": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema8": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema9": {
+        "nullable": true,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "case": {
+        "additionalProperties": false,
+        "properties": {
+          "assignees": {
+            "items": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "maxItems": 10,
+            "nullable": true,
+            "type": "array"
+          },
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema1"
+              }
+            ],
+            "description": "The case category."
+          },
+          "closed_at": {
+            "format": "date-time",
+            "maxLength": 64,
+            "nullable": true,
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+            "type": "string"
+          },
+          "closed_by": {
+            "additionalProperties": false,
+            "nullable": true,
+            "properties": {
+              "email": {
+                "nullable": true,
+                "type": "string"
+              },
+              "full_name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "profile_uid": {
+                "type": "string"
+              },
+              "username": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "email",
+              "full_name",
+              "username"
+            ],
+            "type": "object"
+          },
+          "comments": {
+            "description": "An array of comment objects for the case.",
+            "items": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "maxItems": 10000,
+            "type": "array"
+          },
+          "connector": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "fields": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema14"
+                      }
+                    ],
+                    "description": "An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.",
+                    "nullable": true
+                  },
+                  "id": {
+                    "description": "The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The name of the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The type of connector. To create a case without a connector, use `.none`. To update a case to remove the connector, specify `.none`.",
+                    "enum": [
+                      ".none"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "fields",
+                  "id",
+                  "name",
+                  "type"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "fields": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "id": {
+                    "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The name of the connector.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The type of connector.",
+                    "enum": [
+                      ".cases-webhook"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "fields",
+                  "id",
+                  "name",
+                  "type"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "fields": {
+                    "additionalProperties": false,
+                    "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+                    "properties": {
+                      "issueType": {
+                        "$ref": "#/definitions/__schema15"
+                      },
+                      "parent": {
+                        "$ref": "#/definitions/__schema17"
+                      },
+                      "priority": {
+                        "$ref": "#/definitions/__schema19"
+                      }
+                    },
+                    "required": [
+                      "issueType",
+                      "parent",
+                      "priority"
+                    ],
+                    "type": "object"
+                  },
+                  "id": {
+                    "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The name of the connector.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The type of connector.",
+                    "enum": [
+                      ".jira"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "fields",
+                  "id",
+                  "name",
+                  "type"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "fields": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema21"
+                      }
+                    ],
+                    "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+                    "nullable": true
+                  },
+                  "id": {
+                    "description": "The identifier for the connector.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The name of the connector.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The type of connector.",
+                    "enum": [
+                      ".resilient"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "fields",
+                  "id",
+                  "name",
+                  "type"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "fields": {
+                    "additionalProperties": false,
+                    "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+                    "properties": {
+                      "category": {
+                        "$ref": "#/definitions/__schema23"
+                      },
+                      "impact": {
+                        "$ref": "#/definitions/__schema25"
+                      },
+                      "severity": {
+                        "$ref": "#/definitions/__schema27"
+                      },
+                      "subcategory": {
+                        "$ref": "#/definitions/__schema29"
+                      },
+                      "urgency": {
+                        "$ref": "#/definitions/__schema31"
+                      }
+                    },
+                    "required": [
+                      "category",
+                      "impact",
+                      "severity",
+                      "subcategory",
+                      "urgency"
+                    ],
+                    "type": "object"
+                  },
+                  "id": {
+                    "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The name of the connector.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The type of connector.",
+                    "enum": [
+                      ".servicenow"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "fields",
+                  "id",
+                  "name",
+                  "type"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "fields": {
+                    "additionalProperties": false,
+                    "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+                    "properties": {
+                      "category": {
+                        "$ref": "#/definitions/__schema33"
+                      },
+                      "destIp": {
+                        "$ref": "#/definitions/__schema35"
+                      },
+                      "malwareHash": {
+                        "$ref": "#/definitions/__schema37"
+                      },
+                      "malwareUrl": {
+                        "$ref": "#/definitions/__schema39"
+                      },
+                      "priority": {
+                        "$ref": "#/definitions/__schema41"
+                      },
+                      "sourceIp": {
+                        "$ref": "#/definitions/__schema43"
+                      },
+                      "subcategory": {
+                        "$ref": "#/definitions/__schema45"
+                      }
+                    },
+                    "required": [
+                      "category",
+                      "destIp",
+                      "malwareHash",
+                      "malwareUrl",
+                      "priority",
+                      "sourceIp",
+                      "subcategory"
+                    ],
+                    "type": "object"
+                  },
+                  "id": {
+                    "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The name of the connector.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The type of connector.",
+                    "enum": [
+                      ".servicenow-sir"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "fields",
+                  "id",
+                  "name",
+                  "type"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "fields": {
+                    "additionalProperties": false,
+                    "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+                    "properties": {
+                      "caseId": {
+                        "$ref": "#/definitions/__schema47"
+                      }
+                    },
+                    "required": [
+                      "caseId"
+                    ],
+                    "type": "object"
+                  },
+                  "id": {
+                    "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The name of the connector.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The type of connector.",
+                    "enum": [
+                      ".swimlane"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "fields",
+                  "id",
+                  "name",
+                  "type"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          "created_at": {
+            "format": "date-time",
+            "maxLength": 64,
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+            "type": "string"
+          },
+          "created_by": {
+            "additionalProperties": false,
+            "properties": {
+              "email": {
+                "$ref": "#/definitions/__schema7"
+              },
+              "full_name": {
+                "$ref": "#/definitions/__schema8"
+              },
+              "profile_uid": {
+                "$ref": "#/definitions/__schema10"
+              },
+              "username": {
+                "$ref": "#/definitions/__schema9"
+              }
+            },
+            "required": [
+              "email",
+              "full_name",
+              "username"
+            ],
+            "type": "object"
+          },
+          "customFields": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema49"
+              }
+            ],
+            "description": "Deprecated. Use `extended_fields` instead. Custom field values for the case."
+          },
+          "description": {
+            "type": "string"
+          },
+          "duration": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema53"
+              }
+            ],
+            "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
+            "nullable": true
+          },
+          "extended_fields": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema54"
+              }
+            ],
+            "description": "The case's stored field values, keyed by storage key (for example `priority_as_keyword`).\n"
+          },
+          "extended_fields_labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "properties": {},
+            "type": "object"
+          },
+          "external_service": {
+            "additionalProperties": false,
+            "nullable": true,
+            "properties": {
+              "connector_id": {
+                "type": "string"
+              },
+              "connector_name": {
+                "type": "string"
+              },
+              "external_id": {
+                "type": "string"
+              },
+              "external_title": {
+                "type": "string"
+              },
+              "external_url": {
+                "type": "string"
+              },
+              "pushed_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "pushed_by": {
+                "additionalProperties": false,
+                "nullable": true,
+                "properties": {
+                  "email": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "full_name": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "profile_uid": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "id": {
+            "type": "string"
+          },
+          "incremental_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema55"
+              }
+            ],
+            "description": "A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.\n"
+          },
+          "observables": {
+            "description": "Observables attached to the case.",
+            "items": {
+              "$ref": "#/definitions/__schema56"
+            },
+            "type": "array"
+          },
+          "owner": {
+            "enum": [
+              "cases",
+              "observability",
+              "securitySolution"
+            ],
+            "type": "string"
+          },
+          "settings": {
+            "additionalProperties": false,
+            "properties": {
+              "extractObservables": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema59"
+                  }
+                ],
+                "description": "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, even if the template or space configuration says `true`. Sending `true` returns a 400 error unless the case already stores `true`.\n"
+              },
+              "syncAlerts": {
+                "description": "Turns alert syncing on or off.",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "syncAlerts"
+            ],
+            "type": "object"
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "high",
+              "low",
+              "medium"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "closed",
+              "in-progress",
+              "open"
+            ],
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          },
+          "totalAlerts": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "totalComment": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "totalEvents": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema61"
+              }
+            ],
+            "description": "The number of events attached to the case."
+          },
+          "total_observables": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema60"
+              }
+            ],
+            "description": "The number of observables attached to the case.",
+            "nullable": true
+          },
+          "updated_at": {
+            "format": "date-time",
+            "maxLength": 64,
+            "nullable": true,
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+            "type": "string"
+          },
+          "updated_by": {
+            "nullable": true
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "closed_at",
+          "closed_by",
+          "comments",
+          "connector",
+          "created_at",
+          "created_by",
+          "description",
+          "duration",
+          "external_service",
+          "id",
+          "observables",
+          "owner",
+          "settings",
+          "severity",
+          "status",
+          "tags",
+          "title",
+          "totalAlerts",
+          "totalComment",
+          "total_observables",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "case"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

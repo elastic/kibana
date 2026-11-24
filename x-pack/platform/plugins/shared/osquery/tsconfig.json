@@ -80,7 +80,6 @@
     "@kbn/zod",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
-    "@kbn/crypto",
     "@kbn/test-es-server",
     "@kbn/core-lifecycle-server",
     "@kbn/core-http-server-utils",

@@ -1,0 +1,42 @@
+{
+  "exposure": "open",
+  "id": "proposals.checkDecidePrivileges",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "proposalId": {
+        "description": "Proposal the decision would apply to.",
+        "type": "string"
+      },
+      "respondedBy": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Who answered the gate, from its own output. Required to tell an authenticated resume apart from an external one, whose execution identity says nothing about the human."
+      }
+    },
+    "required": [
+      "proposalId"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "canDecide": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "canDecide"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

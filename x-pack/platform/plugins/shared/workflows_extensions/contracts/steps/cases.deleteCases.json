@@ -1,0 +1,50 @@
+{
+  "exposure": "open",
+  "id": "cases.deleteCases",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "case_ids": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 100,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "case_ids"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "case_ids": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 100,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "case_ids"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -1,0 +1,136 @@
+{
+  "exposure": "open",
+  "id": "proposals.updateProposal",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "enum": [
+          "executing",
+          "succeeded",
+          "failed",
+          "expired",
+          "no_action"
+        ],
+        "type": "string"
+      },
+      "__schema1": {
+        "enum": [
+          "approved",
+          "dismissed"
+        ],
+        "type": "string"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "enum": [
+          "no_reason",
+          "duplicate",
+          "false_positive",
+          "handled_elsewhere",
+          "risk_accepted",
+          "other"
+        ],
+        "type": "string"
+      },
+      "__schema4": {
+        "type": "string"
+      },
+      "__schema5": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "decidedBy": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Username of the approver, used only when the execution itself yields no identity."
+      },
+      "decision": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "What the human concluded. Write-once: a proposal that already carries a decision rejects another."
+      },
+      "dismissReason": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Structured reason, when the decision is a dismissal."
+      },
+      "executionError": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Failure detail, when the action failed."
+      },
+      "proposalId": {
+        "description": "Proposal to update.",
+        "type": "string"
+      },
+      "rationale": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Free-text explanation of the decision."
+      },
+      "status": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Terminal or in-flight outcome to record against the proposal."
+      }
+    },
+    "required": [
+      "proposalId"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "decision": {
+        "enum": [
+          "approved",
+          "dismissed"
+        ],
+        "type": "string"
+      },
+      "proposalId": {
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "pending",
+          "executing",
+          "succeeded",
+          "failed",
+          "expired",
+          "no_action",
+          "superseded"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "proposalId",
+      "status"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

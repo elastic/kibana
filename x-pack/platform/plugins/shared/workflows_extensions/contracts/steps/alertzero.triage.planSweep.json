@@ -1,0 +1,228 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.planSweep",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "enum": [
+          "ok",
+          "behind",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "__schema3": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema4": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema5": {
+        "minimum": 0,
+        "type": "number"
+      }
+    },
+    "properties": {
+      "analysis_tag_prefix": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker."
+      },
+      "batch_workflow_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Workflow id of the batch workflow."
+      },
+      "budget_per_hour": {
+        "maximum": 100000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "exclude_building_blocks": {
+        "type": "boolean"
+      },
+      "excluded_rule_tags": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "maxItems": 50,
+        "type": "array"
+      },
+      "headroom": {
+        "description": "Output of the headroom step.",
+        "properties": {
+          "in_flight": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "lag_ms": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "slots": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "status": {
+            "$ref": "#/definitions/__schema2"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "interval_minutes": {
+        "maximum": 143998560,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "lookback_hours": {
+        "maximum": 8760,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "min_severity": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "analysis_tag_prefix",
+      "batch_workflow_id",
+      "budget_per_hour",
+      "exclude_building_blocks",
+      "excluded_rule_tags",
+      "headroom",
+      "interval_minutes",
+      "lookback_hours",
+      "min_severity"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "number"
+      }
+    },
+    "properties": {
+      "batches": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "alert_ids": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "rule_id": {
+              "type": "string"
+            },
+            "rule_name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "alert_ids",
+            "rule_id",
+            "rule_name"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "numbers": {
+        "additionalProperties": false,
+        "properties": {
+          "aged_out_alerts": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema0"
+              }
+            ],
+            "description": "Open alerts older than the look-back that were never triaged."
+          },
+          "claimed_alerts": {
+            "type": "number"
+          },
+          "live_batches": {
+            "type": "number"
+          },
+          "pending_alerts": {
+            "type": "number"
+          },
+          "planned_alerts": {
+            "type": "number"
+          },
+          "planned_batches": {
+            "type": "number"
+          },
+          "planned_cost": {
+            "type": "number"
+          },
+          "reclaimed_alerts": {
+            "type": "number"
+          },
+          "sweep_budget": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "claimed_alerts",
+          "live_batches",
+          "pending_alerts",
+          "planned_alerts",
+          "planned_batches",
+          "planned_cost",
+          "reclaimed_alerts",
+          "sweep_budget"
+        ],
+        "type": "object"
+      },
+      "skip_reason": {
+        "enum": [
+          "none",
+          "tm_behind",
+          "tm_unknown",
+          "live_batches_unreadable",
+          "in_flight_ceiling",
+          "budget_too_small",
+          "nothing_pending"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "batches",
+      "numbers",
+      "skip_reason"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

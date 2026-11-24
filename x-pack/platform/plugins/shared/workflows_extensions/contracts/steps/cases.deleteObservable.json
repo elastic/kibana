@@ -1,0 +1,38 @@
+{
+  "exposure": "open",
+  "id": "cases.deleteObservable",
+  "input": {
+    "properties": {
+      "case_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "observable_id": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "case_id",
+      "observable_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "case_id": {
+        "type": "string"
+      },
+      "observable_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "case_id",
+      "observable_id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

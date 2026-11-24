@@ -1,0 +1,1501 @@
+{
+  "exposure": "open",
+  "id": "alertzero.reportWorkerOutcome",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema1": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema10": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema11": {
+        "default": "none",
+        "enum": [
+          "none",
+          "missing_data",
+          "dependency_unavailable",
+          "partial_timeout",
+          "capacity",
+          "other"
+        ],
+        "type": "string"
+      },
+      "__schema12": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema13": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema14": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema15": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema16": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema17": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema18": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema19": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema2": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema20": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema21": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema22": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema23": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema24": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema25": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema26": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema27": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema28": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema29": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema3": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema30": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema31": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema32": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema33": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema34": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema35": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema36": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema37": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema38": {
+        "type": "boolean"
+      },
+      "__schema39": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema4": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema40": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema41": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema42": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema43": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema44": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema45": {
+        "default": "none",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "none"
+        ],
+        "type": "string"
+      },
+      "__schema46": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema47": {
+        "enum": [
+          "prebuilt",
+          "custom"
+        ],
+        "type": "string"
+      },
+      "__schema48": {
+        "enum": [
+          "query",
+          "eql",
+          "esql",
+          "threshold",
+          "new_terms",
+          "ml",
+          "threat_match",
+          "other"
+        ],
+        "type": "string"
+      },
+      "__schema49": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema5": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema50": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema51": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema52": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema53": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema54": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema55": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema56": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema57": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema58": {
+        "enum": [
+          "prebuilt",
+          "custom"
+        ],
+        "type": "string"
+      },
+      "__schema59": {
+        "enum": [
+          "query",
+          "eql",
+          "esql",
+          "threshold",
+          "new_terms",
+          "ml",
+          "threat_match",
+          "other"
+        ],
+        "type": "string"
+      },
+      "__schema6": {
+        "type": "boolean"
+      },
+      "__schema60": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema61": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema62": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema63": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema64": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema65": {
+        "default": "none",
+        "enum": [
+          "none",
+          "existing_proposals",
+          "check_failed"
+        ],
+        "type": "string"
+      },
+      "__schema66": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema67": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema68": {
+        "type": "boolean"
+      },
+      "__schema69": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema7": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema70": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema71": {
+        "type": "boolean"
+      },
+      "__schema72": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema73": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema74": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema75": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema76": {
+        "default": 0,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema77": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema78": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema8": {
+        "type": "boolean"
+      },
+      "__schema9": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      }
+    },
+    "oneOf": [
+      {
+        "additionalProperties": false,
+        "properties": {
+          "alerts_analyzed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema0"
+              }
+            ],
+            "description": "Alerts the run analyzed"
+          },
+          "attacks_generated": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema1"
+              }
+            ],
+            "description": "Attacks the run generated, before de-duplication"
+          },
+          "attacks_persisted": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema2"
+              }
+            ],
+            "description": "Attacks the run persisted"
+          },
+          "batches_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema3"
+              }
+            ],
+            "description": "Generation batches that failed"
+          },
+          "batches_total": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema4"
+              }
+            ],
+            "description": "Generation batches the run attempted"
+          },
+          "event": {
+            "enum": [
+              "ad_worker_run_completed"
+            ],
+            "type": "string"
+          },
+          "run_outcome": {
+            "description": "How the run ended",
+            "enum": [
+              "produced",
+              "empty_no_alerts",
+              "empty_no_attacks",
+              "empty_all_duplicates",
+              "degraded_partial",
+              "failed_all_batches"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "event",
+          "run_outcome"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "event": {
+            "enum": [
+              "ad_worker_review_started"
+            ],
+            "type": "string"
+          },
+          "investigation_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema5"
+              }
+            ],
+            "description": "Investigation the review opened or reused"
+          },
+          "is_rereview": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ],
+            "description": "Whether the attack already had an Investigation"
+          }
+        },
+        "required": [
+          "event",
+          "investigation_id",
+          "is_rereview"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_error": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema7"
+              }
+            ],
+            "description": "Whether the FP/TP analysis failed or timed out"
+          },
+          "event": {
+            "enum": [
+              "ad_worker_analysis_completed"
+            ],
+            "type": "string"
+          },
+          "verdict": {
+            "description": "FP/TP analysis verdict",
+            "enum": [
+              "true_positive",
+              "false_positive",
+              "inconclusive",
+              "failed"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "event",
+          "verdict"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "auto_approve_requested": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema8"
+              }
+            ],
+            "description": "Whether the review asked the gate to auto-approve"
+          },
+          "event": {
+            "enum": [
+              "ad_worker_handoff_resolved"
+            ],
+            "type": "string"
+          },
+          "outcome": {
+            "description": "How the escalation gate resolved",
+            "enum": [
+              "approved",
+              "dismissed",
+              "expired",
+              "approved_action_failed"
+            ],
+            "type": "string"
+          },
+          "verdict": {
+            "description": "FP/TP analysis verdict that led to the escalation",
+            "enum": [
+              "true_positive",
+              "inconclusive"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "auto_approve_requested",
+          "event",
+          "outcome",
+          "verdict"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "close_reason": {
+            "description": "Investigation template close reason the Worker wrote",
+            "enum": [
+              "false_positive",
+              "benign",
+              "resolved",
+              "duplicate",
+              "other"
+            ],
+            "type": "string"
+          },
+          "event": {
+            "enum": [
+              "worker_investigation_closed"
+            ],
+            "type": "string"
+          },
+          "investigation_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema9"
+              }
+            ],
+            "description": "Investigation the Worker closed"
+          }
+        },
+        "required": [
+          "close_reason",
+          "event",
+          "investigation_id"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "candidates_found": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema10"
+              }
+            ],
+            "description": "Work items the run found to work on"
+          },
+          "degraded_reason": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema11"
+              }
+            ],
+            "description": "Main reason the run did less than the work it found; none when it did all of it"
+          },
+          "event": {
+            "enum": [
+              "worker_run_completed"
+            ],
+            "type": "string"
+          },
+          "items_dispatched": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema12"
+              }
+            ],
+            "description": "Work items the run started or handed on"
+          },
+          "items_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema13"
+              }
+            ],
+            "description": "Work items that failed or could not be started"
+          },
+          "items_in_flight": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema14"
+              }
+            ],
+            "description": "Work items still in progress that the run did not wait for"
+          },
+          "lookup_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema15"
+              }
+            ],
+            "description": "Whether a secondary lookup failed and the run carried on without it"
+          },
+          "run_outcome": {
+            "description": "How the run ended",
+            "enum": [
+              "produced",
+              "empty_nothing_pending",
+              "empty_nothing_found",
+              "empty_at_capacity",
+              "degraded_partial",
+              "failed_source_unavailable",
+              "failed_all_items",
+              "blocked_precondition"
+            ],
+            "type": "string"
+          },
+          "source_read_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema16"
+              }
+            ],
+            "description": "Whether reading the source of work items failed"
+          }
+        },
+        "required": [
+          "event",
+          "run_outcome"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "alerts_total": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema17"
+              }
+            ],
+            "description": "Alerts in the batch"
+          },
+          "alerts_without_verdict": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema18"
+              }
+            ],
+            "description": "Alerts the analysis returned no verdict for"
+          },
+          "event": {
+            "enum": [
+              "alert_triage_batch_classified"
+            ],
+            "type": "string"
+          },
+          "fp_below_floor": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema19"
+              }
+            ],
+            "description": "False positives below the confidence floor, which are not proposed"
+          },
+          "fp_candidates": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema20"
+              }
+            ],
+            "description": "False positives at or above the confidence floor"
+          },
+          "investigation_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema21"
+              }
+            ],
+            "description": "Investigation of the batch, absent because a batch has none"
+          },
+          "verdicts_false_positive": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema22"
+              }
+            ],
+            "description": "Alerts classified as false positives"
+          },
+          "verdicts_inconclusive": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema23"
+              }
+            ],
+            "description": "Alerts classified as inconclusive"
+          },
+          "verdicts_true_positive": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema24"
+              }
+            ],
+            "description": "Alerts classified as true positives"
+          }
+        },
+        "required": [
+          "event"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "alerts_joined": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema25"
+              }
+            ],
+            "description": "Alerts that joined a proposal an earlier batch had opened"
+          },
+          "alerts_pooled": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema26"
+              }
+            ],
+            "description": "Alerts pooled into one shared proposal"
+          },
+          "alerts_with_strict_key": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema27"
+              }
+            ],
+            "description": "Classified alerts with a strict pattern key"
+          },
+          "conversation_created": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema28"
+              }
+            ],
+            "description": "Whether the batch created a conversation of its own"
+          },
+          "event": {
+            "enum": [
+              "alert_triage_batch_grouped"
+            ],
+            "type": "string"
+          },
+          "fp_candidates_on_fallback": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema29"
+              }
+            ],
+            "description": "False positives at or above the confidence floor with no strict key"
+          },
+          "grouping": {
+            "description": "Whether the batch was grouped, or why not",
+            "enum": [
+              "on",
+              "supervised",
+              "flag_off",
+              "lookup_incomplete",
+              "no_candidates"
+            ],
+            "type": "string"
+          },
+          "proposals_created": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema30"
+              }
+            ],
+            "description": "New closure proposals the batch raised"
+          },
+          "strict_keys": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema31"
+              }
+            ],
+            "description": "Distinct strict pattern keys among the classified alerts"
+          },
+          "strict_keys_single_alert": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema32"
+              }
+            ],
+            "description": "Strict pattern keys that only one alert of the batch has"
+          },
+          "wide_keys": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema33"
+              }
+            ],
+            "description": "Distinct wide pattern keys among the classified alerts"
+          },
+          "wide_keys_single_alert": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema34"
+              }
+            ],
+            "description": "Wide pattern keys that only one alert of the batch has"
+          }
+        },
+        "required": [
+          "event",
+          "grouping"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "alerts_proposed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema35"
+              }
+            ],
+            "description": "Alerts the closure proposal covered"
+          },
+          "alerts_retag_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema36"
+              }
+            ],
+            "description": "Alerts a dismissal could not re-tag"
+          },
+          "auto_approve_requested": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema38"
+              }
+            ],
+            "description": "Whether the review asked the gate to auto-approve"
+          },
+          "event": {
+            "enum": [
+              "alert_triage_closure_resolved"
+            ],
+            "type": "string"
+          },
+          "investigation_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema39"
+              }
+            ],
+            "description": "Investigation the closure review settles"
+          },
+          "outcome": {
+            "description": "How the closure proposal settled",
+            "enum": [
+              "approved",
+              "dismissed",
+              "expired",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "proposal_read_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema40"
+              }
+            ],
+            "description": "Whether the decided proposal could not be read back"
+          },
+          "revisions": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema37"
+              }
+            ],
+            "description": "Revisions the proposal reached when it settled"
+          }
+        },
+        "required": [
+          "auto_approve_requested",
+          "event",
+          "investigation_id",
+          "outcome"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "applied": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema41"
+              }
+            ],
+            "description": "Whether an approved tuning change landed on the rule"
+          },
+          "approved_not_applied": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema42"
+              }
+            ],
+            "description": "Whether an approved tuning change did not land"
+          },
+          "backtest_ran": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema43"
+              }
+            ],
+            "description": "Whether both backtest previews succeeded"
+          },
+          "backtest_reduced_alerts": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema44"
+              }
+            ],
+            "description": "Whether the proposed rule produced fewer preview alerts"
+          },
+          "change_type": {
+            "description": "Kind of tuning change proposed",
+            "enum": [
+              "query",
+              "risk_score",
+              "exception",
+              "threshold",
+              "schedule",
+              "manual",
+              "none"
+            ],
+            "type": "string"
+          },
+          "confidence": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema45"
+              }
+            ],
+            "description": "The diagnosis's stated confidence"
+          },
+          "decision": {
+            "description": "What the tuning proposal came to",
+            "enum": [
+              "approved",
+              "dismissed",
+              "undecided",
+              "none"
+            ],
+            "type": "string"
+          },
+          "entry_gate": {
+            "description": "How the manual-autonomy entry gate went",
+            "enum": [
+              "skipped",
+              "approved",
+              "declined",
+              "undecided"
+            ],
+            "type": "string"
+          },
+          "event": {
+            "enum": [
+              "rule_tuning_review_completed"
+            ],
+            "type": "string"
+          },
+          "investigation_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema46"
+              }
+            ],
+            "description": "Investigation the review opened; absent only when rule_unavailable"
+          },
+          "rule_source": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema47"
+              }
+            ],
+            "description": "Whether the reviewed rule is prebuilt"
+          },
+          "rule_type": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema48"
+              }
+            ],
+            "description": "The reviewed rule's type"
+          },
+          "rule_unavailable": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema49"
+              }
+            ],
+            "description": "Whether the rule could not be read or was disabled"
+          }
+        },
+        "required": [
+          "change_type",
+          "decision",
+          "entry_gate",
+          "event"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "applied": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema50"
+              }
+            ],
+            "description": "Whether an approved enable or install landed on the rule"
+          },
+          "approved_not_applied": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema51"
+              }
+            ],
+            "description": "Whether an approved enable or install did not land"
+          },
+          "check_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema52"
+              }
+            ],
+            "description": "Whether the indicator was missing or the check gave no verdict"
+          },
+          "creation_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema53"
+              }
+            ],
+            "description": "Whether the rule-creation run failed"
+          },
+          "creation_skipped": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema54"
+              }
+            ],
+            "description": "Whether the rule-creation run proposed nothing"
+          },
+          "decision": {
+            "description": "What the coverage proposal came to",
+            "enum": [
+              "approved",
+              "dismissed",
+              "undecided",
+              "none"
+            ],
+            "type": "string"
+          },
+          "entry_gate": {
+            "description": "How the manual-autonomy entry gate went",
+            "enum": [
+              "skipped",
+              "approved",
+              "declined",
+              "undecided"
+            ],
+            "type": "string"
+          },
+          "event": {
+            "enum": [
+              "rule_coverage_review_completed"
+            ],
+            "type": "string"
+          },
+          "investigation_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema55"
+              }
+            ],
+            "description": "Investigation the review opened; absent only when check_failed"
+          },
+          "ki_processed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema56"
+              }
+            ],
+            "description": "Whether the indicator was marked processed"
+          },
+          "proposal_kind": {
+            "description": "What the review proposed",
+            "enum": [
+              "enable_rule",
+              "install_prebuilt_rule",
+              "create_rule",
+              "confirm_coverage",
+              "manual_follow_up",
+              "none"
+            ],
+            "type": "string"
+          },
+          "rule_created": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema57"
+              }
+            ],
+            "description": "Whether a new rule was created"
+          },
+          "rule_source": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema58"
+              }
+            ],
+            "description": "Whether the rule the review is about is prebuilt"
+          },
+          "rule_type": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema59"
+              }
+            ],
+            "description": "The type of the rule the review is about"
+          },
+          "verdict": {
+            "description": "The coverage check's verdict",
+            "enum": [
+              "covered_enabled",
+              "covered_disabled",
+              "prebuilt_available",
+              "no_coverage",
+              "none"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "entry_gate",
+          "event",
+          "proposal_kind",
+          "verdict"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "closed_clean": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema60"
+              }
+            ],
+            "description": "Whether a run with no confirmed hit closed the Investigation: as benign, or as `other` for a `retired_incomplete` run, which is true too although part of the report was never searched"
+          },
+          "coverage_kis_skipped": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema61"
+              }
+            ],
+            "description": "Coverage knowledge items packaging did not write"
+          },
+          "coverage_kis_written": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema62"
+              }
+            ],
+            "description": "Coverage knowledge items packaging wrote for Detection Watch"
+          },
+          "event": {
+            "enum": [
+              "hunt_report_completed"
+            ],
+            "type": "string"
+          },
+          "has_confirmed_hit": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema63"
+              }
+            ],
+            "description": "Whether the hunt cleared the confirmed-hit bar"
+          },
+          "hunt_status": {
+            "description": "The hunt child's result status",
+            "enum": [
+              "success",
+              "partial",
+              "retired_incomplete",
+              "failed",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "investigation_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema64"
+              }
+            ],
+            "description": "The report's Investigation; absent only when package_status is run_incomplete"
+          },
+          "mint_suppression": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema65"
+              }
+            ],
+            "description": "Why packaging held back its Proposals"
+          },
+          "package_status": {
+            "description": "Packaging's own status",
+            "enum": [
+              "success",
+              "run_incomplete"
+            ],
+            "type": "string"
+          },
+          "proposals_dispatch_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema66"
+              }
+            ],
+            "description": "Proposal gates that failed to launch"
+          },
+          "proposals_prepared": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema67"
+              }
+            ],
+            "description": "Proposals packaging prepared and launched a gate for"
+          },
+          "tier2_invoked": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema68"
+              }
+            ],
+            "description": "Whether the hunt ran Behavior Hunt"
+          }
+        },
+        "required": [
+          "event",
+          "hunt_status",
+          "package_status"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "actions_recommended": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema69"
+              }
+            ],
+            "description": "Containment actions the analysis recommended"
+          },
+          "agent_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema70"
+              }
+            ],
+            "description": "Whether the forensic agent failed"
+          },
+          "analysis_outcome": {
+            "description": "How the run settled its indicator",
+            "enum": [
+              "processed",
+              "no_host",
+              "failed",
+              "proposals_lost",
+              "unreachable",
+              "invalid",
+              "not_pending"
+            ],
+            "type": "string"
+          },
+          "auto_approve_requested": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema71"
+              }
+            ],
+            "description": "Whether the proposals asked the gate to auto-approve"
+          },
+          "event": {
+            "enum": [
+              "endpoint_analysis_completed"
+            ],
+            "type": "string"
+          },
+          "findings_attached": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema72"
+              }
+            ],
+            "description": "Whether the timeline and IoC findings are on the Investigation"
+          },
+          "host_resolved": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema73"
+              }
+            ],
+            "description": "Whether a host was found to analyze"
+          },
+          "iocs_found": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema74"
+              }
+            ],
+            "description": "Whether the analysis extracted any IoC"
+          },
+          "proposals_dispatch_failed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema75"
+              }
+            ],
+            "description": "Containment proposals that did not reach the queue"
+          },
+          "proposals_dispatched": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema76"
+              }
+            ],
+            "description": "Containment proposals dispatched"
+          },
+          "reused_prior_assessment": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema77"
+              }
+            ],
+            "description": "Whether an earlier run's findings were reused"
+          },
+          "timeline_found": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema78"
+              }
+            ],
+            "description": "Whether the analysis reconstructed any timeline event"
+          }
+        },
+        "required": [
+          "analysis_outcome",
+          "auto_approve_requested",
+          "event"
+        ],
+        "type": "object"
+      }
+    ]
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "reported": {
+        "description": "Whether the outcome event was reported",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "reported"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

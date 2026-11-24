@@ -1,0 +1,78 @@
+{
+  "exposure": "open",
+  "id": "ai.attachment.update",
+  "input": {
+    "definitions": {
+      "__schema0": {},
+      "__schema1": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema2": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "attachment_id": {
+        "description": "The ID of the attachment to update.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "conversation_id": {
+        "description": "The ID of the conversation the attachment belongs to.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "data": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The new attachment data/content. Creates a new version when content changes."
+      },
+      "description": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Optional new description for the attachment."
+      },
+      "render_inline": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it. Defaults to false."
+      }
+    },
+    "required": [
+      "attachment_id",
+      "conversation_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "attachment_id": {
+        "description": "The ID of the updated attachment.",
+        "type": "string"
+      },
+      "current_version": {
+        "description": "The current version number after update. Reflects the new version when `data` changed.",
+        "type": "number"
+      }
+    },
+    "required": [
+      "attachment_id",
+      "current_version"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

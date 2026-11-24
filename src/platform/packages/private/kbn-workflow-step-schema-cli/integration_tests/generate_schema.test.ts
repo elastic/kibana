@@ -21,12 +21,13 @@ import {
 import {
   fetchComposedSchema,
   fetchConnectorTypes,
-  fetchStepDefinitionHashes,
+  fetchStepContracts,
   fetchStepDefinitionIds,
   fetchTriggerDefinitionIds,
   type KibanaConnection,
 } from '../src/fetch';
-import { checkStepApprovals, formatStepApprovalFailure } from '../src/step_approval';
+import { STEP_CONTRACTS_DIR } from '../src/constants';
+import { writeStepContracts } from '../src/step_contracts';
 import { transformToStrict, transformToTemplate } from '../src/template_transform';
 import { extractStepTypes, extractTriggerTypes } from '../src/introspect';
 import { checkCompleteness } from '../src/completeness';
@@ -50,13 +51,11 @@ const OUTPUT_DIR = Path.resolve(
     Path.join(REPO_ROOT, 'src/platform/packages/private/kbn-workflow-step-schema-cli/generated')
 );
 
-// Per-step approved `definitionHash` files, owned by workflows-eng. Mismatches are
-// written to WORKFLOW_STEP_APPROVAL_REPORT (when set) instead of failing the test, so
-// the codegen script's boot retries are not spent on a deterministic failure and the
-// script decides whether to enforce them for the current build type.
-const APPROVED_STEP_DEFINITIONS_DIR_RELATIVE =
-  'x-pack/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions';
-const APPROVAL_REPORT_PATH = process.env.WORKFLOW_STEP_APPROVAL_REPORT;
+// One committed contract file per custom step. Like the schema artifact, the test rewrites
+// them and the codegen script decides what to do with the changes for the current build type:
+// commit them to a feature PR (after checking them for breaking changes), or fail a merge
+// queue build.
+const STEP_CONTRACTS_OUTPUT_DIR = Path.join(REPO_ROOT, STEP_CONTRACTS_DIR);
 
 // Poll the *non-latching* step-definitions route, not `/api/workflows/schema`.
 // The schema route freezes the registered-step cache on the first 200 it returns;
@@ -146,7 +145,7 @@ describe('workflow step schema generation', () => {
 
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
-  let baseUrl: string;
+  let connection: KibanaConnection;
 
   beforeAll(async () => {
     const { startES, startKibana } = createTestServers({
@@ -174,7 +173,8 @@ describe('workflow step schema generation', () => {
     // Use 127.0.0.1 (IPv4) explicitly to avoid IPv6/IPv4 ambiguity where `localhost`
     // may resolve to `::1` on macOS while Kibana binds to `0.0.0.0` (IPv4 only).
     const host = hostname === '0.0.0.0' ? '127.0.0.1' : hostname;
-    baseUrl = `${protocol}://${host}:${port}`;
+    const baseUrl = `${protocol}://${host}:${port}`;
+    connection = { kibanaUrl: baseUrl, username: USERNAME, password: PASSWORD };
 
     await waitForStepRegistry(log, baseUrl);
   });
@@ -185,12 +185,6 @@ describe('workflow step schema generation', () => {
   });
 
   it('writes the workflow step schema artifact from a live Kibana', async () => {
-    const connection: KibanaConnection = {
-      kibanaUrl: baseUrl,
-      username: USERNAME,
-      password: PASSWORD,
-    };
-
     const composedSchema = await fetchComposedSchema(connection, log);
     const connectorTypes = await fetchConnectorTypes(connection, log);
     const stepTypes = extractStepTypes(composedSchema);
@@ -256,18 +250,23 @@ describe('workflow step schema generation', () => {
     writeIndex(bundleDir, manifest);
 
     log.success(`Wrote workflow step schema artifact to ${bundleDir}`);
+  });
 
-    const approvals = checkStepApprovals({
-      steps: await fetchStepDefinitionHashes(connection, log),
-      approvalsDir: Path.join(REPO_ROOT, APPROVED_STEP_DEFINITIONS_DIR_RELATIVE),
-      approvalsDirRelative: APPROVED_STEP_DEFINITIONS_DIR_RELATIVE,
-    });
-    if (approvals.issues.length > 0) {
-      const message = formatStepApprovalFailure(approvals);
-      log.warning(message);
-      if (APPROVAL_REPORT_PATH) {
-        Fs.writeFileSync(APPROVAL_REPORT_PATH, `${message}\n`);
-      }
+  it('writes the contract of every registered custom step', async () => {
+    const { contracts, errors } = await fetchStepContracts(connection, log);
+    if (errors.length > 0) {
+      throw new Error(
+        [
+          'Kibana could not serialize the contract of some steps:',
+          ...errors.map(({ id, error }) => `  - ${id}: ${error}`),
+        ].join('\n')
+      );
     }
+
+    const { added, changed, removed } = writeStepContracts(contracts, STEP_CONTRACTS_OUTPUT_DIR);
+    log.success(
+      `Wrote ${contracts.length} step contracts to ${STEP_CONTRACTS_DIR} ` +
+        `(added: ${added.length}, changed: ${changed.length}, removed: ${removed.length})`
+    );
   });
 });

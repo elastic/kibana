@@ -614,11 +614,11 @@ Public loaders run lazily, the first time `workflowsExtensions.isReady()` is cal
 
 For complete examples of conditional async registration on both sides, see `examples/workflows_extensions_example/server/step_types/index.ts` and `examples/workflows_extensions_example/public/step_types/index.ts`.
 
-### Step 5: Get Approval
+### Step 5: Check the Step Contract
 
-All custom step definitions must be approved by the workflows-eng team. See the [Step Definition Approval Process](#step-definition-approval-process) section below.
+CI keeps a contract file for every custom step, commits the file of a new or changed step to your PR, and fails the PR on a breaking change to an existing step. A new step also needs workflows-eng's approval: add its id to `contracts/approved_steps.json` in the same PR. See [Step Contract Check](#step-contract-check).
 
-Before requesting approval, run the [Server and Client Registration Check](#server-and-client-registration-check) to confirm the step is registered on both sides.
+Also run the [Server and Client Registration Check](#server-and-client-registration-check) to confirm the step is registered on both sides.
 
 ### Example Implementation
 
@@ -1184,56 +1184,75 @@ export const durablePollStepDefinition = createPollServerStepDefinition({
 
 Public registration is identical to single-shot steps: `createPublicStepDefinition` with the same common `id` and schemas. See [Public-Side Definition Requirements](#public-side-definition-requirements) and register via the `workflows_extensions` plugin contract in your plugin `setup` (same as `examples/workflows_extensions_example/README.md`).
 
-## Step Definition Approval Process
+## Step Contract Check
 
-All custom step definitions must be approved by the workflows-eng team before being merged. This is enforced by the workflow step schema generation job (a Jest integration test that boots a real Kibana), which runs in the `Checks` step of every PR and merge queue build and validates registered steps against a set of approved hashes.
+Workflows depend on the contract of each custom step: the input and config a workflow writes, the output that later steps read, and which workflows may use the step. CI keeps a file with the contract of every registered step. It fails a PR that adds a step workflows-eng hasn't approved, or that breaks a contract.
 
 ### How It Works
 
-1. **Registration Detection**: When you register a new step or change an existing step definition (id, label, schemas, category, documentation, etc.), the job detects it during CI runs.
-
-2. **Definition Hash**: The job reads a SHA256 hash of each step's definition from the `internal/workflows_extensions/step_definitions` endpoint (`definitionHash`). Any meaningful change to the definition produces a new hash.
-
-3. **Per-step approval files**: Each approved step is stored in its own file under:
+1. **Contract files**: The workflow step schema job (a Jest integration test that boots Kibana with every plugin, in the `Checks` step of every PR and merge queue build) reads the contracts from the `internal/workflows_extensions/step_definitions?include_contracts=true` endpoint and writes one file per step:
 
    ```
-   test/scout/api/fixtures/approved_step_definitions/<step.id>.txt
+   x-pack/platform/plugins/shared/workflows_extensions/contracts/steps/<step.id>.json
    ```
 
-   The file contains a single line: the approved `definitionHash` for that step. One file per step means PRs that add or update different steps never conflict on a shared list. The directory is owned by workflows-eng through `CODEOWNERS`, so changing an approval file requests their review.
+   A contract holds the step's `id`, `stability` (`tech_preview` when the definition omits it), `exposure` (`open` when omitted), `deprecation`, and the JSON Schema of its `input` and `config`, as a workflow writes them (a field with a default is optional), and of its `output`, as later steps read it. The step's label, description, documentation and handler aren't part of the contract, so changing them doesn't change the file. The descriptions of the schema fields are.
 
-### Adding a New Step or Updating an Existing One
+2. **CI updates the files**: When your change adds a step or changes a contract, CI commits the updated files to your PR. One file per step means PRs that change different steps don't conflict. The directory has no code owner, so a compatible contract change needs no extra review.
 
-1. **Run the approval check locally** so it prints the exact commands you need:
+3. **New steps need approval**: Every registered step must be listed in `x-pack/platform/plugins/shared/workflows_extensions/contracts/approved_steps.json`, which workflows-eng owns. See [Adding a New Step](#adding-a-new-step).
+
+4. **Breaking changes fail the PR**: CI compares the contracts with the ones at the PR's merge base, comparing the schemas with [oasdiff](https://github.com/oasdiff/oasdiff), and fails on breaking changes. That includes tech preview and beta steps, since workflows use them too. The build annotation lists the changes. Breaking changes include:
+   - Removing a step.
+   - Narrowing its exposure to `managed_only`. Narrowing it to `internal` is reported but doesn't fail.
+   - In the input or config: removing a field, adding a required field, making a field required, or narrowing a type or enum.
+   - In the output: removing a field, making a field optional, or changing a type.
+
+   Adding a step, an optional input field or an output field is compatible. In oasdiff's messages, request properties under `with/` are the input, those under `config/` are the config, and the response is the output.
+
+The merge queue fails when the committed contracts don't match the registered steps, which can happen when two PRs change the same step. Merge the target branch into your PR so CI updates them.
+
+The job boots Kibana with the default configuration, so it only checks the steps that ship by default. A step behind a flag or setting that is off by default is still experimental, so it has no contract and can change freely. It gets one in the PR that turns the flag on by default.
+
+### Adding a New Step
+
+In the PR that registers the step, add its id to `contracts/approved_steps.json`, keeping the list sorted. For a step behind a flag that is off by default, that's the PR that turns the flag on by default. The file is owned by workflows-eng, so the change requests their review of the new step. Until then, CI fails the PR. Once a step is approved, changes to it only need workflows-eng's review when they're breaking.
+
+### Making a Breaking Change on Purpose
+
+If a breaking change is intended (for example, the step was never released, or you're updating every workflow that uses it), add an entry to `x-pack/platform/plugins/shared/workflows_extensions/contracts/breaking_changes_allowlist.json` in the same PR. The file is owned by workflows-eng, so the entry requests their review:
+
+```json
+{
+  "entries": [
+    {
+      "stepId": "my-namespace.myCustomStep",
+      "rule": "response-required-property-removed",
+      "reason": "The field was never set: https://github.com/elastic/kibana/issues/123456"
+    }
+  ]
+}
+```
+
+`rule` is the rule the annotation shows for the change. Omit it to accept every breaking change of the step. An entry only applies in the PR that adds it, so it can't let a later breaking change of the same step through.
+
+### Running the Check Locally
+
+CI does all of this, but you can run it before pushing:
+
+1. **Update the contract files.** This boots Elasticsearch and Kibana, so it takes several minutes:
 
    ```bash
-   WORKFLOW_STEP_APPROVAL_REPORT=/tmp/step_approval.txt \
-     WORKFLOW_SCHEMA_OUTPUT_DIR="$PWD/target/workflow_step_schema_local" \
+   WORKFLOW_SCHEMA_OUTPUT_DIR="$PWD/target/workflow_step_schema_local" \
      node scripts/jest_integration \
      --config src/platform/packages/private/kbn-workflow-step-schema-cli/integration_tests/jest.integration.config.js
-   cat /tmp/step_approval.txt
    ```
 
-   When a step is unapproved (new id or changed hash), the report (and the failing CI job) contains a message like:
+2. **Compare them with your branch's merge base**, where `upstream` is your remote for `elastic/kibana`. When a contract changed, this needs oasdiff (`brew install oasdiff`):
 
+   ```bash
+   node scripts/check_workflow_step_contracts --base "$(git merge-base HEAD upstream/main)"
    ```
-   Found 1 unapproved step definition(s):
-     - Step "my-namespace.myCustomStep" is not in the approved list.
-
-   Run the following command(s) from your kibana directory and request review from the workflows-eng team:
-
-   echo <definitionHash> > x-pack/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions/my-namespace.myCustomStep.txt
-   ```
-
-2. **Run the printed `echo` command(s) from your kibana directory.** This creates (or overwrites) the per-step approval file with the new hash.
-
-3. **Re-run the check** to confirm the report is no longer produced.
-
-4. **Commit the new/updated file** under `approved_step_definitions/` and request approval from the workflows-eng team in your PR.
-
-If you change a step's definition later, only its own approval file needs updating — repeat the steps above.
-
-CI never writes approval files: it prints the commands and fails the PR or merge queue build until the approval files are committed and reviewed.
 
 ## Server and Client Registration Check
 

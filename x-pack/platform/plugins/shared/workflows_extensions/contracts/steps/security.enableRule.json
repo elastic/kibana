@@ -1,0 +1,128 @@
+{
+  "exposure": "open",
+  "id": "security.enableRule",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.\nOnly valid when query property is undefined.\n"
+      },
+      "__schema1": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "ids": {
+        "$ref": "#/definitions/__schema0"
+      },
+      "query": {
+        "$ref": "#/definitions/__schema3"
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "errors": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "err_code": {
+              "enum": [
+                "IMMUTABLE",
+                "PREBUILT_CUSTOMIZATION_LICENSE",
+                "MACHINE_LEARNING_AUTH",
+                "MACHINE_LEARNING_INDEX_PATTERN",
+                "ESQL_INDEX_PATTERN",
+                "MANUAL_RULE_RUN_FEATURE",
+                "MANUAL_RULE_RUN_DISABLED_RULE",
+                "THRESHOLD_RULE_TYPE_IN_SUPPRESSION",
+                "UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD",
+                "RULE_FILL_GAPS_DISABLED_RULE",
+                "USER_INSUFFICIENT_RULE_PRIVILEGES"
+              ],
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "rules": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "status_code": {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "message",
+            "rules",
+            "status_code"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "failed": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "skipped": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "succeeded": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "total": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "failed",
+      "skipped",
+      "succeeded",
+      "total"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

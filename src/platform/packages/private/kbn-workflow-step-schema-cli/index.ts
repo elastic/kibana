@@ -8,6 +8,7 @@
  */
 
 export { run } from './src/cli';
+export { runCheckStepContracts } from './src/check_step_contracts_cli';
 export type {
   JsonValue,
   JsonObject,

@@ -1,0 +1,94 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.joinProposal",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alert_ids": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "minItems": 1,
+        "type": "array"
+      },
+      "confidence_floor": {
+        "description": "Confidence floor, quoted in the comment.",
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      },
+      "proposal_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Id the review tried to create the proposal under."
+      },
+      "rule_name": {
+        "description": "Name of the rule, quoted in the proposal comment.",
+        "maxLength": 1024,
+        "type": "string"
+      }
+    },
+    "required": [
+      "alert_ids",
+      "confidence_floor",
+      "proposal_id",
+      "rule_name"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alert_ids": {
+        "description": "Only the alerts the proposal did not hold. Empty when it held them all.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "alerts_page_query": {
+        "description": "Query string of the Alerts page link that shows just the added alerts.",
+        "type": "string"
+      },
+      "conversation_id": {
+        "description": "The owner's Investigation, when it joined.",
+        "type": "string"
+      },
+      "joined": {
+        "type": "boolean"
+      },
+      "proposal_id": {
+        "description": "The revision the join created, when it joined.",
+        "type": "string"
+      },
+      "revision": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "alert_ids",
+      "alerts_page_query",
+      "conversation_id",
+      "joined",
+      "proposal_id",
+      "revision"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

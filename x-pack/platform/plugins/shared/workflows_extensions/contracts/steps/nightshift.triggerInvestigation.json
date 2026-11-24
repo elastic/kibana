@@ -1,0 +1,383 @@
+{
+  "exposure": "open",
+  "id": "nightshift.triggerInvestigation",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 255,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema10": {
+        "additionalProperties": false,
+        "properties": {
+          "automation_id": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "automation_name": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "connector_id": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "$ref": "#/definitions/__schema11"
+            },
+            "type": "object"
+          },
+          "type": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "connector_id",
+          "params",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema11": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "enum": [
+                  null
+                ],
+                "nullable": true,
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema12"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          {
+            "additionalProperties": {
+              "$ref": "#/definitions/__schema12"
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "__schema12": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "enum": [
+                  null
+                ],
+                "nullable": true,
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema13"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          {
+            "additionalProperties": {
+              "$ref": "#/definitions/__schema13"
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "__schema13": {
+        "anyOf": [
+          {
+            "maxLength": 4096,
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "enum": [
+              null
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        ]
+      },
+      "__schema14": {
+        "properties": {
+          "channel": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "external_conversation_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema15"
+              }
+            ],
+            "description": "The Relay's key for the thread. When empty, the same key is built from the thread's ids."
+          },
+          "thread_ts": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "workspace": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "thread_ts",
+          "workspace"
+        ],
+        "type": "object"
+      },
+      "__schema15": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "__schema2": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema3": {
+        "enum": [
+          "automatic",
+          "manual"
+        ],
+        "type": "string"
+      },
+      "__schema4": {
+        "maxLength": 10000,
+        "type": "string"
+      },
+      "__schema5": {
+        "maxLength": 10000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema6": {
+        "maxLength": 5000,
+        "type": "string"
+      },
+      "__schema7": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema8": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "__schema9": {
+        "items": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "maxItems": 5,
+        "type": "array"
+      }
+    },
+    "properties": {
+      "automation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Owning automation ID. Enforces its current daily dispatch limit before starting an investigation."
+      },
+      "context": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema8"
+          }
+        ],
+        "description": "Additional context to pass to the investigation workflow. When subject_type is \"alert\" and no \"alerts\" array is given, the alert is looked up by subject_id (classic or universal). Otherwise this must carry an \"alerts\" array of alert snapshots."
+      },
+      "instructions": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema6"
+          }
+        ],
+        "description": "Additional operator guidance for this investigation round; empty means no additional guidance"
+      },
+      "message": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Caller-supplied prompt for the investigation agent"
+      },
+      "notificationDestinations": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema9"
+          }
+        ],
+        "description": "Destinations that receive the concluded investigation. Delivery results are recorded on the investigation."
+      },
+      "slack_thread": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema14"
+          }
+        ],
+        "description": "The Slack thread the investigation is about. A reply in that thread continues the investigation."
+      },
+      "subject_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "The subject ID; optional for a manual question, and not accepted for a Slack thread, whose ID comes from slack_thread"
+      },
+      "subject_type": {
+        "description": "The type of entity being investigated. Use \"manual\" when the prompt is the whole subject, and \"slack_thread\" when it is a Slack thread, which slack_thread then names.",
+        "enum": [
+          "significant_event",
+          "alert",
+          "manual",
+          "slack_thread"
+        ],
+        "type": "string"
+      },
+      "summary": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Short description of the subject, returned on reads as subject.summary"
+      },
+      "timeout_seconds": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "Upper bound for this investigation workflow run in seconds"
+      },
+      "title": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Accepted for compatibility; not used as the investigation title, which Agent Builder generates from the first round"
+      },
+      "trigger_type": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "What initiated this investigation. Defaults to \"automatic\"."
+      }
+    },
+    "required": [
+      "subject_type"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      },
+      "__schema1": {
+        "enum": [
+          "daily_limit",
+          "investigation_limit"
+        ],
+        "type": "string"
+      },
+      "__schema2": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "properties": {
+      "daily_limit": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "The daily limit that denied this dispatch"
+      },
+      "execution_id": {
+        "type": "string"
+      },
+      "investigation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The investigation (Agent Builder conversation) the start created or continued"
+      },
+      "skip_reason": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Why the investigation was not dispatched"
+      }
+    },
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

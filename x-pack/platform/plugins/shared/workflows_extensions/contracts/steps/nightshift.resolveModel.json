@@ -1,0 +1,39 @@
+{
+  "exposure": "open",
+  "id": "nightshift.resolveModel",
+  "input": {
+    "properties": {
+      "connector_id": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "round_connector_id": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "step": {
+        "enum": [
+          "investigation"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "step"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "connector_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "connector_id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -11,7 +11,7 @@ import { timeoutSignal } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { KIBANA_API_VERSION } from './constants';
-import type { RegisteredStepHash } from './step_approval';
+import { parseStepContract, type StepContract } from './step_contracts';
 import type { JsonObject, JsonValue } from './types';
 
 export interface KibanaConnection {
@@ -185,30 +185,40 @@ export const fetchStepDefinitionIds = async (
   return extractDefinitionIds(body.steps);
 };
 
+export interface FetchedStepContracts {
+  contracts: StepContract[];
+  /** The steps whose contract Kibana couldn't serialize, with the error. */
+  errors: Array<{ id: string; error: string }>;
+}
+
 /**
- * Fetch the registered step definitions with their `definitionHash` from the
- * internal `workflows_extensions` route. Used by the step approval check.
+ * Fetch the contract of every registered step definition from the internal
+ * `workflows_extensions` route. Used to write the committed step contracts.
  */
-export const fetchStepDefinitionHashes = async (
+export const fetchStepContracts = async (
   connection: KibanaConnection,
   log: ToolingLog
-): Promise<RegisteredStepHash[]> => {
-  log.info(
-    'Fetching registered step definition hashes (GET /internal/workflows_extensions/step_definitions)'
-  );
-  const body = await kibanaGet(connection, '/internal/workflows_extensions/step_definitions');
+): Promise<FetchedStepContracts> => {
+  const path = '/internal/workflows_extensions/step_definitions?include_contracts=true';
+  log.info(`Fetching registered step contracts (GET ${path})`);
+  const body = await kibanaGet(connection, path);
   if (!Array.isArray(body.steps)) {
-    return [];
+    throw new Error(`GET ${path} returned no "steps" array`);
   }
-  return body.steps.flatMap((entry) =>
-    entry !== null &&
-    typeof entry === 'object' &&
-    !Array.isArray(entry) &&
-    typeof entry.id === 'string' &&
-    typeof entry.definitionHash === 'string'
-      ? [{ id: entry.id, definitionHash: entry.definitionHash }]
-      : []
-  );
+
+  const result: FetchedStepContracts = { contracts: [], errors: [] };
+  for (const entry of body.steps) {
+    if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) {
+      throw new Error(`GET ${path} returned a step that is not an object`);
+    }
+    const { id, contract, contractError } = entry;
+    if (typeof contractError === 'string') {
+      result.errors.push({ id: String(id), error: contractError });
+    } else {
+      result.contracts.push(parseStepContract(contract, `The contract of step "${id}"`));
+    }
+  }
+  return result;
 };
 
 /** Fetch the ids of registered trigger definitions from the internal route. */

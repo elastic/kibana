@@ -1,0 +1,64 @@
+{
+  "exposure": "open",
+  "id": "context-engine.getDreamingStatus",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "enum": [
+          "memories",
+          "traces",
+          "relationships",
+          "maintenance"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "source": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "What the run dreams on: memories (the default); the traces configured on the AI index, which also need a trace source; its facts and entities, to link with relationships, which also need relationship types; or its facts and entities, to maintain, which also needs maintenance turned on"
+      }
+    },
+    "required": [
+      "ai_index_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "dream": {
+        "description": "Whether this run should dream",
+        "type": "boolean"
+      },
+      "reason": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Why it should not, when `dream` is false"
+      }
+    },
+    "required": [
+      "dream"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

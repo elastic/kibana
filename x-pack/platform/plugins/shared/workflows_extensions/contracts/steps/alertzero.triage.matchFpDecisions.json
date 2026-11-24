@@ -1,0 +1,148 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.matchFpDecisions",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "analysis_tag_prefix": {
+        "description": "Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "exclude_building_blocks": {
+        "type": "boolean"
+      },
+      "excluded_rule_tags": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 50,
+        "type": "array"
+      },
+      "lookback_hours": {
+        "maximum": 8760,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "min_severity": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "analysis_tag_prefix",
+      "exclude_building_blocks",
+      "excluded_rule_tags",
+      "lookback_hours",
+      "min_severity"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "candidates": {
+        "description": "Open untriaged alerts of the look-back that were checked.",
+        "type": "number"
+      },
+      "capped": {
+        "description": "Matches left for the normal path because the decision reached its daily cap.",
+        "type": "number"
+      },
+      "close_failures": {
+        "description": "Decisions whose alerts could not all be closed.",
+        "type": "number"
+      },
+      "closed": {
+        "description": "Alerts closed by a decision. Always 0 unless the mode is `on`.",
+        "type": "number"
+      },
+      "decisions_matched": {
+        "description": "Distinct decisions that matched an alert.",
+        "type": "number"
+      },
+      "deferred": {
+        "description": "Decisions left for the next sweep because the step ran out of time.",
+        "type": "number"
+      },
+      "excluded_by_severity": {
+        "description": "Matches the severity guard keeps with a human, not tagged.",
+        "type": "number"
+      },
+      "held_in_shadow": {
+        "description": "Matches on a cloud key, an untrusted signer or a key with neither a signer nor a hash that `on` only tagged, as shadow does: the alert goes to analysis.",
+        "type": "number"
+      },
+      "left_for_notes": {
+        "description": "Matches left untouched for the next sweep because the sweep had no notes left for them.",
+        "type": "number"
+      },
+      "notes_missing": {
+        "description": "Alerts a decision closed or skipped that have no note: a failed write, or past the time limit.",
+        "type": "number"
+      },
+      "out_of_time": {
+        "description": "The step stopped starting decisions or reading pages because its time was spent.",
+        "type": "boolean"
+      },
+      "skipped": {
+        "description": "Alerts kept out of analysis by a dismissal. 0 unless `on`.",
+        "type": "number"
+      },
+      "status": {
+        "description": "`off` when the flag is `off` (the default), `disabled` when the Context Engine is off in the space, `failed` when nothing could be matched.",
+        "enum": [
+          "ok",
+          "off",
+          "disabled",
+          "failed"
+        ],
+        "type": "string"
+      },
+      "tag_failures": {
+        "description": "Tag updates that failed. Those alerts match again next sweep.",
+        "type": "number"
+      },
+      "would_close": {
+        "description": "Alerts a false positive decision matched.",
+        "type": "number"
+      },
+      "would_skip": {
+        "description": "Alerts a do-not-propose item matched.",
+        "type": "number"
+      }
+    },
+    "required": [
+      "candidates",
+      "capped",
+      "close_failures",
+      "closed",
+      "decisions_matched",
+      "deferred",
+      "excluded_by_severity",
+      "held_in_shadow",
+      "left_for_notes",
+      "notes_missing",
+      "out_of_time",
+      "skipped",
+      "status",
+      "tag_failures",
+      "would_close",
+      "would_skip"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

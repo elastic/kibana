@@ -3992,6 +3992,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 **/moon.yml
 # Only the workflow step schema sync PR changes these (auto-approved), feature PRs never do
 /src/platform/packages/private/kbn-workflow-step-schema-cli/generated/
+# CI writes these. New steps need an entry in contracts/approved_steps.json and breaking changes one in contracts/breaking_changes_allowlist.json, both owned by workflows-eng
+/x-pack/platform/plugins/shared/workflows_extensions/contracts/steps/
 
 # Operations (last-match override)
 /src/platform/test/package @elastic/kibana-operations

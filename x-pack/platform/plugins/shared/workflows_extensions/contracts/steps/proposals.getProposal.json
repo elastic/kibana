@@ -1,0 +1,99 @@
+{
+  "exposure": "open",
+  "id": "proposals.getProposal",
+  "input": {
+    "properties": {
+      "proposalId": {
+        "description": "Proposal to read.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "proposalId"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "actionWorkflowId": {
+        "type": "string"
+      },
+      "decidedBy": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "maxLength": 256,
+            "nullable": true,
+            "type": "string"
+          },
+          "fullName": {
+            "maxLength": 256,
+            "nullable": true,
+            "type": "string"
+          },
+          "profileUid": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "username": {
+            "maxLength": 256,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "fullName",
+          "username"
+        ],
+        "type": "object"
+      },
+      "decision": {
+        "enum": [
+          "approved",
+          "dismissed"
+        ],
+        "type": "string"
+      },
+      "dismissReason": {
+        "enum": [
+          "no_reason",
+          "duplicate",
+          "false_positive",
+          "handled_elsewhere",
+          "risk_accepted",
+          "other"
+        ],
+        "type": "string"
+      },
+      "expiresAt": {
+        "type": "string"
+      },
+      "rationale": {
+        "maxLength": 4096,
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "pending",
+          "executing",
+          "succeeded",
+          "failed",
+          "expired",
+          "no_action",
+          "superseded"
+        ],
+        "type": "string"
+      },
+      "supersededBy": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "status"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

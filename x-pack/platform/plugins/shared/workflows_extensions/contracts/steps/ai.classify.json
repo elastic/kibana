@@ -1,0 +1,114 @@
+{
+  "config": {
+    "properties": {
+      "connector-id": {
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "ai.classify",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "description",
+              "name"
+            ],
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "properties": {
+      "allowMultipleCategories": {
+        "type": "boolean"
+      },
+      "categories": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "fallbackCategory": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ]
+      },
+      "includeRationale": {
+        "type": "boolean"
+      },
+      "input": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {},
+            "type": "array"
+          },
+          {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        ]
+      },
+      "instructions": {
+        "type": "string"
+      },
+      "temperature": {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      }
+    },
+    "required": [
+      "categories",
+      "input"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "categories": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "category": {
+        "type": "string"
+      },
+      "metadata": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "rationale": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "metadata"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -1,0 +1,253 @@
+{
+  "exposure": "open",
+  "id": "context-engine.readTraceTranscripts",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema1": {
+        "maximum": 2000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema2": {
+        "maximum": 10000000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema3": {
+        "maximum": 1000000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema4": {
+        "maximum": 60,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "properties": {
+      "after": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The resume_after of the read that stopped at since: the trace id to continue after. Empty or omitted: read from since."
+      },
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "batch_tokens": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "The most estimated tokens of one batch: what one model call reads. Defaults to 50000."
+      },
+      "max_tokens": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Stop the read before its transcripts exceed this many estimated tokens. Defaults to 600000."
+      },
+      "settle_minutes": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Leave rounds that ended this recently for the next run. Defaults to 5."
+      },
+      "since": {
+        "description": "Read the rounds that ended since this ISO 8601 time",
+        "maxLength": 64,
+        "type": "string"
+      },
+      "size": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "How many rounds to read, oldest first. Defaults to 50."
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "since"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "attributes": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object"
+          },
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "permissions": {
+            "additionalProperties": false,
+            "properties": {
+              "kibana": {
+                "additionalProperties": false,
+                "properties": {
+                  "privileges": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "space": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "space"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "privileges"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "kibana"
+            ],
+            "type": "object"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "id",
+          "permissions",
+          "title",
+          "type",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "rounds": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "rounds",
+          "type",
+          "value"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "batches": {
+        "description": "The memories in batches for the model, a call each: rounds that share permissions, each conversation together and in order, whole conversations up to batch_tokens",
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "type": "array"
+      },
+      "memories": {
+        "description": "One transcript per round, oldest first, shaped as the memories applyDreamChanges takes",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "resume_after": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Set when size or max_tokens cut the read: the trace id to pass as after"
+      },
+      "resume_from": {
+        "description": "Where the next read starts: the end of the last round read when size or max_tokens cut the read, else the end of the window read",
+        "type": "string"
+      },
+      "skipped": {
+        "description": "Rounds left out because their traces hold no conversation text to read",
+        "type": "number"
+      },
+      "sources": {
+        "description": "Each trace source of the AI index: how many rounds it found, or why it failed",
+        "items": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "batches",
+      "memories",
+      "resume_from",
+      "skipped",
+      "sources"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

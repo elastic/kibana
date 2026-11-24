@@ -1,0 +1,45 @@
+{
+  "exposure": "open",
+  "id": "nightshift.ensureInvestigationAgent",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "enum": [
+          "nightshift.investigation",
+          "significant-events.decision-tree-reinforcement"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Which investigation agent to install. Defaults to nightshift.investigation."
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "agent_id": {
+        "description": "The agent that was ensured",
+        "type": "string"
+      },
+      "space_id": {
+        "description": "The space the investigation agent was ensured in",
+        "type": "string"
+      }
+    },
+    "required": [
+      "agent_id",
+      "space_id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

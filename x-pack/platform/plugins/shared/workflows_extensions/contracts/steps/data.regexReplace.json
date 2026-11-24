@@ -1,0 +1,66 @@
+{
+  "config": {
+    "properties": {
+      "detailed": {
+        "default": false,
+        "type": "boolean"
+      },
+      "source": {}
+    },
+    "required": [
+      "source"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.regexReplace",
+  "input": {
+    "properties": {
+      "flags": {
+        "type": "string"
+      },
+      "pattern": {
+        "maxLength": 10000,
+        "type": "string"
+      },
+      "replacement": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "pattern",
+      "replacement"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "anyOf": [
+      {
+        "type": "string"
+      },
+      {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "matchCount": {
+            "type": "number"
+          },
+          "original": {},
+          "replaced": {}
+        },
+        "required": [
+          "matchCount",
+          "original",
+          "replaced"
+        ],
+        "type": "object"
+      }
+    ]
+  },
+  "stability": "tech_preview"
+}

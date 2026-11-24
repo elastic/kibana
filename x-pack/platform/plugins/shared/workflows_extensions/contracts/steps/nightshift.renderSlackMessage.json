@@ -1,0 +1,67 @@
+{
+  "exposure": "open",
+  "id": "nightshift.renderSlackMessage",
+  "input": {
+    "properties": {
+      "investigation_id": {
+        "maxLength": 500,
+        "minLength": 1,
+        "type": "string"
+      },
+      "phase": {
+        "enum": [
+          "started",
+          "completed",
+          "failed",
+          "timed_out"
+        ],
+        "type": "string"
+      },
+      "reason": {
+        "maxLength": 10000,
+        "type": "string"
+      }
+    },
+    "required": [
+      "investigation_id",
+      "phase"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": {},
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "blocks": {
+        "description": "Slack Block Kit blocks",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "text": {
+        "description": "Fallback and notification text",
+        "type": "string"
+      }
+    },
+    "required": [
+      "blocks",
+      "text"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

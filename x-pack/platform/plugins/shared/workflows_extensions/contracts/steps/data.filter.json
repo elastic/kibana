@@ -1,0 +1,34 @@
+{
+  "config": {
+    "properties": {
+      "items": {}
+    },
+    "required": [
+      "items"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.filter",
+  "input": {
+    "properties": {
+      "condition": {
+        "type": "string"
+      },
+      "limit": {
+        "exclusiveMinimum": true,
+        "minimum": 0,
+        "type": "number"
+      }
+    },
+    "required": [
+      "condition"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "items": {},
+    "type": "array"
+  },
+  "stability": "tech_preview"
+}

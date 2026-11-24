@@ -1,0 +1,295 @@
+{
+  "exposure": "open",
+  "id": "security.createExceptionListItem",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "default": "single",
+        "enum": [
+          "agnostic",
+          "single"
+        ],
+        "type": "string"
+      },
+      "__schema10": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema11": {
+        "items": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "maxItems": 1000,
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema12": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema13": {
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "binary",
+              "boolean",
+              "byte",
+              "date",
+              "date_nanos",
+              "date_range",
+              "double",
+              "double_range",
+              "float",
+              "float_range",
+              "geo_point",
+              "geo_shape",
+              "half_float",
+              "integer",
+              "integer_range",
+              "ip",
+              "ip_range",
+              "keyword",
+              "long",
+              "long_range",
+              "shape",
+              "short",
+              "text"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema14": {
+        "items": {
+          "enum": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema15": {
+        "items": {
+          "$ref": "#/definitions/__schema16"
+        },
+        "maxItems": 50,
+        "type": "array"
+      },
+      "__schema16": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema17": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema18": {
+        "items": {
+          "$ref": "#/definitions/__schema19"
+        },
+        "maxItems": 50,
+        "type": "array"
+      },
+      "__schema19": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema3": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema4": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema5": {
+        "maxLength": 2048,
+        "type": "string"
+      },
+      "__schema6": {
+        "items": {
+          "$ref": "#/definitions/__schema7"
+        },
+        "maxItems": 100,
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema7": {
+        "properties": {
+          "field": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "list": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "operator": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "value": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "values": {
+            "$ref": "#/definitions/__schema11"
+          }
+        },
+        "required": [
+          "field",
+          "operator"
+        ],
+        "type": "object"
+      },
+      "__schema8": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema9": {
+        "enum": [
+          "is",
+          "is_not",
+          "is_one_of",
+          "is_not_one_of",
+          "matches",
+          "does_not_match",
+          "exists",
+          "does_not_exist",
+          "is_in_list",
+          "is_not_in_list"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "comments": {
+        "$ref": "#/definitions/__schema18"
+      },
+      "description": {
+        "$ref": "#/definitions/__schema5"
+      },
+      "entries": {
+        "$ref": "#/definitions/__schema6"
+      },
+      "expire_time": {
+        "$ref": "#/definitions/__schema17"
+      },
+      "item_id": {
+        "$ref": "#/definitions/__schema2"
+      },
+      "list_id": {
+        "$ref": "#/definitions/__schema0"
+      },
+      "name": {
+        "$ref": "#/definitions/__schema4"
+      },
+      "namespace_type": {
+        "$ref": "#/definitions/__schema1"
+      },
+      "os_types": {
+        "$ref": "#/definitions/__schema14"
+      },
+      "overwrite": {
+        "$ref": "#/definitions/__schema3"
+      },
+      "tags": {
+        "$ref": "#/definitions/__schema15"
+      }
+    },
+    "required": [
+      "description",
+      "entries",
+      "list_id",
+      "name"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "created_at": {
+        "description": "Autogenerated date of object creation.",
+        "format": "date-time",
+        "maxLength": 64,
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+        "type": "string"
+      },
+      "created_by": {
+        "description": "Autogenerated value - user that created object.",
+        "type": "string"
+      },
+      "expire_time": {
+        "format": "date-time",
+        "maxLength": 64,
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+        "type": "string"
+      },
+      "id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "item_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "list_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "name": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "namespace_type": {
+        "enum": [
+          "agnostic",
+          "single"
+        ],
+        "type": "string"
+      },
+      "outcome": {
+        "enum": [
+          "created",
+          "skipped",
+          "overwritten"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "created_at",
+      "created_by",
+      "id",
+      "item_id",
+      "list_id",
+      "name",
+      "namespace_type",
+      "outcome"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -1,0 +1,144 @@
+{
+  "exposure": "open",
+  "id": "security.assignAttack",
+  "input": {
+    "anyOf": [
+      {
+        "properties": {
+          "assignees_to_add": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ],
+            "description": "A list of user IDs to assign",
+            "items": {
+              "$ref": "#/definitions/__schema5"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "assignees_to_remove": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ],
+            "default": [],
+            "description": "A list of user IDs to unassign"
+          },
+          "ids": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "update_related_alerts": {
+            "$ref": "#/definitions/__schema4"
+          }
+        },
+        "required": [
+          "assignees_to_add",
+          "ids"
+        ],
+        "type": "object"
+      },
+      {
+        "properties": {
+          "assignees_to_add": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ],
+            "default": [],
+            "description": "A list of user IDs to assign"
+          },
+          "assignees_to_remove": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ],
+            "description": "A list of user IDs to unassign",
+            "items": {
+              "$ref": "#/definitions/__schema5"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "ids": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "update_related_alerts": {
+            "$ref": "#/definitions/__schema4"
+          }
+        },
+        "required": [
+          "assignees_to_remove",
+          "ids"
+        ],
+        "type": "object"
+      }
+    ],
+    "definitions": {
+      "__schema0": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          },
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "A single attack ID or a list of IDs to support bulk updates"
+      },
+      "__schema1": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "items": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema3": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema4": {
+        "default": false,
+        "type": "boolean"
+      },
+      "__schema5": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema6": {
+        "items": {
+          "$ref": "#/definitions/__schema5"
+        },
+        "type": "array"
+      }
+    }
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "message": {
+        "maxLength": 1000,
+        "type": "string"
+      },
+      "success": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "success"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

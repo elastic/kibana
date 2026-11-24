@@ -1,0 +1,326 @@
+{
+  "exposure": "open",
+  "id": "context-engine.applyDreamRelationships",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "maxItems": 200,
+        "type": "array"
+      },
+      "__schema1": {
+        "additionalProperties": {},
+        "properties": {
+          "governance": {
+            "properties": {
+              "lifecycle": {
+                "properties": {
+                  "status": {
+                    "maxLength": 64,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "permissions": {
+            "properties": {
+              "kibana": {
+                "properties": {
+                  "privileges": {
+                    "items": {
+                      "$ref": "#/definitions/__schema3"
+                    },
+                    "maxItems": 100,
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "updated_at": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "__schema10": {
+        "type": "boolean"
+      },
+      "__schema2": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema3": {
+        "properties": {
+          "count": {
+            "type": "number"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/definitions/__schema4"
+            },
+            "maxItems": 50,
+            "type": "array"
+          },
+          "space": {
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "space"
+        ],
+        "type": "object"
+      },
+      "__schema4": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema5": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "maxItems": 200,
+        "type": "array"
+      },
+      "__schema6": {
+        "default": [],
+        "items": {
+          "$ref": "#/definitions/__schema7"
+        },
+        "maxItems": 200,
+        "type": "array"
+      },
+      "__schema7": {
+        "properties": {
+          "delete": {
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 2048,
+            "type": "string"
+          },
+          "from": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "relation": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema2"
+          }
+        },
+        "required": [
+          "from",
+          "relation",
+          "to"
+        ],
+        "type": "object"
+      },
+      "__schema8": {
+        "items": {
+          "$ref": "#/definitions/__schema9"
+        },
+        "maxItems": 400,
+        "type": "array"
+      },
+      "__schema9": {
+        "additionalProperties": {},
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "type"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "changes": {
+        "description": "The relationship changes the dreaming model returned",
+        "properties": {
+          "relationships": {
+            "$ref": "#/definitions/__schema6"
+          }
+        },
+        "type": "object"
+      },
+      "documents": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema8"
+          }
+        ],
+        "description": "On a dry run, the facts and entities the extraction step would write, so relationships can link them before they are stored"
+      },
+      "dry_run": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "Check and resolve the changes and report what they would write, without writing."
+      },
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Without memories: the ids of the stored facts and entities being linked, which share permissions. Every relationship has an end among them, is based on the memories its ends cite, and takes the permissions of its ends."
+      },
+      "memories": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The memories of the batch, as read from the AI index. They must all have the same permissions. A relationship is based on the ones its two ends cite, and is skipped when neither end cites any. Omit them to link stored facts and entities, listed in items."
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "changes"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "item": {
+            "description": "Which item of the change set, such as `fact new:1`",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why it was not applied",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "change": {
+              "enum": [
+                "created",
+                "updated",
+                "deleted"
+              ],
+              "type": "string"
+            },
+            "id": {
+              "description": "The KI id",
+              "type": "string"
+            },
+            "title": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema3"
+                }
+              ],
+              "description": "Absent when it would be deleted"
+            },
+            "type": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema2"
+                }
+              ],
+              "description": "Absent when it would be deleted"
+            }
+          },
+          "required": [
+            "change",
+            "id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "created": {
+        "description": "Relationships created",
+        "type": "number"
+      },
+      "deleted": {
+        "description": "Relationships deleted",
+        "type": "number"
+      },
+      "rejected": {
+        "description": "Relationships that were not applied, each with why",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "updated": {
+        "description": "Relationships updated",
+        "type": "number"
+      },
+      "would_write": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "On a dry run, each relationship it would write; nothing is stored"
+      }
+    },
+    "required": [
+      "created",
+      "deleted",
+      "rejected",
+      "updated"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

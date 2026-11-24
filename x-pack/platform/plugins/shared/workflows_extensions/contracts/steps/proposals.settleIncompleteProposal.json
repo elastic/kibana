@@ -1,0 +1,73 @@
+{
+  "exposure": "open",
+  "id": "proposals.settleIncompleteProposal",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "enum": [
+          "failed",
+          "expired"
+        ],
+        "type": "string"
+      },
+      "__schema1": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "executionError": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Why the proposal is being settled without a completed decision loop."
+      },
+      "proposalId": {
+        "description": "Any proposal in the chain — the live head is resolved first.",
+        "type": "string"
+      },
+      "status": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Terminal status to write. Omit to choose from the record: failed when already decided, expired when not."
+      }
+    },
+    "required": [
+      "proposalId"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "decision": {
+        "enum": [
+          "approved",
+          "dismissed"
+        ],
+        "type": "string"
+      },
+      "proposalId": {
+        "description": "The live revision that was settled.",
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "failed",
+          "expired"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "proposalId",
+      "status"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

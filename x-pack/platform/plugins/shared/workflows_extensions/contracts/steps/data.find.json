@@ -1,0 +1,45 @@
+{
+  "config": {
+    "properties": {
+      "items": {}
+    },
+    "required": [
+      "items"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.find",
+  "input": {
+    "properties": {
+      "condition": {
+        "type": "string"
+      },
+      "errorIfEmpty": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "condition"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "nullable": true,
+        "type": "number"
+      },
+      "item": {
+        "nullable": true
+      }
+    },
+    "required": [
+      "index",
+      "item"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -1,0 +1,62 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.loadAlerts",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alert_ids": {
+        "description": "Alerts of one triage batch.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 100,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "alert_ids"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "__schema1": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alerts": {
+        "description": "Alerts with `_id`, `_index` and the fields Alert Analysis and the pattern keys read, in the shape Alert Analysis takes.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "missing_alert_ids": {
+        "description": "Ids that no longer match an alert.",
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "alerts",
+      "missing_alert_ids"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -18,7 +18,8 @@
     "@kbn/tooling-log",
     "@kbn/repo-info",
     "@kbn/core-test-helpers-kbn-server",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/api-contracts"
   ],
   "exclude": [
     "target/**/*"

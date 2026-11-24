@@ -1,0 +1,90 @@
+{
+  "exposure": "open",
+  "id": "workflow.getLastRun",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maximum": 8760,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema1": {
+        "maximum": 8760,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "properties": {
+      "default_hours": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Hours the window covers on the first run, when there is no earlier run. Defaults to 24."
+      },
+      "max_hours": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Longest window, so a run after a long pause or failures does not read everything since. Defaults to no limit."
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "execution_id": {
+            "type": "string"
+          },
+          "finished_at": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "execution_id",
+          "started_at"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "first_run": {
+        "description": "True when this workflow has no earlier successful run.",
+        "type": "boolean"
+      },
+      "hours_since": {
+        "description": "Whole hours from `since` to now, rounded up.",
+        "type": "number"
+      },
+      "last_success": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The last completed run of this workflow, test runs excluded."
+      },
+      "since": {
+        "description": "Start of the window to process: when the last successful run started, or default_hours ago on the first run, never further back than max_hours.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "first_run",
+      "hours_since",
+      "since"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -1,0 +1,66 @@
+{
+  "config": {
+    "properties": {
+      "connector-id": {
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "ai.summarize",
+  "input": {
+    "properties": {
+      "input": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {},
+            "type": "array"
+          },
+          {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        ]
+      },
+      "instructions": {
+        "type": "string"
+      },
+      "maxLength": {
+        "exclusiveMinimum": true,
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "temperature": {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      }
+    },
+    "required": [
+      "input"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "content": {
+        "type": "string"
+      },
+      "metadata": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "required": [
+      "content"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

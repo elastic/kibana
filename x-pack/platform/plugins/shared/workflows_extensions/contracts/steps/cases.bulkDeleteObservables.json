@@ -1,0 +1,52 @@
+{
+  "exposure": "open",
+  "id": "cases.bulkDeleteObservables",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 36,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "case_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "observable_ids": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 50,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "case_id",
+      "observable_ids"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "case_id": {
+        "type": "string"
+      },
+      "observable_ids": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "case_id",
+      "observable_ids"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

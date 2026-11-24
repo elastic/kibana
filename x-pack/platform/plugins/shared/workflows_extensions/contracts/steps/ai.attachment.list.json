@@ -1,0 +1,82 @@
+{
+  "exposure": "open",
+  "id": "ai.attachment.list",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "conversation_id": {
+        "description": "The ID of the conversation whose attachments should be listed.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "include_deleted": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "When true, includes soft-deleted attachments. Defaults to false."
+      }
+    },
+    "required": [
+      "conversation_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "current_version": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "active",
+          "current_version",
+          "id",
+          "type"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "attachments": {
+        "description": "Summary of each attachment: id, type, current_version, description, active.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "total_token_estimate": {
+        "description": "Aggregate estimated token count across the returned attachments.",
+        "type": "number"
+      }
+    },
+    "required": [
+      "attachments",
+      "total_token_estimate"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

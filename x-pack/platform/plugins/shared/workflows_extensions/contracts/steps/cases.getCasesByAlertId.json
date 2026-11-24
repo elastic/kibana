@@ -1,0 +1,128 @@
+{
+  "exposure": "open",
+  "id": "cases.getCasesByAlertId",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "enum": [
+          "cases",
+          "observability",
+          "securitySolution"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alert_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "owner": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "type": "array"
+          }
+        ]
+      }
+    },
+    "required": [
+      "alert_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "When the case was created.",
+            "format": "date-time",
+            "maxLength": 64,
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+            "type": "string"
+          },
+          "description": {
+            "description": "The case description.",
+            "type": "string"
+          },
+          "id": {
+            "description": "The case identifier.",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "closed",
+              "in-progress",
+              "open"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "description": "The case title.",
+            "type": "string"
+          },
+          "totals": {
+            "additionalProperties": false,
+            "properties": {
+              "alerts": {
+                "description": "Number of alert attachments on the case.",
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "events": {
+                "description": "Number of event attachments on the case.",
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "userComments": {
+                "description": "Number of user comment attachments on the case.",
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "alerts",
+              "events",
+              "userComments"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "createdAt",
+          "description",
+          "id",
+          "status",
+          "title",
+          "totals"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "cases": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 10000,
+        "type": "array"
+      }
+    },
+    "required": [
+      "cases"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

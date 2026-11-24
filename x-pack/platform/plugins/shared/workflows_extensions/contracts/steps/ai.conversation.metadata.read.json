@@ -1,0 +1,38 @@
+{
+  "exposure": "open",
+  "id": "ai.conversation.metadata.read",
+  "input": {
+    "properties": {
+      "conversation_id": {
+        "description": "The unique identifier of the conversation to read metadata from.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "conversation_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {}
+    },
+    "properties": {
+      "metadata": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "description": "The current metadata key/value pairs for this conversation.",
+        "type": "object"
+      }
+    },
+    "required": [
+      "metadata"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

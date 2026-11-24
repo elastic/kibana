@@ -1,0 +1,94 @@
+{
+  "exposure": "open",
+  "id": "alerting.create_signal",
+  "input": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "__schema2": {
+        "format": "date-time",
+        "maxLength": 64,
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "data": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ]
+      },
+      "fingerprint": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "fingerprint_fields": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 10,
+        "minItems": 1,
+        "type": "array"
+      },
+      "severity": {
+        "enum": [
+          "info",
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "type": "string"
+      },
+      "source": {
+        "maxLength": 150,
+        "minLength": 1,
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "breached",
+          "recovered",
+          "no_data"
+        ],
+        "type": "string"
+      },
+      "timestamp": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "The ISO datetime when the event occurred at the source. Defaults to the time the request is received."
+      }
+    },
+    "required": [
+      "source"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "group_hash": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "group_hash"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

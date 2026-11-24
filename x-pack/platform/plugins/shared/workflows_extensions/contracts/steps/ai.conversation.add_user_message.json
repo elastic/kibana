@@ -1,0 +1,51 @@
+{
+  "exposure": "open",
+  "id": "ai.conversation.add_user_message",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "author_name": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Display name recorded on the user message this step writes, for example the workflow name. Applied only when the workflow runs as a service account; the message stays attributed to that account."
+      },
+      "conversation_id": {
+        "description": "The unique identifier of the conversation to add the user message to.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "message": {
+        "description": "The user message text.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "conversation_id",
+      "message"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "conversation_id": {
+        "description": "The ID of the conversation the user message was added to.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "conversation_id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

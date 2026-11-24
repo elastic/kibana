@@ -1,0 +1,225 @@
+{
+  "exposure": "open",
+  "id": "ai.conversation.create",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent."
+      },
+      "__schema1": {
+        "maxLength": 64,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema10": {
+        "properties": {
+          "id": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "member"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "user"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema11": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema12"
+          }
+        ],
+        "description": "Optional ID of a conversation template to apply. When set, seeds default metadata and validates any caller-supplied `metadata` against the template field definitions."
+      },
+      "__schema12": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema13": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema14"
+          }
+        ],
+        "description": "Initial metadata values. Each key must be declared by the referenced template; each value is validated against the field definition. Requires `template_id`."
+      },
+      "__schema14": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema15"
+        },
+        "type": "object"
+      },
+      "__schema15": {
+        "anyOf": [
+          {
+            "maxLength": 10000,
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema16"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        ]
+      },
+      "__schema16": {
+        "maxLength": 2000,
+        "type": "string"
+      },
+      "__schema2": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Optional client-supplied UUID for the conversation. Server-generated if omitted."
+      },
+      "__schema3": {
+        "format": "uuid",
+        "maxLength": 256,
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema4": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Title for the conversation. Defaults to \"New conversation\"."
+      },
+      "__schema5": {
+        "maxLength": 500,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema6": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "Optional access-control settings. Defaults to private with no shared members."
+      },
+      "__schema7": {
+        "properties": {
+          "access_mode": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "entries": {
+            "$ref": "#/definitions/__schema9"
+          }
+        },
+        "required": [
+          "access_mode"
+        ],
+        "type": "object"
+      },
+      "__schema8": {
+        "enum": [
+          "private",
+          "public"
+        ],
+        "type": "string"
+      },
+      "__schema9": {
+        "items": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "maxItems": 100,
+        "type": "array"
+      }
+    },
+    "properties": {
+      "access_control": {
+        "$ref": "#/definitions/__schema6"
+      },
+      "agent_id": {
+        "$ref": "#/definitions/__schema0"
+      },
+      "conversation_id": {
+        "$ref": "#/definitions/__schema2"
+      },
+      "metadata": {
+        "$ref": "#/definitions/__schema13"
+      },
+      "template_id": {
+        "$ref": "#/definitions/__schema11"
+      },
+      "title": {
+        "$ref": "#/definitions/__schema4"
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      },
+      "__schema1": {}
+    },
+    "properties": {
+      "agent_id": {
+        "description": "The agent associated with the conversation.",
+        "type": "string"
+      },
+      "conversation_id": {
+        "description": "The ID of the newly created conversation.",
+        "type": "string"
+      },
+      "metadata": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "description": "The conversation metadata after applying template defaults and caller-supplied values.",
+        "type": "object"
+      },
+      "template_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The template applied to the conversation, if any."
+      }
+    },
+    "required": [
+      "agent_id",
+      "conversation_id",
+      "metadata"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

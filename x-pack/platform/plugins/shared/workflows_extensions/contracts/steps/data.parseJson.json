@@ -1,0 +1,19 @@
+{
+  "config": {
+    "properties": {
+      "source": {}
+    },
+    "required": [
+      "source"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.parseJson",
+  "input": {
+    "properties": {},
+    "type": "object"
+  },
+  "output": {},
+  "stability": "tech_preview"
+}

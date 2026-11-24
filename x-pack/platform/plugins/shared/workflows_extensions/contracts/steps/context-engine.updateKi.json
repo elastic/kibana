@@ -1,0 +1,295 @@
+{
+  "exposure": "open",
+  "id": "context-engine.updateKi",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "description": "The KI type (e.g. index_metadata, document, detection)",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "description": "A short title for the KI",
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema10": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema11"
+        },
+        "type": "object"
+      },
+      "__schema11": {
+        "anyOf": [
+          {
+            "maxLength": 10000,
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema12"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          {
+            "enum": [
+              null
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        ]
+      },
+      "__schema12": {
+        "maxLength": 10000,
+        "type": "string"
+      },
+      "__schema13": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema14"
+          }
+        ],
+        "description": "URIs this KI relates to"
+      },
+      "__schema14": {
+        "items": {
+          "$ref": "#/definitions/__schema15"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "__schema15": {
+        "properties": {
+          "description": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema16"
+              }
+            ],
+            "description": "Why this reference exists"
+          },
+          "relation": {
+            "description": "How the URI relates to this KI",
+            "enum": [
+              "derived_from",
+              "relates_to",
+              "supersedes"
+            ],
+            "type": "string"
+          },
+          "uri": {
+            "description": "The referenced URI, for example index://logs-*",
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri"
+        ],
+        "type": "object"
+      },
+      "__schema16": {
+        "maxLength": 2048,
+        "type": "string"
+      },
+      "__schema17": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema18"
+          }
+        ],
+        "description": "Expiry date in ISO 8601. Leave unset and the KI never expires",
+        "nullable": true
+      },
+      "__schema18": {
+        "format": "date-time",
+        "maxLength": 64,
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|[+-](?:[01]\\d|2[0-3]):[0-5]\\d)$",
+        "type": "string"
+      },
+      "__schema19": {
+        "properties": {
+          "status": {
+            "description": "Lifecycle status of the KI. Unset reads as active",
+            "enum": [
+              "active",
+              "deleted",
+              "verification_failed"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "A one-line description of the KI"
+      },
+      "__schema20": {
+        "type": "boolean"
+      },
+      "__schema21": {
+        "type": "boolean"
+      },
+      "__schema3": {
+        "maxLength": 2048,
+        "type": "string"
+      },
+      "__schema4": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "The knowledge content of the KI"
+      },
+      "__schema5": {
+        "maxLength": 65536,
+        "type": "string"
+      },
+      "__schema6": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "Tags used to categorize the KI"
+      },
+      "__schema7": {
+        "items": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "__schema8": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema9": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "Arbitrary key-value attributes attached to the KI. A null value omits the attribute."
+      }
+    },
+    "properties": {
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "force": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema20"
+          }
+        ],
+        "description": "Update the knowledge indicator even if it is deleted"
+      },
+      "ki": {
+        "description": "The knowledge indicator fields to update",
+        "properties": {
+          "attributes": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "content": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "expires_at": {
+            "$ref": "#/definitions/__schema17"
+          },
+          "references": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "title": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "type": {
+            "$ref": "#/definitions/__schema0"
+          }
+        },
+        "type": "object"
+      },
+      "ki_id": {
+        "description": "The document id of the knowledge indicator",
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "lifecycle": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema19"
+          }
+        ],
+        "description": "The lifecycle status to set"
+      },
+      "refresh": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema21"
+          }
+        ],
+        "description": "Wait for the write to become searchable before the step completes (default false)"
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "ki",
+      "ki_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "description": "The document id of the updated knowledge indicator",
+        "type": "string"
+      },
+      "result": {
+        "description": "Whether the update changed the document or was a no-op",
+        "enum": [
+          "updated",
+          "noop"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "id",
+      "result"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

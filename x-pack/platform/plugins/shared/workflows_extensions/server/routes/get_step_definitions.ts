@@ -5,73 +5,41 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { createSHA256Hash } from '@kbn/crypto';
-import { stableStringify } from '@kbn/std';
-import { z } from '@kbn/zod/v4';
 import type { ServerStepRegistry } from '../step_registry';
+import { buildStepContract, type StepContract } from '../step_registry/step_contract';
 import type { ServerStepDefinition } from '../step_registry/types';
 
 const ROUTE_PATH = '/internal/workflows_extensions/step_definitions';
 
-/**
- * Converts a zod schema to a stable JSON Schema representation for hashing.
- * Unrepresentable parts (e.g. transforms) are emitted as `{}` instead of throwing,
- * matching the workflow schema generation, so such steps still get a real hash
- * rather than the constant fallback.
- */
-function schemaToJson(schema?: z.ZodType): unknown {
-  if (!schema) {
-    return undefined;
-  }
-  return z.toJSONSchema(schema, { unrepresentable: 'any' });
+interface StepDefinitionEntry {
+  id: string;
+  contract?: StepContract;
+  contractError?: string;
 }
 
-/**
- * Computes a hash over the serializable contract of a step definition: its
- * schemas (inputSchema/outputSchema/configSchema) and metadata. `id` is excluded
- * since it's the lookup key.
- *
- * Function (handler/onCancel) implementations are intentionally NOT hashed: there is no
- * reliable way to hash function behavior at runtime. `fn.toString()` misses logic
- * in closed-over wrappers (e.g. `createCasesStepHandler`) and changes across
- * builds/transpilation. Plugins own their implementations; the first registration
- * is reviewed manually, and contract (schema/metadata) changes are caught here.
- */
-function computeDefinitionHash(definition: ServerStepDefinition, logger: Logger): string {
-  const {
-    label,
-    description,
-    category,
-    stability,
-    deprecation,
-    inputSchema,
-    outputSchema,
-    configSchema,
-  } = definition;
-
+// A step whose contract can't be serialized is returned with the error, so the contract
+// check reports that step instead of the whole request failing.
+const toEntryWithContract = (
+  definition: ServerStepDefinition,
+  logger: Logger
+): StepDefinitionEntry => {
   try {
-    const canonical = {
-      label,
-      description,
-      category,
-      stability,
-      deprecation,
-      inputSchema: schemaToJson(inputSchema),
-      outputSchema: schemaToJson(outputSchema),
-      configSchema: schemaToJson(configSchema),
-    };
-    return createSHA256Hash(stableStringify(canonical));
+    return { id: definition.id, contract: buildStepContract(definition) };
   } catch (error) {
-    logger.error(`Failed to compute definition hash for step ${definition.id}`, { error });
-    return 'definition-hashing-error';
+    logger.error(`Failed to serialize the contract of step ${definition.id}`, { error });
+    return {
+      id: definition.id,
+      contractError: error instanceof Error ? error.message : `${error}`,
+    };
   }
-}
+};
 
 /**
- * Registers the route to get all registered step definitions.
- * This endpoint is used by Scout tests to validate that new step registrations
- * are approved by the workflows-eng team.
+ * Registers the route that lists the registered step definitions. The client registration
+ * Scout test reads the ids, and the workflow step schema job reads the contracts
+ * (`include_contracts=true`) to keep the committed step contracts up to date.
  */
 export function registerGetStepDefinitionsRoute(
   router: IRouter,
@@ -90,18 +58,21 @@ export function registerGetStepDefinitionsRoute(
           reason: 'This route is used for testing purposes only. No sensitive data is exposed.',
         },
       },
-      validate: false,
+      validate: {
+        query: schema.object({
+          include_contracts: schema.boolean({ defaultValue: false }),
+        }),
+      },
     },
-    async (_context, _request, response) => {
+    async (_context, request, response) => {
+      const { include_contracts: includeContracts } = request.query;
       // Async loaders (e.g. dynamic imports waiting on start services) may still be pending.
       await registry.whenReady();
-      const allStepDefinitions = registry.getAll();
-      const steps = allStepDefinitions
-        // hash the serializable contract (schemas + metadata) to detect changes
-        .map((definition) => ({
-          id: definition.id,
-          definitionHash: computeDefinitionHash(definition, logger),
-        }))
+      const steps = registry
+        .getAll()
+        .map((definition) =>
+          includeContracts ? toEntryWithContract(definition, logger) : { id: definition.id }
+        )
         .sort((a, b) => a.id.localeCompare(b.id));
 
       return response.ok({ body: { steps } });

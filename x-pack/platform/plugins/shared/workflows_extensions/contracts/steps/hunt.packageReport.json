@@ -1,0 +1,485 @@
+{
+  "exposure": "open",
+  "id": "hunt.packageReport",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema2": {
+        "items": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "maxItems": 200,
+        "type": "array"
+      },
+      "__schema3": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema4": {
+        "items": {
+          "$ref": "#/definitions/__schema5"
+        },
+        "maxItems": 20,
+        "type": "array"
+      },
+      "__schema5": {
+        "properties": {
+          "confidence": {
+            "type": "number"
+          },
+          "evidence_quote": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "execution": {
+            "properties": {
+              "executed": {
+                "type": "boolean"
+              },
+              "hit": {
+                "type": "boolean"
+              },
+              "inconclusive_reason": {
+                "maxLength": 64,
+                "type": "string"
+              },
+              "row_count": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "executed",
+              "hit",
+              "row_count"
+            ],
+            "type": "object"
+          },
+          "severity": {
+            "maxLength": 32,
+            "type": "string"
+          },
+          "technique_id": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "technique_name": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "validated_esql": {
+            "maxLength": 32000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "confidence",
+          "technique_id",
+          "validated_esql"
+        ],
+        "type": "object"
+      },
+      "__schema6": {
+        "items": {
+          "$ref": "#/definitions/__schema7"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "__schema7": {
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "technique_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail",
+          "reason"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "behaviors": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "The coordinator's `tier2.behaviors`. Clean-run coverage KIs carry the executed query as `validated_esql` with `esql_status: executed_no_rows`."
+      },
+      "coverageGaps": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema6"
+          }
+        ],
+        "description": "The hunt's `coverage_gaps`: what a `retired_incomplete` run could not search, and why. Named in the coverage KI and the Investigation summary. Omit when none are known."
+      },
+      "expectedSseCount": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged. Omit to skip the shortfall check (e.g. an already-installed Worker that does not supply it yet)."
+      },
+      "hasConfirmedHit": {
+        "description": "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from IOC Hunt, or a behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable.",
+        "type": "boolean"
+      },
+      "huntStatus": {
+        "description": "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish and a later sweep will hunt the report again, `retired_incomplete` when the hunt stamped the report after a gap no rerun can close (the absence of a hit is a settled result, but not a clean verdict), `failed` when the coordinator call failed or was skipped.",
+        "enum": [
+          "success",
+          "partial",
+          "retired_incomplete",
+          "failed"
+        ],
+        "type": "string"
+      },
+      "investigationConversationId": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Investigation conversation id; must equal uuidv5(hunt:report:{spaceId}|{reportId})."
+      },
+      "reportId": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Threat report id this Investigation is bound to."
+      },
+      "reportIntentTargets": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "The coordinator's `report_intent_targets`: the datasets the report itself points at, without IOC Hunt hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
+      },
+      "runId": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Current-run id; packaging reads only attachments scoped to this run."
+      },
+      "spaceId": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Space the Investigation lives in (S1; must match the workflow space)."
+      }
+    },
+    "required": [
+      "hasConfirmedHit",
+      "huntStatus",
+      "investigationConversationId",
+      "reportId",
+      "runId",
+      "spaceId"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 5000,
+        "type": "string"
+      }
+    },
+    "oneOf": [
+      {
+        "additionalProperties": false,
+        "properties": {
+          "alreadyOpenCount": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "closureSummary": {
+            "type": "string"
+          },
+          "converged": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "note": {
+                  "maxLength": 2000,
+                  "type": "string"
+                },
+                "outcome": {
+                  "enum": [
+                    "revised",
+                    "already_mentioned",
+                    "not_revisable",
+                    "too_long",
+                    "revision_limit",
+                    "failed"
+                  ],
+                  "type": "string"
+                },
+                "ownerConversationId": {
+                  "type": "string"
+                },
+                "proposalId": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "note",
+                "outcome",
+                "ownerConversationId",
+                "proposalId"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "coverage": {
+            "additionalProperties": false,
+            "properties": {
+              "skipped": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kiId": {
+                      "type": "string"
+                    },
+                    "reason": {
+                      "enum": [
+                        "disabled",
+                        "denied",
+                        "storage_failure",
+                        "already_processed"
+                      ],
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kiId",
+                    "reason",
+                    "subject"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "written": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kiId": {
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kiId",
+                    "subject"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "skipped",
+              "written"
+            ],
+            "type": "object"
+          },
+          "dismiss": {
+            "type": "boolean"
+          },
+          "dismissHold": {
+            "enum": [
+              "none",
+              "open_proposal",
+              "check_failed"
+            ],
+            "type": "string"
+          },
+          "expectedProposalCount": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "mintSuppression": {
+            "enum": [
+              "none",
+              "check_failed"
+            ],
+            "type": "string"
+          },
+          "omittedProposalCount": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "proposalBullets": {
+            "items": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "proposals": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "actionInput": {
+                  "additionalProperties": {},
+                  "type": "object"
+                },
+                "actionWorkflowId": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "comment": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "enum": [
+                    "low",
+                    "medium",
+                    "high"
+                  ],
+                  "type": "string"
+                },
+                "conversationId": {
+                  "type": "string"
+                },
+                "hostName": {
+                  "type": "string"
+                },
+                "impact": {
+                  "type": "string"
+                },
+                "proposalId": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                "subject": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "host",
+                        "process"
+                      ],
+                      "type": "string"
+                    },
+                    "value": {
+                      "maxLength": 2048,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                "subjectKey": {
+                  "type": "string"
+                },
+                "title": {
+                  "maxLength": 256,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "category",
+                "comment",
+                "conversationId",
+                "proposalId",
+                "subjectKey"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "packaged"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "alreadyOpenCount",
+          "closureSummary",
+          "converged",
+          "coverage",
+          "dismiss",
+          "dismissHold",
+          "expectedProposalCount",
+          "mintSuppression",
+          "omittedProposalCount",
+          "proposalBullets",
+          "proposals",
+          "status"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "run_incomplete"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "status"
+        ],
+        "type": "object"
+      }
+    ]
+  },
+  "stability": "tech_preview"
+}

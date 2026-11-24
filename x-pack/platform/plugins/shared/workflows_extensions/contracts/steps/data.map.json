@@ -1,0 +1,100 @@
+{
+  "config": {
+    "properties": {
+      "items": {}
+    },
+    "required": [
+      "items"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.map",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/definitions/__schema0"
+                }
+              ]
+            },
+            "properties": {
+              "$map": {
+                "allOf": [
+                  {
+                    "properties": {
+                      "index": {
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+                        "type": "string"
+                      },
+                      "item": {
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+                        "type": "string"
+                      },
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "items"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "$ref": "#/definitions/__schema0"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "properties": {
+      "fields": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "object"
+      }
+    },
+    "required": [
+      "fields"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "anyOf": [
+      {
+        "items": {
+          "additionalProperties": {},
+          "type": "object"
+        },
+        "type": "array"
+      },
+      {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    ]
+  },
+  "stability": "tech_preview"
+}

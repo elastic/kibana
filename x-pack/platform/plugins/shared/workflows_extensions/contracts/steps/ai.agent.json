@@ -1,0 +1,2359 @@
+{
+  "config": {
+    "definitions": {
+      "__schema0": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "The ID of the agent to chat with. Defaults to the default Elastic AI agent."
+      },
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema10": {
+        "type": "boolean"
+      },
+      "__schema11": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema12"
+          }
+        ],
+        "description": "When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation."
+      },
+      "__schema12": {
+        "type": "boolean"
+      },
+      "__schema13": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema14"
+          }
+        ],
+        "description": "When true, the run writes nothing to a conversation: no conversation is created and, with conversation_id, the conversation is loaded as context but not modified (no message, round, metadata or workspace change). Defaults to false."
+      },
+      "__schema14": {
+        "type": "boolean"
+      },
+      "__schema15": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema16"
+          }
+        ],
+        "description": "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
+      },
+      "__schema16": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema17": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema18"
+          }
+        ],
+        "description": "The product solution to attribute this step to. Ignored when `plugin-id` is not set."
+      },
+      "__schema18": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema19": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema20"
+          }
+        ],
+        "description": "The product feature to attribute this step to. Ignored when `plugin-id` is not set."
+      },
+      "__schema2": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "The ID of the connector to use. Defaults to the default GenAI connector. Mutually exclusive with `inference-id`."
+      },
+      "__schema20": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema21": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema22"
+          }
+        ],
+        "description": "The parent feature id to group this step's LLM token usage under (connector telemetry aggregateBy)."
+      },
+      "__schema22": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema23": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema24"
+          }
+        ],
+        "description": "Maximum response size for this workflow step."
+      },
+      "__schema24": {
+        "maxLength": 32,
+        "type": "string"
+      },
+      "__schema25": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema26"
+          }
+        ],
+        "description": "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider. Ignored when the step runs on a `connector-id-by-feature` feature, whose configured reasoning is used instead."
+      },
+      "__schema26": {
+        "enum": [
+          "none",
+          "minimal",
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "type": "string"
+      },
+      "__schema3": {
+        "type": "string"
+      },
+      "__schema4": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted."
+      },
+      "__schema5": {
+        "type": "string"
+      },
+      "__schema6": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "A Model Management feature id, or an ordered list of them. The step runs on the first id that has a model configured for it: the feature's configured model and reasoning are used, and `reasoning-level` is ignored. An id that is not registered, or has no configured model, is skipped and the next id is tried. A configured feature is mutually exclusive with `connector-id` and `inference-id`. A list where every id misses is not a conflict."
+      },
+      "__schema7": {
+        "anyOf": [
+          {
+            "maxLength": 255,
+            "type": "string"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema8"
+            },
+            "maxItems": 8,
+            "type": "array"
+          }
+        ]
+      },
+      "__schema8": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema9": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "When true, creates a conversation for the step."
+      }
+    },
+    "properties": {
+      "agent-id": {
+        "$ref": "#/definitions/__schema0"
+      },
+      "aggregate-by": {
+        "$ref": "#/definitions/__schema21"
+      },
+      "connector-id": {
+        "$ref": "#/definitions/__schema2"
+      },
+      "connector-id-by-feature": {
+        "$ref": "#/definitions/__schema6"
+      },
+      "create-conversation": {
+        "$ref": "#/definitions/__schema9"
+      },
+      "ephemeral": {
+        "$ref": "#/definitions/__schema13"
+      },
+      "inference-id": {
+        "$ref": "#/definitions/__schema4"
+      },
+      "max-step-size": {
+        "$ref": "#/definitions/__schema23"
+      },
+      "plugin-id": {
+        "$ref": "#/definitions/__schema15"
+      },
+      "product-feature": {
+        "$ref": "#/definitions/__schema19"
+      },
+      "product-solution": {
+        "$ref": "#/definitions/__schema17"
+      },
+      "public-conversation": {
+        "$ref": "#/definitions/__schema11"
+      },
+      "reasoning-level": {
+        "$ref": "#/definitions/__schema25"
+      }
+    },
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "ai.agent",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "jsonSchemaModel": true,
+        "properties": {
+          "$defs": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "$ref": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "definitions": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "properties": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "required": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "title": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "type": {
+            "$ref": "#/definitions/__schema1"
+          }
+        },
+        "type": "object"
+      },
+      "__schema1": {
+        "enum": [
+          "object"
+        ],
+        "type": "string"
+      },
+      "__schema10": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema11": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema7"
+        },
+        "type": "object"
+      },
+      "__schema12": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema7"
+        },
+        "type": "object"
+      },
+      "__schema13": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema14": {
+        "exclusiveMinimum": true,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema15": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "__schema16": {
+        "items": {
+          "properties": {
+            "data": {
+              "$ref": "#/definitions/__schema19"
+            },
+            "hidden": {
+              "$ref": "#/definitions/__schema21"
+            },
+            "id": {
+              "$ref": "#/definitions/__schema17"
+            },
+            "origin": {
+              "$ref": "#/definitions/__schema20"
+            },
+            "type": {
+              "$ref": "#/definitions/__schema18"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema17": {
+        "type": "string"
+      },
+      "__schema18": {
+        "type": "string"
+      },
+      "__schema19": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema20": {
+        "type": "string"
+      },
+      "__schema21": {
+        "type": "boolean"
+      },
+      "__schema22": {
+        "type": "string"
+      },
+      "__schema23": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema24": {
+        "additionalProperties": {
+          "maxLength": 1024,
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "__schema25": {
+        "properties": {
+          "auto_approved_apis": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema26"
+              }
+            ],
+            "description": "Destructive APIs pre-approved for this step, keyed by backend, which the agent may then call without a user confirmation."
+          }
+        },
+        "type": "object"
+      },
+      "__schema26": {
+        "additionalProperties": false,
+        "properties": {
+          "elasticsearch": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema27"
+              }
+            ],
+            "description": "Elasticsearch APIs pre-approved for this step. Each entry is an exact identifier formed from the namespace and name (e.g. \"indices.create\"), a namespace wildcard (e.g. \"indices.*\"), or \"*\" for every Elasticsearch API."
+          },
+          "kibana": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema29"
+              }
+            ],
+            "description": "Kibana APIs pre-approved for this step. Each entry is an exact identifier formed from the namespace and name (e.g. \"alerting.delete-alerting-rule-id\"), a namespace wildcard (e.g. \"alerting.*\"), or \"*\" for every Kibana API."
+          }
+        },
+        "type": "object"
+      },
+      "__schema27": {
+        "items": {
+          "$ref": "#/definitions/__schema28"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "__schema28": {
+        "enum": [
+          "*",
+          "async-search.*",
+          "cat.*",
+          "ccr.*",
+          "cluster.*",
+          "connector.*",
+          "dangling-indices.*",
+          "encryption.*",
+          "enrich.*",
+          "eql.*",
+          "esql.*",
+          "features.*",
+          "fleet.*",
+          "graph.*",
+          "ilm.*",
+          "indices.*",
+          "inference.*",
+          "ingest.*",
+          "license.*",
+          "logstash.*",
+          "migration.*",
+          "ml.*",
+          "nodes.*",
+          "project.*",
+          "query-rules.*",
+          "rollup.*",
+          "search-application.*",
+          "searchable-snapshots.*",
+          "security.*",
+          "simulate.*",
+          "slm.*",
+          "snapshot.*",
+          "sql.*",
+          "ssl.*",
+          "streams.*",
+          "synonyms.*",
+          "tasks.*",
+          "text-structure.*",
+          "transform.*",
+          "watcher.*",
+          "xpack.*",
+          "async-search.delete",
+          "async-search.get",
+          "async-search.status",
+          "async-search.submit",
+          "bulk",
+          "cancel_reindex",
+          "cat.aliases",
+          "cat.allocation",
+          "cat.circuit_breaker",
+          "cat.component_templates",
+          "cat.count",
+          "cat.fielddata",
+          "cat.health",
+          "cat.help",
+          "cat.indices",
+          "cat.master",
+          "cat.ml_data_frame_analytics",
+          "cat.ml_datafeeds",
+          "cat.ml_jobs",
+          "cat.ml_trained_models",
+          "cat.nodeattrs",
+          "cat.nodes",
+          "cat.pending_tasks",
+          "cat.plugins",
+          "cat.recovery",
+          "cat.repositories",
+          "cat.segments",
+          "cat.shards",
+          "cat.snapshots",
+          "cat.tasks",
+          "cat.templates",
+          "cat.thread_pool",
+          "cat.transforms",
+          "ccr.delete_auto_follow_pattern",
+          "ccr.follow",
+          "ccr.follow_info",
+          "ccr.follow_stats",
+          "ccr.forget_follower",
+          "ccr.get_auto_follow_pattern",
+          "ccr.pause_auto_follow_pattern",
+          "ccr.pause_follow",
+          "ccr.put_auto_follow_pattern",
+          "ccr.resume_auto_follow_pattern",
+          "ccr.resume_follow",
+          "ccr.stats",
+          "ccr.unfollow",
+          "clear_scroll",
+          "close_point_in_time",
+          "cluster.allocation_explain",
+          "cluster.delete_component_template",
+          "cluster.delete_voting_config_exclusions",
+          "cluster.exists_component_template",
+          "cluster.get_component_template",
+          "cluster.get_settings",
+          "cluster.health",
+          "cluster.info",
+          "cluster.pending_tasks",
+          "cluster.post_voting_config_exclusions",
+          "cluster.put_component_template",
+          "cluster.put_settings",
+          "cluster.remote_info",
+          "cluster.reroute",
+          "cluster.state",
+          "cluster.stats",
+          "connector.check_in",
+          "connector.delete",
+          "connector.get",
+          "connector.list",
+          "connector.post",
+          "connector.put",
+          "connector.sync_job_cancel",
+          "connector.sync_job_check_in",
+          "connector.sync_job_claim",
+          "connector.sync_job_delete",
+          "connector.sync_job_error",
+          "connector.sync_job_get",
+          "connector.sync_job_list",
+          "connector.sync_job_post",
+          "connector.sync_job_update_stats",
+          "connector.update_active_filtering",
+          "connector.update_api_key_id",
+          "connector.update_configuration",
+          "connector.update_error",
+          "connector.update_features",
+          "connector.update_filtering",
+          "connector.update_filtering_validation",
+          "connector.update_index_name",
+          "connector.update_name",
+          "connector.update_native",
+          "connector.update_pipeline",
+          "connector.update_scheduling",
+          "connector.update_service_type",
+          "connector.update_status",
+          "count",
+          "create",
+          "dangling-indices.delete_dangling_index",
+          "dangling-indices.import_dangling_index",
+          "dangling-indices.list_dangling_indices",
+          "delete",
+          "delete_by_query",
+          "delete_by_query_rethrottle",
+          "delete_script",
+          "encryption.reset",
+          "enrich.delete_policy",
+          "enrich.execute_policy",
+          "enrich.get_policy",
+          "enrich.put_policy",
+          "enrich.stats",
+          "eql.delete",
+          "eql.get",
+          "eql.get_status",
+          "eql.search",
+          "esql.async_query",
+          "esql.async_query_delete",
+          "esql.async_query_get",
+          "esql.async_query_stop",
+          "esql.delete_data_source",
+          "esql.delete_dataset",
+          "esql.delete_view",
+          "esql.get_data_source",
+          "esql.get_dataset",
+          "esql.get_query",
+          "esql.get_view",
+          "esql.list_queries",
+          "esql.put_data_source",
+          "esql.put_dataset",
+          "esql.put_view",
+          "esql.query",
+          "exists",
+          "exists_source",
+          "explain",
+          "features.get_features",
+          "features.reset_features",
+          "field_caps",
+          "fleet.global_checkpoints",
+          "fleet.msearch",
+          "fleet.search",
+          "get",
+          "get_reindex",
+          "get_script",
+          "get_script_context",
+          "get_script_languages",
+          "get_source",
+          "graph.explore",
+          "health_report",
+          "ilm.delete_lifecycle",
+          "ilm.explain_lifecycle",
+          "ilm.get_lifecycle",
+          "ilm.get_status",
+          "ilm.migrate_to_data_tiers",
+          "ilm.move_to_step",
+          "ilm.put_lifecycle",
+          "ilm.remove_policy",
+          "ilm.retry",
+          "ilm.start",
+          "ilm.stop",
+          "index",
+          "indices.add_block",
+          "indices.analyze",
+          "indices.cancel_migrate_reindex",
+          "indices.clear_cache",
+          "indices.clone",
+          "indices.close",
+          "indices.create",
+          "indices.create_data_stream",
+          "indices.create_from",
+          "indices.data_streams_stats",
+          "indices.delete",
+          "indices.delete_alias",
+          "indices.delete_data_lifecycle",
+          "indices.delete_data_stream",
+          "indices.delete_data_stream_options",
+          "indices.delete_index_template",
+          "indices.delete_template",
+          "indices.disk_usage",
+          "indices.downsample",
+          "indices.exists",
+          "indices.exists_alias",
+          "indices.exists_index_template",
+          "indices.exists_template",
+          "indices.explain_data_lifecycle",
+          "indices.field_usage_stats",
+          "indices.flush",
+          "indices.forcemerge",
+          "indices.get",
+          "indices.get_alias",
+          "indices.get_data_lifecycle",
+          "indices.get_data_lifecycle_stats",
+          "indices.get_data_stream",
+          "indices.get_data_stream_mappings",
+          "indices.get_data_stream_options",
+          "indices.get_data_stream_settings",
+          "indices.get_field_mapping",
+          "indices.get_index_template",
+          "indices.get_mapping",
+          "indices.get_migrate_reindex_status",
+          "indices.get_settings",
+          "indices.get_template",
+          "indices.migrate_reindex",
+          "indices.migrate_to_data_stream",
+          "indices.modify_data_stream",
+          "indices.open",
+          "indices.promote_data_stream",
+          "indices.put_alias",
+          "indices.put_data_lifecycle",
+          "indices.put_data_stream_mappings",
+          "indices.put_data_stream_options",
+          "indices.put_data_stream_settings",
+          "indices.put_index_template",
+          "indices.put_mapping",
+          "indices.put_settings",
+          "indices.put_template",
+          "indices.recovery",
+          "indices.refresh",
+          "indices.reload_search_analyzers",
+          "indices.remove_block",
+          "indices.resolve_cluster",
+          "indices.resolve_index",
+          "indices.rollover",
+          "indices.segments",
+          "indices.shard_stores",
+          "indices.shrink",
+          "indices.simulate_index_template",
+          "indices.simulate_template",
+          "indices.split",
+          "indices.stats",
+          "indices.update_aliases",
+          "indices.validate_query",
+          "inference.chat_completion_unified",
+          "inference.completion",
+          "inference.delete",
+          "inference.delete_region_policy",
+          "inference.document_extraction",
+          "inference.embedding",
+          "inference.get",
+          "inference.get_region_policy",
+          "inference.inference",
+          "inference.non_streaming_chat_completion",
+          "inference.put",
+          "inference.put_ai21",
+          "inference.put_alibabacloud",
+          "inference.put_amazonbedrock",
+          "inference.put_amazonsagemaker",
+          "inference.put_anthropic",
+          "inference.put_azureaistudio",
+          "inference.put_azureopenai",
+          "inference.put_cohere",
+          "inference.put_contextualai",
+          "inference.put_custom",
+          "inference.put_deepseek",
+          "inference.put_elasticsearch",
+          "inference.put_elser",
+          "inference.put_fireworksai",
+          "inference.put_googleaistudio",
+          "inference.put_googlevertexai",
+          "inference.put_groq",
+          "inference.put_hugging_face",
+          "inference.put_jinaai",
+          "inference.put_llama",
+          "inference.put_mistral",
+          "inference.put_nvidia",
+          "inference.put_openai",
+          "inference.put_openshift_ai",
+          "inference.put_region_policy",
+          "inference.put_voyageai",
+          "inference.put_watsonx",
+          "inference.rerank",
+          "inference.sparse_embedding",
+          "inference.stream_completion",
+          "inference.text_embedding",
+          "inference.update",
+          "info",
+          "ingest.delete_geoip_database",
+          "ingest.delete_ip_location_database",
+          "ingest.delete_pipeline",
+          "ingest.geo_ip_stats",
+          "ingest.get_geoip_database",
+          "ingest.get_ip_location_database",
+          "ingest.get_pipeline",
+          "ingest.processor_grok",
+          "ingest.put_geoip_database",
+          "ingest.put_ip_location_database",
+          "ingest.put_pipeline",
+          "ingest.simulate",
+          "license.delete",
+          "license.get",
+          "license.get_basic_status",
+          "license.get_trial_status",
+          "license.post",
+          "license.post_start_basic",
+          "license.post_start_trial",
+          "list_reindex",
+          "logstash.delete_pipeline",
+          "logstash.get_pipeline",
+          "logstash.put_pipeline",
+          "mget",
+          "migration.deprecations",
+          "migration.get_feature_upgrade_status",
+          "migration.post_feature_upgrade",
+          "ml.clear_trained_model_deployment_cache",
+          "ml.close_job",
+          "ml.delete_calendar",
+          "ml.delete_calendar_event",
+          "ml.delete_calendar_job",
+          "ml.delete_data_frame_analytics",
+          "ml.delete_datafeed",
+          "ml.delete_expired_data",
+          "ml.delete_filter",
+          "ml.delete_forecast",
+          "ml.delete_job",
+          "ml.delete_model_snapshot",
+          "ml.delete_trained_model",
+          "ml.delete_trained_model_alias",
+          "ml.estimate_model_memory",
+          "ml.evaluate_data_frame",
+          "ml.explain_data_frame_analytics",
+          "ml.flush_job",
+          "ml.forecast",
+          "ml.get_buckets",
+          "ml.get_calendar_events",
+          "ml.get_calendars",
+          "ml.get_categories",
+          "ml.get_data_frame_analytics",
+          "ml.get_data_frame_analytics_stats",
+          "ml.get_datafeed_stats",
+          "ml.get_datafeeds",
+          "ml.get_filters",
+          "ml.get_influencers",
+          "ml.get_job_stats",
+          "ml.get_jobs",
+          "ml.get_memory_stats",
+          "ml.get_model_snapshot_upgrade_stats",
+          "ml.get_model_snapshots",
+          "ml.get_overall_buckets",
+          "ml.get_records",
+          "ml.get_trained_models",
+          "ml.get_trained_models_stats",
+          "ml.infer_trained_model",
+          "ml.info",
+          "ml.open_job",
+          "ml.post_calendar_events",
+          "ml.post_data",
+          "ml.preview_data_frame_analytics",
+          "ml.preview_datafeed",
+          "ml.put_calendar",
+          "ml.put_calendar_job",
+          "ml.put_data_frame_analytics",
+          "ml.put_datafeed",
+          "ml.put_filter",
+          "ml.put_job",
+          "ml.put_trained_model",
+          "ml.put_trained_model_alias",
+          "ml.put_trained_model_definition_part",
+          "ml.put_trained_model_vocabulary",
+          "ml.reset_job",
+          "ml.revert_model_snapshot",
+          "ml.set_upgrade_mode",
+          "ml.start_data_frame_analytics",
+          "ml.start_datafeed",
+          "ml.start_trained_model_deployment",
+          "ml.stop_data_frame_analytics",
+          "ml.stop_datafeed",
+          "ml.stop_trained_model_deployment",
+          "ml.update_data_frame_analytics",
+          "ml.update_datafeed",
+          "ml.update_filter",
+          "ml.update_job",
+          "ml.update_model_snapshot",
+          "ml.update_trained_model_deployment",
+          "ml.upgrade_job_snapshot",
+          "msearch",
+          "msearch_template",
+          "mtermvectors",
+          "nodes.clear_repositories_metering_archive",
+          "nodes.get_repositories_metering_info",
+          "nodes.hot_threads",
+          "nodes.info",
+          "nodes.reload_secure_settings",
+          "nodes.stats",
+          "nodes.usage",
+          "open_point_in_time",
+          "ping",
+          "project.create_many_routing",
+          "project.create_routing",
+          "project.delete_routing",
+          "project.get_many_routing",
+          "project.get_routing",
+          "project.tags",
+          "put_script",
+          "query-rules.delete_rule",
+          "query-rules.delete_ruleset",
+          "query-rules.get_rule",
+          "query-rules.get_ruleset",
+          "query-rules.list_rulesets",
+          "query-rules.put_rule",
+          "query-rules.put_ruleset",
+          "query-rules.test",
+          "rank_eval",
+          "reindex",
+          "reindex_rethrottle",
+          "render_search_template",
+          "rollup.delete_job",
+          "rollup.get_jobs",
+          "rollup.get_rollup_caps",
+          "rollup.get_rollup_index_caps",
+          "rollup.put_job",
+          "rollup.rollup_search",
+          "rollup.start_job",
+          "rollup.stop_job",
+          "scripts_painless_execute",
+          "scroll",
+          "search",
+          "search-application.delete",
+          "search-application.delete_behavioral_analytics",
+          "search-application.get",
+          "search-application.get_behavioral_analytics",
+          "search-application.list",
+          "search-application.post_behavioral_analytics_event",
+          "search-application.put",
+          "search-application.put_behavioral_analytics",
+          "search-application.render_query",
+          "search-application.search",
+          "search_mvt",
+          "search_shards",
+          "search_template",
+          "searchable-snapshots.cache_stats",
+          "searchable-snapshots.clear_cache",
+          "searchable-snapshots.mount",
+          "searchable-snapshots.stats",
+          "security.activate_user_profile",
+          "security.authenticate",
+          "security.bulk_delete_role",
+          "security.bulk_put_role",
+          "security.bulk_update_api_keys",
+          "security.change_password",
+          "security.clear_api_key_cache",
+          "security.clear_cached_privileges",
+          "security.clear_cached_realms",
+          "security.clear_cached_roles",
+          "security.clear_cached_service_tokens",
+          "security.clone_api_key",
+          "security.create_api_key",
+          "security.create_cross_cluster_api_key",
+          "security.create_service_token",
+          "security.delegate_pki",
+          "security.delete_privileges",
+          "security.delete_role",
+          "security.delete_role_mapping",
+          "security.delete_service_token",
+          "security.delete_user",
+          "security.delete_user_managed_service_account",
+          "security.disable_user",
+          "security.disable_user_profile",
+          "security.enable_user",
+          "security.enable_user_profile",
+          "security.enroll_kibana",
+          "security.enroll_node",
+          "security.get_api_key",
+          "security.get_builtin_privileges",
+          "security.get_privileges",
+          "security.get_role",
+          "security.get_role_mapping",
+          "security.get_service_accounts",
+          "security.get_service_credentials",
+          "security.get_settings",
+          "security.get_stats",
+          "security.get_token",
+          "security.get_user",
+          "security.get_user_privileges",
+          "security.get_user_profile",
+          "security.grant_api_key",
+          "security.has_privileges",
+          "security.has_privileges_user_profile",
+          "security.invalidate_api_key",
+          "security.invalidate_token",
+          "security.oidc_authenticate",
+          "security.oidc_logout",
+          "security.oidc_prepare_authentication",
+          "security.put_privileges",
+          "security.put_role",
+          "security.put_role_mapping",
+          "security.put_user",
+          "security.put_user_managed_service_account",
+          "security.query_api_keys",
+          "security.query_role",
+          "security.query_user",
+          "security.saml_authenticate",
+          "security.saml_complete_logout",
+          "security.saml_invalidate",
+          "security.saml_logout",
+          "security.saml_prepare_authentication",
+          "security.saml_service_provider_metadata",
+          "security.suggest_user_profiles",
+          "security.update_api_key",
+          "security.update_cross_cluster_api_key",
+          "security.update_settings",
+          "security.update_user_profile_data",
+          "simulate.ingest",
+          "slm.delete_lifecycle",
+          "slm.execute_lifecycle",
+          "slm.execute_retention",
+          "slm.get_lifecycle",
+          "slm.get_stats",
+          "slm.get_status",
+          "slm.put_lifecycle",
+          "slm.start",
+          "slm.stop",
+          "snapshot.cleanup_repository",
+          "snapshot.clone",
+          "snapshot.create",
+          "snapshot.create_repository",
+          "snapshot.delete",
+          "snapshot.delete_repository",
+          "snapshot.get",
+          "snapshot.get_repository",
+          "snapshot.repository_analyze",
+          "snapshot.repository_verify_integrity",
+          "snapshot.restore",
+          "snapshot.status",
+          "snapshot.verify_repository",
+          "sql.clear_cursor",
+          "sql.delete_async",
+          "sql.get_async",
+          "sql.get_async_status",
+          "sql.query",
+          "sql.translate",
+          "ssl.certificates",
+          "streams.logs_disable",
+          "streams.logs_enable",
+          "streams.status",
+          "synonyms.delete_synonym",
+          "synonyms.delete_synonym_rule",
+          "synonyms.get_synonym",
+          "synonyms.get_synonym_rule",
+          "synonyms.get_synonyms_sets",
+          "synonyms.put_synonym",
+          "synonyms.put_synonym_rule",
+          "tasks.cancel",
+          "tasks.get",
+          "tasks.list",
+          "terms_enum",
+          "termvectors",
+          "text-structure.find_field_structure",
+          "text-structure.find_message_structure",
+          "text-structure.find_structure",
+          "text-structure.test_grok_pattern",
+          "transform.delete_transform",
+          "transform.get_node_stats",
+          "transform.get_transform",
+          "transform.get_transform_stats",
+          "transform.preview_transform",
+          "transform.put_transform",
+          "transform.reset_transform",
+          "transform.schedule_now_transform",
+          "transform.set_upgrade_mode",
+          "transform.start_transform",
+          "transform.stop_transform",
+          "transform.update_transform",
+          "transform.upgrade_transforms",
+          "update",
+          "update_by_query",
+          "update_by_query_rethrottle",
+          "watcher.ack_watch",
+          "watcher.activate_watch",
+          "watcher.deactivate_watch",
+          "watcher.delete_watch",
+          "watcher.execute_watch",
+          "watcher.get_settings",
+          "watcher.get_watch",
+          "watcher.put_watch",
+          "watcher.query_watches",
+          "watcher.start",
+          "watcher.stats",
+          "watcher.stop",
+          "watcher.update_settings",
+          "xpack.info",
+          "xpack.usage"
+        ],
+        "type": "string"
+      },
+      "__schema29": {
+        "items": {
+          "$ref": "#/definitions/__schema30"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "__schema3": {
+        "type": "string"
+      },
+      "__schema30": {
+        "enum": [
+          "*",
+          "agent-builder.*",
+          "alerting.*",
+          "alerting-v2.*",
+          "apm-agent-configuration.*",
+          "apm-agent-keys.*",
+          "apm-annotations.*",
+          "apm-server-schema.*",
+          "apm-sourcemaps.*",
+          "cases.*",
+          "connectors.*",
+          "context-engine.*",
+          "dashboards.*",
+          "data-streams.*",
+          "data-views.*",
+          "data-views-v2.*",
+          "discover-sessions.*",
+          "elastic-agent-actions.*",
+          "elastic-agent-binary-download-sources.*",
+          "elastic-agent-policies.*",
+          "elastic-agent-status.*",
+          "elastic-agents.*",
+          "elastic-package-manager-epm.*",
+          "fleet-agentless-policies.*",
+          "fleet-cloud-connectors.*",
+          "fleet-cloud-onboarding-deployments.*",
+          "fleet-enrollment-api-keys.*",
+          "fleet-internals.*",
+          "fleet-managed-integrations.*",
+          "fleet-outputs.*",
+          "fleet-package-policies.*",
+          "fleet-proxies.*",
+          "fleet-remote-synced-integrations.*",
+          "fleet-server-hosts.*",
+          "fleet-service-tokens.*",
+          "fleet-uninstall-tokens.*",
+          "links.*",
+          "logstash.*",
+          "maintenance-window.*",
+          "markdowns.*",
+          "message-signing-service.*",
+          "misc.*",
+          "ml.*",
+          "observabilityaiassistant.*",
+          "roles.*",
+          "saved-objects.*",
+          "security-ai-assistant-api.*",
+          "security-attack-discovery-api.*",
+          "security-detections-api.*",
+          "security-endpoint-exceptions-api.*",
+          "security-endpoint-management-api.*",
+          "security-entity-analytics-api.*",
+          "security-entity-store.*",
+          "security-exceptions-api.*",
+          "security-lists-api.*",
+          "security-osquery-api.*",
+          "security-solution-initialization-api.*",
+          "security-timeline-api.*",
+          "short-url.*",
+          "slo.*",
+          "spaces.*",
+          "streams.*",
+          "synthetics.*",
+          "system.*",
+          "tags.*",
+          "task-manager.*",
+          "universal-profiling.*",
+          "upgrade.*",
+          "uptime.*",
+          "user-session.*",
+          "visualizations.*",
+          "workflows.*",
+          "agent-builder.post-agent-builder-a2a-agentid",
+          "agent-builder.get-agent-builder-a2a-agentid-json",
+          "agent-builder.get-agent-builder-agents",
+          "agent-builder.post-agent-builder-agents",
+          "agent-builder.post-agent-builder-agents-agent-id-consumption",
+          "agent-builder.delete-agent-builder-agents-id",
+          "agent-builder.get-agent-builder-agents-id",
+          "agent-builder.put-agent-builder-agents-id",
+          "agent-builder.get-agent-builder-agents-id-access-control",
+          "agent-builder.put-agent-builder-agents-id-access-control",
+          "agent-builder.get-agent-builder-conversations",
+          "agent-builder.post-agent-builder-conversations",
+          "agent-builder.delete-agent-builder-conversations-conversation-id",
+          "agent-builder.get-agent-builder-conversations-conversation-id",
+          "agent-builder.post-agent-builder-conversations-conversation-id-add-events",
+          "agent-builder.put-agent-builder-conversations-conversation-id-access-control",
+          "agent-builder.get-agent-builder-conversations-conversation-id-attachments",
+          "agent-builder.post-agent-builder-conversations-conversation-id-attachments",
+          "agent-builder.delete-agent-builder-conversations-conversation-id-attachments-attachment-id",
+          "agent-builder.get-agent-builder-conversations-conversation-id-attachments-attachment-id",
+          "agent-builder.patch-agent-builder-conversations-conversation-id-attachments-attachment-id",
+          "agent-builder.put-agent-builder-conversations-conversation-id-attachments-attachment-id",
+          "agent-builder.post-agent-builder-conversations-conversation-id-attachments-attachment-id-restore",
+          "agent-builder.put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin",
+          "agent-builder.get-agent-builder-conversations-conversation-id-attachments-stale",
+          "agent-builder.post-agent-builder-converse",
+          "agent-builder.post-agent-builder-converse-async",
+          "agent-builder.post-agent-builder-mcp",
+          "agent-builder.get-agent-builder-plugins",
+          "agent-builder.delete-agent-builder-plugins-pluginid",
+          "agent-builder.get-agent-builder-plugins-pluginid",
+          "agent-builder.post-agent-builder-plugins-install",
+          "agent-builder.get-agent-builder-skills",
+          "agent-builder.post-agent-builder-skills",
+          "agent-builder.delete-agent-builder-skills-skillid",
+          "agent-builder.get-agent-builder-skills-skillid",
+          "agent-builder.put-agent-builder-skills-skillid",
+          "agent-builder.get-agent-builder-tools",
+          "agent-builder.post-agent-builder-tools",
+          "agent-builder.post-agent-builder-tools-execute",
+          "agent-builder.delete-agent-builder-tools-toolid",
+          "agent-builder.get-agent-builder-tools-toolid",
+          "agent-builder.put-agent-builder-tools-toolid",
+          "agent-builder.post-chat-message",
+          "alerting.get-alerting-health",
+          "alerting.get-rule-types",
+          "alerting.delete-alerting-rule-id",
+          "alerting.get-alerting-rule-id",
+          "alerting.post-alerting-rule-id",
+          "alerting.put-alerting-rule-id",
+          "alerting.post-alerting-rule-id-disable",
+          "alerting.post-alerting-rule-id-enable",
+          "alerting.post-alerting-rule-id-mute-all",
+          "alerting.post-alerting-rule-id-unmute-all",
+          "alerting.post-alerting-rule-id-update-api-key",
+          "alerting.get-alerting-rule-id-query-inspector",
+          "alerting.post-alerting-rule-id-snooze-schedule",
+          "alerting.post-alerting-rule-rule-id-alert-alert-id-mute",
+          "alerting.post-alerting-rule-rule-id-alert-alert-id-snooze",
+          "alerting.post-alerting-rule-rule-id-alert-alert-id-unmute",
+          "alerting.post-alerting-rule-rule-id-alert-alert-id-unsnooze",
+          "alerting.delete-alerting-rule-ruleid-snooze-schedule-scheduleid",
+          "alerting.get-alerting-rules-find",
+          "alerting.post-alerting-rules-backfill-find",
+          "alerting.post-alerting-rules-backfill-schedule",
+          "alerting.delete-alerting-rules-backfill-id",
+          "alerting.get-alerting-rules-backfill-id",
+          "alerting-v2.get-alerting-v2-action-policies",
+          "alerting-v2.post-alerting-v2-action-policies",
+          "alerting-v2.post-alerting-v2-action-policies-bulk-delete",
+          "alerting-v2.post-alerting-v2-action-policies-bulk-disable",
+          "alerting-v2.post-alerting-v2-action-policies-bulk-enable",
+          "alerting-v2.post-alerting-v2-action-policies-bulk-snooze",
+          "alerting-v2.post-alerting-v2-action-policies-bulk-unsnooze",
+          "alerting-v2.post-alerting-v2-action-policies-bulk-update-api-key",
+          "alerting-v2.delete-alerting-v2-action-policies-id",
+          "alerting-v2.get-alerting-v2-action-policies-id",
+          "alerting-v2.patch-alerting-v2-action-policies-id",
+          "alerting-v2.put-alerting-v2-action-policies-id",
+          "alerting-v2.post-alerting-v2-action-policies-id-disable",
+          "alerting-v2.post-alerting-v2-action-policies-id-enable",
+          "alerting-v2.post-alerting-v2-action-policies-id-snooze",
+          "alerting-v2.post-alerting-v2-action-policies-id-unsnooze",
+          "alerting-v2.post-alerting-v2-action-policies-id-update-api-key",
+          "alerting-v2.post-alerting-v2-alerts-bulk-ack",
+          "alerting-v2.post-alerting-v2-alerts-bulk-activate",
+          "alerting-v2.post-alerting-v2-alerts-bulk-assign",
+          "alerting-v2.post-alerting-v2-alerts-bulk-deactivate",
+          "alerting-v2.post-alerting-v2-alerts-bulk-tag",
+          "alerting-v2.post-alerting-v2-alerts-bulk-unack",
+          "alerting-v2.post-alerting-v2-alerts-id-ack",
+          "alerting-v2.post-alerting-v2-alerts-id-activate",
+          "alerting-v2.post-alerting-v2-alerts-id-assign",
+          "alerting-v2.post-alerting-v2-alerts-id-deactivate",
+          "alerting-v2.post-alerting-v2-alerts-id-tag",
+          "alerting-v2.post-alerting-v2-alerts-id-unack",
+          "alerting-v2.get-alerting-v2-execution-history-action-policies",
+          "alerting-v2.get-alerting-v2-execution-history-rules",
+          "alerting-v2.get-alerting-v2-rules",
+          "alerting-v2.post-alerting-v2-rules",
+          "alerting-v2.post-alerting-v2-rules-bulk-create",
+          "alerting-v2.post-alerting-v2-rules-bulk-delete",
+          "alerting-v2.post-alerting-v2-rules-bulk-disable",
+          "alerting-v2.post-alerting-v2-rules-bulk-enable",
+          "alerting-v2.post-alerting-v2-rules-bulk-get",
+          "alerting-v2.post-alerting-v2-rules-bulk-update-api-key",
+          "alerting-v2.post-alerting-v2-rules-delete-by-query",
+          "alerting-v2.post-alerting-v2-rules-disable-by-query",
+          "alerting-v2.post-alerting-v2-rules-enable-by-query",
+          "alerting-v2.post-alerting-v2-rules-update-api-key-by-query",
+          "alerting-v2.delete-alerting-v2-rules-id",
+          "alerting-v2.get-alerting-v2-rules-id",
+          "alerting-v2.patch-alerting-v2-rules-id",
+          "alerting-v2.put-alerting-v2-rules-id",
+          "alerting-v2.post-alerting-v2-rules-id-disable",
+          "alerting-v2.post-alerting-v2-rules-id-enable",
+          "alerting-v2.post-alerting-v2-rules-id-run",
+          "apm-agent-configuration.delete-agent-configuration",
+          "apm-agent-configuration.get-agent-configurations",
+          "apm-agent-configuration.create-update-agent-configuration",
+          "apm-agent-configuration.get-agent-name-for-service",
+          "apm-agent-configuration.get-environments-for-service",
+          "apm-agent-configuration.search-single-configuration",
+          "apm-agent-configuration.get-single-agent-configuration",
+          "apm-agent-keys.create-agent-key",
+          "apm-annotations.create-annotation",
+          "apm-annotations.get-annotation",
+          "apm-server-schema.save-apm-server-schema",
+          "apm-sourcemaps.get-source-maps",
+          "apm-sourcemaps.upload-source-map",
+          "apm-sourcemaps.delete-source-map",
+          "cases.delete-case",
+          "cases.update-case",
+          "cases.create-case",
+          "cases.find-cases",
+          "cases.get-case",
+          "cases.get-case-alerts",
+          "cases.delete-case-attachments-default-space",
+          "cases.find-case-attachments-default-space",
+          "cases.create-case-attachment-default-space",
+          "cases.delete-case-attachment-default-space",
+          "cases.get-case-attachment-default-space",
+          "cases.replace-case-attachment-default-space",
+          "cases.delete-case-comments",
+          "cases.update-case-comment",
+          "cases.add-case-comment",
+          "cases.find-case-comments",
+          "cases.delete-case-comment",
+          "cases.get-case-comment",
+          "cases.push-case",
+          "cases.get-case-applicable-fields",
+          "cases.add-case-file",
+          "cases.find-case-activity",
+          "cases.get-cases-by-alert",
+          "cases.get-case-configuration",
+          "cases.set-case-configuration",
+          "cases.update-case-configuration",
+          "cases.find-case-connectors",
+          "cases.get-case-field-definitions-default-space",
+          "cases.create-case-field-definition-default-space",
+          "cases.delete-case-field-definition-default-space",
+          "cases.get-case-field-definition-default-space",
+          "cases.update-case-field-definition-default-space",
+          "cases.get-applicable-fields",
+          "cases.get-case-reporters",
+          "cases.get-case-tags",
+          "cases.get-case-templates",
+          "cases.create-case-template",
+          "cases.delete-case-template",
+          "cases.get-case-template",
+          "cases.update-case-template",
+          "connectors.get-actions-connector-types",
+          "connectors.get-actions-connector-oauth-callback",
+          "connectors.get-actions-connector-oauth-callback-script",
+          "connectors.get-actions-connector-connectorid-oauth-start",
+          "connectors.delete-actions-connector-id",
+          "connectors.get-actions-connector-id",
+          "connectors.post-actions-connector-id",
+          "connectors.put-actions-connector-id",
+          "connectors.post-actions-connector-id-execute",
+          "connectors.get-actions-connectors",
+          "connectors.post-actions-events-connector-type-id-connector-id",
+          "context-engine.get-context-engine-ai-index",
+          "context-engine.post-context-engine-ai-index",
+          "context-engine.post-context-engine-ai-index-query",
+          "context-engine.delete-context-engine-ai-index-aiindexid",
+          "context-engine.get-context-engine-ai-index-aiindexid",
+          "context-engine.put-context-engine-ai-index-aiindexid",
+          "context-engine.get-context-engine-ai-index-aiindexid-describe",
+          "dashboards.search-dashboards",
+          "dashboards.create-dashboard",
+          "dashboards.get-dashboard",
+          "dashboards.upsert-dashboard",
+          "dashboards.delete-dashboard",
+          "data-streams.get-fleet-data-streams",
+          "data-streams.get-fleet-data-streams-data",
+          "data-streams.get-fleet-epm-data-streams",
+          "data-views.get-all-data-views-default",
+          "data-views.create-data-view-default",
+          "data-views.delete-data-view-default",
+          "data-views.get-data-view-default",
+          "data-views.update-data-view-default",
+          "data-views.update-fields-metadata-default",
+          "data-views.create-runtime-field-default",
+          "data-views.create-update-runtime-field-default",
+          "data-views.delete-runtime-field-default",
+          "data-views.get-runtime-field-default",
+          "data-views.update-runtime-field-default",
+          "data-views.get-default-data-view-default",
+          "data-views.set-default-datail-view-default",
+          "data-views.swap-data-views-default",
+          "data-views.preview-swap-data-views-default",
+          "data-views-v2.get-data-views-v2",
+          "data-views-v2.post-data-views-v2",
+          "data-views-v2.delete-data-views-v2-id",
+          "data-views-v2.get-data-views-v2-id",
+          "data-views-v2.put-data-views-v2-id",
+          "discover-sessions.search-discover-sessions",
+          "discover-sessions.create-discover-session",
+          "discover-sessions.delete-discover-session",
+          "discover-sessions.get-discover-session",
+          "discover-sessions.upsert-discover-session",
+          "elastic-agent-actions.post-fleet-agents-agentid-actions",
+          "elastic-agent-actions.post-fleet-agents-agentid-reassign",
+          "elastic-agent-actions.post-fleet-agents-agentid-remove-collector",
+          "elastic-agent-actions.post-fleet-agents-agentid-request-diagnostics",
+          "elastic-agent-actions.post-fleet-agents-agentid-restart",
+          "elastic-agent-actions.post-fleet-agents-agentid-rollback",
+          "elastic-agent-actions.post-fleet-agents-agentid-unenroll",
+          "elastic-agent-actions.post-fleet-agents-agentid-upgrade",
+          "elastic-agent-actions.get-fleet-agents-action-status",
+          "elastic-agent-actions.post-fleet-agents-actions-actionid-cancel",
+          "elastic-agent-actions.post-fleet-agents-bulk-reassign",
+          "elastic-agent-actions.post-fleet-agents-bulk-remove-collectors",
+          "elastic-agent-actions.post-fleet-agents-bulk-request-diagnostics",
+          "elastic-agent-actions.post-fleet-agents-bulk-restart",
+          "elastic-agent-actions.post-fleet-agents-bulk-rollback",
+          "elastic-agent-actions.post-fleet-agents-bulk-unenroll",
+          "elastic-agent-actions.post-fleet-agents-bulk-update-agent-tags",
+          "elastic-agent-actions.post-fleet-agents-bulk-upgrade",
+          "elastic-agent-binary-download-sources.get-fleet-agent-download-sources",
+          "elastic-agent-binary-download-sources.post-fleet-agent-download-sources",
+          "elastic-agent-binary-download-sources.delete-fleet-agent-download-sources-sourceid",
+          "elastic-agent-binary-download-sources.get-fleet-agent-download-sources-sourceid",
+          "elastic-agent-binary-download-sources.put-fleet-agent-download-sources-sourceid",
+          "elastic-agent-policies.get-fleet-agent-policies",
+          "elastic-agent-policies.post-fleet-agent-policies",
+          "elastic-agent-policies.post-fleet-agent-policies-bulk-get",
+          "elastic-agent-policies.get-fleet-agent-policies-agentpolicyid",
+          "elastic-agent-policies.put-fleet-agent-policies-agentpolicyid",
+          "elastic-agent-policies.get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status",
+          "elastic-agent-policies.post-fleet-agent-policies-agentpolicyid-copy",
+          "elastic-agent-policies.get-fleet-agent-policies-agentpolicyid-download",
+          "elastic-agent-policies.get-fleet-agent-policies-agentpolicyid-full",
+          "elastic-agent-policies.get-fleet-agent-policies-agentpolicyid-outputs",
+          "elastic-agent-policies.post-fleet-agent-policies-delete",
+          "elastic-agent-policies.post-fleet-agent-policies-outputs",
+          "elastic-agent-policies.get-fleet-kubernetes",
+          "elastic-agent-policies.get-fleet-kubernetes-download",
+          "elastic-agent-status.get-fleet-agent-status",
+          "elastic-agents.get-fleet-agent-status-data",
+          "elastic-agents.get-fleet-agents",
+          "elastic-agents.post-fleet-agents",
+          "elastic-agents.delete-fleet-agents-agentid",
+          "elastic-agents.get-fleet-agents-agentid",
+          "elastic-agents.put-fleet-agents-agentid",
+          "elastic-agents.get-fleet-agents-agentid-effective-config",
+          "elastic-agents.post-fleet-agents-agentid-migrate",
+          "elastic-agents.post-fleet-agents-agentid-privilege-level-change",
+          "elastic-agents.get-fleet-agents-agentid-uploads",
+          "elastic-agents.get-fleet-agents-available-versions",
+          "elastic-agents.post-fleet-agents-bulk-migrate",
+          "elastic-agents.post-fleet-agents-bulk-privilege-level-change",
+          "elastic-agents.delete-fleet-agents-files-fileid",
+          "elastic-agents.get-fleet-agents-files-fileid-filename",
+          "elastic-agents.get-fleet-agents-setup",
+          "elastic-agents.post-fleet-agents-setup",
+          "elastic-agents.get-fleet-agents-tags",
+          "elastic-package-manager-epm.post-fleet-epm-bulk-assets",
+          "elastic-package-manager-epm.get-fleet-epm-categories",
+          "elastic-package-manager-epm.post-fleet-epm-custom-integrations",
+          "elastic-package-manager-epm.put-fleet-epm-custom-integrations-pkgname",
+          "elastic-package-manager-epm.get-fleet-epm-packages",
+          "elastic-package-manager-epm.post-fleet-epm-packages",
+          "elastic-package-manager-epm.post-fleet-epm-packages-bulk",
+          "elastic-package-manager-epm.post-fleet-epm-packages-bulk-namespace-customization",
+          "elastic-package-manager-epm.post-fleet-epm-packages-bulk-rollback",
+          "elastic-package-manager-epm.get-fleet-epm-packages-bulk-rollback-taskid",
+          "elastic-package-manager-epm.post-fleet-epm-packages-bulk-uninstall",
+          "elastic-package-manager-epm.get-fleet-epm-packages-bulk-uninstall-taskid",
+          "elastic-package-manager-epm.post-fleet-epm-packages-bulk-upgrade",
+          "elastic-package-manager-epm.get-fleet-epm-packages-bulk-upgrade-taskid",
+          "elastic-package-manager-epm.delete-fleet-epm-packages-pkgname",
+          "elastic-package-manager-epm.get-fleet-epm-packages-pkgname",
+          "elastic-package-manager-epm.post-fleet-epm-packages-pkgname",
+          "elastic-package-manager-epm.put-fleet-epm-packages-pkgname",
+          "elastic-package-manager-epm.delete-fleet-epm-packages-pkgname-pkgversion",
+          "elastic-package-manager-epm.get-fleet-epm-packages-pkgname-pkgversion",
+          "elastic-package-manager-epm.post-fleet-epm-packages-pkgname-pkgversion",
+          "elastic-package-manager-epm.put-fleet-epm-packages-pkgname-pkgversion",
+          "elastic-package-manager-epm.get-fleet-epm-packages-pkgname-pkgversion-filepath",
+          "elastic-package-manager-epm.delete-fleet-epm-packages-pkgname-pkgversion-datastream-assets",
+          "elastic-package-manager-epm.get-fleet-epm-packages-pkgname-pkgversion-dependencies",
+          "elastic-package-manager-epm.delete-fleet-epm-packages-pkgname-pkgversion-kibana-assets",
+          "elastic-package-manager-epm.post-fleet-epm-packages-pkgname-pkgversion-kibana-assets",
+          "elastic-package-manager-epm.post-fleet-epm-packages-pkgname-pkgversion-rule-assets",
+          "elastic-package-manager-epm.post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize",
+          "elastic-package-manager-epm.post-fleet-epm-packages-pkgname-review-upgrade",
+          "elastic-package-manager-epm.post-fleet-epm-packages-pkgname-rollback",
+          "elastic-package-manager-epm.get-fleet-epm-packages-pkgname-stats",
+          "elastic-package-manager-epm.get-fleet-epm-packages-installed",
+          "elastic-package-manager-epm.get-fleet-epm-packages-limited",
+          "elastic-package-manager-epm.get-fleet-epm-templates-pkgname-pkgversion-inputs",
+          "elastic-package-manager-epm.get-fleet-epm-verification-key-id",
+          "fleet-agentless-policies.get-fleet-agentless-policies",
+          "fleet-agentless-policies.post-fleet-agentless-policies",
+          "fleet-agentless-policies.post-fleet-agentless-policies-upgrade",
+          "fleet-agentless-policies.post-fleet-agentless-policies-upgrade-dryrun",
+          "fleet-agentless-policies.delete-fleet-agentless-policies-policyid",
+          "fleet-agentless-policies.get-fleet-agentless-policies-policyid",
+          "fleet-agentless-policies.put-fleet-agentless-policies-policyid",
+          "fleet-cloud-connectors.get-fleet-cloud-connectors",
+          "fleet-cloud-connectors.post-fleet-cloud-connectors",
+          "fleet-cloud-connectors.delete-fleet-cloud-connectors-cloudconnectorid",
+          "fleet-cloud-connectors.get-fleet-cloud-connectors-cloudconnectorid",
+          "fleet-cloud-connectors.put-fleet-cloud-connectors-cloudconnectorid",
+          "fleet-cloud-connectors.get-fleet-cloud-connectors-cloudconnectorid-usage",
+          "fleet-cloud-onboarding-deployments.post-fleet-cloud-onboarding-deployments",
+          "fleet-cloud-onboarding-deployments.delete-fleet-cloud-onboarding-deployments-id",
+          "fleet-cloud-onboarding-deployments.get-fleet-cloud-onboarding-deployments-id",
+          "fleet-cloud-onboarding-deployments.put-fleet-cloud-onboarding-deployments-id",
+          "fleet-cloud-onboarding-deployments.get-fleet-cloud-onboarding-deployments-connector-connectorid",
+          "fleet-enrollment-api-keys.get-fleet-enrollment-api-keys",
+          "fleet-enrollment-api-keys.post-fleet-enrollment-api-keys",
+          "fleet-enrollment-api-keys.post-fleet-enrollment-api-keys-bulk-delete",
+          "fleet-enrollment-api-keys.delete-fleet-enrollment-api-keys-keyid",
+          "fleet-enrollment-api-keys.get-fleet-enrollment-api-keys-keyid",
+          "fleet-internals.get-fleet-check-permissions",
+          "fleet-internals.post-fleet-health-check",
+          "fleet-internals.get-fleet-settings",
+          "fleet-internals.put-fleet-settings",
+          "fleet-internals.post-fleet-setup",
+          "fleet-internals.get-fleet-space-settings",
+          "fleet-internals.put-fleet-space-settings",
+          "fleet-managed-integrations.get-fleet-managed-integrations",
+          "fleet-managed-integrations.post-fleet-managed-integrations",
+          "fleet-managed-integrations.post-fleet-managed-integrations-upgrade",
+          "fleet-managed-integrations.post-fleet-managed-integrations-upgrade-dryrun",
+          "fleet-managed-integrations.delete-fleet-managed-integrations-policyid",
+          "fleet-managed-integrations.get-fleet-managed-integrations-policyid",
+          "fleet-managed-integrations.put-fleet-managed-integrations-policyid",
+          "fleet-outputs.post-fleet-logstash-api-keys",
+          "fleet-outputs.get-fleet-outputs",
+          "fleet-outputs.post-fleet-outputs",
+          "fleet-outputs.delete-fleet-outputs-outputid",
+          "fleet-outputs.get-fleet-outputs-outputid",
+          "fleet-outputs.put-fleet-outputs-outputid",
+          "fleet-outputs.get-fleet-outputs-outputid-health",
+          "fleet-package-policies.get-fleet-package-policies",
+          "fleet-package-policies.post-fleet-package-policies",
+          "fleet-package-policies.post-fleet-package-policies-bulk-get",
+          "fleet-package-policies.delete-fleet-package-policies-packagepolicyid",
+          "fleet-package-policies.get-fleet-package-policies-packagepolicyid",
+          "fleet-package-policies.put-fleet-package-policies-packagepolicyid",
+          "fleet-package-policies.post-fleet-package-policies-delete",
+          "fleet-package-policies.post-fleet-package-policies-upgrade",
+          "fleet-package-policies.post-fleet-package-policies-upgrade-dryrun",
+          "fleet-proxies.get-fleet-proxies",
+          "fleet-proxies.post-fleet-proxies",
+          "fleet-proxies.delete-fleet-proxies-itemid",
+          "fleet-proxies.get-fleet-proxies-itemid",
+          "fleet-proxies.put-fleet-proxies-itemid",
+          "fleet-remote-synced-integrations.get-fleet-remote-synced-integrations-outputid-remote-status",
+          "fleet-remote-synced-integrations.get-fleet-remote-synced-integrations-status",
+          "fleet-server-hosts.get-fleet-fleet-server-hosts",
+          "fleet-server-hosts.post-fleet-fleet-server-hosts",
+          "fleet-server-hosts.delete-fleet-fleet-server-hosts-itemid",
+          "fleet-server-hosts.get-fleet-fleet-server-hosts-itemid",
+          "fleet-server-hosts.put-fleet-fleet-server-hosts-itemid",
+          "fleet-service-tokens.post-fleet-service-tokens",
+          "fleet-uninstall-tokens.get-fleet-uninstall-tokens",
+          "fleet-uninstall-tokens.post-fleet-uninstall-tokens-agentpolicyid-rotate",
+          "fleet-uninstall-tokens.get-fleet-uninstall-tokens-uninstalltokenid",
+          "links.get-links",
+          "links.post-links",
+          "links.delete-links-id",
+          "links.get-links-id",
+          "links.put-links-id",
+          "logstash.delete-logstash-pipeline",
+          "logstash.get-logstash-pipeline",
+          "logstash.put-logstash-pipeline",
+          "logstash.get-logstash-pipelines",
+          "maintenance-window.post-maintenance-window",
+          "maintenance-window.get-maintenance-window-find",
+          "maintenance-window.delete-maintenance-window-id",
+          "maintenance-window.get-maintenance-window-id",
+          "maintenance-window.patch-maintenance-window-id",
+          "maintenance-window.post-maintenance-window-id-archive",
+          "maintenance-window.post-maintenance-window-id-unarchive",
+          "markdowns.get-markdowns",
+          "markdowns.post-markdowns",
+          "markdowns.delete-markdowns-id",
+          "markdowns.get-markdowns-id",
+          "markdowns.put-markdowns-id",
+          "message-signing-service.post-fleet-message-signing-service-rotate-key-pair",
+          "misc.post-security-role-query",
+          "misc.post-spaces-resolve-copy-saved-objects-errors",
+          "ml.ml-sync",
+          "ml.ml-update-jobs-spaces",
+          "ml.ml-update-trained-models-spaces",
+          "observabilityaiassistant.observability-ai-assistant-chat-complete",
+          "roles.get-security-role",
+          "roles.delete-security-role-name",
+          "roles.get-security-role-name",
+          "roles.put-security-role-name",
+          "roles.post-security-roles",
+          "saved-objects.rotate-encryption-key",
+          "saved-objects.post-saved-objects-bulk-create",
+          "saved-objects.post-saved-objects-bulk-delete",
+          "saved-objects.post-saved-objects-bulk-get",
+          "saved-objects.post-saved-objects-bulk-resolve",
+          "saved-objects.put-saved-objects-bulk-update",
+          "saved-objects.post-saved-objects-export",
+          "saved-objects.get-saved-objects-find",
+          "saved-objects.post-saved-objects-import",
+          "saved-objects.post-saved-objects-resolve-import-errors",
+          "saved-objects.post-saved-objects-type",
+          "saved-objects.delete-saved-objects-type-id",
+          "saved-objects.get-saved-objects-type-id",
+          "saved-objects.post-saved-objects-type-id",
+          "saved-objects.put-saved-objects-type-id",
+          "saved-objects.get-saved-objects-resolve-type-id",
+          "security-ai-assistant-api.perform-anonymization-fields-bulk-action",
+          "security-ai-assistant-api.find-anonymization-fields",
+          "security-ai-assistant-api.chat-complete",
+          "security-ai-assistant-api.delete-all-conversations",
+          "security-ai-assistant-api.create-conversation",
+          "security-ai-assistant-api.find-conversations",
+          "security-ai-assistant-api.delete-conversation",
+          "security-ai-assistant-api.read-conversation",
+          "security-ai-assistant-api.update-conversation",
+          "security-ai-assistant-api.get-knowledge-base",
+          "security-ai-assistant-api.post-knowledge-base",
+          "security-ai-assistant-api.read-knowledge-base",
+          "security-ai-assistant-api.create-knowledge-base",
+          "security-ai-assistant-api.create-knowledge-base-entry",
+          "security-ai-assistant-api.perform-knowledge-base-entry-bulk-action",
+          "security-ai-assistant-api.find-knowledge-base-entries",
+          "security-ai-assistant-api.delete-knowledge-base-entry",
+          "security-ai-assistant-api.read-knowledge-base-entry",
+          "security-ai-assistant-api.update-knowledge-base-entry",
+          "security-ai-assistant-api.perform-prompts-bulk-action",
+          "security-ai-assistant-api.find-prompts",
+          "security-attack-discovery-api.post-attack-discovery-bulk",
+          "security-attack-discovery-api.attack-discovery-find",
+          "security-attack-discovery-api.post-attack-discovery-generate",
+          "security-attack-discovery-api.get-attack-discovery-generations",
+          "security-attack-discovery-api.get-attack-discovery-generation",
+          "security-attack-discovery-api.post-attack-discovery-generations-dismiss",
+          "security-attack-discovery-api.create-attack-discovery-schedules",
+          "security-attack-discovery-api.bulk-delete-attack-discovery-schedules",
+          "security-attack-discovery-api.bulk-disable-attack-discovery-schedules",
+          "security-attack-discovery-api.bulk-enable-attack-discovery-schedules",
+          "security-attack-discovery-api.find-attack-discovery-schedules",
+          "security-attack-discovery-api.delete-attack-discovery-schedules",
+          "security-attack-discovery-api.get-attack-discovery-schedules",
+          "security-attack-discovery-api.update-attack-discovery-schedules",
+          "security-attack-discovery-api.disable-attack-discovery-schedules",
+          "security-attack-discovery-api.enable-attack-discovery-schedules",
+          "security-detections-api.set-attacks-assignees",
+          "security-detections-api.search-attacks",
+          "security-detections-api.set-attacks-status",
+          "security-detections-api.set-attacks-tags",
+          "security-detections-api.delete-alerts-index",
+          "security-detections-api.read-alerts-index",
+          "security-detections-api.create-alerts-index",
+          "security-detections-api.read-privileges",
+          "security-detections-api.delete-rule",
+          "security-detections-api.read-rule",
+          "security-detections-api.patch-rule",
+          "security-detections-api.create-rule",
+          "security-detections-api.update-rule",
+          "security-detections-api.perform-rules-bulk-action",
+          "security-detections-api.export-rules",
+          "security-detections-api.find-rules",
+          "security-detections-api.import-rules",
+          "security-detections-api.install-prebuilt-rules-and-timelines",
+          "security-detections-api.read-prebuilt-rules-and-timelines-status",
+          "security-detections-api.rule-preview",
+          "security-detections-api.set-alert-assignees",
+          "security-detections-api.finalize-alerts-migration",
+          "security-detections-api.alerts-migration-cleanup",
+          "security-detections-api.create-alerts-migration",
+          "security-detections-api.read-alerts-migration-status",
+          "security-detections-api.search-alerts",
+          "security-detections-api.set-alerts-status",
+          "security-detections-api.set-alert-tags",
+          "security-detections-api.read-tags",
+          "security-endpoint-exceptions-api.create-endpoint-list",
+          "security-endpoint-exceptions-api.delete-endpoint-list-item",
+          "security-endpoint-exceptions-api.read-endpoint-list-item",
+          "security-endpoint-exceptions-api.create-endpoint-list-item",
+          "security-endpoint-exceptions-api.update-endpoint-list-item",
+          "security-endpoint-exceptions-api.find-endpoint-list-items",
+          "security-endpoint-management-api.endpoint-get-actions-list",
+          "security-endpoint-management-api.endpoint-get-actions-status",
+          "security-endpoint-management-api.endpoint-get-actions-details",
+          "security-endpoint-management-api.endpoint-file-info",
+          "security-endpoint-management-api.endpoint-file-download",
+          "security-endpoint-management-api.cancel-action",
+          "security-endpoint-management-api.endpoint-execute-action",
+          "security-endpoint-management-api.endpoint-get-file-action",
+          "security-endpoint-management-api.endpoint-isolate-action",
+          "security-endpoint-management-api.endpoint-kill-process-action",
+          "security-endpoint-management-api.endpoint-generate-memory-dump",
+          "security-endpoint-management-api.run-script-action",
+          "security-endpoint-management-api.endpoint-get-processes-action",
+          "security-endpoint-management-api.endpoint-scan-action",
+          "security-endpoint-management-api.endpoint-get-actions-state",
+          "security-endpoint-management-api.endpoint-suspend-process-action",
+          "security-endpoint-management-api.endpoint-unisolate-action",
+          "security-endpoint-management-api.endpoint-upload-action",
+          "security-endpoint-management-api.get-endpoint-metadata-list",
+          "security-endpoint-management-api.get-endpoint-metadata",
+          "security-endpoint-management-api.get-policy-response",
+          "security-endpoint-management-api.get-protection-updates-note",
+          "security-endpoint-management-api.create-update-protection-updates-note",
+          "security-endpoint-management-api.endpoint-script-library-list-scripts",
+          "security-endpoint-management-api.endpoint-script-library-create-script",
+          "security-endpoint-management-api.endpoint-script-library-delete-script",
+          "security-endpoint-management-api.endpoint-script-library-get-one-script",
+          "security-endpoint-management-api.endpoint-script-library-patch-update-script",
+          "security-endpoint-management-api.endpoint-script-library-download-script",
+          "security-entity-analytics-api.delete-asset-criticality-record",
+          "security-entity-analytics-api.get-asset-criticality-record",
+          "security-entity-analytics-api.create-asset-criticality-record",
+          "security-entity-analytics-api.bulk-upsert-asset-criticality-records",
+          "security-entity-analytics-api.find-asset-criticality-records",
+          "security-entity-analytics-api.delete-monitoring-engine",
+          "security-entity-analytics-api.disable-monitoring-engine",
+          "security-entity-analytics-api.init-monitoring-engine",
+          "security-entity-analytics-api.schedule-monitoring-engine",
+          "security-entity-analytics-api.priv-mon-health",
+          "security-entity-analytics-api.priv-mon-privileges",
+          "security-entity-analytics-api.create-priv-mon-user",
+          "security-entity-analytics-api.privmon-bulk-upload-users-c-s-v",
+          "security-entity-analytics-api.delete-priv-mon-user",
+          "security-entity-analytics-api.update-priv-mon-user",
+          "security-entity-analytics-api.list-priv-mon-users",
+          "security-entity-analytics-api.install-privileged-access-detection-package",
+          "security-entity-analytics-api.get-privileged-access-detection-package-status",
+          "security-entity-analytics-api.create-watchlist",
+          "security-entity-analytics-api.get-watchlist",
+          "security-entity-analytics-api.update-watchlist",
+          "security-entity-analytics-api.upload-watchlist-csv",
+          "security-entity-analytics-api.assign-watchlist-entities",
+          "security-entity-analytics-api.unassign-watchlist-entities",
+          "security-entity-analytics-api.list-watchlists",
+          "security-entity-analytics-api.clean-up-risk-engine",
+          "security-entity-analytics-api.configure-risk-engine-saved-object",
+          "security-entity-analytics-api.schedule-risk-engine-now",
+          "security-entity-analytics-api.get-risk-score-history",
+          "security-entity-store.put-security-entity-store",
+          "security-entity-store.get-security-entity-store-entities",
+          "security-entity-store.delete-security-entity-store-entities",
+          "security-entity-store.post-security-entity-store-entities-entitytype",
+          "security-entity-store.put-security-entity-store-entities-entitytype",
+          "security-entity-store.put-security-entity-store-entities-bulk",
+          "security-entity-store.put-security-entity-store-history-snapshot-disable",
+          "security-entity-store.put-security-entity-store-history-snapshot-enable",
+          "security-entity-store.post-security-entity-store-install",
+          "security-entity-store.get-security-entity-store-resolution-group",
+          "security-entity-store.post-security-entity-store-resolution-link",
+          "security-entity-store.get-security-entity-store-resolution-rules",
+          "security-entity-store.put-security-entity-store-resolution-rules-id-disable",
+          "security-entity-store.put-security-entity-store-resolution-rules-id-enable",
+          "security-entity-store.post-security-entity-store-resolution-unlink",
+          "security-entity-store.put-security-entity-store-start",
+          "security-entity-store.get-security-entity-store-status",
+          "security-entity-store.put-security-entity-store-stop",
+          "security-entity-store.post-security-entity-store-uninstall",
+          "security-exceptions-api.create-rule-exception-list-items",
+          "security-exceptions-api.delete-exception-list",
+          "security-exceptions-api.read-exception-list",
+          "security-exceptions-api.create-exception-list",
+          "security-exceptions-api.update-exception-list",
+          "security-exceptions-api.duplicate-exception-list",
+          "security-exceptions-api.export-exception-list",
+          "security-exceptions-api.find-exception-lists",
+          "security-exceptions-api.import-exception-list",
+          "security-exceptions-api.delete-exception-list-item",
+          "security-exceptions-api.read-exception-list-item",
+          "security-exceptions-api.create-exception-list-item",
+          "security-exceptions-api.update-exception-list-item",
+          "security-exceptions-api.find-exception-list-items",
+          "security-exceptions-api.read-exception-list-summary",
+          "security-exceptions-api.create-shared-exception-list",
+          "security-lists-api.delete-list",
+          "security-lists-api.read-list",
+          "security-lists-api.patch-list",
+          "security-lists-api.create-list",
+          "security-lists-api.update-list",
+          "security-lists-api.find-lists",
+          "security-lists-api.delete-list-index",
+          "security-lists-api.read-list-index",
+          "security-lists-api.create-list-index",
+          "security-lists-api.delete-list-item",
+          "security-lists-api.read-list-item",
+          "security-lists-api.patch-list-item",
+          "security-lists-api.create-list-item",
+          "security-lists-api.update-list-item",
+          "security-lists-api.export-list-items",
+          "security-lists-api.find-list-items",
+          "security-lists-api.import-list-items",
+          "security-lists-api.read-list-privileges",
+          "security-osquery-api.osquery-get-unified-history",
+          "security-osquery-api.osquery-find-live-queries",
+          "security-osquery-api.osquery-create-live-query",
+          "security-osquery-api.osquery-get-live-query-details",
+          "security-osquery-api.osquery-get-live-query-results",
+          "security-osquery-api.osquery-export-live-query-results",
+          "security-osquery-api.osquery-find-packs",
+          "security-osquery-api.osquery-create-packs",
+          "security-osquery-api.osquery-delete-packs",
+          "security-osquery-api.osquery-get-packs-details",
+          "security-osquery-api.osquery-update-packs",
+          "security-osquery-api.osquery-copy-packs",
+          "security-osquery-api.osquery-find-saved-queries",
+          "security-osquery-api.osquery-create-saved-query",
+          "security-osquery-api.osquery-delete-saved-query",
+          "security-osquery-api.osquery-get-saved-query-details",
+          "security-osquery-api.osquery-update-saved-query",
+          "security-osquery-api.osquery-copy-saved-query",
+          "security-osquery-api.osquery-get-scheduled-action-results",
+          "security-osquery-api.osquery-export-scheduled-query-results",
+          "security-osquery-api.osquery-get-scheduled-query-results",
+          "security-solution-initialization-api.initialize-security-solution",
+          "security-timeline-api.delete-note",
+          "security-timeline-api.get-notes",
+          "security-timeline-api.persist-note-route",
+          "security-timeline-api.persist-pinned-event-route",
+          "security-timeline-api.delete-timelines",
+          "security-timeline-api.get-timeline",
+          "security-timeline-api.patch-timeline",
+          "security-timeline-api.create-timelines",
+          "security-timeline-api.copy-timeline",
+          "security-timeline-api.get-draft-timelines",
+          "security-timeline-api.clean-draft-timelines",
+          "security-timeline-api.export-timelines",
+          "security-timeline-api.persist-favorite-route",
+          "security-timeline-api.import-timelines",
+          "security-timeline-api.install-prepacked-timelines",
+          "security-timeline-api.resolve-timeline",
+          "security-timeline-api.get-timelines",
+          "short-url.post-url",
+          "short-url.resolve-url",
+          "short-url.delete-url",
+          "short-url.get-url",
+          "slo.find-slos-op",
+          "slo.create-slo-op",
+          "slo.bulk-delete-op",
+          "slo.bulk-delete-status-op",
+          "slo.delete-rollup-data-op",
+          "slo.bulk-snapshot-op",
+          "slo.delete-slo-instances-op",
+          "slo.delete-slo-op",
+          "slo.get-slo-op",
+          "slo.update-slo-op",
+          "slo.reset-slo-op",
+          "slo.get-snapshot-op",
+          "slo.disable-slo-op",
+          "slo.enable-slo-op",
+          "slo.get-definitions-op",
+          "spaces.post-spaces-copy-saved-objects",
+          "spaces.post-spaces-disable-legacy-url-aliases",
+          "spaces.post-spaces-get-shareable-references",
+          "spaces.post-spaces-update-objects-spaces",
+          "spaces.get-spaces-space",
+          "spaces.post-spaces-space",
+          "spaces.delete-spaces-space-id",
+          "spaces.get-spaces-space-id",
+          "spaces.put-spaces-space-id",
+          "streams.get-streams",
+          "streams.post-streams-disable",
+          "streams.post-streams-enable",
+          "streams.post-streams-resync",
+          "streams.delete-streams-name",
+          "streams.get-streams-name",
+          "streams.put-streams-name",
+          "streams.post-streams-name-fork",
+          "streams.get-streams-name-ingest",
+          "streams.put-streams-name-ingest",
+          "streams.get-streams-name-query",
+          "streams.put-streams-name-query",
+          "streams.post-streams-name-content-export",
+          "streams.post-streams-name-content-import",
+          "streams.get-streams-streamname-attachments",
+          "streams.post-streams-streamname-attachments-bulk",
+          "streams.delete-streams-streamname-attachments-attachmenttype-attachmentid",
+          "streams.put-streams-streamname-attachments-attachmenttype-attachmentid",
+          "synthetics.post-synthetics-monitor-test",
+          "synthetics.get-synthetic-monitors",
+          "synthetics.post-synthetic-monitors",
+          "synthetics.post-synthetic-monitors-bulk-create",
+          "synthetics.delete-synthetic-monitors",
+          "synthetics.put-synthetic-monitors-bulk-update",
+          "synthetics.delete-synthetic-monitor",
+          "synthetics.get-synthetic-monitor",
+          "synthetics.put-synthetic-monitor",
+          "synthetics.get-parameters",
+          "synthetics.post-parameters",
+          "synthetics.delete-parameters",
+          "synthetics.delete-parameter",
+          "synthetics.get-parameter",
+          "synthetics.put-parameter",
+          "synthetics.get-private-locations",
+          "synthetics.post-private-location",
+          "synthetics.delete-private-location",
+          "synthetics.get-private-location",
+          "synthetics.put-private-location",
+          "system.get-features",
+          "system.get-status",
+          "tags.get-tags",
+          "tags.post-tags",
+          "tags.delete-tags-id",
+          "tags.get-tags-id",
+          "tags.put-tags-id",
+          "task-manager.task-manager-health",
+          "universal-profiling.get-profiling-setup-es-resources",
+          "universal-profiling.post-profiling-setup-es-resources",
+          "upgrade.get-upgrade-status",
+          "uptime.get-uptime-settings",
+          "uptime.put-uptime-settings",
+          "user-session.post-security-session-invalidate",
+          "visualizations.search-visualizations",
+          "visualizations.create-visualization",
+          "visualizations.get-visualization",
+          "visualizations.upsert-visualization",
+          "visualizations.delete-visualization",
+          "workflows.delete-workflows",
+          "workflows.get-workflows",
+          "workflows.post-workflows",
+          "workflows.get-workflows-aggs",
+          "workflows.get-workflows-connectors",
+          "workflows.get-workflows-executions-executionid",
+          "workflows.post-workflows-executions-executionid-cancel",
+          "workflows.get-workflows-executions-executionid-children",
+          "workflows.get-workflows-executions-executionid-logs",
+          "workflows.post-workflows-executions-executionid-resume",
+          "workflows.get-workflows-executions-executionid-step-stepexecutionid",
+          "workflows.get-workflows-executions-executionid-steps",
+          "workflows.get-workflows-executions-executionid-steps-stepid-resume-external",
+          "workflows.post-workflows-executions-executionid-steps-stepid-resume-external",
+          "workflows.get-workflows-executions-executionid-steps-stepid-resume-external-form",
+          "workflows.post-workflows-export",
+          "workflows.put-workflows-managed-workflow-id",
+          "workflows.post-workflows-mget",
+          "workflows.get-workflows-schema",
+          "workflows.get-workflows-stats",
+          "workflows.post-workflows-step-test",
+          "workflows.post-workflows-test",
+          "workflows.post-workflows-workflow",
+          "workflows.delete-workflows-workflow-id",
+          "workflows.get-workflows-workflow-id",
+          "workflows.put-workflows-workflow-id",
+          "workflows.post-workflows-workflow-id-clone",
+          "workflows.post-workflows-workflow-id-run",
+          "workflows.get-workflows-workflow-workflowid-executions",
+          "workflows.post-workflows-workflow-workflowid-executions-cancel",
+          "workflows.get-workflows-workflow-workflowid-executions-steps",
+          "workflows.get-workflows-workflow-executions"
+        ],
+        "type": "string"
+      },
+      "__schema31": {
+        "properties": {
+          "enable_elastic_capabilities": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema38"
+              }
+            ],
+            "description": "Whether to enable built-in Elastic skills for this execution."
+          },
+          "instructions": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema32"
+              }
+            ],
+            "description": "Custom instructions for the agent, replacing the stored instructions."
+          },
+          "skill_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema36"
+              }
+            ],
+            "description": "Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false."
+          },
+          "tools": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema33"
+              }
+            ],
+            "description": "Tool selection to enable for this execution, replacing the stored tool list."
+          }
+        },
+        "type": "object"
+      },
+      "__schema32": {
+        "maxLength": 2048,
+        "type": "string"
+      },
+      "__schema33": {
+        "items": {
+          "$ref": "#/definitions/__schema34"
+        },
+        "maxItems": 50,
+        "type": "array"
+      },
+      "__schema34": {
+        "properties": {
+          "tool_ids": {
+            "description": "Tool IDs to enable.",
+            "items": {
+              "$ref": "#/definitions/__schema35"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "tool_ids"
+        ],
+        "type": "object"
+      },
+      "__schema35": {
+        "maxLength": 100,
+        "type": "string"
+      },
+      "__schema36": {
+        "items": {
+          "$ref": "#/definitions/__schema37"
+        },
+        "maxItems": 50,
+        "type": "array"
+      },
+      "__schema37": {
+        "maxLength": 100,
+        "type": "string"
+      },
+      "__schema38": {
+        "type": "boolean"
+      },
+      "__schema4": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ]
+      },
+      "__schema5": {
+        "anyOf": [
+          {
+            "enum": [
+              "#/kibana/definitions/alertingV2NotificationGroup",
+              "#/kibana/definitions/securityAlertAnalysisCallerAlerts"
+            ],
+            "type": "string"
+          },
+          {
+            "maxLength": 512,
+            "type": "string"
+          }
+        ]
+      },
+      "__schema6": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema7"
+        },
+        "type": "object"
+      },
+      "__schema7": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema8"
+          }
+        ],
+        "jsonSchemaModel": true
+      },
+      "__schema8": {
+        "properties": {
+          "$defs": {
+            "additionalProperties": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "type": "object"
+          },
+          "$ref": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema5"
+              }
+            ]
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "$ref": "#/definitions/__schema7"
+              }
+            ]
+          },
+          "anyOf": {
+            "items": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "type": "array"
+          },
+          "const": {},
+          "default": {},
+          "definitions": {
+            "additionalProperties": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "type": "object"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enum": {
+            "items": {},
+            "type": "array"
+          },
+          "exclusiveMaximum": {
+            "type": "number"
+          },
+          "exclusiveMinimum": {
+            "type": "number"
+          },
+          "format": {
+            "enum": [
+              "date-time",
+              "date",
+              "time",
+              "email",
+              "uuid",
+              "uri"
+            ],
+            "type": "string"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/__schema7"
+              },
+              {
+                "items": {
+                  "$ref": "#/definitions/__schema7"
+                },
+                "type": "array"
+              }
+            ]
+          },
+          "maxItems": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxLength": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maximum": {
+            "type": "number"
+          },
+          "minItems": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minLength": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minimum": {
+            "type": "number"
+          },
+          "multipleOf": {
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "type": "number"
+          },
+          "oneOf": {
+            "items": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "type": "array"
+          },
+          "pattern": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "type": "object"
+          },
+          "required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "object",
+                  "array",
+                  "string",
+                  "number",
+                  "integer",
+                  "boolean",
+                  "null"
+                ],
+                "type": "string"
+              },
+              {
+                "items": {
+                  "enum": [
+                    "object",
+                    "array",
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean",
+                    "null"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ]
+          },
+          "uniqueItems": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "__schema9": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ]
+      }
+    },
+    "properties": {
+      "approvals": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema25"
+          }
+        ],
+        "description": "Actions pre-approved for this step, which the agent may then take without a user confirmation. The grant covers this step execution and the sub-agents it spawns, and adds to any defaults stored in the agent's configuration."
+      },
+      "attachments": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema16"
+          }
+        ],
+        "description": "Optional attachments to provide to the agent."
+      },
+      "author_name": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema23"
+          }
+        ],
+        "description": "Display name recorded on the user message this step writes, for example the workflow name. Applied only when the workflow runs as a service account; the message stays attributed to that account."
+      },
+      "configuration_overrides": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema31"
+          }
+        ],
+        "description": "Runtime configuration overrides applied to this step execution only. Each provided field replaces the corresponding field in the stored agent configuration."
+      },
+      "conversation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema22"
+          }
+        ],
+        "description": "Optional existing conversation ID to continue a previous conversation."
+      },
+      "message": {
+        "description": "The user input message to send to the agent.",
+        "type": "string"
+      },
+      "metadata": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema24"
+          }
+        ],
+        "description": "Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag."
+      },
+      "schema": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The schema for the output of the agent."
+      },
+      "template_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema13"
+          }
+        ],
+        "description": "Pinned EIS prompt template id, including the leading dot. Sent instead of the message when the connector requires templates."
+      },
+      "template_variables": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema15"
+          }
+        ],
+        "description": "Variables for template_id. Ignored when the connector does not require a template."
+      },
+      "template_version": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema14"
+          }
+        ],
+        "description": "Pinned EIS prompt template version. Required with template_id when the connector requires templates."
+      }
+    },
+    "required": [
+      "message"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {},
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema2": {
+        "additionalProperties": false,
+        "properties": {
+          "cachedTokens": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema4"
+              }
+            ],
+            "description": "Cached input tokens reused across all LLM rounds. Subset of inputTokens."
+          },
+          "connectorId": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema3"
+              }
+            ],
+            "description": "Id of the LLM connector used for this step, when reported by the model."
+          },
+          "inputTokens": {
+            "description": "Total input tokens consumed across all LLM rounds.",
+            "type": "number"
+          },
+          "outputTokens": {
+            "description": "Total output tokens produced across all LLM rounds.",
+            "type": "number"
+          },
+          "totalTokens": {
+            "description": "Sum of input and output tokens across all LLM rounds.",
+            "type": "number"
+          }
+        },
+        "required": [
+          "inputTokens",
+          "outputTokens",
+          "totalTokens"
+        ],
+        "type": "object"
+      },
+      "__schema3": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema4": {
+        "type": "number"
+      }
+    },
+    "properties": {
+      "conversation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Conversation ID associated with this step execution. Present when the step created or updated a conversation."
+      },
+      "message": {
+        "description": "The text response from the agent. When schema is provided, contains a string version of the structured output",
+        "type": "string"
+      },
+      "metadata": {
+        "additionalProperties": false,
+        "description": "Step execution metadata, including token usage across all LLM rounds.",
+        "properties": {
+          "usage": {
+            "$ref": "#/definitions/__schema2"
+          }
+        },
+        "required": [
+          "usage"
+        ],
+        "type": "object"
+      },
+      "structured_output": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The structured output from the agent. Only here when schema was provided"
+      }
+    },
+    "required": [
+      "message"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

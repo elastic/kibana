@@ -1,0 +1,159 @@
+{
+  "exposure": "open",
+  "id": "security.attack-discovery.defaultValidation",
+  "input": {
+    "properties": {
+      "alerts_context_count": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "alerts_index_pattern": {
+        "type": "string"
+      },
+      "anonymized_alerts": {
+        "items": {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "metadata": {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            "page_content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "page_content"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "api_config": {
+        "properties": {
+          "action_type_id": {
+            "type": "string"
+          },
+          "connector_id": {
+            "type": "string"
+          },
+          "default_system_prompt_id": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "OpenAI",
+              "Azure OpenAI",
+              "Other"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "connector_id"
+        ],
+        "type": "object"
+      },
+      "attack_discoveries": {
+        "items": {
+          "properties": {
+            "alert_ids": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "details_markdown": {
+              "type": "string"
+            },
+            "entity_summary_markdown": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "mitre_attack_tactics": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "summary_markdown": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "alert_ids",
+            "details_markdown",
+            "summary_markdown",
+            "title"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "connector_name": {
+        "type": "string"
+      },
+      "enable_field_rendering": {
+        "default": true,
+        "type": "boolean"
+      },
+      "generation_uuid": {
+        "type": "string"
+      },
+      "replacements": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "with_replacements": {
+        "default": false,
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "api_config",
+      "attack_discoveries",
+      "generation_uuid"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "filter_reason": {
+        "type": "string"
+      },
+      "filtered_count": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "validated_discoveries": {
+        "items": {},
+        "type": "array"
+      }
+    },
+    "required": [
+      "filtered_count",
+      "validated_discoveries"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

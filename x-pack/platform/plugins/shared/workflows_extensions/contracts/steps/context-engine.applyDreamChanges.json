@@ -1,0 +1,456 @@
+{
+  "exposure": "open",
+  "id": "context-engine.applyDreamChanges",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": {},
+        "properties": {
+          "governance": {
+            "properties": {
+              "lifecycle": {
+                "properties": {
+                  "status": {
+                    "maxLength": 64,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "permissions": {
+            "properties": {
+              "kibana": {
+                "properties": {
+                  "privileges": {
+                    "items": {
+                      "$ref": "#/definitions/__schema2"
+                    },
+                    "maxItems": 100,
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "updated_at": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema10": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "__schema11": {
+        "default": [],
+        "items": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "maxItems": 200,
+        "type": "array"
+      },
+      "__schema12": {
+        "properties": {
+          "access_patterns": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema8"
+              }
+            ]
+          },
+          "content": {
+            "maxLength": 65536,
+            "type": "string"
+          },
+          "delete": {
+            "type": "boolean"
+          },
+          "ref": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "source_memory_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema10"
+              }
+            ]
+          },
+          "title": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ]
+          }
+        },
+        "required": [
+          "ref"
+        ],
+        "type": "object"
+      },
+      "__schema13": {
+        "type": "boolean"
+      },
+      "__schema2": {
+        "properties": {
+          "count": {
+            "type": "number"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "maxItems": 50,
+            "type": "array"
+          },
+          "space": {
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "space"
+        ],
+        "type": "object"
+      },
+      "__schema3": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema4": {
+        "default": [],
+        "items": {
+          "$ref": "#/definitions/__schema5"
+        },
+        "maxItems": 200,
+        "type": "array"
+      },
+      "__schema5": {
+        "properties": {
+          "access_patterns": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema8"
+              }
+            ]
+          },
+          "attributes": {
+            "items": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "maxItems": 200,
+            "type": "array"
+          },
+          "content": {
+            "maxLength": 65536,
+            "type": "string"
+          },
+          "delete": {
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 2048,
+            "type": "string"
+          },
+          "ref": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "source_memory_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema10"
+              }
+            ]
+          },
+          "title": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ]
+          }
+        },
+        "required": [
+          "ref"
+        ],
+        "type": "object"
+      },
+      "__schema6": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema7": {
+        "properties": {
+          "key": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "value": {
+            "maxLength": 10000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "__schema8": {
+        "items": {
+          "$ref": "#/definitions/__schema9"
+        },
+        "maxItems": 5,
+        "type": "array"
+      },
+      "__schema9": {
+        "properties": {
+          "esql_example": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "esql_template": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "question_type": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "returns": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "esql_example",
+          "esql_template",
+          "question_type",
+          "returns"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "changes": {
+        "description": "The change set the dreaming model returned",
+        "properties": {
+          "entities": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "facts": {
+            "$ref": "#/definitions/__schema11"
+          }
+        },
+        "type": "object"
+      },
+      "dry_run": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema13"
+          }
+        ],
+        "description": "Check and resolve the change set and report what it would write, without writing. Each call is previewed on its own, without what earlier calls of the same run would write."
+      },
+      "memories": {
+        "description": "The memories the model was shown, as read from the AI index: the latest revision of each. They must all have the same permissions. Every item it writes must cite some of them, or memories the item already cites, and is visible only where they all are. Deleted ones are ignored.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 200,
+        "type": "array"
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "changes",
+      "memories"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "item": {
+            "description": "Which item of the change set, such as `fact new:1`",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why it was not applied",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "change": {
+              "enum": [
+                "created",
+                "updated",
+                "deleted"
+              ],
+              "type": "string"
+            },
+            "id": {
+              "description": "The KI id",
+              "type": "string"
+            },
+            "title": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema3"
+                }
+              ],
+              "description": "Absent when it would be deleted"
+            },
+            "type": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema2"
+                }
+              ],
+              "description": "Absent when it would be deleted"
+            }
+          },
+          "required": [
+            "change",
+            "id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "type": "string"
+      },
+      "__schema4": {
+        "items": {
+          "additionalProperties": {},
+          "properties": {
+            "id": {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "type"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "properties": {
+      "created": {
+        "description": "Facts and entities created",
+        "type": "number"
+      },
+      "deleted": {
+        "description": "Facts and entities deleted",
+        "type": "number"
+      },
+      "documents": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Each KI it created or updated, as stored; on a dry run, each it would create or update"
+      },
+      "dropped_access_patterns": {
+        "description": "Access patterns dropped because their example query did not run",
+        "type": "number"
+      },
+      "rejected": {
+        "description": "Items of the change set that were not applied, each with why",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "updated": {
+        "description": "Facts and entities updated",
+        "type": "number"
+      },
+      "would_write": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "On a dry run, each KI it would write; nothing is stored"
+      }
+    },
+    "required": [
+      "created",
+      "deleted",
+      "dropped_access_patterns",
+      "rejected",
+      "updated"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

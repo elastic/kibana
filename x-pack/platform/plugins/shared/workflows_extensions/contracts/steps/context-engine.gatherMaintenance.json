@@ -1,0 +1,452 @@
+{
+  "exposure": "open",
+  "id": "context-engine.gatherMaintenance",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 512,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "after_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "With since: also those changed exactly at since, with a greater id"
+      },
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "since": {
+        "description": "Review the items and memories changed after this ISO 8601 time",
+        "maxLength": 64,
+        "type": "string"
+      },
+      "sweep_after_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Sweep the items with a greater id. Empty: start from the first item"
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "since"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "about_facts": {
+            "description": "Facts about the reviewed entities",
+            "items": {
+              "$ref": "#/definitions/__schema19"
+            },
+            "maxItems": 500,
+            "type": "array"
+          },
+          "audience": {
+            "description": "Who can see every item of the batch",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "neighbors": {
+            "description": "Similar items the reviewed ones may duplicate or contradict",
+            "items": {
+              "$ref": "#/definitions/__schema19"
+            },
+            "maxItems": 500,
+            "type": "array"
+          },
+          "relationships": {
+            "description": "Relationships touching the reviewed items or their neighbors",
+            "items": {
+              "$ref": "#/definitions/__schema20"
+            },
+            "maxItems": 500,
+            "type": "array"
+          }
+        },
+        "required": [
+          "about_facts",
+          "audience",
+          "items",
+          "neighbors",
+          "relationships"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "additionalProperties": false,
+        "properties": {
+          "about_fact_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema15"
+              }
+            ],
+            "description": "For an entity, the facts about it, newest first"
+          },
+          "content": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "kind": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "last_seen_at": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "lost_source_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema16"
+              }
+            ],
+            "description": "The memories it came from that were deleted"
+          },
+          "neighbor_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema14"
+              }
+            ],
+            "description": "The most similar items of its kind"
+          },
+          "occurrences": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "person_edited": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "reasons": {
+            "description": "Why it is reviewed",
+            "items": {
+              "$ref": "#/definitions/__schema13"
+            },
+            "type": "array"
+          },
+          "remaining_memories": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema17"
+              }
+            ],
+            "description": "The memories it came from that remain, to rewrite it from"
+          },
+          "title": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "type": {
+            "$ref": "#/definitions/__schema4"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "occurrences",
+          "reasons",
+          "title",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema10": {
+        "type": "string"
+      },
+      "__schema11": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema12"
+          }
+        ],
+        "description": "A person edited it: its text is kept and it is never removed"
+      },
+      "__schema12": {
+        "type": "boolean"
+      },
+      "__schema13": {
+        "enum": [
+          "changed",
+          "lost_sources",
+          "about_facts_changed",
+          "sweep"
+        ],
+        "type": "string"
+      },
+      "__schema14": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "type": "array"
+      },
+      "__schema15": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "type": "array"
+      },
+      "__schema16": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "type": "array"
+      },
+      "__schema17": {
+        "items": {
+          "$ref": "#/definitions/__schema18"
+        },
+        "maxItems": 10,
+        "type": "array"
+      },
+      "__schema18": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "id"
+        ],
+        "type": "object"
+      },
+      "__schema19": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "kind": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "last_seen_at": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "occurrences": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "person_edited": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "title": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "type": {
+            "$ref": "#/definitions/__schema4"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "occurrences",
+          "title",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema20": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "from": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema2"
+          }
+        },
+        "required": [
+          "from",
+          "id",
+          "relation",
+          "to"
+        ],
+        "type": "object"
+      },
+      "__schema21": {
+        "additionalProperties": false,
+        "properties": {
+          "change": {
+            "enum": [
+              "merged",
+              "superseded",
+              "rewritten",
+              "summarized",
+              "tombstoned",
+              "needs_review"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "change",
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema3": {
+        "enum": [
+          "fact",
+          "entity"
+        ],
+        "type": "string"
+      },
+      "__schema4": {
+        "type": "string"
+      },
+      "__schema5": {
+        "type": "string"
+      },
+      "__schema6": {
+        "type": "string"
+      },
+      "__schema7": {
+        "type": "string"
+      },
+      "__schema8": {
+        "description": "How many memories it was seen in",
+        "type": "number"
+      },
+      "__schema9": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "When the latest memory it was seen in was saved"
+      }
+    },
+    "properties": {
+      "batches": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "counts": {
+        "additionalProperties": false,
+        "properties": {
+          "about_facts_changed": {
+            "type": "number"
+          },
+          "changed": {
+            "type": "number"
+          },
+          "lost_sources": {
+            "type": "number"
+          },
+          "sweep": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "about_facts_changed",
+          "changed",
+          "lost_sources",
+          "sweep"
+        ],
+        "type": "object"
+      },
+      "fixes": {
+        "description": "Items and relationships to tombstone without asking the model",
+        "items": {
+          "$ref": "#/definitions/__schema21"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "needs_review": {
+        "description": "Items left for a person, each with why",
+        "items": {
+          "$ref": "#/definitions/__schema21"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "resume_after_id": {
+        "type": "string"
+      },
+      "resume_from": {
+        "description": "Where the next run reads changes from, when this run did not read them all",
+        "type": "string"
+      },
+      "reviewed": {
+        "description": "Items in the batches",
+        "type": "number"
+      },
+      "sweep_after_id": {
+        "description": "Where the next sweep starts; empty to start over",
+        "type": "string"
+      }
+    },
+    "required": [
+      "batches",
+      "counts",
+      "fixes",
+      "needs_review",
+      "resume_after_id",
+      "resume_from",
+      "reviewed",
+      "sweep_after_id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

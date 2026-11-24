@@ -1,0 +1,73 @@
+{
+  "exposure": "open",
+  "id": "cases.deleteAttachments",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "case_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "ids": {
+        "description": "The `id` of each attachment to delete, from `cases.getAllAttachments`. Use the attachment's own `id`, not its `attachmentId`, which points to an alert, event, or saved object.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 100,
+        "minItems": 1,
+        "type": "array"
+      },
+      "include_related": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Also delete the attachments that the deleted ones brought to the case, such as the alerts of an attack. Default: true."
+      }
+    },
+    "required": [
+      "case_id",
+      "ids"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "case_id": {
+        "type": "string"
+      },
+      "ids": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 100,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "case_id",
+      "ids"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

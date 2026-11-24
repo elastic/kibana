@@ -1,0 +1,134 @@
+{
+  "exposure": "open",
+  "id": "security.assignAlert",
+  "input": {
+    "anyOf": [
+      {
+        "properties": {
+          "alert_ids": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "assignees_to_add": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema5"
+              }
+            ],
+            "description": "A list of user IDs to assign",
+            "items": {
+              "$ref": "#/definitions/__schema4"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "assignees_to_remove": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema5"
+              }
+            ],
+            "default": [],
+            "description": "A list of user IDs to unassign"
+          }
+        },
+        "required": [
+          "alert_ids",
+          "assignees_to_add"
+        ],
+        "type": "object"
+      },
+      {
+        "properties": {
+          "alert_ids": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "assignees_to_add": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema5"
+              }
+            ],
+            "default": [],
+            "description": "A list of user IDs to assign"
+          },
+          "assignees_to_remove": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema5"
+              }
+            ],
+            "description": "A list of user IDs to unassign",
+            "items": {
+              "$ref": "#/definitions/__schema4"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "alert_ids",
+          "assignees_to_remove"
+        ],
+        "type": "object"
+      }
+    ],
+    "definitions": {
+      "__schema0": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          },
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "A single alert ID or a list of IDs to support bulk updates"
+      },
+      "__schema1": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "items": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema3": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema4": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema5": {
+        "items": {
+          "$ref": "#/definitions/__schema4"
+        },
+        "type": "array"
+      }
+    }
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "message": {
+        "maxLength": 1000,
+        "type": "string"
+      },
+      "success": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "success"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

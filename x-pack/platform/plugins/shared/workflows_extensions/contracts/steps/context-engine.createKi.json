@@ -1,0 +1,431 @@
+{
+  "exposure": "open",
+  "id": "context-engine.createKi",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "description": "The document id of the knowledge indicator",
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "The user the KI is scoped to. Unset means shared with every user"
+      },
+      "__schema10": {
+        "items": {
+          "$ref": "#/definitions/__schema11"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "__schema11": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema12": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema13"
+          }
+        ],
+        "description": "Arbitrary key-value attributes attached to the KI. A null value omits the attribute."
+      },
+      "__schema13": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema14"
+        },
+        "type": "object"
+      },
+      "__schema14": {
+        "anyOf": [
+          {
+            "maxLength": 10000,
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema15"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          {
+            "enum": [
+              null
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        ]
+      },
+      "__schema15": {
+        "maxLength": 10000,
+        "type": "string"
+      },
+      "__schema16": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema17"
+          }
+        ],
+        "description": "URIs this KI relates to"
+      },
+      "__schema17": {
+        "items": {
+          "$ref": "#/definitions/__schema18"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "__schema18": {
+        "properties": {
+          "description": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema19"
+              }
+            ],
+            "description": "Why this reference exists"
+          },
+          "relation": {
+            "description": "How the URI relates to this KI",
+            "enum": [
+              "derived_from",
+              "relates_to",
+              "supersedes"
+            ],
+            "type": "string"
+          },
+          "uri": {
+            "description": "The referenced URI, for example index://logs-*",
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri"
+        ],
+        "type": "object"
+      },
+      "__schema19": {
+        "maxLength": 2048,
+        "type": "string"
+      },
+      "__schema2": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema20": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema21"
+          }
+        ],
+        "description": "Expiry date in ISO 8601. Leave unset and the KI never expires"
+      },
+      "__schema21": {
+        "format": "date-time",
+        "maxLength": 64,
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|[+-](?:[01]\\d|2[0-3]):[0-5]\\d)$",
+        "type": "string"
+      },
+      "__schema22": {
+        "description": "The verifiers to run, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). At least one unique entry is required.",
+        "items": {
+          "$ref": "#/definitions/__schema23"
+        },
+        "maxItems": 10,
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema23": {
+        "anyOf": [
+          {
+            "enum": [
+              "esql-valid-syntax",
+              "esql-valid-runtime"
+            ],
+            "type": "string"
+          },
+          {
+            "properties": {
+              "applies_to": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema25"
+                  }
+                ],
+                "description": "When omitted, the verifier runs for every KI"
+              },
+              "timeout_sec": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema24"
+                  }
+                ],
+                "description": "Seconds to wait for the verifier workflow before failing the KI (default 60)"
+              },
+              "workflow_id": {
+                "description": "The id of the workflow to run as a verifier",
+                "maxLength": 256,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow_id"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "__schema24": {
+        "maximum": 300,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema25": {
+        "properties": {
+          "attributes": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema28"
+              }
+            ],
+            "description": "Run only for KIs carrying every one of these attribute keys"
+          },
+          "types": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema26"
+              }
+            ],
+            "description": "Run only for KIs with one of these types"
+          }
+        },
+        "type": "object"
+      },
+      "__schema26": {
+        "items": {
+          "$ref": "#/definitions/__schema27"
+        },
+        "maxItems": 20,
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema27": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema28": {
+        "items": {
+          "$ref": "#/definitions/__schema29"
+        },
+        "maxItems": 20,
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema29": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema3": {
+        "description": "The KI type (e.g. index_metadata, document, detection)",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema30": {
+        "type": "boolean"
+      },
+      "__schema4": {
+        "description": "A short title for the KI",
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema5": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema6"
+          }
+        ],
+        "description": "A one-line description of the KI"
+      },
+      "__schema6": {
+        "maxLength": 2048,
+        "type": "string"
+      },
+      "__schema7": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema8"
+          }
+        ],
+        "description": "The knowledge content of the KI"
+      },
+      "__schema8": {
+        "maxLength": 65536,
+        "type": "string"
+      },
+      "__schema9": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "Tags used to categorize the KI"
+      }
+    },
+    "properties": {
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "ki": {
+        "description": "The knowledge indicator document to create",
+        "properties": {
+          "attributes": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "content": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "expires_at": {
+            "$ref": "#/definitions/__schema20"
+          },
+          "references": {
+            "$ref": "#/definitions/__schema16"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "title": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "type": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "user_id": {
+            "$ref": "#/definitions/__schema1"
+          }
+        },
+        "required": [
+          "title",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ki_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Optional stable id for the knowledge indicator. On an index re-runs with the same id replace it; on a data stream they append a new revision. Generated when omitted."
+      },
+      "refresh": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema30"
+          }
+        ],
+        "description": "Wait for the write to become searchable before the step completes (default false). Set when a later step in the same run updates or deletes this KI."
+      },
+      "verifiers": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema22"
+          }
+        ],
+        "description": "Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, the KI is written with lifecycle status `verification_failed` and excluded from search."
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "ki"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "passed": {
+            "type": "boolean"
+          },
+          "results": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "passed": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "verifier": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "passed",
+                "verifier"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "passed",
+          "results"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "id": {
+        "description": "The id of the created knowledge indicator",
+        "type": "string"
+      },
+      "verification": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Verifier results; present when `verifiers` was given"
+      }
+    },
+    "required": [
+      "id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

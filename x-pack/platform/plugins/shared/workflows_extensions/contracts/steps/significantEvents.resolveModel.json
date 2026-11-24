@@ -1,0 +1,38 @@
+{
+  "exposure": "open",
+  "id": "significantEvents.resolveModel",
+  "input": {
+    "properties": {
+      "connector_id": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "step": {
+        "enum": [
+          "discovery",
+          "kiExtraction",
+          "kiQueryGeneration"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "step"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "connector_id": {
+        "maxLength": 255,
+        "type": "string"
+      }
+    },
+    "required": [
+      "connector_id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

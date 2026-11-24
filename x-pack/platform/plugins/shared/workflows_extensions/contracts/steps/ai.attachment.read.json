@@ -1,0 +1,59 @@
+{
+  "exposure": "open",
+  "id": "ai.attachment.read",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "exclusiveMinimum": true,
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "properties": {
+      "attachment_id": {
+        "description": "The ID of the attachment to read.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "conversation_id": {
+        "description": "The ID of the conversation the attachment belongs to.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "version": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Optional version number to read. Defaults to the current version."
+      }
+    },
+    "required": [
+      "attachment_id",
+      "conversation_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "data": {
+        "description": "The raw attachment data at the requested version."
+      },
+      "version": {
+        "description": "The version number that was read.",
+        "type": "number"
+      }
+    },
+    "required": [
+      "data",
+      "version"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

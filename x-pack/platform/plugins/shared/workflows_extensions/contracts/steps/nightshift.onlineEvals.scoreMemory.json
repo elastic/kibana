@@ -1,0 +1,369 @@
+{
+  "exposure": "open",
+  "id": "nightshift.onlineEvals.scoreMemory",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema10": {
+        "additionalProperties": {},
+        "properties": {
+          "params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "tool_call_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "tool_id": {
+            "maxLength": 512,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "__schema11": {
+        "items": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "maxItems": 2000,
+        "type": "array"
+      },
+      "__schema12": {
+        "additionalProperties": {},
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/definitions/__schema13"
+            },
+            "maxItems": 2000,
+            "type": "array"
+          },
+          "tool_call_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "tool_id": {
+            "maxLength": 512,
+            "type": "string"
+          }
+        },
+        "required": [
+          "results",
+          "tool_call_id"
+        ],
+        "type": "object"
+      },
+      "__schema13": {},
+      "__schema14": {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      },
+      "__schema2": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "__schema3": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema4": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema5": {
+        "items": {
+          "$ref": "#/definitions/__schema6"
+        },
+        "maxItems": 500,
+        "type": "array"
+      },
+      "__schema6": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema7": {
+        "items": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "maxItems": 200,
+        "type": "array"
+      },
+      "__schema8": {
+        "properties": {
+          "action": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "after_content": {
+            "type": "string"
+          },
+          "after_status": {
+            "type": "string"
+          },
+          "before_content": {
+            "type": "string"
+          },
+          "before_status": {
+            "type": "string"
+          },
+          "item_id": {
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "replaced_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "source_memory_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "store": {
+            "enum": [
+              "wiki",
+              "semantic_memory",
+              "decision_tree",
+              "decision_tree_learning"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "item_id",
+          "store"
+        ],
+        "type": "object"
+      },
+      "__schema9": {
+        "items": {
+          "$ref": "#/definitions/__schema10"
+        },
+        "maxItems": 2000,
+        "type": "array"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Agent id that ran the investigation round."
+      },
+      "background_trace_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Deterministic T_background trace id from materialize."
+      },
+      "conversation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The investigation conversation id for the completed round."
+      },
+      "decision_tree_applied_writes": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "Applied Decision Tree and Learning writes from reinforce_decision_trees."
+      },
+      "decision_tree_opened_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Decision tree ids opened by the agent during the round."
+      },
+      "hydrated_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Hydrated Wiki and Decision Tree ids supplied to the round."
+      },
+      "memory_applied_writes": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "Applied Semantic Memory writes from optimize_memory."
+      },
+      "memory_opened_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Semantic Memory ids opened by the agent during the round."
+      },
+      "recalled_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Recalled Semantic Memory ids supplied to the round."
+      },
+      "round_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "The completed conversation round id (or alias such as `last`)."
+      },
+      "round_index": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Optional 0-based or negative round index selector."
+      },
+      "sample_rate": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema14"
+          }
+        ],
+        "description": "Deterministic subsample rate in [0, 1] (default: 1.0)."
+      },
+      "tool_calls": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema9"
+          }
+        ],
+        "description": "Investigator tool calls from this round for fallback read extraction."
+      },
+      "tool_results": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema11"
+          }
+        ],
+        "description": "Investigator tool results from this round for fallback read extraction."
+      },
+      "wiki_applied_writes": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "Applied Wiki writes from optimize_wiki."
+      },
+      "wiki_opened_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Wiki page ids opened by the agent during the round."
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "number"
+      },
+      "__schema1": {
+        "type": "number"
+      },
+      "__schema2": {
+        "type": "number"
+      },
+      "__schema3": {
+        "enum": [
+          "disabled",
+          "evals_unavailable",
+          "paused",
+          "nothing_to_score",
+          "not_sampled"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "evaluator_count": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Evaluators the event reports."
+      },
+      "failed_count": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Evaluators that failed."
+      },
+      "scored": {
+        "description": "Whether a score event was sent.",
+        "type": "boolean"
+      },
+      "skip_reason": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Why nothing was scored."
+      },
+      "skipped_count": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Evaluators the round didn't have evidence for."
+      }
+    },
+    "required": [
+      "scored"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -1,0 +1,170 @@
+{
+  "exposure": "open",
+  "id": "proposals.createProposal",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema2": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "__schema3": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "type": "string"
+      },
+      "__schema4": {
+        "maxLength": 64,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema5": {
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "type": "string"
+      },
+      "__schema6": {
+        "type": "string"
+      },
+      "__schema7": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      }
+    },
+    "properties": {
+      "actionInput": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Inputs passed to the action workflow."
+      },
+      "actionWorkflowId": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Managed action workflow to run once approved. Omit for a non-action proposal."
+      },
+      "category": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Grouping axis for the decision queue. Overrides the action workflow’s own declared category, and is the only way a proposal with no action gets one — consumers group by it, so without it such a proposal has nowhere to appear."
+      },
+      "comment": {
+        "description": "Explains what is being proposed, rendered as markdown. Required: a proposal a human cannot read is not reviewable.",
+        "type": "string"
+      },
+      "confidence": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Confidence in the recommendation."
+      },
+      "conversationId": {
+        "description": "Conversation this proposal belongs to.",
+        "type": "string"
+      },
+      "expiresIn": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema6"
+          }
+        ],
+        "description": "How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation."
+      },
+      "impact": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Impact snapshotted at creation. Takes precedence over the action workflow’s own declared impact, since the caller knows the situation the proposal came out of."
+      },
+      "origin": {
+        "description": "Which system is producing this proposal, so a solution’s queue can show its own and not another’s. Required and undefaulted: a default would attribute every caller that forgot it to whichever system the default named.",
+        "enum": [
+          "alertzero",
+          "nightshift",
+          "context_engine",
+          "agent_builder"
+        ],
+        "type": "string"
+      },
+      "proposalId": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "The id to create the proposal under, instead of a random one, for a caller that derives it from what it is proposing. An id that already exists fails the step with a conflict and creates nothing. Omit for a proposal that is always new."
+      },
+      "title": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Short plain-text label naming what is proposed — `comment` is already the markdown body. Optional here, but stored on every proposal: omitting it stores the action workflow’s own name, or `Proposed action` when the action has no name either."
+      }
+    },
+    "required": [
+      "comment",
+      "conversationId",
+      "origin"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "alwaysGate": {
+        "type": "boolean"
+      },
+      "category": {
+        "type": "string"
+      },
+      "expiresAt": {
+        "type": "string"
+      },
+      "proposalId": {
+        "type": "string"
+      },
+      "rootProposalId": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "alwaysGate",
+      "proposalId",
+      "rootProposalId",
+      "status"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

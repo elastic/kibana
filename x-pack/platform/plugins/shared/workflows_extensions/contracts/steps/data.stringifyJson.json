@@ -1,0 +1,26 @@
+{
+  "config": {
+    "properties": {
+      "source": {}
+    },
+    "required": [
+      "source"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.stringifyJson",
+  "input": {
+    "properties": {
+      "pretty": {
+        "default": false,
+        "type": "boolean"
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "type": "string"
+  },
+  "stability": "tech_preview"
+}

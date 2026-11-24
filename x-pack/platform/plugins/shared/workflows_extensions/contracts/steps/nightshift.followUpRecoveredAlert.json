@@ -1,0 +1,124 @@
+{
+  "exposure": "open",
+  "id": "nightshift.followUpRecoveredAlert",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 100,
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 100,
+        "type": "string"
+      },
+      "__schema2": {
+        "maxLength": 500,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alert_id": {
+        "description": "The alert instance ID",
+        "maxLength": 500,
+        "minLength": 1,
+        "type": "string"
+      },
+      "alert_start": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "When the alert first became active"
+      },
+      "alert_uuid": {
+        "description": "The recovered alert UUID",
+        "maxLength": 500,
+        "minLength": 1,
+        "type": "string"
+      },
+      "recovered_at": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "When the recovery event was dispatched to workflows"
+      },
+      "rule_id": {
+        "maxLength": 500,
+        "nullable": true,
+        "type": "string"
+      },
+      "rule_name": {
+        "maxLength": 500,
+        "nullable": true,
+        "type": "string"
+      },
+      "rule_tags": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "maxItems": 50,
+        "nullable": true,
+        "type": "array"
+      },
+      "rule_type_id": {
+        "maxLength": 500,
+        "nullable": true,
+        "type": "string"
+      }
+    },
+    "required": [
+      "alert_id",
+      "alert_uuid"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      },
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema2": {
+        "enum": [
+          "no_open_investigation"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "execution_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "The investigation workflow execution of the recovery round, which records whether it ran"
+      },
+      "investigation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The investigation the recovery round was requested on"
+      },
+      "skip_reason": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Why no recovery round was queued"
+      }
+    },
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

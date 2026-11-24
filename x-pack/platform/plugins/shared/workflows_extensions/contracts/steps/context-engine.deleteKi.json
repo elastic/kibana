@@ -1,0 +1,52 @@
+{
+  "exposure": "open",
+  "id": "context-engine.deleteKi",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "ki_id": {
+        "description": "The document id of the knowledge indicator",
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "refresh": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Wait for the write to become searchable before the step completes (default false)"
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "ki_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "description": "The document id of the deleted knowledge indicator",
+        "type": "string"
+      }
+    },
+    "required": [
+      "id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

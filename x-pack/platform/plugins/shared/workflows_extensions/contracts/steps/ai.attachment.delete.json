@@ -1,0 +1,57 @@
+{
+  "exposure": "open",
+  "id": "ai.attachment.delete",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "attachment_id": {
+        "description": "The ID of the attachment to delete.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "conversation_id": {
+        "description": "The ID of the conversation the attachment belongs to.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "permanent": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "When true, permanently removes the attachment. Defaults to soft delete."
+      }
+    },
+    "required": [
+      "attachment_id",
+      "conversation_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "permanent": {
+        "description": "Whether the delete was permanent.",
+        "type": "boolean"
+      },
+      "success": {
+        "description": "Always true on success.",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "permanent",
+      "success"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

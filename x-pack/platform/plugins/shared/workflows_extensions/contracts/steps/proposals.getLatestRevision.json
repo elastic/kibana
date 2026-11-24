@@ -1,0 +1,70 @@
+{
+  "exposure": "open",
+  "id": "proposals.getLatestRevision",
+  "input": {
+    "properties": {
+      "proposalId": {
+        "description": "Any proposal in the revision chain to resolve — not necessarily the root.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "proposalId"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "properties": {
+      "actionInput": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The live revision action input. Resolve this before executing the action: a revision may have corrected the parameters, and the trigger input a caller captured at creation is then stale."
+      },
+      "decision": {
+        "enum": [
+          "approved",
+          "dismissed"
+        ],
+        "type": "string"
+      },
+      "proposalId": {
+        "description": "The live revision — the input id if it was already live.",
+        "type": "string"
+      },
+      "revision": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "status": {
+        "enum": [
+          "pending",
+          "executing",
+          "succeeded",
+          "failed",
+          "expired",
+          "no_action",
+          "superseded"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "proposalId",
+      "revision",
+      "status"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

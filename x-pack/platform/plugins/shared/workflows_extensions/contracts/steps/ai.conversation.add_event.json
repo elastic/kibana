@@ -1,0 +1,69 @@
+{
+  "exposure": "open",
+  "id": "ai.conversation.add_event",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "properties": {
+      "conversation_id": {
+        "description": "The unique identifier of the conversation to append the event to.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "data": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "default": {},
+        "description": "The event payload. Its shape is defined by the registered event type and is validated against that type before the event is appended."
+      },
+      "type": {
+        "description": "The event type to append. Must be a custom event type registered by a plugin; built-in timeline event types are rejected.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "conversation_id",
+      "type"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "conversation_id": {
+        "description": "The ID of the conversation the event was appended to.",
+        "type": "string"
+      },
+      "created_at": {
+        "description": "The ISO timestamp assigned to the event by the server.",
+        "type": "string"
+      },
+      "event_id": {
+        "description": "The server-assigned ID of the appended event.",
+        "type": "string"
+      },
+      "type": {
+        "description": "The type of the appended event.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "conversation_id",
+      "created_at",
+      "event_id",
+      "type"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

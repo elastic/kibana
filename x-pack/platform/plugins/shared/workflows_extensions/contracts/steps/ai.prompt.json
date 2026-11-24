@@ -1,0 +1,437 @@
+{
+  "config": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema1": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Maximum response size for this workflow step. Also used as the response content length limit of the LLM call."
+      },
+      "__schema10": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema11": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema12"
+          }
+        ],
+        "description": "[tech preview] Reasoning effort level forwarded to the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider."
+      },
+      "__schema12": {
+        "enum": [
+          "none",
+          "minimal",
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "type": "string"
+      },
+      "__schema13": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema14"
+          }
+        ],
+        "description": "A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with connector-id. A list where every id misses is not a conflict. Example: \"context_engine_prompt\"."
+      },
+      "__schema14": {
+        "anyOf": [
+          {
+            "maxLength": 255,
+            "type": "string"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema15"
+            },
+            "maxItems": 8,
+            "type": "array"
+          }
+        ]
+      },
+      "__schema15": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema2": {
+        "maxLength": 32,
+        "type": "string"
+      },
+      "__schema3": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "The feature id to attribute this step's LLM call to in token usage tracking and connector telemetry. When omitted, no telemetry metadata is sent."
+      },
+      "__schema4": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema5": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema6"
+          }
+        ],
+        "description": "The parent feature id to group this step's token usage under. Only used when `plugin-id` is set."
+      },
+      "__schema6": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema7": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema8"
+          }
+        ],
+        "description": "The product solution to attribute this step to. Ignored when `plugin-id` is not set."
+      },
+      "__schema8": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "__schema9": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "The product feature to attribute this step to. Ignored when `plugin-id` is not set."
+      }
+    },
+    "properties": {
+      "aggregate-by": {
+        "$ref": "#/definitions/__schema5"
+      },
+      "connector-id": {
+        "$ref": "#/definitions/__schema0"
+      },
+      "connector-id-by-feature": {
+        "$ref": "#/definitions/__schema13"
+      },
+      "max-step-size": {
+        "$ref": "#/definitions/__schema1"
+      },
+      "plugin-id": {
+        "$ref": "#/definitions/__schema3"
+      },
+      "product-feature": {
+        "$ref": "#/definitions/__schema9"
+      },
+      "product-solution": {
+        "$ref": "#/definitions/__schema7"
+      },
+      "reasoning-level": {
+        "$ref": "#/definitions/__schema11"
+      }
+    },
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "ai.prompt",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "jsonSchemaModel": true
+      },
+      "__schema1": {
+        "properties": {
+          "$defs": {
+            "additionalProperties": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "type": "object"
+          },
+          "$ref": {
+            "anyOf": [
+              {
+                "enum": [
+                  "#/kibana/definitions/alertingV2NotificationGroup",
+                  "#/kibana/definitions/securityAlertAnalysisCallerAlerts"
+                ],
+                "type": "string"
+              },
+              {
+                "maxLength": 512,
+                "type": "string"
+              }
+            ]
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "$ref": "#/definitions/__schema0"
+              }
+            ]
+          },
+          "anyOf": {
+            "items": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "type": "array"
+          },
+          "const": {},
+          "default": {},
+          "definitions": {
+            "additionalProperties": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "type": "object"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enum": {
+            "items": {},
+            "type": "array"
+          },
+          "exclusiveMaximum": {
+            "type": "number"
+          },
+          "exclusiveMinimum": {
+            "type": "number"
+          },
+          "format": {
+            "enum": [
+              "date-time",
+              "date",
+              "time",
+              "email",
+              "uuid",
+              "uri"
+            ],
+            "type": "string"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/__schema0"
+              },
+              {
+                "items": {
+                  "$ref": "#/definitions/__schema0"
+                },
+                "type": "array"
+              }
+            ]
+          },
+          "maxItems": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxLength": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maximum": {
+            "type": "number"
+          },
+          "minItems": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minLength": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minimum": {
+            "type": "number"
+          },
+          "multipleOf": {
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "type": "number"
+          },
+          "oneOf": {
+            "items": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "type": "array"
+          },
+          "pattern": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "type": "object"
+          },
+          "required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "object",
+                  "array",
+                  "string",
+                  "number",
+                  "integer",
+                  "boolean",
+                  "null"
+                ],
+                "type": "string"
+              },
+              {
+                "items": {
+                  "enum": [
+                    "object",
+                    "array",
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean",
+                    "null"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ]
+          },
+          "uniqueItems": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "__schema2": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema3": {
+        "exclusiveMinimum": true,
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema4": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "properties": {
+      "prompt": {
+        "type": "string"
+      },
+      "schema": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The schema for the output of the step."
+      },
+      "systemPrompt": {
+        "type": "string"
+      },
+      "temperature": {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      },
+      "template_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Pinned EIS prompt template id, including the leading dot. Sent instead of the prompt when the connector requires templates."
+      },
+      "template_variables": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Variables for template_id. Ignored when the connector does not require a template."
+      },
+      "template_version": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Pinned EIS prompt template version. Required with template_id when the connector requires templates."
+      }
+    },
+    "required": [
+      "prompt"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "anyOf": [
+      {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/definitions/__schema0"
+          }
+        },
+        "required": [
+          "content",
+          "metadata"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "content": {},
+          "metadata": {
+            "$ref": "#/definitions/__schema0"
+          }
+        },
+        "required": [
+          "content",
+          "metadata"
+        ],
+        "type": "object"
+      }
+    ],
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    }
+  },
+  "stability": "tech_preview"
+}

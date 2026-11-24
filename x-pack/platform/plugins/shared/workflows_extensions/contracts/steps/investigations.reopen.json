@@ -1,0 +1,37 @@
+{
+  "exposure": "open",
+  "id": "investigations.reopen",
+  "input": {
+    "properties": {
+      "conversationId": {
+        "description": "Investigation to reopen.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "conversationId"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "reopened": {
+        "description": "True when the investigation was closed and has been reopened; false when it was already open.",
+        "type": "boolean"
+      },
+      "title": {
+        "description": "Current title of the investigation after the step ran.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "reopened",
+      "title"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

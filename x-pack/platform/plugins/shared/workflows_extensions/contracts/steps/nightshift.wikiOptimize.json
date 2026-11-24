@@ -1,0 +1,309 @@
+{
+  "exposure": "open",
+  "id": "nightshift.wikiOptimize",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema10": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "__schema11": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "__schema12": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema13": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema2": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "__schema3": {
+        "items": {
+          "$ref": "#/definitions/__schema4"
+        },
+        "maxItems": 2000,
+        "type": "array"
+      },
+      "__schema4": {
+        "additionalProperties": {},
+        "properties": {
+          "params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "tool_call_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "tool_id": {
+            "maxLength": 512,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "__schema5": {
+        "items": {
+          "$ref": "#/definitions/__schema6"
+        },
+        "maxItems": 2000,
+        "type": "array"
+      },
+      "__schema6": {
+        "additionalProperties": {},
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "maxItems": 2000,
+            "type": "array"
+          },
+          "tool_call_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "tool_id": {
+            "maxLength": 512,
+            "type": "string"
+          }
+        },
+        "required": [
+          "results",
+          "tool_call_id"
+        ],
+        "type": "object"
+      },
+      "__schema7": {},
+      "__schema8": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema9": {
+        "maxLength": 1024,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema8"
+          }
+        ],
+        "description": "Agent id that produced the round."
+      },
+      "background_trace_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema12"
+          }
+        ],
+        "description": "Deterministic T_background trace id from materialize."
+      },
+      "connector_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "Strict model override for a direct run. Fails when the id does not resolve."
+      },
+      "conversation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Conversation the round belongs to."
+      },
+      "prompt": {
+        "description": "The user message that started the round.",
+        "maxLength": 65536,
+        "type": "string"
+      },
+      "response": {
+        "description": "The assistant's final response for the round.",
+        "maxLength": 65536,
+        "type": "string"
+      },
+      "round_connector_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema11"
+          }
+        ],
+        "description": "Inference connector the triggering agent used for this round."
+      },
+      "round_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Id or positional/semantic alias (e.g. \"0\", \"-1\", \"1st\", \"first\", \"last\", \"investigation_start\") of the completed round."
+      },
+      "round_index": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Zero-based sequence index of the round in the conversation (supports negative offsets such as -1 for latest)."
+      },
+      "round_trace_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema13"
+          }
+        ],
+        "description": "Trace id of the agent run for this round, so the step's spans join it."
+      },
+      "sandbox_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema9"
+          }
+        ],
+        "description": "Workspace key from nightshift.obtainSandbox. Already space-scoped."
+      },
+      "tool_calls": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Investigator tool calls from this round. Shows the optimizer what the investigator queried."
+      },
+      "tool_results": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned."
+      }
+    },
+    "required": [
+      "prompt",
+      "response"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema1": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "type": "string"
+            },
+            "after_content": {
+              "type": "string"
+            },
+            "after_status": {
+              "type": "string"
+            },
+            "before_content": {
+              "type": "string"
+            },
+            "before_status": {
+              "type": "string"
+            },
+            "item_id": {
+              "type": "string"
+            },
+            "replaced_ids": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "store": {
+              "enum": [
+                "wiki",
+                "semantic_memory",
+                "decision_tree",
+                "decision_tree_learning"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action",
+            "item_id",
+            "store"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "properties": {
+      "applied_writes": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Wiki page writes applied during this round."
+      },
+      "opened_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Canonical Wiki page ids opened by the investigator this round."
+      },
+      "skipped": {
+        "type": "boolean"
+      },
+      "status": {
+        "description": "The optimizer finished without throwing.",
+        "enum": [
+          "ok"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "status"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}
