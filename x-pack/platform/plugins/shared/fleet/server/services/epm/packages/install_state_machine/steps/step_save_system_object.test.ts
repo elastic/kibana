@@ -243,6 +243,62 @@ describe('updateLatestExecutedState', () => {
     );
   });
 
+  it('Should not warn when every package policy upgraded', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-integration',
+      attributes: {
+        title: 'title',
+        name: 'test-integration',
+        version: '1.0.0',
+        install_source: 'registry',
+        install_status: 'installed',
+        package_assets: [],
+        keep_policies_up_to_date: true,
+      },
+    } as any);
+    mockedPackagePolicyService.listIds.mockReturnValue({
+      items: ['packagePolicy1', 'packagePolicy2', 'packagePolicy3'],
+    } as any);
+    mockedPackagePolicyService.bulkUpgrade.mockResolvedValue([
+      { id: 'packagePolicy1', success: true },
+      { id: 'packagePolicy2', success: true },
+      { id: 'packagePolicy3', success: true },
+    ]);
+    logger.warn.mockClear();
+
+    await expect(
+      stepSaveSystemObject({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger,
+        packageInstallContext: {
+          archiveIterator: createArchiveIteratorFromMap(new Map()),
+          paths: [],
+          packageInfo: {
+            title: 'title',
+            name: 'test-integration',
+            version: '1.0.0',
+            description: 'test',
+            type: 'integration',
+            categories: ['cloud', 'custom'],
+            format_version: 'string',
+            release: 'experimental',
+            conditions: { kibana: { version: 'x.y.z' } },
+            owner: { github: 'elastic/fleet' },
+          },
+        },
+        installType: 'install',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(mockedPackagePolicyService.bulkUpgrade).toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('Should save the SO with rolled_back:true if update version is less than current version', async () => {
     soClient.get.mockResolvedValue({
       id: 'test-integration',

@@ -27,6 +27,14 @@ type InputField =
 export const withPackageSpan = <T>(stepName: string, func: () => Promise<T>) =>
   withSpan({ name: stepName, type: 'package' }, func);
 
+// A package can have thousands of package policies, so the warning names only the first few, and
+// keeps each error message short, to stay within one log record.
+export const MAX_LOGGED_FAILED_POLICY_UPGRADES = 20;
+export const MAX_LOGGED_UPGRADE_ERROR_LENGTH = 200;
+
+const truncate = (message: string, maxLength: number) =>
+  message.length > maxLength ? `${message.slice(0, maxLength)}…` : message;
+
 /**
  * `packagePolicyService.bulkUpgrade()` doesn't throw for a policy that fails to upgrade; it returns
  * it as an item with `success: false`. Logs those items, so a failed upgrade is visible.
@@ -44,10 +52,20 @@ export const logFailedPackagePolicyUpgrades = (
     return;
   }
   const details = failed
-    .map((result) => `${result.id}: ${result.body?.message ?? 'unknown error'}`)
+    .slice(0, MAX_LOGGED_FAILED_POLICY_UPGRADES)
+    .map(
+      (result) =>
+        `${result.id}: ${truncate(
+          result.body?.message ?? 'unknown error',
+          MAX_LOGGED_UPGRADE_ERROR_LENGTH
+        )}`
+    )
     .join('; ');
+  const notListed = failed.length - MAX_LOGGED_FAILED_POLICY_UPGRADES;
   logger.warn(
-    `Failed to upgrade ${failed.length} of ${results.length} package policies of package ${pkgName}: ${details}`
+    `Failed to upgrade ${failed.length} of ${results.length} package policies of package ${pkgName}: ${details}${
+      notListed > 0 ? ` …and ${notListed} more` : ''
+    }`
   );
 };
 
