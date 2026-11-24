@@ -29,6 +29,7 @@ import {
   getGapReason,
   getNumCatchupIntervals,
   getRuleRangeTuples,
+  getUncoveredGapRange,
   getExceptions,
   hasTimestampFields,
   createErrorsFromShard,
@@ -327,6 +328,42 @@ describe('utils', () => {
         originalTo: moment('2024-01-01T16:00:00.000Z'),
       });
       expect(reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+  });
+
+  describe('getUncoveredGapRange', () => {
+    const tuple = (from: string, to: string) => ({
+      from: moment(from),
+      to: moment(to),
+      maxSignals: 100,
+    });
+
+    test('returns the drift gap unchanged when every tuple was covered', () => {
+      const driftGap = { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:10:00.000Z' };
+
+      expect(getUncoveredGapRange({ driftGap, uncoveredTuples: [] })).toEqual(driftGap);
+      expect(getUncoveredGapRange({ driftGap: undefined, uncoveredTuples: [] })).toEqual(undefined);
+    });
+
+    test('returns the window of a tuple whose search failed when there is no drift gap', () => {
+      expect(
+        getUncoveredGapRange({
+          driftGap: undefined,
+          uncoveredTuples: [tuple('2024-01-01T00:10:00.000Z', '2024-01-01T00:16:00.000Z')],
+        })
+      ).toEqual({ gte: '2024-01-01T00:10:00.000Z', lte: '2024-01-01T00:16:00.000Z' });
+    });
+
+    test('merges the drift gap with the windows of the tuples that were not covered', () => {
+      expect(
+        getUncoveredGapRange({
+          driftGap: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:10:00.000Z' },
+          uncoveredTuples: [
+            tuple('2024-01-01T00:10:00.000Z', '2024-01-01T00:16:00.000Z'),
+            tuple('2024-01-01T00:15:00.000Z', '2024-01-01T00:21:00.000Z'),
+          ],
+        })
+      ).toEqual({ gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T00:21:00.000Z' });
     });
   });
 

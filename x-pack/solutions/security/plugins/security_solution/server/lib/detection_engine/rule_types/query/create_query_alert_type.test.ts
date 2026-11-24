@@ -219,39 +219,114 @@ describe('Custom Query Alerts', () => {
     expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
   });
 
-  it('classifies gap errors as user errors', async () => {
-    const queryAlertType = securityRuleTypeWrapper(
-      createQueryAlertType({
-        id: QUERY_RULE_TYPE_ID,
-        name: 'Custom Query Rule',
-      })
+  describe('gaps', () => {
+    const gapNoticeMatcher = expect.stringContaining(
+      'were not queried between this rule execution and the last execution'
     );
 
-    alerting.registerType(queryAlertType);
+    const getLastLoggedGap = () => {
+      const metrics = mockedStatusLogger.logMetrics.mock.calls.at(-1)?.[0];
+      if (metrics?.gap_range == null) {
+        throw new Error('Expected a gap to be logged with the last metrics');
+      }
+      return { ...metrics, gap_range: metrics.gap_range };
+    };
 
-    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
-      hits: {
-        hits: [],
-        total: { relation: 'eq', value: 0 },
-      },
-      took: 0,
-      timed_out: false,
-      _shards: { failed: 0, skipped: 0, successful: 1, total: 1 },
+    const registerAndRun = async (previousStartedAt?: Date) => {
+      const queryAlertType = securityRuleTypeWrapper(
+        createQueryAlertType({
+          id: QUERY_RULE_TYPE_ID,
+          name: 'Custom Query Rule',
+        })
+      );
+
+      alerting.registerType(queryAlertType);
+
+      return executor({ params: getQueryRuleParams(), previousStartedAt });
+    };
+
+    const mockEmptySearch = () =>
+      services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+        hits: {
+          hits: [],
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: { failed: 0, skipped: 0, successful: 1, total: 1 },
+      });
+
+    it('reports a gap left behind by an earlier run as a warning, not as an error', async () => {
+      mockEmptySearch();
+
+      await registerAndRun(new Date(Date.now() - 60 * 60 * 1000));
+
+      expect(mockedStatusLogger.warn).toHaveBeenCalledWith(gapNoticeMatcher);
+      expect(mockedStatusLogger.error).not.toHaveBeenCalledWith(
+        gapNoticeMatcher,
+        expect.anything()
+      );
+      expect(mockedStatusLogger.logMetrics).toHaveBeenCalledWith(
+        expect.objectContaining({
+          gap_range: { gte: expect.any(String), lte: expect.any(String) },
+          gap_reason: { type: 'rule_did_not_run' },
+        })
+      );
     });
 
-    const params = getQueryRuleParams();
+    it('does not record a gap when the search succeeds and there is no drift gap', async () => {
+      mockEmptySearch();
 
-    await executor({
-      params,
-      previousStartedAt: new Date(Date.now() - 60 * 60 * 1000),
+      await registerAndRun();
+
+      expect(mockedStatusLogger.logMetrics).toHaveBeenCalledTimes(1);
+      expect(mockedStatusLogger.logMetrics).toHaveBeenCalledWith(
+        expect.objectContaining({ gap_range: undefined })
+      );
     });
 
-    expect(mockedStatusLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'were not queried between this rule execution and the last execution'
-      ),
-      expect.objectContaining({ userError: true })
-    );
+    it('records a gap for the window of a run whose search failed and still completes the run', async () => {
+      services.scopedClusterClient.asCurrentUser.search.mockRejectedValue(
+        new Error('no_shard_available_action_exception')
+      );
+
+      const result = await registerAndRun();
+
+      // The run completed and returned its state, so the framework advances the anchor as before.
+      expect(result).toEqual(expect.objectContaining({ state: expect.any(Object) }));
+      expect(mockedStatusLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('no_shard_available_action_exception'),
+        expect.anything()
+      );
+
+      // The window the failed search was supposed to cover (the rule's `from` -> `to`, here 6 minutes
+      // ending at the run's start) is recorded as a gap.
+      const gapMetrics = getLastLoggedGap();
+      expect(gapMetrics).toEqual(
+        expect.objectContaining({
+          gap_duration_s: 6 * 60,
+          gap_range: { gte: expect.any(String), lte: expect.any(String) },
+          gap_reason: { type: 'rule_did_not_run' },
+        })
+      );
+      const { gte, lte } = gapMetrics.gap_range;
+      expect(Date.parse(lte) - Date.parse(gte)).toEqual(6 * 60 * 1000);
+      expect(Math.abs(Date.now() - Date.parse(lte))).toBeLessThan(10 * 1000);
+    });
+
+    it('merges the drift gap with the window of a failed search into a single gap', async () => {
+      services.scopedClusterClient.asCurrentUser.search.mockRejectedValue(
+        new Error('cluster_block_exception')
+      );
+      const previousStartedAt = new Date(Date.now() - 60 * 60 * 1000);
+
+      await registerAndRun(previousStartedAt);
+
+      const gapMetrics = getLastLoggedGap();
+      expect(gapMetrics.gap_range.gte).toEqual(previousStartedAt.toISOString());
+      expect(Math.abs(Date.now() - Date.parse(gapMetrics.gap_range.lte))).toBeLessThan(10 * 1000);
+      expect(gapMetrics.gap_reason).toEqual({ type: 'rule_did_not_run' });
+    });
   });
 
   it('sends an alert when events are found and logs a warning when hasTimestampFields throws an error', async () => {

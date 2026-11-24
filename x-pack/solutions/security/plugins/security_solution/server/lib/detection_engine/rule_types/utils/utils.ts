@@ -476,6 +476,49 @@ export const getRuleRangeTuples = async ({
   };
 };
 
+export interface GapRange {
+  gte: string;
+  lte: string;
+}
+
+/**
+ * Builds the gap range to record for this execution.
+ *
+ * The catch-up anchor (`previousStartedAt`) advances whenever a run completes, even when the
+ * search for one of its range tuples failed (shard, cluster block, verification or cache errors),
+ * so the window of such a tuple would otherwise be silently skipped. This merges the drift gap
+ * detected between runs with the windows of the tuples that were not actually covered into a
+ * single range, so that the missed time is visible as a gap and recoverable through gap fill.
+ *
+ * The range tuples are consecutive intervals adjacent to the drift gap, so a single bounding
+ * range is used. When only non-adjacent tuples fail, the range also spans the tuples between
+ * them, which over-reports rather than under-reports the missed time.
+ */
+export const getUncoveredGapRange = ({
+  driftGap,
+  uncoveredTuples,
+}: {
+  driftGap: GapRange | undefined;
+  uncoveredTuples: RuleRangeTuple[];
+}): GapRange | undefined => {
+  if (uncoveredTuples.length === 0) {
+    return driftGap;
+  }
+
+  const ranges: GapRange[] = uncoveredTuples.map((tuple) => ({
+    gte: tuple.from.toISOString(),
+    lte: tuple.to.toISOString(),
+  }));
+  if (driftGap != null) {
+    ranges.push(driftGap);
+  }
+
+  return {
+    gte: new Date(Math.min(...ranges.map((range) => Date.parse(range.gte)))).toISOString(),
+    lte: new Date(Math.max(...ranges.map((range) => Date.parse(range.lte)))).toISOString(),
+  };
+};
+
 /**
  * Creates rule range tuples needed to cover gaps since the last rule run.
  * @param to moment.Moment representing the rules 'to' property
