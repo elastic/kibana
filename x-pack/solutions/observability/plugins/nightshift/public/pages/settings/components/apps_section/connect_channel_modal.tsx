@@ -28,11 +28,7 @@ import {
   useBindChannel,
   type BindFailure,
 } from '../../../../data/relay_apps/use_relay_app_bindings';
-import {
-  NIGHTSHIFT_EBT_ACTIONS,
-  NIGHTSHIFT_EBT_DETAILS,
-  NIGHTSHIFT_EBT_ELEMENTS,
-} from '../../../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import { parseSlackChannelInput } from '../../../../common/parse_slack_channel_input';
 
 const failureCopy = ({ reason, message }: BindFailure): string => {
@@ -221,7 +217,6 @@ export function ConnectChannelModal({ onClose, onConnected }: ConnectChannelModa
           {...getEbtProps({
             action: NIGHTSHIFT_EBT_ACTIONS.CONNECT_SLACK_CHANNEL,
             element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-            detail: NIGHTSHIFT_EBT_DETAILS.CONFIRM,
           })}
         >
           {i18n.translate('xpack.nightshift.settings.apps.slackConnectChannelConfirm', {

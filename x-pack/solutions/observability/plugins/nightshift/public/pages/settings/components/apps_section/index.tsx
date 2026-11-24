@@ -11,7 +11,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiDescriptionList,
@@ -25,7 +24,6 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +36,7 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import { useAllRelayAppBindings } from '../../../../data/relay_apps/use_relay_app_bindings';
+import { ConfirmModal } from '../../../../components/ui/confirm_modal';
 import { SettingsSection } from '../settings_section';
 import { useRelayAppConnection } from './use_relay_app_connection';
 import { SlackConnectionBindings } from './slack_connection_bindings';
@@ -419,6 +418,10 @@ function ConfirmWorkspaceCallout({
             onClick={() => void onConfirm(tenantKey).catch(() => undefined)}
             isDisabled={!canEdit || isMutating}
             data-test-subj="streamsSlackAppConfirmWorkspaceButton"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_SLACK_WORKSPACE,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
           >
             {i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceConfirm', {
               defaultMessage: 'Yes',
@@ -432,6 +435,10 @@ function ConfirmWorkspaceCallout({
             onClick={() => void onReject(tenantKey).catch(() => undefined)}
             isDisabled={!canEdit || isMutating}
             data-test-subj="streamsSlackAppRejectWorkspaceButton"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.REJECT_SLACK_WORKSPACE,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
           >
             {i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceReject', {
               defaultMessage: 'No',
@@ -454,7 +461,6 @@ function WorkspaceMenu({ canEdit, isMutating, workspaceName, onDisconnect }: Wor
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
-  const modalTitleId = useGeneratedHtmlId();
   const menuLabel = i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceMenu', {
     defaultMessage: 'Slack workspace actions',
   });
@@ -509,7 +515,7 @@ function WorkspaceMenu({ canEdit, isMutating, workspaceName, onDisconnect }: Wor
         />
       </EuiPopover>
       {confirmOpen && (
-        <EuiConfirmModal
+        <ConfirmModal
           title={i18n.translate(
             'xpack.nightshift.settings.apps.slackDisconnectWorkspaceConfirmTitle',
             {
@@ -533,14 +539,16 @@ function WorkspaceMenu({ canEdit, isMutating, workspaceName, onDisconnect }: Wor
             'xpack.nightshift.settings.apps.slackDisconnectConfirmConfirm',
             { defaultMessage: 'Disconnect workspace' }
           )}
+          confirmEbt={{
+            action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_DISCONNECT_SLACK,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          }}
           buttonColor="danger"
-          aria-labelledby={modalTitleId}
-          titleProps={{ id: modalTitleId }}
           data-test-subj="streamsSlackAppDisconnectConfirmModal"
         >
           <DisconnectWorkspaceBody workspaceName={workspaceLabel} />
           <WorkspaceAffectedAutomationsWarning />
-        </EuiConfirmModal>
+        </ConfirmModal>
       )}
     </>
   );

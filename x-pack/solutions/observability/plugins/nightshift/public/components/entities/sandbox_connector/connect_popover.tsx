@@ -14,8 +14,10 @@ import {
   EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { ConnectorList } from './connector_list';
 
 /**
@@ -107,6 +109,11 @@ export function ConnectPopover({
             onCreate();
           }}
           data-test-subj={`${typeId}-create`}
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.OPEN_ADD_SANDBOX_CONNECTOR,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            detail: typeId,
+          })}
         >
           {i18n.translate('xpack.nightshift.connectPopover.createConnector', {
             defaultMessage: 'Create connector',

@@ -20,9 +20,15 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
 import { isHttpNotFoundError } from '../../../common/http_error';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
@@ -156,6 +162,11 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
                 isDisabled={!canEditAgent}
                 onClick={() => unassign(connector)}
                 data-test-subj={`nightshiftConnectorRemove-${connector.id}`}
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  detail: NIGHTSHIFT_EBT_DETAILS.DISABLE,
+                })}
               />
             </EuiToolTip>
           );

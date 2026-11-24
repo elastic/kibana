@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { ConnectorTypeGroup } from '../../../data/sandbox_connectors/use_connectors_by_type';
 import { useAgentConnectors } from '../../../data/sandbox_connectors/use_agent_connectors';
@@ -74,6 +75,11 @@ export function ConnectTypeCard({
                 disabledReason: createDisabledReason,
                 onClick: () => openAdd(actionType),
                 'data-test-subj': `${actionType.id}-connect`,
+                ebt: {
+                  action: NIGHTSHIFT_EBT_ACTIONS.OPEN_ADD_SANDBOX_CONNECTOR,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  detail: actionType.id,
+                },
               }
         }
         actionNode={

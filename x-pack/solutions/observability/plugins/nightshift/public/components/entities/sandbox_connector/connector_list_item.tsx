@@ -19,7 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
 
 const ACTIONS_CLASS = 'nightshiftConnectorListItem__actions';
 
@@ -111,6 +115,11 @@ export function ConnectorListItem({
         </span>
       }
       data-test-subj={`nightshiftConnectorListToggle-${connector.id}`}
+      {...getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+        element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+        detail: isAssigned ? NIGHTSHIFT_EBT_DETAILS.DISABLE : NIGHTSHIFT_EBT_DETAILS.ENABLE,
+      })}
     />
   );
 
@@ -150,7 +159,7 @@ export function ConnectorListItem({
             onClick={onDelete}
             data-test-subj={`nightshiftConnectorListDelete-${connector.id}`}
             {...getEbtProps({
-              action: NIGHTSHIFT_EBT_ACTIONS.DELETE_CONNECTOR,
+              action: NIGHTSHIFT_EBT_ACTIONS.OPEN_DELETE_CONNECTOR,
               element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
             })}
           />

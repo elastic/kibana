@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
-  EuiConfirmModal,
   EuiCopy,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -21,7 +20,6 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -33,6 +31,7 @@ import {
 } from '../../../../data/relay_apps/use_relay_app_bindings';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import { ChannelLabel } from '../../../../components/ui/channel_label';
+import { ConfirmModal } from '../../../../components/ui/confirm_modal';
 import { ChannelAffectedAutomationsWarning } from './affected_automations';
 import { ConnectChannelModal } from './connect_channel_modal';
 
@@ -124,7 +123,7 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
       onClick={() => setIsConnectOpen(true)}
       data-test-subj="streamsSlackAppOpenConnectChannelButton"
       {...getEbtProps({
-        action: NIGHTSHIFT_EBT_ACTIONS.CONNECT_SLACK_CHANNEL,
+        action: NIGHTSHIFT_EBT_ACTIONS.OPEN_CONNECT_SLACK_CHANNEL,
         element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
       })}
     >
@@ -316,7 +315,6 @@ interface BindingActionCellProps {
 function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCellProps) {
   const { unbind, isLoading: isUnbinding } = useUnbindChannel();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const modalTitleId = useGeneratedHtmlId();
 
   const channelName = formatChannelLabel(binding);
   const isPrivate = isPrivateChannel(binding);
@@ -335,13 +333,13 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
           aria-label={disconnectLabel}
           data-test-subj="streamsSlackAppUnbindChannelButton"
           {...getEbtProps({
-            action: NIGHTSHIFT_EBT_ACTIONS.DISCONNECT_SLACK_CHANNEL,
+            action: NIGHTSHIFT_EBT_ACTIONS.OPEN_DISCONNECT_SLACK_CHANNEL,
             element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
           })}
         />
       </EuiToolTip>
       {confirmOpen && (
-        <EuiConfirmModal
+        <ConfirmModal
           title={
             isPrivate
               ? i18n.translate('xpack.nightshift.settings.apps.slackUnbindPrivateConfirmTitle', {
@@ -370,9 +368,11 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
             { defaultMessage: 'Cancel' }
           )}
           confirmButtonText={disconnectLabel}
+          confirmEbt={{
+            action: NIGHTSHIFT_EBT_ACTIONS.DISCONNECT_SLACK_CHANNEL,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          }}
           buttonColor="danger"
-          aria-labelledby={modalTitleId}
-          titleProps={{ id: modalTitleId }}
           data-test-subj="streamsSlackAppUnbindConfirmModal"
         >
           <EuiText size="s">
@@ -393,7 +393,7 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
               channel={{ id: binding.channel, displayName: binding.displayName }}
             />
           )}
-        </EuiConfirmModal>
+        </ConfirmModal>
       )}
     </>
   );

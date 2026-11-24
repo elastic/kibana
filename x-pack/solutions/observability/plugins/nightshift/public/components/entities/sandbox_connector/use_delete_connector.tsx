@@ -6,11 +6,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
 import { useQueryClient } from '@kbn/react-query';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { ConfirmModal } from '../../ui/confirm_modal';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useRefreshSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
 import { INVESTIGATION_AGENT_QUERY_KEY } from '../../../data/sandbox_connectors/use_agent_connectors';
@@ -23,7 +25,6 @@ export function useDeleteConnector(): {
   const queryClient = useQueryClient();
   const refresh = useRefreshSandboxConnectors();
   const [pending, setPending] = useState<SandboxConnector | undefined>();
-  const confirmTitleId = useGeneratedHtmlId({ prefix: 'nightshiftDeleteConnector' });
 
   const deleteConnector = useCallback(async () => {
     if (!pending) return;
@@ -49,9 +50,7 @@ export function useDeleteConnector(): {
   }, [agentBuilder, http, notifications.toasts, pending, queryClient, refresh]);
 
   const confirmModal = pending ? (
-    <EuiConfirmModal
-      aria-labelledby={confirmTitleId}
-      titleProps={{ id: confirmTitleId }}
+    <ConfirmModal
       title={i18n.translate('xpack.nightshift.sandboxConnectors.deleteConfirmTitle', {
         defaultMessage: 'Delete {name}?',
         values: { name: pending.name },
@@ -64,6 +63,10 @@ export function useDeleteConnector(): {
       confirmButtonText={i18n.translate('xpack.nightshift.sandboxConnectors.deleteConfirm', {
         defaultMessage: 'Delete',
       })}
+      confirmEbt={{
+        action: NIGHTSHIFT_EBT_ACTIONS.DELETE_CONNECTOR,
+        element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+      }}
       buttonColor="danger"
       data-test-subj="nightshiftDeleteConnectorConfirm"
     >
@@ -75,7 +78,7 @@ export function useDeleteConnector(): {
           })}
         </p>
       </EuiText>
-    </EuiConfirmModal>
+    </ConfirmModal>
   ) : null;
 
   return { requestDelete: setPending, confirmModal };
