@@ -28,6 +28,33 @@ import { SOURCE_COLUMN } from '../utils/columns';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
 import type { DocumentsDisplayMode, ValueToStringConverter } from '../types';
 
+const MAX_ARIA_VALUE_LENGTH = 100;
+
+/**
+ * Returns the cell value as a short string for use in accessible names, or
+ * `undefined` when it is empty, cannot be resolved, or is a whole document /
+ * multi-line value that would make for an unusable label.
+ */
+const getCellValueForLabel = (
+  valueToStringConverter: ValueToStringConverter | undefined,
+  rowIndex: number,
+  columnId: string
+): string | undefined => {
+  if (!valueToStringConverter || columnId === SOURCE_COLUMN) {
+    return undefined;
+  }
+  let value: string;
+  try {
+    value = valueToStringConverter(rowIndex, columnId).formattedString.trim();
+  } catch {
+    return undefined;
+  }
+  if (!value || value.includes('\n')) {
+    return undefined;
+  }
+  return value.length > MAX_ARIA_VALUE_LENGTH ? `${value.slice(0, MAX_ARIA_VALUE_LENGTH)}…` : value;
+};
+
 function onFilterCell(
   context: DataTableContext,
   rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
@@ -63,16 +90,24 @@ export const FilterInBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
   dataGridRef,
+  valueToStringConverter,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   field: DataViewField;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  valueToStringConverter?: ValueToStringConverter;
 }) => {
   const context = useContext(UnifiedDataTableContext);
-  const buttonTitle = i18n.translate('unifiedDataTable.grid.filterForAria', {
-    defaultMessage: 'Filter for this {value}',
-    values: { value: field.displayName },
-  });
+  const cellValue = getCellValueForLabel(valueToStringConverter, rowIndex, columnId);
+  const buttonTitle = cellValue
+    ? i18n.translate('unifiedDataTable.grid.filterForAriaWithValue', {
+        defaultMessage: 'Filter for {field}: {value}',
+        values: { field: field.displayName, value: cellValue },
+      })
+    : i18n.translate('unifiedDataTable.grid.filterForAria', {
+        defaultMessage: 'Filter for this {value}',
+        values: { value: field.displayName },
+      });
 
   if (isCellValueIgnored(context, rowIndex, field)) {
     return null;
@@ -99,16 +134,24 @@ export const FilterOutBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
   dataGridRef,
+  valueToStringConverter,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   field: DataViewField;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  valueToStringConverter?: ValueToStringConverter;
 }) => {
   const context = useContext(UnifiedDataTableContext);
-  const buttonTitle = i18n.translate('unifiedDataTable.grid.filterOutAria', {
-    defaultMessage: 'Filter out this {value}',
-    values: { value: field.displayName },
-  });
+  const cellValue = getCellValueForLabel(valueToStringConverter, rowIndex, columnId);
+  const buttonTitle = cellValue
+    ? i18n.translate('unifiedDataTable.grid.filterOutAriaWithValue', {
+        defaultMessage: 'Filter out {field}: {value}',
+        values: { field: field.displayName, value: cellValue },
+      })
+    : i18n.translate('unifiedDataTable.grid.filterOutAria', {
+        defaultMessage: 'Filter out this {value}',
+        values: { value: field.displayName },
+      });
 
   if (isCellValueIgnored(context, rowIndex, field)) {
     return null;
@@ -203,10 +246,16 @@ export function buildCopyValueButton(
   documentsDisplayMode: DocumentsDisplayMode,
   columnDisplayName?: string
 ) {
-  const buttonTitle = i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
-    defaultMessage: 'Copy value of {column}',
-    values: { column: columnDisplayName ?? columnId },
-  });
+  const cellValue = getCellValueForLabel(valueToStringConverter, rowIndex, columnId);
+  const buttonTitle = cellValue
+    ? i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitleWithValue', {
+        defaultMessage: 'Copy value of {column}: {value}',
+        values: { column: columnDisplayName ?? columnId, value: cellValue },
+      })
+    : i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
+        defaultMessage: 'Copy value of {column}',
+        values: { column: columnDisplayName ?? columnId },
+      });
 
   return (
     <Component
@@ -289,12 +338,14 @@ export function buildCellActions(
               cellActionProps,
               field,
               dataGridRef,
+              valueToStringConverter,
             }),
           (cellActionProps: EuiDataGridColumnCellActionProps) =>
             FilterOutBtn({
               cellActionProps,
               field,
               dataGridRef,
+              valueToStringConverter,
             }),
         ]
       : []),

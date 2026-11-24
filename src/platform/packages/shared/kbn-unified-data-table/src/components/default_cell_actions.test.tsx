@@ -79,7 +79,7 @@ describe('Default cell actions ', () => {
           columnId: 'message',
         })
       )!.props['aria-label']
-    ).toEqual('Copy value of message');
+    ).toEqual('Copy value of message: test1');
   });
 
   it('should show filter actions for filterable fields', () => {
@@ -112,7 +112,7 @@ describe('Default cell actions ', () => {
     ).toEqual('Copy value of _source');
   });
 
-  it('should use the field display name in the action labels', () => {
+  it('should include the field display name and cell value in the action labels', () => {
     const cellActions = buildCellActions(
       bytesField,
       servicesMock.toastNotifications,
@@ -126,21 +126,49 @@ describe('Default cell actions ', () => {
         {cellActions.map((CellAction, index) => (
           <CellAction
             key={index}
-            {...createCellActionProps({ colIndex: 1, columnId: 'bytes', rowIndex: 1 })}
+            {...createCellActionProps({ colIndex: 1, columnId: 'bytes', rowIndex: 0 })}
           />
         ))}
       </UnifiedDataTableContext.Provider>
     );
 
     expect(
-      screen.getByRole('button', { name: 'Filter for this bytesDisplayName' })
+      screen.getByRole('button', { name: 'Filter for bytesDisplayName: 20' })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Filter out this bytesDisplayName' })
+      screen.getByRole('button', { name: 'Filter out bytesDisplayName: 20' })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Copy value of bytesDisplayName' })
+      screen.getByRole('button', { name: 'Copy value of bytesDisplayName: 20' })
     ).toBeInTheDocument();
+  });
+
+  it('should truncate long values and omit multi-line values in the labels', () => {
+    const longValue = 'a'.repeat(150);
+    const converter = jest
+      .fn()
+      .mockReturnValueOnce({ formattedString: longValue, withFormula: false })
+      .mockReturnValueOnce({ formattedString: 'line1\nline2', withFormula: false });
+
+    renderWithI18n(
+      <UnifiedDataTableContext.Provider value={dataTableContextMock}>
+        <FilterInBtn
+          cellActionProps={createCellActionProps({ rowIndex: 0 })}
+          field={getField('extension')}
+          valueToStringConverter={converter}
+        />
+        <FilterOutBtn
+          cellActionProps={createCellActionProps({ rowIndex: 0 })}
+          field={getField('extension')}
+          valueToStringConverter={converter}
+        />
+      </UnifiedDataTableContext.Provider>
+    );
+
+    expect(
+      screen.getByRole('button', { name: `Filter for extension: ${'a'.repeat(100)}…` })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Filter out this extension' })).toBeInTheDocument();
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
@@ -245,7 +273,7 @@ describe('Default cell actions ', () => {
       </UnifiedDataTableContext.Provider>
     );
 
-    await userEvent.click(screen.getByRole('button', { name: 'Copy value of extension' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Copy value of extension: jpg' }));
 
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
