@@ -16,8 +16,13 @@ import {
   prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
-import { getWorkflowZodSchema } from '../../../common/schema';
+import { getStepExposure, getWorkflowZodSchema } from '../../../common/schema';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
+
+jest.mock('../../../common/schema', () => ({
+  ...jest.requireActual('../../../common/schema'),
+  getStepExposure: jest.fn(() => 'open'),
+}));
 
 describe('getTriggerTypesFromDefinition', () => {
   it('returns empty array for null definition', () => {
@@ -221,6 +226,7 @@ describe('applyYamlUpdate', () => {
 
   it('coerces definition to null (not undefined) on the invalid branch so full-replace index does not drop the field', async () => {
     const result = await applyYamlUpdate({
+      isManaged: false,
       workflowYaml: 'not: valid: yaml:',
       zodSchema: failingSchema,
       triggerDefinitions: [],
@@ -248,6 +254,7 @@ describe('applyYamlUpdate', () => {
     ].join('\n');
 
     const result = await applyYamlUpdate({
+      isManaged: false,
       workflowYaml: invalidYamlWithName,
       zodSchema,
       triggerDefinitions: [],
@@ -274,6 +281,7 @@ describe('applyYamlUpdate', () => {
     ].join('\n');
 
     const result = await applyYamlUpdate({
+      isManaged: false,
       workflowYaml: invalidYamlWithTags,
       zodSchema,
       triggerDefinitions: [],
@@ -299,6 +307,7 @@ describe('applyYamlUpdate', () => {
     ].join('\n');
 
     const result = await applyYamlUpdate({
+      isManaged: false,
       workflowYaml: invalidYamlWithName,
       zodSchema,
       triggerDefinitions: [],
@@ -326,6 +335,7 @@ describe('applyYamlUpdate', () => {
     ].join('\n');
 
     const result = await applyYamlUpdate({
+      isManaged: false,
       workflowYaml: invalidYamlWithoutName,
       zodSchema,
       triggerDefinitions: [],
@@ -356,6 +366,7 @@ describe('applyYamlUpdate', () => {
     ].join('\n');
 
     await applyYamlUpdate({
+      isManaged: false,
       workflowYaml: yaml,
       zodSchema,
       triggerDefinitions: [],
@@ -390,7 +401,12 @@ describe('keepEnabledUnlessDeclared', () => {
   const prepare = async (yaml: string, enabled: boolean) =>
     keepEnabledUnlessDeclared(
       yaml,
-      await applyYamlUpdate({ workflowYaml: yaml, zodSchema, triggerDefinitions: [] }),
+      await applyYamlUpdate({
+        isManaged: false,
+        workflowYaml: yaml,
+        zodSchema,
+        triggerDefinitions: [],
+      }),
       enabled
     );
 
@@ -434,6 +450,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     ].join('\n');
 
     const result = await prepareWorkflowDocumentFromYaml({
+      isManaged: false,
       yaml: invalidYamlWithName,
       zodSchema,
       authenticatedUser: 'user1',
@@ -463,6 +480,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     ].join('\n');
 
     const result = await prepareWorkflowDocumentFromYaml({
+      isManaged: false,
       yaml: invalidYamlWithoutName,
       zodSchema,
       authenticatedUser: 'user1',
@@ -493,6 +511,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     ].join('\n');
 
     const result = await prepareWorkflowDocumentFromYaml({
+      isManaged: false,
       yaml: invalidYamlWithTags,
       zodSchema,
       authenticatedUser: 'user1',
@@ -510,6 +529,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     // A scalar root has no `name` key to extract, so without the fallback this would
     // collapse to "Untitled workflow".
     const result = await prepareWorkflowDocumentFromYaml({
+      isManaged: false,
       yaml: 'not-a-workflow',
       zodSchema,
       authenticatedUser: 'user1',
@@ -526,6 +546,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     const zodSchema = getWorkflowZodSchema({});
 
     const result = await prepareWorkflowDocumentFromYaml({
+      isManaged: false,
       yaml: 'name: From YAML\ndescription: still broken',
       zodSchema,
       authenticatedUser: 'user1',
@@ -541,6 +562,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     const zodSchema = getWorkflowZodSchema({});
 
     const result = await prepareWorkflowDocumentFromYaml({
+      isManaged: false,
       yaml: 'name: New document\nenabled: true',
       zodSchema,
       authenticatedUser: 'user1',
@@ -557,6 +579,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     const zodSchema = getWorkflowZodSchema({});
 
     const result = await prepareWorkflowDocumentFromYaml({
+      isManaged: false,
       yaml: 'name: Existing document\nenabled: true',
       zodSchema,
       authenticatedUser: 'user1',
@@ -588,6 +611,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     ].join('\n');
 
     await prepareWorkflowDocumentFromYaml({
+      isManaged: false,
       yaml,
       zodSchema,
       authenticatedUser: 'user1',
@@ -625,6 +649,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     ].join('\n');
 
     await prepareWorkflowDocumentFromYaml({
+      isManaged: false,
       yaml,
       zodSchema,
       authenticatedUser: 'user1',
@@ -639,5 +664,85 @@ describe('prepareWorkflowDocumentFromYaml', () => {
         labels: expect.objectContaining({ step_names: 'get-case' }),
       })
     );
+  });
+});
+
+describe('managed-only steps on save', () => {
+  const zodSchema = getWorkflowZodSchema({});
+  const now = new Date('2024-01-01T00:00:00.000Z');
+  const yaml = [
+    'name: Uses a managed-only step',
+    'enabled: true',
+    'triggers:',
+    '  - type: manual',
+    'steps:',
+    '  - name: log',
+    '    type: console',
+    '    with:',
+    '      message: hello',
+  ].join('\n');
+
+  beforeEach(() => {
+    jest
+      .mocked(getStepExposure)
+      .mockImplementation((stepType: string) => (stepType === 'console' ? 'managed_only' : 'open'));
+  });
+
+  afterEach(() => {
+    jest.mocked(getStepExposure).mockImplementation(() => 'open');
+  });
+
+  it('stores a workflow that is not managed as invalid', async () => {
+    const { workflowData } = await prepareWorkflowDocumentFromYaml({
+      yaml,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      isManaged: false,
+    });
+
+    expect(workflowData.valid).toBe(false);
+    expect(workflowData.definition).toBeNull();
+  });
+
+  it('stores a managed workflow as valid', async () => {
+    const { workflowData } = await prepareWorkflowDocumentFromYaml({
+      yaml,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      isManaged: true,
+    });
+
+    expect(workflowData.valid).toBe(true);
+    expect(workflowData.definition).not.toBeNull();
+  });
+
+  it('turns off a workflow that is not managed when its YAML is updated, and reports why', async () => {
+    const { updatedDataPatch, validationErrors } = await applyYamlUpdate({
+      workflowYaml: yaml,
+      zodSchema,
+      triggerDefinitions: [],
+      isManaged: false,
+    });
+
+    expect(updatedDataPatch).toMatchObject({ valid: false, enabled: false, definition: null });
+    expect(validationErrors).toEqual([
+      'Step type "console" is an internal step and can\'t be used in custom workflows.',
+    ]);
+  });
+
+  it('keeps a managed workflow valid when its YAML is updated', async () => {
+    const { updatedDataPatch, validationErrors } = await applyYamlUpdate({
+      workflowYaml: yaml,
+      zodSchema,
+      triggerDefinitions: [],
+      isManaged: true,
+    });
+
+    expect(updatedDataPatch).toMatchObject({ valid: true, enabled: true });
+    expect(validationErrors).toEqual([]);
   });
 });

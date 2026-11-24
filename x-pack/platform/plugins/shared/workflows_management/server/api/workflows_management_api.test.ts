@@ -1018,7 +1018,7 @@ steps:
           mockWorkflowYaml,
           spaceId,
           mockRequest,
-          { includeVariableRules: false, includeEsqlRules: false }
+          { includeVariableRules: false, includeEsqlRules: false, isManaged: false }
         );
         const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
@@ -1164,6 +1164,31 @@ steps:
             expect.objectContaining({ yaml: mockWorkflowYaml, isTestRun: true, isEphemeral }),
             expect.any(Object),
             mockRequest
+          );
+        }
+      );
+
+      it.each([
+        { managed: true, isManaged: true },
+        { managed: undefined, isManaged: false },
+      ])(
+        'validates the tested YAML with isManaged=$isManaged when the saved workflow has managed=$managed',
+        async ({ managed, isManaged }) => {
+          mockWorkflowsService.getWorkflow.mockResolvedValue({ ...mockWorkflowDetailDto, managed });
+
+          await api.testWorkflow({
+            workflowId: mockWorkflowDetailDto.id,
+            workflowYaml: mockWorkflowYaml,
+            inputs,
+            spaceId,
+            request: mockRequest,
+          });
+
+          expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+            mockWorkflowYaml,
+            spaceId,
+            mockRequest,
+            { includeVariableRules: false, includeEsqlRules: false, isManaged }
           );
         }
       );
@@ -1384,7 +1409,7 @@ steps:
           mockWorkflowYaml,
           spaceId,
           mockRequest,
-          { includeVariableRules: false, includeEsqlRules: false }
+          { includeVariableRules: false, includeEsqlRules: false, isManaged: false }
         );
       });
     });
@@ -1418,6 +1443,12 @@ steps:
       );
 
       expect(result).toBe('test-step-exec-id');
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test Workflow',
+        'default',
+        mockRequest,
+        { includeVariableRules: false, includeEsqlRules: false, isManaged: false }
+      );
       expect(mockWorkflowsExecutionEngine.executeWorkflowStep).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'internal-test-workflow',
@@ -1474,6 +1505,44 @@ steps:
         undefined,
         {},
         mockRequest
+      );
+    });
+
+    it('validates the YAML as managed when the step belongs to a managed workflow', async () => {
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: {
+          version: '1',
+          name: 'Test Workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [{ name: 'step1', type: 'console' }],
+        },
+      });
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'existing-workflow-id',
+        managed: true,
+      } as WorkflowDetailDto);
+      mockWorkflowsExecutionEngine.executeWorkflowStep.mockResolvedValue({
+        workflowExecutionId: 'test-step-exec-id',
+      });
+
+      await api.testStep(
+        'name: Test Workflow',
+        'step1',
+        'existing-workflow-id',
+        undefined,
+        {},
+        'default',
+        mockRequest
+      );
+
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test Workflow',
+        'default',
+        mockRequest,
+        { includeVariableRules: false, includeEsqlRules: false, isManaged: true }
       );
     });
   });
@@ -1986,7 +2055,7 @@ steps:
         'name: Test Workflow',
         'default',
         mockRequest,
-        { includeVariableRules: false, includeEsqlRules: false }
+        { includeVariableRules: false, includeEsqlRules: false, isManaged: false }
       );
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2097,7 +2166,7 @@ steps:
         'name: Test',
         'default',
         mockRequest,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
       expect(result).toBe(expectedResult);
     });
@@ -2123,7 +2192,7 @@ steps:
         'invalid: yaml',
         'my-space',
         mockRequest,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
       expect(result).toEqual(expectedResult);
     });
@@ -2156,7 +2225,8 @@ steps:
         'wf-1',
         { enabled: false },
         'default',
-        mockRequest
+        mockRequest,
+        { isManaged: true }
       );
     });
 
@@ -2190,7 +2260,8 @@ steps:
         'wf-1',
         { name: 'Updated Workflow' },
         'default',
-        mockRequest
+        mockRequest,
+        { isManaged: true }
       );
     });
 
@@ -2203,7 +2274,13 @@ steps:
         api.updateWorkflow('wf-1', { name: 'Updated Workflow' }, 'default', mockRequest)
       ).resolves.toBe(updateResult);
 
-      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalled();
+      expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalledWith(
+        'wf-1',
+        { name: 'Updated Workflow' },
+        'default',
+        mockRequest,
+        { isManaged: false }
+      );
     });
   });
 
@@ -2232,8 +2309,9 @@ steps:
           ],
         },
       };
+      const getDefinitionToStore = jest.fn().mockResolvedValue(null);
       Object.assign(mockWorkflowsService, {
-        getDefinitionToStore: jest.fn().mockResolvedValue(null),
+        getDefinitionToStore,
         findWorkflowsCalling: jest.fn(async (ids: string[]) =>
           ids.includes('workflow-123') ? [caller] : []
         ),
@@ -2244,6 +2322,13 @@ steps:
         'default',
         mockRequest,
         'steps: ['
+      );
+
+      expect(getDefinitionToStore).toHaveBeenCalledWith(
+        'steps: [',
+        { id: 'workflow-123', enabled: true, managed: false },
+        'default',
+        mockRequest
       );
 
       expect(analysis.dependents).toEqual([

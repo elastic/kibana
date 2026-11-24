@@ -12,7 +12,12 @@ import Path from 'path';
 import { isWorkflowValidationRuleId } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { validateWorkflowYaml } from './validate_workflow_yaml';
-import { getWorkflowZodSchema } from '../schema';
+import { getStepExposure, getWorkflowZodSchema } from '../schema';
+
+jest.mock('../schema', () => ({
+  ...jest.requireActual('../schema'),
+  getStepExposure: jest.fn(() => 'open'),
+}));
 
 const loadExample = (name: string) =>
   readFileSync(Path.join(__dirname, '..', 'examples', name), 'utf8');
@@ -690,6 +695,74 @@ steps:
       expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
         false
       );
+    });
+  });
+
+  describe('step exposure', () => {
+    // `wait` stands for an internal step, and `console` for a managed-only one used in two nested steps.
+    const yaml = `
+version: '1'
+name: exposure
+triggers:
+  - type: manual
+steps:
+  - name: pause
+    type: wait
+    with:
+      duration: 1s
+  - name: loop
+    type: foreach
+    foreach: "{{ inputs.items }}"
+    steps:
+      - name: first
+        type: console
+        with:
+          message: one
+      - name: second
+        type: console
+        with:
+          message: two
+`;
+
+    beforeEach(() => {
+      jest.mocked(getStepExposure).mockImplementation((stepType: string) => {
+        if (stepType === 'console') return 'managed_only';
+        if (stepType === 'wait') return 'internal';
+        return 'open';
+      });
+    });
+
+    afterEach(() => {
+      jest.mocked(getStepExposure).mockImplementation(() => 'open');
+    });
+
+    it('reports each managed-only step type once, nested steps included, in a workflow that is not managed', async () => {
+      const result = await validateWorkflowYaml(yaml, schema, { isManaged: false });
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics).toEqual([
+        {
+          severity: 'error',
+          message:
+            'Step type "console" is an internal step and can\'t be used in custom workflows.',
+          source: 'step-exposure',
+          ruleId: 'managedOnlyStepType',
+        },
+      ]);
+    });
+
+    it('accepts managed-only steps in a managed workflow', async () => {
+      const result = await validateWorkflowYaml(yaml, schema, { isManaged: true });
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([]);
+    });
+
+    it('does not check step exposure when the caller does not say whether the workflow is managed', async () => {
+      const result = await validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([]);
     });
   });
 
