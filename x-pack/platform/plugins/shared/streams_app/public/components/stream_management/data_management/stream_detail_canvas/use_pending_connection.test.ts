@@ -106,7 +106,7 @@ const dragFrom = (result: HookResult, nodeId: string, handleType: 'source' | 'ta
   );
 
 describe('usePendingConnection', () => {
-  it('records the origin and the nodes that can take a new line', () => {
+  it('records the origin and the nodes that can take a new line until the drag ends', () => {
     const { result } = renderPendingConnection();
 
     dragFrom(result, LOGS_IN);
@@ -115,6 +115,9 @@ describe('usePendingConnection', () => {
       originId: LOGS_IN,
       targetIds: new Set([ES_ARCHIVE]),
     });
+
+    act(() => result.current.endConnection());
+    expect(result.current.pendingConnection).toBeNull();
   });
 
   it('refuses a Prometheus source on a routing node that only handles Documents', () => {
