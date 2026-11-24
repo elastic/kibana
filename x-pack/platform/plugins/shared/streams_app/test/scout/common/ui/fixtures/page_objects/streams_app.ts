@@ -311,13 +311,16 @@ export class StreamsApp {
     await this.canvasEdgeMenuButton.click();
   }
 
-  /** Adds an `add_fields` processor that upserts a literal value at a record path. */
-  async addAddFieldsProcessor(path: string, value: string) {
-    const pathInput = this.processingFlyout
-      .getByTestId('componentDefinitionFormPath-path')
-      .getByRole('combobox');
-    await pathInput.fill(path);
-    await pathInput.press('Enter');
+  /** Adds an `add_fields` processor that upserts a literal value into an attribute of the record. */
+  async addAddFieldsProcessor(name: string, value: string) {
+    // The catalogue offers several processors, so the editor starts without one chosen.
+    await this.processingFlyout
+      .getByTestId('streamsProcessingFlyoutProcessorType')
+      .getByRole('combobox')
+      .click();
+    // The option's name also carries its status badge.
+    await this.page.getByRole('option', { name: /^Add fields/ }).click();
+    await this.processingFlyout.getByTestId('componentDefinitionFormString-name').fill(name);
     await this.processingFlyout.getByTestId('componentDefinitionFormLiteral-value').fill(value);
     await this.processingFlyout.getByTestId('streamsProcessingFlyoutEditorSubmit').click();
   }
