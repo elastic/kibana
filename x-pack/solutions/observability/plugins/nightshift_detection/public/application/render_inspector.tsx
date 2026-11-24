@@ -18,9 +18,14 @@ export function renderInspector({
   coreStart: CoreStart;
   element: HTMLElement;
 }): () => void {
+  // The app element clips its content by default, and results pile up past the fold.
+  const previousOverflow = element.style.overflow;
+  element.style.overflow = 'auto';
+
   ReactDOM.render(coreStart.rendering.addContext(<InspectorPage http={coreStart.http} />), element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    element.style.overflow = previousOverflow;
   };
 }

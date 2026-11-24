@@ -77,7 +77,7 @@ export function InspectorPage({ http }: InspectorPageProps) {
   const [runningActionId, setRunningActionId] = useState<string | null>(null);
   const [results, setResults] = useState<ActionResult[]>([]);
 
-  const runAction = async (action: EngineAction) => {
+  const handleRunAction = async (action: EngineAction) => {
     setRunningActionId(action.id);
     const startedAt = new Date();
     const record = (ok: boolean, response: unknown) =>
@@ -121,7 +121,7 @@ export function InspectorPage({ http }: InspectorPageProps) {
                 data-test-subj={`nightshiftDetectionInspectorAction-${action.id}`}
                 isLoading={runningActionId === action.id}
                 isDisabled={runningActionId !== null}
-                onClick={() => runAction(action)}
+                onClick={() => handleRunAction(action)}
               >
                 {action.label}
               </EuiButton>
