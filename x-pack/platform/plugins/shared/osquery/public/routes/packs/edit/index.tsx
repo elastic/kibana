@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -110,6 +111,7 @@ const EditPackPageComponent = () => {
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
+              color="text"
               onClick={handleDuplicateClick}
               iconType="copy"
               isLoading={copyPackMutation.isLoading}
@@ -120,12 +122,12 @@ const EditPackPageComponent = () => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
+            <EuiButtonEmpty color="danger" onClick={handleDeleteClick} iconType="trash">
               <FormattedMessage
                 id="xpack.osquery.editPack.deletePackButtonLabel"
                 defaultMessage="Delete pack"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null,

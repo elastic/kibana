@@ -138,7 +138,7 @@ describe('PolicyAssignmentList', () => {
         );
 
         expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
-        expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('2 of 3 selected');
+        expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('2 of 3 agent policies selected');
         await openSharedPolicies();
         const marker = await screen.findByText('Included via shared integration');
         expect(marker.closest('li')).toHaveTextContent('Beta Policy');
@@ -149,7 +149,7 @@ describe('PolicyAssignmentList', () => {
         expect(onFormChange).toHaveBeenLastCalledWith({ policy_ids: ['policy-1'], shards: {} });
 
         if (!isReadOnly) {
-          fireEvent.click(screen.getByTestId('policyAssignmentUnselectAll'));
+          fireEvent.click(screen.getByRole('checkbox', { name: groupName }));
           expect(screen.getByRole('checkbox', { name: groupName })).not.toBeChecked();
           expect(screen.queryByText('Included via shared integration')).not.toBeInTheDocument();
           expect(
@@ -202,7 +202,7 @@ describe('PolicyAssignmentList', () => {
 
     it('renders a shared integration as one row: first policy, +N badge, Shared label, summed agents', async () => {
       render(<FormWrapper />);
-      expect(screen.getAllByRole('checkbox')).toHaveLength(2);
+      expect(screen.getAllByRole('checkbox')).toHaveLength(3);
       expect(screen.getByRole('checkbox', { name: groupName })).not.toBeChecked();
       const group = screen.getByRole('group', { name: 'Shared integration: Shared hosts' });
       expect(within(group).getByText('Alpha Policy')).toBeInTheDocument();
@@ -253,11 +253,11 @@ describe('PolicyAssignmentList', () => {
         expect.objectContaining({ policy_ids: ['policy-1', 'policy-2'] })
       );
       expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent(
-        '2 of 3 selected | 15 agents enrolled'
+        '2 of 3 agent policies selected | 15 agents enrolled'
       );
       fireEvent.click(screen.getByRole('checkbox', { name: groupName }));
       expect(onFormChange).toHaveBeenLastCalledWith(expect.objectContaining({ policy_ids: [] }));
-      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('0 of 3 selected');
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('0 of 3 agent policies selected');
     });
 
     it('lists members as plain text when the user cannot read Fleet agent policies', async () => {
@@ -285,7 +285,7 @@ describe('PolicyAssignmentList', () => {
           expect.objectContaining({ policy_ids: ['policy-1', 'policy-2'] })
         );
         expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('2 of 2 matching');
-        fireEvent.click(screen.getByTestId('policyAssignmentUnselectAll'));
+        fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
         expect(onFormChange).toHaveBeenLastCalledWith(expect.objectContaining({ policy_ids: [] }));
       }
     );
@@ -295,8 +295,8 @@ describe('PolicyAssignmentList', () => {
       fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
       expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
       expect(screen.getByRole('checkbox', { name: 'Select policy Gamma Policy' })).toBeChecked();
-      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('3 of 3 selected');
-      fireEvent.click(screen.getByTestId('policyAssignmentUnselectAll'));
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('3 of 3 agent policies selected');
+      fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
       screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).not.toBeChecked());
     });
 
@@ -316,7 +316,7 @@ describe('PolicyAssignmentList', () => {
       expect(screen.queryByText('Alpha Policy')).not.toBeInTheDocument();
       fireEvent.click(screen.getByTestId('pagination-button-1'));
       expect(screen.getByText('Alpha Policy')).toBeInTheDocument();
-      expect(screen.getAllByRole('checkbox')).toHaveLength(2);
+      expect(screen.getAllByRole('checkbox')).toHaveLength(3);
       fireEvent.click(screen.getByRole('checkbox', { name: groupName }));
       // Selecting does not reset the page.
       expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
@@ -327,7 +327,6 @@ describe('PolicyAssignmentList', () => {
       expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
       screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).toBeDisabled());
       expect(screen.getByTestId('policyAssignmentSelectAll')).toBeDisabled();
-      expect(screen.getByTestId('policyAssignmentUnselectAll')).toBeDisabled();
       expect(screen.getByTestId('viewPolicy-policy-1')).toHaveAttribute(
         'href',
         '/app/fleet/policies/policy-1'
@@ -400,7 +399,7 @@ describe('PolicyAssignmentList', () => {
       expect(screen.getByText('policy-1')).toBeInTheDocument();
       // The assignment must not be editable against an incomplete list.
       expect(screen.getByRole('checkbox', { name: 'Select policy policy-1' })).toBeDisabled();
-      expect(screen.getByTestId('policyAssignmentUnselectAll')).toBeDisabled();
+      expect(screen.getByTestId('policyAssignmentSelectAll')).toBeDisabled();
     });
 
     it('blocks editing while the first fetch is still in flight', () => {
@@ -413,7 +412,6 @@ describe('PolicyAssignmentList', () => {
 
       expect(screen.getByRole('checkbox', { name: 'Select policy policy-1' })).toBeDisabled();
       expect(screen.getByTestId('policyAssignmentSelectAll')).toBeDisabled();
-      expect(screen.getByTestId('policyAssignmentUnselectAll')).toBeDisabled();
     });
 
     it('gives each checkbox a unique accessible name from the policy name', () => {
@@ -442,7 +440,9 @@ describe('PolicyAssignmentList', () => {
       render(<FormWrapper />);
       expect(screen.getByText('Scheduled agent policies (optional)')).toBeInTheDocument();
       expect(
-        screen.getByText('Queries in this pack are scheduled for agents in the selected policies.')
+        screen.getByText(
+          'Queries in this pack are scheduled for agents in the selected agent policies and any that share their integration.'
+        )
       ).toBeInTheDocument();
     });
 
@@ -517,7 +517,7 @@ describe('PolicyAssignmentList', () => {
   describe('search', () => {
     it('filters rows by name', () => {
       render(<FormWrapper />);
-      const searchInput = screen.getByPlaceholderText('Search policies');
+      const searchInput = screen.getByPlaceholderText('Search agent policies.');
       fireEvent.change(searchInput, { target: { value: 'Alpha' } });
       expect(screen.getByText('Alpha Policy')).toBeInTheDocument();
       expect(screen.queryByText('Beta Policy')).not.toBeInTheDocument();
@@ -526,7 +526,7 @@ describe('PolicyAssignmentList', () => {
 
     it('shows a search-specific empty state when the filter matches nothing', () => {
       render(<FormWrapper />);
-      const searchInput = screen.getByPlaceholderText('Search policies');
+      const searchInput = screen.getByPlaceholderText('Search agent policies.');
       fireEvent.change(searchInput, { target: { value: 'no-such-policy' } });
 
       expect(screen.getByText('No policies match your search')).toBeInTheDocument();
@@ -542,7 +542,7 @@ describe('PolicyAssignmentList', () => {
 
     it('filters rows by description', () => {
       render(<FormWrapper />);
-      const searchInput = screen.getByPlaceholderText('Search policies');
+      const searchInput = screen.getByPlaceholderText('Search agent policies.');
       fireEvent.change(searchInput, { target: { value: 'Windows' } });
 
       expect(screen.getByText('Beta Policy')).toBeInTheDocument();
@@ -551,7 +551,7 @@ describe('PolicyAssignmentList', () => {
 
     it('does not match on policy id', () => {
       render(<FormWrapper />);
-      const searchInput = screen.getByPlaceholderText('Search policies');
+      const searchInput = screen.getByPlaceholderText('Search agent policies.');
       fireEvent.change(searchInput, { target: { value: 'policy-1' } });
 
       expect(screen.getByText('No policies match your search')).toBeInTheDocument();
@@ -564,7 +564,7 @@ describe('PolicyAssignmentList', () => {
       render(<FormWrapper defaultValues={{ policy_ids: ['policy-1', 'policy-2'] }} />);
       const countEl = screen.getByTestId('policyAssignmentCount');
       // policy-1 (5 agents) + policy-2 (10 agents) = 15
-      expect(countEl).toHaveTextContent('2 of 3 selected | 15 agents enrolled');
+      expect(countEl).toHaveTextContent('2 of 3 agent policies selected | 15 agents enrolled');
     });
 
     it('hydrates checkboxes from seeded policy_ids', () => {
@@ -616,7 +616,7 @@ describe('PolicyAssignmentList', () => {
           onFormChange={handleChange}
         />
       );
-      fireEvent.click(screen.getByTestId('policyAssignmentUnselectAll'));
+      fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
       const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
       expect(lastCall.policy_ids).toHaveLength(0);
     });
@@ -627,7 +627,7 @@ describe('PolicyAssignmentList', () => {
       const handleChange = jest.fn();
       render(<FormWrapper onFormChange={handleChange} />);
 
-      const searchInput = screen.getByPlaceholderText('Search policies');
+      const searchInput = screen.getByPlaceholderText('Search agent policies.');
       fireEvent.change(searchInput, { target: { value: 'Alpha' } });
 
       fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
@@ -641,7 +641,7 @@ describe('PolicyAssignmentList', () => {
         <FormWrapper defaultValues={{ policy_ids: ['policy-3'] }} onFormChange={handleChange} />
       );
 
-      const searchInput = screen.getByPlaceholderText('Search policies');
+      const searchInput = screen.getByPlaceholderText('Search agent policies.');
       fireEvent.change(searchInput, { target: { value: 'Alpha' } });
       fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
 
@@ -660,29 +660,27 @@ describe('PolicyAssignmentList', () => {
         />
       );
 
-      const searchInput = screen.getByPlaceholderText('Search policies');
+      const searchInput = screen.getByPlaceholderText('Search agent policies.');
       fireEvent.change(searchInput, { target: { value: 'Alpha' } });
-      fireEvent.click(screen.getByTestId('policyAssignmentUnselectAll'));
+      fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
 
       const lastCall = handleChange.mock.calls[handleChange.mock.calls.length - 1][0];
       expect(lastCall.policy_ids).toEqual(['policy-3']);
     });
 
-    it('labels the bulk actions as scoped while a search is active', () => {
+    it('labels the header checkbox as scoped while a search is active', () => {
       render(<FormWrapper />);
 
-      expect(screen.getByTestId('policyAssignmentSelectAll')).toHaveTextContent('Select all');
-      expect(screen.getByTestId('policyAssignmentSelectAll')).not.toHaveTextContent('matching');
+      expect(screen.getByTestId('policyAssignmentSelectAll')).toHaveAccessibleName(
+        'Select all policies'
+      );
 
-      fireEvent.change(screen.getByPlaceholderText('Search policies'), {
+      fireEvent.change(screen.getByPlaceholderText('Search agent policies.'), {
         target: { value: 'Alpha' },
       });
 
-      expect(screen.getByTestId('policyAssignmentSelectAll')).toHaveTextContent(
-        'Select all matching'
-      );
-      expect(screen.getByTestId('policyAssignmentUnselectAll')).toHaveTextContent(
-        'Un-select all matching'
+      expect(screen.getByTestId('policyAssignmentSelectAll')).toHaveAccessibleName(
+        'Select all matching policies'
       );
     });
 
@@ -694,7 +692,7 @@ describe('PolicyAssignmentList', () => {
           onFormChange={handleChange}
         />
       );
-      const searchInput = screen.getByPlaceholderText('Search policies');
+      const searchInput = screen.getByPlaceholderText('Search agent policies.');
       // Filter out policy-1 and policy-2
       fireEvent.change(searchInput, { target: { value: 'Gamma' } });
       // Clear filter
@@ -790,7 +788,7 @@ describe('PolicyAssignmentList', () => {
     it('excludes shard-targeted policies from the selectable total', () => {
       render(<FormWrapper defaultValues={{ policy_ids: [], shards: { 'policy-2': 50 } }} />);
 
-      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('0 of 2 selected');
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('0 of 2 agent policies selected');
     });
 
     it('explains why a shard-targeted policy cannot be selected', () => {
@@ -911,7 +909,7 @@ describe('PolicyAssignmentList', () => {
       expect(orphanCheckbox).toBeChecked();
 
       const countEl = screen.getByTestId('policyAssignmentCount');
-      expect(countEl).toHaveTextContent('2 of 4 selected');
+      expect(countEl).toHaveTextContent('2 of 4 agent policies selected');
     });
 
     it('unchecks an orphan policy_id without clearing other selections', () => {
@@ -960,12 +958,9 @@ describe('PolicyAssignmentList', () => {
       });
     });
 
-    it('select all and un-select all buttons are disabled in read-only mode', () => {
-      // Seed a selection so Un-select all is disabled by read-only rather than
-      // by there being nothing to clear.
+    it('the header checkbox is disabled in read-only mode', () => {
       render(<FormWrapper isReadOnly={true} defaultValues={{ policy_ids: ['policy-1'] }} />);
       expect(screen.getByTestId('policyAssignmentSelectAll')).toBeDisabled();
-      expect(screen.getByTestId('policyAssignmentUnselectAll')).toBeDisabled();
     });
 
     it('View policy links are still usable in read-only mode', () => {
