@@ -49,6 +49,13 @@ describe('SCOUT_MODULE_GRAPH_IGNORE', () => {
     });
   });
 
+  describe('bundle size limits', () => {
+    it('excludes packages/kbn-rspack-optimizer/limits.yml', () => {
+      expect(matches('packages/kbn-rspack-optimizer/limits.yml')).toBe(true);
+      expect(matches('packages/kbn-rspack-optimizer/src/limits.ts')).toBe(false);
+    });
+  });
+
   describe('source files are NOT excluded', () => {
     it('keeps regular TypeScript source files', () => {
       expect(matches('src/core/server/index.ts')).toBe(false);

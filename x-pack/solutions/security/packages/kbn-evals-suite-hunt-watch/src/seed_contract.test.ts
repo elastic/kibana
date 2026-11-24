@@ -123,7 +123,7 @@ describe('scenario fixtures match what dataset rows claim', () => {
     {
       name: 'difficult hit (ioc-only): telemetry IOCs, no technique ids',
       slug: 'aws-iam-ioc-only',
-      contains: ['192.0.2.30', 'dev-user@corp.example', 'mitre: []'],
+      contains: ['192.0.2.30', 'dev-user@corp.example.cloud', 'mitre: []'],
       omits: ['joinIocsArticleOnly: true'],
     },
     {

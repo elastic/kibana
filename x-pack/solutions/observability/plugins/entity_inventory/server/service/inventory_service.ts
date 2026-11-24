@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import type {
+  AttributeValuesResponse,
   GetTypesResponse,
   InventoryRow,
   InventoryType,
@@ -47,7 +48,10 @@ import {
   resolveIdentityPlan,
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
-import type { ListRequest } from '../inventory/types';
+import type { ListAttributeValuesRequest, ListRequest } from '../inventory/types';
+import { partialRowsReason } from '../inventory/reasons';
+import { listAttributeValues } from './list_attribute_values';
+import { toTypeColumns } from './type_columns';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
@@ -62,10 +66,6 @@ interface ListPlan {
   /** Wall time of the concurrent probes, in fractional milliseconds. */
   probesMs: number;
 }
-
-// The `errors[]` reason for a plan whose response has `is_partial: true`.
-const PARTIAL_RESULT_REASON =
-  'partial result: some shards or clusters did not answer, so rows may be missing';
 
 const toUnavailableColumns = (
   { index, indexPattern }: QueryPlan,
@@ -236,7 +236,7 @@ export class InventoryService {
         errors.push({
           indexPattern: plan.indexPattern,
           status: null,
-          reason: PARTIAL_RESULT_REASON,
+          reason: partialRowsReason(),
         });
       }
       const { usable, reason, unavailableFields } = interpretPlanResult(result, identity, columns);
@@ -279,6 +279,17 @@ export class InventoryService {
       unavailableColumns,
     };
   };
+
+  /** Lists the values a dropdown can offer for an attribute; see `listAttributeValues`. */
+  listAttributeValues = (request: ListAttributeValuesRequest): Promise<AttributeValuesResponse> =>
+    listAttributeValues(
+      {
+        getDynamicDefinition: this.getDynamicDefinition,
+        esClient: this.esClient,
+        logger: this.logger,
+      },
+      request
+    );
 
   /**
    * Plans the request exactly as `list` does, probes included, and returns the probes and the list
@@ -392,7 +403,7 @@ export class InventoryService {
 
   private buildType = (definition: RegisteredEntityDefinition): InventoryType => {
     const { type, name, description } = definition;
-    const { sources } = getDynamicBlock(definition);
+    const { sources, displayLabels, suggestedFilters = [] } = getDynamicBlock(definition);
     const identityPlan = resolveIdentityPlan(definition);
     const columns = buildColumns(
       definition,
@@ -404,7 +415,8 @@ export class InventoryService {
       name,
       description,
       identityFields: identityPlan.groupingFields,
-      columns: toResponseColumns(columns),
+      columns: toTypeColumns(columns, displayLabels),
+      suggestedFilters,
       sources: sources.map(({ indexPattern, filter }) => ({ indexPattern, filter })),
     };
   };

@@ -29,26 +29,23 @@ import {
   type ESQLControlVariable,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import {
-  appendStatsByToQuery,
-  getESQLResults,
-  getIndexPatternFromESQLQuery,
-} from '@kbn/esql-utils';
+import { appendStatsByToQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { ESQLValuesPreview } from '@kbn/esql-browser';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
+import { getTimeZoneFromSettings } from '@kbn/es-query';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { reportEsqlError } from '@kbn/esql-editor';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ServiceDeps } from '../../../kibana_services';
 import { ControlLabel, ControlSelectionType } from './shared_form_components';
 
 interface ValueControlFormProps {
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
   variableType: ESQLVariableType;
   variableName: string;
   controlFlyoutType: EsqlControlType;
@@ -186,25 +183,24 @@ export function ValueControlForm({
       setIsLoading(true);
       try {
         const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
-        const results = await getESQLResults({
-          esqlQuery: query,
-          search,
-          signal: controller.signal,
-          filter: undefined,
-          dropNullColumns: true,
-          timeRange,
-          timezone,
-          variables: esqlVariables,
-        });
+        const { rawResponse: response } = await search.esql(
+          {
+            query,
+            dropNullColumns: true,
+            timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
+            kibanaQueryContext: { timeRange, esqlVariables },
+          },
+          { abortSignal: controller.signal }
+        );
         if (!isMounted() || controller.signal.aborted) {
           return;
         }
-        const columns = results.response.columns;
+        const columns = response.columns;
         setQueryColumns(columns);
         setShowValuesPreview(true);
 
         if (columns.length === 1) {
-          const valuesArray = results.response.values.map((value) => value[0]);
+          const valuesArray = response.values.map((value) => value[0]);
           const options = valuesArray
             .filter((v) => v)
             .map((option) => {
