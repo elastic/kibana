@@ -181,11 +181,11 @@ export function mapOperatorsToCommands({
   }));
 
   return {
-    // The FROM or FORK that holds subqueries is only worth a row when it did work of its own. Any
+    // The FROM or FORK that holds subqueries is only worth a row when it took time of its own. Any
     // other command stays, as it can have a subquery in its expressions, such as WHERE a IN (...).
     commands: heats.filter(
-      ({ command, operators: names }) =>
-        !(CONTAINER_COMMANDS.includes(command.name) && command.branches?.length) || names.length > 0
+      ({ command, share }) =>
+        !(CONTAINER_COMMANDS.includes(command.name) && command.branches?.length) || share > 0
     ),
     unattributedShare: shareOf(unattributedNanos, totalNanos),
     hasSubqueries: commands.some((command) => Boolean(command.branches?.length)),

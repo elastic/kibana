@@ -259,9 +259,11 @@ describe('mapOperatorsToCommands with subqueries', () => {
     ]);
   });
 
-  it('leaves out the row of the FROM that holds the subqueries when it did no work of its own', () => {
+  it('leaves out the row of the FROM that holds the subqueries when it took no time of its own', () => {
     const idle = heatOf(QUERY, [
       { operator: 'TopNOperator', node: { id: '4', text: 'SORT c DESC' }, nanos: 15 },
+      // The operators that merge the subqueries report no time, but they are on the FROM.
+      { operator: 'ExchangeSourceOperator', node: { id: '3', text: MERGE } },
     ]);
 
     expect(idle.commands.map(({ command }) => command.name)).toEqual([
