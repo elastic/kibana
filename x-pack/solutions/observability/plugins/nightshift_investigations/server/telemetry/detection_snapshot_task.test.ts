@@ -87,9 +87,12 @@ describe('reportDetectionSnapshots', () => {
       rules_truncated: false,
       automations_total: 2,
       automations_enabled: 1,
-      automations_alert_trigger: 2,
-      automations_schedule_trigger: 0,
-      automations_slack_trigger: 0,
+      automations_alert_total: 2,
+      automations_alert_enabled: 1,
+      automations_schedule_total: 0,
+      automations_schedule_enabled: 0,
+      automations_slack_total: 0,
+      automations_slack_enabled: 0,
       connectors_configured: 4,
       connectors_by_type: [
         { connector_type: '.datadog', count: 3 },
@@ -106,7 +109,7 @@ describe('reportDetectionSnapshots', () => {
     });
   });
 
-  it('counts an automation once per trigger kind it has', async () => {
+  it('counts an automation once under each trigger kind it has', async () => {
     const { analytics, run } = setup({
       automations: [
         {
@@ -115,20 +118,30 @@ describe('reportDetectionSnapshots', () => {
           trigger: {
             rows: [
               { kind: 'slack', event: 'message' },
-              { kind: 'slack', event: 'message' },
+              { kind: 'slack', event: 'message', channels: ['C1'] },
+              { kind: 'schedule', schedulePreset: 'hourly' },
             ],
           },
         },
-        automation({ kind: 'slack', event: 'message' }),
+        automation({ kind: 'slack', event: 'message' }, false),
       ],
     });
 
     await run();
 
-    expect(analytics.reportEvent.mock.calls[0][1]).toMatchObject({
-      automations_alert_trigger: 0,
-      automations_slack_trigger: 2,
-    });
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      NIGHTSHIFT_DETECTION_SNAPSHOT_EVENT,
+      expect.objectContaining({
+        automations_total: 2,
+        automations_enabled: 1,
+        automations_alert_total: 0,
+        automations_alert_enabled: 0,
+        automations_schedule_total: 1,
+        automations_schedule_enabled: 1,
+        automations_slack_total: 2,
+        automations_slack_enabled: 1,
+      })
+    );
   });
 
   it('skips the rule scan when an automation has no rule filter', async () => {

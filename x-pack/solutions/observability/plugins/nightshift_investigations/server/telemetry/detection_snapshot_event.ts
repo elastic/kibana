@@ -35,11 +35,14 @@ export interface DetectionSnapshotEvent extends Partial<DetectionSnapshotKnowled
   rules_truncated: boolean;
   automations_total: number;
   automations_enabled: number;
+  automations_alert_total: number;
+  automations_alert_enabled: number;
+  automations_schedule_total: number;
+  automations_schedule_enabled: number;
+  automations_slack_total: number;
+  automations_slack_enabled: number;
   connectors_configured: number;
   connectors_by_type: Array<{ connector_type: string; count: number }>;
-  automations_alert_trigger: number;
-  automations_schedule_trigger: number;
-  automations_slack_trigger: number;
   external_connectors_configured: number;
   external_connectors_active_24h: number;
   external_sources_active_24h: number;
@@ -81,6 +84,14 @@ const detectionSnapshotSchema: RootSchema<DetectionSnapshotEvent> = {
   },
   automations_total: count('Automations in the space.'),
   automations_enabled: count('Enabled automations in the space.'),
+  automations_alert_total: count(
+    'Automations with an alert trigger. An automation counts once under each trigger kind it has, so the kinds can sum above automations_total.'
+  ),
+  automations_alert_enabled: count('Enabled automations with an alert trigger.'),
+  automations_schedule_total: count('Automations with a schedule trigger.'),
+  automations_schedule_enabled: count('Enabled automations with a schedule trigger.'),
+  automations_slack_total: count('Automations with a Slack trigger.'),
+  automations_slack_enabled: count('Enabled automations with a Slack trigger.'),
   connectors_configured: count('Connectors of any type in the space.'),
   connectors_by_type: {
     type: 'array',
@@ -91,15 +102,6 @@ const detectionSnapshotSchema: RootSchema<DetectionSnapshotEvent> = {
       },
     },
   },
-  automations_alert_trigger: count(
-    'Automations with an alert trigger. An automation with several trigger kinds counts once per kind.'
-  ),
-  automations_schedule_trigger: count(
-    'Automations with a schedule trigger. An automation with several trigger kinds counts once per kind.'
-  ),
-  automations_slack_trigger: count(
-    'Automations with a Slack trigger. An automation with several trigger kinds counts once per kind.'
-  ),
   external_connectors_configured: count(
     'Connectors of a type that imports alerts from an external system.'
   ),

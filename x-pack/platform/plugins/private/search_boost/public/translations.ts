@@ -50,30 +50,6 @@ export const OUTRANKED_ICON_LABEL = i18n.translate('xpack.searchBoost.outrankedI
   defaultMessage: 'Outranked',
 });
 
-export const getAdditionalHiddenIndices = (count: number) =>
-  i18n.translate('xpack.searchBoost.additionalHiddenIndices', {
-    defaultMessage: '+{count, plural, one {# hidden index} other {# hidden indices}}',
-    values: { count },
-  });
-
-export const getHiddenIndices = (count: number) =>
-  i18n.translate('xpack.searchBoost.hiddenIndices', {
-    defaultMessage: '{count, plural, one {# hidden index} other {# hidden indices}}',
-    values: { count },
-  });
-
-export const getAdditionalHiddenDataStreams = (count: number) =>
-  i18n.translate('xpack.searchBoost.additionalHiddenDataStreams', {
-    defaultMessage: '+{count, plural, one {# hidden data stream} other {# hidden data streams}}',
-    values: { count },
-  });
-
-export const getHiddenDataStreams = (count: number) =>
-  i18n.translate('xpack.searchBoost.hiddenDataStreams', {
-    defaultMessage: '{count, plural, one {# hidden data stream} other {# hidden data streams}}',
-    values: { count },
-  });
-
 export const LOADING_LABEL = i18n.translate('xpack.searchBoost.page.loading', {
   defaultMessage: 'Loading boost settings…',
 });
@@ -403,8 +379,6 @@ export const MATCHES_LABELS: Readonly<
       list: { entity: string; entityPlural: string; searchPlaceholder: string };
       title: string;
       name: string;
-      noHidden: string;
-      onlyHidden: string;
       noSearchMatches: string;
     }
   >
@@ -421,12 +395,6 @@ export const MATCHES_LABELS: Readonly<
     },
     title: MATCHING_INDICES_TITLE,
     name: i18n.translate('xpack.searchBoost.matches.indexColumn', { defaultMessage: 'Index' }),
-    noHidden: i18n.translate('xpack.searchBoost.matches.noHiddenIndices', {
-      defaultMessage: 'This rule matches no hidden indices.',
-    }),
-    onlyHidden: i18n.translate('xpack.searchBoost.matches.onlyHiddenIndices', {
-      defaultMessage: 'Only hidden indices match. Show hidden to see them.',
-    }),
     noSearchMatches: i18n.translate('xpack.searchBoost.matches.noIndicesMatchSearch', {
       defaultMessage: 'No indices match your search or filter.',
     }),
@@ -446,12 +414,6 @@ export const MATCHES_LABELS: Readonly<
     title: MATCHING_DATA_STREAMS_TITLE,
     name: i18n.translate('xpack.searchBoost.matches.dataStreamColumn', {
       defaultMessage: 'Data stream',
-    }),
-    noHidden: i18n.translate('xpack.searchBoost.matches.noHiddenDataStreams', {
-      defaultMessage: 'This rule matches no hidden data streams.',
-    }),
-    onlyHidden: i18n.translate('xpack.searchBoost.matches.onlyHiddenDataStreams', {
-      defaultMessage: 'Only hidden data streams match. Show hidden to see them.',
     }),
     noSearchMatches: i18n.translate('xpack.searchBoost.matches.noDataStreamsMatchSearch', {
       defaultMessage: 'No data streams match your search or filter.',
@@ -488,14 +450,6 @@ export const RETENTION_COLUMN = i18n.translate('xpack.searchBoost.matches.retent
   defaultMessage: 'Data retention',
 });
 
-export const SHOW_HIDDEN_LABEL = i18n.translate('xpack.searchBoost.matches.showHidden', {
-  defaultMessage: 'Show hidden',
-});
-
-export const HIDDEN_BADGE = i18n.translate('xpack.searchBoost.matches.hiddenBadge', {
-  defaultMessage: 'Hidden',
-});
-
 export const NO_MATCHES_MESSAGE = i18n.translate('xpack.searchBoost.matches.noMatches', {
   defaultMessage: 'This rule matches nothing yet.',
 });
@@ -507,18 +461,6 @@ export const KEEP_INDEFINITELY = i18n.translate('xpack.searchBoost.matches.keepI
 export const RETENTION_DISABLED = i18n.translate('xpack.searchBoost.matches.retentionDisabled', {
   defaultMessage: 'Disabled',
 });
-
-export const formatMatchesTotal = (
-  type: BoostProfileType,
-  count: number,
-  hiddenCount: number
-): string =>
-  hiddenCount > 0
-    ? i18n.translate('xpack.searchBoost.matches.totalWithHidden', {
-        defaultMessage: '{total} · {hiddenCount, number} hidden',
-        values: { total: formatTargetCount(type, count), hiddenCount },
-      })
-    : formatTargetCount(type, count);
 
 export const SETTINGS_TITLE = i18n.translate('xpack.searchBoost.details.settingsTitle', {
   defaultMessage: 'Settings',

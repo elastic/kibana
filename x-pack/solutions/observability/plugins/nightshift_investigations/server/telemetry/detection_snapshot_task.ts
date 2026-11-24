@@ -13,10 +13,7 @@ import {
   type TaskManagerSetupContract,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type {
-  NightshiftAutomationAttributes,
-  NightshiftTriggerRow,
-} from '../lib/automations/types';
+import type { NightshiftAutomationAttributes } from '../lib/automations/types';
 import {
   NIGHTSHIFT_DETECTION_SNAPSHOT_EVENT,
   type DetectionSnapshotEvent,
@@ -98,16 +95,6 @@ const countConnectorsByType = (
   return [...counts].map(([connector_type, count]) => ({ connector_type, count }));
 };
 
-const countAutomationsByTriggerKind = (automations: readonly SnapshotAutomation[]) => {
-  const withKind = (kind: NightshiftTriggerRow['kind']) =>
-    automations.filter(({ trigger }) => trigger.rows.some((row) => row.kind === kind)).length;
-  return {
-    automations_alert_trigger: withKind('alert'),
-    automations_schedule_trigger: withKind('schedule'),
-    automations_slack_trigger: withKind('slack'),
-  };
-};
-
 const countRules = async (
   spaceId: string,
   matchers: readonly RuleMatcher[],
@@ -147,6 +134,11 @@ const countRules = async (
   };
 };
 
+type TriggerKind = SnapshotAutomation['trigger']['rows'][number]['kind'];
+
+const countByTrigger = (automations: readonly SnapshotAutomation[], kind: TriggerKind): number =>
+  automations.filter(({ trigger }) => trigger.rows.some((row) => row.kind === kind)).length;
+
 const collectSpaceSnapshot = async (
   spaceId: string,
   sources: DetectionSnapshotSources,
@@ -180,14 +172,21 @@ const collectSpaceSnapshot = async (
     }),
   ]);
 
+  const enabledAutomations = automations.filter(({ isEnabled }) => isEnabled);
+
   return {
     space_id: spaceId,
     ...rules,
     automations_total: automations.length,
-    automations_enabled: automations.filter(({ isEnabled }) => isEnabled).length,
-    ...countAutomationsByTriggerKind(automations),
+    automations_enabled: enabledAutomations.length,
     connectors_configured: connectors.length,
     connectors_by_type: countConnectorsByType(connectors),
+    automations_alert_total: countByTrigger(automations, 'alert'),
+    automations_alert_enabled: countByTrigger(enabledAutomations, 'alert'),
+    automations_schedule_total: countByTrigger(automations, 'schedule'),
+    automations_schedule_enabled: countByTrigger(enabledAutomations, 'schedule'),
+    automations_slack_total: countByTrigger(automations, 'slack'),
+    automations_slack_enabled: countByTrigger(enabledAutomations, 'slack'),
     external_connectors_configured: connectorSources.length,
     external_connectors_active_24h: connectorSources.filter((source) =>
       activeConnectorSources.includes(source)
