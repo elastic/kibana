@@ -177,13 +177,9 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
         // 2022-05-10T21:39:56.832Z.
         const LATE_ALERT_UUID = 'late-alert-uuid';
         const LATE_ALERT_TIME = '2022-05-10T21:40:00.000Z';
-        // a second alert after the first one, and an alert in the long gap after the first process events
+        // a second alert after the first one
         const LATER_ALERT_UUID = 'later-alert-uuid';
         const LATER_ALERT_TIME = '2022-05-10T21:40:05.000Z';
-        const GAP_ALERT_UUID = 'gap-alert-uuid';
-        const GAP_ALERT_TIME = '2022-05-09T00:00:00.000Z';
-        // no process event of the mock session lies between this time and the next one at 2022-05-10T20:38Z
-        const GAP_CURSOR = '2022-05-08T13:46:40.000Z';
         const ALERTS_INDEX = '.internal.alerts-security.alerts-default';
         // the total of process events of the mock session since MOCK_SESSION_START_TIME
         const PROCESS_EVENTS_IN_SESSION = 418;
@@ -218,7 +214,6 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
           alertIds = [
             await clone(LATE_ALERT_UUID, LATE_ALERT_TIME),
             await clone(LATER_ALERT_UUID, LATER_ALERT_TIME),
-            await clone(GAP_ALERT_UUID, GAP_ALERT_TIME),
           ];
         });
 
@@ -307,19 +302,6 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
           });
           expect(response.status).to.be(200);
           expect(getAlertUuids(response.body.events)).to.contain(LATER_ALERT_UUID);
-        });
-
-        it('returns an alert between the cursor and the first process event of a forward page', async () => {
-          const response = await getTestRoute().query({
-            index: MOCK_INDEX,
-            sessionEntityId: MOCK_SESSION_ENTITY_ID,
-            sessionStartTime: MOCK_SESSION_START_TIME,
-            cursor: GAP_CURSOR,
-            forward: true,
-            pageSize: MOCK_PAGE_SIZE,
-          });
-          expect(response.status).to.be(200);
-          expect(getAlertUuids(response.body.events)).to.contain(GAP_ALERT_UUID);
         });
 
         it('keeps the alerts of a forward page when the cursor is not a date', async () => {

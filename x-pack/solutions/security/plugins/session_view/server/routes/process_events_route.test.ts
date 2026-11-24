@@ -116,12 +116,8 @@ describe('process_events_route.ts', () => {
 
       const firstTimestamp = mockEvents[0]['@timestamp'];
       const lastTimestamp = mockEvents[mockEvents.length - 1]['@timestamp'];
-      // the gap before the first event of a page stops 1 ms before it, as the page query covers that time
-      const beforeFirstTimestamp = new Date(
-        new Date(firstTimestamp ?? 0).getTime() - 1
-      ).toISOString();
 
-      const fetchAndGetAlertsRanges = async (
+      const fetchAndGetAlertsRange = async (
         cursor: string | undefined,
         forward: boolean,
         pageSize?: number
@@ -142,23 +138,11 @@ describe('process_events_route.ts', () => {
           pageSize
         );
 
-        return find.mock.calls.map(([{ query }]) => {
-          const { must } = (query as { bool: { must: RangeClause[] } }).bool;
+        expect(find).toHaveBeenCalledTimes(1);
+        const { query } = find.mock.calls[0][0];
+        const { must } = (query as { bool: { must: RangeClause[] } }).bool;
 
-          return must.find((clause) => clause.range)?.range?.[ALERT_ORIGINAL_TIME_PROPERTY];
-        });
-      };
-
-      const fetchAndGetAlertsRange = async (
-        cursor: string | undefined,
-        forward: boolean,
-        pageSize?: number
-      ) => {
-        const ranges = await fetchAndGetAlertsRanges(cursor, forward, pageSize);
-
-        expect(ranges).toHaveLength(1);
-
-        return ranges[0];
+        return must.find((clause) => clause.range)?.range?.[ALERT_ORIGINAL_TIME_PROPERTY];
       };
 
       it('leaves the range open on the last page of the session', async () => {
@@ -182,87 +166,6 @@ describe('process_events_route.ts', () => {
         const range = await fetchAndGetAlertsRange(cursor, false);
 
         expect(range).toEqual({ gte: firstTimestamp, lte: cursor });
-      });
-
-      it('searches the alerts between the cursor and the first event of a forward page on their own', async () => {
-        // a forward page holds the events from its cursor on, so the cursor is not after its first event. The
-        // gap has its own query, so its alerts cannot take the result slots of the alerts inside the page.
-        const cursor = '2021-11-23T15:25:00.000Z';
-        const ranges = await fetchAndGetAlertsRanges(cursor, true, mockEvents.length);
-
-        expect(ranges).toEqual([
-          { gte: cursor, lte: beforeFirstTimestamp },
-          { gte: firstTimestamp, lte: lastTimestamp },
-        ]);
-      });
-
-      it('leaves the range of the page open on a short forward page after the gap', async () => {
-        const cursor = '2021-11-23T15:25:00.000Z';
-        const ranges = await fetchAndGetAlertsRanges(cursor, true);
-
-        expect(ranges).toEqual([
-          { gte: cursor, lte: beforeFirstTimestamp },
-          { gte: firstTimestamp },
-        ]);
-      });
-
-      it('searches the gap when the process events store their time as epoch milliseconds', async () => {
-        const cursor = '2021-11-23T15:25:00.000Z';
-        const hits = mockEvents.map((event) => ({
-          _source: { ...event, '@timestamp': new Date(event['@timestamp'] ?? 0).getTime() },
-        }));
-        const client = elasticsearchServiceMock.createElasticsearchClient(
-          (async () => ({ hits: { total: { value: hits.length, relation: 'eq' }, hits } }))()
-        );
-        const alertsClient = getAlertsClientMockInstance();
-        const find = jest.spyOn(alertsClient, 'find');
-
-        await fetchEventsAndScopedAlerts(
-          client,
-          alertsClient,
-          TEST_PROCESS_INDEX,
-          'mockId',
-          TEST_SESSION_START_TIME,
-          cursor,
-          true,
-          mockEvents.length
-        );
-
-        expect(find).toHaveBeenCalledTimes(2);
-      });
-
-      it('starts the gap search and the page search together', async () => {
-        const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
-        const alertsClient = getAlertsClientMockInstance();
-        let pending = 0;
-        let maxPending = 0;
-        jest.spyOn(alertsClient, 'find').mockImplementation(async () => {
-          maxPending = Math.max(maxPending, ++pending);
-          await new Promise((resolve) => setImmediate(resolve));
-          pending--;
-
-          return { hits: { hits: [], total: { value: 0, relation: 'eq' } } } as never;
-        });
-
-        await fetchEventsAndScopedAlerts(
-          client,
-          alertsClient,
-          TEST_PROCESS_INDEX,
-          'mockId',
-          TEST_SESSION_START_TIME,
-          '2021-11-23T15:25:00.000Z',
-          true,
-          mockEvents.length
-        );
-
-        expect(maxPending).toBe(2);
-      });
-
-      it('does not search a gap when the first event is at the cursor', async () => {
-        // normal paging: the cursor is the time of the last event of the previous page
-        const range = await fetchAndGetAlertsRange(firstTimestamp, true, mockEvents.length);
-
-        expect(range).toEqual({ gte: firstTimestamp, lte: lastTimestamp });
       });
 
       it('searches alerts from the cursor when no process event follows it', async () => {
@@ -317,9 +220,10 @@ describe('process_events_route.ts', () => {
       // Elasticsearch reject the range, so the alerts of a valid page would all be dropped.
       describe('with a cursor that is not a date', () => {
         it('sends a date that Elasticsearch can parse for a date that only JavaScript parses', async () => {
-          const ranges = await fetchAndGetAlertsRanges('Tue, 23 Nov 2021 15:25:00 GMT', true);
+          // after the last mocked event, like the backward page of a cursor that is newer than its events
+          const range = await fetchAndGetAlertsRange('Tue, 23 Nov 2021 15:25:06 GMT', false);
 
-          expect(ranges[0]).toEqual({ gte: '2021-11-23T15:25:00.000Z', lte: beforeFirstTimestamp });
+          expect(range).toEqual({ gte: firstTimestamp, lte: '2021-11-23T15:25:06.000Z' });
         });
 
         it('ignores it on a short forward page', async () => {

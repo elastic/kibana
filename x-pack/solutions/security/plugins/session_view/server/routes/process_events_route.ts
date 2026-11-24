@@ -210,7 +210,6 @@ export const fetchEventsAndScopedAlerts = async (
 
     let range;
     let alertsRange;
-    let gapRange;
 
     if (firstEvent?.['@timestamp'] && lastEvent?.['@timestamp']) {
       range = [firstEvent['@timestamp'], lastEvent['@timestamp']];
@@ -226,35 +225,15 @@ export const fetchEventsAndScopedAlerts = async (
       } else {
         alertsRange = range;
       }
-
-      // A forward page starts at its cursor, so it also covers the alerts between its cursor and its first
-      // event. That gap only exists when Session View opens from an alert. It has its own query so that its
-      // alerts cannot take the result slots of the alerts inside the page.
-      if (forward && alertsCursor && cursorTime < new Date(range[0]).getTime()) {
-        // the page query covers the alerts at the time of the first event, so the gap stops 1 ms before it
-        gapRange = [alertsCursor, new Date(new Date(range[0]).getTime() - 1).toISOString()];
-      }
     }
 
-    // the two alert searches do not depend on each other, so they run together
-    const [gapAlertsBody, alertsBody] = await Promise.all([
-      gapRange
-        ? searchAlerts(
-            alertsClient,
-            sessionEntityId,
-            ALERTS_PER_PROCESS_EVENTS_PAGE,
-            undefined,
-            gapRange
-          )
-        : undefined,
-      searchAlerts(
-        alertsClient,
-        sessionEntityId,
-        ALERTS_PER_PROCESS_EVENTS_PAGE,
-        undefined,
-        alertsRange
-      ),
-    ]);
+    const alertsBody = await searchAlerts(
+      alertsClient,
+      sessionEntityId,
+      ALERTS_PER_PROCESS_EVENTS_PAGE,
+      undefined,
+      alertsRange
+    );
 
     const processesWithIOEvents = await searchProcessWithIOEvents(
       client,
@@ -265,7 +244,6 @@ export const fetchEventsAndScopedAlerts = async (
 
     events = [
       ...events,
-      ...(gapAlertsBody?.events ?? []).map(normalizeToSearchHit),
       ...alertsBody.events.map(normalizeToSearchHit),
       ...processesWithIOEvents.map(normalizeToSearchHit),
     ];
