@@ -21,6 +21,7 @@ describe('transformConnectorSpecResponse', () => {
         icon: 'logoElastic',
         docs_url: 'https://example.com/docs',
         is_technical_preview: true,
+        spec_version: '1.3',
       },
       schema: { type: 'object', properties: {} },
       is_testable: true,
@@ -35,6 +36,7 @@ describe('transformConnectorSpecResponse', () => {
       icon: 'logoElastic',
       docsUrl: 'https://example.com/docs',
       isTechnicalPreview: true,
+      specVersion: '1.3',
     });
     expect(result.schema).toEqual({ type: 'object', properties: {} });
     expect(result.isTestable).toBe(true);

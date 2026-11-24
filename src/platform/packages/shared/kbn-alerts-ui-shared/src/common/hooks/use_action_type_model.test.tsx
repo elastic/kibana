@@ -11,7 +11,7 @@ import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { docLinksServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { actionTypeRegistryMock } from '../test_utils/action_type_registry.mock';
@@ -119,6 +119,49 @@ describe('useActionTypeModel', () => {
 
     // Should not call HTTP get for registered connectors
     expect(mockHttp.get).not.toHaveBeenCalled();
+  });
+
+  it('keeps versioned and legacy specs in separate cache entries', async () => {
+    const http = httpServiceMock.createStartContract();
+    actionTypeRegistry.has.mockReturnValue(false);
+    http.get
+      .mockResolvedValueOnce({
+        ...mockSpecResponse,
+        metadata: { ...mockSpecResponse.metadata, spec_version: '1.3' },
+      })
+      .mockResolvedValueOnce(mockSpecResponse);
+    const initialProps: { specVersion?: string } = { specVersion: '1' };
+    const { result, rerender } = renderHook(
+      ({ specVersion }: { specVersion?: string }) =>
+        useActionTypeModel({
+          actionTypeRegistry,
+          actionTypeId: 'spec-connector',
+          http,
+          docLinks: mockDocLinks,
+          specVersion,
+        }),
+      { wrapper: createWrapper(), initialProps }
+    );
+    await waitFor(() => expect(result.current.actionTypeModel?.specVersion).toBe('1.3'));
+    expect(http.get).toHaveBeenLastCalledWith(
+      '/internal/actions/connector_types/spec-connector/spec',
+      {
+        signal: expect.any(AbortSignal),
+        query: { spec_version: '1' },
+      }
+    );
+    rerender({ specVersion: undefined });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(http.get).toHaveBeenLastCalledWith(
+      '/internal/actions/connector_types/spec-connector/spec',
+      {
+        signal: expect.any(AbortSignal),
+      }
+    );
+    expect(result.current.actionTypeModel?.specVersion).toBeUndefined();
+    rerender({ specVersion: '1' });
+    await waitFor(() => expect(result.current.actionTypeModel?.specVersion).toBe('1.3'));
+    expect(http.get).toHaveBeenCalledTimes(2);
   });
 
   it('fetches spec from API for spec-based connectors not in registry', async () => {

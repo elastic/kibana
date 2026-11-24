@@ -50,11 +50,12 @@ export function shouldHideWorkflowsOnlyConnector(
 export async function fetchConnectorSpec(
   http: HttpSetup,
   connectorTypeId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  specVersion?: string
 ): Promise<ConnectorSpecResponse> {
   const wire = await http.get<ConnectorSpecWireResponse>(
     `/internal/actions/connector_types/${encodeURIComponent(connectorTypeId)}/spec`,
-    { signal }
+    { signal, ...(specVersion !== undefined ? { query: { spec_version: specVersion } } : {}) }
   );
   return transformConnectorSpecResponse(wire);
 }
@@ -124,6 +125,7 @@ export function transformSpecToActionTypeModel(
     subtype: undefined,
     isTestable: spec.isTestable,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
+    ...(spec.metadata.specVersion !== undefined ? { specVersion: spec.metadata.specVersion } : {}),
     docsUrl: getDocsUrlFromSpec(spec, docLinks),
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
