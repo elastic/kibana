@@ -123,14 +123,14 @@ describe('testLimits', () => {
   });
 
   describe('unsatisfiedBy', () => {
-    it('reports every only limit as unsatisfied without attributes', () => {
+    it('leaves out every only tag when the run has no attributes', () => {
       expect(testLimits.unsatisfiedBy([]).map((limit) => limit.playwrightTag)).toEqual([
         '@limit/only-fips',
         '@limit/only-upgradeAssistant',
       ]);
     });
 
-    it('reports except-fips as unsatisfied with the fips attribute', () => {
+    it('leaves out except-fips and only-upgradeAssistant when the run has fips', () => {
       expect(testLimits.unsatisfiedBy(['fips']).map((limit) => limit.playwrightTag)).toEqual([
         '@limit/only-upgradeAssistant',
         '@limit/except-fips',
