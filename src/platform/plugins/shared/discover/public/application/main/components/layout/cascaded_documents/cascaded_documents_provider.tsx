@@ -37,6 +37,10 @@ export interface CascadedDocumentsContext
   cascadedLeafDataSource: DataSource | undefined;
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
+  /**
+   * True when group rows can be compared with the default document-count histogram.
+   */
+  histogramComparisonEnabled: boolean;
   timeRange: TimeRange | undefined;
   esqlApproximation: boolean;
   renderViewModeToggle: RenderViewModeToggle | undefined;

@@ -676,6 +676,52 @@ describe('cascaded documents helpers utils', () => {
             );
           });
 
+          it('escapes raw punctuation in the ordered RLIKE filter for a text field', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                    FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(message)
+                  `,
+            };
+
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath: ['CATEGORIZE(message)'],
+              nodePathMap: {
+                'CATEGORIZE(message)': '.*?GET.+?HTTP/1.1.+?Chrome/11.0.696.50.*?',
+              },
+            });
+
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logs | WHERE MATCH(message, "GET HTTP/1.1 Chrome/11.0.696.50", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"}) | WHERE TO_LOWER(message) RLIKE ".*get.+http/1\\\\.1.+chrome/11\\\\.0\\\\.696\\\\.50.*"'
+            );
+          });
+
+          it('adds an ordered RLIKE filter for a CATEGORIZE pattern and keeps keyword fields on RLIKE only', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                    FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(message.keyword)
+                  `,
+            };
+
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath: ['CATEGORIZE(message.keyword)'],
+              nodePathMap: {
+                'CATEGORIZE(message.keyword)': '.*?Failed login for .+? from .+?',
+              },
+            });
+
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logs | WHERE MATCH(message, "Failed login for from", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"}) | WHERE TO_LOWER(`message.keyword`) RLIKE ".*failed login for .+ from .+"'
+            );
+          });
+
           it('should construct a valid cascade query for a named categorize operation', () => {
             const editorQuery: AggregateQuery = {
               esql: `

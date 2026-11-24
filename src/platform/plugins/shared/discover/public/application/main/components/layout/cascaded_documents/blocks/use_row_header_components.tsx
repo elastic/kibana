@@ -29,6 +29,7 @@ import {
   EuiWrappingPopover,
   copyToClipboard,
   useEuiTheme,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { NumberBadge, type DataCascadeRowProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -388,16 +389,38 @@ const NO_VALUE_PLACEHOLDER = i18n.translate('discover.dataCascade.row.action.noV
   defaultMessage: '(blank)',
 });
 
+const compareWithTotalLabel = i18n.translate('discover.dataCascade.row.action.compareWithTotal', {
+  defaultMessage: 'Compare with total',
+});
+
+const stopComparingWithTotalLabel = i18n.translate(
+  'discover.dataCascade.row.action.stopComparingWithTotal',
+  {
+    defaultMessage: 'Stop comparing with total',
+  }
+);
+
 const getArrayBadgeDisplayValue = (value: string | number) =>
   typeof value === 'number' ? value : value || NO_VALUE_PLACEHOLDER;
+
+/** Lets a group row toggle its comparison with the main histogram. */
+export interface GroupHistogramComparison {
+  isSelected: (rowData: ESQLDataGroupNode) => boolean;
+  toggle: (rowData: ESQLDataGroupNode) => void;
+}
+
+const isComparableGroup = (rowData: ESQLDataGroupNode) =>
+  Boolean(rowData.groupValue) && rowData.groupValue !== GROUP_NOT_SET_VALUE;
 
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'],
-  columnTypes: Map<string, 'number' | 'array'>
+  columnTypes: Map<string, 'number' | 'array'>,
+  histogramComparison?: GroupHistogramComparison
 ) {
   const { euiTheme } = useEuiTheme();
+  const isMobile = useIsWithinMaxBreakpoint('m');
   const services = useDiscoverServices();
   const aggregateColumnIdentifiers = useMemo(() => {
     return new Set(editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier));
@@ -461,7 +484,11 @@ export function useEsqlDataCascadeRowHeaderComponents(
             return (
               <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false} css={{ width: '100px', minHeight: euiTheme.size.l }}>
-                  <SparklineRenderer charts={services.charts} values={aggregatedValue} />
+                  <SparklineRenderer
+                    charts={services.charts}
+                    isSelected={histogramComparison?.isSelected(rowData) ?? false}
+                    values={aggregatedValue}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             );
@@ -509,6 +536,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
       columnTypes,
       editorQueryMeta,
       euiTheme.size.l,
+      histogramComparison,
       selectedColumns,
       services.charts,
     ]
@@ -520,17 +548,31 @@ export function useEsqlDataCascadeRowHeaderComponents(
     ({ rowData, nodePath }) => {
       const groupId = nodePath[nodePath.length - 1];
       const groupValue = rowData.groupValue;
+      const contextAction = {
+        iconType: 'boxesVertical',
+        'aria-label': `${rowData.id}-cascade-row-actions`,
+        'data-test-subj': `${rowData.id}-dscCascadeRowContextActionButton`,
+        onClick: togglePopover?.bind({ groupId, groupValue }),
+      };
+
+      // The cascade moves every action into an overflow menu on mobile, where the unlabeled row menu can't open.
+      if (!histogramComparison || isMobile || !isComparableGroup(rowData)) {
+        return [contextAction];
+      }
+
+      const selected = histogramComparison.isSelected(rowData);
 
       return [
         {
-          iconType: 'boxesVertical',
-          'aria-label': `${rowData.id}-cascade-row-actions`,
-          'data-test-subj': `${rowData.id}-dscCascadeRowContextActionButton`,
-          onClick: togglePopover?.bind({ groupId, groupValue }),
+          iconType: selected ? 'eyeSlash' : 'eye',
+          'aria-label': selected ? stopComparingWithTotalLabel : compareWithTotalLabel,
+          'data-test-subj': `${rowData.id}-dscCascadeRowCompareWithTotalButton`,
+          onClick: () => histogramComparison.toggle(rowData),
         },
+        contextAction,
       ];
     },
-    [togglePopover]
+    [histogramComparison, isMobile, togglePopover]
   );
 
   return useMemo(

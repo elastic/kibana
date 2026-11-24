@@ -16,6 +16,7 @@ import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverMainContentProps } from './discover_main_content';
 import { DiscoverMainContent } from './discover_main_content';
+import { DiscoverDocuments } from './discover_documents';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDataSource } from '../../../../../common/data_sources';
@@ -66,11 +67,13 @@ const renderComponent = async ({
   hideChart = false,
   isEsqlMode = false,
   isChartAvailable,
+  isHistogramComparisonAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
 }: {
   hideChart?: boolean;
   isEsqlMode?: boolean;
   isChartAvailable?: boolean;
+  isHistogramComparisonAvailable?: boolean;
   viewMode?: VIEW_MODE;
 } = {}) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
@@ -126,6 +129,7 @@ const renderComponent = async ({
     viewMode,
     onAddFilter: jest.fn(),
     isChartAvailable,
+    isHistogramComparisonAvailable,
   };
 
   renderWithKibanaRenderContext(
@@ -203,9 +207,13 @@ describe('Discover main content component', () => {
 
   describe('Document view', () => {
     it('should show DiscoverDocuments when VIEW_MODE is DOCUMENT_LEVEL', async () => {
-      await renderComponent();
+      await renderComponent({ isChartAvailable: true, isHistogramComparisonAvailable: false });
 
       expect(screen.getByTestId('discoverDocumentsMock')).toBeVisible();
+      expect(jest.mocked(DiscoverDocuments).mock.lastCall?.[0].isChartAvailable).toBe(true);
+      expect(jest.mocked(DiscoverDocuments).mock.lastCall?.[0].isHistogramComparisonAvailable).toBe(
+        false
+      );
       expect(screen.queryByTestId('patternAnalysisTabMock')).not.toBeInTheDocument();
       expect(screen.queryByTestId('fieldStatisticsTabMock')).not.toBeInTheDocument();
     });
