@@ -312,6 +312,20 @@ describe('test fetchAll', () => {
       expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
     });
 
+    test('should set main$ to ERROR if the displayed chart was hidden in the meantime', async () => {
+      const fetchPromise = fetchAllEsql();
+      subjects.main$.next({ fetchStatus: FetchStatus.PARTIAL });
+      deps.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: deps.getCurrentTab().id,
+          appState: { hideChart: true },
+        })
+      );
+      await fetchPromise;
+
+      expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+    });
+
     test('should not set main$ to ERROR if a chart is already displayed', async () => {
       const fetchPromise = fetchAllEsql();
       // the chart finished loading before the documents request failed

@@ -148,13 +148,8 @@ export function fetchAll(
       timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
     });
 
-    // TEMP: slow documents, remove
-    const slowResponse = response.finally(
-      () => new Promise((resolve) => setTimeout(resolve, 10000))
-    );
-
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
-    slowResponse
+    response
       .then(
         ({
           records,
@@ -259,7 +254,9 @@ export function fetchAll(
         // A chart of this fetch is already displayed (main$ is PARTIAL): keep it, the error is
         // shown in place of the documents. A chart loading later replaces the full page error.
         const isChartDisplayed =
-          isEsqlQuery && dataSubjects.main$.getValue().fetchStatus === FetchStatus.PARTIAL;
+          isEsqlQuery &&
+          dataSubjects.main$.getValue().fetchStatus === FetchStatus.PARTIAL &&
+          !getCurrentTab().appState.hideChart;
 
         if (!isChartDisplayed) {
           sendErrorMsg(dataSubjects.main$, e);
