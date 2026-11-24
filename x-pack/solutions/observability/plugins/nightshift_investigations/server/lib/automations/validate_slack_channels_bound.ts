@@ -7,30 +7,46 @@
 
 import { badRequest, serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/core/server';
 import type { SlackChannelBindingChecker } from '../../types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from './generate_workflow_yaml';
 import type { NightshiftAutomationAttributes } from './types';
+
+const SLACK_CHANNEL_ID_PATTERN = /^[CG][A-Z0-9]+$/;
 
 export const validateSlackChannelsBound = async ({
   automation,
   request,
   checker,
+  logger,
 }: {
   automation: Pick<NightshiftAutomationAttributes, 'completions'>;
   request: KibanaRequest;
   checker: SlackChannelBindingChecker | undefined;
+  logger: Logger;
 }): Promise<void> => {
-  if (!checker) return;
   const channels = new Set<string>();
   for (const { action, targetMode, destination, connectorId } of automation.completions) {
     const isElasticApp =
       (connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID) === ELASTIC_APPS_SLACK_CONNECTOR_ID;
-    if (action === 'post_to_slack' && targetMode === 'channel' && destination && isElasticApp) {
-      channels.add(destination.trim());
+    const channel = destination?.trim();
+    if (
+      action === 'post_to_slack' &&
+      targetMode === 'channel' &&
+      isElasticApp &&
+      channel &&
+      SLACK_CHANNEL_ID_PATTERN.test(channel)
+    ) {
+      channels.add(channel);
     }
   }
+  if (channels.size === 0) return;
+  if (!checker) {
+    throw badRequest('The Elastic Slack App is not available on this deployment.');
+  }
   for (const channel of channels) {
-    const isBound = await checker(request, channel).catch(() => {
+    const isBound = await checker(request, channel).catch((error: Error) => {
+      logger.warn(`Could not check the binding of Slack channel ${channel}: ${error.message}`);
       throw serverUnavailable(`Could not check that Slack channel ${channel} is connected.`);
     });
     if (!isBound) {

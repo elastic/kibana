@@ -10,6 +10,7 @@ import {
   investigationNotificationDestinationSchema,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
 } from '../../../common';
+import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from './generate_workflow_yaml';
 
 // Keep operator guidance bounded independently of trigger evidence in the final agent message.
 export const MAX_PROMPT_TEMPLATE_LENGTH = MAX_AUTOMATION_INSTRUCTIONS_LENGTH;
@@ -53,12 +54,14 @@ export const savedAutomationCompletionSchema = lazySchema(() =>
     if (
       completion.action === 'post_to_slack' &&
       completion.targetMode === 'channel' &&
+      (completion.connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID) ===
+        ELASTIC_APPS_SLACK_CONNECTOR_ID &&
       SLACK_USER_OR_DM_ID_PATTERN.test(completion.destination?.trim() ?? '')
     ) {
       context.addIssue({
         code: 'custom',
         path: ['destination'],
-        message: 'Slack destinations must be a channel, not a user',
+        message: 'The Elastic Slack App can only post to channels, not users',
       });
     }
   })

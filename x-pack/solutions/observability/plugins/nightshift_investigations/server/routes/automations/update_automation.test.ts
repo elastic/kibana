@@ -435,3 +435,18 @@ it('rejects a replacement channel that is not bound before any write', async () 
   expect(updateWorkflow).not.toHaveBeenCalled();
   expect(soClient.update).not.toHaveBeenCalled();
 });
+
+it('does not re-check the saved Slack destination when the update leaves it alone', async () => {
+  checkChannelBound.mockResolvedValue(false);
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: 'C012ABCDEF' }],
+    },
+  });
+
+  await call({ name: 'Renamed' });
+
+  expect(checkChannelBound).not.toHaveBeenCalled();
+  expect(soClient.update).toHaveBeenCalled();
+});

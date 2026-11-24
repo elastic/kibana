@@ -12,6 +12,7 @@ import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import {
+  automationCompletionSchema,
   savedAutomationCompletionSchema,
   promptTemplateSchema,
 } from '../../lib/automations/schemas';
@@ -80,6 +81,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     isUniversalAlertingAvailable,
     getSlackChannelBindingChecker,
     getInvestigatorServiceAccountService,
+    logger,
     context,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
@@ -117,19 +119,19 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     };
 
     if (!pauseOnly) {
-      const completions = z
-        .array(savedAutomationCompletionSchema)
-        .max(10)
-        .safeParse(merged.completions);
+      const completions = z.array(automationCompletionSchema).max(10).safeParse(merged.completions);
       if (!completions.success) throw badRequest(completions.error.message);
       merged.completions = completions.data;
       validateScheduledAutomation(merged);
-      validateThreadCompletion(merged);
-      await validateSlackChannelsBound({
-        automation: merged,
-        request,
-        checker: getSlackChannelBindingChecker(),
-      });
+      if (body.completions !== undefined || body.trigger !== undefined) {
+        validateThreadCompletion(merged);
+        await validateSlackChannelsBound({
+          automation: merged,
+          request,
+          checker: getSlackChannelBindingChecker(),
+          logger,
+        });
+      }
     }
 
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
