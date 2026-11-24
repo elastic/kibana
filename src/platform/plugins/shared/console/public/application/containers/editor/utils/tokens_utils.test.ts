@@ -196,6 +196,10 @@ describe('tokens_utils', () => {
         ]);
       });
 
+      it('keeps the property value context after a comment before the colon', () => {
+        expect(parseBody(`{"value" ${comment}\n  : "`)).toEqual(['{', 'value']);
+      });
+
       it('skips consecutive comments separated by indentation', () => {
         expect(
           parseBody(`{${comment}\n  // another comment\n  /* last comment */\n  "description": "`)

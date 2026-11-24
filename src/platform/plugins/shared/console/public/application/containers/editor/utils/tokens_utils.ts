@@ -309,8 +309,8 @@ export const parseBody = (value: string): string[] => {
         if (isDoubleQuote(char)) {
           // property name: parse the string and add to tokens
           const propertyName = parsePropertyName();
-          // allow whitespace
-          skipWhitespace();
+          // allow whitespace and comments
+          skipWhitespaceAndComments();
           // expecting a colon, otherwise the parser fails
           if (!isColon(char)) {
             throw new Error('Not able to parse');
