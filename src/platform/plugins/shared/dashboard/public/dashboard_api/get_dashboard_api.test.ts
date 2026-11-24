@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import type { DashboardChangeSource } from '../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import { coreServices } from '../services/kibana_services';
@@ -52,6 +54,24 @@ describe('initializeSettingsManager', () => {
       });
     });
   });
+});
+
+describe('pause fetch', () => {
+  test.each([true, false])(
+    'does not pause fetching while awaiting required filters when auto-apply is %s',
+    async (autoApplyFilters) => {
+      const { api } = getDashboardApi({
+        incomingEmbeddables: [],
+        initialState: {
+          ...DEFAULT_DASHBOARD_STATE,
+          options: { ...DEFAULT_DASHBOARD_STATE.options, auto_apply_filters: autoApplyFilters },
+        },
+        initiallyAwaitingFilters: true,
+      });
+      // required controls can only be given a selection once they have fetched their options
+      expect(await firstValueFrom(api.isFetchPaused$)).toBe(false);
+    }
+  );
 });
 
 describe('dashboard_saved telemetry', () => {

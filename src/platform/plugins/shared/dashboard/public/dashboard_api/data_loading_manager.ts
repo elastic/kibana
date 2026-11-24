@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, first, map } from 'rxjs';
 import type { PublishesDataLoading, PublishingSubject } from '@kbn/presentation-publishing';
 import {
   apiCanCancelRequests,
@@ -18,7 +19,9 @@ import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 
 export function initializeDataLoadingManager(
-  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
+  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>,
+  /** The ids of the children that are rendered; the API of a child lingers in `children$` after it unmounts */
+  visibleChildren$: Observable<string[]>
 ) {
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
@@ -26,7 +29,14 @@ export function initializeDataLoadingManager(
     PublishesDataLoading,
     boolean | undefined
   >(
-    { children$ },
+    {
+      // a child that unmounts mid-fetch never reports that it is done, so only rendered children count
+      children$: combineLatest([children$, visibleChildren$]).pipe(
+        map(([children, visibleChildren]) =>
+          visibleChildren.flatMap((uuid) => (children[uuid] ? [children[uuid]] : []))
+        )
+      ),
+    },
     'dataLoading$',
     apiPublishesDataLoading,
     undefined,

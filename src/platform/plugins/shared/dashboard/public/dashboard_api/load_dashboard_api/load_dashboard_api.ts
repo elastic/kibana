@@ -118,6 +118,7 @@ export async function loadDashboardApi({
     isAccessControlEnabled,
     changedBy: [...(creationOptions?.changedBy ?? []), ...parseChangeSources(restoredChangedBy)],
     viewMode,
+    initiallyAwaitingFilters,
   });
   const userActivityService = getDashboardUserActivityService(api);
 
@@ -154,7 +155,6 @@ export async function loadDashboardApi({
       telemetrySubscription.unsubscribe();
     },
     internalApi,
-    initiallyAwaitingFilters,
     useControlsIntegration: creationOptions?.useControlsIntegration,
   };
 }

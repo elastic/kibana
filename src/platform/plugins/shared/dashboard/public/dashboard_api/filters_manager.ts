@@ -12,13 +12,16 @@ import {
   BehaviorSubject,
   combineLatest,
   combineLatestWith,
+  debounce,
   debounceTime,
   distinctUntilChanged,
   filter,
   first,
   map,
+  of,
   skip,
   switchMap,
+  timer,
   type Subject,
 } from 'rxjs';
 
@@ -50,6 +53,7 @@ export const initializeFiltersManager = (
     distinctUntilChanged(deepEqual)
   );
 
+  const childrenAwaitingRequiredFilters$ = new BehaviorSubject<boolean>(false);
   const requiredFiltersSubscription = combineCompatibleChildrenApis<
     PublishesAwaitingRequiredFilters,
     boolean
@@ -69,12 +73,11 @@ export const initializeFiltersManager = (
       return values.some((awaitingRequired) => awaitingRequired);
     }
   ).subscribe((a) => {
-    console.log('[DBG] awaitingRequiredFilters$', a);
-    awaitingRequiredFilters$.next(a);
+    childrenAwaitingRequiredFilters$.next(a);
   });
 
   /** `true` while any child is still computing its filters */
-  const childFiltersLoading$ = combineCompatibleChildrenApis<AppliesFilters, boolean>(
+  const anyChildFiltersLoading$ = combineCompatibleChildrenApis<AppliesFilters, boolean>(
     { children$: layoutManager.api.children$ },
     'filtersLoading$',
     apiAppliesFilters,
@@ -84,11 +87,8 @@ export const initializeFiltersManager = (
     }
   );
 
-  /** push filters to `unpublishedChildFilters$` once children are done computing their filters */
-  const unpublishedFiltersSubscription = combineCompatibleChildrenApis<
-    AppliesFilters,
-    Filter[] | undefined
-  >(
+  /** the filters that the children are currently outputting, regardless of whether they are published */
+  const childFilters$ = combineCompatibleChildrenApis<AppliesFilters, Filter[] | undefined>(
     { children$: layoutManager.api.children$ },
     'appliedFilters$',
     apiAppliesFilters,
@@ -99,10 +99,21 @@ export const initializeFiltersManager = (
       ) as Filter[][];
       return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : undefined;
     }
-  )
+  ).pipe(distinctUntilChanged(deepEqual));
+
+  /** children that are awaiting required filters count as loading, so that the grid stays hidden */
+  const childFiltersLoading$ = combineLatest([
+    anyChildFiltersLoading$,
+    awaitingRequiredFilters$,
+  ]).pipe(
+    map(([loading, awaiting]) => loading || awaiting),
+    distinctUntilChanged()
+  );
+
+  /** push filters to `unpublishedChildFilters$` once children are done computing their filters */
+  const unpublishedFiltersSubscription = childFilters$
     .pipe(
-      distinctUntilChanged(deepEqual),
-      combineLatestWith(childFiltersLoading$),
+      combineLatestWith(anyChildFiltersLoading$),
       skip(1),
       debounceTime(0),
       filter(([, loading]) => !loading)
@@ -117,6 +128,7 @@ export const initializeFiltersManager = (
     if (!deepEqual(published, unpublished)) {
       publishedChildFilters$.next(unpublished);
     }
+    awaitingRequiredFilters$.next(childrenAwaitingRequiredFilters$.getValue());
   };
 
   /** `true` while the unpublished child filters differ from the published ones */
@@ -179,6 +191,9 @@ export const initializeFiltersManager = (
       childFiltersLoading$,
       publishFilters,
       awaitingRequiredFilters$,
+    },
+    internalApi: {
+      anyChildFiltersLoading$,
     },
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();

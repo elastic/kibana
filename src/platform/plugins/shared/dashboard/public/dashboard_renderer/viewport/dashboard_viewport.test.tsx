@@ -18,7 +18,6 @@ import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
 } from '@kbn/controls-constants';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
@@ -56,11 +55,9 @@ const pinnedControls = [
 const renderDashboardViewport = async ({
   internalApiOverrides,
   pinnedPanels,
-  initiallyAwaitingFilters,
 }: {
   internalApiOverrides?: Partial<DashboardInternalApi>;
   pinnedPanels?: DashboardState['pinned_panels'];
-  initiallyAwaitingFilters?: boolean;
 } = {}) => {
   const panels = getMockPanels();
   const { api: baseApi, internalApi } = buildMockDashboardApi({
@@ -81,7 +78,7 @@ const renderDashboardViewport = async ({
             ...internalApiOverrides,
           }}
         >
-          <DashboardViewport initiallyAwaitingFilters={initiallyAwaitingFilters} />
+          <DashboardViewport />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     </EuiThemeProvider>
@@ -159,60 +156,16 @@ describe('DashboardViewport', () => {
       });
     });
 
-    test('uses the initial value until every pinned control has mounted', async () => {
-      const { component, awaitingRequiredFilters$, dashboardApi } = await renderDashboardViewport({
+    test('shows the awaiting screen from the api value even before any pinned control has mounted', async () => {
+      const { component, awaitingRequiredFilters$ } = await renderDashboardViewport({
         pinnedPanels: pinnedControls,
-        initiallyAwaitingFilters: true,
       });
-      // control not mounted yet: the (false) api value is ignored
+      await waitFor(() => component.getByTestId('mockDashboardGrid'));
+
+      // the api value is seeded before any control mounts, so the viewport follows it as-is
+      act(() => awaitingRequiredFilters$.next(true));
       await waitFor(() => component.getByTestId('mockAwaitingFiltersScreen'));
       expect(component.queryByTestId('mockDashboardGrid')).toBeNull();
-
-      // once mounted, the control's published value takes over
-      act(() => {
-        dashboardApi.registerChildApi({ uuid: 'control1' } as DefaultEmbeddableApi);
-      });
-      await waitFor(() => component.getByTestId('mockDashboardGrid'));
-
-      act(() => awaitingRequiredFilters$.next(true));
-      await waitFor(() => component.getByTestId('mockAwaitingFiltersScreen'));
-    });
-
-    test('does not revert to the initial value when a pinned control is added after the first mount', async () => {
-      const { component, dashboardApi, awaitingRequiredFilters$ } = await renderDashboardViewport({
-        pinnedPanels: pinnedControls,
-        initiallyAwaitingFilters: true,
-      });
-      await waitFor(() => component.getByTestId('mockAwaitingFiltersScreen'));
-      act(() => {
-        dashboardApi.registerChildApi({ uuid: 'control1' } as DefaultEmbeddableApi);
-      });
-      await waitFor(() => component.getByTestId('mockDashboardGrid'));
-
-      // a new pinned control is in the layout but has not registered its api yet
-      act(() => {
-        const { layout$ } = dashboardApi;
-        const { pinnedPanels } = layout$.value;
-        layout$.next({
-          ...layout$.value,
-          pinnedPanels: { ...pinnedPanels, control2: { ...pinnedPanels.control1, order: 1 } },
-        });
-      });
-      await waitFor(() => expect(component.getByTestId('mockDashboardGrid')).toBeInTheDocument());
-      expect(component.queryByTestId('mockAwaitingFiltersScreen')).toBeNull();
-
-      // the live value still takes over once it is mounted
-      act(() => awaitingRequiredFilters$.next(true));
-      await waitFor(() => component.getByTestId('mockAwaitingFiltersScreen'));
-    });
-
-    test('does not show the awaiting screen when not initially awaiting and controls are unmounted', async () => {
-      const { component } = await renderDashboardViewport({
-        pinnedPanels: pinnedControls,
-        initiallyAwaitingFilters: false,
-      });
-      await waitFor(() => component.getByTestId('mockDashboardGrid'));
-      expect(component.queryByTestId('mockAwaitingFiltersScreen')).toBeNull();
     });
   });
 });

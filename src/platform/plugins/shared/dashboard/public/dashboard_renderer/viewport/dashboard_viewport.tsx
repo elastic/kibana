@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
@@ -21,17 +21,11 @@ import { SelectedPanelsToolbar } from '../selected_panels_toolbar';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 import { AwaitingFiltersScreen } from './empty_screen/awaiting_filters_screen';
 
-export const DashboardViewport = ({
-  initiallyAwaitingFilters = false,
-}: {
-  /** Whether required controls are expected to await filters, known before any control is mounted */
-  initiallyAwaitingFilters?: boolean;
-}) => {
+export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const [
-    awaitingRequiredFilters,
-    children,
+    awaitingRequired,
     dashboardTitle,
     description,
     expandedPanelId,
@@ -41,7 +35,6 @@ export const DashboardViewport = ({
     fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.awaitingRequiredFilters$,
-    dashboardApi.children$,
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
@@ -50,18 +43,6 @@ export const DashboardViewport = ({
     dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
   );
-  // controls can only report that they are awaiting filters once mounted, so until then use the initial value
-  const allPinnedMounted = Object.keys(layout.pinnedPanels).every((uuid) =>
-    Boolean(children[uuid])
-  );
-  // the initial value only covers the first load; a pinned control added later must not revert to it
-  const hasMountedAllPinned = useRef(false);
-  if (allPinnedMounted) hasMountedAllPinned.current = true;
-  const awaitingRequired =
-    hasMountedAllPinned.current || allPinnedMounted
-      ? awaitingRequiredFilters
-      : initiallyAwaitingFilters;
-
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);

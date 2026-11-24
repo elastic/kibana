@@ -67,6 +67,7 @@ export function getDashboardApi({
   isAccessControlEnabled,
   changedBy,
   viewMode,
+  initiallyAwaitingFilters = false,
 }: {
   creationOptions?: DashboardCreationOptions;
   panelFlyoutType?: EuiFlyoutProps['type'];
@@ -78,6 +79,8 @@ export function getDashboardApi({
   isAccessControlEnabled?: boolean;
   changedBy?: readonly DashboardChangeSource[];
   viewMode?: ViewMode;
+  /** Whether required controls are expected to await filters, resolved before any control is mounted */
+  initiallyAwaitingFilters?: boolean;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
@@ -114,7 +117,7 @@ export function getDashboardApi({
   );
 
   // written by the filters manager, read by the layout manager to know which children are going to be rendered
-  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(false);
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(initiallyAwaitingFilters);
 
   const layoutManager = initializeLayoutManager(
     viewModeManager,
@@ -125,7 +128,10 @@ export function getDashboardApi({
   );
   childrenSubject$.next(layoutManager.api.children$);
 
-  const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
+  const dataLoadingManager = initializeDataLoadingManager(
+    layoutManager.api.children$,
+    layoutManager.internalApi.visibleChildren$
+  );
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
   const settingsManager = initializeSettingsManager(initialState);
 
@@ -267,7 +273,10 @@ export function getDashboardApi({
     layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
   }
 
-  const pauseFetchManager = initializePauseFetchManager(filtersManager.api.childFiltersLoading$);
+  // required controls must fetch their options while the dashboard awaits their filters, so only pause on filters that are loading
+  const pauseFetchManager = initializePauseFetchManager(
+    filtersManager.internalApi.anyChildFiltersLoading$
+  );
 
   const canCancel$ = new BehaviorSubject<boolean>(false);
   const canCancelSubscription = combineLatest([

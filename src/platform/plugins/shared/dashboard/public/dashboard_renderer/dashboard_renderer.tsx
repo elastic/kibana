@@ -98,7 +98,6 @@ export function DashboardRenderer({
     | {
         api: DashboardApi;
         internalApi: DashboardInternalApi;
-        initiallyAwaitingFilters: boolean;
         showControlGroup: boolean;
       }
     | undefined
@@ -156,7 +155,6 @@ export function DashboardRenderer({
         setDashboard({
           api: results.api,
           internalApi: results.internalApi,
-          initiallyAwaitingFilters: results.initiallyAwaitingFilters,
           showControlGroup: results.useControlsIntegration ?? true,
         });
         const unpublishAppClientApi = publishAsAppClientApi
@@ -242,7 +240,7 @@ export function DashboardRenderer({
             <DashboardContext.Provider value={dashboard.api}>
               <DashboardInternalContext.Provider value={dashboard.internalApi}>
                 {dashboard.showControlGroup && <DashboardControlsRenderer />}
-                <DashboardViewport initiallyAwaitingFilters={dashboard.initiallyAwaitingFilters} />
+                <DashboardViewport />
               </DashboardInternalContext.Provider>
             </DashboardContext.Provider>
           </KibanaContextProvider>
