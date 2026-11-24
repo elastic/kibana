@@ -27,6 +27,7 @@ const buildService = (
   const state = {
     setStepIo: jest.fn(),
     getStepIo: jest.fn().mockReturnValue(undefined),
+    countLiveOutputs: jest.fn().mockReturnValue(0),
   } as unknown as jest.Mocked<WorkflowExecutionState>;
   return {
     service: new StepIoService({ stepRepository, state, maxBytes, maxEntryBytes }),
@@ -69,6 +70,33 @@ describe('StepIoService cache budget', () => {
     stepRepository.getStepExecutionsByIds.mockClear();
     await readOutputs(service, ['a']);
 
+    expect(stepRepository.getStepExecutionsByIds).toHaveBeenCalledWith(['a'], ['id', 'output']);
+  });
+
+  it('does not cache a fresh write that exceeds minPayloadSize but fits the budget', async () => {
+    const output = { v: 'a'.repeat(30) } as JsonValue;
+    const { service, stepRepository } = buildService(10_000, [{ id: 'a', output }], 9);
+
+    service.write({
+      executionId: 'a',
+      contextId: 'a',
+      type: 'output',
+      value: output,
+      sizeBytes: 50,
+    });
+
+    expect(service.getResidentOutputStats()).toEqual({
+      liveOutputs: 0,
+      cacheEntries: 0,
+      cacheBytes: 0,
+    });
+
+    stepRepository.getStepExecutionsByIds.mockClear();
+    expect((await readOutputs(service, ['a'])).get('a')).toEqual(output);
+    expect(stepRepository.getStepExecutionsByIds).toHaveBeenCalledWith(['a'], ['id', 'output']);
+
+    stepRepository.getStepExecutionsByIds.mockClear();
+    expect((await readOutputs(service, ['a'])).get('a')).toEqual(output);
     expect(stepRepository.getStepExecutionsByIds).toHaveBeenCalledWith(['a'], ['id', 'output']);
   });
 

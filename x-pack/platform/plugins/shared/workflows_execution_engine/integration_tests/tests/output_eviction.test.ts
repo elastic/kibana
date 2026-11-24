@@ -22,6 +22,7 @@ describe('workflow output eviction', () => {
       // Nothing but a tiny value fits, so connector outputs are not kept in the LRU.
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         maxCacheSize: new ByteSizeValue(1),
+        minPayloadSize: new ByteSizeValue(10 * 1024),
       };
     });
 
@@ -142,6 +143,7 @@ steps:
       // A small connector output fits, so a fresh run serves it from memory.
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
+        minPayloadSize: new ByteSizeValue(10 * 1024),
       };
     });
 
@@ -215,6 +217,7 @@ steps:
     workflowRunFixture = new WorkflowRunFixture();
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       maxCacheSize: new ByteSizeValue(1),
+      minPayloadSize: new ByteSizeValue(10 * 1024),
     };
     await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
   });
@@ -303,6 +306,7 @@ steps:
     workflowRunFixture = new WorkflowRunFixture();
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       maxCacheSize: new ByteSizeValue(1),
+      minPayloadSize: new ByteSizeValue(10 * 1024),
     };
     await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
   });
@@ -357,6 +361,7 @@ describe('workflow input eviction', () => {
     // 1-byte cache, so connector outputs are not kept in the LRU.
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       maxCacheSize: new ByteSizeValue(1),
+      minPayloadSize: new ByteSizeValue(10 * 1024),
     };
   });
 
@@ -437,6 +442,7 @@ describe('workflow eviction with pause and resume', () => {
       workflowRunFixture = new WorkflowRunFixture();
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         maxCacheSize: new ByteSizeValue(1),
+        minPayloadSize: new ByteSizeValue(10 * 1024),
       };
 
       const yaml = `
@@ -492,6 +498,7 @@ steps:
       workflowRunFixture = new WorkflowRunFixture();
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         maxCacheSize: new ByteSizeValue(1),
+        minPayloadSize: new ByteSizeValue(10 * 1024),
       };
 
       const yaml = `
@@ -553,6 +560,7 @@ steps:
       workflowRunFixture = new WorkflowRunFixture();
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         maxCacheSize: new ByteSizeValue(1),
+        minPayloadSize: new ByteSizeValue(10 * 1024),
       };
 
       const yaml = `
@@ -634,6 +642,7 @@ describe('workflow output eviction with pause and resume', () => {
     // 1-byte cache, so connector outputs are not kept in the LRU.
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       maxCacheSize: new ByteSizeValue(1),
+      minPayloadSize: new ByteSizeValue(10 * 1024),
     };
   });
 
@@ -751,6 +760,7 @@ steps:
     workflowRunFixture = new WorkflowRunFixture();
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       maxCacheSize: new ByteSizeValue(1),
+      minPayloadSize: new ByteSizeValue(10 * 1024),
     };
     await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
     await workflowRunFixture.driveToTerminal();

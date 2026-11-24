@@ -93,6 +93,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly stepRepository: StepExecutionRepository;
   private readonly state: WorkflowExecutionState;
   private readonly cache: StepIoCache;
+  private readonly maxBytes: number;
   private readonly maxEntryBytes: number;
   /** Execution-wide sizes of outputs written with a measured byte count, for telemetry. */
   private readonly measuredSizes = new Map<string, number>();
@@ -107,6 +108,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }: StepIoServiceInit) {
     this.stepRepository = stepRepository;
     this.state = state;
+    this.maxBytes = maxBytes;
     this.maxEntryBytes = maxEntryBytes;
     this.cache = new StepIoCache(maxBytes, logger);
   }
@@ -162,15 +164,23 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
   }
 
-  /** True when `bytes` is at most `eviction.minPayloadSize` (or uncapped). */
+  /**
+   * True when `bytes` may enter the LRU: at most `eviction.minPayloadSize` and
+   * at most the total `eviction.maxCacheSize` budget (when those caps are finite).
+   * Rejecting oversized entries here avoids `lru-cache.set` deleting an existing
+   * smaller key for the same accessibility id when the entry cannot fit.
+   */
   private outputFitsCache(bytes: number | undefined): boolean {
     if (bytes === undefined) {
       return false;
     }
-    if (!Number.isFinite(this.maxEntryBytes)) {
-      return true;
+    if (Number.isFinite(this.maxEntryBytes) && bytes > this.maxEntryBytes) {
+      return false;
     }
-    return bytes <= this.maxEntryBytes;
+    if (Number.isFinite(this.maxBytes) && bytes > this.maxBytes) {
+      return false;
+    }
+    return true;
   }
 
   // ----- Telemetry ----------------------------------------------------------
