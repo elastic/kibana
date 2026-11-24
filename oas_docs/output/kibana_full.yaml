@@ -26825,7 +26825,7 @@ paths:
                     message: Context Engine memory is turned off.
                     statusCode: 404
                 memoryNotFoundExample:
-                  description: `id` does not match an active memory of the target user in this space
+                  description: '`id` does not match an active memory of the target user in this space'
                   summary: Session memory not found
                   value:
                     error: Not Found
