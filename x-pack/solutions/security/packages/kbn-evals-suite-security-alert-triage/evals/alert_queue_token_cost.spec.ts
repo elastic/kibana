@@ -141,6 +141,50 @@ const QUEUE_PROMPTS: Array<{ id: string; question: string; expected: string }> =
   },
 ];
 
+/** Queue questions worded to tempt triage tools (related alerts, Security Labs, entity risk). */
+const TEMPTING_PROMPTS: Array<{ id: string; question: string; expected: string }> = [
+  {
+    id: 'worth-escalating',
+    question: 'Is anything in the open alert queue worth escalating?',
+    expected: 'Judges the open alerts from the queue and names the highest severity one.',
+  },
+  {
+    id: 'related-to-each-other',
+    question: 'Are the open alerts related to each other?',
+    expected: `Says the open alerts come from ${RULE_NAME} for ${USER} on ${HOST}.`,
+  },
+  {
+    id: 'riskiest-user',
+    question: 'Which user in the open alerts looks the riskiest?',
+    expected: `Names ${USER} as the user in the open alerts.`,
+  },
+  {
+    id: 'what-to-do',
+    question: 'What should I do about the open alerts?',
+    expected: 'Gives next steps based on the open alerts in the queue.',
+  },
+  {
+    id: 'is-host-at-risk',
+    question: `Is ${HOST} at risk based on the open alerts?`,
+    expected: `Assesses ${HOST} using the open alerts that involve it.`,
+  },
+  {
+    id: 'technique-context',
+    question: 'What attack technique do the open alerts point to?',
+    expected: 'Names brute force or credential access from the open alerts.',
+  },
+  {
+    id: 'rundown-user',
+    question: `Give me a quick rundown of the queue and what is going on with ${USER}.`,
+    expected: `Summarizes the open alerts and the activity for ${USER}.`,
+  },
+  {
+    id: 'same-source',
+    question: 'Do the open alerts share a source IP or other indicator?',
+    expected: 'Reports the source IPs of the open alerts without inventing indicators.',
+  },
+];
+
 type EvaluateAlertQueue = ReturnType<typeof createEvaluateConverse>;
 
 const evaluate = base.extend<{ evaluateAlertQueue: EvaluateAlertQueue }, {}>({
@@ -221,19 +265,42 @@ evaluate.describe(
       });
     });
 
-    // No-skill arm — skill_ids=[] so the model cannot load alert-analysis (AESOP finding 7).
+    // Queue questions that invite triage; measures whether the skill keeps the model on security.alerts.
+    evaluate('Alert queue — tempting questions, skill bound', async ({ evaluateAlertQueue }) => {
+      await evaluateAlertQueue({
+        dataset: {
+          name: 'agent builder: security-alert-queue-tempting-skill',
+          description:
+            'Queue questions worded to invite related-alert, Security Labs, or entity-risk calls, ' +
+            'with configuration_overrides.skill_ids=[alert-analysis].',
+          examples: TEMPTING_PROMPTS.map(({ id, question, expected }) => ({
+            id,
+            input: { question },
+            output: { expected },
+            metadata: { skillIds: ['alert-analysis'] },
+          })),
+        },
+        criteria: [
+          'The response answers the alert-queue question using the alerts that exist',
+          'The response does not invent alerts, hosts, users, or indicators that are not in the queue',
+        ],
+      });
+    });
+
+    // No-skill arm — skill_ids=[] with built-in skills off, so alert-analysis cannot load (AESOP finding 7).
+    // security.alerts is granted directly because it is otherwise only reachable through the skill.
     evaluate('Alert queue — no skill bound', async ({ evaluateAlertQueue }) => {
       await evaluateAlertQueue({
         dataset: {
           name: 'agent builder: security-alert-queue-token-cost-no-skill',
           description:
-            'Same queue questions with configuration_overrides.skill_ids=[] (no skill). ' +
+            'Same queue questions with no skills and only the security.alerts tool. ' +
             'Baseline for token cost and factuality vs the skill-bound arm.',
           examples: QUEUE_PROMPTS.map(({ id, question, expected }) => ({
             id: `${id}-no-skill`,
             input: { question },
             output: { expected },
-            metadata: { skillIds: [] },
+            metadata: { skillIds: [], toolIds: ['security.alerts'] },
           })),
         },
         criteria: [

@@ -27,8 +27,8 @@ export const alertAnalysisSkill = defineSkillType({
   description:
     'Count, list, prioritize, and investigate Security detection alerts in the current Kibana space. ' +
     'Use for questions like "how many alerts", "high/critical alerts in last 24h", or triage of a specific alert. ' +
-    'List and count questions use only security.alerts. Single-alert triage may correlate related alerts, ' +
-    'enrich with Security Labs, and assess entity risk.',
+    'List and count questions use only security.alerts. Judgment questions about a named user or host may also ' +
+    'check entity risk. Single-alert triage may correlate related alerts, enrich with Security Labs, and assess entity risk.',
   content: `# Alert Analysis Guide
 
 ## When to Use This Skill
@@ -47,12 +47,23 @@ Pick one path before any other tool call:
 
 ### Queue path (list, count, prioritize, summarize many alerts)
 - Call only 'security.alerts'. For a plain list, use detail 'summary'. Keep the default detail when the question needs alert content such as command lines.
-- Answer from that result. Stop.
-- Do NOT call 'security.alert-analysis.get-related-alerts', 'security.security_labs_search', or 'security.get_entity' on this path.
+- Call 'security.alerts' once. Each call runs a query generator and costs far more than the other tools. A count or breakdown by several fields (rule, severity, status, user, host) is one call: ask for all of it in one question, or list rows with detail 'summary' and tally them yourself. Call it again only when the first result is empty or failed, or when you need a different time window.
+- Answer from that result, then add one or two sentences on the pattern in the returned alerts (shared rule, host or user, severity trend, timing). Use only what the result shows. Stop.
+- Do NOT call 'security.alert-analysis.get-related-alerts', 'security.security_labs_search', or 'security.get_entity' for list, count, or summary questions.
 - Do NOT run the triage steps below.
 
+### Judgment questions about the queue
+When the question asks for a judgment, call 'security.alerts' first, then make at most one call to each tool below, and only when the question asks for it:
+- 'security.get_entity' for a user or host the question names or asks about (risk, "is it at risk", "rundown of this user"), for at most two entities. If it finds no entity, do not retry
+- 'security.alert-analysis.get-related-alerts' only when the question asks whether alerts are related and the alerts carry host or IP values. It compares alert fields only
+- 'security.security_labs_search' only when the question asks for threat intelligence or technique context
+If 'security.get_entity' is not available, say that entity risk was not checked. Then answer and stop.
+
+### Check the evidence before you answer
+An alert shows that a rule matched. It does not show what happened around it, and some alerts (threshold alerts, for example) carry only the grouping field and no host or IP. When the question asks whether something is serious, urgent or "on fire", which alert to handle first, whether alerts are related or share hosts or IPs, what the alerts hide or miss, or whether an account is compromised, do not decide from alert severity, risk score or alert fields alone. After 'security.alerts', use the ES|QL tool if it is available to query the events behind the alerts, in one query (for example, whether a successful logon followed the failures, from which source and on which host). For what the alerts miss, query the wider event data for activity the rule cannot see. Say what you checked.
+
 ### Triage path (one specific alert, attached or named by id)
-- Follow the triage steps below. Skip any step that does not apply.
+- Follow the triage steps below. Skip any step that does not apply. Make at most one call to each tool.
 
 ## Triage Steps (specific alert only)
 
@@ -76,7 +87,7 @@ Pick one path before any other tool call:
   - IOC context for IPs, domains, or file hashes found in the alert
 
 ### 4. Assess Entity Risk
-- Only on the triage path. Skip this step for list, count, prioritize, or summarize-queue questions
+- Use this step on the triage path. Skip it for list, count, prioritize, or summarize-queue questions
 - If 'security.get_entity' is available, use it to look up the involved hosts and users, including their risk scores
 - If it is not available, skip this step and state that entity risk was not checked. Do not load another skill or search for another tool to replace it
 - High risk scores (>80) on involved entities increase alert priority

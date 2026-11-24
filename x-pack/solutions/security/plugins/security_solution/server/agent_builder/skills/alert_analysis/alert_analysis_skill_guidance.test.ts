@@ -74,6 +74,47 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(queuePath).toMatch(/'security\.get_entity'/i);
   });
 
+  // Why: each security.alerts call runs an NL -> ES|QL generator on a second model. In the 21037 lab it
+  // was ~70% of the extra input tokens, and the model called the tool ~2.8 times per run.
+  it('tells the model to call security.alerts once and tally breakdowns itself', () => {
+    const { content } = alertAnalysisSkill;
+    const queuePath = content.slice(
+      content.indexOf('### Queue path'),
+      content.indexOf('### Judgment questions')
+    );
+
+    expect(queuePath).toMatch(/call 'security\.alerts' once/i);
+    expect(queuePath).toMatch(/tally them yourself/i);
+  });
+
+  // Why: with a hard stop after security.alerts, every skill arm answered "nothing is on fire" from
+  // alert severity alone (security-team#21037, question 14). Threshold alerts also carry no host or IP.
+  it('tells the model to check the events behind the alerts on judgment questions', () => {
+    const { content } = alertAnalysisSkill;
+    const evidence = content.slice(
+      content.indexOf('### Check the evidence before you answer'),
+      content.indexOf('### Triage path')
+    );
+
+    expect(evidence).toMatch(/"on fire"/i);
+    expect(evidence).toMatch(/share hosts or IPs/i);
+    expect(evidence).toMatch(/ES\|QL tool if it is available/i);
+    expect(evidence).toMatch(/in one query/i);
+  });
+
+  it('limits entity and related-alert lookups on judgment questions', () => {
+    const { content } = alertAnalysisSkill;
+    const judgment = content.slice(
+      content.indexOf('### Judgment questions'),
+      content.indexOf('### Check the evidence')
+    );
+
+    expect(judgment).toMatch(/at most one call to each tool/i);
+    expect(judgment).toMatch(/'security\.get_entity'[^\n]*at most two entities/i);
+    expect(judgment).toMatch(/get-related-alerts'[^\n]*carry host or IP values/i);
+    expect(judgment).toMatch(/security_labs_search'[^\n]*threat intelligence/i);
+  });
+
   // Why: security.get_entity exists only when the Entity Store V2 index exists. Where it is missing,
   // a skill that names it without a fallback sends the model looking for it (extra load_skill calls).
   // PR #304299 made Claude call it on every triage run (0.07 → 2.0); keep it triage-only.
@@ -81,7 +122,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     const { content } = alertAnalysisSkill;
     const step4 = content.slice(content.indexOf('### 4.'), content.indexOf('### 5.'));
 
-    expect(step4).toMatch(/only on the triage path/i);
+    expect(step4).toMatch(/on the triage path\. skip it for list, count/i);
     expect(step4).toMatch(/if 'security\.get_entity' is available/i);
     expect(step4).toMatch(/if it is not available, skip this step/i);
     expect(step4).not.toMatch(/entity-analytics skill/i);
