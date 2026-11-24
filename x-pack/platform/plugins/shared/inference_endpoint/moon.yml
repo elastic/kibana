@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/config-schema'
   - '@kbn/safer-lodash-set'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod

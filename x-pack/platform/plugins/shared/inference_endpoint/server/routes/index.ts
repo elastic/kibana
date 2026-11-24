@@ -8,6 +8,7 @@
 import type { IKibanaResponse, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { schema, type Type } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import type {
   InferenceInferenceEndpointInfo,
   InferenceTaskType,
@@ -248,7 +249,15 @@ export const getInferenceServicesRoute = (
 
           if (!provider) {
             return response.badRequest({
-              body: { message: `Unable to find the configuration for service ${config.provider}` },
+              body: {
+                message: i18n.translate(
+                  'xpack.inferenceEndpoint.updateEndpoint.missingServiceConfigurationError',
+                  {
+                    defaultMessage: 'Unable to find the configuration for service {provider}',
+                    values: { provider: config.provider },
+                  }
+                ),
+              },
             });
           }
 
