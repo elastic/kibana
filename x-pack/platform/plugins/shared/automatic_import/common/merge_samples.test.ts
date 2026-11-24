@@ -33,10 +33,13 @@ describe('mergeSamples', () => {
     });
   });
 
-  it('keeps the first non-empty value when keys overlap', () => {
-    const docs = [{ status: 'ok' }, { status: 'error' }];
-    const result = mergeSamples(docs);
-    expect(result.status).toBe('ok');
+  it('keeps every value when keys overlap, in order', () => {
+    expect(mergeSamples([{ status: 'ok' }, { status: 'error' }])).toEqual({
+      status: ['ok', 'error'],
+    });
+    expect(mergeSamples([{ f: 'a' }, { f: 'b' }, { f: 1 }, { f: 'c' }])).toEqual({
+      f: ['a', 'b', 1, 'c'],
+    });
   });
 
   it('keeps whole and decimal numbers together in an array', () => {

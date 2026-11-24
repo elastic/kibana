@@ -294,7 +294,7 @@ describe('EditPipelineFlyout', () => {
 
       expect(screen.queryByText('rules')).not.toBeInTheDocument();
       expect(screen.getByText('rules.name')).toBeInTheDocument();
-      expect(screen.getByText('block-ssh')).toBeInTheDocument();
+      expect(screen.getByText('["block-ssh","allow-web"]')).toBeInTheDocument();
       expect(screen.getByText('rules.owner')).toBeInTheDocument();
       expect(screen.getByText('admin')).toBeInTheDocument();
     });

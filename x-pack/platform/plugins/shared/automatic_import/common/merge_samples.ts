@@ -19,10 +19,6 @@ const isEmptyValue = (value: unknown): boolean => {
 
 const isScalar = (value: unknown): boolean => value != null && typeof value !== 'object';
 
-/** A value's kind for typing. Whole and decimal numbers differ: they map to different types. */
-const getValueKind = (value: unknown): string =>
-  typeof value === 'number' && !Number.isInteger(value) ? 'decimal' : typeof value;
-
 /** Returns the value to keep when a sample has a plain value (not an object or array) for a key. */
 const mergePlainValue = (target: unknown, source: unknown): unknown => {
   if (isEmptyValue(target) && !isEmptyValue(source)) return source;
@@ -30,9 +26,7 @@ const mergePlainValue = (target: unknown, source: unknown): unknown => {
     target.push(source);
     return target;
   }
-  if (isScalar(target) && isScalar(source) && getValueKind(target) !== getValueKind(source)) {
-    return [target, source];
-  }
+  if (isScalar(target) && isScalar(source)) return [target, source];
   return target;
 };
 
@@ -90,11 +84,10 @@ const mergeInto = (target: SampleObject, source: SampleObject): SampleObject => 
 };
 
 /**
- * Deep-merges sample objects into one representative object without changing them: arrays are
- * concatenated, an object and an array of objects under the same key are merged together, a plain
- * value and an array are combined into one array, and objects win over scalars. Plain values of
- * different types (whole and decimal numbers count as different) are kept together in an array, so
- * a field's type can be inferred from all of them. Otherwise the first non-empty value wins.
+ * Deep-merges sample objects into one representative object without changing them. Every plain
+ * value is kept: values and arrays under the same key are combined into one array, in sample
+ * order, so field types can be inferred from all of them. An object and an array of objects under
+ * the same key are merged together, and objects win over plain values.
  */
 export const mergeSamples = (samples: readonly SampleObject[]): SampleObject => {
   const result = Object.create(null) as SampleObject;
