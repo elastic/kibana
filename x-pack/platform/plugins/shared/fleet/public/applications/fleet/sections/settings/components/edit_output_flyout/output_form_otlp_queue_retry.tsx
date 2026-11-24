@@ -133,7 +133,7 @@ const OtlpBatchFields: React.FunctionComponent<{ inputs: OutputFormInputsType }>
               defaultText={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.otlpBatchSizerDefault"
-                  defaultMessage="the unit of the queue size, or items if it is not set"
+                  defaultMessage="the unit of the queue size, or items if the queue counts requests"
                 />
               }
             />

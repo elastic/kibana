@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
+
 import type { OtlpExporterConfig } from '../types/models/output';
 
 export type OtlpSendingQueue = NonNullable<OtlpExporterConfig['sending_queue']>;
@@ -26,8 +28,7 @@ export const OTLP_QUEUE_SPEC_DEFAULTS = {
 export const getOtlpBatchSizer = (batchSizer: string | null | undefined, queueSizer: string) =>
   batchSizer || (queueSizer === 'requests' ? 'items' : queueSizer);
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+type PlainObject = Record<string, unknown>;
 
 /**
  * Merges an update into a stored value as a saved object update does: a non-empty object is merged
@@ -38,12 +39,16 @@ const mergeAsSavedObjectUpdate = (stored: unknown, update: unknown): unknown => 
   if (update === undefined) {
     return stored;
   }
-  if (!isPlainObject(update) || !Object.keys(update).length || !isPlainObject(stored)) {
+  if (
+    !isPlainObject(update) ||
+    !Object.keys(update as PlainObject).length ||
+    !isPlainObject(stored)
+  ) {
     return update;
   }
-  const merged: Record<string, unknown> = { ...stored };
-  Object.entries(update).forEach(([key, value]) => {
-    merged[key] = mergeAsSavedObjectUpdate(stored[key], value);
+  const merged: PlainObject = { ...(stored as PlainObject) };
+  Object.entries(update as PlainObject).forEach(([key, value]) => {
+    merged[key] = mergeAsSavedObjectUpdate((stored as PlainObject)[key], value);
   });
   return merged;
 };
@@ -62,9 +67,12 @@ export const withRemovedStoredSettings = (value: unknown, stored: unknown): unkn
   if (!isPlainObject(value) || !isPlainObject(stored)) {
     return value;
   }
-  const result: Record<string, unknown> = { ...value };
-  Object.keys(stored).forEach((key) => {
-    result[key] = key in value ? withRemovedStoredSettings(value[key], stored[key]) : null;
+  const valueObject = value as PlainObject;
+  const storedObject = stored as PlainObject;
+  const result: PlainObject = { ...valueObject };
+  Object.keys(storedObject).forEach((key) => {
+    result[key] =
+      key in valueObject ? withRemovedStoredSettings(valueObject[key], storedObject[key]) : null;
   });
   return result;
 };
