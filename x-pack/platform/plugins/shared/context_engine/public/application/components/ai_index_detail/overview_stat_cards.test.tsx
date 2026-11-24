@@ -26,6 +26,7 @@ const defaultProps: OverviewStatCardsProps = {
   isManaged: false,
   isMemoryEnabled: false,
   isLoading: false,
+  isAiIndexLoading: false,
 };
 
 const renderCards = (props: Partial<OverviewStatCardsProps> = {}) =>
@@ -108,6 +109,18 @@ describe('OverviewStatCards', () => {
       screen.queryByTestId('contextOverviewStatCardValue-knowledgeDocuments')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('contextOverviewStatCardValue-sources')).toBeInTheDocument();
+  });
+
+  it('shows skeletons instead of the sources and automations counts while the AI index loads', () => {
+    renderCards({ isAiIndexLoading: true });
+
+    expect(screen.queryByTestId('contextOverviewStatCardValue-sources')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextOverviewStatCardValue-automations')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('contextOverviewStatCardValue-knowledgeDocuments')
+    ).toBeInTheDocument();
   });
 
   it.each([

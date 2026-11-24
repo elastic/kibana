@@ -814,12 +814,39 @@ describe('AiIndexDetailPage', () => {
     expect(
       screen.queryByTestId('contextOverviewStatCardValue-knowledgeDocuments')
     ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextOverviewRecentDocuments')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextOverviewDocumentsChart')).not.toBeInTheDocument();
+    // The chart stays until the summary for this AI index says there are no documents.
+    expect(screen.getByTestId('contextOverviewDocumentsChart')).toBeInTheDocument();
     expect(screen.queryByTestId('contextOnboardingConnectAgentPanel')).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
     ).not.toBeInTheDocument();
+  });
+
+  it('shows the Overview sections with skeletons before the AI index has loaded', async () => {
+    const services = createServices();
+    let resolveAiIndexGet: (value: GetAiIndexResponse) => void = () => {};
+    services.http.get.mockImplementation(
+      () =>
+        new Promise<GetAiIndexResponse>((resolve) => {
+          resolveAiIndexGet = resolve;
+        })
+    );
+
+    renderWithProviders(services);
+
+    expect(await screen.findByTestId('contextOverviewStatCards')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewStatCardValue-sources')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextOverviewStatCardValue-automations')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextOverviewRecentDocuments')).toBeInTheDocument();
+    expect(screen.getByTestId('contextOverviewDocumentsChart')).toBeInTheDocument();
+
+    resolveAiIndexGet(aiIndex);
+
+    expect(await screen.findByTestId('contextOverviewStatCardValue-sources')).toHaveTextContent(
+      '1'
+    );
   });
 
   it('shows the Manage in Settings link only once the AI index is known to be editable', async () => {

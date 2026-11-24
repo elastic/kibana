@@ -96,6 +96,8 @@ interface OverviewStatCardsProps {
   isManaged: boolean;
   isMemoryEnabled: boolean;
   isLoading: boolean;
+  /** Sources and Automations come from the AI index, so they wait for it. */
+  isAiIndexLoading: boolean;
 }
 
 export const OverviewStatCards = ({
@@ -106,6 +108,7 @@ export const OverviewStatCards = ({
   isManaged,
   isMemoryEnabled,
   isLoading,
+  isAiIndexLoading,
 }: OverviewStatCardsProps) => (
   <EuiFlexGroup gutterSize="m" responsive={true} data-test-subj="contextOverviewStatCards">
     <EuiFlexItem>
@@ -150,7 +153,7 @@ export const OverviewStatCards = ({
               )
         }
         path={getAiIndexSourcesPath(aiIndexId)}
-        isLoading={false}
+        isLoading={isAiIndexLoading}
       />
     </EuiFlexItem>
     <EuiFlexItem>
@@ -166,7 +169,7 @@ export const OverviewStatCards = ({
           { defaultMessage: 'keep documents up to date' }
         )}
         path={getAiIndexAutomationsPath(aiIndexId)}
-        isLoading={false}
+        isLoading={isAiIndexLoading}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

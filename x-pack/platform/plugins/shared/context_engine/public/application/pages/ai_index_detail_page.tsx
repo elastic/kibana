@@ -305,40 +305,35 @@ export const AiIndexDetailPage = () => {
           <EuiSpacer size="l" />
         </>
       )}
-      {aiIndex && (
-        <>
-          <OverviewStatCards
-            aiIndexId={aiIndex.id}
-            knowledgeDocumentsCount={kiSummaryError ? undefined : summary.total}
-            sourcesCount={sources.length}
-            automationsCount={visibleAutomationsCount}
+      {/* Sections render with skeletons right away, so nothing is pushed down while they load. */}
+      <OverviewStatCards
+        aiIndexId={resolvedAiIndexId}
+        knowledgeDocumentsCount={kiSummaryError ? undefined : summary.total}
+        sourcesCount={sources.length}
+        automationsCount={visibleAutomationsCount}
+        isManaged={isManaged}
+        isMemoryEnabled={isMemoryEnabled}
+        isLoading={isKiSummaryPending}
+        isAiIndexLoading={aiIndex === undefined}
+      />
+      <EuiSpacer size="l" />
+      {/* `key` remounts the panels for another AI index, so they never show its previous data. */}
+      <EuiFlexGroup gutterSize="m" key={resolvedAiIndexId}>
+        <EuiFlexItem css={shrinkableFlexItemStyle}>
+          <RecentKnowledgeDocumentsPanel
+            aiIndexId={resolvedAiIndexId}
             isManaged={isManaged}
             isMemoryEnabled={isMemoryEnabled}
-            isLoading={isKiSummaryPending}
           />
-          <EuiSpacer size="l" />
-        </>
-      )}
-      {/* Wait for the summary, so the chart column does not pop in next to Recent documents. */}
-      {hasLoadedKiSummary && (
-        <>
-          <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem css={shrinkableFlexItemStyle}>
-              <RecentKnowledgeDocumentsPanel
-                aiIndexId={resolvedAiIndexId}
-                isManaged={isManaged}
-                isMemoryEnabled={isMemoryEnabled}
-              />
-            </EuiFlexItem>
-            {hasKnowledgeIndicators && (
-              <EuiFlexItem css={shrinkableFlexItemStyle}>
-                <KnowledgeDocumentsChartPanel aiIndexId={resolvedAiIndexId} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-        </>
-      )}
+        </EuiFlexItem>
+        {/* Most AI indices have documents, so the chart stays until the summary says there are none. */}
+        {(!hasLoadedKiSummary || hasKnowledgeIndicators) && (
+          <EuiFlexItem css={shrinkableFlexItemStyle}>
+            <KnowledgeDocumentsChartPanel aiIndexId={resolvedAiIndexId} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
       <AutomationsSection
         isLoading={isLoading}
         aiIndex={aiIndex}
