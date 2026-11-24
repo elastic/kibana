@@ -18,6 +18,8 @@ import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
 import { escalationTemplate } from '../templates/escalation/register';
 import { investigationTemplate } from '../templates/investigation/register';
 import { resetInvestigationsPrivilegesCache } from '../../investigations/hooks/use_can_manage_investigations';
+import { investigationQueryKeys } from '../../investigations/query_keys';
+import { getSharedInvestigationsQueryClient } from '../../shared_query_client';
 import { registerTemplate } from './register_template';
 
 jest.mock('@kbn/agentic-investigations-common', () => ({
@@ -131,6 +133,12 @@ describe('registerTemplate', () => {
   });
 
   describe('the escalation button without the UI capability', () => {
+    // The investigation flyout's Provider uses the page-wide shared client, so its cache outlives
+    // a test.
+    beforeEach(async () => {
+      (await getSharedInvestigationsQueryClient()).clear();
+    });
+
     const renderButton = async (manageEscalations: boolean) => {
       const core = coreMock.createStart();
       core.http.get.mockResolvedValue({
@@ -159,8 +167,14 @@ describe('registerTemplate', () => {
 
     it('hides the button when the probe reports no escalations manage privilege', async () => {
       const core = await renderButton(false);
+      const queryClient = await getSharedInvestigationsQueryClient();
 
-      await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(queryClient.getQueryState(investigationQueryKeys.privileges())?.status).toBe(
+          'success'
+        )
+      );
+      expect(core.http.get).toHaveBeenCalled();
       expect(screen.queryByRole('button', { name: 'Open escalation' })).not.toBeInTheDocument();
     });
   });
