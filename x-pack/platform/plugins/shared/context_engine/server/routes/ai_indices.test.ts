@@ -18,7 +18,10 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  WorkflowsManagementApiActions,
+  WorkflowsManagementOperationPrivileges,
+} from '@kbn/workflows';
 import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from '../ai_indices/ki_write';
 import { KiConflictError, KiDeletedError, KiNotFoundError } from '../ai_indices/errors';
 import type { ContextEngineAnalyticsService } from '../telemetry';
@@ -3164,12 +3167,13 @@ describe('ai indices routes', () => {
           withWorkflowExecutePrivilege
         );
 
-      it('requires the context engine write and workflow execute privileges', () => {
+      it('requires the context engine write and workflow execute and readManagedExecution privileges', () => {
         expect(getRoute('POST', AI_INDEX_DREAMING_RUN_PATH).config.security).toEqual({
           authz: {
             requiredPrivileges: [
               apiPrivileges.writeContextEngine,
-              WorkflowsManagementApiActions.execute,
+              ...WorkflowsManagementOperationPrivileges.execute,
+              ...WorkflowsManagementOperationPrivileges.readManagedExecution,
             ],
           },
         });

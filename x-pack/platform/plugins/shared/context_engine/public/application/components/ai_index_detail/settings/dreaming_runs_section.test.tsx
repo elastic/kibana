@@ -44,6 +44,7 @@ jest.mock('../../../hooks/use_can_write_context_engine', () => ({
 const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canExecuteWorkflow: true,
   canReadWorkflowExecution: true,
+  canReadManagedWorkflowExecution: true,
 }));
 
 jest.mock('@kbn/workflows-ui', () => ({
@@ -85,6 +86,7 @@ describe('DreamingRunsSection', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       canExecuteWorkflow: true,
       canReadWorkflowExecution: true,
+      canReadManagedWorkflowExecution: true,
     });
     mockUseWorkflowSummaries.mockImplementation((ids: readonly string[]) => ({
       summaries: new Map(
@@ -141,14 +143,46 @@ describe('DreamingRunsSection', () => {
     expect(
       screen.queryByText('You do not have permission to run workflows')
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('You need permission to read managed workflow executions to run')
+    ).not.toBeInTheDocument();
     expect(screen.queryByText('Add fact or entity types to run')).not.toBeInTheDocument();
     expect(screen.queryByText('Turn on the schedule to run')).not.toBeInTheDocument();
+  });
+
+  it('disables Run now without workflow execution read permission', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      canExecuteWorkflow: true,
+      canReadWorkflowExecution: false,
+      canReadManagedWorkflowExecution: true,
+    });
+    renderSection();
+
+    expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
+    expect(
+      screen.getByText('You need permission to read managed workflow executions to run')
+    ).toBeInTheDocument();
+  });
+
+  it('disables Run now without managed workflow execution read permission', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      canExecuteWorkflow: true,
+      canReadWorkflowExecution: true,
+      canReadManagedWorkflowExecution: false,
+    });
+    renderSection();
+
+    expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
+    expect(
+      screen.getByText('You need permission to read managed workflow executions to run')
+    ).toBeInTheDocument();
   });
 
   it('disables Run now without workflow execute permission', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       canExecuteWorkflow: false,
       canReadWorkflowExecution: true,
+      canReadManagedWorkflowExecution: true,
     });
     renderSection();
 
@@ -184,6 +218,7 @@ describe('DreamingRunsSection', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       canExecuteWorkflow: true,
       canReadWorkflowExecution: false,
+      canReadManagedWorkflowExecution: true,
     });
     const onStarted = jest.fn();
     renderSection({ onStarted });

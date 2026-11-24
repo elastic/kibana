@@ -40,7 +40,8 @@ export const DreamingRunsSection = ({
   onStarted,
 }: DreamingRunsSectionProps) => {
   const canWrite = useCanWriteContextEngine();
-  const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow, canReadWorkflowExecution, canReadManagedWorkflowExecution } =
+    useWorkflowsCapabilities();
   const { runDreaming, isLoading: isRunLoading } = useRunDreaming({
     onStarted: (response) => {
       if (canReadWorkflowExecution) {
@@ -70,6 +71,14 @@ export const DreamingRunsSection = ({
         'xpack.contextEngine.aiIndexDetail.dreaming.runs.disabledNoExecutePermission',
         {
           defaultMessage: 'You do not have permission to run workflows',
+        }
+      );
+    }
+    if (!canReadWorkflowExecution || !canReadManagedWorkflowExecution) {
+      return i18n.translate(
+        'xpack.contextEngine.aiIndexDetail.dreaming.runs.disabledNoReadExecutionPermission',
+        {
+          defaultMessage: 'You need permission to read managed workflow executions to run',
         }
       );
     }

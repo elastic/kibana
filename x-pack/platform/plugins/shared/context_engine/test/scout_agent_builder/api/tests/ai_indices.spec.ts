@@ -228,7 +228,10 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
               body: withMaintenance,
             });
             expect(putResponse).toHaveStatusCode(200);
-            expect(putResponse.body).toStrictEqual({ dreaming: withMaintenance });
+            expect(putResponse.body).toStrictEqual({
+              dreaming: withMaintenance,
+              workflow_ids: [],
+            });
 
             const outOfBounds = await apiClient.put(dreamingPath, {
               headers: internalHeaders,
@@ -248,7 +251,10 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
               headers: internalHeaders,
               responseType: 'json',
             });
-            expect(getResponse.body).toStrictEqual({ dreaming: withMaintenance });
+            expect(getResponse.body).toStrictEqual({
+              dreaming: withMaintenance,
+              workflow_ids: [],
+            });
           }
         );
       } finally {

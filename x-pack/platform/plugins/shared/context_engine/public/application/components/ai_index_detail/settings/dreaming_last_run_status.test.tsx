@@ -106,6 +106,27 @@ describe('DreamingLastRunStatus', () => {
     expect(screen.queryByText('Never run')).not.toBeInTheDocument();
   });
 
+  it('shows status unavailable when execution history could not be loaded', () => {
+    renderLastRunStatus({
+      workflowIds: [DREAMING_WORKFLOW_ID, RELATIONSHIPS_WORKFLOW_ID],
+      executions: undefined,
+      unavailableWorkflowIds: [DREAMING_WORKFLOW_ID, RELATIONSHIPS_WORKFLOW_ID],
+    });
+
+    const summary = screen.getByTestId('contextAiIndexDreamingLastRun');
+    expect(summary).toHaveTextContent(/^Last run/);
+    expect(screen.getByTestId('contextAiIndexDreamingLastRunPopoverButton')).toHaveTextContent(
+      'Status unavailable'
+    );
+
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingLastRunPopoverButton'));
+
+    const rows = screen.getAllByTestId('contextAiIndexDreamingLastRunPopoverRow');
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveTextContent('Status unavailable');
+    expect(rows[1]).toHaveTextContent('Status unavailable');
+  });
+
   it('shows never run when execution history has no runs', () => {
     renderLastRunStatus({
       workflowIds: [DREAMING_WORKFLOW_ID],

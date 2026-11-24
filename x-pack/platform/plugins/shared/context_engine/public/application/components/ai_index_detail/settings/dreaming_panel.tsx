@@ -81,6 +81,10 @@ const intervalPrependLabel = i18n.translate(
     defaultMessage: 'Every',
   }
 );
+const intervalAriaLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.dreaming.intervalAriaLabel',
+  { defaultMessage: 'Dreaming interval' }
+);
 
 const sameTypes = (a: DreamingConfigDraft, b: DreamingConfigDraft): boolean =>
   JSON.stringify(typesOfDraft(a)) === JSON.stringify(typesOfDraft(b));
@@ -264,6 +268,7 @@ const DreamingEditor = ({
                       compressed
                       fullWidth
                       prepend={intervalPrependLabel}
+                      aria-label={intervalAriaLabel}
                       value={interval}
                       isInvalid={intervalError !== undefined}
                       onChange={(event) => setEditedInterval(event.target.value)}

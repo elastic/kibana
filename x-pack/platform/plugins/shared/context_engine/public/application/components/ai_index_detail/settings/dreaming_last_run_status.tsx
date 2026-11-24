@@ -156,23 +156,21 @@ export const DreamingLastRunStatus = ({
     return byId;
   }, [executions]);
 
-  if (executions === undefined) {
+  if (executions === undefined && unavailableWorkflowIds.length === 0) {
     return null;
   }
 
-  if (executions.length === 0) {
+  if (executions !== undefined && executions.length === 0) {
     return (
       <WorkflowLastExecution hasExecution={false} data-test-subj="contextAiIndexDreamingLastRun" />
     );
   }
 
-  const worst = getWorstExecution(executions);
-  if (worst === undefined) {
-    return null;
-  }
-
-  const worstStatusDisplay = getWorkflowExecutionStatusDisplay(worst.execution.status);
-  const worstStartedAt = worst.execution.startedAt;
+  const worst = executions ? getWorstExecution(executions) : undefined;
+  const worstStatusDisplay = worst
+    ? getWorkflowExecutionStatusDisplay(worst.execution.status)
+    : undefined;
+  const worstStartedAt = worst?.execution.startedAt;
   const hasWorstStartedAt = worstStartedAt !== undefined && worstStartedAt !== '';
 
   return (
@@ -202,18 +200,20 @@ export const DreamingLastRunStatus = ({
               onClick={() => setIsPopoverOpen((open) => !open)}
             >
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type={worstStatusDisplay.type}
-                    color={worstStatusDisplay.color}
-                    size="s"
-                    data-test-subj={`contextAiIndexDreamingLastRunStatus-${worst.execution.status}`}
-                    aria-hidden={true}
-                  />
-                </EuiFlexItem>
+                {worstStatusDisplay && worst ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon
+                      type={worstStatusDisplay.type}
+                      color={worstStatusDisplay.color}
+                      size="s"
+                      data-test-subj={`contextAiIndexDreamingLastRunStatus-${worst.execution.status}`}
+                      aria-hidden={true}
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
-                    {worstStatusDisplay.label}
+                    {worstStatusDisplay ? worstStatusDisplay.label : statusUnavailableRowLabel}
                   </EuiText>
                 </EuiFlexItem>
                 {hasWorstStartedAt ? (

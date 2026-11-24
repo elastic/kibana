@@ -161,9 +161,11 @@ const DELETE_SECURITY: RouteSecurity = {
 
 const RUN_DREAMING_SECURITY: RouteSecurity = {
   authz: {
+    // Managed dreaming workflows read prior executions as the caller during last_run / last_output.
     requiredPrivileges: [
       apiPrivileges.writeContextEngine,
       ...WorkflowsManagementOperationPrivileges.execute,
+      ...WorkflowsManagementOperationPrivileges.readManagedExecution,
     ],
   },
 };
