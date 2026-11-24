@@ -40,7 +40,10 @@
     "@kbn/core-security-common",
     "@kbn/core-spaces-common",
     "@kbn/react-query",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/app-header",
+    "@kbn/app-menu",
+    "@kbn/security-solution-features"
   ],
   "exclude": ["target/**/*"]
 }
