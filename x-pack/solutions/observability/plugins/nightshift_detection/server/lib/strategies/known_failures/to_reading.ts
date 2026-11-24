@@ -9,16 +9,16 @@ import type { QueryLink } from '@kbn/significant-events-schema';
 import type { RuleRow } from '../../rules/managed_rule_reader';
 import type { DetectionSignalReading } from '../types';
 
-/** The latest row of a Known failures rule in the window, with the knowledge indicator it watches. */
-export interface ActiveKnownFailure {
+/** The rows a Known failures rule wrote in the window, newest first, with the indicator it watches. */
+export interface MeasuredKnownFailure {
   knowledgeIndicator: QueryLink;
-  row: RuleRow;
+  rows: RuleRow[];
 }
 
 /**
- * The reading of an active known failure. Returns nothing until the row to reading mapping lands
- * in a follow-up, so the strategy is wired end to end but stores no signal yet.
+ * The readings of a measured known failure. Returns nothing until the judgement lands in a
+ * follow-up, so the strategy is wired end to end but stores no signal yet.
  */
-export function toReading(_active: ActiveKnownFailure): DetectionSignalReading | undefined {
-  return undefined;
+export function toReadings(_measured: MeasuredKnownFailure): DetectionSignalReading[] {
+  return [];
 }

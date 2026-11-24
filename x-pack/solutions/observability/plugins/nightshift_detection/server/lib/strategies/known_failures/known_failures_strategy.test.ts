@@ -46,7 +46,7 @@ const createContext = (
 
 describe('KnownFailuresStrategy', () => {
   describe('resources', () => {
-    it('wants one change point rule per countable match knowledge indicator', async () => {
+    it('wants one measuring rule per countable match knowledge indicator', async () => {
       const { resources, skipped } = await new KnownFailuresStrategy().resources(
         createContext([createQuery()])
       );
@@ -62,12 +62,41 @@ describe('KnownFailuresStrategy', () => {
             metadata: { name: 'Checkout timeouts' },
             query: {
               base: expect.stringMatching(
-                /^FROM logs-\* \| WHERE service\.name == "checkout" AND message : "timeout"\n\| WHERE @timestamp >= .*CHANGE_POINT metric_value ON bucket/s
+                /^FROM logs-\*\n\| WHERE service\.name == "checkout" AND message : "timeout"\n\| WHERE @timestamp >= .*CHANGE_POINT count ON bucket/s
               ),
             },
           }),
         },
       ]);
+    });
+
+    // Dropped, not refused: they leave the matched lines unchanged, and KEEP could drop @timestamp.
+    it('counts a knowledge indicator with KEEP, DROP or SORT on its filters alone', async () => {
+      const { resources } = await new KnownFailuresStrategy().resources(
+        createContext([
+          createQuery({
+            esql: 'FROM logs-* | KEEP message | WHERE message : "timeout" | DROP a | SORT message',
+          }),
+        ])
+      );
+
+      expect(resources[0].data.query.base).toMatch(
+        /^FROM logs-\*\n\| WHERE message : "timeout"\n\| WHERE @timestamp >= /
+      );
+    });
+
+    // The parser counts positions in code points and strings in UTF-16 units: cut wrong, the
+    // condition silently loses its end and the rule counts other lines.
+    it('keeps a condition whole when the knowledge indicator quotes an emoji', async () => {
+      const { resources } = await new KnownFailuresStrategy().resources(
+        createContext([
+          createQuery({ esql: 'FROM logs-* | WHERE message : "🔥 failed" AND code == 12' }),
+        ])
+      );
+
+      expect(resources[0].data.query.base).toMatch(
+        /^FROM logs-\*\n\| WHERE message : "🔥 failed" AND code == 12\n/
+      );
     });
 
     // Noted, not skipped: a skipped source keeps all its rules, so the old rule of an edited
@@ -76,7 +105,8 @@ describe('KnownFailuresStrategy', () => {
       const { resources, skipped, notes } = await new KnownFailuresStrategy().resources(
         createContext([
           createQuery({ id: 'stats', type: 'stats' }),
-          createQuery({ id: 'sorted', esql: 'FROM logs-* | WHERE a == 1 | SORT b' }),
+          createQuery({ id: 'limited', esql: 'FROM logs-* | WHERE a == 1 | LIMIT 10' }),
+          createQuery({ id: 'unfiltered', esql: 'FROM logs-* | SORT message' }),
           createQuery({ id: 'set', esql: 'SET a = 1; FROM logs-* | WHERE a == 1' }),
           createQuery({
             id: 'subquery',
@@ -93,7 +123,8 @@ describe('KnownFailuresStrategy', () => {
       expect(skipped).toEqual([]);
       expect(notes).toEqual([
         expect.stringMatching(/^source-1: .*\[stats\]/),
-        expect.stringMatching(/^source-1: .*\[sorted\]/),
+        expect.stringMatching(/^source-1: .*\[limited\]/),
+        expect.stringMatching(/^source-1: .*\[unfiltered\]/),
         expect.stringMatching(/^source-1: .*\[set\]/),
         expect.stringMatching(/^source-1: .*\[subquery\]/),
         expect.stringMatching(/^source-1: .*\[long\] is too long/),

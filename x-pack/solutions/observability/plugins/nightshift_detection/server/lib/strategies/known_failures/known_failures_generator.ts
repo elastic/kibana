@@ -6,23 +6,22 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { sortBy } from 'lodash';
-import type { RuleRow } from '../../rules/managed_rule_reader';
+import { groupBy, sortBy } from 'lodash';
 import type { DetectionSignalGenerator, GenerateResult, GeneratorContext } from '../types';
 import { KNOWN_FAILURES_STRATEGY_ID } from './constants';
 import { getKnownFailureRuleId, getUnwatchableReason } from './known_failure_rule';
-import { toReading, type ActiveKnownFailure } from './to_reading';
+import { toReadings, type MeasuredKnownFailure } from './to_reading';
 
 /**
- * Reads what the Known failures rules wrote in the window. The rules do the detection: a rule writes
- * a row only while its knowledge indicator's count is up, so every rule with a row is an active
- * failure. The generator finds which knowledge indicator each rule watches and keeps the rule's
- * latest row.
+ * Reads what the Known failures rules wrote in the window. A rule only measures: every run writes
+ * one row with its knowledge indicator's newest per-minute counts, normal level and latest change
+ * point. The generator finds which knowledge indicator each rule watches and hands all of the rule's
+ * rows to the judgement, since consecutive runs cover different minutes.
  */
 export class KnownFailuresGenerator implements DetectionSignalGenerator {
   public async generate(context: GeneratorContext): Promise<GenerateResult> {
-    const active = await readActiveFailures(context);
-    const readings = active.flatMap((failure) => toReading(failure) ?? []);
+    const measured = await readMeasuredFailures(context);
+    const readings = measured.flatMap(toReadings);
 
     return { readings, notes: [], truncated: false };
   }
@@ -30,9 +29,9 @@ export class KnownFailuresGenerator implements DetectionSignalGenerator {
 
 /**
  * 1. Joins the strategy's enabled rules with the knowledge indicators they watch.
- * 2. Reads the rows those rules wrote in the window, and keeps each rule's latest.
+ * 2. Reads the rows those rules wrote in the window, grouped by rule.
  */
-async function readActiveFailures(context: GeneratorContext): Promise<ActiveKnownFailure[]> {
+async function readMeasuredFailures(context: GeneratorContext): Promise<MeasuredKnownFailure[]> {
   const { spaceId, window, rules, abortSignal } = context;
 
   // 1.
@@ -47,10 +46,13 @@ async function readActiveFailures(context: GeneratorContext): Promise<ActiveKnow
     abortSignal,
   });
 
-  return [...getLatestRowByRuleId(rows)].flatMap(([ruleId, row]) => {
-    const knowledgeIndicator = knowledgeIndicatorByRuleId.get(ruleId);
-    return knowledgeIndicator ? [{ knowledgeIndicator, row }] : [];
-  });
+  // The reader returns rows newest first, and grouping keeps that order within each rule.
+  return Object.entries(groupBy(rows, ({ rule_id: ruleId }) => ruleId)).flatMap(
+    ([ruleId, ruleRows]) => {
+      const knowledgeIndicator = knowledgeIndicatorByRuleId.get(ruleId);
+      return knowledgeIndicator ? [{ knowledgeIndicator, rows: ruleRows }] : [];
+    }
+  );
 }
 
 /**
@@ -81,15 +83,4 @@ async function readWatchedKnowledgeIndicators({
       ])
       .filter(([ruleId]) => enabledRuleIds.has(ruleId))
   );
-}
-
-/** Each rule's latest row; the rows come newest first, so a rule's first row is its latest. */
-function getLatestRowByRuleId(rows: RuleRow[]): Map<string, RuleRow> {
-  const latestRowByRuleId = new Map<string, RuleRow>();
-  rows.forEach((row) => {
-    if (!latestRowByRuleId.has(row.rule_id)) {
-      latestRowByRuleId.set(row.rule_id, row);
-    }
-  });
-  return latestRowByRuleId;
 }

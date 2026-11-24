@@ -22,15 +22,20 @@ type Level = typeof BASE | typeof HIGH | number;
 
 /**
  * Per-minute shape of each scenario, by how many minutes ago the minute starts: 1 is the last
- * closed minute. `base` is about 2 matches a minute, `high` about 25.
+ * closed minute, left out by the end margin, so 2 is the newest minute the rule counts. `base` is
+ * about 2 matches a minute, `high` about 25.
  */
 const SCENARIOS: Record<string, (minutesAgo: number) => Level> = {
-  spike: (minutesAgo) => (minutesAgo === 2 ? 80 : BASE),
-  step_up: (minutesAgo) => (minutesAgo <= 40 ? HIGH : BASE),
-  recovered: (minutesAgo) => (minutesAgo >= 16 && minutesAgo <= 60 ? HIGH : BASE),
-  step_down_after_up: (minutesAgo) => (minutesAgo >= 61 && minutesAgo <= 120 ? HIGH : BASE),
   quiet: () => 0,
-  flat_high: () => HIGH,
+  spike: (minutesAgo) => (minutesAgo === 3 ? 80 : BASE),
+  step_up: (minutesAgo) => (minutesAgo <= 20 ? HIGH : BASE),
+  // A one-minute spike after a step up, so the spike is the newest change `CHANGE_POINT` marks.
+  step_then_spike: (minutesAgo) => {
+    if (minutesAgo === 6) {
+      return 80;
+    }
+    return minutesAgo <= 60 ? HIGH : BASE;
+  },
 };
 
 /** A deterministic wobble of one around the level, so medians are stable and the series is not flat. */
@@ -106,8 +111,12 @@ const runCompiledQuery = async (esClient: ElasticsearchClient, scenario: string)
   );
 };
 
-// The rule's query is the detection: if it returns a row for a series that is not up, or none for
-// one that is, every Known failures signal is wrong. This runs it against real Elasticsearch.
+const getCounts = (newestCounts: unknown): number[] =>
+  ([newestCounts].flat() as string[]).sort().map((minute) => Number(minute.split('=')[1]));
+
+// The rule's query is the measurement every Known failures signal is judged on: a wrong count, a
+// normal level read over the wrong minutes or a missing row misjudges every indicator. This runs it
+// against real Elasticsearch. The assertions hold if a minute boundary passes while the test runs.
 describe('compileKnownFailureQuery against Elasticsearch', () => {
   let esServer: TestElasticsearchUtils;
   let esClient: ElasticsearchClient;
@@ -134,41 +143,55 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
     await esServer?.stop().catch(() => {});
   });
 
-  it('reports a spike with its own minute as the level', async () => {
-    const rows = await runCompiledQuery(esClient, 'spike');
+  it('returns one row of zeros for a knowledge indicator that never matches', async () => {
+    const rows = await runCompiledQuery(esClient, 'quiet');
 
-    expect(rows).toEqual([
-      expect.objectContaining({
-        change_type: 'spike',
-        reference: 2,
-        level_at_change: 80,
-        recovery_threshold: 41,
-        recent_max: 80,
-        // Every minute of the six-hour window, empty or not.
-        minute_count: 360,
-      }),
-    ]);
+    expect(rows).toHaveLength(1);
+    expect(getCounts(rows[0].newest_counts)).toEqual([0, 0, 0, 0, 0, 0, 0]);
+    expect(rows[0]).toEqual(
+      expect.objectContaining({ baseline_median: 0, baseline_minutes: 60, change_at: null })
+    );
   });
 
-  it('reports a sustained step up with the level after it', async () => {
-    const rows = await runCompiledQuery(esClient, 'step_up');
+  it('returns a spike among the newest counts, measured against the hour before them', async () => {
+    const [row] = await runCompiledQuery(esClient, 'spike');
 
-    expect(rows).toEqual([
+    expect(getCounts(row.newest_counts)).toContain(80);
+    expect(row).toEqual(
+      expect.objectContaining({
+        // The wobble of one around 2, over every minute of the hour, empty or not.
+        baseline_median: 2,
+        baseline_mad: 1,
+        baseline_minutes: 60,
+        // A spike is the baseline check's to judge, not a change of level.
+        change_at: null,
+      })
+    );
+  });
+
+  it('returns the latest change point with the levels before and after it', async () => {
+    const [row] = await runCompiledQuery(esClient, 'step_up');
+
+    expect(row).toEqual(
       expect.objectContaining({
         change_type: 'step_change',
-        reference: 2,
-        level_at_change: 25,
-        recovery_threshold: 13.5,
-      }),
-    ]);
+        before_change_median: 2,
+        after_change_median: 25,
+        recent_median: 25,
+      })
+    );
+    expect(row.before_change_minutes).toBeGreaterThan(300);
   });
 
-  it.each([
-    ['recovered', 'a step up that has been back to normal for fifteen minutes'],
-    ['step_down_after_up', 'a step down after a step up'],
-    ['quiet', 'a knowledge indicator that never matches'],
-    ['flat_high', 'a level that is high but never changed'],
-  ])('returns nothing for %s: %s', async (scenario) => {
-    await expect(runCompiledQuery(esClient, scenario)).resolves.toEqual([]);
+  it('keeps reporting a step up after a later one-minute spike', async () => {
+    const [row] = await runCompiledQuery(esClient, 'step_then_spike');
+
+    expect(row).toEqual(
+      expect.objectContaining({
+        change_type: 'step_change',
+        before_change_median: 2,
+        after_change_median: 25,
+      })
+    );
   });
 });
