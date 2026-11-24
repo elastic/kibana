@@ -514,8 +514,9 @@ describe('Filter Utils', () => {
       });
 
       it('validates them in linear time', () => {
-        // At this size a linear walker takes ~0.2 s locally, while one that copies its results for
-        // every clause took ~9 s. The limit leaves headroom for slower CI machines.
+        // At this size a linear walker takes ~0.2 s locally (~0.5 s on an overloaded machine), while
+        // one that copies its results for every clause took ~9 s. The limit leaves ample headroom
+        // for slow CI workers and still catches a return to quadratic work.
         const clauseCount = 100_000;
         const astFilter = siblingClauses(clauseCount, () => 'foo.attributes.title');
 
@@ -529,7 +530,7 @@ describe('Filter Utils', () => {
         const elapsedMs = Date.now() - start;
 
         expect(validationObject).toHaveLength(clauseCount);
-        expect(elapsedMs).toBeLessThan(2_000);
+        expect(elapsedMs).toBeLessThan(5_000);
       });
     });
   });
