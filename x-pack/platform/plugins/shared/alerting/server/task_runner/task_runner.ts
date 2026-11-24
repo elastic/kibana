@@ -528,6 +528,7 @@ export class TaskRunner<
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
+      ruleResultService: this.ruleResult,
       apiKey: effectiveApiKey,
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,

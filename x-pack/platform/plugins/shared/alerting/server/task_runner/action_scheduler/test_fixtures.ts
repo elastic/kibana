@@ -23,6 +23,7 @@ import type { NormalizedRuleType } from '../../rule_type_registry';
 import type { TaskRunnerContext } from '../types';
 import type { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
 import { Alert } from '../../alert';
+import { RuleResultService } from '../../monitoring/rule_result_service';
 
 const apiKey = Buffer.from('123:abc').toString('base64');
 
@@ -207,4 +208,5 @@ export const getDefaultSchedulerContext = <
   } as unknown as ConcreteTaskInstance,
   actionsClient: actionsClientMock,
   alertsClient: alertsClientMock,
+  ruleResultService: new RuleResultService(),
 });
