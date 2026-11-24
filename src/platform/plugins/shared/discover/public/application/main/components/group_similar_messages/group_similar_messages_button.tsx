@@ -57,7 +57,7 @@ export const GroupSimilarMessagesButton = () => {
   return (
     <EuiToolTip
       content={i18n.translate('discover.esql.groupSimilarMessages.tooltip', {
-        defaultMessage: 'Group similar log messages into patterns to spot trends and anomalies.',
+        defaultMessage: 'Group log messages by pattern to spot trends and anomalies.',
       })}
     >
       <EuiBadge
