@@ -16,7 +16,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
   useHasActiveSession,
-  useIsInsideParentFlyout,
+  useIsInManagedFlyout,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -36,9 +36,11 @@ const QUERY_DETAILS_TITLE = i18n.translate('xpack.osquery.liveQueryActions.detai
 
 const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action, onClose }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'osqueryQueryDetailsFlyoutTitle' });
-  const isInsideParentFlyout = useIsInsideParentFlyout();
+  // Only join a session when rendered inside a managed (session) flyout; an unmanaged
+  // parent (session="never") keeps this flyout standalone at size m.
+  const isInManagedFlyout = useIsInManagedFlyout();
   const hasActiveSession = useHasActiveSession();
-  const isNested = isInsideParentFlyout && hasActiveSession;
+  const isNested = isInManagedFlyout && hasActiveSession;
 
   return (
     <EuiPortal>

@@ -134,8 +134,11 @@ describe('QueryDetailsFlyout', () => {
 
     expectDetailsShown();
     expect(validationErrors(consoleErrorSpy)).toHaveLength(0);
-    expect(getFlyoutManagerStore().getState().flyouts).toEqual(
-      expect.arrayContaining([expect.objectContaining({ level: 'child', size: 's' })])
+    // an unmanaged parent keeps the details flyout standalone: only the sibling session is registered
+    const { flyouts } = getFlyoutManagerStore().getState();
+    expect(flyouts).toHaveLength(1);
+    expect(flyouts).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ level: 'child' })])
     );
   });
 });
