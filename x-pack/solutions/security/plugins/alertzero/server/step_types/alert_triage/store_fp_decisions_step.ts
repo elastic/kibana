@@ -109,7 +109,9 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
               )
             : { closedAsOther: [], closedWithoutReason: [] };
         const blockingIds = new Set(closedAsOther);
-        const noEvidenceIds = new Set([...closedAsOther, ...closedWithoutReason]);
+        // Alerts closed as another reason are left out of the grouping by `blockingIds`, so the
+        // evidence filter only has the ones closed with no reason left to take out.
+        const noEvidenceIds = new Set(closedWithoutReason);
         const conflictedKeys = groupByStrictKey({
           alerts: entries.filter(({ id }) => blockingIds.has(id)),
           spaceId,
