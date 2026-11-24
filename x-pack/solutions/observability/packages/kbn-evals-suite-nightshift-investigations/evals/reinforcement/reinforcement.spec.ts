@@ -19,6 +19,7 @@ import {
   replaceSandboxAllowlist,
   restoreSpaceSettings,
   snapshotSpaceSettings,
+  type SpaceSetting,
 } from '../investigation/sandbox_allowlist';
 import { enableNightshiftSpace } from '../investigation/space_setup';
 import {
@@ -222,9 +223,13 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
       );
       // Snapshot the custom context and egress rules before setup, which adds rules of its own.
       const previousSettings = await snapshotSpaceSettings(fetch);
+      const touched = new Set<SpaceSetting>();
       try {
+        // Setup adds repository rules.
+        touched.add('sandboxAllowlist');
         await setup([NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID]);
         await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: false });
+        touched.add('customContext');
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         await replaceSandboxAllowlist(fetch, getDatasetSandboxAllowlist(dataset));
         const [experiment] = await executorClient.runExperiment(
@@ -251,7 +256,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
           repetitions,
         });
       } finally {
-        await restoreSpaceSettings(fetch, previousSettings);
+        await restoreSpaceSettings(fetch, previousSettings, touched);
       }
     }
   );

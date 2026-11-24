@@ -21,6 +21,7 @@ import {
   replaceSandboxAllowlist,
   restoreSpaceSettings,
   snapshotSpaceSettings,
+  type SpaceSetting,
 } from './sandbox_allowlist';
 import {
   ORCABENCH_ES_CONNECTOR_ID,
@@ -191,7 +192,10 @@ export const registerInvestigationEvaluation = ({
         // The custom context and egress rules are the default space's, so a run on an existing
         // stack must leave them as it found them. Snapshot before setup, which adds rules of its own.
         const previousSettings = await snapshotSpaceSettings(fetch);
+        const touched = new Set<SpaceSetting>();
         try {
+          // Setup adds repository rules.
+          touched.add('sandboxAllowlist');
           await enableNightshiftSpace({
             config,
             esClient,
@@ -201,6 +205,7 @@ export const registerInvestigationEvaluation = ({
             log,
             connectorId: connector.id,
           });
+          touched.add('customContext');
           await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
           // The rules are space-wide. Safe because the suite runs one Playwright worker (Scout's
           // default) and each CI shard has its own Kibana, so no two datasets share the space at once.
@@ -481,7 +486,7 @@ export const registerInvestigationEvaluation = ({
             )
             .toBeGreaterThan(0);
         } finally {
-          await restoreSpaceSettings(fetch, previousSettings);
+          await restoreSpaceSettings(fetch, previousSettings, touched);
         }
       }
     );

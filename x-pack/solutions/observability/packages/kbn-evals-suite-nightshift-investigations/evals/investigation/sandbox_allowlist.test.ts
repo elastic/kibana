@@ -85,10 +85,14 @@ describe('restoreSpaceSettings', () => {
     });
 
     await expect(
-      restoreSpaceSettings(fetch as unknown as HttpHandler, {
-        customContext: ['before the eval'],
-        sandboxAllowlist: ['allow https github.com GET /elastic/kibana/info/refs'],
-      })
+      restoreSpaceSettings(
+        fetch as unknown as HttpHandler,
+        {
+          customContext: ['before the eval'],
+          sandboxAllowlist: ['allow https github.com GET /elastic/kibana/info/refs'],
+        },
+        new Set(['customContext', 'sandboxAllowlist'])
+      )
     ).rejects.toThrow(AggregateError);
     expect(fetch).toHaveBeenCalledWith(
       SANDBOX_ALLOWLIST_API_PATH,

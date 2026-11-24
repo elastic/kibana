@@ -80,6 +80,9 @@ export interface SpaceSettingsSnapshot {
   sandboxAllowlist: string[];
 }
 
+/** A setting an eval run changes; a run records each one before it starts changing it. */
+export type SpaceSetting = keyof SpaceSettingsSnapshot;
+
 /** Reads the settings an eval run changes, to put back with `restoreSpaceSettings`. */
 export const snapshotSpaceSettings = async (fetch: HttpHandler): Promise<SpaceSettingsSnapshot> => {
   const [customContext, sandboxAllowlist] = await Promise.all([
@@ -89,15 +92,21 @@ export const snapshotSpaceSettings = async (fetch: HttpHandler): Promise<SpaceSe
   return { customContext, sandboxAllowlist };
 };
 
-/** Puts both settings back independently, so one failure can't skip the other, then fails if either did. */
+/**
+ * Puts back the settings the run touched, independently so one failure can't skip the other, then
+ * fails if either did. Untouched settings are left alone: restoring rewrites snippet metadata.
+ */
 export const restoreSpaceSettings = async (
   fetch: HttpHandler,
-  { customContext, sandboxAllowlist }: SpaceSettingsSnapshot
+  { customContext, sandboxAllowlist }: SpaceSettingsSnapshot,
+  touched: ReadonlySet<SpaceSetting>
 ): Promise<void> => {
   const failures = (
     await Promise.allSettled([
-      replaceCustomContext(fetch, customContext),
-      replaceSandboxAllowlist(fetch, sandboxAllowlist),
+      touched.has('customContext') ? replaceCustomContext(fetch, customContext) : undefined,
+      touched.has('sandboxAllowlist')
+        ? replaceSandboxAllowlist(fetch, sandboxAllowlist)
+        : undefined,
     ])
   ).filter((result): result is PromiseRejectedResult => result.status === 'rejected');
   if (failures.length > 0) {
