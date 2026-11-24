@@ -369,9 +369,11 @@ describe('withRetry', () => {
       ['Saturday, 21-Nov-26 10:00:45 GMT', 45_000],
       ['Sat Nov 21 10:00:45 2026', 45_000],
       ['Sat Nov  1 10:00:45 2026', 0],
-      // a leap second is only valid at 23:59:60 on the last day of June or December
+      // a leap second is only valid at 23:59:60 on the last day of a month
       ['Thu, 31 Dec 2026 23:59:60 GMT', Date.UTC(2027, 0, 1) - Date.UTC(2026, 10, 21, 10)],
       ['Tue, 30 Jun 2026 23:59:60 GMT', 0],
+      ['Mon, 30 Nov 2026 23:59:60 GMT', Date.UTC(2026, 11, 1) - Date.UTC(2026, 10, 21, 10)],
+      ['Tue, 31 Mar 2026 23:59:60 GMT', 0],
       // a two-digit year more than 50 years ahead is the most recent past year with those digits
       ['Saturday, 21-Nov-99 10:00:45 GMT', 0],
     ])('parses valid %p as %p ms', (value, expected) => {
@@ -421,7 +423,8 @@ describe('withRetry', () => {
       'Thu, 31 Dec 2026 23:58:60 GMT',
       'Wed, 30 Dec 2026 23:59:60 GMT',
       'Tue, 30 Jun 2026 22:59:60 GMT',
-      'Mon, 31 Aug 2026 23:59:60 GMT',
+      'Sun, 30 Aug 2026 23:59:60 GMT',
+      'Sat, 28 Feb 2026 23:58:60 GMT',
       'Sat, 21 Nov 2026 10:00:61 GMT',
       'Sat, 21 Foo 2026 10:00:30 GMT',
       'Foo, 21 Nov 2026 10:00:30 GMT',
