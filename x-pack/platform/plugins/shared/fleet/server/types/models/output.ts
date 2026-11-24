@@ -689,7 +689,7 @@ const OtlpExporterBaseSchema = {
   tls: schema.maybe(schema.oneOf([schema.literal(null), OtlpExporterTlsSchema])),
   sending_queue: nullable(
     OtlpExporterSendingQueueSchema,
-    'The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting set to `null` is reset to its default. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.'
+    'The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.'
   ),
   retry_on_failure: schema.maybe(schema.oneOf([schema.literal(null), OtlpExporterRetrySchema])),
 };
