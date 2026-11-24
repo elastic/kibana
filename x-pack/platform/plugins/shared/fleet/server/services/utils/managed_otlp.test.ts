@@ -12,6 +12,7 @@ import { OutputInvalidError } from '../../errors';
 import {
   applyManagedOtlpDefaults,
   getManagedOtlpEndpoint,
+  getOtlpExporterUpdate,
   isManagedOtlpEndpoint,
   validateOtlpSendingQueueSizes,
 } from './managed_otlp';
@@ -228,7 +229,7 @@ describe('validateOtlpSendingQueueSizes', () => {
   it('rejects a minimum batch size that does not fit in the queue', () => {
     expect(() =>
       validateOtlpSendingQueueSizes({
-        update: { sizer: 'items', batch: { sizer: 'items' } },
+        queue: { sizer: 'items', batch: { sizer: 'items' } },
         fromPreconfiguration: false,
       })
     ).toThrow(OutputInvalidError);
@@ -237,7 +238,7 @@ describe('validateOtlpSendingQueueSizes', () => {
   it('rejects a maximum batch size below the minimum', () => {
     expect(() =>
       validateOtlpSendingQueueSizes({
-        update: {
+        queue: {
           sizer: 'bytes',
           queue_size: 50_000_000,
           batch: { min_size: 2000, max_size: 1000 },
@@ -254,39 +255,132 @@ describe('validateOtlpSendingQueueSizes', () => {
       { sizer: 'items' as const, batch: null },
       null,
       undefined,
-    ].forEach((update) =>
+    ].forEach((queue) =>
       expect(() =>
-        validateOtlpSendingQueueSizes({ update, fromPreconfiguration: false })
+        validateOtlpSendingQueueSizes({ queue, fromPreconfiguration: false })
       ).not.toThrow()
     );
-  });
-
-  it('checks the update merged into the stored queue', () => {
-    // the stored queue size holds the batch that the update sets
-    expect(() =>
-      validateOtlpSendingQueueSizes({
-        update: { sizer: 'items', batch: { sizer: 'items' } },
-        stored: { sizer: 'items', queue_size: 100_000 },
-        fromPreconfiguration: false,
-      })
-    ).not.toThrow();
-    // the stored batch does not fit in the queue size of the update
-    expect(() =>
-      validateOtlpSendingQueueSizes({
-        update: { queue_size: 500 },
-        stored: { sizer: 'items', queue_size: 100_000, batch: { sizer: 'items', min_size: 2000 } },
-        fromPreconfiguration: false,
-      })
-    ).toThrow(OutputInvalidError);
   });
 
   it('only warns for a preconfigured output', () => {
     expect(() =>
       validateOtlpSendingQueueSizes({
-        update: { sizer: 'items', batch: { sizer: 'items' } },
+        queue: { sizer: 'items', batch: { sizer: 'items' } },
         fromPreconfiguration: true,
       })
     ).not.toThrow();
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('min_size (8192)'));
+  });
+});
+
+describe('getOtlpExporterUpdate', () => {
+  const OTHER_HOST = 'collector.example.com:4317';
+  const update = (endpoint: string, sendingQueue?: unknown) =>
+    ({
+      protocol: 'grpc',
+      endpoint,
+      ...(sendingQueue !== undefined ? { sending_queue: sendingQueue } : {}),
+    } as any);
+  const stored = (endpoint: string, sendingQueue: unknown) =>
+    ({ protocol: 'grpc', endpoint, sending_queue: sendingQueue } as any);
+
+  beforeEach(() => {
+    mockedAppContextService.getCloud.mockReturnValue({
+      managedOtlp: { url: MANAGED_HOST },
+    } as any);
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('keeps the stored settings that a partial update of the managed endpoint leaves out', () => {
+    const storedQueue = {
+      sizer: 'items',
+      queue_size: 100_000,
+      block_on_overflow: false,
+      batch: { sizer: 'items', min_size: 2000 },
+    };
+    expect(
+      getOtlpExporterUpdate({
+        update: update(MANAGED_HOST, { batch: { min_size: 3000 } }),
+        stored: stored(MANAGED_HOST, storedQueue),
+        fromPreconfiguration: false,
+      }).sending_queue
+    ).toEqual({
+      enabled: true,
+      sizer: 'items',
+      queue_size: 100_000,
+      block_on_overflow: false,
+      batch: { flush_timeout: '1s', sizer: 'items', min_size: 3000 },
+    });
+    expect(
+      getOtlpExporterUpdate({
+        update: update(MANAGED_HOST),
+        stored: stored(MANAGED_HOST, storedQueue),
+        fromPreconfiguration: false,
+      }).sending_queue
+    ).toEqual(expect.objectContaining({ queue_size: 100_000, block_on_overflow: false }));
+  });
+
+  it('replaces the stored batch with an empty one, as the saved object update does', () => {
+    // the stored minimum of 500 fits in 1000 items, the default minimum of 8192 does not
+    expect(() =>
+      getOtlpExporterUpdate({
+        update: update(OTHER_HOST, { batch: {} }),
+        stored: stored(OTHER_HOST, {
+          sizer: 'items',
+          queue_size: 1000,
+          batch: { sizer: 'items', min_size: 500 },
+        }),
+        fromPreconfiguration: false,
+      })
+    ).toThrow(OutputInvalidError);
+  });
+
+  it('removes the stored settings that the merged queue does not have', () => {
+    expect(
+      getOtlpExporterUpdate({
+        update: update(OTHER_HOST, { batch: {} }),
+        stored: stored(OTHER_HOST, {
+          sizer: 'items',
+          queue_size: 10_000,
+          batch: { sizer: 'items', min_size: 500 },
+        }),
+        fromPreconfiguration: false,
+      }).sending_queue
+    ).toEqual({
+      sizer: 'items',
+      queue_size: 10_000,
+      batch: { sizer: null, min_size: null },
+    });
+  });
+
+  it('checks the update merged into the stored queue', () => {
+    // the stored queue size holds the batch that the update sets
+    expect(() =>
+      getOtlpExporterUpdate({
+        update: update(OTHER_HOST, { sizer: 'items', batch: { sizer: 'items' } }),
+        stored: stored(OTHER_HOST, { sizer: 'items', queue_size: 100_000 }),
+        fromPreconfiguration: false,
+      })
+    ).not.toThrow();
+    // the stored batch does not fit in the queue size of the update
+    expect(() =>
+      getOtlpExporterUpdate({
+        update: update(OTHER_HOST, { queue_size: 500 }),
+        stored: stored(OTHER_HOST, {
+          sizer: 'items',
+          queue_size: 100_000,
+          batch: { sizer: 'items', min_size: 2000 },
+        }),
+        fromPreconfiguration: false,
+      })
+    ).toThrow(OutputInvalidError);
+  });
+
+  it('leaves out the queue of an update when there is none to write', () => {
+    const otherUpdate = update(OTHER_HOST);
+    expect(
+      getOtlpExporterUpdate({ update: otherUpdate, stored: undefined, fromPreconfiguration: false })
+    ).toBe(otherUpdate);
   });
 });

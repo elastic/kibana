@@ -79,6 +79,7 @@ export const getOtlpQueueDefaults = ({
   isManaged,
   queueSizer,
   batchSizer,
+  batchEnabled = true,
   queueSize,
   minSize,
   maxSize,
@@ -88,6 +89,8 @@ export const getOtlpQueueDefaults = ({
   queueSizer: string;
   /** The unit of the batch, empty for the default one. */
   batchSizer: string;
+  /** Whether the output batches: the size of a queue that does not count bytes depends on it. */
+  batchEnabled?: boolean;
   queueSize?: string;
   minSize?: string;
   maxSize?: string;
@@ -112,11 +115,13 @@ export const getOtlpQueueDefaults = ({
     withManagedOtlpQueueDefaults({
       sizer: sizer as OtlpQueueSizer,
       queue_size: toSize(sizes.queueSize),
-      batch: {
-        ...(batchSizer ? { sizer: batchSizer as OtlpBatchSizer } : {}),
-        min_size: toSize(sizes.minSize),
-        max_size: toSize(sizes.maxSize),
-      },
+      batch: batchEnabled
+        ? {
+            ...(batchSizer ? { sizer: batchSizer as OtlpBatchSizer } : {}),
+            min_size: toSize(sizes.minSize),
+            max_size: toSize(sizes.maxSize),
+          }
+        : null,
     });
   const filled = fill({ queueSize, minSize, maxSize });
   return {
@@ -433,6 +438,7 @@ export function useOtlpInputs(
       isManaged,
       queueSizer: otlpQueueSizerInput.value,
       batchSizer: otlpBatchSizerInput.value,
+      batchEnabled: otlpBatchEnabledInput.value,
       queueSize: otlpQueueSizeInput.value,
       minSize: otlpBatchMinSizeInput.value,
       maxSize: otlpBatchMaxSizeInput.value,
@@ -759,6 +765,7 @@ export const getOtlpQueueDefaultsOfInputs = (inputs: OtlpInputs) =>
     isManaged: isManagedEndpoint(inputs),
     queueSizer: inputs.otlpQueueSizerInput.value,
     batchSizer: inputs.otlpBatchSizerInput.value,
+    batchEnabled: inputs.otlpBatchEnabledInput.value,
     queueSize: inputs.otlpQueueSizeInput.value,
     minSize: inputs.otlpBatchMinSizeInput.value,
     maxSize: inputs.otlpBatchMaxSizeInput.value,

@@ -112,29 +112,47 @@ export const withManagedOtlpQueueDefaults = (
   };
 };
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
- * Merges an update of a sending queue into the stored one, as a saved object update does: a
- * setting that is left out keeps its stored value, and `null` removes it.
+ * Merges an update into a stored value as a saved object update does: a non-empty object is merged
+ * into the stored one, a setting that is left out keeps its stored value, and any other value,
+ * `null` and an empty object included, replaces the stored one.
  */
-export const mergeOtlpSendingQueue = (
-  stored: OtlpSendingQueue | null | undefined,
-  update: OtlpSendingQueue | null | undefined
-): OtlpSendingQueue | null | undefined => {
+const mergeAsSavedObjectUpdate = (stored: unknown, update: unknown): unknown => {
   if (update === undefined) {
     return stored;
   }
-  if (update === null || !stored) {
+  if (!isPlainObject(update) || !Object.keys(update).length || !isPlainObject(stored)) {
     return update;
   }
-  const definedEntries = <T extends object>(value: T) =>
-    Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as Partial<T>;
-  const batch =
-    update.batch === undefined
-      ? stored.batch
-      : update.batch === null || !stored.batch
-      ? update.batch
-      : { ...stored.batch, ...definedEntries(update.batch) };
-  return { ...stored, ...definedEntries(update), batch };
+  const merged: Record<string, unknown> = { ...stored };
+  Object.entries(update).forEach(([key, value]) => {
+    merged[key] = mergeAsSavedObjectUpdate(stored[key], value);
+  });
+  return merged;
+};
+
+/** The sending queue that an output has once an update of it is merged into the stored one. */
+export const mergeOtlpSendingQueue = (
+  stored: OtlpSendingQueue | null | undefined,
+  update: OtlpSendingQueue | null | undefined
+) => mergeAsSavedObjectUpdate(stored, update) as OtlpSendingQueue | null | undefined;
+
+/**
+ * An update that writes a value in place of a stored one, as a saved object update merges it: the
+ * stored settings that the value does not have are set to `null`.
+ */
+export const withRemovedStoredSettings = (value: unknown, stored: unknown): unknown => {
+  if (!isPlainObject(value) || !isPlainObject(stored)) {
+    return value;
+  }
+  const result: Record<string, unknown> = { ...value };
+  Object.keys(stored).forEach((key) => {
+    result[key] = key in value ? withRemovedStoredSettings(value[key], stored[key]) : null;
+  });
+  return result;
 };
 
 /**

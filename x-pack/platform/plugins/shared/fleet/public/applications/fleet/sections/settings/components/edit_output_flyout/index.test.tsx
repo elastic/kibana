@@ -2475,6 +2475,23 @@ describe('EditOutputFlyout', () => {
           });
         });
 
+        it('should size a queue of the managed endpoint that does not count bytes for its batch', async () => {
+          mockStartServices(false, MANAGED_URL);
+          const { utils } = renderFlyout();
+          selectOtlpType(utils);
+          setValue(utils, 'otlpEndpointInput', 'managed.example.com:443');
+          setValue(utils, 'otlpQueueSizerInput', 'items');
+          setValue(utils, 'otlpBatchSizerInput', 'items');
+          const queueSize = () => utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput');
+
+          // the queue holds a batch of the default minimum size
+          await waitFor(() => expect(queueSize()).toHaveAttribute('placeholder', '8192'));
+
+          // without batching, the queue keeps the spec default
+          click(utils, 'otlpBatchEnabledInput');
+          await waitFor(() => expect(queueSize()).toHaveAttribute('placeholder', '1000'));
+        });
+
         it('should send the empty settings of the managed endpoint as null for the server to fill', async () => {
           mockStartServices(false, MANAGED_URL);
           const { utils } = renderFlyout();

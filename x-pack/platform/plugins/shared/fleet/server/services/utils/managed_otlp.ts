@@ -11,6 +11,7 @@ import {
   getOtlpSendingQueueSizeError,
   mergeOtlpSendingQueue,
   withManagedOtlpQueueDefaults,
+  withRemovedStoredSettings,
 } from '../../../common/services/otlp_sending_queue';
 import type { OtlpSendingQueue } from '../../../common/services/otlp_sending_queue';
 import { OutputInvalidError } from '../../errors';
@@ -46,20 +47,18 @@ export const applyManagedOtlpDefaults = (exporter: OtlpExporterConfig): OtlpExpo
 };
 
 /**
- * Checks the sizes of the sending queue that an output gets once it is saved: the stored queue with
- * the update merged into it. Sizes that the collector rejects are an error, except for a
- * preconfigured output, which only logs a warning so that it does not stop the Fleet setup.
+ * Checks the sizes of the sending queue of an output. Sizes that the collector rejects are an error,
+ * except for a preconfigured output, which only logs a warning so that it does not stop the Fleet
+ * setup.
  */
 export const validateOtlpSendingQueueSizes = ({
-  update,
-  stored,
+  queue,
   fromPreconfiguration,
 }: {
-  update: OtlpSendingQueue | null | undefined;
-  stored?: OtlpSendingQueue | null;
+  queue: OtlpSendingQueue | null | undefined;
   fromPreconfiguration: boolean;
 }) => {
-  const error = getOtlpSendingQueueSizeError(mergeOtlpSendingQueue(stored, update));
+  const error = getOtlpSendingQueueSizeError(queue);
   if (!error) {
     return;
   }
@@ -70,4 +69,34 @@ export const validateOtlpSendingQueueSizes = ({
     return;
   }
   throw new OutputInvalidError(error);
+};
+
+/**
+ * The exporter of an update of an OTLP output. The update of the sending queue is merged into the
+ * stored queue first, so the defaults of the managed endpoint only fill what neither sets, and the
+ * sizes are checked as they are saved. The whole queue is then written, with the stored settings it
+ * no longer has set to `null`.
+ */
+export const getOtlpExporterUpdate = ({
+  update,
+  stored,
+  fromPreconfiguration,
+}: {
+  update: OtlpExporterConfig;
+  stored: OtlpExporterConfig | undefined;
+  fromPreconfiguration: boolean;
+}): OtlpExporterConfig => {
+  const storedQueue = stored?.sending_queue;
+  const exporter = applyManagedOtlpDefaults({
+    ...update,
+    sending_queue: mergeOtlpSendingQueue(storedQueue, update.sending_queue),
+  } as OtlpExporterConfig);
+  validateOtlpSendingQueueSizes({ queue: exporter.sending_queue, fromPreconfiguration });
+  if (exporter.sending_queue === undefined) {
+    return update;
+  }
+  return {
+    ...update,
+    sending_queue: withRemovedStoredSettings(exporter.sending_queue, storedQueue),
+  } as OtlpExporterConfig;
 };
