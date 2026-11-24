@@ -13,10 +13,15 @@ import {
 } from '@kbn/significant-events-schema';
 import { forbidden } from '@hapi/boom';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { getSamplingProblem } from '../extraction/select_supported_candidates';
 import { internalKIOnboardingRoutes } from './route';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock('../extraction/select_supported_candidates', () => ({
+  getSamplingProblem: jest.fn(),
 }));
 
 const mockResolveNightshiftModelForRequest = jest.fn(async ({ step }: { step: string }) =>
@@ -34,6 +39,8 @@ const bulkStatusRoute =
   internalKIOnboardingRoutes['POST /internal/streams/onboarding/_bulk_status'];
 const statusRoute =
   internalKIOnboardingRoutes['GET /internal/streams/{sourceId}/onboarding/_status'];
+const canOnboardRoute =
+  internalKIOnboardingRoutes['GET /internal/streams/{sourceId}/onboarding/_can_onboard'];
 type HandlerParams = Parameters<typeof route.handler>[0];
 
 const makeHandlerParams = ({
@@ -165,6 +172,30 @@ it('maps an unknown strict override to a 400 response', async () => {
     output: { statusCode: 400 },
   });
   expect(run).not.toHaveBeenCalled();
+});
+
+describe('canOnboardRoute', () => {
+  it('reports why a source cannot be onboarded', async () => {
+    const handlerParams = {
+      params: { path: { sourceId: 'logs.test' } },
+      request: {},
+      server: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({ source: { view_name: 'view-logs-test' } }),
+        },
+      }),
+    } as unknown as Parameters<typeof canOnboardRoute.handler>[0];
+
+    jest.mocked(getSamplingProblem).mockResolvedValueOnce('no @timestamp');
+    await expect(canOnboardRoute.handler(handlerParams)).resolves.toEqual({
+      canOnboard: false,
+      reason: 'no @timestamp',
+    });
+
+    jest.mocked(getSamplingProblem).mockResolvedValueOnce(undefined);
+    await expect(canOnboardRoute.handler(handlerParams)).resolves.toEqual({ canOnboard: true });
+  });
 });
 
 describe('onboardingBulkStatusRoute', () => {

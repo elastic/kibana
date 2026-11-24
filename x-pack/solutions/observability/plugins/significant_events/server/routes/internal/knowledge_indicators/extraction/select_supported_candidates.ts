@@ -23,7 +23,7 @@ export interface UnsupportedSource {
 }
 
 /** Answers why feature identification would refuse to sample the source, with its own guard. */
-const getSamplingProblem = async ({
+export const getSamplingProblem = async ({
   index,
   esClient,
   logger,

@@ -154,3 +154,19 @@ describe('KI onboarding workflow recency guard', () => {
     expect(input?.default).toBe(0);
   });
 });
+
+describe('KI onboarding workflow source check', () => {
+  it('fails only on an explicit refusal', () => {
+    const exit = workflow.steps.find(({ name }) => name === 'exit_if_cannot_onboard');
+    const matches = (output?: { canOnboard: boolean }): boolean =>
+      Boolean(
+        createWorkflowLiquidEngine().evalValueSync(exit?.condition?.slice(3, -2).trim() ?? '', {
+          steps: { check_source: { output } },
+        })
+      );
+
+    expect(exit?.steps?.map(({ type }) => type)).toEqual(['workflow.fail']);
+    expect(matches({ canOnboard: false })).toBe(true);
+    expect(matches()).toBe(false);
+  });
+});

@@ -105,6 +105,29 @@ triggers:
         required: false
         description: "Root workflow trigger type propagated by a managed driver."
 steps:
+  # Ahead of the budget, so a source that cannot be sampled takes no unit.
+  - name: check_source
+    type: kibana.request
+    if: '${{ inputs.skipFeatures == false and inputs.sourceType != "metrics" }}'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/onboarding/_can_onboard'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+    timeout: '20s'
+    on-failure:
+      continue: true
+
+  - name: exit_if_cannot_onboard
+    type: if
+    condition: '${{ steps.check_source.output.canOnboard == false }}'
+    steps:
+      - name: fail_cannot_onboard
+        type: workflow.fail
+        with:
+          message: '{{ steps.check_source.output.reason }}'
+
   # Metrics sources are gated later, only when they fall back to the LLM path.
   - name: check_budget
     type: kibana.request

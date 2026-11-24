@@ -28,6 +28,7 @@ import {
   MAX_SOURCES_PER_QUERY,
   type SignificantEventsKIsOnboardingInputs,
 } from '../../../../lib/workflows/onboarding_workflow_client';
+import { getSamplingProblem } from '../extraction/select_supported_candidates';
 
 const timestampFromString = z
   .string()
@@ -242,6 +243,40 @@ const onboardingStatusRoute = createServerRoute({
   },
 });
 
+const canOnboardRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{sourceId}/onboarding/_can_onboard',
+  options: {
+    access: 'internal',
+    summary: 'Check whether a source can be onboarded',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ canOnboard: boolean; reason?: string }> => {
+    const { licensing, sourcesClient, streamDataEsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const { source } = await sourcesClient.get(params.path.sourceId);
+    const reason = await getSamplingProblem({
+      index: source.view_name,
+      esClient: streamDataEsClient,
+      logger,
+    });
+    return reason === undefined ? { canOnboard: true } : { canOnboard: false, reason };
+  },
+});
+
 const onboardingBulkStatusRoute = createServerRoute({
   endpoint: 'POST /internal/streams/onboarding/_bulk_status',
   options: {
@@ -303,5 +338,6 @@ const onboardingBulkStatusRoute = createServerRoute({
 export const internalKIOnboardingRoutes = {
   ...onboardingExecuteRoute,
   ...onboardingStatusRoute,
+  ...canOnboardRoute,
   ...onboardingBulkStatusRoute,
 };
