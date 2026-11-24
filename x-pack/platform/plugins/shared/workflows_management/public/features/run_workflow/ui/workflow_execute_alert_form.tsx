@@ -272,6 +272,7 @@ export const WorkflowExecuteAlertForm = ({
             key={dataView?.id ?? 'no-alert-dataview'}
             appName={WORKFLOW_EXECUTE_ALERT_SEARCH_APP_NAME}
             useDefaultBehaviors={true}
+            disableSubscribingToGlobalDataServices={true}
             onQueryChange={handleQueryChange}
             onQuerySubmit={handleQuerySubmit}
             query={query}

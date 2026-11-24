@@ -113,6 +113,99 @@ describe('validateAwaitExecutionsReferences', () => {
     ]);
   });
 
+  describe('when the steps sit in different branches', () => {
+    const PARALLEL_STEPS = `steps:
+  - name: split
+    type: parallel
+    branches:
+      - name: a
+        steps:
+          - name: start_a
+            type: workflow.executeAsync
+            with:
+              workflow-id: child
+      - name: b
+        steps:
+          - name: start_b
+            type: workflow.executeAsync
+            with:
+              workflow-id: child
+          - name: join_b
+            type: workflow.awaitExecutions
+            with:
+              from-steps: [start_a, start_b]
+`;
+
+    it('flags a step in a sibling parallel branch and accepts its own branch', () => {
+      expect(validate(PARALLEL_STEPS)).toEqual([
+        {
+          ruleId: 'awaitedStepNotFinished',
+          message:
+            'Step "start_a" runs in another branch of "split", and an await only sees ' +
+            'executions from its own branch. Await it after "split".',
+          startLineNumber: 20,
+        },
+      ]);
+    });
+
+    it('accepts steps inside a parallel step from an await after it', () => {
+      expect(
+        validate(`${PARALLEL_STEPS}  - name: join_all
+    type: workflow.awaitExecutions
+    with:
+      from-steps: [start_a, start_b]
+`)
+      ).toEqual([expect.objectContaining({ startLineNumber: 20 })]);
+    });
+
+    it.each([
+      [
+        'the then branch of an if, from its else branch',
+        `  - name: check
+    type: if
+    condition: 'true'
+    steps:
+      - name: start
+        type: workflow.executeAsync
+        with:
+          workflow-id: child
+    else:
+      - name: join
+        type: workflow.awaitExecutions
+        with:
+          from-steps: [start]
+`,
+      ],
+      [
+        'another switch case',
+        `  - name: check
+    type: switch
+    expression: '{{ inputs.kind }}'
+    cases:
+      - match: a
+        steps:
+          - name: start
+            type: workflow.executeAsync
+            with:
+              workflow-id: child
+      - match: b
+        steps:
+          - name: join
+            type: workflow.awaitExecutions
+            with:
+              from-steps: [start]
+`,
+      ],
+    ])('flags a step in %s', (_, steps) => {
+      expect(validate(`steps:\n${steps}`)).toEqual([
+        expect.objectContaining({
+          ruleId: 'awaitedStepNotFinished',
+          message: 'Step "start" is in another branch of "check", so it never runs before "join".',
+        }),
+      ]);
+    });
+  });
+
   it('ignores explicit execution IDs', () => {
     expect(
       validate(`steps:

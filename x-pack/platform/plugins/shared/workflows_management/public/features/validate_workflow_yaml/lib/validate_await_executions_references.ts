@@ -34,6 +34,42 @@ const isAncestorOf = (
   return false;
 };
 
+const BRANCHING_STEP_TYPES: ReadonlySet<string> = new Set(['parallel', 'if', 'switch']);
+
+/**
+ * The closest step containing both steps, when they sit in different branches of it
+ * (parallel branches, switch cases, or if/else).
+ */
+const findSplittingStep = (
+  referencedStep: StepInfo,
+  awaitStep: StepInfo,
+  workflowLookup: WorkflowLookup
+): StepInfo | undefined => {
+  const referencedBranchByAncestor = new Map<string, string | undefined>();
+  for (
+    let step: StepInfo | undefined = referencedStep;
+    step?.parentStepId !== undefined;
+    step = workflowLookup.steps[step.parentStepId]
+  ) {
+    referencedBranchByAncestor.set(step.parentStepId, step.branchKey);
+  }
+
+  for (
+    let step: StepInfo | undefined = awaitStep;
+    step?.parentStepId !== undefined;
+    step = workflowLookup.steps[step.parentStepId]
+  ) {
+    if (referencedBranchByAncestor.has(step.parentStepId)) {
+      const commonStep = workflowLookup.steps[step.parentStepId];
+      const isSplit =
+        BRANCHING_STEP_TYPES.has(commonStep?.stepType ?? '') &&
+        referencedBranchByAncestor.get(step.parentStepId) !== step.branchKey;
+      return isSplit ? commonStep : undefined;
+    }
+  }
+  return undefined;
+};
+
 const startsExecutions = (stepId: string, workflowLookup: WorkflowLookup): boolean =>
   Object.values(workflowLookup.steps).some(
     (step) =>
@@ -59,6 +95,19 @@ const getReferenceProblem = (
       message:
         `Step "${stepName}" contains "${awaitStep.stepId}", so it has not finished when ` +
         `"${awaitStep.stepId}" runs. Await it from a step that runs after "${stepName}".`,
+    };
+  }
+  const splittingStep = findSplittingStep(referencedStep, awaitStep, workflowLookup);
+  if (splittingStep) {
+    const { stepId: splitId, stepType: splitType } = splittingStep;
+    return {
+      ruleId: 'awaitedStepNotFinished',
+      message:
+        splitType === 'parallel'
+          ? `Step "${stepName}" runs in another branch of "${splitId}", and an await only sees ` +
+            `executions from its own branch. Await it after "${splitId}".`
+          : `Step "${stepName}" is in another branch of "${splitId}", so it never runs before ` +
+            `"${awaitStep.stepId}".`,
     };
   }
   if (referencedStep.lineStart > awaitStep.lineStart) {

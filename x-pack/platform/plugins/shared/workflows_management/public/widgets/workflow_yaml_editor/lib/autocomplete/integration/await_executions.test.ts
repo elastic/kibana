@@ -68,6 +68,33 @@ describe('getCompletionItemProvider - workflow.awaitExecutions from-steps', () =
     expect(labels).toEqual(['scan', 'enrich']);
   });
 
+  it('leaves out steps in sibling parallel branches', async () => {
+    const labels = await getSuggestionLabels(`
+steps:
+  - name: split
+    type: parallel
+    branches:
+      - name: a
+        steps:
+          - name: start_a
+            type: workflow.executeAsync
+            with:
+              workflow-id: child
+      - name: b
+        steps:
+          - name: start_b
+            type: workflow.executeAsync
+            with:
+              workflow-id: child
+          - name: join_b
+            type: workflow.awaitExecutions
+            with:
+              from-steps:
+                - |<-`);
+
+    expect(labels).toEqual(['start_b']);
+  });
+
   it('inserts a list when from-steps has no value yet', async () => {
     const suggestions = await getSuggestions(`${STEPS}
   - name: join
