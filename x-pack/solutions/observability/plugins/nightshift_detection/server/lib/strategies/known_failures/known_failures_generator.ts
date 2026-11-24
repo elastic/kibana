@@ -65,7 +65,7 @@ async function readWatchedKnowledgeIndicators({
   rules,
   cpsEnabled,
 }: GeneratorContext): Promise<Map<string, QueryLink>> {
-  const [managedRules, links] = await Promise.all([
+  const [managedRules, queries] = await Promise.all([
     rules.listManaged({ strategy: KNOWN_FAILURES_STRATEGY_ID }),
     knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) }),
   ]);
@@ -73,11 +73,11 @@ async function readWatchedKnowledgeIndicators({
 
   // Two indicators with the same query share a rule id; sorted by id, the same one always wins.
   return new Map(
-    sortBy(links, ({ query }) => query.id)
+    sortBy(queries, ({ query }) => query.id)
       .filter(({ query }) => getUnwatchableReason(query) === undefined)
-      .map((link): [string, QueryLink] => [
-        getKnownFailureRuleId({ spaceId, link, cpsEnabled }),
-        link,
+      .map((query): [string, QueryLink] => [
+        getKnownFailureRuleId({ spaceId, query, cpsEnabled }),
+        query,
       ])
       .filter(([ruleId]) => enabledRuleIds.has(ruleId))
   );

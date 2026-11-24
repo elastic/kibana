@@ -43,11 +43,11 @@ export class KnownFailuresStrategy implements DetectionStrategy {
     knowledge,
     cpsEnabled,
   }: ResourceContext): Promise<DesiredResources> {
-    const links = await knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) });
+    const queries = await knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) });
     const enabledSourceIds = new Set(sources.filter(({ enabled }) => enabled).map(({ id }) => id));
     const result: Required<DesiredResources> = { resources: [], skipped: [], notes: [] };
 
-    links.forEach(({ query, source_id: sourceId }) => {
+    queries.forEach(({ query, source_id: sourceId }) => {
       const reason = getUnwatchableReason(query);
       if (reason) {
         result.notes.push(`${sourceId}: ${reason}`);

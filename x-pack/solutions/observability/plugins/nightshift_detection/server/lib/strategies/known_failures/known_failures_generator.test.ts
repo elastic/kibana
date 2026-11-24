@@ -12,7 +12,7 @@ import { KnownFailuresGenerator } from './known_failures_generator';
 
 const WINDOW = { from: Date.UTC(2026, 10, 20, 10, 0), to: Date.UTC(2026, 10, 20, 10, 5) };
 
-const createLink = (id: string, esql: string): QueryLink => ({
+const createQuery = (id: string, esql: string): QueryLink => ({
   query: { id, title: id, description: id, esql: { query: esql }, type: 'match' },
   source_id: 'source-1',
   rule_backed: false,
@@ -23,10 +23,10 @@ describe('KnownFailuresGenerator', () => {
   // The join is the generator's only logic until the mapping lands: a wrong id reads another
   // indicator's rows, or none.
   it('reads the window of the enabled rules that watch a current knowledge indicator', async () => {
-    const watched = createLink('watched', 'FROM logs | WHERE message : "timeout"');
-    const offRule = createLink('off', 'FROM logs | WHERE message : "refused"');
-    const getId = (link: QueryLink) =>
-      getKnownFailureRuleId({ spaceId: 'default', link, cpsEnabled: false });
+    const watched = createQuery('watched', 'FROM logs | WHERE message : "timeout"');
+    const offRule = createQuery('off', 'FROM logs | WHERE message : "refused"');
+    const getId = (query: QueryLink) =>
+      getKnownFailureRuleId({ spaceId: 'default', query, cpsEnabled: false });
     const readRows = jest.fn().mockResolvedValue([]);
 
     await new KnownFailuresGenerator().generate({

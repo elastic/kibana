@@ -74,18 +74,18 @@ export function buildKnownFailureRule({
 /** The id the reconciler gives the rule of a knowledge indicator, to find its rows again. */
 export function getKnownFailureRuleId({
   spaceId,
-  link,
+  query,
   cpsEnabled,
 }: {
   spaceId: string;
-  link: Pick<QueryLink, 'source_id' | 'query'>;
+  query: Pick<QueryLink, 'source_id' | 'query'>;
   cpsEnabled: boolean;
 }): string {
   // The reconciler's own id function, so the generator finds exactly the rule it created.
   return computeRuleId({
     spaceId,
     strategy: KNOWN_FAILURES_STRATEGY_ID,
-    sourceId: link.source_id,
-    data: buildKnownFailureRule({ query: link.query, cpsEnabled }),
+    sourceId: query.source_id,
+    data: buildKnownFailureRule({ query: query.query, cpsEnabled }),
   });
 }
