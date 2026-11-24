@@ -79,8 +79,11 @@ export const IncompatibleAgentVersionCallout: React.FC<{
             ) : null}
           </>
         }
-      >
-        {onAcknowledgeChange ? (
+      />
+
+      {onAcknowledgeChange ? (
+        <>
+          <EuiSpacer size="s" />
           <EuiCheckbox
             id={checkboxId}
             data-test-subj="acknowledgeAgentVersionIncompatibilityCheckbox"
@@ -93,8 +96,8 @@ export const IncompatibleAgentVersionCallout: React.FC<{
               />
             }
           />
-        ) : null}
-      </KbnWarningCallout>
+        </>
+      ) : null}
 
       <EuiSpacer size="m" />
     </>
