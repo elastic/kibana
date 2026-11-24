@@ -22,7 +22,7 @@ import type {
   ExternalServiceCredentials,
   Incident,
   PartialIncident,
-  ResponseError,
+  ServiceError,
   ErrorMessageFormat,
   RequestContext,
 } from './types';
@@ -55,7 +55,7 @@ export const prepareIncident = (
  * 2. OAuth: error.message is JSON like {"error": "invalid_grant", "error_description"?: "User not found"}
  * 3. Plain message like Incident id is empty
  */
-const createErrorMessage = (error: ResponseError): ErrorMessageFormat => {
+const createErrorMessage = (error: ServiceError): ErrorMessageFormat => {
   // 1. Standard ServiceNow Table API error (error.response.data exists)
   const data = error.response?.data;
 
@@ -111,10 +111,10 @@ const isMaxContentLengthError = (error: AxiosError | Error): boolean => {
   return typeof error.message === 'string' && error.message.includes('maxContentLength');
 };
 export const addServiceMessageToError = (
-  error: ResponseError,
+  error: ServiceError,
   message: string,
   context?: RequestContext
-): AxiosError => {
+): ServiceError => {
   const { error: errorPart, reason } = createErrorMessage(error);
 
   const parts = [`${message}.`, 'Error:', errorPart];

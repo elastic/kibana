@@ -1,5 +1,5 @@
 {
-  "sha1": "8d75556296b3cb149c20aac0915f3aae46f6473a",
+  "sha1": "61269d252e9c5b1cbc7aa27c28db13765f7e525f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -66,6 +66,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/siem_deprecated_ui_actions.spec.ts",
         "line": 223,
         "column": 11
+      }
+    },
+    {
+      "id": "89c6948730a6104-27901129cf6e18b",
+      "title": "Workflow insights APIs on Security Complete allows reading workflow insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access.spec.ts",
+        "line": 26,
+        "column": 15
+      }
+    },
+    {
+      "id": "89c6948730a6104-0fe3e7a99bd1824",
+      "title": "Workflow insights APIs on Security Complete allows reading running defend insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access.spec.ts",
+        "line": 38,
+        "column": 23
       }
     }
   ]

@@ -26,8 +26,10 @@ import {
   getNightshiftInvestigationIdFromSearch,
   setNightshiftInvestigationIdParam,
 } from '../../../common/url_params';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { useKibana } from '../../../hooks/use_kibana';
 import { OnboardingIntroBanner } from './intro_banner';
+import type { IntroBannerDismissal } from '../../../components/use_intro_banner_dismissal';
 import {
   ONBOARDING_STEP_IDS,
   OnboardingStepsCard,
@@ -111,13 +113,16 @@ export function NightshiftOnboarding({
   latestInvestigation,
   automationsHref,
   onFinish,
+  introBannerDismissal,
 }: {
   latestInvestigation?: InvestigationSummary;
   automationsHref?: string;
+  introBannerDismissal?: IntroBannerDismissal;
   /** "Skip this step" / Done on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const isMobile = useIsMobile();
   const { agentBuilder } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
@@ -163,6 +168,9 @@ export function NightshiftOnboarding({
     : latestInvestigation && stepOverride !== 'investigate'
     ? 'automate'
     : 'investigate';
+
+  const isIntroStep = step === 'enable' || step === 'addData' || step === 'connectSources';
+  const introBannerVisible = isIntroStep && !introBannerDismissal?.isDismissed;
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -353,9 +361,9 @@ export function NightshiftOnboarding({
     >
       <NightshiftHeader title={HERO_TITLES[step]} />
       <EuiSpacer size="l" />
-      {(step === 'enable' || step === 'addData' || step === 'connectSources') && (
+      {introBannerVisible && (
         <>
-          <OnboardingIntroBanner />
+          <OnboardingIntroBanner dismissal={introBannerDismissal} />
           <EuiSpacer size="xl" />
         </>
       )}
@@ -370,7 +378,7 @@ export function NightshiftOnboarding({
       <div
         css={css`
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 280px;
+          grid-template-columns: ${isMobile ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 280px'};
           gap: ${euiTheme.size.base};
           align-items: start;
         `}

@@ -278,6 +278,14 @@ export interface ResumeExternalHitlParams {
 
 export interface WorkflowsClient {
   isWorkflowsAvailable: boolean;
+  /**
+   * Emit a trigger event.
+   *
+   * `authenticatedUser` is a principal from a verified authentication, the same kind of value
+   * the inbound hub forwards after Elasticsearch authenticates a service-account bearer. It is
+   * written as `executedBy` and skips the missing-identity check, so an unverified name is
+   * recorded as the run's identity.
+   */
   emitEvent: (
     triggerId: string,
     payload: Record<string, unknown>,

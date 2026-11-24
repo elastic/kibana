@@ -12,8 +12,10 @@ import {
   MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH,
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
   MAX_AI_INDEX_QUERY_PARAMS,
+  MAX_AI_INDEX_USER_ID_LENGTH,
   MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
 } from './constants';
+import { MIN_DREAMING_INTERVAL_MINUTES } from './dreaming';
 import type { QueryAiIndicesRequest } from './http_api/ai_indices';
 
 // Starts with a lowercase letter or number, then lowercase letters, numbers, hyphens, or underscores.
@@ -66,6 +68,24 @@ export const validateFeedbackAnalysisInterval = (value: string): string | undefi
   return undefined;
 };
 
+/** Returns a translated error message for an invalid dreaming interval, or `undefined` when valid. */
+export const validateDreamingInterval = (value: string): string | undefined => {
+  const minutes = parseIntervalMinutes(value);
+  if (minutes === undefined) {
+    return i18n.translate('xpack.contextEngine.dreaming.error.invalidInterval', {
+      defaultMessage:
+        'Must be a positive number followed by m (minutes), h (hours), or d (days), for example 30m, 1h, or 7d.',
+    });
+  }
+  if (minutes < MIN_DREAMING_INTERVAL_MINUTES) {
+    return i18n.translate('xpack.contextEngine.dreaming.error.intervalBelowFloor', {
+      defaultMessage: 'Must be at least {minMinutes} minutes.',
+      values: { minMinutes: MIN_DREAMING_INTERVAL_MINUTES },
+    });
+  }
+  return undefined;
+};
+
 const RELATIVE_FROM_PATTERN = /^now-([1-9][0-9]*)(m|h|d|w|M|y)$/;
 
 /** Minutes covered by a relative signal window such as `now-30d`; `undefined` when malformed. */
@@ -83,8 +103,12 @@ export const validateRelativeSignalWindow = (value: string): string | undefined 
       })
     : undefined;
 
-/** Returns a translated error message for an invalid absolute signal window, or `undefined` when valid. */
-export const validateAbsoluteSignalWindow = (value: string): string | undefined =>
+/** Returns an error message when a string is empty or whitespace-only, or `undefined` when valid. */
+export const validateNonBlank = (value: string): string | undefined =>
+  value.trim().length > 0 ? undefined : 'must not be blank';
+
+/** Returns a translated error message for a value `Date.parse` cannot read, or `undefined` when valid. */
+export const validateIsoDate = (value: string): string | undefined =>
   Number.isNaN(Date.parse(value))
     ? i18n.translate('xpack.contextEngine.feedbackAnalysis.error.invalidAbsoluteFrom', {
         defaultMessage: 'Must be an ISO 8601 date, for example 2026-01-31T00:00:00.000Z.',
@@ -139,11 +163,21 @@ export const validateQueryAiIndicesRequest = ({
   query,
   params,
   limit,
+  user_id: userId,
 }: QueryAiIndicesRequest): string | undefined => {
   if (query.length === 0 || query.length > MAX_AI_INDEX_QUERY_LENGTH) {
     return i18n.translate('xpack.contextEngine.aiIndexQuery.error.invalidQueryLength', {
       defaultMessage: 'query must be between 1 and {max} characters.',
       values: { max: MAX_AI_INDEX_QUERY_LENGTH },
+    });
+  }
+  if (
+    userId !== undefined &&
+    (userId.length === 0 || userId.length > MAX_AI_INDEX_USER_ID_LENGTH)
+  ) {
+    return i18n.translate('xpack.contextEngine.aiIndexQuery.error.invalidUserIdLength', {
+      defaultMessage: 'user_id must be between 1 and {max} characters.',
+      values: { max: MAX_AI_INDEX_USER_ID_LENGTH },
     });
   }
   if (limit !== undefined) {

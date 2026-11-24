@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SEARCH_BOOST_APP_ID } from '../common/constants';
+import { registerRoutes } from './routes';
 import type { SearchBoostSetupDependencies } from './types';
 
 export class SearchBoostPlugin implements Plugin<void, void, SearchBoostSetupDependencies> {
-  public setup(_core: CoreSetup, { features }: SearchBoostSetupDependencies) {
-    // The `_boost` APIs are `cluster:admin/boost/*` for writes and `cluster:monitor/boost/*` for
-    // reads, which `manage` and `monitor` cover; there is no boost-specific privilege.
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
+  public setup(core: CoreSetup, { features }: SearchBoostSetupDependencies) {
+    registerRoutes(core.http.createRouter(), this.logger);
+
+    // Profiles and rules are shown together, so each level needs the privilege for both.
     features.registerElasticsearchFeature({
       id: SEARCH_BOOST_APP_ID,
       management: {
@@ -20,11 +28,11 @@ export class SearchBoostPlugin implements Plugin<void, void, SearchBoostSetupDep
       },
       privileges: [
         {
-          requiredClusterPrivileges: ['manage'],
+          requiredClusterPrivileges: ['manage_boost_profiles', 'manage_boost_rules'],
           ui: ['save'],
         },
         {
-          requiredClusterPrivileges: ['monitor'],
+          requiredClusterPrivileges: ['read_boost_profiles', 'read_boost_rules'],
           ui: ['show'],
         },
       ],

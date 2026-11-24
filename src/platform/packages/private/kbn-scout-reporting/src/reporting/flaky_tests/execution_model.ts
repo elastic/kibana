@@ -27,6 +27,8 @@ export interface ExecutionModel {
   failureFilter: string;
   /** ES|QL expression evaluating to 1 for a failed execution, 0 otherwise. */
   failedExpression: string;
+  /** ES|QL expression evaluating to 1 for a passed execution, a pass on a retry included. */
+  passedExpression: string;
   /** ES|QL expression evaluating to 1 when the execution failed then passed within the run. */
   retryFlakeExpression: string;
 }
@@ -49,6 +51,7 @@ export const buildExecutionModels = (frameworks: readonly TestFramework[]): Exec
       executionFilter: `(event.action == "test-end" AND ${reporterFilter} AND test.status IN ("passed", "failed", "timedOut"))`,
       failureFilter: `(event.action == "test-end" AND ${reporterFilter} AND test.status IN ("failed", "timedOut"))`,
       failedExpression: 'CASE(test.status IN ("failed", "timedOut"), 1, 0)',
+      passedExpression: 'CASE(test.status == "passed", 1, 0)',
       retryFlakeExpression: '0',
     });
   }
@@ -66,6 +69,7 @@ export const buildExecutionModels = (frameworks: readonly TestFramework[]): Exec
       executionFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("expected", "unexpected", "flaky"))`,
       failureFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("unexpected", "flaky"))`,
       failedExpression: 'CASE(test.outcome IN ("unexpected", "flaky"), 1, 0)',
+      passedExpression: 'CASE(test.outcome IN ("expected", "flaky"), 1, 0)',
       retryFlakeExpression: 'CASE(test.outcome == "flaky", 1, 0)',
     });
   }

@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceMapNode } from '../../../../common/service_map';
-import { isServiceNodeData } from '../../../../common/service_map';
+import { isServiceGroupNodeData, isServiceNodeData } from '../../../../common/service_map';
 
 export function ServiceMapMinimap() {
   const { euiTheme } = useEuiTheme();
 
   const nodeColor = useCallback(
     (node: ServiceMapNode) => {
-      if (isServiceNodeData(node.data)) {
+      if (isServiceNodeData(node.data) || isServiceGroupNodeData(node.data)) {
         const { anomalyScore } = node.data.serviceAnomalyStats ?? {};
         if (anomalyScore !== undefined) {
           return getSeverityColor(anomalyScore);

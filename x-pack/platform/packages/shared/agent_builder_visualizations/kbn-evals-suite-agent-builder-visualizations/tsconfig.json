@@ -12,6 +12,7 @@
     "@kbn/agent-builder-visualizations-common",
     "@kbn/core",
     "@kbn/custom-content-common",
+    "@kbn/dashboard-agent-authoring",
     "@kbn/esql-language",
     "@kbn/esql-utils",
     "@kbn/evals",

@@ -6,7 +6,7 @@
  */
 
 import type { Server } from 'http';
-import { createServer } from '@mswjs/http-middleware';
+import { createServer } from '@msw/serve';
 import { http, HttpResponse } from 'msw';
 import { MOCK_IDP_UIAM_PROJECT_ID } from '@kbn/mock-idp-utils';
 import { AUTOOPS_METRICS_RESPONSE } from './constants';

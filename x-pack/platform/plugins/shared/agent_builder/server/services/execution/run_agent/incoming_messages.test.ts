@@ -1,0 +1,235 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { loggerMock } from '@kbn/logging-mocks';
+import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationEvent } from '@kbn/agent-builder-common';
+import { createConversationClientMock } from '../../../test_utils/conversations';
+import { createIncomingMessages } from './incoming_messages';
+import { STEERS_PER_CHECK_MAX } from './constants';
+
+const owner = { type: EventActorType.user, id: 'owner' };
+const other = { type: EventActorType.user, id: 'other' };
+
+const steer = (
+  id: string,
+  actor = owner,
+  createdAt = '2026-01-01T00:00:01.000Z',
+  executionId = 'exec-1'
+): ConversationEvent => ({
+  id,
+  type: TimelineEventType.userMessage,
+  created_at: createdAt,
+  actor,
+  data: { message: `m-${id}`, steer: { execution_id: executionId } },
+});
+
+const terminal = (
+  executionId: string,
+  type: TimelineEventType.executionTerminated | TimelineEventType.executionFailed,
+  outcomeType: 'responded' | 'prompt_requested' = 'responded'
+): ConversationEvent => ({
+  id: `${executionId}::terminal`,
+  type,
+  execution_id: executionId,
+  created_at: '2026-01-01T00:00:03.000Z',
+  actor: owner,
+  data:
+    type === TimelineEventType.executionTerminated
+      ? {
+          outcome: {
+            type: outcomeType,
+            ...(outcomeType === 'prompt_requested'
+              ? { prompts: [] }
+              : { response: { message: 'done' } }),
+          },
+        }
+      : { error: { code: 'x', message: 'x' } },
+});
+
+const document = (
+  events: ConversationEvent[],
+  activeExecutionId: string | undefined = 'record-1'
+): Conversation =>
+  ({
+    id: 'conv-1',
+    events,
+    ...(activeExecutionId ? { active_execution: { execution_id: activeExecutionId } } : {}),
+  } as unknown as Conversation);
+
+describe('createIncomingMessages', () => {
+  const setup = () => {
+    const client = createConversationClientMock();
+    const incoming = createIncomingMessages({
+      conversationClient: client,
+      conversationId: 'conv-1',
+      executionId: 'record-1',
+      timelineExecutionId: 'exec-1',
+      runOwnerId: 'owner',
+      logger: loggerMock.create(),
+    });
+    return { client, incoming };
+  };
+
+  it('reads the body on the first check and delivers pending steers with the owner flag', async () => {
+    const { client, incoming } = setup();
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([steer('s1'), steer('s2', other, '2026-01-01T00:00:00.000Z')]),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+
+    const delivered = await incoming.drain({ cycle: 0 });
+
+    expect(client.peekVersion).not.toHaveBeenCalled();
+    expect(delivered.map((step) => [step.event_id, step.is_run_owner])).toEqual([
+      ['s2', false],
+      ['s1', true],
+    ]);
+    expect(delivered[0]).toMatchObject({ cycle: 0, message: 'm-s2' });
+  });
+
+  it('marks a message read after the answer so the notice and the placement say so', async () => {
+    const { client, incoming } = setup();
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([steer('s1')]),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+
+    const delivered = await incoming.drain({ cycle: 2, afterAnswer: true });
+
+    expect(delivered[0]).toMatchObject({ event_id: 's1', cycle: 2, after_answer: true });
+    expect(delivered[0]).not.toHaveProperty('tool_call_group_id');
+  });
+
+  it('skips the body read when the version did not change', async () => {
+    const { client, incoming } = setup();
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([]),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+    await incoming.drain({ cycle: 0 });
+    client.peekVersion.mockResolvedValue({ seqNo: 10, primaryTerm: 1 });
+
+    const delivered = await incoming.drain({ cycle: 1 });
+
+    expect(delivered).toEqual([]);
+    expect(client.getWithVersion).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads again on change and delivers each steer at most once per execution', async () => {
+    const { client, incoming } = setup();
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([steer('s1')]),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+    await incoming.drain({ cycle: 0 });
+    client.peekVersion.mockResolvedValue({ seqNo: 11, primaryTerm: 1 });
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([steer('s1'), steer('s2')]),
+      seqNo: 11,
+      primaryTerm: 1,
+    });
+
+    const delivered = await incoming.drain({ cycle: 1, lastToolCallGroupId: 'g1' });
+
+    expect(delivered.map((step) => step.event_id)).toEqual(['s2']);
+    expect(delivered[0].tool_call_group_id).toBe('g1');
+  });
+
+  it('stops delivering once another execution holds the conversation', async () => {
+    const { client, incoming } = setup();
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([steer('s1')], 'exec-2'),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+
+    expect(await incoming.drain({ cycle: 0 })).toEqual([]);
+
+    client.peekVersion.mockResolvedValue({ seqNo: 12, primaryTerm: 1 });
+    expect(await incoming.drain({ cycle: 1 })).toEqual([]);
+    expect(client.getWithVersion).toHaveBeenCalledTimes(1);
+  });
+
+  it('caps a single check', async () => {
+    const { client, incoming } = setup();
+    const many = Array.from({ length: STEERS_PER_CHECK_MAX + 2 }, (_, index) =>
+      steer(`s${index}`, owner, `2026-01-01T00:00:0${index}.000Z`)
+    );
+    client.getWithVersion.mockResolvedValue({
+      conversation: document(many),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+
+    const delivered = await incoming.drain({ cycle: 0 });
+
+    expect(delivered).toHaveLength(STEERS_PER_CHECK_MAX);
+    expect(delivered[0]).toMatchObject({ event_id: 's0' });
+  });
+
+  it('leaves the steers of a run that is over to the user, and reads those of the pause it resumes', async () => {
+    const { client, incoming } = setup();
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([
+        steer('failed', owner, '2026-01-01T00:00:00.000Z', 'exec-failed'),
+        terminal('exec-failed', TimelineEventType.executionFailed),
+        steer('paused', owner, '2026-01-01T00:00:01.000Z', 'exec-paused'),
+        terminal('exec-paused', TimelineEventType.executionTerminated, 'prompt_requested'),
+        steer('own', owner, '2026-01-01T00:00:02.000Z'),
+      ]),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+
+    const delivered = await incoming.drain({ cycle: 0 });
+
+    expect(delivered.map((step) => step.event_id)).toEqual(['paused', 'own']);
+  });
+
+  it('keeps reading while a backlog remains, whatever the version says', async () => {
+    const { client, incoming } = setup();
+    const many = Array.from({ length: STEERS_PER_CHECK_MAX + 2 }, (_, index) =>
+      steer(`s${index}`, owner, `2026-01-01T00:00:0${index}.000Z`)
+    );
+    client.getWithVersion.mockResolvedValue({
+      conversation: document(many),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+    client.peekVersion.mockResolvedValue({ seqNo: 10, primaryTerm: 1 });
+
+    const first = await incoming.drain({ cycle: 0 });
+    const second = await incoming.drain({ cycle: 1 });
+    const third = await incoming.drain({ cycle: 2 });
+
+    expect(first).toHaveLength(STEERS_PER_CHECK_MAX);
+    expect(second.map((step) => step.event_id)).toEqual(['s5', 's6']);
+    expect(third).toEqual([]);
+    // the second check skipped the probe; the third, with nothing left behind, used it
+    expect(client.getWithVersion).toHaveBeenCalledTimes(2);
+    expect(client.peekVersion).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns nothing and keeps going when the probe or the read fails', async () => {
+    const { client, incoming } = setup();
+    client.getWithVersion.mockRejectedValueOnce(new Error('boom'));
+
+    expect(await incoming.drain({ cycle: 0 })).toEqual([]);
+
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([steer('s1')]),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+    expect((await incoming.drain({ cycle: 1 })).map((step) => step.event_id)).toEqual(['s1']);
+  });
+});

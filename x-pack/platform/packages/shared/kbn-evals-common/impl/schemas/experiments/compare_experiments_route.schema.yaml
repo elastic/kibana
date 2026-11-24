@@ -37,6 +37,16 @@ paths:
             type: string
             maxLength: 1024
           description: Target experiment or execution ID (depends on type)
+        - name: repetition_policy
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/RepetitionPolicy'
+            default: mean
+          description: >-
+            How repetitions of one example are compared. `mean` and `median`
+            reduce each example to one score per experiment and test one pair
+            per example.
       responses:
         '200':
           description: Successful response
@@ -52,12 +62,33 @@ paths:
                   pairing:
                     type: object
                     properties:
+                      repetitionPolicy:
+                        $ref: '#/components/schemas/RepetitionPolicy'
                       totalPairs:
                         type: integer
+                        description: Number of pairs tested over all slices
                       skippedMissingPairs:
                         type: integer
+                        description: >-
+                          Unpaired examples. A target example with only null
+                          scores counts in `skippedNullScores` instead.
                       skippedNullScores:
                         type: integer
+                      rejectedSlices:
+                        type: array
+                        description: >-
+                          Only for `median`: slices left out of `results`
+                          because a score is outside [0, 1].
+                        items:
+                          type: object
+                          properties:
+                            datasetName:
+                              type: string
+                            evaluatorName:
+                              type: string
+                          required:
+                            - datasetName
+                            - evaluatorName
                       truncatedBaseline:
                         type: boolean
                         description: Whether the baseline scores were truncated due to size limits
@@ -65,6 +96,7 @@ paths:
                         type: boolean
                         description: Whether the target scores were truncated due to size limits
                     required:
+                      - repetitionPolicy
                       - totalPairs
                       - skippedMissingPairs
                       - skippedNullScores
@@ -76,6 +108,12 @@ paths:
 
 components:
   schemas:
+    RepetitionPolicy:
+      type: string
+      enum:
+        - mean
+        - median
+
     StatisticalTestId:
       type: string
       enum:
@@ -137,6 +175,32 @@ components:
         - id
         - statistic
 
+    ComparisonSide:
+      type: object
+      description: One experiment's scores in a (dataset, evaluator) slice.
+      properties:
+        mean:
+          type: number
+          description: Mean of the paired scores
+        used:
+          type: integer
+          description: Valid repetition scores
+        missing:
+          type: integer
+          description: Repetitions without a valid score
+        stability:
+          type: number
+          nullable: true
+          description: >-
+            Mean of the sample standard deviations of each paired example's
+            valid repetitions, over the examples with at least two. Null when
+            no example has two.
+      required:
+        - mean
+        - used
+        - missing
+        - stability
+
     ComparisonResult:
       type: object
       properties:
@@ -151,13 +215,17 @@ components:
           maxLength: 256
         sampleSize:
           type: integer
-          description: Number of paired scores in this slice
-        meanBaseline:
-          type: number
-          description: Mean score of the baseline experiment
-        meanTarget:
-          type: number
-          description: Mean score of the target experiment
+          description: Number of examples tested in this slice
+        baseline:
+          $ref: '#/components/schemas/ComparisonSide'
+        target:
+          $ref: '#/components/schemas/ComparisonSide'
+        repetitionWarning:
+          type: boolean
+          description: >-
+            True when an example in this slice has a different number of valid
+            repetitions in the two experiments, or a repetition without a
+            valid score.
         pValue:
           type: number
           nullable: true
@@ -181,8 +249,9 @@ components:
         - datasetName
         - evaluatorName
         - sampleSize
-        - meanBaseline
-        - meanTarget
+        - baseline
+        - target
+        - repetitionWarning
         - pValue
         - direction
         - metricType
