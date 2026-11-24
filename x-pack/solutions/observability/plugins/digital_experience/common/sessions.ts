@@ -108,7 +108,7 @@ export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
 
 export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
-export type SessionsHealth = 'missing' | 'healthy' | 'lagging' | 'degraded';
+export type SessionsHealth = 'missing' | 'disabled' | 'healthy' | 'lagging' | 'degraded';
 
 export interface SessionsSettings {
   /** How often the summaries task runs, as a time value such as `1m`. */
@@ -127,6 +127,11 @@ export interface SessionsRunError {
 export interface SessionsStatus {
   /** True once sessions are enabled: the summaries task is scheduled. */
   installed: boolean;
+  /**
+   * True when a user with the manage sessions privilege turned sessions off: the task no longer
+   * runs, the summaries built so far are kept, and only such a user can turn them back on.
+   */
+  disabled: boolean;
   health: SessionsHealth;
   /** Version of the summaries the task writes, and of this Kibana's. */
   installedVersion: number | null;
@@ -137,8 +142,8 @@ export interface SessionsStatus {
    */
   rebuilding: boolean;
   /**
-   * True when the task's API key was invalidated or expired: it can't run until a user with the
-   * manage sessions privilege enables sessions again.
+   * True when the task's API key was invalidated or expired: it can't run until a user who can set
+   * sessions up enables them again, which the app does by itself.
    */
   apiKeyInvalid: boolean;
   /** How far the summaries are behind, in seconds: every event before `summarizedUntil` is in. */
@@ -152,7 +157,30 @@ export interface SessionsStatus {
   enabledBy: string | null;
   /** Sessions are kept for this many days, so older time ranges have none. */
   retentionDays: number;
+  /**
+   * True when sessions aren't set up, or their API key no longer works, and the current user has
+   * every privilege enabling checks, so they can set them up. Never once they were turned off.
+   */
+  canEnable: boolean;
+  /**
+   * True when the current user can set sessions up, there are EDOT Browser or mobile events to
+   * summarize, and setting them up hasn't failed on this Kibana in the last hour: the app then sets
+   * them up without asking.
+   */
+  autoEnable: boolean;
+  /**
+   * True when the current user manages sessions in all spaces: they can turn sessions off and back
+   * on, and are told who enabled them and why a run failed.
+   */
+  canManage: boolean;
+  /**
+   * Why nobody can set sessions up, when they need setting up: Kibana has no Task Manager to run
+   * the summaries task, or no encryption key to store its API key.
+   */
+  setUpBlocker: SessionsSetUpBlocker | null;
 }
+
+export type SessionsSetUpBlocker = 'taskManager' | 'encryptionKey';
 
 /** The browser sessions status, and that of the mobile sessions, which their own task builds. */
 export interface SessionsStatusResponse extends SessionsStatus {

@@ -9,7 +9,7 @@ import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
 import { getHistogramInterval } from '../../../lib/helpers/time_series';
 import { MAX_APPLICATIONS_PER_SOURCE, MAX_ENVIRONMENTS_PER_APPLICATION } from '../constants';
 import { sessionOverlapFilters } from '../../sessions/list_sessions';
-import { sessionsSearch } from './sessions_search_requests';
+import { sessionsSearch, sessionsVitalsSearch } from './sessions_search_requests';
 
 const START = Date.parse('2021-01-18T12:00:00.000Z');
 const END = Date.parse('2021-01-18T13:00:00.000Z');
@@ -96,17 +96,18 @@ describe('sessionsSearch', () => {
     });
   });
 
-  it('adds up the samples of each vital and takes the p75 of the sessions p75', () => {
+  it('adds up the samples of each vital, leaving the p75 to the vitals search', () => {
     const { aggs } = inEnvironment().aggs.applications;
 
     expect(aggs.lcp.aggs).toEqual({
       samples: { sum: { field: 'web_vital_samples.lcp.count' } },
       good: { sum: { field: 'web_vital_samples.lcp.good' } },
       needsImprovement: { sum: { field: 'web_vital_samples.lcp.needs_improvement' } },
-      p75: { percentiles: { field: 'web_vitals.lcp', percents: [75], keyed: false } },
     });
     for (const vital of ['inp', 'cls', 'fcp', 'ttfb']) {
-      expect(aggs[vital].aggs.p75.percentiles?.field).toBe(`web_vitals.${vital}`);
+      expect(aggs[vital].aggs.samples).toEqual({
+        sum: { field: `web_vital_samples.${vital}.count` },
+      });
     }
   });
 
@@ -166,6 +167,49 @@ describe('sessionsSearch', () => {
       expect(JSON.stringify(inEnvironment(ENVIRONMENT_NOT_DEFINED_VALUE).filter)).toContain(
         '"must_not":[{"exists":{"field":"environment"}}]'
       );
+    });
+  });
+});
+
+describe('sessionsVitalsSearch', () => {
+  const range = { start: new Date(START).toISOString(), end: new Date(END).toISOString() };
+
+  it('reads the same sessions as the metrics, failing rather than returning partial results', () => {
+    expect(sessionsVitalsSearch({ start: START, end: END })).toMatchObject({
+      index: 'digital-experience-sessions-browser-*',
+      size: 0,
+      track_total_hits: false,
+      ignore_unavailable: true,
+      allow_partial_search_results: false,
+      query: { bool: { filter: [...sessionOverlapFilters(range), { match_all: {} }] } },
+    });
+  });
+
+  it('narrows the sessions to the selected environment', () => {
+    expect(
+      sessionsVitalsSearch({ start: START, end: END, environment: 'production' }).query
+    ).toEqual({
+      bool: {
+        filter: [
+          ...sessionOverlapFilters(range),
+          inEnvironment('production').filter as Record<string, unknown>,
+        ],
+      },
+    });
+  });
+
+  it('takes the p75 of the sessions p75 of each vital, for the applications the metrics list', () => {
+    const { applications } = sessionsVitalsSearch({ start: START, end: END })
+      .aggs as unknown as Record<string, Aggregation>;
+
+    expect(applications.terms).toEqual(inEnvironment().aggs.applications.terms);
+    expect(applications.aggs).toEqual({
+      pageLoads: { sum: { field: 'page_load_count' } },
+      lcp: { percentiles: { field: 'web_vitals.lcp', percents: [75], keyed: false } },
+      inp: { percentiles: { field: 'web_vitals.inp', percents: [75], keyed: false } },
+      cls: { percentiles: { field: 'web_vitals.cls', percents: [75], keyed: false } },
+      fcp: { percentiles: { field: 'web_vitals.fcp', percents: [75], keyed: false } },
+      ttfb: { percentiles: { field: 'web_vitals.ttfb', percents: [75], keyed: false } },
     });
   });
 });
