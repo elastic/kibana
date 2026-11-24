@@ -138,15 +138,14 @@ sandbox:
 
 safe-outputs:
   threat-detection:
-    # The detection job can't request an OIDC token, so it runs on Copilot. It inherits the
-    # main engine's env: blank the secrets it must not receive.
+    # The detection job can't request an OIDC token, so it runs on Copilot.
     engine:
       id: copilot
       model: sonnet
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
-        ANTHROPIC_API_KEY: ${{ '' }}
-        AWF_ANTHROPIC_AUTH_HEADER: ${{ '' }}
+    # a detection failure blocks the outputs instead of passing with a warning
+    continue-on-error: false
   noop:
     report-as-issue: false
   activation-comments: false
