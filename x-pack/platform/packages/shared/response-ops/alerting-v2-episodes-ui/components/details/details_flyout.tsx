@@ -592,8 +592,7 @@ export const AlertEpisodeDetailsFlyout = ({
           {isAddToChatAvailable && (
             <FlyoutTemplate.Footer.SecondaryAction
               variant="ai"
-              iconType="productAgent"
-              label={i18n.FLYOUT_ADD_TO_CHAT}
+              iconType="addToChat"
               onClick={addToChat}
               data-test-subj="alertingV2EpisodeFlyoutAddToChatButton"
             />
