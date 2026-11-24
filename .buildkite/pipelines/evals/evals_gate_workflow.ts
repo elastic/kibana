@@ -32,8 +32,6 @@ import {
 
 const SUITES_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 const COMMENT_MARKER = '<!-- evals-gate-comment -->';
-// The workflow comments with GITHUB_TOKEN, which posts as this bot.
-const GATE_COMMENT_AUTHOR = 'github-actions[bot]';
 const ERROR_DESCRIPTION = 'Evals gate errored, not enforced (see the workflow logs)';
 const MAX_LISTED_FILES = 20;
 const GATED_BASE_BRANCH = 'main';
@@ -93,15 +91,14 @@ const withRenames = (files: Array<{ filename: string; previous_filename?: string
   );
 
 /**
- * The gate's own comment among a PR's comments. The author is matched too, so a comment that only
- * quotes the marker is never edited or deleted.
+ * The gate's own comment among a PR's comments. Only a bot's comment counts, so a person quoting
+ * the marker is never edited or deleted; any bot does, so it keeps working if the workflow moves
+ * from GITHUB_TOKEN to an app token.
  */
 export const findGateCommentId = (
-  comments: ReadonlyArray<{ id: number; body?: string | null; user?: { login: string } | null }>
+  comments: ReadonlyArray<{ id: number; body?: string | null; user?: { type: string } | null }>
 ): number | undefined =>
-  comments.find(
-    ({ body, user }) => user?.login === GATE_COMMENT_AUTHOR && body?.includes(COMMENT_MARKER)
-  )?.id;
+  comments.find(({ body, user }) => user?.type === 'Bot' && body?.includes(COMMENT_MARKER))?.id;
 
 /** Implements `GateApi` with the Octokit client `actions/github-script` provides. */
 export const createGateApi = (
@@ -411,6 +408,12 @@ export const runEvalsGate = async ({
       // including backports. The baselines and suite config are main's, so only gate main.
       if (pr.baseRef !== GATED_BASE_BRANCH) {
         core.info(`Skipping #${prNumber}: it targets ${pr.baseRef}, not ${GATED_BASE_BRANCH}.`);
+        continue;
+      }
+      // A status for an older commit runs in that commit's concurrency group, so evaluating the
+      // new head here could race the head's own run. The head's events cover it.
+      if (context.eventName === 'status' && pr.headSha !== context.payload.sha) {
+        core.info(`Skipping #${prNumber}: the status is for ${context.payload.sha}, not its head.`);
         continue;
       }
       headSha = pr.headSha;

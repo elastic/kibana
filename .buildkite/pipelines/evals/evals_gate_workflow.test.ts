@@ -226,6 +226,18 @@ describe('runEvalsGate', () => {
     expect(calls.statuses[0].state).toBe('success');
   });
 
+  it("ignores a verdict status for a commit that is no longer the PR's head", async () => {
+    const calls = await run(
+      { pr: { labels: ['evals:gated'] }, changedFiles: ['plugins/gated/b.ts'], openPrNumbers: [7] },
+      {
+        eventName: 'status',
+        repo: { owner: 'elastic', repo: 'kibana' },
+        payload: { sha: EARLIER, context: 'kibana-evals/gated' },
+      }
+    );
+    expect(calls.statuses).toEqual([]);
+  });
+
   it('ignores status events from other contexts', async () => {
     const calls = await run(
       { changedFiles: [], openPrNumbers: [7] },
@@ -342,19 +354,15 @@ describe('runEvalsGate', () => {
 describe('findGateCommentId', () => {
   const MARKER = '<!-- evals-gate-comment -->';
 
-  it("finds the bot's comment and ignores a person quoting the marker", () => {
+  it("finds a bot's comment and ignores a person quoting the marker", () => {
     expect(
       findGateCommentId([
-        { id: 1, body: `quoting the bot: ${MARKER}`, user: { login: 'dev' } },
-        {
-          id: 2,
-          body: `Evals decision required\n${MARKER}`,
-          user: { login: 'github-actions[bot]' },
-        },
+        { id: 1, body: `quoting the bot: ${MARKER}`, user: { type: 'User' } },
+        { id: 2, body: `Evals decision required\n${MARKER}`, user: { type: 'Bot' } },
       ])
     ).toBe(2);
     expect(
-      findGateCommentId([{ id: 1, body: `quoting the bot: ${MARKER}`, user: { login: 'dev' } }])
+      findGateCommentId([{ id: 1, body: `quoting the bot: ${MARKER}`, user: { type: 'User' } }])
     ).toBeUndefined();
   });
 });
