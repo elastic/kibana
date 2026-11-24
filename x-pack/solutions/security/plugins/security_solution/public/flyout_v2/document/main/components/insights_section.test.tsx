@@ -15,7 +15,7 @@ import { Provider } from 'react-redux-v7';
 import { createStore } from 'redux-v4';
 import { INSIGHTS_SECTION_TEST_ID, InsightsSection } from './insights_section';
 import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
@@ -23,8 +23,8 @@ import { getColumns } from '../../tools/prevalence/utils/get_columns';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
+jest.mock('../hooks/use_overview_section_expanded', () => ({
+  useOverviewSectionExpanded: jest.fn(),
 }));
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
   useRuleWithFallback: jest.fn(),
@@ -127,7 +127,7 @@ const findElementWithProp = (node: ReactNode, propName: string): React.ReactElem
 };
 
 describe('InsightsSection', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseOverviewSectionExpanded = jest.mocked(useOverviewSectionExpanded);
   const mockUseRuleWithFallback = jest.mocked(useRuleWithFallback);
   const mockUseKibana = jest.mocked(useKibana);
   const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
@@ -153,7 +153,7 @@ describe('InsightsSection', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseRuleWithFallback.mockReturnValue({
       rule: {
@@ -176,7 +176,7 @@ describe('InsightsSection', () => {
   });
 
   it('renders the Insights expandable section', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { getByTestId } = renderInsightsSection();
 
@@ -186,7 +186,7 @@ describe('InsightsSection', () => {
   });
 
   it('renders the component collapsed if value is false in local storage', async () => {
-    mockUseExpandSection.mockReturnValue(false);
+    mockUseOverviewSectionExpanded.mockReturnValue([false, jest.fn()]);
 
     const { getByTestId } = renderInsightsSection();
 
@@ -196,7 +196,7 @@ describe('InsightsSection', () => {
   });
 
   it('renders the component expanded if value is true in local storage', async () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { getByTestId } = renderInsightsSection();
 

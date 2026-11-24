@@ -15,7 +15,7 @@ import { Provider } from 'react-redux-v7';
 import { createStore } from 'redux-v4';
 import { VISUALIZATION_SECTION_TEST_ID, VisualizationsSection } from './visualizations_section';
 import { VISUALIZATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -24,8 +24,8 @@ import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyz
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
+jest.mock('../hooks/use_overview_section_expanded', () => ({
+  useOverviewSectionExpanded: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/is_in_security_app', () => ({
@@ -88,7 +88,7 @@ const mockHit = createMockHit({
 });
 
 describe('VisualizationsSection', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseOverviewSectionExpanded = jest.mocked(useOverviewSectionExpanded);
   const mockUseKibana = jest.mocked(useKibana);
   const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
   const mockIsAnalyzerEnabled = jest.mocked(useIsAnalyzerEnabled);
@@ -135,7 +135,7 @@ describe('VisualizationsSection', () => {
   });
 
   it('renders the Visualizations expandable section', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { getByTestId } = renderVisualizationsSection();
 
@@ -145,7 +145,7 @@ describe('VisualizationsSection', () => {
   });
 
   it('renders the component collapsed if value is false in local storage', async () => {
-    mockUseExpandSection.mockReturnValue(false);
+    mockUseOverviewSectionExpanded.mockReturnValue([false, jest.fn()]);
 
     const { getByTestId } = renderVisualizationsSection();
 
@@ -155,7 +155,7 @@ describe('VisualizationsSection', () => {
   });
 
   it('renders the component expanded if value is true in local storage', async () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { getByTestId } = renderVisualizationsSection();
 
@@ -171,7 +171,7 @@ describe('VisualizationsSection', () => {
   });
 
   it('uses Security history key when opening session flyout in Security app', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     mockUseIsInSecurityApp.mockReturnValue(true);
 
     const { getByTestId } = renderVisualizationsSection();
@@ -187,7 +187,7 @@ describe('VisualizationsSection', () => {
   });
 
   it('uses Discover history key when opening session flyout outside Security app', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     mockUseIsInSecurityApp.mockReturnValue(false);
 
     const { getByTestId } = renderVisualizationsSection();
@@ -203,7 +203,7 @@ describe('VisualizationsSection', () => {
   });
 
   it('uses Security history key when opening graph flyout in Security app', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     mockUseIsInSecurityApp.mockReturnValue(true);
 
     const { getByTestId } = renderVisualizationsSection();
@@ -219,7 +219,7 @@ describe('VisualizationsSection', () => {
   });
 
   it('uses Discover history key when opening graph flyout outside Security app', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     mockUseIsInSecurityApp.mockReturnValue(false);
 
     const { getByTestId } = renderVisualizationsSection();

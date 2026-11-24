@@ -15,10 +15,10 @@ import {
   RESPONSE_SECTION_HEADER_TEST_ID,
 } from './test_ids';
 import { ResponseSectionContent } from './response_section_content';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
+jest.mock('../hooks/use_overview_section_expanded', () => ({
+  useOverviewSectionExpanded: jest.fn(),
 }));
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
@@ -63,11 +63,11 @@ const renderResponseSectionContent = ({ hit = alertMockHit }: { hit?: DataTableR
   );
 
 describe('<ResponseSectionContent />', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseOverviewSectionExpanded = jest.mocked(useOverviewSectionExpanded);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
   });
 
   it('should render response component', () => {
@@ -78,7 +78,7 @@ describe('<ResponseSectionContent />', () => {
   });
 
   it('should render the component collapsed if value is false in local storage', () => {
-    mockUseExpandSection.mockReturnValue(false);
+    mockUseOverviewSectionExpanded.mockReturnValue([false, jest.fn()]);
 
     const { getByTestId } = renderResponseSectionContent();
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).not.toBeVisible();

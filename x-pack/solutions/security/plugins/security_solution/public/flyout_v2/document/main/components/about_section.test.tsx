@@ -9,7 +9,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
@@ -50,8 +50,8 @@ jest.mock('./event_renderer', () => ({
   EventRenderer: () => <div>{'EventRenderer'}</div>,
 }));
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
+jest.mock('../hooks/use_overview_section_expanded', () => ({
+  useOverviewSectionExpanded: jest.fn(),
 }));
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
@@ -69,7 +69,7 @@ const alertHit = createMockHit({
 });
 
 describe('AboutSection', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseOverviewSectionExpanded = jest.mocked(useOverviewSectionExpanded);
   const flyoutApi = createFlyoutApiMock();
 
   beforeEach(() => {
@@ -79,7 +79,7 @@ describe('AboutSection', () => {
   });
 
   it('renders the About expandable section', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
@@ -91,7 +91,7 @@ describe('AboutSection', () => {
   });
 
   it('renders the component collapsed if value is false in local storage', async () => {
-    mockUseExpandSection.mockReturnValue(false);
+    mockUseOverviewSectionExpanded.mockReturnValue([false, jest.fn()]);
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
@@ -105,7 +105,7 @@ describe('AboutSection', () => {
   });
 
   it('renders the component expanded if value is true in local storage', async () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { getByTestId, getByText } = render(
       <IntlProvider locale="en">
@@ -123,7 +123,7 @@ describe('AboutSection', () => {
   });
 
   it('opens the rule flyout with the alert rule id when onShowRuleSummary is invoked', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     render(
       <IntlProvider locale="en">
@@ -146,7 +146,7 @@ describe('AboutSection', () => {
   });
 
   it('renders EventCategoryDescription and EventRenderer for event.kind === event', async () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     const eventHit = createMockHit({ 'event.kind': 'event' });
 
     const { getByText } = render(
@@ -162,7 +162,7 @@ describe('AboutSection', () => {
   });
 
   it('renders EventKindDescription and EventRenderer for a non-event ECS-valid event.kind', async () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     const metricHit = createMockHit({ 'event.kind': 'metric' });
 
     const { getByText } = render(
@@ -178,7 +178,7 @@ describe('AboutSection', () => {
   });
 
   it('renders only EventRenderer for a non-ECS event.kind', async () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     const unknownKindHit = createMockHit({ 'event.kind': 'custom-non-ecs-kind' });
 
     const { getByText, queryByText } = render(
@@ -195,7 +195,7 @@ describe('AboutSection', () => {
   });
 
   it('renders only EventRenderer when event.kind is not set', async () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     const noKindHit = createMockHit({});
 
     const { getByText, queryByText } = render(

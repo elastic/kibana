@@ -15,7 +15,7 @@ import { Provider } from 'react-redux-v7';
 import { createStore } from 'redux-v4';
 import { INVESTIGATION_SECTION_TEST_ID, InvestigationSection } from './investigation_section';
 import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useOverviewSectionExpanded } from '../hooks/use_overview_section_expanded';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { HighlightedFields } from './highlighted_fields';
@@ -32,8 +32,8 @@ import { CustomYaraSignatureHighlightedFieldLink } from './custom_yara_signature
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import * as useFlyoutApiModule from '../../../use_flyout_api';
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
+jest.mock('../hooks/use_overview_section_expanded', () => ({
+  useOverviewSectionExpanded: jest.fn(),
 }));
 
 jest.mock('../../../../common/lib/kibana', () => ({
@@ -102,7 +102,7 @@ const mockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode
 ));
 
 describe('InvestigationSection', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseOverviewSectionExpanded = jest.mocked(useOverviewSectionExpanded);
   const mockUseKibana = jest.mocked(useKibana);
   const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
   const mockHighlightedFields = jest.mocked(HighlightedFields);
@@ -127,7 +127,7 @@ describe('InvestigationSection', () => {
   });
 
   it('renders the Investigation expandable section', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
@@ -145,7 +145,7 @@ describe('InvestigationSection', () => {
   });
 
   it('renders the component collapsed if value is false in local storage', () => {
-    mockUseExpandSection.mockReturnValue(false);
+    mockUseOverviewSectionExpanded.mockReturnValue([false, jest.fn()]);
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
@@ -161,7 +161,7 @@ describe('InvestigationSection', () => {
   });
 
   it('renders the component expanded if value is true in local storage', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
@@ -177,7 +177,7 @@ describe('InvestigationSection', () => {
   });
 
   it('renders investigation guide when document is signal', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
@@ -193,7 +193,7 @@ describe('InvestigationSection', () => {
   });
 
   it('does not render investigation guide when document is not signal', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { queryByTestId } = render(
       <IntlProvider locale="en">
@@ -212,7 +212,7 @@ describe('InvestigationSection', () => {
   });
 
   it('does not render investigation guide for a remote alert', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     const { queryByTestId } = render(
       <IntlProvider locale="en">
@@ -231,7 +231,7 @@ describe('InvestigationSection', () => {
   });
 
   it('passes renderCellActions to HighlightedFields', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     const localMockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
       <>{children}</>
     ));
@@ -253,7 +253,7 @@ describe('InvestigationSection', () => {
   });
 
   it('renders a rule link keyed by the rule UUID', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     const ruleUuid = '28f4bc3f-5795-46e3-b5ca-d73cd4ab3e5c';
     const ruleHit = createMockHit({
       'event.kind': 'signal',
@@ -283,7 +283,7 @@ describe('InvestigationSection', () => {
   });
 
   it('falls back to plain children for a rule field when the rule UUID is unavailable', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     render(
       <IntlProvider locale="en">
@@ -308,7 +308,7 @@ describe('InvestigationSection', () => {
   });
 
   it('renders a Source event link that opens the ancestor document in a new flyout', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     const sourceEventHit = createMockHit(
       {
         'event.kind': 'signal',
@@ -358,7 +358,7 @@ describe('InvestigationSection', () => {
   });
 
   it('falls back to plain children for a Source event when the ancestors index is unavailable', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     render(
       <IntlProvider locale="en">
@@ -393,7 +393,7 @@ describe('InvestigationSection', () => {
   });
 
   it('keeps non-rule entity fields (host) as direct flyout links', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
 
     render(
       <IntlProvider locale="en">
@@ -416,7 +416,7 @@ describe('InvestigationSection', () => {
   });
 
   it('wraps custom YARA signature fields in a CYS page link', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     const cysHit = createMockHit({
       'event.kind': 'signal',
       'rule.custom_yara_signature.entry_id': '123-456',
@@ -445,7 +445,7 @@ describe('InvestigationSection', () => {
   });
 
   it('uses Security history key when opening flyout inside Security app', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     mockUseIsInSecurityApp.mockReturnValue(true);
 
     const { getByTestId } = render(
@@ -470,7 +470,7 @@ describe('InvestigationSection', () => {
   });
 
   it('uses Discover history key when opening flyout outside Security app', () => {
-    mockUseExpandSection.mockReturnValue(true);
+    mockUseOverviewSectionExpanded.mockReturnValue([true, jest.fn()]);
     mockUseIsInSecurityApp.mockReturnValue(false);
 
     const { getByTestId } = render(
@@ -502,7 +502,7 @@ describe('InvestigationSection Source event link under CPS', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useExpandSection).mockReturnValue(true);
+    jest.mocked(useOverviewSectionExpanded).mockReturnValue([true, jest.fn()]);
     // Stub the flyout API for this block only. The tests above intentionally exercise the real
     // useFlyoutApi chain (down to overlays.openSystemFlyout), so a file-wide jest.mock is not an
     // option; a scoped spy lets these tests assert on openDocumentFlyoutFromPattern directly.
