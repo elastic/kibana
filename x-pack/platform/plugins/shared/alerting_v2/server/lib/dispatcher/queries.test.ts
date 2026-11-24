@@ -13,7 +13,7 @@ import {
   getAlertSuppressionsQueries,
   getSeriesSuppressionsQueries,
   getLastNotifiedTimestampsQueries,
-  getAlertDataQueries,
+  getAlertDataQuery,
   getAlreadyNotifiedQueries,
   getMinLastEventTimestamp,
 } from './queries';
@@ -154,7 +154,7 @@ describe('getDispatchableAlertEventsQuery', () => {
   it('groups INLINE STATS BY subject, group_hash (not rule_id, group_hash)', () => {
     const query = queryOf();
 
-    expect(query).toContain('BY subject, group_hash');
+    expect(query).toMatch(/INLINE STATS[^|]*\bBY subject, group_hash\s*\|/);
     expect(query).not.toContain('BY rule_id, group_hash');
   });
 
@@ -178,37 +178,28 @@ describe('getDispatchableAlertEventsQuery', () => {
   });
 });
 
-describe('getAlertDataQueries', () => {
+describe('getAlertDataQuery', () => {
   const GTE = '2026-01-22T07:00:00.000Z';
   const LTE = '2026-01-22T07:10:00.000Z';
-
-  it('returns an empty array for empty input', () => {
-    expect(getAlertDataQueries([], { gte: GTE, lte: LTE })).toEqual([]);
-  });
+  const queryOf = (alertIds: string[]) => getAlertDataQuery(alertIds, { gte: GTE, lte: LTE }).query;
 
   it('returns a valid ES|QL request for a single alert id', () => {
-    const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
-
-    expect(requests).toHaveLength(1);
-    expect(typeof requests[0].query).toBe('string');
+    expect(typeof queryOf(['ep-1'])).toBe('string');
   });
 
   it('queries only the alert events data stream', () => {
-    const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+    const query = queryOf(['ep-1']);
 
-    expect(requests[0].query).toContain('.rule-events');
-    expect(requests[0].query).not.toContain('.alert-actions');
+    expect(query).toContain('.rule-events');
+    expect(query).not.toContain('.alert-actions');
   });
 
   it('requests _source metadata for JSON_EXTRACT', () => {
-    const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
-
-    expect(requests[0].query).toContain('METADATA _source');
+    expect(queryOf(['ep-1'])).toContain('METADATA _source');
   });
 
   it('places WHERE before JSON_EXTRACT so _source is fetched only for matching rows', () => {
-    const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
-    const query = requests[0].query;
+    const query = queryOf(['ep-1']);
 
     const whereIdx = query.indexOf('WHERE type ==');
     const extractIdx = query.indexOf('JSON_EXTRACT(_source');
@@ -219,8 +210,7 @@ describe('getAlertDataQueries', () => {
   });
 
   it('filters by type == "alert", alert.id IN (...), and timestamp range', () => {
-    const requests = getAlertDataQueries(['ep-1', 'ep-2'], { gte: GTE, lte: LTE });
-    const query = requests[0].query;
+    const query = queryOf(['ep-1', 'ep-2']);
 
     expect(query).toContain('type == "alert"');
     expect(query).toContain('alert.id IN');
@@ -232,22 +222,18 @@ describe('getAlertDataQueries', () => {
   });
 
   it('inlines range bounds as ::datetime literals', () => {
-    const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
-    const query = requests[0].query;
+    const query = queryOf(['ep-1']);
 
     expect(query).toContain(`"${GTE}"::DATETIME`);
     expect(query).toContain(`"${LTE}"::DATETIME`);
   });
 
   it('extracts data_json via JSON_EXTRACT(_source, "$.data")', () => {
-    const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
-
-    expect(requests[0].query).toContain('JSON_EXTRACT(_source, "$.data")');
+    expect(queryOf(['ep-1'])).toContain('JSON_EXTRACT(_source, "$.data")');
   });
 
   it('drops _source before the STATS buffer', () => {
-    const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
-    const query = requests[0].query;
+    const query = queryOf(['ep-1']);
 
     const dropIdx = query.indexOf('DROP _source');
     const statsIdx = query.indexOf('STATS data_json');
@@ -258,60 +244,15 @@ describe('getAlertDataQueries', () => {
   });
 
   it('aggregates data_json using LAST by timestamp grouped by alert_id', () => {
-    const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
-
-    expect(requests[0].query).toContain('LAST(data_json, @timestamp) BY alert_id');
+    expect(queryOf(['ep-1'])).toContain('LAST(data_json, @timestamp) BY alert_id');
   });
 
   it('keeps only alert_id and data_json', () => {
-    const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
-
-    expect(requests[0].query).toContain('KEEP alert_id, data_json');
+    expect(queryOf(['ep-1'])).toContain('KEEP alert_id, data_json');
   });
 
-  it('ends every chunk with an explicit row limit', () => {
-    const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
-    const requests = getAlertDataQueries(longIds, { gte: GTE, lte: LTE });
-
-    expect(requests.length).toBeGreaterThanOrEqual(2);
-    for (const request of requests) {
-      expect(endsWithRowLimit(request.query)).toBe(true);
-    }
-  });
-
-  it('splits into multiple requests when alert ids exceed the size budget', () => {
-    // 36-byte UUIDs + 6 bytes overhead = 42 bytes each; ~14_285 per 600 KB chunk.
-    const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
-
-    const requests = getAlertDataQueries(longIds, { gte: GTE, lte: LTE });
-
-    expect(requests.length).toBeGreaterThanOrEqual(2);
-    for (const request of requests) {
-      expect(request.query.length).toBeLessThan(1_000_000);
-    }
-    const concatenated = requests.map((r) => r.query).join('\n');
-    expect(concatenated).toContain(longIds[0]);
-    expect(concatenated).toContain(longIds[longIds.length - 1]);
-  });
-
-  it('never puts more alert ids in a chunk than the row limit returns', () => {
-    const ids = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) => `ep-${i}`);
-
-    const requests = getAlertDataQueries(ids, { gte: GTE, lte: LTE });
-
-    expect(requests).toHaveLength(2);
-    expect(requests[1].query).toContain(`alert.id IN ("ep-${ESQL_QUERY_ROW_LIMIT}")`);
-  });
-
-  it('applies the same gte/lte bounds on every chunk', () => {
-    const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
-    const requests = getAlertDataQueries(longIds, { gte: GTE, lte: LTE });
-
-    expect(requests.length).toBeGreaterThanOrEqual(2);
-    for (const request of requests) {
-      expect(request.query).toContain(`"${GTE}"`);
-      expect(request.query).toContain(`"${LTE}"`);
-    }
+  it('ends with an explicit row limit', () => {
+    expect(endsWithRowLimit(queryOf(['ep-1']))).toBe(true);
   });
 });
 
@@ -352,6 +293,8 @@ describe('chunkInClauseLiterals', () => {
 
     const chunks = chunkInClauseLiterals(literals);
 
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.flat()).toEqual(literals);
     for (const chunk of chunks) {
       const chunkBytes = chunk.reduce((sum, lit) => sum + lit.length + PER_LITERAL_OVERHEAD, 0);
       expect(chunkBytes).toBeLessThanOrEqual(ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES);
@@ -412,12 +355,11 @@ describe('chunkInClauseLiterals', () => {
     const chunks = chunkInClauseLiterals(literals, budget);
 
     expect(chunks.length).toBeGreaterThan(chunkInClauseLiterals(literals).length);
+    expect(chunks.flat()).toEqual(literals);
+    expect(chunks[0]).toHaveLength(Math.floor(budget / (literalSize + PER_LITERAL_OVERHEAD)));
     for (const chunk of chunks) {
       const chunkBytes = chunk.reduce((sum, lit) => sum + lit.length + PER_LITERAL_OVERHEAD, 0);
-      // A single literal may exceed the budget (own chunk); multi-literal chunks must stay within.
-      if (chunk.length > 1) {
-        expect(chunkBytes).toBeLessThanOrEqual(budget);
-      }
+      expect(chunkBytes).toBeLessThanOrEqual(budget);
     }
   });
 });
@@ -723,6 +665,7 @@ describe('getSeriesSuppressionsQueries', () => {
   it('places the raw-field pre-filter before the subject EVAL so it can push down', () => {
     const { query } = getSeriesSuppressionsQueries([createAlert()])[0];
 
+    expect(query.indexOf('group_hash IN (')).toBeGreaterThan(-1);
     expect(query.indexOf('group_hash IN (')).toBeLessThan(query.indexOf('subject = CASE('));
   });
 

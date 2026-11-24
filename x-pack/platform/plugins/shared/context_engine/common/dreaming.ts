@@ -20,6 +20,8 @@ export const MAX_DREAMING_ENTITY_TYPES = 50;
 export const MAX_DREAMING_ENTITY_ATTRIBUTES = 50;
 export const MAX_DREAMING_RELATIONSHIP_TYPES = 50;
 export const MAX_DREAMING_CONNECTOR_ID_LENGTH = 256;
+/** Max length of managed dreaming workflow ids in run, GET, and PUT responses. */
+export const MAX_DREAMING_WORKFLOW_ID_LENGTH = 1024;
 
 /** Type prefixes of the KIs dreaming writes: `fact.<fact type>` and `entity.<entity type>`. */
 export const FACT_TYPE_PREFIX = 'fact.';
@@ -47,6 +49,10 @@ export const ABOUT_RELATIONSHIP_TYPE = 'about';
 export const OCCURRENCES_ATTRIBUTE = 'memory.number_of_occurrences';
 /** When the latest memory a fact or entity was seen in was recorded. */
 export const LAST_SEEN_AT_ATTRIBUTE = 'memory.last_seen_at';
+/** Who edited what a KI says through the KI update API. Automation then leaves its text alone. */
+export const EDITED_BY_ATTRIBUTE = 'memory.edited_by';
+/** When a person last edited what a KI says. */
+export const EDITED_AT_ATTRIBUTE = 'memory.edited_at';
 
 /** Maximum items in each list of a change set. */
 export const MAX_DREAMING_CHANGE_SET_ITEMS = 200;
@@ -87,6 +93,45 @@ export interface DreamingRelationshipType {
   description?: string;
 }
 
+export const DEFAULT_MAINTENANCE_INTERVAL = '24h';
+export const DEFAULT_MAINTENANCE_NEIGHBORS = 5;
+export const MAX_MAINTENANCE_NEIGHBORS = 20;
+export const DEFAULT_MAINTENANCE_SWEEP_SIZE = 200;
+export const MAX_MAINTENANCE_SWEEP_SIZE = 1000;
+
+export const MAINTENANCE_MODES = ['report', 'apply'] as const;
+/** `report` lists the changes maintenance would make; `apply` makes them. */
+export type MaintenanceMode = (typeof MAINTENANCE_MODES)[number];
+
+/** How an AI index's memory is kept tidy: duplicates merged, contradictions and stale items fixed. */
+export interface DreamingMaintenanceConfig {
+  /** Whether maintenance runs on its schedule. */
+  enabled: boolean;
+  /** Defaults to `report`. */
+  mode?: MaintenanceMode;
+  /** How often maintenance runs. Defaults to {@link DEFAULT_MAINTENANCE_INTERVAL}. */
+  schedule?: { interval: string };
+  /** How many similar items each reviewed item is compared with. */
+  neighbors?: number;
+  /** How many unchanged items each run also reviews, so every item is reviewed in time. */
+  sweep_size?: number;
+}
+
+export type ResolvedMaintenanceConfig = Required<Omit<DreamingMaintenanceConfig, 'schedule'>> & {
+  schedule: { interval: string };
+};
+
+/** The maintenance config with its defaults filled in. */
+export const maintenanceConfigOf = (
+  maintenance: DreamingMaintenanceConfig | undefined
+): ResolvedMaintenanceConfig => ({
+  enabled: maintenance?.enabled ?? false,
+  mode: maintenance?.mode ?? 'report',
+  schedule: { interval: maintenance?.schedule?.interval ?? DEFAULT_MAINTENANCE_INTERVAL },
+  neighbors: maintenance?.neighbors ?? DEFAULT_MAINTENANCE_NEIGHBORS,
+  sweep_size: maintenance?.sweep_size ?? DEFAULT_MAINTENANCE_SWEEP_SIZE,
+});
+
 /**
  * What an AI index learns from its memories: facts, entities, and the relationships between them.
  * A kind with no types configured is not built.
@@ -109,6 +154,8 @@ export interface AiIndexDreamingConfig {
    * also link to the entities they are about, with the built-in `about` type.
    */
   relationships?: DreamingRelationshipType[] | null;
+  /** Missing: maintenance does not run. */
+  maintenance?: DreamingMaintenanceConfig;
 }
 
 /** The parts of a dreaming config that say what it builds. */
@@ -120,6 +167,20 @@ export type DreamingTypesConfig = Pick<
 /** Response of `GET` and `PUT /internal/context_engine/ai_index/{aiIndexId}/dreaming`. */
 export interface GetAiIndexDreamingResponse {
   dreaming: AiIndexDreamingConfig;
+  /**
+   * Ids of the workflows dreaming runs for the AI index, in the order their runs are shown.
+   * Empty while dreaming is off.
+   */
+  workflow_ids: string[];
+}
+
+/** Response of `POST /internal/context_engine/ai_index/{aiIndexId}/dreaming/run`. */
+export interface RunAiIndexDreamingResponse {
+  executions: Array<{ workflow_id: string; execution_id: string }>;
+  /** Ids of the workflows that failed to start. */
+  failed: string[];
+  /** Ids of workflows skipped because a run was already in progress. */
+  skipped: string[];
 }
 
 /** The dreaming config of an AI index that never configured it. */
@@ -169,6 +230,10 @@ export const dreamingBuildsAnything = (config: DreamingTypesConfig): boolean => 
   return facts.length > 0 || entities.length > 0;
 };
 
+/** Whether a dreaming config is on and builds something, so its workflows are installed and can run. */
+export const isDreamingOn = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
+
 const findDuplicate = (values: readonly string[]): string | undefined =>
   values.find((value, position) => values.indexOf(value) !== position);
 
@@ -203,6 +268,20 @@ export const validateDreamingTypes = ({
   const duplicateRelationship = findDuplicate(relationshipTypes);
   if (duplicateRelationship !== undefined) {
     return `Relationship type '${duplicateRelationship}' is listed twice.`;
+  }
+  return undefined;
+};
+
+/** What is wrong with a config as a whole, or `undefined` when nothing is. */
+export const validateDreamingConfig = (
+  config: DreamingTypesConfig & Pick<AiIndexDreamingConfig, 'maintenance'>
+): string | undefined => {
+  const typesError = validateDreamingTypes(config);
+  if (typesError !== undefined) {
+    return typesError;
+  }
+  if (config.maintenance?.enabled && !dreamingBuildsAnything(config)) {
+    return 'Maintenance needs at least one fact or entity type to maintain.';
   }
   return undefined;
 };
