@@ -17,6 +17,10 @@ export const MAX_MAX_ROWS = 1000;
 // Rows fetched in the first cursor batch; later batches are sized from the row width and the remaining budget.
 const FETCH_BATCH_SIZE = 20;
 
+// Hard ceiling on a batch: the average width of earlier rows says nothing about later ones, so this limits how
+// many unexpectedly wide rows can be buffered before the cap sees them.
+const MAX_FETCH_BATCH_SIZE = 100;
+
 // Fallback for xpack.actions.maxResponseContentLength when the client did not record one.
 const DEFAULT_MAX_CONTENT_LENGTH = 1024 * 1024;
 
@@ -98,6 +102,7 @@ export const withReadOnlySession = async <R>(
       // budget without a round trip per few rows. One row past maxRows is enough to detect truncation.
       const averageBytes = Math.max(1, capped.bytes / batch.length);
       batchSize = Math.min(
+        MAX_FETCH_BATCH_SIZE,
         maxRows - rows.length + 1,
         Math.max(1, Math.floor(remainingBytes / averageBytes))
       );
@@ -163,20 +168,28 @@ export const runUnrestricted = async (
     outcome = await new Promise<QueryResult | QueryResult[]>((resolve, reject) => {
       // A callback is needed to surface timeouts and connection errors, and makes the driver also accumulate rows.
       const query = new Query(sql, (err, result) => (err ? reject(err) : resolve(result)));
+      let rowError: Error | undefined;
       query.on('row', (row, result) => {
-        if (!result) return;
-        // Drop the driver's own copy of the previous row; only the capped copy below is kept.
-        result.rows.length = 0;
-        const statement = kept.get(result) ?? { rows: [], truncated: false };
-        kept.set(result, statement);
-        if (statement.truncated) return;
-        const rowBytes = Buffer.byteLength(JSON.stringify(row), 'utf8');
-        if (statement.rows.length >= MAX_MAX_ROWS || rowBytes > remainingBytes) {
-          statement.truncated = true;
-          return;
+        if (!result || rowError) return;
+        // This runs on the driver's socket event stack, where a throw would crash the process, so fail the action.
+        try {
+          // Drop the driver's own copy of the previous row; only the capped copy below is kept.
+          result.rows.length = 0;
+          const statement = kept.get(result) ?? { rows: [], truncated: false };
+          kept.set(result, statement);
+          if (statement.truncated) return;
+          // Throws for a row whose JSON form exceeds the maximum string length.
+          const rowBytes = Buffer.byteLength(JSON.stringify(row), 'utf8');
+          if (statement.rows.length >= MAX_MAX_ROWS || rowBytes > remainingBytes) {
+            statement.truncated = true;
+            return;
+          }
+          statement.rows.push(row);
+          remainingBytes -= rowBytes;
+        } catch (err) {
+          rowError = err instanceof Error ? err : new Error(String(err));
+          reject(rowError);
         }
-        statement.rows.push(row);
-        remainingBytes -= rowBytes;
       });
       client.query(query);
     });

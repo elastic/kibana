@@ -390,6 +390,17 @@ describe('PostgresqlConnector', () => {
       expect(fetchSizes(statements)).toEqual([20, 81]);
     });
 
+    it('never asks for more than a fixed ceiling of rows in one batch', async () => {
+      const { pool, statements } = makePool([{ rows: rowsOf(350) }]);
+
+      await PostgresqlConnector.actions.query.handler(makeContext(pool), {
+        sql: 'SELECT id FROM t',
+        maxRows: 1000,
+      });
+
+      expect(fetchSizes(statements)).toEqual([20, 100, 100, 100, 100]);
+    });
+
     it('shrinks batches as the response-size budget runs low', async () => {
       const { pool, statements } = makePool([
         { rows: Array.from({ length: 100 }, () => ({ v: 'x'.repeat(98) })) },
@@ -925,6 +936,21 @@ describe('PostgresqlConnector', () => {
 
       // The handler empties the driver's copy before each new row, so at most the latest row remains.
       expect(driverRows).toHaveLength(1);
+    });
+
+    it('fails the action, not the process, when a row cannot be serialized', async () => {
+      const unserializable = {
+        toJSON: () => {
+          throw new Error('Invalid string length');
+        },
+      };
+      const { pool, client } = makePool([{ command: 'SELECT', rows: [unserializable] }]);
+
+      await expect(
+        PostgresqlConnector.actions.executeSql.handler(makeContext(pool), { sql: 'SELECT x' })
+      ).rejects.toThrow('Invalid string length');
+
+      expect(client.release).toHaveBeenCalledWith(true);
     });
 
     it('applies one response-size budget across all statements', async () => {
