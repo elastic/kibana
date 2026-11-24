@@ -26,9 +26,9 @@ import { WorkflowRunFixture } from '../workflow_run_fixture';
  */
 
 // ---------------------------------------------------------------------------
-// Suite 1: on-failure:continue + eviction — failed step must not corrupt eviction state
+// Suite 1: on-failure:continue + resume — failed null output must not break consumers
 // ---------------------------------------------------------------------------
-describe('output eviction: on-failure:continue does not corrupt eviction state', () => {
+describe('output eviction: on-failure:continue does not break resume rehydration', () => {
   let fixture: WorkflowRunFixture;
 
   // Workflow:
@@ -127,7 +127,7 @@ steps:
       expect(stepConsumer?.output as string).toContain('20000');
     });
 
-    it('step_large was rehydrated (it is referenced in step_consumer template and was evicted on load)', () => {
+    it('step_large was rehydrated (named by step_consumer; load() omitted outputs)', () => {
       const stepLargeExec = Array.from(
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'step_large');
@@ -169,9 +169,9 @@ describe('output eviction: if/then/else branch + eviction + resume', () => {
   //   → pause (wait: 20m) → final_step (references setup_step AND then_step outputs)
   //
   // On resume:
-  //   - load() marks all non-data.set steps as evicted
-  //   - prepareContext() for final_step must load setup_step and then_step
-  //   - else_step never executed → not in eviction state → no crash
+  //   - load() omits outputs; prepareContext for final_step fetches setup_step
+  //     and then_step through readBatch
+  //   - else_step never ran → no step execution to fetch → no crash
   const yaml = `
 name: if-branch-eviction-resume
 enabled: false
@@ -314,16 +314,17 @@ describe('output eviction: on-failure:retry + eviction boundary + targeted rehyd
   let fixture: WorkflowRunFixture;
 
   // Workflow:
-  //   step_large (20KB, IS evicted) → step_small (slack1, ~50 bytes, NOT evicted) →
+  //   step_large (20KB) → step_small (slack1, ~50 bytes) →
   //   step_retry_target (slack1, retries 2x with 1s delay, template references step_large only) →
   //   pause (wait: 20m) → step_consumer (references step_large and step_retry_target outputs)
   //
-  // The retry always succeeds on attempt 1 (slack1 = success connector), so retries won't fire.
-  // The pause is what creates the eviction boundary.
+  // The 1-byte cache keeps neither producer. The retry always succeeds on attempt 1
+  // (slack1 = success connector), so retries won't fire. Pause + resume drops live
+  // outputs (load omits them); the consumer fetches what it names from ES.
   //
   // Key invariants tested:
   //   - step_large is fetched on resume because the consumer names it
-  //   - step_small's stored output is intact
+  //   - step_small's stored output remains intact in ES
   //   - the retry target succeeds on the first attempt, so there is no failed attempt
   const yaml = `
 name: retry-eviction-boundary-resume
@@ -433,14 +434,12 @@ steps:
     });
 
     it('step_small output is intact after resume', () => {
-      // Resume omits every output, whatever its size. step_small is still stored
-      // in Elasticsearch, and the consumer can read it.
+      // load() omits every output, whatever its size. step_small remains durable in
+      // the repository (fake ES) and can be fetched when a later node names it.
       const stepSmallExec = Array.from(
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'step_small');
-      // step_small output is present in ES (was never stripped by live-execution eviction)
       expect(stepSmallExec?.output).toBeDefined();
-      // The workflow completed correctly despite step_small being rehydrated from ES
       const exec = fixture.workflowExecutionRepositoryMock.workflowExecutions.get(
         'fake_workflow_execution_id'
       );
