@@ -167,20 +167,7 @@ export const SHOW_UNMATCHED_LABEL = i18n.translate('xpack.searchBoost.ruleFlyout
   defaultMessage: 'Show unmatched',
 });
 
-export const SHOW_HIDDEN_LABEL = i18n.translate('xpack.searchBoost.ruleFlyout.showHidden', {
-  defaultMessage: 'Show hidden',
-});
-
 export const UNFILTERED_LIST_REASON = i18n.translate(
   'xpack.searchBoost.ruleFlyout.unfilteredListReason',
   { defaultMessage: "The list isn't filtered until you enter a pattern or name." }
 );
-
-export const NO_HIDDEN_TARGETS_REASONS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.searchBoost.ruleFlyout.noHiddenIndices', {
-    defaultMessage: 'There are no hidden indices.',
-  }),
-  data_streams: i18n.translate('xpack.searchBoost.ruleFlyout.noHiddenDataStreams', {
-    defaultMessage: 'There are no hidden data streams.',
-  }),
-};

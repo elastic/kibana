@@ -245,6 +245,7 @@ describe('RuleFlyout', () => {
       expect(getTargetNames()).toEqual([
         'archive-2024',
         'archive-2025',
+        'archive-internal',
         'catalog-2026-fall',
         'products',
       ]);
@@ -265,7 +266,7 @@ describe('RuleFlyout', () => {
       expect(getProfileInput()).toHaveValue('storefront-search');
     });
 
-    it('narrows the list to exact matches, counting hidden ones, and shows what the rule applies to', async () => {
+    it('narrows the list to exact matches and shows what the rule applies to', async () => {
       renderFlyout();
 
       await selectProfile('storefront-search');
@@ -274,7 +275,7 @@ describe('RuleFlyout', () => {
       expect(screen.getByTestId('searchBoostRuleTargetsTitle')).toHaveTextContent(
         '3 exact matches'
       );
-      expect(getTargetNames()).toEqual(['archive-2024', 'archive-2025']);
+      expect(getTargetNames()).toEqual(['archive-2024', 'archive-2025', 'archive-internal']);
       expect(screen.getByTestId('searchBoostAppliesToCount')).toHaveTextContent('3 indices');
       expect(screen.getByTestId('searchBoostAppliesToSize')).toHaveTextContent('141 GB');
     });
@@ -329,7 +330,7 @@ describe('RuleFlyout', () => {
       expect(screen.getByTestId('searchBoostRuleFlyoutIndexPattern')).toHaveFocus();
     });
 
-    it('shows unmatched and hidden targets from the list options', async () => {
+    it('shows unmatched targets from the list options', async () => {
       renderFlyout();
 
       await selectProfile('storefront-search');
@@ -340,32 +341,24 @@ describe('RuleFlyout', () => {
       expect(getTargetNames()).toEqual([
         'archive-2024',
         'archive-2025',
-        'catalog-2026-fall',
-        'products',
-      ]);
-
-      await userEvent.click(screen.getByTestId('searchBoostRuleTargetsShowHidden'));
-
-      expect(getTargetNames()).toEqual([
-        'archive-2024',
-        'archive-2025',
         'archive-internal',
         'catalog-2026-fall',
         'products',
       ]);
     });
 
-    it('explains why a list option is off', async () => {
-      renderFlyout({ targets: { ...targets, data_streams: [targets.data_streams[1]] } });
+    it('explains why "Show unmatched" is off before anything is typed', async () => {
+      renderFlyout();
 
-      await selectProfile('clickstream-recent');
+      await selectProfile('storefront-search');
       await userEvent.click(screen.getByTestId('searchBoostRuleTargetsOptions'));
 
       expect(screen.getByTestId('searchBoostRuleTargetsShowUnmatched')).toBeDisabled();
-      expect(screen.getByTestId('searchBoostRuleTargetsShowHidden')).toBeDisabled();
 
-      await userEvent.hover(screen.getByTestId('searchBoostRuleTargetsShowHiddenTip'));
-      expect(await screen.findByText('There are no hidden data streams.')).toBeInTheDocument();
+      await userEvent.hover(screen.getByTestId('searchBoostRuleTargetsShowUnmatchedTip'));
+      expect(
+        await screen.findByText("The list isn't filtered until you enter a pattern or name.")
+      ).toBeInTheDocument();
     });
 
     it.each([

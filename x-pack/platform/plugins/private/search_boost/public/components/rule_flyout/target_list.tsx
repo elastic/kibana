@@ -31,11 +31,9 @@ import type { MatchedTarget } from './target_matches';
 import {
   LIST_OPTIONS_LABEL,
   MATCH_LABELS,
-  NO_HIDDEN_TARGETS_REASONS,
   NO_MATCHES_COUNT,
   NO_MATCHES_DETECTED,
   NO_TARGETS_DETECTED,
-  SHOW_HIDDEN_LABEL,
   SHOW_UNMATCHED_LABEL,
   TARGET_LIST_PROMPTS,
   UNFILTERED_LIST_REASON,
@@ -45,7 +43,6 @@ import {
 
 export interface TargetListProps {
   type: BoostProfileType;
-  /** What the user typed in the index pattern field. */
   pattern: string;
   targets: readonly MatchedTarget[];
   isDisabled?: boolean;
@@ -106,7 +103,7 @@ const ListOptionSwitch = ({
     <EuiSwitch
       compressed
       label={label}
-      checked={checked && !disabledReason}
+      checked={checked}
       disabled={Boolean(disabledReason)}
       onChange={(event) => onChange(event.target.checked)}
       data-test-subj={dataTestSubj}
@@ -178,18 +175,15 @@ const TargetLabel = ({ target }: { target: MatchedTarget }) => {
   );
 };
 
-/** The indices or data streams of a type, narrowed to what matches the typed pattern. */
+/** Lists the indices or data streams a rule can target, narrowing them down as a pattern is typed. */
 export const TargetList = ({ type, pattern, targets, isDisabled, onSelect }: TargetListProps) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'searchBoostRuleTargetsTitle' });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showsUnmatched, setShowsUnmatched] = useState(false);
-  const [showsHidden, setShowsHidden] = useState(false);
 
   const hasPattern = pattern.length > 0;
-  const hasHidden = targets.some(({ isHidden }) => isHidden);
   const visibleTargets = targets
-    .filter(({ isHidden }) => showsHidden || !isHidden)
     .filter(({ matchType }) => !hasPattern || showsUnmatched || matchType)
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -231,26 +225,13 @@ export const TargetList = ({ type, pattern, targets, isDisabled, onSelect }: Tar
               </EuiToolTip>
             }
           >
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <ListOptionSwitch
-                  label={SHOW_UNMATCHED_LABEL}
-                  checked={showsUnmatched}
-                  disabledReason={hasPattern ? undefined : UNFILTERED_LIST_REASON}
-                  onChange={setShowsUnmatched}
-                  data-test-subj="searchBoostRuleTargetsShowUnmatched"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ListOptionSwitch
-                  label={SHOW_HIDDEN_LABEL}
-                  checked={showsHidden}
-                  disabledReason={hasHidden ? undefined : NO_HIDDEN_TARGETS_REASONS[type]}
-                  onChange={setShowsHidden}
-                  data-test-subj="searchBoostRuleTargetsShowHidden"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <ListOptionSwitch
+              label={SHOW_UNMATCHED_LABEL}
+              checked={showsUnmatched}
+              disabledReason={hasPattern ? undefined : UNFILTERED_LIST_REASON}
+              onChange={setShowsUnmatched}
+              data-test-subj="searchBoostRuleTargetsShowUnmatched"
+            />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
