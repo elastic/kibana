@@ -13,17 +13,22 @@ import { of } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getSourceCommandFromESQLQuery, hasAggregatingCommand } from '@kbn/esql-utils';
+import { getCategorizationField } from '@kbn/aiops-utils';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ESQL_CATEGORIZE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useAppStateSelector, useCurrentDataSource } from '../../state_management/redux';
-import { GROUP_SIMILAR_MESSAGES_FIELD } from './constants';
 
 const NO_LICENSE$ = of(undefined);
+const TEXT_ES_TYPES: ReadonlySet<string | undefined> = new Set([
+  ES_FIELD_TYPES.TEXT,
+  ES_FIELD_TYPES.MATCH_ONLY_TEXT,
+]);
 
 /**
- * Whether the current ES|QL results can be grouped into message patterns with CATEGORIZE.
+ * Returns the field the current ES|QL results can be grouped by with CATEGORIZE, or undefined when grouping is not available.
  */
-export const useCanGroupSimilarMessages = (): boolean => {
+export const useGroupSimilarMessagesField = (): string | undefined => {
   const { core, licensing } = useDiscoverServices();
   const license = useObservable<ILicense | undefined>(licensing?.license$ ?? NO_LICENSE$);
   const query = useAppStateSelector((state) => state.query);
@@ -31,23 +36,24 @@ export const useCanGroupSimilarMessages = (): boolean => {
 
   return useMemo(() => {
     if (!isOfAggregateQueryType(query) || currentDataSource?.kind !== 'esql') {
-      return false;
+      return undefined;
     }
 
     // CATEGORIZE requires a platinum license and is not available on every serverless tier
     const hasLicense = Boolean(license?.isActive && license.hasAtLeast('platinum'));
     if (!hasLicense || !core.pricing.isFeatureAvailable(ESQL_CATEGORIZE_PRODUCT_FEATURE_ID)) {
-      return false;
+      return undefined;
     }
 
-    const hasMessageColumn = currentDataSource.resultColumns.some(
-      ({ name, meta }) => name === GROUP_SIMILAR_MESSAGES_FIELD && meta.type === 'string'
-    );
+    if (getSourceCommandFromESQLQuery(query.esql) !== 'FROM' || hasAggregatingCommand(query.esql)) {
+      return undefined;
+    }
 
-    return (
-      hasMessageColumn &&
-      getSourceCommandFromESQLQuery(query.esql) === 'FROM' &&
-      !hasAggregatingCommand(query.esql)
-    );
+    // Like the Patterns tab, only text fields are candidates
+    const textColumns = currentDataSource.resultColumns
+      .filter(({ meta }) => TEXT_ES_TYPES.has(meta.esType))
+      .map(({ name }) => name);
+
+    return getCategorizationField(textColumns);
   }, [core.pricing, currentDataSource, license, query]);
 };

@@ -27,11 +27,13 @@ import {
 } from '../../state_management/redux';
 import { GroupSimilarMessagesButton } from './group_similar_messages_button';
 
-const MESSAGE_COLUMN: DatatableColumn = {
-  id: 'message',
-  name: 'message',
-  meta: { type: 'string' },
-};
+const createColumn = (name: string, esType: string): DatatableColumn => ({
+  id: name,
+  name,
+  meta: { type: esType === 'long' ? 'number' : 'string', esType },
+});
+
+const MESSAGE_COLUMN = createColumn('message', 'text');
 
 const setup = async ({
   esql = 'FROM logs-* | LIMIT 1000',
@@ -102,18 +104,60 @@ describe('GroupSimilarMessagesButton', () => {
     });
   });
 
-  it('is not rendered without a message column', async () => {
+  it('groups by the highest priority text column when there is no message column', async () => {
+    const { getQuery, trackEsqlCategorizeEvent } = await setup({
+      resultColumns: [
+        createColumn('host.name', 'keyword'),
+        createColumn('event.original', 'text'),
+        createColumn('error.message', 'text'),
+      ],
+    });
+
+    await userEvent.click(screen.getByTestId('dscGroupSimilarMessagesButton'));
+
+    expect(getQuery()).toEqual({
+      esql: 'FROM logs-*\n  | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(error.message)\n  | SORT Count DESC',
+    });
+    expect(trackEsqlCategorizeEvent).toHaveBeenCalledWith({
+      eventName: 'group_similar_messages_clicked',
+      fieldName: 'error.message',
+    });
+  });
+
+  it('falls back to the first text column when no well-known message field is present', async () => {
+    const { getQuery } = await setup({
+      resultColumns: [createColumn('host.name', 'keyword'), createColumn('summary', 'text')],
+    });
+
+    await userEvent.click(screen.getByTestId('dscGroupSimilarMessagesButton'));
+
+    expect(getQuery()).toEqual({
+      esql: 'FROM logs-*\n  | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(summary)\n  | SORT Count DESC',
+    });
+  });
+
+  it('treats match_only_text columns as text', async () => {
+    const { getQuery } = await setup({
+      resultColumns: [createColumn('message', 'match_only_text')],
+    });
+
+    await userEvent.click(screen.getByTestId('dscGroupSimilarMessagesButton'));
+
+    expect(getQuery()).toEqual({
+      esql: 'FROM logs-*\n  | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)\n  | SORT Count DESC',
+    });
+  });
+
+  it('is not rendered without a text column', async () => {
     await setup({
-      resultColumns: [{ id: 'host.name', name: 'host.name', meta: { type: 'string' } }],
+      resultColumns: [createColumn('host.name', 'keyword'), createColumn('bytes', 'long')],
     });
 
     expect(screen.queryByTestId('dscGroupSimilarMessagesButton')).not.toBeInTheDocument();
   });
 
-  it('is not rendered when message is not a string column', async () => {
-    await setup({
-      resultColumns: [{ id: 'message', name: 'message', meta: { type: 'number' } }],
-    });
+  it('is not rendered when the only message column is a keyword', async () => {
+    await setup({ resultColumns: [createColumn('message', 'keyword')] });
 
     expect(screen.queryByTestId('dscGroupSimilarMessagesButton')).not.toBeInTheDocument();
   });

@@ -21,29 +21,32 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import { GROUP_SIMILAR_MESSAGES_FIELD } from './constants';
-import { useCanGroupSimilarMessages } from './use_can_group_similar_messages';
+import { useGroupSimilarMessagesField } from './use_group_similar_messages_field';
 
 export const GroupSimilarMessagesButton = () => {
   const dispatch = useInternalStateDispatch();
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const { scopedEBTManager } = useScopedServices();
-  const canGroupSimilarMessages = useCanGroupSimilarMessages();
+  const groupByField = useGroupSimilarMessagesField();
 
   const onClick = useCallback(() => {
+    if (!groupByField) {
+      return;
+    }
+
     scopedEBTManager.trackEsqlCategorizeEvent({
       [EsqlCategorizeEventDataKeys.EVENT_NAME]:
         EsqlCategorizeEventName.GROUP_SIMILAR_MESSAGES_CLICKED,
-      [EsqlCategorizeEventDataKeys.FIELD_NAME]: GROUP_SIMILAR_MESSAGES_FIELD,
+      [EsqlCategorizeEventDataKeys.FIELD_NAME]: groupByField,
     });
     dispatch(
       updateESQLQuery({
-        queryOrUpdater: (esql) => appendCategorizeToESQLQuery(esql, GROUP_SIMILAR_MESSAGES_FIELD),
+        queryOrUpdater: (esql) => appendCategorizeToESQLQuery(esql, groupByField),
       })
     );
-  }, [dispatch, scopedEBTManager, updateESQLQuery]);
+  }, [dispatch, groupByField, scopedEBTManager, updateESQLQuery]);
 
-  if (!canGroupSimilarMessages) {
+  if (!groupByField) {
     return null;
   }
 
