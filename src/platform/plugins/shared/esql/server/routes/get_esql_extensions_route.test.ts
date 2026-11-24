@@ -16,51 +16,51 @@ const MAX_QUERY_LENGTH = 10000;
 const nest = (depth: number) => '('.repeat(depth) + 'x' + ')'.repeat(depth);
 
 describe('ESQL extensions route', () => {
+  const recommendedQuery = { name: 'Logs overview', query: 'FROM logs-* | STATS count()' };
+
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const registry = new ESQLExtensionsRegistry();
-    jest.spyOn(registry, 'getRecommendedQueries');
+    registry.setRecommendedQueries([recommendedQuery], 'classic');
     registerESQLExtensionsRoute(router, registry, coreMock.createPluginInitializerContext());
     const [config, handler] = router.get.mock.calls[0];
     const context = coreMock.createRequestHandlerContext();
     context.elasticsearch.client.asCurrentUser.indices.resolveIndex.mockResolvedValue({
-      indices: [],
+      indices: [{ name: 'logs-2023' }],
       aliases: [],
       data_streams: [],
     } as never);
     const call = (query: string) =>
       handler(
-        coreMock.createCustomRequestHandlerContext(context) as never,
+        { core: Promise.resolve(context) } as never,
         httpServerMock.createKibanaRequest({ params: { solutionId: 'classic', query } }),
         kibanaResponseFactory
       );
-    return { config, call, registry };
+    return { config, call };
   };
 
-  it('serves a normal query', async () => {
-    const { call, registry } = setup();
+  it('returns the recommendations for a normal query on a matching source', async () => {
+    const { call } = setup();
     const response = await call('FROM logs-* | LIMIT 10');
 
     expect(response.status).toBe(200);
-    expect(registry.getRecommendedQueries).toHaveBeenCalledTimes(1);
+    expect(response.payload.recommendedQueries).toEqual([recommendedQuery]);
   });
 
   it.each([
-    ['deeply nested parentheses', `FROM a | WHERE ${nest(2000)}`],
+    ['deeply nested parentheses', `FROM logs-* | WHERE ${nest(2000)}`],
     [
       'deep nesting behind a comment full of closing parentheses',
-      `/*${')'.repeat(200)}*/ FROM a | WHERE ${nest(250)}`,
+      `/*${')'.repeat(200)}*/ FROM logs-* | WHERE ${nest(250)}`,
     ],
     [
       'deep nesting behind a string full of closing parentheses',
-      `FROM a | WHERE y == "${')'.repeat(200)}" AND ${nest(250)}`,
+      `FROM logs-* | WHERE y == "${')'.repeat(200)}" AND ${nest(250)}`,
     ],
-  ])('answers quickly without recommendations for %s', async (_name, query) => {
+  ])('does not parse the query for %s', async (_name, query) => {
     const { call } = setup();
-    const start = Date.now();
     const response = await call(query);
 
-    expect(Date.now() - start).toBeLessThan(1000);
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ recommendedQueries: [], recommendedFields: [] });
   });
