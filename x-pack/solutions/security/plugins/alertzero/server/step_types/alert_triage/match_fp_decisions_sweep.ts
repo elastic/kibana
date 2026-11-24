@@ -84,6 +84,11 @@ interface CloseProgress {
    * sweep could tell which of them it closed. Empty once the sweep has reconciled the chunk.
    */
   unknownIds: string[];
+  /**
+   * How many of the `unknownIds` the close route said it closed. It is `undefined` when the close
+   * itself threw, because then nothing is known about them.
+   */
+  unknownReported: number | undefined;
   /** How many closes this decision added to the totals. */
   counted: number;
 }
@@ -292,9 +297,11 @@ export const createDecisionSweep = ({
         chunk,
         chargeAttempt: (alertIds) => {
           progress.unknownIds = alertIds;
+          progress.unknownReported = undefined;
           adjustRoom(id, -alertIds.length);
         },
       });
+      progress.unknownReported = updated;
       totals.closed += updated;
       progress.counted += updated;
       if (chunkTimedOut) timedOut = true;
@@ -307,6 +314,7 @@ export const createDecisionSweep = ({
           : [];
       progress.closedIds.push(...attempted.filter((alertId) => !moved.includes(alertId)));
       progress.unknownIds = [];
+      progress.unknownReported = undefined;
     }
     return timedOut;
   };
@@ -327,10 +335,13 @@ export const createDecisionSweep = ({
    * Which of the alerts of a close whose outcome is unknown were closed by this sweep, so that they
    * get their notes. Only alerts that still carry the decision's tag count: the cleanup after a
    * failed close took it off the alerts that stayed open, so an alert that an analyst closed since
-   * is not credited to the sweep. When that cannot be read they count as alerts with no note.
-   * `closed` is not changed: it counts what the close route reported.
+   * is not credited to the sweep. When that cannot be read, the alerts with no note are the ones
+   * the close route said it closed, which is known when the close returned. Only when the close
+   * itself threw, all the alerts of the chunk count. `closed` is not changed: it counts what the
+   * close route reported.
    */
-  const closedAmong = async (id: string, unknownIds: string[]): Promise<string[]> => {
+  const closedAmong = async (id: string, progress: CloseProgress): Promise<string[]> => {
+    const { unknownIds, unknownReported } = progress;
     if (unknownIds.length === 0) return [];
     try {
       return await findAlertsClosedAsFalsePositive(
@@ -339,7 +350,7 @@ export const createDecisionSweep = ({
         closedByDecisionTag(id)
       );
     } catch (error) {
-      totals.notes_missing += unknownIds.length;
+      totals.notes_missing += unknownReported ?? unknownIds.length;
       warn('Could not read which alerts of a failed close were closed; they get no note', error);
       return [];
     }
@@ -356,7 +367,7 @@ export const createDecisionSweep = ({
   const settleClosed = async (id: string, tagged: string[], progress: CloseProgress) => {
     const { closedIds, unknownIds, counted } = progress;
     if ((await statusAfterWrite(id, 'closed its alerts')) !== 'gone') {
-      const noted = [...closedIds, ...(await closedAmong(id, unknownIds))];
+      const noted = [...closedIds, ...(await closedAmong(id, progress))];
       if (noted.length > 0) queueNotes(id, noted, 'closed');
       return;
     }
@@ -386,7 +397,12 @@ export const createDecisionSweep = ({
    * open. When the verdicts or the daily count cannot be read nothing is closed.
    */
   const closeDecision = async (id: string, alertIds: string[]) => {
-    const progress: CloseProgress = { closedIds: [], unknownIds: [], counted: 0 };
+    const progress: CloseProgress = {
+      closedIds: [],
+      unknownIds: [],
+      unknownReported: undefined,
+      counted: 0,
+    };
     let tagged: string[] = [];
     try {
       if ((await statusOf(id)) !== 'active') {

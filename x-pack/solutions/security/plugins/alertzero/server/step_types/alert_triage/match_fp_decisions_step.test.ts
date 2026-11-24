@@ -1262,7 +1262,7 @@ describe('triage match decisions step in on mode', () => {
         expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
       });
 
-      it('counts the alerts as missing a note when it cannot tell which were closed', async () => {
+      it('counts the alerts the close route reported as missing a note when it cannot tell which were closed', async () => {
         const { run, callKibanaApi, notes } = setup({
           mode: 'on',
           movedOn: ['b'],
@@ -1273,6 +1273,39 @@ describe('triage match decisions step in on mode', () => {
           decisions: approved('C:\\x.exe'),
         });
         failingRelease(callKibanaApi, true);
+
+        const { output } = await run();
+
+        // The close route said it closed 1 of the 2, so one note is missing, not two.
+        expect(notes()).toEqual([]);
+        expect(output).toEqual(expect.objectContaining({ close_failures: 1, notes_missing: 1 }));
+      });
+
+      it('counts every alert of the chunk as missing a note when the close itself threw and nothing is known', async () => {
+        const { run, callKibanaApi, notes } = setup({
+          mode: 'on',
+          alerts: [
+            ['a', source('C:\\x.exe')],
+            ['b', source('C:\\x.exe')],
+          ],
+          decisions: approved('C:\\x.exe'),
+        });
+        const inner = callKibanaApi.getMockImplementation()!;
+        callKibanaApi.mockImplementation(
+          async (params: { path: string; body?: Record<string, any> }) => {
+            const filter = params.body?.query?.bool?.filter;
+            if (params.path.endsWith('/signals/status') && params.body?.status === 'closed') {
+              throw new Error('close failed');
+            }
+            if (
+              params.path.endsWith('/signals/search') &&
+              filter?.[1]?.term?.['kibana.alert.workflow_status'] === 'closed'
+            ) {
+              throw new Error('lookup failed');
+            }
+            return inner(params);
+          }
+        );
 
         const { output } = await run();
 
