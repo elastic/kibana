@@ -60,6 +60,37 @@ const expectRejections = (
 };
 
 describe('expandChangeSet', () => {
+  it.each<[string, boolean | DeviceControlAccessLevel]>([
+    ['windows.device_control.usb_storage', DeviceControlAccessLevel.read_only],
+    ['windows.popup.malware.enabled', false],
+    ['windows.malware.blocklist', false],
+    ['windows.memory_protection.custom_yara_signatures', true],
+    ['windows.behavior_protection.reputation_service', false],
+  ])('does not write sibling OS branches for set_field %s', (path, value) => {
+    const policy = policyFactory();
+    policyConfigHelpers.setDeviceControlSwitch(policy, true);
+    for (const os of ['windows', 'mac', 'linux'] as const) {
+      policy[os].popup.malware.enabled = true;
+      policy[os].malware.blocklist = true;
+      policy[os].memory_protection.custom_yara_signatures = false;
+      policy[os].behavior_protection.reputation_service = true;
+    }
+    const before = structuredClone(policy);
+
+    const result = expandChangeSet(
+      [{ op: 'set_field', path, value }],
+      policy,
+      ransomwareLinuxContext
+    );
+
+    expect(result.proposedConfig.mac).toEqual(before.mac);
+    expect(result.proposedConfig.linux).toEqual(before.linux);
+    expect(changeAt(result.explicitChanges, path)?.to).toBe(value);
+    if (path === 'windows.device_control.usb_storage') {
+      expect(result.proposedConfig.windows.popup.device_control?.enabled).toBe(false);
+    }
+  });
+
   it('dispatches protection enabled across the card OS lists', () => {
     const behaviorPolicy = policyFactory();
     behaviorPolicy.windows.behavior_protection.reputation_service = true;
@@ -326,7 +357,9 @@ describe('expandChangeSet', () => {
     expect(prepared.proposedConfig.windows.device_control?.enabled).toBe(false);
     expect(prepared.proposedConfig.mac.device_control?.enabled).toBe(false);
     expect(prepared.proposedConfig.windows.device_control?.usb_storage).toBe('deny_all');
-    expect(prepared.proposedConfig.mac.device_control?.usb_storage).toBe('deny_all');
+    expect(prepared.proposedConfig.mac.device_control?.usb_storage).toBe('audit');
+    expect(prepared.proposedConfig.windows.popup.device_control?.enabled).toBe(true);
+    expect(prepared.proposedConfig.mac.popup.device_control?.enabled).toBe(false);
   });
 
   it('preserves an explicit usb_storage level after enabling device control', () => {
@@ -345,7 +378,6 @@ describe('expandChangeSet', () => {
       ransomwareLinuxContext
     );
     const requestedUsb = changeAt(prepared.explicitChanges, 'windows.device_control.usb_storage');
-    const siblingUsb = changeAt(prepared.explicitChanges, 'mac.device_control.usb_storage');
 
     expect(changeAt(prepared.explicitChanges, 'windows.device_control.enabled')?.to).toBe(true);
     expect(changeAt(prepared.explicitChanges, 'mac.device_control.enabled')?.to).toBe(true);
@@ -353,10 +385,9 @@ describe('expandChangeSet', () => {
       DeviceControlAccessLevel.read_only
     );
     expect(prepared.proposedConfig.mac.device_control?.usb_storage).toBe(
-      DeviceControlAccessLevel.read_only
+      DeviceControlAccessLevel.deny_all
     );
     expect(requestedUsb?.to).toBe(DeviceControlAccessLevel.read_only);
-    expect(siblingUsb?.to).toBe(DeviceControlAccessLevel.read_only);
   });
 
   it('stages a USB value without implicitly enabling device control', () => {
@@ -381,7 +412,7 @@ describe('expandChangeSet', () => {
       DeviceControlAccessLevel.deny_all
     );
     expect(prepared.proposedConfig.mac.device_control?.usb_storage).toBe(
-      DeviceControlAccessLevel.deny_all
+      DeviceControlAccessLevel.audit
     );
   });
 
@@ -410,7 +441,7 @@ describe('expandChangeSet', () => {
     );
   });
 
-  it('creates a missing mac device-control sibling as a coupled effect', () => {
+  it('leaves a missing mac device-control sibling untouched', () => {
     const missingSibling = policyFactory();
     delete missingSibling.mac.device_control;
 
@@ -429,10 +460,7 @@ describe('expandChangeSet', () => {
     expect(prepared.proposedConfig.windows.device_control?.usb_storage).toBe(
       DeviceControlAccessLevel.read_only
     );
-    expect(prepared.proposedConfig.mac.device_control?.usb_storage).toBe(
-      DeviceControlAccessLevel.read_only
-    );
-    expect(prepared.proposedConfig.mac.device_control?.enabled).toBe(true);
+    expect(prepared.proposedConfig.mac.device_control).toBeUndefined();
   });
 
   it('creates a missing ai_data_collection block for the requested OS only', () => {
@@ -533,7 +561,7 @@ describe('expandChangeSet', () => {
     ).toBe(false);
   });
 
-  it('couples a ransomware notification change to Linux only while the flag is on', () => {
+  it('writes a ransomware notification only on the path OS regardless of the Linux flag', () => {
     const withoutLinux = policyFactory();
     delete withoutLinux.linux.ransomware;
     delete withoutLinux.linux.popup.ransomware;
@@ -543,15 +571,26 @@ describe('expandChangeSet', () => {
       withoutLinux,
       { linuxRansomwareProtection: false, licenseInformation: null }
     );
-    expect(flagOff.proposedConfig.mac.popup.ransomware.enabled).toBe(false);
+    expect(flagOff.proposedConfig.windows.popup.ransomware.enabled).toBe(false);
+    expect(flagOff.proposedConfig.mac.popup.ransomware).toEqual(withoutLinux.mac.popup.ransomware);
     expect(flagOff.proposedConfig.linux.popup.ransomware).toBeUndefined();
 
+    const withLinux = policyFactory();
     const flagOn = expandChangeSet(
       [{ op: 'set_field', path: 'windows.popup.ransomware.enabled', value: false }],
-      policyFactory(),
+      withLinux,
       ransomwareLinuxContext
     );
-    expect(flagOn.proposedConfig.linux.popup.ransomware).toEqual({ enabled: false, message: '' });
+    expect(flagOn.proposedConfig.windows.popup.ransomware.enabled).toBe(false);
+    expect(flagOn.proposedConfig.mac.popup.ransomware).toEqual(withLinux.mac.popup.ransomware);
+    expect(flagOn.proposedConfig.linux.popup.ransomware).toEqual(withLinux.linux.popup.ransomware);
+
+    const linuxPath = expandChangeSet(
+      [{ op: 'set_field', path: 'linux.popup.ransomware.enabled', value: false }],
+      withLinux,
+      ransomwareLinuxContext
+    );
+    expect(linuxPath.proposedConfig.linux.popup.ransomware?.enabled).toBe(false);
   });
 
   it.each([
@@ -624,7 +663,7 @@ describe('expandChangeSet', () => {
     expect(prepared.proposedConfig.mac.ransomware.mode).toBe(ProtectionModes.detect);
   });
 
-  it('lets a later ransomware notification change override the materialized Linux notification default', () => {
+  it('preserves the materialized Linux notification default after a Windows notification change', () => {
     const prepared = expandChangeSet(
       [
         { op: 'set_field', path: 'linux.ransomware.mode', value: ProtectionModes.prevent },
@@ -638,8 +677,9 @@ describe('expandChangeSet', () => {
       mode: ProtectionModes.prevent,
       supported: true,
     });
-    expect(prepared.proposedConfig.linux.popup.ransomware).toEqual({ message: '', enabled: false });
-    expect(prepared.proposedConfig.mac.popup.ransomware.enabled).toBe(false);
+    expect(prepared.proposedConfig.linux.popup.ransomware).toEqual({ message: '', enabled: true });
+    expect(prepared.proposedConfig.windows.popup.ransomware.enabled).toBe(false);
+    expect(prepared.proposedConfig.mac.popup.ransomware.enabled).toBe(true);
   });
 
   it.each([
@@ -771,7 +811,7 @@ describe('expandChangeSet', () => {
     );
   });
 
-  it('creates custom YARA on all OSes through the shared helper', () => {
+  it('creates custom YARA only on the path OS through the shared helper', () => {
     const policy = policyFactory();
     delete policy.windows.memory_protection.custom_yara_signatures;
     delete policy.mac.memory_protection.custom_yara_signatures;
@@ -782,14 +822,10 @@ describe('expandChangeSet', () => {
       ransomwareLinuxContext
     );
     expect(result.proposedConfig.windows.memory_protection.custom_yara_signatures).toBe(true);
-    expect(result.proposedConfig.mac.memory_protection.custom_yara_signatures).toBe(true);
-    expect(result.proposedConfig.linux.memory_protection.custom_yara_signatures).toBe(true);
-    expect(
-      changeAt(result.explicitChanges, 'mac.memory_protection.custom_yara_signatures')?.origin.kind
-    ).toBe('coupled');
-    expect(
-      changeAt(result.explicitChanges, 'linux.memory_protection.custom_yara_signatures')?.origin
-        .kind
-    ).toBe('coupled');
+    expect(result.proposedConfig.mac.memory_protection.custom_yara_signatures).toBeUndefined();
+    expect(result.proposedConfig.linux.memory_protection.custom_yara_signatures).toBeUndefined();
+    expect(pathsOf(result.explicitChanges)).toEqual([
+      'windows.memory_protection.custom_yara_signatures',
+    ]);
   });
 });

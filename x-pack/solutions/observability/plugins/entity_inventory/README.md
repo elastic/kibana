@@ -10,11 +10,11 @@ xpack.entityInventory.enabled: true
 
 ## Routes
 
-The routes exist only when the plugin is enabled. Both are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
+The routes exist only when the plugin is enabled. All are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
 
 ### `GET /internal/entity_inventory/types`
 
-No body and no parameters. It returns one entry per registered definition that has a `dynamic` block, whoever registered it, so the entity store's built-in `host` is listed beside this plugin's own types. Example response for `k8s.deployment`:
+No body and no parameters. It returns one entry per registered definition that has a `dynamic` block, whoever registered it, so the entity store's built-in `host` is listed beside this plugin's own types. `suggestedFilters` lists the columns the definition offers as dropdown filters, in display order, and is empty when it suggests none. Example response for `k8s.deployment`:
 
 ```json
 {
@@ -36,6 +36,7 @@ No body and no parameters. It returns one entry per registered definition that h
         { "name": "k8s.deployment.uid", "kind": "attribute" },
         { "name": "last_seen", "kind": "last_seen" }
       ],
+      "suggestedFilters": ["k8s.cluster.name", "kubernetes.namespace"],
       "sources": [
         {
           "indexPattern": "metrics-kubernetes.state_deployment-*",
@@ -67,8 +68,9 @@ Response:
 | `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
 | `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
 | `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`. |
-| `took` | Wall time of the request in milliseconds, probes included. |
-| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, and Elasticsearch's `took`, `documentsFound` and `rowCount`. A failed query has null `took` and `documentsFound` and `rowCount` 0. Probes are not listed. |
+| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, `rowCount`, `isPartial`, and Elasticsearch's execution metadata: `took`, `documentsFound`, `valuesLoaded`, `rowsEmitted`, `cpuNanos`, `driverNanos`, `bytesRead`, `shards`. A failed query has null metadata and `rowCount` 0; why it failed is in `errors`. |
+| `probes` | One entry per distinct source pattern: `indexPattern`, `esql`, `params`, `outcome` (`time_series`, `no_time_series` or `failed`), `isPartial` and the same execution metadata as `queries`; a probe that threw has null metadata. |
+| `timings` | Server phases in fractional milliseconds: `definitionMs`, `planningMs` (probes and query generation), `probesMs` (part of `planningMs`), `queriesMs`, `processingMs` and `totalMs`, their sum. |
 | `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
 | `unavailableColumns` | `{ column, indexPattern, field }` for an attribute no index behind that source's pattern maps; its value is null. |
 
@@ -91,6 +93,58 @@ Errors that fail the request:
 | The definition cannot be turned into queries | 400 |
 
 The route does not cap the window length: it checks only that `from` and `to` are instants and that `from` is earlier than `to`. The limit lives in the UI, which clamps its picker to `ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS` (3 days, `entity_inventory_app/public/application/constants.ts`). A direct caller is therefore unbounded — `{"from":"1970-01-01T00:00:00Z","to":"2200-01-01T00:00:00Z"}` is a valid request — which is acceptable while the route is internal and both plugins are off by default.
+
+### `POST /internal/entity_inventory/entities/{type}/_plan`
+
+Lets a caller, such as a benchmark, run the inventory's generated queries itself: it plans the request exactly as `_list` does, probes included, and returns the probes and the list queries `_list` would send for the same request, without running the list queries. Planning and the request body are shared with `_list`, so the queries are the ones `_list` sends.
+
+Body: the same as `_list` (`from`, `to`, `limit`, strict).
+
+Response:
+
+| key | |
+| --- | --- |
+| `probes` | One entry per distinct source pattern, in source order: `indexPattern`, `request`, and `hasTimeSeries`, whether the probe found a readable time-series index (null when the probe failed). |
+| `queries` | One entry per plan query `_list` would send, in plan order: `indexPattern`, `engine` (`TS` or `FROM`) and `request`. A source whose probe failed has none, as in `_list`. |
+| `errors` | `{ indexPattern, status, reason }` per source whose probe failed. |
+
+Each `request` is the body to send to Elasticsearch's `POST /_query` unchanged: `query`, `params` (the named parameters, never interpolated) and `include_execution_metadata: true`. A probe that fails is reported in `errors` and never fails the request. The request errors and their statuses are those of `_list`.
+
+### `POST /internal/entity_inventory/filters/_values`
+
+Returns the distinct values a dropdown can offer for one attribute, merged across the sources of the types in scope, narrowed by the other dropdowns and by the time range.
+
+Body, strict (an unknown key such as `documentFilter` is a 400):
+
+| key | | |
+| --- | --- | --- |
+| `attribute` | required | The column to list: an attribute or identity field, 1 to 512 characters, that at least one type in `types` lists in its `suggestedFilters` |
+| `types` | required | 1 to 32 type ids. A type that does not suggest the attribute is left out |
+| `filters` | optional | The other dropdowns' selections: column name to the values selected, as the response shows them (value labels applied). At most 16 columns and 100 values each. A source reads each column from the field it declares for it, and a label is matched against every raw value that reads as it |
+| `selected` | optional | The values currently selected in this dropdown, at most 100 |
+| `from`, `to` | required | As in `_list` |
+| `limit` | optional | integer 1–9,999, default 9,999 |
+
+Response:
+
+| key | |
+| --- | --- |
+| `values` | The distinct values, sorted, with value labels applied, at most `limit`. A value that is empty or longer than 256 characters is not offered, because the route could not take it back as a selection |
+| `invalidSelections` | The `selected` values that are not in `values`: no longer offered, or cut by `limit` (then `truncated` is true). Every selected value is in one of the two lists |
+| `truncated` | True only when `limit` left values out |
+| `errors` | `{ indexPattern, status, reason }` per source problem, as in `_list`; never a stack. A source whose probe or query failed does not fail the request |
+
+How it runs: one values query per source plan that can contribute, run concurrently. A source that declares no field for the attribute is neither probed nor queried. The value labels, the selections and the length filter are part of the query, and the values go in as named parameters, never as text. The values come from the documents of the window, not from entities, so a value that only a hidden duplicate of an entity carries is still offered.
+
+Errors that fail the request:
+
+| request | status |
+| --- | --- |
+| No type in `types` suggests `attribute` | 400 |
+| A type has no entity definition, or has no `dynamic` block | 404 |
+| A body key is missing or invalid, `from >= to`, or `limit` is not an integer in 1–9,999 | 400 |
+| An unknown body key | 400 |
+| The definition cannot be turned into queries | 400 |
 
 ### Access control (interim)
 
@@ -135,6 +189,8 @@ registers them.
 | `columns.ts` | The output columns in order: `entity.id`, identity fields, attributes (one column per name across sources), `last_seen`. |
 | `list_query.ts` | One list query per plan. |
 | `probe_query.ts` | The probe deciding whether a source gets a `TS` plan. |
+| `attribute_filters.ts` | The other dropdowns' selections as one ES\|QL predicate per plan: each column read from the field the plan's source declares, each label matched against every raw value that reads as it, values as named parameters. A plan that cannot match the selections gets none. |
+| `attribute_values_query.ts` | One values query per plan: the distinct values of an attribute among the documents of the type in the window that pass the selections, with value labels applied before the sort and the limit, and empty or over-long values dropped. |
 
 Attributes only for now; metrics, detail and the document filter are later phases.
 

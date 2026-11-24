@@ -8,6 +8,9 @@
 import type { EventTypeOpts, RootSchema, SchemaObject } from '@kbn/core/server';
 import type { EventOrigin } from './event_origin';
 import type {
+  CompositeSloDefinitionEbtData,
+  CompositeSloDeletedEbtData,
+  CompositeSloUpdatedEbtData,
   SloDefinitionEbtData,
   SloDeletedEbtData,
   SloEbtEventMap,
@@ -15,6 +18,9 @@ import type {
   SloUpdatedEbtData,
 } from './ebt_event_types';
 import {
+  COMPOSITE_SLO_CREATED_EBT_EVENT_TYPE,
+  COMPOSITE_SLO_DELETED_EBT_EVENT_TYPE,
+  COMPOSITE_SLO_UPDATED_EBT_EVENT_TYPE,
   SLO_CREATED_EBT_EVENT_TYPE,
   SLO_DELETED_EBT_EVENT_TYPE,
   SLO_RESET_EBT_EVENT_TYPE,
@@ -111,6 +117,43 @@ const sloDeletedEbtSchema: RootSchema<WithOrigin<SloDeletedEbtData>> = {
   },
 };
 
+const compositeSloDeletedEbtSchema: RootSchema<WithOrigin<CompositeSloDeletedEbtData>> = {
+  composite_slo_id: {
+    type: 'keyword',
+    _meta: { description: 'The SHA-256 hash of the composite SLO ID.' },
+  },
+  origin: eventOriginEbtSchema,
+};
+
+const compositeSloDefinitionEbtSchema: RootSchema<WithOrigin<CompositeSloDefinitionEbtData>> = {
+  ...compositeSloDeletedEbtSchema,
+  members_count: {
+    type: 'long',
+    _meta: { description: 'The number of member SLOs of the composite SLO.' },
+  },
+  members_with_instance_id_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of members that target a specific SLO instance (`instanceId`).',
+    },
+  },
+};
+
+const compositeSloUpdatedEbtSchema: RootSchema<WithOrigin<CompositeSloUpdatedEbtData>> = {
+  ...compositeSloDefinitionEbtSchema,
+  changed_fields: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'A changed field: `name`, `description`, `members`, `compositeMethod`, `timeWindow`, `budgetingMethod`, `objective`, `tags`, or `enabled`.',
+      },
+    },
+    _meta: { description: 'The composite SLO fields changed by the update.' },
+  },
+};
+
 export const sloCreatedEbtEvent: SloEbtEventTypeOpts<typeof SLO_CREATED_EBT_EVENT_TYPE> = {
   eventType: SLO_CREATED_EBT_EVENT_TYPE,
   schema: sloDefinitionEbtSchema,
@@ -129,4 +172,25 @@ export const sloDeletedEbtEvent: SloEbtEventTypeOpts<typeof SLO_DELETED_EBT_EVEN
 export const sloResetEbtEvent: SloEbtEventTypeOpts<typeof SLO_RESET_EBT_EVENT_TYPE> = {
   eventType: SLO_RESET_EBT_EVENT_TYPE,
   schema: sloDefinitionEbtSchema,
+};
+
+export const compositeSloCreatedEbtEvent: SloEbtEventTypeOpts<
+  typeof COMPOSITE_SLO_CREATED_EBT_EVENT_TYPE
+> = {
+  eventType: COMPOSITE_SLO_CREATED_EBT_EVENT_TYPE,
+  schema: compositeSloDefinitionEbtSchema,
+};
+
+export const compositeSloUpdatedEbtEvent: SloEbtEventTypeOpts<
+  typeof COMPOSITE_SLO_UPDATED_EBT_EVENT_TYPE
+> = {
+  eventType: COMPOSITE_SLO_UPDATED_EBT_EVENT_TYPE,
+  schema: compositeSloUpdatedEbtSchema,
+};
+
+export const compositeSloDeletedEbtEvent: SloEbtEventTypeOpts<
+  typeof COMPOSITE_SLO_DELETED_EBT_EVENT_TYPE
+> = {
+  eventType: COMPOSITE_SLO_DELETED_EBT_EVENT_TYPE,
+  schema: compositeSloDeletedEbtSchema,
 };

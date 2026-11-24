@@ -85,6 +85,10 @@ export const triggerLabels = {
   searchApps: i18n.translate('xpack.nightshift.automations.flyout.searchApps', {
     defaultMessage: 'Exact app name, app ID or bot ID…',
   }),
+  slackMentionHelp: i18n.translate('xpack.nightshift.automations.flyout.slackMentionHelp', {
+    defaultMessage:
+      "Messages that mention @Elastic are answered as questions and don't start this automation.",
+  }),
   slackDailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.slackDailyLimitHelp', {
     defaultMessage:
       "When reached, new messages aren't investigated until the limit resets at 12:00 AM UTC. Skipped messages appear in this automation's history.",
@@ -211,6 +215,18 @@ export const triggerLabels = {
       defaultMessage:
         'A limit of {limit} allows up to {limit} automation runs per day. Runs can consume investigation credits — consider staying at or below {softLimit} unless you expect sustained high volume.',
       values: { limit, softLimit },
+    }),
+  limitBelowScheduleTitle: i18n.translate(
+    'xpack.nightshift.automations.flyout.limitBelowSchedule',
+    {
+      defaultMessage: 'Limit is lower than the schedule',
+    }
+  ),
+  getLimitBelowScheduleBody: (runs: number, limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.limitBelowScheduleBody', {
+      defaultMessage:
+        'This schedule runs up to {runs} times a day, but the daily trigger limit is {limit}. Runs above the limit are skipped.',
+      values: { runs, limit },
     }),
   getPlanLimitBody: (max: number) =>
     i18n.translate('xpack.nightshift.automations.flyout.planLimitBody', {

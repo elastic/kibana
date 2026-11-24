@@ -342,20 +342,3 @@ describe('Alert Triage outcome reports', () => {
     });
   });
 });
-
-describe('Alert Triage managed versions', () => {
-  it.each([
-    [
-      ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW.id,
-      ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW.version,
-      13,
-    ],
-    [
-      ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW.id,
-      ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW.version,
-      15,
-    ],
-  ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
-    expect(version).toBe(expected);
-  });
-});

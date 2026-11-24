@@ -6,7 +6,13 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { durationSchema, futureIsoDateTime, queryIntSchema } from './common';
+import {
+  durationSchema,
+  entityIdSchema,
+  ACTION_POLICY_ID_NOTE,
+  futureIsoDateTime,
+  queryIntSchema,
+} from './common';
 import { bulkByIdsSchema } from './bulk_operation_schema';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
@@ -329,6 +335,13 @@ const buildActionPolicyDataBaseSchema = (api: ActionPolicyWriteApi) =>
 
 export const createActionPolicyDataSchema = lazySchema(() =>
   buildActionPolicyDataBaseSchema('create')
+    .extend({
+      id: entityIdSchema
+        .optional()
+        .describe(
+          `The action policy ID. If omitted, Kibana generates one. If a policy with this ID already exists, the request returns a 409 error. ${ACTION_POLICY_ID_NOTE}`
+        ),
+    })
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_new_action_policy' })
 );

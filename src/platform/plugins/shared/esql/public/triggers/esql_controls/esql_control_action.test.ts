@@ -32,7 +32,6 @@ describe('CreateESQLControlAction', () => {
   let action: CreateESQLControlAction;
   let mockCore: ReturnType<typeof coreMock.createStart>;
   let currentAppId$: BehaviorSubject<string>;
-  const searchMock = dataMock.search.search;
 
   const mockContext = {
     queryString: 'FROM index | WHERE field = ?variable',
@@ -51,7 +50,7 @@ describe('CreateESQLControlAction', () => {
     currentAppId$ = new BehaviorSubject('discover');
     mockCore.application.currentAppId$ = currentAppId$;
 
-    action = new CreateESQLControlAction(mockCore, searchMock, timefilterMock);
+    action = new CreateESQLControlAction(mockCore, dataMock.search, timefilterMock);
 
     jest.clearAllMocks();
   });

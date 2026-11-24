@@ -1,5 +1,5 @@
 {
-  "sha1": "a0c783d987915ae7456312389c0c5364b268ca8a",
+  "sha1": "617bdc2e17d956b74f16bdbdbea0cb2f70cf2fdb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,8 +28,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications_from_sessions.spec.ts",
-        "line": 255,
-        "column": 32
+        "line": 249,
+        "column": 19
+      }
+    },
+    {
+      "id": "8dc11f41e4be27e-80c8bab2fa38a6a",
+      "title": "Digital Experience applications API from the sessions index keeps the page loads and sessions of the last bucket when the range ends inside it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications_sessions.spec.ts",
+        "line": 47,
+        "column": 43
       }
     },
     {
@@ -125,8 +139,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/classic_applications.spec.ts",
-        "line": 20,
+        "line": 29,
         "column": 9
+      }
+    },
+    {
+      "id": "05b5afb090a51c6-65bb286518fcbe8",
+      "title": "Digital Experience applications API with Classic RUM data buckets both sources on the same keys, at local midnight and noon",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/classic_applications.spec.ts",
+        "line": 57,
+        "column": 32
       }
     },
     {
@@ -254,13 +281,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 54,
-        "column": 11
+        "line": 109,
+        "column": 21
       }
     },
     {
-      "id": "ec1e2e4853fab11-cd60a217ea19385",
-      "title": "Digital Experience feature privileges resolves show and save, but not managing sessions, for the all privilege",
+      "id": "ec1e2e4853fab11-8d260c0622bf136",
+      "title": "Digital Experience feature privileges resolves show, save and short URLs, but not managing sessions, for the all privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -268,8 +295,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 110,
-        "column": 22
+        "line": 220,
+        "column": 32
+      }
+    },
+    {
+      "id": "ec1e2e4853fab11-0dabe9471ba6f63",
+      "title": "Digital Experience feature privileges resolves show and save, but no short URLs, for all without the Short URLs sub-feature",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
+        "line": 220,
+        "column": 32
+      }
+    },
+    {
+      "id": "ec1e2e4853fab11-b874ca4f8902b7c",
+      "title": "Digital Experience feature privileges resolves short URLs with the url_create sub-feature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
+        "line": 220,
+        "column": 32
       }
     },
     {
@@ -282,8 +337,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 110,
-        "column": 22
+        "line": 220,
+        "column": 32
       }
     },
     {
@@ -296,8 +351,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 110,
-        "column": 22
+        "line": 220,
+        "column": 32
       }
     },
     {
@@ -310,8 +365,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
-        "line": 110,
-        "column": 22
+        "line": 220,
+        "column": 32
       }
     },
     {
@@ -436,6 +491,62 @@
       }
     },
     {
+      "id": "e08d4a09e7354d6-f976293566f58af",
+      "title": "Digital Experience saved views lets the read privilege list the views, and refuses it saving, changing and deleting them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/saved_views.spec.ts",
+        "line": 56,
+        "column": 5
+      }
+    },
+    {
+      "id": "e08d4a09e7354d6-262e9388eb6c998",
+      "title": "Digital Experience saved views lets the all privilege save, replace and delete a view, and refuses a name that is taken",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/saved_views.spec.ts",
+        "line": 90,
+        "column": 23
+      }
+    },
+    {
+      "id": "e08d4a09e7354d6-67d82573ee38de8",
+      "title": "Digital Experience saved views lists the views that are valid when one holds what no route would save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/saved_views.spec.ts",
+        "line": 136,
+        "column": 93
+      }
+    },
+    {
+      "id": "e08d4a09e7354d6-a8cffe389d5e22c",
+      "title": "Digital Experience saved views keeps the views of one space from the others",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/saved_views.spec.ts",
+        "line": 172,
+        "column": 9
+      }
+    },
+    {
       "id": "c004af908bbcd9d-8a5b577f1ca42bf",
       "title": "Enabling Digital Experience sessions enables sessions for an admin",
       "expectedStatus": "passed",
@@ -475,6 +586,76 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_task.spec.ts",
         "line": 209,
         "column": 5
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-110c72e79f445c4",
+      "title": "Digital Experience histogram buckets in the time zone counts the page loads by 12 hours from local midnight and noon in the time zone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 84,
+        "column": 42
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-7a9b6d12ca16015",
+      "title": "Digital Experience histogram buckets in the time zone counts the page loads by local days across a daylight saving change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 84,
+        "column": 42
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-1f550a2ce8c51a1",
+      "title": "Digital Experience histogram buckets in the time zone counts the page loads by 12 hours from UTC midnight and noon without a time zone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 84,
+        "column": 42
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-ae6c6023b9e8b22",
+      "title": "Digital Experience histogram buckets in the time zone buckets the Overview trend in the time zone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 109,
+        "column": 41
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-b82c1f0e3c5a109",
+      "title": "Digital Experience histogram buckets in the time zone returns 400 for an unknown time zone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 127,
+        "column": 15
       }
     },
     {
@@ -543,7 +724,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.teardown.ts",
-        "line": 13,
+        "line": 14,
         "column": 35
       }
     },
@@ -558,8 +739,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.teardown.ts",
-        "line": 18,
-        "column": 12
+        "line": 19,
+        "column": 27
       }
     }
   ]

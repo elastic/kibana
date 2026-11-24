@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { findImportedSavedObjectId, spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
@@ -16,6 +17,18 @@ import {
 } from '../constants';
 
 let fewPanelsDashboardId = '';
+
+/**
+ * Kibana picks Cmd or Ctrl from the browser's platform, which can differ from the host OS that
+ * `ControlOrMeta` is resolved against, and selection only starts when that key is held alone.
+ */
+const getSelectionModifier = async (page: ScoutPage): Promise<'Meta' | 'Control'> => {
+  const platform = await page.evaluate(() => {
+    const { userAgentData } = navigator as Navigator & { userAgentData?: { platform?: string } };
+    return userAgentData?.platform || navigator.userAgent || navigator.platform;
+  });
+  return platform.toLowerCase().includes('mac') ? 'Meta' : 'Control';
+};
 
 spaceTest.describe('Panel multi-selection', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -57,10 +70,8 @@ spaceTest.describe('Panel multi-selection', { tag: tags.deploymentAgnostic }, ()
         const box = await firstPanel.boundingBox();
         expect(box).not.toBeNull();
         // Near the bottom-left corner, away from the hover actions and the panel's own controls.
-        // Kibana picks Cmd or Ctrl from the browser's user agent, which can differ from the host OS
-        // that `ControlOrMeta` is resolved against, so both keys are held.
         await firstPanel.click({
-          modifiers: ['Control', 'Meta'],
+          modifiers: [await getSelectionModifier(page)],
           position: { x: 8, y: (box?.height ?? 16) - 8 },
         });
         await expect(toolbar).toBeVisible();
@@ -81,6 +92,64 @@ spaceTest.describe('Panel multi-selection', { tag: tags.deploymentAgnostic }, ()
       await spaceTest.step('a single undo restores both panels', async () => {
         await page.getByRole('button', { name: 'Undo', exact: true }).click();
         await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(initialPanelCount);
+      });
+    }
+  );
+
+  spaceTest(
+    'groups the selected panels in a new collapsible section',
+    async ({ page, pageObjects }) => {
+      await pageObjects.dashboard.openDashboardWithId(fewPanelsDashboardId);
+      await pageObjects.dashboard.switchToEditMode();
+
+      const initialPanelCount = await pageObjects.dashboard.getPanelCount();
+      expect(initialPanelCount).toBeGreaterThan(2);
+
+      const [firstTitle, secondTitle] = await pageObjects.dashboard.getPanelTitles();
+      const toolbar = page.testSubj.locator('dashboardSelectedPanelsToolbar');
+      const selectedCount = page.testSubj.locator('dashboardSelectedPanelsCount');
+      const newSectionTitle = page.locator('[data-test-subj^="kbnGridSectionTitle-"]', {
+        hasText: 'New collapsible section',
+      });
+
+      await spaceTest.step('select two panels', async () => {
+        const firstPanel = pageObjects.dashboard.getPanelHoverActionsLocator(firstTitle);
+        const box = await firstPanel.boundingBox();
+        expect(box).not.toBeNull();
+        // the checkboxes only show up once a panel is selected, so the selection starts with Cmd/Ctrl+click
+        await firstPanel.click({
+          modifiers: [await getSelectionModifier(page)],
+          position: { x: 8, y: (box?.height ?? 16) - 8 },
+        });
+        await pageObjects.dashboard
+          .getPanelHoverActionsLocator(secondTitle)
+          .getByRole('checkbox', { name: 'Select panel', exact: true })
+          .click();
+        await expect(selectedCount).toHaveText('2 selected');
+      });
+
+      await spaceTest.step(
+        'grouping moves both panels into a new section and clears the selection',
+        async () => {
+          await page.testSubj.click('dashboardSelectedPanelsGroupInSection');
+          await expect(toolbar).toBeHidden();
+          await expect(newSectionTitle).toBeVisible();
+
+          const sectionId = (await newSectionTitle.getAttribute('data-test-subj'))?.replace(
+            'kbnGridSectionTitle-',
+            ''
+          );
+          await expect(
+            page.testSubj.locator(`kbnGridSectionHeader-${sectionId}--panelCount`)
+          ).toHaveText('(2 panels)');
+          expect(await pageObjects.dashboard.getPanelCount()).toBe(initialPanelCount);
+        }
+      );
+
+      await spaceTest.step('a single undo removes the new section', async () => {
+        await page.getByRole('button', { name: 'Undo', exact: true }).click();
+        await expect(newSectionTitle).toBeHidden();
+        expect(await pageObjects.dashboard.getPanelCount()).toBe(initialPanelCount);
       });
     }
   );

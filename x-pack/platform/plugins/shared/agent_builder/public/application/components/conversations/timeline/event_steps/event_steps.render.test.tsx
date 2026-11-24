@@ -72,9 +72,9 @@ describe('EventSteps — stopped turn threads isAborted to the labels', () => {
     expect(screen.queryByText('2 tools running…')).not.toBeInTheDocument();
   });
 
-  it('leaves a running turn (default) reading "running…"', () => {
+  it('does not append a running status to a lone tool call', () => {
     renderWithProviders(<EventSteps steps={[toolStep('tc-1', 'search')]} />);
-    expect(screen.getByText('running…')).toBeInTheDocument();
+    expect(screen.queryByText('running…')).not.toBeInTheDocument();
     expect(screen.queryByText('stopped')).not.toBeInTheDocument();
   });
 });

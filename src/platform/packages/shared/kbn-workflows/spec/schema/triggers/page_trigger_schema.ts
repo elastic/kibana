@@ -45,6 +45,10 @@ export type PageTrigger = z.infer<typeof PageTriggerSchema>;
 export const isPageTrigger = (trigger: { type?: string }): trigger is PageTrigger =>
   trigger.type === PAGE_TRIGGER_TYPE;
 
+/** Returns the page trigger `id`, or `default` for a definition that was not parsed with it. */
+export const getPageTriggerId = (trigger: Pick<PageTrigger, 'id'>): string =>
+  trigger.id ?? DEFAULT_PAGE_TRIGGER_ID;
+
 /** At most one page trigger per workflow. Use in `superRefine` on the `triggers` array. */
 export const validatePageTriggers = (triggers: readonly unknown[], ctx: z.RefinementCtx): void => {
   let seenPageTrigger = false;
