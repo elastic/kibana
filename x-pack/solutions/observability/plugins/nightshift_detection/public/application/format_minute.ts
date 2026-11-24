@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-/** Base path of the engine's internal routes. */
-export const DETECTION_ENGINE_API_PATH = '/internal/nightshift/detection';
+/** An epoch-millisecond minute boundary as `YYYY-MM-DD HH:mm` UTC, the unit the engine plans in. */
+export function formatMinute(epochMs: number): string {
+  return `${new Date(epochMs).toISOString().slice(0, 16).replace('T', ' ')}Z`;
+}
