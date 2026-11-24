@@ -137,6 +137,11 @@ export interface StatementResult {
   truncated: boolean;
 }
 
+interface StatementRows {
+  rows: Row[];
+  truncated: boolean;
+}
+
 /** Runs unrestricted SQL, possibly several statements, and returns one capped result per statement. */
 export const runUnrestricted = async (
   ctx: ActionContext,
@@ -144,25 +149,48 @@ export const runUnrestricted = async (
 ): Promise<StatementResult[]> => {
   const pool = await ctx.getClient('postgresql');
   let remainingBytes = getResponseLimit(pool) ?? DEFAULT_MAX_CONTENT_LENGTH;
+  const { Query } = await import('pg');
   const client = await pool.connect();
   // pg-pool drops its own error listener while a client is checked out; without one a connection error is thrown.
   client.on('error', (err) => {
     ctx.log.warn(`[postgresql] Connection error during executeSql: ${err.message}`);
   });
+  // Rows are capped as the driver parses them, so a large result is never buffered in full. The driver still
+  // reports each statement's command and total row count.
+  const kept = new Map<QueryResult, StatementRows>();
   let outcome: QueryResult | QueryResult[];
   try {
-    // A multi-statement string yields one result per statement at runtime, which the driver types as one.
-    outcome = await client.query(sql);
+    outcome = await new Promise<QueryResult | QueryResult[]>((resolve, reject) => {
+      // A callback is needed to surface timeouts and connection errors, and makes the driver also accumulate rows.
+      const query = new Query(sql, (err, result) => (err ? reject(err) : resolve(result)));
+      query.on('row', (row, result) => {
+        if (!result) return;
+        // Drop the driver's own copy of the previous row; only the capped copy below is kept.
+        result.rows.length = 0;
+        const statement = kept.get(result) ?? { rows: [], truncated: false };
+        kept.set(result, statement);
+        if (statement.truncated) return;
+        const rowBytes = Buffer.byteLength(JSON.stringify(row), 'utf8');
+        if (statement.rows.length >= MAX_MAX_ROWS || rowBytes > remainingBytes) {
+          statement.truncated = true;
+          return;
+        }
+        statement.rows.push(row);
+        remainingBytes -= rowBytes;
+      });
+      client.query(query);
+    });
   } finally {
     // The statements may change session state (an unfinished BEGIN, SET, advisory locks), so destroy the
     // connection instead of returning it to the shared pool.
     client.release(true);
   }
+  // A multi-statement string yields one result per statement at runtime, which the driver types as one.
   const results = Array.isArray(outcome) ? outcome : [outcome];
-  // One byte budget for the whole action, not one per statement.
-  return results.map(({ command, rowCount, rows }) => {
-    const capped = capRows(rows, MAX_MAX_ROWS, remainingBytes);
-    remainingBytes -= capped.bytes;
-    return { command, rowCount, rows: capped.rows, truncated: capped.truncated };
-  });
+  return results.map((result) => ({
+    command: result.command,
+    rowCount: result.rowCount,
+    rows: kept.get(result)?.rows ?? [],
+    truncated: kept.get(result)?.truncated ?? false,
+  }));
 };

@@ -8,6 +8,7 @@
  */
 
 import { EventEmitter } from 'events';
+import { Query } from 'pg';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { setResponseLimit } from '../../lib/clients/postgresql_response_limit';
 
@@ -20,7 +21,15 @@ interface ScriptedResult {
   fetchError?: Error;
   rowCount?: number | null;
   command?: string;
+  /** Results of a multi-statement string, one per statement. */
+  statements?: ScriptedResult[];
 }
+
+// The submitted Query object, with the fields node-postgres sets on it.
+type SubmittedQuery = Query & {
+  text: string;
+  callback: (error: Error | null, result?: unknown) => void;
+};
 
 const SESSION_CONTROL = ['BEGIN READ ONLY', 'ROLLBACK', 'DISCARD ALL'];
 
@@ -37,7 +46,32 @@ const makePool = (
   const statements: Array<{ text: string; values?: unknown[] }> = [];
   const cursors = new Map<string, { rows: Row[]; fetchError?: Error }>();
   const client = Object.assign(new EventEmitter(), {
-    query: jest.fn(async (arg: string | { text: string; values?: unknown[] }) => {
+    query: jest.fn(async (arg: string | { text: string; values?: unknown[] } | SubmittedQuery) => {
+      if (arg instanceof Query) {
+        // executeSql submits a Query object: its rows arrive as 'row' events, and the callback reports the outcome.
+        const submitted = arg as SubmittedQuery;
+        statements.push({ text: submitted.text });
+        const next = nextResult();
+        if (next.error) {
+          submitted.callback(next.error);
+          return submitted;
+        }
+        const parts = next.statements ?? [next];
+        const outcomes = parts.map((part) => ({
+          command: part.command ?? 'SELECT',
+          rowCount: part.rowCount === undefined ? part.rows?.length ?? null : part.rowCount,
+          rows: [] as Row[],
+        }));
+        parts.forEach(({ rows = [] }, index) =>
+          rows.forEach((row) => {
+            submitted.emit('row', row, outcomes[index]);
+            // The driver also accumulates the row when a callback is set.
+            outcomes[index].rows.push(row);
+          })
+        );
+        submitted.callback(null, outcomes.length > 1 ? outcomes : outcomes[0]);
+        return submitted;
+      }
       const statement = typeof arg === 'string' ? { text: arg } : arg;
       statements.push(statement);
       if (statement.text === 'BEGIN READ ONLY') return {};
@@ -820,10 +854,11 @@ describe('PostgresqlConnector', () => {
     it('destroys the connection and logs when the statement fails on a broken connection', async () => {
       const { pool, client } = makePool();
       const ctx = makeContext(pool);
-      client.query.mockImplementationOnce(async () => {
+      client.query.mockImplementationOnce(async (query) => {
         // An EventEmitter with no 'error' listener throws here, which would crash the process.
         client.emit('error', new Error('connection terminated'));
-        throw new Error('connection terminated');
+        (query as SubmittedQuery).callback(new Error('connection terminated'));
+        return query as SubmittedQuery;
       });
 
       await expect(
@@ -835,11 +870,14 @@ describe('PostgresqlConnector', () => {
     });
 
     it('returns one result per statement when several are sent', async () => {
-      const { pool, client } = makePool();
-      client.query.mockResolvedValueOnce([
-        { command: 'CREATE', rowCount: null, rows: [] },
-        { command: 'SELECT', rowCount: 1, rows: [{ a: 1 }] },
-      ] as never);
+      const { pool } = makePool([
+        {
+          statements: [
+            { command: 'CREATE', rowCount: null, rows: [] },
+            { command: 'SELECT', rowCount: 1, rows: [{ a: 1 }] },
+          ],
+        },
+      ]);
 
       const result = await PostgresqlConnector.actions.executeSql.handler(makeContext(pool), {
         sql: 'CREATE TABLE x(a int); SELECT 1 AS a',
@@ -866,13 +904,39 @@ describe('PostgresqlConnector', () => {
       expect(result.results[0].truncated).toBe(true);
     });
 
+    it('does not keep the rows the driver accumulates, only the capped copy', async () => {
+      const { pool, client } = makePool([{ command: 'SELECT', rows: rowsOf(500) }]);
+      let driverRows: Row[] = [];
+      client.query.mockImplementationOnce(async (query) => {
+        const submitted = query as SubmittedQuery;
+        const result = { command: 'SELECT', rowCount: 500, rows: [] as Row[] };
+        rowsOf(500).forEach((row) => {
+          submitted.emit('row', row, result);
+          result.rows.push(row);
+        });
+        driverRows = result.rows;
+        submitted.callback(null, result);
+        return submitted;
+      });
+
+      await PostgresqlConnector.actions.executeSql.handler(makeContext(pool), {
+        sql: 'SELECT id FROM t',
+      });
+
+      // The handler empties the driver's copy before each new row, so at most the latest row remains.
+      expect(driverRows).toHaveLength(1);
+    });
+
     it('applies one response-size budget across all statements', async () => {
-      const { pool, client } = makePool();
       const statementRows = () => Array.from({ length: 10 }, () => ({ v: 'x'.repeat(98) }));
-      client.query.mockResolvedValueOnce([
-        { command: 'SELECT', rowCount: 10, rows: statementRows() },
-        { command: 'SELECT', rowCount: 10, rows: statementRows() },
-      ] as never);
+      const { pool } = makePool([
+        {
+          statements: [
+            { command: 'SELECT', rowCount: 10, rows: statementRows() },
+            { command: 'SELECT', rowCount: 10, rows: statementRows() },
+          ],
+        },
+      ]);
       // Each row serializes to 106 bytes, so 15 rows fit across the two statements.
       setResponseLimit(pool, 106 * 15);
 
