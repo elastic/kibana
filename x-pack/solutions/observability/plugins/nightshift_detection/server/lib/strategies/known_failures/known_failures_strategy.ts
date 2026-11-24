@@ -14,8 +14,8 @@ import { KnownFailuresGenerator } from './known_failures_generator';
 
 /**
  * Known failures: a knowledge indicator describes a failure the space already knows, and the
- * strategy reports when that failure starts happening more. One Alerting v2 rule per indicator runs
- * change point detection over its per-minute count; the generator reads what those rules found.
+ * strategy reports when that failure starts happening more. One Alerting v2 rule per indicator
+ * measures its per-minute count, normal level and latest change point; the generator judges them.
  */
 @injectable()
 export class KnownFailuresStrategy implements DetectionStrategy {
@@ -35,7 +35,8 @@ export class KnownFailuresStrategy implements DetectionStrategy {
 
   /**
    * One rule per countable match knowledge indicator, on while its source is enabled. A STATS
-   * indicator, or one that is more than `FROM` and `WHERE`, is only noted: skipping its source
+   * indicator, or one that is more than `FROM` and `WHERE` (`KEEP`, `DROP` and `SORT` aside), is only
+   * noted: skipping its source
    * would freeze the source's other rules, so an edited indicator's old rule would never go.
    */
   public async resources({
@@ -43,11 +44,11 @@ export class KnownFailuresStrategy implements DetectionStrategy {
     knowledge,
     cpsEnabled,
   }: ResourceContext): Promise<DesiredResources> {
-    const links = await knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) });
+    const queries = await knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) });
     const enabledSourceIds = new Set(sources.filter(({ enabled }) => enabled).map(({ id }) => id));
     const result: Required<DesiredResources> = { resources: [], skipped: [], notes: [] };
 
-    links.forEach(({ query, source_id: sourceId }) => {
+    queries.forEach(({ query, source_id: sourceId }) => {
       const reason = getUnwatchableReason(query);
       if (reason) {
         result.notes.push(`${sourceId}: ${reason}`);

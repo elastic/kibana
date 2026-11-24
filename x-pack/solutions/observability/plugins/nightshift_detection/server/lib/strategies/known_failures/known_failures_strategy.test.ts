@@ -11,7 +11,7 @@ import type { ResourceContext } from '../types';
 import { getKnownFailureRuleId } from './known_failure_rule';
 import { KnownFailuresStrategy } from './known_failures_strategy';
 
-const createLink = ({
+const createQuery = ({
   id = 'ki-1',
   sourceId = 'source-1',
   title = 'Checkout timeouts',
@@ -31,7 +31,7 @@ const createLink = ({
 });
 
 const createContext = (
-  links: QueryLink[],
+  queries: QueryLink[],
   sources = [{ id: 'source-1', enabled: true }]
 ): ResourceContext =>
   ({
@@ -40,15 +40,15 @@ const createContext = (
     cpsEnabled: false,
     knowledge: {
       listQueries: async ({ sourceIds }) =>
-        links.filter(({ source_id: sourceId }) => sourceIds.includes(sourceId)),
+        queries.filter(({ source_id: sourceId }) => sourceIds.includes(sourceId)),
     } as Partial<KnowledgeIndicatorReader>,
   } as unknown as ResourceContext);
 
 describe('KnownFailuresStrategy', () => {
   describe('resources', () => {
-    it('wants one change point rule per countable match knowledge indicator', async () => {
+    it('wants one measuring rule per countable match knowledge indicator', async () => {
       const { resources, skipped } = await new KnownFailuresStrategy().resources(
-        createContext([createLink()])
+        createContext([createQuery()])
       );
 
       expect(skipped).toEqual([]);
@@ -62,7 +62,7 @@ describe('KnownFailuresStrategy', () => {
             metadata: { name: 'Checkout timeouts' },
             query: {
               base: expect.stringMatching(
-                /^FROM logs-\* \| WHERE service\.name == "checkout" AND message : "timeout"\n\| WHERE @timestamp >= .*CHANGE_POINT metric_value ON bucket/s
+                /^FROM logs-\*\n\| WHERE service\.name == "checkout" AND message : "timeout"\n\| WHERE @timestamp >= .*CHANGE_POINT count ON bucket/s
               ),
             },
           }),
@@ -70,19 +70,49 @@ describe('KnownFailuresStrategy', () => {
       ]);
     });
 
+    // Dropped, not refused: they leave the matched lines unchanged, and KEEP could drop @timestamp.
+    it('counts a knowledge indicator with KEEP, DROP or SORT on its filters alone', async () => {
+      const { resources } = await new KnownFailuresStrategy().resources(
+        createContext([
+          createQuery({
+            esql: 'FROM logs-* | KEEP message | WHERE message : "timeout" | DROP a | SORT message',
+          }),
+        ])
+      );
+
+      expect(resources[0].data.query.base).toMatch(
+        /^FROM logs-\*\n\| WHERE message : "timeout"\n\| WHERE @timestamp >= /
+      );
+    });
+
+    // The parser counts positions in code points and strings in UTF-16 units: cut wrong, the
+    // condition silently loses its end and the rule counts other lines.
+    it('keeps a condition whole when the knowledge indicator quotes an emoji', async () => {
+      const { resources } = await new KnownFailuresStrategy().resources(
+        createContext([
+          createQuery({ esql: 'FROM logs-* | WHERE message : "🔥 failed" AND code == 12' }),
+        ])
+      );
+
+      expect(resources[0].data.query.base).toMatch(
+        /^FROM logs-\*\n\| WHERE message : "🔥 failed" AND code == 12\n/
+      );
+    });
+
     // Noted, not skipped: a skipped source keeps all its rules, so the old rule of an edited
     // indicator beside a STATS one would never be deleted.
     it('notes STATS, non-filter, SET, subquery and overlong knowledge indicators without skipping their source', async () => {
       const { resources, skipped, notes } = await new KnownFailuresStrategy().resources(
         createContext([
-          createLink({ id: 'stats', type: 'stats' }),
-          createLink({ id: 'sorted', esql: 'FROM logs-* | WHERE a == 1 | SORT b' }),
-          createLink({ id: 'set', esql: 'SET a = 1; FROM logs-* | WHERE a == 1' }),
-          createLink({
+          createQuery({ id: 'stats', type: 'stats' }),
+          createQuery({ id: 'limited', esql: 'FROM logs-* | WHERE a == 1 | LIMIT 10' }),
+          createQuery({ id: 'unfiltered', esql: 'FROM logs-* | SORT message' }),
+          createQuery({ id: 'set', esql: 'SET a = 1; FROM logs-* | WHERE a == 1' }),
+          createQuery({
             id: 'subquery',
             esql: 'FROM logs-*, (FROM other | STATS c = COUNT(*)) | WHERE a == 1',
           }),
-          createLink({
+          createQuery({
             id: 'long',
             esql: `FROM logs-* | WHERE message == "${'a'.repeat(9_500)}"`,
           }),
@@ -93,7 +123,8 @@ describe('KnownFailuresStrategy', () => {
       expect(skipped).toEqual([]);
       expect(notes).toEqual([
         expect.stringMatching(/^source-1: .*\[stats\]/),
-        expect.stringMatching(/^source-1: .*\[sorted\]/),
+        expect.stringMatching(/^source-1: .*\[limited\]/),
+        expect.stringMatching(/^source-1: .*\[unfiltered\]/),
         expect.stringMatching(/^source-1: .*\[set\]/),
         expect.stringMatching(/^source-1: .*\[subquery\]/),
         expect.stringMatching(/^source-1: .*\[long\] is too long/),
@@ -102,7 +133,7 @@ describe('KnownFailuresStrategy', () => {
 
     it('keeps the rule of a disabled source, turned off', async () => {
       const { resources } = await new KnownFailuresStrategy().resources(
-        createContext([createLink()], [{ id: 'source-1', enabled: false }])
+        createContext([createQuery()], [{ id: 'source-1', enabled: false }])
       );
 
       expect(resources).toEqual([expect.objectContaining({ enabled: false })]);
@@ -110,7 +141,7 @@ describe('KnownFailuresStrategy', () => {
 
     it('routes the rule across projects when cross-project search is on', async () => {
       const { resources } = await new KnownFailuresStrategy().resources({
-        ...createContext([createLink()]),
+        ...createContext([createQuery()]),
         cpsEnabled: true,
       });
 
@@ -121,8 +152,8 @@ describe('KnownFailuresStrategy', () => {
   // The generator finds a rule's rows by recomputing its id, so any input the rule depends on must
   // move it, and nothing else may.
   describe('getKnownFailureRuleId', () => {
-    const getId = (overrides: Parameters<typeof createLink>[0], cpsEnabled = false) =>
-      getKnownFailureRuleId({ spaceId: 'default', link: createLink(overrides), cpsEnabled });
+    const getId = (overrides: Parameters<typeof createQuery>[0], cpsEnabled = false) =>
+      getKnownFailureRuleId({ spaceId: 'default', query: createQuery(overrides), cpsEnabled });
 
     it('changes with the query, the source and the routing', () => {
       const id = getId({});

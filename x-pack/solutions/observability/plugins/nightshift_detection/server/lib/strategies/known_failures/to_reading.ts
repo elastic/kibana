@@ -6,67 +6,106 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { z, lazySchema } from '@kbn/zod/v4';
-import type { RuleRow } from '../../rules/managed_rule_reader';
 import type { DetectionSignalReading } from '../types';
 import { compileEvidenceQuery } from './compile_known_failure_query';
 import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants';
+import type { UnusualMinute } from './judge_known_failure';
+import type { KnownFailureChange } from './known_failure_row';
 
 const MINUTE_MS = 60_000;
 
-/** The columns the rule query keeps; dates come out of `.rule-events` as epoch ms. */
-const knownFailureRowSchema = lazySchema(() =>
-  z.object({
-    change_at: z.number().int(),
-    window_end: z.number().int(),
-    change_type: z.string(),
-    change_pvalue: z.number(),
-    reference: z.number(),
-    level_at_change: z.number(),
-    recovery_threshold: z.number(),
-    recent_max: z.number(),
-  })
-);
-
-/** The latest row of a Known failures rule in the window, with the knowledge indicator it watches. */
-export interface ActiveKnownFailure {
+/** What a Known failures reading says about its knowledge indicator, beside its own check. */
+interface ReadingContext {
   knowledgeIndicator: QueryLink;
-  row: RuleRow;
-}
-
-/**
- * The breached reading of an active known failure, or `undefined` when the row does not have the
- * columns the rule query keeps (a rule written by another version of the query).
- */
-export function toReading({
-  knowledgeIndicator,
-  row,
-  entity,
-  cpsEnabled,
-}: ActiveKnownFailure & {
+  /** The rule that measured it. */
+  ruleId: string;
   entity: DetectionSignalReading['entity'];
   cpsEnabled: boolean;
-}): DetectionSignalReading | undefined {
-  const parsed = knownFailureRowSchema.safeParse(row.data);
-  if (!parsed.success) {
-    return undefined;
-  }
-  const { data } = parsed;
-  const { query } = knowledgeIndicator;
+}
 
+/** The series a knowledge indicator's readings belong to, the same whichever rule measured them. */
+export function getKnownFailureFingerprint(knowledgeIndicator: QueryLink): string {
+  // The knowledge indicator, not the rule: a rule id changes with the query, the routing and every
+  // tuned setting, and the event must keep its identity through those.
+  return `${KNOWN_FAILURES_STRATEGY_ID}:${knowledgeIndicator.query.id}`;
+}
+
+/** The breached reading of an unusual minute. */
+export function toUnusualMinuteReading({
+  unusual,
+  ...context
+}: ReadingContext & { unusual: UnusualMinute }): DetectionSignalReading {
+  const { minute, count, threshold, baseline } = unusual;
+  return toReading({
+    ...context,
+    from: minute,
+    to: minute + MINUTE_MS,
+    evidenceFrom: minute,
+    value: count,
+    // `check` and `threshold` are read back from history: an open event is judged against the
+    // threshold saved when it opened.
+    details: { check: 'unusual_minute', threshold, baseline },
+  });
+}
+
+/** The breached reading of a rise that still holds, over the minutes that show it holds. */
+export function toLastingRiseReading({
+  change,
+  rise,
+  lastMinute,
+  ...context
+}: ReadingContext & {
+  change: KnownFailureChange;
+  rise: number;
+  /** Start of the newest minute the rule counted, in epoch milliseconds. */
+  lastMinute: number;
+}): DetectionSignalReading {
+  const to = lastMinute + MINUTE_MS;
+  return toReading({
+    ...context,
+    from: to - KNOWN_FAILURES_SETTINGS.recent_minutes * MINUTE_MS,
+    to,
+    evidenceFrom: change.at,
+    value: change.recent_median,
+    details: {
+      check: 'lasting_rise',
+      change_type: change.type,
+      p_value: change.pvalue,
+      change_at: new Date(change.at).toISOString(),
+      before_change_median: change.before_median,
+      after_change_median: change.after_median,
+      rise,
+    },
+  });
+}
+
+function toReading({
+  knowledgeIndicator,
+  ruleId,
+  entity,
+  cpsEnabled,
+  from,
+  to,
+  evidenceFrom,
+  value,
+  details,
+}: ReadingContext & {
+  from: number;
+  to: number;
+  evidenceFrom: number;
+  value: number;
+  details: Record<string, unknown>;
+}): DetectionSignalReading {
+  const { query } = knowledgeIndicator;
   return {
     status: 'breached',
-    // The knowledge indicator, not the rule: a rule id changes with the query, the routing and
-    // every tuned setting, and the event must keep its identity through those.
-    fingerprint: `${KNOWN_FAILURES_STRATEGY_ID}:${query.id}`,
-    rule_id: row.rule_id,
+    fingerprint: getKnownFailureFingerprint(knowledgeIndicator),
+    rule_id: ruleId,
     source_id: knowledgeIndicator.source_id,
     entity,
-    // The closed minutes whose maximum the rule compared with the recovery threshold.
-    // Read from the row, not the schedule: the run's clock can be a minute past its scheduled time.
-    bucket_start: data.window_end - KNOWN_FAILURES_SETTINGS.recovery_minutes * MINUTE_MS,
-    bucket_end: data.window_end,
-    value: data.recent_max,
+    bucket_start: from,
+    bucket_end: to,
+    value,
     unit: 'count',
     title: query.title,
     description: query.description,
@@ -75,21 +114,16 @@ export function toReading({
     importance: Math.min(100, Math.max(0, query.severity_score ?? 50)),
     evidence_esql: compileEvidenceQuery({
       esql: query.esql.query,
-      from: data.change_at,
-      to: data.window_end,
+      from: evidenceFrom,
+      to,
       cpsEnabled,
     }),
     role: 'primary',
-    // The change point already compared the series with its own past.
+    // The strategy compared the count with the indicator's normal level itself.
     compare_with_normal: false,
     quiet_period_minutes: KNOWN_FAILURES_SETTINGS.quiet_period_minutes,
     details: {
-      change_point_type: data.change_type,
-      p_value: data.change_pvalue,
-      change_at: new Date(data.change_at).toISOString(),
-      reference: data.reference,
-      level_at_change: data.level_at_change,
-      recovery_threshold: data.recovery_threshold,
+      ...details,
       ki_id: query.id,
       linked_feature_ids: (query.features ?? []).map(({ id }) => id),
     },

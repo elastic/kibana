@@ -9,49 +9,76 @@ import { Parser } from '@elastic/esql';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { KNOWN_FAILURES_SETTINGS } from './constants';
 
-const FILTER_ONLY_COMMANDS = new Set(['from', 'where']);
+/** Commands that decide which lines a knowledge indicator matches. */
+const FILTER_COMMANDS = new Set(['from', 'where']);
+/** Commands that only shape the output, so dropping them leaves the matched lines unchanged. */
+const OUTPUT_ONLY_COMMANDS = new Set(['keep', 'drop', 'sort']);
+/** The `CHANGE_POINT` types that move the level for longer than a minute. */
+const IS_LEVEL_CHANGE = 'change_point_type IN ("step_change", "trend_change")';
 
 /**
- * Whether a match knowledge indicator can be counted per minute: `FROM` and zero or more `WHERE`,
- * nothing else, and no `SET` header. A query that does not parse cannot (fail closed).
+ * The `FROM` and `WHERE` commands of a match knowledge indicator, as written, or `undefined` when
+ * its lines cannot be counted per minute. `KEEP`, `DROP` and `SORT` are left out: they do not change
+ * which lines match, and `KEEP` or `DROP` could remove `@timestamp`. Anything else could (`LIMIT`,
+ * `EVAL` shadowing a field, `STATS`), and so could a `SET` header or a subquery in `FROM`. A query
+ * that does not parse cannot be counted (fail closed).
  */
-export function canCompileKnownFailureQuery(esql: string): boolean {
-  const trimmed = esql.trim();
-  if (!trimmed) {
-    return false;
+function getFilterCommands(esql: string): string[] | undefined {
+  const source = esql.trim();
+  if (!source) {
+    return undefined;
   }
 
   // `Parser.parse` never throws; syntax errors land in `errors`.
-  const { root, errors } = Parser.parse(trimmed);
-  // A `SET` header lands in `root.header`, not in the commands, and could change how the query runs.
+  const { root, errors } = Parser.parse(source);
   if (errors.length > 0 || root.header?.length) {
-    return false;
+    return undefined;
   }
 
-  const names = root.commands.map((command) => command.name.toLowerCase());
+  const [from] = root.commands;
   // A subquery in `FROM` parses as a `parens` argument and could aggregate before the count.
-  const hasSubquery = root.commands[0]?.args.some(
-    (arg) => !Array.isArray(arg) && arg.type === 'parens'
-  );
-  return (
-    names[0] === 'from' && !hasSubquery && names.every((name) => FILTER_ONLY_COMMANDS.has(name))
-  );
+  const hasSubquery = from?.args.some((arg) => !Array.isArray(arg) && arg.type === 'parens');
+  const names = root.commands.map((command) => command.name.toLowerCase());
+  if (
+    from?.name.toLowerCase() !== 'from' ||
+    hasSubquery ||
+    // Without a `WHERE` the rule would count every line of the index, which is no failure.
+    !names.includes('where') ||
+    !names.every((name) => FILTER_COMMANDS.has(name) || OUTPUT_ONLY_COMMANDS.has(name))
+  ) {
+    return undefined;
+  }
+
+  // Sliced from the source by position, so the conditions run exactly as the indicator wrote them,
+  // and a `//` comment between commands is left behind. The parser counts positions in code points,
+  // so the source is split into code points first: sliced as UTF-16, an emoji in a quoted message
+  // would shift the cut and drop the end of the condition.
+  const codePoints = Array.from(source);
+  return root.commands
+    .filter((command) => FILTER_COMMANDS.has(command.name.toLowerCase()))
+    .map(({ location }) => codePoints.slice(location.min, location.max + 1).join(''));
+}
+
+/** Whether a match knowledge indicator's lines can be counted per minute; see `getFilterCommands`. */
+export function canCompileKnownFailureQuery(esql: string): boolean {
+  return getFilterCommands(esql) !== undefined;
 }
 
 /**
- * Compiles a match knowledge indicator into the Known failures rule query. It counts matches per
- * minute over the window, zero-filling empty minutes, runs `CHANGE_POINT` on that series and
- * returns one row only while an increase is active: the most significant change is a spike, or a
- * step or trend up, and the last `recovery_minutes` closed minutes have not all fallen back to the
- * recovery threshold, halfway between the level before the change and the level at it.
+ * Compiles a match knowledge indicator into the Known failures rule query. The rule only measures;
+ * the generator decides. It counts the indicator's lines per minute over the window, empty minutes
+ * as zero, and returns exactly one row:
+ * - `newest_counts`: the newest minutes as `<minute start>=<count>` strings, one per minute;
+ * - `baseline_*`: the median, median absolute deviation, mean, standard deviation and number of
+ *   minutes of the hour before them, the inputs of the baseline check;
+ * - `change_*`, `before_change_*`, `after_change_median`, `recent_median`: the latest step or trend
+ *   change `CHANGE_POINT` marked in the window, the median since the change before it, the median
+ *   after it, and the median of the last minutes.
  *
- * Settled by running it on serverless (Step 0 of Phase 2):
- * - `CHANGE_POINT` can mark more than one minute; the lowest p-value wins, a tie goes to the later.
- * - The medians are taken over the segment between the neighbouring change points, so an earlier
- *   step down does not drag the level after a step up towards the reference.
- * - A spike's level is its own minute: its later median is back at the reference.
+ * One row, because Alerting v2 stores every returned row as its own document. Zero-filled, so a row
+ * comes back on every run, and a missing row means the rule did not run.
  *
- * @throws Error when the query is not `FROM` plus `WHERE` only; check with
+ * @throws Error when the indicator cannot be counted; check with
  * {@link canCompileKnownFailureQuery} first.
  */
 export function compileKnownFailureQuery({
@@ -61,30 +88,47 @@ export function compileKnownFailureQuery({
   esql: string;
   cpsEnabled: boolean;
 }): string {
-  const settings = KNOWN_FAILURES_SETTINGS;
-  const base = esql.trim();
-  if (!canCompileKnownFailureQuery(base)) {
+  const filterCommands = getFilterCommands(esql);
+  if (!filterCommands) {
     throw new Error('Known failures counts FROM … | WHERE … queries only');
   }
 
+  const settings = KNOWN_FAILURES_SETTINGS;
   const end = `DATE_TRUNC(1 minute, NOW()) - ${settings.end_margin_minutes} minutes`;
   const start = `${end} - ${settings.window_minutes} minutes`;
+  const newestStart = `${end} - ${settings.newest_minutes} minutes`;
+  const inBaseline = `bucket >= ${newestStart} - ${settings.baseline_minutes} minutes AND bucket < ${newestStart}`;
+  const beforeChange = 'bucket >= segment_start AND bucket < change_at';
+
   const query = [
-    base,
+    ...filterCommands,
     `WHERE @timestamp >= ${start} AND @timestamp < ${end}`,
-    `STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, ${settings.window_minutes}, ${start}, ${end}, {"include_empty_buckets": true})`,
-    'CHANGE_POINT metric_value ON bucket AS cp_type, cp_pvalue',
-    'INLINE STATS best_p = MIN(cp_pvalue), minute_count = COUNT(*)',
-    'INLINE STATS change_at = MAX(bucket) WHERE cp_pvalue == best_p',
-    'INLINE STATS prev_change = MAX(bucket) WHERE cp_type IS NOT NULL AND bucket < change_at, next_change = MIN(bucket) WHERE cp_type IS NOT NULL AND bucket > change_at',
-    `EVAL seg_start = COALESCE(prev_change, ${start}), seg_end = COALESCE(next_change, ${end})`,
-    `INLINE STATS change_type = MAX(cp_type) WHERE bucket == change_at, change_pvalue = MAX(cp_pvalue) WHERE bucket == change_at, value_at_change = MAX(metric_value) WHERE bucket == change_at, pre_median = MEDIAN(metric_value) WHERE bucket >= seg_start AND bucket < change_at, post_median = MEDIAN(metric_value) WHERE bucket >= change_at AND bucket < seg_end, recent_max = MAX(metric_value) WHERE bucket >= ${end} - ${settings.recovery_minutes} minutes`,
-    'EVAL reference = pre_median, level_at_change = CASE(change_type == "spike", value_at_change::DOUBLE, post_median), is_increase = change_type == "spike" OR (change_type IN ("step_change", "trend_change") AND post_median > pre_median), recovery_threshold = reference + (level_at_change - reference) / 2, active = is_increase AND recent_max > recovery_threshold',
-    // The end of the closed minutes the run compared, so the signal reports exactly those.
-    `EVAL window_end = ${end}`,
-    'WHERE bucket == change_at AND active',
-    'KEEP change_at, change_type, change_pvalue, reference, level_at_change, recovery_threshold, recent_max, minute_count, window_end',
-    // Joined with a new line, so a KI that ends in a `//` comment cannot swallow the next pipe.
+    `STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, ${settings.window_minutes}, ${start}, ${end}, {"include_empty_buckets": true})`,
+    'CHANGE_POINT count ON bucket AS change_point_type, change_point_pvalue',
+    // The latest change of level, not the most significant: an older, larger one must not hide a new
+    // rise. Spikes and dips are left out: a one-minute blip after a step would otherwise replace the
+    // step for every later run, and a spike is the baseline check's job anyway.
+    `INLINE STATS change_at = MAX(bucket) WHERE ${IS_LEVEL_CHANGE}`,
+    // The level before a change is measured from the change before it, so an earlier step does not
+    // drag it.
+    `INLINE STATS previous_change_at = MAX(bucket) WHERE ${IS_LEVEL_CHANGE} AND bucket < change_at`,
+    `EVAL segment_start = COALESCE(previous_change_at, ${start}), minute = CONCAT(TO_STRING(bucket), "=", TO_STRING(count))`,
+    [
+      `STATS newest_counts = VALUES(minute) WHERE bucket >= ${newestStart}`,
+      `baseline_median = MEDIAN(count) WHERE ${inBaseline}`,
+      `baseline_mad = MEDIAN_ABSOLUTE_DEVIATION(count) WHERE ${inBaseline}`,
+      `baseline_mean = AVG(count) WHERE ${inBaseline}`,
+      `baseline_std_dev = STD_DEV(count) WHERE ${inBaseline}`,
+      `baseline_minutes = COUNT(*) WHERE ${inBaseline}`,
+      'change_at = MAX(change_at)',
+      'change_type = MAX(change_point_type) WHERE bucket == change_at',
+      'change_pvalue = MIN(change_point_pvalue) WHERE bucket == change_at',
+      `before_change_median = MEDIAN(count) WHERE ${beforeChange}`,
+      `before_change_minutes = COUNT(*) WHERE ${beforeChange}`,
+      'after_change_median = MEDIAN(count) WHERE bucket >= change_at',
+      `recent_median = MEDIAN(count) WHERE bucket >= ${end} - ${settings.recent_minutes} minutes`,
+    ].join(', '),
+    // Joined with a new line, so a condition that ends in a `//` comment cannot swallow the next pipe.
   ].join('\n| ');
 
   return withProjectRouting({ query, cpsEnabled });

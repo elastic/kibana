@@ -23,7 +23,7 @@ const FIND_PAGE_SIZE = 500;
  */
 const MAX_LISTED_RULES = 10_000;
 /** Rows one read returns at most; a window holds about one row per rule run. */
-const MAX_ROWS = 10_000;
+export const MAX_ROWS = 10_000;
 
 /** A rule the engine manages, as far as reconciling and reading it needs. */
 export interface ManagedRule {

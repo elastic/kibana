@@ -17,8 +17,8 @@ import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants
 
 /**
  * Why a knowledge indicator gets no Known failures rule, or `undefined` when it gets one. Only match
- * queries made of `FROM` and `WHERE` can be counted per minute, and only while the rule query stays
- * within the rules API's length limit.
+ * queries made of `FROM` and `WHERE`, with at most `KEEP`, `DROP` or `SORT` beside them, can be
+ * counted per minute, and only while the rule query stays within the rules API's length limit.
  */
 export function getUnwatchableReason(
   query: Pick<StreamQuery, 'id' | 'type' | 'esql'>
@@ -27,7 +27,7 @@ export function getUnwatchableReason(
     return `knowledge indicator [${query.id}] is a STATS query, which Known failures does not count yet`;
   }
   if (!canCompileKnownFailureQuery(query.esql.query)) {
-    return `knowledge indicator [${query.id}] is not a FROM … | WHERE … query`;
+    return `knowledge indicator [${query.id}] is not a FROM … | WHERE … query (KEEP, DROP and SORT aside)`;
   }
   // The rules API rejects a longer query. The cross-project form is the longest, so a query that
   // fits it fits either way, and the rule id does not flip with the setting.
@@ -60,8 +60,7 @@ export function buildKnownFailureRule({
         KNOWN_FAILURES_SETTINGS.window_minutes + KNOWN_FAILURES_SETTINGS.end_margin_minutes + 1
       }m`,
     },
-    // One active change per run at most, so a run writes one row and a new change a new group.
-    grouping: { fields: ['change_at'] },
+    // No grouping: the query returns one row per run, all of one series.
     query: {
       base: compileKnownFailureQuery({
         esql: query.esql.query,
@@ -74,18 +73,18 @@ export function buildKnownFailureRule({
 /** The id the reconciler gives the rule of a knowledge indicator, to find its rows again. */
 export function getKnownFailureRuleId({
   spaceId,
-  link,
+  query,
   cpsEnabled,
 }: {
   spaceId: string;
-  link: Pick<QueryLink, 'source_id' | 'query'>;
+  query: Pick<QueryLink, 'source_id' | 'query'>;
   cpsEnabled: boolean;
 }): string {
   // The reconciler's own id function, so the generator finds exactly the rule it created.
   return computeRuleId({
     spaceId,
     strategy: KNOWN_FAILURES_STRATEGY_ID,
-    sourceId: link.source_id,
-    data: buildKnownFailureRule({ query: link.query, cpsEnabled }),
+    sourceId: query.source_id,
+    data: buildKnownFailureRule({ query: query.query, cpsEnabled }),
   });
 }

@@ -7,8 +7,7 @@
 
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { wrapReading } from '../../signals/wrap_reading';
-import type { RuleRow } from '../../rules/managed_rule_reader';
-import { toReading } from './to_reading';
+import { toLastingRiseReading, toUnusualMinuteReading } from './to_reading';
 
 const KNOWLEDGE_INDICATOR: QueryLink = {
   query: {
@@ -25,61 +24,54 @@ const KNOWLEDGE_INDICATOR: QueryLink = {
   rule_id: 'sig-rule-1',
 };
 
-// A step up at 10:20 still active in the run scheduled at 10:31 that read its clock at 10:32:01,
-// so it compared the minutes up to 10:31.
-const ROW: RuleRow = {
-  rule_id: 'rule-1',
-  scheduled_timestamp: Date.UTC(2026, 10, 20, 10, 31, 0),
-  data: {
-    change_at: Date.UTC(2026, 10, 20, 10, 20),
-    change_type: 'step_change',
-    change_pvalue: 5.2e-235,
-    reference: 2,
-    level_at_change: 25,
-    recovery_threshold: 13.5,
-    recent_max: 26,
-    minute_count: 360,
-    window_end: Date.UTC(2026, 10, 20, 10, 31),
-  },
+const CONTEXT = {
+  knowledgeIndicator: KNOWLEDGE_INDICATOR,
+  ruleId: 'rule-1',
+  entity: { type: 'service', name: 'checkout' } as const,
+  cpsEnabled: false,
 };
+const BASELINE = { median: 2, mad: 1, mean: 2, std_dev: 0.8 };
+const UNUSUAL = {
+  minute: Date.UTC(2026, 10, 20, 10, 27),
+  count: 40,
+  threshold: 8,
+  baseline: BASELINE,
+};
+const CHANGE = {
+  at: Date.UTC(2026, 10, 20, 9, 50),
+  type: 'step_change',
+  pvalue: 1e-20,
+  before_median: 5,
+  before_minutes: 300,
+  after_median: 10,
+  recent_median: 11,
+};
+const RISE = { ...CONTEXT, change: CHANGE, rise: 5, lastMinute: Date.UTC(2026, 10, 20, 10, 30) };
 
-const ENTITY = { type: 'service', name: 'checkout' } as const;
-
-describe('toReading', () => {
-  it('reports the row as a breach of the last closed minutes the rule compared', () => {
-    expect(
-      toReading({
-        knowledgeIndicator: KNOWLEDGE_INDICATOR,
-        row: ROW,
-        entity: ENTITY,
-        cpsEnabled: false,
-      })
-    ).toEqual({
+describe('toUnusualMinuteReading', () => {
+  it('reports the minute with the threshold it was judged against', () => {
+    expect(toUnusualMinuteReading({ ...CONTEXT, unusual: UNUSUAL })).toEqual({
       status: 'breached',
       fingerprint: 'known_failures:ki-timeouts',
       rule_id: 'rule-1',
       source_id: 'source-1',
-      entity: ENTITY,
-      // The minutes the rule compared, not those its scheduled time would suggest.
-      bucket_start: Date.UTC(2026, 10, 20, 10, 25),
-      bucket_end: Date.UTC(2026, 10, 20, 10, 31),
-      value: 26,
+      entity: { type: 'service', name: 'checkout' },
+      bucket_start: Date.UTC(2026, 10, 20, 10, 27),
+      bucket_end: Date.UTC(2026, 10, 20, 10, 28),
+      value: 40,
       unit: 'count',
       title: 'Checkout timeouts',
       description: 'Checkout calls time out',
       importance: 70,
       evidence_esql:
-        'FROM logs | WHERE message : "timeout"\n| WHERE @timestamp >= "2026-11-20T10:20:00.000Z" AND @timestamp < "2026-11-20T10:31:00.000Z"',
+        'FROM logs | WHERE message : "timeout"\n| WHERE @timestamp >= "2026-11-20T10:27:00.000Z" AND @timestamp < "2026-11-20T10:28:00.000Z"',
       role: 'primary',
       compare_with_normal: false,
-      quiet_period_minutes: 5,
+      quiet_period_minutes: 10,
       details: {
-        change_point_type: 'step_change',
-        p_value: 5.2e-235,
-        change_at: '2026-11-20T10:20:00.000Z',
-        reference: 2,
-        level_at_change: 25,
-        recovery_threshold: 13.5,
+        check: 'unusual_minute',
+        threshold: 8,
+        baseline: BASELINE,
         ki_id: 'ki-timeouts',
         linked_feature_ids: ['checkout'],
       },
@@ -88,81 +80,80 @@ describe('toReading', () => {
 
   // The event keeps its identity when the query, and so the rule and its id, change.
   it('keeps the fingerprint when the knowledge indicator query changes', () => {
-    const before = toReading({
-      knowledgeIndicator: KNOWLEDGE_INDICATOR,
-      row: ROW,
-      entity: ENTITY,
-      cpsEnabled: false,
-    });
-    const after = toReading({
+    const edited = toUnusualMinuteReading({
+      ...CONTEXT,
+      ruleId: 'rule-2',
       knowledgeIndicator: {
         ...KNOWLEDGE_INDICATOR,
-        query: {
-          ...KNOWLEDGE_INDICATOR.query,
-          esql: { query: 'FROM logs | WHERE message : "timed out"' },
-        },
+        query: { ...KNOWLEDGE_INDICATOR.query, esql: { query: 'FROM logs | WHERE a == 1' } },
       },
-      row: { ...ROW, rule_id: 'rule-2' },
-      entity: ENTITY,
-      cpsEnabled: false,
+      unusual: UNUSUAL,
     });
 
-    expect(after?.fingerprint).toBe(before?.fingerprint);
+    expect(edited.fingerprint).toBe('known_failures:ki-timeouts');
   });
 
   it('routes the evidence query across projects when cross-project search is on', () => {
-    const reading = toReading({
-      knowledgeIndicator: KNOWLEDGE_INDICATOR,
-      row: ROW,
-      entity: ENTITY,
-      cpsEnabled: true,
-    });
-
-    expect(reading?.evidence_esql).toMatch(/^SET project_routing=".+";\nFROM logs/);
+    expect(
+      toUnusualMinuteReading({ ...CONTEXT, cpsEnabled: true, unusual: UNUSUAL }).evidence_esql
+    ).toMatch(/^SET project_routing=".+";\nFROM logs/);
   });
 
-  // The engine drops a reading the signal format rejects, so a mismatch would store nothing.
-  it('gives a reading the signal format accepts', () => {
-    const reading = toReading({
-      knowledgeIndicator: KNOWLEDGE_INDICATOR,
-      row: ROW,
-      entity: ENTITY,
-      cpsEnabled: false,
+  // The knowledge indicator write path stores any score; the signal format only accepts 0 to 100.
+  it.each([
+    [150, 100],
+    [undefined, 50],
+  ])('keeps a severity score of %s within the signal format as %s', (severityScore, importance) => {
+    const reading = toUnusualMinuteReading({
+      ...CONTEXT,
+      knowledgeIndicator: {
+        ...KNOWLEDGE_INDICATOR,
+        query: { ...KNOWLEDGE_INDICATOR.query, severity_score: severityScore },
+      },
+      unusual: UNUSUAL,
     });
 
+    expect(reading.importance).toBe(importance);
+  });
+});
+
+describe('toLastingRiseReading', () => {
+  it('reports the recent minutes that show the rise holds, with evidence from the change', () => {
+    expect(toLastingRiseReading(RISE)).toEqual(
+      expect.objectContaining({
+        bucket_start: Date.UTC(2026, 10, 20, 10, 16),
+        bucket_end: Date.UTC(2026, 10, 20, 10, 31),
+        value: 11,
+        evidence_esql: expect.stringContaining(
+          '@timestamp >= "2026-11-20T09:50:00.000Z" AND @timestamp < "2026-11-20T10:31:00.000Z"'
+        ),
+        details: expect.objectContaining({
+          check: 'lasting_rise',
+          change_type: 'step_change',
+          change_at: '2026-11-20T09:50:00.000Z',
+          before_change_median: 5,
+          after_change_median: 10,
+          rise: 5,
+        }),
+      })
+    );
+  });
+});
+
+// The engine drops a reading the signal format rejects, so a mismatch would store nothing.
+describe('Known failures readings', () => {
+  it.each([
+    ['an unusual minute', toUnusualMinuteReading({ ...CONTEXT, unusual: UNUSUAL })],
+    ['a lasting rise', toLastingRiseReading(RISE)],
+  ])('give %s the signal format accepts', (_label, reading) => {
     expect(
       wrapReading({
-        reading: reading!,
+        reading,
         strategyId: 'known_failures',
         strategyVersion: 1,
         spaceId: 'default',
         scheduledMinute: Date.UTC(2026, 10, 20, 10, 35),
       })
     ).toMatchObject({ dropped: false });
-  });
-
-  it('caps the importance of a knowledge indicator scored above 100', () => {
-    const reading = toReading({
-      knowledgeIndicator: {
-        ...KNOWLEDGE_INDICATOR,
-        query: { ...KNOWLEDGE_INDICATOR.query, severity_score: 150 },
-      },
-      row: ROW,
-      entity: ENTITY,
-      cpsEnabled: false,
-    });
-
-    expect(reading?.importance).toBe(100);
-  });
-
-  it('gives nothing for a row without the columns the rule query keeps', () => {
-    expect(
-      toReading({
-        knowledgeIndicator: KNOWLEDGE_INDICATOR,
-        row: { ...ROW, data: { change_at: '2026-11-20T10:20:00.000Z' } },
-        entity: ENTITY,
-        cpsEnabled: false,
-      })
-    ).toBeUndefined();
   });
 });
