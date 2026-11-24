@@ -400,8 +400,7 @@ export class TimePickerPageObject extends FtrService {
   }
 
   private async getRefreshConfigNewPicker() {
-    // Open popover → navigate to Settings panel
-    await this.openNewPickerSettingsPanel();
+    await this.openNewPickerMainPanel();
 
     const interval = await this.testSubjects.getAttribute(
       'dateRangePickerAutoRefreshIntervalCount',
@@ -425,7 +424,7 @@ export class TimePickerPageObject extends FtrService {
       'aria-checked'
     );
 
-    await this.closeNewPickerSettingsPanel();
+    await this.closeNewPickerPopover();
 
     return {
       interval,
@@ -472,33 +471,29 @@ export class TimePickerPageObject extends FtrService {
   }
 
   /**
-   * Opens the DateRangePicker settings panel by clicking the control button,
-   * then navigating to the settings sub-panel.
+   * Opens the DateRangePicker main panel, which holds the auto-refresh form,
+   * by clicking the control button.
    */
-  private async openNewPickerSettingsPanel() {
-    // If the settings panel is already visible, nothing to do.
-    const alreadyOpen = await this.testSubjects.exists('dateRangePickerSettingsPanel');
-    if (alreadyOpen) return;
+  private async openNewPickerMainPanel() {
+    if (await this.testSubjects.exists('dateRangePickerMainPanel')) return;
 
     await this.testSubjects.click('dateRangePickerControlButton');
     await this.testSubjects.existOrFail('dateRangePickerMainPanel', { timeout: 5000 });
-    await this.testSubjects.click('dateRangePickerSettingsButton');
-    await this.testSubjects.existOrFail('dateRangePickerSettingsPanel', { timeout: 5000 });
   }
 
   /**
-   * Closes the DateRangePicker after settings-panel interactions and waits for
+   * Closes the DateRangePicker after auto-refresh interactions and waits for
    * idle state (control button visible, popover gone, tooltip dismissed).
    *
    * `browser.pressKeys(ESCAPE)` sends to `document.body` after focus drifts
    * away from panel elements (WebDriver behaviour), so it never reaches
    * `onPanelKeyDown` and the popover stays open. Fix: navigate back to the main
-   * panel via the back button, focus the text input (which is in the control,
+   * panel via the back button if needed, focus the text input (which is in the control,
    * not the popover), then press Escape so `onInputKeyDown` fires and calls
    * `setIsEditing(false)`.
    */
-  private async closeNewPickerSettingsPanel() {
-    // Navigate back from settings sub-panel to main panel if still there.
+  private async closeNewPickerPopover() {
+    // Navigate back from a sub-panel to the main panel if still there.
     if (await this.testSubjects.exists('dateRangePickerSubPanelBackButton')) {
       await this.testSubjects.click('dateRangePickerSubPanelBackButton');
       await this.testSubjects.existOrFail('dateRangePickerMainPanel', { timeout: 3000 });
@@ -648,7 +643,7 @@ export class TimePickerPageObject extends FtrService {
   }
 
   private async startAutoRefreshNewPicker(intervalS = 3) {
-    await this.openNewPickerSettingsPanel();
+    await this.openNewPickerMainPanel();
 
     // Enable auto-refresh if not already enabled
     const toggleChecked = await this.testSubjects.getAttribute(
@@ -671,7 +666,7 @@ export class TimePickerPageObject extends FtrService {
       );
     });
 
-    await this.closeNewPickerSettingsPanel();
+    await this.closeNewPickerPopover();
   }
 
   private async startAutoRefreshLegacy(intervalS = 3) {
@@ -697,10 +692,10 @@ export class TimePickerPageObject extends FtrService {
   public async pauseAutoRefresh() {
     this.log.debug('pauseAutoRefresh');
     if (await this.isNewDateRangePicker()) {
-      // Disable auto-refresh via the settings panel toggle so that
+      // Disable auto-refresh via the auto-refresh switch so that
       // onRefreshChange fires with isPaused: true (the play/pause button
       // only toggles isPaused locally without notifying the timefilter).
-      await this.openNewPickerSettingsPanel();
+      await this.openNewPickerMainPanel();
       const toggleChecked = await this.testSubjects.getAttribute(
         'dateRangePickerAutoRefreshToggle',
         'aria-checked'
@@ -708,7 +703,7 @@ export class TimePickerPageObject extends FtrService {
       if (toggleChecked === 'true') {
         await this.testSubjects.click('dateRangePickerAutoRefreshToggle');
       }
-      await this.closeNewPickerSettingsPanel();
+      await this.closeNewPickerPopover();
     } else {
       const refreshConfig = await this.getRefreshConfig(true);
       if (!refreshConfig.isPaused) {
@@ -741,8 +736,8 @@ export class TimePickerPageObject extends FtrService {
           await this.testSubjects.click('dateRangePickerAutoRefreshButton');
         }
       } else {
-        // Auto-refresh is not enabled at all — enable it via the settings panel.
-        await this.openNewPickerSettingsPanel();
+        // Auto-refresh is not enabled at all — enable it via the auto-refresh switch.
+        await this.openNewPickerMainPanel();
         const toggleChecked = await this.testSubjects.getAttribute(
           'dateRangePickerAutoRefreshToggle',
           'aria-checked'
@@ -750,7 +745,7 @@ export class TimePickerPageObject extends FtrService {
         if (toggleChecked !== 'true') {
           await this.testSubjects.click('dateRangePickerAutoRefreshToggle');
         }
-        await this.closeNewPickerSettingsPanel();
+        await this.closeNewPickerPopover();
       }
     } else {
       const refreshConfig = await this.getRefreshConfig(true);

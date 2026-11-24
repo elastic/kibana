@@ -11,19 +11,18 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
-import type { DateRangePickerProps } from '../date_range_picker';
 import { DateRangePickerProvider } from '../date_range_picker_context';
 import { DateRangePickerPanelNavigationProvider } from '../date_range_picker_panel_navigation';
 import { SettingsPanel } from './settings_panel';
 
-const renderSettingsPanel = (props: Partial<DateRangePickerProps> = {}) =>
+const renderSettingsPanel = (timeZone?: string) =>
   renderWithEuiTheme(
     <DateRangePickerProvider
       defaultValue="-15m"
       onChange={() => {}}
       settings={{ roundRelativeTime: false }}
       onSettingsChange={() => {}}
-      {...props}
+      timeZone={timeZone}
     >
       <DateRangePickerPanelNavigationProvider
         defaultPanelId={SettingsPanel.PANEL_ID}
@@ -41,7 +40,7 @@ describe('SettingsPanel', () => {
 
   describe('time zone description', () => {
     it('names the configured time zone', () => {
-      renderSettingsPanel({ timeZone: 'Europe/Amsterdam' });
+      renderSettingsPanel('Europe/Amsterdam');
 
       expect(
         screen.getByText(/Time zone is set to Europe\/Amsterdam \(GMT[+-]\d{2}:\d{2}\)/)
@@ -69,25 +68,6 @@ describe('SettingsPanel', () => {
       expect(
         screen.getByText("Time zone is unset. Your browser's default is used.")
       ).toBeInTheDocument();
-    });
-  });
-
-  describe('auto-refresh', () => {
-    const autoRefresh = { isEnabled: false, isPaused: true, intervalMs: 10_000 };
-
-    it('shows the refresh interval form when `onRefresh` and `autoRefresh` are set', () => {
-      renderSettingsPanel({ onRefresh: () => {}, autoRefresh });
-
-      expect(screen.getByTestId('dateRangePickerAutoRefreshToggle')).toBeInTheDocument();
-    });
-
-    it.each<[string, Partial<DateRangePickerProps>]>([
-      ['`autoRefresh` is absent', { onRefresh: () => {} }],
-      ['`onRefresh` is absent', { autoRefresh }],
-    ])('hides the refresh interval form when %s', (_, props) => {
-      renderSettingsPanel(props);
-
-      expect(screen.queryByTestId('dateRangePickerAutoRefreshToggle')).not.toBeInTheDocument();
     });
   });
 });

@@ -30,6 +30,7 @@ import {
 } from '../date_range_picker_panel_ui';
 import { DocumentationPanel } from './documentation_panel';
 import { SettingsPanel } from './settings_panel';
+import { RefreshInterval } from '../refresh_interval/refresh_interval';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { mainPanelStyles } from './main_panel.styles';
@@ -179,6 +180,29 @@ const SubPanelMenu = () => {
   );
 };
 
+const AutoRefreshSection = () => {
+  const { autoRefresh, onAutoRefreshChange, autoRefreshMinIntervalMs, hasAutoRefresh } =
+    useDateRangePickerContext();
+  const euiThemeContext = useEuiTheme();
+  const styles = mainPanelStyles(euiThemeContext);
+  const dividerStyles = panelDividerStyles(euiThemeContext);
+
+  if (!hasAutoRefresh || !autoRefresh) return null;
+
+  return (
+    <>
+      <hr css={dividerStyles.root} />
+      <div css={styles.refreshInterval}>
+        <RefreshInterval
+          value={autoRefresh}
+          onChange={onAutoRefreshChange}
+          minIntervalMs={autoRefreshMinIntervalMs}
+        />
+      </div>
+    </>
+  );
+};
+
 const DocumentationButton = () => {
   const { navigateTo } = useDateRangePickerPanelNavigation();
   const euiThemeContext = useEuiTheme();
@@ -228,6 +252,7 @@ export function MainPanel() {
         <PanelBodySection spacingSide="none" css={styles.bottomSection}>
           <hr css={dividerStyles.root} />
           <SubPanelMenu />
+          <AutoRefreshSection />
         </PanelBodySection>
       </PanelBody>
       <PanelFooter

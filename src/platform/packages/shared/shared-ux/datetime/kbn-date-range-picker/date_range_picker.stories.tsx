@@ -50,20 +50,22 @@ const meta: Meta<DateRangePickerProps> = {
 export default meta;
 type Story = StoryObj<DateRangePickerProps>;
 
+const PLAYGROUND_PRESETS: TimeRangeBoundsOption[] = [
+  { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+  { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
+  { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+  { start: 'now/d', end: 'now/d', label: 'Today' },
+  { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
+  { start: 'now-24h/h', end: 'now', label: 'Last 24 hours' },
+  { start: 'now-30d/d', end: 'now', label: 'Last 30 days' },
+  { start: 'now-3M', end: 'now', label: 'Last 3 months' },
+  { start: 'now-1y', end: 'now', label: 'Last 1 year' },
+];
+
 export const Playground: Story = {
   args: {
     defaultValue: 'last 20 minutes',
-    presets: [
-      { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
-      { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
-      { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
-      { start: 'now/d', end: 'now/d', label: 'Today' },
-      { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
-      { start: 'now-24h/h', end: 'now', label: 'Last 24 hours' },
-      { start: 'now-30d/d', end: 'now', label: 'Last 30 days' },
-      { start: 'now-3M', end: 'now', label: 'Last 3 months' },
-      { start: 'now-1y', end: 'now', label: 'Last 1 year' },
-    ],
+    presets: PLAYGROUND_PRESETS,
     timeZone: 'Browser',
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
@@ -147,6 +149,7 @@ export const Presets: Story = {
 export const AutoRefresh: Story = {
   args: {
     defaultValue: 'last 15 minutes',
+    presets: PLAYGROUND_PRESETS,
     autoRefresh: {
       isEnabled: true,
       isPaused: false,

@@ -42,6 +42,10 @@ export const mainPanelStyles = (euiThemeContext: UseEuiTheme) => {
     margin-block-start: auto;
     flex-shrink: 0;
   `;
+  const refreshInterval = css`
+    padding-block: ${euiTheme.size.m};
+    padding-inline: ${euiTheme.size.s};
+  `;
   const documentationButtonWrapper = css`
     padding-inline: ${euiTheme.size.s};
     margin-block-start: calc(${euiTheme.size.s} * 2);
@@ -56,6 +60,7 @@ export const mainPanelStyles = (euiThemeContext: UseEuiTheme) => {
     scroller,
     roundedSuffix,
     bottomSection,
+    refreshInterval,
     documentationButtonWrapper,
   };
 };

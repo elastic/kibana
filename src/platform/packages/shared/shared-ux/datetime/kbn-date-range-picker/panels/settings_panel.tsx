@@ -21,7 +21,6 @@ import {
   PanelBodySectionInfo,
   SubPanelHeading,
 } from '../date_range_picker_panel_ui';
-import { RefreshInterval } from '../refresh_interval/refresh_interval';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { settingsPanelTexts } from '../translations';
 import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
@@ -51,17 +50,8 @@ const getTimeZoneDescription = (timeZone: string | undefined, offset: string | n
  * Settings panel for the date range picker, accessible from the main panel gear button.
  */
 export function SettingsPanel() {
-  const {
-    settings,
-    onSettingsChange,
-    autoRefresh,
-    onAutoRefreshChange,
-    autoRefreshMinIntervalMs,
-    hasAutoRefresh,
-    timeZone,
-    prependBasePath,
-    canAccessAdvancedSettings,
-  } = useDateRangePickerContext();
+  const { settings, onSettingsChange, timeZone, prependBasePath, canAccessAdvancedSettings } =
+    useDateRangePickerContext();
 
   const handleRoundRelativeTimeChange = useCallback(() => {
     onSettingsChange({ ...settings, roundRelativeTime: !settings.roundRelativeTime });
@@ -92,13 +82,6 @@ export function SettingsPanel() {
       <PanelBody spacingSide="both">
         <PanelBodySection>
           <EuiFlexGroup gutterSize="l" direction="column">
-            {hasAutoRefresh && autoRefresh ? (
-              <RefreshInterval
-                value={autoRefresh}
-                onChange={onAutoRefreshChange}
-                minIntervalMs={autoRefreshMinIntervalMs}
-              />
-            ) : null}
             <PanelBodySectionInfo
               heading={settingsPanelTexts.timeFormatHeading}
               markdown={timeZoneDescription}
