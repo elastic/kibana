@@ -14,45 +14,45 @@ import {
   hasPlatformRuleReadCapabilities,
 } from './rule_capabilities';
 
+const capabilities = (features: Record<string, unknown> = {}): Capabilities =>
+  ({
+    navLinks: {},
+    management: {},
+    catalogue: {},
+    ...features,
+  } as Capabilities);
+
 describe('canAccessTriggersActionsRules', () => {
   it('returns true when the triggersActionsRules capability is granted', () => {
-    const capabilities = {
-      management: { insightsAndAlerting: { triggersActionsRules: true } },
-    } as unknown as Capabilities;
-
-    expect(canAccessTriggersActionsRules(capabilities)).toBe(true);
+    expect(
+      canAccessTriggersActionsRules(
+        capabilities({
+          management: { insightsAndAlerting: { triggersActionsRules: true } },
+        })
+      )
+    ).toBe(true);
   });
 
   it('returns false when the capability is explicitly denied', () => {
-    const capabilities = {
-      management: { insightsAndAlerting: { triggersActionsRules: false } },
-    } as unknown as Capabilities;
-
-    expect(canAccessTriggersActionsRules(capabilities)).toBe(false);
+    expect(
+      canAccessTriggersActionsRules(
+        capabilities({
+          management: { insightsAndAlerting: { triggersActionsRules: false } },
+        })
+      )
+    ).toBe(false);
   });
 
   it('returns false when the insightsAndAlerting section is absent', () => {
-    const capabilities = { management: {} } as unknown as Capabilities;
-
-    expect(canAccessTriggersActionsRules(capabilities)).toBe(false);
+    expect(canAccessTriggersActionsRules(capabilities({ management: {} }))).toBe(false);
   });
 
   it('returns false when the management section is absent', () => {
-    const capabilities = {} as Capabilities;
-
-    expect(canAccessTriggersActionsRules(capabilities)).toBe(false);
+    expect(canAccessTriggersActionsRules({} as Capabilities)).toBe(false);
   });
 });
 
 describe('hasPlatformRuleReadCapabilities', () => {
-  const capabilities = (features: Record<string, unknown>): Capabilities =>
-    ({
-      navLinks: {},
-      management: {},
-      catalogue: {},
-      ...features,
-    } as Capabilities);
-
   it.each([
     ['stack rules show', { stackAlerts: { show: true } }],
     ['the machine learning app privilege', { navLinks: { ml: true } }],
@@ -62,21 +62,22 @@ describe('hasPlatformRuleReadCapabilities', () => {
     expect(hasPlatformAlertReadCapabilities(capabilities(features))).toBe(true);
   });
 
-  it('returns false for Actions and Connectors and Classic Rules Settings', () => {
-    const actionsAndConnectors = capabilities({
+  it('returns false for Actions and Connectors, Classic Rules Settings, and management alerts', () => {
+    const managementOnly = capabilities({
       actions: { show: true },
       rulesSettings: { show: true },
       management: {
         insightsAndAlerting: {
           triggersActionsRules: true,
+          triggersActionsAlerts: true,
           triggersActionsConnectors: true,
         },
       },
     });
 
-    expect(canAccessTriggersActionsRules(actionsAndConnectors)).toBe(true);
-    expect(hasPlatformRuleReadCapabilities(actionsAndConnectors)).toBe(false);
-    expect(hasPlatformAlertReadCapabilities(actionsAndConnectors)).toBe(false);
+    expect(canAccessTriggersActionsRules(managementOnly)).toBe(true);
+    expect(hasPlatformRuleReadCapabilities(managementOnly)).toBe(false);
+    expect(hasPlatformAlertReadCapabilities(managementOnly)).toBe(false);
   });
 
   it('returns true for the Machine Learning app privilege when canUseMlAlerts is off', () => {
@@ -126,36 +127,11 @@ describe('hasPlatformRuleReadCapabilities', () => {
 });
 
 describe('hasPlatformAlertReadCapabilities', () => {
-  const capabilities = (features: Record<string, unknown>): Capabilities =>
-    ({
-      navLinks: {},
-      management: {},
-      catalogue: {},
-      ...features,
-    } as Capabilities);
-
   it('returns true for alert-only Stack Alerts', () => {
     const stackAlertsOnly = capabilities({ stackAlertsOnly: { show: true } });
 
     expect(hasPlatformAlertReadCapabilities(stackAlertsOnly)).toBe(true);
     expect(hasPlatformRuleReadCapabilities(stackAlertsOnly)).toBe(false);
-  });
-
-  it('returns false when only management rule and alert capabilities are granted', () => {
-    const managementOnly = capabilities({
-      actions: { show: true },
-      rulesSettings: { show: true },
-      management: {
-        insightsAndAlerting: {
-          triggersActionsRules: true,
-          triggersActionsAlerts: true,
-          triggersActionsConnectors: true,
-        },
-      },
-    });
-
-    expect(canAccessTriggersActionsRules(managementOnly)).toBe(true);
-    expect(hasPlatformAlertReadCapabilities(managementOnly)).toBe(false);
   });
 
   it('returns false without any platform alerts capability', () => {

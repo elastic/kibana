@@ -126,28 +126,25 @@ describe('classic rules and alerts read', () => {
   });
 
   it('returns false for Actions and Connectors, Classic Rules Settings, and Security rules', () => {
-    expect(
-      hasClassicRulesReadCapability(
-        capabilities({
-          actions: { show: true },
-          rulesSettings: { show: true },
-          management: {
-            insightsAndAlerting: {
-              triggersActionsRules: true,
-              triggersActionsConnectors: true,
-            },
-          },
-        })
-      )
-    ).toBe(false);
-    expect(
-      hasClassicAlertsReadCapability(
-        capabilities({
-          securitySolutionRulesV4: { read_rules: true },
-          siem: { show: true },
-        })
-      )
-    ).toBe(false);
+    const actionsAndConnectors = capabilities({
+      actions: { show: true },
+      rulesSettings: { show: true },
+      management: {
+        insightsAndAlerting: {
+          triggersActionsRules: true,
+          triggersActionsConnectors: true,
+        },
+      },
+    });
+    const securityRules = capabilities({
+      securitySolutionRulesV4: { read_rules: true },
+      siem: { show: true },
+    });
+
+    expect(hasClassicRulesReadCapability(actionsAndConnectors)).toBe(false);
+    expect(hasClassicAlertsReadCapability(actionsAndConnectors)).toBe(false);
+    expect(hasClassicRulesReadCapability(securityRules)).toBe(false);
+    expect(hasClassicAlertsReadCapability(securityRules)).toBe(false);
   });
 });
 
