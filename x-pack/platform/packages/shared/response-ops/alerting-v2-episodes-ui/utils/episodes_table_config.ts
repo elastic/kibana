@@ -70,7 +70,7 @@ export const isEpisodesTableColumnId = (value: unknown): value is EpisodesTableC
  * columns fill the remaining slots in display order.
  */
 export const getColumnSelectorOrder = (visibleColumns: string[]): EpisodesTableColumnId[] => {
-  const visibleIds = visibleColumns.filter(isEpisodesTableColumnId);
+  const visibleIds = [...new Set(visibleColumns.filter(isEpisodesTableColumnId))];
   const visibleSet = new Set<string>(visibleIds);
   let nextVisibleIndex = 0;
   return EPISODES_TABLE_COLUMN_IDS.map((columnId) =>

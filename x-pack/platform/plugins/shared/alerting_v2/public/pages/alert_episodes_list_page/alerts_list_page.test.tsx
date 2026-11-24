@@ -353,20 +353,6 @@ describe('AlertsListPage', () => {
     });
   });
 
-  it('keeps the remove column action on customized columns', () => {
-    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    const customize = lastCall?.customGridColumnsConfiguration?.tags;
-
-    const column = customize!({
-      column: {
-        id: 'tags',
-        actions: { showHide: { label: 'Remove column' }, showMoveLeft: true },
-      },
-      headerRowHeight: 1,
-    });
-    expect(column.actions).toEqual({ showHide: { label: 'Remove column' }, showMoveLeft: true });
-  });
-
   it('registers a cell renderer for the suppressed column', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
 

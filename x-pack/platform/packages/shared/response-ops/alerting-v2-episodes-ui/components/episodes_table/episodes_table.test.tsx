@@ -320,7 +320,7 @@ describe('EpisodesTable', () => {
       await screen.findByTestId('dataGridColumnSelectorSearch');
     };
 
-    it("replaces the grid's reorder-only column control and keeps a hidden time column hidden", () => {
+    it("disables the grid's column selector and time column prepend", () => {
       renderTable();
 
       expect(lastGridProps().isColumnSelectorEnabled).toBe(false);
@@ -369,7 +369,7 @@ describe('EpisodesTable', () => {
       expect(onVisibleColumnsChange).toHaveBeenLastCalledWith([]);
     });
 
-    it('passes an empty selection to the grid so it shows its summary column', () => {
+    it('passes an empty selection through to the grid', () => {
       renderTable({ visibleColumns: [], onVisibleColumnsChange: jest.fn() });
 
       expect(lastGridProps().columns).toEqual([]);

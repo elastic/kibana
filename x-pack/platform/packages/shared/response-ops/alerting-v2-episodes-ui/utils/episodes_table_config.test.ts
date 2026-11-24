@@ -78,6 +78,13 @@ describe('getColumnSelectorOrder', () => {
       'suppressed',
     ]);
   });
+
+  it('lists each column once when the visible columns repeat an id', () => {
+    const order = getColumnSelectorOrder(['tags', 'tags', 'reason']);
+
+    expect(new Set(order).size).toBe(DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.length);
+    expect(order).toContain('reason');
+  });
 });
 
 describe('resolveSortForVisibleColumns', () => {
