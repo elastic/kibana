@@ -156,6 +156,7 @@ jest.mock('./compose_discover_form', () => {
       readCommittedQuery = () => getValues('query');
       readRecovery = () => getValues('recovery');
       readRoutingTags = () => getValues('metadata.routingTags');
+      readReason = () => getValues('reason');
       readTimeField = () => getValues('timeField');
       return (
         <div data-test-subj="composeDiscoverFormMock">
@@ -218,6 +219,7 @@ let yamlRuleFormProps:
 let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecovery: (() => FormValues['recovery']) | undefined;
 let readRoutingTags: (() => FormValues['metadata']['routingTags']) | undefined;
+let readReason: (() => FormValues['reason']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
 
 jest.mock('./query_sandbox_flyout', () => ({
@@ -425,6 +427,7 @@ describe('ComposeDiscoverFlyout', () => {
     readCommittedQuery = undefined;
     readRecovery = undefined;
     readRoutingTags = undefined;
+    readReason = undefined;
     readTimeField = undefined;
     mockParseYamlToFormValues = (yaml) => ({
       values: yaml ? defaultYamlFormValues : null,
@@ -2465,6 +2468,19 @@ describe('ComposeDiscoverFlyout', () => {
       });
 
       expect(readRoutingTags?.()).toBeUndefined();
+    });
+
+    it('clears the reason when kind changes to signal, so it is never sent for signal rules', () => {
+      const rule = { ...ruleWithRecovery, reason: { template: 'CPU {{ data.cpu }}' } };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      expect(readReason?.()).toEqual({ template: 'CPU {{ data.cpu }}' });
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+
+      expect(readReason?.()).toBeUndefined();
     });
 
     it('resets recovery to no_breach when kind changes back to alert', () => {
