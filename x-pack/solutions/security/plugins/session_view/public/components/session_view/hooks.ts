@@ -40,6 +40,11 @@ const isSessionEventAction = (action: EventAction | undefined): boolean => {
   );
 };
 
+// Alerts come in the same page as process events and have an exec or fork action too, but their time is not
+// a process event time, so only process events can be the cursor of the next or previous page.
+const isSessionProcessEvent = (event: ProcessEvent): boolean =>
+  event.event?.kind !== 'signal' && isSessionEventAction(event.event?.action as EventAction);
+
 export const useFetchSessionViewProcessEvents = (
   index: string,
   sessionEntityId: string,
@@ -91,10 +96,7 @@ export const useFetchSessionViewProcessEvents = (
       getNextPageParam: (lastPage, pages) => {
         const isRefetch = pages.length === 1 && jumpToCursor;
         if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
-          const filtered = lastPage.events.filter((event) => {
-            const action = event.event?.action as EventAction;
-            return isSessionEventAction(action);
-          });
+          const filtered = lastPage.events.filter(isSessionProcessEvent);
 
           const cursor = filtered?.[filtered.length - 1]?.['@timestamp'];
 
@@ -107,10 +109,7 @@ export const useFetchSessionViewProcessEvents = (
         }
       },
       getPreviousPageParam: (firstPage, pages) => {
-        const filtered = firstPage.events.filter((event) => {
-          const action = event.event?.action as EventAction;
-          return isSessionEventAction(action);
-        });
+        const filtered = firstPage.events.filter(isSessionProcessEvent);
 
         const atBeginning = pages.length > 1 && filtered.length < PROCESS_EVENTS_PER_PAGE;
 
