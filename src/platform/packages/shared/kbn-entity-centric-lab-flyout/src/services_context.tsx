@@ -27,6 +27,35 @@ import type { DashboardPreviewRequest } from './dashboards_list_tab';
  * The shared package can't depend on the `dashboard` plugin, so hosting
  * plugins that *can* (e.g. Streams app) inject a renderer instead.
  */
+/** Points for one line (or one heatmap lane) on a flyout chart. */
+export interface FlyoutChartFrameSeries {
+  readonly label: string;
+  readonly points: ReadonlyArray<{ readonly x: number; readonly y: number }>;
+}
+
+/** What the host needs to turn a flyout chart into a dashboard panel. */
+export interface FlyoutChartFrameData {
+  readonly series: ReadonlyArray<FlyoutChartFrameSeries>;
+  /**
+   * Dashboard visualization to create. Golden signal tiles are a single
+   * metric; the other charts are lines.
+   */
+  readonly kind?: 'line' | 'metric';
+  /**
+   * The number, unit, and trend currently shown on a golden signal tile.
+   * The dashboard metric uses these instead of re-aggregating the sparkline.
+   */
+  readonly metric?: {
+    readonly value: number;
+    readonly decimals: number;
+    readonly unit: string;
+    readonly trend: string;
+    readonly color: string;
+  };
+  /** When set, `y` is an index into these labels (phase heatmap). */
+  readonly yLabels?: readonly string[];
+}
+
 export interface EntityDashboardRenderContext {
   readonly entityName: string;
   readonly entityType?: string;
@@ -66,6 +95,21 @@ export interface EntityFlyoutServices {
     },
     entityName: string
   ) => ReactNode;
+  /**
+   * Host wrapper that gives a flyout chart the dashboard panel hover menu
+   * (Add to dashboard, Inspect, and the rest). When omitted, the chart renders
+   * on its own.
+   */
+  readonly renderChartFrame?: (frame: {
+    readonly id: string;
+    readonly title: string;
+    /**
+     * Series currently drawn on the chart. The host uses this to add a real
+     * dashboard panel that shows the same trend.
+     */
+    readonly chart?: FlyoutChartFrameData;
+    readonly children: ReactNode;
+  }) => ReactNode;
   /**
    * Legacy flag; inventory copy always uses "entity/entities".
    * Latest / entity-centric leave this unset (or false).

@@ -35,6 +35,7 @@ import type { AlertNotificationSuppression, AlertRow, AlertsTabData } from './fa
 import { alertRowToStableRuleUuid } from './alert_row_ids';
 import { formatIncidentTick, windowLabeledTimes, windowPoints } from './time_domain';
 import { useResolvedFlyoutTimeRange } from './time_range_context';
+import { FlyoutChartPanel } from './chart_panel';
 
 interface AlertsTabProps {
   readonly alerts: AlertsTabData;
@@ -113,9 +114,12 @@ const NotificationsSuppressedPopover = ({
         <EuiFlexItem>
           <EuiText size="s">
             <strong>
-              {i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.suppressedTitle', {
-                defaultMessage: 'Actions suppressed',
-              })}
+              {i18n.translate(
+                'entityCentricLabFlyout.flyout.alerts.notifications.suppressedTitle',
+                {
+                  defaultMessage: 'Actions suppressed',
+                }
+              )}
             </strong>
           </EuiText>
         </EuiFlexItem>
@@ -490,7 +494,9 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           defaultMessage: 'Triggered',
         }),
         sortable: true,
-        render: (triggeredAt: string) => <EuiText size={density === 'compact' ? 'xs' : 's'}>{triggeredAt}</EuiText>,
+        render: (triggeredAt: string) => (
+          <EuiText size={density === 'compact' ? 'xs' : 's'}>{triggeredAt}</EuiText>
+        ),
       },
       {
         field: 'ruleName',
@@ -512,13 +518,17 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
                   white-space: normal;
                   overflow-wrap: break-word;
                   word-break: break-word;
-                  &:hover { text-decoration: underline; }
+                  &:hover {
+                    text-decoration: underline;
+                  }
                 `}
                 onClick={(event) => {
                   event.preventDefault();
                   openRuleRow(row);
                 }}
-                onKeyDown={(event) => { if (event.key === 'Enter') openRuleRow(row); }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') openRuleRow(row);
+                }}
               >
                 {ruleName}
               </a>
@@ -545,13 +555,17 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
                   white-space: normal;
                   overflow-wrap: break-word;
                   word-break: break-word;
-                  &:hover { text-decoration: underline; }
+                  &:hover {
+                    text-decoration: underline;
+                  }
                 `}
                 onClick={(event) => {
                   event.preventDefault();
                   openAlertRow(row);
                 }}
-                onKeyDown={(event) => { if (event.key === 'Enter') openAlertRow(row); }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') openAlertRow(row);
+                }}
               >
                 {reason}
               </a>
@@ -618,92 +632,115 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 260 }}>
-          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem>
-                <EuiTitle size="xxs">
-                  <h4>
-                    {i18n.translate(
-                      'entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle',
-                      { defaultMessage: 'Active alerts over time' }
-                    )}
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('entityCentricLabFlyout.flyout.alerts.overTimeTooltip', {
-                    defaultMessage:
-                      'Number of active alerts attributed to this entity over the selected time window.',
-                  })}
-                  position="top"
-                  delay="long"
-                >
-                  <EuiButtonIcon
-                    iconType="question"
-                    color="text"
-                    aria-label={i18n.translate(
-                      'entityCentricLabFlyout.flyout.alerts.overTimeTooltipAriaLabel',
-                      { defaultMessage: 'Show chart description' }
-                    )}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <div style={{ height: 140 }} data-test-subj="entityCentricLabAlertsOverTimeChart">
-              <Chart>
-                <Settings
-                  baseTheme={chartBaseTheme}
-                  locale={i18n.getLocale()}
-                  showLegend={false}
-                  xDomain={
-                    timeRange ? { min: timeRange.startMs, max: timeRange.endMs } : undefined
-                  }
-                />
-                <Axis
-                  id="alerts-over-time-x"
-                  position={Position.Bottom}
-                  tickFormat={(value) => formatIncidentTick(Number(value))}
-                />
-                <Axis id="alerts-over-time-y" position={Position.Left} />
-                <LineSeries
-                  id="active-alerts"
-                  name="Active alerts"
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="x"
-                  yAccessors={['y']}
-                  data={overTime as Array<{ x: number; y: number }>}
-                  color={euiTheme.colors.vis.euiColorVis0}
-                  // Pin time axis to UTC so the alert-count climb at 02:47:31
-                  // UTC lines up with the AI summary copy and log timestamps.
-                  timeZone="utc"
-                />
-              </Chart>
-            </div>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <span
-                  aria-hidden
-                  css={css`
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    background-color: ${euiTheme.colors.vis.euiColorVis0};
-                    display: inline-block;
-                  `}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsLegend', {
+          <FlyoutChartPanel
+            id="alerts-over-time"
+            title={i18n.translate(
+              'entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle',
+              {
+                defaultMessage: 'Active alerts over time',
+              }
+            )}
+            chart={{
+              series: [
+                {
+                  label: i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsLegend', {
                     defaultMessage: 'Active alerts',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+                  }),
+                  points: overTime,
+                },
+              ],
+            }}
+          >
+            <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem>
+                  <EuiTitle size="xxs">
+                    <h4>
+                      {i18n.translate(
+                        'entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle',
+                        { defaultMessage: 'Active alerts over time' }
+                      )}
+                    </h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'entityCentricLabFlyout.flyout.alerts.overTimeTooltip',
+                      {
+                        defaultMessage:
+                          'Number of active alerts attributed to this entity over the selected time window.',
+                      }
+                    )}
+                    position="top"
+                    delay="long"
+                  >
+                    <EuiButtonIcon
+                      iconType="question"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'entityCentricLabFlyout.flyout.alerts.overTimeTooltipAriaLabel',
+                        { defaultMessage: 'Show chart description' }
+                      )}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <div style={{ height: 140 }} data-test-subj="entityCentricLabAlertsOverTimeChart">
+                <Chart>
+                  <Settings
+                    baseTheme={chartBaseTheme}
+                    locale={i18n.getLocale()}
+                    showLegend={false}
+                    xDomain={
+                      timeRange ? { min: timeRange.startMs, max: timeRange.endMs } : undefined
+                    }
+                  />
+                  <Axis
+                    id="alerts-over-time-x"
+                    position={Position.Bottom}
+                    tickFormat={(value) => formatIncidentTick(Number(value))}
+                  />
+                  <Axis id="alerts-over-time-y" position={Position.Left} />
+                  <LineSeries
+                    id="active-alerts"
+                    name="Active alerts"
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="x"
+                    yAccessors={['y']}
+                    data={overTime as Array<{ x: number; y: number }>}
+                    color={euiTheme.colors.vis.euiColorVis0}
+                    // Pin time axis to UTC so the alert-count climb at 02:47:31
+                    // UTC lines up with the AI summary copy and log timestamps.
+                    timeZone="utc"
+                  />
+                </Chart>
+              </div>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <span
+                    aria-hidden
+                    css={css`
+                      width: 8px;
+                      height: 8px;
+                      border-radius: 50%;
+                      background-color: ${euiTheme.colors.vis.euiColorVis0};
+                      display: inline-block;
+                    `}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsLegend', {
+                      defaultMessage: 'Active alerts',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </FlyoutChartPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -729,25 +766,25 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiBasicTable<AlertRow>
-          items={pageOfItems as AlertRow[]}
-          columns={columns}
-          compressed={density === 'compact'}
-          tableCaption={i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTableCaption', {
-            defaultMessage: 'Active alerts details',
-          })}
-          pagination={{
-            pageIndex,
-            pageSize,
-            totalItemCount: details.length,
-            pageSizeOptions: [10, 25, 50],
-          }}
-          onChange={({ page }: Criteria<AlertRow>) => {
-            if (page) {
-              setPagination({ pageIndex: page.index, pageSize: page.size });
-            }
-          }}
-          data-test-subj="entityCentricLabAlertsDetailsTable"
-        />
+        items={pageOfItems as AlertRow[]}
+        columns={columns}
+        compressed={density === 'compact'}
+        tableCaption={i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTableCaption', {
+          defaultMessage: 'Active alerts details',
+        })}
+        pagination={{
+          pageIndex,
+          pageSize,
+          totalItemCount: details.length,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        onChange={({ page }: Criteria<AlertRow>) => {
+          if (page) {
+            setPagination({ pageIndex: page.index, pageSize: page.size });
+          }
+        }}
+        data-test-subj="entityCentricLabAlertsDetailsTable"
+      />
 
       {!onOpenAlertDetail && selectedAlertRow && renderAlertDetailFlyout
         ? renderAlertDetailFlyout({

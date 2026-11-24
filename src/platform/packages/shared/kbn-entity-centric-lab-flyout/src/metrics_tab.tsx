@@ -43,6 +43,7 @@ import {
 } from '@elastic/charts';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { useEntityFlyoutServices } from './services_context';
+import { FlyoutChartPanel } from './chart_panel';
 import type { MetricEvent, MetricSeries, MetricsTabData } from './fake_entity_tabs';
 import {
   formatIncidentTick,
@@ -222,151 +223,161 @@ export const MetricChartCard = ({
     isDateHistogram: true,
   });
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="xs">
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{series.label}</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            type="info"
-            size="s"
-            color="subdued"
-            position="left"
-            content={explainFlyoutMetric(series.description)}
-            aria-label={i18n.translate(
-              'entityCentricLabFlyout.flyout.metrics.descriptionAriaLabel',
-              {
-                defaultMessage: 'About {metric}',
-                values: { metric: series.label },
-              }
-            )}
-            anchorProps={{
-              'data-test-subj': `entityCentricLabMetricsDescription-${series.id}`,
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <div
-        style={{ height: chartHeight }}
-        data-test-subj={`entityCentricLabMetricsChart-${series.id}`}
-      >
+    <FlyoutChartPanel
+      id={series.id}
+      title={series.label}
+      chart={{
+        yLabels: chartSeries.yLabels,
+        series: chartSeries.series.map((line) => ({
+          label: line.label,
+          points: line.points,
+        })),
+      }}
+    >
+      <EuiPanel hasBorder hasShadow={false} paddingSize="xs">
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h4>{series.label}</h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type="info"
+              size="s"
+              color="subdued"
+              position="left"
+              content={explainFlyoutMetric(series.description)}
+              aria-label={i18n.translate(
+                'entityCentricLabFlyout.flyout.metrics.descriptionAriaLabel',
+                {
+                  defaultMessage: 'About {metric}',
+                  values: { metric: series.label },
+                }
+              )}
+              anchorProps={{
+                'data-test-subj': `entityCentricLabMetricsDescription-${series.id}`,
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xs" />
+        <div
+          style={{ height: chartHeight }}
+          data-test-subj={`entityCentricLabMetricsChart-${series.id}`}
+        >
+          {yLabels ? (
+            <PhaseHeatmap
+              series={chartSeries}
+              yLabels={yLabels}
+              chartRef={chartRef}
+              onPointerUpdate={handleCursorUpdate}
+              baseTheme={chartBaseTheme}
+              euiTheme={euiTheme}
+            />
+          ) : (
+            <Chart ref={chartRef}>
+              <Settings
+                baseTheme={chartBaseTheme}
+                locale={i18n.getLocale()}
+                showLegend={false}
+                onPointerUpdate={handleCursorUpdate}
+                xDomain={timeRange ? { min: timeRange.startMs, max: timeRange.endMs } : undefined}
+              />
+              <Axis
+                id={`${series.id}-x`}
+                position={Position.Bottom}
+                tickFormat={(value) => formatIncidentTick(Number(value))}
+              />
+              <Axis id={`${series.id}-y`} position={Position.Left} />
+              {series.threshold !== undefined ? (
+                <LineAnnotation
+                  id={`${series.id}-threshold`}
+                  domainType={AnnotationDomainType.YDomain}
+                  dataValues={[{ dataValue: series.threshold }]}
+                  style={{
+                    line: {
+                      stroke: euiTheme.colors.danger,
+                      strokeWidth: 1,
+                      opacity: 0.5,
+                      dash: [4, 4],
+                    },
+                  }}
+                />
+              ) : null}
+              {chartEvents.length > 0 ? (
+                <LineAnnotation
+                  id={`${series.id}-events`}
+                  domainType={AnnotationDomainType.XDomain}
+                  // `header` + `details` are picked up by the built-in annotation
+                  // tooltip on hover — that's how the demo surfaces the deployment
+                  // story (e.g. "Deployment — payments-service v2.14.3").
+                  dataValues={chartEvents.map((event) => ({
+                    dataValue: event.x,
+                    header: event.header,
+                    details: event.details,
+                  }))}
+                  marker={<EventDiamond euiTheme={euiTheme} />}
+                  markerPosition={Position.Bottom}
+                  style={{
+                    line: { stroke: euiTheme.colors.accent, strokeWidth: 1.5, opacity: 0.8 },
+                  }}
+                />
+              ) : null}
+              {chartSeries.series.map((line, idx) => (
+                <LineSeries
+                  key={line.id}
+                  id={line.id}
+                  name={line.label}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="x"
+                  yAccessors={['y']}
+                  data={line.points as Array<{ x: number; y: number }>}
+                  color={chartLineColor(idx, euiTheme)}
+                  // Pin time axis to UTC so deploy marker (02:46:41 UTC) and the
+                  // spike that follows it sit under labels matching the AI summary.
+                  timeZone="utc"
+                />
+              ))}
+            </Chart>
+          )}
+        </div>
         {yLabels ? (
-          <PhaseHeatmap
-            series={chartSeries}
-            yLabels={yLabels}
-            chartRef={chartRef}
-            onPointerUpdate={handleCursorUpdate}
-            baseTheme={chartBaseTheme}
+          <PhaseLegend
+            labels={yLabels}
+            points={chartSeries.series[0]?.points ?? []}
             euiTheme={euiTheme}
           />
-        ) : (
-          <Chart ref={chartRef}>
-            <Settings
-              baseTheme={chartBaseTheme}
-              locale={i18n.getLocale()}
-              showLegend={false}
-              onPointerUpdate={handleCursorUpdate}
-              xDomain={
-                timeRange ? { min: timeRange.startMs, max: timeRange.endMs } : undefined
-              }
-            />
-            <Axis
-              id={`${series.id}-x`}
-              position={Position.Bottom}
-              tickFormat={(value) => formatIncidentTick(Number(value))}
-            />
-            <Axis id={`${series.id}-y`} position={Position.Left} />
-            {series.threshold !== undefined ? (
-              <LineAnnotation
-                id={`${series.id}-threshold`}
-                domainType={AnnotationDomainType.YDomain}
-                dataValues={[{ dataValue: series.threshold }]}
-                style={{
-                  line: {
-                    stroke: euiTheme.colors.danger,
-                    strokeWidth: 1,
-                    opacity: 0.5,
-                    dash: [4, 4],
-                  },
-                }}
-              />
-            ) : null}
-            {chartEvents.length > 0 ? (
-              <LineAnnotation
-                id={`${series.id}-events`}
-                domainType={AnnotationDomainType.XDomain}
-                // `header` + `details` are picked up by the built-in annotation
-                // tooltip on hover — that's how the demo surfaces the deployment
-                // story (e.g. "Deployment — payments-service v2.14.3").
-                dataValues={chartEvents.map((event) => ({
-                  dataValue: event.x,
-                  header: event.header,
-                  details: event.details,
-                }))}
-                marker={<EventDiamond euiTheme={euiTheme} />}
-                markerPosition={Position.Bottom}
-                style={{
-                  line: { stroke: euiTheme.colors.accent, strokeWidth: 1.5, opacity: 0.8 },
-                }}
-              />
-            ) : null}
-            {chartSeries.series.map((line, idx) => (
-              <LineSeries
-                key={line.id}
-                id={line.id}
-                name={line.label}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor="x"
-                yAccessors={['y']}
-                data={line.points as Array<{ x: number; y: number }>}
-                color={chartLineColor(idx, euiTheme)}
-                // Pin time axis to UTC so deploy marker (02:46:41 UTC) and the
-                // spike that follows it sit under labels matching the AI summary.
-                timeZone="utc"
-              />
+        ) : series.series.length > 0 ? (
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            {series.series.map((line, idx) => (
+              <EuiFlexItem grow={false} key={line.id}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <span
+                      aria-hidden
+                      css={css`
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                        background-color: ${chartLineColor(idx, euiTheme)};
+                        display: inline-block;
+                      `}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {line.label}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
             ))}
-          </Chart>
-        )}
-      </div>
-      {yLabels ? (
-        <PhaseLegend
-          labels={yLabels}
-          points={chartSeries.series[0]?.points ?? []}
-          euiTheme={euiTheme}
-        />
-      ) : series.series.length > 0 ? (
-        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-          {series.series.map((line, idx) => (
-            <EuiFlexItem grow={false} key={line.id}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <span
-                    aria-hidden
-                    css={css`
-                      width: 8px;
-                      height: 8px;
-                      border-radius: 50%;
-                      background-color: ${chartLineColor(idx, euiTheme)};
-                      display: inline-block;
-                    `}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {line.label}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ) : null}
-    </EuiPanel>
+          </EuiFlexGroup>
+        ) : null}
+      </EuiPanel>
+    </FlyoutChartPanel>
   );
 };
 

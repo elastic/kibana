@@ -77,6 +77,7 @@ import {
   type FlyoutCustomLink,
   type LinkedDashboardOverride,
 } from '@kbn/entity-centric-lab-flyout';
+import { StreamsFlyoutChartPanel } from './flyout_chart_panel';
 
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
@@ -824,6 +825,26 @@ const EntityDetailPageInner = () => {
       notifications,
       charts,
       renderTabDashboard,
+      renderChartFrame: ({
+        id,
+        title,
+        chart,
+        children,
+      }: {
+        id: string;
+        title: string;
+        chart?: import('@kbn/entity-centric-lab-flyout').FlyoutChartFrameData;
+        children: React.ReactNode;
+      }) => (
+        <StreamsFlyoutChartPanel
+          id={id}
+          title={title}
+          chart={chart}
+          notifications={notifications}
+        >
+          {children}
+        </StreamsFlyoutChartPanel>
+      ),
       resourceCopy: true,
       density: listDensity,
       renderAlertDetailFlyout,

@@ -31,6 +31,7 @@ import {
   useEntityFlyoutServices,
 } from '@kbn/entity-centric-lab-flyout';
 import type { AlertRow, AlertsTabData } from '@kbn/entity-centric-lab-flyout';
+import { StreamsFlyoutChartPanel } from './flyout_chart_panel';
 
 /** Lets Rule name and Reason wrap inside the fixed table layout. */
 const wrappingCellCss = css`
@@ -60,7 +61,7 @@ export const StreamsElasticOnAlertsTab = ({
   onOpenRuleRow,
 }: StreamsElasticOnAlertsTabProps) => {
   const { euiTheme } = useEuiTheme();
-  const { charts, density } = useEntityFlyoutServices();
+  const { charts, density, notifications } = useEntityFlyoutServices();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
@@ -276,6 +277,24 @@ export const StreamsElasticOnAlertsTab = ({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 260 }}>
+          <StreamsFlyoutChartPanel
+            id="alerts-over-time"
+            title={i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle', {
+              defaultMessage: 'Active alerts over time',
+            })}
+            notifications={notifications}
+            chart={{
+              series: [
+                {
+                  label: i18n.translate(
+                    'entityCentricLabFlyout.flyout.alerts.activeAlertsLegend',
+                    { defaultMessage: 'Active alerts' }
+                  ),
+                  points: alerts.overTime,
+                },
+              ],
+            }}
+          >
           <EuiPanel hasBorder hasShadow={false} paddingSize="s">
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem>
@@ -332,6 +351,7 @@ export const StreamsElasticOnAlertsTab = ({
               </Chart>
             </div>
           </EuiPanel>
+          </StreamsFlyoutChartPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
 

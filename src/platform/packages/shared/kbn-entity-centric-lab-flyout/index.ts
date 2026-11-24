@@ -42,7 +42,11 @@ export {
   stableUuidFromSeed,
 } from './src/alert_row_ids';
 export { EntityFlyoutServicesProvider, useEntityFlyoutServices } from './src/services_context';
-export type { EntityFlyoutServices, EntityDashboardRenderContext } from './src/services_context';
+export type {
+  EntityFlyoutServices,
+  EntityDashboardRenderContext,
+  FlyoutChartFrameData,
+} from './src/services_context';
 export type {
   K8sFlyoutRelatedResource,
   K8sFlyoutInventoryFilterApply,

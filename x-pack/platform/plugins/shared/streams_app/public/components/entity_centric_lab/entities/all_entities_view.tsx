@@ -75,6 +75,7 @@ import {
   type DashboardPreviewRequest,
 } from '@kbn/entity-centric-lab-flyout';
 import { InventoryDashboardPreviewFlyout } from './inventory_dashboard_preview_flyout';
+import { StreamsFlyoutChartPanel } from './flyout_chart_panel';
 import { InfrastructureExperienceBanner, LabTruncationCallout } from './inventory_notices';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
 import { K8sDetailDashboard } from './k8s_detail_dashboard';
@@ -2990,6 +2991,26 @@ const AllEntitiesViewInner = ({
       notifications,
       charts,
       renderTabDashboard,
+      renderChartFrame: ({
+        id,
+        title,
+        chart,
+        children,
+      }: {
+        id: string;
+        title: string;
+        chart?: import('@kbn/entity-centric-lab-flyout').FlyoutChartFrameData;
+        children: React.ReactNode;
+      }) => (
+        <StreamsFlyoutChartPanel
+          id={id}
+          title={title}
+          chart={chart}
+          notifications={notifications}
+        >
+          {children}
+        </StreamsFlyoutChartPanel>
+      ),
       resourceCopy: isElasticOn,
       density: effectiveListDensity,
       enrichK8sFlyoutOverviewDetails: isElasticOn

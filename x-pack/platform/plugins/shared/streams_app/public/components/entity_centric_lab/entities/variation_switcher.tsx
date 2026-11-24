@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.28';
+export const PROTOTYPE_VERSION = '1.29';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-24',
+    summary:
+      'Hovering a flyout chart shows the dashboard action menu on the top edge, clear of the info icon.',
+    details:
+      'Charts in the entity flyout use the same hover menu as a dashboard panel, including Add to dashboard. The menu sits on the top border of the card so it no longer covers the info icon. Bump to v1.29.',
+  },
   {
     date: '2026-11-23',
     summary: 'Golden signal cards show a percent change, and Kubernetes nodes list their condition.',

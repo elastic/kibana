@@ -41,6 +41,7 @@ import type {
 import { formatGoldenSignalValue } from './fake_entity_overview';
 import type { MetricsTabData, MetricEvent } from './fake_entity_tabs';
 import { explainFlyoutMetric, MetricChartCard } from './metrics_tab';
+import { FlyoutChartPanel } from './chart_panel';
 import type { OnSelectEntity } from './fake_entity_tabs';
 import { K8sFlyoutRelatedSection } from './k8s_flyout_related_section';
 
@@ -118,9 +119,7 @@ export const OverviewTab = ({
   const [otherA, otherB] = metrics?.otherMetrics ?? [];
 
   const k8sRelatedResources =
-    entityName && getK8sFlyoutRelatedResources
-      ? getK8sFlyoutRelatedResources(entityName)
-      : [];
+    entityName && getK8sFlyoutRelatedResources ? getK8sFlyoutRelatedResources(entityName) : [];
 
   const detailRows = React.useMemo(() => {
     let rows = withoutRedundantName(overview.details, overview.displayName);
@@ -272,9 +271,12 @@ export const OverviewTab = ({
             initialIsOpen
             buttonContent={
               <SectionTitle
-                title={i18n.translate('entityCentricLabFlyout.flyout.overview.relatedResourcesTitle', {
-                  defaultMessage: 'Related resources',
-                })}
+                title={i18n.translate(
+                  'entityCentricLabFlyout.flyout.overview.relatedResourcesTitle',
+                  {
+                    defaultMessage: 'Related resources',
+                  }
+                )}
               />
             }
             paddingSize="s"
@@ -515,8 +517,7 @@ const formatGoldenSignalTrend = (
   range: ResolvedTimeRange | undefined
 ): string => {
   const rounded = Math.round(goldenSignalPercentChange(trend));
-  const change =
-    rounded > 0 ? `+${rounded}%` : rounded < 0 ? `\u2212${Math.abs(rounded)}%` : '0%';
+  const change = rounded > 0 ? `+${rounded}%` : rounded < 0 ? `\u2212${Math.abs(rounded)}%` : '0%';
   return i18n.translate('entityCentricLabFlyout.flyout.overview.goldenSignalTrend', {
     defaultMessage: '{change} {window}',
     values: { change, window: formatTrendWindow(range) },
@@ -584,78 +585,109 @@ const GoldenSignalCard = ({
   };
 
   return (
-    <div
-      role="group"
-      aria-label={signal.label}
-      css={css`
-        position: relative;
-        height: ${layout.height}px;
-        border: ${euiTheme.border.thin};
-        border-radius: ${euiTheme.border.radius.small};
-        overflow: hidden;
-
-        .echMetricText {
-          padding: ${layout.padPx}px ${layout.padPx + 1}px !important;
-        }
-        .echMetricText__title {
-          font-size: ${layout.titlePx}px !important;
-          font-weight: ${euiTheme.font.weight.semiBold} !important;
-          line-height: 1.15 !important;
-        }
-        .echMetricText__value {
-          font-size: ${layout.valuePx}px !important;
-          font-weight: ${euiTheme.font.weight.bold} !important;
-          line-height: 1.15 !important;
-        }
-        .echMetricText__extra,
-        .echMetricText__extraBlock .echMetricText__extra {
-          font-size: ${layout.extraPx}px !important;
-          font-weight: ${euiTheme.font.weight.medium} !important;
-          white-space: nowrap;
-        }
-        .echMetricText__part {
-          font-size: inherit !important;
-          font-weight: inherit;
-        }
-        .echMetricText__extraBlock {
-          font-size: ${layout.extraPx}px !important;
-          line-height: 1.2 !important;
-        }
-      `}
-      data-test-subj={`entityCentricLabGoldenSignalCard-${signal.id}`}
+    <FlyoutChartPanel
+      id={`golden-${signal.id}`}
+      title={signal.label}
+      chart={{
+        kind: 'metric',
+        metric: {
+          value:
+            signal.id === 'throughput' ? Math.round(signal.value) : Number(signal.value.toFixed(1)),
+          decimals: signal.id === 'throughput' ? 0 : 1,
+          unit: signal.unit,
+          trend: trendLabel,
+          color: goldenSignalTileBackground(signal.color, euiTheme),
+        },
+        series: [
+          {
+            label: signal.label,
+            points: signal.trend.map((y, index) => {
+              const count = signal.trend.length;
+              const start = timeRange?.startMs ?? 0;
+              const end = timeRange?.endMs ?? Math.max(count - 1, 0);
+              const x = count <= 1 ? end : start + ((end - start) * index) / (count - 1);
+              return { x, y };
+            }),
+          },
+        ],
+      }}
     >
-      <Chart>
-        <Settings
-          baseTheme={chartBaseTheme}
-          locale={i18n.getLocale()}
-          theme={{ metric: { valueFontSize: layout.valuePx } }}
-        />
-        <Metric id={`entityCentricLab-goldenSignal-${signal.id}`} data={[[datum]]} />
-      </Chart>
-      <span
+      <div
+        role="group"
+        aria-label={signal.label}
         css={css`
-          position: absolute;
-          top: ${euiTheme.size.xxs};
-          right: ${euiTheme.size.xxs};
-          z-index: 1;
+          position: relative;
+          height: ${layout.height}px;
+          border: ${euiTheme.border.thin};
+          border-radius: ${euiTheme.border.radius.small};
+          overflow: hidden;
+
+          .echMetricText {
+            padding: ${layout.padPx}px ${layout.padPx + 1}px !important;
+          }
+          .echMetricText__title {
+            font-size: ${layout.titlePx}px !important;
+            font-weight: ${euiTheme.font.weight.semiBold} !important;
+            line-height: 1.15 !important;
+          }
+          .echMetricText__value {
+            font-size: ${layout.valuePx}px !important;
+            font-weight: ${euiTheme.font.weight.bold} !important;
+            line-height: 1.15 !important;
+          }
+          .echMetricText__extra,
+          .echMetricText__extraBlock .echMetricText__extra {
+            font-size: ${layout.extraPx}px !important;
+            font-weight: ${euiTheme.font.weight.medium} !important;
+            white-space: nowrap;
+          }
+          .echMetricText__part {
+            font-size: inherit !important;
+            font-weight: inherit;
+          }
+          .echMetricText__extraBlock {
+            font-size: ${layout.extraPx}px !important;
+            line-height: 1.2 !important;
+          }
         `}
+        data-test-subj={`entityCentricLabGoldenSignalCard-${signal.id}`}
       >
-        <EuiIconTip
-          type="info"
-          size="s"
-          color="subdued"
-          position="left"
-          content={explainFlyoutMetric(signal.description)}
-          aria-label={i18n.translate('entityCentricLabFlyout.flyout.overview.metricInfoAriaLabel', {
-            defaultMessage: 'About {metric}',
-            values: { metric: signal.label },
-          })}
-          anchorProps={{
-            'data-test-subj': `entityCentricLabGoldenSignalInfo-${signal.id}`,
-          }}
-        />
-      </span>
-    </div>
+        <Chart>
+          <Settings
+            baseTheme={chartBaseTheme}
+            locale={i18n.getLocale()}
+            theme={{ metric: { valueFontSize: layout.valuePx } }}
+          />
+          <Metric id={`entityCentricLab-goldenSignal-${signal.id}`} data={[[datum]]} />
+        </Chart>
+        <span
+          css={css`
+            position: absolute;
+            top: ${euiTheme.size.xxs};
+            right: ${euiTheme.size.xxs};
+            z-index: 1;
+          `}
+        >
+          <EuiIconTip
+            type="info"
+            size="s"
+            color="subdued"
+            position="left"
+            content={explainFlyoutMetric(signal.description)}
+            aria-label={i18n.translate(
+              'entityCentricLabFlyout.flyout.overview.metricInfoAriaLabel',
+              {
+                defaultMessage: 'About {metric}',
+                values: { metric: signal.label },
+              }
+            )}
+            anchorProps={{
+              'data-test-subj': `entityCentricLabGoldenSignalInfo-${signal.id}`,
+            }}
+          />
+        </span>
+      </div>
+    </FlyoutChartPanel>
   );
 };
 

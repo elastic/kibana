@@ -10,6 +10,7 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import React, { Suspense } from 'react';
 import { EmbeddablePublicPlugin } from './plugin';
+import type { PresentationPanelProps } from './react_embeddable_system/panel_component/types';
 
 export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/types';
 
@@ -46,7 +47,23 @@ export {
   type EmbeddableFactory,
 } from './react_embeddable_system';
 
-export type { PresentationPanelProps } from './react_embeddable_system/panel_component/types';
+export type {
+  DefaultPresentationPanelApi,
+  PresentationPanelProps,
+} from './react_embeddable_system/panel_component/types';
+
+
+const LazyPresentationPanel = React.lazy(async () => {
+  const { PresentationPanel: Panel } = await import('./async_module');
+  return { default: Panel as React.ComponentType<PresentationPanelProps> };
+});
+
+/** Dashboard panel chrome, including the hover action menu. */
+export const PresentationPanel = (props: PresentationPanelProps) => (
+  <Suspense fallback={null}>
+    <LazyPresentationPanel {...props} />
+  </Suspense>
+);
 
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
 

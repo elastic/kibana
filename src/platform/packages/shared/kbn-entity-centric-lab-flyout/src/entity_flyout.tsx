@@ -1525,7 +1525,15 @@ export const EntityFlyout = ({
           ))}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        css={css`
+          /* Chart hover menus sit on the top edge of the card, like dashboard
+             panels. An open accordion otherwise clips that menu. */
+          .euiAccordion-isOpen > .euiAccordion__childWrapper {
+            overflow: visible;
+          }
+        `}
+      >
         {activeTab === 'dashboards' && (dashboardStyle === 'list' || dashboardStyle === 'listWithPreview') ? null : (
           <>
             <EuiFlexGroup responsive={false}>

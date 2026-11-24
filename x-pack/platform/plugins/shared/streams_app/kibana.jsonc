@@ -28,6 +28,8 @@
       "unifiedSearch",
       "unifiedDocViewer",
       "dashboard",
+      "embeddable",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "agentBuilder",
