@@ -248,6 +248,29 @@ describe('native_vuln.fetch_feed handler', () => {
     );
   });
 
+  it('counts Linux and Windows hosts together, and a Windows-only setup as scanned', async () => {
+    const windowsHost = { inventory: { os: { family: 'windows', version: '10.0.19045' } } };
+    inventoryMock.mockResolvedValue({
+      ...snapshot([]),
+      hosts: [ubuntuHost] as unknown as InventorySnapshot['hosts'],
+      windowsHosts: [windowsHost, windowsHost] as unknown as InventorySnapshot['windowsHosts'],
+    });
+    downloadMock.mockResolvedValue({
+      status: 'ok',
+      body: new Uint8Array(1),
+      durationMs: 5,
+      downloadedBytes: 1,
+    });
+    expect((await run()).result.output).toEqual(expect.objectContaining({ hosts: 3 }));
+
+    inventoryMock.mockResolvedValue({
+      ...snapshot([]),
+      windowsHosts: [windowsHost] as unknown as InventorySnapshot['windowsHosts'],
+    });
+    const { result } = await run();
+    expect(result.output).toEqual({ feeds: [], hosts: 1, pack_missing: false });
+  });
+
   it('reports a missing pack without downloading anything', async () => {
     inventoryMock.mockResolvedValue(snapshot([], true));
 

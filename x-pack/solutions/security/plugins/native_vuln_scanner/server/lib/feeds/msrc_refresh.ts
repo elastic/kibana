@@ -68,7 +68,7 @@ interface FetchedMonth {
 const stores = new Map<string, Map<string, MsrcMonthSlice>>();
 
 /** Months being fetched right now, by `${mirrorKey}|${month}`; concurrent callers await one fetch. */
-const inFlight = new Map<string, Promise<FetchedMonth>>();
+const inFlight = new Map<string, { promise: Promise<FetchedMonth>; signal?: AbortSignal }>();
 
 /** The mirror as `resolveFeedUrl` reads it: a trailing slash does not name another mirror. */
 const mirrorKey = (feedMirrorUrl: string | undefined): string =>
@@ -125,17 +125,25 @@ const downloadMonth = async (
  * multi-megabyte document twice. The entry is dropped as soon as the fetch settles, so a failure
  * is retried by the next call and a finished fetch is served from the store, not from here.
  */
-const fetchMonth = (
+const fetchMonth = async (
   entry: MsrcUpdatesIndexEntry,
   options: MsrcRefreshOptions
 ): Promise<FetchedMonth> => {
   const key = `${mirrorKey(options.feedMirrorUrl)}|${entry.id}|${entry.currentReleaseDate ?? ''}`;
   const running = inFlight.get(key);
-  if (running) return running;
+  if (running) {
+    try {
+      return await running.promise;
+    } catch (error) {
+      // The fetch belonged to a caller that has since aborted; that abort is not ours, so fetch
+      // again with our own signal.
+      if (!running.signal?.aborted || options.signal?.aborted) throw error;
+    }
+  }
   const started = downloadMonth(entry, options).finally(() => {
-    if (inFlight.get(key) === started) inFlight.delete(key);
+    if (inFlight.get(key)?.promise === started) inFlight.delete(key);
   });
-  inFlight.set(key, started);
+  inFlight.set(key, { promise: started, signal: options.signal });
   return started;
 };
 

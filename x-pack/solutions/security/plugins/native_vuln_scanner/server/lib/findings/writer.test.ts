@@ -133,6 +133,19 @@ describe('writeFindings', () => {
     expect(result.fixed).toBe(2);
   });
 
+  it('writes the findings but leaves open ones alone when the fix pass is skipped', async () => {
+    const result = await writeFindings(es, {
+      ...PARAMS,
+      hosts: [host('h1')],
+      findings: [finding('h1', 'CVE-1')],
+      skipFixPass: true,
+    });
+
+    expect(result).toMatchObject({ written: 1, fixed: 0, fixSkipped: 0 });
+    expect(es.bulk).toHaveBeenCalledTimes(1);
+    expect(es.updateByQuery).not.toHaveBeenCalled();
+  });
+
   it('reports open findings the fix pass skipped on conflicts or failures', async () => {
     es.updateByQuery.mockResolvedValue({
       updated: 1,

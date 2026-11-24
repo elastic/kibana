@@ -92,6 +92,11 @@ export interface WriteFindingsParams {
    * it already has. False when the catalog (even a stale copy) is the truth for this run.
    */
   keepKev?: boolean;
+  /**
+   * Write the findings but leave every open finding of `hosts` as it is. For a run whose feed is
+   * known to be incomplete, where an absent finding does not mean the vulnerability is fixed.
+   */
+  skipFixPass?: boolean;
   signal?: AbortSignal;
 }
 
@@ -157,6 +162,7 @@ export const writeFindings = async (
     kev,
     knowledge,
     keepKev = false,
+    skipFixPass = false,
     signal,
   }: WriteFindingsParams
 ): Promise<WriteFindingsResult> => {
@@ -187,7 +193,9 @@ export const writeFindings = async (
     written += batch.length - countFailures(response, failures);
   }
   if (Object.keys(failures).length > 0) throw new FindingsWriteError(failures);
-  if (hosts.length === 0) return { written, fixed: 0, fixSkipped: 0, kevListed, failures };
+  if (hosts.length === 0 || skipFixPass) {
+    return { written, fixed: 0, fixSkipped: 0, kevListed, failures };
+  }
 
   await es.indices.refresh({ index: FINDINGS_INDEX }, { signal });
   const hostIds = [...metaById.keys()];

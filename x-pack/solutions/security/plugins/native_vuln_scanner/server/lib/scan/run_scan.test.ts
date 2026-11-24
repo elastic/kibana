@@ -1062,7 +1062,9 @@ describe('runScan on Windows hosts', () => {
     expect(params.hosts.map(({ id }) => id)).toEqual(['w1']);
     expect(summary.skippedRows).toMatchObject({ windows_no_ubr: 1 });
     expect(summary.skippedHosts).toMatchObject({ unsupported_os: 1 });
-    expect(summary.notes?.[MSRC_RELEASE_KEY]).toContain('windows_no_ubr=1');
+    expect(summary.notes?.[MSRC_RELEASE_KEY]).toContain(
+      'windows_no_ubr=1 (upgrade osquery to 5.12.1 or later to report the UBR)'
+    );
   });
 
   it('surfaces a host older than the window and a month that could not be refreshed', async () => {
@@ -1078,6 +1080,47 @@ describe('runScan on Windows hosts', () => {
     expect(note).toContain('2026-Oct');
   });
 
+  describe('a window month with no rows', () => {
+    const openFindingsFixed = async (broken: string[]) => {
+      const { deps } = setup([windowsAgent('w1', WIN10_OS)]);
+      const { writeFindings: realWrite } = jest.requireActual('../findings');
+      writeMock.mockImplementation(realWrite);
+      (deps.es.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [], took: 1 });
+      (deps.es.updateByQuery as jest.Mock).mockResolvedValue({ updated: 3 });
+      const summary = await runScan(
+        {
+          ...deps,
+          // The trimmed fixtures have no 2026-Aug document, so the window stops at Sep.
+          refreshMsrc: (o) =>
+            refreshMsrcFeed({ ...o, windowMonths: 3, fetchImpl: msrcFetch(broken) as never }),
+        },
+        { signal: new AbortController().signal, runId: 'r1' }
+      );
+      return { summary, es: deps.es };
+    };
+
+    it('writes the findings but marks none fixed, and says why', async () => {
+      const { summary, es } = await openFindingsFixed(['2026-Sep']);
+
+      expect(summary.releases[MSRC_RELEASE_KEY]).toBe('matched');
+      expect(summary.findings).toBeGreaterThan(0);
+      expect(summary.fixed).toBe(0);
+      expect(es.bulk).toHaveBeenCalled();
+      expect(es.updateByQuery).not.toHaveBeenCalled();
+      expect(summary.notes?.[MSRC_RELEASE_KEY]).toContain(
+        'fixed status not updated this run: MSRC 2026-Sep unavailable'
+      );
+    });
+
+    it('still runs the fix pass when every month has rows', async () => {
+      const { summary, es } = await openFindingsFixed([]);
+
+      expect(es.updateByQuery).toHaveBeenCalled();
+      expect(summary.fixed).toBeGreaterThan(0);
+      expect(summary.notes?.[MSRC_RELEASE_KEY] ?? '').not.toContain('fixed status not updated');
+    });
+  });
+
   it('fails the Windows release, not the Linux one, when the first month cannot be fetched', async () => {
     const { deps } = setup([rhelAgent('a1', '9'), windowsAgent('w1', WIN10_OS)]);
     const refreshMsrc = (o: Parameters<typeof refreshMsrcFeed>[0]) =>
@@ -1091,6 +1134,25 @@ describe('runScan on Windows hosts', () => {
     expect(error).toBeInstanceOf(ScanFailedError);
     expect(error.summary.releases).toEqual({ 'rhel:9': 'matched', [MSRC_RELEASE_KEY]: 'failed' });
     expect(error.failures[MSRC_RELEASE_KEY]).toEqual(expect.any(String));
+  });
+
+  it('reports an abort during the Microsoft refresh as aborted, not as a failed release', async () => {
+    const controller = new AbortController();
+    const { deps } = setup([windowsAgent('w1', WIN10_OS)]);
+    const refreshMsrc = jest.fn(async () => {
+      controller.abort();
+      throw new Error('This operation was aborted');
+    });
+
+    const summary = await runScan(
+      { ...deps, refreshMsrc },
+      { signal: controller.signal, runId: 'r1' }
+    );
+
+    expect(summary.aborted).toBe(true);
+    expect(summary.releases).toEqual({});
+    expect(summary.failedReleases).toBe(0);
+    expect(writeMock).not.toHaveBeenCalled();
   });
 
   it('does not touch the Microsoft feed when there is no Windows host', async () => {

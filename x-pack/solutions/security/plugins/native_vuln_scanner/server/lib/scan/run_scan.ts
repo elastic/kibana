@@ -310,6 +310,11 @@ const msrcFeedInfo = (
   };
 };
 
+/** What to do about a skipped-host reason, appended to its counter in the note. */
+const WINDOWS_SKIP_HINTS: Record<string, string> = {
+  windows_no_ubr: 'upgrade osquery to 5.12.1 or later to report the UBR',
+};
+
 const WINDOWS_STAT_LABELS: Record<string, string> = {
   windows_build_older_than_window:
     'Windows host(s) are on a build older than the months the feed covers, so fixes released before that window are not reported',
@@ -318,12 +323,19 @@ const WINDOWS_STAT_LABELS: Record<string, string> = {
 /** What the user should know about the Windows feed: refresh warnings, hosts left out, match counters. */
 const windowsNote = (
   { warnings }: MsrcRefreshResult,
-  { skippedRows, matchStats }: ScanSummary
+  { skippedRows, matchStats }: ScanSummary,
+  missingMonths: readonly string[]
 ): string => {
   const parts = [...warnings];
+  if (missingMonths.length > 0) {
+    parts.push(`fixed status not updated this run: MSRC ${missingMonths.join(', ')} unavailable`);
+  }
   const left = Object.entries(skippedRows)
     .filter(([reason]) => reason.startsWith('windows_'))
-    .map(([reason, count]) => `${reason}=${count}`);
+    .map(([reason, count]) => {
+      const hint = WINDOWS_SKIP_HINTS[reason];
+      return `${reason}=${count}${hint ? ` (${hint})` : ''}`;
+    });
   if (left.length > 0)
     parts.push(`Windows hosts not scanned (no exact product or UBR): ${left.join(', ')}`);
   for (const [stat, label] of Object.entries(WINDOWS_STAT_LABELS)) {
@@ -555,6 +567,10 @@ export const runScan = async (
       const findings = windowsHosts.flatMap(({ inventory: host }) =>
         matchWindowsHost(host, index, summary.matchStats)
       );
+      // A window month with no rows (fetch failed and nothing stored) hides the fixes of its CVEs:
+      // their findings are absent, not fixed, so the fix pass is skipped for this run.
+      const present = new Set(refreshed.slices.map(({ id }) => id));
+      const missingMonths = refreshed.window.filter((month) => !present.has(month));
       const written = await writeFindings(es, {
         hosts: windowsHosts.map(({ meta }) => meta),
         findings,
@@ -563,6 +579,7 @@ export const runScan = async (
         unfixedScanned: includeUnfixed ?? false,
         kev: kev?.entries,
         keepKev: kev?.status === 'unavailable',
+        skipFixPass: missingMonths.length > 0,
         signal,
       });
       for (const { cve } of findings) cves.add(cve.id);
@@ -574,7 +591,7 @@ export const runScan = async (
       summary.fixSkipped += written.fixSkipped;
       summary.kev.listed += written.kevListed;
       summary.feedInfo[MSRC_RELEASE_KEY] = msrcFeedInfo(refreshed, feedMirrorUrl, scanStart);
-      const note = windowsNote(refreshed, summary);
+      const note = windowsNote(refreshed, summary, missingMonths);
       if (note) (summary.notes ??= {})[MSRC_RELEASE_KEY] = truncate(note);
       for (const warning of refreshed.warnings) logger.warn(warning);
     } catch (error) {

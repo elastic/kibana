@@ -297,6 +297,34 @@ describe('refreshMsrcFeed', () => {
     expect(second.refreshed.sort()).toEqual(['2026-Nov', '2026-Oct']);
   });
 
+  it('fetches again with its own signal when the shared fetch failed because another caller aborted', async () => {
+    const site = msrcSite();
+    const aborted = new AbortController();
+    const gate = jest.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith('/cvrf/v3.0/updates')) return site.fetchImpl(url, init);
+      // The first caller's request is the one that is in flight when it aborts.
+      if (aborted.signal.aborted) return site.fetchImpl(url, init);
+      queueMicrotask(() => aborted.abort(new DOMException('aborted', 'AbortError')));
+      return new Promise<Response>((_, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(init.signal?.reason), { once: true });
+      });
+    });
+    const options = { feedMirrorUrl: undefined, windowMonths: 1 };
+
+    const [first, second] = await Promise.allSettled([
+      refreshMsrcFeed({
+        ...options,
+        fetchImpl: gate as unknown as typeof fetch,
+        signal: aborted.signal,
+      }),
+      refreshMsrcFeed({ ...options, fetchImpl: gate as unknown as typeof fetch }),
+    ]);
+
+    expect(first.status).toBe('rejected');
+    expect(second.status).toBe('fulfilled');
+    expect((second as PromiseFulfilledResult<{ slices: unknown[] }>).value.slices).toHaveLength(1);
+  });
+
   it('does not share a fetch across mirrors, or once a month was re-stamped', async () => {
     const site = msrcSite();
     await Promise.all([
