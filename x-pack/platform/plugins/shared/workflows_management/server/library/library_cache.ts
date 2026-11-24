@@ -50,7 +50,8 @@ export type LibraryFailureListener = (failure: LibraryFailure) => void;
  *
  * `setCatalog` is the only mutation that does more than assign a field: it
  * also drops the slug-keyed body map, because a fresh catalog can re-point
- * a slug at a different `definitionUrl`.
+ * a slug at a different `definitionUrl`, and stops tracking the failures of
+ * templates the new catalog no longer lists.
  *
  * The optional failure listener hears only status changes: the first failure
  * after a success (or after startup), tracked separately for the catalog and
@@ -80,6 +81,11 @@ export class LibraryCache {
   setCatalog(catalog: TemplatesCatalog): void {
     this.catalog = catalog;
     this.bodies.clear();
+    // A template removed from the catalog can't load again, so stop tracking it.
+    const listedSlugs = new Set(catalog.templates.map(({ slug }) => slug));
+    for (const slug of this.failingTemplates) {
+      if (!listedSlugs.has(slug)) this.failingTemplates.delete(slug);
+    }
   }
 
   setVersionId(id: string): void {

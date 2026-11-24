@@ -182,6 +182,29 @@ describe('LibraryCache', () => {
       ]);
     });
 
+    it('stops tracking a failing template once a new catalog no longer lists it', () => {
+      const onFailure = jest.fn();
+      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+      const withSlugs = (...slugs: string[]): TemplatesCatalog => ({
+        ...catalogA,
+        templates: slugs.map((slug) => ({ ...catalogA.templates[0], slug })),
+      });
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadFailure('beta', fetchError());
+
+      // `alpha` is dropped from the catalog and later comes back; `beta` stays listed.
+      cache.setCatalog(withSlugs('beta'));
+      cache.setCatalog(withSlugs('alpha', 'beta'));
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadFailure('beta', fetchError());
+
+      expect(onFailure.mock.calls.map(([failure]) => failure.templateSlug)).toEqual([
+        'alpha',
+        'beta',
+        'alpha',
+      ]);
+    });
+
     it('tracks the catalog and template bodies separately', () => {
       const onFailure = jest.fn();
       const cache = new LibraryCache(TTL_MS, 'http', onFailure);
