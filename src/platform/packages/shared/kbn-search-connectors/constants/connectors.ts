@@ -214,7 +214,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'azure_blob_storage.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['cloud', 'azure', 'blob', 's3', 'content crawler'],
+    keywords: ['cloud', 'azure', 'blob', 's3', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.azureBlob.name', {
       defaultMessage: 'Azure Blob Storage',
     }),
@@ -231,7 +231,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'confluence_cloud.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['confluence', 'cloud', 'content crawler'],
+    keywords: ['confluence', 'cloud', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence Cloud & Server',
     }),
@@ -249,7 +249,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     isTechPreview: true,
-    keywords: ['confluence', 'data', 'center', 'content crawler'],
+    keywords: ['confluence', 'data', 'center', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.confluence_data_center.name', {
       defaultMessage: 'Confluence Data Center',
     }),
@@ -264,7 +264,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     isTechPreview: false,
-    keywords: ['dropbox', 'content crawler'],
+    keywords: ['dropbox', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.dropbox.name', {
       defaultMessage: 'Dropbox',
     }),
@@ -278,7 +278,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'jira_cloud.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['jira', 'cloud', 'content crawler'],
+    keywords: ['jira', 'cloud', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.jira.name', {
       defaultMessage: 'Jira Cloud',
     }),
@@ -295,7 +295,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'jira_server.svg',
     isBeta: false,
     isNative: false,
-    keywords: ['jira', 'server', 'content crawler'],
+    keywords: ['jira', 'server', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.jiraServer.name', {
       defaultMessage: 'Jira Server',
     }),
@@ -313,7 +313,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isTechPreview: true,
     isNative: true,
-    keywords: ['jira', 'data', 'center', 'content crawler'],
+    keywords: ['jira', 'data', 'center', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.jira_data_center.name', {
       defaultMessage: 'Jira Data Center',
     }),
@@ -327,7 +327,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'github.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['github', 'cloud', 'content crawler'],
+    keywords: ['github', 'cloud', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.github.name', {
       defaultMessage: 'GitHub & GitHub Enterprise Server',
     }),
@@ -342,7 +342,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     isTechPreview: true,
-    keywords: ['gitlab', 'cloud', 'content crawler'],
+    keywords: ['gitlab', 'cloud', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.gitlab.name', {
       defaultMessage: 'GitLab',
     }),
@@ -359,7 +359,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'google_cloud_storage.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['google', 'cloud', 'blob', 's3', 'content crawler'],
+    keywords: ['google', 'cloud', 'blob', 's3', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.googleCloud.name', {
       defaultMessage: 'Google Cloud Storage',
     }),
@@ -376,7 +376,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'google_drive.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['google', 'drive', 'content crawler'],
+    keywords: ['google', 'drive', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.googleDrive.name', {
       defaultMessage: 'Google Drive',
     }),
@@ -390,7 +390,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'graphql.svg',
     isBeta: false,
     isNative: false,
-    keywords: ['graphql', 'content crawler'],
+    keywords: ['graphql', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.graphQL.name', {
       defaultMessage: 'GraphQL',
     }),
@@ -405,7 +405,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'mongodb.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['mongo', 'mongodb', 'database', 'nosql', 'content crawler'],
+    keywords: ['mongo', 'mongodb', 'database', 'nosql', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.mongodb.name', {
       defaultMessage: 'MongoDB',
     }),
@@ -419,7 +419,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'mysql.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['mysql', 'sql', 'database', 'content crawler'],
+    keywords: ['mysql', 'sql', 'database', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.mysql.name', {
       defaultMessage: 'MySQL',
     }),
@@ -433,7 +433,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'mssql.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['mssql', 'microsoft', 'sql', 'database', 'content crawler'],
+    keywords: ['mssql', 'microsoft', 'sql', 'database', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.microsoftSQL.name', {
       defaultMessage: 'Microsoft SQL',
     }),
@@ -450,7 +450,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'network_drive.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['network', 'drive', 'file', 'directory', 'content crawler'],
+    keywords: ['network', 'drive', 'file', 'directory', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
     }),
@@ -464,7 +464,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'notion.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['notion', 'content crawler'],
+    keywords: ['notion', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.notion.name', {
       defaultMessage: 'Notion',
     }),
@@ -481,7 +481,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'postgresql.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['postgresql', 'sql', 'database', 'content crawler'],
+    keywords: ['postgresql', 'sql', 'database', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.postgresql.name', {
       defaultMessage: 'PostgreSQL',
     }),
@@ -496,7 +496,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: false,
     isTechPreview: true,
-    keywords: ['redis', 'content crawler'],
+    keywords: ['redis', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.redis.name', {
       defaultMessage: 'Redis',
     }),
@@ -513,7 +513,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'salesforce.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['salesforce', 'cloud', 'content crawler'],
+    keywords: ['salesforce', 'cloud', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.salesforce.name', {
       defaultMessage: 'Salesforce',
     }),
@@ -530,7 +530,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'salesforce.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['salesforce', 'cloud', 'content crawler', 'sandbox'],
+    keywords: ['salesforce', 'cloud', 'content crawlers', 'sandbox'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.salesforceBox.name', {
       defaultMessage: 'Salesforce Sandbox',
     }),
@@ -548,7 +548,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     isTechPreview: false,
-    keywords: ['servicenow', 'cloud', 'content crawler'],
+    keywords: ['servicenow', 'cloud', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.serviceNow.name', {
       defaultMessage: 'ServiceNow',
     }),
@@ -566,7 +566,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     isTechPreview: false,
-    keywords: ['sharepoint', 'office365', 'cloud', 'content crawler'],
+    keywords: ['sharepoint', 'office365', 'cloud', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.sharepointOnline.name', {
       defaultMessage: 'Sharepoint Online',
     }),
@@ -580,7 +580,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'gmail.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['gmail', 'content crawler'],
+    keywords: ['gmail', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.gmail.name', {
       defaultMessage: 'Gmail',
     }),
@@ -594,7 +594,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'oracle.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['oracle', 'sql', 'database', 'content crawler'],
+    keywords: ['oracle', 'sql', 'database', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.oracle.name', {
       defaultMessage: 'Oracle',
     }),
@@ -608,7 +608,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'onedrive.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['network', 'drive', 'file', 'content crawler'],
+    keywords: ['network', 'drive', 'file', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.oneDrive.name', {
       defaultMessage: 'OneDrive',
     }),
@@ -622,7 +622,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 's3.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['s3', 'cloud', 'amazon', 'content crawler'],
+    keywords: ['s3', 'cloud', 'amazon', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.s3.name', {
       defaultMessage: 'S3',
     }),
@@ -637,7 +637,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     isTechPreview: true,
-    keywords: ['slack', 'content crawler'],
+    keywords: ['slack', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.slack.name', {
       defaultMessage: 'Slack',
     }),
@@ -655,7 +655,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: true,
     isNative: true,
     isTechPreview: false,
-    keywords: ['sharepoint', 'cloud', 'content crawler'],
+    keywords: ['sharepoint', 'cloud', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.sharepointServer.name', {
       defaultMessage: 'Sharepoint Server',
     }),
@@ -684,7 +684,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'outlook.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['outlook', 'content crawler'],
+    keywords: ['outlook', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.outlook.name', {
       defaultMessage: 'Outlook',
     }),
@@ -701,7 +701,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'outlook.svg',
     isBeta: false,
     isNative: true,
-    keywords: ['exchange', 'outlook', 'content crawler'],
+    keywords: ['exchange', 'outlook', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.exchangeServer.name', {
       defaultMessage: 'Exchange Server',
     }),
@@ -716,7 +716,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     isTechPreview: true,
-    keywords: ['teams', 'content crawler'],
+    keywords: ['teams', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.teams.name', {
       defaultMessage: 'Teams',
     }),
@@ -731,7 +731,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isBeta: false,
     isNative: true,
     isTechPreview: true,
-    keywords: ['zoom', 'content crawler'],
+    keywords: ['zoom', 'content crawlers'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.zoom.name', {
       defaultMessage: 'Zoom',
     }),
@@ -748,7 +748,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     iconPath: 'custom.svg',
     isBeta: false,
     isNative: false,
-    keywords: ['custom', 'content crawler', 'code'],
+    keywords: ['custom', 'content crawlers', 'code'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.customConnector.name', {
       defaultMessage: 'Customized content crawler',
     }),
