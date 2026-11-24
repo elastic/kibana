@@ -6,7 +6,7 @@
  */
 
 import { Parser, Walker } from '@elastic/esql';
-import type { ESQLAstQueryExpression } from '@elastic/esql/types';
+import type { ESQLCommand } from '@elastic/esql/types';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { KNOWN_FAILURES_SETTINGS } from './constants';
 
@@ -34,7 +34,7 @@ function getFilterCommands(esql: string): string[] | undefined {
 
   // `Parser.parse` never throws; syntax errors land in `errors`.
   const { root, errors } = Parser.parse(source);
-  if (errors.length > 0 || root.header?.length || hasOwnTimeOrParams(root)) {
+  if (errors.length > 0 || root.header?.length) {
     return undefined;
   }
 
@@ -52,24 +52,28 @@ function getFilterCommands(esql: string): string[] | undefined {
     return undefined;
   }
 
+  const kept = root.commands.filter((command) => FILTER_COMMANDS.has(command.name.toLowerCase()));
+  if (kept.some(hasOwnTimeOrParams)) {
+    return undefined;
+  }
+
   // Sliced from the source by position, so the conditions run exactly as the indicator wrote them,
   // and a `//` comment between commands is left behind. The parser counts positions in code points,
   // so the source is split into code points first: sliced as UTF-16, an emoji in a quoted message
   // would shift the cut and drop the end of the condition.
   const codePoints = Array.from(source);
-  return root.commands
-    .filter((command) => FILTER_COMMANDS.has(command.name.toLowerCase()))
-    .map(({ location }) => codePoints.slice(location.min, location.max + 1).join(''));
+  return kept.map(({ location }) => codePoints.slice(location.min, location.max + 1).join(''));
 }
 
 /**
- * Whether the query bounds its own time or needs parameters. With a time bound of its own (`NOW()`,
- * a condition on `@timestamp`), the minutes outside it would count as zero matches and give a false
- * normal level. The rule binds no parameters, so a `?param` would fail every run.
+ * Whether a kept command bounds the query's time or needs parameters. With a time bound of its own
+ * (`NOW()`, a condition on `@timestamp`), the minutes outside it would count as zero matches and give
+ * a false normal level. The rule binds no parameters, so a `?param` would fail every run. Only the
+ * kept commands count: an `@timestamp` in a dropped `SORT` or `KEEP` bounds nothing.
  */
-function hasOwnTimeOrParams(root: ESQLAstQueryExpression): boolean {
+function hasOwnTimeOrParams(command: ESQLCommand): boolean {
   let isFound = false;
-  Walker.walk(root, {
+  Walker.walk(command, {
     visitLiteral: (node) => {
       isFound ||= node.literalType === 'param';
     },

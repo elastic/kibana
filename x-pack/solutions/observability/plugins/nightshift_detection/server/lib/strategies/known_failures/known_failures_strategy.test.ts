@@ -75,11 +75,12 @@ describe('KnownFailuresStrategy', () => {
     });
 
     // Dropped, not refused: they leave the matched lines unchanged, and KEEP could drop @timestamp.
+    // An @timestamp in them is no time bound of the indicator's own, since the rule drops them.
     it('counts a knowledge indicator with KEEP, DROP or SORT on its filters alone', async () => {
       const { resources } = await new KnownFailuresStrategy().resources(
         createContext([
           createQuery({
-            esql: 'FROM logs-* | KEEP message | WHERE message : "timeout" | DROP a | SORT message',
+            esql: 'FROM logs-* | KEEP @timestamp, message | WHERE message : "timeout" | DROP a | SORT @timestamp DESC',
           }),
         ])
       );
