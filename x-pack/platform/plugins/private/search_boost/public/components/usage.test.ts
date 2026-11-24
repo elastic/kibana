@@ -11,10 +11,10 @@ describe('getUsage', () => {
   it('counts the matches no higher-ranked rule outranks, with their storage size', () => {
     expect(
       getUsage([
-        { name: 'catalog-products', isHidden: false, storageSizeInBytes: 100 },
-        { name: '.internal-alerts', isHidden: true, storageSizeInBytes: 20 },
-        { name: 'orders', isHidden: false, storageSizeInBytes: 5, outrankedByRuleName: 'other' },
-        { name: 'customers', isHidden: false },
+        { name: 'catalog-products', storageSizeInBytes: 100 },
+        { name: '.internal-alerts', storageSizeInBytes: 20 },
+        { name: 'orders', storageSizeInBytes: 5, outrankedByRuleName: 'other' },
+        { name: 'customers' },
       ])
     ).toEqual({ appliesTo: 3, storageSizeInBytes: 120 });
   });
