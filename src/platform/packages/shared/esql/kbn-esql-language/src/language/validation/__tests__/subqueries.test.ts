@@ -20,3 +20,12 @@ it('does not count the unmapped fields of a nested IN subquery as outer columns'
     []
   );
 });
+
+it('keeps the unmapped fields of a FORK branch as columns', async () => {
+  const { expectErrors } = await setup();
+
+  await expectErrors(
+    'SET unmapped_fields = "LOAD"; FROM index | WHERE (keywordField, innerOnly) IN (ROW keywordField = "a" | FORK (WHERE innerOnly == "x") (LIMIT 1) | DROP _fork)',
+    []
+  );
+});
