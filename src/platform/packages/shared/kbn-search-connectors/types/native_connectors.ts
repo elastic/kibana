@@ -3918,7 +3918,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         sensitive: false,
         tooltip: translate('searchConnectors.nativeConnectors.outlook.data_source.tooltip', {
           defaultMessage:
-            'The Outlook Server option is deprecated. For on-premises Exchange, use the Exchange Server content crawler instead.',
+            'The Outlook Server option is deprecated. For on-premises Exchange, use the Exchange Server Content Crawler instead.',
         }),
         type: STRING,
         ui_restrictions: [],
