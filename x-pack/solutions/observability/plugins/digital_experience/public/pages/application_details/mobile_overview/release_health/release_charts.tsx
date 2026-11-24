@@ -23,7 +23,11 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { MIN_RELEASE_SESSIONS, OTHER_RELEASE_LABEL } from '../../../../../common/mobile/releases';
+import {
+  MIN_BUCKET_SESSIONS,
+  MIN_RELEASE_SESSIONS,
+  OTHER_RELEASE_LABEL,
+} from '../../../../../common/mobile/releases';
 import type { HistogramBuckets } from '../../../../../common/types/applications';
 import type {
   MobileReleaseMarker,
@@ -68,8 +72,12 @@ const ERROR_RATE_TOOLTIP = i18n.translate(
   'xpack.digitalExperience.mobile.releases.errorRate.tooltip',
   {
     defaultMessage:
-      '{description} Releases with fewer than {minSessions} sessions in the range are left out. The markers show where a release first appears.',
-    values: { description: MOBILE_ERROR_RATE_DESCRIPTION, minSessions: MIN_RELEASE_SESSIONS },
+      '{description} Releases with fewer than {minSessions} sessions in the range are left out, and so are time buckets with fewer than {minBucketSessions}. The markers show where a release first appears.',
+    values: {
+      description: MOBILE_ERROR_RATE_DESCRIPTION,
+      minSessions: MIN_RELEASE_SESSIONS,
+      minBucketSessions: MIN_BUCKET_SESSIONS,
+    },
   }
 );
 

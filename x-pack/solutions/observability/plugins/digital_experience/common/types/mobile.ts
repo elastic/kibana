@@ -23,7 +23,7 @@ export interface MobileReleasePoint {
   /** Start of the bucket, in epoch milliseconds. */
   timestamp: number;
   sessions: number;
-  /** Exceptions per session in the bucket; `null` without sessions. */
+  /** Exceptions per session in the bucket; `null` below `MIN_BUCKET_SESSIONS`. */
   errorRate: number | null;
 }
 

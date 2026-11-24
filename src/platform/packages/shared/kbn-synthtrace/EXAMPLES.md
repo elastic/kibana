@@ -979,9 +979,9 @@ node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scen
 
 #### `digital_experience_mixed`
 
-Generates the `digital_experience_browser`, `digital_experience_mobile` and `digital_experience_mobile_native` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The mobile apps run on Android and iOS (`field-service-mobile` and `trailmap-android` on Android only, `ride-ios` on iOS only), the React Native ones with the `app.launch` and screen spans that some of them create themselves, so it doesn't take the `platform` and `withManualSpans` options of the mobile scenarios. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
+Generates the `digital_experience_browser`, `digital_experience_mobile`, `digital_experience_mobile_releases` and `digital_experience_mobile_native` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The mobile apps run on Android and iOS (`field-service-mobile` and `trailmap-android` on Android only, `ride-ios` on iOS only), the React Native ones with the `app.launch` and screen spans that some of them create themselves, so it doesn't take the `platform` and `withManualSpans` options of the mobile scenarios. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
 
-It already includes the browser and mobile apps, so don't run it together with `digital_experience_browser`, `digital_experience_mobile` or `digital_experience_mobile_native` in one synthtrace invocation: with the same `--from`, they share their default seed and index the same sessions twice.
+It already includes the browser and mobile apps, so don't run it together with `digital_experience_browser`, `digital_experience_mobile`, `digital_experience_mobile_releases` or `digital_experience_mobile_native` in one synthtrace invocation: with the same `--from`, they share their default seed and index the same sessions twice.
 
 **Usage:**
 
@@ -1033,6 +1033,14 @@ Generates EDOT Android and EDOT iOS data of three native apps (`trailmap-android
 ```sh
 node scripts/synthtrace digital_experience_mobile_native --from=now-30m --to=now
 node scripts/synthtrace digital_experience_mobile_native --live --scenarioOpts platform=ios
+```
+
+#### `digital_experience_mobile_releases`
+
+Generates one EDOT React Native app, `release-train-mobile` (the `shop-mobile` app), on seven releases, for the release health section of the Digital Experience mobile page: the five with most sessions show by name and the rest as "Other". The newest, `6.0.0`, rolls out 12 hours into the run, so it first appears inside the time range, and more of its HTTP requests fail, so its error rate rises above the others'. Use a run of at least a day. Takes the options of `digital_experience_mobile`. `digital_experience_mixed` includes this app too.
+
+```sh
+node scripts/synthtrace digital_experience_mobile_releases --from=now-24h --to=now
 ```
 
 #### Smaller `digital_experience_mobile` scenarios

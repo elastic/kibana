@@ -15,8 +15,11 @@ import { kpiStats } from './kpis';
 /** The releases shown by name; the others are grouped as "Other". */
 export const TOP_RELEASES = 5;
 
-/** The sessions a release needs in the range (or bucket) for its error rate to be shown. */
+/** The sessions a release needs in the range for its error rate to be shown. */
 export const MIN_RELEASE_SESSIONS = 100;
+
+/** The sessions a bucket of the time series needs for its error rate to be drawn. */
+export const MIN_BUCKET_SESSIONS = 10;
 
 /**
  * The key of the "Other" group. A real release is never empty (`withRelease` drops those), so no

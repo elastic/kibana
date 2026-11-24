@@ -138,7 +138,9 @@ on serverless and stateful.
   **top 5 by sessions** in the range, and **Other** for the rest (last in the table, left out when
   nothing falls outside the top 5; with a release filter there is one group). A release needs
   **100 sessions** (`MIN_RELEASE_SESSIONS`) in the range for an error rate: below it the table
-  shows "Not enough data" and the error rate chart leaves the release out. A release **first
+  shows "Not enough data" and the error rate chart leaves the release out. The chart also leaves a
+  gap for a time bucket with fewer than 10 sessions (`MIN_BUCKET_SESSIONS`), where one exception
+  would swing the rate from 0 to a spike. A release **first
   appears** at its first document with that `service.version` in the selected environment, looked
   up 30 days before the range; one first seen before the range start gets no marker. The section
   loads apart from the KPIs (`GET .../mobile_applications/{serviceName}/releases`, same params as

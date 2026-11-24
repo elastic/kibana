@@ -10,6 +10,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { RESULT_COLUMNS } from '../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobile/filters';
 import {
+  MIN_BUCKET_SESSIONS,
   MIN_RELEASE_SESSIONS,
   OTHER_RELEASE_KEY,
   TOP_RELEASES,
@@ -57,12 +58,13 @@ export const getMobileReleases = async ({
   environment,
 }: GetMobileReleasesParams): Promise<MobileReleasesResponse> => {
   const histogram = { interval: getHistogramInterval(start, end), start, end };
-  const query = mobilePanelQuery(filters);
+  // A new query each time: `pipe` adds to the query it's called on.
+  const query = () => mobilePanelQuery(filters);
 
   const topRows = await runEsql<ReleaseRow>(
     esClient,
     'get_mobile_release_top',
-    withReleaseCounts(query, TOP_RELEASES),
+    withReleaseCounts(query(), TOP_RELEASES),
     timeFilter(start, end, environment)
   );
   const top = topRows.flatMap(({ [RESULT_COLUMNS.release]: release }) =>
@@ -76,19 +78,19 @@ export const getMobileReleases = async ({
     runEsql<ReleaseTotalsRow>(
       esClient,
       'get_mobile_release_totals',
-      withReleaseTotals(query, top),
+      withReleaseTotals(query(), top),
       timeFilter(start, end, environment)
     ),
     runEsql<ReleaseSeriesRow>(
       esClient,
       'get_mobile_release_series',
-      withReleaseSeries(query, top, histogram.interval),
+      withReleaseSeries(query(), top, histogram.interval),
       timeFilter(start, end, environment)
     ),
     runEsql<ReleaseFirstSeenRow>(
       esClient,
       'get_mobile_release_first_seen',
-      withReleaseFirstSeen(query, top),
+      withReleaseFirstSeen(query(), top),
       timeFilter(start - FIRST_SEEN_LOOKBACK_MS, end, environment)
     ),
   ]);
@@ -121,7 +123,11 @@ export const getMobileReleases = async ({
           return {
             timestamp: Date.parse(row[RESULT_COLUMNS.bucket]),
             sessions,
-            errorRate: errorRateOf(sessions, row[RESULT_COLUMNS.exceptions] ?? 0),
+            // A bucket with few sessions swings from 0 to a spike on one exception.
+            errorRate:
+              sessions >= MIN_BUCKET_SESSIONS
+                ? errorRateOf(sessions, row[RESULT_COLUMNS.exceptions] ?? 0)
+                : null,
           };
         }),
       'timestamp'

@@ -91,6 +91,8 @@ describe('getMobileReleases', () => {
     const [topRequest, totalsRequest] = client.esql.query.mock.calls.map(([request]) => request);
     expect(topRequest.query).toContain('LIMIT 5');
     expect(totalsRequest.query).toContain('IN ("1", "2", "3", "4", "5")');
+    // Each query starts from the filtered documents, not from the top releases' query.
+    expect(totalsRequest.query).not.toContain('LIMIT 5');
   });
 
   it('has no "Other" when every release is in the top', async () => {
@@ -148,10 +150,10 @@ describe('getMobileReleases', () => {
         {
           release_group: '1',
           bucket: new Date(START + HOUR).toISOString(),
-          sessions: 4,
-          exceptions: 2,
+          sessions: 40,
+          exceptions: 20,
         },
-        { release_group: '1', bucket: new Date(START).toISOString(), sessions: 5, exceptions: 0 },
+        { release_group: '1', bucket: new Date(START).toISOString(), sessions: 50, exceptions: 0 },
       ],
     });
 
@@ -162,10 +164,33 @@ describe('getMobileReleases', () => {
         release: '1',
         isOther: false,
         points: [
-          { timestamp: START, sessions: 5, errorRate: 0 },
-          { timestamp: START + HOUR, sessions: 4, errorRate: 0.5 },
+          { timestamp: START, sessions: 50, errorRate: 0 },
+          { timestamp: START + HOUR, sessions: 40, errorRate: 0.5 },
         ],
       },
+    ]);
+  });
+
+  it('leaves the error rate of a bucket below 10 sessions out: 9 has none', async () => {
+    const { run } = setup({
+      top: [{ release: '1', sessions: 300 }],
+      totals: [total('1', 300)],
+      series: [
+        { release_group: '1', bucket: new Date(START).toISOString(), sessions: 10, exceptions: 1 },
+        {
+          release_group: '1',
+          bucket: new Date(START + HOUR).toISOString(),
+          sessions: 9,
+          exceptions: 3,
+        },
+      ],
+    });
+
+    const { series } = await run();
+
+    expect(series[0].points).toEqual([
+      { timestamp: START, sessions: 10, errorRate: 0.1 },
+      { timestamp: START + HOUR, sessions: 9, errorRate: null },
     ]);
   });
 

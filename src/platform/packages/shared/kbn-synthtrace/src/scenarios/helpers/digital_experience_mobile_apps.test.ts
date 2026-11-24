@@ -642,6 +642,44 @@ describe('digital experience mobile apps', () => {
       ).toEqual(new Set([newest.serviceVersion]));
     });
 
+    it('runs no installation on the newest version before its rollout starts', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, ...older] = app.versions;
+      // Starts halfway into the 30 minutes of the run, everywhere at once
+      const delayed = {
+        ...app,
+        versions: [
+          { ...newest, rollout: { initialAdoption: 1, hours: 0, startsAfterHours: 0.25 } },
+          ...older,
+        ],
+      };
+      const delayedLogs = logsOf(
+        generateEdotNativeSessions(range, {
+          environment: 'test',
+          from: FROM,
+          scale: 1,
+          platform: 'both',
+          seed: 'digital-experience-native-delayed-rollout',
+          apps: [delayed],
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+        )
+      );
+      const startsOn = (serviceVersion: string) =>
+        delayedLogs
+          .filter(
+            (doc) =>
+              doc.event_name === EVENT_SESSION_START &&
+              doc.resource?.attributes?.['service.version'] === serviceVersion
+          )
+          .map((doc) => Number(doc['@timestamp']));
+      const rolloutStart = FROM + 15 * 60_000;
+
+      expect(startsOn(newest.serviceVersion).length).toBeGreaterThan(0);
+      expect(Math.min(...startsOn(newest.serviceVersion))).toBeGreaterThanOrEqual(rolloutStart);
+      expect(startsOn(older[0].serviceVersion).some((time) => time < rolloutStart)).toBe(true);
+    });
+
     it('keeps the sessions in progress of apps that share a service name apart', () => {
       const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
       const withVersion = (serviceVersion: string, appId: string) => ({

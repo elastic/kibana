@@ -47,11 +47,12 @@ export interface DigitalExperienceMobileAppVersion {
   /** Overrides the app's health profile for this version, e.g. its crash rate or launch time. */
   health?: Partial<Omit<MobileHealthProfile, 'name'>>;
   /**
-   * Rolls the version out from the start of the run: `initialAdoption` of all the installations run
-   * it from the start, and all of them `hours` later, which replaces its `share`. The others run the
-   * older versions by their shares until their turn. Only the newest version can roll out.
+   * Rolls the version out from the start of the run, or `startsAfterHours` into it (none run it
+   * before): `initialAdoption` of all the installations run it from then, and all of them `hours`
+   * later, which replaces its `share`. The others run the older versions by their shares until
+   * their turn. Only the newest version can roll out.
    */
-  rollout?: { initialAdoption: number; hours: number };
+  rollout?: { initialAdoption: number; hours: number; startsAfterHours?: number };
 }
 
 export interface DigitalExperienceMobileApp {
@@ -387,6 +388,45 @@ export const DIGITAL_EXPERIENCE_MOBILE_APPS: readonly DigitalExperienceMobileApp
     },
   },
 ];
+
+const RELEASE_TRAIN_BASE_APP = 'shop-mobile';
+
+const releaseTrainBaseApp = DIGITAL_EXPERIENCE_MOBILE_APPS.find(
+  ({ serviceName }) => serviceName === RELEASE_TRAIN_BASE_APP
+);
+if (!releaseTrainBaseApp) {
+  throw new Error(
+    `The mobile app catalog has no ${RELEASE_TRAIN_BASE_APP} to build the release app from`
+  );
+}
+
+/**
+ * The shop-mobile app on seven releases, for the release health of the mobile page: five show by
+ * name and the rest as "Other". The newest, 6.0.0, rolls out 12 hours into the run, so it first
+ * appears inside the time range, and more of its HTTP requests fail.
+ */
+export const DIGITAL_EXPERIENCE_RELEASE_TRAIN_APP: DigitalExperienceMobileApp = {
+  ...releaseTrainBaseApp,
+  serviceName: 'release-train-mobile',
+  appId: 'com.example.releasetrain',
+  sessionsPerMinute: 8,
+  versions: [
+    {
+      serviceVersion: '6.0.0',
+      buildNumber: 600,
+      share: 0.3,
+      rollout: { initialAdoption: 0.1, hours: 6, startsAfterHours: 12 },
+      // A regression: many more failed requests, each an exception
+      health: { httpFailureRate: 0.15 },
+    },
+    { serviceVersion: '5.4.0', buildNumber: 540, share: 0.35 },
+    { serviceVersion: '5.3.2', buildNumber: 532, share: 0.25 },
+    { serviceVersion: '5.3.1', buildNumber: 531, share: 0.18 },
+    { serviceVersion: '5.3.0', buildNumber: 530, share: 0.12 },
+    { serviceVersion: '5.2.0', buildNumber: 520, share: 0.06 },
+    { serviceVersion: '5.1.0', buildNumber: 510, share: 0.04 },
+  ],
+};
 
 // The newest native versions reach a third of their installations at the start of the run
 const NEWEST_ROLLOUT = { initialAdoption: 0.35, hours: 6 };
@@ -798,14 +838,15 @@ const pickInstalledVersion = (
   if (!rollout || older.length === 0) {
     return pickVersion(random, versions);
   }
-  const { initialAdoption, hours } = rollout;
+  const { initialAdoption, hours, startsAfterHours = 0 } = rollout;
+  const sinceStart = elapsed - startsAfterHours * HOUR_MS;
+  if (sinceStart < 0) {
+    return 1 + pickVersion(random, older);
+  }
   const progress =
     hours <= 0
       ? 1
-      : Math.min(
-          initialAdoption + ((1 - initialAdoption) * Math.max(elapsed, 0)) / (hours * HOUR_MS),
-          1
-        );
+      : Math.min(initialAdoption + ((1 - initialAdoption) * sinceStart) / (hours * HOUR_MS), 1);
   return random() < progress ? 0 : 1 + pickVersion(random, older);
 };
 
