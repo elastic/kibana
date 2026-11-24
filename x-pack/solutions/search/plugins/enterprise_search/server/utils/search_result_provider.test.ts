@@ -9,6 +9,7 @@ import { NEVER, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
 import type { GlobalSearchProviderContext } from '@kbn/global-search-plugin/server';
+import { CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 
@@ -228,6 +229,30 @@ describe('Search search provider', () => {
           )
         ).toBe('(a|)', {
           a: [],
+        });
+      });
+    });
+
+    it('matches built-in sources when searching content crawlers', () => {
+      const searchProvider = getSearchResultProvider(
+        { hasConnectors: true } as any,
+        CONNECTOR_DEFINITIONS
+      );
+      getTestScheduler().run(({ expectObservable }) => {
+        expectObservable(
+          searchProvider.find(
+            { term: 'content crawlers' },
+            { aborted$: NEVER, maxResults: 100, preference: '' },
+            mockSearchProviderContext
+          )
+        ).toBe('(a|)', {
+          a: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'azure_blob_storage',
+              score: 50,
+              title: 'Azure Blob Storage',
+            }),
+          ]),
         });
       });
     });

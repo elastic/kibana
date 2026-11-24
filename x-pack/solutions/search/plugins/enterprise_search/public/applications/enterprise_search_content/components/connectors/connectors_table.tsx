@@ -29,6 +29,11 @@ import { ConnectorViewIndexLink } from '../shared/connector_view_search_indices_
 
 import { ConnectorType } from './connector_type';
 import type { ConnectorViewItem } from './connectors_logic';
+import {
+  getDeleteActionDescription,
+  getNoItemsMessage,
+  getTableCaption,
+} from './connectors_table_labels';
 
 interface ConnectorsTableProps {
   isCrawler: boolean;
@@ -141,7 +146,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     {
       actions: [
         {
-          description: isCrawler ? 'Delete this crawler' : 'Delete this content crawler',
+          description: getDeleteActionDescription(isCrawler),
           icon: 'trash',
           isPrimary: false,
           name: (connector) =>
@@ -225,30 +230,11 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           columns={columns}
           onChange={onChange}
           tableLayout="fixed"
-          tableCaption={
-            isCrawler
-              ? i18n.translate(
-                  'xpack.enterpriseSearch.connectorsTable.table.availableCrawlersTableCaption',
-                  { defaultMessage: 'Available crawlers table' }
-                )
-              : i18n.translate(
-                  'xpack.enterpriseSearch.connectorsTable.table.availableConnectorsTableCaption',
-                  { defaultMessage: 'Available content crawlers table' }
-                )
-          }
+          tableCaption={getTableCaption(isCrawler)}
           loading={isLoading}
           noItemsMessage={
             <EuiText aria-live="polite" size="s">
-              {isCrawler
-                ? i18n.translate(
-                    'xpack.enterpriseSearch.connectorsTable.table.noCrawlersResultsMessage',
-                    {
-                      defaultMessage: 'No crawlers found',
-                    }
-                  )
-                : i18n.translate('xpack.enterpriseSearch.connectorsTable.table.noResultsMessage', {
-                    defaultMessage: 'No content crawlers found',
-                  })}
+              {getNoItemsMessage(isCrawler)}
             </EuiText>
           }
           pagination={{
