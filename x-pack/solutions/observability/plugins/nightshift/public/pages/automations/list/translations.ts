@@ -32,7 +32,7 @@ export const listLabels = {
   slackThreadDestination: i18n.translate(
     'xpack.nightshift.automations.slackThreadDestinationLabel',
     {
-      defaultMessage: 'Triggering Slack thread',
+      defaultMessage: 'Original Slack thread',
     }
   ),
   noDestination: i18n.translate('xpack.nightshift.automations.noDestinationLabel', {

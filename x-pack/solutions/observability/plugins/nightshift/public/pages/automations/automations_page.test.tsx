@@ -651,7 +651,7 @@ describe('AutomationsPage', () => {
 
       const slackRow = within(rowOf('Investigate Slack messages'));
       expect(slackRow.getByText('Slack')).toBeVisible();
-      expect(slackRow.getByText('Triggering Slack thread')).toBeVisible();
+      expect(slackRow.getByText('Original Slack thread')).toBeVisible();
       expect(slackRow.getByText('No runs recorded')).toBeVisible();
     });
 
