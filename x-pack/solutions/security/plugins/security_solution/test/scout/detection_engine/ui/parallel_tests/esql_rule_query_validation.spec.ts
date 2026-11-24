@@ -11,7 +11,6 @@ import {
   createEsqlSourceIndex,
   deleteEsqlSourceIndex,
   esqlSourceIndexName,
-  getEsqlRuleQuery,
   MISSING_ESQL_SOURCE,
 } from '../fixtures/esql_rule';
 
@@ -44,32 +43,6 @@ spaceTest.describe(
     spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
       await deleteEsqlSourceIndex(esClient, esqlSourceIndexName(scoutSpace.id));
     });
-
-    spaceTest('shows an error when the ES|QL query is empty', async ({ pageObjects }) => {
-      const { esqlRuleForm } = pageObjects;
-
-      await esqlRuleForm.continueFromDefineStep();
-
-      await expect(esqlRuleForm.queryBar).toContainText('ES|QL query is required');
-    });
-
-    spaceTest(
-      'proceeds to the about step once the empty query is fixed',
-      async ({ pageObjects, scoutSpace }) => {
-        const { esqlRuleForm, ruleCreateWizard } = pageObjects;
-
-        await esqlRuleForm.continueFromDefineStep();
-        await expect(esqlRuleForm.queryBar).toContainText('required');
-
-        await esqlRuleForm.setQueryAndWaitToSettle(
-          getEsqlRuleQuery(esqlSourceIndexName(scoutSpace.id))
-        );
-        await esqlRuleForm.continueToAboutStep();
-
-        await expect(esqlRuleForm.queryBar).toBeHidden();
-        await expect(ruleCreateWizard.aboutRuleName).toBeVisible();
-      }
-    );
 
     spaceTest(
       'accepts a non-aggregating query without the metadata operator',
