@@ -23,6 +23,8 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryDetailsFlyout } from './query_details_flyout';
+import { QueryDetailsFlyoutErrorBoundary } from './query_details_flyout_error_boundary';
+import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
@@ -93,6 +95,11 @@ const euiBasicTableCss = ({ euiTheme }: UseEuiTheme) => ({
     borderRight: '0px',
   },
 });
+
+const QUERY_DETAILS_FLYOUT_ERROR_TITLE = i18n.translate(
+  'xpack.osquery.pack.queriesTable.queryDetailsFlyoutErrorTitle',
+  { defaultMessage: 'Unable to show query details' }
+);
 
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
@@ -201,6 +208,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   onSaveQuery,
 }) => {
   const exportFiltersStore = useExportFiltersContext();
+  const setErrorToast = useErrorToast();
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
     query: string;
@@ -221,6 +229,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     []
   );
   const handleQueryFlyoutClose = useCallback(() => setQueryDetailsFlyoutOpen(null), []);
+  const handleQueryFlyoutError = useCallback(
+    (error: Error) => {
+      setQueryDetailsFlyoutOpen(null);
+      setErrorToast(error, { title: QUERY_DETAILS_FLYOUT_ERROR_TITLE });
+    },
+    [setErrorToast]
+  );
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
@@ -644,7 +659,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       />
       {queryDetailsFlyoutOpen ? (
-        <QueryDetailsFlyout onClose={handleQueryFlyoutClose} action={queryDetailsFlyoutOpen} />
+        <QueryDetailsFlyoutErrorBoundary onError={handleQueryFlyoutError}>
+          <QueryDetailsFlyout onClose={handleQueryFlyoutClose} action={queryDetailsFlyoutOpen} />
+        </QueryDetailsFlyoutErrorBoundary>
       ) : null}
     </>
   );
