@@ -36,8 +36,9 @@ import type { SecretConnector, SecretMetadata } from '@kbn/secrets';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { getSecretsErrorMessage } from './api';
 import type { SecretsApi } from './api';
+import { buildCreateSecretParams, buildUpdateSecretParams } from './secret_form';
 import { ConnectorSourceFields, KibanaSourceFields } from './secret_source_fields';
-import { useCreateSecret, useReplaceSecret } from './use_secret_mutations';
+import { useCreateSecret, useUpdateSecret } from './use_secret_mutations';
 import { useSecretForm } from './use_secret_form';
 
 const PROVIDERS = [SECRET_PROVIDER_TYPE.kibana, SECRET_PROVIDER_TYPE.connector] as const;
@@ -47,7 +48,7 @@ interface SecretFlyoutProps {
   notifications: NotificationsStart;
   /** How the consumer refers to a secret by its name. */
   getSecretReference: (name: string) => string;
-  /** The secret to replace. Without it, the flyout creates a secret. */
+  /** The secret to edit. Without it, the flyout creates a secret. */
   secret?: SecretMetadata;
   /** The names that are taken, to catch a duplicate before the request. */
   existingNames: readonly string[];
@@ -57,7 +58,7 @@ interface SecretFlyoutProps {
   onClose: () => void;
 }
 
-/** Creates a secret, or replaces the source of an existing one. */
+/** Creates a secret, or edits an existing one. */
 export const SecretFlyout = ({
   api,
   notifications,
@@ -72,16 +73,20 @@ export const SecretFlyout = ({
   const providerGroupId = useGeneratedHtmlId({ prefix: 'secretProvider' });
 
   const form = useSecretForm({ secret, existingNames });
-  const { isReplacing, values, errors, setValue, markTouched, isInvalid } = form;
+  const { isEditing, values, errors, setValue, markTouched, isInvalid } = form;
 
   const createSecret = useCreateSecret({ api, notifications });
-  const replaceSecret = useReplaceSecret({ api, notifications });
-  const saveSecret = isReplacing ? replaceSecret : createSecret;
+  const updateSecret = useUpdateSecret({ api, notifications });
+  const saveSecret = isEditing ? updateSecret : createSecret;
 
   const save = () => {
-    const params = form.submit();
-    if (params) {
-      saveSecret.mutate(params, { onSuccess: onClose });
+    if (!form.hasChanges || !form.validate()) {
+      return;
+    }
+    if (secret) {
+      updateSecret.mutate(buildUpdateSecretParams({ values, secret }), { onSuccess: onClose });
+    } else {
+      createSecret.mutate(buildCreateSecretParams(values), { onSuccess: onClose });
     }
   };
 
@@ -116,9 +121,9 @@ export const SecretFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={titleId}>
-            {isReplacing
-              ? i18n.translate('xpack.secretsUi.flyout.replaceTitle', {
-                  defaultMessage: 'Replace secret',
+            {isEditing
+              ? i18n.translate('xpack.secretsUi.flyout.editTitle', {
+                  defaultMessage: 'Edit secret',
                 })
               : i18n.translate('xpack.secretsUi.flyout.createTitle', {
                   defaultMessage: 'Create secret',
@@ -139,7 +144,7 @@ export const SecretFlyout = ({
               defaultMessage: 'Name',
             })}
             helpText={
-              isReplacing
+              isEditing
                 ? i18n.translate('xpack.secretsUi.flyout.nameImmutableHelp', {
                     defaultMessage: 'The name cannot change, because it is how the secret is used.',
                   })
@@ -155,7 +160,7 @@ export const SecretFlyout = ({
             <EuiFieldText
               value={values.name}
               maxLength={SECRET_NAME_MAX_LENGTH}
-              disabled={isReplacing}
+              disabled={isEditing}
               isInvalid={isInvalid('name')}
               onChange={(event) => setValue('name', event.target.value)}
               onBlur={() => markTouched('name')}
@@ -250,11 +255,12 @@ export const SecretFlyout = ({
               fill
               onClick={save}
               isLoading={saveSecret.isLoading}
+              isDisabled={!form.hasChanges}
               data-test-subj="secretSaveButton"
             >
-              {isReplacing
-                ? i18n.translate('xpack.secretsUi.flyout.replaceButton', {
-                    defaultMessage: 'Replace secret',
+              {isEditing
+                ? i18n.translate('xpack.secretsUi.flyout.saveButton', {
+                    defaultMessage: 'Save changes',
                   })
                 : i18n.translate('xpack.secretsUi.flyout.createButton', {
                     defaultMessage: 'Create secret',

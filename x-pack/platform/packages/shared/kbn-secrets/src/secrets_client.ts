@@ -6,7 +6,7 @@
  */
 
 import { SECRET_PROVIDER_TYPE } from './constants';
-import { SecretNotFoundError, SecretsUnavailableError } from './errors';
+import { SecretNotFoundError, SecretsUnavailableError, SecretValidationError } from './errors';
 import type { SecretsStorage } from './storage';
 import type {
   SecretEntry,
@@ -22,7 +22,7 @@ export interface CreateSecretsClientParams {
   readonly storage: SecretsStorage;
   /** Id of the feature using the client. */
   readonly consumer: string;
-  /** Recorded as the author of created and replaced secrets. */
+  /** Recorded as the author of created and updated secrets. */
   readonly username: string;
   /** How to obtain a value, for each place a value can live. */
   readonly providers: SecretProviders;
@@ -113,22 +113,25 @@ export const createSecretsClient = ({
       return withoutValue(entry);
     },
 
-    replace: async (secret) => {
-      await validateSecret({ secret, connectorProvider: providers.connector });
+    update: async (secret) => {
       const { name, description, source } = secret;
+      if (source === undefined && description === undefined) {
+        throw new SecretValidationError('Updating a secret needs a source or a description');
+      }
+      await validateSecret({ secret, connectorProvider: providers.connector });
       const existing = await findOrThrow(name);
       const { allowedConsumers, createdBy, createdAt } = existing;
-      const entry: SecretEntry = {
-        name,
-        // Replacing a value must not require sending the description again.
+      const changes = {
+        // Changing a value must not require sending the description again.
         description: description ?? existing.description,
-        allowedConsumers,
-        createdBy,
-        createdAt,
         updatedBy: username,
         updatedAt: new Date().toISOString(),
-        ...source,
       };
+      // A new source replaces every field of the current one. Without one, the current source
+      // stays: changing a description must not require sending the value again.
+      const entry: SecretEntry = source
+        ? { name, allowedConsumers, createdBy, createdAt, ...changes, ...source }
+        : { ...existing, ...changes };
       await storage.replace({ entry });
       return withoutValue(entry);
     },

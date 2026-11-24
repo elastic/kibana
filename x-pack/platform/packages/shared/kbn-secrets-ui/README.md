@@ -9,7 +9,7 @@ const api = useMemo(() => createSecretsApi({ http, routes }), [http]);
 const { data } = useSecrets(api);
 ```
 
-`SecretsManagement` renders the secrets of a consumer in a table, and creates, replaces, deletes and tests them. A secret takes its value from Kibana or from a connector. The consumer decides who sees it, and passes `getSecretReference` to say how a secret is referred to by name:
+`SecretsManagement` renders the secrets of a consumer in a table, and creates, edits, deletes and tests them. A secret takes its value from Kibana or from a connector. The consumer decides who sees it, and passes `getSecretReference` to say how a secret is referred to by name:
 
 ```tsx
 <SecretsManagement

@@ -9,6 +9,7 @@ import { buildPath } from '@kbn/core-http-browser';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type {
   DeleteSecretParams,
+  UpdateSecretParams,
   SecretConnectorsResponse,
   SecretMetadata,
   SecretsListResponse,
@@ -23,7 +24,7 @@ export type SecretsHttpError = IHttpFetchError<ResponseErrorBody>;
 export interface SecretsApiRoutes {
   /** `GET` lists the secrets, `POST` creates one. */
   readonly secrets: string;
-  /** `PUT` replaces and `DELETE` deletes the secret named by its `{name}` parameter. */
+  /** `PATCH` updates and `DELETE` deletes the secret named by its `{name}` parameter. */
   readonly secret: string;
   /** `POST` checks that the secret named by its `{name}` parameter can be read. */
   readonly secretTest: string;
@@ -36,8 +37,8 @@ export interface SecretsApi {
   readonly routes: SecretsApiRoutes;
   readonly listSecrets: () => Promise<SecretsListResponse>;
   readonly createSecret: (params: WriteSecretParams) => Promise<SecretMetadata>;
-  /** Replaces the source and the description of a secret. Its name cannot change. */
-  readonly replaceSecret: (params: WriteSecretParams) => Promise<SecretMetadata>;
+  /** Updates the source of a secret, its description, or both. Its name cannot change. */
+  readonly updateSecret: (params: UpdateSecretParams) => Promise<SecretMetadata>;
   readonly deleteSecret: (params: DeleteSecretParams) => Promise<void>;
   readonly testSecret: (params: TestSecretParams) => Promise<SecretTestResult>;
   readonly listSecretConnectors: () => Promise<SecretConnectorsResponse>;
@@ -54,8 +55,8 @@ export const createSecretsApi = ({
   listSecrets: () => http.get<SecretsListResponse>(routes.secrets),
   createSecret: (secret) =>
     http.post<SecretMetadata>(routes.secrets, { body: JSON.stringify(secret) }),
-  replaceSecret: ({ name, description, source }) =>
-    http.put<SecretMetadata>(buildPath(routes.secret, { name }), {
+  updateSecret: ({ name, description, source }) =>
+    http.patch<SecretMetadata>(buildPath(routes.secret, { name }), {
       body: JSON.stringify({ description, source }),
     }),
   deleteSecret: ({ name }) => http.delete<void>(buildPath(routes.secret, { name })),

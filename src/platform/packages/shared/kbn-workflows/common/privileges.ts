@@ -72,7 +72,7 @@ export const WorkflowsManagementOperationPrivileges = {
   // Changing a page needs `execute` too, so a page manager never gets a link to a workflow that
   // they cannot run. It does not edit the workflow, so it needs no `update`.
   managePage: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.managePages],
-  // Creating, replacing and deleting secrets. It never gives access to a value.
+  // Creating, updating and deleting secrets. It never gives access to a value.
   manageSecrets: [WorkflowsManagementApiActions.manageSecrets],
   // Running a workflow that resolves secrets. Checked against the account the run executes as.
   useSecrets: [WorkflowsManagementApiActions.useSecrets],

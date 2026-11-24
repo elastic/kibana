@@ -32,7 +32,7 @@ interface SecretsTableProps {
   /** The secret that is being tested, so that it cannot be tested twice at once. */
   testingSecretName?: string;
   onTest: (secret: SecretMetadata) => void;
-  onReplace: (secret: SecretMetadata) => void;
+  onEdit: (secret: SecretMetadata) => void;
   onDelete: (secret: SecretMetadata) => void;
   onCreate: () => void;
 }
@@ -43,7 +43,7 @@ export const SecretsTable = ({
   getSecretReference,
   testingSecretName,
   onTest,
-  onReplace,
+  onEdit,
   onDelete,
   onCreate,
 }: SecretsTableProps) => {
@@ -161,17 +161,17 @@ export const SecretsTable = ({
           'data-test-subj': 'secretTestAction',
         },
         {
-          name: i18n.translate('xpack.secretsUi.table.replaceAction', {
-            defaultMessage: 'Replace',
+          name: i18n.translate('xpack.secretsUi.table.editAction', {
+            defaultMessage: 'Edit',
           }),
-          description: i18n.translate('xpack.secretsUi.table.replaceActionDescription', {
-            defaultMessage: 'Replace the value or the description',
+          description: i18n.translate('xpack.secretsUi.table.editActionDescription', {
+            defaultMessage: 'Edit the source or the description',
           }),
           icon: 'pencil',
           type: 'icon',
           isPrimary: true,
-          onClick: onReplace,
-          'data-test-subj': 'secretReplaceAction',
+          onClick: onEdit,
+          'data-test-subj': 'secretEditAction',
         },
         {
           name: i18n.translate('xpack.secretsUi.table.deleteAction', {

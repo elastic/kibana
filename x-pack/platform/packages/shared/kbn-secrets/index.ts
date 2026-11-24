@@ -30,6 +30,7 @@ export type {
   DeleteSecretParams,
   KibanaSecretEntry,
   KibanaSecretSource,
+  UpdateSecretParams,
   ResolvedSecrets,
   ResolveSecretsParams,
   SecretDetails,

@@ -79,12 +79,18 @@ export interface SecretConnectorsResponse {
   readonly connectors: SecretConnector[];
 }
 
-/**
- * What a caller supplies to create a secret, or to replace the source of an existing one.
- * On replace, an omitted description keeps the current one and an empty one clears it.
- */
+/** What a caller supplies to create a secret. */
 export interface WriteSecretParams extends Pick<SecretDetails, 'name' | 'description'> {
   readonly source: SecretSource;
+}
+
+/**
+ * What a caller supplies to update the source of a secret, its description, or both.
+ * An omitted source keeps the current one. An omitted description keeps the current one and
+ * an empty one clears it.
+ */
+export interface UpdateSecretParams extends Pick<SecretDetails, 'name' | 'description'> {
+  readonly source?: SecretSource;
 }
 
 export type DeleteSecretParams = Pick<SecretDetails, 'name'>;
@@ -146,7 +152,7 @@ export interface SecretProviders {
 export interface SecretsClient {
   list(): Promise<SecretMetadata[]>;
   create(params: WriteSecretParams): Promise<SecretMetadata>;
-  replace(params: WriteSecretParams): Promise<SecretMetadata>;
+  update(params: UpdateSecretParams): Promise<SecretMetadata>;
   delete(params: DeleteSecretParams): Promise<void>;
   /**
    * Checks that a stored secret can be read, the way a run reads it, and never returns its

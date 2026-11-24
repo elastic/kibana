@@ -12,7 +12,7 @@ export type { SecretsManagementProps } from './src/secrets_management';
 export {
   useCreateSecret,
   useDeleteSecret,
-  useReplaceSecret,
+  useUpdateSecret,
   useTestSecret,
 } from './src/use_secret_mutations';
 export { useSecretConnectors, useSecrets } from './src/use_secrets';

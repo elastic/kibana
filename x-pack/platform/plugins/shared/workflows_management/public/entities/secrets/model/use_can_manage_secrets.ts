@@ -10,7 +10,7 @@ import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import { useKibana } from '../../../hooks/use_kibana';
 
 /**
- * Whether the user may create, replace, delete and test secrets. The capability only exists when
+ * Whether the user may create, update, delete and test secrets. The capability only exists when
  * the secrets plugin is enabled, because the privilege is registered together with its routes.
  */
 export const useCanManageSecrets = (): boolean => {

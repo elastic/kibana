@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { UseMutationResult } from '@kbn/react-query';
 import type {
   DeleteSecretParams,
+  UpdateSecretParams,
   SecretMetadata,
   SecretTestResult,
   TestSecretParams,
@@ -48,19 +49,19 @@ export const useCreateSecret = ({
   });
 };
 
-/** Replaces the source and the description of a secret. Its name cannot change. */
-export const useReplaceSecret = ({
+/** Updates the source of a secret, its description, or both. Its name cannot change. */
+export const useUpdateSecret = ({
   api,
   notifications,
-}: SecretMutationDeps): UseMutationResult<SecretMetadata, SecretsHttpError, WriteSecretParams> => {
+}: SecretMutationDeps): UseMutationResult<SecretMetadata, SecretsHttpError, UpdateSecretParams> => {
   const queryClient = useQueryClient();
-  return useMutation<SecretMetadata, SecretsHttpError, WriteSecretParams>({
-    mutationFn: api.replaceSecret,
+  return useMutation<SecretMetadata, SecretsHttpError, UpdateSecretParams>({
+    mutationFn: api.updateSecret,
     onSuccess: (_data, { name }) => {
       queryClient.invalidateQueries({ queryKey: getSecretsQueryKey(api) });
       notifications.toasts.addSuccess(
-        i18n.translate('xpack.secretsUi.replaceSuccessToast', {
-          defaultMessage: 'Secret "{name}" replaced',
+        i18n.translate('xpack.secretsUi.updateSuccessToast', {
+          defaultMessage: 'Secret "{name}" updated',
           values: { name },
         })
       );

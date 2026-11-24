@@ -14,7 +14,7 @@ import {
 } from './constants';
 import { SecretValidationError } from './errors';
 import { isValidSecretName } from './secret_name';
-import type { ConnectorSecretProvider, SecretSource, WriteSecretParams } from './types';
+import type { ConnectorSecretProvider, UpdateSecretParams, SecretSource } from './types';
 
 const validateSource = async (
   source: SecretSource,
@@ -44,14 +44,15 @@ const validateSource = async (
 };
 
 /**
- * Throws `SecretValidationError` when a secret cannot be created or replaced as requested.
+ * Throws `SecretValidationError` when a secret cannot be created or updated as requested.
  * A secret from a connector is also checked by the connector provider, when there is one.
+ * An update that keeps the current source has no source to check.
  */
 export const validateSecret = async ({
   secret: { name, description, source },
   connectorProvider,
 }: {
-  secret: WriteSecretParams;
+  secret: UpdateSecretParams;
   connectorProvider: ConnectorSecretProvider | undefined;
 }): Promise<void> => {
   if (!isValidSecretName(name)) {
@@ -64,5 +65,7 @@ export const validateSecret = async ({
       `A secret description has at most ${SECRET_DESCRIPTION_MAX_LENGTH} characters`
     );
   }
-  await validateSource(source, connectorProvider);
+  if (source) {
+    await validateSource(source, connectorProvider);
+  }
 };

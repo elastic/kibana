@@ -13,7 +13,7 @@ import type { SecretForm } from './use_secret_form';
 
 /** The value of a secret that is stored in Kibana. */
 export const KibanaSourceFields = ({
-  form: { isReplacing, values, errors, setValue, markTouched, isInvalid },
+  form: { isEditing, values, errors, setValue, markTouched, isInvalid },
 }: {
   form: SecretForm;
 }) => (
@@ -22,9 +22,10 @@ export const KibanaSourceFields = ({
       defaultMessage: 'Value',
     })}
     helpText={
-      isReplacing
-        ? i18n.translate('xpack.secretsUi.flyout.valueReplaceHelp', {
-            defaultMessage: 'The current value is never shown. Enter the value that replaces it.',
+      isEditing
+        ? i18n.translate('xpack.secretsUi.flyout.valueEditHelp', {
+            defaultMessage:
+              'The current value is never shown. Leave this empty to keep it, or enter the value that replaces it.',
           })
         : i18n.translate('xpack.secretsUi.flyout.valueHelp', {
             defaultMessage: 'It is stored encrypted and never shown again.',

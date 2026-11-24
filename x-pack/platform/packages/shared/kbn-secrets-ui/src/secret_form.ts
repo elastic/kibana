@@ -15,7 +15,13 @@ import {
   SECRET_VALUE_MAX_LENGTH,
   SECRET_VALUE_MIN_LENGTH,
 } from '@kbn/secrets';
-import type { SecretMetadata, SecretProviderType, WriteSecretParams } from '@kbn/secrets';
+import type {
+  UpdateSecretParams,
+  SecretMetadata,
+  SecretProviderType,
+  SecretSource,
+  WriteSecretParams,
+} from '@kbn/secrets';
 
 export interface SecretFormValues {
   name: string;
@@ -33,7 +39,7 @@ export type SecretFormField = 'name' | 'value' | 'connectorId' | 'reference';
 
 export type SecretFormErrors = Partial<Record<SecretFormField, string>>;
 
-/** The form of a new secret when there is no secret, or of the replacement of an existing one. */
+/** The form of a new secret when there is no secret, or to edit an existing one. */
 export const getInitialSecretFormValues = (secret?: SecretMetadata): SecretFormValues => {
   if (!secret) {
     return {
@@ -56,19 +62,52 @@ export const getInitialSecretFormValues = (secret?: SecretMetadata): SecretFormV
   };
 };
 
+/**
+ * Whether the form leaves the source of the secret it edits as it is. A value stored in
+ * Kibana is never known to the form, so leaving it empty is how it is kept.
+ */
+const isKeepingSource = ({
+  values: { provider, value, connectorId, reference },
+  secret,
+}: {
+  values: SecretFormValues;
+  secret?: SecretMetadata;
+}): boolean => {
+  if (!secret || secret.provider !== provider) {
+    return false;
+  }
+  return secret.provider === SECRET_PROVIDER_TYPE.kibana
+    ? value.length === 0
+    : secret.connectorId === connectorId && secret.reference === reference;
+};
+
+/** Whether saving the form would change the secret it edits. A new secret is always a change. */
+export const hasSecretFormChanges = ({
+  values,
+  secret,
+}: {
+  values: SecretFormValues;
+  secret?: SecretMetadata;
+}): boolean =>
+  !secret ||
+  values.description !== (secret.description ?? '') ||
+  !isKeepingSource({ values, secret });
+
 /** The checks that the server makes, so that a mistake shows before the request is sent. */
 export const getSecretFormErrors = ({
-  values: { name, provider, value, connectorId, reference },
-  isReplacing,
+  values,
+  secret,
   existingNames,
 }: {
   values: SecretFormValues;
-  isReplacing: boolean;
+  /** The secret that the form edits. Without it, the form creates a secret. */
+  secret?: SecretMetadata;
   existingNames: readonly string[];
 }): SecretFormErrors => {
+  const { name, provider, value, connectorId, reference } = values;
   const errors: SecretFormErrors = {};
 
-  if (!isReplacing) {
+  if (!secret) {
     if (name.length === 0) {
       errors.name = i18n.translate('xpack.secretsUi.form.nameRequired', {
         defaultMessage: 'A name is required.',
@@ -86,6 +125,10 @@ export const getSecretFormErrors = ({
         defaultMessage: 'A secret with this name already exists. Names are not case sensitive.',
       });
     }
+  }
+
+  if (isKeepingSource({ values, secret })) {
+    return errors;
   }
 
   if (provider === SECRET_PROVIDER_TYPE.kibana) {
@@ -112,21 +155,43 @@ export const getSecretFormErrors = ({
   return errors;
 };
 
+const getSource = ({
+  provider,
+  value,
+  connectorId,
+  reference,
+}: Pick<SecretFormValues, 'provider' | 'value' | 'connectorId' | 'reference'>): SecretSource =>
+  provider === SECRET_PROVIDER_TYPE.kibana
+    ? { provider, value }
+    : { provider, connectorId, reference };
+
+/** The request that creates the secret of the form. */
+export const buildCreateSecretParams = ({
+  name,
+  description,
+  provider,
+  value,
+  connectorId,
+  reference,
+}: SecretFormValues): WriteSecretParams => ({
+  name,
+  description: description.length > 0 ? description : undefined,
+  source: getSource({ provider, value, connectorId, reference }),
+});
+
 /**
- * The request that saves the form. When replacing, an empty description is sent as it is,
- * because that is how it gets cleared. When creating, there is nothing to clear.
+ * The request that updates a secret with the form. An empty description is sent as it is,
+ * because that is how it gets cleared. A source that did not change is not sent, so that it
+ * is kept.
  */
-export const buildWriteSecretParams = ({
-  values: { name, description, provider, value, connectorId, reference },
-  isReplacing,
+export const buildUpdateSecretParams = ({
+  values,
+  secret,
 }: {
   values: SecretFormValues;
-  isReplacing: boolean;
-}): WriteSecretParams => ({
-  name,
-  description: isReplacing || description.length > 0 ? description : undefined,
-  source:
-    provider === SECRET_PROVIDER_TYPE.kibana
-      ? { provider, value }
-      : { provider, connectorId, reference },
+  secret: SecretMetadata;
+}): UpdateSecretParams => ({
+  name: secret.name,
+  description: values.description,
+  source: isKeepingSource({ values, secret }) ? undefined : getSource(values),
 });

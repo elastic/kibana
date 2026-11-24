@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/** The request to create or replace a secret is not acceptable. */
+/** The request to create or update a secret is not acceptable. */
 export class SecretValidationError extends Error {
   constructor(message: string) {
     super(message);

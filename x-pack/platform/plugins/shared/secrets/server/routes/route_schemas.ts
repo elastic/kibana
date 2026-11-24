@@ -44,8 +44,19 @@ export const createSecretBodySchema = schema.object({
   source: sourceSchema,
 });
 
-/** The name comes from the path: it cannot change. */
-export const replaceSecretBodySchema = schema.object({
-  description: descriptionSchema,
-  source: sourceSchema,
-});
+/**
+ * The name comes from the path: it cannot change. Without a source, the current one is kept,
+ * and without a description, the current one is kept. One of the two is required.
+ */
+export const updateSecretBodySchema = schema.object(
+  {
+    description: descriptionSchema,
+    source: schema.maybe(sourceSchema),
+  },
+  {
+    validate: ({ description, source }) =>
+      description === undefined && source === undefined
+        ? 'either [description] or [source] is required'
+        : undefined,
+  }
+);

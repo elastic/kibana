@@ -10,8 +10,8 @@ import type { SecretConnectorsResponse, SecretsClient, SecretsListResponse } fro
 import {
   createSecretBodySchema,
   handleSecretsRouteError,
-  replaceSecretBodySchema,
   secretNameParamsSchema,
+  updateSecretBodySchema,
 } from '@kbn/secrets-plugin/server';
 import { SECRETS_LIST_SECURITY, SECRETS_MANAGE_SECURITY } from './route_security';
 import {
@@ -30,7 +30,7 @@ export interface SecretsRouteDependencies {
 }
 
 /**
- * Registers the routes that list, create, replace, delete and test workflow secrets.
+ * Registers the routes that list, create, update, delete and test workflow secrets.
  * No route returns a value.
  * TODO: version these routes (`router.versioned`, `INTERNAL_API_VERSION`) like the other
  * internal Workflows routes. They are unversioned during the POC so that Dev Tools can call them.
@@ -74,18 +74,18 @@ export const registerSecretsRoutes = ({
     })
   );
 
-  router.put(
+  router.patch(
     {
       path: WORKFLOW_SECRET_ROUTE,
       security: SECRETS_MANAGE_SECURITY,
       options: { access: 'internal' },
-      validate: { params: secretNameParamsSchema, body: replaceSecretBodySchema },
+      validate: { params: secretNameParamsSchema, body: updateSecretBodySchema },
     },
     withAvailabilityCheck(async (_context, request, response) => {
       try {
         const client = await getSecretsClient(request);
         const { name } = request.params;
-        return response.ok({ body: await client.replace({ name, ...request.body }) });
+        return response.ok({ body: await client.update({ name, ...request.body }) });
       } catch (error) {
         return handleSecretsRouteError({ response, error });
       }

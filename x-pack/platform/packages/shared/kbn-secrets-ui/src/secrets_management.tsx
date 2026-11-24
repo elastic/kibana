@@ -64,7 +64,7 @@ export interface SecretsManagementProps {
   getSecretReference: (name: string) => string;
 }
 
-/** Lists the secrets of a consumer, and creates, replaces and tests them. Must be rendered within a `QueryClientProvider`. */
+/** Lists the secrets of a consumer, and creates, edits, deletes and tests them. Must be rendered within a `QueryClientProvider`. */
 export const SecretsManagement = ({
   api,
   notifications,
@@ -73,7 +73,7 @@ export const SecretsManagement = ({
   const { data, error, isLoading } = useSecrets(api);
   const { data: connectorsData, isLoading: isLoadingConnectors } = useSecretConnectors(api);
   const testSecret = useTestSecret({ api, notifications });
-  // `null` when the flyout is closed, `{}` to create a secret and `{ secret }` to replace one.
+  // `null` when the flyout is closed, `{}` to create a secret and `{ secret }` to edit one.
   const [flyout, setFlyout] = useState<{ secret?: SecretMetadata } | null>(null);
   const [secretToDelete, setSecretToDelete] = useState<SecretMetadata | null>(null);
 
@@ -131,7 +131,7 @@ export const SecretsManagement = ({
           getSecretReference={getSecretReference}
           testingSecretName={testSecret.isLoading ? testSecret.variables?.name : undefined}
           onTest={({ name }) => testSecret.mutate({ name })}
-          onReplace={(secret) => setFlyout({ secret })}
+          onEdit={(secret) => setFlyout({ secret })}
           onDelete={setSecretToDelete}
           onCreate={createSecret}
         />

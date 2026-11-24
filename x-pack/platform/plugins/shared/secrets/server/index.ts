@@ -22,6 +22,6 @@ export type { GetSecretsClientParams, SecretsPluginSetup, SecretsPluginStart } f
 export { handleSecretsRouteError } from './routes/handle_secrets_route_error';
 export {
   createSecretBodySchema,
-  replaceSecretBodySchema,
+  updateSecretBodySchema,
   secretNameParamsSchema,
 } from './routes/route_schemas';

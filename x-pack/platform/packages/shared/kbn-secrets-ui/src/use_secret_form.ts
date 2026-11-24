@@ -6,20 +6,22 @@
  */
 
 import { useMemo, useState } from 'react';
-import type { SecretMetadata, WriteSecretParams } from '@kbn/secrets';
+import type { SecretMetadata } from '@kbn/secrets';
 import {
-  buildWriteSecretParams,
   getInitialSecretFormValues,
   getSecretFormErrors,
+  hasSecretFormChanges,
 } from './secret_form';
 import type { SecretFormErrors, SecretFormField, SecretFormValues } from './secret_form';
 
 const ALL_FIELDS: readonly SecretFormField[] = ['name', 'value', 'connectorId', 'reference'];
 
 export interface SecretForm {
-  isReplacing: boolean;
+  isEditing: boolean;
   values: SecretFormValues;
   errors: SecretFormErrors;
+  /** Whether there is anything to save. Always true for a new secret. */
+  hasChanges: boolean;
   setValue: <TField extends keyof SecretFormValues>(
     field: TField,
     value: SecretFormValues[TField]
@@ -29,12 +31,12 @@ export interface SecretForm {
   isInvalid: (field: SecretFormField) => boolean;
   /**
    * Shows what is wrong in every field, which is what a form submitted half filled needs.
-   * Returns the request that saves the form, or `undefined` when it has errors.
+   * Returns whether the form can be saved.
    */
-  submit: () => WriteSecretParams | undefined;
+  validate: () => boolean;
 }
 
-/** The state of the form that creates a secret, or that replaces the secret it is given. */
+/** The state of the form that creates a secret, or that edits the secret it is given. */
 export const useSecretForm = ({
   secret,
   existingNames,
@@ -42,27 +44,26 @@ export const useSecretForm = ({
   secret?: SecretMetadata;
   existingNames: readonly string[];
 }): SecretForm => {
-  const isReplacing = secret !== undefined;
+  const isEditing = secret !== undefined;
   const [values, setValues] = useState<SecretFormValues>(() => getInitialSecretFormValues(secret));
   const [touched, setTouched] = useState<ReadonlySet<SecretFormField>>(new Set());
 
   const errors = useMemo(
-    () => getSecretFormErrors({ values, isReplacing, existingNames }),
-    [values, isReplacing, existingNames]
+    () => getSecretFormErrors({ values, secret, existingNames }),
+    [values, secret, existingNames]
   );
 
   return {
-    isReplacing,
+    isEditing,
     values,
     errors,
+    hasChanges: hasSecretFormChanges({ values, secret }),
     setValue: (field, value) => setValues((current) => ({ ...current, [field]: value })),
     markTouched: (field) => setTouched((current) => new Set(current).add(field)),
     isInvalid: (field) => touched.has(field) && errors[field] !== undefined,
-    submit: () => {
+    validate: () => {
       setTouched(new Set(ALL_FIELDS));
-      return Object.keys(errors).length > 0
-        ? undefined
-        : buildWriteSecretParams({ values, isReplacing });
+      return Object.keys(errors).length === 0;
     },
   };
 };
