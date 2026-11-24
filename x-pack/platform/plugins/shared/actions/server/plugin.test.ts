@@ -48,7 +48,10 @@ import {
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
 import { registerConnectorEventTopics } from './inbound/register_connector_event_topics';
-import { setConnectorEventPublisher } from './inbound/publish_connector_event';
+import {
+  publishConnectorEvent,
+  setConnectorEventPublisher,
+} from './inbound/publish_connector_event';
 
 function getConfig(overrides = {}) {
   return {
@@ -259,6 +262,62 @@ describe('Actions Plugin', () => {
       );
       expect(registeredNames).toEqual([...topics.keys()]);
       expect(registeredNames).not.toContain(slack2HitlAction.name);
+    });
+
+    it('does not install the connector event publisher while inbound events are disabled', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+      const coreStart = coreMock.createStart();
+      plugin.start(coreStart, {
+        licensing: licensingMock.createStart(),
+        taskManager: taskManagerMock.createStart(),
+        encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        eventLog: eventLogMock.createStart(),
+      });
+
+      await publishConnectorEvent('slack2.message', {
+        connectorId: 'connector-1',
+        connectorTypeId: '.slack2',
+        spaceId: 'default',
+      });
+
+      expect(coreStart.pubsub.publish).not.toHaveBeenCalled();
+    });
+
+    it('installs the connector event publisher when inbound events are enabled', async () => {
+      const enabledPlugin = new ActionsPlugin(
+        coreMock.createPluginInitializerContext<ActionsConfig>(
+          getConfig({
+            inboundEvents: {
+              enabled: true,
+              maxBodyBytes: new ByteSizeValue(1024 * 1024),
+              maxEmitted: 25,
+              ...defaultInboundEventsLimitConfigs,
+            },
+          })
+        )
+      );
+      await enabledPlugin.setup(coreSetup, pluginsSetup);
+      const coreStart = coreMock.createStart();
+      enabledPlugin.start(coreStart, {
+        licensing: licensingMock.createStart(),
+        taskManager: taskManagerMock.createStart(),
+        encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        eventLog: eventLogMock.createStart(),
+      });
+
+      const eventId = [...registerConnectorEventTopics(jest.fn()).keys()][0];
+      await publishConnectorEvent(eventId, {
+        connectorId: 'connector-1',
+        connectorTypeId: '.slack2',
+        spaceId: 'default',
+      });
+
+      expect(coreStart.pubsub.publish).toHaveBeenCalledWith(
+        expect.objectContaining({ name: eventId }),
+        expect.objectContaining({
+          data: expect.objectContaining({ connectorId: 'connector-1', spaceId: 'default' }),
+        })
+      );
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {

@@ -639,11 +639,13 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
-    setConnectorEventPublisher({
-      pubsub: core.pubsub,
-      logger: this.logger,
-      topics: this.connectorEventTopicsByEventId ?? new Map(),
-    });
+    if (this.actionsConfig.inboundEvents.enabled) {
+      setConnectorEventPublisher({
+        pubsub: core.pubsub,
+        logger: this.logger,
+        topics: this.connectorEventTopicsByEventId ?? new Map(),
+      });
+    }
     this.securityStart = plugins.security;
     if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
       this.logger.warn(
