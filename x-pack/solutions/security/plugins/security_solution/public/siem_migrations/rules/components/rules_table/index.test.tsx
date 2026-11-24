@@ -343,6 +343,40 @@ describe('MigrationRulesTable', () => {
     expect(getByTestId('siemMigrationsRulesTable')).toBeInTheDocument();
   });
 
+  test('should render the integrations badge for a prebuilt match with no stored integration ids while the catalog is loading', () => {
+    const prebuiltMatchedRule: RuleMigrationRule = {
+      ...makeTranslatedRule('prebuilt-row', 'Web Server Potential Spike in Error Response Codes'),
+      elastic_rule: {
+        title: 'Web Server Potential Spike in Error Response Codes',
+        description: 'Detects a spike in web server error response codes.',
+        prebuilt_rule_id: 'prebuilt-1',
+        severity: 'low',
+        risk_score: 21,
+      },
+    };
+    (useGetMigrationRules as jest.Mock).mockReturnValue({
+      data: { migrationRules: [prebuiltMatchedRule], total: 1 },
+      isLoading: false,
+    });
+    (useGetMigrationPrebuiltRules as jest.Mock).mockReturnValue({
+      data: {
+        'prebuilt-1': {
+          target: {
+            ...getRulesEqlSchemaMock(),
+            related_integrations: [{ package: 'apache', version: '^1.0.0' }],
+          },
+        },
+      },
+      isLoading: false,
+    });
+
+    render(<MigrationRulesTable migrationStats={mockMigrationStats} isIntegrationsLoading />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByTestId('IntegrationsDisplayPopoverButton')).toBeInTheDocument();
+  });
+
   describe('Table results', () => {
     beforeEach(() => {
       (useGetMigrationRules as jest.Mock).mockReturnValue({

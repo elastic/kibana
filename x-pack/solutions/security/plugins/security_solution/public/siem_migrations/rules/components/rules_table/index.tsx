@@ -353,13 +353,19 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const getRuleIntegrations = useCallback(
       (migrationRule: RuleMigrationRule) => {
         if (!isRulesLoading) {
+          const matchedPrebuiltRule = getMatchedPrebuiltRule(migrationRule);
+          // Prebuilt badges already have their integration list. The popover loads
+          // install status itself, so only catalog-backed rows wait on that request.
+          const waitsForIntegrationsCatalog = !(
+            isMigrationPrebuiltRule(migrationRule.elastic_rule) && matchedPrebuiltRule != null
+          );
           return {
             relatedIntegrations: getRelatedIntegrationsForMigrationRule({
               migrationRule,
-              matchedPrebuiltRule: getMatchedPrebuiltRule(migrationRule),
+              matchedPrebuiltRule,
               integrations,
             }),
-            isIntegrationsLoading,
+            isIntegrationsLoading: waitsForIntegrationsCatalog ? isIntegrationsLoading : false,
           };
         }
       },

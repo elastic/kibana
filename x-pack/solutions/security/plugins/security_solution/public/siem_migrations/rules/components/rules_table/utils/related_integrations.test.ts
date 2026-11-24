@@ -68,6 +68,20 @@ describe('getRelatedIntegrationsForMigrationRule', () => {
     expect(relatedIntegrations).toEqual([]);
   });
 
+  it('falls back to stored integration ids when the matched prebuilt rule is unavailable', () => {
+    const relatedIntegrations = getRelatedIntegrationsForMigrationRule({
+      migrationRule: {
+        elastic_rule: {
+          ...prebuiltMigrationRule.elastic_rule,
+          integration_ids: ['apache', 'missing-package'],
+        },
+      },
+      integrations: { apache: apacheIntegration },
+    });
+
+    expect(relatedIntegrations).toEqual([apacheIntegration]);
+  });
+
   it('resolves custom rule integration ids through the catalog and drops unknown ids', () => {
     const relatedIntegrations = getRelatedIntegrationsForMigrationRule({
       migrationRule: customMigrationRule,

@@ -22,8 +22,10 @@ export const getRelatedIntegrationsForMigrationRule = ({
   matchedPrebuiltRule?: Pick<RuleResponse, 'related_integrations'>;
   integrations?: Record<string, RelatedIntegration>;
 }): RelatedIntegration[] => {
-  if (isMigrationPrebuiltRule(migrationRule.elastic_rule)) {
-    return matchedPrebuiltRule?.related_integrations ?? [];
+  // A loaded prebuilt rule is authoritative, including an explicit empty list.
+  // When that rule failed to load, fall back to stored ids in the security-logs catalog.
+  if (isMigrationPrebuiltRule(migrationRule.elastic_rule) && matchedPrebuiltRule) {
+    return matchedPrebuiltRule.related_integrations ?? [];
   }
 
   const integrationIds = migrationRule.elastic_rule?.integration_ids;
