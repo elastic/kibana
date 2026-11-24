@@ -125,13 +125,6 @@ export interface EndpointLookupService {
   /** Resolves an exact IP from the space-scoped united Endpoint metadata index. */
   resolveByIp(ip: string): Promise<EndpointLookupResult>;
   /**
-   * Whether this agent's united Endpoint metadata holds the exact IP. Answered
-   * by a query filtered on both the address and the agent id, so a host whose
-   * address is shared by more endpoints than the ambiguity list can show is
-   * still confirmed (or refuted) correctly.
-   */
-  agentHoldsIp(ip: string, agentId: string): Promise<boolean>;
-  /**
    * Resolves one specific agent by its Fleet agent ID, behind the same space
    * and supported-integration gates as the hostname walk. Never `ambiguous`:
    * an ID names exactly one agent.
@@ -772,27 +765,6 @@ export function createEndpointLookupService(
   };
 
   return {
-    async agentHoldsIp(ip: string, agentId: string): Promise<boolean> {
-      if (supportedAgentTypes && !supportedAgentTypes.includes('endpoint')) {
-        return false;
-      }
-      const quotedAgentId = `"${escapeQuotes(agentId)}"`;
-      const { data } = await endpointAppContextService
-        .getEndpointMetadataService(spaceId)
-        .getHostMetadataList(
-          {
-            page: 0,
-            pageSize: 1,
-            kuery: `united.endpoint.host.ip: "${escapeQuotes(
-              canonicalizeIp(ip)
-            )}" AND (united.agent.agent.id: ${quotedAgentId} OR agent.id: ${quotedAgentId})`,
-          },
-          // Dispatch acts on the origin project only, as the IP resolution does.
-          dispatchMode ? undefined : scoped
-        );
-      return (data ?? []).some((entry) => getMetadataAgentId(entry) === agentId);
-    },
-
     async resolveByIp(ip: string): Promise<EndpointLookupResult> {
       // IP targeting is Defend-only: Fleet has no response-action-safe mapping
       // from a host IP to third-party EDR agent identity. The metadata service

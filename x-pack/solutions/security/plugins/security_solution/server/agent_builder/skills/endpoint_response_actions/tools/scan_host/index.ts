@@ -19,7 +19,7 @@ import {
   MAX_ACTION_COMMENT_LENGTH,
   MAX_FILE_PATH_LENGTH,
   dispatchErrorResult,
-  summarizeQueuedOrErrors,
+  summarizeActionErrors,
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
@@ -181,7 +181,13 @@ export const scanHostTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
-                ...summarizeQueuedOrErrors(target.endpoint.status === 'offline', actionDetails),
+                ...(target.endpoint.status === 'offline'
+                  ? {
+                      queued: true,
+                      message:
+                        'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.',
+                    }
+                  : summarizeActionErrors(actionDetails.errors) ?? {}),
                 hosts: actionDetails.hosts,
                 comment,
               },

@@ -133,28 +133,17 @@ const escapeForCodeSpan = (cp: number): string => {
  * human check before dispatch, so what the analyst reads must be exactly the
  * text that will be recorded or dispatched — a newline in a comment would
  * otherwise render as a space and let a crafted comment forge extra card lines.
- *
- * A literal backslash is shown doubled whenever what follows it could be read
- * as part of an escape (`n`, `r`, `t`, `u`, another backslash, or an escape
- * itself). A lone backslash therefore never starts an escape, so a path that
- * contains the text `\u{202E}` cannot render like one that contains U+202E.
- * Ordinary Windows paths (`C:\Users\x`) keep their single backslashes.
  */
 export function formatForConfirmationCard(value: string): string {
-  const tokens = Array.from(value, (ch) => {
+  let formatted = '';
+  for (const ch of value) {
     const cp = ch.codePointAt(0) ?? ch.charCodeAt(0);
-    return isMisleadingCodePoint(cp) || cp === 0x60 /* backtick breaks the code span */
-      ? { text: escapeForCodeSpan(cp), escaped: true }
-      : { text: ch, escaped: false };
-  });
-  const formatted = tokens
-    .map(({ text, escaped }, index) => {
-      if (escaped || text !== '\\') return text;
-      const next = tokens[index + 1];
-      const startsEscape = next !== undefined && (next.escaped || /^[nrtu\\]$/.test(next.text));
-      return startsEscape ? '\\\\' : text;
-    })
-    .join('');
+    if (isMisleadingCodePoint(cp) || cp === 0x60 /* backtick breaks the code span */) {
+      formatted += escapeForCodeSpan(cp);
+    } else {
+      formatted += ch;
+    }
+  }
   return `"${formatted}"`;
 }
 
@@ -1010,24 +999,6 @@ export interface ActionErrorsSummary {
   errors: unknown[];
   totalErrors: number;
   errorsTruncated?: number;
-}
-
-const QUEUED_ACTION_MESSAGE =
-  'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.';
-
-/**
- * The `queued` marker for an action dispatched to an offline endpoint. Only a
- * still-pending action is queued: one already completed when it was read (the
- * host reconnected) reports its real outcome and failure reasons instead.
- */
-export function summarizeQueuedOrErrors(
-  isOffline: boolean,
-  actionDetails: { isCompleted?: boolean; errors?: unknown }
-): { queued: true; message: string } | ActionErrorsSummary | Record<string, never> {
-  if (isOffline && actionDetails.isCompleted !== true) {
-    return { queued: true, message: QUEUED_ACTION_MESSAGE };
-  }
-  return summarizeActionErrors(actionDetails.errors) ?? {};
 }
 
 /**

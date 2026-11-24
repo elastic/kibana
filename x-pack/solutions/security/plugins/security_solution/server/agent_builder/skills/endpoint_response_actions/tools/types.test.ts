@@ -22,7 +22,6 @@ import {
   summarizeActionHosts,
   summarizeActionOutputs,
   summarizeAgentState,
-  summarizeQueuedOrErrors,
   waitForActionCompletion,
   GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
   MAX_ACTION_ERRORS,
@@ -258,25 +257,6 @@ describe('response action error helpers', () => {
   });
 });
 
-describe('summarizeQueuedOrErrors', () => {
-  it('marks a still-pending offline action as queued', () => {
-    expect(summarizeQueuedOrErrors(true, { isCompleted: false })).toMatchObject({ queued: true });
-  });
-
-  it('does not mark an offline action that already completed as queued, and keeps its errors', () => {
-    const summary = summarizeQueuedOrErrors(true, {
-      isCompleted: true,
-      errors: ['host rejected the action'],
-    });
-    expect(summary).not.toHaveProperty('queued');
-    expect(summary).toMatchObject({ errors: ['host rejected the action'], totalErrors: 1 });
-  });
-
-  it('reports no queue marker for an online endpoint', () => {
-    expect(summarizeQueuedOrErrors(false, { isCompleted: false })).toEqual({});
-  });
-});
-
 describe('formatForConfirmationCard', () => {
   it('escapes newline, tab, NUL and DEL as visible escapes', () => {
     expect(formatForConfirmationCard('/tmp/a\nb')).toBe('"/tmp/a\\nb"');
@@ -293,20 +273,6 @@ describe('formatForConfirmationCard', () => {
 
   it('keeps Windows backslashes as single, literal backslashes', () => {
     expect(formatForConfirmationCard('C:\\Users\\x\\evil.exe')).toBe('"C:\\Users\\x\\evil.exe"');
-  });
-
-  it('renders literal escape text differently from the code point it imitates', () => {
-    // A path that contains the characters `\u{202E}` must not look like one
-    // that contains U+202E, nor `\n` like a newline.
-    const literalEscape = formatForConfirmationCard('/tmp/a\\u{202E}b');
-    expect(literalEscape).toBe('"/tmp/a\\\\u{202E}b"');
-    expect(literalEscape).not.toBe(formatForConfirmationCard('/tmp/a\u202eb'));
-    expect(formatForConfirmationCard('/tmp/a\\nb')).not.toBe(
-      formatForConfirmationCard('/tmp/a\nb')
-    );
-    // A literal backslash directly before an invisible character stays distinct too.
-    expect(formatForConfirmationCard('/tmp/a\\\nb')).toBe('"/tmp/a\\\\\\nb"');
-    expect(formatForConfirmationCard('/tmp/a\\\\nb')).toBe('"/tmp/a\\\\\\\\nb"');
   });
 
   it('keeps ordinary text and padding whitespace exactly as typed inside quotes', () => {

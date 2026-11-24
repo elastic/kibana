@@ -1341,46 +1341,6 @@ describe('createEndpointLookupService', () => {
     });
   });
 
-  describe('agentHoldsIp', () => {
-    const holder = (agentId: string) => ({
-      metadata: { elastic: { agent: { id: agentId } }, host: { hostname: `${agentId}-host` } },
-      host_status: HostStatus.HEALTHY,
-    });
-
-    it('filters the metadata query on both the address and the agent id', async () => {
-      const getHostMetadataList = jest
-        .fn()
-        .mockResolvedValue({ data: [holder('agent-eleven')], total: 1 });
-      const { lookup } = buildService({ getHostMetadataList });
-
-      await expect(lookup.agentHoldsIp('10.0.0.7', 'agent-eleven')).resolves.toBe(true);
-
-      expect(getHostMetadataList).toHaveBeenCalledWith(
-        expect.objectContaining({
-          kuery:
-            'united.endpoint.host.ip: "10.0.0.7" AND (united.agent.agent.id: "agent-eleven" OR agent.id: "agent-eleven")',
-        }),
-        undefined
-      );
-    });
-
-    it('is false when no metadata document matches both', async () => {
-      const getHostMetadataList = jest.fn().mockResolvedValue({ data: [], total: 0 });
-      const { lookup } = buildService({ getHostMetadataList });
-
-      await expect(lookup.agentHoldsIp('10.0.0.7', 'agent-other')).resolves.toBe(false);
-    });
-
-    it('is false when the returned document belongs to a different agent', async () => {
-      const getHostMetadataList = jest
-        .fn()
-        .mockResolvedValue({ data: [holder('agent-other')], total: 1 });
-      const { lookup } = buildService({ getHostMetadataList });
-
-      await expect(lookup.agentHoldsIp('10.0.0.7', 'agent-eleven')).resolves.toBe(false);
-    });
-  });
-
   describe('resolveByIp', () => {
     it('queries united endpoint metadata by exact IP and returns one live endpoint', async () => {
       const getHostMetadataList = jest.fn().mockResolvedValue({

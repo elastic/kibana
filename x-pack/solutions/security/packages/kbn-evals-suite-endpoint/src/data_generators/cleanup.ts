@@ -6,7 +6,6 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 
 const EVAL_SEEDED_INDICES = [
   'metrics-endpoint.metadata-default',
@@ -26,15 +25,6 @@ const RESTRICTED_INDICES = [
   '.fleet-agents',
   '.logs-endpoint.actions-default',
   '.logs-endpoint.action.responses-default',
-];
-
-/**
- * Response actions the eval dispatches land in Fleet's action queue, keyed by
- * the target agent ids (`agents` on the request, `agent_id` on its result).
- */
-const FLEET_ACTION_INDICES = [
-  { index: AGENT_ACTIONS_INDEX, agentIdField: 'agents' },
-  { index: AGENT_ACTIONS_RESULTS_INDEX, agentIdField: 'agent_id' },
 ];
 
 /**
@@ -69,16 +59,6 @@ async function cleanupSeededData({
     ...RESTRICTED_INDICES.map((index) =>
       internalEsClient
         .deleteByQuery({ index, query: deleteQuery, refresh: true, ignore_unavailable: true })
-        .catch(() => {})
-    ),
-    ...FLEET_ACTION_INDICES.map(({ index, agentIdField }) =>
-      internalEsClient
-        .deleteByQuery({
-          index,
-          query: { prefix: { [agentIdField]: agentIdPrefix } },
-          refresh: true,
-          ignore_unavailable: true,
-        })
         .catch(() => {})
     ),
   ]);

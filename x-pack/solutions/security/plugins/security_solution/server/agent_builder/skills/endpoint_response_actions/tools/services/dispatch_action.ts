@@ -36,6 +36,7 @@ import {
 } from '../types';
 import { createEndpointLookupService, type ResolvedEndpoint } from './endpoint_lookup';
 import {
+  agentHoldsIp,
   resolveDispatchTarget,
   type DispatchActionName,
   type ResolvedDispatchTarget,
@@ -252,7 +253,7 @@ const resolveTarget = async (
   // name different hosts and the address the analyst asked about is dropped.
   const ipMismatch =
     target.kind === 'found' && ip && agentId
-      ? !(await lookup.agentHoldsIp(ip, target.endpoint.agentId))
+      ? !(await agentHoldsIp(lookup, ip, target.endpoint.agentId))
       : false;
 
   return { target, ipMismatch };
@@ -508,7 +509,7 @@ const isHostIsolationDisabled = async (
 const getIsolationState = async (
   request: DispatchRequest,
   agentId: string
-): Promise<{ isolated: boolean | undefined; metadataTimestamp: number }> => {
+): Promise<boolean | undefined> => {
   const quotedAgentId = `"${escapeQuotes(agentId)}"`;
   const { data } = await request.endpointAppContextService
     .getEndpointMetadataService(request.context.spaceId)
@@ -518,56 +519,7 @@ const getIsolationState = async (
       kuery: `(united.agent.agent.id: ${quotedAgentId} OR agent.id: ${quotedAgentId})`,
     });
 
-  const metadata = data?.[0]?.metadata;
-  const timestamp = new Date(metadata?.['@timestamp'] as string | number).getTime();
-  return {
-    isolated: metadata?.Endpoint?.state?.isolation,
-    // An unreadable timestamp sorts before every completion, so any recent
-    // opposite action then counts as newer than the metadata.
-    metadataTimestamp: Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp,
-  };
-};
-
-const OPPOSITE_ISOLATION_COMMAND = { isolate: 'unisolate', unisolate: 'isolate' } as const;
-
-/**
- * Whether an opposite isolate/release completed after the metadata document
- * was written. Once an action completes it leaves the pending list, but the
- * united metadata only catches up on the endpoint's next check-in, so for that
- * window `Endpoint.state.isolation` still shows the state before the action.
- * Reporting it as current would turn a real isolate/release into a false no-op.
- * A failed read counts as newer, so the analyst gets the normal confirmation
- * card instead of a no-op built on a state that could not be verified.
- */
-const hasNewerOppositeCompletion = async (
-  request: DispatchRequest,
-  agentId: string,
-  action: 'isolate' | 'unisolate',
-  metadataTimestamp: number
-): Promise<boolean> => {
-  try {
-    const { data } = await getActionListByStatus({
-      spaceId: request.context.spaceId,
-      endpointService: request.endpointAppContextService,
-      unExpiredOnly: true,
-      elasticAgentIds: [agentId],
-      commands: [OPPOSITE_ISOLATION_COMMAND[action]],
-      statuses: ['successful'],
-      pageSize: 20,
-    });
-
-    return data.some((detail) => {
-      const completedAt = new Date(detail.completedAt ?? '').getTime();
-      return !Number.isNaN(completedAt) && completedAt > metadataTimestamp;
-    });
-  } catch (error) {
-    request.context.logger.warn(
-      `Could not read completed isolation actions for agent [${agentId}]: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-    return true;
-  }
+  return data?.[0]?.metadata?.Endpoint?.state?.isolation;
 };
 
 /**
@@ -741,10 +693,7 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     if (request.action !== 'isolate' && request.action !== 'unisolate') {
       return undefined;
     }
-    const { isolated, metadataTimestamp } = await getIsolationState(
-      request,
-      target.endpoint.agentId
-    );
+    const isolated = await getIsolationState(request, target.endpoint.agentId);
     if (
       (request.action === 'isolate' && isolated === true) ||
       (request.action === 'unisolate' && isolated === false)
@@ -752,18 +701,6 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
       // A queued isolate/release will change the state when the host checks in,
       // so the metadata state cannot be reported as the current one.
       if (await hasPendingIsolationAction(request, target.endpoint.agentId)) {
-        return undefined;
-      }
-      // Neither can it when the opposite action completed after the metadata
-      // was written: the metadata has not caught up with it yet.
-      if (
-        await hasNewerOppositeCompletion(
-          request,
-          target.endpoint.agentId,
-          request.action,
-          metadataTimestamp
-        )
-      ) {
         return undefined;
       }
       return request.action;
