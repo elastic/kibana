@@ -190,7 +190,9 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
       render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
-      expect(screen.queryByTestId('alertingV2EpisodeFlyoutAddToChatButton')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
     });
 
     it('does not offer add to chat until the episode is loaded', () => {
@@ -201,7 +203,9 @@ describe('AlertEpisodeDetailsFlyout', () => {
         { wrapper: Wrapper }
       );
 
-      expect(screen.queryByTestId('alertingV2EpisodeFlyoutAddToChatButton')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
     });
 
     it('opens a new conversation with the alert when the chat is not bound', () => {
