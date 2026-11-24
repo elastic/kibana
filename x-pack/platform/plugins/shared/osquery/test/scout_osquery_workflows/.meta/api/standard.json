@@ -1,5 +1,5 @@
 {
-  "sha1": "b2a77e28b9bf07598daf0f1474b84c01c598ada6",
+  "sha1": "46d81f2981a8ccc83ad1f3a11ddf194c289166b8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 109,
-        "column": 23
+        "line": 120,
+        "column": 5
       }
     },
     {
@@ -26,8 +26,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 189,
+        "line": 201,
+        "column": 16
+      }
+    },
+    {
+      "id": "4560f1c29d741cd-23ff4988c4879e2",
+      "title": "osquery.runPack workflow step success with the minimal role: the step runs as the calling user, not as an admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
+        "line": 229,
         "column": 26
+      }
+    },
+    {
+      "id": "4560f1c29d741cd-27cfdb649eb48e7",
+      "title": "osquery.runPack workflow step history: a pack dispatch records the workflow origin and is listed with source Workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
+        "line": 263,
+        "column": 27
       }
     },
     {
@@ -39,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 209,
-        "column": 12
+        "line": 296,
+        "column": 21
       }
     },
     {
@@ -52,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 224,
-        "column": 29
+        "line": 308,
+        "column": 24
       }
     },
     {
@@ -65,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 235,
-        "column": 30
+        "line": 331,
+        "column": 27
       }
     },
     {
@@ -78,8 +104,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 268,
-        "column": 13
+        "line": 361,
+        "column": 26
+      }
+    },
+    {
+      "id": "4560f1c29d741cd-0f5bfbfcd2fb9e3",
+      "title": "osquery.runPack workflow step PACK_NOT_FOUND for a pack that exists only in another space, before anything is dispatched",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
+        "line": 377,
+        "column": 30
       }
     },
     {
@@ -91,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 283,
-        "column": 28
+        "line": 395,
+        "column": 23
       }
     },
     {
@@ -104,8 +143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 306,
-        "column": 14
+        "line": 416,
+        "column": 98
       }
     },
     {
@@ -117,8 +156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 320,
-        "column": 4
+        "line": 431,
+        "column": 28
       }
     },
     {
@@ -130,8 +169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 339,
-        "column": 29
+        "line": 448,
+        "column": 26
       }
     },
     {
@@ -143,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_pack_step.spec.ts",
-        "line": 363,
-        "column": 14
+        "line": 472,
+        "column": 26
       }
     },
     {
@@ -156,8 +195,47 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 139,
-        "column": 22
+        "line": 161,
+        "column": 25
+      }
+    },
+    {
+      "id": "6f10528a93307ba-f1608b921caaefd",
+      "title": "osquery.runQuery workflow step history: a workflow dispatch is listed with source Workflow and under the workflow filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 202,
+        "column": 24
+      }
+    },
+    {
+      "id": "6f10528a93307ba-aedab67f3632ac2",
+      "title": "osquery.runQuery workflow step history: a generic kibana.request call to the live query API is listed with source Workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 266,
+        "column": 16
+      }
+    },
+    {
+      "id": "6f10528a93307ba-2cb4f52af576284",
+      "title": "osquery.runQuery workflow step history: a public API call cannot claim a workflow origin with the execution header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
+        "line": 309,
+        "column": 24
       }
     },
     {
@@ -169,8 +247,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 179,
-        "column": 9
+        "line": 345,
+        "column": 11
       }
     },
     {
@@ -182,8 +260,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 203,
-        "column": 7
+        "line": 368,
+        "column": 11
       }
     },
     {
@@ -195,8 +273,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 222,
-        "column": 21
+        "line": 388,
+        "column": 23
       }
     },
     {
@@ -208,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 234,
-        "column": 41
+        "line": 406,
+        "column": 51
       }
     },
     {
@@ -221,8 +299,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 276,
-        "column": 25
+        "line": 450,
+        "column": 35
       }
     },
     {
@@ -234,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 296,
-        "column": 33
+        "line": 470,
+        "column": 34
       }
     },
     {
@@ -247,7 +325,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 334,
+        "line": 507,
         "column": 43
       }
     },
@@ -260,8 +338,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 353,
-        "column": 25
+        "line": 527,
+        "column": 23
       }
     },
     {
@@ -273,8 +351,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_workflows/api/tests/run_query_step.spec.ts",
-        "line": 373,
-        "column": 23
+        "line": 558,
+        "column": 27
       }
     }
   ]
