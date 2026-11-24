@@ -117,6 +117,44 @@ describe('getOAuthPasswordAccessToken', () => {
     expect(requestOAuthPasswordToken as jest.Mock).toHaveBeenCalledTimes(1);
   });
 
+  test('normalizes a lowercase bearer token_type to Bearer', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: null,
+    });
+    (requestOAuthPasswordToken as jest.Mock).mockResolvedValueOnce({
+      tokenType: 'bearer',
+      accessToken: 'brandnewaccesstoken',
+      expiresIn: 1000,
+    });
+
+    const accessToken = await getOAuthPasswordAccessToken(opts);
+
+    expect(accessToken).toEqual('Bearer brandnewaccesstoken');
+    expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith(
+      expect.objectContaining({ newToken: 'Bearer brandnewaccesstoken' })
+    );
+  });
+
+  test('normalizes a stored token with a lowercase bearer scheme', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: {
+        id: '1',
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'bearer cachedtoken',
+        createdAt: new Date('2021-01-01T08:00:00.000Z').toISOString(),
+        expiresAt: new Date('2021-01-02T13:00:00.000Z').toISOString(),
+      },
+    });
+
+    const accessToken = await getOAuthPasswordAccessToken(opts);
+
+    expect(accessToken).toEqual('Bearer cachedtoken');
+    expect(requestOAuthPasswordToken as jest.Mock).not.toHaveBeenCalled();
+  });
+
   test('returns null and logs a warning if username is missing', async () => {
     const accessToken = await getOAuthPasswordAccessToken({ ...opts, username: '' });
 

@@ -78,6 +78,26 @@ describe('getOAuthJwtAccessToken', () => {
     expect(requestOAuthJWTToken as jest.Mock).not.toHaveBeenCalled();
   });
 
+  test('normalizes a lowercase bearer token_type to Bearer', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: null,
+    });
+    (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
+    (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
+      tokenType: 'bearer',
+      accessToken: 'brandnewaccesstoken',
+      expiresIn: 1000,
+    });
+
+    const accessToken = await getOAuthJwtAccessToken(getOAuthJwtAccessTokenOpts);
+
+    expect(accessToken).toEqual('Bearer brandnewaccesstoken');
+    expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith(
+      expect.objectContaining({ newToken: 'Bearer brandnewaccesstoken' })
+    );
+  });
+
   test('creates new assertion if stored access token does not exist', async () => {
     connectorTokenClient.get.mockResolvedValueOnce({
       hasErrors: false,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
+import { normalizeAuthorizationHeaderValue } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
 import { requestOAuthPasswordToken } from './request_oauth_password_token';
@@ -63,7 +64,9 @@ export const getOAuthPasswordAccessToken = async ({
       { username, password, clientId, scope, usernameField, requestBodyFormat, tokenType },
       configurationUtilities
     );
-    accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
+    accessToken = normalizeAuthorizationHeaderValue(
+      `${tokenResult.tokenType} ${tokenResult.accessToken}`
+    );
 
     // try to update connector_token SO
     if (connectorId && connectorTokenClient) {
@@ -84,7 +87,7 @@ export const getOAuthPasswordAccessToken = async ({
     }
   } else {
     // use existing valid token
-    accessToken = connectorToken.token;
+    accessToken = normalizeAuthorizationHeaderValue(connectorToken.token);
   }
   return accessToken;
 };

@@ -317,6 +317,66 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     expect(requestOAuthClientCredentialsToken as jest.Mock).not.toHaveBeenCalled();
   });
 
+  test('normalizes a lowercase bearer token_type to Bearer before storing and returning it', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: null,
+    });
+    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+      tokenType: 'bearer',
+      accessToken: 'brandnewaccesstoken',
+      expiresIn: 1000,
+    });
+
+    const accessToken = await getOAuthClientCredentialsAccessToken(
+      getOAuthClientCredentialsAccessTokenOpts
+    );
+
+    expect(accessToken).toEqual('Bearer brandnewaccesstoken');
+    expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith(
+      expect.objectContaining({ newToken: 'Bearer brandnewaccesstoken' })
+    );
+  });
+
+  test('normalizes a stored token with a lowercase bearer scheme', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: {
+        id: '1',
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'bearer cachedtoken',
+        createdAt: new Date(Date.now() - 1000).toISOString(),
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      },
+    });
+
+    const accessToken = await getOAuthClientCredentialsAccessToken(
+      getOAuthClientCredentialsAccessTokenOpts
+    );
+
+    expect(accessToken).toEqual('Bearer cachedtoken');
+    expect(requestOAuthClientCredentialsToken as jest.Mock).not.toHaveBeenCalled();
+  });
+
+  test('does not rewrite non-bearer token types', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: null,
+    });
+    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+      tokenType: 'MAC',
+      accessToken: 'brandnewaccesstoken',
+      expiresIn: 1000,
+    });
+
+    const accessToken = await getOAuthClientCredentialsAccessToken(
+      getOAuthClientCredentialsAccessTokenOpts
+    );
+
+    expect(accessToken).toEqual('MAC brandnewaccesstoken');
+  });
+
   test('throws error if requestOAuthClientCredentialsToken throws error', async () => {
     connectorTokenClient.get.mockResolvedValueOnce({
       hasErrors: false,
