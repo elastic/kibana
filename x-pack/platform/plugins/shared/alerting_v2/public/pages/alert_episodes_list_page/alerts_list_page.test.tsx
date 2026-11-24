@@ -57,8 +57,16 @@ jest.mock('@kbn/unified-data-table', () => ({
   // The page injects the episode count + reset-filters controls via the toolbar's leftSide.
   // Render the custom toolbar (and have the toolbar builder render its leftSide) so those
   // controls end up in the DOM and stay reactive to the page's filter state.
-  UnifiedDataTable: jest.fn((props: { renderCustomToolbar?: () => React.ReactNode }) =>
-    props.renderCustomToolbar ? props.renderCustomToolbar() : null
+  UnifiedDataTable: jest.fn(
+    (props: {
+      renderCustomToolbar?: (toolbar: {
+        toolbarProps: Record<string, unknown>;
+        gridProps: Record<string, unknown>;
+      }) => React.ReactNode;
+    }) =>
+      props.renderCustomToolbar
+        ? props.renderCustomToolbar({ toolbarProps: {}, gridProps: {} })
+        : null
   ),
   getRenderCustomToolbarWithElements: jest.fn(
     ({ leftSide }: { leftSide: React.ReactNode }) =>
@@ -345,38 +353,18 @@ describe('AlertsListPage', () => {
     });
   });
 
-  it.each([
-    'episode.status',
-    'alerting_source',
-    'severity',
-    '@timestamp',
-    'rule.id',
-    'reason',
-    'duration',
-    'tags',
-    'rule_tags',
-    'assignees',
-    'suppressed',
-  ])('takes the remove column action away from the %s column', (columnId) => {
+  it('keeps the remove column action on customized columns', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
+    const customize = lastCall?.customGridColumnsConfiguration?.tags;
 
-    expect(customize).toBeDefined();
     const column = customize!({
       column: {
-        id: columnId,
+        id: 'tags',
         actions: { showHide: { label: 'Remove column' }, showMoveLeft: true },
       },
       headerRowHeight: 1,
     });
-    expect(column.actions).toEqual({ showHide: false, showMoveLeft: true });
-  });
-
-  it('keeps disabled column actions disabled', () => {
-    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    const customize = lastCall?.customGridColumnsConfiguration?.['rule.id'];
-
-    expect(customize!({ column: { id: 'rule.id', actions: false } }).actions).toBe(false);
+    expect(column.actions).toEqual({ showHide: { label: 'Remove column' }, showMoveLeft: true });
   });
 
   it('registers a cell renderer for the suppressed column', () => {

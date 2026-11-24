@@ -176,6 +176,32 @@ describe('useEpisodesTableConfig', () => {
     );
   });
 
+  it('keeps both changes when setVisibleColumns and setSort run in the same tick', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const mockStorage = createMockStorage(null);
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <Router history={history}>{children}</Router>
+    );
+
+    const { result } = renderHook(() => useEpisodesTableConfig(mockStorage as any), { wrapper });
+
+    await act(async () => {
+      result.current.setVisibleColumns(['tags', 'severity']);
+      result.current.setSort({ sortField: 'severity', sortDirection: 'asc' });
+    });
+
+    expect(result.current.visibleColumns).toEqual(['tags', 'severity']);
+    expect(result.current.sort).toEqual({ sortField: 'severity', sortDirection: 'asc' });
+    expect(mockStorage.set).toHaveBeenLastCalledWith(
+      EPISODES_TABLE_CONFIG_STORAGE_KEY,
+      expect.objectContaining({
+        visibleColumns: ['tags', 'severity'],
+        sort: { sortField: 'severity', sortDirection: 'asc' },
+      })
+    );
+  });
+
   it('setRowHeight updates state and writes to both stores', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     const mockStorage = createMockStorage(null);

@@ -16,10 +16,12 @@ import {
   EuiText,
   EuiToolTip,
   logicalCSS,
+  useDataGridColumnSelector,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isEqual } from 'lodash';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type {
   ApplicationStart,
@@ -51,6 +53,7 @@ import {
   getRowHeight,
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
+  type UnifiedDataTableRenderCustomToolbar,
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
@@ -87,8 +90,16 @@ import {
   DEFAULT_EPISODES_TABLE_CONFIG,
   DEFAULT_EPISODES_TABLE_SORT,
   DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
+  EPISODES_TABLE_TIME_COLUMN_ID,
+  isEpisodesTableColumnId,
+  resolveSortForVisibleColumns,
   type EpisodesTableColumnSettings,
 } from '../../utils/episodes_table_config';
+import {
+  EPISODES_TABLE_COLUMN_LABELS,
+  SELECTOR_OPTIONS,
+  getSelectorColumns,
+} from './episodes_table_columns';
 import {
   EPISODES_LIST_COLUMN_ALERT_TAGS,
   EPISODES_LIST_COLUMN_ASSIGNEES,
@@ -96,6 +107,7 @@ import {
   EPISODES_LIST_COLUMN_SUPPRESSED,
   EPISODES_LIST_COLUMN_RULE_TAGS,
   EPISODES_LIST_COLUMN_SOURCE,
+  EPISODES_LIST_REMOVE_COLUMN,
   EPISODES_LIST_ITEM_COUNT,
   EPISODES_LIST_ITEM_COUNT_CAPPED,
   EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP,
@@ -110,7 +122,7 @@ const EPISODES_TABLE_CONSUMER = 'alertingV2Alerts';
  * Some fields are not in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a
  * sort on them falls back to `@timestamp` and only looks like it works.
  */
-const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
+const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
     displayAsText: EPISODES_LIST_COLUMN_ALERT_TAGS,
@@ -140,20 +152,22 @@ const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
     displayAsText: EPISODES_LIST_COLUMN_REASON,
     isSortable: false,
   }),
+  // The grid never offers Remove on its time field column; this table lets users hide it.
+  [EPISODES_TABLE_TIME_COLUMN_ID]: ({ column }) =>
+    column.actions
+      ? {
+          ...column,
+          actions: {
+            ...column.actions,
+            showHide: {
+              label: EPISODES_LIST_REMOVE_COLUMN,
+              iconType: 'cross',
+              'data-test-subj': 'unifiedDataTableRemoveColumn',
+            },
+          },
+        }
+      : column,
 };
-
-// Drops the default column actions this table can't support yet.
-// - showHide: there is no way to add a column back, so a removed column would be lost for good.
-const removeUnsupportedDefaultActions = (column: EuiDataGridColumn): EuiDataGridColumn =>
-  column.actions ? { ...column, actions: { ...column.actions, showHide: false } } : column;
-
-const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object.fromEntries(
-  DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.map((columnId) => [
-    columnId,
-    (props: Parameters<CustomGridColumnsConfiguration[string]>[0]) =>
-      removeUnsupportedDefaultActions(COLUMN_CUSTOMIZATIONS[columnId]?.(props) ?? props.column),
-  ])
-);
 
 /**
  * Two reasons this is a whole pixel value rather than the `1.6em` default:
@@ -441,52 +455,90 @@ export const EpisodesTable = ({
     [height, minHeight, maxHeight, rowHeight, loadedEpisodesCount]
   );
 
-  const renderCustomToolbar = useMemo(
-    () =>
-      getRenderCustomToolbarWithElements({
-        leftSide: (
-          <EuiFlexGroup
-            alignItems="center"
-            responsive={false}
-            gutterSize="xs"
-            css={css`
-              ${logicalCSS('padding-horizontal', euiTheme.size.s)}
-            `}
-          >
-            <EuiFlexItem grow={false}>
-              {isEpisodeListCapped ? (
-                <EuiToolTip content={EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP(fetchSize)}>
-                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount" tabIndex={0}>
-                    {EPISODES_LIST_ITEM_COUNT_CAPPED(fetchSize)}
-                  </EuiText>
-                </EuiToolTip>
-              ) : (
-                <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
-                  {EPISODES_LIST_ITEM_COUNT(loadedEpisodesCount)}
-                </EuiText>
-              )}
-            </EuiFlexItem>
-            {renderAdditionalToolbarControls ? (
-              <>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    |
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{renderAdditionalToolbarControls()}</EuiFlexItem>
-              </>
-            ) : null}
-          </EuiFlexGroup>
-        ),
-      }),
-    [
-      euiTheme.size.s,
-      fetchSize,
-      isEpisodeListCapped,
-      loadedEpisodesCount,
-      renderAdditionalToolbarControls,
-    ]
+  const applyVisibleColumns = useCallback(
+    (columnIds: string[]) => {
+      const nextVisibleColumns = columnIds.filter(isEpisodesTableColumnId);
+      // Moving a hidden column in the selector reports the same visible columns; skipping the
+      // update keeps the selector from re-seeding its order and undoing that move.
+      if (isEqual(nextVisibleColumns, visibleColumns)) {
+        return;
+      }
+      setVisibleColumns(nextVisibleColumns);
+      const nextSort = resolveSortForVisibleColumns(episodesSort, nextVisibleColumns);
+      if (nextSort !== episodesSort) {
+        setSort(nextSort);
+      }
+    },
+    [episodesSort, setSort, setVisibleColumns, visibleColumns]
   );
+
+  const onSetColumns = useCallback(
+    (cols: string[], _hideTimeCol: boolean) => {
+      applyVisibleColumns(cols);
+    },
+    [applyVisibleColumns]
+  );
+
+  const selectorColumns = useMemo(() => getSelectorColumns(visibleColumns), [visibleColumns]);
+
+  const [columnSelector] = useDataGridColumnSelector(
+    selectorColumns,
+    { visibleColumns, setVisibleColumns: applyVisibleColumns },
+    SELECTOR_OPTIONS,
+    EPISODES_TABLE_COLUMN_LABELS
+  );
+
+  const renderCustomToolbar = useMemo<UnifiedDataTableRenderCustomToolbar>(() => {
+    const renderToolbar = getRenderCustomToolbarWithElements({
+      leftSide: (
+        <EuiFlexGroup
+          alignItems="center"
+          responsive={false}
+          gutterSize="xs"
+          css={css`
+            ${logicalCSS('padding-horizontal', euiTheme.size.s)}
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            {isEpisodeListCapped ? (
+              <EuiToolTip content={EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP(fetchSize)}>
+                <EuiText size="xs" data-test-subj="alertEpisodesItemCount" tabIndex={0}>
+                  {EPISODES_LIST_ITEM_COUNT_CAPPED(fetchSize)}
+                </EuiText>
+              </EuiToolTip>
+            ) : (
+              <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
+                {EPISODES_LIST_ITEM_COUNT(loadedEpisodesCount)}
+              </EuiText>
+            )}
+          </EuiFlexItem>
+          {renderAdditionalToolbarControls ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  |
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{renderAdditionalToolbarControls()}</EuiFlexItem>
+            </>
+          ) : null}
+        </EuiFlexGroup>
+      ),
+    });
+    // The grid's own column control can only reorder, so the selector takes its toolbar slot.
+    return (props) =>
+      renderToolbar({
+        ...props,
+        toolbarProps: { ...props.toolbarProps, columnControl: columnSelector },
+      });
+  }, [
+    columnSelector,
+    euiTheme.size.s,
+    fetchSize,
+    isEpisodeListCapped,
+    loadedEpisodesCount,
+    renderAdditionalToolbarControls,
+  ]);
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
     (hit) => {
@@ -588,13 +640,6 @@ export const EpisodesTable = ({
     onSuccess: invalidateEpisodeQueries,
   });
 
-  const onSetColumns = useCallback(
-    (cols: string[], _hideTimeCol: boolean) => {
-      setVisibleColumns(cols);
-    },
-    [setVisibleColumns]
-  );
-
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
@@ -661,7 +706,9 @@ export const EpisodesTable = ({
           columns={visibleColumns}
           onSetColumns={onSetColumns}
           canDragAndDropColumns
-          showTimeCol={!!dataView.timeFieldName}
+          isColumnSelectorEnabled={false}
+          // Otherwise the grid renders the data view's time field first whenever it's not in `columns`.
+          showTimeCol={false}
           customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
           externalCustomRenderers={externalCustomRenderers}
           rows={rows}

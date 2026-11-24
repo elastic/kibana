@@ -81,6 +81,27 @@ describe('episodes_table_config', () => {
       expect(mergeEpisodesTableConfig(null, null)).toEqual(DEFAULT_EPISODES_TABLE_CONFIG);
       expect(mergeEpisodesTableConfig(undefined, undefined)).toEqual(DEFAULT_EPISODES_TABLE_CONFIG);
     });
+
+    it('resets an oldest-first time sort when the time column is hidden', () => {
+      const result = mergeEpisodesTableConfig({
+        visibleColumns: ['tags'],
+        sort: { sortField: '@timestamp', sortDirection: 'asc' },
+      });
+      expect(result.sort).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.sort);
+    });
+
+    it('keeps the default sort when its column is hidden', () => {
+      const result = mergeEpisodesTableConfig({ visibleColumns: ['tags'] });
+      expect(result.sort).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.sort);
+    });
+
+    it('resets the sort to the default when the sorted column is hidden', () => {
+      const result = mergeEpisodesTableConfig(
+        { sort: { sortField: 'duration', sortDirection: 'asc' } },
+        { visibleColumns: ['tags'] }
+      );
+      expect(result.sort).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.sort);
+    });
   });
 
   describe('readEpisodesTableConfigFromStorage / writeEpisodesTableConfigToStorage', () => {
@@ -213,9 +234,16 @@ describe('episodes_table_config', () => {
       expect(readEpisodesTableConfigFromUrl(urlStorage)?.sort).toBeUndefined();
     });
 
-    it('ignores empty visibleColumns arrays', async () => {
+    it('reads an empty visibleColumns array', async () => {
       const urlStorage = await createKbnTestUrlStorage({ visibleColumns: [] });
-      expect(readEpisodesTableConfigFromUrl(urlStorage)?.visibleColumns).toBeUndefined();
+      expect(readEpisodesTableConfigFromUrl(urlStorage)?.visibleColumns).toEqual([]);
+    });
+
+    it('drops unknown visibleColumns ids', async () => {
+      const urlStorage = await createKbnTestUrlStorage({
+        visibleColumns: ['tags', 'unknown.field'],
+      });
+      expect(readEpisodesTableConfigFromUrl(urlStorage)?.visibleColumns).toEqual(['tags']);
     });
   });
 
