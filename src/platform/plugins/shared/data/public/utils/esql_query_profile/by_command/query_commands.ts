@@ -29,33 +29,60 @@ export interface QueryCommand {
 const isParens = (item: ESQLAstItem): item is ESQLParens =>
   !Array.isArray(item) && item.type === 'parens';
 
-const toQueryCommand = (query: string, command: ESQLAstCommand): QueryCommand => ({
-  name: command.name.toUpperCase(),
+/** Turns a position counted in characters, as the parser does, into an index of the string. */
+type ToIndex = (position: number) => number;
+
+const SURROGATE_PAIR = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
+
+/** The parser counts a character such as an emoji as one, while a string counts it as two. */
+const createToIndex = (query: string): ToIndex => {
+  if (!SURROGATE_PAIR.test(query)) {
+    return (position) => position;
+  }
+  const indexes: number[] = [];
+  let index = 0;
+  for (const character of query) {
+    indexes.push(index);
+    index += character.length;
+  }
+  indexes.push(index);
+  return (position) => indexes[position] ?? query.length;
+};
+
+const toQueryCommand = (query: string, toIndex: ToIndex, command: ESQLAstCommand): QueryCommand => {
+  const start = toIndex(command.location.min);
   // The parser's location includes its last character.
-  text: query.slice(command.location.min, command.location.max + 1),
-  start: command.location.min,
-  end: command.location.max + 1,
-});
+  const end = toIndex(command.location.max + 1);
+  return { name: command.name.toUpperCase(), text: query.slice(start, end), start, end };
+};
 
 /** The queries in parentheses of a command, such as the subqueries of a FROM. */
-const readBranches = (query: string, command: ESQLAstCommand): QueryCommand[][] => {
+const readBranches = (
+  query: string,
+  toIndex: ToIndex,
+  command: ESQLAstCommand
+): QueryCommand[][] => {
   const args: ESQLAstItem[] = command.args;
   return args
     .filter(isParens)
     .flatMap(({ child }) =>
-      'commands' in child ? [child.commands.map((inner) => toQueryCommand(query, inner))] : []
+      'commands' in child
+        ? [child.commands.map((inner) => toQueryCommand(query, toIndex, inner))]
+        : []
     )
     .filter((branch) => branch.length > 0);
 };
 
 /**
  * Splits an ES|QL query into its commands. A command with queries in parentheses, such as a FROM
- * with subqueries or a FORK, gets them as `branches`. The query is parsed, so pipes in strings and comments do not split it.
+ * with subqueries or a FORK, gets them as `branches`. The query is parsed, so pipes in strings and
+ * comments do not split it.
  */
 export function splitQueryCommands(query: string): QueryCommand[] {
+  const toIndex = createToIndex(query);
   return Parser.parse(query).root.commands.map((command) => {
-    const queryCommand = toQueryCommand(query, command);
-    const branches = readBranches(query, command);
+    const queryCommand = toQueryCommand(query, toIndex, command);
+    const branches = readBranches(query, toIndex, command);
     return branches.length > 0 ? { ...queryCommand, branches } : queryCommand;
   });
 }

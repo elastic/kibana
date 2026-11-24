@@ -86,7 +86,7 @@ const CommandRow = ({ entry, isNested }: { entry: CommandHeat; isNested: boolean
       ? entry.operators.join(', ')
       : i18n.translate('data.inspector.queryProfile.noOperatorOfItsOwnNote', {
           defaultMessage:
-            'No operator of its own. The planner may have merged it into another step, such as the search.',
+            'No operator of its own. The planner may have merged it into another step.',
         });
 
   return (
@@ -130,40 +130,38 @@ const GroupHeading = ({ subquery, isFirst }: { subquery?: number; isFirst: boole
 );
 
 /** The query, one command per row, with the share of the operator time that belongs to it. */
-export const ByCommandTab = ({ heat }: { heat: QueryHeat }) => {
-  return (
-    <div data-test-subj="esqlQueryProfileByCommand">
-      <EuiText size="xs" color="subdued">
-        <p>
-          <FormattedMessage
-            id="data.inspector.queryProfile.byCommandDescription"
-            defaultMessage="Time of the operators that Elasticsearch built for each command. The planner can merge a command into another step, such as a filter into the search, so a command can show little time."
-          />
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-      {heat.commands.map((entry, index) => (
-        <React.Fragment key={`${entry.command.name}-${index}`}>
-          {heat.hasSubqueries && entry.subquery !== heat.commands[index - 1]?.subquery ? (
-            <GroupHeading subquery={entry.subquery} isFirst={index === 0} />
-          ) : null}
-          <CommandRow entry={entry} isNested={heat.hasSubqueries && entry.subquery !== undefined} />
-        </React.Fragment>
-      ))}
-      {heat.unattributedShare >= MIN_UNATTRIBUTED_SHARE ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileUnattributed">
-            <p>
-              <FormattedMessage
-                id="data.inspector.queryProfile.unattributedDescription"
-                defaultMessage="{share} of the operator time is in steps that belong to no command."
-                values={{ share: formatShare(heat.unattributedShare) }}
-              />
-            </p>
-          </EuiText>
-        </>
-      ) : null}
-    </div>
-  );
-};
+export const ByCommandTab = ({ heat }: { heat: QueryHeat }) => (
+  <div data-test-subj="esqlQueryProfileByCommand">
+    <EuiText size="xs" color="subdued">
+      <p>
+        <FormattedMessage
+          id="data.inspector.queryProfile.byCommandDescription"
+          defaultMessage="Time of the operators that Elasticsearch built for each command. The planner can merge a command into another step, such as a filter into the search, so a command can show little time."
+        />
+      </p>
+    </EuiText>
+    <EuiSpacer size="s" />
+    {heat.commands.map((entry, index) => (
+      <React.Fragment key={`${entry.command.name}-${index}`}>
+        {heat.hasSubqueries && entry.subquery !== heat.commands[index - 1]?.subquery ? (
+          <GroupHeading subquery={entry.subquery} isFirst={index === 0} />
+        ) : null}
+        <CommandRow entry={entry} isNested={heat.hasSubqueries && entry.subquery !== undefined} />
+      </React.Fragment>
+    ))}
+    {heat.unattributedShare >= MIN_UNATTRIBUTED_SHARE ? (
+      <>
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileUnattributed">
+          <p>
+            <FormattedMessage
+              id="data.inspector.queryProfile.unattributedDescription"
+              defaultMessage="{share} of the operator time is in steps that belong to no command."
+              values={{ share: formatShare(heat.unattributedShare) }}
+            />
+          </p>
+        </EuiText>
+      </>
+    ) : null}
+  </div>
+);

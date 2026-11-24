@@ -42,6 +42,16 @@ describe('splitQueryCommands', () => {
     ]);
   });
 
+  it('keeps the positions right after characters that count as two in a string, such as an emoji', () => {
+    const query = 'FROM a | WHERE b == "é😀" | LIMIT 5';
+    const commands = splitQueryCommands(query);
+
+    expect(commands.map(({ text }) => text)).toEqual(['FROM a', 'WHERE b == "é😀"', 'LIMIT 5']);
+    expect(commands.map(({ start, end }) => query.slice(start, end))).toEqual(
+      commands.map(({ text }) => text)
+    );
+  });
+
   it('has no commands for an empty query', () => {
     expect(splitQueryCommands('   ')).toEqual([]);
   });
