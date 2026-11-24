@@ -49,9 +49,14 @@ const makeHandlerParams = ({
   connectors?: { features?: string; queries?: string };
 } = {}) => {
   const run = jest.fn().mockResolvedValue({ executionId: 'execution-1' });
-  const getSource = jest
-    .fn()
-    .mockResolvedValue({ source: { id: 'logs.test', slug: 'logs-test', enabled: true } });
+  const getSource = jest.fn().mockResolvedValue({
+    source: {
+      id: 'logs.test',
+      slug: 'logs-test',
+      enabled: true,
+      esql_updated_at: '2026-01-01T00:00:00.000Z',
+    },
+  });
   const request = { spaceId: 'default' };
   const server = {
     inference: {},
@@ -125,6 +130,7 @@ it('resolves strict overrides and forwards canonical connector IDs', async () =>
     inputs: {
       sourceId: 'logs.test',
       sourceSlug: 'logs-test',
+      sourceRevision: '2026-01-01T00:00:00.000Z',
       features: {
         skip: false,
         start: 1,

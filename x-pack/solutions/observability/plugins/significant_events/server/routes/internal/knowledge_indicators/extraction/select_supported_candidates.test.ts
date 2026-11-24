@@ -61,12 +61,19 @@ const mockColumnsByView = (
 const select = (
   sourceIds: string[],
   availableSlots: number,
-  { emptyViews = [], failingViews = [] }: { emptyViews?: string[]; failingViews?: string[] } = {}
+  {
+    emptyViews = [],
+    failingViews = [],
+    partialViews = [],
+  }: { emptyViews?: string[]; failingViews?: string[]; partialViews?: string[] } = {}
 ) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.esql.query.mockImplementation((async ({ query }: { query: string }) => {
     if (failingViews.some((view) => query.includes(view))) {
       throw new Error('Request timed out');
+    }
+    if (partialViews.some((view) => query.includes(view))) {
+      return { is_partial: true, values: [[0]] };
     }
     return { values: [[emptyViews.some((view) => query.includes(view)) ? 0 : 1]] };
   }) as never);
@@ -166,13 +173,15 @@ describe('selectSupportedCandidates', () => {
       'view-slow': new Error('Request timed out'),
       'view-down': makeResponseError(503, 'unavailable_shards_exception', 'no shard available'),
       'view-uncounted': [TIMESTAMP_COLUMN],
+      'view-partial': [TIMESTAMP_COLUMN],
     });
 
-    const { toSchedule } = await select(['slow', 'down', 'uncounted'], 5, {
+    const { toSchedule } = await select(['slow', 'down', 'uncounted', 'partial'], 5, {
       failingViews: ['view-uncounted'],
+      partialViews: ['view-partial'],
     });
 
-    expect(ids(toSchedule)).toEqual(['slow', 'down', 'uncounted']);
+    expect(ids(toSchedule)).toEqual(['slow', 'down', 'uncounted', 'partial']);
   });
 
   it('rejects a fractional slot count instead of looping without progress', async () => {

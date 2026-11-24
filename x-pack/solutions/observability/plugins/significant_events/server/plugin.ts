@@ -421,7 +421,6 @@ export class SignificantEventsPlugin
             inputs: {
               sourceId: source.id,
               sourceSlug: source.slug,
-              sourceRevision: source.esql_updated_at,
               rootTriggeredBy: 'scheduled',
               features: {
                 skip: false,

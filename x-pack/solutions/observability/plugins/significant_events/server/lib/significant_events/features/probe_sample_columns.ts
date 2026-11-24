@@ -174,7 +174,14 @@ export const hasAnyDocument = async ({
   const response = (await esClient.esql.query(
     { query: query.limit(1).pipe`STATS total = COUNT(*)`.print('basic') },
     { signal }
-  )) as unknown as { values: unknown[][] };
+  )) as unknown as { values: unknown[][]; is_partial?: boolean };
   const total = response.values[0]?.[0];
-  return typeof total === 'number' && total > 0;
+  const hasDocument = typeof total === 'number' && total > 0;
+  // A partial result counts only the shards that did not fail, so its zero proves nothing.
+  if (!hasDocument && response.is_partial) {
+    throw new Error(
+      `Cannot tell whether [${index}] holds a document: Elasticsearch returned partial results`
+    );
+  }
+  return hasDocument;
 };

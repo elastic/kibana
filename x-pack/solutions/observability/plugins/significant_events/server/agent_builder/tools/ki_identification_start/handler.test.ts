@@ -22,6 +22,7 @@ const source = {
   id: 'logs.nginx',
   slug: 'logs-nginx',
   view_name: '$.nightshift.sources.default.logs-nginx',
+  esql_updated_at: '2026-01-01T00:00:00.000Z',
 };
 
 describe('startKiIdentificationToolHandler', () => {
@@ -42,7 +43,7 @@ describe('startKiIdentificationToolHandler', () => {
       telemetry,
       logger: loggerMock.create(),
       getSourcesClient: jest.fn().mockResolvedValue({
-        get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
+        get: jest.fn().mockResolvedValue({ source }),
       }),
     });
     const maintenanceService = {

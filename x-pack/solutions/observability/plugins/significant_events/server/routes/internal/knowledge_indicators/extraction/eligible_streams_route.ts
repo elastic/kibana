@@ -27,8 +27,12 @@ import {
 } from './classify_sources';
 import { reconcileSourceCatalog } from '../reconcile_source_catalog';
 import { selectSupportedCandidates, type UnsupportedSource } from './select_supported_candidates';
+import { keepQuietSourcesAlive } from './keep_quiet_sources_alive';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
+const MILLISECONDS_PER_HOUR = 3_600_000;
+
+const toWholeSeconds = (epochMillis: number): number => Math.floor(epochMillis / 1000) * 1000;
 
 export interface EligibleStreamsResponse {
   candidates: Array<SourceCandidate & { sourceRevision: string }>;
@@ -154,10 +158,12 @@ const eligibleStreamsRoute = createServerRoute({
       intervalHours,
     });
 
-    // Fixed before the probes: they look for documents in the window the runs then sample.
-    const now = Date.now();
-    const start = now - lookbackHours * 3_600_000;
+    // Fixed before the probes: they look for documents in the window the runs then sample. On
+    // whole seconds, because the workflow hands the window to the runs as epoch seconds.
+    const now = toWholeSeconds(Date.now());
+    const start = toWholeSeconds(now - lookbackHours * MILLISECONDS_PER_HOUR);
 
+    const routeLogger = logger.get('continuous_onboarding', 'eligible');
     const availableSlots = Math.max(0, maxStreams - alreadyRunning.length);
     const { toSchedule, skipped, unsupported, empty } = await selectSupportedCandidates({
       candidates,
@@ -165,7 +171,14 @@ const eligibleStreamsRoute = createServerRoute({
       viewNames: new Map(sources.map(({ id, view_name: viewName }) => [id, viewName])),
       timeRange: { start, end: now },
       esClient: streamDataEsClient,
-      logger: logger.get('continuous_onboarding', 'eligible'),
+      logger: routeLogger,
+    });
+
+    await keepQuietSourcesAlive({
+      sources: empty,
+      lastRefreshedBefore: new Date(now - intervalHours * MILLISECONDS_PER_HOUR).toISOString(),
+      kiClient,
+      logger: routeLogger,
     });
 
     const revisions = new Map(sources.map((source) => [source.id, source.esql_updated_at]));

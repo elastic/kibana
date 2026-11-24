@@ -29,7 +29,7 @@ export const startSourceOnboarding = async ({
   request,
   logger,
 }: {
-  source: Pick<NightshiftSource, 'view_name'>;
+  source: Pick<NightshiftSource, 'view_name' | 'esql_updated_at'>;
   inputs: SignificantEventsKIsOnboardingInputs;
   onboardingClient: Pick<SignificantEventsKIsOnboardingClient, 'run'>;
   /** Reads the data behind the source, as feature identification does. */
@@ -58,6 +58,10 @@ export const startSourceOnboarding = async ({
     }
   }
 
-  const { executionId } = await onboardingClient.run({ inputs, request });
+  // `run` reloads the source: the revision makes it refuse a query edited since the probe.
+  const { executionId } = await onboardingClient.run({
+    inputs: { ...inputs, sourceRevision: source.esql_updated_at },
+    request,
+  });
   return { kind: 'started', executionId };
 };

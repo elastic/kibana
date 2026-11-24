@@ -21,7 +21,7 @@ import { NIGHTSHIFT_SOURCES_APP_PATH } from '../../../../common/constants';
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 interface StartKiIdentificationHandlerParams {
-  source: Pick<NightshiftSource, 'id' | 'slug' | 'view_name'>;
+  source: Pick<NightshiftSource, 'id' | 'slug' | 'view_name' | 'esql_updated_at'>;
   steps: KIsOnboardingStep[];
   connectors?: {
     features?: string;

@@ -19,7 +19,10 @@ const start = (assessment: SourceSamplingAssessment, skipFeatures = false) => {
   jest.mocked(assessSourceSampling).mockResolvedValue(assessment);
   const run = jest.fn().mockResolvedValue({ executionId: 'execution-id' });
   const result = startSourceOnboarding({
-    source: { view_name: '$.nightshift.sources.default.nginx' },
+    source: {
+      view_name: '$.nightshift.sources.default.nginx',
+      esql_updated_at: '2026-01-01T00:00:00.000Z',
+    },
     inputs: {
       sourceId: 'source-id',
       features: { skip: skipFeatures, start: 1000, end: 2000 },

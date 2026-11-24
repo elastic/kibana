@@ -37,9 +37,12 @@ const makeEsqlQuery = (emptyViews: string[] = []) =>
     values: [[emptyViews.some((view) => query.includes(view)) ? 0 : 1]],
   }));
 
-const makeHandlerParams = (esqlQuery = makeEsqlQuery()): HandlerParams =>
+const makeHandlerParams = (
+  esqlQuery = makeEsqlQuery(),
+  keepAlivePersistentIndicators = jest.fn().mockResolvedValue({ refreshed: 0 })
+): HandlerParams =>
   ({
-    params: undefined,
+    params: { query: { extractionIntervalHours: 6 } },
     request: {},
     server: {},
     logger: loggingSystemMock.createLogger(),
@@ -52,7 +55,7 @@ const makeHandlerParams = (esqlQuery = makeEsqlQuery()): HandlerParams =>
       streamDataEsClient: { esql: { query: esqlQuery } },
       licensing: {},
       uiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
-      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
+      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ keepAlivePersistentIndicators }),
     }),
   } as unknown as HandlerParams);
 
@@ -93,22 +96,49 @@ describe('eligibleStreamsRoute', () => {
     expect(response.unsupported.map(({ sourceId }) => sourceId)).toEqual(['no-timestamp']);
   });
 
-  it('leaves out a source with no document in the time range it returns', async () => {
+  it('leaves out a source with no document in the whole-second time range it returns', async () => {
     (reconcileSourceCatalog as jest.Mock).mockResolvedValue({
       sources: [makeSource('quiet', true), makeSource('ok', true)],
     });
     const esqlQuery = makeEsqlQuery(['view-quiet']);
+    const dateNow = jest.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-01-02T00:00:00.789Z'));
 
-    const response = await eligibleRoute.handler(makeHandlerParams(esqlQuery));
+    try {
+      const response = await eligibleRoute.handler(makeHandlerParams(esqlQuery));
 
-    expect(response.candidates.map(({ sourceId }) => sourceId)).toEqual(['ok']);
-    expect(response.empty.map(({ sourceId }) => sourceId)).toEqual(['quiet']);
-    const { from, to } = response.timeRange;
-    expect(esqlQuery).toHaveBeenCalledWith(
-      {
-        query: `FROM view-quiet | WHERE @timestamp >= "${from}" AND @timestamp <= "${to}" | LIMIT 1 | STATS total = COUNT(*)`,
-      },
-      expect.anything()
+      expect(response.candidates.map(({ sourceId }) => sourceId)).toEqual(['ok']);
+      expect(response.empty.map(({ sourceId }) => sourceId)).toEqual(['quiet']);
+      expect(response.timeRange).toEqual({
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+      });
+      expect(esqlQuery).toHaveBeenCalledWith(
+        {
+          query:
+            'FROM view-quiet | WHERE @timestamp >= "2026-01-01T00:00:00.000Z" AND @timestamp <= "2026-01-02T00:00:00.000Z" | LIMIT 1 | STATS total = COUNT(*)',
+        },
+        expect.anything()
+      );
+    } finally {
+      dateNow.mockRestore();
+    }
+  });
+
+  it('keeps alive only the empty source, once per interval, and answers when that fails', async () => {
+    (reconcileSourceCatalog as jest.Mock).mockResolvedValue({
+      sources: [makeSource('quiet', true), makeSource('ok', true)],
+    });
+    const keepAlive = jest.fn().mockRejectedValue(new Error('lease held'));
+
+    const response = await eligibleRoute.handler(
+      makeHandlerParams(makeEsqlQuery(['view-quiet']), keepAlive)
     );
+
+    const oneIntervalBeforeEnd = new Date(
+      Date.parse(response.timeRange.to) - 6 * 3_600_000
+    ).toISOString();
+    expect(keepAlive.mock.calls).toEqual([
+      ['quiet', { lastRefreshedBefore: oneIntervalBeforeEnd }],
+    ]);
   });
 });
