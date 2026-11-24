@@ -33,6 +33,11 @@ triggers:
             ki:
               type: object
               description: The Knowledge Indicator document, as `context-engine.createKi` takes it.
+            provenance:
+              type: object
+              description: >
+                Where the change came from: the analysis run and the signals it was derived from.
+                Recorded with the proposal and ignored by this action.
           required:
             - ai_index_id
             - ki_id

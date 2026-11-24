@@ -29,6 +29,9 @@ describe('recordImprovements', () => {
     recordImprovements({
       aiIndexId: 'orders',
       spaceId: 'default',
+      agentRunId: 'run-1',
+      signalWindow: { from: 'now-7d', to: 'now' },
+      signalSpaces: ['default'],
       allowedActions: [...IMPROVEMENT_ACTIONS],
       proposals: [buildProposal()],
       review: {
@@ -65,8 +68,27 @@ describe('recordImprovements', () => {
           ai_index_id: 'orders',
           ki_id: `improvement-${improvementId}`,
           ki: { type: 'document', title: 'Failed logins' },
+          provenance: expect.any(Object),
         },
       }),
+    });
+  });
+
+  it('records where a change came from on its proposal, so it can be traced to its evidence', async () => {
+    await run({
+      proposals: [buildProposal({ signal_tags: ['coverage_gap'] })],
+      agentRunId: 'run-9',
+      signalWindow: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-08T00:00:00.000Z' },
+      signalSpaces: ['default', 'marketing'],
+    });
+
+    expect(provider.create.mock.calls[0][0].proposal.actionInput.provenance).toEqual({
+      agent_run_id: 'run-9',
+      signal_ids: ['trace-1:span-1'],
+      signal_spaces: ['default', 'marketing'],
+      signal_window: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-08T00:00:00.000Z' },
+      signal_count: 1,
+      tags: ['coverage_gap'],
     });
   });
 

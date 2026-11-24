@@ -45,7 +45,13 @@ export const getRecordImprovementsStepDefinition = ({
         });
       }
 
-      const { ai_index_id: aiIndexId, agent_run_id: agentRunId, improvements } = context.input;
+      const {
+        ai_index_id: aiIndexId,
+        agent_run_id: agentRunId,
+        signal_window: signalWindow,
+        signal_spaces: signalSpaces,
+        improvements,
+      } = context.input;
 
       const auditLogger = await getAuditLogger(request);
 
@@ -59,6 +65,9 @@ export const getRecordImprovementsStepDefinition = ({
         const result = await recordImprovements({
           aiIndexId,
           spaceId,
+          agentRunId,
+          signalWindow,
+          signalSpaces,
           allowedActions,
           proposals: improvements,
           review: { provider: proposalsProvider, context: { spaceId, request }, logger },

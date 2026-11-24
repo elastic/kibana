@@ -18,6 +18,13 @@ import {
 const change = (proposal: Record<string, unknown> = {}): ProposedChange => ({
   improvementId: 'abc',
   aiIndexId: 'orders',
+  provenance: {
+    agent_run_id: 'run-1',
+    signal_ids: ['s-1'],
+    signal_spaces: ['default'],
+    signal_window: { from: 'now-7d', to: 'now' },
+    signal_count: 1,
+  },
   proposal: {
     action: 'add_ki',
     title: 'Add a KI',
@@ -59,6 +66,7 @@ describe('improvement proposals', () => {
           ai_index_id: 'orders',
           ki_id: 'improvement-abc',
           ki: { type: 'document', title: 'T' },
+          provenance: expect.objectContaining({ agent_run_id: 'run-1', signal_ids: ['s-1'] }),
         },
       })
     );
@@ -73,14 +81,19 @@ describe('improvement proposals', () => {
           payload: { ki_patch: { title: 'New' } },
         })
       )?.actionInput
-    ).toEqual({ ai_index_id: 'orders', ki_id: 'ki-1', ki_patch: { title: 'New' } });
+    ).toEqual({
+      ai_index_id: 'orders',
+      ki_id: 'ki-1',
+      ki_patch: { title: 'New' },
+      provenance: expect.any(Object),
+    });
   });
 
   it('carries only the target of a removal', () => {
     expect(
       toProposal(change({ action: 'remove_ki', target: { ki_id: 'ki-1' }, payload: {} }))
         ?.actionInput
-    ).toEqual({ ai_index_id: 'orders', ki_id: 'ki-1' });
+    ).toEqual({ ai_index_id: 'orders', ki_id: 'ki-1', provenance: expect.any(Object) });
   });
 
   it('proposes nothing for an action without an action workflow', () => {

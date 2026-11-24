@@ -46,16 +46,28 @@ export const improvementActionOf = (actionWorkflowId: string): ImprovementAction
     (action) => ACTION_WORKFLOW_BY_IMPROVEMENT_ACTION[action] === actionWorkflowId
   );
 
+/** Where a proposed change came from, so a reviewer or a later run can trace it to its evidence. */
+export interface ProposalProvenance {
+  agent_run_id: string;
+  signal_ids: string[];
+  signal_spaces: string[];
+  signal_window: { from: string; to: string };
+  signal_count: number;
+  tags?: string[];
+}
+
 export interface ProposedChange {
   improvementId: string;
   aiIndexId: string;
   proposal: ProposedImprovement;
+  provenance: ProposalProvenance;
 }
 
 const actionInputFor = ({
   improvementId,
   aiIndexId,
   proposal: { action, payload, target },
+  provenance,
 }: ProposedChange): Record<string, unknown> => {
   switch (action) {
     case 'add_ki':
@@ -63,11 +75,17 @@ const actionInputFor = ({
         ai_index_id: aiIndexId,
         ki_id: addedKiIdFor(improvementId),
         ki: payload?.ki,
+        provenance,
       };
     case 'edit_ki':
-      return { ai_index_id: aiIndexId, ki_id: target?.ki_id, ki_patch: payload?.ki_patch };
+      return {
+        ai_index_id: aiIndexId,
+        ki_id: target?.ki_id,
+        ki_patch: payload?.ki_patch,
+        provenance,
+      };
     default:
-      return { ai_index_id: aiIndexId, ki_id: target?.ki_id };
+      return { ai_index_id: aiIndexId, ki_id: target?.ki_id, provenance };
   }
 };
 

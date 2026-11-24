@@ -24,7 +24,7 @@ export const CONTEXT_ENGINE_ACTION_ADD_KI_WORKFLOW = {
   id: CONTEXT_ENGINE_ACTION_ADD_KI_WORKFLOW_ID,
   management: CONTEXT_ENGINE_ACTION_WORKFLOW_MANAGEMENT,
   pluginId: 'contextEngine',
-  version: 1,
+  version: 2,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'action_add_ki.yaml');
   },
@@ -37,7 +37,7 @@ export const CONTEXT_ENGINE_ACTION_EDIT_KI_WORKFLOW = {
   id: CONTEXT_ENGINE_ACTION_EDIT_KI_WORKFLOW_ID,
   management: CONTEXT_ENGINE_ACTION_WORKFLOW_MANAGEMENT,
   pluginId: 'contextEngine',
-  version: 1,
+  version: 2,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'action_edit_ki.yaml');
   },
@@ -50,7 +50,7 @@ export const CONTEXT_ENGINE_ACTION_REMOVE_KI_WORKFLOW = {
   id: CONTEXT_ENGINE_ACTION_REMOVE_KI_WORKFLOW_ID,
   management: CONTEXT_ENGINE_ACTION_WORKFLOW_MANAGEMENT,
   pluginId: 'contextEngine',
-  version: 1,
+  version: 2,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'action_remove_ki.yaml');
   },

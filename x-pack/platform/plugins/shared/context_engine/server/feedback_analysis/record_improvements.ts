@@ -19,6 +19,10 @@ import type { ProposalsProvider, ProposalsProviderContext } from '../proposals/p
 export interface RecordImprovementsOptions {
   aiIndexId: string;
   spaceId: string;
+  /** The workflow execution that produced the proposals. */
+  agentRunId: string;
+  signalWindow: { from: string; to: string };
+  signalSpaces: string[];
   /** The actions the AI index permits; an empty list is observe-only. */
   allowedActions: ImprovementAction[];
   /** Straight off the agent, unvalidated. */
@@ -63,6 +67,9 @@ const describe = (proposal: unknown): { action?: string; title?: string } => {
 export const recordImprovements = async ({
   aiIndexId,
   spaceId,
+  agentRunId,
+  signalWindow,
+  signalSpaces,
   allowedActions,
   proposals,
   review,
@@ -167,7 +174,19 @@ export const recordImprovements = async ({
 
   const recorded: RecordImprovementsResponse['recorded'] = [];
   for (const { improvementId, proposal } of candidates) {
-    const change = toProposal({ improvementId, aiIndexId, proposal });
+    const change = toProposal({
+      improvementId,
+      aiIndexId,
+      proposal,
+      provenance: {
+        agent_run_id: agentRunId,
+        signal_ids: proposal.signal_ids ?? [],
+        signal_spaces: signalSpaces,
+        signal_window: signalWindow,
+        signal_count: proposal.signal_ids?.length ?? 0,
+        ...(proposal.signal_tags ? { tags: proposal.signal_tags } : {}),
+      },
+    });
     if (!change) {
       continue;
     }

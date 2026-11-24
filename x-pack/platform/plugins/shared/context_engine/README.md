@@ -543,7 +543,10 @@ reviewer could not do themselves. A proposal carries:
   the proposals of one AI index are listed together. It is not a real
   conversation;
 - the agent's rationale as its comment, and the action workflow and its single
-  `actionInput`.
+  `actionInput`. The `actionInput` also carries a `provenance` object (the run's
+  execution id, the signal ids, spaces and window it drew on, and the classifier
+  tags), which the actions ignore; it is how a reviewer or a later run traces a
+  proposal to its evidence.
 
 | Improvement action | Action workflow                          |
 | ------------------ | ---------------------------------------- |

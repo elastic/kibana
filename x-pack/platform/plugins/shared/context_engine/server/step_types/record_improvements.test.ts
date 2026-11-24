@@ -127,6 +127,9 @@ describe('getRecordImprovementsStepDefinition', () => {
     expect(recordImprovementsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         aiIndexId: 'orders',
+        agentRunId: 'execution-1',
+        signalWindow: INPUT.signal_window,
+        signalSpaces: ['default'],
         proposals: INPUT.improvements,
         spaceId: 'default',
         review: expect.objectContaining({
