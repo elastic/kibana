@@ -22,7 +22,7 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsEndpointPolicyManager();
+      await browserAuth.loginAsSecurityRole('endpoint_operations_analyst');
     });
 
     spaceTest('renders tab content', async ({ pageObjects, endpointPolicy }) => {
