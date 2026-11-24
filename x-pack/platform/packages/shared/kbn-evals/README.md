@@ -250,14 +250,20 @@ fewer models, list it under `specModelGroups` in
 - `shards` are unrelated. They decide which specs share a CI step, not which models run. A shard
   can also set `judge` to an evaluation connector id (for example `"judge": "eis-openai-gpt-5-4"`)
   to pin the judge for its steps only; shards without one keep the suite-wide judge.
-- A suite's fanout steps share one Buildkite concurrency group across builds, limited to
-  `fanoutConcurrency` steps at once (4 when unset). A shard can set `concurrencyGroup` to a key of
-  the suite's `concurrencyGroups` (for example `"concurrencyGroups": { "sandbox-heavy": 2 }`) to
-  count against that limit instead, so expensive shards can be capped without holding back the rest.
-  A shard id of the form `<base>-<index>-of-<count>` marks slices of one shard, which may list the
-  same spec files; the suite reads its part from the id.
 - Only the weekly run (`KBN_EVALS_WEEKLY=1`) applies this. PR and on-demand runs still run every
   model against every spec.
+
+On every run, a suite's fanout steps share one Buildkite concurrency group across builds, limited
+to `fanoutConcurrency` steps at once (4 when unset):
+
+- A shard can set `concurrencyGroup` to a key of the suite's `concurrencyGroups` (for example
+  `"concurrencyGroups": { "sandbox-heavy": 2 }`) to count against that limit instead, so expensive
+  shards can be capped without holding back the rest. A step that runs every spec (a grep run, or a
+  suite without shards) takes the group with the lowest limit.
+- `stepTimeoutInMinutes` bounds each fanout step (120 when unset); `shardStepTimeoutInMinutes`, when
+  set, bounds a one-shard step instead.
+- A shard id of the form `<base>-<index>-of-<count>` marks slices of one shard. Every slice lists
+  the same spec files, and the suite reads its part from the id.
 
 `spec_model_groups.test.js` fails PR CI if an entry points at a missing file, lists a file twice,
 names a model outside the weekly list, or leaves a spec on disk unlisted.

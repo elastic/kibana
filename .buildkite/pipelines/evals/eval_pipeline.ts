@@ -43,6 +43,8 @@ export interface EvalsSuiteMetadataEntry {
   defaultJudge?: string;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
+  /** Step timeout for one-shard fanout steps, which run a fraction of the suite. */
+  shardStepTimeoutInMinutes?: number;
   /**
    * How many of the suite's fanout steps run at once, across builds; 4 when unset. Shards in one of
    * `concurrencyGroups` count against that group's limit instead.
@@ -268,7 +270,10 @@ function buildEvalsYaml({
     // `getPipeline()` strips `steps:` so fragments concatenate under one top-level `steps:`.
     `  - group: LLM Evals`,
     `    key: kibana-evals`,
+    // `build` is skipped when the PR build's artifact is reused, which no longer orders the evals
+    // after `pre_build`, the step that pins the ES snapshot manifest for the whole build.
     `    depends_on:`,
+    `      - pre_build`,
     `      - build`,
     `    steps:`,
     suiteSteps,

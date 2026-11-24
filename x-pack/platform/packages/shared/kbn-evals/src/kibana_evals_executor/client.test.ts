@@ -264,6 +264,71 @@ describe('KibanaEvalsClient', () => {
     ]);
   });
 
+  it('starts no task when the selector throws', async () => {
+    const task = jest.fn(async () => ({ ok: true }));
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [0, 1, 2].map((q) => ({ input: { q } })),
+    };
+
+    await expect(
+      createClient().runExperiment(
+        {
+          datasets: [dataset],
+          task,
+          selectExample: (_example, index) => {
+            if (index === 2) throw new Error('bad selector');
+            return true;
+          },
+        },
+        []
+      )
+    ).rejects.toThrow('bad selector');
+    expect(task).not.toHaveBeenCalled();
+  });
+
+  it('gives slices of one execution their own experiments over the same stored examples', async () => {
+    const upsertDataset = jest.fn().mockResolvedValue('stored-dataset-id');
+    const onEvaluationComplete = jest.fn();
+    const client = createClient({ upsertDataset, onEvaluationComplete });
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [0, 1, 2, 3].map((q) => ({ id: `example-${q}`, input: { q } })),
+    };
+    const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { ok: boolean }>> = [
+      {
+        name: 'AlwaysOne',
+        kind: 'CODE',
+        direction: 'maximize',
+        evaluate: async () => ({ score: 1 }),
+      },
+    ];
+    const runSlice = (slice: number) =>
+      client.runExperiment(
+        {
+          name: `experiment (slice ${slice}/2)`,
+          datasets: [dataset],
+          task: async () => ({ ok: true }),
+          selectExample: (_example, index) => Math.floor(index / 2) === slice - 1,
+        },
+        evaluators
+      );
+
+    const [[first], [second]] = [await runSlice(1), await runSlice(2)];
+
+    expect(first.id).not.toBe(second.id);
+    expect(first.datasetId).toBe('stored-dataset-id');
+    expect(second.datasetId).toBe('stored-dataset-id');
+    expect(onEvaluationComplete.mock.calls.map(([{ exampleId }]) => exampleId).sort()).toEqual([
+      'example-0',
+      'example-1',
+      'example-2',
+      'example-3',
+    ]);
+  });
+
   it('captures and stores trace IDs for tasks and evaluators', async () => {
     const client = createClient();
     const dataset: EvaluationDataset = {

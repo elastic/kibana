@@ -39,6 +39,9 @@ EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
 # Per-suite step timeout for suites that legitimately need longer than the 120m default.
 EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
+# A one-shard step runs a fraction of the suite, so a suite can give it a shorter budget than a
+# step that runs every spec (a grep run, or a suite without shards).
+EVAL_SUITE_SHARD_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.shardStepTimeoutInMinutes // empty' 2>/dev/null || true)"
 # Per-suite fanout concurrency for suites with more shards than the default 4 lets run at once.
 EVAL_SUITE_FANOUT_CONCURRENCY="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.fanoutConcurrency // empty' 2>/dev/null || true)"
 # The suite's Scout arch/domain, for steps (e.g. the weekly pipeline) that don't pass them. The
@@ -274,6 +277,11 @@ EOF
 
         # A shard in one of the suite's `concurrencyGroups` shares that group's limit, across builds,
         # instead of the suite-wide one, so heavy shards can be capped without holding back the rest.
+        step_timeout_in_minutes="${timeout_in_minutes}"
+        if [[ -n "$shard_id" && -z "${EVAL_STEP_TIMEOUT_IN_MINUTES:-}" && -n "${EVAL_SUITE_SHARD_STEP_TIMEOUT:-}" ]]; then
+          step_timeout_in_minutes="${EVAL_SUITE_SHARD_STEP_TIMEOUT}"
+        fi
+
         step_concurrency_group="kbn-evals-${group_key_safe}"
         step_concurrency="${EVAL_FANOUT_CONCURRENCY}"
         row_concurrency_group="$(jq -r '.concurrencyGroup // ""' <<<"$row")"
@@ -312,7 +320,7 @@ EOF
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
           EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
           EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
-        timeout_in_minutes: ${timeout_in_minutes}
+        timeout_in_minutes: ${step_timeout_in_minutes}
         concurrency_group: "${step_concurrency_group}"
         concurrency: ${step_concurrency}
         agents:

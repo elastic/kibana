@@ -220,9 +220,13 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         `🧪 Starting experiment "${experimentName} - Dataset: ${resolvedDataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
       );
 
+      // Selected up front, so a selector that throws fails the experiment before any task starts.
+      const selectedExamples = resolvedDataset.examples.flatMap((example, exampleIndex) =>
+        selectExample(example, exampleIndex) ? [{ example, exampleIndex }] : []
+      );
+
       for (let rep = 0; rep < repetitions; rep++) {
-        resolvedDataset.examples.forEach((example, exampleIndex) => {
-          if (!selectExample(example, exampleIndex)) return;
+        selectedExamples.forEach(({ example, exampleIndex }) => {
           runJobs.push(
             limiter(async () => {
               const runKey = `${exampleIndex}-${rep}-${randomUUID()}`;

@@ -110,14 +110,47 @@ describe('evals.suites.json shards', () => {
     expect(problems).toEqual([]);
   });
 
-  it('gives fanoutConcurrency a positive integer when set', () => {
-    // run_suite.sh writes it into the fanout YAML as is, so a bad value only fails at upload.
-    const problems = suites
-      .filter(
-        ({ fanoutConcurrency: limit }) =>
-          limit !== undefined && (!Number.isInteger(limit) || limit < 1)
-      )
-      .map(({ id, fanoutConcurrency }) => `${id}: fanoutConcurrency is ${fanoutConcurrency}`);
+  it('gives fanoutConcurrency and shardStepTimeoutInMinutes a positive integer when set', () => {
+    // run_suite.sh writes them into the fanout YAML as is, so a bad value only fails at upload.
+    const problems = suites.flatMap((suite) =>
+      (['fanoutConcurrency', 'shardStepTimeoutInMinutes'] as const)
+        .filter((field) => {
+          const value = suite[field];
+          return value !== undefined && (!Number.isInteger(value) || value < 1);
+        })
+        .map((field) => `${suite.id}: ${field} is ${suite[field]}`)
+    );
+
+    expect(problems).toEqual([]);
+  });
+
+  it('gives concurrency groups names that are already step-key safe', () => {
+    // run_suite.sh slugifies the name into the group key, so `a b` and `a-b` would share a queue.
+    const problems = suites.flatMap(({ id, concurrencyGroups = {} }) =>
+      Object.keys(concurrencyGroups)
+        .filter((group) => !STEP_KEY_SAFE_ID.test(group))
+        .map((group) => `${id}: concurrency group "${group}" is not lowercase [a-z0-9_-]`)
+    );
+
+    expect(problems).toEqual([]);
+  });
+
+  it('gives every slice of a shard the same spec files', () => {
+    // A slice that lists other specs would leave part of the sliced specs' examples unrun.
+    const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) => {
+      const specsByBase = new Map<string, Set<string>>();
+      for (const { id, specFiles = [] } of shards) {
+        const base = SLICE_SHARD_ID.exec(id)?.[1];
+        if (!base) continue;
+        specsByBase.set(
+          base,
+          (specsByBase.get(base) ?? new Set()).add([...specFiles].sort().join(' '))
+        );
+      }
+      return [...specsByBase]
+        .filter(([, specLists]) => specLists.size > 1)
+        .map(([base]) => `${suiteId}: slices of "${base}" list different spec files`);
+    });
 
     expect(problems).toEqual([]);
   });

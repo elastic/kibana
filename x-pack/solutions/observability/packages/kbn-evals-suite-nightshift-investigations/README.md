@@ -1283,9 +1283,10 @@ themselves don't use it.
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any
   investigation starts, as does a source or key that fails the [preflight](#telemetry-cutoff).
 - Each task runs once, at most eight at a time, and Playwright doesn't retry the test.
-- The eval fails when fewer than 80% of investigations complete (60% for one slice, whose 10 tasks
-  are too few for the full-run rate), or when none returned ORCA telemetry. Judge scores are
-  advisory.
+- The eval fails when fewer than 80% of investigations complete (60% for a slice of fewer than 50
+  tasks, such as a 10-task CI slice, which is too small for the full-run rate), when fewer than
+  80% of the report.md it tried to write are usable, or when none returned ORCA telemetry. Judge
+  scores are advisory.
 - All shards draw on one sandbox pool. When it runs out, investigations end without a
   conclusion and the eval fails, so leave room for overlapping builds.
 

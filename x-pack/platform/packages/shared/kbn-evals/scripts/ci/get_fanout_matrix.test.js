@@ -314,6 +314,32 @@ describe('buildFanoutMatrix - override / no-config parity', () => {
     ).toEqual(expected);
   });
 
+  it("puts a step that isn't one shard in the suite's tightest concurrency group", () => {
+    const suiteInfo = {
+      shards: [{ id: 's1', specFiles: [DISCOVERY], concurrencyGroup: 'heavy' }],
+      concurrencyGroups: { light: 6, heavy: 2 },
+    };
+
+    expect(
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo,
+        requestedModelGroups: ['eis/a'],
+        perSpec: false,
+        grepOverride: true,
+      })
+    ).toEqual([{ connectorId: 'eis-a', shardId: '', specFiles: [], concurrencyGroup: 'heavy' }]);
+    expect(
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo: {},
+        requestedModelGroups: ['eis/a'],
+        perSpec: false,
+        grepOverride: true,
+      })
+    ).toEqual([{ connectorId: 'eis-a', shardId: '', specFiles: [] }]);
+  });
+
   it('selects every provisioned connector for an "all" request', () => {
     const rows = buildFanoutMatrix({
       connectors: CONNECTORS,

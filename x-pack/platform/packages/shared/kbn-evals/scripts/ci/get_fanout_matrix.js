@@ -93,23 +93,44 @@ const assertListedModelsHaveConnectors = (connectors, groups) => {
 
 // A shard's `judge` pins the evaluation connector of its steps; otherwise the suite-wide judge applies.
 // A shard's `concurrencyGroup` names the suite group its steps share a concurrency limit in.
-const shardFields = (shard) => {
+// A step that isn't one shard (a grep run, or a suite without shards) can run any spec, so it takes
+// the suite's tightest group rather than the suite-wide limit.
+const shardConcurrencyGroup = (shard, concurrencyGroups) => {
+  const named = typeof shard?.concurrencyGroup === 'string' ? shard.concurrencyGroup.trim() : '';
+  if (named) return named;
+  if (shard?.id) return '';
+  return tightestConcurrencyGroup(concurrencyGroups);
+};
+
+const shardFields = (shard, concurrencyGroups) => {
   const judge = typeof shard?.judge === 'string' ? shard.judge.trim() : '';
-  const concurrencyGroup =
-    typeof shard?.concurrencyGroup === 'string' ? shard.concurrencyGroup.trim() : '';
+  const concurrencyGroup = shardConcurrencyGroup(shard, concurrencyGroups);
   return { ...(judge ? { judge } : {}), ...(concurrencyGroup ? { concurrencyGroup } : {}) };
+};
+
+// The suite concurrency group with the lowest limit, or '' when the suite defines none.
+const tightestConcurrencyGroup = (concurrencyGroups) => {
+  const [tightest] = Object.entries(
+    concurrencyGroups && typeof concurrencyGroups === 'object' ? concurrencyGroups : {}
+  ).sort(([, left], [, right]) => left - right);
+  return tightest ? tightest[0] : '';
 };
 
 // Connector x shard: every requested connector runs every spec file in each shard, or the whole
 // suite (one step per connector, empty specFiles) when there are no shards.
-function buildConnectorShardMatrix({ connectors, shards, requestedModelGroups }) {
+function buildConnectorShardMatrix({
+  connectors,
+  shards,
+  requestedModelGroups,
+  concurrencyGroups,
+}) {
   const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);
   const effectiveShards = shards.length === 0 ? [{ id: '', specFiles: [] }] : shards;
   const rows = [];
   for (const shard of effectiveShards) {
     const shardId = shard.id || '';
     const specFiles = Array.isArray(shard.specFiles) ? shard.specFiles : [];
-    const fields = shardFields(shard);
+    const fields = shardFields(shard, concurrencyGroups);
     for (const connectorId of connectorIds) {
       rows.push({ connectorId, shardId, specFiles, ...fields });
     }
@@ -146,7 +167,12 @@ function buildFanoutMatrix({
 
   if (!perSpec) {
     const shards = grepOverride ? [] : configuredShards;
-    return buildConnectorShardMatrix({ connectors, shards, requestedModelGroups });
+    return buildConnectorShardMatrix({
+      connectors,
+      shards,
+      requestedModelGroups,
+      concurrencyGroups: suiteInfo.concurrencyGroups,
+    });
   }
 
   const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);
@@ -173,7 +199,7 @@ function buildFanoutMatrix({
   for (const batch of batches) {
     const shardId = batch.id || '';
     const batchFiles = Array.isArray(batch.specFiles) ? batch.specFiles : [];
-    const fields = shardFields(batch);
+    const fields = shardFields(batch, suiteInfo.concurrencyGroups);
     for (const connectorId of connectorIds) {
       const connector = connectors[connectorId];
       const specFiles = batchFiles.filter((file) =>

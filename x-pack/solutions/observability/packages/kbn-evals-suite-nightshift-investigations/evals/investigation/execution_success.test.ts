@@ -9,6 +9,7 @@ import {
   assertExecutionSuccessRate,
   executionSuccessEvaluator,
   getExecutionFailure,
+  getMinExecutionSuccessRate,
   MIN_SLICE_EXECUTION_SUCCESS_RATE,
 } from './execution_success';
 import { NO_CONCLUSION_ERROR } from './task';
@@ -86,6 +87,14 @@ describe('assertExecutionSuccessRate', () => {
     expect(() =>
       assertExecutionSuccessRate(Array(5).fill(failure), 10, MIN_SLICE_EXECUTION_SUCCESS_RATE)
     ).toThrow('5 of 10 investigations completed (50%), below the 60% threshold');
+  });
+
+  it('relaxes the gate only for a slice too small for the full-run rate', () => {
+    expect(getMinExecutionSuccessRate({ sliced: true, runs: 10 })).toBe(
+      MIN_SLICE_EXECUTION_SUCCESS_RATE
+    );
+    expect(getMinExecutionSuccessRate({ sliced: true, runs: 94 })).toBe(0.8);
+    expect(getMinExecutionSuccessRate({ sliced: false, runs: 10 })).toBe(0.8);
   });
 
   it('fails a single-case dataset whose only run failed, and an empty run', () => {

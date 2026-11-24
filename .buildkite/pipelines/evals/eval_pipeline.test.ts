@@ -306,6 +306,14 @@ describe('eval_pipeline', () => {
     });
   });
 
+  it('waits for pre_build as well as build, which is skipped when the PR artifact is reused', () => {
+    const group = parseStep(
+      getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string
+    );
+
+    expect(group.depends_on).toEqual(['pre_build', 'build']);
+  });
+
   describe('getEvalPipeline Scout arch/domain', () => {
     it("passes the suite's scoutArch/scoutDomain to run_suite.sh", () => {
       const yaml = getEvalPipeline(
