@@ -13,6 +13,7 @@ import {
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { createClient, type AgentClient } from './client';
 import { createPersistedProviderFn, toInternalDefinition } from './provider';
+import { AvailabilityCache } from '../../common/availability_cache';
 
 jest.mock('./client');
 
@@ -152,6 +153,7 @@ describe('persisted agent provider', () => {
       logger: {} as never,
       availabilityByAgentId: new Map(),
       hiddenByAgentId: new Map(),
+      availabilityCache: new AvailabilityCache(),
     });
     const provider = await providerFactory({ request: {} as never, space: 'default' });
 
@@ -175,6 +177,7 @@ describe('persisted agent provider', () => {
         logger: {} as never,
         availabilityByAgentId: new Map(),
         hiddenByAgentId: new Map(),
+        availabilityCache: new AvailabilityCache(),
       })({ request: {} as never, space: 'default' });
 
       const agent = await provider.get(gatedAgent.id);
@@ -205,6 +208,7 @@ describe('persisted agent provider', () => {
         logger: {} as never,
         availabilityByAgentId,
         hiddenByAgentId: new Map(),
+        availabilityCache: new AvailabilityCache(),
       })({ request: {} as never, space: 'default' });
 
       const agent = await provider.get(gatedAgent.id);
@@ -236,6 +240,7 @@ describe('persisted agent provider', () => {
         logger: {} as never,
         availabilityByAgentId,
         hiddenByAgentId: new Map(),
+        availabilityCache: new AvailabilityCache(),
       })({ request: {} as never, space: 'default' });
 
       const agent = await provider.get(gatedAgent.id);

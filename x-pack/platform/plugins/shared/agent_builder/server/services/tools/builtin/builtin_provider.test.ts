@@ -14,6 +14,7 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { createBuiltinProviderFn } from './builtin_provider';
 import { createBuiltinToolRegistry } from './builtin_registry';
+import { AvailabilityCache } from '../../common/availability_cache';
 import type { BuiltinToolTypeDefinition } from '../tool_types/definitions';
 
 const builtinDefinition: BuiltinToolTypeDefinition = {
@@ -57,10 +58,11 @@ describe('createBuiltinProviderFn', () => {
       toolTypes: [builtinDefinition],
       uiSettings: uiSettingsServiceMock.createStartContract(),
       savedObjects: savedObjectsServiceMock.createStartContract(),
+      availabilityCache: new AvailabilityCache(),
     });
   };
 
-  it('reuses cached availability results across the providers it creates', async () => {
+  it('shares the availability cache it is given across the providers it creates', async () => {
     const handler = jest
       .fn<Promise<ToolAvailabilityResult>, [ToolAvailabilityContext]>()
       .mockResolvedValue({ status: 'available' });
@@ -82,40 +84,6 @@ describe('createBuiltinProviderFn', () => {
     await secondTool.isAvailable(createAvailabilityContext('default'));
 
     expect(handler).toHaveBeenCalledTimes(1);
-  });
-
-  it('caches per principal for the space-user cache mode', async () => {
-    const handler = jest
-      .fn<Promise<ToolAvailabilityResult>, [ToolAvailabilityContext]>()
-      .mockResolvedValue({ status: 'available' });
-    const registry = createBuiltinToolRegistry();
-    registry.register(createTool({ handler, cacheMode: 'space-user' }));
-    const providerFn = createBuiltinProviderFn({
-      registry,
-      toolTypes: [builtinDefinition],
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      savedObjects: savedObjectsServiceMock.createStartContract(),
-      getPrincipalKey: (request) => String(request.headers['x-test-principal']),
-    });
-
-    const createPrincipalContext = (principal: string): ToolAvailabilityContext => ({
-      request: httpServerMock.createKibanaRequest({ headers: { 'x-test-principal': principal } }),
-      uiSettings: uiSettingsServiceMock.createClient(),
-      spaceId: 'default',
-    });
-
-    const provider = await providerFn({
-      request: httpServerMock.createKibanaRequest(),
-      space: 'default',
-    });
-    const tool = await provider.get(toolId);
-
-    await tool.isAvailable(createPrincipalContext('jane'));
-    await tool.isAvailable(createPrincipalContext('jane'));
-    expect(handler).toHaveBeenCalledTimes(1);
-
-    await tool.isAvailable(createPrincipalContext('john'));
-    expect(handler).toHaveBeenCalledTimes(2);
   });
 
   it('does not reuse a space-scoped result for another space', async () => {

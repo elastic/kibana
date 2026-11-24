@@ -24,24 +24,22 @@ import type {
 } from '../tool_types/definitions';
 import { isDisabledDefinition } from '../tool_types/definitions';
 import { convertTool } from './converter';
-import { ToolAvailabilityCache } from './availability_cache';
-import type { PrincipalKeyResolver } from '../../common/principal_key';
+import type { AvailabilityCache } from '../../common/availability_cache';
 
 export const createBuiltinProviderFn = ({
   registry,
   toolTypes,
   uiSettings,
   savedObjects,
-  getPrincipalKey,
+  availabilityCache,
 }: {
   registry: BuiltinToolRegistry;
   toolTypes: AnyToolTypeDefinition[];
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
-  getPrincipalKey?: PrincipalKeyResolver;
+  /** Owned by the caller, so that availability results are reused across requests. */
+  availabilityCache: AvailabilityCache;
 }): ToolProviderFn<true> => {
-  // Shared by every provider, so that availability results are reused across requests.
-  const availabilityCache = new ToolAvailabilityCache({ getPrincipalKey });
   return async ({ request, space }) => {
     return createBuiltinToolProvider({
       registry,
@@ -70,7 +68,7 @@ export const createBuiltinToolProvider = ({
   space: string;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
-  availabilityCache: ToolAvailabilityCache;
+  availabilityCache: AvailabilityCache;
 }): ReadonlyToolProvider => {
   const definitionMap = toolTypes
     .filter((def) => !isDisabledDefinition(def))

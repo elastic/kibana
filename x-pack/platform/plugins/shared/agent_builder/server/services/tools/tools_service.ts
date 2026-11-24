@@ -31,6 +31,7 @@ import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
 import { createToolHealthClient } from './health';
 import type { AgentBuilderConfig } from '../../config';
+import { AvailabilityCache } from '../common/availability_cache';
 import type { PrincipalKeyResolver } from '../common/principal_key';
 
 export interface ToolsServiceSetupDeps {
@@ -107,12 +108,15 @@ export class ToolsService {
         .map((def) => def.toolType)
     );
 
+    // Created once per service start, so that availability results are reused across requests.
+    const availabilityCache = new AvailabilityCache({ getPrincipalKey });
+
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
       uiSettings,
       savedObjects,
-      getPrincipalKey,
+      availabilityCache,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,

@@ -9,13 +9,13 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import { toInternalDefinition } from './provider';
-import { AgentAvailabilityCache } from './availability_cache';
+import { AvailabilityCache } from '../../common/availability_cache';
 
 describe('toInternalDefinition', () => {
   const convert = (definition: BuiltInAgentDefinition) => {
     return toInternalDefinition({
       definition,
-      availabilityCache: new AgentAvailabilityCache(),
+      availabilityCache: new AvailabilityCache(),
       configContext: { request: httpServerMock.createKibanaRequest(), spaceId: 'default' },
     });
   };

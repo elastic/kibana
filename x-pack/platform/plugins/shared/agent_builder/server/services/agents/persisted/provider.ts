@@ -19,33 +19,28 @@ import {
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { GetAgentOptions, WritableAgentProvider, AgentProviderFn } from '../agent_source';
 import type { ToolsServiceStart } from '../../tools';
-import { AgentAvailabilityCache } from '../builtin/availability_cache';
-import type { PrincipalKeyResolver } from '../../common/principal_key';
+import type { AvailabilityCache } from '../../common/availability_cache';
 import { createClient } from './client';
 import type { AgentClient } from './client';
 import type { InternalAgentDefinition } from '../agent_registry';
 import type { PersistedAgentDefinitionWithPermissions } from './types';
 import { getDefaultAgentCreateRequest } from '../default_agent_definition';
 
-export const createPersistedProviderFn = ({
-  getPrincipalKey,
-  ...opts
-}: {
+export const createPersistedProviderFn = (opts: {
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
   logger: Logger;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
   hiddenByAgentId: Map<string, boolean>;
-  getPrincipalKey?: PrincipalKeyResolver;
+  /** Owned by the caller, so that availability results are reused across requests. */
+  availabilityCache: AvailabilityCache;
 }): AgentProviderFn<false> => {
-  const availabilityCache = new AgentAvailabilityCache({ getPrincipalKey });
   return ({ request, space }) => {
     return createPersistedProvider({
       ...opts,
       request,
       space,
-      availabilityCache,
     });
   };
 };
@@ -75,7 +70,7 @@ const createPersistedProvider = async ({
   logger: Logger;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
   hiddenByAgentId: Map<string, boolean>;
-  availabilityCache: AgentAvailabilityCache;
+  availabilityCache: AvailabilityCache;
 }): Promise<WritableAgentProvider> => {
   const client = await createClient({
     elasticsearch,
@@ -204,7 +199,7 @@ export const toInternalDefinition = ({
   definition: PersistedAgentDefinitionWithPermissions;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
   hiddenByAgentId: Map<string, boolean>;
-  availabilityCache: AgentAvailabilityCache;
+  availabilityCache: AvailabilityCache;
 }): InternalAgentDefinition => {
   const type = definition.type ?? chatAgentTypeId;
   const isSystemCreated = definition.created_by?.username === SYSTEM_USER_ID;

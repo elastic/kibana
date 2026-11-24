@@ -34,6 +34,7 @@ import type {
 } from './types';
 import type { AgentsUsingSkillsResult, AgentsUsingToolsResult } from './persisted/types';
 import type { ToolsServiceStart } from '../tools';
+import { AvailabilityCache } from '../common/availability_cache';
 import type { PrincipalKeyResolver } from '../common/principal_key';
 import {
   createBuiltinAgentRegistry,
@@ -154,9 +155,10 @@ export class AgentsService {
       logger,
     });
 
+    // Created once per service start, so that availability results are reused across requests.
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
-      getPrincipalKey,
+      availabilityCache: new AvailabilityCache({ getPrincipalKey }),
     });
     const persistedProviderFn = createPersistedProviderFn({
       elasticsearch,
@@ -165,7 +167,7 @@ export class AgentsService {
       logger,
       availabilityByAgentId: this.availabilityByAgentId,
       hiddenByAgentId: this.hiddenByAgentId,
-      getPrincipalKey,
+      availabilityCache: new AvailabilityCache({ getPrincipalKey }),
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {

@@ -11,17 +11,16 @@ import type { BuiltInAgentDefinition, AgentConfigContext } from '@kbn/agent-buil
 import type { BuiltinAgentRegistry } from './registry';
 import type { AgentProviderFn, GetAgentOptions, ReadonlyAgentProvider } from '../agent_source';
 import type { InternalAgentDefinition } from '../agent_registry';
-import { AgentAvailabilityCache } from './availability_cache';
-import type { PrincipalKeyResolver } from '../../common/principal_key';
+import type { AvailabilityCache } from '../../common/availability_cache';
 
 export const createBuiltinProviderFn = ({
   registry,
-  getPrincipalKey,
+  availabilityCache,
 }: {
   registry: BuiltinAgentRegistry;
-  getPrincipalKey?: PrincipalKeyResolver;
+  /** Owned by the caller, so that availability results are reused across requests. */
+  availabilityCache: AvailabilityCache;
 }): AgentProviderFn<true> => {
-  const availabilityCache = new AgentAvailabilityCache({ getPrincipalKey });
   return ({ request, space }) => {
     return registryToProvider({ registry, request, space, availabilityCache });
   };
@@ -36,7 +35,7 @@ const registryToProvider = ({
   registry: BuiltinAgentRegistry;
   request: KibanaRequest;
   space: string;
-  availabilityCache: AgentAvailabilityCache;
+  availabilityCache: AvailabilityCache;
 }): ReadonlyAgentProvider => {
   const configContext: AgentConfigContext = { request, spaceId: space };
 
@@ -70,7 +69,7 @@ export const toInternalDefinition = async ({
   configContext,
 }: {
   definition: BuiltInAgentDefinition;
-  availabilityCache: AgentAvailabilityCache;
+  availabilityCache: AvailabilityCache;
   configContext: AgentConfigContext;
 }): Promise<InternalAgentDefinition> => {
   const configuration =
