@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, renderHook, screen } from '@testing-library/react';
+import { act, fireEvent, renderHook, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateDetailsFlyoutDescriptor } from '@kbn/agent-builder-browser';
@@ -61,13 +61,19 @@ const renderBlocks = ({ header }: ConversationTemplateDetailsFlyoutDescriptor) =
  * Renders a module the way Agent Builder does: the descriptor inside the module's `Provider`, with
  * the footer actions as buttons.
  */
-const renderModule = (options: Partial<InvestigationDetailsFlyoutOptions>) => {
+const renderModule = (
+  options: Partial<InvestigationDetailsFlyoutOptions>,
+  initialConversation: Conversation = conversation()
+) => {
   const { Provider, useDetailsFlyout } = createInvestigationDetailsFlyoutModule({
     ...baseOptions,
     ...options,
   });
+  let setShown: (shown: Conversation) => void = () => {};
   const Flyout = () => {
-    const { footer } = useDetailsFlyout({ conversation: conversation(), isOpenedFromChat: false });
+    const [shown, setShownState] = React.useState(initialConversation);
+    setShown = setShownState;
+    const { footer } = useDetailsFlyout({ conversation: shown, isOpenedFromChat: false });
     return (
       <>
         {footer?.primary && (
@@ -77,11 +83,12 @@ const renderModule = (options: Partial<InvestigationDetailsFlyoutOptions>) => {
     );
   };
   if (!Provider) throw new Error('Expected a Provider');
-  return renderWithKibanaRenderContext(
+  renderWithKibanaRenderContext(
     <Provider>
       <Flyout />
     </Provider>
   );
+  return { showConversation: (shown: Conversation) => act(() => setShown(shown)) };
 };
 
 describe('useInvestigationDetailsFlyout', () => {
@@ -177,6 +184,24 @@ describe('useInvestigationDetailsFlyout', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close modal' }));
 
     expect(screen.queryByText('Escalation modal create')).not.toBeInTheDocument();
+  });
+
+  it('keeps an open escalation modal on the investigation the flyout shows now', () => {
+    const renderEscalationModal = jest.fn(({ investigation }) => (
+      <div>Escalating {investigation.title}</div>
+    ));
+    const { showConversation } = renderModule(
+      { renderEscalationModal },
+      conversation({ title: 'Untitled investigation' })
+    );
+    fireEvent.click(screen.getByRole('button', { name: OPEN_ESCALATION }));
+    expect(screen.getByText('Escalating Untitled investigation')).toBeInTheDocument();
+
+    showConversation(conversation({ title: 'Checkout errors traced to payment-service' }));
+
+    expect(
+      screen.getByText('Escalating Checkout errors traced to payment-service')
+    ).toBeInTheDocument();
   });
 
   it('hides Open an escalation from a user who may not escalate, inside the plugin Provider', () => {

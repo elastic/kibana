@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
@@ -15,6 +15,8 @@ import type {
   ConversationTemplateDetailsFlyoutRenderProps,
 } from '@kbn/agent-builder-browser';
 import type { EscalationModalRenderProps } from '../components/modals/investigation_action_modals';
+import type { EscalationModalMode } from '../components/modals/escalation_modal/types';
+import type { Investigation } from '../types';
 import { getHeaderBlocks, type HeaderBlockValues } from '../components/details/header_blocks';
 import { SEVERITY_COLORS, SEVERITY_LABELS } from '../components/details/severity';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
@@ -99,15 +101,18 @@ const useConversationTitle = ({ title }: TitleSlotRenderProps) => title;
 
 const useNoEscalationGate = () => true;
 
-type EscalationModalOpenProps = Omit<EscalationModalRenderProps, 'onClose'>;
+interface EscalationModalControls {
+  open: (mode: EscalationModalMode) => void;
+  showInvestigation: (investigation: Investigation) => void;
+}
 
-const EscalationModalContext = createContext<
-  ((props: EscalationModalOpenProps) => void) | undefined
->(undefined);
+const EscalationModalContext = createContext<EscalationModalControls | undefined>(undefined);
 
 /**
  * Renders the escalation modal the footer action opens. The flyout's footer is data, so the modal
- * is rendered here, around the flyout, where the module's `Provider` puts it.
+ * is rendered here, around the flyout, where the module's `Provider` puts it. The flyout hands over
+ * each investigation it renders, so an open modal follows it: a title generated while the modal
+ * loads reaches the escalation form.
  */
 const EscalationModalHost = ({
   renderEscalationModal,
@@ -116,12 +121,17 @@ const EscalationModalHost = ({
   renderEscalationModal: NonNullable<InvestigationDetailsFlyoutOptions['renderEscalationModal']>;
   children: React.ReactNode;
 }) => {
-  const [modalProps, setModalProps] = useState<EscalationModalOpenProps>();
-  const closeModal = useCallback(() => setModalProps(undefined), []);
+  const [mode, setMode] = useState<EscalationModalMode>();
+  const [investigation, setInvestigation] = useState<Investigation>();
+  const controls = useMemo<EscalationModalControls>(
+    () => ({ open: setMode, showInvestigation: setInvestigation }),
+    []
+  );
+  const closeModal = useCallback(() => setMode(undefined), []);
   return (
-    <EscalationModalContext.Provider value={setModalProps}>
+    <EscalationModalContext.Provider value={controls}>
       {children}
-      {modalProps && renderEscalationModal({ ...modalProps, onClose: closeModal })}
+      {mode && investigation && renderEscalationModal({ mode, investigation, onClose: closeModal })}
     </EscalationModalContext.Provider>
   );
 };
@@ -158,9 +168,12 @@ export const useInvestigationDetailsFlyout = (
   const canOpenEscalation = useCanOpenEscalation();
   const useTitle = context?.useTitle ?? useConversationTitle;
   const title = useTitle({ conversationId: conversation.id, title: conversation.title });
-  const openEscalationModal = useContext(EscalationModalContext);
+  const escalationModal = useContext(EscalationModalContext);
 
-  const investigation = conversationToInvestigation(conversation);
+  const investigation = useMemo(() => conversationToInvestigation(conversation), [conversation]);
+  useEffect(() => {
+    escalationModal?.showInvestigation(investigation);
+  }, [escalationModal, investigation]);
   const conversationId = conversation.id;
   const statusNode = renderStatus?.({
     conversationId,
@@ -215,12 +228,12 @@ export const useInvestigationDetailsFlyout = (
           'data-test-subj': 'investigationFlyoutOpenChat',
         },
       }),
-      ...(openEscalationModal &&
+      ...(escalationModal &&
         canOpenEscalation && {
           primary: {
             iconType: 'document',
             label: ACTIONS_TRANSLATIONS.buttons.openEscalation,
-            onClick: () => openEscalationModal({ mode: 'create', investigation }),
+            onClick: () => escalationModal.open('create'),
             'data-test-subj': 'investigationFlyoutOpenEscalation',
           },
         }),
