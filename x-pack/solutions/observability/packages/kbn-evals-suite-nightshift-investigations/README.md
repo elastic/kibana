@@ -314,6 +314,15 @@ investigation starts.
 5. After the merge, the next daily and weekly builds run the new cut. Its scores start a new
    series, so compare runs within one cut, not across cuts.
 
+To run a different stored dataset in CI as well, add an entry naming its shard, and add that shard
+to `evals.suites.json` if it is new. Each entry's id is also a `NIGHTSHIFT_DATASETS` selector,
+opt-in like `connector-probe`.
+
+Both datasets query the Customer-0 cluster live, so they run with the `default`
+[connector set](#connector-sets). Selecting them without it fails before any test runs, since
+without a connector the investigations would run without telemetry and score low instead of
+failing.
+
 ## PR evals gate
 
 The suite opts into the [evals decision on PRs](../../../../platform/packages/shared/kbn-evals/README.md#requiring-an-evals-decision-on-prs).
@@ -325,10 +334,11 @@ A PR that changes the investigation harness gets a failing `evals gate` check un
 
 The paths are under `requireDecisionOnPaths` in
 [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json). They include
-all of `nightshift_investigations/server` and `agentic_investigations/server`, plus the decision
-trees package, the managed workflow definitions and model resolution. They exclude tests, docs,
-online evals, and the server folders that don't change how the agent investigates: routes,
-telemetry, saved objects, purge, tracing, automations, investigation quotas and notifications.
+all of `nightshift_investigations/server` and `common`, and `agentic_investigations/server`, plus
+the decision trees package's code, the managed workflow definitions and model resolution. They
+exclude tests, docs, online evals, and the folders that don't change how the agent investigates:
+routes, telemetry, saved objects, purge, tracing, automations, investigation quotas,
+notifications, locators and the service account helpers.
 
 A new folder is gated by default, so nobody has to remember to add it. Only add an exclude for a
 folder that holds no prompts or agent logic; a config test fails if a folder exclude covers a
@@ -340,14 +350,14 @@ A run also has to pass the regression gate: `goal_pass` on the pinned golden cut
 `evals:accept-regression`. Other evaluators stay advisory in the comparison comment, and a missing
 or stale baseline never blocks.
 
-To run a different stored dataset in CI as well, add an entry naming its shard, and add that shard
-to `evals.suites.json` if it is new. Each entry's id is also a `NIGHTSHIFT_DATASETS` selector,
-opt-in like `connector-probe`.
+The verdict arrives about 1.5 hours after the PR's Kibana build, once all four shards finish, even
+though the gate only reads the golden one.
 
-Both datasets query the Customer-0 cluster live, so they run with the `default`
-[connector set](#connector-sets). Selecting them without it fails before any test runs, since
-without a connector the investigations would run without telemetry and score low instead of
-failing.
+The golden cut has 15 examples, and the daily baseline on `main` moves by up to about 0.2 between
+runs, so the thresholds aren't calibrated yet. Before `evals gate` becomes a required check, the
+gate is backtested on pairs of consecutive daily runs (`node scripts/evals compare <run> <run>`
+with the `--gate-*` flags). If it flags noise, the golden shard gets repetitions or the thresholds
+are raised.
 
 ## Connector sets
 

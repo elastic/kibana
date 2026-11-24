@@ -267,7 +267,10 @@ The weekly runs catch what the globs miss, such as prompts in a new package outs
 The `nightshift-investigations` entry is a worked example of both fields; its suite README explains
 [which paths it gates and why](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/README.md#pr-evals-gate).
 Owners of agents whose behaviour spans several plugins (for example Agent Builder) are welcome to
-opt in the same way; suites that don't opt in are never flagged.
+opt in the same way; suites that don't opt in are never flagged. When you opt in, add your suite
+and a few real paths to
+[`evals_gate_scenarios.test.ts`](../../../../../.buildkite/pipelines/evals/evals_gate_scenarios.test.ts),
+which runs the gate against the real config.
 
 The eval trigger step reads the labels again once the PR's Kibana build step finishes, so a run
 label added before then takes effect. A label added after that needs a new push or a `/ci` comment.

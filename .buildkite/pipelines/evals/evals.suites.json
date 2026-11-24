@@ -159,8 +159,10 @@
       "requireDecisionOnPaths": {
         "include": [
           "x-pack/solutions/observability/plugins/nightshift_investigations/server/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/common/**",
           "x-pack/platform/plugins/shared/agentic_investigations/server/**",
-          "x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/**",
+          "x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/src/**",
+          "x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/index.ts",
           "src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/**",
           "x-pack/platform/packages/shared/kbn-nightshift-ai/src/resolve_nightshift_model*.ts"
         ],
@@ -181,7 +183,12 @@
           "x-pack/solutions/observability/plugins/nightshift_investigations/server/tracing/**",
           "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/automations/**",
           "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/investigation_quotas/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/notifications/**"
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/notifications/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/common/automation_*.ts",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/common/investigation_quotas/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/common/locators/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/common/purge.ts",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/common/service_account.ts"
         ]
       },
       "regressionGate": {

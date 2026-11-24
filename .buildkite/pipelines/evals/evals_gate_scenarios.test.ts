@@ -71,6 +71,7 @@ const touchedSuites = (changedFiles: string[]): string[] =>
     .map(({ id }) => id);
 
 describe('evals gate against evals.suites.json', () => {
+  // A suite that opts in adds itself here, with scenarios for its own paths below.
   it('only Nightshift Investigations requires a decision so far', () => {
     expect(suites.filter((suite) => suite.requireDecisionOnPaths).map(({ id }) => id)).toEqual([
       'nightshift-investigations',
@@ -107,6 +108,15 @@ describe('evals gate against evals.suites.json', () => {
         `${NIGHTSHIFT}/server/lib/investigation_quotas/consume.ts`,
         `${NIGHTSHIFT}/server/lib/automations/schemas.ts`,
         `${NIGHTSHIFT}/server/lib/notifications/slack_notification.ts`,
+        `${NIGHTSHIFT}/common/locators/investigation_locator.ts`,
+        `${NIGHTSHIFT}/common/automation_schedule.ts`,
+      ],
+    ],
+    [
+      'decision trees package config',
+      [
+        'x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/moon.yml',
+        'x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/tsconfig.json',
       ],
     ],
   ])('passes %s changes without a decision or a trigger step', async (_label, files) => {
@@ -134,6 +144,7 @@ describe('evals gate against evals.suites.json', () => {
       'the investigation message builder',
       `${NIGHTSHIFT}/server/client/build_investigation_message.ts`,
     ],
+    ['the shared custom context definitions', `${NIGHTSHIFT}/common/custom_context.ts`],
     // Not a real folder: a new one is gated by default, without anyone updating the config.
     ['a prompt in a brand-new folder', `${NIGHTSHIFT}/server/new_feature/prompts/system.md.text`],
   ])('requires a Nightshift decision for changes to %s', async (_label, file) => {
