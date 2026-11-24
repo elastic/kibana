@@ -12,6 +12,7 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
+import { getApmIndices } from './get_apm_indices';
 
 export interface ApmResources {
   apmEventClient: APMEventClient;
@@ -33,9 +34,8 @@ export async function buildApmResources({
   logger: Logger;
 }): Promise<ApmResources> {
   const [coreStart] = await core.getStartServices();
-  const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-  const indices = await plugins.apmDataAccess.getApmIndices(savedObjectsClient);
+  const indices = await getApmIndices({ core, plugins, request, logger });
 
   const apmEventClient = new APMEventClient({
     esClient,
