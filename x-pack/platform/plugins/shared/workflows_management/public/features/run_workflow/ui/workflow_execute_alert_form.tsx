@@ -176,6 +176,7 @@ export const WorkflowExecuteAlertForm = ({
 
   const {
     query,
+    draftQuery,
     timeRange,
     handleQueryChange,
     handleQuerySubmit,
@@ -277,6 +278,7 @@ export const WorkflowExecuteAlertForm = ({
             onQueryChange={handleQueryChange}
             onQuerySubmit={handleQuerySubmit}
             query={query}
+            draft={{ query: draftQuery }}
             indexPatterns={dataView ? [dataView] : []}
             showDatePicker={true}
             dateRangeFrom={timeRange.from}

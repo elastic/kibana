@@ -189,6 +189,7 @@ export const WorkflowExecuteIndexForm = ({
 
   const {
     query,
+    draftQuery,
     timeRange,
     submittedQueryString,
     handleQueryChange,
@@ -321,6 +322,7 @@ export const WorkflowExecuteIndexForm = ({
                 onQueryChange={handleQueryChange}
                 onQuerySubmit={handleQuerySubmit}
                 query={query}
+                draft={{ query: draftQuery }}
                 indexPatterns={selectedDataView ? [selectedDataView] : []}
                 showDatePicker={true}
                 dateRangeFrom={timeRange?.from || 'now-15m'}

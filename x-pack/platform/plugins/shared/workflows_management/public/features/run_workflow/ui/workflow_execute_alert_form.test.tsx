@@ -297,6 +297,32 @@ describe('WorkflowExecuteAlertForm', () => {
     );
   });
 
+  it('restores the unsubmitted query after the search bar remounts', async () => {
+    const renderForm = (isTableGridFullScreen: boolean) => (
+      <TestWrapper>
+        <WorkflowExecuteAlertForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+          isTableGridFullScreen={isTableGridFullScreen}
+        />
+      </TestWrapper>
+    );
+    const { getByTestId, queryByTestId, rerender } = render(renderForm(false));
+
+    await waitFor(() => {
+      expect(getByTestId('search-bar')).toBeInTheDocument();
+    });
+    fireEvent.change(getByTestId('query-input'), { target: { value: 'draft query' } });
+
+    rerender(renderForm(true));
+    expect(queryByTestId('search-bar')).not.toBeInTheDocument();
+    rerender(renderForm(false));
+
+    expect((getByTestId('query-input') as HTMLInputElement).value).toBe('draft query');
+  });
+
   it('calls setValue when an alert row is selected', async () => {
     const { findByTestId } = render(
       <TestWrapper>
