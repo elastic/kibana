@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { EsClient, KbnClient, ScoutTestConfig } from '@kbn/scout-security';
 import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
+import { timeoutSignal } from '@kbn/std';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import {
   AGENT_STATUS_ROUTE,
@@ -278,6 +279,7 @@ const pollHostIsolation = async ({
   let lastError: unknown;
   let lastAgentStatus: unknown;
   while (Date.now() < deadline) {
+    const signal = timeoutSignal(Math.max(deadline - Date.now(), 1));
     try {
       const response = await kbnClient.request<AgentStatusResponse>({
         method: 'GET',
@@ -288,7 +290,7 @@ const pollHostIsolation = async ({
         },
         // One attempt bounded by the remaining budget: the lock is held while this runs, and the loop retries.
         retries: 1,
-        signal: AbortSignal.timeout(Math.max(deadline - Date.now(), 1)),
+        signal,
       });
       lastAgentStatus = response.data;
 
@@ -297,6 +299,8 @@ const pollHostIsolation = async ({
       }
     } catch (error) {
       lastError = error;
+    } finally {
+      signal.dispose();
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1_000));
