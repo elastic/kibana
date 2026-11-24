@@ -17,14 +17,11 @@ import {
 import type { WorkflowInsightActionType } from '../../../../../common/endpoint/types/workflow_insights';
 import { apiTest, tags } from '../fixtures';
 
-const DEFEND_INSIGHTS_INDEX_PATTERN = '.kibana-elastic-ai-assistant-defend-insights-*';
-const CLEANUP_TIMEOUT_MS = 5_000;
-
 apiTest.describe(
   'Workflow insights APIs on Security Essentials',
   { tag: tags.serverless.security.essentials },
   () => {
-    // An id unique to this run matches no stored insight, and is the only key the cleanup deletes by.
+    // An id unique to this run matches no stored insight.
     const targetId = `scout-workflow-insights-${uuidv4()}`;
     let headers: Record<string, string>;
 
@@ -33,38 +30,6 @@ apiTest.describe(
       // gating, so a `*` role is the strictest case: if `admin` is denied, every role is.
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       headers = { ...cookieHeader, ...INTERNAL_API_HEADERS, 'kbn-xsrf': 'true' };
-    });
-
-    // A POST that slips past the gate and its endpoint checks writes a `running` defend insight
-    // before it reaches the connector; remove it so a regression leaves no data on a shared project.
-    // The background graph can update that doc mid-delete, and ES skips a conflicting doc, so retry
-    // (bounded) only when the first delete reports a conflict or failure.
-    apiTest.afterAll(async ({ esClient }) => {
-      const deleteInsights = async (): Promise<number> => {
-        const { version_conflicts: versionConflicts = 0, failures = [] } =
-          await esClient.deleteByQuery({
-            index: DEFEND_INSIGHTS_INDEX_PATTERN,
-            query: { terms: { endpoint_ids: [targetId] } },
-            conflicts: 'proceed',
-            ignore_unavailable: true,
-            allow_no_indices: true,
-            expand_wildcards: 'all',
-            refresh: true,
-          });
-        return versionConflicts + failures.length;
-      };
-
-      if ((await deleteInsights()) === 0) {
-        return;
-      }
-
-      await expect
-        .poll(deleteInsights, {
-          message: `Defend insights for ${targetId} were left behind after cleanup`,
-          timeout: CLEANUP_TIMEOUT_MS,
-          intervals: [500, 1_000, 2_000],
-        })
-        .toBe(0);
     });
 
     apiTest('denies reading workflow insights', async ({ apiClient }) => {
@@ -81,6 +46,8 @@ apiTest.describe(
       expect(response).toHaveStatusCode(403);
     });
 
+    // The PUT route is gated on `canReadWorkflowInsights` (not a write privilege), so this checks
+    // the same tier-gated read privilege as the GET above, not a separate write gate.
     apiTest('denies updating a workflow insight', async ({ apiClient }) => {
       const remediated: WorkflowInsightActionType = 'remediated';
 
