@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  formatNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
@@ -22,9 +23,15 @@ import {
   formatRateParts,
 } from '../../../services/unit_stats_client/format_stats';
 import type {
+  DeliverySeriesView,
   DestinationFailedView,
   FailureClassView,
 } from '../../../services/unit_stats_client/types';
+import {
+  UNKNOWN_STAT_VALUE,
+  formatDocsPerSec,
+  splitFormattedBytes,
+} from '../../stream_detail_overview/ingest_chart_statistics';
 import {
   getFailureClasses,
   getFailureRangeSubtitle,
@@ -38,8 +45,15 @@ import { StatCell } from '../../stream_detail_overview/stat_cell';
 import { DestinationFailureCausesTable } from './destination_failure_causes_table';
 import { FlyoutPanel } from './flyout_panel';
 
-/** Whether the destination reported anything about its failures: a `null` is not known. */
-const hasFailureData = ({ total, authentication, authorization }: DestinationFailedView): boolean =>
+/**
+ * Whether the destination attempted any deliveries: a failure figure of `0` means attempts that
+ * did not fail, and `null` means none were attempted.
+ */
+const hasDeliveryAttempts = ({
+  total,
+  authentication,
+  authorization,
+}: DestinationFailedView): boolean =>
   [total, authentication, authorization].some(
     ({ percentage, rate }) => percentage !== null || rate !== null
   );
@@ -116,6 +130,105 @@ function FailureClassCauses({
         dataTestSubj={dataTestSubj}
       />
     </div>
+  );
+}
+
+/** What the panel shows above the delivery, for a destination that writes to indices. */
+export interface DeliveryTotalsInput {
+  /**
+   * The documents written to the indices listed below it, so it adds up with their Docs written
+   * column. Undefined when unknown.
+   */
+  documents: { count?: number; loading: boolean };
+  /** Omitted where storage is not reported, such as on serverless. */
+  storage?: {
+    /** Undefined when unknown. */
+    bytes?: number;
+    loading: boolean;
+  };
+}
+
+/** The highest delivered count of a bucket of the chart, per second. */
+const peakDeliveryRate = (series: DeliverySeriesView | undefined): number | undefined => {
+  if (!series) {
+    return undefined;
+  }
+  const delivered = series.points.map(({ total, failed }) => Math.max(0, total - failed));
+  const bucketSec = series.bucketMs / 1000;
+  return delivered.length > 0 && bucketSec > 0 ? Math.max(...delivered) / bucketSec : 0;
+};
+
+/**
+ * The documents written to the indices listed below, the peak rate of the delivery chart, and
+ * the storage of those indices.
+ */
+function DeliveryTotals({
+  series,
+  documents,
+  storage,
+}: {
+  series: DeliverySeriesView | undefined;
+  documents: DeliveryTotalsInput['documents'];
+  storage: DeliveryTotalsInput['storage'];
+}) {
+  const peakRate = peakDeliveryRate(series);
+  const storageParts =
+    storage?.bytes === undefined ? undefined : splitFormattedBytes(storage.bytes);
+
+  return (
+    <>
+      <EuiFlexGroup responsive wrap={false} gutterSize="xl">
+        <StatCell
+          data-test-subj="streamsDestinationWrittenDocs"
+          title={i18n.translate('xpack.streams.destinations.delivery.writtenDocsLabel', {
+            defaultMessage: 'Docs written',
+          })}
+          value={
+            documents.loading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : documents.count === undefined ? (
+              UNKNOWN_STAT_VALUE
+            ) : (
+              formatNumber(documents.count, '0,0')
+            )
+          }
+          unit={
+            documents.loading
+              ? undefined
+              : i18n.translate('xpack.streams.destinations.delivery.writtenDocsUnit', {
+                  defaultMessage: 'docs',
+                })
+          }
+        />
+        <StatCell
+          data-test-subj="streamsDestinationPeakDeliveryRate"
+          title={i18n.translate('xpack.streams.destinations.delivery.peakRateLabel', {
+            defaultMessage: 'Peak delivery rate',
+          })}
+          value={peakRate === undefined ? UNKNOWN_STAT_VALUE : formatDocsPerSec(peakRate)}
+          unit={i18n.translate('xpack.streams.destinations.delivery.peakRateUnit', {
+            defaultMessage: 'docs/sec',
+          })}
+        />
+        {storage && (
+          <StatCell
+            data-test-subj="streamsDestinationStorageSize"
+            title={i18n.translate('xpack.streams.destinations.delivery.storageSizeLabel', {
+              defaultMessage: 'Storage size',
+            })}
+            value={
+              storage.loading ? (
+                <EuiLoadingSpinner size="m" />
+              ) : (
+                storageParts?.value ?? UNKNOWN_STAT_VALUE
+              )
+            }
+            unit={storage.loading ? undefined : storageParts?.unit}
+          />
+        )}
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="m" />
+    </>
   );
 }
 
@@ -226,13 +339,11 @@ function OtherFailuresOnly({ chart }: { chart: React.ReactNode }) {
 function DeliveryOutcome({
   failed,
   hasPartialError,
-  panelRole,
   destinationType,
   chart,
 }: {
   failed: DestinationFailedView;
   hasPartialError: boolean;
-  panelRole: DestinationDeliveryPanelRole;
   destinationType: string;
   chart: React.ReactNode;
 }) {
@@ -246,24 +357,23 @@ function DeliveryOutcome({
 
   if (hasFailures(failed.total)) return <OtherFailuresOnly chart={chart} />;
 
-  if (hasFailureData(failed)) {
-    // A delivery panel shows what was delivered and says nothing about failures. A failures panel
-    // says that none failed.
-    if (panelRole === 'delivery' && chart) return <>{chart}</>;
-
+  if (!hasDeliveryAttempts(failed)) {
     return (
-      <EmptyStateMessage dataTestSubj="streamsDestinationFailuresNone">
-        {i18n.translate('xpack.streams.destinations.failures.noFailures', {
-          defaultMessage: 'No delivery failures in this time range.',
+      <EmptyStateMessage dataTestSubj="streamsDestinationFailuresNoData">
+        {i18n.translate('xpack.streams.destinations.failures.noData', {
+          defaultMessage: 'No delivery attempts in this time range.',
         })}
       </EmptyStateMessage>
     );
   }
 
+  // Attempts, and none failed: the chart shows what was delivered.
+  if (chart) return <>{chart}</>;
+
   return (
-    <EmptyStateMessage dataTestSubj="streamsDestinationFailuresNoData">
-      {i18n.translate('xpack.streams.destinations.failures.noData', {
-        defaultMessage: 'No delivery attempts in this time range.',
+    <EmptyStateMessage dataTestSubj="streamsDestinationFailuresNone">
+      {i18n.translate('xpack.streams.destinations.failures.noFailures', {
+        defaultMessage: 'No delivery failures in this time range.',
       })}
     </EmptyStateMessage>
   );
@@ -275,11 +385,9 @@ function DeliveryOutcome({
  * the delivery chart. Its subtitle says what the figures are a share of: `Of events for the
  * selected time range`.
  *
- * The panel has one of two roles. A `failures` panel adds the failures to a flyout that already
- * shows delivery in a chart above, as a local Elasticsearch destination does. When nothing failed,
- * it says so. A `delivery` panel is the delivery of the flyout. It has a neutral title, brings its
- * own time picker, and when nothing failed it shows what was delivered. In both, nothing attempted
- * is said as such.
+ * It brings its own time picker. When nothing failed it shows what was delivered, and nothing
+ * attempted is said as such. With `totals`, the panel starts with the documents delivered, as for
+ * a local Elasticsearch destination.
  *
  * It is always there, so that the picker is always within reach: a range with no data must not take
  * away the control that changes it. It also says when it could not load. A part that could not
@@ -288,11 +396,11 @@ function DeliveryOutcome({
 export function DestinationDeliverySection({
   destinationId,
   destinationType,
-  panelRole,
+  totals,
 }: {
   destinationId: string;
   destinationType: string;
-  panelRole: DestinationDeliveryPanelRole;
+  totals?: DeliveryTotalsInput;
 }) {
   const { value, loading, error } = useDestinationFailures(destinationId);
   const { updateTimeRange } = useTimeRangeUpdate();
@@ -301,21 +409,19 @@ export function DestinationDeliverySection({
     <DestinationDeliveryView
       value={value}
       destinationType={destinationType}
-      panelRole={panelRole}
+      totals={totals}
       loading={loading}
       error={error}
-      showTimePicker={panelRole === 'delivery'}
+      showTimePicker
       onBrushEnd={updateTimeRange}
     />
   );
 }
 
-export type DestinationDeliveryPanelRole = 'failures' | 'delivery';
-
 export function DestinationDeliveryView({
   value,
   destinationType,
-  panelRole,
+  totals,
   loading,
   error,
   showTimePicker,
@@ -323,7 +429,7 @@ export function DestinationDeliveryView({
 }: {
   value: ReturnType<typeof useDestinationFailures>['value'];
   destinationType: string;
-  panelRole: DestinationDeliveryPanelRole;
+  totals?: DeliveryTotalsInput;
   loading: boolean;
   error?: Error;
   showTimePicker: boolean;
@@ -364,10 +470,16 @@ export function DestinationDeliveryView({
     return (
       <>
         {partialError !== undefined && <PartialErrorCallout reason={partialError} />}
+        {totals && (
+          <DeliveryTotals
+            series={failed.series}
+            documents={totals.documents}
+            storage={totals.storage}
+          />
+        )}
         <DeliveryOutcome
           failed={failed}
           hasPartialError={partialError !== undefined}
-          panelRole={panelRole}
           destinationType={destinationType}
           chart={chart}
         />
@@ -378,15 +490,9 @@ export function DestinationDeliveryView({
   return (
     <FlyoutPanel
       data-test-subj="streamsDestinationDeliverySection"
-      title={
-        panelRole === 'failures'
-          ? i18n.translate('xpack.streams.destinations.failures.title', {
-              defaultMessage: 'Delivery failures',
-            })
-          : i18n.translate('xpack.streams.destinations.failures.titleDelivery', {
-              defaultMessage: 'Delivery',
-            })
-      }
+      title={i18n.translate('xpack.streams.destinations.failures.titleDelivery', {
+        defaultMessage: 'Delivery',
+      })}
       subtitle={
         // What the figures are a share of is said here once, so the stats carry no noun. Without
         // failures there are no figures to name.

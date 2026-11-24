@@ -155,9 +155,52 @@ describe('destinationsStateMachine', () => {
 
     expect(fetch).toHaveBeenCalledWith(
       'GET /internal/streams/unit/{id}/_resolve_indices',
-      expect.objectContaining({ params: { path: { id: 'edge' } } })
+      expect.objectContaining({
+        params: {
+          path: { id: 'edge' },
+          query: { start: '1970-01-01T00:00:00.000Z', end: '1970-01-01T00:00:01.000Z' },
+        },
+      })
     );
     unitActor.stop();
+  });
+
+  const resolveIndicesCalls = () =>
+    fetch.mock.calls.filter(([endpoint]: [string]) => endpoint.includes('/_resolve_indices'));
+
+  it('resolves indices once at start, for the page time range', async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+
+    expect(resolveIndicesCalls()).toHaveLength(1);
+  });
+
+  it('resolves indices again for a new time range, and keeps the previous ones meanwhile', async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    fetch.mockResolvedValueOnce({
+      destinations: { 'es-1': { indices: [{ name: 'logs-old', is_data_stream: false }] } },
+    });
+    actor.send({ type: 'resolvedIndices.reload' });
+    await waitFor(actor, (snapshot) => snapshot.context.resolvedIndicesByDestination.has('es-1'));
+    fetch.mockClear();
+
+    emitTimeState('shift', '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:02.000Z');
+
+    expect(actor.getSnapshot().matches({ resolvedIndices: 'loading' })).toBe(true);
+    expect(actor.getSnapshot().context.resolvedIndicesByDestination.get('es-1')).toEqual([
+      { name: 'logs-old', is_data_stream: false },
+    ]);
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    expect(resolveIndicesCalls()).toEqual([
+      [
+        'GET /internal/streams/unit/{id}/_resolve_indices',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            query: { start: '1970-01-01T00:00:00.000Z', end: '1970-01-01T00:00:02.000Z' },
+          }),
+        }),
+      ],
+    ]);
+    expect(actor.getSnapshot().context.resolvedIndicesByDestination.size).toBe(0);
   });
 
   it('ignores an invalid form', () => {
@@ -215,8 +258,12 @@ describe('destinationsStateMachine', () => {
     expect(resolveCalls[0][1].signal).toBeInstanceOf(AbortSignal);
   });
 
-  it('clears resolved indices while refreshing', async () => {
+  it.each([
+    ['a refresh', () => ({ type: 'resolvedIndices.reload' as const })],
+    ['a later unit load', () => ({ type: 'unit.loaded' as const, unitDefinition })],
+  ])('keeps the previous indices while %s reloads them, like a range change', async (_, event) => {
     await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({ type: 'unit.loaded', unitDefinition });
     fetch.mockResolvedValueOnce({
       destinations: {
         'es-1': { indices: [{ name: 'logs-old', is_data_stream: false }] },
@@ -224,12 +271,15 @@ describe('destinationsStateMachine', () => {
     });
     actor.send({ type: 'resolvedIndices.reload' });
     await waitFor(actor, (snapshot) => snapshot.context.resolvedIndicesByDestination.has('es-1'));
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
 
     fetch.mockResolvedValueOnce({ destinations: {} });
-    actor.send({ type: 'resolvedIndices.reload' });
+    actor.send(event());
 
-    expect(actor.getSnapshot().context.resolvedIndicesByDestination.size).toBe(0);
+    expect(actor.getSnapshot().matches({ resolvedIndices: 'loading' })).toBe(true);
+    expect(actor.getSnapshot().context.resolvedIndicesByDestination.has('es-1')).toBe(true);
     await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    expect(actor.getSnapshot().context.resolvedIndicesByDestination.size).toBe(0);
   });
 
   it('creates an S3 destination without minting an API key and sends the secrets to the parent', () => {
@@ -454,6 +504,18 @@ describe('destinationsStateMachine', () => {
 
   it('reloads the shown destinations when the time range changes or is refreshed', async () => {
     await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({
+      type: 'unit.loaded',
+      unitDefinition: {
+        ...unitDefinition,
+        unit: {
+          ...unitDefinition.unit,
+          destinations: [
+            { id: 'es-1', type: 'elasticsearch', supported_telemetry: ['logs' as const] },
+          ],
+        },
+      },
+    });
     actor.send({ type: 'destinationDetail.show', destinationId: 'es-1', viewerId: 'row' });
     const detailRef = actor.getSnapshot().context.destinationDetailRefs.get('es-1');
     if (!detailRef) {
@@ -463,13 +525,14 @@ describe('destinationsStateMachine', () => {
       waitFor(detailRef, (snapshot) => snapshot.matches({ indexStats: 'ready' }));
     await isReady();
 
+    // The stats wait for the indices of the new range, then load for it.
     emitTimeState('shift', '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:02.000Z');
-    expect(detailRef.getSnapshot().matches({ indexStats: 'loading' })).toBe(true);
+    expect(detailRef.getSnapshot().matches({ indexStats: 'pending' })).toBe(true);
     expect(detailRef.getSnapshot().context.indexStatsTimeRange).toEqual({ start: 0, end: 2000 });
     await isReady();
 
     emitTimeState('override', '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:02.000Z');
-    expect(detailRef.getSnapshot().matches({ indexStats: 'loading' })).toBe(true);
+    expect(detailRef.getSnapshot().matches({ indexStats: 'pending' })).toBe(true);
     await isReady();
   });
 

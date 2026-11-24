@@ -93,7 +93,6 @@ const renderView = (props: Partial<React.ComponentProps<typeof DestinationDelive
     <I18nProvider>
       <DestinationDeliveryView
         destinationType="elasticsearch"
-        panelRole="failures"
         loading={false}
         showTimePicker={false}
         value={undefined}
@@ -175,35 +174,27 @@ describe('DestinationDeliveryView', () => {
   describe('when nothing failed', () => {
     const healthy = entryWith({ ...noFailures, series: deliveredSeries });
 
-    it('says so, with no chart, in a failures panel, whatever its series', () => {
-      renderView({ panelRole: 'failures', value: healthy });
-
-      expect(screen.getByTestId('streamsDestinationFailuresNone').textContent).toBe(
-        'No delivery failures in this time range.'
-      );
-      expect(isShown('streamsDestinationDeliveryChart')).toBe(false);
-      // There are no failures to be a share of, so the subtitle names nothing.
-      expect(screen.getByText('For the selected time range')).toBeInTheDocument();
-    });
-
-    it('shows what was delivered, and says nothing about failures, in a delivery panel', () => {
-      renderView({ panelRole: 'delivery', value: healthy });
+    it('shows what was delivered, and says nothing about failures', () => {
+      renderView({ value: healthy });
 
       expect(isShown('streamsDestinationDeliveryChart')).toBe(true);
       expect(isShown('streamsDestinationFailuresNone')).toBe(false);
       expect(isShown('streamsDestinationFailuresAuthentication')).toBe(false);
+      // There are no failures to be a share of, so the subtitle names nothing.
+      expect(screen.getByText('For the selected time range')).toBeInTheDocument();
     });
 
-    it('says that none failed in a delivery panel that has no series to show', () => {
-      renderView({ panelRole: 'delivery', value: entryWith(noFailures) });
+    it('says that none failed when there is no series to show', () => {
+      renderView({ value: entryWith(noFailures) });
 
       expect(isShown('streamsDestinationDeliveryChart')).toBe(false);
-      expect(isShown('streamsDestinationFailuresNone')).toBe(true);
+      expect(screen.getByTestId('streamsDestinationFailuresNone').textContent).toBe(
+        'No delivery failures in this time range.'
+      );
     });
 
-    it('says that none failed in a delivery panel whose series has no points', () => {
+    it('says that none failed when the series has no points', () => {
       renderView({
-        panelRole: 'delivery',
         value: entryWith({ ...noFailures, series: { ...deliveredSeries, points: [] } }),
       });
 
@@ -212,33 +203,27 @@ describe('DestinationDeliveryView', () => {
     });
   });
 
-  it.each(['failures', 'delivery'] as const)(
-    'says that nothing was attempted when the classes report nothing, in a %s panel',
-    (panelRole) => {
-      renderView({ panelRole, value: entryWith(EMPTY_DESTINATION_FAILED) });
+  it('says that nothing was attempted when the classes report nothing', () => {
+    renderView({ value: entryWith(EMPTY_DESTINATION_FAILED) });
 
-      expect(screen.getByTestId('streamsDestinationFailuresNoData').textContent).toBe(
-        'No delivery attempts in this time range.'
-      );
-      expect(isShown('streamsDestinationFailuresNone')).toBe(false);
-    }
-  );
+    expect(screen.getByTestId('streamsDestinationFailuresNoData').textContent).toBe(
+      'No delivery attempts in this time range.'
+    );
+    expect(isShown('streamsDestinationFailuresNone')).toBe(false);
+  });
 
   describe('when only failures of neither class exist, such as parse errors or 429 responses', () => {
     const otherOnly = entryWith({ ...noFailures, total: totalFailures, series: failedSeries });
 
-    it.each(['failures', 'delivery'] as const)(
-      'does not say that nothing failed, and shows the chart, in a %s panel',
-      (panelRole) => {
-        renderView({ panelRole, value: otherOnly });
+    it('does not say that nothing failed, and shows the chart', () => {
+      renderView({ value: otherOnly });
 
-        expect(screen.getByTestId('streamsDestinationFailuresNoClasses').textContent).toBe(
-          'No authentication or authorization failures in this time range.'
-        );
-        expect(isShown('streamsDestinationFailuresNone')).toBe(false);
-        expect(isShown('streamsDestinationDeliveryChart')).toBe(true);
-      }
-    );
+      expect(screen.getByTestId('streamsDestinationFailuresNoClasses').textContent).toBe(
+        'No authentication or authorization failures in this time range.'
+      );
+      expect(isShown('streamsDestinationFailuresNone')).toBe(false);
+      expect(isShown('streamsDestinationDeliveryChart')).toBe(true);
+    });
 
     it('says so without a chart when there is no series', () => {
       renderView({ value: entryWith({ ...noFailures, total: totalFailures }) });
@@ -262,17 +247,14 @@ describe('DestinationDeliveryView', () => {
       error: { code: 'error', reason: 'The stats query failed.' },
     };
 
-    it.each(['failures', 'delivery'] as const)(
-      'shows the chart next to the warning, in a %s panel',
-      (panelRole) => {
-        renderView({ panelRole, value: withWarning });
+    it('shows the chart next to the warning', () => {
+      renderView({ value: withWarning });
 
-        expect(isShown('streamsDestinationFailuresPartialError')).toBe(true);
-        expect(isShown('streamsDestinationDeliveryChart')).toBe(true);
-        expect(isShown('streamsDestinationFailuresNone')).toBe(false);
-        expect(isShown('streamsDestinationFailuresNoData')).toBe(false);
-      }
-    );
+      expect(isShown('streamsDestinationFailuresPartialError')).toBe(true);
+      expect(isShown('streamsDestinationDeliveryChart')).toBe(true);
+      expect(isShown('streamsDestinationFailuresNone')).toBe(false);
+      expect(isShown('streamsDestinationFailuresNoData')).toBe(false);
+    });
 
     it('shows only the warning when the series did not load either', () => {
       renderView({ value: fixtureEntry('partialFailure', 'es-dev') });
@@ -282,19 +264,10 @@ describe('DestinationDeliveryView', () => {
     });
   });
 
-  describe('the title', () => {
-    it('names the failures in a failures panel', () => {
-      renderView({ panelRole: 'failures', value: entryWith(EMPTY_DESTINATION_FAILED) });
+  it('has a neutral title, as it shows more than failures', () => {
+    renderView({ value: entryWith(EMPTY_DESTINATION_FAILED) });
 
-      expect(screen.getByRole('heading', { name: 'Delivery failures' })).toBeInTheDocument();
-    });
-
-    it('is neutral in a delivery panel, which shows more than failures', () => {
-      renderView({ panelRole: 'delivery', value: entryWith(EMPTY_DESTINATION_FAILED) });
-
-      expect(screen.getByRole('heading', { name: 'Delivery' })).toBeInTheDocument();
-      expect(screen.queryByRole('heading', { name: 'Delivery failures' })).not.toBeInTheDocument();
-    });
+    expect(screen.getByRole('heading', { name: 'Delivery' })).toBeInTheDocument();
   });
 
   it('warns about a part that could not load, and does not say there is no data for it', () => {
@@ -352,6 +325,73 @@ describe('DestinationDeliveryView', () => {
     expect(screen.getByTestId('streamsDestinationFailuresError').textContent).toContain(
       'Unavailable'
     );
+  });
+
+  describe('the totals', () => {
+    const twoBuckets: DeliverySeriesView = {
+      ...deliveredSeries,
+      points: [
+        ...deliveredSeries.points,
+        {
+          start: '2026-11-16T20:01:00.000Z',
+          total: 100,
+          failed: 40,
+          authentication: 0,
+          authorization: 0,
+        },
+      ],
+    };
+
+    const written = { count: 1234, loading: false };
+
+    it('show the documents written that they are given, and the peak delivery rate of the series', () => {
+      renderView({
+        value: entryWith({ ...noFailures, series: twoBuckets }),
+        totals: { documents: written },
+      });
+
+      expect(screen.getByTestId('streamsDestinationWrittenDocs')).toHaveTextContent('1,234');
+      expect(screen.getByTestId('streamsDestinationPeakDeliveryRate')).toHaveTextContent('1');
+      expect(isShown('streamsDestinationStorageSize')).toBe(false);
+    });
+
+    it('show the storage when it is given', () => {
+      renderView({
+        value: entryWith({ ...noFailures, series: twoBuckets }),
+        totals: { documents: written, storage: { bytes: 2048, loading: false } },
+      });
+      expect(screen.getByTestId('streamsDestinationStorageSize')).toHaveTextContent('KB');
+    });
+
+    it('show the documents written as loading while they are', () => {
+      renderView({
+        value: entryWith({ ...noFailures, series: twoBuckets }),
+        totals: { documents: { loading: true } },
+      });
+
+      const documents = screen.getByTestId('streamsDestinationWrittenDocs');
+      expect(documents).not.toHaveTextContent('docs');
+      expect(documents.querySelector('[role="progressbar"]')).toBeInTheDocument();
+    });
+
+    it('are unknown, not zero, when not known', () => {
+      renderView({
+        value: entryWith(noFailures),
+        totals: { documents: { loading: false }, storage: { loading: false } },
+      });
+
+      expect(screen.getByTestId('streamsDestinationWrittenDocs')).toHaveTextContent('-');
+      expect(screen.getByTestId('streamsDestinationPeakDeliveryRate')).toHaveTextContent('-');
+      expect(screen.getByTestId('streamsDestinationStorageSize')).toHaveTextContent('-');
+    });
+
+    it('are not there unless asked', () => {
+      renderView({
+        value: entryWith({ ...noFailures, series: twoBuckets }),
+      });
+
+      expect(isShown('streamsDestinationWrittenDocs')).toBe(false);
+    });
   });
 
   describe('the time picker', () => {
