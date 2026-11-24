@@ -45,7 +45,7 @@ $$$kibana-292914$$$
 
 **Impact**<br> `customFields` and legacy templates keep working as before. The API reference marks them as deprecated.
 
-**Action**<br> Use `extended_fields` in new integrations, and migrate existing clients and workflows that use `customFields`. To create or update templates, use `/api/cases/templates` instead of the case configuration `templates` setting.
+**Action**<br> Use `extended_fields` in new integrations, and migrate existing clients and workflows that use `customFields`. Instead of the case configuration `templates` setting, create templates with `POST /api/cases/templates` and update them with `PUT /api/cases/templates/{template_id}`.
 
 View [#292914]({{kib-pull}}292914).
 ::::
