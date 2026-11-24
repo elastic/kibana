@@ -62,11 +62,18 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   public async install(): Promise<void> {
     this.logger.debug('Installing SLO shared resources');
 
-    await Promise.all(
+    // Wait for every component template to settle so no ES call outlives the install lock.
+    const results = await Promise.allSettled(
       COMPONENT_TEMPLATES.map((template) =>
         this.installResource(template.name, () => this.createOrUpdateComponentTemplate(template))
       )
     );
+    const failure = results.find(
+      (result): result is PromiseRejectedResult => result.status === 'rejected'
+    );
+    if (failure) {
+      throw failure.reason;
+    }
 
     for (const template of INDEX_TEMPLATES) {
       await this.installResource(template.name, () => this.createOrUpdateIndexTemplate(template));
