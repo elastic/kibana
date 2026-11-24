@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { appendCategorizeToESQLQuery } from '@kbn/esql-utils';
 import { useScopedServices } from '../../../../components/scoped_services_provider/scoped_services_provider';
@@ -47,16 +47,25 @@ export const GroupSimilarMessagesButton = () => {
     return null;
   }
 
+  const label = i18n.translate('discover.esql.groupSimilarMessages.buttonLabel', {
+    defaultMessage: 'Find patterns',
+  });
+
   return (
-    <EuiButtonEmpty
-      size="xs"
-      iconType="aggregate"
-      onClick={onClick}
-      data-test-subj="dscGroupSimilarMessagesButton"
-    >
-      {i18n.translate('discover.esql.groupSimilarMessages.buttonLabel', {
-        defaultMessage: 'Group similar messages',
+    <EuiToolTip
+      content={i18n.translate('discover.esql.groupSimilarMessages.tooltip', {
+        defaultMessage: 'Group similar log messages into patterns to spot trends and anomalies.',
       })}
-    </EuiButtonEmpty>
+    >
+      <EuiBadge
+        color="primary"
+        iconType="bulb"
+        onClick={onClick}
+        onClickAriaLabel={label}
+        data-test-subj="dscGroupSimilarMessagesButton"
+      >
+        {label}
+      </EuiBadge>
+    </EuiToolTip>
   );
 };

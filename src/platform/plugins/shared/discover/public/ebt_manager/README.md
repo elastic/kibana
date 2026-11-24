@@ -124,7 +124,7 @@ Tracks entry points that group ES|QL results into patterns with `CATEGORIZE`.
 
 | Event name                       | Description                                                       |
 | -------------------------------- | ----------------------------------------------------------------- |
-| `group_similar_messages_clicked` | The "Group similar messages" button was clicked in ES\|QL mode. |
+| `group_similar_messages_clicked` | The "Find patterns" button was clicked in ES\|QL mode. |
 
 | Field       | Type      | Description                        |
 | ----------- | --------- | ---------------------------------- |
