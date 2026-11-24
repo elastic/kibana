@@ -25,10 +25,6 @@ import {
   MATCHING_DATA_STREAMS_TITLE,
   MATCHING_INDICES_TITLE,
   OUTRANKED_ICON_LABEL,
-  getAdditionalHiddenDataStreams,
-  getAdditionalHiddenIndices,
-  getHiddenDataStreams,
-  getHiddenIndices,
   getMatchesCount,
   getMatchesCountWithOutranked,
   getOutrankedTooltip,
@@ -40,24 +36,8 @@ export interface MatchesPopoverProps {
   isOpen: boolean;
   closePopover: () => void;
   type: BoostProfileType;
-  matches: ReadonlyArray<Pick<BoostRuleMatch, 'name' | 'isHidden' | 'outrankedByRuleName'>>;
+  matches: readonly BoostRuleMatch[];
 }
-
-const getHiddenLabel = (
-  type: BoostProfileType,
-  hiddenCount: number,
-  hasVisibleMatches: boolean
-): string => {
-  if (type === 'indices') {
-    return hasVisibleMatches
-      ? getAdditionalHiddenIndices(hiddenCount)
-      : getHiddenIndices(hiddenCount);
-  }
-
-  return hasVisibleMatches
-    ? getAdditionalHiddenDataStreams(hiddenCount)
-    : getHiddenDataStreams(hiddenCount);
-};
 
 const getListStyles = ({ base }: EuiThemeComputed) => css`
   min-width: ${base * 15}px;
@@ -79,8 +59,6 @@ export const MatchesPopover = ({
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'searchBoostMatchesPopoverTitle' });
 
-  const visibleMatches = matches.filter(({ isHidden }) => !isHidden);
-  const hiddenCount = matches.length - visibleMatches.length;
   const outrankedCount = matches.filter(({ outrankedByRuleName }) => outrankedByRuleName).length;
   const title = type === 'indices' ? MATCHING_INDICES_TITLE : MATCHING_DATA_STREAMS_TITLE;
 
@@ -104,7 +82,7 @@ export const MatchesPopover = ({
         </EuiText>
       </EuiPopoverTitle>
       <div css={getListStyles(euiTheme)} data-test-subj="searchBoostMatchesPopoverList">
-        {visibleMatches.map(({ name, outrankedByRuleName }) => (
+        {matches.map(({ name, outrankedByRuleName }) => (
           <EuiFlexGroup
             key={name}
             gutterSize="xs"
@@ -134,11 +112,6 @@ export const MatchesPopover = ({
             ) : null}
           </EuiFlexGroup>
         ))}
-        {hiddenCount > 0 ? (
-          <EuiText size="s" data-test-subj="searchBoostMatchesPopoverHidden">
-            <em>{getHiddenLabel(type, hiddenCount, visibleMatches.length > 0)}</em>
-          </EuiText>
-        ) : null}
       </div>
     </EuiPopover>
   );

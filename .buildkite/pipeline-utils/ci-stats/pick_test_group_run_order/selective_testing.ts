@@ -23,8 +23,14 @@ import type { MoonTestSelection } from '../../affected-packages/moon_test_tasks.
 
 const MAX_LOGGED_CRITICAL_FILES = 20;
 
-// Documentation files (README, *.md, CHANGELOG*) can't affect runtime behaviour.
-const DOCUMENTATION_IGNORE_PATTERNS = ['**/README*', '**/*.md', '**/CHANGELOG*'] as const;
+// Files that cannot affect Jest test behavior; limits.yml is validated in Build Kibana Distribution
+// and would otherwise fan out from @kbn/rspack-optimizer -> @kbn/storybook across UI packages.
+const JEST_SELECTIVE_IGNORE_PATTERNS = [
+  '**/README*',
+  '**/*.md',
+  '**/CHANGELOG*',
+  'packages/kbn-rspack-optimizer/limits.yml',
+] as const;
 
 /** Inputs shared by Jest package filtering and critical-file checks. */
 export interface SelectiveTestingContext {
@@ -40,7 +46,7 @@ export async function resolveSelectiveTestingContext(
     changedFiles,
     strategy: 'git',
     includeDownstream: true,
-    ignorePatterns: DOCUMENTATION_IGNORE_PATTERNS,
+    ignorePatterns: JEST_SELECTIVE_IGNORE_PATTERNS,
     ignoreUncategorizedChanges: true,
   }).catch((error) => {
     console.error('Error getting affected packages', error);
@@ -104,7 +110,7 @@ function filterByAffected(args: {
   // Docs are ignored here too, so a docs-only change in a critical package doesn't run everything.
   const matchedCriticalFiles = filterIgnoredFiles(
     context.changedFiles,
-    DOCUMENTATION_IGNORE_PATTERNS
+    JEST_SELECTIVE_IGNORE_PATTERNS
   ).filter(createScopeMatcher(criticalFiles));
   if (matchedCriticalFiles.length > 0) {
     const displayedFiles = matchedCriticalFiles.slice(0, MAX_LOGGED_CRITICAL_FILES);

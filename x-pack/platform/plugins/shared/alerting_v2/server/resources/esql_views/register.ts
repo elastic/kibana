@@ -27,7 +27,7 @@ export function registerEsqlViews({
   for (const viewDefinition of getEsqlViewDefinitions()) {
     const initializer = new ESQLViewInitializer(logger, esClient, viewDefinition);
 
-    resourceManager.registerResource(viewDefinition.key, initializer, { optional: true });
+    resourceManager.registerResource(viewDefinition.key, initializer);
   }
 }
 

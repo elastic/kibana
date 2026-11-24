@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Position } from '@elastic/charts';
+import type { ChartPosition } from '@kbn/chart-expressions-common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export interface AxisPolicyMember {
@@ -47,7 +47,7 @@ interface AxisFormatMismatch {
 export interface AxisFormatPolicy {
   /** `left`, `right`, or `axis-${id}` for an explicit Y-axis config. */
   groupId: string;
-  position: typeof Position.Left | typeof Position.Right;
+  position: typeof ChartPosition.Left | typeof ChartPosition.Right;
   /** Formatter used for ticks, tooltips, and reference-line labels. Duration `inputFormat` is rewritten to `coordinateUnit`. */
   formatter: SerializedFieldFormat;
   /** Plotted-number unit for this axis. Absent when the owner is not a valid duration. */

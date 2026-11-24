@@ -43,7 +43,7 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
   start(core: CoreStart, { data, uiActions, agentBuilder }: StartDeps) {
     setServices(
       core,
-      data.search.search,
+      data.search,
       data.dataViews,
       agentBuilder,
       uiActions,

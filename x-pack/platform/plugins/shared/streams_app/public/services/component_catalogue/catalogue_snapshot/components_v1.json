@@ -1,7 +1,18 @@
 {
   "schema_version": "v1",
-  "component_revision": "sha256:faaf9454970e4eb4b7eb64f3f9164b25d2b9f0ef98ff4ad1f4424a046647c1e8",
+  "component_revision": "sha256:463f17195071d8d032f7c4368101a649d9c314b2c8e8a3a8de9f180cf500a4ae",
   "components": [
+    {
+      "type": "async_bulk",
+      "kind": "source",
+      "display_name": "Async bulk",
+      "description": "Receives Elasticsearch _bulk documents from the managed ingestion path.",
+      "supported_telemetry": [
+        "docs"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    },
     {
       "type": "otlp",
       "kind": "source",
@@ -15,7 +26,7 @@
         "profiles"
       ],
       "telemetry_selection": "configurable",
-      "status": "beta"
+      "status": "experimental"
     },
     {
       "type": "prometheus_remote_write",
@@ -32,7 +43,97 @@
       "type": "add_fields",
       "kind": "processor",
       "display_name": "Add fields",
-      "description": "Add, change and remove fields on records.",
+      "description": "Add fields to telemetry records, when a condition holds.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    },
+    {
+      "type": "delete_fields",
+      "kind": "processor",
+      "display_name": "Delete fields",
+      "description": "Delete fields from telemetry records, when a condition holds.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    },
+    {
+      "type": "filter",
+      "kind": "processor",
+      "display_name": "Filter",
+      "description": "Drop records that match OTTL conditions.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    },
+    {
+      "type": "move_fields",
+      "kind": "processor",
+      "display_name": "Move fields",
+      "description": "Move fields of telemetry records to other fields, when a condition holds.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    },
+    {
+      "type": "rename_fields",
+      "kind": "processor",
+      "display_name": "Rename fields",
+      "description": "Rename fields of telemetry records, when a condition holds.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    },
+    {
+      "type": "set",
+      "kind": "processor",
+      "display_name": "Set",
+      "description": "Set fields on telemetry records.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    },
+    {
+      "type": "transform",
+      "kind": "processor",
+      "display_name": "Transform",
+      "description": "Run OTTL statements on records, optionally guarded by conditions.",
       "supported_telemetry": [
         "logs",
         "metrics",
@@ -47,7 +148,21 @@
       "type": "elasticsearch",
       "kind": "destination",
       "display_name": "Elasticsearch",
-      "description": "Writes records to one fixed Elasticsearch index or data stream.",
+      "description": "Writes records to one fixed Elasticsearch index or data stream per signal, or routes them dynamically when no index is set.",
+      "supported_telemetry": [
+        "logs",
+        "docs",
+        "metrics",
+        "traces"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    },
+    {
+      "type": "remote_elasticsearch",
+      "kind": "destination",
+      "display_name": "Remote elasticsearch",
+      "description": "Writes records to an Elasticsearch cluster on Elastic Cloud outside this deployment, with an API key the user brings.",
       "supported_telemetry": [
         "logs",
         "docs",
@@ -66,17 +181,17 @@
           {
             "value": "stable",
             "label": "Stable",
-            "description": "Ready for production use. It is actively supported, and breaking changes are not expected."
+            "description": "Ready for production. Fully supported, with no breaking changes expected."
           },
           {
             "value": "beta",
             "label": "Beta",
-            "description": "Usable, but it may still change. Bugs are triaged and fixed, and breaking changes come with notice."
+            "description": "Usable, but may still change. Bugs are fixed, and breaking changes come with notice."
           },
           {
             "value": "experimental",
             "label": "Experimental",
-            "description": "Recently added and still evolving. It is supported on a best-effort basis and may change in the future."
+            "description": "New and still evolving. Best-effort support, and it may change."
           },
           {
             "value": "deprecated",
@@ -156,6 +271,110 @@
           }
         ]
       },
+      "ottl.filter_contexts": {
+        "options": [
+          {
+            "value": "resource",
+            "label": "Resource",
+            "description": "Fields of the resource that produced the telemetry, such as the service name."
+          },
+          {
+            "value": "scope",
+            "label": "Scope",
+            "description": "Fields of the instrumentation scope (the library) that produced the telemetry."
+          },
+          {
+            "value": "log",
+            "label": "Log",
+            "description": "Fields of a log record, such as its body, severity and attributes.",
+            "supported_telemetry": [
+              "logs",
+              "docs"
+            ]
+          },
+          {
+            "value": "span",
+            "label": "Span",
+            "description": "Fields of a trace span, such as its name, status and attributes.",
+            "supported_telemetry": [
+              "traces"
+            ]
+          },
+          {
+            "value": "spanevent",
+            "label": "Span event",
+            "description": "Fields of an event recorded on a span, such as an exception.",
+            "supported_telemetry": [
+              "traces"
+            ]
+          },
+          {
+            "value": "metric",
+            "label": "Metric",
+            "description": "Fields of a metric, such as its name, unit and type.",
+            "supported_telemetry": [
+              "metrics"
+            ]
+          },
+          {
+            "value": "datapoint",
+            "label": "Data point",
+            "description": "Fields of a metric data point, such as its value and attributes.",
+            "supported_telemetry": [
+              "metrics"
+            ]
+          },
+          {
+            "value": "profile",
+            "label": "Profile",
+            "description": "Fields of a profile, such as its duration and sampling period.",
+            "supported_telemetry": [
+              "profiles"
+            ]
+          }
+        ]
+      },
+      "path.keyed_locations": {
+        "options": [
+          {
+            "value": "body",
+            "label": "Body",
+            "description": "The log record body.",
+            "supported_telemetry": [
+              "logs",
+              "docs"
+            ]
+          },
+          {
+            "value": "resource",
+            "label": "Resource",
+            "description": "Resource-level fields shared by telemetry records."
+          },
+          {
+            "value": "scope",
+            "label": "Scope",
+            "description": "Instrumentation scope fields."
+          },
+          {
+            "value": "attributes",
+            "label": "Attributes",
+            "description": "The current record's attributes."
+          },
+          {
+            "value": "metadata",
+            "label": "Metadata",
+            "description": "The metadata of the current record, when it supports it. Otherwise, the attributes of the record."
+          },
+          {
+            "value": "doc",
+            "label": "Document",
+            "description": "The document being built, with ECS-style dotted field names.",
+            "supported_telemetry": [
+              "docs"
+            ]
+          }
+        ]
+      },
       "path.locations": {
         "options": [
           {
@@ -190,7 +409,7 @@
           {
             "value": "metadata",
             "label": "Metadata",
-            "description": "Batch-level metadata that travels with the data through the pipeline. It is not sent to the destination with each record."
+            "description": "The metadata of the current record, when it supports it. Otherwise, the attributes of the record."
           },
           {
             "value": "doc",
@@ -204,6 +423,251 @@
       }
     },
     "path_sets": {
+      "ottl.key_paths": {
+        "contexts": {
+          "datapoint": [
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the data point. Replace key with the attribute name."
+            }
+          ],
+          "exemplar": [
+            {
+              "path": "filtered_attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One filtered attribute. Replace key with the attribute name."
+            }
+          ],
+          "log": [
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the log record. Replace key with the attribute name."
+            },
+            {
+              "path": "body[\"key\"]",
+              "value_kind": "any",
+              "description": "One field of a structured log body. Replace key with the field name."
+            }
+          ],
+          "profile": [
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the profile. Replace key with the attribute name."
+            }
+          ],
+          "resource": [
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the resource. Replace key with the attribute name."
+            }
+          ],
+          "scope": [
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the instrumentation scope. Replace key with the attribute name."
+            }
+          ],
+          "span": [
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the span. Replace key with the attribute name."
+            },
+            {
+              "path": "trace_state[\"key\"]",
+              "value_kind": "string",
+              "description": "One entry of the W3C trace state. Replace key with the entry name."
+            }
+          ],
+          "spanevent": [
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the span event. Replace key with the attribute name."
+            }
+          ]
+        },
+        "locations": {
+          "attributes": [
+            {
+              "path": "service.name",
+              "value_kind": "string",
+              "description": "Service name attribute."
+            },
+            {
+              "path": "host.name",
+              "value_kind": "string",
+              "description": "Host name attribute."
+            },
+            {
+              "path": "deployment.environment",
+              "value_kind": "string",
+              "description": "Deployment environment attribute."
+            }
+          ],
+          "body": [
+            {
+              "path": "message",
+              "value_kind": "string",
+              "description": "Message in a structured log body.",
+              "supported_telemetry": [
+                "logs",
+                "docs"
+              ]
+            },
+            {
+              "path": "level",
+              "value_kind": "string",
+              "description": "Level in a structured log body.",
+              "supported_telemetry": [
+                "logs",
+                "docs"
+              ]
+            },
+            {
+              "path": "status",
+              "value_kind": "string",
+              "description": "Status in a structured log body.",
+              "supported_telemetry": [
+                "logs",
+                "docs"
+              ]
+            }
+          ],
+          "doc": [
+            {
+              "path": "message",
+              "value_kind": "string",
+              "description": "Message field of a document.",
+              "supported_telemetry": [
+                "docs"
+              ]
+            },
+            {
+              "path": "event.dataset",
+              "value_kind": "string",
+              "description": "Dataset field of a document.",
+              "supported_telemetry": [
+                "docs"
+              ]
+            },
+            {
+              "path": "log.level",
+              "value_kind": "string",
+              "description": "Level field of a document.",
+              "supported_telemetry": [
+                "docs"
+              ]
+            }
+          ],
+          "metadata": [
+            {
+              "path": "unit",
+              "value_kind": "string",
+              "description": "Unit of a metric."
+            },
+            {
+              "path": "description",
+              "value_kind": "string",
+              "description": "Description of a metric."
+            },
+            {
+              "path": "source",
+              "value_kind": "string",
+              "description": "Where a record comes from."
+            }
+          ],
+          "record": [
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the log record. Replace key with the attribute name.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "body[\"key\"]",
+              "value_kind": "any",
+              "description": "One field of a structured log body. Replace key with the field name.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the data point. Replace key with the attribute name.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the span. Replace key with the attribute name.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "trace_state[\"key\"]",
+              "value_kind": "string",
+              "description": "One entry of the W3C trace state. Replace key with the entry name.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the profile. Replace key with the attribute name.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            }
+          ],
+          "resource": [
+            {
+              "path": "service.name",
+              "value_kind": "string",
+              "description": "Service name of the resource."
+            },
+            {
+              "path": "host.name",
+              "value_kind": "string",
+              "description": "Host name of the resource."
+            },
+            {
+              "path": "deployment.environment",
+              "value_kind": "string",
+              "description": "Deployment environment of the resource."
+            }
+          ],
+          "scope": [
+            {
+              "path": "library.name",
+              "value_kind": "string",
+              "description": "Name of the library that produced the records."
+            },
+            {
+              "path": "library.version",
+              "value_kind": "string",
+              "description": "Version of the library that produced the records."
+            },
+            {
+              "path": "library.language",
+              "value_kind": "string",
+              "description": "Language of the library that produced the records."
+            }
+          ]
+        }
+      },
       "ottl.paths": {
         "contexts": {
           "datapoint": [
@@ -1627,6 +2091,22 @@
   "definitions": [
     {
       "kind": "source",
+      "type": "async_bulk",
+      "schema_version": "v1",
+      "display_name": "Async bulk",
+      "description": "Receives Elasticsearch _bulk documents from the managed ingestion path.",
+      "supported_telemetry": [
+        "docs"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [],
+      "help": {
+        "summary": "Receives Elasticsearch _bulk documents from the managed ingestion path."
+      }
+    },
+    {
+      "kind": "source",
       "type": "otlp",
       "schema_version": "v1",
       "display_name": "Otlp",
@@ -1639,7 +2119,7 @@
         "profiles"
       ],
       "telemetry_selection": "configurable",
-      "status": "beta",
+      "status": "experimental",
       "fields": [],
       "help": {
         "summary": "Receives OTLP data from the managed ingestion path."
@@ -1666,7 +2146,7 @@
       "type": "add_fields",
       "schema_version": "v1",
       "display_name": "Add fields",
-      "description": "Add, change and remove fields on records.",
+      "description": "Add fields to telemetry records, when a condition holds.",
       "supported_telemetry": [
         "logs",
         "metrics",
@@ -1678,6 +2158,18 @@
       "status": "experimental",
       "fields": [
         {
+          "name": "condition",
+          "type": "string",
+          "label": "Condition",
+          "description": "OTTL condition that has to hold for the fields to be added to a record. Without it, they are added to every record.",
+          "telemetry_selection": "configurable",
+          "ui": {
+            "placeholder": "attributes[\"env\"] == \"prod\""
+          },
+          "min_length": 1,
+          "format": "ottl_condition"
+        },
+        {
           "name": "fields",
           "type": "array",
           "label": "Fields",
@@ -1685,54 +2177,41 @@
           "telemetry_selection": "configurable",
           "items": {
             "type": "object",
-            "telemetry_selection": "configurable",
             "fields": [
               {
                 "name": "location",
                 "type": "enum",
                 "label": "Location",
-                "description": "Portable base location of the path. Omit it to write a full OTTL path.",
-                "ui": {
-                  "row": "target",
-                  "width": "s"
-                },
-                "enum_set": "path.locations"
-              },
-              {
-                "name": "context",
-                "type": "enum",
-                "label": "Context",
-                "description": "Explicit OTTL context of the path. Not used together with location.",
-                "ui": {
-                  "row": "target",
-                  "width": "s"
-                },
-                "enum_set": "ottl.contexts"
-              },
-              {
-                "name": "path",
-                "type": "path",
-                "label": "Path",
-                "description": "Field path within the location, or a full OTTL path when no location is set.",
+                "description": "Where the field lives.",
                 "required": true,
                 "ui": {
                   "row": "target",
+                  "width": "s"
+                },
+                "default": "attributes",
+                "enum_set": "path.keyed_locations"
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "label": "Name",
+                "description": "Name of the field within the location. A name that starts with a bracket, such as [\"labels\"][\"tier\"], reaches into a map that is the value of a key.",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "placeholder": "env",
                   "width": "m"
                 },
-                "path_set": "ottl.paths"
+                "min_length": 1
               },
               {
                 "name": "value",
                 "type": "literal",
                 "label": "Value",
                 "description": "Literal value to write. Mutually exclusive with ottl_value.",
-                "available_when": {
-                  "path": "/action",
-                  "operator": "neq",
-                  "value": "delete"
-                },
                 "ui": {
                   "row": "value",
+                  "placeholder": "test",
                   "width": "m"
                 },
                 "literal_kinds": [
@@ -1748,13 +2227,9 @@
                 "type": "string",
                 "label": "OTTL value",
                 "description": "OTTL expression evaluated in the applicable context. Mutually exclusive with value.",
-                "available_when": {
-                  "path": "/action",
-                  "operator": "neq",
-                  "value": "delete"
-                },
                 "ui": {
                   "row": "value",
+                  "placeholder": "attributes[\"env\"]",
                   "width": "m"
                 },
                 "min_length": 1,
@@ -1784,11 +2259,538 @@
                     "value": "insert",
                     "label": "Insert",
                     "description": "Write only when the field is absent."
+                  }
+                ]
+              }
+            ],
+            "choice_groups": [
+              {
+                "id": "value_source",
+                "label": "Value",
+                "fields": [
+                  "value",
+                  "ottl_value"
+                ],
+                "min_selected": 1,
+                "max_selected": 1,
+                "default_field": "value"
+              }
+            ]
+          },
+          "min_items": 1
+        }
+      ],
+      "help": {
+        "summary": "Add fields to telemetry records, when a condition holds."
+      }
+    },
+    {
+      "kind": "processor",
+      "type": "delete_fields",
+      "schema_version": "v1",
+      "display_name": "Delete fields",
+      "description": "Delete fields from telemetry records, when a condition holds.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [
+        {
+          "name": "condition",
+          "type": "string",
+          "label": "Condition",
+          "description": "OTTL condition that has to hold for the fields to be deleted from a record. Without it, they are deleted from every record.",
+          "telemetry_selection": "configurable",
+          "ui": {
+            "placeholder": "attributes[\"env\"] == \"prod\""
+          },
+          "min_length": 1,
+          "format": "ottl_condition"
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "label": "Fields",
+          "required": true,
+          "telemetry_selection": "configurable",
+          "items": {
+            "type": "object",
+            "fields": [
+              {
+                "name": "location",
+                "type": "enum",
+                "label": "Location",
+                "description": "Where the fields live. With record, each name is an OTTL path that indexes a map, in the context of the record, such as attributes[\"env\"] for a log, or a full path that starts with a context, such as log.attributes[\"env\"].",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "width": "s"
+                },
+                "default": "attributes",
+                "enum_set": "path.locations"
+              },
+              {
+                "name": "names",
+                "type": "array",
+                "label": "Names",
+                "description": "Names of the fields to delete from the location. A name that starts with a bracket, such as [\"labels\"][\"tier\"], reaches into a map that is the value of a key.",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "width": "m"
+                },
+                "items": {
+                  "type": "path",
+                  "required": true,
+                  "ui": {
+                    "placeholder": "env"
+                  },
+                  "path_set": "ottl.key_paths"
+                },
+                "min_items": 1
+              }
+            ]
+          },
+          "min_items": 1
+        }
+      ],
+      "help": {
+        "summary": "Delete fields from telemetry records, when a condition holds."
+      }
+    },
+    {
+      "kind": "processor",
+      "type": "filter",
+      "schema_version": "v1",
+      "display_name": "Filter",
+      "description": "Drop records that match OTTL conditions.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [
+        {
+          "name": "error_mode",
+          "type": "enum",
+          "label": "Default error mode",
+          "description": "Determines how errors that occur while evaluating a condition are treated. It is the default for every block.",
+          "telemetry_selection": "configurable",
+          "options": [
+            {
+              "value": "propagate",
+              "label": "Propagate",
+              "description": "Stop and report the error. The payload is dropped."
+            },
+            {
+              "value": "ignore",
+              "label": "Ignore",
+              "description": "Log the error and carry on with the next condition."
+            },
+            {
+              "value": "silent",
+              "label": "Silent",
+              "description": "Carry on with the next condition without logging the error."
+            }
+          ]
+        },
+        {
+          "name": "conditions",
+          "type": "array",
+          "label": "Configurations",
+          "description": "The blocks of OTTL conditions. Data that matches any condition is dropped.",
+          "required": true,
+          "telemetry_selection": "configurable",
+          "items": {
+            "type": "object",
+            "description": "A block of conditions. Data is dropped when it matches any condition of any block.",
+            "fields": [
+              {
+                "name": "error_mode",
+                "type": "enum",
+                "label": "Error mode",
+                "description": "Overrides the default error mode.",
+                "ui": {
+                  "group": "advanced"
+                },
+                "options": [
+                  {
+                    "value": "propagate",
+                    "label": "Propagate",
+                    "description": "Stop and report the error. The payload is dropped."
                   },
                   {
-                    "value": "delete",
-                    "label": "Delete",
-                    "description": "Remove the field. No value is used."
+                    "value": "ignore",
+                    "label": "Ignore",
+                    "description": "Log the error and carry on with the next condition."
+                  },
+                  {
+                    "value": "silent",
+                    "label": "Silent",
+                    "description": "Carry on with the next condition without logging the error."
+                  }
+                ]
+              },
+              {
+                "name": "context",
+                "type": "enum",
+                "label": "Context",
+                "description": "Explicit OTTL context of the conditions. Leave it blank to automatically infer. The filter drops whole records, metrics and data points, so it has no exemplar context.",
+                "ui": {
+                  "group": "advanced"
+                },
+                "enum_set": "ottl.filter_contexts"
+              },
+              {
+                "name": "conditions",
+                "type": "array",
+                "label": "Conditions",
+                "description": "A list of OTTL conditions. The data that matches any of them is dropped.",
+                "required": true,
+                "items": {
+                  "type": "string",
+                  "ui": {
+                    "placeholder": "attributes[\"http.route\"] == \"/healthz\""
+                  },
+                  "format": "ottl_condition"
+                },
+                "min_items": 1
+              }
+            ]
+          },
+          "min_items": 1
+        }
+      ],
+      "groups": [
+        {
+          "id": "advanced",
+          "label": "Advanced",
+          "advanced": true
+        }
+      ],
+      "help": {
+        "summary": "Drop records that match OTTL conditions."
+      }
+    },
+    {
+      "kind": "processor",
+      "type": "move_fields",
+      "schema_version": "v1",
+      "display_name": "Move fields",
+      "description": "Move fields of telemetry records to other fields, when a condition holds.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [
+        {
+          "name": "condition",
+          "type": "string",
+          "label": "Condition",
+          "description": "OTTL condition that has to hold for the fields to be moved on a record. Without it, they are moved on every record.",
+          "telemetry_selection": "configurable",
+          "ui": {
+            "placeholder": "attributes[\"env\"] == \"prod\""
+          },
+          "min_length": 1,
+          "format": "ottl_condition"
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "label": "Fields",
+          "required": true,
+          "telemetry_selection": "configurable",
+          "items": {
+            "type": "object",
+            "fields": [
+              {
+                "name": "location",
+                "type": "enum",
+                "label": "Location",
+                "description": "Where the field lives now.",
+                "required": true,
+                "ui": {
+                  "row": "from",
+                  "width": "s"
+                },
+                "default": "attributes",
+                "enum_set": "path.locations"
+              },
+              {
+                "name": "name",
+                "type": "path",
+                "label": "Name",
+                "description": "Name of the field within the location, or an OTTL path for the record location. A name that starts with a bracket, such as [\"labels\"][\"tier\"], reaches into a map that is the value of a key.",
+                "required": true,
+                "ui": {
+                  "row": "from",
+                  "placeholder": "env",
+                  "width": "m"
+                },
+                "path_set": "ottl.key_paths"
+              },
+              {
+                "name": "new_location",
+                "type": "enum",
+                "label": "New location",
+                "description": "Where the value goes.",
+                "required": true,
+                "ui": {
+                  "row": "to",
+                  "width": "s"
+                },
+                "default": "attributes",
+                "enum_set": "path.locations"
+              },
+              {
+                "name": "new_name",
+                "type": "path",
+                "label": "New name",
+                "description": "Name of the field the value goes to, or an OTTL path for the record location.",
+                "required": true,
+                "ui": {
+                  "row": "to",
+                  "placeholder": "deployment.environment",
+                  "width": "m"
+                },
+                "path_set": "ottl.key_paths"
+              }
+            ]
+          },
+          "min_items": 1
+        }
+      ],
+      "help": {
+        "summary": "Move fields of telemetry records to other fields, when a condition holds."
+      }
+    },
+    {
+      "kind": "processor",
+      "type": "rename_fields",
+      "schema_version": "v1",
+      "display_name": "Rename fields",
+      "description": "Rename fields of telemetry records, when a condition holds.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [
+        {
+          "name": "condition",
+          "type": "string",
+          "label": "Condition",
+          "description": "OTTL condition that has to hold for the fields to be renamed in a record. Without it, they are renamed in every record.",
+          "telemetry_selection": "configurable",
+          "ui": {
+            "placeholder": "attributes[\"env\"] == \"prod\""
+          },
+          "min_length": 1,
+          "format": "ottl_condition"
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "label": "Fields",
+          "required": true,
+          "telemetry_selection": "configurable",
+          "items": {
+            "type": "object",
+            "fields": [
+              {
+                "name": "location",
+                "type": "enum",
+                "label": "Location",
+                "description": "Where the field lives. With record, name and new_name are paths in the context of the record, as in set.",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "width": "s"
+                },
+                "default": "attributes",
+                "enum_set": "path.locations"
+              },
+              {
+                "name": "name",
+                "type": "path",
+                "label": "Name",
+                "description": "Name of the field within the location. With record, a path in the context of the record that indexes a map.",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "placeholder": "env",
+                  "width": "m"
+                },
+                "path_set": "ottl.key_paths"
+              },
+              {
+                "name": "new_name",
+                "type": "path",
+                "label": "New name",
+                "description": "The new name of the field. A field that already has it is overwritten. With record, a path in the context of the record that indexes a map.",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "placeholder": "deployment.environment",
+                  "width": "m"
+                },
+                "path_set": "ottl.key_paths"
+              }
+            ]
+          },
+          "min_items": 1
+        }
+      ],
+      "help": {
+        "summary": "Rename fields of telemetry records, when a condition holds."
+      }
+    },
+    {
+      "kind": "processor",
+      "type": "set",
+      "schema_version": "v1",
+      "display_name": "Set",
+      "description": "Set fields on telemetry records.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [
+        {
+          "name": "condition",
+          "type": "string",
+          "label": "Condition",
+          "description": "OTTL condition that has to hold for the operations to run on a record. Without it, they run on every record.",
+          "telemetry_selection": "configurable",
+          "ui": {
+            "placeholder": "attributes[\"env\"] == \"prod\""
+          },
+          "min_length": 1,
+          "format": "ottl_condition"
+        },
+        {
+          "name": "operations",
+          "type": "array",
+          "label": "Operations",
+          "required": true,
+          "telemetry_selection": "configurable",
+          "items": {
+            "type": "object",
+            "fields": [
+              {
+                "name": "location",
+                "type": "enum",
+                "label": "Location",
+                "description": "Portable base location of the path. Omit it to write a full OTTL path, or a field of the document for docs.",
+                "ui": {
+                  "row": "target",
+                  "width": "s"
+                },
+                "enum_set": "path.locations"
+              },
+              {
+                "name": "context",
+                "type": "enum",
+                "label": "Context",
+                "description": "Explicit OTTL context of the path. Not used together with location.",
+                "ui": {
+                  "row": "target",
+                  "width": "s"
+                },
+                "enum_set": "ottl.contexts"
+              },
+              {
+                "name": "path",
+                "type": "path",
+                "label": "Path",
+                "description": "Field path within the location, or a full OTTL path when no location is set. For docs it is a field of the document.",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "placeholder": "env",
+                  "width": "m"
+                },
+                "path_set": "ottl.paths"
+              },
+              {
+                "name": "value",
+                "type": "literal",
+                "label": "Value",
+                "description": "Literal value to write. Mutually exclusive with ottl_value.",
+                "ui": {
+                  "row": "value",
+                  "placeholder": "test",
+                  "width": "m"
+                },
+                "literal_kinds": [
+                  "string",
+                  "integer",
+                  "number",
+                  "boolean",
+                  "null"
+                ]
+              },
+              {
+                "name": "ottl_value",
+                "type": "string",
+                "label": "OTTL value",
+                "description": "OTTL expression evaluated in the applicable context. Mutually exclusive with value.",
+                "ui": {
+                  "row": "value",
+                  "placeholder": "attributes[\"env\"]",
+                  "width": "m"
+                },
+                "min_length": 1,
+                "format": "ottl_value"
+              },
+              {
+                "name": "action",
+                "type": "enum",
+                "label": "Action",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "width": "xs"
+                },
+                "options": [
+                  {
+                    "value": "upsert",
+                    "label": "Upsert",
+                    "description": "Write unconditionally."
+                  },
+                  {
+                    "value": "update",
+                    "label": "Update",
+                    "description": "Write only when the field already exists."
+                  },
+                  {
+                    "value": "insert",
+                    "label": "Insert",
+                    "description": "Write only when the field is absent."
                   }
                 ]
               }
@@ -1801,7 +2803,7 @@
                   "location",
                   "context"
                 ],
-                "min_selected": 1,
+                "min_selected": 0,
                 "max_selected": 1,
                 "default_field": "location"
               },
@@ -1822,7 +2824,148 @@
         }
       ],
       "help": {
-        "summary": "Add, change and remove fields on records."
+        "summary": "Set fields on telemetry records."
+      }
+    },
+    {
+      "kind": "processor",
+      "type": "transform",
+      "schema_version": "v1",
+      "display_name": "Transform",
+      "description": "Run OTTL statements on records, optionally guarded by conditions.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [
+        {
+          "name": "error_mode",
+          "type": "enum",
+          "label": "Default error mode",
+          "description": "Determines how errors that occur while processing a statement are treated.",
+          "telemetry_selection": "configurable",
+          "options": [
+            {
+              "value": "propagate",
+              "label": "Propagate",
+              "description": "Stop and report the error."
+            },
+            {
+              "value": "ignore",
+              "label": "Ignore",
+              "description": "Log the error and carry on with the next statement."
+            },
+            {
+              "value": "silent",
+              "label": "Silent",
+              "description": "Carry on with the next statement without logging the error."
+            }
+          ]
+        },
+        {
+          "name": "statements",
+          "type": "array",
+          "label": "Configurations",
+          "description": "The blocks of OTTL statements to run.",
+          "required": true,
+          "telemetry_selection": "configurable",
+          "items": {
+            "type": "object",
+            "description": "A group of statements with optional guard conditions. Blocks run in order, and a block sees the changes of the ones before it.",
+            "fields": [
+              {
+                "name": "error_mode",
+                "type": "enum",
+                "label": "Error mode",
+                "description": "Overrides the default error mode.",
+                "ui": {
+                  "group": "advanced"
+                },
+                "options": [
+                  {
+                    "value": "propagate",
+                    "label": "Propagate",
+                    "description": "Stop and report the error."
+                  },
+                  {
+                    "value": "ignore",
+                    "label": "Ignore",
+                    "description": "Log the error and carry on with the next statement."
+                  },
+                  {
+                    "value": "silent",
+                    "label": "Silent",
+                    "description": "Carry on with the next statement without logging the error."
+                  }
+                ]
+              },
+              {
+                "name": "context",
+                "type": "enum",
+                "label": "Context",
+                "description": "Explicit OTTL context of the path. Leave it blank to automatically infer.",
+                "ui": {
+                  "group": "advanced"
+                },
+                "enum_set": "ottl.contexts"
+              },
+              {
+                "name": "conditions",
+                "type": "array",
+                "label": "Conditions",
+                "description": "A list comprised of multiple where clauses, which will be processed as global conditions for the accompanying set of statements.",
+                "items": {
+                  "type": "string",
+                  "ui": {
+                    "placeholder": "attributes[\"env\"] == \"prod\""
+                  },
+                  "format": "ottl_condition"
+                }
+              },
+              {
+                "name": "statements",
+                "type": "array",
+                "label": "Statements",
+                "description": "A list of OTTL statements.",
+                "required": true,
+                "items": {
+                  "type": "string",
+                  "ui": {
+                    "placeholder": "set(attributes[\"env\"], \"test\")"
+                  },
+                  "format": "ottl_statement"
+                },
+                "min_items": 1
+              },
+              {
+                "name": "shared_cache",
+                "type": "boolean",
+                "label": "Shared cache",
+                "description": "Enables sharing per-context caches between all configuration with this option enabled. Use this when you want to hold state across multiple iterations over a set of data.",
+                "ui": {
+                  "group": "advanced"
+                },
+                "default": false
+              }
+            ]
+          },
+          "min_items": 1
+        }
+      ],
+      "groups": [
+        {
+          "id": "advanced",
+          "label": "Advanced",
+          "advanced": true
+        }
+      ],
+      "help": {
+        "summary": "Run OTTL statements on records, optionally guarded by conditions."
       }
     },
     {
@@ -1830,7 +2973,7 @@
       "type": "elasticsearch",
       "schema_version": "v1",
       "display_name": "Elasticsearch",
-      "description": "Writes records to one fixed Elasticsearch index or data stream.",
+      "description": "Writes records to one fixed Elasticsearch index or data stream per signal, or routes them dynamically when no index is set.",
       "supported_telemetry": [
         "logs",
         "docs",
@@ -1844,8 +2987,20 @@
           "name": "index",
           "type": "string",
           "label": "Index",
-          "description": "The index or data stream every record is written to. It must be a fixed, lowercase name with no wildcards, templates or date math.",
-          "required": true
+          "description": "The index or data stream records are written to. It must be a fixed, lowercase name with no wildcards, templates or date math. Scope an entry to some signals to write each signal to its own index; a scoped entry takes precedence over an unscoped one. A signal without an index is routed dynamically by its elasticsearch.index or data_stream.* attributes.",
+          "telemetry_selection": "configurable"
+        },
+        {
+          "name": "write_patterns",
+          "type": "array",
+          "label": "Write patterns",
+          "description": "Index name patterns the destination may write to, with * wildcards such as logs-*-*. They describe the write scope of the destination's credential and do not change where records are routed. Scope an entry to some signals to set the patterns of those signals. Omit them to leave the scope to the credential.",
+          "telemetry_selection": "configurable",
+          "items": {
+            "type": "string"
+          },
+          "min_items": 1,
+          "unique_items": true
         },
         {
           "name": "api_key",
@@ -1855,7 +3010,48 @@
         }
       ],
       "help": {
-        "summary": "Writes records to one fixed Elasticsearch index or data stream."
+        "summary": "Writes records to one fixed Elasticsearch index or data stream per signal, or routes them dynamically when no index is set."
+      }
+    },
+    {
+      "kind": "destination",
+      "type": "remote_elasticsearch",
+      "schema_version": "v1",
+      "display_name": "Remote elasticsearch",
+      "description": "Writes records to an Elasticsearch cluster on Elastic Cloud outside this deployment, with an API key the user brings.",
+      "supported_telemetry": [
+        "logs",
+        "docs",
+        "metrics",
+        "traces"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [
+        {
+          "name": "endpoint",
+          "type": "string",
+          "label": "Endpoint",
+          "description": "The https URL of the remote Elasticsearch cluster, which must be an Elastic Cloud one.",
+          "required": true
+        },
+        {
+          "name": "index",
+          "type": "string",
+          "label": "Index",
+          "description": "The index or data stream records are written to. It must be a fixed, lowercase name with no wildcards, templates or date math. Scope an entry to some signals to write each signal to its own index; a scoped entry takes precedence over an unscoped one. A signal without an index is routed dynamically by its elasticsearch.index or data_stream.* attributes.",
+          "telemetry_selection": "configurable"
+        },
+        {
+          "name": "api_key",
+          "type": "secret",
+          "label": "API key",
+          "description": "An API key created on the remote cluster: a {credential: <name>} reference to a sealed credential passed with the unit, or a plaintext key for testing, which ends up in the compiled configuration. The key needs write access to the target indices.",
+          "required": true
+        }
+      ],
+      "help": {
+        "summary": "Writes records to an Elasticsearch cluster on Elastic Cloud outside this deployment, with an API key the user brings."
       }
     }
   ]
