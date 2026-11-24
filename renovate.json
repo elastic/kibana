@@ -1490,15 +1490,6 @@
       "enabled": true
     },
     {
-      "groupName": "lmdb",
-      "matchDepNames": ["lmdb"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "pirates",
       "matchDepNames": ["pirates"],
       "reviewers": ["team:kibana-operations"],

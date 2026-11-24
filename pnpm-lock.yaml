@@ -5598,9 +5598,6 @@ importers:
       listr2:
         specifier: 8.2.5
         version: 8.2.5
-      lmdb:
-        specifier: 3.4.4
-        version: 3.4.4
       magic-string:
         specifier: 0.30.21
         version: 0.30.21
@@ -10487,42 +10484,6 @@ packages:
   '@ljharb/through@2.3.13':
     resolution: {integrity: sha512-/gKJun8NNiWGZJkGzI/Ragc53cOdcLNdzjLaIa+GEjguQs0ulsurx8WN0jijdK9yPqDvziX995sMRLyLt1uZMQ==}
     engines: {node: '>= 0.4'}
-
-  '@lmdb/lmdb-darwin-arm64@3.4.4':
-    resolution: {integrity: sha512-XaKL705gDWd6XVls3ATDj13ZdML/LqSIxwgnYpG8xTzH2ifArx8fMMDdvqGE/Emd+W6R90W2fveZcJ0AyS8Y0w==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@lmdb/lmdb-darwin-x64@3.4.4':
-    resolution: {integrity: sha512-GPHGEVcwJlkD01GmIr7B4kvbIcUDS2+kBadVEd7lU4can1RZaZQLDDBJRrrNfS2Kavvl0VLI/cMv7UASAXGrww==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@lmdb/lmdb-linux-arm64@3.4.4':
-    resolution: {integrity: sha512-mALqr7DE42HsiwVTKpQWxacjHoJk+e9p00RWIJqTACh/hpucxp/0lK/XMh5XzWnU/TDCZLukq1+vNqnNumTP/Q==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@lmdb/lmdb-linux-arm@3.4.4':
-    resolution: {integrity: sha512-cmev5/dZr5ACKri9f6GU6lZCXTjMhV72xujlbOhFCgFXrt4W0TxGsmY8kA1BITvH60JBKE50cSxsiulybAbrrw==}
-    cpu: [arm]
-    os: [linux]
-
-  '@lmdb/lmdb-linux-x64@3.4.4':
-    resolution: {integrity: sha512-QjLs8OcmCNcraAcLoZyFlo0atzBJniQLLwhtR+ymQqS5kLYpV5RqwriL87BW+ZiR9ZiGgZx3evrz5vnWPtJ1fQ==}
-    cpu: [x64]
-    os: [linux]
-
-  '@lmdb/lmdb-win32-arm64@3.4.4':
-    resolution: {integrity: sha512-tr/pwHDlZ33forLGAr0tI04cRmP4SgF93yHbb+2zvZiDEyln5yMHhbKDySxY66aUOkhvBvTuHq9q/3YmTj6ZHQ==}
-    cpu: [arm64]
-    os: [win32]
-
-  '@lmdb/lmdb-win32-x64@3.4.4':
-    resolution: {integrity: sha512-KRzfocJzB/mgoTCqnMawuLSKheHRVTqWfSmouIgYpFs6Hx4zvZSvsZKSCEb5gHmICy7qsx9l06jk3MFTtiFVAQ==}
-    cpu: [x64]
-    os: [win32]
-
   '@loaders.gl/core@3.4.7':
     resolution: {integrity: sha512-iKyOKtUTYsgmIaXFmkaV1bc4h36TiHoKzc4xrolU4eSw9BQzR3UATEx/356sUI8g90uQe1SosAcKAUgAvFqgGg==}
 
@@ -10688,37 +10649,6 @@ packages:
     resolution: {integrity: sha512-bIyOiXQT7Pk8hOxLPHmJTVQL1CD4ZkSmQmv/l597fgiYbC9O1AzVzMi83LfZwxf9l/Czg5RgjhXMzgCLxeGXzg==}
     cpu: [x64]
     os: [win32]
-
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.2':
-    resolution: {integrity: sha512-9bfjwDxIDWmmOKusUcqdS4Rw+SETlp9Dy39Xui9BEGEk19dDwH0jhipwFzEff/pFg95NKymc6TOTbRKcWeRqyQ==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.2':
-    resolution: {integrity: sha512-lwriRAHm1Yg4iDf23Oxm9n/t5Zpw1lVnxYU3HnJPTi2lJRkKTrps1KVgvL6m7WvmhYVt/FIsssWay+k45QHeuw==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.2':
-    resolution: {integrity: sha512-FU20Bo66/f7He9Fp9sP2zaJ1Q8L9uLPZQDub/WlUip78JlPeMbVL8546HbZfcW9LNciEXc8d+tThSJjSC+tmsg==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.2':
-    resolution: {integrity: sha512-MOI9Dlfrpi2Cuc7i5dXdxPbFIgbDBGgKR5F2yWEa6FVEtSWncfVNKW5AKjImAQ6CZlBK9tympdsZJ2xThBiWWA==}
-    cpu: [arm]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.2':
-    resolution: {integrity: sha512-gsWNDCklNy7Ajk0vBBf9jEx04RUxuDQfBse918Ww+Qb9HCPoGzS+XJTLe96iN3BVK7grnLiYghP/M4L8VsaHeA==}
-    cpu: [x64]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.2':
-    resolution: {integrity: sha512-O+6Gs8UeDbyFpbSh2CPEz/UOrrdWPTBYNblZK5CxxLisYt4kGX3Sc+czffFonyjiGSq3jWLwJS/CCJc7tBr4sQ==}
-    cpu: [x64]
-    os: [win32]
-
   '@mswjs/http-middleware@0.10.1':
     resolution: {integrity: sha512-I58RDHXzwKjMjaSO7aV7X0zUzbAvUEEDYsL9+I6Ro0zF5LgjnNdpZoMufG/WoYEenhDCgv7K+HMpLxGuhlfjKA==}
     engines: {node: '>=18'}
@@ -18449,11 +18379,6 @@ packages:
   listr2@8.2.5:
     resolution: {integrity: sha512-iyAZCeyD+c1gPyE9qpFu8af0Y+MRtmKOncdGoA2S5EY8iFq99dmmvkNnHiWo+pj0s7yH7l3KPIgee77tKpXPWQ==}
     engines: {node: '>=18.0.0'}
-
-  lmdb@3.4.4:
-    resolution: {integrity: sha512-+Y2DqovevLkb6DrSQ6SXTYLEd6kvlRbhsxzgJrk7BUfOVA/mt21ak6pFDZDKxiAczHMWxrb02kXBTSTIA0O94A==}
-    hasBin: true
-
   load-json-file@6.2.0:
     resolution: {integrity: sha512-gUD/epcRms75Cw8RT1pUdHugZYM5ce64ucs2GEISABwkRsOQr0q2wm/MV2TKThycIe5e0ytRweW2RZxclogCdQ==}
     engines: {node: '>=8'}
@@ -19094,14 +19019,6 @@ packages:
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
-
-  msgpackr-extract@3.0.2:
-    resolution: {integrity: sha512-SdzXp4kD/Qf8agZ9+iTu6eql0m3kWm1A2y1hkpTeVNENutaB0BwHlSvAIaMxwntmRUAUjon2V4L8Z/njd0Ct8A==}
-    hasBin: true
-
-  msgpackr@1.11.4:
-    resolution: {integrity: sha512-uaff7RG9VIC4jacFW9xzL3jc0iM32DNHe4jYVycBcjUePT/Klnfj7pqtWJt9khvDFizmjN2TlYniYmSS2LIaZg==}
-
   msw@2.11.6:
     resolution: {integrity: sha512-MCYMykvmiYScyUm7I6y0VCxpNq1rgd5v7kG8ks5dKtvmxRUUPjribX6mUoUNBbM5/3PhUyoelEWiKXGOz84c+w==}
     engines: {node: '>=18'}
@@ -19186,10 +19103,6 @@ packages:
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
     deprecated: This package is no longer needed on supported Node.js versions. Node.js 16+ includes AbortController and AbortSignal as built-in globals. All Node.js versions requiring this polyfill are end-of-life. Use the built-in globals instead.
-
-  node-addon-api@6.1.0:
-    resolution: {integrity: sha512-+eawOlIgy680F0kBzPUNFhMZGtJ1YmqM6l4+Crf4IkImjYrO/mqPwRMh352g23uIaQKFItcQ64I7KMaJxHgAVA==}
-
   node-addon-api@7.1.1:
     resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
 
@@ -19217,15 +19130,6 @@ packages:
   node-forge@1.4.3:
     resolution: {integrity: sha512-P6wzfh6t70avmV8FrVEAd/36sOPJQ+hkaJVX1Laap9J/77m7M0eyozDvc8SwnDf4P7MP94gwbAAo0rg3YVXT+g==}
     engines: {node: '>= 6.13.0'}
-
-  node-gyp-build-optional-packages@5.0.7:
-    resolution: {integrity: sha512-YlCCc6Wffkx0kHkmam79GKvDQ6x+QZkMjFGrIMxgFNILFvGSbCp2fCBC55pGTT9gVaz8Na5CLmxt/urtzRv36w==}
-    hasBin: true
-
-  node-gyp-build-optional-packages@5.2.2:
-    resolution: {integrity: sha512-s+w+rBWnpTMwSFbaE0UXsRlg7hU4FjekKU4eyAih5T8nJuNZT1nNsskXpxmeqSK9UzkBl6UgRlnKc8hz8IEqOw==}
-    hasBin: true
-
   node-int64@0.4.0:
     resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
 
@@ -19491,10 +19395,6 @@ packages:
   ora@5.4.1:
     resolution: {integrity: sha512-5b6Y85tPxZZ7QytO+BQzysW31HJku27cRIlkbAXaNx+BdcVi+LlRFmVXzeF6a7JCwJpyw5c4b+YSVImQIrBpuQ==}
     engines: {node: '>=10'}
-
-  ordered-binary@1.5.3:
-    resolution: {integrity: sha512-oGFr3T+pYdTGJ+YFEILMpS3es+GiIbs9h/XQrclBXUtd44ey7XwfsMzM31f64I1SQOawDoDr/D823kNCADI8TA==}
-
   original-url@1.2.3:
     resolution: {integrity: sha512-BYm+pKYLtS4mVe/mgT3YKGtWV5HzN/XKiaIu1aK4rsxyjuHeTW9N+xVBEpJcY1onB3nccfH0RbzUEoimMqFUHQ==}
 
@@ -22816,10 +22716,6 @@ packages:
 
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
-
-  weak-lru-cache@1.2.2:
-    resolution: {integrity: sha512-DEAoo25RfSYMuTGc9vPJzZcZullwIqRDSI9LOy+fkCJPi6hykCnfKaXTuPBDuXAUcqHXyOgFtHNp/kB2FjYHbw==}
-
   web-features@3.34.1:
     resolution: {integrity: sha512-x+TGFo3TzB8dmXHNvveQXmaoYhzNH6blW93TO0u1Ygvr8/Bk3KIFZC9LVofHNnkcEmeodh8P3Mes5fPWyO7ATA==}
 
@@ -26445,28 +26341,6 @@ snapshots:
   '@ljharb/through@2.3.13':
     dependencies:
       call-bind: 1.0.9
-
-  '@lmdb/lmdb-darwin-arm64@3.4.4':
-    optional: true
-
-  '@lmdb/lmdb-darwin-x64@3.4.4':
-    optional: true
-
-  '@lmdb/lmdb-linux-arm64@3.4.4':
-    optional: true
-
-  '@lmdb/lmdb-linux-arm@3.4.4':
-    optional: true
-
-  '@lmdb/lmdb-linux-x64@3.4.4':
-    optional: true
-
-  '@lmdb/lmdb-win32-arm64@3.4.4':
-    optional: true
-
-  '@lmdb/lmdb-win32-x64@3.4.4':
-    optional: true
-
   '@loaders.gl/core@3.4.7':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -26681,25 +26555,6 @@ snapshots:
 
   '@moonrepo/core-windows-x64-msvc@2.4.6':
     optional: true
-
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.2':
-    optional: true
-
   '@mswjs/http-middleware@0.10.1(msw@2.11.6(@types/node@24.10.13)(typescript@5.9.3))(supports-color@8.1.1)':
     dependencies:
       express: 4.22.0(supports-color@8.1.1)
@@ -35972,23 +35827,6 @@ snapshots:
       log-update: 6.1.0
       rfdc: 1.4.1
       wrap-ansi: 9.0.0
-
-  lmdb@3.4.4:
-    dependencies:
-      msgpackr: 1.11.4
-      node-addon-api: 6.1.0
-      node-gyp-build-optional-packages: 5.2.2
-      ordered-binary: 1.5.3
-      weak-lru-cache: 1.2.2
-    optionalDependencies:
-      '@lmdb/lmdb-darwin-arm64': 3.4.4
-      '@lmdb/lmdb-darwin-x64': 3.4.4
-      '@lmdb/lmdb-linux-arm': 3.4.4
-      '@lmdb/lmdb-linux-arm64': 3.4.4
-      '@lmdb/lmdb-linux-x64': 3.4.4
-      '@lmdb/lmdb-win32-arm64': 3.4.4
-      '@lmdb/lmdb-win32-x64': 3.4.4
-
   load-json-file@6.2.0:
     dependencies:
       graceful-fs: 4.2.11
@@ -36712,23 +36550,6 @@ snapshots:
   ms@2.1.2: {}
 
   ms@2.1.3: {}
-
-  msgpackr-extract@3.0.2:
-    dependencies:
-      node-gyp-build-optional-packages: 5.0.7
-    optionalDependencies:
-      '@msgpackr-extract/msgpackr-extract-darwin-arm64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-darwin-x64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-linux-arm': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-linux-arm64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-linux-x64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-win32-x64': 3.0.2
-    optional: true
-
-  msgpackr@1.11.4:
-    optionalDependencies:
-      msgpackr-extract: 3.0.2
-
   msw@2.11.6(@types/node@24.10.13)(typescript@5.9.3):
     dependencies:
       '@inquirer/confirm': 5.0.0(@types/node@24.10.13)
@@ -36826,9 +36647,6 @@ snapshots:
       - supports-color
 
   node-abort-controller@3.1.1: {}
-
-  node-addon-api@6.1.0: {}
-
   node-addon-api@7.1.1: {}
 
   node-diff3@3.1.2: {}
@@ -36844,14 +36662,6 @@ snapshots:
       whatwg-url: 5.0.0
 
   node-forge@1.4.3: {}
-
-  node-gyp-build-optional-packages@5.0.7:
-    optional: true
-
-  node-gyp-build-optional-packages@5.2.2:
-    dependencies:
-      detect-libc: 2.1.2
-
   node-int64@0.4.0: {}
 
   node-jose@2.2.0:
@@ -37192,9 +37002,6 @@ snapshots:
       log-symbols: 4.1.0
       strip-ansi: 6.0.1
       wcwidth: 1.0.1
-
-  ordered-binary@1.5.3: {}
-
   original-url@1.2.3:
     dependencies:
       forwarded-parse: 2.1.2
@@ -41057,9 +40864,6 @@ snapshots:
   wcwidth@1.0.1:
     dependencies:
       defaults: 1.0.3
-
-  weak-lru-cache@1.2.2: {}
-
   web-features@3.34.1: {}
 
   web-namespaces@1.1.4: {}

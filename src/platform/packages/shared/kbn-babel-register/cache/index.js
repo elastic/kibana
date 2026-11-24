@@ -38,37 +38,18 @@ function determineCachePrefix() {
 }
 
 /** @type {boolean} */
-let lmdbDisabledLogged = false;
-/** @type {string | undefined} */
-let lmdbDisabledReason;
-
-function lmdbAvailable() {
-  try {
-    if (process.env.CODEX_SANDBOX) {
-      // Codex sandbox disallows LMDB-backed caches, so skip them entirely here.
-      lmdbDisabledReason = 'CODEX_SANDBOX is set';
-      return false;
-    }
-
-    require('lmdb');
-    return true;
-  } catch {
-    lmdbDisabledReason = 'LMDB module unavailable';
-    return false;
-  }
-}
+let cacheDisabledLogged = false;
 
 /**
- * @param {string | undefined} reason
+ * @param {string} reason
  */
-function logLmdbDisabledOnce(reason) {
-  if (lmdbDisabledLogged) {
+function logCacheDisabledOnce(reason) {
+  if (cacheDisabledLogged) {
     return;
   }
 
-  lmdbDisabledLogged = true;
-  const detail = reason ? ` (${reason})` : '';
-  console.warn(`LMDB cache disabled for @kbn/babel-register${detail}`);
+  cacheDisabledLogged = true;
+  console.warn(`cache disabled for @kbn/babel-register (${reason})`);
 }
 
 /**
@@ -80,22 +61,32 @@ function getCache() {
     : undefined;
 
   if (process.env.DISABLE_BABEL_REGISTER_CACHE) {
-    log?.end('lmdb cache is disabled\n');
+    log?.end('cache is disabled\n');
     return new (require('./no_cache_cache').NoCacheCache)();
   }
 
-  if (lmdbAvailable()) {
-    log?.write('lmdb is available, using lmdb cache\n');
-    return new (require('./lmdb_cache').LmdbCache)({
-      dir: Path.resolve(REPO_ROOT, 'data/babel_register_cache', UPSTREAM_BRANCH),
+  if (process.env.CODEX_SANDBOX) {
+    log?.end('CODEX_SANDBOX is set, disabling cache\n');
+    logCacheDisabledOnce('CODEX_SANDBOX is set');
+    return new (require('./no_cache_cache').NoCacheCache)();
+  }
+
+  const dir = Path.resolve(REPO_ROOT, 'data/babel_register_cache', UPSTREAM_BRANCH);
+  try {
+    const cache = new (require('./sqlite_cache').SqliteCache)({
+      dir,
       prefix: determineCachePrefix(),
       log,
     });
+    log?.write('using sqlite cache\n');
+    return cache;
+  } catch (error) {
+    log?.end(`sqlite cache unavailable, disabling cache: ${error.stack}\n`);
+    logCacheDisabledOnce(
+      `${error.message}; deleting "${Path.relative(process.cwd(), dir)}" may fix this`
+    );
+    return new (require('./no_cache_cache').NoCacheCache)();
   }
-
-  log?.end('lmdb is unavailable, disabling cache\n');
-  logLmdbDisabledOnce(lmdbDisabledReason);
-  return new (require('./no_cache_cache').NoCacheCache)();
 }
 
 module.exports = {
