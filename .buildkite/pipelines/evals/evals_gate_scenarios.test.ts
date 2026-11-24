@@ -99,6 +99,16 @@ describe('evals gate against evals.suites.json', () => {
         `${NIGHTSHIFT}/server/routes/archive_memory_page.ts`,
       ],
     ],
+    [
+      'Nightshift plumbing (telemetry, saved objects, quotas, automations, notifications)',
+      [
+        `${NIGHTSHIFT}/server/telemetry/index.ts`,
+        `${NIGHTSHIFT}/server/saved_objects/index.ts`,
+        `${NIGHTSHIFT}/server/lib/investigation_quotas/consume.ts`,
+        `${NIGHTSHIFT}/server/lib/automations/schemas.ts`,
+        `${NIGHTSHIFT}/server/lib/notifications/slack_notification.ts`,
+      ],
+    ],
   ])('passes %s changes without a decision or a trigger step', async (_label, files) => {
     expect(touchedSuites(files)).toEqual([]);
     await expect(gate(files)).resolves.toEqual({
@@ -120,6 +130,12 @@ describe('evals gate against evals.suites.json', () => {
       'the investigation workflow',
       'src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/investigation/investigation_workflow.yaml',
     ],
+    [
+      'the investigation message builder',
+      `${NIGHTSHIFT}/server/client/build_investigation_message.ts`,
+    ],
+    // Not a real folder: a new one is gated by default, without anyone updating the config.
+    ['a prompt in a brand-new folder', `${NIGHTSHIFT}/server/new_feature/prompts/system.md.text`],
   ])('requires a Nightshift decision for changes to %s', async (_label, file) => {
     expect(touchedSuites([file])).toEqual(['nightshift-investigations']);
     const { status, comments } = await gate([file]);

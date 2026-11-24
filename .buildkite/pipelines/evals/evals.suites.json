@@ -158,26 +158,11 @@
       "defaultModelGroups": ["eis/anthropic-claude-5.5-sonnet"],
       "requireDecisionOnPaths": {
         "include": [
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/tools/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/decision_trees/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/findings_recorder/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/custom_context/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/memory/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/wiki/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/investigation_round/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/onboarding/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/workflows/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/step_definitions/**",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/install_*_agent.ts",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/list_sandbox_connectors.ts",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/managed_workflows/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/server/**",
           "x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/**",
           "src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/**",
-          "x-pack/platform/packages/shared/kbn-nightshift-ai/src/resolve_nightshift_model*.ts",
-          "x-pack/platform/plugins/shared/agentic_investigations/server/hypotheses/**",
-          "x-pack/platform/plugins/shared/agentic_investigations/server/impact/**",
-          "x-pack/platform/plugins/shared/agentic_investigations/server/investigations/**"
+          "x-pack/platform/packages/shared/kbn-nightshift-ai/src/resolve_nightshift_model*.ts"
         ],
         "exclude": [
           "**/*.test.ts",
@@ -188,7 +173,15 @@
           "**/test/**",
           "**/*.md",
           "**/online_evals/**",
-          "**/*online_evals*.ts"
+          "**/*online_evals*.ts",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/routes/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/telemetry/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/saved_objects/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/purge/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/tracing/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/automations/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/investigation_quotas/**",
+          "x-pack/solutions/observability/plugins/nightshift_investigations/server/lib/notifications/**"
         ]
       },
       "regressionGate": {

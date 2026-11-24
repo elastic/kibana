@@ -237,8 +237,12 @@ depends on. Opt in with `requireDecisionOnPaths` in the suite's
 ```json
 "defaultModelGroups": ["eis/anthropic-claude-5.5-sonnet"],
 "requireDecisionOnPaths": {
-  "include": ["x-pack/solutions/my_solution/plugins/my_plugin/server/agents/**"],
-  "exclude": ["**/*.test.ts", "**/__snapshots__/**"]
+  "include": ["x-pack/solutions/my_solution/plugins/my_plugin/server/**"],
+  "exclude": [
+    "**/*.test.ts",
+    "**/__snapshots__/**",
+    "x-pack/solutions/my_solution/plugins/my_plugin/server/routes/**"
+  ]
 }
 ```
 
@@ -252,9 +256,12 @@ matched files. The comment is removed once the PR has a decision:
   `smoke-tests`. A skip wins over a run label, but not over a regression already measured on the
   head commit (see [Regression gate](#regression-gate)).
 
-Prefer directory globs over file lists, so new files are covered without editing the config. A
-config test fails when an include glob stops matching any tracked file, and the weekly runs catch
-what the globs miss. `**` doesn't match dot directories or dotfiles (e.g. `server/.agents/` or
+Include whole plugins and exclude the folders that don't change agent behaviour (routes, telemetry,
+saved objects), rather than listing the folders that do. A new folder, say one holding prompts, is
+then gated by default, and a forgotten exclude costs one extra label instead of a missed
+regression. Config tests fail when an include glob stops matching any tracked file, and when a
+folder exclude covers a prompt file (`*.text`, `*prompt*`, or anything under `instructions/`).
+The weekly runs catch what the globs miss, such as prompts in a new package outside the plugin. `**` doesn't match dot directories or dotfiles (e.g. `server/.agents/` or
 `server/.prompt.md`), so list those with their own glob. Opting in needs no new GitHub labels.
 
 The `nightshift-investigations` entry is a worked example of both fields; its suite README explains

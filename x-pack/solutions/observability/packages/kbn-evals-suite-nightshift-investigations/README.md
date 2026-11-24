@@ -324,12 +324,15 @@ A PR that changes the investigation harness gets a failing `evals gate` check un
 - `evals:skip`: a conscious skip.
 
 The paths are under `requireDecisionOnPaths` in
-[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json): the agents and
-their prompts, tools and connector guides, decision trees, findings recorder, custom context,
-memory, wiki, investigation round, onboarding, workflow triggers and step definitions, the agent
-installers, the managed workflow definitions, model resolution, and the agentic investigations
-hypotheses, impact and investigations code. Tests, online evals, the UI and routes don't need a
-decision. Add a directory there when you add one that changes how the agent investigates.
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json). They include
+all of `nightshift_investigations/server` and `agentic_investigations/server`, plus the decision
+trees package, the managed workflow definitions and model resolution. They exclude tests, docs,
+online evals, and the server folders that don't change how the agent investigates: routes,
+telemetry, saved objects, purge, tracing, automations, investigation quotas and notifications.
+
+A new folder is gated by default, so nobody has to remember to add it. Only add an exclude for a
+folder that holds no prompts or agent logic; a config test fails if a folder exclude covers a
+prompt file (`*.text`, `*prompt*`, or anything under `instructions/`).
 
 A run also has to pass the regression gate: `goal_pass` on the pinned golden cut
 (`ns-investigation-golden-2710`) mustn't drop by 0.10 or more with p < 0.05 against the latest

@@ -172,9 +172,9 @@ describe('evals.suites.json evals decision', () => {
   const decisionSuites = suites.filter((suite) => suite.requireDecisionOnPaths !== undefined);
   const gatedSuites = suites.filter((suite) => suite.regressionGate !== undefined);
 
-  it('lists include globs that each match a tracked file', () => {
-    // A glob that matches nothing (e.g. after a directory move) silently stops requiring a decision.
-    const trackedFiles =
+  let trackedFilesCache: string[] | undefined;
+  const getTrackedFiles = (): string[] => {
+    trackedFilesCache ??=
       decisionSuites.length > 0
         ? execFileSync('git', ['ls-files'], {
             cwd: Path.resolve(__dirname, '../../..'),
@@ -182,6 +182,38 @@ describe('evals.suites.json evals decision', () => {
             maxBuffer: 256 * 1024 * 1024,
           }).split('\n')
         : [];
+    return trackedFilesCache;
+  };
+
+  it('never hides a prompt behind a folder-specific exclude', () => {
+    // Suites include whole plugins and exclude the folders that don't change agent behaviour, so a
+    // new folder is gated by default. An exclude naming a folder (unlike `**/*.test.ts`-style
+    // file-kind rules) is the one way a prompt can slip out, so it must not cover any prompt file.
+    const isPromptFile = (file: string): boolean =>
+      file.endsWith('.text') ||
+      /prompt/i.test(Path.basename(file)) ||
+      file.includes('/instructions/');
+
+    const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) => {
+      const { include = [], exclude = [] } = requireDecisionOnPaths ?? {};
+      const folderExcludes = exclude.filter((glob) => !glob.startsWith('**/'));
+      return getTrackedFiles()
+        .filter(
+          (file) => isPromptFile(file) && include.some((glob) => Path.matchesGlob(file, glob))
+        )
+        .flatMap((file) =>
+          folderExcludes
+            .filter((glob) => Path.matchesGlob(file, glob))
+            .map((glob) => `${id}: exclude "${glob}" hides the prompt file ${file}`)
+        );
+    });
+
+    expect(problems).toEqual([]);
+  });
+
+  it('lists include globs that each match a tracked file', () => {
+    // A glob that matches nothing (e.g. after a directory move) silently stops requiring a decision.
+    const trackedFiles = getTrackedFiles();
 
     const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) => {
       const { include = [], exclude = [] } = requireDecisionOnPaths ?? {};
