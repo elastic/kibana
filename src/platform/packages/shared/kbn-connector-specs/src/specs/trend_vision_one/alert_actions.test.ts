@@ -404,6 +404,9 @@ describe('TrendAI Vision One addAlertNote', () => {
     ['%E0%A4%A', null],
     ['%', null],
     ['n%2D7', 'n-7'],
+    ['note_7', 'note_7'],
+    ['2035567', '2035567'],
+    ['a.b~c', 'a.b~c'],
   ])(
     'reads the note id %s from Location without failing a successful write',
     async (segment, noteId) => {

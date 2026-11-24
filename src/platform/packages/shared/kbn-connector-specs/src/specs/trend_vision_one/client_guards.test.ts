@@ -11,6 +11,7 @@ import { getFinitePositiveNumber, getHeaderValue } from '../../connector_utils';
 import {
   apiUrlProblem,
   checkNextLink,
+  decodeSegment,
   filterHeader,
   getApiOrigin,
   normaliseLink,
@@ -208,14 +209,22 @@ describe('TrendAI Vision One id decoding and link normalising', () => {
     expect(decodedId('a%20b')).toBeNull();
   });
 
+  it('decodes a segment without any id rule and returns null when it is malformed', () => {
+    expect(decodeSegment('note_7')).toBe('note_7');
+    expect(decodeSegment('a.b~c')).toBe('a.b~c');
+    expect(decodeSegment('a%20b')).toBe('a b');
+    expect(decodeSegment('%E0%A4%A')).toBeNull();
+    expect(decodeSegment('%')).toBeNull();
+  });
+
   it('puts the same cursor in one form: absolute, sorted query, no fragment', () => {
     expect(normaliseLink(ctx, '/v3.0/x?b=2&a=1#frag')).toBe(`${API}/x?a=1&b=2`);
   });
 });
 
-describe('TrendAI Vision One headers on a failed write, as the Kibana executor reads them', () => {
+describe('TrendAI Vision One headers on a failed request, as the Kibana executor reads them', () => {
   // Replicates generate_executor_function.ts: getHttpStatus and the Retry-After part of getRetryDate
-  // (a retry date is returned for any HTTP error that carries Retry-After).
+  // (a retry date is returned for any HTTP error that carries Retry-After, read or write).
   interface AxiosLikeError {
     response?: { status?: unknown; headers?: unknown };
   }
@@ -244,18 +253,38 @@ describe('TrendAI Vision One headers on a failed write, as the Kibana executor r
     ['read 429 with Retry-After', false, 429, true],
     ['read 503 with Retry-After', false, 503, true],
     ['write 429 with Retry-After', true, 429, true],
-    ['write 503 with Retry-After', true, 503, false],
-    ['write 500 with Retry-After', true, 500, false],
-  ])('%s: retry date %s', async (_what, mutating, status, expectRetry) => {
+    ['write 503 with Retry-After', true, 503, true],
+  ])('%s: the vendor delay is handed over (retry date %s)', async (_what, mutating, status) => {
     // A single attempt: a Retry-After above the cap is reported instead of waited for.
     const error = await failure(mutating, httpError(status, {}, { 'Retry-After': '120' }));
-    expect(retryDate(error) !== undefined).toBe(expectRetry);
-    expect((error as { response: { status: number } }).response.status).toBe(status);
+    const waitMs = (retryDate(error)?.getTime() ?? 0) - Date.now();
+    expect(waitMs).toBeGreaterThan(110_000);
+    expect(waitMs).toBeLessThanOrEqual(120_000);
+    expect((error as { response: unknown }).response).toEqual({
+      status,
+      headers: { 'Retry-After': '120' },
+    });
     expect((error as { status: number }).status).toBe(status);
-    if (!expectRetry) {
-      expect((error as { response: object }).response).toEqual({ status });
-      expect(error).not.toHaveProperty('headers');
-    }
+  });
+
+  it('never puts the request config or the API key on the error of a failed write', async () => {
+    const error = await failure(
+      true,
+      Object.assign(httpError(503, {}, { 'retry-after': '5' }), {
+        config: { headers: { Authorization: 'Bearer unit-test-key' } },
+        request: { headers: { Authorization: 'Bearer unit-test-key' } },
+      })
+    );
+    expect(Object.keys(error as object).sort()).toEqual([
+      'headers',
+      'response',
+      'status',
+      'statusCode',
+    ]);
+    expect(JSON.stringify(error)).not.toContain('unit-test-key');
+    expect((error as Error).message).not.toContain('unit-test-key');
+    expect(error).not.toHaveProperty('config');
+    expect(error).not.toHaveProperty('request');
   });
 
   it('gives no retry date for a write 500 without headers or a write without a response', async () => {
@@ -320,10 +349,12 @@ describe('TrendAI Vision One ids read from Location headers', () => {
 
   it.each([
     ['7', '7'],
+    ['note_7', 'note_7'],
+    ['2035567', '2035567'],
     ['n%2D7', 'n-7'],
+    ['a.b~c', 'a.b~c'],
+    ['a%20b', 'a b'],
     ['%E0%A4%A', null],
-    ['a%2Fb', null],
-    ['a%20b', null],
   ])(
     'addAlertNote reads the note id %s as %j and the write stays a success',
     async (segment, noteId) => {

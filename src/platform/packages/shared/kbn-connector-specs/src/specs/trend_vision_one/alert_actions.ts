@@ -13,7 +13,7 @@ import {
   budgetLeft,
   buildFilter,
   checkNextLink,
-  decodedId,
+  decodeSegment,
   filterHeader,
   getHeader,
   normaliseLink,
@@ -205,7 +205,7 @@ export const alertActions: ConnectorSpec['actions'] = {
       });
       const location = getHeader(response, 'location');
       const noteId = location ? location.split('?')[0].split('/').filter(Boolean).pop() : undefined;
-      return { alertId: input.alertId, noteId: noteId ? decodedId(noteId) : null };
+      return { alertId: input.alertId, noteId: noteId ? decodeSegment(noteId) : null };
     },
   },
 };
