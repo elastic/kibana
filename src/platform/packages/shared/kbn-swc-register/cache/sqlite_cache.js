@@ -21,8 +21,8 @@ const DAY = HOUR * 24;
 const ATIME_REFRESH_INTERVAL = 7 * DAY;
 const ATIME_LIMIT = 30 * DAY;
 const PRUNE_INTERVAL = 7 * DAY;
-// Cache writes are best-effort; do not block the event loop for long when another process holds the lock.
-const BUSY_TIMEOUT_MS = 100;
+// parallel processes (CI, scripts/check) share the db; writers wait for each other instead of failing
+const BUSY_TIMEOUT_MS = 10_000;
 const DB_FILE = 'v3.sqlite';
 
 /** @typedef {import('./types').Cache} CacheInterface */
@@ -110,16 +110,7 @@ class SqliteCache {
    */
   getSourceMap(key) {
     const row = this.#safeGet('map', this.#statements.getMap, key);
-    if (!row) {
-      return undefined;
-    }
-
-    try {
-      return JSON.parse(String(row.map));
-    } catch (error) {
-      this.#logError('GET', key, error);
-      return undefined;
-    }
+    return row ? JSON.parse(String(row.map)) : undefined;
   }
 
   /**
@@ -229,9 +220,6 @@ class SqliteCache {
 
     try {
       this.#db.prepare('DELETE FROM cache WHERE atime < ?').run(Date.now() - ATIME_LIMIT);
-      this.#db
-        .prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('lastPrune', ?)")
-        .run(GLOBAL_ATIME);
     } catch (error) {
       process.stderr.write(`
 Failed to cleanup @kbn/swc-register cache:
@@ -240,6 +228,10 @@ Failed to cleanup @kbn/swc-register cache:
 
 To eliminate this problem you may want to delete the "${Path.relative(process.cwd(), dir)}"
 directory and report this error to the Operations team.\n`);
+    } finally {
+      this.#db
+        .prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('lastPrune', ?)")
+        .run(GLOBAL_ATIME);
     }
   }
 

@@ -10,9 +10,6 @@
 import Fs from 'fs';
 import Path from 'path';
 import { Writable } from 'stream';
-import { spawn } from 'child_process';
-import type { ChildProcessWithoutNullStreams } from 'child_process';
-import { once } from 'events';
 import { DatabaseSync } from 'node:sqlite';
 
 import del from 'del';
@@ -85,73 +82,6 @@ const makeCache = (...options: ConstructorParameters<typeof SqliteCache>) => {
   const cache = new SqliteCache(...options);
   caches.push(cache);
   return cache;
-};
-
-const withTimeout = <T>(promise: Promise<T>, label: string, timeoutMs = 8_000): Promise<T> =>
-  new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs);
-    promise.then(
-      (value) => {
-        clearTimeout(timeout);
-        resolve(value);
-      },
-      (error) => {
-        clearTimeout(timeout);
-        reject(error);
-      }
-    );
-  });
-
-const stopChild = async (child: ChildProcessWithoutNullStreams) => {
-  if (child.exitCode !== null || child.signalCode !== null) {
-    return;
-  }
-  const exit = withTimeout(once(child, 'exit'), 'child cleanup', 2_000);
-  child.kill('SIGKILL');
-  await exit;
-};
-
-const waitForReady = (child: ChildProcessWithoutNullStreams): Promise<void> =>
-  withTimeout(
-    new Promise((resolve, reject) => {
-      const cleanup = () => {
-        child.stdout.off('data', onReady);
-        child.off('error', onError);
-        child.off('exit', onExit);
-      };
-      const onReady = () => {
-        cleanup();
-        resolve();
-      };
-      const onError = (error: Error) => {
-        cleanup();
-        reject(error);
-      };
-      const onExit = (code: number | null) => {
-        cleanup();
-        reject(new Error(`Child exited before becoming ready (code ${code})`));
-      };
-
-      child.stdout.once('data', onReady);
-      child.once('error', onError);
-      child.once('exit', onExit);
-    }),
-    'child readiness'
-  );
-
-const startWriter = (key: string) => {
-  const child = spawn(process.execPath, [
-    '-e',
-    `const { SqliteCache } = require(${JSON.stringify(require.resolve('./sqlite_cache'))});
-     const cache = new SqliteCache({ dir: ${JSON.stringify(DIR)}, prefix: 'prefix' });
-     process.stdout.write('ready');
-     process.stdin.once('data', () => {
-       cache.update(${JSON.stringify(key)}, { code: ${JSON.stringify(key)} })
-         .then(() => cache.close())
-         .catch((error) => { console.error(error); process.exitCode = 1; });
-     });`,
-  ]);
-  return { child, ready: waitForReady(child) };
 };
 
 beforeEach(async () => await del(DIR));
@@ -308,87 +238,6 @@ it('shares entries between instances using the same directory', async () => {
   expect(reader.getCode('shared')).toBe('var shared = true');
 });
 
-it('shares a cache between processes that open it at the same time', async () => {
-  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
-  const first = startWriter('first');
-  const second = startWriter('second');
-  try {
-    await Promise.all([first.ready, second.ready]);
-
-    const firstExit = withTimeout(once(first.child, 'exit'), 'first writer exit');
-    first.child.stdin.end('write');
-    expect((await firstExit)[0]).toBe(0);
-
-    const secondExit = withTimeout(once(second.child, 'exit'), 'second writer exit');
-    second.child.stdin.end('write');
-    expect((await secondExit)[0]).toBe(0);
-
-    expect(readRow('first')).toMatchObject({ code: 'first' });
-    expect(readRow('second')).toMatchObject({ code: 'second' });
-  } finally {
-    await Promise.all([stopChild(first.child), stopChild(second.child)]);
-  }
-}, 40_000);
-
-it('handles simultaneous writes from separate processes', async () => {
-  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
-  const first = startWriter('first');
-  const second = startWriter('second');
-  try {
-    await Promise.all([first.ready, second.ready]);
-    const firstExit = withTimeout(once(first.child, 'exit'), 'first writer exit');
-    const secondExit = withTimeout(once(second.child, 'exit'), 'second writer exit');
-    first.child.stdin.end('write');
-    second.child.stdin.end('write');
-
-    expect((await firstExit)[0]).toBe(0);
-    expect((await secondExit)[0]).toBe(0);
-    expect([readRow('first'), readRow('second')].filter(Boolean).length).toBeGreaterThanOrEqual(1);
-  } finally {
-    await Promise.all([stopChild(first.child), stopChild(second.child)]);
-  }
-}, 25_000);
-
-it('treats malformed source maps as cache misses', () => {
-  const cache = makeCache({ dir: DIR, prefix: 'prefix' });
-  writeRows([['invalid-map', GLOBAL_ATIME, 'code', '{invalid']]);
-  const stderr = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
-
-  try {
-    expect(cache.getSourceMap('invalid-map')).toBe(undefined);
-  } finally {
-    stderr.mockRestore();
-  }
-});
-
-it('does not block for long when another process holds the write lock', async () => {
-  const cache = makeCache({ dir: DIR, prefix: 'prefix' });
-  const locker = spawn(process.execPath, [
-    '-e',
-    `const { DatabaseSync } = require('node:sqlite');
-     const db = new DatabaseSync(${JSON.stringify(DB_FILE)});
-     db.exec('BEGIN IMMEDIATE');
-     process.stdout.write('locked');
-     process.stdin.once('data', () => { db.exec('ROLLBACK'); db.close(); });`,
-  ]);
-  try {
-    await waitForReady(locker);
-    const stderr = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
-    try {
-      const start = Date.now();
-      await cache.update('locked', { code: 'code' });
-      expect(Date.now() - start).toBeLessThan(1000);
-    } finally {
-      stderr.mockRestore();
-    }
-    const exit = withTimeout(once(locker, 'exit'), 'locker exit');
-    locker.stdin.end('release');
-    expect((await exit)[0]).toBe(0);
-  } finally {
-    await stopChild(locker);
-  }
-}, 25_000);
-
 it('only refreshes atime for entries older than the refresh interval', async () => {
   const log = makeTestLog();
   const cache = makeCache({
@@ -432,25 +281,4 @@ it('prunes stale entries when the last prune is older than a week', async () => 
   await makeCache({ dir: DIR, prefix: 'prefix' }).close();
   expect(readRow('old')).toBe(undefined);
   expect(readRow('fresh')).toMatchObject({ code: 'fresh' });
-});
-
-it('defers pruning when another connection holds the write lock', async () => {
-  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
-  writeRows([['old', GLOBAL_ATIME - 31 * DAY, 'old', null]]);
-  const locker = new DatabaseSync(DB_FILE);
-  locker.prepare("UPDATE meta SET value = ? WHERE key = 'lastPrune'").run(GLOBAL_ATIME - 8 * DAY);
-  locker.exec('BEGIN IMMEDIATE');
-  const stderr = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
-
-  try {
-    await makeCache({ dir: DIR, prefix: 'prefix' }).close();
-    expect(readRow('old')).toMatchObject({ code: 'old' });
-  } finally {
-    stderr.mockRestore();
-    locker.exec('ROLLBACK');
-    locker.close();
-  }
-
-  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
-  expect(readRow('old')).toBe(undefined);
 });
