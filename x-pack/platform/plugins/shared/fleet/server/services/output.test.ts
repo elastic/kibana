@@ -6359,6 +6359,24 @@ describe('Output Service', () => {
       expect((outputSavedObjectToOutput(optedOut) as any).otlp_exporter.sending_queue).toBeNull();
     });
 
+    it.each([
+      ['keeps a batch that is turned off', null, null],
+      ['keeps a batch without settings, which batches with the defaults', { sizer: null }, {}],
+    ])('should read the OTLP queue: %s', (_label, batch, expected) => {
+      const so = mockOutputSO('output-test', {
+        type: 'otlp',
+        otlp_exporter: {
+          protocol: 'grpc',
+          endpoint: 'collector.example.com:4317',
+          sending_queue: { batch },
+        },
+      } as any);
+
+      expect((outputSavedObjectToOutput(so) as any).otlp_exporter.sending_queue.batch).toEqual(
+        expected
+      );
+    });
+
     it('should return output object with parsed SSL when SSL is a valid JSON string', () => {
       const so = mockOutputSO('output-test', {
         type: 'elasticsearch',
