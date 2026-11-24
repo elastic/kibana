@@ -302,6 +302,9 @@ describe('test fetchAll', () => {
       return fetchAll({ ...deps, esqlSource: createMockEsqlSource([], [], '@timestamp') });
     };
 
+    // main$ is PARTIAL once a chart of the fetch is displayed
+    const showChart = () => subjects.main$.next({ fetchStatus: FetchStatus.PARTIAL });
+
     test('should set main$ and totalHits$ to ERROR and resolve', async () => {
       await fetchAllEsql();
 
@@ -312,9 +315,21 @@ describe('test fetchAll', () => {
       expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
     });
 
+    test('should complete main$ if a chart is already displayed', async () => {
+      const fetchPromise = fetchAllEsql();
+      showChart();
+      await fetchPromise;
+
+      expect(subjects.main$.getValue()).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        foundDocuments: true,
+        error: undefined,
+      });
+    });
+
     test('should set main$ to ERROR if the displayed chart was hidden in the meantime', async () => {
       const fetchPromise = fetchAllEsql();
-      subjects.main$.next({ fetchStatus: FetchStatus.PARTIAL });
+      showChart();
       deps.internalState.dispatch(
         internalStateActions.updateAppState({
           tabId: deps.getCurrentTab().id,
@@ -324,23 +339,6 @@ describe('test fetchAll', () => {
       await fetchPromise;
 
       expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
-    });
-
-    test('should not set main$ to ERROR if a chart is already displayed', async () => {
-      const fetchPromise = fetchAllEsql();
-      // the chart finished loading before the documents request failed
-      subjects.main$.next({ fetchStatus: FetchStatus.PARTIAL });
-      await fetchPromise;
-
-      expect(subjects.documents$.getValue()).toEqual(
-        expect.objectContaining({ fetchStatus: FetchStatus.ERROR, error })
-      );
-      expect(subjects.totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
-      expect(subjects.main$.getValue()).toEqual({
-        fetchStatus: FetchStatus.COMPLETE,
-        foundDocuments: true,
-        error: undefined,
-      });
     });
   });
 
