@@ -26,10 +26,7 @@ import {
   type SourceClassificationResult,
 } from './classify_sources';
 import { reconcileSourceCatalog } from '../reconcile_source_catalog';
-import {
-  selectSampleableCandidates,
-  type UnsampleableSource,
-} from './select_sampleable_candidates';
+import { selectSupportedCandidates, type UnsupportedSource } from './select_supported_candidates';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
@@ -37,9 +34,8 @@ export interface EligibleStreamsResponse {
   candidates: Array<SourceCandidate & { sourceRevision: string }>;
   alreadyRunning: SourceClassificationResult['alreadyRunning'];
   upToDate: SourceCandidate[];
-  unsupported: string[];
   /** Candidates left out because feature identification could not sample them. */
-  unsampleable: UnsampleableSource[];
+  unsupported: UnsupportedSource[];
   skipped: SourceCandidate[];
   disabled: SourceClassificationResult['disabled'];
   settings: {
@@ -71,7 +67,7 @@ const eligibleStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'List sources eligible for KI extraction',
     description:
-      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, unsampleable, skipped, and disabled buckets based on extraction settings, workflow execution state, and whether the source can be sampled.',
+      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, skipped, and disabled buckets based on extraction settings, workflow execution state, and whether the source can be sampled.',
   },
   security: {
     authz: {
@@ -148,14 +144,14 @@ const eligibleStreamsRoute = createServerRoute({
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
-    const { alreadyRunning, candidates, upToDate, unsupported, disabled } = classifySources({
+    const { alreadyRunning, candidates, upToDate, disabled } = classifySources({
       sources,
       executions,
       intervalHours,
     });
 
     const availableSlots = Math.max(0, maxStreams - alreadyRunning.length);
-    const { toSchedule, skipped, unsampleable } = await selectSampleableCandidates({
+    const { toSchedule, skipped, unsupported } = await selectSupportedCandidates({
       candidates,
       availableSlots,
       viewNames: new Map(sources.map(({ id, view_name: viewName }) => [id, viewName])),
@@ -178,7 +174,6 @@ const eligibleStreamsRoute = createServerRoute({
       alreadyRunning,
       upToDate,
       unsupported,
-      unsampleable,
       skipped,
       disabled,
       settings: {

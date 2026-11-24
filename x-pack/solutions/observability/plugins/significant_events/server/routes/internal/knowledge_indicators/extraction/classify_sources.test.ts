@@ -94,7 +94,6 @@ describe('classifySources', () => {
         lastCompletedAt: null,
       },
     ]);
-    expect(result.unsupported).toEqual([]);
   });
 
   it('identifies already running executions, even when the query changed mid-run', () => {
@@ -304,7 +303,6 @@ describe('classifySources', () => {
       result.candidates.length +
         result.alreadyRunning.length +
         result.upToDate.length +
-        result.unsupported.length +
         result.disabled.length
     ).toBe(sources.length);
   });

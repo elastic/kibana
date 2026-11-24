@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getEsqlColumnSchema } from '@kbn/ai-tools';
 import type { SourceCandidate } from './classify_sources';
-import { selectSampleableCandidates } from './select_sampleable_candidates';
+import { selectSupportedCandidates } from './select_supported_candidates';
 
 jest.mock('@kbn/ai-tools', () => ({
   getEsqlColumnSchema: jest.fn(),
@@ -45,7 +45,7 @@ const mockColumnsByView = (
 const select = (sourceIds: string[], availableSlots: number) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.esql.query.mockResolvedValue({ columns: [], values: [[0]] } as never);
-  return selectSampleableCandidates({
+  return selectSupportedCandidates({
     candidates: sourceIds.map(makeCandidate),
     availableSlots,
     viewNames: new Map(sourceIds.map((id) => [id, `view-${id}`])),
@@ -54,7 +54,7 @@ const select = (sourceIds: string[], availableSlots: number) => {
   });
 };
 
-describe('selectSampleableCandidates', () => {
+describe('selectSupportedCandidates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -67,11 +67,11 @@ describe('selectSampleableCandidates', () => {
       'view-c': [TIMESTAMP_COLUMN],
     });
 
-    const { toSchedule, skipped, unsampleable } = await select(['invalid', 'a', 'b', 'c'], 2);
+    const { toSchedule, skipped, unsupported } = await select(['invalid', 'a', 'b', 'c'], 2);
 
     expect(ids(toSchedule)).toEqual(['a', 'b']);
     expect(ids(skipped)).toEqual(['c']);
-    expect(unsampleable).toEqual([
+    expect(unsupported).toEqual([
       { sourceId: 'invalid', sourceSlug: 'invalid-slug', reason: MISSING_TIMESTAMP_REASON },
     ]);
     expect(getEsqlColumnSchemaMock).not.toHaveBeenCalledWith(
@@ -86,10 +86,10 @@ describe('selectSampleableCandidates', () => {
       ),
     });
 
-    const { toSchedule, unsampleable } = await select(['missing'], 5);
+    const { toSchedule, unsupported } = await select(['missing'], 5);
 
     expect(toSchedule).toEqual([]);
-    expect(unsampleable).toEqual([
+    expect(unsupported).toEqual([
       expect.objectContaining({ reason: expect.stringContaining('does not exist yet') }),
     ]);
   });
@@ -97,9 +97,9 @@ describe('selectSampleableCandidates', () => {
   it('keeps a source with no data yet and one whose probe cannot answer', async () => {
     mockColumnsByView({ 'view-empty': [], 'view-slow': new Error('Request timed out') });
 
-    const { toSchedule, unsampleable } = await select(['empty', 'slow'], 5);
+    const { toSchedule, unsupported } = await select(['empty', 'slow'], 5);
 
     expect(ids(toSchedule)).toEqual(['empty', 'slow']);
-    expect(unsampleable).toEqual([]);
+    expect(unsupported).toEqual([]);
   });
 });

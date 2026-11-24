@@ -77,7 +77,7 @@ export async function fetchSampleDocuments({
       signal: samplingSignal,
       samplingTimeoutMs,
     });
-    if (probe.kind === 'invalid') {
+    if (probe.kind === 'unsupported') {
       throw new StatusError(`Cannot sample [${index}]: ${probe.problem}`, 400);
     }
     if (probe.kind === 'empty') {

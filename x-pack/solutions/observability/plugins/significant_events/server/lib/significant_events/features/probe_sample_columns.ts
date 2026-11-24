@@ -41,9 +41,9 @@ export const withSamplingErrorContext = async <T>(
 
 export type SampleColumnsProbe =
   /** `columns` is absent when the probe could not answer: sampling runs without it. */
-  | { kind: 'sampleable'; columns: EsqlColumnSchema[] | undefined }
+  | { kind: 'supported'; columns: EsqlColumnSchema[] | undefined }
   | { kind: 'empty' }
-  | { kind: 'invalid'; problem: string };
+  | { kind: 'unsupported'; problem: string };
 
 /** Decides from a source's columns whether it can be sampled; throws a 400 when an index behind it does not exist. */
 export const probeSampleColumns = async ({
@@ -87,7 +87,7 @@ export const probeSampleColumns = async ({
   // looks the same for a source with data but no @timestamp (saved before the source API
   // required it) and for a wildcard with no index yet. Only the first is the source's fault.
   if (!columns || !getTimestampColumnProblem(columns)) {
-    return { kind: 'sampleable', columns };
+    return { kind: 'supported', columns };
   }
 
   const isTimestampUnmapped = !columns.some(({ name }) => name === SOURCE_TIMESTAMP_FIELD);
@@ -120,7 +120,7 @@ export const probeSampleColumns = async ({
   // schema with a valid @timestamp, and then there is nothing to reject. Its schema also
   // carries the entity fields the first, empty answer lacked.
   const problem = getTimestampColumnProblem(fullColumns);
-  return problem ? { kind: 'invalid', problem } : { kind: 'sampleable', columns: fullColumns };
+  return problem ? { kind: 'unsupported', problem } : { kind: 'supported', columns: fullColumns };
 };
 
 /** One cheap `LIMIT 1` count: tells a view with no data yet apart from one that has documents. */

@@ -84,6 +84,6 @@ describe('eligibleStreamsRoute', () => {
     const response = await eligibleRoute.handler(makeHandlerParams());
 
     expect(response.candidates.map(({ sourceId }) => sourceId)).toEqual(['ok']);
-    expect(response.unsampleable.map(({ sourceId }) => sourceId)).toEqual(['no-timestamp']);
+    expect(response.unsupported.map(({ sourceId }) => sourceId)).toEqual(['no-timestamp']);
   });
 });

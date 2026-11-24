@@ -15,7 +15,7 @@ import type { SourceCandidate } from './classify_sources';
 
 const PROBE_TIMEOUT_MS = 15_000;
 
-export interface UnsampleableSource {
+export interface UnsupportedSource {
   sourceId: string;
   sourceSlug: string;
   reason: string;
@@ -25,7 +25,7 @@ export interface UnsampleableSource {
  * Fills the available slots with the first candidates feature identification can sample, so a
  * source whose run is bound to fail takes neither a slot nor a daily extraction unit.
  */
-export const selectSampleableCandidates = async ({
+export const selectSupportedCandidates = async ({
   candidates,
   availableSlots,
   viewNames,
@@ -40,10 +40,10 @@ export const selectSampleableCandidates = async ({
 }): Promise<{
   toSchedule: SourceCandidate[];
   skipped: SourceCandidate[];
-  unsampleable: UnsampleableSource[];
+  unsupported: UnsupportedSource[];
 }> => {
   const toSchedule: SourceCandidate[] = [];
-  const unsampleable: UnsampleableSource[] = [];
+  const unsupported: UnsupportedSource[] = [];
   let next = 0;
 
   // Probes only as many candidates as there are slots left: the sources past the last slot
@@ -53,7 +53,7 @@ export const selectSampleableCandidates = async ({
     next += batch.length;
     const reasons = await Promise.all(
       batch.map(({ sourceId }) =>
-        getUnsampleableReason({ index: viewNames.get(sourceId), esClient, logger })
+        getUnsupportedReason({ index: viewNames.get(sourceId), esClient, logger })
       )
     );
     batch.forEach((candidate, position) => {
@@ -64,14 +64,14 @@ export const selectSampleableCandidates = async ({
       }
       const { sourceId, sourceSlug } = candidate;
       logger.debug(() => `Not scheduling onboarding of source ${sourceId}: ${reason}`);
-      unsampleable.push({ sourceId, sourceSlug, reason });
+      unsupported.push({ sourceId, sourceSlug, reason });
     });
   }
 
-  return { toSchedule, skipped: candidates.slice(next), unsampleable };
+  return { toSchedule, skipped: candidates.slice(next), unsupported };
 };
 
-const getUnsampleableReason = async ({
+const getUnsupportedReason = async ({
   index,
   esClient,
   logger,
@@ -92,13 +92,13 @@ const getUnsampleableReason = async ({
       signal,
       samplingTimeoutMs: PROBE_TIMEOUT_MS,
     });
-    return probe.kind === 'invalid' ? probe.problem : undefined;
+    return probe.kind === 'unsupported' ? probe.problem : undefined;
   } catch (error) {
     if (error instanceof StatusError) {
       return error.message;
     }
     // A probe that cannot answer rejects nothing: the run decides.
-    logger.debug(() => `Sampleability probe of [${index}] failed: ${parseError(error).message}`);
+    logger.debug(() => `Column probe of [${index}] failed: ${parseError(error).message}`);
     return undefined;
   } finally {
     signal.dispose();
