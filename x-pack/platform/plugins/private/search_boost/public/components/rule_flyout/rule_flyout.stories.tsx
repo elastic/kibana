@@ -173,7 +173,7 @@ export default meta;
 
 type Story = StoryObj<RuleFlyoutProps>;
 
-/** Select "storefront-search" and type `catalog-2026-*` to see a priority tie on save. */
+/** Select "storefront-search" and type `catalog-2026-*` to see outranked targets. */
 export const Create: Story = {};
 
 export const EditIndices: Story = {

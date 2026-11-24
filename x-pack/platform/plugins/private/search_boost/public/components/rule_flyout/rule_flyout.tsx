@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButton,
@@ -42,7 +42,6 @@ import { AppliesToFooter } from '../applies_to_footer/applies_to_footer';
 import { IndexPatternField } from './index_pattern_field';
 import { PriorityField, parsePriority } from './priority_field';
 import { ProfilePicker } from './profile_picker';
-import { findTiedRule } from './rule_ties';
 import { TargetList } from './target_list';
 import { matchTargets } from './target_matches';
 import {
@@ -74,11 +73,13 @@ export interface RuleFlyoutProps {
   /** The rule to edit. Without one, the flyout creates a rule. */
   rule?: BoostRule;
   profiles: readonly BoostProfile[];
-  /** Every existing rule, to catch a duplicate name or a priority tie. */
+  /** Every existing rule, to catch a duplicate name. */
   rules: readonly BoostRuleListItem[];
   /** The indices and data streams a rule can target, per type. */
   targets: Readonly<Record<BoostProfileType, readonly BoostRuleMatch[]>>;
   isSaving?: boolean;
+  /** Passed when Elasticsearch rejects the current rule for a tie on save. */
+  tiedRuleName?: string;
   /**
    * Opens the profile flyout, with the type fixed when given. Resolves with the name of the profile
    * it creates, which then gets selected.
@@ -109,6 +110,7 @@ export const RuleFlyout = ({
   rules,
   targets,
   isSaving = false,
+  tiedRuleName,
   onCreateProfile,
   onSave,
   onClose,
@@ -118,10 +120,8 @@ export const RuleFlyout = ({
   const lockedType = rule
     ? profiles.find(({ name }) => name === rule.boost_profile)?.type
     : undefined;
-  const getProfileType = (profileName: string) =>
-    profiles.find(({ name }) => name === profileName)?.type;
 
-  const { control, handleSubmit } = useForm<RuleFormValues>({
+  const { control, handleSubmit, setError } = useForm<RuleFormValues>({
     defaultValues: {
       name: rule?.name ?? '',
       profileName: rule?.boost_profile ?? '',
@@ -168,25 +168,19 @@ export const RuleFlyout = ({
   const { field: priorityField, fieldState: priorityState } = useController({
     control,
     name: 'priority',
-    rules: {
-      validate: (priority, { name, profileName, indexPattern }) => {
-        const type = getProfileType(profileName);
-        if (!type || validateIndexPattern(indexPattern)) {
-          return true;
-        }
-        const tiedRule = findTiedRule(
-          {
-            name: rule?.name ?? name,
-            index_pattern: indexPattern,
-            priority: parsePriority(priority),
-            type,
-          },
-          rules
-        );
-        return tiedRule ? getPriorityTieError(tiedRule.name) : true;
-      },
-    },
   });
+  const isTied = priorityState.error?.type === 'tie';
+
+  // Waits for saving to end, since the field is disabled until then and can't take focus.
+  useEffect(() => {
+    if (tiedRuleName && !isSaving) {
+      setError(
+        'priority',
+        { type: 'tie', message: getPriorityTieError(tiedRuleName) },
+        { shouldFocus: true }
+      );
+    }
+  }, [tiedRuleName, isSaving, setError]);
 
   const selectedProfile = profiles.find(({ name }) => name === profileField.value);
   const type = selectedProfile?.type;
@@ -336,7 +330,7 @@ export const RuleFlyout = ({
         ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        {type && appliedMatches.length > 0 ? (
+        {type && appliedMatches.length > 0 && !isTied ? (
           <>
             <AppliesToFooter
               type={type}

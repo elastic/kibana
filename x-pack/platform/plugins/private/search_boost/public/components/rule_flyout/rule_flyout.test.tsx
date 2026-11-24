@@ -122,8 +122,12 @@ const defaultProps: RuleFlyoutProps = {
 
 const renderFlyout = (props: Partial<RuleFlyoutProps> = {}) => {
   const allProps = { ...defaultProps, ...props };
-  render(<RuleFlyout {...allProps} />);
-  return allProps;
+  const { rerender } = render(<RuleFlyout {...allProps} />);
+  return {
+    ...allProps,
+    rerender: (changes: Partial<RuleFlyoutProps>) =>
+      rerender(<RuleFlyout {...allProps} {...changes} />),
+  };
 };
 
 const getProfileInput = () =>
@@ -399,25 +403,37 @@ describe('RuleFlyout', () => {
       expect(priority).toHaveValue(12);
     });
 
-    it('reports a priority tie with another rule, and clears it when the priority changes', async () => {
-      const { onSave } = renderFlyout();
+    it.each([
+      ['priority', () => userEvent.type(screen.getByTestId('searchBoostRuleFlyoutPriority'), '1')],
+      ['pattern', () => typePattern('catalog-2027-*')],
+    ])(
+      'shows and focuses the tie reported on save, and clears it when the %s changes',
+      async (_field, change) => {
+        const { onSave, rerender } = renderFlyout();
 
-      await userEvent.type(screen.getByTestId('searchBoostRuleFlyoutName'), 'storefront-archive');
-      await selectProfile('storefront-search');
-      await typePattern('catalog-*');
-      await userEvent.clear(screen.getByTestId('searchBoostRuleFlyoutPriority'));
-      await userEvent.type(screen.getByTestId('searchBoostRuleFlyoutPriority'), '10');
-      await save();
+        await userEvent.type(screen.getByTestId('searchBoostRuleFlyoutName'), 'storefront-archive');
+        await selectProfile('storefront-search');
+        await typePattern('catalog-*');
+        await save();
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+        rerender({ tiedRuleName: 'storefront-catalogs' });
 
-      expect(await screen.findByText('Ties with rule "storefront-catalogs".')).toBeInTheDocument();
-      expect(onSave).not.toHaveBeenCalled();
+        expect(
+          await screen.findByText('Ties with rule "storefront-catalogs".')
+        ).toBeInTheDocument();
+        await waitFor(() =>
+          expect(screen.getByTestId('searchBoostRuleFlyoutPriority')).toHaveFocus()
+        );
 
-      await userEvent.type(screen.getByTestId('searchBoostRuleFlyoutPriority'), '0');
+        await change();
 
-      await waitFor(() =>
-        expect(screen.queryByText('Ties with rule "storefront-catalogs".')).not.toBeInTheDocument()
-      );
-    });
+        await waitFor(() =>
+          expect(
+            screen.queryByText('Ties with rule "storefront-catalogs".')
+          ).not.toBeInTheDocument()
+        );
+      }
+    );
 
     it('saves the rule', async () => {
       const { onSave } = renderFlyout();
@@ -519,6 +535,57 @@ describe('RuleFlyout', () => {
       expect(screen.getByTestId('searchBoostAppliesToCount')).toHaveTextContent('1 data stream');
       expect(screen.getByTestId('searchBoostAppliesToSize')).toHaveTextContent('200 GB');
       expect(screen.getByTestId('searchBoostTimeline-period-standard')).toBeInTheDocument();
+    });
+
+    it('hides the applies to footer while save reports a tie', async () => {
+      const { onSave, rerender } = renderFlyout({ rule: indicesRule });
+      expect(screen.getByTestId('searchBoostAppliesToFooter')).toBeInTheDocument();
+
+      await save();
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+      rerender({ tiedRuleName: 'storefront-catalogs' });
+
+      expect(await screen.findByText('Ties with rule "storefront-catalogs".')).toBeInTheDocument();
+      expect(screen.queryByTestId('searchBoostAppliesToFooter')).not.toBeInTheDocument();
+
+      await userEvent.type(screen.getByTestId('searchBoostRuleFlyoutPriority'), '0');
+
+      expect(await screen.findByTestId('searchBoostAppliesToFooter')).toBeInTheDocument();
+    });
+
+    it('shows a tie and focuses the priority field only once saving ends', async () => {
+      const { onSave, rerender } = renderFlyout({ rule: indicesRule });
+      const priority = screen.getByTestId('searchBoostRuleFlyoutPriority');
+
+      await save();
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+      rerender({ isSaving: true, tiedRuleName: 'storefront-catalogs' });
+
+      expect(screen.queryByText('Ties with rule "storefront-catalogs".')).not.toBeInTheDocument();
+      expect(priority).not.toHaveFocus();
+
+      rerender({ tiedRuleName: 'storefront-catalogs' });
+
+      expect(await screen.findByText('Ties with rule "storefront-catalogs".')).toBeInTheDocument();
+      await waitFor(() => expect(priority).toHaveFocus());
+    });
+
+    it('shows a repeated tie again after the next save', async () => {
+      const { onSave, rerender } = renderFlyout({ rule: indicesRule });
+
+      await save();
+      await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+      rerender({ tiedRuleName: 'storefront-catalogs' });
+      expect(await screen.findByText('Ties with rule "storefront-catalogs".')).toBeInTheDocument();
+
+      await save();
+      await waitFor(() => expect(onSave).toHaveBeenCalledTimes(2));
+      rerender({ isSaving: true });
+      expect(screen.queryByText('Ties with rule "storefront-catalogs".')).not.toBeInTheDocument();
+
+      rerender({ tiedRuleName: 'storefront-catalogs' });
+
+      expect(await screen.findByText('Ties with rule "storefront-catalogs".')).toBeInTheDocument();
     });
 
     it('disables the fields while saving', () => {
