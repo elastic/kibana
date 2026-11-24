@@ -36,6 +36,8 @@ import { registerAutomationSuggestionRoutes } from './routes/automation_suggesti
 import { registerSessionEventsRoutes } from './routes/session_events';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
+import { registerSpendRoutes } from './routes/spend';
+import { SpendService, createPriceCatalog, createWorkflowExecutionsSpendSource } from './spend';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
@@ -70,6 +72,8 @@ import { resolveSpaceId } from './utils/resolve_space_id';
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
 
+const DEFAULT_PRICE_CATALOG_BASE_URL = 'https://cloud.elastic.co';
+
 export class ContextEnginePlugin
   implements
     Plugin<
@@ -98,6 +102,8 @@ export class ContextEnginePlugin
   private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private readonly aiIndexChanges: AiIndexChangeNotifier;
+  private spendService?: SpendService;
+  private priceCatalogBaseUrl = DEFAULT_PRICE_CATALOG_BASE_URL;
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
     | (DeleteWorkflowsApi &
@@ -235,6 +241,13 @@ export class ContextEnginePlugin
         throw new Error('Improvements service not available — plugin has not started');
       }
       return this.createImprovementsService(esClient, spaceId);
+    };
+
+    const getSpendService = () => {
+      if (!this.spendService) {
+        throw new Error('Spend service not available — plugin has not started');
+      }
+      return this.spendService;
     };
 
     const getScheduleService = () => {
@@ -388,6 +401,17 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    this.priceCatalogBaseUrl = setupDeps.cloud?.baseUrl ?? DEFAULT_PRICE_CATALOG_BASE_URL;
+    registerSpendRoutes({
+      router,
+      logger: this.logger.get('spend'),
+      getSpendService,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+    });
+
     registerAutomationSuggestionRoutes({
       router,
       getAiIndexService,
@@ -503,6 +527,17 @@ export class ContextEnginePlugin
       logger: this.logger.get('signals'),
     });
     const signalsService = this.signalsService;
+
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    this.spendService = new SpendService({
+      aiIndexService,
+      priceCatalog: createPriceCatalog({
+        fetchFn: (url, init) => fetch(url, init),
+        baseUrl: this.priceCatalogBaseUrl,
+        logger: this.logger.get('spend', 'pricing'),
+      }),
+      sources: [createWorkflowExecutionsSpendSource({ getEsClient: () => internalEsClient })],
+    });
 
     const sessionMemoryService = createSessionMemoryService(this.esClient);
     const sessionEventsService = createSessionEventsService(this.esClient);
