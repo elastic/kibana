@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { CONNECTOR_SPEC_VERSION_MAX_LENGTH } from '../../common';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ActionType } from '../types';
@@ -42,7 +43,11 @@ export const resolveConnectorSpecVersion = ({
   actionType: ActionType;
   specVersion?: string;
   configurationUtilities: ActionsConfigurationUtilities;
-}): { resolvedSpecVersion: string | undefined; actionTypeForValidation: ActionType } => {
+}): {
+  resolvedSpecVersion: string | undefined;
+  actionTypeForValidation: ActionType;
+  selectedSpec?: ConnectorSpec;
+} => {
   const { id: actionTypeId } = actionType;
   const { specs } = actionType;
 
@@ -99,5 +104,5 @@ export const resolveConnectorSpecVersion = ({
     },
   };
 
-  return { resolvedSpecVersion, actionTypeForValidation };
+  return { resolvedSpecVersion, actionTypeForValidation, selectedSpec };
 };

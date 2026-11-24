@@ -304,14 +304,17 @@ export class ActionsClient {
 
   public async getConnectorSpec({
     id,
+    specVersion,
     configurationUtilities,
   }: {
     id: string;
+    specVersion?: string;
     configurationUtilities: ActionsConfigurationUtilities;
   }) {
     return getConnectorSpecAsJsonSchema({
       context: this.context,
       id,
+      specVersion,
       configurationUtilities,
     });
   }

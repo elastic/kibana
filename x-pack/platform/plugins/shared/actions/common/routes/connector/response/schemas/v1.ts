@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { CONNECTOR_SPEC_VERSION_MAX_LENGTH } from '../../../..';
 
 const connectorResponseFields = {
   id: schema.string({
@@ -309,6 +310,15 @@ export const connectorAuthStatusResponseSchema = schema.recordOf(
 export const getConnectorSpecResponseBodySchema = schema.object({
   metadata: schema.object(
     {
+      spec_version: schema.maybe(
+        schema.version({
+          maxLength: CONNECTOR_SPEC_VERSION_MAX_LENGTH,
+          meta: {
+            description:
+              'The exact connector schema version served, when the connector type is versioned.',
+          },
+        })
+      ),
       id: schema.string({
         meta: {
           description: 'The connector type identifier (same shape as an action type id).',

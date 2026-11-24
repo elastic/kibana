@@ -6,6 +6,7 @@
  */
 
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
+import { resolveConnectorSpecVersion } from '../../../../lib/resolve_connector_spec_version';
 import { getRegisteredSpec } from '../../../../specs_client/lib/get_registered_spec';
 import { serializeSpecDetail } from '../../../../specs_client/lib/serialize_spec_detail';
 import type { GetConnectorSpecParams, GetConnectorSpecResult } from './types';
@@ -13,6 +14,7 @@ import type { GetConnectorSpecParams, GetConnectorSpecResult } from './types';
 export async function getConnectorSpecAsJsonSchema({
   context,
   id,
+  specVersion,
   configurationUtilities,
 }: GetConnectorSpecParams): Promise<GetConnectorSpecResult> {
   try {
@@ -28,10 +30,18 @@ export async function getConnectorSpecAsJsonSchema({
   }
 
   const registered = getRegisteredSpec(context.actionTypeRegistry, id);
-  const detail = serializeSpecDetail(registered, configurationUtilities);
+  const { resolvedSpecVersion, selectedSpec } = configurationUtilities.isCatalogEnabled()
+    ? resolveConnectorSpecVersion({
+        actionType: context.actionTypeRegistry.get(id),
+        specVersion,
+        configurationUtilities,
+      })
+    : { resolvedSpecVersion: undefined, selectedSpec: registered.spec };
+  const spec = selectedSpec ?? registered.spec;
+  const detail = serializeSpecDetail({ ...registered, spec }, configurationUtilities);
 
   return {
-    metadata: registered.spec.metadata,
+    metadata: { ...spec.metadata, specVersion: resolvedSpecVersion },
     schema: detail.formSchema,
     isTestable: detail.isTestable,
     authTypeIds: detail.authTypeIds,
