@@ -9,42 +9,43 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getAgentFromRunContext } from '@kbn/agent-builder-server';
-import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
-import { MAX_KI_ID_LENGTH } from '@kbn/context-engine-plugin/common/step_types/ki';
-import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
-  getKiRevision,
-  writeKiRevision,
-  isKiDeleted,
-  type KiWriter,
-} from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
+  MAX_MEMORY_ID_LENGTH,
+  MAX_SESSION_MEMORY_FORGET_IDS,
+} from '@kbn/context-engine-plugin/common/constants';
+import {
+  auditFailureForResult,
+  sessionMemoryForgetAuditEvent,
+} from '@kbn/context-engine-plugin/server/audit/audit_events';
+import type {
+  ForgetResult,
+  SessionMemoryService,
+} from '@kbn/context-engine-plugin/server/session_memory/types';
+import { toError } from '@kbn/context-engine-plugin/server/routes/memory_user';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
-import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
-import { createMemoryWriter, isMemoryDocument } from '../memory_document';
+import { getCallerProfileId } from '../memory_caller';
 
-const forgetSchema = z.object({
-  aiIndexId: aiIndexIdFieldSchema.describe(
-    'The Context Engine AI-index registry ID containing the memory. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
-  ),
-  id: z
-    .string()
-    .min(1)
-    .max(MAX_KI_ID_LENGTH)
-    .describe('The ID of the existing memory to mark as deleted'),
-});
+const forgetSchema = lazySchema(() =>
+  z.object({
+    ids: z
+      .array(z.string().min(1).max(MAX_MEMORY_ID_LENGTH))
+      .min(1)
+      .max(MAX_SESSION_MEMORY_FORGET_IDS)
+      .describe('The ids of the memories to forget, as returned by the remember tool.'),
+  })
+);
 
 export const createForgetTool = ({
-  getAiIndexService,
+  getSessionMemoryService,
   getCoreStart,
   getSecurityStart,
 }: {
-  getAiIndexService: () => Promise<AiIndexService>;
+  getSessionMemoryService: () => Promise<SessionMemoryService>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
 }): BuiltinToolDefinition<typeof forgetSchema> => ({
@@ -60,94 +61,43 @@ export const createForgetTool = ({
     openWorldHint: false,
   },
   description: dedent`
-    Mark a memory as deleted in a memory-enabled Context Engine AI index so it is no longer
-    recalled. Provide the id returned by the remember tool. The memory remains stored as a
-    lifecycle tombstone.
+    Forget short-term memories of the current user in this space so they are no longer recalled.
+    Provide the ids returned by the remember tool. Each id gets an outcome: forgotten,
+    already_forgotten, not_found, or failed. The change may not show in recall right after this
+    call, and a memory written moments ago may report not_found.
   `,
   schema: forgetSchema,
-  handler: async (params, context) => {
-    const { request, spaceId, esClient, runContext, logger } = context;
+  handler: async ({ ids }, context) => {
+    const { request, spaceId, logger } = context;
+    const uniqueIds = [...new Set(ids)];
+    let coreStart: CoreStart | undefined;
+    let userId: string | undefined;
+
+    const audit = (memoryId: string, failure?: 'not_found' | Error) =>
+      coreStart?.security.audit
+        .asScoped(request)
+        .log(sessionMemoryForgetAuditEvent({ memoryId, targetUserId: userId, failure }));
 
     try {
-      await assertContextEngineWriteAccess({
-        request,
-        spaceId,
-        getCoreStart,
-        getSecurityStart,
-      });
+      await assertContextEngineWriteAccess({ request, spaceId, getCoreStart, getSecurityStart });
+      coreStart = await getCoreStart();
 
-      const aiIndex = await getWritableMemoryAiIndex({
-        aiIndexId: params.aiIndexId,
-        spaceId,
-        request,
-        getAiIndexService,
-        getCoreStart,
-      });
-
-      const currentUserClient = esClient.asCurrentUser;
-      const abortSignal = new AbortController().signal;
-
-      const revision = await getKiRevision({
-        esClient: currentUserClient,
-        aiIndexId: params.aiIndexId,
-        dest: aiIndex.dest,
-        kiId: params.id,
-        abortSignal,
-        includeSource: true,
-      });
-
-      if (!isMemoryDocument(revision.source)) {
-        throw new Error(
-          `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
-        );
-      }
-      if (isKiDeleted(revision.source)) {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: { id: params.id },
-            },
-          ],
-        };
+      let results: ForgetResult[];
+      try {
+        userId = await getCallerProfileId({ coreStart, request });
+        results = await (
+          await getSessionMemoryService()
+        ).forget({ space: spaceId, userId }, uniqueIds);
+      } catch (error) {
+        const failure = toError(error);
+        uniqueIds.forEach((memoryId) => audit(memoryId, failure));
+        throw error;
       }
 
-      const now = new Date().toISOString();
-      const agent = getAgentFromRunContext(runContext);
-      const writer: KiWriter = createMemoryWriter({
-        toolId: contextEngineMemoryTools.forget,
-        runId: runContext.runId,
-        agentId: agent?.agentId,
-      });
-      const changes = {
-        updated_at: now,
-        governance: {
-          provenance: { updated_by: writer },
-          lifecycle: { status: 'deleted' as const },
-        },
-      };
-
-      await writeKiRevision({
-        esClient: currentUserClient,
-        aiIndexId: params.aiIndexId,
-        dest: aiIndex.dest,
-        kiId: params.id,
-        revision,
-        changes,
-        refresh: true,
-        abortSignal,
-      });
-
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: { id: params.id },
-          },
-        ],
-      };
+      results.forEach((result) => audit(result.id, auditFailureForResult(result)));
+      return { results: [{ type: ToolResultType.other, data: { results } }] };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const { message } = toError(error);
       logger.error(`Error running ${contextEngineMemoryTools.forget}: ${message}`, { error });
       return {
         results: [
