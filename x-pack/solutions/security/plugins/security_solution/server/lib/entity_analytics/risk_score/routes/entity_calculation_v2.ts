@@ -27,6 +27,10 @@ import { withMinimumLicense } from '../../utils/with_minimum_license';
 import { checkAndFormatPrivileges } from '../../utils/check_and_format_privileges';
 import { recalculateEntityRiskScore } from '../recalculate_entity_risk_score';
 import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
+import {
+  checkEntityRiskScoreCalculationPrivileges,
+  MISSING_INDEX_PRIVILEGES_MESSAGE,
+} from '../check_entity_risk_score_calculation_privileges';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 type Handler = (
@@ -82,6 +86,35 @@ const handler: (
     });
   }
 
+  const soClient = coreContext.savedObjects.client;
+
+  // The pattern-based check above misses privileges on the resolved alerts index
+  // (read + view_index_metadata) and view_index_metadata on the entity store
+  // latest index, so verify those explicitly on the concrete index names.
+  let hasRequiredPrivileges: boolean;
+  try {
+    hasRequiredPrivileges = await checkEntityRiskScoreCalculationPrivileges({
+      request,
+      security,
+      namespace,
+      soClient,
+      logger,
+    });
+  } catch (e) {
+    const error = transformError(e);
+    return siemResponse.error({
+      statusCode: error.statusCode,
+      body: { message: error.message, full_error: JSON.stringify(e) },
+      bypassErrorFormat: true,
+    });
+  }
+  if (!hasRequiredPrivileges) {
+    return siemResponse.error({
+      statusCode: 403,
+      body: MISSING_INDEX_PRIVILEGES_MESSAGE,
+    });
+  }
+
   securityContext.getAuditLogger()?.log({
     message: 'User triggered custom manual scoring',
     event: {
@@ -92,7 +125,6 @@ const handler: (
     },
   });
 
-  const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
   try {
