@@ -578,6 +578,9 @@ async function remoteSyncIntegrationsCheck(
   }
 }
 
+const OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE =
+  'auth of an OTLP output requires secret storage to be enabled, its credential is only stored as a secret';
+
 class OutputService {
   private get soClient() {
     return appContextService.getInternalUserSOClient();
@@ -1006,9 +1009,7 @@ class OutputService {
     // Store secret values if enabled; if not, store plain text values
     const secretStorageEnabled = await isOutputSecretStorageEnabled(esClient, soClient);
     if (isOtlpOutput(output) && output.auth && !secretStorageEnabled) {
-      throw new OutputInvalidError(
-        'auth of an OTLP output requires secret storage to be enabled, its credential is only stored as a secret'
-      );
+      throw new OutputInvalidError(OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE);
     }
     if (secretStorageEnabled) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
@@ -2067,9 +2068,7 @@ class OutputService {
     const auth = data.auth !== undefined ? data.auth : original?.auth;
 
     if (auth && !secretStorageEnabled) {
-      throw new OutputInvalidError(
-        'auth of an OTLP output requires secret storage to be enabled, its credential is only stored as a secret'
-      );
+      throw new OutputInvalidError(OTLP_AUTH_REQUIRES_SECRET_STORAGE_MESSAGE);
     }
 
     // `auth: null` removes the credential with the authentication
