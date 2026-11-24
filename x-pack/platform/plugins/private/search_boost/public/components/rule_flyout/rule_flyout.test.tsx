@@ -73,25 +73,23 @@ const rules: BoostRuleListItem[] = [
 
 const targets: RuleFlyoutProps['targets'] = {
   indices: [
-    { name: 'products', isHidden: false, storageSizeInBytes: 5 * GIB },
-    { name: 'archive-2025', isHidden: false, storageSizeInBytes: 70 * GIB },
-    { name: 'archive-2024', isHidden: false, storageSizeInBytes: 70 * GIB },
+    { name: 'products', storageSizeInBytes: 5 * GIB },
+    { name: 'archive-2025', storageSizeInBytes: 70 * GIB },
+    { name: 'archive-2024', storageSizeInBytes: 70 * GIB },
     {
       name: 'catalog-2026-fall',
-      isHidden: false,
       outrankedByRuleName: 'storefront-catalogs',
       storageSizeInBytes: 4 * GIB,
     },
-    { name: 'archive-internal', isHidden: true, storageSizeInBytes: GIB },
+    { name: 'archive-internal', storageSizeInBytes: GIB },
   ],
   data_streams: [
     {
       name: 'clicks-mobile',
-      isHidden: false,
       outrankedByRuleName: 'mobile-clicks-weekly',
       storageSizeInBytes: 10 * GIB,
     },
-    { name: 'clicks-web', isHidden: false, storageSizeInBytes: 200 * GIB },
+    { name: 'clicks-web', storageSizeInBytes: 200 * GIB },
   ],
 };
 

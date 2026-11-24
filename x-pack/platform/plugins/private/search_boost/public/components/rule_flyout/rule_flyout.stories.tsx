@@ -98,7 +98,6 @@ const target = (
   overrides: Partial<BoostRuleMatch> = {}
 ): BoostRuleMatch => ({
   name,
-  isHidden: false,
   storageSizeInBytes: sizeInGib * GIB,
   ...overrides,
 });
@@ -114,14 +113,14 @@ const TARGETS: RuleFlyoutProps['targets'] = {
     target('products', 12, { outrankedByRuleName: 'storefront-products' }),
     target('synonyms', 0.01),
     target('users', 1.5),
-    target('.internal-alerts', 0.01, { isHidden: true }),
+    target('.internal-alerts', 0.01),
   ],
   data_streams: [
     target('clicks-mobile', 10, { outrankedByRuleName: 'mobile-clicks-weekly' }),
     target('clicks-web', 200),
     target('logs-nginx-default', 21),
     target('metrics-system-cpu', 3.4),
-    target('.logs-elastic-agent', 1.2, { isHidden: true }),
+    target('.logs-elastic-agent', 1.2),
   ],
 };
 

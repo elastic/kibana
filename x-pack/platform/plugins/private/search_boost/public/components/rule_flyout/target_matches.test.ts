@@ -9,10 +9,10 @@ import type { BoostRuleMatch } from '../../../common/types';
 import { matchTargets } from './target_matches';
 
 const targets: BoostRuleMatch[] = [
-  { name: 'archive-2024', isHidden: false },
-  { name: 'catalog-2026-fall', isHidden: false },
-  { name: 'products', isHidden: false },
-  { name: '.internal-alerts', isHidden: true },
+  { name: 'archive-2024' },
+  { name: 'catalog-2026-fall' },
+  { name: 'products' },
+  { name: '.internal-alerts' },
 ];
 
 const matchOf = (pattern: string) =>
@@ -83,7 +83,7 @@ describe('matchTargets', () => {
 
   it('matches patterns with several wildcards', () => {
     const matchTypeOf = (pattern: string, name: string) =>
-      matchTargets(pattern, [{ name, isHidden: false }])[0].matchType;
+      matchTargets(pattern, [{ name }])[0].matchType;
 
     expect(matchTypeOf('logs-*-*-default', 'logs-nginx-access-default')).toBe('exact');
     expect(matchTypeOf('a*b*c', 'axxbyyc')).toBe('exact');
@@ -93,16 +93,14 @@ describe('matchTargets', () => {
   });
 
   it('rules out a pattern with many wildcards without freezing', () => {
-    const [target] = matchTargets(`${'a*'.repeat(30)}b`, [
-      { name: 'a'.repeat(255), isHidden: false },
-    ]);
+    const [target] = matchTargets(`${'a*'.repeat(30)}b`, [{ name: 'a'.repeat(255) }]);
 
     expect(target.matchType).toBeUndefined();
   });
 
   it('keeps the rest of each target', () => {
     const [outranked] = matchTargets('archive-*', [
-      { name: 'archive-2024', isHidden: false, outrankedByRuleName: 'archives' },
+      { name: 'archive-2024', outrankedByRuleName: 'archives' },
     ]);
     expect(outranked).toMatchObject({ matchType: 'exact', outrankedByRuleName: 'archives' });
   });
