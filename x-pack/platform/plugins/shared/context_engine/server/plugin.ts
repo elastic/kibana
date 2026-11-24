@@ -34,6 +34,7 @@ import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerAutomationSuggestionRoutes } from './routes/automation_suggestions';
 import { registerSessionEventsRoutes } from './routes/session_events';
+import { BackgroundWriteTracker } from './routes/background_write_tracker';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
 import { registerSpendRoutes } from './routes/spend';
@@ -102,6 +103,7 @@ export class ContextEnginePlugin
   private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private readonly aiIndexChanges: AiIndexChangeNotifier;
+  private readonly rememberWriteTracker: BackgroundWriteTracker;
   private spendService?: SpendService;
   private priceCatalogBaseUrl = DEFAULT_PRICE_CATALOG_BASE_URL;
   private analyticsService?: ContextEngineAnalyticsService;
@@ -116,6 +118,9 @@ export class ContextEnginePlugin
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
     this.aiIndexChanges = new AiIndexChangeNotifier(this.logger.get('ai_index_changes'));
+    this.rememberWriteTracker = new BackgroundWriteTracker({
+      logger: this.logger.get('session_memory'),
+    });
   }
 
   setup(
@@ -452,6 +457,7 @@ export class ContextEnginePlugin
       },
       getAiIndexService,
       isMemoryEnabled,
+      backgroundWrites: this.rememberWriteTracker,
       logger: this.logger.get('session_memory'),
     });
 
@@ -620,5 +626,7 @@ export class ContextEnginePlugin
     };
   }
 
-  stop() {}
+  async stop(): Promise<void> {
+    await this.rememberWriteTracker.drain();
+  }
 }

@@ -26330,7 +26330,9 @@ paths:
 
         After authorization, validation, and feature-flag checks pass, the route writes one `memory_remember` audit event per request, when the background write finishes or when it rejects the request. The route does not report a failed background write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit event.
 
-        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.
+        Returns 429 with a `Retry-After` header when this Kibana instance is at its in-flight background write limit or shutting down.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), when an AI index in `ai_index_ids` does not exist, or when `id` does not match an active memory of the target user in this space.
 
         **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
       operationId: post-context-engine-memory-remember
@@ -26391,7 +26393,7 @@ paths:
                   minLength: 1
                   type: string
                 id:
-                  description: The id of an existing memory to revise. The revision replaces the memory in full, and the route does not check whether the id exists. Omit this field to generate a new id.
+                  description: The id of an existing memory to revise. The revision replaces the memory in full and returns 404 if the memory does not exist, was forgotten, or belongs to another user or space. Omit this field to generate a new id.
                   maxLength: 256
                   minLength: 1
                   type: string
@@ -26495,6 +26497,13 @@ paths:
                     error: Not Found
                     message: Context Engine memory is turned off.
                     statusCode: 404
+                memoryNotFoundExample:
+                  description: `id` does not match an active memory of the target user in this space
+                  summary: Session memory not found
+                  value:
+                    error: Not Found
+                    message: Session memory '7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10' not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 description: Generic error response.
@@ -26511,7 +26520,35 @@ paths:
                     type: number
                 required:
                   - message
-          description: Context Engine or memory is turned off, or an AI index does not exist.
+          description: Context Engine or memory is turned off, an AI index does not exist, or `id` does not match an active memory of the target user in this space.
+        '429':
+          content:
+            application/json:
+              examples:
+                tooManyWritesExample:
+                  description: This Kibana instance is at its in-flight background write limit
+                  summary: Too many background writes
+                  value:
+                    error: Too Many Requests
+                    message: Too many session memory writes are already in progress. Retry shortly.
+                    statusCode: 429
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Too many background memory writes are already in progress on this Kibana instance, or the instance is shutting down. Retry after the `Retry-After` interval.
       summary: Remember a session memory
       tags:
         - context engine

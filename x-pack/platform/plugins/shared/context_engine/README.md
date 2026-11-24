@@ -453,9 +453,10 @@ POST /api/context_engine/memory/_remember
 ```
 
 `session_id` and `content` are required. Pass `id` to revise an existing memory. The revision
-replaces the memory in full, and the route does not check whether the id exists. Without `id`,
-the route generates one. `ai_index_ids` lists the AI indices that dreaming promotes the memory
-into. `attributes` is a map of string hints for dreaming.
+replaces the memory in full, and the route returns 404 if the memory does not exist, was
+forgotten, or belongs to another user or space. Without `id`, the route generates a new UUID.
+`ai_index_ids` lists the AI indices that dreaming promotes the memory into. `attributes` is a
+map of string hints for dreaming.
 
 The route returns `202` with `{ "id": "..." }` and writes the memory in the background, because
 `semantic_text` inference runs inside the index request. The memory becomes searchable after
@@ -500,13 +501,11 @@ and the route audits the attempt as a failure. On `_forget`, when `user_id` does
 memory's owner, the route returns `not_found`.
 
 `_remember` writes one `memory_remember` audit event per request, when the background write
-finishes or when the route rejects the request. Because `_remember` does not check whether a
-supplied `id` exists, a request with an unknown `id` creates a memory while auditing with
-`event.type` set to `change`. `_forget` writes one `memory_forget` audit event per unique id.
-Both events record the authenticated actor in `user.*`, the memory's owner in `user.target.id`,
-and the memory in `kibana.saved_object`. Because memories are scoped by space and user and the
-caller can choose `id`, two users can share the same id; combine the space, `user.target.id`,
-and `kibana.saved_object.id` to identify a single memory. The routes record rejected requests,
+finishes or when the route rejects the request. `_forget` writes one `memory_forget` audit event
+per unique id. Both events record the authenticated actor in `user.*`, the memory's owner in
+`user.target.id`, and the memory in `kibana.saved_object` when known (`user.target.id` is absent
+when neither `user_id` nor a caller profile is available, and `kibana.saved_object.id` is absent
+when `_remember` rejects a request before assigning an id). The routes record rejected requests,
 background write errors, `not_found`, `failed`, and Elasticsearch errors as failures.
 
 ## Improvements
