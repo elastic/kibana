@@ -364,25 +364,16 @@ export const allowedExperimentalValues = Object.freeze({
   mitreAttackUpdatesUIEnabled: true,
 
   /**
-   * Enables the reworked Elastic Defend policy settings form with
-   * per-operating-system protection configuration.
-   * Release: 9.6
-   */
-  perOsPolicySettings: true,
-
-  /**
    * Enables ransomware protection for Linux in Elastic Defend policies.
    * When disabled, `linux.ransomware` is not added to new policies, is stripped from updated
    * ones, and is not shown in the UI.
-   * Requires `perOsPolicySettings`: the Linux toggle exists only in the per-OS policy form, so the
-   * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
    * Release: 9.6
    */
   linuxRansomwareProtection: true,
 
   /**
    * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
-   * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
+   * turns AI event enrichment on by default for new policies.
    * Release: 9.6
    */
   endpointAiDataCollection: true,
