@@ -26,7 +26,7 @@ import { COMPOSITE_SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/comp
 import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_template';
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
 import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
-import { SLOResourcesNotInstalled } from '../errors';
+import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import type { RetryOptions } from '../utils/retry';
 import { DEFAULT_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 
@@ -68,17 +68,11 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     this.logger.debug('Installing SLO shared resources');
 
     // Wait for every component template to settle so no ES call outlives the install lock.
-    const results = await Promise.allSettled(
+    await allSettledOrThrow(
       COMPONENT_TEMPLATES.map((template) =>
         this.installResource(template.name, () => this.createOrUpdateComponentTemplate(template))
       )
     );
-    const failure = results.find(
-      (result): result is PromiseRejectedResult => result.status === 'rejected'
-    );
-    if (failure) {
-      throw failure.reason;
-    }
 
     for (const template of INDEX_TEMPLATES) {
       await this.installResource(template.name, () => this.createOrUpdateIndexTemplate(template));
@@ -99,9 +93,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     try {
       await install();
     } catch (err) {
-      throw new SLOResourcesNotInstalled(
-        `Failed to install SLO resource [${name}]: ${err.message}`
-      );
+      throw new Error(`Failed to install SLO resource [${name}]: ${err.message}`);
     }
   }
 

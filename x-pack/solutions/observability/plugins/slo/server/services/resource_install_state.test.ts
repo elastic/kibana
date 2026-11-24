@@ -90,12 +90,31 @@ describe('ResourceInstallState', () => {
     const { installer, state } = setup();
     installer.install.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce();
 
-    await expect(state.ensureInstalled()).rejects.toThrow(
-      new SLOResourcesNotInstalled('Failed to install SLO resources: boom')
-    );
+    await expect(state.ensureInstalled()).rejects.toThrow(new SLOResourcesNotInstalled('boom'));
     await expect(state.ensureInstalled()).resolves.toBeUndefined();
 
     expect(installer.install).toHaveBeenCalledTimes(2);
+  });
+
+  it('reconcile installs under the lock and marks the resources installed', async () => {
+    const { installer, installerFactory, lockManager, state } = setup();
+    installer.install.mockResolvedValue();
+
+    await expect(state.reconcile()).resolves.toBe(true);
+    await state.ensureInstalled();
+
+    expect(installerFactory).toHaveBeenCalledWith(DEFAULT_RETRY_OPTIONS);
+    expect(lockManager.withLock).toHaveBeenCalledTimes(1);
+  });
+
+  it('reconcile returns false without waiting when another process holds the lock', async () => {
+    const { installer, lockManager, state } = setup();
+    lockManager.withLock.mockRejectedValue(new LockAcquisitionError('lock held'));
+
+    await expect(state.reconcile()).resolves.toBe(false);
+
+    expect(lockManager.withLock).toHaveBeenCalledTimes(1);
+    expect(installer.install).not.toHaveBeenCalled();
   });
 
   it('installs once another process releases the lock', async () => {

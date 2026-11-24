@@ -5,89 +5,42 @@
  * 2.0.
  */
 
-import type { CoreSetup, LoggerFactory } from '@kbn/core/server';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { LockManagerService } from '@kbn/lock-manager';
-import { LockAcquisitionError } from '@kbn/lock-manager';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { LoggerFactory } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { LOCK_ID_RESOURCE_INSTALLER } from '../../../../common/constants';
 import type { SLOPluginStartDependencies } from '../../../types';
+import type { ResourceInstallState } from '../../resource_install_state';
 import { ResourcesReconcileTask, TYPE } from './resources_reconcile_task';
-
-const mockInstall = jest.fn();
-jest.mock('../../resource_installer', () => ({
-  DefaultResourceInstaller: jest.fn().mockImplementation(() => ({
-    install: mockInstall,
-  })),
-}));
 
 const TASK_ID = `${TYPE}:1.0.0`;
 
-const createTaskInstance = (id: string = TASK_ID): ConcreteTaskInstance => {
-  const now = new Date('2026-11-24T00:00:00.000Z');
-  return {
-    id,
-    taskType: TYPE,
-    params: {},
-    state: {},
-    scheduledAt: now,
-    attempts: 0,
-    status: TaskStatus.Running,
-    runAt: now,
-    startedAt: now,
-    retryAt: null,
-    ownerId: null,
-  };
-};
+const createTaskInstance = (id: string = TASK_ID) =>
+  taskManagerMock.createTask({ id, taskType: TYPE, params: {}, state: {} });
 
 const createStartPlugins = (hasLicense: boolean = true) => {
   const taskManager = taskManagerMock.createStart();
-  const plugins = {
-    licensing: {
-      getLicense: jest
-        .fn()
-        .mockResolvedValue({ hasAtLeast: jest.fn().mockReturnValue(hasLicense) }),
-    },
-    taskManager,
-  } as unknown as SLOPluginStartDependencies;
+  const licensing = licensingMock.createStart();
+  licensing.getLicense.mockResolvedValue(
+    licensingMock.createLicense({ license: { type: hasLicense ? 'platinum' : 'basic' } })
+  );
+  const plugins = { licensing, taskManager } as unknown as SLOPluginStartDependencies;
   return { plugins, taskManager };
 };
 
 describe('ResourcesReconcileTask', () => {
-  let coreSetup: ReturnType<typeof coreMock.createSetup>;
-  let lockManager: jest.Mocked<Pick<LockManagerService, 'withLock'>>;
+  let resourceInstallState: jest.Mocked<Pick<ResourceInstallState, 'reconcile'>>;
   let loggingSystem: ReturnType<typeof loggingSystemMock.create>;
   let task: ResourcesReconcileTask;
 
-  const run = (taskInstance: ConcreteTaskInstance = createTaskInstance()) =>
-    task.runTask(taskInstance, coreSetup as CoreSetup);
-
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockInstall.mockResolvedValue(undefined);
-
-    coreSetup = coreMock.createSetup();
-    coreSetup.getStartServices.mockResolvedValue([
-      {
-        elasticsearch: {
-          client: { asInternalUser: elasticsearchServiceMock.createElasticsearchClient() },
-        },
-      } as never,
-      {} as never,
-      {} as never,
-    ]);
-
-    lockManager = { withLock: jest.fn() };
-    lockManager.withLock.mockImplementation((_lockId, callback) => callback());
+    resourceInstallState = { reconcile: jest.fn().mockResolvedValue(true) };
     loggingSystem = loggingSystemMock.create();
 
     task = new ResourcesReconcileTask({
-      core: coreSetup as CoreSetup,
       taskManager: taskManagerMock.createSetup(),
       logFactory: loggingSystem as unknown as LoggerFactory,
-      lockManager,
+      resourceInstallState,
     });
   });
 
@@ -118,27 +71,23 @@ describe('ResourcesReconcileTask', () => {
     });
 
     it('deletes an outdated task instance', async () => {
-      const result = await run(createTaskInstance(`${TYPE}:0.0.1`));
+      const result = await task.runTask(createTaskInstance(`${TYPE}:0.0.1`));
 
       expect(result).toEqual({ state: {}, shouldDeleteTask: true });
-      expect(mockInstall).not.toHaveBeenCalled();
+      expect(resourceInstallState.reconcile).not.toHaveBeenCalled();
     });
 
-    it('installs the resources under the lock', async () => {
-      const result = await run();
+    it('reconciles the resources', async () => {
+      const result = await task.runTask(createTaskInstance());
 
-      expect(lockManager.withLock).toHaveBeenCalledWith(
-        LOCK_ID_RESOURCE_INSTALLER,
-        expect.any(Function)
-      );
-      expect(mockInstall).toHaveBeenCalledTimes(1);
+      expect(resourceInstallState.reconcile).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ state: {} });
     });
 
     it('logs at debug and completes when another process holds the lock', async () => {
-      lockManager.withLock.mockRejectedValue(new LockAcquisitionError('lock held'));
+      resourceInstallState.reconcile.mockResolvedValue(false);
 
-      await expect(run()).resolves.toEqual({ state: {} });
+      await expect(task.runTask(createTaskInstance())).resolves.toEqual({ state: {} });
 
       expect(loggingSystemMock.collect(loggingSystem).debug).toContainEqual([
         'SLO resources are being installed by another process',
@@ -147,9 +96,9 @@ describe('ResourcesReconcileTask', () => {
     });
 
     it('logs a warning and completes when the install fails', async () => {
-      mockInstall.mockRejectedValue(new Error('health data stream failed'));
+      resourceInstallState.reconcile.mockRejectedValue(new Error('health data stream failed'));
 
-      await expect(run()).resolves.toEqual({ state: {} });
+      await expect(task.runTask(createTaskInstance())).resolves.toEqual({ state: {} });
 
       expect(loggingSystemMock.collect(loggingSystem).warn).toContainEqual([
         'Failed to reconcile SLO resources: health data stream failed',

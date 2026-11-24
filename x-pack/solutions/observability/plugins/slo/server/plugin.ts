@@ -324,10 +324,9 @@ export class SLOPlugin
     });
 
     this.resourcesReconcileTask = new ResourcesReconcileTask({
-      core,
       taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
-      lockManager,
+      resourceInstallState,
     });
 
     new BulkDeleteTask({

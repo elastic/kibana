@@ -5,37 +5,33 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
-import type { LockManagerService } from '@kbn/lock-manager';
-import { isLockAcquisitionError } from '@kbn/lock-manager';
+import type { Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { LOCK_ID_RESOURCE_INSTALLER } from '../../../../common/constants';
 import type { SLOPluginStartDependencies } from '../../../types';
-import { DefaultResourceInstaller } from '../../resource_installer';
+import type { ResourceInstallState } from '../../resource_install_state';
 
 export const TYPE = 'slo:resources-reconcile-task';
 
 interface TaskSetupContract {
   taskManager: TaskManagerSetupContract;
-  core: CoreSetup;
   logFactory: LoggerFactory;
-  lockManager: Pick<LockManagerService, 'withLock'>;
+  resourceInstallState: Pick<ResourceInstallState, 'reconcile'>;
 }
 
 /** Periodically reinstalls missing or outdated SLO shared resources. */
 export class ResourcesReconcileTask {
   private logger: Logger;
-  private lockManager: Pick<LockManagerService, 'withLock'>;
+  private resourceInstallState: Pick<ResourceInstallState, 'reconcile'>;
   private wasStarted: boolean = false;
 
   constructor(setupContract: TaskSetupContract) {
-    const { core, taskManager, logFactory, lockManager } = setupContract;
+    const { taskManager, logFactory, resourceInstallState } = setupContract;
     this.logger = logFactory.get(this.taskId);
-    this.lockManager = lockManager;
+    this.resourceInstallState = resourceInstallState;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -46,7 +42,7 @@ export class ResourcesReconcileTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance);
             },
           };
         },
@@ -90,7 +86,7 @@ export class ResourcesReconcileTask {
     }
   }
 
-  public async runTask(taskInstance: ConcreteTaskInstance, core: CoreSetup) {
+  public async runTask(taskInstance: ConcreteTaskInstance) {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
       return;
@@ -103,20 +99,12 @@ export class ResourcesReconcileTask {
       return getDeleteTaskRunResult();
     }
 
-    const [coreStart] = await core.getStartServices();
-    const installer = new DefaultResourceInstaller(
-      coreStart.elasticsearch.client.asInternalUser,
-      this.logger
-    );
-
     try {
-      await this.lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () => installer.install());
-    } catch (err) {
-      if (isLockAcquisitionError(err)) {
+      if (!(await this.resourceInstallState.reconcile())) {
         this.logger.debug('SLO resources are being installed by another process');
-      } else {
-        this.logger.warn(`Failed to reconcile SLO resources: ${err.message}`);
       }
+    } catch (err) {
+      this.logger.warn(`Failed to reconcile SLO resources: ${err.message}`);
     }
 
     return { state: {} };

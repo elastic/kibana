@@ -27,7 +27,6 @@ import {
   SUMMARY_INDEX_TEMPLATE_NAME,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
-import { SLOResourcesNotInstalled } from '../errors';
 import { DefaultResourceInstaller } from './resource_installer';
 
 type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -135,7 +134,6 @@ describe('resourceInstaller', () => {
 
     const result = createInstaller(esClient).install();
 
-    await expect(result).rejects.toThrow(SLOResourcesNotInstalled);
     await expect(result).rejects.toThrow(
       `Failed to install SLO resource [${SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME}]: boom`
     );
