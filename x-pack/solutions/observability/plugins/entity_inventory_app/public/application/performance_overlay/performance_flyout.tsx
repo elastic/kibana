@@ -28,7 +28,6 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ENTITY_INVENTORY_EBT_ACTIONS, ENTITY_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
-import { listSourceProblems } from '../utils/list_source_problems';
 import { EMPTY_VALUE, formatMs, formatRequest } from './format';
 import { ListCallDetail } from './list_call_detail';
 import {
@@ -142,8 +141,8 @@ const historyColumns = (
       if (list === null) {
         return EMPTY_VALUE;
       }
-      const { length } = listSourceProblems(list);
-      return length > 0 ? <EuiBadge color="danger">{length}</EuiBadge> : length;
+      const count = [...list.probes, ...list.queries].filter(({ error }) => error !== null).length;
+      return count > 0 ? <EuiBadge color="danger">{count}</EuiBadge> : count;
     },
   },
 ];

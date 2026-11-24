@@ -77,7 +77,7 @@ Anything about one source degrades the result and never fails the request. A los
 
 - A probe that fails for a reason other than verification: none of the source's plans run, and the probe carries the error.
 - A plan query that fails: the other plans still return rows, and the query carries the error.
-- A plan whose response is partial (`is_partial`, some shards or clusters did not answer): its rows are kept, `isPartial` is true and `error` stays null.
+- A plan whose response is partial (`is_partial`, some shards or clusters did not answer): its rows are kept and `isPartial` is true. `error` stays null unless the plan is also unusable, which drops its rows.
 - A plan that reads nothing usable, because no readable index behind its pattern maps `@timestamp` or its identity fields are unmapped: the plan's rows are dropped and its query carries an `unusable` error. A user who can read none of the source indices gets `rows: []`, an error on every query and `truncated: false`.
 
 Errors that fail the request:

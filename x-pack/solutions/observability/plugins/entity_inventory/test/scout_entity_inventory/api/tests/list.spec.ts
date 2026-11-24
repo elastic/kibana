@@ -117,6 +117,9 @@ apiTest.describe(
           last_seen: '2026-11-01T10:01:00.000Z',
         });
         expect(body.truncated).toBe(false);
+        expect(body.probes.map(({ indexPattern }) => indexPattern).sort()).toStrictEqual(
+          [OTEL_PATTERN, STATE_PATTERN].sort()
+        );
         expect(sourceErrors(body)).toStrictEqual([]);
         expect(body.unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
       }
