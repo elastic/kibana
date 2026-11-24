@@ -15,17 +15,9 @@ export interface EluRateLimitResponseLike {
   headers?: Record<string, unknown>;
 }
 
-const getHeader = (headers: Record<string, unknown> | undefined, name: string): unknown => {
-  if (!headers) {
-    return undefined;
-  }
-  const direct = headers[name];
-  if (direct !== undefined) {
-    return direct;
-  }
-  const lower = name.toLowerCase();
-  return Object.entries(headers).find(([key]) => key.toLowerCase() === lower)?.[1];
-};
+// node lowercases incoming header names
+const getHeader = (headers: Record<string, unknown> | undefined, name: string): unknown =>
+  headers?.[name.toLowerCase()];
 
 /** True when the response is Kibana's ELU HTTP rate limiter (not other 429 sources). */
 export const isEluRateLimiter429 = (response: EluRateLimitResponseLike | undefined): boolean => {

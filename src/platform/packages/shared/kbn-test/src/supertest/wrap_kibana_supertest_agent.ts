@@ -131,6 +131,12 @@ const retryOnEluRateLimit = (
     return true;
   });
 
+  /**
+   * superagent has no delay option for `.retry()`: it resends as soon as the response arrives, which
+   * would hammer a server that just said it is overloaded. `_retry` is the only place the resend is
+   * triggered, so we wrap it to wait for the `Retry-After` delay first (and skip the resend if the
+   * request was aborted or the caller's `.timeout()` ran out meanwhile), then call the original.
+   */
   internals._retry = function delayedRetry() {
     test.clearTimeout();
     timer = setTimeout(() => {

@@ -14,7 +14,7 @@ describe('isEluRateLimiter429', () => {
     expect(
       isEluRateLimiter429({
         status: 429,
-        headers: { RateLimit: '"elu";r=0;t=30' },
+        headers: { ratelimit: '"elu";r=0;t=30' },
       })
     ).toBe(true);
   });
@@ -23,16 +23,16 @@ describe('isEluRateLimiter429', () => {
     expect(
       isEluRateLimiter429({
         status: 429,
-        headers: { 'RateLimit-Limit': '100' },
+        headers: { 'ratelimit-limit': '100' },
       })
     ).toBe(false);
   });
 
   it('matches the elu policy name exactly', () => {
-    expect(isEluRateLimiter429({ status: 429, headers: { RateLimit: '"non-elu";r=0;t=30' } })).toBe(
+    expect(isEluRateLimiter429({ status: 429, headers: { ratelimit: '"non-elu";r=0;t=30' } })).toBe(
       false
     );
-    expect(isEluRateLimiter429({ status: 429, headers: { RateLimit: '"elu";r=0;t=0' } })).toBe(
+    expect(isEluRateLimiter429({ status: 429, headers: { ratelimit: '"elu";r=0;t=0' } })).toBe(
       true
     );
   });
@@ -47,7 +47,7 @@ describe('isEluRateLimiter429', () => {
     expect(
       isEluRateLimiter429({
         status: 503,
-        headers: { RateLimit: '"elu";r=0;t=30' },
+        headers: { ratelimit: '"elu";r=0;t=30' },
       })
     ).toBe(false);
   });
@@ -58,7 +58,7 @@ describe('getEluRateLimiterRetryDelayMs', () => {
     expect(
       getEluRateLimiterRetryDelayMs({
         status: 429,
-        headers: { 'Retry-After': '2' },
+        headers: { 'retry-after': '2' },
       })
     ).toBe(2000);
   });
