@@ -446,7 +446,7 @@ groups:
 
       - setting: xpack.fleet.proxies
         description: |
-          List of proxies that are configured when the {{fleet}} app starts. {{fleet-server}} hosts, outputs, and agent binary download sources use a proxy by referencing its `id` in their `proxy_id` setting.
+          List of proxies that are configured when the {{fleet}} app starts. {{fleet-server}} hosts, outputs, and agent binary download sources use a proxy by referencing its `id` in their `proxy_id` setting. Kafka outputs don't support proxies.
         datatype: string
         applies_to:
           stack: ga
@@ -501,13 +501,13 @@ groups:
         description: |
           List of agent binary download sources that {{fleet}} configures when {{kib}} starts. {{agents}} download the binaries for upgrades from these sources. For more information, refer to [Agent binary download settings](docs-content://reference/fleet/fleet-settings.md#fleet-agent-binary-download-settings).
 
-          The {{fleet}} UI marks preconfigured download sources as managed, and you can't delete them in the UI or through the API. Each time {{kib}} starts, {{fleet}} applies the values from `kibana.yml`, replacing any changes made to them in the UI or through the API.
+          The {{fleet}} UI marks preconfigured download sources as managed, and you can't delete them in the UI or through the API. Each time {{kib}} starts, {{fleet}} applies the values from `kibana.yml`, replacing any changes made to them in the UI or through the API. If `kibana.yml` doesn't set `ssl` or `proxy_id` for a source, the source keeps its current value for that setting, including a value set in the UI, through the API, or in an earlier `kibana.yml` configuration.
 
           If you remove a source from `kibana.yml`, {{fleet}} deletes it, unless it's the default source or an agent policy uses it. In that case, {{fleet}} keeps the source, and you can manage it in the UI.
 
-          When an agent policy uses several download sources, the `proxy_id`, `ssl`, and `reserve_diskspace` settings of its first source apply to all of them.
+          When an agent policy uses several download sources, the `proxy_id`, `ssl`, `reserve_diskspace`, and authentication settings of its first source apply to all of them.
 
-          You can't configure authentication for a download source in `kibana.yml`. Use the {{fleet}} UI or API instead.
+          You can't configure HTTP authentication for a download source in `kibana.yml`, such as a username and password, an API key, or custom headers. Use the {{fleet}} UI or API instead. To authenticate with a client certificate, use the `ssl` settings.
         datatype: string
         applies_to:
           stack: ga 9.6+
@@ -542,12 +542,12 @@ groups:
         settings:
           - setting: "[n].id"
             description: |
-              Required. Unique ID for the download source.
+              Required. Unique ID for the download source. You can't use `default`, which is reserved.
             datatype: string
 
           - setting: "[n].name"
             description: |
-              Required. Name of the download source.
+              Required. Name of the download source. The name must be unique across all download sources in {{fleet}}, including the ones created in the UI or through the API.
             datatype: string
 
           - setting: "[n].host"
@@ -563,7 +563,7 @@ groups:
 
           - setting: "[n].proxy_id"
             description: |
-              Optional. ID of a proxy defined in `xpack.fleet.proxies` that {{agents}} use to connect to the download source.
+              Optional. ID of the proxy that {{agents}} use to connect to the download source. The proxy can be defined in `xpack.fleet.proxies` or created in the {{fleet}} UI or through the API. To remove a proxy from the source, set `proxy_id` to `null`.
             datatype: string
 
           - setting: "[n].reserve_diskspace"
