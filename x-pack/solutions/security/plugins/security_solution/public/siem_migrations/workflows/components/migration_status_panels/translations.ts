@@ -42,3 +42,38 @@ export const WORKFLOW_MIGRATION_VIEW_TRANSLATED_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.panel.result.viewButton',
   { defaultMessage: 'Go to translated workflows' }
 );
+
+export const WORKFLOW_MIGRATION_SUMMARY_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.migrationPanel.summaryTitle',
+  { defaultMessage: 'Translation Summary' }
+);
+
+export const WORKFLOW_MIGRATION_SUMMARY_CHART_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.migrationPanel.summaryChartTitle',
+  { defaultMessage: 'Workflows by translation status' }
+);
+
+export const WORKFLOW_MIGRATION_TRANSLATION_FAILED = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.migrationPanel.translationFailed',
+  { defaultMessage: 'Failed' }
+);
+
+export const WORKFLOW_MIGRATION_TABLE_COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.migrationPanel.tableColumnStatus',
+  { defaultMessage: 'Status' }
+);
+
+export const WORKFLOW_MIGRATION_TABLE_COLUMN_WORKFLOWS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.migrationPanel.tableColumnWorkflows',
+  { defaultMessage: 'Workflows' }
+);
+
+export const WORKFLOW_MIGRATION_EXPAND = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.migrationPanel.expand',
+  { defaultMessage: 'Expand workflow migration' }
+);
+
+export const WORKFLOW_MIGRATION_COLLAPSE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.migrationPanel.collapse',
+  { defaultMessage: 'Collapse workflow migration' }
+);
