@@ -11,7 +11,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { agentPolicyService } from '../agent_policy';
 import type { Agent } from '../../types';
-import { UpdateByQueryCancelledError } from '../../errors';
+import { FleetVersionConflictError, UpdateByQueryCancelledError } from '../../errors';
 
 import { createClientMock } from './action.mock';
 import { MAX_RETRY_COUNT } from './retry_helper';
@@ -581,8 +581,9 @@ describe('update_agent_tags', () => {
           ([request]) => (request as any).query.terms._id.length
         );
 
-      // the first run, of the whole batch, is cancelled, and so is the chunk after `cancelledChunk`
-      const mockChunks = (cancelledChunk?: number) => {
+      // the first run, of the whole batch, is cancelled, and so is the chunk after `cancelledChunk`.
+      // What a chunk reports is that all its agents were updated, except for what `results` has for it
+      const mockChunks = (cancelledChunk?: number, results: Record<number, object> = {}) => {
         const sizes: Record<string, number> = {};
         esClient.updateByQuery.mockImplementation((async (request: any) => {
           const taskId = `node1:${Object.keys(sizes).length}`;
@@ -593,18 +594,31 @@ describe('update_agent_tags', () => {
           const run = Number(taskId.split(':')[1]);
           return run === 0 || run === cancelledChunk
             ? cancelledTask
-            : finishedTask({ updated: sizes[taskId], total: sizes[taskId] });
+            : finishedTask({ updated: sizes[taskId], total: sizes[taskId], ...results[run] });
         }) as any);
       };
 
-      const batch = (agentsOfBatch: Agent[]) =>
+      const batch = (agentsOfBatch: Agent[], retryCount?: number) =>
         updateTagsBatch(
           soClient,
           esClient,
           agentsOfBatch,
           {},
-          { tagsToAdd: ['new'], tagsToRemove: ['old'], total: agentsOfBatch.length }
+          { tagsToAdd: ['new'], tagsToRemove: ['old'], total: agentsOfBatch.length, retryCount }
         );
+
+      // 2500 agents, in chunks of 1000, 1000 and 500, with something to report in each of them
+      const chunksWithConflictsAndFailures = {
+        1: {
+          updated: 999,
+          failures: [{ id: 'agent3', cause: { reason: 'failed in the first chunk' } }],
+        },
+        2: { updated: 998, version_conflicts: 2 },
+        3: {
+          updated: 499,
+          failures: [{ id: 'agent2400', cause: { reason: 'failed in the last chunk' } }],
+        },
+      };
 
       it('should update the agents a chunk at a time, and record each of them once', async () => {
         mockChunks();
@@ -616,6 +630,41 @@ describe('update_agent_tags', () => {
         expect(res).toEqual(expect.objectContaining({ updated: 2500 }));
         expect((esClient.create.mock.calls[0][0] as any).document.agents).toHaveLength(2500);
         expect(getErrorResults(esClient)).toEqual([]);
+      });
+
+      it('should record the failures of every chunk, and retry for the version conflicts of them', async () => {
+        mockChunks(undefined, chunksWithConflictsAndFailures);
+
+        await expect(batch(manyAgents(2500))).rejects.toBeInstanceOf(FleetVersionConflictError);
+
+        // 2496 agents updated and the 2 that failed, in different chunks, and not the 2 that
+        // conflicted, which the retry goes through again
+        expect((esClient.create.mock.calls[0][0] as any).document.agents).toHaveLength(2498);
+        expect(
+          (getErrorResults(esClient) as any[]).map((result) => [result.agent_id, result.error])
+        ).toEqual([
+          ['agent3', 'failed in the first chunk'],
+          ['agent2400', 'failed in the last chunk'],
+        ]);
+      });
+
+      it('should record the version conflicts of the chunks when no retry is left', async () => {
+        mockChunks(undefined, chunksWithConflictsAndFailures);
+
+        await expect(batch(manyAgents(2500), MAX_RETRY_COUNT)).rejects.toThrow(
+          'Version conflict of 2 agents'
+        );
+
+        // every agent of the batch: 2496 updated, 2 failed and 2 that conflicted
+        expect((esClient.create.mock.calls[0][0] as any).document.agents).toHaveLength(2500);
+        expect((getErrorResults(esClient) as any[]).map((result) => result.error).sort()).toEqual(
+          [
+            'failed in the last chunk',
+            'failed in the first chunk',
+            'version conflict on last retry',
+            'version conflict on last retry',
+          ].sort()
+        );
       });
 
       it('should update every agent in the chunks, and none twice', async () => {
