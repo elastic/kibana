@@ -26,13 +26,9 @@ export const dashboardCopyToDashboardActionStrings = {
     i18n.translate('dashboard.panel.copyToDashboard.newDashboardOptionLabel', {
       defaultMessage: 'New dashboard',
     }),
-  getNewDashboardSaveFirstTooltip: () =>
-    i18n.translate('dashboard.panel.copyToDashboard.newDashboardSaveFirstTooltip', {
-      defaultMessage: 'Save the current dashboard first.',
-    }),
-  getNewDashboardUnavailableTooltip: () =>
-    i18n.translate('dashboard.panel.copyToDashboard.newDashboardUnavailableTooltip', {
-      defaultMessage: "This option isn't available from this application.",
+  getNewDashboardDisabledTooltip: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.newDashboardDisabledTooltip', {
+      defaultMessage: 'You can copy to a new dashboard only from a saved dashboard.',
     }),
   getExistingDashboardOption: () =>
     i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
