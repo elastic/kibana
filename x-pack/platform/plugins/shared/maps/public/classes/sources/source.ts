@@ -33,7 +33,7 @@ export type OnSourceChangeArgs<TSourceDescriptor = DiscriminatedSourceDescriptor
 
 export type SourcePropName = OnSourceChangeArgs['propName'];
 
-export type SourceEditorArgs<TSourceDescriptor = Record<string, unknown>> = {
+export type SourceEditorArgs<TSourceDescriptor> = {
   currentLayerType: string;
   hasSpatialJoins: boolean;
   numberOfJoins: number;
