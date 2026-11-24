@@ -42,6 +42,9 @@ export const ZendeskConnector: ConnectorSpec = {
         defaults: {
           // `read` gives access to every GET endpoint; the ticket operations list `tickets:read`.
           scope: 'read tickets:read',
+          // Zendesk documents client_id and client_secret in the /oauth/tokens request body, not in
+          // an HTTP Basic header. The body is form-encoded, which Zendesk accepts.
+          useBasicAuth: false,
         },
         overrides: {
           meta: {
