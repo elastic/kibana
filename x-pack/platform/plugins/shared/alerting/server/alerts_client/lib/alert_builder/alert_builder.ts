@@ -10,6 +10,7 @@ import { flatMap, get, keys, values } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_INSTANCE_ID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_DELAYED,
@@ -32,7 +33,9 @@ import { buildGraduatedAlert } from './build_graduated_alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import { buildDelayedAlert } from './build_delayed_alert';
+import { buildUntrackedAlert } from './build_untracked_alert';
 import { reactivateRecoveredAlert } from './reactivate_recovered_alert';
+import { formatInstanceIds } from '../reconcile_tracked_alerts';
 import type { LegacyAlertsClient } from '../../legacy_alerts_client';
 import { getRecoveredAlertIdsToStopTracking } from '../../../lib/flapping/optimize_task_state_for_flapping';
 
@@ -336,14 +339,33 @@ export class AlertBuilder<
       keepUuids.add(delayedAlert.getUuid());
     }
     // Tracked AAD docs that are not in this run's working set will never be
-    // rebuilt. Flip tracked to false so they stop matching the tracked query.
-    // Status and lifecycle fields are left unchanged; status-aware orphan
-    // reconciliation is a follow-up.
+    // rebuilt, so they must stop matching the tracked query. An active one is
+    // untracked, otherwise it would stay active forever with nothing left to
+    // recover it. Any other status only has tracked flipped to false.
+    const untrackedInstanceIds: string[] = [];
     for (const [uuid, alert] of Object.entries(this.trackedAlerts.all)) {
       if (keepUuids.has(uuid) || get(alert, ALERT_TRACKED) === false) {
         continue;
       }
-      recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
+      if (get(alert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
+        recoveredAlertsToIndex.push(
+          buildUntrackedAlert<AlertData>({ alert, timestamp: this.currentTime })
+        );
+        untrackedInstanceIds.push(get(alert, ALERT_INSTANCE_ID) ?? uuid);
+      } else {
+        recoveredAlertsToIndex.push({ ...alert, [ALERT_TRACKED]: false });
+      }
+    }
+
+    if (untrackedInstanceIds.length > 0) {
+      this.logger.warn(
+        `Untracked ${
+          untrackedInstanceIds.length
+        } active alert document(s) that this run does not track ${
+          this.ruleInfoMessage
+        }: ${formatInstanceIds(untrackedInstanceIds)}`,
+        this.logTags
+      );
     }
 
     return recoveredAlertsToIndex;
