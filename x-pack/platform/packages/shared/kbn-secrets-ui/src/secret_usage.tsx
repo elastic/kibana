@@ -152,7 +152,9 @@ export const SecretUsedBy = ({ api, name, counts, getItemHref }: SecretUsedByPro
   if (!counts) {
     return null;
   }
-  const count = counts[normalizeSecretName(name)];
+  const key = normalizeSecretName(name);
+  // A secret can be named like a built-in property of objects, such as `constructor`.
+  const count = Object.hasOwn(counts, key) ? counts[key] : undefined;
   const totalCount = count ? count.visibleCount + count.hiddenCount : 0;
   if (totalCount === 0) {
     return (
