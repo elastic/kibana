@@ -25,9 +25,16 @@ export default function ({ getService, getPageObjects }) {
       // Not home.addSampleDataSet: its 20s budget has to cover the ~15s before its click lands as
       // well as the install, so a slightly slow install fails it
       await retry.try(async () => {
-        // The accordion is uncontrolled and re-collapses when the card list loads async
+        // A previous run against the same stack leaves it installed
+        if (await PageObjects.home.isSampleDataSetInstalled('ecommerce')) {
+          return;
+        }
+
+        // The accordion is uncontrolled and re-collapses when the card list loads async.
+        // A single find and click, unlike testSubjects.click's own 120s retry, so a click on a
+        // collapsed accordion fails back to here to reopen it
         await PageObjects.home.openSampleDataAccordion();
-        await testSubjects.click('addSampleDataSetecommerce', 5000);
+        await (await testSubjects.find('addSampleDataSetecommerce', 5000)).click();
       });
       await retry.waitForWithTimeout('ecommerce sample data to be installed', 120_000, () =>
         PageObjects.home.isSampleDataSetInstalled('ecommerce')
