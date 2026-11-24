@@ -521,16 +521,18 @@ export const AntiLeakageJudgePrompt = createPrompt({
   } as const)
   .get();
 
-const TOOL_CALL_ISSUE_SCHEMA = {
-  type: 'array',
-  items: {
-    type: 'object',
-    properties: {
-      step: { type: 'number', description: 'The trajectory step number of the call.' },
-      reason: { type: 'string', description: 'One short sentence on what went wrong.' },
-    },
-    required: ['step', 'reason'],
-  },
+/** The longest summary the judge is asked for. */
+export const TOOL_CALL_SUMMARY_MAX_CHARS = 200;
+
+/**
+ * Call numbers and one short summary per list, as the online judge asks for them. An array of
+ * `{ step, reason }` objects was returned malformed on some long trajectories, on every retry,
+ * which failed the whole evaluation run.
+ */
+const TOOL_CALL_NUMBERS_SCHEMA = { type: 'array', items: { type: 'number' } } as const;
+const TOOL_CALL_SUMMARY_SCHEMA = {
+  type: 'string',
+  maxLength: TOOL_CALL_SUMMARY_MAX_CHARS,
 } as const;
 
 export const ToolCallHealthJudgePrompt = createPrompt({
@@ -554,15 +556,23 @@ export const ToolCallHealthJudgePrompt = createPrompt({
           type: 'object',
           properties: {
             failed_calls: {
-              ...TOOL_CALL_ISSUE_SCHEMA,
-              description: 'Calls that failed to do what the agent intended.',
+              ...TOOL_CALL_NUMBERS_SCHEMA,
+              description: 'Step numbers of the calls that failed to do what the agent intended.',
+            },
+            failed_summary: {
+              ...TOOL_CALL_SUMMARY_SCHEMA,
+              description: `Why the most important failed calls failed, naming them by step number, in at most ${TOOL_CALL_SUMMARY_MAX_CHARS} characters. Empty when none failed.`,
             },
             empty_calls: {
-              ...TOOL_CALL_ISSUE_SCHEMA,
-              description: 'Calls that ran correctly but returned no data.',
+              ...TOOL_CALL_NUMBERS_SCHEMA,
+              description: 'Step numbers of the calls that ran correctly but returned no data.',
+            },
+            empty_summary: {
+              ...TOOL_CALL_SUMMARY_SCHEMA,
+              description: `Which no-data calls matter most and what they were looking for, naming them by step number, in at most ${TOOL_CALL_SUMMARY_MAX_CHARS} characters. Empty when none came back empty.`,
             },
           },
-          required: ['failed_calls', 'empty_calls'],
+          required: ['failed_calls', 'failed_summary', 'empty_calls', 'empty_summary'],
         },
       },
     },

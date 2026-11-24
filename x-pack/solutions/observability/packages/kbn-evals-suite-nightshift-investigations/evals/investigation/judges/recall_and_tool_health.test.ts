@@ -17,6 +17,9 @@ jest.mock('@kbn/inference-tracing', () => ({
     callback(),
 }));
 
+// The judge's retry backoff would outlast the test timeout, and these tests need no retries.
+jest.mock('p-retry', () => ({ __esModule: true, default: (run: () => Promise<unknown>) => run() }));
+
 const judgeReturning = (args: object) => {
   const prompt = jest.fn().mockResolvedValue({ toolCalls: [{ function: { arguments: args } }] });
   return {
@@ -50,21 +53,21 @@ const output = (overrides: Partial<InvestigationTaskOutput> = {}): Investigation
 describe('tool call health', () => {
   it('counts failed and no-data calls from one judge call, ignoring invalid steps', async () => {
     const { deps, prompt } = judgeReturning({
-      failed_calls: [
-        { step: 1, reason: 'Unknown column.' },
-        { step: 1, reason: 'duplicate' },
-        { step: 99, reason: 'out of range' },
-      ],
-      empty_calls: [
-        { step: 1, reason: 'also listed as failed' },
-        { step: 3, reason: 'Empty index list.' },
-      ],
+      failed_calls: [1, 1, 99],
+      failed_summary: 'Step 1 used an unknown column.',
+      empty_calls: [1, 3],
+      empty_summary: 'Step 3 listed no indices.',
     });
     const [failed, empty] = createToolCallHealthEvaluators(deps);
     const params = { ...example, output: output() };
     const failedResult = await failed.evaluate(params);
     const emptyResult = await empty.evaluate(params);
-    expect(failedResult).toMatchObject({ score: 1, label: 'failed', metadata: { steps: [1] } });
+    expect(failedResult).toMatchObject({
+      score: 1,
+      label: 'failed',
+      explanation: 'Step 1 used an unknown column.',
+      metadata: { steps: [1] },
+    });
     expect(emptyResult).toMatchObject({ score: 1, label: 'no-data', metadata: { steps: [3] } });
     expect(prompt).toHaveBeenCalledTimes(1);
   });
@@ -93,6 +96,19 @@ describe('tool call health on a truncated trajectory', () => {
       expect(result).toMatchObject({ score: null, label: 'n/a' });
     }
     expect(prompt).not.toHaveBeenCalled();
+  });
+});
+
+describe('tool call health when the judge fails', () => {
+  it('scores n/a instead of failing the evaluation run', async () => {
+    const { deps, prompt } = judgeReturning({});
+    prompt.mockRejectedValue(new Error('toolValidationError'));
+    for (const evaluator of createToolCallHealthEvaluators(deps)) {
+      expect(await evaluator.evaluate({ ...example, output: output() })).toMatchObject({
+        score: null,
+        label: 'n/a',
+      });
+    }
   });
 });
 

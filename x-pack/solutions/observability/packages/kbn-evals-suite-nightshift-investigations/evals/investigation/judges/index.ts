@@ -15,6 +15,7 @@ import {
   DecisionTreeHelpfulnessJudgePrompt,
   GoalPassJudgePrompt,
   RecallUsageJudgePrompt,
+  TOOL_CALL_SUMMARY_MAX_CHARS,
   ToolCallHealthJudgePrompt,
   TruthfulnessJudgePrompt,
 } from './prompts';
@@ -272,43 +273,43 @@ export const createDecisionTreeHelpfulnessEvaluator = (
   },
 });
 
-interface ToolCallIssue {
-  step: number;
-  reason: string;
+interface ToolCallIssues {
+  steps: number[];
+  summary: string;
 }
 
 interface ToolCallHealth {
-  failed: ToolCallIssue[];
-  empty: ToolCallIssue[];
+  failed: ToolCallIssues;
+  empty: ToolCallIssues;
 }
 
-/** Valid, unique issues for steps that exist in the trajectory, in step order. */
-const toToolCallIssues = (
-  issues: ToolCallIssue[] | undefined,
+/** Valid, unique step numbers that exist in the trajectory, in order; `excluded` steps are skipped. */
+const toToolCallSteps = (
+  steps: unknown,
   stepCount: number,
-  excludedSteps: ReadonlySet<number> = new Set()
-): ToolCallIssue[] => {
-  const byStep = new Map<number, ToolCallIssue>();
-  for (const { step, reason } of Array.isArray(issues) ? issues : []) {
-    if (!Number.isInteger(step) || step < 1 || step > stepCount) continue;
-    if (excludedSteps.has(step) || byStep.has(step)) continue;
-    byStep.set(step, { step, reason: String(reason ?? '') });
-  }
-  return [...byStep.values()].sort((a, b) => a.step - b.step);
-};
+  excluded: ReadonlySet<number> = new Set()
+): number[] =>
+  [
+    ...new Set(
+      (Array.isArray(steps) ? steps : []).filter(
+        (step): step is number =>
+          Number.isInteger(step) && step >= 1 && step <= stepCount && !excluded.has(step)
+      )
+    ),
+  ].sort((a, b) => a - b);
 
 const toolCallIssueResult = (
-  issues: ToolCallIssue[],
+  { steps, summary }: ToolCallIssues,
   output: InvestigationTaskOutput,
   noun: string
 ) => ({
-  score: issues.length,
-  label: issues.length > 0 ? noun : 'none',
+  score: steps.length,
+  label: steps.length > 0 ? noun : 'none',
   explanation:
-    issues.length > 0
-      ? issues.map(({ step, reason }) => `step ${step}: ${reason}`).join('\n')
+    steps.length > 0
+      ? summary.trim().slice(0, TOOL_CALL_SUMMARY_MAX_CHARS) || `steps ${steps.join(', ')}`
       : `No ${noun} tool calls.`,
-  metadata: { steps: issues.map(({ step }) => step), total_tool_calls: output.tool_call_count },
+  metadata: { steps, total_tool_calls: output.tool_call_count },
 });
 
 /** The task keeps only the trajectory prefix that fits its size budget, so it can be shorter than the run. */
@@ -332,19 +333,27 @@ export const createToolCallHealthEvaluators = (deps: JudgeDeps): InvestigationEv
   ): Promise<ToolCallHealth> =>
     memo(output, async () => {
       const result = await invokeJudge<{
-        failed_calls?: ToolCallIssue[];
-        empty_calls?: ToolCallIssue[];
+        failed_calls?: number[];
+        failed_summary?: string;
+        empty_calls?: number[];
+        empty_summary?: string;
       }>(deps, 'tool_call_health', ToolCallHealthJudgePrompt, { question, trajectory });
       const stepCount = output.tool_call_trajectory?.length ?? 0;
-      const failed = toToolCallIssues(result.failed_calls, stepCount);
-      const failedSteps = new Set(failed.map(({ step }) => step));
-      return { failed, empty: toToolCallIssues(result.empty_calls, stepCount, failedSteps) };
+      const failed = toToolCallSteps(result.failed_calls, stepCount);
+      return {
+        failed: { steps: failed, summary: String(result.failed_summary ?? '') },
+        empty: {
+          // A call is either failed or empty, never both.
+          steps: toToolCallSteps(result.empty_calls, stepCount, new Set(failed)),
+          summary: String(result.empty_summary ?? ''),
+        },
+      };
     });
 
   const create = (
     name: string,
     noun: string,
-    pick: (health: ToolCallHealth) => ToolCallIssue[]
+    pick: (health: ToolCallHealth) => ToolCallIssues
   ): InvestigationEvaluator => ({
     name,
     kind: 'LLM',
@@ -362,7 +371,24 @@ export const createToolCallHealthEvaluators = (deps: JudgeDeps): InvestigationEv
           explanation: `Only ${output.tool_call_trajectory?.length} of ${output.tool_call_count} tool calls were captured, so a count of failed or empty calls would miss the rest.`,
         };
       }
-      const health = await assess(output, judge.question, judge.trajectory);
+      // A judge that cannot produce a valid answer costs these two scores, not the whole run.
+      const health = await assess(output, judge.question, judge.trajectory).catch(
+        (error: unknown) => {
+          deps.log.warning(
+            `tool_call_health judge failed, scoring n/a: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return undefined;
+        }
+      );
+      if (!health) {
+        return {
+          score: null,
+          label: 'n/a',
+          explanation: 'The tool_call_health judge did not return a valid answer.',
+        };
+      }
       return toolCallIssueResult(pick(health), output, noun);
     },
   });
