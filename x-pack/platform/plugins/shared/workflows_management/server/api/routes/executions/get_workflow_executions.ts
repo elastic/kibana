@@ -174,7 +174,7 @@ export function registerGetWorkflowExecutionsRoute({
                     {
                       meta: {
                         description:
-                          'Field to collapse execution results by. Use page and size to paginate collapsed results. Collapsed responses omit the searchAfter cursor, and requests that combine collapse with searchAfter return HTTP 400.',
+                          'Field to collapse execution results by. Use page and size to paginate collapsed results. The total field counts matching executions before collapsing, so offset pagination can return empty trailing pages. Collapsed responses omit the searchAfter cursor, and requests that combine collapse with searchAfter return HTTP 400.',
                         availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                       },
                     }

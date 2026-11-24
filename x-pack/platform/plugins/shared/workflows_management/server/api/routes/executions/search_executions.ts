@@ -124,7 +124,7 @@ const querySchema = schema.object(
         {
           meta: {
             description:
-              'Field to collapse execution results by. Use page and size to paginate collapsed results. Collapsed responses omit the searchAfter cursor.',
+              'Field to collapse execution results by. Use page and size to paginate collapsed results. The total field counts matching executions before collapsing, so offset pagination can return empty trailing pages. Collapsed responses omit the searchAfter cursor.',
           },
         }
       )
