@@ -17,6 +17,7 @@ import { runFunctionsValidationSuite } from '../__tests__/functions_suite';
 import { runInlineCastValidationSuite } from '../__tests__/inline_cast_suite';
 import { runSourcesValidationSuite } from '../__tests__/sources_suite';
 import { runSubqueriesValidationSuite } from '../__tests__/subqueries_suite';
+import { runNamedSubqueriesValidationSuite } from '../__tests__/named_subqueries_suite';
 import { runValidationCommandsLicenseSuite } from '../__tests__/commands_license_suite';
 import { runValidationParamsSuite } from '../__tests__/params_suite';
 import { setupEsqlEnv, type EsqlEnv } from './helpers';
@@ -24,19 +25,20 @@ import { setupEsqlEnv, type EsqlEnv } from './helpers';
 const ES_QUERY_CONCURRENCY = 8;
 
 describe('ES|QL validation integration suites', () => {
-  let esqlEnv: EsqlEnv | undefined;
+  let esqlEnv: EsqlEnv;
   const clientRejectedQueries = new Map<string, string[]>();
 
   const setup: Setup = createValidationTestSetup({
+    // Verify positive cases against ES; afterValidate only queues queries rejected by the client.
+    expectElasticsearchAccepts: async (query) => {
+      const { error } = await esqlEnv.sendEsqlQuery(query);
+      expect(error).toBeUndefined();
+    },
     afterValidate: async ({ query, result, hasUnmodifiedDefaultCallbacks }) => {
       // Integration tests compare with real ES, while validateQuery still uses unit-test mocks.
       // This flag lets us skip ES checks when a unit test overrides those mocks.
       if (!hasUnmodifiedDefaultCallbacks) {
         return;
-      }
-
-      if (!esqlEnv) {
-        throw new Error('ES|QL integration environment has not been initialized.');
       }
 
       const clientHasError = result.errors.length > 0;
@@ -77,19 +79,15 @@ describe('ES|QL validation integration suites', () => {
   runFunctionsValidationSuite(setup);
   runInlineCastValidationSuite(setup);
   runSubqueriesValidationSuite(setup);
+  runNamedSubqueriesValidationSuite(setup);
   runValidationCommandsLicenseSuite(setup);
   runValidationParamsSuite(setup);
 
   it('when Elasticsearch accepts a query, the client validator does not report errors', async () => {
-    if (!esqlEnv) {
-      throw new Error('ES|QL integration environment has not been initialized.');
-    }
-    const env = esqlEnv;
-
     const clientErrorsWhenEsAccepts = await pMap(
       Array.from(clientRejectedQueries.entries()),
       async ([query, errors]) => {
-        const esqlResponse = await env.sendEsqlQuery(query);
+        const esqlResponse = await esqlEnv.sendEsqlQuery(query);
 
         if (esqlResponse.error) {
           return undefined;

@@ -297,4 +297,14 @@ describe('createSessionEventsService', () => {
       })
     ).rejects.toThrow('no_shard_available_action_exception');
   });
+
+  it('rejects a blank space or userId', async () => {
+    await expect(
+      service.saveEvents({ space: '  ', userId: 'jdoe' }, { sessionId: 'session-1', events: [] })
+    ).rejects.toThrow('non-empty space');
+    await expect(
+      service.saveEvents({ space: 'default', userId: '' }, { sessionId: 'session-1', events: [] })
+    ).rejects.toThrow('non-empty userId');
+    expect(esClient.bulk).not.toHaveBeenCalled();
+  });
 });

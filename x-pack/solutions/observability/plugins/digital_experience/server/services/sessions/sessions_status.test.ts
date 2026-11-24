@@ -9,18 +9,22 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
+  MOBILE_SESSIONS_TASK_ID,
+  MOBILE_SESSIONS_VERSION,
   SESSIONS_LOOKBACK_DAYS,
   SESSIONS_TASK_ID,
   SESSIONS_VERSION,
   type SessionsStatus,
 } from '../../../common/sessions';
-import { getSessionsStatus } from './sessions_status';
+import { BROWSER_SESSIONS_PLATFORM } from './sessions_platforms';
+import { getSessionsStatus, getSessionsStatusResponse } from './sessions_status';
 import type { SessionsTaskState } from './sessions_task';
 
 type TaskUserScope = NonNullable<ConcreteTaskInstance['userScope']>;
 
 const NOW = Date.parse('2026-11-10T12:00:00.000Z');
 const settings = { frequency: '1m' };
+const platform = BROWSER_SESSIONS_PLATFORM;
 const secondsAgo = (seconds: number) => new Date(NOW - seconds * 1000).toISOString();
 
 const userScope: TaskUserScope = {
@@ -43,6 +47,7 @@ const healthyState: SessionsTaskState = {
 
 const MISSING: SessionsStatus = {
   installed: false,
+  disabled: false,
   health: 'missing',
   installedVersion: null,
   currentVersion: SESSIONS_VERSION,
@@ -55,6 +60,10 @@ const MISSING: SessionsStatus = {
   lastError: null,
   enabledBy: null,
   retentionDays: SESSIONS_LOOKBACK_DAYS,
+  canEnable: false,
+  autoEnable: false,
+  canManage: false,
+  setUpBlocker: null,
 };
 
 describe('getSessionsStatus', () => {
@@ -68,13 +77,14 @@ describe('getSessionsStatus', () => {
   /** The status as a user who can set sessions up reads it, with the details. */
   const statusOf = (
     state: SessionsTaskState,
-    { frequency, withDetails = true }: { frequency?: string; withDetails?: boolean } = {}
+    { frequency, canManage = true }: { frequency?: string; canManage?: boolean } = {}
   ) => {
     mockTask(state);
     return getSessionsStatus({
+      platform,
       taskManager,
       settings: { ...settings, ...(frequency ? { frequency } : {}) },
-      withDetails,
+      canManage,
       now: NOW,
     });
   };
@@ -85,9 +95,9 @@ describe('getSessionsStatus', () => {
 
   describe('missing', () => {
     it('is missing without Task Manager, which builds the sessions', async () => {
-      expect(await getSessionsStatus({ taskManager: undefined, settings, now: NOW })).toEqual(
-        MISSING
-      );
+      expect(
+        await getSessionsStatus({ platform, taskManager: undefined, settings, now: NOW })
+      ).toEqual(MISSING);
     });
 
     it('is missing until the summaries task is scheduled', async () => {
@@ -95,22 +105,65 @@ describe('getSessionsStatus', () => {
         SavedObjectsErrorHelpers.createGenericNotFoundError('task', SESSIONS_TASK_ID)
       );
 
-      expect(await getSessionsStatus({ taskManager, settings, now: NOW })).toEqual(MISSING);
+      expect(await getSessionsStatus({ platform, taskManager, settings, now: NOW })).toEqual(
+        MISSING
+      );
       expect(taskManager.get).toHaveBeenCalledWith(SESSIONS_TASK_ID);
+    });
+
+    it('tells a manager they manage sessions before they are set up', async () => {
+      expect(
+        await getSessionsStatus({
+          platform,
+          taskManager: undefined,
+          settings,
+          canManage: true,
+          now: NOW,
+        })
+      ).toEqual({ ...MISSING, canManage: true });
     });
 
     it('rethrows other errors reading the task', async () => {
       taskManager.get.mockRejectedValue(new Error('no shards available'));
 
-      await expect(getSessionsStatus({ taskManager, settings, now: NOW })).rejects.toThrow(
-        'no shards available'
-      );
+      await expect(
+        getSessionsStatus({ platform, taskManager, settings, now: NOW })
+      ).rejects.toThrow('no shards available');
+    });
+  });
+
+  it('reports sessions that were turned off, neither rebuilding nor failing', async () => {
+    mockTask(
+      {
+        ...healthyState,
+        caughtUp: false,
+        apiKeyInvalid: true,
+        lastError: { message: 'x', at: secondsAgo(30) },
+      },
+      { enabled: false }
+    );
+
+    expect(
+      await getSessionsStatus({ platform, taskManager, settings, canManage: true, now: NOW })
+    ).toEqual({
+      ...MISSING,
+      installed: true,
+      disabled: true,
+      health: 'disabled',
+      installedVersion: SESSIONS_VERSION,
+      lagSeconds: 90,
+      summarizedUntil: healthyState.checkpoint,
+      lastRunAt: healthyState.lastRunAt,
+      lastSuccessAt: healthyState.lastSuccessAt,
+      enabledBy: 'ana',
+      canManage: true,
     });
   });
 
   it('reports healthy, caught-up summaries and who enabled them', async () => {
     expect(await statusOf(healthyState)).toEqual({
       installed: true,
+      disabled: false,
       health: 'healthy',
       installedVersion: SESSIONS_VERSION,
       currentVersion: SESSIONS_VERSION,
@@ -123,6 +176,10 @@ describe('getSessionsStatus', () => {
       lastError: null,
       enabledBy: 'ana',
       retentionDays: SESSIONS_LOOKBACK_DAYS,
+      canEnable: false,
+      autoEnable: false,
+      canManage: true,
+      setUpBlocker: null,
     });
   });
 
@@ -232,9 +289,10 @@ describe('getSessionsStatus', () => {
       mockTask(healthyState, { userScope: undefined });
 
       const status = await getSessionsStatus({
+        platform,
         taskManager,
         settings,
-        withDetails: true,
+        canManage: true,
         now: NOW,
       });
 
@@ -282,7 +340,7 @@ describe('getSessionsStatus', () => {
 
   describe('without the details, for users who cannot set sessions up', () => {
     it('hides who enabled sessions', async () => {
-      expect((await statusOf(healthyState, { withDetails: false })).enabledBy).toBeNull();
+      expect((await statusOf(healthyState, { canManage: false })).enabledBy).toBeNull();
     });
 
     it('says the last run failed, but not why', async () => {
@@ -292,7 +350,7 @@ describe('getSessionsStatus', () => {
           ...healthyState,
           lastError: { message: 'security_exception: action denied for user [ana]', at },
         },
-        { withDetails: false }
+        { canManage: false }
       );
 
       expect(status).toEqual(
@@ -301,7 +359,32 @@ describe('getSessionsStatus', () => {
           lastError: { message: null, at },
         })
       );
-      expect(JSON.stringify(status)).not.toContain('ana');
+      expect(JSON.stringify(status)).not.toMatch(/\bana\b/);
     });
+  });
+});
+
+describe('getSessionsStatusResponse', () => {
+  it('reports the browser sessions as before, and the mobile ones from their own task', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockImplementation(async (id) => {
+      if (id === MOBILE_SESSIONS_TASK_ID) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError('task', id);
+      }
+      return taskManagerMock.createTask({ id, state: healthyState, userScope });
+    });
+
+    const response = await getSessionsStatusResponse({ taskManager, settings, now: NOW });
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        installed: true,
+        health: 'healthy',
+        currentVersion: SESSIONS_VERSION,
+      })
+    );
+    expect(response.mobile).toEqual({ ...MISSING, currentVersion: MOBILE_SESSIONS_VERSION });
+    expect(taskManager.get).toHaveBeenCalledWith(SESSIONS_TASK_ID);
+    expect(taskManager.get).toHaveBeenCalledWith(MOBILE_SESSIONS_TASK_ID);
   });
 });

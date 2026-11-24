@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { InferenceTracingLangfuseExportConfig } from '@kbn/inference-tracing-config';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { memoize } from 'lodash';
 import { diag } from '@opentelemetry/api';
+import type { ReadableSpan } from '@opentelemetry/sdk-trace';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
 import { parseJsonAttr } from '../util/parse_json_attr';
 import { isTextPart, isToolCallPart } from '../util/message_parts';
@@ -51,7 +51,7 @@ export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
     };
   }
 
-  override processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
+  override processInferenceSpan(span: ReadableSpan): ReadableSpan {
     if (span.attributes['gen_ai.operation.name'] === 'chat') {
       const inputMessages = parseJsonAttr<GenAIInputMessage[]>(
         span.attributes[GenAISemanticConventions.GenAIInputMessages]

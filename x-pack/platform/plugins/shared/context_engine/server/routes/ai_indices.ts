@@ -141,7 +141,8 @@ import {
 } from './schemas/dreaming_schema';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
-import { withContextEngineFeatureFlag } from './with_feature_flag';
+import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
+import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -170,9 +171,6 @@ const RUN_DREAMING_SECURITY: RouteSecurity = {
 const CONTEXT_ENGINE_DISABLED_NOTE =
   'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).';
 
-const CONTEXT_ENGINE_DOCS_NOTE =
-  '**For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**';
-
 const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
 
 const hasWorkflowPrivileges = (
@@ -182,8 +180,6 @@ const hasWorkflowPrivileges = (
 
 const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   hasWorkflowPrivileges(request, WorkflowsManagementOperationPrivileges.delete);
-
-const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
 
 const toPublicAiIndex = ({
   dreaming: _dreaming,
@@ -381,7 +377,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { id, memory_enabled: _memoryEnabled, ...properties } = request.body;
         try {
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -473,7 +469,7 @@ export const registerAiIndexRoutes = ({
           const aiIndexService = getAiIndexService();
           const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
           const { memory_enabled: _memoryEnabled, ...properties } = request.body;
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -959,6 +955,7 @@ export const registerAiIndexRoutes = ({
                 kiId,
                 ki: request.body.ki,
                 writer,
+                personEdit: true,
                 backingIndex,
               });
               return { output: result };

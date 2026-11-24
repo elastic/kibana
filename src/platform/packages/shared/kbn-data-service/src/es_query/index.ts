@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getEsQueryConfig } from './get_es_query_config';
+export { getEsQueryConfig, getEsQueryConfigAsync } from './get_es_query_config';
