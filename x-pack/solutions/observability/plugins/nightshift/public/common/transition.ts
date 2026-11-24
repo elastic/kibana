@@ -33,11 +33,6 @@ export const nightshiftBorderColorTransition = (euiTheme: EuiThemeComputed): str
 export const nightshiftInteractiveSurfaceTransition = (euiTheme: EuiThemeComputed): string =>
   `${nightshiftBackgroundColorTransition(euiTheme)}, ${nightshiftBorderColorTransition(euiTheme)}`;
 
-export const nightshiftStatusCardTransition = (euiTheme: EuiThemeComputed): string =>
-  `${nightshiftBoxShadowTransition(euiTheme)}, ${nightshiftBackgroundColorTransition(
-    euiTheme
-  )}, ${nightshiftBorderColorTransition(euiTheme)}`;
-
 export const nightshiftReducedMotionStyles = css`
   @media (prefers-reduced-motion: reduce) {
     animation: none;

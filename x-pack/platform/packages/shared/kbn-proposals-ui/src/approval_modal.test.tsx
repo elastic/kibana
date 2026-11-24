@@ -55,7 +55,7 @@ describe('ApprovalModal', () => {
 
   it('keeps proposal details readable but prevents decisions in read-only mode', async () => {
     renderModal({ readOnly: true });
-    expect(screen.getByText('Apply monitored exception')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('Apply monitored exception');
     const confirm = screen.getByTestId('approvalModal-confirm');
     const dismiss = screen.getByTestId('approvalModal-dismiss');
     expect(confirm).toHaveAttribute('aria-disabled', 'true');
@@ -93,7 +93,7 @@ describe('ApprovalModal', () => {
   it('renders the proposal inside a modal dialog', () => {
     renderModal();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('Apply monitored exception')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('Apply monitored exception');
   });
 
   it('wires aria-labelledby to the rendered title', () => {

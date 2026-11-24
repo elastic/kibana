@@ -18,10 +18,7 @@ const renderPopover = (props: Partial<MatchesPopoverProps> = {}) =>
       isOpen
       closePopover={jest.fn()}
       type="indices"
-      matches={[
-        { name: 'products', isHidden: false },
-        { name: 'users', isHidden: false },
-      ]}
+      matches={[{ name: 'products' }, { name: 'users' }]}
       {...props}
     />
   );
@@ -44,9 +41,9 @@ describe('MatchesPopover', () => {
   it('counts outranked matches and marks them with an icon', () => {
     renderPopover({
       matches: [
-        { name: 'products', isHidden: false, outrankedByRuleName: 'Product catalog' },
-        { name: 'archive', isHidden: false, outrankedByRuleName: 'Product catalog' },
-        { name: 'users', isHidden: false },
+        { name: 'products', outrankedByRuleName: 'Product catalog' },
+        { name: 'archive', outrankedByRuleName: 'Product catalog' },
+        { name: 'users' },
       ],
     });
 
@@ -56,35 +53,15 @@ describe('MatchesPopover', () => {
     expect(screen.getAllByTestId('searchBoostMatchesPopoverOutrankedIcon')).toHaveLength(2);
   });
 
-  it('counts hidden matches in the total but only lists visible ones', () => {
+  it('lists hidden matches with the rest', () => {
     renderPopover({
-      matches: [
-        { name: 'products', isHidden: false },
-        { name: 'users', isHidden: false },
-        { name: '.hidden-1', isHidden: true },
-        { name: '.hidden-2', isHidden: true },
-        { name: '.hidden-3', isHidden: true },
-      ],
+      matches: [{ name: 'products' }, { name: '.internal-alerts' }],
     });
 
-    expect(screen.getByTestId('searchBoostMatchesPopoverCount').textContent).toBe('5 matches');
-    expect(screen.getAllByTestId('searchBoostMatchesPopoverItem')).toHaveLength(2);
-    expect(screen.queryByText('.hidden-1')).not.toBeInTheDocument();
-    expect(screen.getByTestId('searchBoostMatchesPopoverHidden').textContent).toBe(
-      '+3 hidden indices'
-    );
-  });
-
-  it('omits the plus sign when only hidden matches exist', () => {
-    renderPopover({
-      type: 'data_streams',
-      matches: [{ name: '.hidden-1', isHidden: true }],
-    });
-
-    expect(screen.queryByTestId('searchBoostMatchesPopoverItem')).not.toBeInTheDocument();
-    expect(screen.getByTestId('searchBoostMatchesPopoverHidden').textContent).toBe(
-      '1 hidden data stream'
-    );
+    expect(screen.getByTestId('searchBoostMatchesPopoverCount').textContent).toBe('2 matches');
+    expect(
+      screen.getAllByTestId('searchBoostMatchesPopoverItem').map(({ textContent }) => textContent)
+    ).toEqual(['products', '.internal-alerts']);
   });
 
   it('does not render the content when closed', () => {
