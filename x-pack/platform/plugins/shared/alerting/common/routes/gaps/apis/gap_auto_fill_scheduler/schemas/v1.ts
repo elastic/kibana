@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
 import {
@@ -17,9 +18,39 @@ import {
   ISO_DATE_MAX_LENGTH,
 } from '../../../../../constants';
 import { parseDuration } from '../../../../../parse_duration';
-import { optionalExcludedGapReasonsSchema } from '../../../../../schemas';
+import { gapReasonType } from '../../../../../constants/gap_reason';
 
 const { maxBackfills, numRetries, minScheduleIntervalInMs } = gapAutoFillSchedulerLimits;
+
+export const createGapAutoFillSchedulerExamples = () =>
+  path.join(__dirname, 'examples_create_gap_auto_fill_scheduler.yaml');
+export const getGapAutoFillSchedulerExamples = () =>
+  path.join(__dirname, 'examples_get_gap_auto_fill_scheduler.yaml');
+export const updateGapAutoFillSchedulerExamples = () =>
+  path.join(__dirname, 'examples_update_gap_auto_fill_scheduler.yaml');
+
+const schedulerFieldDescriptions = {
+  id: 'The identifier for the gap auto fill scheduler.',
+  name: 'A name for the gap auto fill scheduler.',
+  enabled:
+    'Indicates whether the scheduler is enabled. When `true`, the scheduler periodically fills detected gaps for the matching rules; when `false`, no automatic gap filling occurs.',
+  maxBackfills: 'The maximum number of backfills the scheduler creates per run.',
+  numRetries: 'The number of times the scheduler retries filling a gap that failed.',
+  gapFillRange:
+    'How far back in time the scheduler looks for gaps, as a date math expression relative to now, for example `now-90d`.',
+  scheduleInterval:
+    'How often the scheduler runs, as a duration string such as `2m` or `1h`. The minimum interval is one minute.',
+  scope: 'The scopes of the scheduler task, for example `security_solution`.',
+  ruleTypes: 'The rule type and consumer pairs that the scheduler fills gaps for.',
+  ruleType: 'The rule type identifier, for example `siem.queryRule`.',
+  ruleConsumer: 'The consumer of the rule type, for example `siem`.',
+  excludedReasons:
+    'The gap reasons that the scheduler skips. Gaps caused by a rule being disabled are excluded by default.',
+  createdBy: 'The identifier for the user that created the scheduler.',
+  updatedBy: 'The identifier for the user that last updated the scheduler.',
+  createdAt: 'The date and time that the scheduler was created.',
+  updatedAt: 'The date and time that the scheduler was last updated.',
+};
 
 const validateGapAutoFillSchedulerPayload = (
   gapFillRange: string,
@@ -63,34 +94,87 @@ const validateGapAutoFillSchedulerPayload = (
 };
 
 export const getGapAutoFillSchedulerParamsSchema = schema.object({
-  id: schema.string({ maxLength: MAX_ID_LENGTH }),
+  id: schema.string({
+    maxLength: MAX_ID_LENGTH,
+    meta: { description: schedulerFieldDescriptions.id },
+  }),
 });
+
+const ruleTypesSchema = schema.arrayOf(
+  schema.object({
+    type: schema.string({
+      maxLength: MAX_FIELD_NAME_LENGTH,
+      meta: { description: schedulerFieldDescriptions.ruleType },
+    }),
+    consumer: schema.string({
+      maxLength: MAX_NAME_LENGTH,
+      meta: { description: schedulerFieldDescriptions.ruleConsumer },
+    }),
+  }),
+  { maxSize: MAX_ARRAY_FIELDS, meta: { description: schedulerFieldDescriptions.ruleTypes } }
+);
+
+const scopeSchema = schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
+  maxSize: MAX_ARRAY_FIELDS,
+  meta: { description: schedulerFieldDescriptions.scope },
+});
+
+const scheduleSchema = schema.object({
+  interval: schema.string({
+    maxLength: MAX_DURATION_STRING_LENGTH,
+    meta: { description: schedulerFieldDescriptions.scheduleInterval },
+  }),
+});
+
+const excludedReasonsSchema = schema.maybe(
+  schema.arrayOf(
+    schema.oneOf([
+      schema.literal(gapReasonType.RULE_DISABLED),
+      schema.literal(gapReasonType.RULE_DID_NOT_RUN),
+    ]),
+    {
+      maxSize: Object.values(gapReasonType).length,
+      meta: { description: schedulerFieldDescriptions.excludedReasons },
+    }
+  )
+);
 
 export const gapAutoFillSchedulerBodySchema = schema.object(
   {
-    id: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
-    name: schema.string({ defaultValue: '', maxLength: MAX_NAME_LENGTH }),
-    enabled: schema.boolean({ defaultValue: true }),
-    max_backfills: schema.number(maxBackfills),
-    num_retries: schema.number(numRetries),
+    id: schema.maybe(
+      schema.string({
+        maxLength: MAX_ID_LENGTH,
+        meta: {
+          description: `${schedulerFieldDescriptions.id} If omitted, a random identifier is generated.`,
+        },
+      })
+    ),
+    name: schema.string({
+      defaultValue: '',
+      maxLength: MAX_NAME_LENGTH,
+      meta: { description: schedulerFieldDescriptions.name },
+    }),
+    enabled: schema.boolean({
+      defaultValue: true,
+      meta: { description: schedulerFieldDescriptions.enabled },
+    }),
+    max_backfills: schema.number({
+      ...maxBackfills,
+      meta: { description: schedulerFieldDescriptions.maxBackfills },
+    }),
+    num_retries: schema.number({
+      ...numRetries,
+      meta: { description: schedulerFieldDescriptions.numRetries },
+    }),
     gap_fill_range: schema.string({
       defaultValue: 'now-90d',
       maxLength: MAX_DURATION_STRING_LENGTH,
+      meta: { description: schedulerFieldDescriptions.gapFillRange },
     }),
-    schedule: schema.object({
-      interval: schema.string({ maxLength: MAX_DURATION_STRING_LENGTH }),
-    }),
-    scope: schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
-      maxSize: MAX_ARRAY_FIELDS,
-    }),
-    rule_types: schema.arrayOf(
-      schema.object({
-        type: schema.string({ maxLength: MAX_FIELD_NAME_LENGTH }),
-        consumer: schema.string({ maxLength: MAX_NAME_LENGTH }),
-      }),
-      { maxSize: MAX_ARRAY_FIELDS }
-    ),
-    excluded_reasons: optionalExcludedGapReasonsSchema,
+    schedule: scheduleSchema,
+    scope: scopeSchema,
+    rule_types: ruleTypesSchema,
+    excluded_reasons: excludedReasonsSchema,
   },
   {
     validate(payload) {
@@ -105,25 +189,27 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
 
 export const gapAutoFillSchedulerUpdateBodySchema = schema.object(
   {
-    name: schema.string({ maxLength: MAX_NAME_LENGTH }),
-    enabled: schema.boolean(),
-    gap_fill_range: schema.string({ maxLength: MAX_DURATION_STRING_LENGTH }),
-    max_backfills: schema.number(maxBackfills),
-    num_retries: schema.number(numRetries),
-    schedule: schema.object({
-      interval: schema.string({ maxLength: MAX_DURATION_STRING_LENGTH }),
+    name: schema.string({
+      maxLength: MAX_NAME_LENGTH,
+      meta: { description: schedulerFieldDescriptions.name },
     }),
-    scope: schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
-      maxSize: MAX_ARRAY_FIELDS,
+    enabled: schema.boolean({ meta: { description: schedulerFieldDescriptions.enabled } }),
+    gap_fill_range: schema.string({
+      maxLength: MAX_DURATION_STRING_LENGTH,
+      meta: { description: schedulerFieldDescriptions.gapFillRange },
     }),
-    rule_types: schema.arrayOf(
-      schema.object({
-        type: schema.string({ maxLength: MAX_FIELD_NAME_LENGTH }),
-        consumer: schema.string({ maxLength: MAX_NAME_LENGTH }),
-      }),
-      { maxSize: MAX_ARRAY_FIELDS }
-    ),
-    excluded_reasons: optionalExcludedGapReasonsSchema,
+    max_backfills: schema.number({
+      ...maxBackfills,
+      meta: { description: schedulerFieldDescriptions.maxBackfills },
+    }),
+    num_retries: schema.number({
+      ...numRetries,
+      meta: { description: schedulerFieldDescriptions.numRetries },
+    }),
+    schedule: scheduleSchema,
+    scope: scopeSchema,
+    rule_types: ruleTypesSchema,
+    excluded_reasons: excludedReasonsSchema,
   },
   {
     validate(payload) {
@@ -136,29 +222,51 @@ export const gapAutoFillSchedulerUpdateBodySchema = schema.object(
   }
 );
 
-export const gapAutoFillSchedulerResponseSchema = schema.object({
-  id: schema.string(),
-  name: schema.string(),
-  enabled: schema.boolean(),
-  schedule: schema.object({
-    interval: schema.string(),
-  }),
-  rule_types: schema.arrayOf(
-    schema.object({
-      type: schema.string(),
-      consumer: schema.string(),
-    })
-  ),
-  gap_fill_range: schema.string(),
-  max_backfills: schema.number(),
-  num_retries: schema.number(),
-  scope: schema.arrayOf(schema.string()),
-  excluded_reasons: schema.maybe(schema.arrayOf(schema.string())),
-  created_by: schema.nullable(schema.string()),
-  updated_by: schema.nullable(schema.string()),
-  created_at: schema.string(),
-  updated_at: schema.string(),
-});
+export const gapAutoFillSchedulerResponseSchema = schema.object(
+  {
+    id: schema.string({ meta: { description: schedulerFieldDescriptions.id } }),
+    name: schema.string({ meta: { description: schedulerFieldDescriptions.name } }),
+    enabled: schema.boolean({ meta: { description: schedulerFieldDescriptions.enabled } }),
+    schedule: schema.object({
+      interval: schema.string({
+        meta: { description: schedulerFieldDescriptions.scheduleInterval },
+      }),
+    }),
+    rule_types: schema.arrayOf(
+      schema.object({
+        type: schema.string({ meta: { description: schedulerFieldDescriptions.ruleType } }),
+        consumer: schema.string({
+          meta: { description: schedulerFieldDescriptions.ruleConsumer },
+        }),
+      }),
+      { meta: { description: schedulerFieldDescriptions.ruleTypes } }
+    ),
+    gap_fill_range: schema.string({
+      meta: { description: schedulerFieldDescriptions.gapFillRange },
+    }),
+    max_backfills: schema.number({
+      meta: { description: schedulerFieldDescriptions.maxBackfills },
+    }),
+    num_retries: schema.number({ meta: { description: schedulerFieldDescriptions.numRetries } }),
+    scope: schema.arrayOf(schema.string(), {
+      meta: { description: schedulerFieldDescriptions.scope },
+    }),
+    excluded_reasons: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        meta: { description: schedulerFieldDescriptions.excludedReasons },
+      })
+    ),
+    created_by: schema.nullable(
+      schema.string({ meta: { description: schedulerFieldDescriptions.createdBy } })
+    ),
+    updated_by: schema.nullable(
+      schema.string({ meta: { description: schedulerFieldDescriptions.updatedBy } })
+    ),
+    created_at: schema.string({ meta: { description: schedulerFieldDescriptions.createdAt } }),
+    updated_at: schema.string({ meta: { description: schedulerFieldDescriptions.updatedAt } }),
+  },
+  { meta: { id: 'gap_auto_fill_scheduler_response' } }
+);
 
 export const gapAutoFillSchedulerLogsRequestQuerySchema = schema.object(
   {

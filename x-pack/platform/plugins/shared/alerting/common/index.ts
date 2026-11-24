@@ -252,6 +252,10 @@ export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
 export const INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH =
   `${INTERNAL_ALERTING_GAPS_API_PATH}/auto_fill_scheduler` as const;
 
+// Public gap auto fill scheduler API path
+export const ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH =
+  `${BASE_ALERTING_API_PATH}/rules/gaps/auto_fill_scheduler` as const;
+
 export const INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_summary` as const;
 

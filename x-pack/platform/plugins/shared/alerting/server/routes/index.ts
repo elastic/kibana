@@ -86,10 +86,22 @@ import { findGapsRoute } from './gaps/apis/find/find_gaps_route';
 import { fillGapByIdRoute } from './gaps/apis/fill/fill_gap_by_id_route';
 import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route';
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
-import { createAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route';
-import { getAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/get/get_auto_fill_scheduler_route';
-import { updateAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route';
-import { deleteAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route';
+import {
+  createAutoFillSchedulerRoute,
+  createAutoFillSchedulerPublicRoute,
+} from './gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route';
+import {
+  getAutoFillSchedulerRoute,
+  getAutoFillSchedulerPublicRoute,
+} from './gaps/apis/gap_auto_fill_schedule/get/get_auto_fill_scheduler_route';
+import {
+  updateAutoFillSchedulerRoute,
+  updateAutoFillSchedulerPublicRoute,
+} from './gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route';
+import {
+  deleteAutoFillSchedulerRoute,
+  deleteAutoFillSchedulerPublicRoute,
+} from './gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route';
 import { findAutoFillSchedulerLogsRoute } from './gaps/apis/gap_auto_fill_schedule/logs/find_auto_fill_scheduler_logs_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 import type { AlertingPluginsStart } from '../plugin';
@@ -196,6 +208,12 @@ export function defineRoutes(opts: RouteOptions) {
   updateAutoFillSchedulerRoute(router, licenseState);
   deleteAutoFillSchedulerRoute(router, licenseState);
   findAutoFillSchedulerLogsRoute(router, licenseState);
+
+  // gap auto fill scheduler APIs (public)
+  createAutoFillSchedulerPublicRoute(router, licenseState);
+  getAutoFillSchedulerPublicRoute(router, licenseState);
+  updateAutoFillSchedulerPublicRoute(router, licenseState);
+  deleteAutoFillSchedulerPublicRoute(router, licenseState);
 
   // Rules Settings APIs
   if (alertingConfig.rulesSettings.enabled) {
