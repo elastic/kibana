@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core-ui-settings-server'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/connector-specs'
+  - '@kbn/actions-plugin'
   - '@kbn/isomer-components'
 tags:
   - shared-common
