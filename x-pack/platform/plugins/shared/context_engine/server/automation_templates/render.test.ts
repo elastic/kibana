@@ -230,6 +230,74 @@ describe('automation template rendering', () => {
       );
     });
 
+    describe('grounding with and without a category field', () => {
+      const renderGrounding = (categoryField: string | undefined) => {
+        const definition = parse(
+          renderIndexMetadataTemplate({
+            ...twoSources,
+            sources: [{ index: 'flights', categoryField }],
+          })
+        );
+        const [loop] = definition.steps as TemplateStep[];
+        const branch = allSteps(loop.steps ?? []);
+        const context = {
+          consts: definition.consts,
+          inputs: {},
+          steps: {
+            source_context: {
+              output: {
+                index: 'flights',
+                category_field: definition.consts.sources[0].category_field,
+              },
+            },
+          },
+        };
+        const render = (template: string | undefined) =>
+          createWorkflowLiquidEngine().parseAndRenderSync(template ?? '', context);
+        return {
+          counts: render(branch.find((step) => step.name === 'esql_category_counts')?.with?.query),
+          totals: render(branch.find((step) => step.name === 'esql_totals')?.with?.query),
+          prompt: render(
+            branch.find((step) => step.name === 'generate_index_profile')?.with?.prompt
+          ),
+        };
+      };
+
+      it('groups the counts by the category field when there is one', () => {
+        const { counts, totals, prompt } = renderGrounding('tier');
+
+        expect(counts).toBe(
+          'FROM flights | STATS count = COUNT(*) BY `tier` | SORT count DESC | LIMIT 50'
+        );
+        expect(totals).toBe(
+          'FROM flights | STATS total = COUNT(*), distinct_categories = COUNT_DISTINCT(`tier`)'
+        );
+        expect(prompt).toContain('Grounding aggregation — document count by tier:');
+        expect(prompt).toContain(
+          'Grounding totals — total document count and distinct tier count:'
+        );
+      });
+
+      it('counts the documents alone when there is none', () => {
+        const { counts, totals, prompt } = renderGrounding(undefined);
+
+        expect(counts).toBe('FROM flights | STATS count = COUNT(*)');
+        expect(totals).toBe('FROM flights | STATS total = COUNT(*)');
+        expect(prompt).toContain('Grounding aggregation — total document count:');
+        expect(prompt).toContain('Grounding totals — total document count:');
+        expect(prompt).not.toContain('distinct');
+      });
+    });
+
+    it('writes an empty category field for a source without one', () => {
+      const yaml = renderIndexMetadataTemplate({
+        ...twoSources,
+        sources: [{ index: 'flights' }],
+      });
+
+      expect(parse(yaml).consts.sources).toEqual([{ index: 'flights', category_field: '' }]);
+    });
+
     it('rejects an unsafe identifier in any source', () => {
       expect(() =>
         renderIndexMetadataTemplate({
