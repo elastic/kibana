@@ -39,7 +39,7 @@ import type { OlsServiceStartParams } from './ols_service';
 import { resolvePrincipal } from './principal';
 import { validateRecipients } from './recipients';
 import { getRecoveryAction } from './recovery';
-import { type RequestState, syncCredential } from './request_state';
+import type { RequestState } from './request_state';
 
 /**
  * Parameters shared by the methods that decide one operation for objects of one type.
@@ -195,8 +195,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
   }
 
   /**
-   * Returns the principal the request acts as. Resolved at most once per request, and again when
-   * the request's credential changes.
+   * Returns the principal the request acts as. Resolved at most once per request.
    *
    * @returns The principal, or `undefined` when the request acts as nobody that can own or receive
    *   access, or OLS is disabled.
@@ -207,7 +206,6 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       return;
     }
 
-    this.syncCredential();
     if (!this.state.principal) {
       this.state.principal = resolvePrincipal({
         request: this.request,
@@ -232,8 +230,6 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
    * @param granted Whether the request holds recovery authority.
    */
   public primeRecovery(type: string, spaceIds: string[], granted: boolean): void {
-    this.syncCredential();
-
     for (const spaceId of spaceIds) {
       this.state.recovery.set(getRecoveryKey(type, spaceId), Promise.resolve(granted));
       // Without Spaces, a check that ran globally is the answer for the default space, which is
@@ -475,18 +471,20 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       return;
     }
 
+    // A fake request always needs its principal, for the filter or for its audit event, so its
+    // lookup runs alongside the recovery check. Any other request looks the principal up only for
+    // spaces without recovery, so a search that recovery covers completely makes no such lookup.
     this.checkRecoveryAtSpaces(type, spaceIds);
-    const recovery = await Promise.all(spaceIds.map((spaceId) => this.hasRecovery(type, spaceId)));
+    const [recovery, fakeRequestPrincipal] = await Promise.all([
+      Promise.all(spaceIds.map((spaceId) => this.hasRecovery(type, spaceId))),
+      this.request.isFakeRequest ? this.getPrincipal() : undefined,
+    ]);
     const recoverySpaces = spaceIds.filter((_, index) => recovery[index]);
     const ordinarySpaces = spaceIds.filter((_, index) => !recovery[index]);
-
-    // Only the spaces without recovery need the principal, and so does the audit event of a request
-    // without an authenticated user. So a search that recovery covers completely makes no principal
-    // lookup, and can't fail on one.
     const principal =
-      ordinarySpaces.length > 0 || this.request.isFakeRequest
-        ? await this.getPrincipal()
-        : undefined;
+      this.request.isFakeRequest || ordinarySpaces.length === 0
+        ? fakeRequestPrincipal
+        : await this.getPrincipal();
     for (const spaceId of recoverySpaces) {
       this.audit({ action: 'ols_admin_override', type, spaceId, operation: 'find', principal });
     }
@@ -754,18 +752,12 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
     return [...userIds].filter((id) => !allowed.has(id));
   }
 
-  private syncCredential() {
-    syncCredential(this.state, this.request, this.params.getAuthenticatedPrincipal);
-  }
-
   /**
    * Checks recovery in one privilege request for the spaces that have no answer yet, so a search
    * across several spaces costs one request rather than one per space. A space needs the same
    * privileges as for {@link hasRecovery}: the recovery action and the login action.
    */
   private checkRecoveryAtSpaces(type: string, spaceIds: string[]) {
-    this.syncCredential();
-
     const unchecked = [...new Set(spaceIds)].filter(
       (spaceId) =>
         spaceId !== ALL_SPACES_ID && !this.state.recovery.has(getRecoveryKey(type, spaceId))
@@ -795,8 +787,6 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
   }
 
   private async hasRecovery(type: string, spaceId: string) {
-    this.syncCredential();
-
     const key = getRecoveryKey(type, spaceId);
     let recovery = this.state.recovery.get(key);
     if (!recovery) {

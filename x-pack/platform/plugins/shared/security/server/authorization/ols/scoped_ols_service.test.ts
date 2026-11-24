@@ -191,25 +191,6 @@ describe('ScopedOlsService', () => {
       expect(userProfiles.getCurrentProfileId).toHaveBeenCalledWith({ request });
     });
 
-    it('resolves the principal and recovery again once the request carries another credential', async () => {
-      const getAuthenticatedPrincipal = jest.fn().mockReturnValue({
-        type: 'service_account',
-        serviceAccountId: SERVICE_ACCOUNT.id,
-        variant: 'stack',
-      });
-      const olsService = createOlsService({ getAuthenticatedPrincipal });
-      const scoped = olsService.asScoped(request);
-      await scoped.getReadFilter({ type: TYPE, spaceIds: ['default'] });
-      expect(checkPrivileges.atSpace).toHaveBeenCalledTimes(1);
-
-      // A released service-account request has no credential left.
-      getAuthenticatedPrincipal.mockReturnValue(null);
-      asPrincipal(STRANGER);
-      await expect(scoped.getPrincipal()).resolves.toEqual(STRANGER);
-      await scoped.getReadFilter({ type: TYPE, spaceIds: ['default'] });
-      expect(checkPrivileges.atSpace).toHaveBeenCalledTimes(2);
-    });
-
     it('returns no principal when OLS is disabled', async () => {
       await expect(
         createOlsService({ enabled: false }).asScoped(request).getPrincipal()
@@ -701,6 +682,49 @@ describe('ScopedOlsService', () => {
       );
       expect(userProfiles.getCurrentProfileId).not.toHaveBeenCalled();
       expect(userProfiles.getApiKeyProfileId).not.toHaveBeenCalled();
+    });
+
+    it('looks up the principal of a fake request alongside the recovery check', async () => {
+      let answerRecovery = () => {};
+      checkPrivileges.atSpaces.mockImplementation(
+        (spaceIds: string[], { kibana }: { kibana: string[] }) =>
+          new Promise((resolve) => {
+            answerRecovery = () =>
+              resolve({
+                hasAllRequested: true,
+                username: 'user',
+                privileges: {
+                  kibana: spaceIds.flatMap((spaceId) =>
+                    kibana.map((privilege) => ({ resource: spaceId, privilege, authorized: true }))
+                  ),
+                  elasticsearch: { cluster: [], index: {} },
+                },
+              });
+          })
+      );
+      userProfiles.getApiKeyProfileId.mockResolvedValue(OWNER.id);
+      request = kibanaRequestFactory({
+        headers: { authorization: `ApiKey ${Buffer.from('owner-key:secret').toString('base64')}` },
+        auth: { isAuthenticated: true },
+      });
+
+      const filter = createOlsService()
+        .asScoped(request)
+        .getReadFilter({ type: TYPE, spaceIds: ['space-a', 'space-b'] });
+      await new Promise(process.nextTick);
+      // The recovery check hasn't answered yet, and the principal lookup has already started.
+      expect(userProfiles.getApiKeyProfileId).toHaveBeenCalledWith(request);
+
+      answerRecovery();
+      await expect(filter).resolves.toEqual(
+        buildAclReadFilter({
+          policy: POLICY,
+          principal: OWNER,
+          access: 'view',
+          recoverySpaces: ['space-a', 'space-b'],
+          ordinarySpaces: [],
+        })
+      );
     });
 
     it('checks recovery globally for a search across all spaces', async () => {

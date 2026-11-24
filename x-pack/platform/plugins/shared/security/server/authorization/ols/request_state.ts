@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
-import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { Principal } from '@kbn/ols';
 
 /**
  * State shared by every scoped service created for one request, so that the principal is resolved
- * and recovery checked at most once per request.
+ * and recovery checked at most once per request. It lives as long as the request object, and
+ * assumes that the request keeps one credential. HTTP and Task Manager requests do. A service
+ * account workload's request is released when its run ends, and must not be used after that: it
+ * can't reach Elasticsearch anymore, and the answers cached here still belong to the account.
  */
 export interface RequestState {
-  /**
-   * The credential the principal and recovery answers belong to. When it changes, as when a
-   * service-account request is released, both are dropped.
-   */
-  credential?: string;
   /** The principal of the request, once resolved. */
   principal?: Promise<Principal | undefined>;
   /** Recovery answers, keyed by `type:spaceId`. */
@@ -38,23 +33,3 @@ export const createRequestState = (): RequestState => ({
   reportedInvalidAcls: new Set(),
   recipients: new Map(),
 });
-
-/**
- * Drops the principal and recovery answers once the request carries another credential, as a
- * released service-account request does. A renewed token of the same account keeps them.
- */
-export const syncCredential = (
-  state: RequestState,
-  request: KibanaRequest,
-  getAuthenticatedPrincipal: (request: KibanaRequest) => AuthenticatedPrincipal | null
-) => {
-  const credential = JSON.stringify([
-    getAuthenticatedPrincipal(request),
-    extractApiKeyIdFromAuthzHeader(request.headers.authorization),
-  ]);
-  if (state.credential !== undefined && state.credential !== credential) {
-    state.principal = undefined;
-    state.recovery.clear();
-  }
-  state.credential = credential;
-};
