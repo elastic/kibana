@@ -502,6 +502,28 @@ describe('Template columns of several queries', () => {
     ]);
   });
 
+  it('keeps reading a bracket key when a string literal follows it in the same tag', () => {
+    expect([
+      ...readColumnReferencesByQuery(
+        '{% for r in rows %}{{ r["host"].value | default: "-" }}{% if r["status"].value == "OK" %}x{% endif %}{% endfor %}'
+      ),
+    ]).toEqual([[0, ['host', 'status']]]);
+  });
+
+  it('binds a loop over a bracket-quoted rows key to its query', () => {
+    expect([
+      ...readColumnReferencesByQuery(
+        '{% for r in queries[1]["rows"] %}{{ r.host.value }}{% endfor %}'
+      ),
+    ]).toEqual([[1, ['host']]]);
+  });
+
+  it('ignores inline comments', () => {
+    expect([
+      ...readColumnReferencesByQuery('{% # source: queries[1].rows %}{{ rows[0].a }}'),
+    ]).toEqual([[0, ['a']]]);
+  });
+
   it('does not read a query chosen by a variable', () => {
     expect([...readColumnReferencesByQuery('{{ queries[i].rows[0].host }}')]).toEqual([]);
   });
@@ -570,6 +592,14 @@ describe('Template columns of several queries', () => {
       })
     );
     expect(result.score).toBe(0.5);
+  });
+
+  it('fails a static panel whose template reads a query', async () => {
+    const result = await run(
+      withColumns({}),
+      outputWith({ template: '<p>{{ queries[1].rows.size }}</p>' })
+    );
+    expect(result).toMatchObject({ score: 0, label: 'unbound-columns' });
   });
 
   it('reports a second query that did not run', async () => {
@@ -1061,6 +1091,31 @@ describe('Custom Content Data Edit Applied', () => {
 
   it('skips when the query does not run', async () => {
     expect((await run(evaluator, after('<p/>', 'FROM nowhere'), gold)).score).toBeNull();
+  });
+
+  it('does not credit a measure that was already in a query the edit left alone', async () => {
+    const hosts = 'FROM logs | STATS requests = COUNT(*) BY host';
+    const kpis = 'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes)';
+    columnsByQuery[hosts] = ['requests', 'host'];
+    columnsByQuery[kpis] = ['requests', 'avg_bytes'];
+    const result = await run(
+      evaluator,
+      outputWith(
+        {
+          esqls: [kpis, hosts],
+          template: '{{ rows[0].avg_bytes.value }}{{ queries[1].rows[0].requests.value }}',
+        },
+        {
+          baseline: {
+            attachmentId: 'att-1',
+            content: { esqls: [kpis, 'FROM logs'] },
+            versionCount: 1,
+          },
+        }
+      ),
+      gold
+    );
+    expect(result).toMatchObject({ score: 0, label: 'measure-not-in-query' });
   });
 
   it('finds the measure added to the second query and the template reading it there', async () => {

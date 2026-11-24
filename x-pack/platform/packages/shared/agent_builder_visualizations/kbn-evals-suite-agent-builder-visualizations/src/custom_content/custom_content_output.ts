@@ -72,10 +72,12 @@ export interface CustomContentTaskOutput {
 export const getQueries = (content: StoredCustomContent | undefined): string[] =>
   content?.esqls ?? (content?.esql ? [content.esql] : []);
 
-const toQueries = (value: unknown): string[] =>
-  (Array.isArray(value) ? value : [value]).filter(
-    (query): query is string => typeof query === 'string' && query.trim().length > 0
+const toQueries = (value: unknown): string[] => {
+  const queries = (Array.isArray(value) ? value : [value]).map((query) =>
+    typeof query === 'string' ? query : ''
   );
+  return queries.some((query) => query.trim().length > 0) ? queries : [];
+};
 
 /** Reads the fields the evaluators score from one stored version of a visualization attachment. */
 export const toStoredCustomContent = (data: unknown): StoredCustomContent | undefined => {

@@ -67,6 +67,12 @@ describe('toStoredCustomContent', () => {
     ).toMatchObject({ esql: 'FROM logs | LIMIT 1' });
   });
 
+  it('keeps the position of every query, blank ones included', () => {
+    expect(
+      toStoredCustomContent(customContentData({ esql: ['FROM logs', '  ', 'FROM other'] }))
+    ).toMatchObject({ esqls: ['FROM logs', '  ', 'FROM other'] });
+  });
+
   it('keeps every query of the panel, in order', () => {
     expect(
       toStoredCustomContent(customContentData({ esql: ['FROM logs | LIMIT 1', 'FROM other'] }))

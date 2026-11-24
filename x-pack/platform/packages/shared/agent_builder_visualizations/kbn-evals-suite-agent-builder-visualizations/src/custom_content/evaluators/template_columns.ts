@@ -25,8 +25,8 @@ export const createTemplateColumnsEvaluator = ({
   evaluate: async ({ output }) => {
     const { template } = output.after ?? {};
     const queries = getQueries(output.after);
-    if (!template || queries.length === 0) {
-      return skippedResult('The panel has no template and query to compare.');
+    if (!template) {
+      return skippedResult('The panel has no template to compare.');
     }
 
     const references = readColumnReferencesByQuery(template);
@@ -76,7 +76,7 @@ export const createTemplateColumnsEvaluator = ({
       ...(unknownQueries.length > 0
         ? [
             `The template reads queries the panel does not have: ${unknownQueries
-              .map((position) => `queries[${position}]`)
+              .map((position) => (position === 0 ? 'rows' : `queries[${position}]`))
               .join(', ')}.`,
           ]
         : []),

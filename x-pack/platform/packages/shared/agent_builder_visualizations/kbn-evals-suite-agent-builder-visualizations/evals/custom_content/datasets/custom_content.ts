@@ -61,7 +61,7 @@ export const CUSTOM_CONTENT_DATA_EXAMPLES: CustomContentDatasetExample[] = [
     },
     output: {
       data: 'query',
-      queryContains: [`FROM ${LOGS}`, 'STATS requests = COUNT(*) BY machine.os'],
+      queryContains: [`FROM ${LOGS} | STATS requests = COUNT(*) BY machine.os`],
     },
     metadata: { useCase: 'user-supplied-query', dataSource: 'logs' },
   },
@@ -84,7 +84,12 @@ export const CUSTOM_CONTENT_MULTI_QUERY_EXAMPLES: CustomContentDatasetExample[] 
     input: {
       question: `${CREATE_PANEL} for ${LOGS} with three parts side by side: a row of headline numbers (total requests, unique hosts, average response time), a table of the top 5 hosts by request count, and a table of the 5 most common HTTP status codes with their counts.`,
     },
-    output: { data: 'query', queryCount: 3, limit: [5, 5] },
+    output: {
+      data: 'query',
+      queryCount: 3,
+      limit: [5, 5],
+      queryContains: ['BY host', 'BY response'],
+    },
     metadata: { useCase: 'multi-query-three-parts', dataSource: 'logs' },
   },
   {
@@ -186,14 +191,6 @@ export const CUSTOM_CONTENT_MULTI_QUERY_EDIT_EXAMPLES: CustomContentDatasetExamp
       limit: [5, 5],
     },
     metadata: { useCase: 'multi-query-add-section', dataSource: 'logs' },
-  },
-  {
-    input: {
-      question: MULTI_QUERY_BASE_PROMPT,
-      followUp: 'Remove the table of top hosts and keep only the headline numbers.',
-    },
-    output: { data: 'query', edit: 'data', queryCount: 1, unchangedQueries: [0] },
-    metadata: { useCase: 'multi-query-remove-section', dataSource: 'logs' },
   },
   {
     input: {

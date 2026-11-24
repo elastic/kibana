@@ -74,10 +74,14 @@ export const createDataEditAppliedEvaluator = ({
       }
     }
 
-    const found = queries.map((query, position) => ({
-      position,
-      ...findMeasureColumns(query, measure, columnsByQuery[position]),
-    }));
+    const baselineQueries = getQueries(output.baseline?.content);
+    const found = queries
+      .map((query, position) => ({
+        position,
+        edited: query !== baselineQueries[position],
+        ...findMeasureColumns(query, measure, columnsByQuery[position]),
+      }))
+      .filter(({ edited }) => edited);
     if (!found.some(({ computed }) => computed)) {
       return {
         score: 0,

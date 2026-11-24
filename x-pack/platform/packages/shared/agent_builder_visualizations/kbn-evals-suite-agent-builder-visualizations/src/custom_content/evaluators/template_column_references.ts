@@ -15,12 +15,14 @@ type Segment = string | number;
 const TAG = /\{%-?([\s\S]*?)-?%\}|\{\{-?([\s\S]*?)-?\}\}/g;
 const LOOP_HEADER = /^\s*(for|tablerow)\s+(\w+)\s+in\s+([\s\S]+)$/;
 const LOOP_END = /^\s*end(for|tablerow)\s*$/;
-const COLLECTION = /^(?:rows|queries\s*\[\s*(\d+)\s*\]\s*\.\s*rows)\b/;
+const COLLECTION =
+  /^(?:rows|queries\s*\[\s*(\d+)\s*\]\s*(?:\.\s*rows|\[\s*(["'])rows\2\s*\]))(?!\w)/;
 const CHAIN =
   /(?<!\w|(?<!\.)\.)([A-Za-z_]\w*)((?:\s*\.\s*\w+|\s*\[\s*(?:"[^"]*"|'[^']*'|\d+|[A-Za-z_][\w.]*)\s*\])*)/g;
 const SEGMENT = /\.\s*(\w+)|\[\s*(?:"([^"]*)"|'([^']*)'|(\d+)|([A-Za-z_][\w.]*))\s*\]/g;
 const BLOCKS_WITHOUT_READS = /\{%-?\s*(comment|raw)\s*-?%\}[\s\S]*?\{%-?\s*end\1\s*-?%\}/g;
-const STRING_LITERAL = /(?<!\[\s*)(["'])(?:(?!\1).)*\1/g;
+const STRING_LITERAL = /(\[\s*(["'])(?:(?!\2).)*\2)|(["'])(?:(?!\3).)*\3/g;
+const INLINE_COMMENT = /^\s*#/;
 
 const isIndexedRow = (segment: Segment | undefined): boolean =>
   typeof segment === 'number' || segment === 'first' || segment === 'last';
@@ -86,7 +88,9 @@ export const readColumnReferencesByQuery = (template: string): Map<number, strin
     byQuery.set(query, columns);
   };
   const noteChains = (body: string) => {
-    for (const [, root, path] of body.replace(STRING_LITERAL, '').matchAll(CHAIN)) {
+    for (const [, root, path] of body
+      .replace(STRING_LITERAL, (_, bracketKey) => bracketKey ?? '')
+      .matchAll(CHAIN)) {
       const reference = readReference(loops, root, readSegments(path));
       if (reference) {
         note(reference);
@@ -95,6 +99,9 @@ export const readColumnReferencesByQuery = (template: string): Map<number, strin
   };
 
   for (const [, tag, output] of template.replace(BLOCKS_WITHOUT_READS, '').matchAll(TAG)) {
+    if (tag !== undefined && INLINE_COMMENT.test(tag)) {
+      continue;
+    }
     const loop = tag === undefined ? null : LOOP_HEADER.exec(tag);
     if (loop) {
       const [, , variable, collection] = loop;
