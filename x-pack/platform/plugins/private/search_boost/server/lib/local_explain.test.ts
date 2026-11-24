@@ -47,11 +47,7 @@ const rule = (
   is_builtin: false,
 });
 
-const index = (name: string, isHidden = false): BoostTarget => ({
-  name,
-  type: 'indices',
-  isHidden,
-});
+const index = (name: string): BoostTarget => ({ name, type: 'indices' });
 
 /** The names of the rules that match each target, highest ranked first. */
 const getMatchedRuleNames = (rules: BoostRule[], targets: BoostTarget[]) =>
@@ -111,14 +107,14 @@ const forbidden = () =>
   });
 
 describe('getBoostTargets', () => {
-  it('lists regular indices and data streams, without backing or system ones', async () => {
+  it('lists regular indices and data streams, hidden ones included, without backing or system ones', async () => {
     const client = createClient();
 
     expect(await getBoostTargets(client)).toEqual([
-      { name: 'products', type: 'indices', isHidden: false },
-      { name: '.hidden-index', type: 'indices', isHidden: true },
-      { name: 'logs', type: 'data_streams', isHidden: false },
-      { name: '.hidden-logs', type: 'data_streams', isHidden: true },
+      { name: 'products', type: 'indices' },
+      { name: '.hidden-index', type: 'indices' },
+      { name: 'logs', type: 'data_streams' },
+      { name: '.hidden-logs', type: 'data_streams' },
     ]);
     expect(client.asCurrentUser.indices.resolveIndex).toHaveBeenCalledWith({
       name: '*',
@@ -143,8 +139,8 @@ describe('getBoostTargets', () => {
     client.asCurrentUser.indices.getDataStream.mockRejectedValue(forbidden());
 
     expect(await getBoostTargets(client)).toEqual([
-      { name: 'products', type: 'indices', isHidden: false },
-      { name: '.hidden-index', type: 'indices', isHidden: true },
+      { name: 'products', type: 'indices' },
+      { name: '.hidden-index', type: 'indices' },
     ]);
   });
 
@@ -157,9 +153,9 @@ describe('getBoostTargets', () => {
 });
 
 describe('explainTargets', () => {
-  it('keeps the type and whether the target is hidden', () => {
-    expect(explainTargets([], PROFILES, [index('.hidden', true)])).toEqual([
-      { name: '.hidden', type: 'indices', isHidden: true, matchedRuleNames: [] },
+  it('keeps the type of the target', () => {
+    expect(explainTargets([], PROFILES, [index('products')])).toEqual([
+      { name: 'products', type: 'indices', matchedRuleNames: [] },
     ]);
   });
 
@@ -223,7 +219,7 @@ describe('explainTargets', () => {
     expect(
       getMatchedRuleNames(
         [rule('indices', '*'), rule('dataStreams', '*', 0, 'recent')],
-        [index('logs'), { name: 'logs', type: 'data_streams', isHidden: false }]
+        [index('logs'), { name: 'logs', type: 'data_streams' }]
       )
     ).toEqual([
       ['logs', ['indices']],

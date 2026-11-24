@@ -38,7 +38,6 @@ export const RuleLibraryPage = () => {
   return (
     <div data-test-subj="ruleLibraryPage">
       <AppHeader
-        sticky={false}
         title={RULE_LIBRARY_PAGE_TITLE}
         badges={[universalRulesOnlyBadge]}
         spacing="bleed"

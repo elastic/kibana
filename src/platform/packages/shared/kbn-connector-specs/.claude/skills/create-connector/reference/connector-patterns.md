@@ -15,7 +15,7 @@ kbn-connector-specs/src/specs/
 │   ├── events.test.ts
 │   ├── slack.test.ts           # Tests
 │   ├── types.ts                # Zod schemas and inferred types
-│   ├── constants.ts            # Event keys and buildEventId results
+│   ├── constants.ts            # Connector type id and parser keys. Event ids live in @kbn/connector-topics
 │   └── icon/
 │       └── index.tsx           # Brand icon component
 ├── github/
@@ -174,12 +174,36 @@ declare `'workflows'`. Add this file in the follow-up that adds `'workflows'`, o
 registered in every Production-NonCanary version. Record the event keys in the first PR's description.
 
 ```
+@kbn/connector-topics/src/events/{connector}.ts   # { name, eventSchema } per event
 {connector}/
-├── events.ts            # ConnectorSpecEvents: definitions + handleEvents
-├── events.test.ts
-├── constants.ts         # EVENT_KEY and buildEventId(metadata.id, key)
-└── types.ts             # event payload schemas, or event_schemas.ts when types.ts is already large
+├── events.ts            # toConnectorSpecEvent(...) plus handleEvents
+└── events.test.ts
 ```
+
+The topic export is the definition. The spec builds its event from that export. `title` and
+`description` stay on the spec.
+
+```typescript
+import { myConnectorItemCreated } from '@kbn/connector-topics';
+import { toConnectorSpecEvent } from '../../connector_spec_events';
+
+export const myConnectorEvents: ConnectorSpecEvents = {
+  definitions: {
+    item_created: toConnectorSpecEvent(myConnectorItemCreated, {
+      title: i18n.translate('connectorSpecs.myConnector.events.itemCreated.title', {
+        defaultMessage: 'Item created',
+      }),
+      description: i18n.translate('connectorSpecs.myConnector.events.itemCreated.description', {
+        defaultMessage: 'An item was created.',
+      }),
+    }),
+  },
+  handleEvents,
+};
+```
+
+`handleEvents` emits `myConnectorItemCreated.name`. Do not copy the schema into `types.ts` and do
+not declare a second event id.
 
 Assign the export on the spec. Do not spread it into `actions`:
 
@@ -195,7 +219,7 @@ export const MyConnector: ConnectorSpec = {
 Rules the contract tests enforce:
 
 - `metadata.id` is in `SPECS_ALLOWED_EVENTS` (`src/specs_allowed_events.ts`)
-- each `eventId` equals `buildEventId(metadata.id, definitionKey)` (`.github` + `issues` → `github.issues`)
+- each `eventId` is the `@kbn/connector-topics` `name`, which equals `buildEventId(metadata.id, definitionKey)` (`.github` + `issues` → `github.issues`)
 - `events.headers` are lowercase and are not `authorization` or `cookie`
 
 `handleEvents` returns one of:

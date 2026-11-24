@@ -6,12 +6,14 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { DataViewSpec } from '@kbn/data-views-types';
 import type { TimeRange } from '@kbn/es-query';
 import type { MapAttributes, StoredLayer, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import { transformLayersOut } from './transform_layers_out';
+import { transformAdhocDataViewOut } from './adhoc_data_view_transforms';
 
 export function transformMapAttributesOut(
   storedMapAttributes: StoredMapAttributes,
@@ -42,7 +44,10 @@ function parseMapStateJSON(mapStateJSON?: string) {
   const { refreshConfig, timeFilters, adHocDataViews, ...rest } = dropUnknownKeys(
     parsedMapState,
     mapStateKeys
-  ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval };
+  ) as Partial<Omit<MapAttributes, 'adHocDataViews'>> & {
+    refreshConfig: StoredRefreshInterval;
+    adHocDataViews?: DataViewSpec[];
+  };
   return {
     ...rest,
     ...(refreshConfig
@@ -53,13 +58,8 @@ function parseMapStateJSON(mapStateJSON?: string) {
     ...(timeFilters
       ? { timeFilters: dropUnknownKeys(timeFilters, ['from', 'to']) as TimeRange }
       : {}),
-    // BWC drop unused adhoc data view keys.
     ...(adHocDataViews?.length
-      ? {
-          adHocDataViews: adHocDataViews.map((adhocDataView) =>
-            dropUnknownKeys(adhocDataView, ['allowHidden', 'id', 'name', 'timeFieldName', 'title'])
-          ) as MapAttributes['adHocDataViews'],
-        }
+      ? { adHocDataViews: adHocDataViews.map(transformAdhocDataViewOut) }
       : {}),
   };
 }
