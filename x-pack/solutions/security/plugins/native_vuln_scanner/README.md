@@ -247,7 +247,7 @@ URL actually fetched, so with a mirror they show the mirror URL. The vendor link
 the knowledge index are references for the analyst and are not rewritten.
 
 Not covered yet: importing the feeds as an uploaded offline bundle instead of serving them from a
-mirror. The EPSS feed is not used by the scanner today, so it needs no mirror entry. The MSRC rows are only fetched once Windows matching is switched on.
+mirror. The EPSS feed is not used by the scanner today, so it needs no mirror entry. The MSRC rows are only fetched when at least one Windows host reports inventory.
 
 ## Agent runtime requirement
 
