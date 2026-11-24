@@ -7,12 +7,40 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { errors } from '@elastic/elasticsearch';
 import { esql } from '@elastic/esql';
-import { getEsqlColumnSchema, type EsqlColumnSchema } from '@kbn/ai-tools';
+import { esqlTimeRange, getEsqlColumnSchema, type EsqlColumnSchema } from '@kbn/ai-tools';
 import { SOURCE_TIMESTAMP_FIELD, getTimestampColumnProblem } from '@kbn/nightshift-shared';
 import { parseError } from '../../streams/parse_error';
 import { isIndexNotFoundError } from '../latest_source_query';
 import { StatusError } from '../../errors/status_error';
+
+type SamplingQuery = 'Column probe' | 'Random sampling query';
+
+const missingIndexError = (index: string): StatusError =>
+  new StatusError(
+    `There are no documents to sample: an index behind [${index}] does not exist yet.`,
+    400
+  );
+
+const describeSamplingFailure = (
+  error: unknown,
+  { samplingTimeoutMs, query }: { samplingTimeoutMs: number; query: SamplingQuery }
+): string =>
+  `${query} failed (samplingTimeoutMs=${samplingTimeoutMs}ms): ${parseError(error).message}`;
+
+const getVerificationProblem = (error: unknown): string | undefined => {
+  if (
+    !(error instanceof errors.ResponseError) ||
+    error.body?.error?.type !== 'verification_exception'
+  ) {
+    return undefined;
+  }
+  const reason: unknown = error.body.error.reason;
+  return `Elasticsearch rejects the source query: ${
+    typeof reason === 'string' ? reason : error.message
+  }`;
+};
 
 /** Reports a failure of the column probe or the random arm, which hard-fail sampling, with its sampling context. */
 export const withSamplingErrorContext = async <T>(
@@ -21,21 +49,16 @@ export const withSamplingErrorContext = async <T>(
     index,
     samplingTimeoutMs,
     query,
-  }: { index: string; samplingTimeoutMs: number; query: 'Column probe' | 'Random sampling query' }
+  }: { index: string; samplingTimeoutMs: number; query: SamplingQuery }
 ): Promise<T> => {
   try {
     return await promise;
   } catch (err) {
     // Missing data is the caller's input, not a sampling failure.
     if (isIndexNotFoundError(err)) {
-      throw new StatusError(
-        `There are no documents to sample: an index behind [${index}] does not exist yet.`,
-        400
-      );
+      throw missingIndexError(index);
     }
-    throw new Error(
-      `${query} failed (samplingTimeoutMs=${samplingTimeoutMs}ms): ${parseError(err).message}`
-    );
+    throw new Error(describeSamplingFailure(err, { samplingTimeoutMs, query }));
   }
 };
 
@@ -65,23 +88,33 @@ export const probeSampleColumns = async ({
   // Only the columns the caller reads: the full schema of a wide source can time out. No time
   // range here: a request-level range narrows the lookup to indices with data in the window,
   // while the sampling query's WHERE does not, so the two could disagree on a column's type.
-  const columns = await withSamplingErrorContext(
-    getEsqlColumnSchema({
+  let columns: EsqlColumnSchema[] | undefined;
+  try {
+    columns = await getEsqlColumnSchema({
       esClient,
       index,
       fields: [SOURCE_TIMESTAMP_FIELD, ...new Set(fields)],
       signal,
-    }),
-    { index, samplingTimeoutMs, query: 'Column probe' }
-  ).catch((error) => {
-    if (error instanceof StatusError) {
-      throw error;
+    });
+  } catch (error) {
+    if (isIndexNotFoundError(error)) {
+      throw missingIndexError(index);
+    }
+    // Every arm fails the same way, so the source is at fault. NULLIFY cannot cause it: it only
+    // covers the columns this probe keeps.
+    const problem = getVerificationProblem(error);
+    if (problem) {
+      return { kind: 'unsupported', problem };
     }
     // A probe that cannot answer must not take sampling down with it: the arms run as they did
     // before the probe existed, the entity arm without its filters.
-    logger.warn(`Column probe failed, sampling without it: ${parseError(error).message}`);
-    return undefined;
-  });
+    logger.warn(
+      `Column probe failed, sampling without it: ${describeSamplingFailure(error, {
+        samplingTimeoutMs,
+        query: 'Column probe',
+      })}`
+    );
+  }
 
   // Every arm filters on @timestamp. A narrowed probe drops unmapped columns, so a missing one
   // looks the same for a source with data but no @timestamp (saved before the source API
@@ -123,18 +156,23 @@ export const probeSampleColumns = async ({
   return problem ? { kind: 'unsupported', problem } : { kind: 'supported', columns: fullColumns };
 };
 
-/** One cheap `LIMIT 1` count: tells a view with no data yet apart from one that has documents. */
-const hasAnyDocument = async ({
+/** Tells whether the source holds a document, within `timeRange` when given. */
+export const hasAnyDocument = async ({
   esClient,
   index,
   signal,
+  timeRange,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   signal: AbortSignal;
+  /** Epoch millis. The source must have a date `@timestamp`. */
+  timeRange?: { start: number; end: number };
 }): Promise<boolean> => {
+  const source = esql.from([index]);
+  const query = timeRange ? source.where`${esqlTimeRange(timeRange.start, timeRange.end)}` : source;
   const response = (await esClient.esql.query(
-    { query: esql.from([index]).limit(1).pipe`STATS total = COUNT(*)`.print('basic') },
+    { query: query.limit(1).pipe`STATS total = COUNT(*)`.print('basic') },
     { signal }
   )) as unknown as { values: unknown[][] };
   const total = response.values[0]?.[0];

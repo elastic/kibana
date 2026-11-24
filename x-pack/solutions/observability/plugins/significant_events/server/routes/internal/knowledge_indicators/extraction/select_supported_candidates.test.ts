@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getEsqlColumnSchema } from '@kbn/ai-tools';
@@ -12,6 +14,7 @@ import type { SourceCandidate } from './classify_sources';
 import { selectSupportedCandidates } from './select_supported_candidates';
 
 jest.mock('@kbn/ai-tools', () => ({
+  ...jest.requireActual('@kbn/ai-tools'),
   getEsqlColumnSchema: jest.fn(),
 }));
 
@@ -20,6 +23,10 @@ const getEsqlColumnSchemaMock = jest.mocked(getEsqlColumnSchema);
 const TIMESTAMP_COLUMN = { name: '@timestamp', type: 'date' };
 const MISSING_TIMESTAMP_REASON =
   'The query must return a [@timestamp] column. Nightshift reads every source over time windows on it.';
+const TIME_RANGE = {
+  start: Date.parse('2026-01-01T00:00:00.000Z'),
+  end: Date.parse('2026-01-02T00:00:00.000Z'),
+};
 
 const makeCandidate = (sourceId: string): SourceCandidate => ({
   sourceId,
@@ -28,13 +35,22 @@ const makeCandidate = (sourceId: string): SourceCandidate => ({
   lastCompletedAt: null,
 });
 
+const makeResponseError = (statusCode: number, type: string, reason: string) =>
+  new errors.ResponseError({
+    statusCode,
+    headers: {},
+    warnings: [],
+    meta: {} as unknown as TransportResult['meta'],
+    body: { error: { type, reason } },
+  } as TransportResult);
+
 const ids = (candidates: SourceCandidate[]) => candidates.map(({ sourceId }) => sourceId);
 
 const mockColumnsByView = (
   columnsByView: Record<string, Array<{ name: string; type: string }> | Error>
 ) => {
   getEsqlColumnSchemaMock.mockImplementation(async ({ index, fields }) => {
-    const columns = columnsByView[index];
+    const columns = columnsByView[index as string];
     if (columns instanceof Error) {
       throw columns;
     }
@@ -42,13 +58,24 @@ const mockColumnsByView = (
   });
 };
 
-const select = (sourceIds: string[], availableSlots: number) => {
+const select = (
+  sourceIds: string[],
+  availableSlots: number,
+  { emptyViews = [], failingViews = [] }: { emptyViews?: string[]; failingViews?: string[] } = {}
+) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  esClient.esql.query.mockResolvedValue({ columns: [], values: [[0]] } as never);
+  esClient.esql.query.mockImplementation((async ({ query }: { query: string }) => {
+    if (failingViews.some((view) => query.includes(view))) {
+      throw new Error('Request timed out');
+    }
+    return { values: [[emptyViews.some((view) => query.includes(view)) ? 0 : 1]] };
+  }) as never);
+
   return selectSupportedCandidates({
     candidates: sourceIds.map(makeCandidate),
     availableSlots,
     viewNames: new Map(sourceIds.map((id) => [id, `view-${id}`])),
+    timeRange: TIME_RANGE,
     esClient,
     logger: loggingSystemMock.createLogger(),
   });
@@ -94,13 +121,58 @@ describe('selectSupportedCandidates', () => {
     ]);
   });
 
-  it('keeps a source with no data yet and one whose probe cannot answer', async () => {
-    mockColumnsByView({ 'view-empty': [], 'view-slow': new Error('Request timed out') });
+  it('rejects a source whose query Elasticsearch refuses to plan', async () => {
+    mockColumnsByView({
+      'view-broken': makeResponseError(
+        400,
+        'verification_exception',
+        'Found 1 problem\nline 1:21 (in view [view-broken]): Unknown column [gone_field]'
+      ),
+      'view-ok': [TIMESTAMP_COLUMN],
+    });
 
-    const { toSchedule, unsupported } = await select(['empty', 'slow'], 5);
+    const { toSchedule, unsupported } = await select(['broken', 'ok'], 1);
 
-    expect(ids(toSchedule)).toEqual(['empty', 'slow']);
-    expect(unsupported).toEqual([]);
+    expect(ids(toSchedule)).toEqual(['ok']);
+    expect(unsupported).toEqual([
+      {
+        sourceId: 'broken',
+        sourceSlug: 'broken-slug',
+        reason:
+          'Elasticsearch rejects the source query: Found 1 problem\nline 1:21 (in view [view-broken]): Unknown column [gone_field]',
+      },
+    ]);
+  });
+
+  it('gives the slot of a source with no document to the next candidate', async () => {
+    mockColumnsByView({
+      'view-nomatch': [],
+      'view-quiet': [TIMESTAMP_COLUMN],
+      'view-a': [TIMESTAMP_COLUMN],
+      'view-b': [TIMESTAMP_COLUMN],
+    });
+
+    const { toSchedule, skipped, empty } = await select(['nomatch', 'quiet', 'a', 'b'], 1, {
+      emptyViews: ['view-nomatch', 'view-quiet'],
+    });
+
+    expect(ids(empty)).toEqual(['nomatch', 'quiet']);
+    expect(ids(toSchedule)).toEqual(['a']);
+    expect(ids(skipped)).toEqual(['b']);
+  });
+
+  it('keeps a source whose probe or document check cannot answer', async () => {
+    mockColumnsByView({
+      'view-slow': new Error('Request timed out'),
+      'view-down': makeResponseError(503, 'unavailable_shards_exception', 'no shard available'),
+      'view-uncounted': [TIMESTAMP_COLUMN],
+    });
+
+    const { toSchedule } = await select(['slow', 'down', 'uncounted'], 5, {
+      failingViews: ['view-uncounted'],
+    });
+
+    expect(ids(toSchedule)).toEqual(['slow', 'down', 'uncounted']);
   });
 
   it('rejects a fractional slot count instead of looping without progress', async () => {
@@ -136,6 +208,7 @@ describe('selectSupportedCandidates', () => {
         candidates: [makeCandidate('orphan')],
         availableSlots: 1,
         viewNames: new Map(),
+        timeRange: TIME_RANGE,
         esClient,
         logger: loggingSystemMock.createLogger(),
       })

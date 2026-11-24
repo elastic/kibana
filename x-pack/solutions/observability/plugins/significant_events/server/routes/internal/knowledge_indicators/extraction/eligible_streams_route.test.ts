@@ -12,6 +12,7 @@ jest.mock('../reconcile_source_catalog', () => ({
   reconcileSourceCatalog: jest.fn(),
 }));
 jest.mock('@kbn/ai-tools', () => ({
+  ...jest.requireActual('@kbn/ai-tools'),
   getEsqlColumnSchema: jest.fn(),
 }));
 
@@ -31,7 +32,12 @@ const makeSource = (id: string, enabled: boolean) => ({
   esql_updated_at: '2020-01-01T00:00:00.000Z',
 });
 
-const makeHandlerParams = (): HandlerParams =>
+const makeEsqlQuery = (emptyViews: string[] = []) =>
+  jest.fn(async ({ query }: { query: string }) => ({
+    values: [[emptyViews.some((view) => query.includes(view)) ? 0 : 1]],
+  }));
+
+const makeHandlerParams = (esqlQuery = makeEsqlQuery()): HandlerParams =>
   ({
     params: undefined,
     request: {},
@@ -43,7 +49,7 @@ const makeHandlerParams = (): HandlerParams =>
     },
     getScopedClients: jest.fn().mockResolvedValue({
       sourcesClient: {},
-      streamDataEsClient: {},
+      streamDataEsClient: { esql: { query: esqlQuery } },
       licensing: {},
       uiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
@@ -85,5 +91,24 @@ describe('eligibleStreamsRoute', () => {
 
     expect(response.candidates.map(({ sourceId }) => sourceId)).toEqual(['ok']);
     expect(response.unsupported.map(({ sourceId }) => sourceId)).toEqual(['no-timestamp']);
+  });
+
+  it('leaves out a source with no document in the time range it returns', async () => {
+    (reconcileSourceCatalog as jest.Mock).mockResolvedValue({
+      sources: [makeSource('quiet', true), makeSource('ok', true)],
+    });
+    const esqlQuery = makeEsqlQuery(['view-quiet']);
+
+    const response = await eligibleRoute.handler(makeHandlerParams(esqlQuery));
+
+    expect(response.candidates.map(({ sourceId }) => sourceId)).toEqual(['ok']);
+    expect(response.empty.map(({ sourceId }) => sourceId)).toEqual(['quiet']);
+    const { from, to } = response.timeRange;
+    expect(esqlQuery).toHaveBeenCalledWith(
+      {
+        query: `FROM view-quiet | WHERE @timestamp >= "${from}" AND @timestamp <= "${to}" | LIMIT 1 | STATS total = COUNT(*)`,
+      },
+      expect.anything()
+    );
   });
 });

@@ -36,6 +36,8 @@ export interface EligibleStreamsResponse {
   upToDate: SourceCandidate[];
   /** Probed candidates left out because feature identification could not sample them. */
   unsupported: UnsupportedSource[];
+  /** Probed candidates left out because they hold no document in `timeRange`. */
+  empty: SourceCandidate[];
   skipped: SourceCandidate[];
   disabled: SourceClassificationResult['disabled'];
   settings: {
@@ -67,7 +69,7 @@ const eligibleStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'List sources eligible for KI extraction',
     description:
-      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, skipped, and disabled buckets based on extraction settings, workflow execution state, and whether the source can be sampled.',
+      'Classifies sources into eligible candidates, already-running, up-to-date, unsupported, empty, skipped, and disabled buckets based on extraction settings, workflow execution state, and whether the source can be sampled and holds documents in the sampling window.',
   },
   security: {
     authz: {
@@ -150,17 +152,19 @@ const eligibleStreamsRoute = createServerRoute({
       intervalHours,
     });
 
+    // Fixed before the probes: they look for documents in the window the runs then sample.
+    const now = Date.now();
+    const start = now - lookbackHours * 3_600_000;
+
     const availableSlots = Math.max(0, maxStreams - alreadyRunning.length);
-    const { toSchedule, skipped, unsupported } = await selectSupportedCandidates({
+    const { toSchedule, skipped, unsupported, empty } = await selectSupportedCandidates({
       candidates,
       availableSlots,
       viewNames: new Map(sources.map(({ id, view_name: viewName }) => [id, viewName])),
+      timeRange: { start, end: now },
       esClient: streamDataEsClient,
       logger: logger.get('continuous_onboarding', 'eligible'),
     });
-
-    const now = Date.now();
-    const start = now - lookbackHours * 3_600_000;
 
     const revisions = new Map(sources.map((source) => [source.id, source.esql_updated_at]));
     return {
@@ -174,6 +178,7 @@ const eligibleStreamsRoute = createServerRoute({
       alreadyRunning,
       upToDate,
       unsupported,
+      empty,
       skipped,
       disabled,
       settings: {
