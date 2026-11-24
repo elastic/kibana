@@ -304,6 +304,10 @@ describe('getExportProviderFieldErrors', () => {
       ['a suffix without a dot before it', 'https://evilblob.core.windows.net'],
       ['the bare suffix', 'https://blob.core.windows.net'],
       ['a trailing dot', 'https://myaccount.blob.core.windows.net.'],
+      ['an empty label', 'https://myaccount..blob.core.windows.net'],
+      // `URL` accepts these in the hostname; another parser could end the host before them
+      ['a semicolon in the host', 'https://evil.com;.blob.core.windows.net'],
+      ['an ampersand in the host', 'https://evil.com&.blob.core.windows.net'],
       ['another Azure Storage service', 'https://myaccount.file.core.windows.net'],
     ])('is not_azure_blob_host for %s', (_desc, serviceUrl) => {
       expect(

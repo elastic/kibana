@@ -138,8 +138,12 @@ const getServiceUrlFieldError = (serviceUrl: unknown): ExportProviderFieldError 
   if (!/^https:\/\/[^/]/.test(serviceUrl)) {
     return 'invalid_format';
   }
-  // `URL` lowercases the hostname; a trailing dot (`acct.blob.core.windows.net.`) fails
-  if (!AZURE_BLOB_SERVICE_URL_HOST_SUFFIXES.some((suffix) => url.hostname.endsWith(suffix))) {
+  // `URL` lowercases the hostname but accepts characters such as `;` or `&` in it, which another
+  // parser could treat as the end of the host. A trailing dot or an empty label fails.
+  if (
+    !/^[a-z0-9-]+(?:\.[a-z0-9-]+)*$/.test(url.hostname) ||
+    !AZURE_BLOB_SERVICE_URL_HOST_SUFFIXES.some((suffix) => url.hostname.endsWith(suffix))
+  ) {
     return 'not_azure_blob_host';
   }
   return undefined;
