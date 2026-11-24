@@ -157,6 +157,7 @@ toc:
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/threatq-action-type.md
           - file: connectors-kibana/trello-action-type.md
+          - file: connectors-kibana/trend-vision-one-action-type.md
           - file: connectors-kibana/unifi-action-type.md
           - file: connectors-kibana/urlscan-io-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md

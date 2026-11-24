@@ -454,4 +454,13 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.trend_vision_one',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconTrendVisionOne" */ './specs/trend_vision_one/icon'
+        )
+    ),
+  ],
 ]);

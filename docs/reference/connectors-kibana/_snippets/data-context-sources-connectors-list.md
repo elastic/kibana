@@ -68,6 +68,7 @@
 - [SolarWinds Platform](/reference/connectors-kibana/solarwinds-platform-action-type.md): Run SWQL queries, list, read, and acknowledge active alerts, and look up nodes.
 - [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
 - [Trello](/reference/connectors-kibana/trello-action-type.md): Search boards, lists, and cards, create and update cards, and post comments in Trello.
+- [TrendAI Vision One](/reference/connectors-kibana/trend-vision-one-action-type.md): Read Workbench alerts, Observed Attack Techniques detections, and endpoints, isolate endpoints, block suspicious objects, and read sandbox analysis results.
 - [UniFi](/reference/connectors-kibana/unifi-action-type.md): Inventory UniFi Network sites, devices, clients, and networks, inspect UniFi Protect cameras and sensors, and restart devices or authorize guests.
 - [Workday](/reference/connectors-kibana/workday-action-type.md): Access Workday HR data across workers, org structure, time off, recruiting, and holidays.
 - [Zabbix](/reference/connectors-kibana/zabbix-action-type.md): Triage problems, manage maintenance windows, and enable or disable hosts and triggers.

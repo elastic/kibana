@@ -2782,6 +2782,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/threatq/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/trello/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/trend_vision_one/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/unifi/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlscan_io/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
