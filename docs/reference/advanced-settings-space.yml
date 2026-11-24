@@ -1345,7 +1345,7 @@ groups:
       - setting: "observability:aiAssistantSearchConnectorIndexPattern"
         id: observability-ai-assistant-search-connector-index-pattern
         description: |
-          Index pattern used by the AI Assistant when querying search connectors indices (part of the knowledge base). Empty by default: the index for every search connector is queried.
+          Index pattern used by the AI Assistant when querying content crawler indices (part of the knowledge base). Empty by default: the index for every content crawler is queried.
         datatype: string
         applies_to:
           stack: preview

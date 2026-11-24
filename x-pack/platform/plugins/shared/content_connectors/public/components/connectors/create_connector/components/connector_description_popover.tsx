@@ -178,7 +178,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                   title={i18n.translate(
                     'xpack.contentConnectors.createConnector.connectorDescriptionBadge.elasticManagedDiscontinuedTitle',
                     {
-                      defaultMessage: 'Elastic managed Content Crawler are no longer supported',
+                      defaultMessage: 'Elastic managed Content Crawlers are no longer supported',
                     }
                   )}
                   size="s"

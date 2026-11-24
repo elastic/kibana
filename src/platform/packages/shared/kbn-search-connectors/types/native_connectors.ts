@@ -1925,7 +1925,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmailDataSync.tooltip',
           {
             defaultMessage:
-              'Provide the admin email to be used with domain-wide delegation for data sync. This email enables the connector to utilize the Admin Directory API for listing organization users. Please refer to the connector documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
+              'Provide the admin email to be used with domain-wide delegation for data sync. This email enables the content crawler to utilize the Admin Directory API for listing organization users. Please refer to the content crawler documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
           }
         ),
         type: STRING,
