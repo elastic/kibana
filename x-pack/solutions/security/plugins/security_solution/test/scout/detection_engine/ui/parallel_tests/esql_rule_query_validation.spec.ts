@@ -72,10 +72,10 @@ spaceTest.describe(
         await ruleCreateWizard.scheduleContinue.click();
 
         await ruleCreateWizard.createWithoutEnabling.click();
-        await expect(esqlRuleForm.saveWithErrorsModal).toBeVisible();
+        await expect(ruleCreateWizard.saveWithErrorsModal).toBeVisible();
 
-        await esqlRuleForm.confirmSaveWithErrors();
-        await expect(esqlRuleForm.saveWithErrorsModal).toBeHidden();
+        await ruleCreateWizard.confirmSaveWithErrors();
+        await expect(ruleCreateWizard.saveWithErrorsModal).toBeHidden();
         await expect(ruleDetailsPage.header).toContainText(RULE_NAME);
       }
     );

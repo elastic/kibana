@@ -9,6 +9,7 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 import type { RuleSeverity } from '../../../constants/detection_rules';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
+import { getSaveWithErrorsModal } from './helpers/save_with_errors_modal';
 
 export type MitreFramework = 'enterprise' | 'atlas';
 
@@ -24,6 +25,8 @@ export class RuleCreateWizardPage {
   readonly scheduleContinue: Locator;
   readonly createWithoutEnabling: Locator;
   readonly createAndEnable: Locator;
+  readonly saveWithErrorsModal: Locator;
+  readonly saveWithErrorsConfirmButton: Locator;
   readonly aboutSeveritySelect: Locator;
   readonly aboutRiskScoreInput: Locator;
   readonly aboutReferenceUrls: Locator;
@@ -62,6 +65,9 @@ export class RuleCreateWizardPage {
     this.scheduleContinue = this.page.testSubj.locator('schedule-continue');
     this.createWithoutEnabling = this.page.testSubj.locator('create-enabled-false');
     this.createAndEnable = this.page.testSubj.locator('create-enable');
+    const { modal, confirmButton } = getSaveWithErrorsModal(this.page);
+    this.saveWithErrorsModal = modal;
+    this.saveWithErrorsConfirmButton = confirmButton;
     this.aboutSeveritySelect = this.page.testSubj
       .locator('detectionEngineStepAboutRuleSeverity')
       .locator('[data-test-subj="select"]');
@@ -224,6 +230,11 @@ export class RuleCreateWizardPage {
     await this.scheduleContinue.click();
 
     await this.createWithoutEnabling.waitFor({ state: 'visible' });
+  }
+
+  /** Confirms the modal shown when the rule has non-blocking validation errors. */
+  async confirmSaveWithErrors(): Promise<void> {
+    await this.saveWithErrorsConfirmButton.click();
   }
 
   /**

@@ -11,6 +11,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
 import { dismissProjectPickerTour } from './helpers/dismiss_project_picker_tour';
+import { RuleCreateWizardPage } from './rule_create_wizard';
 
 /** One attempt to pick options before the selection is retried. */
 const OPTION_ATTEMPT_TIMEOUT_MS = 5_000;
@@ -44,25 +45,20 @@ export class EsqlRuleFormPage {
   /** Form row of the ES|QL query bar, which also renders the query validation messages. */
   readonly queryBar: Locator;
   readonly esqlEditor: EsqlEditor;
-  readonly defineContinue: Locator;
-  readonly saveWithErrorsModal: Locator;
-  readonly saveWithErrorsConfirmButton: Locator;
   readonly suppressionDurationValue: Locator;
   readonly suppressionDurationUnit: Locator;
   readonly suppressPerRuleExecution: Locator;
   readonly suppressPerTimePeriod: Locator;
   readonly suppressMissingFields: Locator;
   readonly doNotSuppressMissingFields: Locator;
+  /** Owns the "Continue" button of the Define step, which every rule type shares. */
+  private readonly ruleCreateWizard: RuleCreateWizardPage;
 
   constructor(private readonly page: ScoutPage) {
+    this.ruleCreateWizard = new RuleCreateWizardPage(this.page);
     this.ruleTypeCard = this.page.testSubj.locator('esqlRuleType');
     this.queryBar = this.page.testSubj.locator('ruleEsqlQueryBar');
     this.esqlEditor = new EsqlEditor(this.page, 'ruleEsqlQueryBar');
-    this.defineContinue = this.page.testSubj.locator('define-continue');
-    this.saveWithErrorsModal = this.page.testSubj.locator('save-with-errors-confirmation-modal');
-    this.saveWithErrorsConfirmButton = this.saveWithErrorsModal.getByTestId(
-      'confirmModalConfirmButton'
-    );
     const suppressionDuration = this.page.testSubj.locator('alertSuppressionDuration');
     this.suppressionDurationValue = suppressionDuration.locator('[data-test-subj="interval"]');
     this.suppressionDurationUnit = suppressionDuration.locator('[data-test-subj="timeType"]');
@@ -93,7 +89,9 @@ export class EsqlRuleFormPage {
     await this.ruleTypeCard.click();
     await this.esqlEditor.waitReady();
     // "Continue" stays disabled until the data view of the form has settled
-    await expect(this.defineContinue).toBeEnabled({ timeout: APP_LOAD_TIMEOUT_MS });
+    await expect(this.ruleCreateWizard.defineContinue).toBeEnabled({
+      timeout: APP_LOAD_TIMEOUT_MS,
+    });
   }
 
   /** Replaces the query of the ES|QL editor. */
@@ -168,7 +166,7 @@ export class EsqlRuleFormPage {
 
   /** Clicks "Continue" once. Use it when the Define step is expected to stay open on an error. */
   async continueFromDefineStep(): Promise<void> {
-    await this.defineContinue.click();
+    await this.ruleCreateWizard.defineContinue.click();
   }
 
   /**
@@ -176,7 +174,7 @@ export class EsqlRuleFormPage {
    * `setQueryAndWaitToSettle` first, so the click cannot land while "Continue" is disabled.
    */
   async continueToAboutStep(): Promise<void> {
-    await this.defineContinue.click();
+    await this.ruleCreateWizard.defineContinue.click();
     await expect(this.queryBar).toBeHidden({ timeout: DATA_LOAD_TIMEOUT_MS });
   }
 
@@ -228,9 +226,5 @@ export class EsqlRuleFormPage {
     await expect(async () => {
       await comboBox.setSelectedOptions([...fieldNames], { timeout: OPTION_ATTEMPT_TIMEOUT_MS });
     }).toPass({ timeout: DATA_LOAD_TIMEOUT_MS });
-  }
-
-  async confirmSaveWithErrors(): Promise<void> {
-    await this.saveWithErrorsConfirmButton.click();
   }
 }
