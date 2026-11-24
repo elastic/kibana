@@ -10,7 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import { combineLatest, map, of, switchMap } from 'rxjs';
 
-import { EuiImage, EuiPageTemplate, EuiSkeletonText, EuiText } from '@elastic/eui';
+import { EuiButton, EuiImage, EuiPageTemplate, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -92,6 +92,10 @@ export function AwaitingFiltersScreen() {
     return <h2>{titleString}</h2>;
   })();
 
+  // the search bar (and its Apply button) may be hidden, e.g. when embedded, so offer Apply here too
+  const showApplyAction =
+    !isReadOnly && labels !== undefined && labels.length === 0 && hasUnpublished;
+
   const body = (
     <EuiText size="s" color="subdued">
       {labels === undefined ? (
@@ -144,6 +148,21 @@ export function AwaitingFiltersScreen() {
         icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
         title={title}
         body={body}
+        actions={
+          showApplyAction ? (
+            <EuiButton
+              fill
+              size="s"
+              iconType="check"
+              onClick={() => dashboardApi.publishFilters()}
+              data-test-subj="dashboardAwaitingRequiredFiltersApply"
+            >
+              {i18n.translate('dashboard.emptyScreen.awaitingPublishApplyButton', {
+                defaultMessage: 'Apply',
+              })}
+            </EuiButton>
+          ) : undefined
+        }
         titleSize="xs"
         color="transparent"
       />

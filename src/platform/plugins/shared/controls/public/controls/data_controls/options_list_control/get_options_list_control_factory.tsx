@@ -179,7 +179,10 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       const fetchSubscription = suggestions$.subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
-          suggestionLoadError = (result as { error: Error }).error;
+          const { error } = result as { error: Error };
+          // a cancelled request is not a failure; keep the current state so required controls stay blocking
+          if (error?.name === 'AbortError') return;
+          suggestionLoadError = error;
           dataControlManager.api.setBlockingError(suggestionLoadError);
           return;
         } else if (suggestionLoadError) {

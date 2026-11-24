@@ -51,27 +51,15 @@ export const initializeFiltersManager = (
     map((layout) => Object.keys(layout.pinnedPanels)),
     distinctUntilChanged<string[]>(deepEqual)
   );
-  const childFiltersLoading$ = layoutManager.internalApi.childApisPending$
-    .pipe(
-      combineLatestWith(
-        combineCompatibleChildrenApis<AppliesFilters, boolean>(
-          { children$: layoutManager.api.children$ },
-          'filtersLoading$',
-          apiAppliesFilters,
-          false,
-          (values) => {
-            return values.some((loading) => loading);
-          }
-        )
-      )
-    )
-    .pipe(
-      map(
-        ([hasPendingChildApis, hasChildFiltersLoading]) =>
-          hasPendingChildApis || hasChildFiltersLoading
-      ),
-      distinctUntilChanged()
-    );
+  /**
+   * Children that are actually rendered. The APIs of unmounted children (e.g. grid panels replaced by the
+   * awaiting screen, or in a collapsed section) stay in `children$`, but their subscriptions are gone, so
+   * a `filtersLoading$` that was set to `true` after unmounting would never be reset.
+   */
+  const renderedChildren$ = combineLatest([
+    layoutManager.api.children$,
+    layoutManager.internalApi.visibleChildren$,
+  ]).pipe(map(([children, visibleIds]) => pick(children, visibleIds)));
 
   /** whether the pinned children are awaiting required filters, regardless of whether it is published yet */
   const childrenAwaitingRequiredFilters$ = new BehaviorSubject<boolean>(
@@ -102,13 +90,25 @@ export const initializeFiltersManager = (
 
   /** `true` while any child is still computing its filters */
   const anyChildFiltersLoading$ = combineCompatibleChildrenApis<AppliesFilters, boolean>(
-    { children$: layoutManager.api.children$ },
+    { children$: renderedChildren$ },
     'filtersLoading$',
     apiAppliesFilters,
     false,
     (values) => {
       return values.some((loading) => loading);
     }
+  );
+
+  /** `true` while any rendered child's API is pending or any child is still computing its filters */
+  const childFiltersLoading$ = combineLatest([
+    layoutManager.internalApi.childApisPending$,
+    anyChildFiltersLoading$,
+  ]).pipe(
+    map(
+      ([hasPendingChildApis, hasChildFiltersLoading]) =>
+        hasPendingChildApis || hasChildFiltersLoading
+    ),
+    distinctUntilChanged()
   );
 
   /** the filters that the children are currently outputting, regardless of whether they are published */
@@ -125,17 +125,30 @@ export const initializeFiltersManager = (
     }
   ).pipe(distinctUntilChanged(deepEqual));
 
+  /** when auto-apply is `false`, the first set of complete filters is published automatically, exactly once */
+  let initialPublishPending = !settingsManager.api.settings.autoApplyFilters$.getValue();
+
   /** push filters to `unpublishedChildFilters$` once children are done computing their filters */
   const unpublishedFiltersSubscription = childFilters$
     .pipe(
       // a change in what the children are awaiting also pushes, so that auto-apply publishes it along with their filters
-      combineLatestWith(anyChildFiltersLoading$, childrenAwaitingRequiredFilters$),
+      combineLatestWith(
+        anyChildFiltersLoading$,
+        childrenAwaitingRequiredFilters$,
+        layoutManager.internalApi.childApisPending$
+      ),
       skip(1),
       debounceTime(0),
       filter(([, loading]) => !loading)
     )
-    .subscribe(([allChildFilters]) => {
+    .subscribe(([allChildFilters, , , hasPendingChildApis]) => {
       unpublishedChildFilters$.next(allChildFilters);
+      // don't consume the initial publish until every rendered child (including the pinned controls) has
+      // registered, so slower controls have reported their filters
+      if (initialPublishPending && !hasPendingChildApis) {
+        initialPublishPending = false;
+        publishFilters();
+      }
     });
 
   const publishFilters = () => {
@@ -172,13 +185,6 @@ export const initializeFiltersManager = (
     .subscribe(([filters, autoApplyFilters]) => {
       publishFilters();
     });
-
-  /** when auto-apply is `false`, publish the first set of filters once the children are done loading them */
-  if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-    unpublishedChildFilters$.pipe(skip(1), first()).subscribe(() => {
-      publishFilters();
-    });
-  }
 
   /** when auto-apply is `false` and the dashboard is reset, wait for new filters to be updated and publish them */
   const forcePublishSubscription = forcePublish$

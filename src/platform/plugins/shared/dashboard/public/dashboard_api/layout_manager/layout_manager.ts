@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import { getSafe } from '@kbn/std';
 import { cloneDeep, omit, pick } from 'lodash';
 import {
@@ -125,7 +126,8 @@ export function initializeLayoutManager(
         ? [] // the grid is replaced by the awaiting screen
         : Object.keys(panels).filter((uuid) => !isSectionCollapsed(panels[uuid].grid.sectionId));
       return [...pinnedPanelIds, ...gridPanelIds];
-    })
+    }),
+    distinctUntilChanged(deepEqual)
   );
 
   /** Publishes `true` while some rendered children's APIs haven't registered yet */

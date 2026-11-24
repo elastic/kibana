@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
+import { BehaviorSubject, Subject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
 
@@ -36,8 +37,28 @@ const buildSetup = (
     sections: {},
     pinnedPanels: Object.fromEntries(pinnedPanelIds.map((id) => [id, { order: 0 }])),
   });
+  // lets tests force the pending state on top of the one derived from the registered children
+  const childApisPending$ = new BehaviorSubject<boolean>(false);
+  const visibleChildren$ = new BehaviorSubject<string[] | undefined>(undefined);
+  // by default, every child is rendered; tests can narrow this down via `setVisibleChildren`.
+  // Like the real layout manager, it emits a new array on every layout change.
+  const renderedIds$ = combineLatest([children$, visibleChildren$, layout$]).pipe(
+    // like the real layout manager, pinned panels are always rendered
+    map(([children, visible, layout]) => [
+      ...Object.keys(layout.pinnedPanels),
+      ...(visible ?? Object.keys(children)).filter((id) => !(id in layout.pinnedPanels)),
+    ]),
+    // the real layout manager de-duplicates, so unchanged layouts don't re-emit the rendered ids
+    distinctUntilChanged<string[]>(deepEqual)
+  );
+  // like the real layout manager, pending while some rendered child hasn't registered its API yet
+  const derivedChildApisPending$ = combineLatest([children$, renderedIds$, childApisPending$]).pipe(
+    map(([children, ids, forced]) => forced || ids.some((id) => !children[id])),
+    distinctUntilChanged()
+  );
   const layoutManager = {
     api: { children$, layout$ },
+    internalApi: { childApisPending$: derivedChildApisPending$, visibleChildren$: renderedIds$ },
   } as unknown as ReturnType<typeof initializeLayoutManager>;
   const settingsManager = {
     api: { settings: { autoApplyFilters$: new BehaviorSubject<boolean>(autoApplyFilters) } },
@@ -58,7 +79,16 @@ const buildSetup = (
   const setChildren = (children: MockChild[]) =>
     children$.next(Object.fromEntries(children.map((child) => [child.uuid, child])));
 
-  return { filtersManager, awaitingRequiredFilters$, layout$, setChildren };
+  const setVisibleChildren = (ids: string[]) => visibleChildren$.next(ids);
+
+  return {
+    filtersManager,
+    awaitingRequiredFilters$,
+    layout$,
+    childApisPending$,
+    setChildren,
+    setVisibleChildren,
+  };
 };
 
 describe('filters manager: awaiting required filters', () => {
@@ -269,6 +299,38 @@ describe('filters manager: awaiting required filters', () => {
     });
   });
 
+  test('auto-apply off: a fast control does not consume the initial publish before slower controls register', async () => {
+    const { filtersManager, setChildren } = buildSetup(['fast', 'slow'], false);
+    const fastFilter = { meta: { key: 'fast' } } as Filter;
+    const slowFilter = { meta: { key: 'slow' } } as Filter;
+    const fast = {
+      uuid: 'fast',
+      awaitingRequiredFilters$: new BehaviorSubject<boolean>(false),
+      filtersLoading$: new BehaviorSubject<boolean>(false),
+      appliedFilters$: new BehaviorSubject<Filter[] | undefined>([fastFilter]),
+    };
+    setChildren([fast]);
+    await flush();
+    // the slow control hasn't registered yet, so nothing may be published
+    expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
+
+    const slow = {
+      uuid: 'slow',
+      awaitingRequiredFilters$: new BehaviorSubject<boolean>(false),
+      filtersLoading$: new BehaviorSubject<boolean>(true),
+      appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+    };
+    setChildren([fast, slow]);
+    await flush();
+    // registered but still computing its filters
+    expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
+
+    slow.appliedFilters$.next([slowFilter]);
+    slow.filtersLoading$.next(false);
+    await flush();
+    expect(filtersManager.api.publishedChildFilters$.value).toEqual([fastFilter, slowFilter]);
+  });
+
   describe('until every pinned control has mounted', () => {
     test('keeps the initial value instead of reflecting the mounted subset of controls', async () => {
       const { filtersManager, awaitingRequiredFilters$, setChildren } = buildSetup(
@@ -340,23 +402,36 @@ describe('filters manager: awaiting required filters', () => {
     });
   });
 
-  test('childFiltersLoading$ is true while awaiting required filters, even if no child is loading', async () => {
-    const { filtersManager, setChildren } = buildSetup(['control1']);
-    const awaiting$ = new BehaviorSubject<boolean>(true);
+  test('childFiltersLoading$ tracks pending child APIs and child filter computation', async () => {
+    const { filtersManager, childApisPending$, setChildren } = buildSetup(['control1']);
+    const filtersLoading$ = new BehaviorSubject<boolean>(false);
     const loadingStates: boolean[] = [];
     filtersManager.api.childFiltersLoading$.subscribe((loading) => loadingStates.push(loading));
     setChildren([
       {
         uuid: 'control1',
-        awaitingRequiredFilters$: awaiting$,
-        filtersLoading$: new BehaviorSubject<boolean>(false),
+        awaitingRequiredFilters$: new BehaviorSubject<boolean>(true),
+        filtersLoading$,
         appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
       },
     ]);
     await flush();
+    // awaiting a required selection alone does not count as loading
+    expect(loadingStates.at(-1)).toBe(false);
+
+    childApisPending$.next(true);
+    await flush();
     expect(loadingStates.at(-1)).toBe(true);
 
-    awaiting$.next(false);
+    childApisPending$.next(false);
+    await flush();
+    expect(loadingStates.at(-1)).toBe(false);
+
+    filtersLoading$.next(true);
+    await flush();
+    expect(loadingStates.at(-1)).toBe(true);
+
+    filtersLoading$.next(false);
     await flush();
     expect(loadingStates.at(-1)).toBe(false);
   });
@@ -381,5 +456,71 @@ describe('filters manager: awaiting required filters', () => {
     appliedFilters$.next(undefined);
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(filtersManager.api.publishedChildFilters$.value).toBeUndefined();
+  });
+
+  test('ignores filtersLoading$ of children that are not rendered, so the restored required selection can publish', async () => {
+    const { filtersManager, setChildren, setVisibleChildren } = buildSetup(['control1']);
+    const requiredFilter = { meta: { key: 'required' } } as Filter;
+    const required = {
+      uuid: 'control1',
+      awaitingRequiredFilters$: new BehaviorSubject<boolean>(true),
+      filtersLoading$: new BehaviorSubject<boolean>(false),
+      appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+    };
+    // a grid control that unmounted: its subscriptions are gone, so nothing ever resets its loading state
+    const unmountedGrid = {
+      uuid: 'grid1',
+      filtersLoading$: new BehaviorSubject<boolean>(true),
+      appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+    };
+    setChildren([required, unmountedGrid]);
+    setVisibleChildren(['control1']);
+    await flush();
+
+    const loadingStates: boolean[] = [];
+    filtersManager.api.childFiltersLoading$.subscribe((loading) => loadingStates.push(loading));
+
+    required.awaitingRequiredFilters$.next(false);
+    required.appliedFilters$.next([requiredFilter]);
+    await flush();
+
+    expect(loadingStates.at(-1)).toBe(false);
+    expect(filtersManager.api.unpublishedChildFilters$.value).toEqual([requiredFilter]);
+    expect(filtersManager.api.filters$.value).toEqual([requiredFilter]);
+
+    // once the child is rendered again, its loading state counts
+    setVisibleChildren(['control1', 'grid1']);
+    await flush();
+    expect(loadingStates.at(-1)).toBe(true);
+  });
+
+  test('does not re-emit loading or filters when the layout changes but the rendered children do not', async () => {
+    const { filtersManager, layout$, setChildren } = buildSetup(['control1']);
+    setChildren([
+      {
+        uuid: 'control1',
+        filtersLoading$: new BehaviorSubject<boolean>(false),
+        appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+      },
+    ]);
+    await flush();
+
+    const loadingStates: boolean[] = [];
+    const unpublished: Array<Filter[] | undefined> = [];
+    filtersManager.internalApi.anyChildFiltersLoading$.subscribe((loading) =>
+      loadingStates.push(loading)
+    );
+    filtersManager.api.unpublishedChildFilters$.subscribe((filters) => unpublished.push(filters));
+    await flush();
+    const loadingCount = loadingStates.length;
+    const unpublishedCount = unpublished.length;
+
+    // e.g. every undo / redo step and every panel resize emits a new layout
+    layout$.next({ ...layout$.value });
+    layout$.next({ ...layout$.value });
+    await flush();
+
+    expect(loadingStates.length).toBe(loadingCount);
+    expect(unpublished.length).toBe(unpublishedCount);
   });
 });

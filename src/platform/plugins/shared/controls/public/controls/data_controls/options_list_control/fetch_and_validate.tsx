@@ -147,7 +147,12 @@ export function fetchAndValidate$({
           const result = await requestCache.runFetchRequest(built.body, newAbortController.signal);
           if ('error' in result) {
             const err = (result as OptionsListFailureResponse).error;
-            return { error: err === 'aborted' ? new Error('Request aborted') : err };
+            if (err === 'aborted') {
+              const abortError = new Error('Request aborted');
+              abortError.name = 'AbortError';
+              return { error: abortError };
+            }
+            return { error: err };
           }
           return result;
         } catch (error) {
