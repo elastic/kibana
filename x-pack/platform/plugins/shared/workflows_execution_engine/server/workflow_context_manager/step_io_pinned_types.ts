@@ -12,6 +12,8 @@
  * - data.set: getVariables reads ALL data.set executions globally, not just the latest
  * - waitForInput: user-provided answers must be preserved for auditability and
  *   downstream access across all loop iterations
+ * - workflow.executeAsync: workflow.awaitExecutions `from-steps` reads every iteration's
+ *   started execution ID; the output is a small, fixed-size summary
  *
  * Centralised here so eviction (StepIoService) and stale-loop cleanup
  * (WorkflowExecutionState.evictStaleLoopOutputs) share a single source of truth.
@@ -19,6 +21,7 @@
 export const EVICTION_EXEMPT_STEP_TYPES: ReadonlySet<string> = new Set([
   'data.set',
   'waitForInput',
+  'workflow.executeAsync',
 ]);
 
 /**

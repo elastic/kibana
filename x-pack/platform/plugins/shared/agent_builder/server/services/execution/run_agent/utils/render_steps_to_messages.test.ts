@@ -18,6 +18,7 @@ import {
   ToolCallInvocation,
   ToolResultType,
   createInjectedContextStep,
+  createModelReasoningStep,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode, ExecutionStatus } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
@@ -157,6 +158,24 @@ describe('renderHistorySteps', () => {
     expect(ai.content).toBe('');
   });
 
+  it('never renders model reasoning, and keeps the tool call group it belongs to whole', async () => {
+    const steps: ConversationRoundStep[] = [
+      createModelReasoningStep({ reasoning: 'provider thoughts', tool_call_group_id: 'g' }),
+      reasoning('group thought', { tool_call_group_id: 'g' }),
+      call('a', { tool_call_group_id: 'g' }),
+      createModelReasoningStep({ reasoning: 'more provider thoughts', tool_call_group_id: 'g' }),
+      call('b', { tool_call_group_id: 'g' }),
+      createModelReasoningStep({ reasoning: 'final provider thoughts' }),
+    ];
+    const messages = await renderHistorySteps({ steps });
+
+    expect(types(messages)).toEqual(['ai', 'tool', 'tool']);
+    const [ai] = messages as [AIMessage];
+    expect(ai.content).toBe('group thought');
+    expect(ai.tool_calls?.map((toolCall) => toolCall.id)).toEqual(['a', 'b']);
+    expect(JSON.stringify(messages)).not.toContain('provider thoughts');
+  });
+
   it('passes results through the transformer', async () => {
     const resultTransformer: ToolCallResultTransformer = async () => [other('summarized')];
     const messages = await renderHistorySteps({ steps: [call('a')], resultTransformer });
@@ -251,6 +270,26 @@ describe('renderHistorySteps', () => {
     ];
     const messages = await renderHistorySteps({ steps });
     expect(types(messages)).toEqual(['human', 'human', 'human']);
+  });
+
+  it('renders an interim answer as the AI turn before the message that made the run continue', async () => {
+    const steps: ConversationRoundStep[] = [
+      { type: ConversationRoundStepType.interimAnswer, message: 'first answer' },
+      {
+        type: ConversationRoundStepType.deliveredMessage,
+        event_id: 'e1',
+        author: { type: 'user', id: 'u1' },
+        is_run_owner: true,
+        message: 'use a table',
+        delivered_at: '2026-01-01T00:00:00.000Z',
+        cycle: 1,
+        after_answer: true,
+      } as ConversationRoundStep,
+    ];
+    const messages = await renderHistorySteps({ steps });
+    expect(types(messages)).toEqual(['ai', 'human']);
+    expect(messages[0].content).toBe('first answer');
+    expect(String(messages[1].content)).toContain('while you were writing the answer above');
   });
 
   it('renders workflow model context before relevant skills and never renders workflow state', async () => {

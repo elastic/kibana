@@ -6,14 +6,13 @@
  */
 import { z, displayName, description, lazySchema } from '@kbn/zod';
 import {
-  compositeSloIdSchema,
   compositeTagsSchema,
-  compositeTargetSchema,
-  compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
+  compositeSloDefinitionResponseSchema,
   compositeSloMembersSchema,
   compositeMethodSchema,
 } from '../../../schema/composite_slo';
+import { occurrencesBudgetingMethodSchema, sloIdSchema, targetSchema } from '../../../schema/slo';
 
 const updateCompositeSLOBodySchema = lazySchema(() =>
   z.object({
@@ -22,27 +21,27 @@ const updateCompositeSLOBodySchema = lazySchema(() =>
     members: compositeSloMembersSchema.optional(),
     compositeMethod: compositeMethodSchema.optional(),
     timeWindow: compositeRollingTimeWindowSchema.optional(),
-    budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
-    objective: compositeTargetSchema.optional(),
+    budgetingMethod: occurrencesBudgetingMethodSchema.optional(),
+    objective: targetSchema.optional(),
     tags: compositeTagsSchema.optional(),
     enabled: z.boolean().optional(),
   })
 );
 
-const updateCompositeSLOParamsSchema = z.object({
-  path: z.object({
-    id: compositeSloIdSchema,
-  }),
-  body: updateCompositeSLOBodySchema,
-});
+const updateCompositeSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
+    }),
+    body: updateCompositeSLOBodySchema,
+  })
+);
 
-const updateCompositeSLOInputSchema = updateCompositeSLOBodySchema.extend({
-  id: compositeSloIdSchema,
-  spaceId: z.string(),
-  userId: z.string(),
-});
+const updateCompositeSLOResponseSchema = compositeSloDefinitionResponseSchema;
 
-type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOInputSchema>;
+type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOBodySchema>;
+type UpdateCompositeSLOParams = z.output<typeof updateCompositeSLOBodySchema>;
+type UpdateCompositeSLOResponse = z.input<typeof updateCompositeSLOResponseSchema>;
 
-export type { UpdateCompositeSLOInput };
-export { updateCompositeSLOParamsSchema };
+export type { UpdateCompositeSLOInput, UpdateCompositeSLOParams, UpdateCompositeSLOResponse };
+export { updateCompositeSLOParamsSchema, updateCompositeSLOResponseSchema };

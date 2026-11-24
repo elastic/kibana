@@ -114,6 +114,7 @@ import {
   toSlackThreadKey,
   toSlackThreadPermalink,
   toStartSubjects,
+  toAutomationVia,
   toSubjectKeys,
   withoutRecordedSubjects,
   type WorkflowSubjectInput,
@@ -549,10 +550,13 @@ export class NightshiftInvestigationsClient {
     {
       automationBudget,
       automationId,
+      automationName,
       entryPoint,
     }: {
       automationBudget?: AutomationBudget;
       automationId?: string;
+      /** Recorded on the subjects of a new investigation, so they show what triggered them. */
+      automationName?: string;
       entryPoint: InvestigationEntryPoint;
     }
   ): Promise<StartInvestigationResponse> {
@@ -605,6 +609,7 @@ export class NightshiftInvestigationsClient {
       triggerType: trigger_type,
       investigationId: newInvestigationId,
       slackThread,
+      via: toAutomationVia({ id: automationId, name: automationName }),
     });
 
     const conversations = await agentBuilder.conversations.getScopedClient({
@@ -1688,18 +1693,23 @@ export class NightshiftInvestigationsClient {
    * Claims the Slack thread a root notification started for the investigation, so a mention or
    * reply in it reaches the investigation. `externalConversationId` is the thread key the Relay
    * returned for the post. A thread another investigation holds is left with that one. Resolves to
-   * whether the investigation now holds the thread.
+   * whether the investigation now holds the thread. With the Slack `workspace`, the subject also
+   * records a permalink to the thread; `summary` is what the subject shows for it.
    */
   async claimSlackThread({
     investigationId,
     externalConversationId,
     channel,
     threadTs,
+    workspace,
+    summary,
   }: {
     investigationId: string;
     externalConversationId: string;
     channel: string;
     threadTs: string;
+    workspace?: string;
+    summary?: string;
   }): Promise<boolean> {
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
     const conversations = await agentBuilder.conversations.getScopedClient({
@@ -1720,11 +1730,16 @@ export class NightshiftInvestigationsClient {
       );
       return false;
     }
+    const permalink = workspace
+      ? toSlackThreadPermalink({ workspace, channel, threadTs })
+      : undefined;
+    const subjectSummary = summary?.slice(0, MAX_SLACK_SUBJECT_SUMMARY_LENGTH);
     await subjectsClient.upsertSubjects(investigationId, [
       {
         type: 'slack_thread',
         id: externalConversationId,
-        slack: { channel, thread_ts: threadTs },
+        slack: { channel, thread_ts: threadTs, ...(permalink && { permalink }) },
+        ...(subjectSummary && { summary: subjectSummary }),
       },
     ]);
     return true;

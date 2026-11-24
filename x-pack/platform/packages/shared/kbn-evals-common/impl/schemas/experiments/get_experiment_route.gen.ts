@@ -100,7 +100,6 @@ export const GetEvaluationExperimentResponse = lazySchema(() =>
   z.object({
     experiment_id: z.string().max(1024),
     experiment_name: z.string().max(256).nullable().optional(),
-    timestamp: z.string().max(64).optional(),
     task_model: Model.optional(),
     evaluator_model: Model.optional(),
     /**

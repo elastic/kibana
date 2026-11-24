@@ -10,6 +10,7 @@
 import type { MarkdownReferencePage, OpenApiDocument } from '@kbn/connector-emulate';
 import { convertMarkdownReference, readLlmsIndex } from '@kbn/connector-emulate';
 import type { MarkdownSourceFormat } from '../manifest';
+import { mapConcurrently } from './map_concurrently';
 
 // Reference pages are small; a few at a time keeps a large API group quick without hammering the docs host.
 const CONCURRENCY = 8;
@@ -25,22 +26,6 @@ export interface LoadMarkdownReferenceOptions {
   readonly pages?: readonly string[];
   readonly fetchText: (url: string) => Promise<string>;
 }
-
-const mapConcurrently = async <T, R>(
-  items: readonly T[],
-  map: (item: T) => Promise<R>
-): Promise<R[]> => {
-  const results: R[] = new Array(items.length);
-  let next = 0;
-  const work = async () => {
-    while (next < items.length) {
-      const index = next++;
-      results[index] = await map(items[index]);
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, items.length) }, work));
-  return results;
-};
 
 /**
  * Fetches the pages of a Markdown API reference that its `llms.txt` index links to, limited to
@@ -75,7 +60,8 @@ export const loadMarkdownReference = async ({
     async (link): Promise<MarkdownReferencePage> => ({
       url: link,
       markdown: await fetchText(link),
-    })
+    }),
+    CONCURRENCY
   );
   return convertMarkdownReference({ format, pages: fetched });
 };
