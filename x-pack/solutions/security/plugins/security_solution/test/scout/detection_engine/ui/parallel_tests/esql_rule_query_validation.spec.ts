@@ -14,8 +14,6 @@ import {
   MISSING_ESQL_SOURCE,
 } from '../fixtures/esql_rule';
 
-// The first run in a new space waits for the app to initialize before the form is editable
-const TEST_TIMEOUT_MS = 3 * 60_000;
 const RULE_NAME = 'ES|QL validation rule';
 const RULE_DESCRIPTION = 'The rule description.';
 
@@ -25,8 +23,6 @@ spaceTest.describe(
     tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
   },
   () => {
-    spaceTest.setTimeout(TEST_TIMEOUT_MS);
-
     spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
       await createEsqlSourceIndex(esClient, esqlSourceIndexName(scoutSpace.id));
     });
