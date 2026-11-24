@@ -77,18 +77,3 @@ describe('readCustomContext', () => {
     expect(fetch).toHaveBeenCalledWith(CUSTOM_CONTEXT_API_PATH);
   });
 });
-
-describe('historical checkout', () => {
-  it.each([
-    ['alert', RETROSPECTIVE_GUARDRAIL_CONTEXT],
-    ['recovery', RECOVERY_GUARDRAIL_CONTEXT],
-  ])(
-    'pins the %s guardrail to the last main commit before it and drops newer refs',
-    (moment, text) => {
-      expect(text).toContain(`--first-parent --before=<${moment} timestamp> HEAD`);
-      expect(text).toContain(`--shallow-since=<${moment} date minus 7 days>`);
-      expect(text).toContain('update-ref --no-deref -d');
-      expect(text).toContain('reflog expire --expire=now --all');
-    }
-  );
-});

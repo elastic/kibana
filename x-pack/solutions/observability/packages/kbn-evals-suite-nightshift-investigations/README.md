@@ -472,9 +472,11 @@ datasets replace them, next to their custom context, with the rules the dataset 
 repositories that context points at, `elastic/kibana` and `elastic/elasticsearch` for Customer-0
 and recovery cases and `open-telemetry/opentelemetry-demo` for ORCA. Only `git clone` and
 `git fetch` get through, so the rest of github.com, including issues and pull requests, stays
-blocked. Other investigation datasets run with no rules. Investigation runs and the reinforcement
-micro-eval snapshot the space's rules before setup and restore them when they end, so a run on an
-existing stack leaves its rules as it found them.
+blocked. Other investigation datasets run with no rules. Investigation runs and live reinforcement
+runs snapshot the space's custom context and rules before setup and restore both when they end, so
+a run on an existing stack leaves them as it found them; a failed restore fails the run. The
+reinforcement replay and trace-file modes don't restore, so they leave setup's prefix rules in
+place.
 
 ORCA checks out the demo's pinned commit. The Customer-0 and recovery guardrails have the agent
 check out main's last commit before the alert or the recovery and drop every newer ref and reflog

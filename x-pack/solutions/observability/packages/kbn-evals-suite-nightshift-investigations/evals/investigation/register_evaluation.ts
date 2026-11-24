@@ -18,8 +18,9 @@ import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import {
   getDatasetSandboxAllowlist,
-  readSandboxAllowlist,
   replaceSandboxAllowlist,
+  restoreSpaceSettings,
+  snapshotSpaceSettings,
 } from './sandbox_allowlist';
 import {
   ORCABENCH_ES_CONNECTOR_ID,
@@ -187,9 +188,9 @@ export const registerInvestigationEvaluation = ({
           // Minting and checking each ORCA cutoff's key, and putting it on the connector.
           cutoffs.length * 60_000;
         evaluate.setTimeout(timeoutMs);
-        // The rules are the default space's, so a run on an existing stack must leave them as it
-        // found them. Snapshot before setup, which adds repository rules of its own.
-        const previousSandboxAllowlist = await readSandboxAllowlist(fetch);
+        // The custom context and egress rules are the default space's, so a run on an existing
+        // stack must leave them as it found them. Snapshot before setup, which adds rules of its own.
+        const previousSettings = await snapshotSpaceSettings(fetch);
         try {
           await enableNightshiftSpace({
             config,
@@ -480,7 +481,7 @@ export const registerInvestigationEvaluation = ({
             )
             .toBeGreaterThan(0);
         } finally {
-          await replaceSandboxAllowlist(fetch, previousSandboxAllowlist);
+          await restoreSpaceSettings(fetch, previousSettings);
         }
       }
     );

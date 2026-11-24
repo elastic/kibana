@@ -7,6 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import {
+  CUSTOM_CONTEXT_API_PATH,
   SANDBOX_ALLOWLIST_API_PATH,
   validateSandboxAllowlist,
 } from '@kbn/nightshift-investigations-plugin/common';
@@ -15,6 +16,7 @@ import {
   getDatasetSandboxAllowlist,
   ORCA_SANDBOX_ALLOWLIST,
   replaceSandboxAllowlist,
+  restoreSpaceSettings,
 } from './sandbox_allowlist';
 
 describe('sandbox allowlists', () => {
@@ -70,5 +72,27 @@ describe('replaceSandboxAllowlist', () => {
     await replaceSandboxAllowlist(empty as unknown as HttpHandler, []);
     expect(empty).toHaveBeenCalledTimes(1);
     expect(empty).toHaveBeenCalledWith(SANDBOX_ALLOWLIST_API_PATH);
+  });
+});
+
+describe('restoreSpaceSettings', () => {
+  it('still restores the egress rules when the custom-context restore fails, then fails', async () => {
+    const fetch = jest.fn(async (path: string, options?: { method?: string }) => {
+      if (path === CUSTOM_CONTEXT_API_PATH && options?.method === 'PUT') {
+        throw new Error('version conflict');
+      }
+      return path === CUSTOM_CONTEXT_API_PATH ? { version: 'v2', snippets: [] } : { hosts: [] };
+    });
+
+    await expect(
+      restoreSpaceSettings(fetch as unknown as HttpHandler, {
+        customContext: ['before the eval'],
+        sandboxAllowlist: ['allow https github.com GET /elastic/kibana/info/refs'],
+      })
+    ).rejects.toThrow(AggregateError);
+    expect(fetch).toHaveBeenCalledWith(
+      SANDBOX_ALLOWLIST_API_PATH,
+      expect.objectContaining({ method: 'PUT' })
+    );
   });
 });

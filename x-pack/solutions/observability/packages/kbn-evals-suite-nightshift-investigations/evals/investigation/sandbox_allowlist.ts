@@ -11,7 +11,12 @@ import {
   type GetSandboxAllowlistResponse,
   type PutSandboxAllowlistRequest,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { getDatasetEnvironment, type DatasetIdentity } from './custom_context';
+import {
+  getDatasetEnvironment,
+  readCustomContext,
+  replaceCustomContext,
+  type DatasetIdentity,
+} from './custom_context';
 
 /**
  * Egress rules that let `git` clone and fetch one public GitHub repository over smart HTTP, with or
@@ -67,4 +72,38 @@ export const replaceSandboxAllowlist = async (
   if (hosts.length === 0 && (await readSandboxAllowlist(fetch)).length === 0) return;
   const body: PutSandboxAllowlistRequest = { hosts: [...hosts] };
   await fetch(SANDBOX_ALLOWLIST_API_PATH, { method: 'PUT', body: JSON.stringify(body) });
+};
+
+/** The default space's custom context and egress rules, which an eval run changes. */
+export interface SpaceSettingsSnapshot {
+  customContext: string[];
+  sandboxAllowlist: string[];
+}
+
+/** Reads the settings an eval run changes, to put back with `restoreSpaceSettings`. */
+export const snapshotSpaceSettings = async (fetch: HttpHandler): Promise<SpaceSettingsSnapshot> => {
+  const [customContext, sandboxAllowlist] = await Promise.all([
+    readCustomContext(fetch),
+    readSandboxAllowlist(fetch),
+  ]);
+  return { customContext, sandboxAllowlist };
+};
+
+/** Puts both settings back independently, so one failure can't skip the other, then fails if either did. */
+export const restoreSpaceSettings = async (
+  fetch: HttpHandler,
+  { customContext, sandboxAllowlist }: SpaceSettingsSnapshot
+): Promise<void> => {
+  const failures = (
+    await Promise.allSettled([
+      replaceCustomContext(fetch, customContext),
+      replaceSandboxAllowlist(fetch, sandboxAllowlist),
+    ])
+  ).filter((result): result is PromiseRejectedResult => result.status === 'rejected');
+  if (failures.length > 0) {
+    throw new AggregateError(
+      failures.map(({ reason }) => reason),
+      "Restoring the space's custom context or sandbox egress rules failed"
+    );
+  }
 };
