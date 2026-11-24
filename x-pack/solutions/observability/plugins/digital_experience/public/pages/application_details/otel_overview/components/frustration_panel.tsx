@@ -50,6 +50,15 @@ const EMPTY_MESSAGE = i18n.translate('xpack.digitalExperience.overview.frustrati
     'No frustration signals. Rage, dead and error clicks need EDOT Browser with frustration detection.',
 });
 
+const NO_ROWS_MESSAGES: Record<FrustrationTab, string> = {
+  elements: i18n.translate('xpack.digitalExperience.overview.frustration.noElements', {
+    defaultMessage: 'None of the signals name the element clicked (browser.css_selector).',
+  }),
+  pages: i18n.translate('xpack.digitalExperience.overview.frustration.noPages', {
+    defaultMessage: 'None of the signals name the page they happened on (url.full).',
+  }),
+};
+
 const TABS_LEGEND = i18n.translate('xpack.digitalExperience.overview.frustration.tabsLegend', {
   defaultMessage: 'Group frustration signals by',
 });
@@ -348,12 +357,22 @@ export function FrustrationPanel({
       showInstrumentationDocs
       data-test-subj="digitalExperienceOverviewFrustration"
     >
-      <BarList
-        items={items.slice(activePage * PAGE_SIZE, (activePage + 1) * PAGE_SIZE)}
-        total={frustration.total}
-        wholePercent
-        aria-label={TITLE}
-      />
+      {items.length === 0 ? (
+        <EuiText
+          size="s"
+          color="subdued"
+          data-test-subj="digitalExperienceOverviewFrustrationNoRows"
+        >
+          {NO_ROWS_MESSAGES[tab]}
+        </EuiText>
+      ) : (
+        <BarList
+          items={items.slice(activePage * PAGE_SIZE, (activePage + 1) * PAGE_SIZE)}
+          total={frustration.total}
+          wholePercent
+          aria-label={TITLE}
+        />
+      )}
       {pageCount > 1 && (
         <>
           <EuiSpacer size="s" />

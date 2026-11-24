@@ -174,6 +174,22 @@ describe('FrustrationPanel', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('says why a tab has no rows when its signals name no element or page', () => {
+    renderPanel({ elements: [] });
+
+    expect(screen.getByTestId('digitalExperienceOverviewFrustrationNoRows')).toHaveTextContent(
+      'browser.css_selector'
+    );
+    expect(screen.getByText('21 signals in 20 sessions')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewFrustrationPagesTab'));
+
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewFrustrationNoRows')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperienceOverviewFrustrationRow-/cart')).toBeInTheDocument();
+  });
+
   it('opens the sessions of an element with the frustration target', () => {
     renderPanel();
 

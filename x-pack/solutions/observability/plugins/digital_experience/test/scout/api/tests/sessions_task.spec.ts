@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-oblt/api';
 import {
   BROWSER_SDK_LANGUAGE,
   EVENT_DEAD_CLICK,
+  EVENT_ERROR_CLICK,
   EVENT_RAGE_CLICK,
   FRUSTRATION_CLICK_COUNT,
 } from '../../../../common/otel_data';
@@ -70,9 +71,9 @@ const url = (path: string) => `https://${APP}.example.com${path}`;
 
 /**
  * One session's OTel events, with something for every field of the summary: three page views of
- * two pages (one by its hash route), a page load, two web vitals, a click, two rage clicks and a
- * dead click, a JS error with the user and location, and three requests: a success, a 503 and one
- * with no response.
+ * two pages (one by its hash route), a page load, two web vitals, a click, two rage clicks, a dead
+ * click and an error click, a JS error with the user and location, and three requests: a success,
+ * a 503 and one with no response.
  */
 const buildEvents = (sessionId: string, startMs: number) => {
   const at = (offsetMs: number) => new Date(startMs + offsetMs).toISOString();
@@ -132,6 +133,10 @@ const buildEvents = (sessionId: string, startMs: number) => {
         'browser.css_selector': DEAD_TARGET,
         'url.full': url('/home?ref=ad'),
       }),
+      log(8 * SECOND_MS, EVENT_ERROR_CLICK, {
+        'browser.css_selector': FRUSTRATED_TARGET,
+        'url.full': url('/home?ref=ad'),
+      }),
       log(10 * SECOND_MS, 'browser.user_action.click', { 'browser.css_selector': 'a#cart' }),
       log(20 * SECOND_MS, 'browser.navigation', { 'url.full': url('/#/cart') }),
       log(25 * SECOND_MS, 'exception', {
@@ -151,7 +156,11 @@ const buildEvents = (sessionId: string, startMs: number) => {
   };
 };
 
-const FRUSTRATION_EVENT_NAMES: readonly string[] = [EVENT_RAGE_CLICK, EVENT_DEAD_CLICK];
+const FRUSTRATION_EVENT_NAMES: readonly string[] = [
+  EVENT_RAGE_CLICK,
+  EVENT_DEAD_CLICK,
+  EVENT_ERROR_CLICK,
+];
 
 const ingestEvents = async (
   esClient: EsClient,
@@ -289,7 +298,7 @@ apiTest.describe(
             start_time: at(0),
             end_time: at(30 * SECOND_MS),
             duration_ms: 30 * SECOND_MS,
-            event_count: 14,
+            event_count: 15,
             page_view_count: 3,
             page_load_count: 1,
             // The frustration events summarize clicks that are counted already.
@@ -297,8 +306,8 @@ apiTest.describe(
             js_error_count: 1,
             rage_click_count: 2,
             dead_click_count: 1,
-            error_click_count: 0,
-            frustration_count: 3,
+            error_click_count: 1,
+            frustration_count: 4,
             frustration_targets: [FRUSTRATED_TARGET, DEAD_TARGET],
             frustration_pages: ['/home'],
             http_request_count: 3,
@@ -372,8 +381,8 @@ apiTest.describe(
           expect(frustrated.sessions[0].frustration).toStrictEqual({
             rageClicks: 2,
             deadClicks: 1,
-            errorClicks: 0,
-            total: 3,
+            errorClicks: 1,
+            total: 4,
           });
           expect(frustrated.kpis.sessionsWithFrustration).toBe(1);
 
