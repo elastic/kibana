@@ -6,17 +6,17 @@
  */
 
 /**
- * Step IO heap gauges:
- *   1. empty outputs → average_memory
- *   2. output > minPayloadSize → average_memory + io_retention_budget (logged separately)
- *   3. output ≤ minPayloadSize → average_memory + io_retention_budget (logged separately);
- *      early consumers also rehydrate after LRU eviction
+ * Step IO retention gauges (LRU cache size, not process heap):
+ *   1. tiny/empty outputs → all admitted; cache ≤ io_retention_budget
+ *   2. output > minPayloadSize → never admitted (cache stays empty)
+ *   3. output ≤ minPayloadSize → cache ≤ io_retention_budget;
+ *      early consumers rehydrate after LRU eviction
  *
- * Mock artefacts that would fake a leak:
+ * Mock artefacts that would fake retention:
  * 1. Repository mock retains flushed `output` unless `discardOutputsAfterUpsert`.
- * 2. Jest `fn.mock.results` retains connector returns — clear before sampling.
+ * 2. Jest `fn.mock.results` retains connector returns — clear when sampling behaviour.
  *
- *   node --expose-gc scripts/jest --config=.../jest.integration.config.js step_io_memory
+ *   node scripts/jest --config=.../jest.integration.config.js step_io_memory
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -37,31 +37,11 @@ const ADMIT_THRESHOLD_BYTES = 10 * 1024;
 
 /**
  * Over-admit payload: larger than minPayloadSize (never enters LRU).
- * Sized so N×payload ≫ engine noise, so unbounded retention would fail the ceiling.
+ * Sized so N×payload ≫ budget if admit were broken.
  */
 const OVER_ADMIT_OUTPUT_BYTES = 50_000;
 /** Under-admit payload: at most minPayloadSize (eligible for LRU). */
 const UNDER_ADMIT_OUTPUT_BYTES = 1_000;
-
-/**
- * Process-heap noise above average_memory + budget. Not part of the product
- * budget — only so asserts survive V8/connector variance.
- */
-const HEAP_NOISE_BYTES = 2 * 1024 * 1024;
-
-const maybeGc = (): void => {
-  const gc = (globalThis as { gc?: () => void }).gc;
-  if (typeof gc === 'function') {
-    // Two passes: the first often frees enough for the second to settle.
-    gc();
-    gc();
-  }
-};
-
-const heapUsedBytes = (): number => process.memoryUsage().heapUsed;
-
-/** Heap delta for a run (negative means GC reclaimed more than the run retained). */
-const residualHeap = (before: number): number => heapUsedBytes() - before;
 
 const formatBytes = (bytes: number): string => {
   if (Math.abs(bytes) < 1024) {
@@ -73,10 +53,7 @@ const formatBytes = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 };
 
-const expectedCeiling = (averageMemory: number): number =>
-  averageMemory + IO_RETENTION_BUDGET_BYTES + HEAP_NOISE_BYTES;
-
-/** Same connector as sized runs, with empty payload — fair average_memory baseline. */
+/** Same connector as sized runs, with empty payload — fair empty-cache baseline. */
 const buildEmptyYaml = (n: number): string => buildSizedYaml(n, 0);
 
 const buildSizedYaml = (n: number, sizeBytes: number): string => {
@@ -141,13 +118,6 @@ ${consumers}
 `;
 };
 
-const stripMockOutputs = (fixture: WorkflowRunFixture): void => {
-  for (const step of fixture.stepExecutionRepositoryMock.stepExecutions.values()) {
-    delete (step as { output?: unknown }).output;
-    delete (step as { input?: unknown }).input;
-  }
-};
-
 const countOutputFetches = (spy: jest.SpyInstance): number =>
   spy.mock.calls.filter((call) => Array.isArray(call[1]) && call[1].includes('output')).length;
 
@@ -168,7 +138,11 @@ const applyBudget = (fixture: WorkflowRunFixture): void => {
 
 /** Capture the StepIoService for the next run via its write path (`mock.contexts`). */
 const captureStepIoService = (): {
-  getResident: () => { stepsRetained: number; cacheBytes: number };
+  getResident: () => {
+    liveOutputs: number;
+    cacheEntries: number;
+    cacheBytes: number;
+  };
   restore: () => void;
 } => {
   const writeSpy = jest.spyOn(StepIoService.prototype, 'write');
@@ -177,10 +151,9 @@ const captureStepIoService = (): {
     getResident: () => {
       const latest = writeSpy.mock.contexts.at(-1) as StepIoService | undefined;
       if (!latest) {
-        return { stepsRetained: 0, cacheBytes: 0 };
+        return { liveOutputs: 0, cacheEntries: 0, cacheBytes: 0 };
       }
-      const { liveOutputs, cacheEntries, cacheBytes } = latest.getResidentOutputStats();
-      return { stepsRetained: liveOutputs + cacheEntries, cacheBytes };
+      return latest.getResidentOutputStats();
     },
     restore: () => {
       writeSpy.mockRestore();
@@ -188,20 +161,14 @@ const captureStepIoService = (): {
   };
 };
 
-describe('StepIoService (LRU): memory consumption', () => {
+describe('StepIoService (LRU): cache retention', () => {
   jest.setTimeout(10 * 60 * 1000);
 
-  /** Engine/graph heap for N empty-output steps — the average_memory baseline. */
-  let averageMemory = 0;
-
-  it(`measures average_memory for ${STEP_COUNT} empty-output steps`, async () => {
+  it(`admits tiny outputs within io_retention_budget for ${STEP_COUNT} empty-output steps`, async () => {
     const fixture = new WorkflowRunFixture();
     fixture.stepExecutionRepositoryMock.discardOutputsAfterUpsert = true;
     applyBudget(fixture);
     const stepIoCapture = captureStepIoService();
-
-    maybeGc();
-    const before = heapUsedBytes();
 
     await fixture.runWorkflow({ workflowYaml: buildEmptyYaml(STEP_COUNT) });
 
@@ -210,18 +177,15 @@ describe('StepIoService (LRU): memory consumption', () => {
     );
     const leafSteps = leafStepsNamed(fixture, 'step_');
     const outputsRetainedInMock = leafSteps.filter((step) => step.output != null).length;
-    const { stepsRetained, cacheBytes } = stepIoCapture.getResident();
+    const { liveOutputs, cacheEntries, cacheBytes } = stepIoCapture.getResident();
     stepIoCapture.restore();
-
     jest.clearAllMocks();
-    maybeGc();
-    averageMemory = residualHeap(before);
 
     // eslint-disable-next-line no-console
     console.log(
-      `[1 empty] average_memory=${formatBytes(averageMemory)}  steps=${
+      `[1 empty] io_retention_budget=${formatBytes(IO_RETENTION_BUDGET_BYTES)}  steps=${
         leafSteps.length
-      }  retained=${stepsRetained}  cache_bytes=${formatBytes(cacheBytes)}`
+      }  live=${liveOutputs}  cache_entries=${cacheEntries}  cache_bytes=${formatBytes(cacheBytes)}`
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
@@ -229,13 +193,16 @@ describe('StepIoService (LRU): memory consumption', () => {
     expect(leafSteps).toHaveLength(STEP_COUNT);
     expect(leafSteps.every((step) => step.status === ExecutionStatus.COMPLETED)).toBe(true);
     expect(outputsRetainedInMock).toBe(0);
-    expect(averageMemory).toBeLessThan(HEAP_NOISE_BYTES * 10);
+    expect(liveOutputs).toBe(0);
+    // Tiny outputs fit under minPayloadSize and under the budget, so all stay cached.
+    expect(cacheEntries).toBe(STEP_COUNT);
+    expect(cacheBytes).toBeGreaterThan(0);
+    expect(cacheBytes).toBeLessThanOrEqual(IO_RETENTION_BUDGET_BYTES);
   });
 
-  it(`reports average_memory and io_retention_budget when each output > minPayloadSize`, async () => {
+  it(`does not admit outputs larger than minPayloadSize`, async () => {
     expect(OVER_ADMIT_OUTPUT_BYTES).toBeGreaterThan(ADMIT_THRESHOLD_BYTES);
     const unboundedIoBytes = STEP_COUNT * OVER_ADMIT_OUTPUT_BYTES;
-    const ceiling = expectedCeiling(averageMemory);
 
     const fixture = new WorkflowRunFixture();
     fixture.stepExecutionRepositoryMock.discardOutputsAfterUpsert = true;
@@ -243,9 +210,6 @@ describe('StepIoService (LRU): memory consumption', () => {
     const stepIoCapture = captureStepIoService();
 
     const getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
-
-    maybeGc();
-    const before = heapUsedBytes();
 
     await fixture.runWorkflow({
       workflowYaml: buildSizedYaml(STEP_COUNT, OVER_ADMIT_OUTPUT_BYTES),
@@ -257,20 +221,15 @@ describe('StepIoService (LRU): memory consumption', () => {
     const leafSteps = leafStepsNamed(fixture, 'step_');
     const outputsRetainedInMock = leafSteps.filter((step) => step.output != null).length;
     const outputFetchCalls = countOutputFetches(getByIdsSpy);
-    const { stepsRetained, cacheBytes } = stepIoCapture.getResident();
+    const { liveOutputs, cacheEntries, cacheBytes } = stepIoCapture.getResident();
     stepIoCapture.restore();
-
     jest.clearAllMocks();
-    maybeGc();
-    const used = residualHeap(before);
 
     // eslint-disable-next-line no-console
     console.log(
-      `[2 over-admit] average_memory=${formatBytes(used)}  io_retention_budget=${formatBytes(
-        IO_RETENTION_BUDGET_BYTES
-      )}  steps=${leafSteps.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(
-        cacheBytes
-      )}`
+      `[2 over-admit] io_retention_budget=${formatBytes(IO_RETENTION_BUDGET_BYTES)}  steps=${
+        leafSteps.length
+      }  live=${liveOutputs}  cache_entries=${cacheEntries}  cache_bytes=${formatBytes(cacheBytes)}`
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
@@ -279,17 +238,18 @@ describe('StepIoService (LRU): memory consumption', () => {
     expect(leafSteps.every((step) => step.status === ExecutionStatus.COMPLETED)).toBe(true);
     expect(outputsRetainedInMock).toBe(0);
     expect(outputFetchCalls).toBe(0);
-    expect(used).toBeLessThan(ceiling);
-    expect(used).toBeLessThan(unboundedIoBytes);
+    expect(liveOutputs).toBe(0);
+    expect(cacheEntries).toBe(0);
+    expect(cacheBytes).toBe(0);
+    // Guard: if every over-admit payload were retained, it would dwarf the budget.
+    expect(unboundedIoBytes).toBeGreaterThan(IO_RETENTION_BUDGET_BYTES);
   });
 
-  it(`reports average_memory and io_retention_budget when each output ≤ minPayloadSize`, async () => {
+  it(`keeps cache ≤ io_retention_budget and rehydrates after eviction when outputs ≤ minPayloadSize`, async () => {
     expect(UNDER_ADMIT_OUTPUT_BYTES).toBeLessThanOrEqual(ADMIT_THRESHOLD_BYTES);
     expect(LRU_PRODUCER_COUNT * UNDER_ADMIT_OUTPUT_BYTES).toBeGreaterThan(
       IO_RETENTION_BUDGET_BYTES
     );
-    const unboundedIoBytes = LRU_PRODUCER_COUNT * UNDER_ADMIT_OUTPUT_BYTES;
-    const ceiling = expectedCeiling(averageMemory);
 
     const fixture = new WorkflowRunFixture();
     // Keep outputs in fake ES so early consumers can rehydrate after eviction.
@@ -298,9 +258,6 @@ describe('StepIoService (LRU): memory consumption', () => {
     const stepIoCapture = captureStepIoService();
 
     const getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
-
-    maybeGc();
-    const before = heapUsedBytes();
 
     await fixture.runWorkflow({
       workflowYaml: buildUnderAdmitEvictionYaml(
@@ -320,22 +277,15 @@ describe('StepIoService (LRU): memory consumption', () => {
       output: step.output,
     }));
     const outputFetchCalls = countOutputFetches(getByIdsSpy);
-    const { stepsRetained, cacheBytes } = stepIoCapture.getResident();
+    const { liveOutputs, cacheEntries, cacheBytes } = stepIoCapture.getResident();
     stepIoCapture.restore();
-
-    // Drop fake-ES / Jest artefacts so residual is engine + ≤budget, not N×payload.
-    stripMockOutputs(fixture);
     jest.clearAllMocks();
-    maybeGc();
-    const used = residualHeap(before);
 
     // eslint-disable-next-line no-console
     console.log(
-      `[3 under-admit] average_memory=${formatBytes(used)}  io_retention_budget=${formatBytes(
-        IO_RETENTION_BUDGET_BYTES
-      )}  steps=${producers.length}  retained=${stepsRetained}  cache_bytes=${formatBytes(
-        cacheBytes
-      )}`
+      `[3 under-admit] io_retention_budget=${formatBytes(IO_RETENTION_BUDGET_BYTES)}  steps=${
+        producers.length
+      }  live=${liveOutputs}  cache_entries=${cacheEntries}  cache_bytes=${formatBytes(cacheBytes)}`
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
@@ -347,7 +297,11 @@ describe('StepIoService (LRU): memory consumption', () => {
       expect(read.status).toBe(ExecutionStatus.COMPLETED);
       expect(String(read.output)).toBe(`early-size=${UNDER_ADMIT_OUTPUT_BYTES}`);
     }
-    expect(used).toBeLessThan(ceiling);
-    expect(used).toBeLessThan(unboundedIoBytes + HEAP_NOISE_BYTES);
+    expect(liveOutputs).toBe(0);
+    expect(cacheBytes).toBeGreaterThan(0);
+    expect(cacheBytes).toBeLessThanOrEqual(IO_RETENTION_BUDGET_BYTES);
+    // Producers overflow the budget, so the LRU cannot hold every admitted entry.
+    expect(cacheEntries).toBeGreaterThan(0);
+    expect(cacheEntries).toBeLessThan(LRU_PRODUCER_COUNT);
   });
 });
