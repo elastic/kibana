@@ -1,0 +1,2857 @@
+{
+ "DocumentTitle": {
+  "Value": "October 2026 Security Updates"
+ },
+ "DocumentType": {
+  "Value": "Security Update"
+ },
+ "DocumentTracking": {
+  "Identification": {
+   "ID": {
+    "Value": "2026-Oct"
+   },
+   "Alias": {
+    "Value": "2026-Oct"
+   }
+  },
+  "Status": 2,
+  "Version": "1.0",
+  "RevisionHistory": [
+   {
+    "Number": "5518",
+    "Date": "2026-11-23T08:00:00",
+    "Description": {
+     "Value": "October 2026 Security Updates"
+    }
+   }
+  ],
+  "InitialReleaseDate": "2026-10-13T07:00:00",
+  "CurrentReleaseDate": "2026-11-23T08:00:00"
+ },
+ "ProductTree": {
+  "Branch": [],
+  "FullProductName": [
+   {
+    "ProductID": "10378",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2012:6.2.9200.26434:*:*:*:*:*:x64:*",
+    "Value": "Windows Server 2012"
+   },
+   {
+    "ProductID": "10379",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2012:6.2.9200.26434:*:*:*:*:*:x64:*",
+    "Value": "Windows Server 2012 (Server Core installation)"
+   },
+   {
+    "ProductID": "10483",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2012_R2:6.3.9600.23470:*:*:*:*:*:x64:*",
+    "Value": "Windows Server 2012 R2"
+   },
+   {
+    "ProductID": "10543",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2012_R2:6.3.9600.23470:*:*:*:*:*:x64:*",
+    "Value": "Windows Server 2012 R2 (Server Core installation)"
+   },
+   {
+    "ProductID": "10816",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2016:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2016"
+   },
+   {
+    "ProductID": "10852",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_1607:*:*:*:*:*:*:x86:*",
+    "Value": "Windows 10 Version 1607 for 32-bit Systems"
+   },
+   {
+    "ProductID": "10853",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_1607:*:*:*:*:*:*:x64:*",
+    "Value": "Windows 10 Version 1607 for x64-based Systems"
+   },
+   {
+    "ProductID": "10855",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2016:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2016 (Server Core installation)"
+   },
+   {
+    "ProductID": "11568",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_1809:*:*:*:*:*:*:x86:*",
+    "Value": "Windows 10 Version 1809 for 32-bit Systems"
+   },
+   {
+    "ProductID": "11569",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_1809:*:*:*:*:*:*:x64:*",
+    "Value": "Windows 10 Version 1809 for x64-based Systems"
+   },
+   {
+    "ProductID": "11571",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2019"
+   },
+   {
+    "ProductID": "11572",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2019 (Server Core installation)"
+   },
+   {
+    "ProductID": "11600",
+    "CPE": "cpe:2.3:a:microsoft:visual_studio_2017:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft Visual Studio 2017 version 15.9 (includes 15.0 - 15.8)"
+   },
+   {
+    "ProductID": "11923",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2022"
+   },
+   {
+    "ProductID": "11924",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2022 (Server Core installation)"
+   },
+   {
+    "ProductID": "11929",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_21H2:*:*:*:*:*:*:x86:*",
+    "Value": "Windows 10 Version 21H2 for 32-bit Systems"
+   },
+   {
+    "ProductID": "11930",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_21H2:*:*:*:*:*:*:arm64:*",
+    "Value": "Windows 10 Version 21H2 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "11931",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_21H2:*:*:*:*:*:*:x64:*",
+    "Value": "Windows 10 Version 21H2 for x64-based Systems"
+   },
+   {
+    "ProductID": "12097",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_22H2:*:*:*:*:*:*:x64:*",
+    "Value": "Windows 10 Version 22H2 for x64-based Systems"
+   },
+   {
+    "ProductID": "12098",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_22H2:*:*:*:*:*:*:arm64:*",
+    "Value": "Windows 10 Version 22H2 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "12099",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_22H2:*:*:*:*:*:*:x86:*",
+    "Value": "Windows 10 Version 22H2 for 32-bit Systems"
+   },
+   {
+    "ProductID": "12242",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_23H2:*:*:*:*:*:*:arm64:*",
+    "Value": "Windows 11 Version 23H2 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "12243",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_23H2:*:*:*:*:*:*:x64:*",
+    "Value": "Windows 11 Version 23H2 for x64-based Systems"
+   },
+   {
+    "ProductID": "12262",
+    "CPE": "cpe:2.3:a:microsoft:powershell:7.4:-:*:*:*:*:*:*",
+    "Value": "PowerShell 7.4"
+   },
+   {
+    "ProductID": "12389",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_24H2:*:*:*:*:*:*:arm64:*",
+    "Value": "Windows 11 Version 24H2 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "12390",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_24H2:*:*:*:*:*:*:x64:*",
+    "Value": "Windows 11 Version 24H2 for x64-based Systems"
+   },
+   {
+    "ProductID": "12436",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2025:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2025"
+   },
+   {
+    "ProductID": "12437",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2025:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2025 (Server Core installation)"
+   },
+   {
+    "ProductID": "16767",
+    "CPE": "cpe:2.3:a:microsoft:visual_studio_2022:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft Visual Studio 2022 version 17.14"
+   },
+   {
+    "ProductID": "16787",
+    "CPE": "cpe:2.3:a:microsoft:powershell:7.5:-:*:*:*:*:*:*",
+    "Value": "PowerShell 7.5"
+   },
+   {
+    "ProductID": "20437",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_25H2:*:*:*:*:*:*:arm64:*",
+    "Value": "Windows 11 Version 25H2 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "20438",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_25H2:*:*:*:*:*:*:x64:*",
+    "Value": "Windows 11 Version 25H2 for x64-based Systems"
+   },
+   {
+    "ProductID": "20853",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_26H1:*:*:*:*:*:*:x64:*",
+    "Value": "Windows 11 version 26H1 for x64-based Systems"
+   },
+   {
+    "ProductID": "20854",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_26H1:*:*:*:*:*:*:arm64:*",
+    "Value": "Windows 11 Version 26H1 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "21227",
+    "CPE": "cpe:2.3:a:microsoft:powershell:7.6:-:*:*:*:*:*:*",
+    "Value": "PowerShell 7.6"
+   },
+   {
+    "ProductID": "21780-17084",
+    "CPE": "cpe:2.3:a:microsoft:azl3_qemu_10.1.0-1:*:*:*:*:*:*:*:*",
+    "Value": "azl3 qemu 10.1.0-1 on Azure Linux 3.0"
+   },
+   {
+    "ProductID": "21891-17084",
+    "CPE": "cpe:2.3:a:microsoft:azl3_nodejs_24.21.0-1:*:*:*:*:*:*:*:*",
+    "Value": "azl3 nodejs 24.21.0-1 on Azure Linux 3.0"
+   },
+   {
+    "ProductID": "21945",
+    "CPE": "cpe:2.3:a:microsoft:windows_11_version_26h2_for_arm64-based_systems:*:*:*:*:*:*:*:*",
+    "Value": "Windows 11 Version 26H2 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "21946",
+    "CPE": "cpe:2.3:a:microsoft:windows_11_version_26h2_for_x64-based_systems:*:*:*:*:*:*:*:*",
+    "Value": "Windows 11 Version 26H2 for x64-based Systems"
+   },
+   {
+    "ProductID": "22215-17084",
+    "CPE": "cpe:2.3:a:microsoft:azl3_brotli_1.1.0-2:*:*:*:*:*:*:*:*",
+    "Value": "azl3 brotli 1.1.0-2 on Azure Linux 3.0"
+   },
+   {
+    "ProductID": "22220",
+    "CPE": "cpe:2.3:a:microsoft:.net_8.0_installed_on_windows:*:*:*:*:*:*:*:*",
+    "Value": ".NET 8.0 installed on Windows"
+   },
+   {
+    "ProductID": "22221",
+    "CPE": "cpe:2.3:a:microsoft:.net_8.0_installed_on_linux:*:*:*:*:*:*:*:*",
+    "Value": ".NET 8.0 installed on Linux"
+   },
+   {
+    "ProductID": "22222",
+    "CPE": "cpe:2.3:a:microsoft:.net_8.0_installed_on_mac_os:*:*:*:*:*:*:*:*",
+    "Value": ".NET 8.0 installed on Mac OS"
+   },
+   {
+    "ProductID": "22223",
+    "CPE": "cpe:2.3:a:microsoft:.net_9.0_installed_on_windows:*:*:*:*:*:*:*:*",
+    "Value": ".NET 9.0 installed on Windows"
+   },
+   {
+    "ProductID": "22224",
+    "CPE": "cpe:2.3:a:microsoft:.net_9.0_installed_on_linux:*:*:*:*:*:*:*:*",
+    "Value": ".NET 9.0 installed on Linux"
+   },
+   {
+    "ProductID": "22225",
+    "CPE": "cpe:2.3:a:microsoft:.net_9.0_installed_on_mac_os:*:*:*:*:*:*:*:*",
+    "Value": ".NET 9.0 installed on Mac OS"
+   },
+   {
+    "ProductID": "22226",
+    "CPE": "cpe:2.3:a:microsoft:.net_10.0_installed_on_windows:*:*:*:*:*:*:*:*",
+    "Value": ".NET 10.0 installed on Windows"
+   },
+   {
+    "ProductID": "22227",
+    "CPE": "cpe:2.3:a:microsoft:.net_10.0_installed_on_linux:*:*:*:*:*:*:*:*",
+    "Value": ".NET 10.0 installed on Linux"
+   },
+   {
+    "ProductID": "22228",
+    "CPE": "cpe:2.3:a:microsoft:.net_10.0_installed_on_mac_os:*:*:*:*:*:*:*:*",
+    "Value": ".NET 10.0 installed on Mac OS"
+   },
+   {
+    "ProductID": "22229",
+    "CPE": "cpe:2.3:a:microsoft:.net_11.0_installed_on_windows:*:*:*:*:*:*:*:*",
+    "Value": ".NET 11.0 installed on Windows"
+   },
+   {
+    "ProductID": "22230",
+    "CPE": "cpe:2.3:a:microsoft:.net_11.0_installed_on_linux:*:*:*:*:*:*:*:*",
+    "Value": ".NET 11.0 installed on Linux"
+   },
+   {
+    "ProductID": "22231",
+    "CPE": "cpe:2.3:a:microsoft:.net_11.0_installed_on_mac_os:*:*:*:*:*:*:*:*",
+    "Value": ".NET 11.0 installed on Mac OS"
+   },
+   {
+    "ProductID": "22232",
+    "CPE": "cpe:2.3:a:microsoft:microsoft_visual_studio_2019_version_16.11:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft Visual Studio 2019 version 16.11"
+   },
+   {
+    "ProductID": "22233",
+    "CPE": "cpe:2.3:a:microsoft:microsoft_visual_studio_2026_version_18.11:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft Visual Studio 2026 version 18.11"
+   },
+   {
+    "ProductID": "22234",
+    "CPE": "cpe:2.3:a:microsoft:microsoft_visual_studio_2026_version_18.12:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft Visual Studio 2026 version 18.12"
+   },
+   {
+    "ProductID": "22260",
+    "CPE": "cpe:2.3:a:microsoft:microsoft_visual_studio_2017_version_15.9:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft Visual Studio 2017 version 15.9"
+   },
+   {
+    "ProductID": "22512-22078",
+    "CPE": "cpe:2.3:a:microsoft:azl4_firefox_148.0-6.azl4:*:*:*:*:*:*:*:*",
+    "Value": "azl4 firefox 148.0-6.azl4 on Azure Linux 4.0"
+   },
+   {
+    "ProductID": "22744-22078",
+    "CPE": "cpe:2.3:a:microsoft:azl4_python-arrow_1.3.0-8.azl4:*:*:*:*:*:*:*:*",
+    "Value": "azl4 python-arrow 1.3.0-8.azl4 on Azure Linux 4.0"
+   },
+   {
+    "ProductID": "23184-22078",
+    "CPE": "cpe:2.3:a:microsoft:azl4_brotli_1.2.0-4.azl4:*:*:*:*:*:*:*:*",
+    "Value": "azl4 brotli 1.2.0-4.azl4 on Azure Linux 4.0"
+   }
+  ]
+ },
+ "Vulnerability": [
+  {
+   "Title": {
+    "Value": "Google: CVE-2026-111497 Buffer overflow vulnerability in the Brotli decoder"
+   },
+   "DiscoveryDate": "0001-01-01T00:00:00",
+   "DiscoveryDateSpecified": false,
+   "ReleaseDate": "0001-01-01T00:00:00",
+   "ReleaseDateSpecified": false,
+   "CVE": "CVE-2026-111497",
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "22215-17084"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "22220"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "22221"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Remediations": [
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "",
+     "ProductID": [
+      "22215-17084"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {},
+     "SubType": "Security Update",
+     "FixedBuild": "1.2.1-1"
+    },
+    {
+     "Description": {
+      "Value": "5133964"
+     },
+     "URL": "https://dotnet.microsoft.com/download/dotnet/8.0",
+     "ProductID": [
+      "22220",
+      "22221"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "8.0.427"
+    },
+    {
+     "Description": {
+      "Value": "5133965"
+     },
+     "URL": "https://dotnet.microsoft.com/download/dotnet/9.0",
+     "ProductID": [
+      "22223",
+      "22224"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "9.0.320"
+    },
+    {
+     "Description": {
+      "Value": "5133966"
+     },
+     "URL": "https://dotnet.microsoft.com/download/dotnet/10.0",
+     "ProductID": [
+      "22226",
+      "22227"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.403"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://dotnet.microsoft.com/download/dotnet/11.0",
+     "ProductID": [
+      "22229",
+      "22230"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "11.0.100-rc.3.26522.148"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://learn.microsoft.com/en-us/visualstudio/releases/2019/release-history",
+     "ProductID": [
+      "22232"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "16.11.61"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://learn.microsoft.com/en-us/visualstudio/releases/2022/release-history",
+     "ProductID": [
+      "16767"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "17.14.43"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://learn.microsoft.com/en-us/visualstudio/releases/2026/release-history",
+     "ProductID": [
+      "22233"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "18.11.2"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://learn.microsoft.com/en-us/visualstudio/releases/2026/release-history",
+     "ProductID": [
+      "22234"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "18.12 Insiders 3"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://github.com/PowerShell/PowerShell/releases/tag/v7.6.9",
+     "ProductID": [
+      "21227"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Maybe"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "7.6.9"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://github.com/PowerShell/PowerShell/releases/tag/v7.5.13",
+     "ProductID": [
+      "16787"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Maybe"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "7.5.13"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://github.com/PowerShell/PowerShell/releases/tag/v7.4.22",
+     "ProductID": [
+      "12262"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Maybe"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "7.4.22"
+    },
+    {
+     "Description": {
+      "Value": "5132061"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5132061",
+     "Supercedence": "5127648",
+     "ProductID": [
+      "21945",
+      "21946"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26300.9974"
+    },
+    {
+     "Description": {
+      "Value": "5132043"
+     },
+     "URL": "",
+     "Supercedence": "5127648",
+     "ProductID": [
+      "21945",
+      "21946"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "No"
+     },
+     "SubType": "Security Hotpatch Update",
+     "FixedBuild": "10.0.26300.9911"
+    },
+    {
+     "Description": {
+      "Value": "5131085"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5131085",
+     "Supercedence": "5126651",
+     "ProductID": [
+      "11571",
+      "11568",
+      "11569"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.17763.9487"
+    },
+    {
+     "Description": {
+      "Value": "5131090"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5131090",
+     "Supercedence": "5126655",
+     "ProductID": [
+      "11923",
+      "11924"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.20348.5870"
+    },
+    {
+     "Description": {
+      "Value": "5131096"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5131096",
+     "Supercedence": "5126657",
+     "ProductID": [
+      "11929",
+      "11930"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19044.7846"
+    },
+    {
+     "Description": {
+      "Value": "5131096"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5131096",
+     "Supercedence": "5126657",
+     "ProductID": [
+      "12097",
+      "12098",
+      "12099"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19045.7846"
+    },
+    {
+     "Description": {
+      "Value": "5131080"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5131080",
+     "Supercedence": "5126646",
+     "ProductID": [
+      "12436",
+      "12437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.33822"
+    },
+    {
+     "Description": {
+      "Value": "5131077"
+     },
+     "URL": "",
+     "Supercedence": "5126646",
+     "ProductID": [
+      "12436",
+      "12437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "No"
+     },
+     "SubType": "Security Hotpatch Update",
+     "FixedBuild": "10.0.26100.33730"
+    },
+    {
+     "Description": {
+      "Value": "5132061"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5132061",
+     "Supercedence": "5127648",
+     "ProductID": [
+      "20438",
+      "20437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26200.9974"
+    },
+    {
+     "Description": {
+      "Value": "5132043"
+     },
+     "URL": "",
+     "Supercedence": "5127648",
+     "ProductID": [
+      "20438",
+      "20437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "No"
+     },
+     "SubType": "Security Hotpatch Update",
+     "FixedBuild": "10.0.26200.9911"
+    },
+    {
+     "Description": {
+      "Value": "5131087"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5131087",
+     "Supercedence": "5126653",
+     "ProductID": [
+      "12243",
+      "12242"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.22631.7711"
+    },
+    {
+     "Description": {
+      "Value": "5132061"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5132061",
+     "Supercedence": "5127648",
+     "ProductID": [
+      "12390",
+      "12389"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.9974"
+    },
+    {
+     "Description": {
+      "Value": "5132043"
+     },
+     "URL": "",
+     "Supercedence": "5127648",
+     "ProductID": [
+      "12390",
+      "12389"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "No"
+     },
+     "SubType": "Security Hotpatch Update",
+     "FixedBuild": "10.0.26100.9911"
+    },
+    {
+     "Description": {
+      "Value": "5132059"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5132059",
+     "Supercedence": "5127646",
+     "ProductID": [
+      "20853",
+      "20854"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.28000.3501"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://visualstudio.microsoft.com/vs/older-downloads/",
+     "ProductID": [
+      "22260"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "15.9.84"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "",
+     "ProductID": [
+      "22512-22078"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {},
+     "SubType": "Security Update",
+     "FixedBuild": "0:158.0.1-15.azl4"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "",
+     "ProductID": [
+      "22744-22078",
+      "21780-17084"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {},
+     "SubType": "Security Update",
+     "FixedBuild": ""
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "",
+     "ProductID": [
+      "23184-22078"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {},
+     "SubType": "Security Update",
+     "FixedBuild": "0:1.2.1-5.azl4"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "",
+     "ProductID": [
+      "21891-17084"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {},
+     "SubType": "Security Update",
+     "FixedBuild": "24.22.1-1"
+    },
+    {
+     "Description": {
+      "Value": "Release Notes"
+     },
+     "URL": "https://play.google.com/store/apps/details?id=com.microsoft.teams",
+     "ProductID": [
+      "11600"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Maybe"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "1416/1.0.0.2026202302"
+    },
+    {
+     "URL": "https://learn.microsoft.com/en-us/azure/azure-linux/tutorial-azure-linux-upgrade",
+     "ProductID": [
+      "22215-17084"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "Release Notes"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5133964",
+     "ProductID": [
+      "22220"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5133964"
+    }
+   ],
+   "Ordinal": "527"
+  },
+  {
+   "Title": {
+    "Value": "Windows Update Service Elevation of Privilege Vulnerability"
+   },
+   "DiscoveryDate": "0001-01-01T00:00:00",
+   "DiscoveryDateSpecified": false,
+   "ReleaseDate": "0001-01-01T00:00:00",
+   "ReleaseDateSpecified": false,
+   "CVE": "CVE-2026-100200",
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12242"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12243"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12389"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Remediations": [
+    {
+     "Description": {
+      "Value": "5126653"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126653",
+     "Supercedence": "5122880",
+     "ProductID": [
+      "12243",
+      "12242"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.22631.7652"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "12390",
+      "12389"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "20438",
+      "20437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26200.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "ProductID": [
+      "21945",
+      "21946"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26300.9711"
+    },
+    {
+     "Description": {
+      "Value": "5126646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126646",
+     "Supercedence": "5122871",
+     "ProductID": [
+      "12436",
+      "12437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.33650"
+    },
+    {
+     "Description": {
+      "Value": "5127646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127646",
+     "Supercedence": "5124012",
+     "ProductID": [
+      "20854",
+      "20853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.28000.3231"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5126653",
+     "ProductID": [
+      "12242"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5126653"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5127648",
+     "ProductID": [
+      "12389"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5127648"
+    }
+   ],
+   "Ordinal": "1"
+  },
+  {
+   "Title": {
+    "Value": "Windows Client License Service Elevation of Privilege Vulnerability"
+   },
+   "DiscoveryDate": "0001-01-01T00:00:00",
+   "DiscoveryDateSpecified": false,
+   "ReleaseDate": "0001-01-01T00:00:00",
+   "ReleaseDateSpecified": false,
+   "CVE": "CVE-2026-100201",
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11568"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11569"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11571"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Remediations": [
+    {
+     "Description": {
+      "Value": "5126651"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126651",
+     "Supercedence": "5122876",
+     "ProductID": [
+      "11571",
+      "11568",
+      "11569"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.17763.9376"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "11929",
+      "11930"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19044.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "12097",
+      "12099",
+      "12098"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19045.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126655"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126655",
+     "Supercedence": "5122882",
+     "ProductID": [
+      "11923",
+      "11924"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.20348.5761"
+    },
+    {
+     "Description": {
+      "Value": "5126653"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126653",
+     "Supercedence": "5122880",
+     "ProductID": [
+      "12243",
+      "12242"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.22631.7652"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "12390",
+      "12389"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "20438",
+      "20437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26200.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "ProductID": [
+      "21945",
+      "21946"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26300.9711"
+    },
+    {
+     "Description": {
+      "Value": "5126646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126646",
+     "Supercedence": "5122871",
+     "ProductID": [
+      "12436",
+      "12437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.33650"
+    },
+    {
+     "Description": {
+      "Value": "5127646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127646",
+     "Supercedence": "5124012",
+     "ProductID": [
+      "20854",
+      "20853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.28000.3231"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5126651",
+     "ProductID": [
+      "11568"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5126651"
+    },
+    {
+     "Description": {
+      "Value": "5126651"
+     },
+     "URL": "https://support.microsoft.com/help/5126651",
+     "ProductID": [
+      "11568"
+     ],
+     "Type": 6,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": []
+    }
+   ],
+   "Ordinal": "2"
+  },
+  {
+   "Title": {
+    "Value": "Windows Message Queuing Queue Manager Remote Code Execution Vulnerability"
+   },
+   "DiscoveryDate": "0001-01-01T00:00:00",
+   "DiscoveryDateSpecified": false,
+   "ReleaseDate": "0001-01-01T00:00:00",
+   "ReleaseDateSpecified": false,
+   "CVE": "CVE-2026-100202",
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 9.8,
+     "TemporalScore": 8.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10378"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 9.8,
+     "TemporalScore": 8.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10379"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 9.8,
+     "TemporalScore": 8.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10483"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Remediations": [
+    {
+     "Description": {
+      "Value": "5126835"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126835",
+     "Supercedence": "5123065",
+     "ProductID": [
+      "10378",
+      "10379"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "6.2.9200.26434"
+    },
+    {
+     "Description": {
+      "Value": "5126836"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126836",
+     "Supercedence": "5123066",
+     "ProductID": [
+      "10483",
+      "10543"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Monthly Rollup",
+     "FixedBuild": "6.3.9600.23470"
+    },
+    {
+     "Description": {
+      "Value": "5126868"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126868",
+     "Supercedence": "5123099",
+     "ProductID": [
+      "10852",
+      "10853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.14393.9612"
+    },
+    {
+     "Description": {
+      "Value": "5126651"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126651",
+     "Supercedence": "5122876",
+     "ProductID": [
+      "11571",
+      "11568",
+      "11569"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.17763.9376"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "11929",
+      "11930"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19044.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "12097",
+      "12099",
+      "12098"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19045.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126655"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126655",
+     "Supercedence": "5122882",
+     "ProductID": [
+      "11923",
+      "11924"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.20348.5761"
+    },
+    {
+     "Description": {
+      "Value": "5126653"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126653",
+     "Supercedence": "5122880",
+     "ProductID": [
+      "12243",
+      "12242"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.22631.7652"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "12390",
+      "12389"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "20438",
+      "20437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26200.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "ProductID": [
+      "21945",
+      "21946"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26300.9711"
+    },
+    {
+     "Description": {
+      "Value": "5126646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126646",
+     "Supercedence": "5122871",
+     "ProductID": [
+      "12436",
+      "12437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.33650"
+    },
+    {
+     "Description": {
+      "Value": "5127646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127646",
+     "Supercedence": "5124012",
+     "ProductID": [
+      "20854",
+      "20853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.28000.3231"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5126835",
+     "ProductID": [
+      "10378"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5126835"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5126836",
+     "ProductID": [
+      "10483"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5126836"
+    }
+   ],
+   "Ordinal": "3"
+  },
+  {
+   "Title": {
+    "Value": "Windows Update Service Elevation of Privilege Vulnerability"
+   },
+   "DiscoveryDate": "0001-01-01T00:00:00",
+   "DiscoveryDateSpecified": false,
+   "ReleaseDate": "0001-01-01T00:00:00",
+   "ReleaseDateSpecified": false,
+   "CVE": "CVE-2026-100203",
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "21946"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12436"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12437"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Remediations": [
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "ProductID": [
+      "21946",
+      "21945"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26300.9711"
+    },
+    {
+     "Description": {
+      "Value": "5126646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126646",
+     "Supercedence": "5122871",
+     "ProductID": [
+      "12436",
+      "12437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.33650"
+    },
+    {
+     "Description": {
+      "Value": "5127646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127646",
+     "Supercedence": "5124012",
+     "ProductID": [
+      "20854",
+      "20853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.28000.3231"
+    },
+    {
+     "Description": {
+      "Value": "5126868"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126868",
+     "Supercedence": "5123099",
+     "ProductID": [
+      "10852",
+      "10853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.14393.9612"
+    },
+    {
+     "Description": {
+      "Value": "5126651"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126651",
+     "Supercedence": "5122876",
+     "ProductID": [
+      "11571",
+      "11568",
+      "11569"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.17763.9376"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "11929",
+      "11930"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19044.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "12097",
+      "12099",
+      "12098"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19045.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126655"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126655",
+     "Supercedence": "5122882",
+     "ProductID": [
+      "11923",
+      "11924"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.20348.5761"
+    },
+    {
+     "Description": {
+      "Value": "5126653"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126653",
+     "Supercedence": "5122880",
+     "ProductID": [
+      "12243",
+      "12242"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.22631.7652"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "12390",
+      "12389"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "20438",
+      "20437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26200.9711"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5127648",
+     "ProductID": [
+      "21946"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5127648"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://support.microsoft.com/help/5127648",
+     "ProductID": [
+      "21946"
+     ],
+     "Type": 6,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": []
+    }
+   ],
+   "Ordinal": "4"
+  },
+  {
+   "Title": {
+    "Value": "Microsoft Graphics Component Remote Code Execution Vulnerability"
+   },
+   "DiscoveryDate": "0001-01-01T00:00:00",
+   "DiscoveryDateSpecified": false,
+   "ReleaseDate": "0001-01-01T00:00:00",
+   "ReleaseDateSpecified": false,
+   "CVE": "CVE-2026-100215",
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 6.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "21946"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 6.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12436"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 6.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12437"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Remediations": [
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "ProductID": [
+      "21946",
+      "21945"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26300.9711"
+    },
+    {
+     "Description": {
+      "Value": "5126646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126646",
+     "Supercedence": "5122871",
+     "ProductID": [
+      "12436",
+      "12437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.33650"
+    },
+    {
+     "Description": {
+      "Value": "5127646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127646",
+     "Supercedence": "5124012",
+     "ProductID": [
+      "20854",
+      "20853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.28000.3231"
+    },
+    {
+     "Description": {
+      "Value": "5126836"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126836",
+     "Supercedence": "5123066",
+     "ProductID": [
+      "10483",
+      "10543"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Monthly Rollup",
+     "FixedBuild": "6.3.9600.23470"
+    },
+    {
+     "Description": {
+      "Value": "5126868"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126868",
+     "Supercedence": "5123099",
+     "ProductID": [
+      "10852",
+      "10853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.14393.9612"
+    },
+    {
+     "Description": {
+      "Value": "5126651"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126651",
+     "Supercedence": "5122876",
+     "ProductID": [
+      "11571",
+      "11568",
+      "11569"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.17763.9376"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "11929",
+      "11930"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19044.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "12097",
+      "12099",
+      "12098"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19045.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126655"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126655",
+     "Supercedence": "5122882",
+     "ProductID": [
+      "11923",
+      "11924"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.20348.5761"
+    },
+    {
+     "Description": {
+      "Value": "5126653"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126653",
+     "Supercedence": "5122880",
+     "ProductID": [
+      "12243",
+      "12242"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.22631.7652"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "12390",
+      "12389"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "20438",
+      "20437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26200.9711"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5127648",
+     "ProductID": [
+      "21946"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5127648"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://support.microsoft.com/help/5127648",
+     "ProductID": [
+      "21946"
+     ],
+     "Type": 6,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": []
+    }
+   ],
+   "Ordinal": "12"
+  },
+  {
+   "Title": {
+    "Value": "Windows Storage Elevation of Privilege Vulnerability"
+   },
+   "DiscoveryDate": "0001-01-01T00:00:00",
+   "DiscoveryDateSpecified": false,
+   "ReleaseDate": "0001-01-01T00:00:00",
+   "ReleaseDateSpecified": false,
+   "CVE": "CVE-2026-100216",
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11568"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11569"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11571"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Remediations": [
+    {
+     "Description": {
+      "Value": "5126651"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126651",
+     "Supercedence": "5122876",
+     "ProductID": [
+      "11571",
+      "11568",
+      "11569"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.17763.9376"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "11929",
+      "11930"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19044.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "12097",
+      "12099",
+      "12098"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19045.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126655"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126655",
+     "Supercedence": "5122882",
+     "ProductID": [
+      "11923",
+      "11924"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.20348.5761"
+    },
+    {
+     "Description": {
+      "Value": "5126653"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126653",
+     "Supercedence": "5122880",
+     "ProductID": [
+      "12243",
+      "12242"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.22631.7652"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "12390",
+      "12389"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "20438",
+      "20437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26200.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "ProductID": [
+      "21945",
+      "21946"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26300.9711"
+    },
+    {
+     "Description": {
+      "Value": "5126646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126646",
+     "Supercedence": "5122871",
+     "ProductID": [
+      "12436",
+      "12437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.33650"
+    },
+    {
+     "Description": {
+      "Value": "5127646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127646",
+     "Supercedence": "5124012",
+     "ProductID": [
+      "20854",
+      "20853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.28000.3231"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5126651",
+     "ProductID": [
+      "11568"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5126651"
+    },
+    {
+     "Description": {
+      "Value": "5126651"
+     },
+     "URL": "https://support.microsoft.com/help/5126651",
+     "ProductID": [
+      "11568"
+     ],
+     "Type": 6,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": []
+    }
+   ],
+   "Ordinal": "13"
+  },
+  {
+   "Title": {
+    "Value": "Windows Group Policy Elevation of Privilege Vulnerability"
+   },
+   "DiscoveryDate": "0001-01-01T00:00:00",
+   "DiscoveryDateSpecified": false,
+   "ReleaseDate": "0001-01-01T00:00:00",
+   "ReleaseDateSpecified": false,
+   "CVE": "CVE-2026-100217",
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 6.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10483"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 6.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10543"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 6.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10852"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Remediations": [
+    {
+     "Description": {
+      "Value": "5126836"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126836",
+     "Supercedence": "5123066",
+     "ProductID": [
+      "10483",
+      "10543"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Monthly Rollup",
+     "FixedBuild": "6.3.9600.23470"
+    },
+    {
+     "Description": {
+      "Value": "5126868"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126868",
+     "Supercedence": "5123099",
+     "ProductID": [
+      "10852",
+      "10853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.14393.9612"
+    },
+    {
+     "Description": {
+      "Value": "5126651"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126651",
+     "Supercedence": "5122876",
+     "ProductID": [
+      "11571",
+      "11568",
+      "11569"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.17763.9376"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "11929",
+      "11930"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19044.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126657"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126657",
+     "Supercedence": "5122878",
+     "ProductID": [
+      "12097",
+      "12099",
+      "12098"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.19045.7807"
+    },
+    {
+     "Description": {
+      "Value": "5126655"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126655",
+     "Supercedence": "5122882",
+     "ProductID": [
+      "11923",
+      "11924"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.20348.5761"
+    },
+    {
+     "Description": {
+      "Value": "5126653"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126653",
+     "Supercedence": "5122880",
+     "ProductID": [
+      "12243",
+      "12242"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.22631.7652"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "12390",
+      "12389"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "Supercedence": "5124008",
+     "ProductID": [
+      "20438",
+      "20437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26200.9711"
+    },
+    {
+     "Description": {
+      "Value": "5127648"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127648",
+     "ProductID": [
+      "21945",
+      "21946"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26300.9711"
+    },
+    {
+     "Description": {
+      "Value": "5126646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5126646",
+     "Supercedence": "5122871",
+     "ProductID": [
+      "12436",
+      "12437"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.26100.33650"
+    },
+    {
+     "Description": {
+      "Value": "5127646"
+     },
+     "URL": "https://catalog.update.microsoft.com/v7/site/Search.aspx?q=KB5127646",
+     "Supercedence": "5124012",
+     "ProductID": [
+      "20854",
+      "20853"
+     ],
+     "Type": 2,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "RestartRequired": {
+      "Value": "Yes"
+     },
+     "SubType": "Security Update",
+     "FixedBuild": "10.0.28000.3231"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5126836",
+     "ProductID": [
+      "10483"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5126836"
+    },
+    {
+     "URL": "https://support.microsoft.com/help/5126868",
+     "ProductID": [
+      "10852"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "AffectedFiles": [],
+     "SubType": "5126868"
+    }
+   ],
+   "Ordinal": "14"
+  }
+ ]
+}

@@ -163,6 +163,8 @@ The scanner needs these files (the list is `FEED_SOURCES` in `server/lib/feeds/f
 | RHEL 8 and 9 OVAL | `https://security.access.redhat.com/data/oval/v2/RHEL<major>/rhel-<major>.oval.xml.bz2` |
 | RHEL 8 and 9 OVAL with unpatched CVEs (only with `includeUnfixed: true`) | `https://security.access.redhat.com/data/oval/v2/RHEL<major>/rhel-<major>-including-unpatched.oval.xml.bz2` |
 | RHEL 10+ CSAF | `https://security.access.redhat.com/data/csaf/v2/advisories/archive_latest.txt`, the archive it names, `changes.csv`, and each advisory `changes.csv` lists |
+| Windows (MSRC) update index | `https://api.msrc.microsoft.com/cvrf/v3.0/updates` |
+| Windows (MSRC) monthly CVRF documents | `https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/<YYYY-Mon>`, for example `2026-Nov`; each month named by the index (documents are up to about 30 MB, served uncompressed) |
 | CISA KEV | `https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json` |
 
 ### Filling the mirror
@@ -176,6 +178,7 @@ MIRROR_ROOT=/srv/feeds
 CODENAMES="jammy noble"
 RHEL_MAJORS="8 9"
 RHEL_CSAF=yes           # RHEL 10 and later
+MSRC=no                 # yes to mirror the Windows (MSRC) documents
 INCLUDE_UNFIXED=no      # yes when includeUnfixed is on
 
 cd "$MIRROR_ROOT"
@@ -200,6 +203,17 @@ if [ "$RHEL_CSAF" = yes ]; then
   SINCE=$(sed -E 's/.*([0-9]{4}-[0-9]{2}-[0-9]{2}).*/\1/' "$D/archive_latest.txt")
   tr -d '"' < "$D/changes.csv" | awk -F, -v since="$SINCE" '$2 >= since {print $1}' |
     while read -r path; do path=${path#./}; wget --force-directories --timestamping "$CSAF/$path"; done
+fi
+if [ "$MSRC" = yes ]; then   # Windows
+  MS=https://api.msrc.microsoft.com/cvrf/v3.0
+  wget --force-directories --header='Accept: application/json' "$MS/updates"
+  # The API serves XML unless asked for JSON, and the scanner only reads the JSON form.
+  # The last 12 monthly documents (GNU date; the month names must be English). The service sends
+  # no ETag or Last-Modified and revises old months, so fetch them all each time.
+  for i in $(seq 0 11); do
+    month=$(LC_ALL=C date -d "$(date +%Y-%m-15) - $i month" +%Y-%b)
+    wget --force-directories --header='Accept: application/json' "$MS/cvrf/$month"
+  done
 fi
 wget --force-directories --timestamping \
   https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
@@ -233,7 +247,7 @@ URL actually fetched, so with a mirror they show the mirror URL. The vendor link
 the knowledge index are references for the analyst and are not rewritten.
 
 Not covered yet: importing the feeds as an uploaded offline bundle instead of serving them from a
-mirror. MSRC and EPSS feeds are not used by the scanner today, so they need no mirror entries.
+mirror. The EPSS feed is not used by the scanner today, so it needs no mirror entry. The MSRC rows are only fetched once Windows matching is switched on.
 
 ## Agent runtime requirement
 

@@ -10,13 +10,14 @@ import { join, relative } from 'path';
 import { zstdCompressSync } from 'zlib';
 import { clearKevCache, downloadKevCatalog } from '../enrichment/kev';
 import { FEED_SOURCES } from './feed_sources';
-import { downloadFeed, type FeedOs } from './fetch';
+import { downloadFeed, downloadMsrcCvrf, downloadMsrcUpdatesIndex, type FeedOs } from './fetch';
 import { resolveFeedUrl } from './mirror';
 
 const MIRROR = 'https://mirror.corp.example/feeds/';
 const kevFixture = readFileSync(
   join(__dirname, '..', 'enrichment', '__fixtures__', 'kev_catalog_trimmed.json')
 );
+const msrcUpdates = readFileSync(join(__dirname, '__fixtures__', 'msrc', 'updates_trimmed.json'));
 const rhelBz2 = readFileSync(join(__dirname, '__fixtures__', 'rhel_9_trimmed.oval.xml.bz2'));
 
 const AbortSignalStatic = AbortSignal as unknown as {
@@ -73,6 +74,10 @@ const vendorSite = (
     }
     if (vendorUrl.endsWith('/2026/rhsa-2026_9999.json')) return fakeResponse(EL10_DELTA_DOC);
     if (vendorUrl.includes('known_exploited_vulnerabilities')) return fakeResponse(kevFixture);
+    if (vendorUrl.includes('api.msrc.microsoft.com/cvrf/v3.0/updates')) {
+      return fakeResponse(msrcUpdates);
+    }
+    if (vendorUrl.includes('api.msrc.microsoft.com/cvrf/v3.0/cvrf/')) return fakeResponse('{}');
     return fakeResponse(rhelBz2);
   }) as unknown as jest.MockedFunction<typeof fetch>;
   return { fetchImpl, requested };
@@ -115,6 +120,22 @@ const scenarios: Array<{
       'https://security.access.redhat.com/data/csaf/v2/advisories/changes.csv',
       'https://security.access.redhat.com/data/csaf/v2/advisories/2026/rhsa-2026_9999.json',
     ],
+  },
+  {
+    name: 'MSRC updates index',
+    run: (feedMirrorUrl, fetchImpl) => downloadMsrcUpdatesIndex({ feedMirrorUrl, fetchImpl }),
+    vendorUrls: ['https://api.msrc.microsoft.com/cvrf/v3.0/updates'],
+  },
+  {
+    name: 'MSRC monthly CVRF document',
+    run: async (feedMirrorUrl, fetchImpl) => {
+      const result = await downloadMsrcCvrf('2026-Nov', { feedMirrorUrl, fetchImpl });
+      if (result.status === 'ok') {
+        for await (const chunk of result.chunks) expect(chunk.byteLength).toBeGreaterThan(0);
+      }
+      return result;
+    },
+    vendorUrls: ['https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2026-Nov'],
   },
   {
     name: 'CISA KEV',
@@ -275,7 +296,7 @@ describe('FEED_SOURCES drift', () => {
 
   it('vendor feed hosts are written only in feed_sources.ts', () => {
     const hosts =
-      /security-metadata\.canonical\.com|security\.access\.redhat\.com\/data|www\.cisa\.gov\/sites/;
+      /security-metadata\.canonical\.com|security\.access\.redhat\.com\/data|www\.cisa\.gov\/sites|api\.msrc\.microsoft\.com/;
     expect(files.filter(({ text }) => hosts.test(text)).map(({ name }) => name)).toEqual([
       'lib/feeds/feed_sources.ts',
     ]);

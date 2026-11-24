@@ -17,6 +17,7 @@ import { parseUbuntuOval } from './ubuntu_oval';
 import { parseRhelOval } from './rhel_oval';
 import {
   CANONICAL_OVAL_BASE_URL,
+  MSRC_CVRF_BASE_URL,
   REDHAT_CSAF_BASE_URL,
   REDHAT_OVAL_BASE_URL,
 } from './feed_sources';
@@ -99,6 +100,43 @@ const isCsafRelease = (os: FeedOs): boolean =>
 
 /** A non-CSAF OVAL feed is at most {@link MAX_FEED_BYTES}; headers and body share one deadline. */
 export const FEED_DOWNLOAD_TIMEOUT_MS = 5 * 60 * 1000;
+
+/** The MSRC `updates` index lists every month since 1999 (about 100 KB today). */
+export const MAX_MSRC_UPDATES_BYTES = 8 * 1024 * 1024;
+
+/** `2026-Nov`: the token MSRC names a monthly CVRF document by. */
+const MSRC_MONTH = /^\d{4}-(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/;
+
+export const isMsrcMonth = (month: string): boolean => MSRC_MONTH.test(month);
+
+export const MSRC_UPDATES_URL = `${MSRC_CVRF_BASE_URL}updates`;
+
+/** The monthly CVRF document URL; the token comes from the index, so it is validated. */
+export const msrcCvrfUrl = (month: string): string => {
+  if (!isMsrcMonth(month)) throw new Error(`Not an MSRC CVRF month: ${JSON.stringify(month)}`);
+  return `${MSRC_CVRF_BASE_URL}cvrf/${month}`;
+};
+
+export type DownloadMsrcIndexResult =
+  | ({ status: 'ok'; body: Uint8Array } & DownloadFeedTiming)
+  /** MSRC has no such document (HTTP 404). */
+  | ({ status: 'unavailable'; url: string } & DownloadFeedTiming);
+
+export type DownloadMsrcCvrfResult =
+  /**
+   * `chunks` is the live body: read it once, it is never buffered whole. `cancel` releases the
+   * deadline timer and the body; the caller runs it in a `finally`, because a stream that is
+   * never iterated cannot clean up after itself.
+   */
+  | { status: 'ok'; url: string; chunks: AsyncIterable<Uint8Array>; cancel: () => Promise<void> }
+  | { status: 'unavailable'; url: string };
+
+export interface DownloadMsrcOptions {
+  signal?: AbortSignal;
+  fetchImpl?: typeof fetch;
+  /** Air-gap mirror base; required so a caller that forgets to pass it down fails the type check. */
+  feedMirrorUrl: string | undefined;
+}
 
 export interface FeedUrlOptions {
   /** RHEL: use the feed that also carries unpatched (unfixed CVE) definitions. */
@@ -295,6 +333,103 @@ export const downloadFeed = async (
       downloadedBytes: body.byteLength,
     };
   });
+};
+
+const MSRC_HEADERS = { accept: 'application/json' };
+
+/** Downloads the MSRC CVRF `updates` index (the months and their `CurrentReleaseDate`). */
+export const downloadMsrcUpdatesIndex = async ({
+  signal,
+  fetchImpl = fetch,
+  feedMirrorUrl,
+}: DownloadMsrcOptions): Promise<DownloadMsrcIndexResult> => {
+  const url = resolveFeedUrl(MSRC_UPDATES_URL, feedMirrorUrl);
+  const startedAt = Date.now();
+  const timing = (downloadedBytes: number): DownloadFeedTiming => ({
+    durationMs: Math.max(1, Math.round(Date.now() - startedAt)),
+    downloadedBytes,
+  });
+  return withTimeout(signal, FEED_DOWNLOAD_TIMEOUT_MS, async (requestSignal) => {
+    const response = await fetchImpl(url, { signal: requestSignal, headers: MSRC_HEADERS });
+    if (response.status === 404) {
+      await response.body?.cancel();
+      return { status: 'unavailable', url, ...timing(0) };
+    }
+    await expectOk(response, `MSRC ${url}`);
+    const body = await readCappedTo(response, MAX_MSRC_UPDATES_BYTES, requestSignal);
+    if (!body) throw new Error(`MSRC ${url} is over ${MAX_MSRC_UPDATES_BYTES} bytes`);
+    return { status: 'ok', body, ...timing(body.byteLength) };
+  });
+};
+
+/**
+ * Opens one monthly CVRF document ('2026-Nov') as a chunk stream. The API sends no gzip,
+ * etag or last-modified (`cache-control: no-store`), and the biggest month so far is 32 MB,
+ * so the raw body is never held: `parseMsrcCvrf` consumes the chunks as they arrive. One
+ * deadline covers the headers and the whole read, the body is capped at
+ * {@link MAX_FEED_BYTES}, and the timer and reader are released when the stream ends, fails,
+ * is abandoned part-way, or the deadline passes; a stream never started needs `cancel()`.
+ */
+export const downloadMsrcCvrf = async (
+  month: string,
+  { signal, fetchImpl = fetch, feedMirrorUrl }: DownloadMsrcOptions
+): Promise<DownloadMsrcCvrfResult> => {
+  const url = resolveFeedUrl(msrcCvrfUrl(month), feedMirrorUrl);
+  signal?.throwIfAborted();
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(new DOMException('The operation timed out', 'TimeoutError')),
+    FEED_DOWNLOAD_TIMEOUT_MS
+  );
+  timer.unref?.();
+  const onCallerAbort = () => controller.abort(signal?.reason);
+  signal?.addEventListener('abort', onCallerAbort, { once: true });
+  const release = (): void => {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', onCallerAbort);
+  };
+  try {
+    const response = await raceAbort(
+      fetchImpl(url, { signal: controller.signal, headers: MSRC_HEADERS }),
+      controller.signal
+    );
+    if (response.status === 404) {
+      await response.body?.cancel();
+      release();
+      return { status: 'unavailable', url };
+    }
+    await expectOk(response, `MSRC ${url}`);
+    const declared = Number(response.headers.get('content-length'));
+    if (declared > MAX_FEED_BYTES) {
+      await response.body?.cancel();
+      throw tooLarge(url, declared);
+    }
+    const reader = response.body?.getReader();
+    const cancel = async (): Promise<void> => {
+      release();
+      await reader?.cancel().catch(() => undefined);
+    };
+    // The deadline or the caller's abort also closes a body nobody has started to read.
+    controller.signal.addEventListener('abort', () => void cancel(), { once: true });
+    const chunks = (async function* () {
+      let total = 0;
+      try {
+        while (reader) {
+          const { done, value } = await raceAbort(reader.read(), controller.signal);
+          if (done) return;
+          total += value.byteLength;
+          if (total > MAX_FEED_BYTES) throw tooLarge(url, total);
+          yield value;
+        }
+      } finally {
+        await cancel();
+      }
+    })();
+    return { status: 'ok', url, chunks, cancel };
+  } catch (error) {
+    release();
+    throw error;
+  }
 };
 
 /** Decompresses and parses a feed body from {@link downloadFeed}. */
