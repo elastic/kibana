@@ -168,6 +168,7 @@ async function getJoinStep(workflowsApi: WorkflowsApiService, executionId: strin
   );
   const dispatchedExecutionIds = stepExecutions
     .filter((s) => s.stepId === 'dispatch_health_check' && s.stepType === 'workflow.executeAsync')
+    .sort((left, right) => left.startedAt.localeCompare(right.startedAt))
     .map((s) => (s.output as { executionId: string }).executionId);
   const output = joinStep?.output as { results: AwaitedExecutionResult[] } | undefined;
   return { joinStep, dispatchedExecutionIds, results: output?.results ?? [] };
@@ -182,9 +183,7 @@ async function expectResultsForDispatched(
   expect(dispatchedExecutionIds).toHaveLength(3);
   expect(dispatchedExecutionIds.every((id) => typeof id === 'string' && id.length > 0)).toBe(true);
   expect(new Set(dispatchedExecutionIds).size).toBe(3);
-  expect(results.map(({ executionId }) => executionId).sort()).toStrictEqual(
-    [...dispatchedExecutionIds].sort()
-  );
+  expect(results.map(({ executionId }) => executionId)).toStrictEqual(dispatchedExecutionIds);
 
   const childExecutions = await Promise.all(
     dispatchedExecutionIds.map((id) => workflowsApi.getExecution(id))
