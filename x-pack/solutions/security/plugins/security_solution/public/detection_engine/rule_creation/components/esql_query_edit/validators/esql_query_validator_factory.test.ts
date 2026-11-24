@@ -11,6 +11,7 @@ import type { FormData, ValidationFunc, ValidationFuncArg } from '../../../../..
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import { esqlQueryValidatorFactory } from './esql_query_validator_factory';
 import { ESQL_ERROR_CODES } from './error_codes';
+import { ESQL_MISSING_ID_FIELD_WARNING } from './translations';
 
 jest.mock('../../../logic/esql_query_columns', () => ({
   fetchEsqlQueryColumns: jest.fn(),
@@ -36,6 +37,30 @@ describe('esqlQueryValidator', () => {
           code: ESQL_ERROR_CODES.INVALID_SYNTAX,
         })
     );
+
+    it('reports the parser message for a trailing unexpected token', async () => {
+      const result = await createValidator()({
+        value: createEsqlQueryFieldValue('from auditbeat* | where true test'),
+      } as EsqlQueryValidatorArgs);
+
+      expect(result).toMatchObject({
+        code: ESQL_ERROR_CODES.INVALID_SYNTAX,
+        message: `Error validating ES|QL: "SyntaxError: extraneous input 'test' expecting <EOF>"`,
+      });
+      expect(fetchEsqlQueryColumnsMock).not.toHaveBeenCalled();
+    });
+
+    it('reports an unknown command as a syntax error without calling the server', async () => {
+      const result = await createValidator()({
+        value: createEsqlQueryFieldValue(
+          'from auditbeat* metadata _id, _version, _index | not_existing_operator'
+        ),
+      } as EsqlQueryValidatorArgs);
+
+      expect(result).toMatchObject({ code: ESQL_ERROR_CODES.INVALID_SYNTAX });
+      expect(result?.message).toContain('Error validating ES|QL');
+      expect(fetchEsqlQueryColumnsMock).not.toHaveBeenCalled();
+    });
 
     it.each([
       ['from test* metadata _id'],
@@ -83,6 +108,7 @@ describe('esqlQueryValidator', () => {
         } as EsqlQueryValidatorArgs)
       ).resolves.toMatchObject({
         code: ESQL_ERROR_CODES.MISSING_ID_FIELD,
+        message: ESQL_MISSING_ID_FIELD_WARNING,
       });
     });
 
@@ -98,14 +124,21 @@ describe('esqlQueryValidator', () => {
       });
     });
 
-    it('succeeds for non-aggregating query without explicit metadata when injection adds _id', () => {
-      fetchEsqlQueryColumnsMock.mockResolvedValue([{ id: '_id' }, { id: 'agent.name' }]);
+    it('succeeds for non-aggregating query without explicit metadata when injection adds _id', async () => {
+      fetchEsqlQueryColumnsMock.mockImplementation(async ({ esqlQuery }: { esqlQuery: string }) =>
+        /metadata _id/i.test(esqlQuery)
+          ? [{ id: '_id' }, { id: 'agent.name' }]
+          : [{ id: 'agent.name' }]
+      );
 
-      return expect(
-        createValidator()({
-          value: createEsqlQueryFieldValue('from test*'),
-        } as EsqlQueryValidatorArgs)
-      ).resolves.toBeUndefined();
+      const result = await createValidator()({
+        value: createEsqlQueryFieldValue('from test*'),
+      } as EsqlQueryValidatorArgs);
+
+      expect(result).toBeUndefined();
+      expect(fetchEsqlQueryColumnsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: expect.stringMatching(/metadata _id/i) })
+      );
     });
   });
 

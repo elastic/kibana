@@ -20,6 +20,7 @@ export class RuleDetailsPage {
   readonly description: Locator;
   readonly investigationNotesToggle: Locator;
   readonly investigationNotes: Locator;
+  readonly investigationFieldValues: Locator;
   readonly alertsTab: Locator;
   readonly actionsMenuButton: Locator;
   readonly duplicateMenuItem: Locator;
@@ -39,6 +40,9 @@ export class RuleDetailsPage {
     this.description = this.page.testSubj.locator('stepAboutRuleDetailsToggleDescriptionText');
     this.investigationNotesToggle = this.page.testSubj.locator('stepAboutDetailsToggle-notes');
     this.investigationNotes = this.page.testSubj.locator('stepAboutDetailsNoteContent');
+    this.investigationFieldValues = this.page.testSubj.locator(
+      'investigationFieldsPropertyValueItem'
+    );
     this.alertsTab = this.page.testSubj.locator('navigation-alerts');
     this.actionsMenuButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.duplicateMenuItem = this.page.testSubj.locator('rules-details-duplicate-rule');
