@@ -9,7 +9,7 @@
 
 import React, { useId } from 'react';
 import type { ReactNode } from 'react';
-import { EuiComboBox, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
@@ -39,6 +39,7 @@ export const ConfigPanelEsqlAnnotation = ({
   return (
     <>
       {queryEditor}
+      <EuiSpacer size="m" />
       <EuiFormRow display="rowCompressed" fullWidth>
         <EuiSwitch
           id={rangeSwitchId}
