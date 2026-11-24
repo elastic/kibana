@@ -78,7 +78,7 @@ const conversationOf = (round: DreamingMemory): string => {
 };
 
 /**
- * Batches rounds that share permissions for the dreaming model, packing whole conversations in
+ * Batches rounds that share permissions and user for the dreaming model, packing whole conversations in
  * order up to `batchTokens` and `MAX_DREAMING_STEP_MEMORIES` rounds, and splitting larger ones
  * between rounds or into parts.
  */
@@ -87,7 +87,9 @@ export const batchByConversation = (
   batchTokens: number
 ): DreamingMemory[][] => {
   const batches: DreamingMemory[][] = [];
-  for (const audience of groupInOrder(rounds, ({ permissions }) => JSON.stringify(permissions))) {
+  for (const audience of groupInOrder(rounds, ({ permissions, user_id: userId }) =>
+    JSON.stringify([permissions, userId])
+  )) {
     let batch: DreamingMemory[] = [];
     let tokens = 0;
     const flush = () => {

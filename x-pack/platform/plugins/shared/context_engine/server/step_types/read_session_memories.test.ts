@@ -57,6 +57,7 @@ describe('readSessionMemories step', () => {
             title: 'Priya prefers aisle seats.',
             content: memory.content,
             updated_at: memory.revisedAt,
+            user_id: 'jdoe',
             attributes: { source: 'chat', 'session.id': 'session-1' },
             permissions: { kibana: { privileges: [{ space: 'team-a' }] } },
           },

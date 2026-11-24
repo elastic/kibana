@@ -931,4 +931,94 @@ describe('addReferences', () => {
 
     expect(addReferences(relationships, citations(1))).toEqual([...relationships, ...citations(1)]);
   });
+
+  describe('for the memories of one user', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      stored.clear();
+      jest.mocked(findKiRevision).mockImplementation(async ({ kiId }) => {
+        const source = stored.get(kiId);
+        return source ? revisionOf(source) : undefined;
+      });
+      jest.mocked(putKiRevision).mockResolvedValue(undefined);
+      jest.mocked(softDeleteKi).mockResolvedValue(undefined);
+    });
+
+    const factOp = {
+      op: 'upsert_fact' as const,
+      id: 'fact-1',
+      type: 'preference',
+      title: 'Tom eats vegetarian',
+      content: 'Tom always wants vegetarian meals.',
+      sourceMemoryIds: ['session-memory:m-1'],
+    };
+    const memoryPermissions = new Map([['session-memory:m-1', undefined]]);
+
+    it("stores what it writes as the user's own", async () => {
+      const counts = await applyOperations(
+        { ...context(undefined, memoryPermissions), userId: 'jdoe' },
+        [factOp]
+      );
+
+      expect(counts.created).toBe(1);
+      expect(written()[0]).toEqual(expect.objectContaining({ id: 'fact-1', user_id: 'jdoe' }));
+    });
+
+    it('updates a KI of the same user, keeping it theirs', async () => {
+      stored.set('fact-1', {
+        id: 'fact-1',
+        type: 'fact.preference',
+        title: 'Tom eats vegetarian',
+        content: 'old',
+        user_id: 'jdoe',
+      });
+
+      const counts = await applyOperations(
+        { ...context(undefined, memoryPermissions), userId: 'jdoe' },
+        [factOp]
+      );
+
+      expect(counts.updated).toBe(1);
+      expect(written()[0].user_id).toBe('jdoe');
+    });
+
+    it('rejects a write to a KI of another user, or of none, and a user-less write to a user KI', async () => {
+      stored.set('fact-1', {
+        id: 'fact-1',
+        type: 'fact.preference',
+        title: 't',
+        content: 'c',
+        user_id: 'someone-else',
+      });
+      stored.set('fact-2', { id: 'fact-2', type: 'fact.preference', title: 't', content: 'c' });
+
+      const forUser = await applyOperations(
+        { ...context(undefined, memoryPermissions), userId: 'jdoe' },
+        [factOp, { ...factOp, id: 'fact-2' }]
+      );
+      const forNone = await applyOperations(context(undefined, memoryPermissions), [factOp]);
+
+      expect(forUser.rejected).toHaveLength(2);
+      expect(forNone.rejected).toHaveLength(1);
+      expect(written()).toEqual([]);
+    });
+
+    it('deletes only the KIs of the same user', async () => {
+      stored.set('fact-1', {
+        id: 'fact-1',
+        type: 'fact.preference',
+        title: 't',
+        content: 'c',
+        user_id: 'someone-else',
+      });
+
+      const result = await applyOperations(
+        { ...context(undefined, memoryPermissions), userId: 'jdoe' },
+        [{ op: 'delete', id: 'fact-1' }]
+      );
+
+      expect(result.deleted).toBe(0);
+      expect(result.rejected).toHaveLength(1);
+    });
+  });
 });

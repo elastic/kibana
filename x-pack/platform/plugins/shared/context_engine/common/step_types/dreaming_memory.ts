@@ -24,6 +24,8 @@ export const dreamingMemorySchema = lazySchema(() =>
     title: z.string(),
     content: z.string(),
     updated_at: z.string(),
+    /** The user the memory belongs to: what dreams on it is visible to that user only. */
+    user_id: z.string().optional(),
     attributes: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
     permissions: z.object({
       kibana: z.object({ privileges: z.array(z.object({ space: z.string() })) }),

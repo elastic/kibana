@@ -215,6 +215,7 @@ export const createSessionEventsService = (
         {
           sessionId,
           turnId,
+          userId: stored[0].user_id,
           endedAt: stored.reduce(
             (latest, event) => (event['@timestamp'] > latest ? event['@timestamp'] : latest),
             stored[0]['@timestamp']

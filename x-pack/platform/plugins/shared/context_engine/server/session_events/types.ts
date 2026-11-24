@@ -124,6 +124,8 @@ export interface ReadSessionTurnsInput {
 export interface SessionTurn {
   sessionId: string;
   turnId: string;
+  /** The user the turn's events were saved for. */
+  userId: string;
   /** When the last of the turn's events was saved. */
   endedAt: string;
   /** In the order the agent created them, without resent duplicates. */

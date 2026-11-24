@@ -37,6 +37,7 @@ const turnOf = (
 ): SessionTurn => ({
   sessionId: 'session-1',
   turnId,
+  userId: 'jdoe',
   endedAt,
   events: [event({ type: 'user', id: `${turnId}-u`, content: text, ...base, turn_id: turnId })],
 });
@@ -170,6 +171,7 @@ describe('readSessionTranscripts', () => {
           title: 'Agent conversation, turn ending 2026-11-16T09:00:00.000Z',
           content: 'User: I always want vegetarian meals.\nAssistant: Noted.',
           updated_at: '2026-11-16T09:00:00.000Z',
+          user_id: 'jdoe',
           attributes: { 'session.id': 'session-1', 'session.turn_id': 'turn-1' },
           permissions: { kibana: { privileges: [{ space: 'team-a' }] } },
         },

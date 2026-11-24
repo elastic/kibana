@@ -335,16 +335,21 @@ export const resolveOrCreateAiIndex = async (
   return { dest, managed: false };
 };
 
-/** Fails the step when a dreaming batch's memories don't all have the same permissions. */
+/** Fails the step when a dreaming batch's memories don't all have the same permissions and user. */
 export const assertSameMemoryPermissions = (
-  memories: ReadonlyArray<{ permissions?: KiPermissions }>
+  memories: ReadonlyArray<{ permissions?: KiPermissions; user_id?: string }>
 ): void => {
   const [first] = memories;
-  if (memories.some(({ permissions }) => !samePermissions(permissions, first?.permissions))) {
+  if (
+    memories.some(
+      ({ permissions, user_id: userId }) =>
+        !samePermissions(permissions, first?.permissions) || userId !== first?.user_id
+    )
+  ) {
     throw new ExecutionError({
       type: 'ValidationError',
       message:
-        "The memories don't all have the same permissions: each dreaming batch must hold one audience's memories",
+        "The memories don't all have the same permissions and user: each dreaming batch must hold one audience's memories",
     });
   }
 };

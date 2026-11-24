@@ -117,7 +117,7 @@ steps:
         type: foreach
         foreach: >-
           {%- assign batches = "" | split: "" -%}
-          {%- assign audiences = variables.memories | group_by_exp: "memory", "memory.permissions | json" -%}
+          {%- assign audiences = variables.memories | group_by_exp: "memory", "memory.permissions | json | append: memory.user_id" -%}
           {%- for audience in audiences -%}
           {%- assign chunks = audience.items | chunk: 100 -%}
           {%- assign batches = batches | concat: chunks -%}
@@ -143,6 +143,7 @@ steps:
                 - attributes
                 - references
                 - permissions
+                - user_id
                 - governance.lifecycle.status
               query:
                 bool:
@@ -259,9 +260,11 @@ steps:
 
                 EXISTING (one item per line, none when empty):
                 {%- assign audience = foreach.item.first.permissions | json %}
+                {%- assign batch_user = foreach.item.first.user_id | default: '' %}
                 {%- for hit in steps.read_existing.output.hits.hits %}
                 {%- assign item_audience = hit._source.permissions | json %}
-                {%- unless hit._source.governance.lifecycle.status == 'deleted' or hit._source.governance.lifecycle.status == 'verification_failed' or item_audience != audience %}
+                {%- assign item_user = hit._source.user_id | default: '' %}
+                {%- unless hit._source.governance.lifecycle.status == 'deleted' or hit._source.governance.lifecycle.status == 'verification_failed' or item_audience != audience or item_user != batch_user %}
                 {{ hit._source | json }}
                 {%- endunless %}
                 {%- endfor %}

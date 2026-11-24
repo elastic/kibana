@@ -29,7 +29,7 @@ const titleOf = (content: string): string => {
 };
 
 const toMemory = (
-  { id, sessionId, content, attributes, revisedAt }: SessionMemory,
+  { id, sessionId, userId, content, attributes, revisedAt }: SessionMemory,
   spaceId: string
 ): ReadSessionMemoriesOutput['memories'][number] => ({
   id: `${SESSION_MEMORY_ID_PREFIX}${id}`,
@@ -37,6 +37,7 @@ const toMemory = (
   title: titleOf(content),
   content,
   updated_at: revisedAt,
+  user_id: userId,
   attributes: { ...attributes, 'session.id': sessionId },
   permissions: { kibana: { privileges: [{ space: spaceId }] } },
 });

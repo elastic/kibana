@@ -72,7 +72,7 @@ export const buildTurnTranscript = (events: readonly StoredSessionEvent[]): stri
 };
 
 const toMemory = (
-  { sessionId, turnId, endedAt }: SessionTurn,
+  { sessionId, turnId, userId, endedAt }: SessionTurn,
   transcript: string,
   spaceId: string
 ): DreamingMemory => ({
@@ -81,6 +81,7 @@ const toMemory = (
   title: `Agent conversation, turn ending ${endedAt}`,
   content: transcript,
   updated_at: endedAt,
+  user_id: userId,
   attributes: { 'session.id': sessionId, 'session.turn_id': turnId },
   permissions: { kibana: { privileges: [{ space: spaceId }] } },
 });

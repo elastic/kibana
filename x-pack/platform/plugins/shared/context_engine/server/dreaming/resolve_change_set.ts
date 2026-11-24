@@ -52,6 +52,8 @@ export interface ResolveContext {
   existing: ReadonlyMap<string, DreamedKi>;
   /** The permissions of each memory the model was shown, which key new entities by audience. */
   memoryPermissions: ReadonlyMap<string, KiPermissions | undefined>;
+  /** The user the memories belong to: a new entity is that user's own, apart from others of its name. */
+  userId?: string;
 }
 
 export interface UpsertEntityOperation {
@@ -111,7 +113,7 @@ const reject: (reason: string) => never = (reason) => {
 /** Validates a change set and resolves its refs to KI ids, rejecting invalid items. */
 export const resolveChangeSet = (
   changeSet: DreamChangeSet,
-  { executionId, vocabulary, memories, existing, memoryPermissions }: ResolveContext
+  { executionId, vocabulary, memories, existing, memoryPermissions, userId }: ResolveContext
 ): ResolvedChangeSet => {
   const operations: DreamingOperation[] = [];
   const rejected: ResolvedChangeSet['rejected'] = [];
@@ -200,7 +202,10 @@ export const resolveChangeSet = (
           entityId(
             type,
             title,
-            audienceKeyOf(sourceMemoryIds.map((id) => memoryPermissions.get(id)))
+            audienceKeyOf(
+              sourceMemoryIds.map((id) => memoryPermissions.get(id)),
+              userId
+            )
           ),
         type,
         title,
