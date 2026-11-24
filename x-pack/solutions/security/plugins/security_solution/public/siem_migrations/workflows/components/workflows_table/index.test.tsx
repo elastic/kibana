@@ -353,6 +353,47 @@ describe('MigrationWorkflowsTable', () => {
     });
   });
 
+  describe('highlighting the opened workflow', () => {
+    const getRowOf = async (title: string) =>
+      (await screen.findAllByText(title))
+        .map((element) => element.closest('tr'))
+        .find((row): row is HTMLTableRowElement => row !== null) as HTMLTableRowElement;
+    const backgroundOf = (row: HTMLElement) => window.getComputedStyle(row).backgroundColor;
+
+    it('should not highlight any row while no workflow is opened', async () => {
+      renderTable();
+
+      expect(backgroundOf(await getRowOf('Phishing triage'))).toBe('');
+    });
+
+    it('should highlight the row of the opened workflow', async () => {
+      renderTable();
+      fireEvent.click((await screen.findAllByTestId('workflowName'))[0]);
+      await screen.findByTestId('workflowDetailsFlyout');
+
+      expect(backgroundOf(await getRowOf('Phishing triage'))).not.toBe('');
+      expect(backgroundOf(await getRowOf('Enrich IOCs'))).toBe('');
+    });
+
+    it('should move the highlight when navigating to the next workflow', async () => {
+      renderTable();
+      fireEvent.click((await screen.findAllByTestId('workflowName'))[0]);
+
+      fireEvent.click(await screen.findByTestId('flyoutPrevNextNavNextButton'));
+
+      expect(backgroundOf(await getRowOf('Enrich IOCs'))).not.toBe('');
+      expect(backgroundOf(await getRowOf('Phishing triage'))).toBe('');
+    });
+
+    it('should remove the highlight when the flyout is closed', async () => {
+      renderTable();
+      fireEvent.click((await screen.findAllByTestId('workflowName'))[0]);
+      fireEvent.click(await screen.findByTestId('detailsFlyoutCloseButton'));
+
+      await waitFor(async () => expect(backgroundOf(await getRowOf('Phishing triage'))).toBe(''));
+    });
+  });
+
   describe('tooltips', () => {
     it('should show the full description when hovering the description', async () => {
       renderTable();

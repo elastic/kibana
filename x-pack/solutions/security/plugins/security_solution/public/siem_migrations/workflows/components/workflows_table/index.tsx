@@ -14,6 +14,7 @@ import {
   EuiSkeletonText,
   EuiSkeletonTitle,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -101,6 +102,24 @@ export const MigrationWorkflowsTable = React.memo<MigrationWorkflowsTableProps>(
     const openedWorkflow = useMemo(
       () => migrationWorkflows.find((workflow) => workflow.id === openedWorkflowId),
       [migrationWorkflows, openedWorkflowId]
+    );
+
+    // highlights the row of the workflow opened in the flyout, also while navigating with previous/next
+    const { euiTheme } = useEuiTheme();
+    const rowProps = useCallback(
+      (workflow: WorkflowMigrationWorkflow) => ({ 'data-workflow-id': workflow.id }),
+      []
+    );
+    const highlightCss = useMemo(
+      () =>
+        openedWorkflow
+          ? {
+              [`.euiTableRow[data-workflow-id="${openedWorkflow.id}"]`]: {
+                backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+              },
+            }
+          : undefined,
+      [openedWorkflow, euiTheme.colors.backgroundBaseInteractiveSelect]
     );
 
     const columns = useMemo(
@@ -217,18 +236,21 @@ export const MigrationWorkflowsTable = React.memo<MigrationWorkflowsTableProps>(
                 </UtilityBarSection>
               </UtilityBar>
               <EuiSpacer size="m" />
-              <MemoizedBasicTable<WorkflowMigrationWorkflow>
-                tableCaption={i18n.WORKFLOWS_MIGRATION_TABLE_CAPTION}
-                loading={isLoading}
-                items={migrationWorkflows}
-                pagination={pagination}
-                sorting={sorting}
-                onChange={onTableChange}
-                selection={tableSelection}
-                itemId="id"
-                data-test-subj="workflows-translation-table"
-                columns={columns}
-              />
+              <div css={highlightCss}>
+                <MemoizedBasicTable<WorkflowMigrationWorkflow>
+                  tableCaption={i18n.WORKFLOWS_MIGRATION_TABLE_CAPTION}
+                  loading={isLoading}
+                  items={migrationWorkflows}
+                  pagination={pagination}
+                  sorting={sorting}
+                  onChange={onTableChange}
+                  selection={tableSelection}
+                  itemId="id"
+                  data-test-subj="workflows-translation-table"
+                  rowProps={rowProps}
+                  columns={columns}
+                />
+              </div>
               {openedWorkflow && (
                 <WorkflowMigrationDetailsFlyout
                   migrationWorkflow={openedWorkflow}
