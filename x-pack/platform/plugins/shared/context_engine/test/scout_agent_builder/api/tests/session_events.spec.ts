@@ -28,7 +28,7 @@ const WRITABLE_INDEX = `ai-index-idx-scout-events-writable-${RUN_ID}`;
 const FORBIDDEN_INDEX = `ai-index-idx-scout-events-forbidden-${RUN_ID}`;
 const WRITABLE_AI_INDEX_ID = `scout-events-writable-${RUN_ID}`;
 const FORBIDDEN_AI_INDEX_ID = `scout-events-forbidden-${RUN_ID}`;
-const MISSING_AI_INDEX_ID = `scout-events-missing-${RUN_ID}`;
+const DEFAULT_SPACE_AI_INDEX_ID = `scout-events-default-space-${RUN_ID}`;
 const TARGET_USER_ID = `scout-other-user-${RUN_ID}`;
 
 const spacePath = (spaceId: string, path: string) => `s/${spaceId}/${path}`;
@@ -130,11 +130,12 @@ apiTest.describe('context engine session events API', { tag: tags.stateful.class
     );
 
     const adminHeaders = { ...adminCredentials.apiKeyHeader, ...API_HEADERS };
-    for (const [id, index] of [
-      [WRITABLE_AI_INDEX_ID, WRITABLE_INDEX],
-      [FORBIDDEN_AI_INDEX_ID, FORBIDDEN_INDEX],
+    for (const [path, id, index] of [
+      [spacePath(OTHER_SPACE_ID, AI_INDEX_COLLECTION_PATH), WRITABLE_AI_INDEX_ID, WRITABLE_INDEX],
+      [spacePath(OTHER_SPACE_ID, AI_INDEX_COLLECTION_PATH), FORBIDDEN_AI_INDEX_ID, FORBIDDEN_INDEX],
+      [AI_INDEX_COLLECTION_PATH, DEFAULT_SPACE_AI_INDEX_ID, WRITABLE_INDEX],
     ] as const) {
-      const response = await apiClient.post(spacePath(OTHER_SPACE_ID, AI_INDEX_COLLECTION_PATH), {
+      const response = await apiClient.post(path, {
         headers: adminHeaders,
         responseType: 'json',
         body: registerAiIndex(id, { type: 'index', value: index }),
@@ -144,30 +145,40 @@ apiTest.describe('context engine session events API', { tag: tags.stateful.class
   });
 
   apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
-    if (adminCredentials) {
-      const adminHeaders = { ...adminCredentials.apiKeyHeader, ...API_HEADERS };
-      for (const id of [WRITABLE_AI_INDEX_ID, FORBIDDEN_AI_INDEX_ID]) {
-        await apiClient.delete(spacePath(OTHER_SPACE_ID, `${AI_INDEX_COLLECTION_PATH}/${id}`), {
-          headers: adminHeaders,
-          responseType: 'json',
-        });
+    try {
+      if (adminCredentials) {
+        const adminHeaders = { ...adminCredentials.apiKeyHeader, ...API_HEADERS };
+        await Promise.allSettled([
+          ...[WRITABLE_AI_INDEX_ID, FORBIDDEN_AI_INDEX_ID].map((id) =>
+            apiClient.delete(spacePath(OTHER_SPACE_ID, `${AI_INDEX_COLLECTION_PATH}/${id}`), {
+              headers: adminHeaders,
+              responseType: 'json',
+            })
+          ),
+          apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${DEFAULT_SPACE_AI_INDEX_ID}`, {
+            headers: adminHeaders,
+            responseType: 'json',
+          }),
+        ]);
       }
-    }
-    await esClient.indices.delete({ index: [WRITABLE_INDEX, FORBIDDEN_INDEX] }, { ignore: [404] });
-    await kbnClient.spaces.delete(OTHER_SPACE_ID);
-
-    if (initialMemorySetting) {
-      if (initialMemorySetting.value === undefined) {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `${GLOBAL_SETTINGS_PATH}/${CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID}`,
-        });
-      } else {
-        await kbnClient.uiSettings.updateGlobal({
-          [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: initialMemorySetting.value,
-        });
+      await Promise.allSettled([
+        esClient.indices.delete({ index: [WRITABLE_INDEX, FORBIDDEN_INDEX] }, { ignore: [404] }),
+        kbnClient.spaces.delete(OTHER_SPACE_ID),
+      ]);
+    } finally {
+      if (initialMemorySetting) {
+        if (initialMemorySetting.value === undefined) {
+          await kbnClient.request({
+            method: 'DELETE',
+            path: `${GLOBAL_SETTINGS_PATH}/${CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID}`,
+          });
+        } else {
+          await kbnClient.uiSettings.updateGlobal({
+            [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: initialMemorySetting.value,
+          });
+        }
+        await kbnClient.uiSettings.waitForEventualCacheRefresh();
       }
-      await kbnClient.uiSettings.waitForEventualCacheRefresh();
     }
   });
 
@@ -302,7 +313,7 @@ apiTest.describe('context engine session events API', { tag: tags.stateful.class
       );
 
       await apiTest.step(
-        'returns 404 when the AI index is not registered in the space',
+        'returns 404 when the AI index is only registered in another space',
         async () => {
           const response = await apiClient.post(
             spacePath(OTHER_SPACE_ID, SESSION_EVENTS_SAVE_PATH),
@@ -311,13 +322,16 @@ apiTest.describe('context engine session events API', { tag: tags.stateful.class
               responseType: 'json',
               body: {
                 session_id: `session-missing-index-${RUN_ID}`,
-                ai_index_ids: [MISSING_AI_INDEX_ID],
+                ai_index_ids: [DEFAULT_SPACE_AI_INDEX_ID],
                 events: [metaEvent('evt-missing')],
               },
             }
           );
 
           expect(response).toHaveStatusCode(404);
+          expect(response.body).toMatchObject({
+            message: expect.stringContaining(DEFAULT_SPACE_AI_INDEX_ID),
+          });
         }
       );
     }

@@ -27032,6 +27032,34 @@ paths:
                 required:
                   - message
           description: Context Engine or memory is turned off, or an AI index does not exist.
+        '429':
+          content:
+            application/json:
+              examples:
+                tooManyRequestsExample:
+                  description: Elasticsearch rejected the whole request with 429; retry with backoff
+                  summary: Too many requests
+                  value:
+                    error: Too Many Requests
+                    message: 'es_rejected_execution_exception: too many requests'
+                    statusCode: 429
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch rejected the request because it is overloaded. The whole request was rejected (unlike individual `failed` items in a 200 response); retry with backoff.
       summary: Save session events
       tags:
         - context engine

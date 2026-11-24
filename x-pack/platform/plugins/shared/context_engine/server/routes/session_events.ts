@@ -287,6 +287,11 @@ export const registerSessionEventsRoutes = ({
               body: errorResponseSchema,
               description: 'Context Engine or memory is turned off, or an AI index does not exist.',
             },
+            429: {
+              body: errorResponseSchema,
+              description:
+                'Elasticsearch rejected the request because it is overloaded. The whole request was rejected (unlike individual `failed` items in a 200 response); retry with backoff.',
+            },
           },
         },
         options: {
