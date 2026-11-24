@@ -950,6 +950,63 @@ describe('getInitialAppState', () => {
   });
 
   describe('default columns', () => {
+    const patternsQuery = {
+      esql: 'FROM logs | STATS count = COUNT(*) BY Pattern = CATEGORIZE(message)',
+    };
+
+    test('ignores configured document columns for a new transformational ES|QL query', () => {
+      const services = createDiscoverServicesMock();
+      expect(services.uiSettings.get(DEFAULT_COLUMNS_SETTING)).toEqual(['default_column']);
+      const state = getInitialAppState({
+        query: patternsQuery,
+        services,
+        persistedTab: undefined,
+        initialUrlState: undefined,
+        dataView: dataViewMock,
+      });
+      expect(state.columns).toBeUndefined();
+    });
+
+    test.each([{ columns: [] }, { columns: ['Pattern', 'count'] }])(
+      'preserves saved ES|QL columns $columns despite space defaults',
+      ({ columns }) => {
+        const services = createDiscoverServicesMock();
+        const state = getInitialAppState({
+          query: patternsQuery,
+          services,
+          persistedTab: { ...getPersistedTab({ services }), columns },
+          initialUrlState: undefined,
+          dataView: dataViewMock,
+        });
+        expect(state.columns).toEqual(columns);
+      }
+    );
+
+    test.each([{ columns: [] }, { columns: ['Pattern', 'count'] }])(
+      'preserves explicit URL columns $columns despite space defaults',
+      ({ columns }) => {
+        const state = getInitialAppState({
+          query: patternsQuery,
+          services: createDiscoverServicesMock(),
+          persistedTab: undefined,
+          initialUrlState: { columns },
+          dataView: dataViewMock,
+        });
+        expect(state.columns).toEqual(columns);
+      }
+    );
+
+    test('keeps space defaults for document ES|QL queries', () => {
+      const state = getInitialAppState({
+        query: { esql: 'FROM logs | WHERE bytes > 0' },
+        services: createDiscoverServicesMock(),
+        persistedTab: undefined,
+        initialUrlState: undefined,
+        dataView: dataViewMock,
+      });
+      expect(state.columns).toEqual(['default_column']);
+    });
+
     test('should use persistedTab columns if provided', () => {
       const services = createDiscoverServicesMock();
       const appState = getInitialAppState({

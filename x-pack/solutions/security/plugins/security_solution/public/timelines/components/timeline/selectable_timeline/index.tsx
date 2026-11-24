@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { debounce, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { SortFieldTimelineEnum, type TimelineType } from '../../../../../common/api/timeline';
 

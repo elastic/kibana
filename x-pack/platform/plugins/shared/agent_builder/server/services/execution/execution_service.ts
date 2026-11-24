@@ -96,7 +96,7 @@ import {
   createConversationIdSetEvent,
   createConversationUpdatedEvent,
 } from './utils/events';
-import { userMessageActor } from '../conversation/client/rounds_to_events';
+import { runTimelineExecutionId, userMessageActor } from '../conversation/client/rounds_to_events';
 
 /** The still-recorded parent execution that spawned a sub-agent execution. */
 interface ParentExecution {
@@ -317,7 +317,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     if (conversationParams && conversation && conversationParams.storeConversation !== false) {
       const pendingResumeRound = getPendingResumeRound(conversation);
-      const activeExecution: AcquireActiveExecution = { action: 'acquire', executionId };
+      const activeExecution: AcquireActiveExecution = {
+        action: 'acquire',
+        executionId,
+        timelineExecutionId: runTimelineExecutionId({
+          events: conversation.events,
+          pausedRoundId: pendingResumeRound?.id,
+          roundId,
+        }),
+      };
 
       try {
         if (pendingResumeRound) {
@@ -938,6 +946,16 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }),
       parentExecution,
     };
+  }
+
+  async assertCanRunAgent({
+    request,
+    agentId,
+  }: {
+    request: KibanaRequest;
+    agentId: string;
+  }): Promise<void> {
+    await this.resolveExecutionIdentity({ request, agentId });
   }
 
   /** Whether the request's credential already is the service account the execution runs as. */

@@ -68,6 +68,7 @@ import { createShouldIncludeExplanations } from './online_evals/should_include_e
 import {
   alertOutcomeJudges,
   memoryJudges,
+  recoveryDueDiligenceJudges,
   referenceFreeJudges,
   wikiJudges,
 } from './online_evals/judges';
@@ -281,6 +282,7 @@ export class NightshiftInvestigationsPlugin
     for (const judge of [
       ...referenceFreeJudges,
       ...alertOutcomeJudges,
+      ...recoveryDueDiligenceJudges,
       ...wikiJudges,
       ...memoryJudges,
     ]) {
@@ -413,6 +415,7 @@ export class NightshiftInvestigationsPlugin
       if (plugins.agenticInvestigations && config.findings_recorder.enabled) {
         const getRecorderOutputRedactor = createSandboxOutputRedactorProvider({
           getDeps: () => ({ actions: this.actionsStart }),
+          logger: this.logger.get('findings_recorder', 'output_redaction'),
         });
         // Records summary, severity, hypotheses and impact from outside the agent, so the
         // investigator needs no recording tools. Every dependency is read lazily: hooks are
@@ -510,6 +513,7 @@ export class NightshiftInvestigationsPlugin
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart }),
+            logger: outputRedactionLogger,
           }),
           logger: outputRedactionLogger,
         };

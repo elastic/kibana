@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { EuiLiveAnnouncer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -15,10 +15,13 @@ import type { DataGridCommandFailureReason } from './data_grid_api';
 
 interface DataGridAnnouncements {
   readonly liveRegion: React.ReactElement;
+  readonly contentEntryHint: React.ReactElement;
+  readonly contentEntryHintId: string;
   readonly announceCopySuccess: () => void;
   readonly announceCopyFailure: () => void;
   readonly announceCommandFailure: (reason: DataGridCommandFailureReason) => void;
   readonly announceRowsBecameEmpty: () => void;
+  readonly announceCellContentEntered: () => void;
 }
 
 interface AnnouncementEvent {
@@ -29,6 +32,7 @@ interface AnnouncementEvent {
 const ANNOUNCEMENT_TIMEOUT_MS = 2000;
 
 export const useDataGridAnnouncements = (): DataGridAnnouncements => {
+  const contentEntryHintId = useId();
   const [announcement, setAnnouncement] = useState<AnnouncementEvent>();
   const announce = useCallback((message: string) => {
     setAnnouncement((previous) => ({ id: (previous?.id ?? 0) + 1, message }));
@@ -93,6 +97,13 @@ export const useDataGridAnnouncements = (): DataGridAnnouncements => {
       })
     );
   }, [announce]);
+  const announceCellContentEntered = useCallback(() => {
+    announce(
+      i18n.translate('discoverDataGrid.accessibility.cellContentExitDescription', {
+        defaultMessage: 'Press the Escape key to return to the cell.',
+      })
+    );
+  }, [announce]);
   const liveMessage = useMemo(
     () => <span key={announcement?.id ?? 0}>{announcement?.message}</span>,
     [announcement]
@@ -104,9 +115,18 @@ export const useDataGridAnnouncements = (): DataGridAnnouncements => {
         {liveMessage}
       </EuiLiveAnnouncer>
     ),
+    contentEntryHint: (
+      <span id={contentEntryHintId} hidden>
+        {i18n.translate('discoverDataGrid.accessibility.cellContentEntryDescription', {
+          defaultMessage: "Press the Enter key to interact with this cell's contents.",
+        })}
+      </span>
+    ),
+    contentEntryHintId,
     announceCopySuccess,
     announceCopyFailure,
     announceCommandFailure,
     announceRowsBecameEmpty,
+    announceCellContentEntered,
   };
 };

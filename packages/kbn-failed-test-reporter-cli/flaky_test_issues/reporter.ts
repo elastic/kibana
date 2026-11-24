@@ -95,6 +95,11 @@ export interface ReportFlakySuiteIssuesOptions {
    */
   commentCooldownDays: number;
   /**
+   * Hours after an issue is closed whose failures don't count against the close, as they can
+   * come from builds that don't have the fix yet: it is neither reopened nor superseded for them.
+   */
+  reopenGraceHours: number;
+  /**
    * Replace the open per-test issues of `githubRepo` with suite issues, once CI no longer updates
    * them: they stop counting as tracking their test, and those about a suite's flaky tests are
    * closed as duplicates of the suite's issue once it is filed or refreshed, a refresh naming them
@@ -247,20 +252,30 @@ const lastFailedAt = (suite: FlakySuite): Date | undefined => {
   return newest;
 };
 
+const MS_PER_HOUR = 60 * 60 * 1000;
+
+/** The suite failed more than `graceHours` after the issue was closed. */
+const failedAfterClose = (suite: FlakySuite, closedAt: string, graceHours: number): boolean => {
+  const failedAt = lastFailedAt(suite);
+  return (
+    failedAt !== undefined &&
+    failedAt.getTime() > new Date(closedAt).getTime() + graceHours * MS_PER_HOUR
+  );
+};
+
 /**
- * A closed issue about a test that failed after it was closed no longer tracks it: the legacy
- * per-test issues get no further comments once `report_failed_tests` stops writing, the stale
- * sweep closes them, and they would otherwise keep the suite silent for `--closed-since-days`.
- * The suite's own issue is the exception, it is reopened instead (`planRefresh`). An issue
- * without `closed_at` keeps counting.
+ * A closed issue about a test that failed after it was closed, and its grace period, no longer
+ * tracks it: the legacy per-test issues get no further comments once `report_failed_tests` stops
+ * writing, the stale sweep closes them, and they would otherwise keep the suite silent for
+ * `--closed-since-days`. The suite's own issue is the exception, it is reopened instead
+ * (`planRefresh`). An issue without `closed_at` keeps counting.
  */
-const isSuperseded = (matched: MatchedIssue, test: FlakySuite): boolean => {
+const isSuperseded = (matched: MatchedIssue, test: FlakySuite, graceHours: number): boolean => {
   const { issue } = matched;
   if (issue.state !== 'closed' || !issue.closed_at || isOwnSuiteIssue(matched, test)) {
     return false;
   }
-  const failedAt = lastFailedAt(test);
-  return failedAt !== undefined && failedAt > new Date(issue.closed_at);
+  return failedAfterClose(test, issue.closed_at, graceHours);
 };
 
 interface Coverage {
@@ -276,7 +291,12 @@ interface Coverage {
   supersededByTest: Map<string, number[]>;
 }
 
-const coverage = (suite: FlakySuite, index: IssueIndex, replacing: boolean): Coverage => {
+const coverage = (
+  suite: FlakySuite,
+  index: IssueIndex,
+  replacing: boolean,
+  graceHours: number
+): Coverage => {
   const covering: MatchedIssue[] = [];
   const superseded = new Map<number, MatchedIssue>();
   const supersededByTest = new Map<string, number[]>();
@@ -288,7 +308,7 @@ const coverage = (suite: FlakySuite, index: IssueIndex, replacing: boolean): Cov
         if (replacing && isOpenPerTestIssue(matched)) {
           return false;
         }
-        if (!isTracking(matched) || !isSuperseded(matched, single)) {
+        if (!isTracking(matched) || !isSuperseded(matched, single, graceHours)) {
           return true;
         }
         superseded.set(matched.issue.number, matched);
@@ -334,30 +354,36 @@ interface Refresh {
   reopen: boolean;
 }
 
+type RefreshSettings = Pick<
+  ReportFlakySuiteIssuesOptions,
+  'commentCooldownDays' | 'reopenGraceHours'
+>;
+
 /**
  * What refreshing the suite's own issue takes, or undefined when it already has this report (a
- * rebuild) or is closed and the suite has not failed since: the report window can still hold
- * the failures a fix was merged for. An issue closed as a duplicate stays closed.
+ * rebuild) or is closed and the suite has not failed since the close and its grace period: the
+ * report window can still hold the failures a fix was merged for. An issue closed as a duplicate
+ * stays closed.
  */
 const planRefresh = (
   suite: FlakySuite,
   issue: GithubIssue,
   report: FlakyTestReport,
-  commentCooldownDays: number
+  { commentCooldownDays, reopenGraceHours }: RefreshSettings
 ): Refresh | undefined => {
   const previous = readFlakySuiteIssueMetadata(issue.body);
   const recordedAt = previous?.['report.generatedAt'];
   if (!previous || (recordedAt && new Date(recordedAt) >= report.generatedAt)) {
     return undefined;
   }
-  const failedAt = lastFailedAt(suite);
   if (issue.state === 'closed') {
-    const closedAt = issue.closed_at ? new Date(issue.closed_at) : undefined;
-    const failedSinceClosed = failedAt && closedAt && failedAt > closedAt;
-    return failedSinceClosed && issue.state_reason !== 'duplicate'
-      ? { previous, comment: true, reopen: true }
-      : undefined;
+    const reopen =
+      !!issue.closed_at &&
+      issue.state_reason !== 'duplicate' &&
+      failedAfterClose(suite, issue.closed_at, reopenGraceHours);
+    return reopen ? { previous, comment: true, reopen: true } : undefined;
   }
+  const failedAt = lastFailedAt(suite);
   const postedAt = lastPostedAt(previous);
   const failedSincePosted = failedAt !== undefined && (!postedAt || failedAt > new Date(postedAt));
   const due =
@@ -455,6 +481,7 @@ export const reportFlakySuiteIssues = async (
     omitSkippedTests,
     updateIssues,
     commentCooldownDays,
+    reopenGraceHours,
     replacePerTestIssues,
     dryRun,
   } = options;
@@ -491,7 +518,7 @@ export const reportFlakySuiteIssues = async (
     const upstreamIndex = indexIssues(fetched.issues.map(describeIssue));
     tracking = { repo: upstream.repo, open: fetched.open, closed: fetched.closed };
     // never written to, so its per-test issues can't be replaced and keep counting
-    trackedUpstream = (suite) => coverage(suite, upstreamIndex, false).tracked;
+    trackedUpstream = (suite) => coverage(suite, upstreamIndex, false, reopenGraceHours).tracked;
   }
 
   const actions: FlakySuiteAction[] = [];
@@ -678,16 +705,36 @@ export const reportFlakySuiteIssues = async (
     }
     const ref = suiteRef(suite);
     const matches = findMatchingIssues(suite, candidateIssues(suite, index));
-    const { tracked, ...supersededIssues } = coverage(suite, index, replacePerTestIssues);
+    const { tracked, ...supersededIssues } = coverage(
+      suite,
+      index,
+      replacePerTestIssues,
+      reopenGraceHours
+    );
     const own = updateIssues ? refreshedIssue(suite, matches) : undefined;
     if (own) {
-      const members = isWholeFileIssue(own.issue) ? suitesSharing(suite, own.issue) : [suite];
-      const ownSuite = isWholeFileIssue(own.issue) ? asWholeFileSuite(members) : suite;
-      const refresh = planRefresh(ownSuite, own.issue, report, commentCooldownDays);
+      const { issue } = own;
+      const members = isWholeFileIssue(issue) ? suitesSharing(suite, issue) : [suite];
+      const ownSuite = isWholeFileIssue(issue) ? asWholeFileSuite(members) : suite;
+      const refresh = planRefresh(ownSuite, issue, report, {
+        commentCooldownDays,
+        reopenGraceHours,
+      });
       if (refresh) {
         members.forEach((member) => refreshedTogether.add(member));
-        await update(ownSuite, own.issue, refresh, members);
+        await update(ownSuite, issue, refresh, members);
         continue;
+      }
+      if (
+        issue.state === 'closed' &&
+        issue.closed_at &&
+        failedAfterClose(ownSuite, issue.closed_at, 0) &&
+        !failedAfterClose(ownSuite, issue.closed_at, reopenGraceHours)
+      ) {
+        log.info(
+          `keep #${issue.number} closed, the suite only failed in the ${reopenGraceHours} hours ` +
+            `after the close: ${describeSuite(suite)}`
+        );
       }
     }
     if (tracked) {

@@ -13,7 +13,11 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { escapeRegExp } from 'lodash';
-import { SESSIONS_INDEX_PATTERN, SESSIONS_SOURCE_INDICES } from '../../../common/sessions';
+import {
+  MOBILE_SESSIONS_INDEX_PATTERN,
+  SESSIONS_INDEX_PATTERN,
+  SESSIONS_SOURCE_INDICES,
+} from '../../../common/sessions';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
 import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 
@@ -39,7 +43,10 @@ export const getMissingSessionsPrivileges = async (
     cluster: isServerless ? ['read_security'] : [],
     index: [
       { names: [...SESSIONS_SOURCE_INDICES], privileges: [...REQUIRED_SOURCE_INDEX_PRIVILEGES] },
-      { names: [SESSIONS_INDEX_PATTERN], privileges: [...REQUIRED_DEST_INDEX_PRIVILEGES] },
+      {
+        names: [SESSIONS_INDEX_PATTERN, MOBILE_SESSIONS_INDEX_PATTERN],
+        privileges: [...REQUIRED_DEST_INDEX_PRIVILEGES],
+      },
     ],
   });
   if (response.has_all_requested) {

@@ -1,0 +1,79 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  connectorSpecHasEvents,
+  connectorsSpecs,
+  INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+} from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import { slack2HitlAction } from '@kbn/connector-topics';
+import {
+  getConnectorEventTriggerDefinitions,
+  getConnectorTypeIdForTriggerEventId,
+} from './connector_event_triggers';
+
+/** Same rule as trigger titles: drop a trailing ` (v2)` from the connector catalog name. */
+const connectorTriggerDisplayName = (displayName: string): string =>
+  displayName.replace(/ \(v\d+\)$/, '');
+
+const expectedConnectorEventTitles = (specs: ConnectorSpec[]): Map<string, string> =>
+  new Map(
+    specs.filter(connectorSpecHasEvents).flatMap((spec) => {
+      const events = spec.events;
+      if (!events) {
+        return [];
+      }
+      const displayName = connectorTriggerDisplayName(spec.metadata.displayName);
+      return Object.values(events.definitions)
+        .filter((eventDefinition) => eventDefinition.eventId !== slack2HitlAction.name)
+        .map(
+          (eventDefinition) =>
+            [eventDefinition.eventId, `${displayName} - ${eventDefinition.title}`] as const
+        );
+    })
+  );
+
+describe('getConnectorTypeIdForTriggerEventId', () => {
+  it('maps inboundWebhook.received to .inboundWebhook', () => {
+    expect(getConnectorTypeIdForTriggerEventId('inboundWebhook.received')).toBe(
+      INBOUND_WEBHOOK_CONNECTOR_TYPE_ID
+    );
+  });
+
+  it('returns undefined for built-in or unregistered trigger ids', () => {
+    expect(getConnectorTypeIdForTriggerEventId('cases.updated')).toBeUndefined();
+    expect(getConnectorTypeIdForTriggerEventId('manual')).toBeUndefined();
+  });
+});
+
+describe('getConnectorEventTriggerDefinitions', () => {
+  it('returns no triggers when inbound events are disabled', () => {
+    expect(getConnectorEventTriggerDefinitions({ inboundEventsEnabled: false })).toEqual([]);
+  });
+
+  it('prefixes each event title with the connector display name', () => {
+    const specs = Object.values(connectorsSpecs);
+    const definitions = getConnectorEventTriggerDefinitions({ inboundEventsEnabled: true, specs });
+    const expected = expectedConnectorEventTitles(specs);
+
+    expect(expected.size).toBeGreaterThan(0);
+    expect(new Map(definitions.map((definition) => [definition.id, definition.title]))).toEqual(
+      expected
+    );
+  });
+
+  it('keeps slack2.hitl_action off the workflow start catalog', () => {
+    const ids = getConnectorEventTriggerDefinitions({ inboundEventsEnabled: true }).map(
+      (definition) => definition.id
+    );
+
+    expect(slack2HitlAction.name).toBe('slack2.hitl_action');
+    expect(ids).toContain('slack2.message');
+    expect(ids).not.toContain(slack2HitlAction.name);
+  });
+});
