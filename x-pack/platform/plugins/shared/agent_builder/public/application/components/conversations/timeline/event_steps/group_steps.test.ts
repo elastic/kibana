@@ -8,6 +8,7 @@
 import {
   ConversationRoundStepType,
   createInjectedContextStep,
+  createModelReasoningStep,
   createReasoningStep,
   createSubstitutionStep,
   createToolCallStep,
@@ -292,5 +293,23 @@ describe('groupSteps', () => {
       { kind: 'step', step: askUserQuestion, index: 2 },
       { kind: 'group', steps: [c] },
     ]);
+  });
+
+  it('hides model reasoning steps without splitting tool groups', () => {
+    const a = toolStep('a', 'g1');
+    const b = toolStep('b', 'g2');
+
+    expect(
+      groupSteps([
+        createModelReasoningStep({ reasoning: 'provider thoughts', tool_call_group_id: 'g1' }),
+        a,
+        createModelReasoningStep({ reasoning: 'more provider thoughts', tool_call_group_id: 'g2' }),
+        b,
+      ])
+    ).toEqual([{ kind: 'group', steps: [a, b] }]);
+  });
+
+  it('returns [] when the only step is model reasoning', () => {
+    expect(groupSteps([createModelReasoningStep({ reasoning: 'provider thoughts' })])).toEqual([]);
   });
 });

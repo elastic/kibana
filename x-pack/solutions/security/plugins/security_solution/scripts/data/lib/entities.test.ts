@@ -13,12 +13,12 @@ describe('relatedFields', () => {
     expect(
       relatedFields(
         { name: 'WIN-ANALYST01', hostname: 'WIN-ANALYST01', ip: ['10.0.1.45'] },
-        { name: 'jsmith', email: 'jsmith@corp.example' },
+        { name: 'jsmith', email: 'jsmith@corp.example.cloud' },
         ['192.0.2.10']
       )
     ).toEqual({
       related: {
-        user: ['jsmith', 'jsmith@corp.example'],
+        user: ['jsmith', 'jsmith@corp.example.cloud'],
         hosts: ['WIN-ANALYST01'],
         ip: ['10.0.1.45', '192.0.2.10'],
       },

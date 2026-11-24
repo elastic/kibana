@@ -54,6 +54,13 @@ export const CONTEXT_READER_KEY = 'kbn.core.eventLoopWatchdog.readExecutionConte
 /** Key of the messages the worker posts to the main thread, one per block that ended. */
 export const BLOCK_MESSAGE_KEY = '__kbnEventLoopBlock';
 
+export const HOUR_MS = 60 * 60_000;
+/**
+ * A file is only saved if it has a different top frame to the previous ones seen within the same
+ * clock hour.
+ */
+export const FILES_PER_HOUR = 3;
+
 /** Kibana is considered running this long after its overall status first becomes available... */
 export const RUNNING_GRACE_MS = 30_000;
 /** ...or this long after the watchdog service starts, whichever comes first. */

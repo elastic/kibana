@@ -34,7 +34,7 @@
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query-get",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

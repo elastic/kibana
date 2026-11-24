@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import * as semver from 'semver';
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { getKbIndexCreatedVersion } from '../utils/knowledge_base';
+import {
+  getKbIndexCreatedVersion,
+  waitForKnowledgeBaseReIndexingToComplete,
+} from '../utils/knowledge_base';
 import {
   TINY_ELSER_INFERENCE_ID,
   TINY_ELSER_MODEL_ID,
@@ -33,7 +36,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   // Sparse vector field was introduced in Elasticsearch 8.11
   // The semantic text field was added to the knowledge base index in 8.17
   // Indices created in 8.10 do not support semantic text field and need to be reindexed
-  // Failing: See https://github.com/elastic/kibana/issues/233043
   describe('Knowledge base: when upgrading from 8.10 to 8.18', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
@@ -95,6 +97,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         const res2 = await createKnowledgeBaseEntry();
         expect(res2.status).to.be(200);
+
+        // The alias swap asserted above happens midway through the re-index, so the background
+        // task is still running and would otherwise leak into the next suite.
+        await waitForKnowledgeBaseReIndexingToComplete(getService);
       });
     });
 

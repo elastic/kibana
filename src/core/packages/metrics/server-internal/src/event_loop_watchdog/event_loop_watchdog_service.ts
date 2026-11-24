@@ -31,7 +31,11 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import type { EventLoopBlock } from '@kbn/core-metrics-server';
-import { OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
+import {
+  OPS_CONFIG_PATH,
+  type OpsConfigType,
+  type OpsConfigEventLoopWatchdogProfiling,
+} from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import type { ReadExecutionContext } from './execution_context_reader';
 import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
@@ -105,7 +109,7 @@ export class EventLoopWatchdogService {
     ]);
     const runningThresholdMs = config.blockThreshold.asMilliseconds();
     const { profiling, startup } = config;
-    const perPhaseMs = (key: keyof typeof profiling) => ({
+    const perPhaseMs = (key: keyof OpsConfigEventLoopWatchdogProfiling) => ({
       starting: (startup.profiling[key] ?? profiling[key]).asMilliseconds(),
       running: profiling[key].asMilliseconds(),
     });
@@ -125,7 +129,7 @@ export class EventLoopWatchdogService {
         startAfterMs: perPhaseMs('startAfter'),
         maxDurationMs: perPhaseMs('maxDuration'),
         cooldownMs: perPhaseMs('cooldown'),
-        diagnosticDir: resolveDiagnosticDir(),
+        diagnosticDir: profiling.dir ?? resolveDiagnosticDir(),
       },
       readExecutionContext,
       onBlock: (block) => this.blocks$.next(block),

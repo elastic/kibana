@@ -42,6 +42,7 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/core-chrome-browser-mocks",
     "@kbn/core-doc-links-browser-mocks",
+    "@kbn/core-feature-flags-browser-mocks",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-security-browser-mocks",
     "@kbn/core-ui-settings-browser-mocks",
