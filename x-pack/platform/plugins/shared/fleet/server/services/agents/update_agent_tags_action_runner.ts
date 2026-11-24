@@ -6,18 +6,14 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
-import { uniq } from 'lodash';
 
 import type { Agent } from '../../types';
-
-import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
 import { agentsNamespaceQuery } from '../spaces/agent_namespaces';
 
-import { FleetError, FleetVersionConflictError, UpdateByQueryIncompleteError } from '../../errors';
+import { FleetVersionConflictError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
 
@@ -30,13 +26,17 @@ import {
 } from './actions';
 import { MAX_RETRY_COUNT } from './retry_helper';
 import type { UpdateByQueryTaskResponse } from './update_by_query_task';
-import { updateByQueryAndWait } from './update_by_query_task';
+import { buildUpdateTagsRequest, updateAgentsTags } from './update_tags_by_query';
+
+const NOT_ELIGIBLE_ERROR = 'agent is not eligible for tags update';
+const SKIPPED_AGENT_ERROR = 'agent not found, or not in the space of the action anymore';
 
 /**
- * How many agents the update of a batch goes through at a time when the update of the whole batch
- * was cancelled for running too long, or timed out. Each has the time limit of an update of its own.
+ * Ids for the results of agents that are counted and not named: an action by kuery does not have
+ * the ids of the agents it updated. They are also what keeps the ids of agents that are in another
+ * space now out of the results, as the action status shows the hostname of an agent by its id.
  */
-const UPDATE_BY_QUERY_CHUNK_SIZE = 1000;
+const generateIds = (count: number) => Array.from({ length: count }, () => uuidv4());
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -65,25 +65,27 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
   }
 }
 
+interface UpdateTagsBatchOptions {
+  tagsToAdd: string[];
+  tagsToRemove: string[];
+  actionId?: string;
+  total?: number;
+  kuery?: string;
+  retryCount?: number;
+  spaceId?: string;
+  /**
+   * Whether the action retries a batch that fails (a batch of the runner, and not agents given by
+   * id, which fail the request). A batch that stays incomplete records what it did only then.
+   */
+  retriedByAction?: boolean;
+}
+
 export async function updateTagsBatch(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
-  options: {
-    tagsToAdd: string[];
-    tagsToRemove: string[];
-    actionId?: string;
-    total?: number;
-    kuery?: string;
-    retryCount?: number;
-    spaceId?: string;
-    /**
-     * Whether the action retries a batch that fails (a batch of the runner, and not agents given by
-     * id, which fail the request). A batch that stays incomplete records what it did only then.
-     */
-    retriedByAction?: boolean;
-  }
+  options: UpdateTagsBatchOptions
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   // Only the restriction errors of agents the caller can access are persisted in the action results.
   // `outgoingErrors` (for example agents not found, or in another space) are deliberately not
@@ -117,12 +119,7 @@ export async function updateTagsBatch(
         type: 'UPDATE_TAGS',
         total: options.total ?? errorAgentIds.length,
       });
-      await createErrorActionResults(
-        esClient,
-        actionId,
-        errors,
-        'agent is not eligible for tags update'
-      );
+      await createErrorActionResults(esClient, actionId, errors, NOT_ELIGIBLE_ERROR);
     }
     return { actionId, updated: 0, took: 0 };
   }
@@ -133,266 +130,45 @@ export async function updateTagsBatch(
       `Agents to update tags in batch: ${agentIds.length}, tagsToAdd: ${options.tagsToAdd}, tagsToRemove: ${options.tagsToRemove}`
     );
 
-  // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
-  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
-
-  // The agents were in the caller's space when they were selected. The update can run for minutes,
-  // and again after being cancelled, so it checks the space itself too: an agent that has moved out
-  // of it in the meantime is left alone, and recorded below as not updated.
+  // The agents were in the caller's space when they were selected, and the update can run for
+  // minutes, so it checks the space itself too: an agent that has moved out of it is left alone.
   const namespaceQuery = await agentsNamespaceQuery(spaceId);
   const updatedAt = new Date().toISOString();
 
-  // the update of some of the agents of the batch
-  const requestFor = (ids: string[]): UpdateByQueryRequest => ({
-    query: namespaceQuery
-      ? { bool: { filter: [{ terms: { _id: ids } }, namespaceQuery] } }
-      : { terms: { _id: ids } },
-    index: AGENTS_INDEX,
-    refresh: true,
-    script: {
-      source: `
-      if (ctx._source.tags == null) {
-        ctx._source.tags = [];
-      }
-      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) {
-        ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
-      } else {
-        ctx._source.tags.removeAll(params.tagsToRemove);
-      }
-      ctx._source.tags.addAll(params.tagsToAdd);
-
-      LinkedHashSet uniqueSet = new LinkedHashSet();
-      uniqueSet.addAll(ctx._source.tags);
-
-      ctx._source.tags = uniqueSet.toArray();
-
-      ctx._source.updated_at = params.updatedAt;
-      `,
-      lang: 'painless',
-      params: {
-        tagsToAdd: uniq(options.tagsToAdd),
-        tagsToRemove: uniq(options.tagsToRemove),
+  const { response, agentsCovered, stoppedBy } = await updateAgentsTags(esClient, agentIds, {
+    requestFor: (ids) =>
+      buildUpdateTagsRequest(ids, {
+        tagsToAdd: options.tagsToAdd,
+        tagsToRemove: options.tagsToRemove,
         updatedAt,
-      },
-    },
-    conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
+        namespaceQuery,
+      }),
+    actionId,
+    retriedByAction: options.retriedByAction,
   });
-
-  const runUpdate = async (ids: string[]) => {
-    try {
-      return await updateByQueryAndWait(esClient, requestFor(ids));
-    } catch (error) {
-      // a FleetError has no enumerable fields, JSON.stringify would drop its message
-      const details = error instanceof FleetError ? error.message : JSON.stringify(error);
-      throw new FleetError('Caught error while batch updating tags: ' + details.slice(0, 1000));
-    }
-  };
-
-  // An update that was cancelled for running too long, or that timed out, got through some of the
-  // agents, and what it reports, its total included, is of those: its first search can time out
-  // before it has counted any agent, with a total of 0. So it is not a complete result, from which
-  // the agents that were skipped are worked out.
-  const isIncomplete = (outcome: UpdateByQueryTaskResponse) =>
-    Boolean(outcome.canceled || outcome.timed_out);
-  const describeIncomplete = (outcome: UpdateByQueryTaskResponse) =>
-    outcome.canceled
-      ? `Update by query cancelled (${outcome.canceled}) after updating ${
-          outcome.updated ?? 0
-        } of ${outcome.total ?? 'an unknown number of'} agents`
-      : `Update by query timed out after updating ${outcome.updated ?? 0} agents`;
-
-  let res = await runUpdate(agentIds);
-  // how many of the agents of the batch `res` is the result for, and why it is not for all of them
-  let agentsInResult = new Set(agentIds).size;
-  let stopped: UpdateByQueryIncompleteError | undefined;
-
-  if (isIncomplete(res)) {
-    // What the cancelled update did is not recorded, as which of the agents it updated is not
-    // known: it did not go through them in an order that can be told. The same agents are updated
-    // again, which updates all of them, and counts each of them once. It is done a chunk at a time,
-    // each with the time limit of an update of its own, as the whole batch was too slow for one.
-    const distinctAgentIds = [...new Set(agentIds)];
-    appContextService
-      .getLogger()
-      .warn(
-        `${describeIncomplete(res)}, running it again for the same ${
-          distinctAgentIds.length
-        } agents, ${UPDATE_BY_QUERY_CHUNK_SIZE} at a time`
-      );
-
-    const chunked: UpdateByQueryTaskResponse = {
-      took: 0,
-      timed_out: false,
-      total: 0,
-      updated: 0,
-      version_conflicts: 0,
-      failures: [],
-    };
-    agentsInResult = 0;
-    for (let start = 0; start < distinctAgentIds.length; start += UPDATE_BY_QUERY_CHUNK_SIZE) {
-      const idsOfChunk = distinctAgentIds.slice(start, start + UPDATE_BY_QUERY_CHUNK_SIZE);
-      const chunk = await runUpdate(idsOfChunk);
-      if (isIncomplete(chunk)) {
-        // No more is known of the agents of this chunk than of the batch before it, so what is
-        // recorded is what the chunks before it did. That is known exactly, and it would be lost
-        // otherwise, as the retry of the action may not select the agents they updated.
-        const failures = chunk.failures ?? [];
-        if (failures.length > 0) {
-          appContextService
-            .getLogger()
-            .warn(
-              `Update by query of action ${actionId} failed for ${
-                failures.length
-              } agents: ${JSON.stringify(failures).slice(0, 1000)}`
-            );
-        }
-        stopped = new UpdateByQueryIncompleteError(
-          `${describeIncomplete(chunk)}, giving up after running it again in chunks`
-        );
-        break;
-      }
-      agentsInResult += idsOfChunk.length;
-      chunked.took = (chunked.took ?? 0) + (chunk.took ?? 0);
-      chunked.total =
-        chunked.total === undefined || chunk.total === undefined
-          ? undefined
-          : chunked.total + chunk.total;
-      chunked.updated = (chunked.updated ?? 0) + (chunk.updated ?? 0);
-      chunked.version_conflicts = (chunked.version_conflicts ?? 0) + (chunk.version_conflicts ?? 0);
-      chunked.failures = (chunked.failures ?? []).concat(chunk.failures ?? []);
-    }
-    // Agents given by id have no action that is retried, so the request just fails, and with no
-    // chunk through there is nothing to record.
-    if (stopped && (!options.retriedByAction || agentsInResult === 0)) {
-      throw stopped;
-    }
-    res = chunked;
-  }
 
   if (appContextService.getLogger().isLevelEnabled('debug')) {
-    appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
+    appContextService.getLogger().debug(JSON.stringify(response).slice(0, 1000));
   }
 
-  // The agents the update did not go through were moved out of the space, or deleted, after they
-  // were selected. They are not updated or failed, but the action counts them in its total, so
-  // without a result of their own it would never reach it. There are as many as the update went
-  // through fewer agents than the batch has: what the task says, and not a later search, which
-  // reads another snapshot and could find an agent that came back, or miss one that left after it
-  // was updated. They are recorded under generated ids, like the agents that were updated, as an
-  // id of an agent that is in another space now would show its hostname in this one.
-  const skippedAgentIds = getUuidArray(
-    res.total !== undefined ? Math.max(0, agentsInResult - res.total) : 0
-  );
-
-  const updatedCount = res.updated ?? 0;
-  const updatedIds = getUuidArray(updatedCount);
-
-  const failures = res.failures ?? [];
-  const failureCount = failures.length;
-
-  const isLastRetry = options.retryCount === MAX_RETRY_COUNT;
-
-  const versionConflictCount = res.version_conflicts ?? 0;
-  const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
-
-  // creating an action doc so that update tags  shows up in activity
-  // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
-  // this ensures that the action status count will be accurate
-  await createAgentAction(esClient, soClient, {
-    id: actionId,
-    agents: updatedIds
-      .concat(failures.map((failure) => failure.id))
-      .concat(isLastRetry ? versionConflictIds : [])
-      .concat(errorAgentIds)
-      .concat(skippedAgentIds),
-    namespaces,
-    created_at: new Date().toISOString(),
-    type: 'UPDATE_TAGS',
-    total:
-      options.total ??
-      (res.total !== undefined
-        ? res.total + errorAgentIds.length + skippedAgentIds.length
-        : undefined),
-  });
-  await createErrorActionResults(
-    esClient,
+  await recordBatchOutcome(esClient, soClient, {
     actionId,
+    namespaces,
     errors,
-    'agent is not eligible for tags update'
-  );
-  appContextService
-    .getLogger()
-    .debug(
-      `action doc wrote on ${
-        updatedCount + failureCount + (isLastRetry ? versionConflictCount : 0)
-      } agentIds, updated: ${updatedCount}, failed: ${failureCount}, version_conflicts: ${versionConflictCount}`
-    );
+    options,
+    response,
+    agentsCovered,
+  });
 
-  if (skippedAgentIds.length > 0) {
-    await bulkCreateAgentActionResults(
-      esClient,
-      skippedAgentIds.map((agentId) => ({
-        agentId,
-        actionId,
-        namespaces,
-        error: 'agent not found, or not in the space of the action anymore',
-      }))
-    );
-    appContextService
-      .getLogger()
-      .debug(`action skipped result wrote on ${skippedAgentIds.length} agents`);
-  }
-
-  // writing successful action results
-  if (updatedCount > 0) {
-    await bulkCreateAgentActionResults(
-      esClient,
-      updatedIds.map((id) => ({
-        agentId: id,
-        actionId,
-        namespaces,
-      }))
-    );
-    appContextService.getLogger().debug(`action updated result wrote on ${updatedCount} agents`);
-  }
-
-  // writing failures from es update
-  if (failures.length > 0) {
-    await bulkCreateAgentActionResults(
-      esClient,
-      failures.map((failure) => ({
-        agentId: failure.id,
-        actionId,
-        namespaces,
-        error: failure.cause.reason ?? undefined, // reason can be null and we want to replace it with undefined
-      }))
-    );
-    appContextService.getLogger().debug(`action failed result wrote on ${failureCount} agents`);
-  }
-
+  const versionConflictCount = response.version_conflicts ?? 0;
   if (versionConflictCount > 0) {
-    // write out error results on last retry, so action is not stuck in progress
-    if (options.retryCount === MAX_RETRY_COUNT) {
-      await bulkCreateAgentActionResults(
-        esClient,
-        versionConflictIds.map((id) => ({
-          agentId: id,
-          actionId,
-          namespaces,
-          error: 'version conflict on last retry',
-        }))
-      );
-      appContextService
-        .getLogger()
-        .debug(`action conflict result wrote on ${versionConflictCount} agents`);
-    }
     throw new FleetVersionConflictError(`Version conflict of ${versionConflictCount} agents`);
   }
 
-  if (stopped) {
-    // What the chunks before the one that was cancelled did is recorded above, and the batch is
-    // retried by the action for the rest. The retry restarts behind the kuery of the action and is
-    // not told what is recorded, and there is a cost either way, so this is a choice:
+  if (stoppedBy) {
+    // What the chunks before the one that was incomplete did is recorded, and the batch is retried
+    // by the action for the rest. The retry restarts behind the kuery of the action and is not told
+    // what is recorded, and there is a cost either way, so this is a choice:
     //
     // - For an update whose kuery leaves out the agents it updated, like `tags:old` for the removal
     //   of a tag, the retry does not select them again. Without this record they would never be
@@ -404,8 +180,118 @@ export async function updateTagsBatch(
     // Which of the two it is cannot be told here without reading that kuery. The agents cannot be
     // left out of the retry by id either, as the retry of an update of tags does not deduplicate:
     // an agent that failed is recorded under its id, and has to be run again.
-    throw stopped;
+    throw stoppedBy;
   }
 
-  return { actionId, updated: res.updated, took: res.took };
+  return { actionId, updated: response.updated, took: response.took };
+}
+
+/**
+ * Records what the update of a batch did, so that the action shows in the activity and its status
+ * counts every agent of the batch: the ones that were updated, failed, conflicted (on the last
+ * retry, as otherwise the retry runs them again), were skipped, or were not eligible.
+ */
+async function recordBatchOutcome(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  {
+    actionId,
+    namespaces,
+    errors,
+    options,
+    response,
+    agentsCovered,
+  }: {
+    actionId: string;
+    namespaces: string[];
+    errors: Record<Agent['id'], Error>;
+    options: UpdateTagsBatchOptions;
+    response: UpdateByQueryTaskResponse;
+    /** How many of the distinct agents of the batch `response` is the result for. */
+    agentsCovered: number;
+  }
+) {
+  const logger = appContextService.getLogger();
+  const errorAgentIds = Object.keys(errors);
+  const isLastRetry = options.retryCount === MAX_RETRY_COUNT;
+
+  const updatedCount = response.updated ?? 0;
+  const updatedIds = generateIds(updatedCount);
+
+  const failures = response.failures ?? [];
+
+  const versionConflictCount = response.version_conflicts ?? 0;
+  const versionConflictIds = isLastRetry ? generateIds(versionConflictCount) : [];
+
+  // The agents the update did not go through were moved out of the space, or deleted, after they
+  // were selected. They are not updated or failed, but the action counts them in its total, so
+  // without a result of their own it would never reach it. There are as many as the update went
+  // through fewer agents than the batch has: what the task says, and not a later search, which
+  // reads another snapshot and could find an agent that came back, or miss one that left after it
+  // was updated.
+  const skippedAgentIds = generateIds(
+    response.total !== undefined ? Math.max(0, agentsCovered - response.total) : 0
+  );
+
+  // The action document only has the agents that were updated, failed, in case of the last retry
+  // conflicted, and skipped, which keeps the count of the action status accurate.
+  await createAgentAction(esClient, soClient, {
+    id: actionId,
+    agents: updatedIds
+      .concat(failures.map((failure) => failure.id))
+      .concat(versionConflictIds)
+      .concat(errorAgentIds)
+      .concat(skippedAgentIds),
+    namespaces,
+    created_at: new Date().toISOString(),
+    type: 'UPDATE_TAGS',
+    total:
+      options.total ??
+      (response.total !== undefined
+        ? response.total + errorAgentIds.length + skippedAgentIds.length
+        : undefined),
+  });
+  await createErrorActionResults(esClient, actionId, errors, NOT_ELIGIBLE_ERROR);
+  logger.debug(
+    `action doc wrote on ${
+      updatedCount + failures.length + versionConflictIds.length
+    } agentIds, updated: ${updatedCount}, failed: ${
+      failures.length
+    }, version_conflicts: ${versionConflictCount}`
+  );
+
+  const writeResults = async (
+    label: string,
+    results: Array<{ agentId: string; error?: string }>
+  ) => {
+    if (results.length === 0) {
+      return;
+    }
+    await bulkCreateAgentActionResults(
+      esClient,
+      results.map((result) => ({ actionId, namespaces, ...result }))
+    );
+    logger.debug(`action ${label} result wrote on ${results.length} agents`);
+  };
+
+  await writeResults(
+    'skipped',
+    skippedAgentIds.map((agentId) => ({ agentId, error: SKIPPED_AGENT_ERROR }))
+  );
+  await writeResults(
+    'updated',
+    updatedIds.map((agentId) => ({ agentId }))
+  );
+  await writeResults(
+    'failed',
+    failures.map((failure) => ({
+      agentId: failure.id,
+      error: failure.cause.reason ?? undefined, // reason can be null and we want to replace it with undefined
+    }))
+  );
+  // so that the action is not stuck in progress
+  await writeResults(
+    'conflict',
+    versionConflictIds.map((agentId) => ({ agentId, error: 'version conflict on last retry' }))
+  );
 }
