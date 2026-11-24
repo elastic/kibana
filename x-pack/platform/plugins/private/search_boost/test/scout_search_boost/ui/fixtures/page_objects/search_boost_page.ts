@@ -21,8 +21,7 @@ export class SearchBoostPage {
   readonly profilesTable: Locator;
   readonly searchBox: Locator;
   readonly headerTitle: Locator;
-  readonly ruleUsage: Locator;
-  readonly profileUsage: Locator;
+  readonly ruleSettings: Locator;
   readonly profileRulesTable: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -41,8 +40,7 @@ export class SearchBoostPage {
     this.profilesTable = page.getByTestId('searchBoostProfilesTable');
     this.searchBox = page.getByTestId('contentListToolbar-searchBox');
     this.headerTitle = page.getByTestId('appHeaderTitle');
-    this.ruleUsage = page.getByTestId('searchBoostRuleUsage');
-    this.profileUsage = page.getByTestId('searchBoostProfileUsage');
+    this.ruleSettings = page.getByTestId('searchBoostRuleSettings');
     this.profileRulesTable = page.getByTestId('searchBoostProfileRulesTable');
   }
 

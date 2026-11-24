@@ -159,7 +159,8 @@ describe('SearchBoostPage', () => {
       unmount();
       contentListQueryClient.clear();
       renderPage(http, addressBar);
-      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(name);
+      expect(await screen.findByTestId('searchBoostRuleSettings')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(name);
     }
   );
 
@@ -169,7 +170,7 @@ describe('SearchBoostPage', () => {
   ])('shows %s as not found, with a way back', async (path, title, backPath) => {
     const { history } = renderPage(createHttp(), path);
 
-    expect(await screen.findByTestId('searchBoostNotFound')).toHaveTextContent(title);
+    expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('searchBoostNotFoundBack'));

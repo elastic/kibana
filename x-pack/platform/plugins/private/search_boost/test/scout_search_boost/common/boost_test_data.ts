@@ -117,6 +117,14 @@ export const getBoostTestData = (namespace: string) => {
       template: { lifecycle: { data_retention: dataStreamRetention } },
     });
     await esClient.indices.createDataStream({ name: dataStream });
+    // Gives metering a size to report.
+    await esClient.index({ index: productsIndex, document: { name: 'product' }, refresh: true });
+    await esClient.index({
+      index: dataStream,
+      op_type: 'create',
+      document: { '@timestamp': new Date().toISOString() },
+      refresh: true,
+    });
   };
 
   return {

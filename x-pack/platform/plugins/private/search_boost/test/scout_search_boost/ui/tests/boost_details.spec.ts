@@ -45,12 +45,6 @@ test.describe('Search boost details pages', { tag: ['@local-serverless-vectordb'
       await expect(searchBoost.headerTitle).toHaveText(testData.patternRule);
     });
 
-    await test.step('counts the matches, less the one the exact rule takes', async () => {
-      // The exact rule outranks the pattern on one of the three matches.
-      await expect(searchBoost.setting(searchBoost.ruleUsage, 'matches')).toHaveText('3 indices');
-      await expect(searchBoost.setting(searchBoost.ruleUsage, 'appliesTo')).toHaveText('2 indices');
-    });
-
     await test.step('lists the matching indices', async () => {
       await expect(
         page
@@ -65,11 +59,16 @@ test.describe('Search boost details pages', { tag: ['@local-serverless-vectordb'
     });
   });
 
-  test('shows the rules using a profile and what they apply to', async ({ page, pageObjects }) => {
+  test("opens a rule's profile and lists the rules using it", async ({ page, pageObjects }) => {
     const { searchBoost } = pageObjects;
-    await searchBoost.gotoDetails('profiles', testData.indicesProfile);
+    await searchBoost.gotoDetails('rules', testData.patternRule);
 
-    await test.step('lists the rules using the profile and what they apply to', async () => {
+    await test.step("opens the profile from the rule's settings", async () => {
+      await searchBoost.setting(searchBoost.ruleSettings, 'profile').getByRole('link').click();
+      await expect(searchBoost.headerTitle).toHaveText(testData.indicesProfile);
+    });
+
+    await test.step('lists the rules using the profile', async () => {
       for (const rule of [
         testData.patternRule,
         testData.exactRule,
@@ -81,9 +80,6 @@ test.describe('Search boost details pages', { tag: ['@local-serverless-vectordb'
       await expect(
         searchBoost.row(searchBoost.profileRulesTable, testData.dataStreamsRule)
       ).toBeHidden();
-      await expect(searchBoost.setting(searchBoost.profileUsage, 'appliesTo')).toHaveText(
-        '4 indices'
-      );
     });
 
     await test.step('has no accessibility violations', async () => {

@@ -113,10 +113,12 @@ apiTest.describe('Search boost list API', { tag: ['@local-serverless-vectordb'] 
     }
   );
 
-  apiTest('adds the storage size and retention of each match', async ({ apiClient }) => {
+  apiTest('adds the storage size and retention of each match', async ({ apiClient, samlAuth }) => {
+    // Metering runs as the caller, and the UI calls this route with a session.
+    const { cookieHeader } = await samlAuth.asInteractiveUser(SEARCH_BOOST_READ_ROLE);
     const getRules = async () => {
       const response = await apiClient.get(RULES_PATH, {
-        headers: readHeaders,
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -135,21 +137,20 @@ apiTest.describe('Search boost list API', { tag: ['@local-serverless-vectordb'] 
     });
     expect(findMatch(rules, testData.exactRule, testData.productsIndex)?.retention).toBeUndefined();
 
-    // Both sizes from one response per attempt, within one waiting time.
+    // Both sizes from one response per attempt, within one waiting time. Both hold a document.
     await expect
       .poll(
         async () => {
           const latestRules = await getRules();
-          return [
-            typeof findMatch(latestRules, testData.exactRule, testData.productsIndex)
-              ?.storageSizeInBytes,
-            typeof findMatch(latestRules, testData.dataStreamsRule, testData.dataStream)
-              ?.storageSizeInBytes,
-          ];
+          const sizes = [
+            findMatch(latestRules, testData.exactRule, testData.productsIndex),
+            findMatch(latestRules, testData.dataStreamsRule, testData.dataStream),
+          ].map((match) => match?.storageSizeInBytes ?? 0);
+          return Math.min(...sizes);
         },
         { timeout: METERING_TIMEOUT_MS }
       )
-      .toStrictEqual(['number', 'number']);
+      .toBeGreaterThan(0);
   });
 
   apiTest('ranks the rules the same way as Elasticsearch', async ({ apiClient, esClient }) => {
