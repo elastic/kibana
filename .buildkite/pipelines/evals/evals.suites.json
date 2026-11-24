@@ -160,7 +160,14 @@
         "include": [
           "x-pack/solutions/observability/plugins/nightshift_investigations/server/**",
           "x-pack/solutions/observability/plugins/nightshift_investigations/common/**",
-          "x-pack/platform/plugins/shared/agentic_investigations/server/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/server/hypotheses/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/server/impact/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/server/investigation_attachments/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/server/findings/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/common/hypotheses/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/common/impact/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/common/investigation_attachments/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/common/evidence/**",
           "x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/src/**",
           "x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/index.ts",
           "src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/**",
@@ -188,7 +195,9 @@
           "x-pack/solutions/observability/plugins/nightshift_investigations/common/investigation_quotas/**",
           "x-pack/solutions/observability/plugins/nightshift_investigations/common/locators/**",
           "x-pack/solutions/observability/plugins/nightshift_investigations/common/purge.ts",
-          "x-pack/solutions/observability/plugins/nightshift_investigations/common/service_account.ts"
+          "x-pack/solutions/observability/plugins/nightshift_investigations/common/service_account.ts",
+          "x-pack/platform/plugins/shared/agentic_investigations/server/impact/routes/**",
+          "x-pack/platform/plugins/shared/agentic_investigations/server/impact/services/*pills*.ts"
         ]
       },
       "regressionGate": {

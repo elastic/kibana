@@ -334,13 +334,18 @@ A PR that changes the investigation harness gets a failing `evals gate` check un
 
 The paths are under `requireDecisionOnPaths` in
 [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json). They include
-all of `nightshift_investigations/server` and `common`, and `agentic_investigations/server`, plus
-the decision trees package's code, the managed workflow definitions and model resolution. They
-exclude tests, docs, online evals, and the folders that don't change how the agent investigates:
-routes, telemetry, saved objects, purge, tracing, automations, investigation quotas,
-notifications, locators and the service account helpers.
+all of `nightshift_investigations/server` and `common`, plus the decision trees package's code,
+the managed workflow definitions and model resolution. They exclude tests, docs, online evals, and
+the folders that don't change how the agent investigates: routes, telemetry, saved objects, purge,
+tracing, automations, investigation quotas, notifications, locators and the service account
+helpers.
 
-A new folder is gated by default, so nobody has to remember to add it. Only add an exclude for a
+`agentic_investigations` is a shared plugin, co-owned with AlertZero (Security), so only the parts
+that shape what the agent records are gated: hypotheses, impact (without its routes and pills),
+investigation attachments and the findings writer, plus their `common` schemas. Escalations,
+proposals, subjects and the rest are AlertZero's and need no decision.
+
+A new folder in the Nightshift plugin is gated by default, so nobody has to remember to add it. Only add an exclude for a
 folder that holds no prompts or agent logic; a config test fails if a folder exclude covers a
 prompt file (`*.text`, `*prompt*`, or anything under `instructions/`).
 

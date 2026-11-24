@@ -24,6 +24,7 @@ const suites = (
 
 const HEAD = 'ffffffffffffffffffffffffffffffffffffffff';
 const NIGHTSHIFT = 'x-pack/solutions/observability/plugins/nightshift_investigations';
+const AGENTIC = 'x-pack/platform/plugins/shared/agentic_investigations';
 
 const gate = async (changedFiles: string[], labels: string[] = []) => {
   const statuses: Array<{ state: string; description: string }> = [];
@@ -119,6 +120,16 @@ describe('evals gate against evals.suites.json', () => {
         'x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/tsconfig.json',
       ],
     ],
+    [
+      'AlertZero work in the shared agentic investigations plugin',
+      [
+        `${AGENTIC}/server/escalations/routes/assign_escalation.ts`,
+        `${AGENTIC}/server/impact/services/impact_pills_service.ts`,
+        `${AGENTIC}/server/impact/routes/get_escalation_impact_pills.ts`,
+        `${AGENTIC}/server/subjects/attachments/subject_attachment_type.ts`,
+        `${AGENTIC}/server/plugin.ts`,
+      ],
+    ],
   ])('passes %s changes without a decision or a trigger step', async (_label, files) => {
     expect(touchedSuites(files)).toEqual([]);
     await expect(gate(files)).resolves.toEqual({
@@ -145,6 +156,12 @@ describe('evals gate against evals.suites.json', () => {
       `${NIGHTSHIFT}/server/client/build_investigation_message.ts`,
     ],
     ['the shared custom context definitions', `${NIGHTSHIFT}/common/custom_context.ts`],
+    [
+      'the hypotheses schema the findings recorder outputs',
+      `${AGENTIC}/common/hypotheses/hypotheses.ts`,
+    ],
+    ['the agent tool that records impact', `${AGENTIC}/server/impact/tools/set_impact_tool.ts`],
+    ['the findings writer', `${AGENTIC}/server/findings/findings_writer.ts`],
     // Not a real folder: a new one is gated by default, without anyone updating the config.
     ['a prompt in a brand-new folder', `${NIGHTSHIFT}/server/new_feature/prompts/system.md.text`],
   ])('requires a Nightshift decision for changes to %s', async (_label, file) => {
