@@ -116,6 +116,8 @@ describe('process_events_route.ts', () => {
 
       const firstTimestamp = mockEvents[0]['@timestamp'];
       const lastTimestamp = mockEvents[mockEvents.length - 1]['@timestamp'];
+      // the gap before the first event of a page stops 1 ms before it, as the page query covers that time
+      const beforeFirstTimestamp = new Date(Date.parse(firstTimestamp) - 1).toISOString();
 
       const fetchAndGetAlertsRanges = async (
         cursor: string | undefined,
@@ -187,7 +189,7 @@ describe('process_events_route.ts', () => {
         const ranges = await fetchAndGetAlertsRanges(cursor, true, mockEvents.length);
 
         expect(ranges).toEqual([
-          { gte: cursor, lte: firstTimestamp },
+          { gte: cursor, lte: beforeFirstTimestamp },
           { gte: firstTimestamp, lte: lastTimestamp },
         ]);
       });
@@ -196,7 +198,10 @@ describe('process_events_route.ts', () => {
         const cursor = '2021-11-23T15:25:00.000Z';
         const ranges = await fetchAndGetAlertsRanges(cursor, true);
 
-        expect(ranges).toEqual([{ gte: cursor, lte: firstTimestamp }, { gte: firstTimestamp }]);
+        expect(ranges).toEqual([
+          { gte: cursor, lte: beforeFirstTimestamp },
+          { gte: firstTimestamp },
+        ]);
       });
 
       it('searches the gap when the process events store their time as epoch milliseconds', async () => {
@@ -285,7 +290,7 @@ describe('process_events_route.ts', () => {
         it('sends a date that Elasticsearch can parse for a date that only JavaScript parses', async () => {
           const ranges = await fetchAndGetAlertsRanges('Tue, 23 Nov 2021 15:25:00 GMT', true);
 
-          expect(ranges[0]).toEqual({ gte: '2021-11-23T15:25:00.000Z', lte: firstTimestamp });
+          expect(ranges[0]).toEqual({ gte: '2021-11-23T15:25:00.000Z', lte: beforeFirstTimestamp });
         });
 
         it('ignores it on a short forward page', async () => {
