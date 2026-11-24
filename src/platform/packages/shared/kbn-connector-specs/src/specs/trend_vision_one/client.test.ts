@@ -169,14 +169,14 @@ describe('TrendAI Vision One requests and errors', () => {
   });
 
   it.each([400, 401, 403, 404, 412, 413, 500, 503])(
-    'keeps status %s and the headers on the error',
+    'keeps status %s and the headers on the error of a read',
     async (status) => {
       request.mockRejectedValue(httpError(status, {}, { 'x-request-id': 'r1' }));
       const error = await vendorRequest(ctx, {
         action: 'x',
-        method: 'POST',
+        method: 'GET',
         path: '/x',
-        mutating: true,
+        mutating: false,
       }).catch((caught: unknown) => caught);
       expect(error).toMatchObject({
         statusCode: status,

@@ -285,8 +285,8 @@ describe('TrendAI Vision One response tasks', () => {
   });
 
   it.each([
-    ['https://api.xdr.trendmicro.com/v3.0/response/tasks/%E0%A4%A', '%E0%A4%A'],
-    ['/v3.0/response/tasks/%', '%'],
+    ['https://api.xdr.trendmicro.com/v3.0/response/tasks/%E0%A4%A', null],
+    ['/v3.0/response/tasks/%', null],
     ['/v3.0/response/tasks/RM%2D1', 'RM-1'],
   ])('reads the task id from %s without throwing on a malformed sequence', (value, id) => {
     expect(taskIdFrom({ headers: [{ name: 'Operation-Location', value }] })).toBe(id);
@@ -297,7 +297,7 @@ describe('TrendAI Vision One response tasks', () => {
     await expect(run('isolateEndpoint', { agentGuid: AGENT_GUID })).resolves.toEqual({
       outcome: 'requested',
       status: 202,
-      taskId: '%E0%A4%A',
+      taskId: null,
       error: null,
     });
   });

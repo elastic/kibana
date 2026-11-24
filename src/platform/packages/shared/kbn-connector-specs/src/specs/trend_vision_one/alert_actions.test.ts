@@ -401,8 +401,8 @@ describe('TrendAI Vision One updateAlertStatus', () => {
 
 describe('TrendAI Vision One addAlertNote', () => {
   it.each([
-    ['%E0%A4%A', '%E0%A4%A'],
-    ['%', '%'],
+    ['%E0%A4%A', null],
+    ['%', null],
     ['n%2D7', 'n-7'],
   ])(
     'reads the note id %s from Location without failing a successful write',

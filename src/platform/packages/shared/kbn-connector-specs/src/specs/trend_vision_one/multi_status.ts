@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { safeDecode } from './client';
+import { decodedId } from './client';
 import { VENDOR } from './constants';
 
 /** One entry of a 207 Multi-Status answer: the per-item status, headers and body. */
@@ -63,12 +63,12 @@ const failItem = (action: string, item: MultiStatusItem): Error => {
   return new Error(`${VENDOR} ${action} failed for the target (${item.status ?? '?'}): ${detail}`);
 };
 
-/** Takes the task id from the Operation-Location header: the last path segment. */
+/** Takes the task id from the Operation-Location header: the last path segment; null when it is not a usable id. */
 export const taskIdFrom = (item: MultiStatusItem): string | null => {
   const location = item.headers?.find((h) => h.name?.toLowerCase() === 'operation-location');
   if (!location?.value) return null;
   const segments = location.value.split('?')[0].split('/').filter(Boolean);
-  return segments.length > 0 ? safeDecode(segments[segments.length - 1]) : null;
+  return segments.length > 0 ? decodedId(segments[segments.length - 1]) : null;
 };
 
 /**

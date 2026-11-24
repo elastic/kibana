@@ -23,6 +23,7 @@ import {
   VENDOR,
   WRITE_RETRY_STATUSES,
 } from './constants';
+import { isAcceptedId } from './types';
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH';
 export type Params = Record<string, string | number | undefined>;
@@ -149,7 +150,8 @@ export const toVendorError = (
   action: string,
   error: unknown,
   notFound?: string,
-  timeoutMs: number = REQUEST_TIMEOUT_MS
+  timeoutMs: number = REQUEST_TIMEOUT_MS,
+  mutating: boolean = false
 ): Error => {
   const err = error as AxiosError;
   if (!err?.isAxiosError && !err?.response) {
@@ -160,10 +162,15 @@ export const toVendorError = (
     return new Error(`${VENDOR} ${action} request failed: ${failureReason(err, timeoutMs)}`);
   }
   const message = statusMessage(action, status, describeError(err.response?.data), notFound);
-  const headers = { ...(err.response?.headers ?? {}) };
   // The Kibana action executor reads error.response.status (errorMeta.statusCode) and
   // error.response.headers (Retry-After) from the thrown error. Only the status and a plain copy
   // of the response headers are kept: never the request config, which holds the API key.
+  // A write the connector did not retry (not a 429) may already be applied: it carries no headers,
+  // so the executor does not tell the caller to retry it.
+  if (mutating && status !== 429) {
+    return Object.assign(new Error(message), { statusCode: status, status, response: { status } });
+  }
+  const headers = { ...(err.response?.headers ?? {}) };
   return Object.assign(new Error(message), {
     statusCode: status,
     status,
@@ -180,12 +187,16 @@ const getRetryAfterMs = (error: AxiosError): number | undefined => {
   return Number.isFinite(seconds) && seconds >= 0 ? Math.round(seconds * 1000) : undefined;
 };
 
-/** Decodes a percent-encoded value; the raw value when it is malformed (never throws). */
-export const safeDecode = (value: string): string => {
+/**
+ * The id of a Location or Operation-Location header value: decoded without error and accepted by the
+ * id input check of the read actions; null otherwise (a successful write is never turned into an error).
+ */
+export const decodedId = (value: string): string | null => {
   try {
-    return decodeURIComponent(value);
+    const id = decodeURIComponent(value);
+    return isAcceptedId(id) ? id : null;
   } catch {
-    return value;
+    return null;
   }
 };
 
@@ -275,7 +286,7 @@ export const vendorRequest = async <T = unknown>(
         attempt < MAX_ATTEMPTS &&
         !req.noRetry?.(axiosError);
       if (!retryable) {
-        const failure = toVendorError(req.action, error, req.notFound, timeoutMs);
+        const failure = toVendorError(req.action, error, req.notFound, timeoutMs, req.mutating);
         const unknownOutcome =
           req.mutating &&
           (axiosError?.isAxiosError || axiosError?.response) &&
@@ -288,7 +299,7 @@ export const vendorRequest = async <T = unknown>(
       if (delayMs > RETRY_AFTER_CAP_MS || delayMs >= budgetLeft(ctx)) {
         // The wait is above the cap or would pass the action's budget: report the last answer
         // instead of retrying before the product allows it.
-        throw toVendorError(req.action, error, req.notFound, timeoutMs);
+        throw toVendorError(req.action, error, req.notFound, timeoutMs, req.mutating);
       }
       ctx.log.debug(`${VENDOR} ${req.action}: HTTP ${status}, retry ${attempt} in ${delayMs} ms`);
       await timers.sleep(delayMs);

@@ -13,11 +13,11 @@ import {
   budgetLeft,
   buildFilter,
   checkNextLink,
+  decodedId,
   filterHeader,
   getHeader,
   normaliseLink,
   pageUrl,
-  safeDecode,
   vendorRequest,
   withoutDeprecated,
 } from './client';
@@ -205,7 +205,7 @@ export const alertActions: ConnectorSpec['actions'] = {
       });
       const location = getHeader(response, 'location');
       const noteId = location ? location.split('?')[0].split('/').filter(Boolean).pop() : undefined;
-      return { alertId: input.alertId, noteId: noteId ? safeDecode(noteId) : null };
+      return { alertId: input.alertId, noteId: noteId ? decodedId(noteId) : null };
     },
   },
 };

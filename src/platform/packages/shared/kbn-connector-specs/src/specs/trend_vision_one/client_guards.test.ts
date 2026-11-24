@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getFinitePositiveNumber, getHeaderValue } from '../../connector_utils';
 import {
   apiUrlProblem,
   checkNextLink,
   filterHeader,
   getApiOrigin,
   normaliseLink,
-  safeDecode,
+  decodedId,
   timers,
   vendorRequest,
 } from './client';
+import { taskIdFrom } from './multi_status';
+import { GetTaskInputSchema } from './response_types';
 import {
   API,
   ctx,
@@ -25,6 +28,7 @@ import {
   ok,
   request,
   resetMocksAroundEachTest,
+  run,
   vendorError,
 } from './test_helpers';
 
@@ -197,13 +201,139 @@ describe('TrendAI Vision One filter header characters', () => {
   });
 });
 
-describe('TrendAI Vision One safe decoding and link normalising', () => {
-  it('decodes a valid value and returns a malformed one as it is', () => {
-    expect(safeDecode('a%20b')).toBe('a b');
-    expect(safeDecode('%E0%A4%A')).toBe('%E0%A4%A');
+describe('TrendAI Vision One id decoding and link normalising', () => {
+  it('decodes a valid id and returns null for a malformed or unusable one', () => {
+    expect(decodedId('n%2D7')).toBe('n-7');
+    expect(decodedId('%E0%A4%A')).toBeNull();
+    expect(decodedId('a%20b')).toBeNull();
   });
 
   it('puts the same cursor in one form: absolute, sorted query, no fragment', () => {
     expect(normaliseLink(ctx, '/v3.0/x?b=2&a=1#frag')).toBe(`${API}/x?a=1&b=2`);
   });
+});
+
+describe('TrendAI Vision One headers on a failed write, as the Kibana executor reads them', () => {
+  // Replicates generate_executor_function.ts: getHttpStatus and the Retry-After part of getRetryDate
+  // (a retry date is returned for any HTTP error that carries Retry-After).
+  interface AxiosLikeError {
+    response?: { status?: unknown; headers?: unknown };
+  }
+  const retryDate = (error: unknown): Date | undefined => {
+    const { response } = (error ?? {}) as AxiosLikeError;
+    if (typeof response?.status !== 'number') return undefined;
+    const value = getHeaderValue({ headers: response.headers, headerName: 'retry-after' });
+    const retryAfter = Array.isArray(value) ? value[0] : value;
+    if (typeof retryAfter === 'string' && retryAfter.trim() !== '') {
+      const seconds = getFinitePositiveNumber(retryAfter.trim());
+      if (seconds !== undefined) return new Date(Date.now() + seconds * 1000);
+    }
+    return undefined;
+  };
+  const failure = (mutating: boolean, failed: unknown) => {
+    request.mockRejectedValue(failed);
+    return vendorRequest(ctx, {
+      action: 'x',
+      method: mutating ? 'POST' : 'GET',
+      path: '/x',
+      mutating,
+    }).catch((caught: unknown) => caught);
+  };
+
+  it.each([
+    ['read 429 with Retry-After', false, 429, true],
+    ['read 503 with Retry-After', false, 503, true],
+    ['write 429 with Retry-After', true, 429, true],
+    ['write 503 with Retry-After', true, 503, false],
+    ['write 500 with Retry-After', true, 500, false],
+  ])('%s: retry date %s', async (_what, mutating, status, expectRetry) => {
+    // A single attempt: a Retry-After above the cap is reported instead of waited for.
+    const error = await failure(mutating, httpError(status, {}, { 'Retry-After': '120' }));
+    expect(retryDate(error) !== undefined).toBe(expectRetry);
+    expect((error as { response: { status: number } }).response.status).toBe(status);
+    expect((error as { status: number }).status).toBe(status);
+    if (!expectRetry) {
+      expect((error as { response: object }).response).toEqual({ status });
+      expect(error).not.toHaveProperty('headers');
+    }
+  });
+
+  it('gives no retry date for a write 500 without headers or a write without a response', async () => {
+    expect(retryDate(await failure(true, httpError(500)))).toBeUndefined();
+    const timeout = await failure(
+      true,
+      Object.assign(new Error('timeout'), { isAxiosError: true, code: 'ECONNABORTED' })
+    );
+    expect(retryDate(timeout)).toBeUndefined();
+  });
+
+  it('keeps the messages of a write 503 unchanged', async () => {
+    const error = await failure(
+      true,
+      httpError(503, vendorError('Busy', 'later'), { 'retry-after': '5' })
+    );
+    expect((error as Error).message).toBe(
+      'TrendAI Vision One x failed (503): Busy: later. The change may already have been applied; check before repeating it.'
+    );
+  });
+});
+
+describe('TrendAI Vision One ids read from Location headers', () => {
+  const opLocation = (value: string) => ({ headers: [{ name: 'Operation-Location', value }] });
+
+  it.each([
+    ['https://api.xdr.trendmicro.com/v3.0/response/tasks/%E0%A4%A', null],
+    ['/v3.0/response/tasks/%', null],
+    ['/v3.0/response/tasks/a%2Fb', null],
+    ['/v3.0/response/tasks/a%20b', null],
+    ['/v3.0/response/tasks/' + 'a'.repeat(37), null],
+    ['/v3.0/response/tasks/00000012', '00000012'],
+    ['/v3.0/response/tasks/RM%2D1', 'RM-1'],
+  ])('taskIdFrom %s gives %j', (value, id) => {
+    expect(taskIdFrom(opLocation(value))).toBe(id);
+  });
+
+  it('only gives ids that getResponseTaskStatus accepts', () => {
+    const samples = [
+      'https://api.xdr.trendmicro.com/v3.0/response/tasks/00000012',
+      '/v3.0/response/tasks/00000012?x=1',
+      '/v3.0/response/tasks/RM%2D1',
+      '/v3.0/response/tasks/%E0%A4%A',
+      '/v3.0/response/tasks/a%2Fb',
+      '/v3.0/response/tasks/a%20b',
+      '/v3.0/response/tasks/%20',
+      '/v3.0/response/tasks/',
+      '',
+      '/',
+      'tasks',
+      'https://api.xdr.trendmicro.com',
+      '/v3.0/response/tasks/\u3000',
+      '/v3.0/response/tasks/%E6%9D%B1',
+    ];
+    for (const value of samples) {
+      const id = taskIdFrom(opLocation(value));
+      if (id !== null) {
+        expect(GetTaskInputSchema.safeParse({ id }).success).toBe(true);
+      }
+    }
+  });
+
+  it.each([
+    ['7', '7'],
+    ['n%2D7', 'n-7'],
+    ['%E0%A4%A', null],
+    ['a%2Fb', null],
+    ['a%20b', null],
+  ])(
+    'addAlertNote reads the note id %s as %j and the write stays a success',
+    async (segment, noteId) => {
+      request.mockResolvedValueOnce(
+        ok(undefined, { location: `${API}/workbench/alerts/WB-1/notes/${segment}` }, 201)
+      );
+      await expect(run('addAlertNote', { alertId: 'WB-1', content: 'c' })).resolves.toEqual({
+        alertId: 'WB-1',
+        noteId,
+      });
+    }
+  );
 });

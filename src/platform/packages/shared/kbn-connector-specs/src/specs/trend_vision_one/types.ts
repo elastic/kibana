@@ -40,7 +40,8 @@ const isRealDateTime = (value: string): boolean => {
 const REAL_DATE_TIME = 'Use a real date and time, for example 2026-11-01T00:00:00Z';
 
 /** A filter value goes into the TMV1-Filter header, which cannot carry characters above U+00FF. */
-const isHeaderSafe = (value: string): boolean => !ABOVE_LATIN1.test(value);
+// The handler trims the value before it builds the header, so the trimmed value is checked.
+const isHeaderSafe = (value: string): boolean => !ABOVE_LATIN1.test(value.trim());
 const headerSafeMessage = (what: string): string =>
   `${what} must not contain characters above U+00FF (the TMV1-Filter header cannot carry them)`;
 
@@ -59,6 +60,9 @@ export const idField = (what: string) =>
     .min(1, `${what} must not be blank`)
     .max(36)
     .regex(ID_PATTERN, `${what} has letters, digits and dashes only`);
+
+/** True when getResponseTaskStatus (and every id input) would accept the value. */
+export const isAcceptedId = (value: string): boolean => idField('id').safeParse(value).success;
 
 export const nextLinkField = () =>
   z

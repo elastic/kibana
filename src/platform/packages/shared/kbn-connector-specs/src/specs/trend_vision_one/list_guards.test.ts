@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { filterHeader } from './client';
 import { ACTION_DESCRIPTIONS } from './descriptions';
 import { TrendVisionOne } from './trend_vision_one';
 import {
@@ -186,5 +187,38 @@ describe('TrendAI Vision One listObservedAttackTechniques input guards', () => {
         parseInput('listObservedAttackTechniques', { [start]: value, [end]: value }).success
       ).toBe(true);
     }
+  });
+});
+
+describe('TrendAI Vision One filters padded with ideographic space', () => {
+  const PAD = '\u3000';
+
+  it('accepts a value padded with U+3000 and sends the trimmed value', async () => {
+    const input = {
+      endpointName: `${PAD}PC1${PAD}`,
+      filter: `${PAD}osPlatform eq 'windows'${PAD}`,
+    };
+    expect(parseInput('listEndpoints', input).success).toBe(true);
+    request.mockResolvedValueOnce(ok({ items: [] }));
+    await run('listEndpoints', input);
+    expect(sent().headers['TMV1-Filter']).toBe(
+      "endpointName eq 'PC1' and (osPlatform eq 'windows')"
+    );
+  });
+
+  it('ignores a filter and an endpointName made only of U+3000', async () => {
+    const input = { endpointName: `${PAD}${PAD}`, filter: `${PAD} ${PAD}` };
+    expect(parseInput('listEndpoints', input).success).toBe(true);
+    request.mockResolvedValueOnce(ok({ items: [] }));
+    await run('listEndpoints', input);
+    expect(sent().headers).toBeUndefined();
+  });
+
+  it('still refuses a real character above U+00FF in the padded value, in the schema and in filterHeader', () => {
+    expect(parseInput('listEndpoints', { endpointName: `${PAD}東京${PAD}` }).success).toBe(false);
+    expect(parseInput('listObservedAttackTechniques', { filter: `${PAD}東京` }).success).toBe(
+      false
+    );
+    expect(() => filterHeader(`${PAD}東京${PAD}`)).toThrow('characters above U+00FF');
   });
 });
