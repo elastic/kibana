@@ -14,6 +14,7 @@ import {
   combineLatest,
   distinctUntilChanged,
   filter,
+  firstValueFrom,
   from,
   map,
   merge,
@@ -110,7 +111,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   parentApi: unknown;
   editorStateManager: ReturnType<typeof initializeStateManager<EditorState>>;
   willHaveInitialFilter?: boolean;
-  getInitialFilter?: (dataSource: FilterableSource) => Filter | undefined;
+  getInitialFilter?: (dataSource: FilterableSource, fieldName: string) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
   const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
     omit(state, 'title'), // this is handled via the label manager
@@ -300,8 +301,12 @@ export const initializeDataControlManager = async <EditorState extends object = 
   let initialFilter: Filter | undefined;
   if (willHaveInitialFilter && getInitialFilter) {
     try {
-      const initialDataSource = await initialDataSourcePromise;
-      initialFilter = getInitialFilter(initialDataSource);
+      // the field of an ES|QL control is only known once its query has run
+      const [initialDataSource, initialFieldName] = await Promise.all([
+        initialDataSourcePromise,
+        firstValueFrom(fieldName$.pipe(filter((fieldName) => fieldName !== undefined))),
+      ]);
+      initialFilter = getInitialFilter(initialDataSource, initialFieldName ?? '');
     } catch (e) {
       setBlockingError(e);
     }

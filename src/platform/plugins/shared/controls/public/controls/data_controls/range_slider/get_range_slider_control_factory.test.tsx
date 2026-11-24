@@ -166,7 +166,7 @@ describe('RangeSliderControlApi', () => {
       );
     });
 
-    test('should restore the saved range of an ES|QL control when its column arrives late', async () => {
+    test('should apply the saved range of an ES|QL control once its column arrives, before it is built', async () => {
       let resolveQuery: () => void = () => {};
       const queryResolved = new Promise<void>((resolve) => (resolveQuery = resolve));
       (dataService.search.esql as jest.Mock).mockImplementation(async () => {
@@ -179,7 +179,7 @@ describe('RangeSliderControlApi', () => {
         };
       });
 
-      const { api } = await factory.buildEmbeddable({
+      const building = factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
@@ -192,14 +192,13 @@ describe('RangeSliderControlApi', () => {
         parentApi,
       });
       resolveQuery();
+      const { api } = await building;
 
-      await waitFor(() =>
-        expect(api.appliedFilters$.value).toEqual([
-          expect.objectContaining({
-            query: { range: { myFieldName: { gte: 100, lte: 200 } } },
-          }),
-        ])
-      );
+      expect(api.appliedFilters$.value).toEqual([
+        expect.objectContaining({
+          query: { range: { myFieldName: { gte: 100, lte: 200 } } },
+        }),
+      ]);
       expect(api.serializeState().value).toEqual(['100', '200']);
     });
 

@@ -35,6 +35,8 @@ export const useControlType = ({
   controlTypeContext: ControlTypeContext;
   isCompatible: { [type: string]: boolean };
   controlType?: string;
+  /** The control type is known to fit the current source and field, not a previous one. */
+  isControlTypeConfirmed: boolean;
 } => {
   const controlTypeContext: ControlTypeContext = useMemo(
     () => ({
@@ -46,20 +48,31 @@ export const useControlType = ({
     [fieldName, source]
   );
 
-  const { loading, value: isCompatible = {} } = useAsync(async () => {
+  // useAsync keeps the previous result for a render after its inputs change, so the result says
+  // which context it was computed for
+  const { value: result } = useAsync(async () => {
     const compatibility: { [type: string]: boolean } = {};
     await asyncForEach(Object.values(controlActionRegistry), async (action) => {
       compatibility[action.type] = await action.isCompatible(controlTypeContext);
     });
-    return compatibility;
+    return { context: controlTypeContext, compatibility };
   }, [controlActionRegistry, controlTypeContext]);
+  const isCompatible = result?.compatibility ?? {};
+  const isResultCurrent = result?.context === controlTypeContext;
 
   const keepSelectedType =
-    loading || !source || !fieldName || (selectedControlType && isCompatible[selectedControlType]);
+    !isResultCurrent ||
+    !source ||
+    !fieldName ||
+    (selectedControlType && isCompatible[selectedControlType]);
   const controlType = keepSelectedType
     ? selectedControlType
     : Object.values(controlActionRegistry).find(({ type }) => isCompatible[type])?.type ??
       selectedControlType;
 
-  return { controlTypeContext, isCompatible, controlType };
+  const isControlTypeConfirmed = Boolean(
+    isResultCurrent && source && fieldName && controlType && isCompatible[controlType]
+  );
+
+  return { controlTypeContext, isCompatible, controlType, isControlTypeConfirmed };
 };

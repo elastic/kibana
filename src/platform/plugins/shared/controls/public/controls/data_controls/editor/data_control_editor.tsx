@@ -249,6 +249,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     controlTypeContext,
     isCompatible,
     controlType: effectiveControlType,
+    isControlTypeConfirmed,
   } = useControlType({
     controlActionRegistry,
     fieldName: editorState.field_name,
@@ -504,9 +505,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                 data-test-subj="control-editor-save"
                 fill
                 color="primary"
-                disabled={
-                  !(controlOptionsValid && Boolean(effectiveControlType) && valuesSourceValid)
-                }
+                disabled={!(controlOptionsValid && isControlTypeConfirmed && valuesSourceValid)}
                 hasAriaDisabled={esqlQueryNeedsRunning}
                 onClick={() => {
                   const transformedState: Partial<State> | undefined =

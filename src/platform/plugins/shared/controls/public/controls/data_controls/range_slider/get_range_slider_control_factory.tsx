@@ -65,7 +65,8 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         state,
         parentApi,
         willHaveInitialFilter: state.value !== undefined,
-        getInitialFilter: (dataSource) => buildFilter(dataSource, uuid, state),
+        getInitialFilter: (dataSource, fieldName) =>
+          buildFilter(dataSource, uuid, { ...state, field_name: fieldName }),
         editorStateManager,
       });
 

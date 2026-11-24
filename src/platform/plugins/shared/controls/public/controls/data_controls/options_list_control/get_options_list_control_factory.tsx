@@ -88,7 +88,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
           state,
           parentApi,
           willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
-          getInitialFilter: (dataSource) => buildFilter(dataSource, uuid, state),
+          getInitialFilter: (dataSource, fieldName) =>
+            buildFilter(dataSource, uuid, { ...state, field_name: fieldName }),
           editorStateManager,
         });
 
