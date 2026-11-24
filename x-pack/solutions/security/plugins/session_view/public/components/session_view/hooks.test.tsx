@@ -76,4 +76,33 @@ describe('useFetchSessionViewProcessEvents', () => {
 
     expect(result.current.hasNextPage).toBe(false);
   });
+
+  it('requests the page before the opening alert with its time when the first page holds only alerts', async () => {
+    const { coreStart, AppWrapper } = createAppRootMockRenderer();
+    const get = coreStart.http.get as jest.Mock;
+    const jumpToCursor = '2022-05-10T21:40:00.000Z';
+    // Session View opened from the last alert of the session: no process event follows it. The alert has an
+    // exec action, and its @timestamp (when it was raised) differs from the time that Session View opened at.
+    const alert = getEvent('signal', Date.parse('2022-05-10T21:40:03.000Z'));
+
+    get.mockResolvedValueOnce({ total: 0, events: [{ _source: alert }] });
+    get.mockResolvedValue({ total: 0, events: [] });
+
+    renderHook(
+      () =>
+        useFetchSessionViewProcessEvents(
+          'index',
+          'entity-id',
+          '2022-05-10T00:00:00.000Z',
+          jumpToCursor
+        ),
+      { wrapper: AppWrapper }
+    );
+
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+
+    expect(get.mock.calls[1][1].query).toEqual(
+      expect.objectContaining({ cursor: jumpToCursor, forward: false })
+    );
+  });
 });
