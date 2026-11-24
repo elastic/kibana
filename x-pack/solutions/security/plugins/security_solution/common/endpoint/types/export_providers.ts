@@ -29,7 +29,10 @@ export interface AzureBlobExportProvider {
   type: 'azure_blob';
   account_name: string;
   container: string;
-  /** Optional; Endpoint defaults to https://<account_name>.blob.core.windows.net */
+  /**
+   * Optional; Endpoint defaults to https://<account_name>.blob.core.windows.net. Only Azure Blob
+   * Storage hosts (`AZURE_BLOB_SERVICE_URL_HOST_SUFFIXES`) are accepted.
+   */
   service_url?: string;
   /** Reference to the stored storage account key; absent until a key is set */
   credentials?: ExportProviderCredentials;

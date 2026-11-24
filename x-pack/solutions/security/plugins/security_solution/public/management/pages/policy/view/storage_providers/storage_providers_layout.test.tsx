@@ -246,7 +246,7 @@ describe('When rendering the StorageProvidersLayout', () => {
         createProvider('azure-2', {
           account_name: 'acct2',
           container: 'files',
-          service_url: 'https://acct2.blob.example.com',
+          service_url: 'https://acct2.blob.core.windows.net',
         }),
       ]);
 
@@ -260,7 +260,7 @@ describe('When rendering the StorageProvidersLayout', () => {
       }
 
       const secondRow = renderResult.getByTestId('storageProvidersTableRow-azure-2');
-      for (const text of ['azure-2', 'acct2', 'files', 'https://acct2.blob.example.com']) {
+      for (const text of ['azure-2', 'acct2', 'files', 'https://acct2.blob.core.windows.net']) {
         expect(secondRow).toHaveTextContent(text);
       }
       expect(secondRow).not.toHaveTextContent('Default');
@@ -296,14 +296,16 @@ describe('When rendering the StorageProvidersLayout', () => {
     });
 
     it('should add the first provider from the empty state with a service URL', async () => {
-      const added = createProvider('azure-1', { service_url: 'https://acct1.blob.example.com' });
+      const added = createProvider('azure-1', {
+        service_url: 'https://acct1.blob.core.windows.net',
+      });
       await render();
 
       await fillAddFlyout(added);
       await openAdvancedSettings();
       await setFieldValue(
         'storageProviderFlyout-serviceUrlInput',
-        'https://acct1.blob.example.com'
+        'https://acct1.blob.core.windows.net'
       );
       await userEvent.click(renderResult.getByTestId('storageProviderFlyout-saveButton'));
       await waitForUpdateRequest();
@@ -471,13 +473,19 @@ describe('When rendering the StorageProvidersLayout', () => {
     });
 
     it('should warn under a destination field that exports will go to the new destination only while it is changed', async () => {
-      await render([createProvider('azure-1', { service_url: 'https://acct1.blob.example.com' })]);
+      await render([
+        createProvider('azure-1', { service_url: 'https://acct1.blob.core.windows.net' }),
+      ]);
       const warning =
         "Exports that haven't uploaded yet will use the new destination. If the storage account or container changed, they'll fail and need to be run again.";
       const destinationFields = {
         accountName: ['storageProviderFlyout-accountNameInput', 'acct2', 'acct1'],
         container: ['storageProviderFlyout-containerInput', 'other-dumps', 'dumps'],
-        serviceUrl: ['storageProviderFlyout-serviceUrlInput', '', 'https://acct1.blob.example.com'],
+        serviceUrl: [
+          'storageProviderFlyout-serviceUrlInput',
+          '',
+          'https://acct1.blob.core.windows.net',
+        ],
       } as const;
       type DestinationField = keyof typeof destinationFields;
       /** The warning shows in the help text of `warnedField`'s row only */
@@ -663,7 +671,9 @@ describe('When rendering the StorageProvidersLayout', () => {
     });
 
     it('should drop the service URL when its field is cleared', async () => {
-      await render([createProvider('azure-1', { service_url: 'https://acct1.blob.example.com' })]);
+      await render([
+        createProvider('azure-1', { service_url: 'https://acct1.blob.core.windows.net' }),
+      ]);
 
       await clickRowAction('azure-1', 'storageProvidersEditAction');
       // A saved URL opens the advanced settings
@@ -851,20 +861,20 @@ describe('When rendering the StorageProvidersLayout', () => {
     );
 
     it.each([
-      ['http URL', 'http://acct1.blob.example.com', 'Use a URL that starts with https://.'],
+      ['http URL', 'http://acct1.blob.core.windows.net', 'Use a URL that starts with https://.'],
       [
         'URL with a query',
-        'https://acct1.blob.example.com?sv=2024',
+        'https://acct1.blob.core.windows.net?sv=2024',
         'Enter a URL that starts with https://, uses only ASCII letters, digits and symbols, and has no spaces, credentials (@), query (?), fragment (#), or backslashes (\\).',
       ],
       [
         'URL with credentials',
-        'https://user@acct1.blob.example.com',
+        'https://user@acct1.blob.core.windows.net',
         'Enter a URL that starts with https://, uses only ASCII',
       ],
       [
         'URL with uppercase scheme',
-        'HTTPS://acct1.blob.example.com',
+        'HTTPS://acct1.blob.core.windows.net',
         'Enter a URL that starts with https://, uses only ASCII',
       ],
       [
@@ -872,6 +882,11 @@ describe('When rendering the StorageProvidersLayout', () => {
         // Cyrillic "о" in the host
         'https://acct1.blob.c\u043ere.windows.net',
         'Enter a URL that starts with https://, uses only ASCII',
+      ],
+      [
+        'URL that is not an Azure Blob Storage endpoint',
+        'https://acct1.example.com',
+        'Use an Azure Blob Storage endpoint: an address ending in .blob.core.windows.net, .blob.core.usgovcloudapi.net or .blob.core.chinacloudapi.cn.',
       ],
     ])('should show an error for a service %s', async (_, value, message) => {
       await render();
