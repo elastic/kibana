@@ -351,7 +351,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix a template `$ref` global field ignoring its hide-on-value condition when the controlling field is in another section [#287308]({{kib-pull}}287308).
 * Fix required-on-close validation skipping global fields that a template includes by `$ref` [#287306]({{kib-pull}}287306).
 * Fix duplicate required-on-close validation errors when a template references a global field that is also required on close [#283922]({{kib-pull}}283922).
-* Fix being unable to close a case that reached the limit of 10,000 user actions [#301378]({{kib-pull}}301378).
+* Fix closing a case failing when the case reached the limit of 10,000 user actions [#301378]({{kib-pull}}301378).
 * Fix **Sync alerts** and **Extract observables** not applying when you change a case template from the sidebar [#288636]({{kib-pull}}288636).
 * Fix cases created from a case template by a rule action not inheriting the template's external connector, **Sync alerts** and **Extract observables** settings, and assignees [#284854]({{kib-pull}}284854).
 * Fix IBM Resilient **Additional Fields** on a case template showing the connector default instead of the value you saved. Saving the template again could replace your value with the default [#303132]({{kib-pull}}303132).
