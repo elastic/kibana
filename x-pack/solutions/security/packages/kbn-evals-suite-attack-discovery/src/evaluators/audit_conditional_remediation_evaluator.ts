@@ -310,7 +310,7 @@ const DIRECTIVE_BEFORE_ID =
  * approval: Recommended response for ...") is a separate clause and does not reject the heading.
  */
 const REJECTED_BEFORE_HEADING =
-  /\b(?:do not|don't|never|avoid|refrain from|disregard|ignore|reject\w*|declin\w*)\b[^:.]{0,30}(?:recommend\w*|suggest\w*|propos\w*)\s+\w*(?:response|remediation|action|measure|step|fix|containment)s?\s+for\s+$/i;
+  /\b(?:do not|don't|never|avoid|refrain from|disregard|ignore|reject\w*|declin\w*|no need)\b[^:.]{0,30}(?:recommend\w*|suggest\w*|propos\w*)\s+\w*(?:response|remediation|action|measure|step|fix|containment)s?\s+for\s+$/i;
 
 /**
  * Whether the text before the id is a recommendation heading that turns the colon into an action

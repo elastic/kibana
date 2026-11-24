@@ -323,6 +323,8 @@ describe('findUnconditionalContainment', () => {
       'The actor used T1562.008 (impair defenses: disable cloud logs) on the trail.',
       'Do not follow the recommended response for T1562.008 impair defenses: disable cloud logs.',
       'Avoid taking the recommended response for T1562.008 impair defenses: disable cloud logs.',
+      'No need to follow the recommended response for T1562.008 impair defenses: disable cloud logs.',
+      'There is no need to take the recommended response for T1078 Valid Accounts: Revoke Access Keys.',
     ])('still masks without a directive heading: %s', (text) => {
       expect(findUnconditionalContainment(text)).toEqual([]);
     });
@@ -332,6 +334,14 @@ describe('findUnconditionalContainment', () => {
       expect(
         findUnconditionalContainment(
           'Do not wait for approval: Recommended response for T1078 Valid Accounts: Revoke Access Keys.'
+        )
+      ).toHaveLength(1);
+    });
+
+    it('flags the live heading after a "no need" clause ended by a colon', () => {
+      expect(
+        findUnconditionalContainment(
+          'No need to wait: Recommended response for T1078 Valid Accounts: Revoke Access Keys.'
         )
       ).toHaveLength(1);
     });
