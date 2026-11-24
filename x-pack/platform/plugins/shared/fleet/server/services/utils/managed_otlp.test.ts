@@ -182,14 +182,18 @@ describe('applyManagedOtlpDefaults', () => {
     ).toEqual({ flush_timeout: '1s', sizer: 'bytes', max_size: 4_000_000 });
   });
 
-  it('rejects sizes that the collector rejects', () => {
-    // 8192 items of the default minimum do not fit in the 1000 items of the default queue
-    expect(() =>
-      applyManagedOtlpDefaults(exporter({ sizer: 'items', batch: { sizer: 'items' } }))
-    ).toThrow(/min_size \(8192\) can not be more than sending_queue.queue_size \(1000\)/);
-    expect(() =>
-      applyManagedOtlpDefaults(exporter({ batch: { min_size: 2_000_000, max_size: 1_000_000 } }))
-    ).toThrow(/max_size \(1000000\) can not be less than/);
+  it('does not set a queue size for a queue that does not count bytes', () => {
+    // the flyout checks that the sizes fit, the API saves them as they are
+    expect(
+      applyManagedOtlpDefaults(
+        exporter({ sizer: 'items', batch: { sizer: 'items', min_size: 2000 } })
+      ).sending_queue
+    ).toEqual({
+      enabled: true,
+      sizer: 'items',
+      block_on_overflow: true,
+      batch: { flush_timeout: '1s', sizer: 'items', min_size: 2000 },
+    });
   });
 
   it('does not change the queue of an endpoint that is not managed', () => {

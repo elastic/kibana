@@ -7,11 +7,7 @@
 
 import type { OtlpExporterConfig } from '../../../common/types';
 import { isManagedOtlpEndpointUrl } from '../../../common/services/managed_otlp_endpoint';
-import {
-  getOtlpSendingQueueSizeError,
-  withManagedOtlpQueueDefaults,
-} from '../../../common/services/otlp_sending_queue';
-import { OutputInvalidError } from '../../errors';
+import { withManagedOtlpQueueDefaults } from '../../../common/services/otlp_sending_queue';
 
 import { appContextService } from '..';
 
@@ -31,17 +27,14 @@ export const isManagedOtlpEndpoint = (endpoint: string): boolean =>
  * spec defaults, and `batch: null` turns batching off.
  *
  * The recommended sizes are in bytes, so they are only set for a queue or a batch that counts
- * bytes, and only when they fit with the sizes that are set. Sizes that the collector would reject
- * are an error.
+ * bytes, and only when they fit with the sizes that are set.
  */
 export const applyManagedOtlpDefaults = (exporter: OtlpExporterConfig): OtlpExporterConfig => {
   if (!isManagedOtlpEndpoint(exporter.endpoint) || exporter.sending_queue === null) {
     return exporter;
   }
-  const sendingQueue = withManagedOtlpQueueDefaults(exporter.sending_queue);
-  const error = getOtlpSendingQueueSizeError(sendingQueue);
-  if (error) {
-    throw new OutputInvalidError(error);
-  }
-  return { ...exporter, sending_queue: sendingQueue } as OtlpExporterConfig;
+  return {
+    ...exporter,
+    sending_queue: withManagedOtlpQueueDefaults(exporter.sending_queue),
+  } as OtlpExporterConfig;
 };

@@ -92,26 +92,3 @@ export const withManagedOtlpQueueDefaults = (
     batch: queue?.batch === null ? null : withManagedBatchDefaults(queue?.batch, sizer, queueSize),
   };
 };
-
-/**
- * The error of the sizes of a sending queue that the collector rejects, with the spec defaults for
- * the sizes that are not set: a minimum batch size that does not fit in the queue when both use the
- * same unit, or a maximum batch size below the minimum.
- */
-export const getOtlpSendingQueueSizeError = (queue: OtlpSendingQueue): string | undefined => {
-  const batch = queue.batch;
-  // the collector does not check a queue that is off, nor a queue without batching
-  if (queue.enabled === false || !batch) {
-    return;
-  }
-  const queueSizer = queue.sizer ?? OTLP_QUEUE_SPEC_DEFAULTS.sizer;
-  const queueSize = queue.queue_size ?? OTLP_QUEUE_SPEC_DEFAULTS.queueSize;
-  const minSize = batch.min_size ?? OTLP_QUEUE_SPEC_DEFAULTS.minSize;
-  const maxSize = batch.max_size ?? OTLP_QUEUE_SPEC_DEFAULTS.maxSize;
-  if (getOtlpBatchSizer(batch.sizer, queueSizer) === queueSizer && minSize > queueSize) {
-    return `sending_queue.batch.min_size (${minSize}) can not be more than sending_queue.queue_size (${queueSize}) when both use the same unit`;
-  }
-  if (maxSize !== 0 && maxSize < minSize) {
-    return `sending_queue.batch.max_size (${maxSize}) can not be less than sending_queue.batch.min_size (${minSize}), unless it is 0`;
-  }
-};
