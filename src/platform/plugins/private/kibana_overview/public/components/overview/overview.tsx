@@ -258,7 +258,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   }
 
   return (
-    <KibanaPageTemplate panelled={false}>
+    <KibanaPageTemplate panelled={false} data-test-subj="kbnOverviewPage">
       <AppHeader
         title={i18n.translate('kibanaOverview.header.title', { defaultMessage: 'Analytics' })}
         menu={menu}
