@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: Watchlist Entity Memberships Schema
+  version: '1'
+
+paths:
+  /internal/entity_analytics/watchlists/entities/memberships:
+    get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: GetEntityWatchlistMemberships
+      summary: Get the watchlist memberships of an entity
+      description: |
+        Returns every watchlist the entity belongs to and why: whether it was assigned manually,
+        and which entity sources (rules, indices, integrations) added it.
+      parameters:
+        - name: euid
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1024
+          description: The EUID of the entity
+          example: 'user:john.doe'
+      responses:
+        "200":
+          description: Memberships retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  memberships:
+                    type: array
+                    maxItems: 1000
+                    items:
+                      $ref: "#/components/schemas/EntityWatchlistMembership"
+                required:
+                  - memberships
+
+components:
+  schemas:
+    EntityWatchlistMembershipSource:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 256
+          description: The entity source ID
+        name:
+          type: string
+          maxLength: 256
+          description: The entity source name
+        type:
+          type: string
+          maxLength: 256
+          description: The entity source type (index, store or entity_analytics_integration)
+      required:
+        - id
+
+    EntityWatchlistMembership:
+      type: object
+      properties:
+        watchlistId:
+          type: string
+          maxLength: 256
+          description: The ID of the watchlist
+        manual:
+          type: boolean
+          description: Whether the entity was assigned to the watchlist manually
+        sources:
+          type: array
+          maxItems: 1000
+          description: Entity sources that added the entity to the watchlist
+          items:
+            $ref: "#/components/schemas/EntityWatchlistMembershipSource"
+      required:
+        - watchlistId
+        - manual
+        - sources

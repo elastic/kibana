@@ -25,6 +25,10 @@ import { AssetCriticalityBadge } from '../../../../entity_analytics/components/a
 import { AssetCriticalityModal } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
+import { useWatchlistsPrivileges } from '../../../../entity_analytics/api/hooks/use_watchlists_privileges';
+import { EntityWatchlistsModal } from '../../../../entity_analytics/components/watchlists/entity_watchlists_modal';
+import type { EntityType } from '../../../../../common/entity_analytics/types';
+import { getEntityType } from '../../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { EntitySourceValue, TruncatedBadgeList } from './entity_source_value';
 import {
@@ -39,10 +43,23 @@ const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   { defaultMessage: 'Additional watchlists' }
 );
 
+const EDIT_WATCHLISTS_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.editWatchlistsLabel',
+  { defaultMessage: 'Edit watchlists' }
+);
+
 const ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.grid.entityIdsOverflowTitle',
   { defaultMessage: 'Additional entity IDs' }
 );
+
+const resolveEntityType = (record: Entity): EntityType | undefined => {
+  try {
+    return getEntityType(record);
+  } catch {
+    return undefined;
+  }
+};
 
 interface EntitySummaryGridProps {
   /** Primary record: its id is the one shown (and copied) in the Entity ID panel. */
@@ -56,11 +73,48 @@ interface EntitySummaryGridProps {
   aliasRecords?: readonly Entity[];
   criticalityLevel?: CriticalityLevelWithUnassigned | null;
   onCriticalitySave?: (value: CriticalityLevelWithUnassigned) => void;
+  onWatchlistsChange?: () => void;
 }
 
+interface EditableWatchlistsCellProps {
+  watchlistIds: string[];
+  canEdit: boolean;
+  onEdit: () => void;
+}
+
+const EditableWatchlistsCell = ({ watchlistIds, canEdit, onEdit }: EditableWatchlistsCellProps) => (
+  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexItem css={{ minWidth: 0 }}>
+      <WatchlistsCell watchlistIds={watchlistIds} />
+    </EuiFlexItem>
+    {canEdit && (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={EDIT_WATCHLISTS_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="pencil"
+            iconSize="s"
+            color="text"
+            aria-label={EDIT_WATCHLISTS_LABEL}
+            onClick={onEdit}
+            data-test-subj="entityWatchlistsEditButton"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
+
 export const EntitySummaryGrid = memo(
-  ({ entityRecord, aliasRecords, criticalityLevel, onCriticalitySave }: EntitySummaryGridProps) => {
+  ({
+    entityRecord,
+    aliasRecords,
+    criticalityLevel,
+    onCriticalitySave,
+    onWatchlistsChange,
+  }: EntitySummaryGridProps) => {
     const [modalVisible, setModalVisible] = useState(false);
+    const [watchlistsModalVisible, setWatchlistsModalVisible] = useState(false);
+    const { data: privileges } = useWatchlistsPrivileges();
 
     const entityId = entityRecord.entity?.id;
     const isGroupView = isEntityGroupView(aliasRecords);
@@ -72,6 +126,13 @@ export const EntitySummaryGrid = memo(
     const displayedCriticality = isGroupView ? getMaxCriticality(groupRecords) : criticalityLevel;
 
     const criticalitySaveHandler = isGroupView ? undefined : onCriticalitySave;
+    const entityType = resolveEntityType(entityRecord);
+    const canEditWatchlists =
+      !isGroupView &&
+      !!entityId &&
+      !!entityType &&
+      !!onWatchlistsChange &&
+      privileges?.has_write_permissions === true;
 
     return (
       <>
@@ -118,10 +179,24 @@ export const EntitySummaryGrid = memo(
               { defaultMessage: 'Watchlists' }
             )}
           >
-            <WatchlistsCell watchlistIds={watchlistIds} />
+            <EditableWatchlistsCell
+              watchlistIds={watchlistIds}
+              canEdit={canEditWatchlists}
+              onEdit={() => setWatchlistsModalVisible(true)}
+            />
           </SummaryPanel>
         </EuiFlexGrid>
         <EuiSpacer size="s" />
+        {watchlistsModalVisible && canEditWatchlists && entityId && entityType && (
+          <EntityWatchlistsModal
+            entityId={entityId}
+            entityName={entityRecord.entity?.name ?? entityId}
+            entityType={entityType}
+            currentWatchlistIds={watchlistIds}
+            onClose={() => setWatchlistsModalVisible(false)}
+            onSaved={onWatchlistsChange}
+          />
+        )}
         {modalVisible && criticalitySaveHandler && (
           <AssetCriticalityModal
             initialCriticalityLevel={

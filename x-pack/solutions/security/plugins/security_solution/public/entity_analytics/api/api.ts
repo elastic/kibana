@@ -106,11 +106,15 @@ import {
   WATCHLISTS_INDICES_URL,
   WATCHLISTS_CSV_UPLOAD_URL,
   WATCHLISTS_PRIVILEGES_URL,
+  WATCHLISTS_ENTITY_MEMBERSHIPS_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
 import {
   RISK_SCORE_HISTORY_URL,
   RISK_SCORE_MAINTAINER_ID,
 } from '../../../common/entity_analytics/risk_score/constants';
+import type { AssignWatchlistEntitiesResponse } from '../../../common/api/entity_analytics/watchlists/entities/assign.gen';
+import type { UnassignWatchlistEntitiesResponse } from '../../../common/api/entity_analytics/watchlists/entities/unassign.gen';
+import type { GetEntityWatchlistMembershipsResponse } from '../../../common/api/entity_analytics/watchlists/entities/memberships.gen';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
   GENERATE_LEADS_URL,
@@ -833,6 +837,39 @@ export const useEntityAnalyticsRoutes = () => {
         context,
       });
 
+    const fetchEntityWatchlistMemberships = async (params: {
+      euid: string;
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }) =>
+      http.fetch<GetEntityWatchlistMembershipsResponse>(WATCHLISTS_ENTITY_MEMBERSHIPS_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+        query: { euid: params.euid },
+        signal: params.signal,
+        context: params.context,
+      });
+
+    const assignWatchlistEntities = async (params: { watchlistId: string; euids: string[] }) =>
+      http.fetch<AssignWatchlistEntitiesResponse>(
+        `${WATCHLISTS_URL}/${encodeURIComponent(params.watchlistId)}/entities/assign`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          body: JSON.stringify({ euids: params.euids }),
+        }
+      );
+
+    const unassignWatchlistEntities = async (params: { watchlistId: string; euids: string[] }) =>
+      http.fetch<UnassignWatchlistEntitiesResponse>(
+        `${WATCHLISTS_URL}/${encodeURIComponent(params.watchlistId)}/entities/unassign`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          body: JSON.stringify({ euids: params.euids }),
+        }
+      );
+
     const listWatchlistEntitySources = async (params: {
       watchlistId: string;
       signal?: AbortSignal;
@@ -1099,6 +1136,9 @@ export const useEntityAnalyticsRoutes = () => {
       getWatchlist,
       updateWatchlist,
       deleteWatchlist,
+      fetchEntityWatchlistMemberships,
+      assignWatchlistEntities,
+      unassignWatchlistEntities,
       listWatchlistEntitySources,
       updateWatchlistEntitySource,
       createWatchlistEntitySource,

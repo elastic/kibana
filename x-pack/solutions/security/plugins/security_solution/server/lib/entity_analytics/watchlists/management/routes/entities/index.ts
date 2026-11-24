@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { assignWatchlistEntitiesRoute } from './assign';
 import { unassignWatchlistEntitiesRoute } from './unassign';
+import { getEntityWatchlistMembershipsRoute } from './memberships';
 
 export const registerManualEntityRoutes = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -16,4 +17,5 @@ export const registerManualEntityRoutes = (
 ) => {
   assignWatchlistEntitiesRoute(router, logger);
   unassignWatchlistEntitiesRoute(router, logger);
+  getEntityWatchlistMembershipsRoute(router, logger);
 };

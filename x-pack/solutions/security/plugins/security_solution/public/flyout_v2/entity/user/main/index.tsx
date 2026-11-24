@@ -497,6 +497,7 @@ export const User: FC<UserProps> = memo(function User({
             aliasRecords={aliasRecords}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
+            onWatchlistsChange={observedUser.refetchEntityStore}
           />
         )}
         {isGroupView && !tabs && <EuiSpacer size="l" />}

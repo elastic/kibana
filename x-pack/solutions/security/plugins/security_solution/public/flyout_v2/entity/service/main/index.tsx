@@ -439,6 +439,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             aliasRecords={aliasRecords}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
+            onWatchlistsChange={observedService.refetchEntityStore}
           />
         )}
         {isGroupView && !tabs && <EuiSpacer size="l" />}

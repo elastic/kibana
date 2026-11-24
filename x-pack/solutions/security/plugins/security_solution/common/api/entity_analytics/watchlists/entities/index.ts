@@ -7,3 +7,4 @@
 
 export * from './assign.gen';
 export * from './unassign.gen';
+export * from './memberships.gen';

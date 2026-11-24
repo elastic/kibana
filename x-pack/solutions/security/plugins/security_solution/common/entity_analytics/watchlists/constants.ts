@@ -29,6 +29,8 @@ export const WATCHLISTS_ENTITIES_ASSIGN_URL =
   `${WATCHLISTS_URL}/{watchlist_id}/entities/assign` as const;
 export const WATCHLISTS_ENTITIES_UNASSIGN_URL =
   `${WATCHLISTS_URL}/{watchlist_id}/entities/unassign` as const;
+export const WATCHLISTS_ENTITY_MEMBERSHIPS_URL =
+  '/internal/entity_analytics/watchlists/entities/memberships' as const;
 
 const PRIVILEGED_USER_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
 export const PRIVILEGED_USER_WATCHLIST_NAME = 'Privileged Users';

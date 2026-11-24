@@ -478,6 +478,7 @@ export const Host: FC<HostProps> = memo(function Host({
             aliasRecords={aliasRecords}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
+            onWatchlistsChange={observedHost.refetchEntityStore}
           />
         )}
         {isGroupView && !tabs && <EuiSpacer size="l" />}
