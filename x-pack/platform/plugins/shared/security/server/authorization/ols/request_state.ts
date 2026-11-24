@@ -11,9 +11,11 @@ import type { Principal } from '@kbn/ols';
  * State shared by every scoped service created for one request, so that the principal is resolved
  * and recovery checked at most once per request. It lives as long as the request object, and
  * assumes that the request keeps one credential. HTTP and Task Manager requests do. A service
- * account workload's request loses its header when its run ends, but work that the run started can
- * outlive it, as a cancelled Workflows step does. That work keeps the run's authority here, as it
- * does in Elasticsearch, because the clients it already holds keep the run's token.
+ * account workload's request loses its credential when its run ends, but work that the run started
+ * can outlive it, as a cancelled Workflows step does. That work still gets the answers cached here
+ * before the release, as Elasticsearch clients created before the release keep the run's token.
+ * Anything it looks up for the first time after the release finds no credential: no principal and
+ * no recovery. So code must not rely on a released request to start work that needs authorization.
  */
 export interface RequestState {
   /** The principal of the request, once resolved. */
