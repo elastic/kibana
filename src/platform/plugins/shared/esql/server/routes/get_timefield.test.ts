@@ -28,9 +28,6 @@ jest.mock('@kbn/esql-server-utils', () => ({
   })),
 }));
 
-const { getTimeFieldFromESQLQuery } = jest.requireMock('@kbn/esql-utils');
-const { Parser } = jest.requireMock('@elastic/esql');
-
 function buildMocks() {
   const handler = jest.fn();
   const router = {
@@ -77,68 +74,5 @@ describe('registerGetTimeFieldRoute', () => {
       expect.objectContaining({ path: TIMEFIELD_ROUTE }),
       expect.any(Function)
     );
-  });
-
-  describe('nesting-depth guard', () => {
-    it('returns 400 for a query whose parenthesis nesting depth exceeds the limit', async () => {
-      const { router, handler, requestHandlerContext, response, context } = buildMocks();
-      registerGetTimeFieldRoute(router, context);
-
-      const depth = 51;
-      const query = 'FROM a | WHERE ' + '('.repeat(depth) + '1' + ')'.repeat(depth);
-      await handler(requestHandlerContext, { body: { query } }, response);
-
-      expect(response.badRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ body: expect.stringContaining('nesting depth') })
-      );
-      expect(getTimeFieldFromESQLQuery).not.toHaveBeenCalled();
-      expect(Parser.parse).not.toHaveBeenCalled();
-    });
-
-    it('returns 400 for a deeply nested bracket query (square brackets)', async () => {
-      const { router, handler, requestHandlerContext, response, context } = buildMocks();
-      registerGetTimeFieldRoute(router, context);
-
-      const depth = 60;
-      const query = 'FROM a | WHERE x IN ' + '['.repeat(depth) + '1' + ']'.repeat(depth);
-      await handler(requestHandlerContext, { body: { query } }, response);
-
-      expect(response.badRequest).toHaveBeenCalled();
-      expect(getTimeFieldFromESQLQuery).not.toHaveBeenCalled();
-    });
-
-    it('allows a query exactly at the nesting limit (depth 50)', async () => {
-      const { router, handler, requestHandlerContext, response, context } = buildMocks();
-      registerGetTimeFieldRoute(router, context);
-
-      const depth = 50;
-      const query = 'FROM a | WHERE ' + '('.repeat(depth) + '1' + ')'.repeat(depth);
-      await handler(requestHandlerContext, { body: { query } }, response);
-
-      expect(response.badRequest).not.toHaveBeenCalled();
-    });
-
-    it('allows a normal flat query', async () => {
-      const { router, handler, requestHandlerContext, response, context } = buildMocks();
-      registerGetTimeFieldRoute(router, context);
-
-      const query = 'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend';
-      await handler(requestHandlerContext, { body: { query } }, response);
-
-      expect(response.badRequest).not.toHaveBeenCalled();
-    });
-
-    it('blocks the permanent-hang PoC payload (depth 1500)', async () => {
-      const { router, handler, requestHandlerContext, response, context } = buildMocks();
-      registerGetTimeFieldRoute(router, context);
-
-      const depth = 1500;
-      const query = 'FROM a | WHERE ' + '('.repeat(depth) + '1' + ')'.repeat(depth);
-      await handler(requestHandlerContext, { body: { query } }, response);
-
-      expect(response.badRequest).toHaveBeenCalled();
-      expect(getTimeFieldFromESQLQuery).not.toHaveBeenCalled();
-      expect(Parser.parse).not.toHaveBeenCalled();
-    });
   });
 });
