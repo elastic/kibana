@@ -131,6 +131,34 @@ export const FindLiveQueryDetailsResponse = lazySchema(() =>
         prebuilt_pack: z.boolean().optional(),
         tags: z.array(z.string()).optional(),
         /**
+         * What started the live query. Absent for live queries started from the UI, the API or a rule.
+         */
+        origin: z
+          .object({
+            /**
+             * The kind of origin. `workflow` means a workflow run made the request.
+             */
+            type: z
+              .literal('workflow')
+              .describe('The kind of origin. `workflow` means a workflow run made the request.'),
+            /**
+             * The workflow execution (run) ID that made the request.
+             */
+            run_id: z.string().describe('The workflow execution (run) ID that made the request.'),
+            /**
+             * Whether Kibana verified that the run exists and made the request. Always `false` for now.
+             */
+            verified: z
+              .boolean()
+              .describe(
+                'Whether Kibana verified that the run exists and made the request. Always `false` for now.'
+              ),
+          })
+          .optional()
+          .describe(
+            'What started the live query. Absent for live queries started from the UI, the API or a rule.'
+          ),
+        /**
          * Global status of the live query (completed, running).
          */
         status: z
