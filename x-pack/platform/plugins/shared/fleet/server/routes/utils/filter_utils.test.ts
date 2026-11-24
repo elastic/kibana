@@ -444,6 +444,76 @@ describe('Filter Utils', () => {
         ]);
       });
     });
+
+    describe('with many sibling clauses', () => {
+      const CLAUSE_COUNT = 10_000;
+      const siblingKuery = (clause: (index: number) => string) =>
+        Array.from({ length: CLAUSE_COUNT }, (_, index) => clause(index)).join(' or ');
+
+      it('returns one result per clause, in order', () => {
+        const validationObject = validateFilterKueryNode({
+          astFilter: esKuery.fromKueryExpression(
+            siblingKuery((index) => `foo.attributes.title:"title-${index}"`)
+          ),
+          types: ['foo'],
+          indexMapping: mockMappings,
+          storeValue: true,
+        });
+
+        expect(validationObject).toHaveLength(CLAUSE_COUNT);
+        expect(validationObject[0]).toEqual({
+          astPath: 'arguments.0',
+          error: null,
+          isSavedObjectAttr: false,
+          key: 'foo.attributes.title',
+          type: 'foo',
+        });
+        expect(validationObject[CLAUSE_COUNT - 1].astPath).toBe(`arguments.${CLAUSE_COUNT - 1}`);
+        expect(validationObject.every(({ error }) => error === null)).toBe(true);
+      });
+
+      it('reports the invalid clause among them at its position', () => {
+        const invalidIndex = CLAUSE_COUNT / 2;
+        const validationObject = validateFilterKueryNode({
+          astFilter: esKuery.fromKueryExpression(
+            siblingKuery((index) =>
+              index === invalidIndex
+                ? 'foo.attributes.not_a_field:value'
+                : `foo.attributes.title:"title-${index}"`
+            )
+          ),
+          types: ['foo'],
+          indexMapping: mockMappings,
+          storeValue: true,
+        });
+
+        const errors = validationObject.filter(({ error }) => error !== null);
+        expect(errors).toEqual([
+          expect.objectContaining({
+            astPath: `arguments.${invalidIndex}`,
+            key: 'foo.attributes.not_a_field',
+          }),
+        ]);
+      });
+
+      it('returns a new array on every call', () => {
+        const params = {
+          astFilter: esKuery.fromKueryExpression(
+            'foo.attributes.title:"a" or (foo.attributes.bytes > 1 and foo.attributes.title:"b")'
+          ),
+          types: ['foo'],
+          indexMapping: mockMappings,
+        };
+
+        const first = validateFilterKueryNode(params);
+        const second = validateFilterKueryNode(params);
+
+        expect(second).toEqual(first);
+        expect(second).not.toBe(first);
+        first.pop();
+        expect(second).toHaveLength(3);
+      });
+    });
   });
 });
 
@@ -509,5 +579,23 @@ describe('validateAgentKueryFields', () => {
     undefined,
   ])('returns undefined for %s', (kuery) => {
     expect(validateAgentKueryFields(kuery)).toBeUndefined();
+  });
+
+  describe('with one clause per policy, as `buildPolicyIdsOrVariantsKuery` builds it', () => {
+    const POLICY_COUNT = 5_000;
+    const policyIds = Array.from({ length: POLICY_COUNT }, (_, index) => `policy-${index}`);
+    const policiesKuery = `(status:online or status:degraded) and (policy_id:(${policyIds.join(
+      ' or '
+    )}) or ${policyIds.map((id) => `policy_id:${id}#*`).join(' or ')})`;
+
+    it('accepts it', () => {
+      expect(validateAgentKueryFields(policiesKuery)).toBeUndefined();
+    });
+
+    it('rejects it when one clause names a field that is not allowed', () => {
+      expect(validateAgentKueryFields(`${policiesKuery} or default_api_key:d*`)).toBe(
+        "This type 'default_api_key' is not allowed"
+      );
+    });
   });
 });

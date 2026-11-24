@@ -18,7 +18,7 @@ const allowedTerms = ['_exists_'];
 
 interface ValidateFilterKueryNode {
   astPath: string;
-  error: string;
+  error: string | null;
   isSavedObjectAttr: boolean;
   key: string;
   type: string | null;
@@ -46,24 +46,25 @@ export const validateFilterKueryNode = ({
   skipNormalization,
 }: ValidateFilterKueryNodeParams): ValidateFilterKueryNode[] => {
   let localNestedKeys: string | undefined;
-  return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
-    if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
-      localNestedKeys = ast.value;
-    } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
-      const key = ast.value.replace('.attributes', '');
-      const mappingKey = 'properties.' + key.split('.').join('.properties.');
-      const field = get(indexMapping, mappingKey);
-
-      if (field != null && field.type === 'nested') {
+  // Results are appended to one accumulator: re-spreading it for every clause made validation
+  // quadratic in the number of sibling clauses.
+  return astFilter.arguments.reduce(
+    (kueryNode: ValidateFilterKueryNode[], ast: KueryNode, index: number) => {
+      if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
         localNestedKeys = ast.value;
-      }
-    }
+      } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
+        const key = ast.value.replace('.attributes', '');
+        const mappingKey = 'properties.' + key.split('.').join('.properties.');
+        const field = get(indexMapping, mappingKey);
 
-    if (ast.arguments) {
-      const myPath = `${path}.${index}`;
-      return [
-        ...kueryNode,
-        ...validateFilterKueryNode({
+        if (field != null && field.type === 'nested') {
+          localNestedKeys = ast.value;
+        }
+      }
+
+      if (ast.arguments) {
+        const myPath = `${path}.${index}`;
+        const childResults = validateFilterKueryNode({
           astFilter: ast,
           types,
           indexMapping,
@@ -72,29 +73,33 @@ export const validateFilterKueryNode = ({
           hasNestedKey: ast.type === 'function' && ast.function === 'nested',
           nestedKeys: localNestedKeys || nestedKeys,
           skipNormalization,
-        }),
-      ];
-    }
-    if (storeValue && index === 0) {
-      const splitPath = path.split('.');
-      const astPath = path.includes('.')
-        ? splitPath.slice(0, splitPath.length - 1).join('.')
-        : `${path}.${index}`;
-      const key = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
+        });
+        // A loop rather than `push(...childResults)`, which can exceed the engine's argument limit.
+        for (const childResult of childResults) {
+          kueryNode.push(childResult);
+        }
+        return kueryNode;
+      }
+      if (storeValue && index === 0) {
+        const splitPath = path.split('.');
+        const astPath = path.includes('.')
+          ? splitPath.slice(0, splitPath.length - 1).join('.')
+          : `${path}.${index}`;
+        const key = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
 
-      return [
-        ...kueryNode,
-        {
+        kueryNode.push({
           astPath,
           error: hasFilterKeyError(key, types, indexMapping, skipNormalization),
           isSavedObjectAttr: isSavedObjectAttr(key, indexMapping),
           key,
           type: getType(key),
-        },
-      ];
-    }
-    return kueryNode;
-  }, []);
+        });
+        return kueryNode;
+      }
+      return kueryNode;
+    },
+    []
+  );
 };
 
 const getType = (key: string | undefined | null) => {
@@ -294,7 +299,7 @@ export const validateAgentKueryFields = (kuery: string | undefined): string | un
       skipNormalization: true,
     })
       .map(({ error }) => error)
-      .filter((error) => error != null);
+      .filter((error): error is string => error != null);
   } catch (e) {
     // The parser accepts non-string field names (e.g. `true:foo`), which the walker cannot check.
     return 'Kuery field is not supported';
