@@ -22,7 +22,7 @@ const getEsqlColumnSchemaMock = jest.mocked(getEsqlColumnSchema);
 
 const TIMESTAMP_COLUMN = { name: '@timestamp', type: 'date' };
 const MISSING_TIMESTAMP_REASON =
-  'The query must return a [@timestamp] column. Nightshift reads every source over time windows on it.';
+  'Cannot sample [view-invalid]: The query must return a [@timestamp] column. Nightshift reads every source over time windows on it.';
 
 const makeCandidate = (sourceId: string): SourceCandidate => ({
   sourceId,

@@ -14,28 +14,22 @@ import { parseError } from '../../streams/parse_error';
 import { isIndexNotFoundError } from '../latest_source_query';
 import { StatusError } from '../../errors/status_error';
 
+const getMissingIndexProblem = (index: string): string =>
+  `There are no documents to sample: an index behind [${index}] does not exist yet.`;
+
 /** Reports a failure of the column probe or the random arm, which hard-fail sampling, with its sampling context. */
 export const withSamplingErrorContext = async <T>(
   promise: Promise<T>,
-  {
-    index,
-    samplingTimeoutMs,
-    query,
-  }: { index: string; samplingTimeoutMs: number; query: 'Column probe' | 'Random sampling query' }
+  { index, query }: { index: string; query: 'Column probe' | 'Random sampling query' }
 ): Promise<T> => {
   try {
     return await promise;
   } catch (err) {
     // Missing data is the caller's input, not a sampling failure.
     if (isIndexNotFoundError(err)) {
-      throw new StatusError(
-        `There are no documents to sample: an index behind [${index}] does not exist yet.`,
-        400
-      );
+      throw new StatusError(getMissingIndexProblem(index), 400);
     }
-    throw new Error(
-      `${query} failed (samplingTimeoutMs=${samplingTimeoutMs}ms): ${parseError(err).message}`
-    );
+    throw new Error(`${query} failed: ${parseError(err).message}`);
   }
 };
 
@@ -43,38 +37,49 @@ export type SampleColumnsProbe =
   /** `columns` is absent when the probe could not answer: sampling runs without it. */
   | { kind: 'supported'; columns: EsqlColumnSchema[] | undefined }
   | { kind: 'empty' }
+  /** `problem` is a full sentence naming the source. */
   | { kind: 'unsupported'; problem: string };
 
-/** Decides from a source's columns whether it can be sampled; throws a 400 when an index behind it does not exist. */
-export const probeSampleColumns = async ({
-  esClient,
-  index,
-  fields = [],
-  logger,
-  signal,
-  samplingTimeoutMs,
-}: {
+interface ProbeSampleColumnsParams {
   esClient: ElasticsearchClient;
   index: string;
   /** Columns to report besides `@timestamp`. */
   fields?: string[];
   logger: Logger;
   signal: AbortSignal;
-  samplingTimeoutMs: number;
-}): Promise<SampleColumnsProbe> => {
+}
+
+/** Decides from a source's columns whether it can be sampled; throws only when it cannot tell. */
+export const probeSampleColumns = async (
+  params: ProbeSampleColumnsParams
+): Promise<SampleColumnsProbe> => {
+  try {
+    return await probeColumns(params);
+  } catch (error) {
+    if (isIndexNotFoundError(error)) {
+      return { kind: 'unsupported', problem: getMissingIndexProblem(params.index) };
+    }
+    throw new Error(`Column probe failed: ${parseError(error).message}`);
+  }
+};
+
+const probeColumns = async ({
+  esClient,
+  index,
+  fields = [],
+  logger,
+  signal,
+}: ProbeSampleColumnsParams): Promise<SampleColumnsProbe> => {
   // Only the columns the caller reads: the full schema of a wide source can time out. No time
   // range here: a request-level range narrows the lookup to indices with data in the window,
   // while the sampling query's WHERE does not, so the two could disagree on a column's type.
-  const columns = await withSamplingErrorContext(
-    getEsqlColumnSchema({
-      esClient,
-      index,
-      fields: [SOURCE_TIMESTAMP_FIELD, ...new Set(fields)],
-      signal,
-    }),
-    { index, samplingTimeoutMs, query: 'Column probe' }
-  ).catch((error) => {
-    if (error instanceof StatusError) {
+  const columns = await getEsqlColumnSchema({
+    esClient,
+    index,
+    fields: [SOURCE_TIMESTAMP_FIELD, ...new Set(fields)],
+    signal,
+  }).catch((error) => {
+    if (isIndexNotFoundError(error)) {
       throw error;
     }
     // A probe that cannot answer must not take sampling down with it: the arms run as they did
@@ -96,20 +101,12 @@ export const probeSampleColumns = async ({
   // whatever the source's WHERE matches. It is wide, but only runs on a source that is
   // already wrong.
   const fullColumns = isTimestampUnmapped
-    ? await withSamplingErrorContext(getEsqlColumnSchema({ esClient, index, signal }), {
-        index,
-        samplingTimeoutMs,
-        query: 'Column probe',
-      })
+    ? await getEsqlColumnSchema({ esClient, index, signal })
     : columns;
   if (
     isTimestampUnmapped &&
     fullColumns.length === 0 &&
-    !(await withSamplingErrorContext(hasAnyDocument({ esClient, index, signal }), {
-      index,
-      samplingTimeoutMs,
-      query: 'Column probe',
-    }))
+    !(await hasAnyDocument({ esClient, index, signal }))
   ) {
     // A source with no index yet, which create accepts. An empty schema alone is not enough,
     // since an index that holds documents but maps no field reports it too: that one is an
@@ -120,7 +117,9 @@ export const probeSampleColumns = async ({
   // schema with a valid @timestamp, and then there is nothing to reject. Its schema also
   // carries the entity fields the first, empty answer lacked.
   const problem = getTimestampColumnProblem(fullColumns);
-  return problem ? { kind: 'unsupported', problem } : { kind: 'supported', columns: fullColumns };
+  return problem
+    ? { kind: 'unsupported', problem: `Cannot sample [${index}]: ${problem}` }
+    : { kind: 'supported', columns: fullColumns };
 };
 
 /** One cheap `LIMIT 1` count: tells a view with no data yet apart from one that has documents. */

@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { timeoutSignal } from '@kbn/std';
-import { StatusError } from '../../../../lib/errors/status_error';
 import { probeSampleColumns } from '../../../../lib/significant_events/features/probe_sample_columns';
 import { parseError } from '../../../../lib/streams/parse_error';
 import type { SourceCandidate } from './classify_sources';
@@ -35,18 +34,9 @@ const getSamplingProblem = async ({
 }): Promise<string | undefined> => {
   const signal = timeoutSignal(PROBE_TIMEOUT_MS);
   try {
-    const probe = await probeSampleColumns({
-      esClient,
-      index,
-      logger,
-      signal,
-      samplingTimeoutMs: PROBE_TIMEOUT_MS,
-    });
+    const probe = await probeSampleColumns({ esClient, index, logger, signal });
     return probe.kind === 'unsupported' ? probe.problem : undefined;
   } catch (error) {
-    if (error instanceof StatusError) {
-      return error.message;
-    }
     // The probe could not answer: the run decides.
     logger.debug(() => `Probe of [${index}] failed: ${parseError(error).message}`);
     return undefined;

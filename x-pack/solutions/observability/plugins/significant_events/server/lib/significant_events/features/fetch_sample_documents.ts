@@ -75,10 +75,9 @@ export async function fetchSampleDocuments({
       fields: entityFilters.flatMap((filter) => getFilterFields(filter)),
       logger,
       signal: samplingSignal,
-      samplingTimeoutMs,
     });
     if (probe.kind === 'unsupported') {
-      throw new StatusError(`Cannot sample [${index}]: ${probe.problem}`, 400);
+      throw new StatusError(probe.problem, 400);
     }
     if (probe.kind === 'empty') {
       // An empty sample lets the workflow end on its "no documents" skip instead of failing the run.
@@ -140,7 +139,7 @@ export async function fetchSampleDocuments({
                 abortSignal: samplingSignal,
               })
           ),
-          { index, samplingTimeoutMs, query: 'Random sampling query' }
+          { index, query: 'Random sampling query' }
         ),
       ]);
 
@@ -243,7 +242,7 @@ export async function fetchSampleDocuments({
                 abortSignal: samplingSignal,
               })
           ),
-          { index, samplingTimeoutMs, query: 'Random sampling query' }
+          { index, query: 'Random sampling query' }
         ),
       ]);
 
