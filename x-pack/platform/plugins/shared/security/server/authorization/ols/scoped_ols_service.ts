@@ -271,8 +271,8 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       ])
     );
 
-    // Nothing counts without the login action in the space, neither an operation nor recovery, as
-    // in every other Kibana privilege check.
+    // The login action is what lets a role use Kibana in a space at all. Without it, nothing
+    // counts, neither an operation nor recovery, as in every other Kibana privilege check.
     const { privileges } = await this.params.authz
       .checkPrivilegesWithRequest(this.request)
       .atSpace(spaceId, {
@@ -287,11 +287,11 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
     const granted = new Set(
       privileges.kibana.filter(({ authorized }) => authorized).map(({ privilege }) => privilege)
     );
-    const loggedIn = granted.has(authzActions.login);
+    const canAccessSpace = granted.has(authzActions.login);
 
     let decision: AclDecision;
     if (enabled) {
-      const recovery = loggedIn && granted.has(recoveryAction);
+      const recovery = canAccessSpace && granted.has(recoveryAction);
       this.primeRecovery(type, [spaceId], recovery);
       decision = evaluateAcl({ policy, acl, principal: await this.getPrincipal(), recovery });
     } else {
@@ -312,7 +312,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       const actions = (RESERVED_OPERATIONS as readonly string[]).includes(operation)
         ? operationActions.get('edit')
         : operationActions.get(operation);
-      return loggedIn && !!actions && actions.every((action) => granted.has(action));
+      return canAccessSpace && !!actions && actions.every((action) => granted.has(action));
     };
     return {
       ...decision,
