@@ -590,6 +590,10 @@ describe('useProposal', () => {
 
       expect(fetchesOfEarlier()).toHaveLength(2);
       expect(isSettled).toBe(false);
+      // The new revision marked the card's query invalid, and did not skip it for being in flight.
+      expect(queryClient.getQueryState(queryKeys.proposals.detail('p-1'))?.isInvalidated).toBe(
+        true
+      );
 
       release();
       await act(async () => {
