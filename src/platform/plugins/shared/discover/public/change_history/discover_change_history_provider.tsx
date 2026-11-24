@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBadge, EuiButtonEmpty, EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   ChangeHistoryBadgeRenderFn,
@@ -22,6 +22,7 @@ import {
 import { DISCOVER_SESSION_DELETE_ACTION } from '../../common/constants';
 import { useDiscoverServices } from '../hooks/use_discover_services';
 import { useInternalStateSelector } from '../application/main/state_management/redux';
+import { DiscoverSessionHistoryPreview } from './discover_session_history_preview';
 import { createDiscoverChangeHistoryAdapter } from './discover_change_history_adapter';
 
 const SCOPE = {
@@ -83,13 +84,9 @@ const renderChanges: NonNullable<ChangeHistoryProviderProps['renderChanges']> = 
     </EuiButtonEmpty>
   );
 
-// shows the session as-code snapshot, or the comparison when the user requested one
-const renderPreview: ChangeHistoryProviderProps['renderPreview'] = ({
-  change,
-  compareSpec,
-  compareMode,
-  diffTelemetry,
-}) => {
+// shows the session rendered read-only, or the JSON comparison when the user requested one
+const renderPreview: ChangeHistoryProviderProps['renderPreview'] = (props) => {
+  const { compareSpec, compareMode, diffTelemetry } = props;
   if (compareMode && compareSpec) {
     return (
       <ChangeHistoryPreview
@@ -102,16 +99,7 @@ const renderPreview: ChangeHistoryProviderProps['renderPreview'] = ({
     );
   }
 
-  return (
-    <EuiCodeBlock
-      language="json"
-      isCopyable
-      overflowHeight="100%"
-      data-test-subj="discoverChangeHistoryPreview"
-    >
-      {JSON.stringify(change.snapshot, null, 2)}
-    </EuiCodeBlock>
-  );
+  return <DiscoverSessionHistoryPreview {...props} />;
 };
 
 export const DiscoverChangeHistoryProvider = ({
