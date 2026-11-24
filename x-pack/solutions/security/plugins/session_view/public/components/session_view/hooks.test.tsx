@@ -77,6 +77,28 @@ describe('useFetchSessionViewProcessEvents', () => {
     expect(result.current.hasNextPage).toBe(false);
   });
 
+  it('counts a process event with an array of actions in a full page', async () => {
+    const { coreStart, AppWrapper } = createAppRootMockRenderer();
+    const get = coreStart.http.get as jest.Mock;
+    // Elasticsearch matches a document whose event.action is ['exec'], so such an event is part of a full page
+    const processEvents = Array.from({ length: PROCESS_EVENTS_PER_PAGE }, (_, i) =>
+      getEvent('event', START + i)
+    );
+    processEvents[0] = { ...processEvents[0], event: { kind: 'event', action: ['exec'] } };
+
+    get.mockResolvedValue({
+      total: processEvents.length,
+      events: processEvents.map((_source) => ({ _source })),
+    });
+
+    const { result } = renderHook(
+      () => useFetchSessionViewProcessEvents('index', 'entity-id', '2022-05-10T00:00:00.000Z'),
+      { wrapper: AppWrapper }
+    );
+
+    await waitFor(() => expect(result.current.hasNextPage).toBe(true));
+  });
+
   it('requests the page before the opening alert with its time when the first page holds only alerts', async () => {
     const { coreStart, AppWrapper } = createAppRootMockRenderer();
     const get = coreStart.http.get as jest.Mock;

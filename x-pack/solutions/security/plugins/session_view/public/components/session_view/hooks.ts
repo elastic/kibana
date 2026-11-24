@@ -31,19 +31,21 @@ import {
   QUERY_KEY_PROCESS_EVENTS,
 } from '../../../common/constants';
 
-const isSessionEventAction = (action: EventAction | undefined): boolean => {
-  if (!action) {
-    return false;
-  }
-  return [EVENT_ACTION_FORK, EVENT_ACTION_EXEC, EVENT_ACTION_EXECUTED, EVENT_ACTION_END].includes(
-    action
-  );
-};
+const SESSION_EVENT_ACTIONS: EventAction[] = [
+  EVENT_ACTION_FORK,
+  EVENT_ACTION_EXEC,
+  EVENT_ACTION_EXECUTED,
+  EVENT_ACTION_END,
+];
+
+// event.action can be an array, and Elasticsearch matches a document with any of its actions
+const isSessionEventAction = (action: EventAction | EventAction[] | undefined): boolean =>
+  [action ?? []].flat().some((item) => SESSION_EVENT_ACTIONS.includes(item));
 
 // Alerts come in the same page as process events and have an exec or fork action too, but their time is not
 // a process event time, so only process events can be the cursor of the next or previous page.
 const isSessionProcessEvent = (event: ProcessEvent): boolean =>
-  event.event?.kind !== 'signal' && isSessionEventAction(event.event?.action as EventAction);
+  event.event?.kind !== 'signal' && isSessionEventAction(event.event?.action);
 
 export const useFetchSessionViewProcessEvents = (
   index: string,
