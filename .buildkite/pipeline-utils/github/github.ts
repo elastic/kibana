@@ -187,6 +187,20 @@ export const getChangedFilesBetween = async (
   );
 };
 
+/** A text file's content on a branch of the repository, read through the API. */
+export const getFileOnBranch = async (
+  path: string,
+  ref: string,
+  owner = process.env.GITHUB_PR_BASE_OWNER || 'elastic',
+  repo = process.env.GITHUB_PR_BASE_REPO || 'kibana'
+): Promise<string> => {
+  const { data } = await github.repos.getContent({ owner, repo, path, ref });
+  if (Array.isArray(data) || data.type !== 'file' || !('content' in data)) {
+    throw new Error(`${path} is not a file on ${ref}`);
+  }
+  return Buffer.from(data.content, 'base64').toString('utf-8');
+};
+
 /** Posts a commit status, e.g. a non-Buildkite PR check. */
 export function setCommitStatus(
   {

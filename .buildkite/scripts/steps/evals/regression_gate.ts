@@ -17,7 +17,9 @@
 //   regression_gate.ts post <suite-id> <verdict-file>   post the verdict as kibana-evals/<suite>
 
 import Fs from 'fs';
+import type { EvalsSuiteMetadataEntry } from '../../../pipelines/evals/eval_pipeline.ts';
 import {
+  EVALS_SUITES_METADATA_RELATIVE_PATH,
   getRunnableEvalSuites,
   readRawEvalsSuites,
 } from '../../../pipelines/evals/eval_pipeline.ts';
@@ -26,7 +28,7 @@ import {
   getGateCompareArgs,
   toVerdictStatus,
 } from '../../../pipelines/evals/regression_gate_status.ts';
-import { setCommitStatus } from '#pipeline-utils';
+import { getFileOnBranch, setCommitStatus } from '#pipeline-utils';
 
 const [command, target, arg] = process.argv.slice(2);
 
@@ -59,6 +61,22 @@ const postStatus = async (
 const postPending = (suiteId: string): Promise<void> =>
   postStatus(suiteId, 'pending', `Running ${suiteId} evals`);
 
+/**
+ * The suites as `main` registers them. The `evals gate` workflow reads `main`'s config too, so a PR
+ * can't drop its own gate (leaving it waiting forever) or loosen the thresholds of its own verdict.
+ */
+const readMainSuites = async (): Promise<EvalsSuiteMetadataEntry[]> => {
+  try {
+    const { suites } = JSON.parse(
+      await getFileOnBranch(EVALS_SUITES_METADATA_RELATIVE_PATH, 'main')
+    ) as { suites?: EvalsSuiteMetadataEntry[] };
+    return Array.isArray(suites) ? suites : [];
+  } catch (error) {
+    console.error("Could not read main's evals.suites.json; using this checkout's.", error);
+    return readRawEvalsSuites();
+  }
+};
+
 const main = async (): Promise<void> => {
   if (!command || target === undefined) {
     throw new Error(
@@ -66,13 +84,16 @@ const main = async (): Promise<void> => {
     );
   }
 
+  const gatedSuites = (await readMainSuites()).filter(({ regressionGate }) => regressionGate);
+  const isGated = (suiteId: string): boolean => gatedSuites.some(({ id }) => id === suiteId);
+
   // The trigger step posts this as soon as it hands the suites to the eval pipeline, so a failure
   // before the fanout still leaves a pending verdict for a finished `kibana-evals` build to settle.
   if (command === 'pending-runnable') {
-    for (const { id, regressionGate } of getRunnableEvalSuites(target)) {
-      if (regressionGate) {
-        await postPending(id);
-      }
+    for (const { id } of getRunnableEvalSuites(target).filter(({ id: suiteId }) =>
+      isGated(suiteId)
+    )) {
+      await postPending(id);
     }
     return;
   }
@@ -81,16 +102,16 @@ const main = async (): Promise<void> => {
   // was marked as started (e.g. while resolving the labels). `error` is inconclusive, so it never
   // blocks; without it the gate would wait for a verdict that never comes.
   if (command === 'fail-runnable') {
-    for (const { id, regressionGate } of getRunnableEvalSuites(target)) {
-      if (regressionGate) {
-        await postStatus(id, 'error', 'the eval trigger failed');
-      }
+    for (const { id } of getRunnableEvalSuites(target).filter(({ id: suiteId }) =>
+      isGated(suiteId)
+    )) {
+      await postStatus(id, 'error', 'the eval trigger failed');
     }
     return;
   }
 
-  const suite = readRawEvalsSuites().find(({ id }) => id === target);
-  if (!suite?.regressionGate) {
+  const suite = gatedSuites.find(({ id }) => id === target);
+  if (!suite) {
     return;
   }
 

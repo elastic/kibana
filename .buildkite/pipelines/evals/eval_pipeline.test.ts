@@ -244,6 +244,28 @@ describe('eval_pipeline', () => {
     });
   });
 
+  describe('the judge of a suite with a regression gate', () => {
+    const env = (labels: string, key: string): Record<string, string> =>
+      (parseStep(getEvalPipeline(labels) as string).steps as Array<Record<string, any>>).find(
+        (step) => step.key === key
+      )?.env;
+
+    it('ignores a `models:judge:` label, which would score against a different baseline', () => {
+      expect(
+        env('evals:gated,models:judge:openrouter/openai-gpt-5.4', 'kbn-evals-gated')
+      ).not.toHaveProperty('EVAL_CONNECTOR_ID');
+    });
+
+    it('still applies the label to ungated suites in the same run', () => {
+      expect(
+        env(
+          'evals:gated,evals:smoke-tests,models:judge:openrouter/openai-gpt-5.4',
+          'kbn-evals-smoke-tests'
+        ).EVAL_CONNECTOR_ID
+      ).toBe('openrouter-openai-gpt-5-4');
+    });
+  });
+
   describe('model groups of a suite with a regression gate', () => {
     const modelGroups = (labels: string, key: string): string =>
       (parseStep(getEvalPipeline(labels) as string).steps as Array<Record<string, any>>).find(

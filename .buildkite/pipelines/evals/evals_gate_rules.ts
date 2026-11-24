@@ -319,10 +319,12 @@ export const findReusableVerdict = async ({
 }): Promise<EvalsVerdict | undefined> => {
   const shas = await lookup.listPullRequestCommitShas();
   const headIndex = shas.indexOf(headSha);
-  const earlier = (headIndex === -1 ? shas : shas.slice(0, headIndex))
-    .filter((sha) => sha !== headSha)
-    .reverse()
-    .slice(0, MAX_VERDICT_LOOKBACK);
+  // GitHub lists at most 250 commits, so a missing head means the list is incomplete and a newer
+  // regression could sit beyond it.
+  if (headIndex === -1) {
+    return undefined;
+  }
+  const earlier = shas.slice(0, headIndex).reverse().slice(0, MAX_VERDICT_LOOKBACK);
   const context = getVerdictStatusContext(suite.id);
 
   for (const sha of earlier) {

@@ -263,6 +263,18 @@ describe('findReusableVerdict', () => {
     ).resolves.toEqual(verdict('success', 'b'));
   });
 
+  it("never reuses a verdict when the PR's commit list doesn't contain the head", async () => {
+    const lookup = createLookup({
+      shas: ['a', 'b'],
+      verdicts: { b: 'success' },
+      files: { b: [] },
+    });
+
+    await expect(
+      findReusableVerdict({ lookup, headSha: HEAD, suite: GATED_SUITE })
+    ).resolves.toBeUndefined();
+  });
+
   it('never reuses a regression, nor an older pass behind it', async () => {
     const lookup = createLookup({
       shas: ['a', 'b', HEAD],

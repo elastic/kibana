@@ -250,6 +250,51 @@ describe('runEvalsGate', () => {
     expect(calls.statuses).toEqual([]);
   });
 
+  it("keeps a failure when the reminder comment can't be posted", async () => {
+    const fake = createFake({ changedFiles: ['plugins/agent/a.ts'] });
+    fake.api.upsertComment = async () => {
+      throw new Error('comments are locked');
+    };
+    await runEvalsGate({
+      api: fake.api,
+      core: fake.core,
+      context: PR_EVENT,
+      readSuites: () => SUITES,
+    });
+    expect(fake.calls.statuses).toEqual([
+      {
+        sha: HEAD,
+        state: 'failure',
+        description: 'Evals decision required: add evals:agent or evals:skip',
+      },
+    ]);
+    expect(fake.calls.errors[0]).toMatch(/comments are locked/);
+  });
+
+  it("fails open on the event's commit when the PR can't be read", async () => {
+    const fake = createFake({ changedFiles: [], openPrNumbers: [7] });
+    fake.api.getPullRequest = async () => {
+      throw new Error('GitHub is down');
+    };
+    await runEvalsGate({
+      api: fake.api,
+      core: fake.core,
+      context: {
+        eventName: 'status',
+        repo: { owner: 'elastic', repo: 'kibana' },
+        payload: { sha: HEAD, context: 'kibana-evals/gated' },
+      },
+      readSuites: () => SUITES,
+    });
+    expect(fake.calls.statuses).toEqual([
+      {
+        sha: HEAD,
+        state: 'success',
+        description: 'Evals gate errored, not enforced (see the workflow logs)',
+      },
+    ]);
+  });
+
   it('fails open when GitHub capped the PR file list', async () => {
     const fake = createFake({ changedFiles: [], commentId: 3 });
     fake.api.listChangedFiles = async () => undefined;

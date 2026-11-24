@@ -12,6 +12,7 @@ import Fs from 'fs';
 import Path from 'path';
 import { parse as parseYaml } from 'yaml';
 import type { EvalsSuiteMetadataEntry } from './eval_pipeline.ts';
+import { matchesDecisionPaths } from './evals_gate_rules.ts';
 
 // Reads the real config, unlike `eval_pipeline.test.ts` which mocks `fs` with a fixture. These
 // mistakes are only reachable by hand-editing the file, so a PR-time check is the cheapest guard.
@@ -184,6 +185,30 @@ describe('evals.suites.json evals decision', () => {
         : [];
     return trackedFilesCache;
   };
+
+  it('only requires a decision for files that run CI', () => {
+    // A PR changing only CI-skippable files (e.g. `.md`) never reaches the eval trigger, so a gated
+    // run label on it would wait forever. Such files must be excluded from the decision paths.
+    const prPipeline = (
+      JSON.parse(Fs.readFileSync(Path.join(__dirname, '../../pull_requests.json'), 'utf-8')) as {
+        jobs: Array<{ pipelineSlug: string; skip_ci_on_only_changed?: string[] }>;
+      }
+    ).jobs.find(({ pipelineSlug }) => pipelineSlug === 'kibana-pull-request');
+    const skippable = (prPipeline?.skip_ci_on_only_changed ?? []).map((re) => new RegExp(re, 'i'));
+
+    const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) =>
+      getTrackedFiles()
+        .filter(
+          (file) =>
+            requireDecisionOnPaths !== undefined &&
+            matchesDecisionPaths(file, requireDecisionOnPaths) &&
+            skippable.some((re) => re.test(file))
+        )
+        .map((file) => `${id}: ${file} requires a decision but doesn't run CI`)
+    );
+
+    expect(problems).toEqual([]);
+  });
 
   it('never hides a prompt behind a folder-specific exclude', () => {
     // Suites include whole plugins and exclude the folders that don't change agent behaviour, so a
