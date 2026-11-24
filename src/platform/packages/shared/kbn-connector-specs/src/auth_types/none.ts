@@ -12,6 +12,8 @@ import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
+export const NO_AUTH_TYPE_ID = 'none';
+
 const authSchema = lazySchema(() => z.object({}).meta({ label: i18n.NO_AUTH_LABEL }));
 
 type AuthSchemaType = z.infer<typeof authSchema>;
@@ -20,7 +22,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * No Authentication
  */
 export const NoAuth: AuthTypeSpec<AuthSchemaType> = {
-  id: 'none',
+  id: NO_AUTH_TYPE_ID,
   schema: authSchema,
   configure: async (_: AuthContext, axiosInstance: AxiosInstance): Promise<AxiosInstance> => {
     return axiosInstance;

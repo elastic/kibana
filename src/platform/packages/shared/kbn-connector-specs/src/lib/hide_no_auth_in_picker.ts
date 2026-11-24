@@ -8,10 +8,9 @@
  */
 
 import { z, ZodDiscriminatedUnion, ZodObject } from '@kbn/zod/v4';
+import { NO_AUTH_TYPE_ID } from '../auth_types/none';
 import { addMeta } from '../connector_spec_ui';
 import type { ConnectorZodSchema } from './deserialize_connector_spec';
-
-const NO_AUTH_TYPE_ID = 'none';
 
 /** Hides auth type none from the form's auth picker, for forms where the Run actions switch sets it. */
 export const hideNoAuthInPicker = (schema: ConnectorZodSchema): void => {

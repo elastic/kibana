@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const NO_AUTH_TYPE_ID = 'none';
+import { NO_AUTH_TYPE_ID } from './auth_types/none';
 
 type ReceiveOnlyConnectorValidator = (
   config: Record<string, unknown>,

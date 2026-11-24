@@ -17,6 +17,7 @@ import {
   hideNoAuthInPicker,
   isDualConnectorSpec,
   isInboundOnlyConnectorSpec,
+  NO_AUTH_TYPE_ID,
 } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs';
@@ -114,8 +115,6 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
   return 'plugs';
 }
 
-const NO_AUTH_TYPE_ID = 'none';
-
 /**
  * Whether the action selection is an empty custom list the form should reject. With Run actions
  * off, the serializer saves no actions on purpose.
@@ -137,7 +136,7 @@ export function transformSpecToActionTypeModel(
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
   const registeredSpec = getConnectorSpec(spec.metadata.id);
-  const showsRunActionsSwitch = registeredSpec !== undefined && isDualConnectorSpec(registeredSpec);
+  const shouldHideNoneAuth = registeredSpec !== undefined && isDualConnectorSpec(registeredSpec);
 
   return {
     id: spec.metadata.id,
@@ -161,7 +160,7 @@ export function transformSpecToActionTypeModel(
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       const specActions = spec.actions ?? [];
-      if (showsRunActionsSwitch) {
+      if (shouldHideNoneAuth) {
         hideNoAuthInPicker(connectorZodSchema);
       }
 
@@ -239,7 +238,7 @@ export function transformSpecToActionTypeModel(
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
       serializer: serializeConnectorForm,
-      deserializer: createConnectorFormDeserializer(showsRunActionsSwitch),
+      deserializer: createConnectorFormDeserializer(shouldHideNoneAuth),
       hideSettingsTitle: registeredSpec !== undefined && isInboundOnlyConnectorSpec(registeredSpec),
     },
   };
@@ -272,13 +271,13 @@ function serializeConnectorForm(formData: InternalConnectorForm): InternalConnec
   return { ...formData, config: updatedConfig };
 }
 
-function createConnectorFormDeserializer(showsRunActionsSwitch: boolean) {
+function createConnectorFormDeserializer(shouldHideNoneAuth: boolean) {
   return (apiData: ConnectorFormSchema): InternalConnectorForm => {
     const { config, secrets } = apiData;
 
     // A saved receive-only connector loads with Run actions off. The auth picker falls back to its
     // default and the action selection to All, ready for when Run actions is turned on.
-    if (showsRunActionsSwitch && (config?.authType ?? secrets?.authType) === NO_AUTH_TYPE_ID) {
+    if (shouldHideNoneAuth && (config?.authType ?? secrets?.authType) === NO_AUTH_TYPE_ID) {
       return {
         ...apiData,
         config: { ...omitAuthType(config), selectedActions: null },

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NO_AUTH_TYPE_ID } from './auth_types/none';
 import type { ConnectorSpec } from './connector_spec';
 import { isDualConnectorSpec } from './is_dual_connector_spec';
-
-const NO_AUTH_TYPE_ID = 'none';
 
 const augmentedSpecs = new WeakMap<ConnectorSpec, ConnectorSpec>();
 
