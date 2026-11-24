@@ -78,7 +78,7 @@ describe('CoreInjectionService', () => {
       });
     });
 
-    it('should not allow resolving soft dependencies yet', () => {
+    it('should not allow resolving extension points yet', () => {
       expect(pluginModuleMock.ready).not.toHaveBeenCalled();
     });
 
@@ -96,7 +96,7 @@ describe('CoreInjectionService', () => {
   });
 
   describe('ready', () => {
-    it('should allow resolving soft dependencies', () => {
+    it('should allow resolving extension points', () => {
       service.ready();
 
       expect(pluginModuleMock.ready).toHaveBeenCalledTimes(1);

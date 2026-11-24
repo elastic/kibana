@@ -36,10 +36,11 @@ export const OnSetup = createToken<(container: Container) => void>('OnSetup');
 export const OnStart = createToken<(container: Container) => void>('OnStart');
 
 /**
- * Plugin's ready lifecycle hook, run once per plugin after every plugin has started.
+ * Plugin's extensions ready lifecycle hook, run once per plugin after every plugin has started
+ * and every plugin's `extensions.collect` handlers have run.
  * @public
  */
-export const OnReady = createToken<(container: Container) => void>('OnReady');
+export const OnExtensionsReady = createToken<(container: Container) => void>('OnExtensionsReady');
 
 /**
  * Plugin's setup dependency.

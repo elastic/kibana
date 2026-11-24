@@ -58,7 +58,7 @@ export class CoreInjectionService {
   }
 
   /**
-   * Runs once every plugin has started, unlocking `SoftDependencies` and running the plugins' `collect` hooks, then their `OnReady` hooks.
+   * Runs once every plugin has started, unlocking `ExtensionService` and running the plugins' `collect` hooks, then their `OnExtensionsReady` hooks.
    */
   public ready(): void {
     this.module.ready();

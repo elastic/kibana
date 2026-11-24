@@ -8,7 +8,9 @@
  */
 
 import { Container, LazyServiceIdentifier, type ServiceIdentifier } from 'inversify';
-import { OnReady, OnSetup, OnStart } from './services/plugin';
+import { createExtensionPoint } from './extension_point';
+import { Logger } from './services/logging';
+import { OnExtensionsReady, OnSetup, OnStart } from './services/plugin';
 import { KibanaContainerModule, type KibanaContainerModuleLoadOptions } from './module';
 
 type Hook = ServiceIdentifier<(container: Container) => void>;
@@ -21,15 +23,15 @@ describe('KibanaContainerModule', () => {
   const token = Symbol.for('something');
   const dependencyToken = Symbol.for('dependency') as ServiceIdentifier<string>;
   const asyncDependencyToken = Symbol.for('async');
-  const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
+  const point = createExtensionPoint<string>('test.Point');
   const Collect = Symbol.for('core.di.Collect') as Hook;
   const Contributions = Symbol.for('core.di.Contributions') as ServiceIdentifier<
-    (serviceIdentifier: ServiceIdentifier) => Array<{
-      plugin: string;
-      status: 'fulfilled';
-      value: unknown[];
-    }>
+    (point: { id: string }) => Array<{ plugin: string; resolve(): unknown }>
   >;
+  const ExtensionContribution = Symbol.for('core.di.ExtensionContribution') as ServiceIdentifier<{
+    pointId: string;
+    slot: ServiceIdentifier;
+  }>;
 
   let container: Container;
   let options: KibanaContainerModuleLoadOptions;
@@ -214,45 +216,55 @@ describe('KibanaContainerModule', () => {
     });
   });
 
-  describe('expose', () => {
-    it('should bind the service', () => {
-      options.expose(dependencyToken).toConstantValue('value');
+  describe('extensions.contribute', () => {
+    it('should record one contribution per call, each bound to its own private slot', () => {
+      options.extensions.contribute(point).toConstantValue('value1');
+      options.extensions.contribute(point).toConstantValue('value2');
 
-      expect(container.get(dependencyToken)).toBe('value');
+      const records = container.getAll(ExtensionContribution);
+      expect(records.map(({ pointId }) => pointId)).toEqual(['test.Point', 'test.Point']);
+      expect(records.map(({ slot }) => container.get(slot))).toEqual(['value1', 'value2']);
     });
 
-    it('should publish one global entry per exposed binding', () => {
-      options.expose(dependencyToken).toConstantValue('value1');
-      options.expose(dependencyToken).toConstantValue('value2');
+    it('should not bind the extension point id or any registered symbol', () => {
+      options.extensions.contribute(point).toConstantValue('value');
 
-      expect(container.getAll(Global)).toEqual([dependencyToken, dependencyToken]);
-      expect(container.getAll(dependencyToken)).toEqual(['value1', 'value2']);
+      const [{ slot }] = container.getAll(ExtensionContribution);
+      expect(typeof slot === 'symbol' && Symbol.keyFor(slot)).toBeUndefined();
+      expect(container.isBound('test.Point')).toBe(false);
+      expect(container.isBound(Symbol.for('test.Point'))).toBe(false);
     });
   });
 
-  describe('collect', () => {
-    let exposed: string[];
+  describe('extensions.collect', () => {
+    let contributions: Array<() => string>;
+    let logger: { error: jest.Mock };
 
     beforeEach(() => {
-      exposed = [];
+      contributions = [];
+      logger = { error: jest.fn() };
       container
         .bind(Contributions)
-        .toConstantValue((serviceIdentifier) =>
-          serviceIdentifier === token && exposed.length
-            ? [{ plugin: 'contributor', status: 'fulfilled', value: exposed }]
+        .toConstantValue(({ id }) =>
+          id === point.id
+            ? contributions.map((resolve) => ({ plugin: 'contributor', resolve }))
             : []
         );
       container.bind(dependencyToken).toConstantValue('something');
+      container.bind(Logger as ServiceIdentifier).toConstantValue(logger);
     });
 
-    it('should call the handler with every exposed service only when its hook runs', () => {
+    it('should call the handler with every contribution only when its hook runs', () => {
       const handler = jest.fn();
-      options.collect(token, dependencyToken, handler);
-      exposed.push('value1', 'value2');
+      options.extensions.collect(point, dependencyToken, handler);
+      contributions.push(
+        () => 'value1',
+        () => 'value2'
+      );
 
       trigger(OnSetup, container);
       trigger(OnStart, container);
-      trigger(OnReady, container);
+      trigger(OnExtensionsReady, container);
       expect(handler).not.toHaveBeenCalled();
 
       trigger(Collect, container);
@@ -261,20 +273,27 @@ describe('KibanaContainerModule', () => {
       expect(handler).toHaveBeenNthCalledWith(2, expect.anything(), 'value2', 'something');
     });
 
-    it('should collect the exposed services rather than the local bindings', () => {
+    it('should skip and log a contribution that fails to build and pass the others', () => {
       const handler = jest.fn();
-      options.collect(token, handler);
-      exposed.push('value');
-      container.bind(token).toConstantValue('local');
+      options.extensions.collect(point, handler);
+      contributions.push(
+        () => {
+          throw new Error('boom');
+        },
+        () => 'healthy'
+      );
 
       trigger(Collect, container);
       expect(handler).toHaveBeenCalledTimes(1);
-      expect(handler).toHaveBeenCalledWith(expect.anything(), 'value');
+      expect(handler).toHaveBeenCalledWith(expect.anything(), 'healthy');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Skipped the "test.Point" contribution from plugin "contributor" because it failed to build: boom'
+      );
     });
 
-    it('should not call the handler when nothing is exposed', () => {
+    it('should not call the handler when nothing is contributed', () => {
       const handler = jest.fn();
-      options.collect(token, handler);
+      options.extensions.collect(point, handler);
 
       expect(() => trigger(Collect, container)).not.toThrow();
       expect(handler).not.toHaveBeenCalled();

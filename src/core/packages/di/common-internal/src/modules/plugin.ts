@@ -18,15 +18,39 @@ import {
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import {
   createToken,
-  OnReady,
+  type ExtensionPoint,
+  ExtensionService,
+  OnExtensionsReady,
   OnSetup,
   OnStart,
   Setup,
-  SoftDependencies,
   Start,
 } from '@kbn/core-di';
+import {
+  Collect,
+  type Contribution,
+  Contributions,
+  createExtensionService,
+  ExtensionContribution,
+} from './extensions';
 
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
+
+/**
+ * One contribution to an extension point: the contributing plugin, its scope, and the slot bound to the value there.
+ */
+interface ExtensionEntry {
+  plugin: string;
+  scope: Container;
+  slot: ServiceIdentifier;
+}
+
+/**
+ * `pending`: plugins run setup and start. `ready`: every plugin started, and its contributions are indexed by extension point id.
+ */
+type Phase =
+  | { name: 'pending' }
+  | { name: 'ready'; extensions: ReadonlyMap<string, readonly ExtensionEntry[]> };
 
 /**
  * Current context to resolve the global services.
@@ -40,32 +64,6 @@ const Context = Symbol('Context') as ServiceIdentifier<Container>;
  * The service identifier for the global service references.
  */
 export const Global = createToken<ServiceIdentifier>('Global');
-
-/**
- * The plugin's `collect` hooks, run once after every plugin started and before any `OnReady` hook.
- */
-export const Collect = createToken<(container: Container) => void>('core.di.Collect');
-
-/**
- * The bindings one plugin exposed for a token, or the error building them threw.
- */
-export type Contribution<T> = { plugin: string } & (
-  | { status: 'fulfilled'; value: T[] }
-  | { status: 'rejected'; reason: unknown }
-);
-
-/**
- * Resolves the bindings every plugin exposed for a token, one settled entry per plugin.
- */
-export const Contributions =
-  createToken<<T>(serviceIdentifier: ServiceIdentifier<T>) => Array<Contribution<T>>>(
-    'core.di.Contributions'
-  );
-
-/**
- * `pending`: plugins run setup and start. `ready`: every plugin started.
- */
-type Phase = 'pending' | 'ready';
 
 /**
  * Current plugin scope identifier.
@@ -105,24 +103,21 @@ export class PluginModule extends ContainerModule {
   };
   private bound = new WeakSet<Container>();
   private scopes = new Set<Container>();
-  private phase: Phase = 'pending';
+  private phase: Phase = { name: 'pending' };
 
   constructor(
     private readonly root: Container,
     private readonly options?: Omit<ContainerOptions, 'parent'>
   ) {
     super(({ bind, onActivation }) => {
+      const getContributions = this.getContributions.bind(this);
+
       bind(Container).toConstantValue(root);
-      bind(Contributions).toConstantValue(this.getContributions.bind(this));
+      bind(Contributions).toConstantValue(getContributions);
+      bind(ExtensionService).toConstantValue(createExtensionService(getContributions));
       bind(Fork).toDynamicValue(this.getForkFactory.bind(this)).inRequestScope();
       bind(OnSetup).toConstantValue(this.registerGlobals.bind(this));
       bind(Plugin).toDynamicValue(this.getPluginFactory.bind(this)).inRequestScope();
-      bind(SoftDependencies)
-        .toResolvedValue<[Container, Container | undefined]>(this.getSoftDependencies.bind(this), [
-          Container,
-          { serviceIdentifier: Context, optional: true },
-        ])
-        .inRequestScope();
       bind(Setup).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
       bind(Start).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
       onActivation(Global, this.onGlobalActivation.bind(this));
@@ -132,69 +127,34 @@ export class PluginModule extends ContainerModule {
   }
 
   /**
-   * Marks every plugin as started, so `SoftDependencies` can resolve services exposed by any of them,
-   * then runs each plugin's `collect` hooks once, then each plugin's `OnReady` hooks once.
+   * Marks every plugin as started and indexes their extension point contributions,
+   * then runs each plugin's `collect` hooks once, then each plugin's `OnExtensionsReady` hooks once.
    */
   public ready(): void {
-    if (this.phase === 'ready') {
+    if (this.phase.name === 'ready') {
       return;
     }
 
-    this.phase = 'ready';
+    this.phase = { name: 'ready', extensions: this.indexExtensions() };
     this.runHooks(Collect);
-    this.runHooks(OnReady);
+    this.runHooks(OnExtensionsReady);
   }
 
   protected getDefaultContract() {
     return undefined;
   }
 
-  protected getContributions<T>(serviceIdentifier: ServiceIdentifier<T>): Array<Contribution<T>> {
-    if (this.phase !== 'ready') {
-      throw new Error(`Cannot collect "${String(serviceIdentifier)}" before all plugins started.`);
+  protected getContributions<T>(point: ExtensionPoint<T>): Array<Contribution<T>> {
+    if (this.phase.name !== 'ready') {
+      throw new Error(
+        `Cannot resolve extension point "${point.id}" before all plugins started. Call it in an OnExtensionsReady hook, a request handler, or later.`
+      );
     }
 
-    return [...this.scopes].flatMap((scope): Array<Contribution<T>> => {
-      const count = this.getServicesCount(scope, serviceIdentifier);
-      if (!count) {
-        return [];
-      }
-
-      const id = scope.get(Id);
-      const plugin = id.description ?? String(id);
-      try {
-        const value = count > 1 ? scope.getAll(serviceIdentifier) : [scope.get(serviceIdentifier)];
-
-        return [{ plugin, status: 'fulfilled', value }];
-      } catch (reason) {
-        return [{ plugin, status: 'rejected', reason }];
-      }
-    });
-  }
-
-  protected getSoftDependencies(origin: Container, context = origin): SoftDependencies {
-    const assertReady = (serviceIdentifier: ServiceIdentifier) => {
-      if (this.phase !== 'ready') {
-        throw new Error(
-          `Cannot resolve soft dependency "${String(
-            serviceIdentifier
-          )}" before all plugins started. Resolve it in an OnReady hook, a request handler, or later.`
-        );
-      }
-    };
-
-    return {
-      get: (serviceIdentifier) => {
-        assertReady(serviceIdentifier);
-
-        return origin.get(serviceIdentifier, { optional: true });
-      },
-      getAll: (serviceIdentifier) => {
-        assertReady(serviceIdentifier);
-
-        return context.getAll(serviceIdentifier, { optional: true });
-      },
-    };
+    return (this.phase.extensions.get(point.id) ?? []).map(({ plugin, scope, slot }) => ({
+      plugin,
+      resolve: () => scope.get(slot) as T,
+    }));
   }
 
   protected onContractActivation<T>(
@@ -334,6 +294,23 @@ export class PluginModule extends ContainerModule {
           .inRequestScope();
       }
     }
+  }
+
+  private indexExtensions(): Map<string, ExtensionEntry[]> {
+    const extensions = new Map<string, ExtensionEntry[]>();
+    for (const scope of this.scopes) {
+      if (!scope.isCurrentBound(ExtensionContribution)) {
+        continue;
+      }
+
+      const id = scope.get(Id);
+      const plugin = id.description ?? String(id);
+      for (const { pointId, slot } of scope.getAll(ExtensionContribution)) {
+        extensions.set(pointId, [...(extensions.get(pointId) ?? []), { plugin, scope, slot }]);
+      }
+    }
+
+    return extensions;
   }
 
   private runHooks(hook: ServiceIdentifier<(container: Container) => void>) {

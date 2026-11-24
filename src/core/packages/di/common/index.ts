@@ -9,9 +9,14 @@
 
 export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
 export { Logger, LoggerFactory } from './src/services/logging';
-export { SoftDependencies } from './src/services/soft_dependencies';
 export {
-  OnReady,
+  createExtensionPoint,
+  type ExtensionPoint,
+  type ExtensionPointOptions,
+} from './src/extension_point';
+export { ExtensionService } from './src/services/extensions';
+export {
+  OnExtensionsReady,
   OnSetup,
   OnStart,
   PluginSetup,
@@ -23,6 +28,7 @@ export { Scope, type ScopedContainer } from './src/services/scope';
 export { createToken, type ServiceToken, type ServiceTypeOf } from './src/token';
 export {
   KibanaContainerModule,
+  type KibanaContainerModuleExtensions,
   type KibanaContainerModuleLoadOptions,
   type KibanaResolutionContext,
 } from './src/module';

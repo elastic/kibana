@@ -17,6 +17,13 @@ export {
   type InternalPluginInitializerContext,
   type ServiceIdentifierFactory,
 } from './src/modules/lifecycle';
-export { Collect, Contributions, Global } from './src/modules/plugin';
+export {
+  Collect,
+  type Contribution,
+  Contributions,
+  createExtensionService,
+  ExtensionContribution,
+} from './src/modules/extensions';
+export { Global } from './src/modules/plugin';
 export type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './src/contracts';
 export { cacheInScope } from './src/utils';

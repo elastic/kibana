@@ -18,6 +18,6 @@ export interface InternalCoreDiServiceSetup {
 /** @internal */
 export interface InternalCoreDiServiceStart extends InternalCoreDiServiceSetup {
   fork(id?: PluginOpaqueId, container?: Container): Container;
-  /** Unlocks `SoftDependencies` and runs the plugins' `OnReady` hooks; call once every plugin has started. */
+  /** Unlocks `ExtensionService` and runs the plugins' `collect` and `OnExtensionsReady` hooks; call once every plugin has started. */
   ready(): void;
 }

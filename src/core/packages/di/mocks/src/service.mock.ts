@@ -12,12 +12,16 @@ import { once } from 'lodash';
 import {
   type CoreDiServiceSetup,
   type CoreDiServiceStart,
+  type ExtensionPoint,
+  ExtensionService,
   Scope,
   type ScopedContainer,
-  SoftDependencies,
 } from '@kbn/core-di';
 import {
+  type Contribution,
   Contributions,
+  createExtensionService,
+  ExtensionContribution,
   type CoreInjectionService,
   type InternalCoreDiServiceSetup,
   type InternalCoreDiServiceStart,
@@ -37,21 +41,13 @@ function create(): jest.Mocked<PublicMethodsOf<CoreInjectionService>> {
 function createContainer(options?: ContainerOptions) {
   const container = new Container({ defaultScope: 'Singleton', ...options });
   container.bind(Container).toConstantValue(container);
-  container.bind(SoftDependencies).toConstantValue({
-    get: (serviceIdentifier) => container.get(serviceIdentifier, { optional: true }),
-    getAll: (serviceIdentifier) => container.getAll(serviceIdentifier, { optional: true }),
-  });
-  container.bind(Contributions).toConstantValue((serviceIdentifier) => {
-    if (!container.isBound(serviceIdentifier)) {
-      return [];
-    }
-
-    try {
-      return [{ plugin: 'mock', status: 'fulfilled', value: container.getAll(serviceIdentifier) }];
-    } catch (reason) {
-      return [{ plugin: 'mock', status: 'rejected', reason }];
-    }
-  });
+  const getContributions = <T>(point: ExtensionPoint<T>): Array<Contribution<T>> =>
+    container
+      .getAll(ExtensionContribution, { optional: true })
+      .filter(({ pointId }) => pointId === point.id)
+      .map(({ slot }) => ({ plugin: 'mock', resolve: () => container.get(slot) as T }));
+  container.bind(Contributions).toConstantValue(getContributions);
+  container.bind(ExtensionService).toConstantValue(createExtensionService(getContributions));
 
   for (const method of [
     'bind',

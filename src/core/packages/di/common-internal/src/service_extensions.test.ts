@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceIdentifier } from 'inversify';
-import { KibanaContainerModule, Setup, SoftDependencies, Start } from '@kbn/core-di';
+import {
+  createExtensionPoint,
+  ExtensionService,
+  KibanaContainerModule,
+  OnExtensionsReady,
+  Setup,
+  Start,
+} from '@kbn/core-di';
 import type { InternalCoreDiServiceSetup } from './contracts';
 import { CoreInjectionService } from './service';
 
 describe('CoreInjectionService', () => {
-  const Greeter = Symbol.for('Greeter') as ServiceIdentifier<string>;
+  const Greeter = createExtensionPoint<string>('test.Greeter');
 
   let service: CoreInjectionService;
   let getContainer: InternalCoreDiServiceSetup['getContainer'];
@@ -23,12 +29,12 @@ describe('CoreInjectionService', () => {
     ({ getContainer } = service.setup());
   });
 
-  it('should make a service exposed by one plugin available to another plugin', () => {
+  it('should make a contribution of one plugin available to another plugin', () => {
     const provider = getContainer(Symbol.for('provider'));
     const consumer = getContainer(Symbol.for('consumer'));
     provider.load(
-      new KibanaContainerModule(({ expose }) => {
-        expose(Greeter).toConstantValue('hello');
+      new KibanaContainerModule(({ extensions }) => {
+        extensions.contribute(Greeter).toConstantValue('hello');
       })
     );
 
@@ -37,7 +43,7 @@ describe('CoreInjectionService', () => {
     [provider, consumer].forEach((plugin) => plugin.get(Start));
     ready();
 
-    expect(consumer.get(SoftDependencies).get(Greeter)).toBe('hello');
+    expect(consumer.get(ExtensionService).get(Greeter)).toBe('hello');
   });
 
   it('should run collect handlers when the service is ready', () => {
@@ -45,13 +51,13 @@ describe('CoreInjectionService', () => {
     const owner = getContainer(Symbol.for('owner'));
     const contributor = getContainer(Symbol.for('contributor'));
     owner.load(
-      new KibanaContainerModule(({ collect }) => {
-        collect(Greeter, handler);
+      new KibanaContainerModule(({ extensions }) => {
+        extensions.collect(Greeter, handler);
       })
     );
     contributor.load(
-      new KibanaContainerModule(({ expose }) => {
-        expose(Greeter).toConstantValue('hello');
+      new KibanaContainerModule(({ extensions }) => {
+        extensions.contribute(Greeter).toConstantValue('hello');
       })
     );
 
@@ -63,5 +69,29 @@ describe('CoreInjectionService', () => {
     ready();
     expect(handler).toHaveBeenCalledTimes(1);
     expect(handler).toHaveBeenCalledWith(expect.anything(), 'hello');
+  });
+
+  it('should serve a classic plugin that gets ExtensionService from its container in setup', () => {
+    const greetings: Array<string | undefined> = [];
+    const provider = getContainer(Symbol.for('provider'));
+    provider.load(
+      new KibanaContainerModule(({ extensions }) => {
+        extensions.contribute(Greeter).toConstantValue('hello');
+      })
+    );
+    const classic = getContainer(Symbol.for('classic'));
+    const extensionService = classic.get(ExtensionService);
+    classic
+      .bind(OnExtensionsReady)
+      .toConstantValue(() => greetings.push(extensionService.get(Greeter)));
+
+    [provider, classic].forEach((plugin) => plugin.get(Setup));
+    const { ready } = service.start();
+    [provider, classic].forEach((plugin) => plugin.get(Start));
+    expect(() => extensionService.get(Greeter)).toThrow(/before all plugins started/);
+
+    ready();
+    expect(greetings).toEqual(['hello']);
+    expect(extensionService.get(Greeter)).toBe('hello');
   });
 });

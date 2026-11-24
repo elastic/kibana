@@ -8,22 +8,27 @@
  */
 
 import type { ServiceIdentifier } from 'inversify';
-import { KibanaContainerModule, OnReady, SoftDependencies } from '@kbn/core-di';
+import {
+  createExtensionPoint,
+  ExtensionService,
+  KibanaContainerModule,
+  OnExtensionsReady,
+} from '@kbn/core-di';
 import { injectionServiceMock } from './service.mock';
 import { ready, setup, start } from './utils';
 
 describe('lifecycle utils', () => {
-  const Widget = Symbol.for('Widget') as ServiceIdentifier<string>;
+  const Widget = createExtensionPoint<string>('test.Widget');
+  const Missing = createExtensionPoint<string>('test.Missing');
   const Registry = Symbol.for('Registry') as ServiceIdentifier<string[]>;
-  const Missing = Symbol.for('Missing') as ServiceIdentifier<string>;
 
-  it('should run a module using collect and SoftDependencies through setup, start and ready', () => {
+  it('should run a module using extensions and ExtensionService through setup, start and ready', () => {
     const container = injectionServiceMock.createSetupContract().getContainer();
     container.load(
-      new KibanaContainerModule(({ bind, collect, expose }) => {
+      new KibanaContainerModule(({ bind, extensions }) => {
         bind(Registry).toConstantValue([]);
-        collect(Widget, Registry, (_context, widget, registry) => registry.push(widget));
-        expose(Widget).toConstantValue('widget');
+        extensions.collect(Widget, Registry, (_context, widget, registry) => registry.push(widget));
+        extensions.contribute(Widget).toConstantValue('widget');
       })
     );
 
@@ -33,20 +38,24 @@ describe('lifecycle utils', () => {
 
     ready(container);
     expect(container.get(Registry)).toEqual(['widget']);
-    expect(container.get(SoftDependencies).get(Widget)).toBe('widget');
-    expect(container.get(SoftDependencies).get(Missing)).toBeUndefined();
-    expect(container.get(SoftDependencies).getAll(Missing)).toEqual([]);
+    expect(container.get(ExtensionService).get(Widget)).toBe('widget');
+    expect(container.get(ExtensionService).getAll(Widget)).toEqual(['widget']);
+    expect(container.get(ExtensionService).get(Missing)).toBeUndefined();
+    expect(container.get(ExtensionService).getAll(Missing)).toEqual([]);
   });
 
-  it('should run every collect handler before the OnReady hooks on ready', () => {
+  it('should run every collect handler before the OnExtensionsReady hooks on ready', () => {
     const seen: string[][] = [];
     const container = injectionServiceMock.createSetupContract().getContainer();
     container.load(
-      new KibanaContainerModule(({ bind, collect, expose }) => {
-        bind(OnReady).toResolvedValue((registry) => () => seen.push([...registry]), [Registry]);
+      new KibanaContainerModule(({ bind, extensions }) => {
+        bind(OnExtensionsReady).toResolvedValue(
+          (registry) => () => seen.push([...registry]),
+          [Registry]
+        );
         bind(Registry).toConstantValue([]);
-        collect(Widget, Registry, (_context, widget, registry) => registry.push(widget));
-        expose(Widget).toConstantValue('widget');
+        extensions.collect(Widget, Registry, (_context, widget, registry) => registry.push(widget));
+        extensions.contribute(Widget).toConstantValue('widget');
       })
     );
 

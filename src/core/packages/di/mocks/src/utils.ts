@@ -8,7 +8,7 @@
  */
 
 import type { Container, ServiceIdentifier } from 'inversify';
-import { OnReady, OnSetup, OnStart } from '@kbn/core-di';
+import { OnExtensionsReady, OnSetup, OnStart } from '@kbn/core-di';
 import { Collect } from '@kbn/core-di-internal';
 
 function run(hook: ServiceIdentifier<(container: Container) => void>, container: Container): void {
@@ -25,8 +25,8 @@ export function start(container: Container): void {
   run(OnStart, container);
 }
 
-/** Runs the container's `collect` handlers, then its `OnReady` hooks. */
+/** Runs the container's `extensions.collect` handlers, then its `OnExtensionsReady` hooks. */
 export function ready(container: Container): void {
   run(Collect, container);
-  run(OnReady, container);
+  run(OnExtensionsReady, container);
 }

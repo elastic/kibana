@@ -11,17 +11,19 @@ import { Container, ContainerModule, type ServiceIdentifier } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  createExtensionPoint,
+  ExtensionService,
   KibanaContainerModule,
   type KibanaContainerModuleLoadOptions,
   Logger,
-  OnReady,
+  OnExtensionsReady,
   OnSetup,
   OnStart,
   Setup,
-  SoftDependencies,
   Start,
 } from '@kbn/core-di';
-import { Contributions, Fork, Global, Plugin, PluginModule } from './plugin';
+import { Collect, Contributions, ExtensionContribution } from './extensions';
+import { Fork, Global, Plugin, PluginModule } from './plugin';
 
 describe('PluginModule', () => {
   const token1 = Symbol.for('token1');
@@ -217,9 +219,9 @@ describe('PluginModule', () => {
     });
   });
 
-  describe('SoftDependencies', () => {
-    const Greeter = Symbol.for('Greeter') as ServiceIdentifier<string>;
-    const Widget = Symbol.for('Widget') as ServiceIdentifier<string>;
+  describe('extension points', () => {
+    const Greeter = createExtensionPoint<string>('test.Greeter');
+    const Widget = createExtensionPoint<string>('test.Widget');
     const StartOnly = Symbol.for('StartOnly') as ServiceIdentifier<string>;
 
     let pluginModule: PluginModule;
@@ -257,55 +259,66 @@ describe('PluginModule', () => {
       root.load(pluginModule);
     });
 
+    it('should use the private tokens the public module binds', () => {
+      expect(Collect).toBe(Symbol.for('core.di.Collect'));
+      expect(Contributions).toBe(Symbol.for('core.di.Contributions'));
+      expect(ExtensionContribution).toBe(Symbol.for('core.di.ExtensionContribution'));
+    });
+
+    it('should keep a contribution reachable only through ExtensionService', () => {
+      const provider = createPlugin(token1, ({ extensions }) => {
+        extensions.contribute(Greeter).toConstantValue('hello');
+      });
+      const consumer = createPlugin(token2);
+      setupStartAndReady(provider, consumer);
+      const [{ slot }] = provider.getAll(ExtensionContribution);
+
+      expect(consumer.get(ExtensionService).get(Greeter)).toBe('hello');
+      expect(consumer.isBound(slot)).toBe(false);
+      expect(consumer.isBound(ExtensionContribution)).toBe(false);
+      expect(root.isBound(slot)).toBe(false);
+      expect(root.isBound(ExtensionContribution)).toBe(false);
+      expect(root.get(Fork)(token2).isBound(slot)).toBe(false);
+    });
+
     describe('get', () => {
-      it('should return the service exposed by another plugin', () => {
-        const provider = createPlugin(token1, ({ expose }) => {
-          expose(Greeter).toConstantValue('hello');
+      it('should return the contribution of another plugin', () => {
+        const provider = createPlugin(token1, ({ extensions }) => {
+          extensions.contribute(Greeter).toConstantValue('hello');
         });
         const consumer = createPlugin(token2);
         setupStartAndReady(provider, consumer);
 
-        expect(consumer.get(SoftDependencies).get(Greeter)).toBe('hello');
+        expect(consumer.get(ExtensionService).get(Greeter)).toBe('hello');
       });
 
-      it('should return undefined when no plugin exposes the service', () => {
+      it('should return undefined when no plugin contributes', () => {
         const consumer = createPlugin(token2);
         setupStartAndReady(consumer);
 
-        expect(consumer.get(SoftDependencies).get(Greeter)).toBeUndefined();
+        expect(consumer.get(ExtensionService).get(Greeter)).toBeUndefined();
       });
 
-      it('should not return a service that is bound but not exposed', () => {
-        const provider = createPlugin(token1, ({ bind }) => {
-          bind(Greeter).toConstantValue('hello');
+      it('should group contributions by extension point id', () => {
+        const provider = createPlugin(token1, ({ extensions }) => {
+          extensions.contribute(createExtensionPoint<string>('test.Greeter')).toConstantValue('hi');
         });
         const consumer = createPlugin(token2);
         setupStartAndReady(provider, consumer);
 
-        expect(consumer.get(SoftDependencies).get(Greeter)).toBeUndefined();
+        expect(consumer.get(ExtensionService).get(Greeter)).toBe('hi');
       });
 
-      it('should resolve the service when the consumer was set up before the provider', () => {
-        const consumer = createPlugin(token2);
-        const provider = createPlugin(token1, ({ expose }) => {
-          expose(Greeter).toConstantValue('hello');
-        });
-        const softDependencies = consumer.get(SoftDependencies);
-        setupStartAndReady(consumer, provider);
-
-        expect(softDependencies.get(Greeter)).toBe('hello');
-      });
-
-      it('should resolve a service needing start bindings of a provider that starts after the consumer', () => {
+      it('should resolve a contribution needing start bindings of a provider that starts after the consumer', () => {
         const greetings: Array<string | undefined> = [];
         const consumer = createPlugin(token2, ({ bind }) => {
-          bind(OnReady).toResolvedValue(
-            (softDependencies) => () => greetings.push(softDependencies.get(Greeter)),
-            [SoftDependencies]
+          bind(OnExtensionsReady).toResolvedValue(
+            (extensionService) => () => greetings.push(extensionService.get(Greeter)),
+            [ExtensionService]
           );
         });
-        const provider = createPlugin(token1, ({ expose }) => {
-          expose(Greeter).toResolvedValue((value) => `hello ${value}`, [StartOnly]);
+        const provider = createPlugin(token1, ({ extensions }) => {
+          extensions.contribute(Greeter).toResolvedValue((value) => `hello ${value}`, [StartOnly]);
         });
         setupStartAndReady(consumer, provider);
 
@@ -313,61 +326,104 @@ describe('PluginModule', () => {
       });
 
       it('should throw until all plugins started', () => {
-        const provider = createPlugin(token1, ({ expose }) => {
-          expose(Greeter).toConstantValue('hello');
+        const provider = createPlugin(token1, ({ extensions }) => {
+          extensions.contribute(Greeter).toConstantValue('hello');
         });
         const consumer = createPlugin(token2);
         setupAndStart(provider, consumer);
 
-        expect(() => consumer.get(SoftDependencies).get(Greeter)).toThrow(
-          'Cannot resolve soft dependency "Symbol(Greeter)" before all plugins started. Resolve it in an OnReady hook, a request handler, or later.'
+        expect(() => consumer.get(ExtensionService).get(Greeter)).toThrow(
+          'Cannot resolve extension point "test.Greeter" before all plugins started. Call it in an OnExtensionsReady hook, a request handler, or later.'
         );
       });
 
       it('should throw when used while the plugin starts', () => {
         const consumer = createPlugin(token2, ({ bind }) => {
           bind(OnStart).toResolvedValue(
-            (softDependencies) => () => softDependencies.get(Greeter),
-            [SoftDependencies]
+            (extensionService) => () => extensionService.get(Greeter),
+            [ExtensionService]
           );
         });
         consumer.get(Setup);
 
         expect(() => consumer.get(Start)).toThrow(/before all plugins started/);
       });
+
+      it('should throw naming the contributing plugins when more than one contribution exists', () => {
+        const provider1 = createPlugin(token1, ({ extensions }) => {
+          extensions.contribute(Greeter).toConstantValue('hello');
+        });
+        const provider2 = createPlugin(token2, ({ extensions }) => {
+          extensions.contribute(Greeter).toConstantValue('hi');
+        });
+        setupStartAndReady(provider1, provider2);
+
+        expect(() => provider1.get(ExtensionService).get(Greeter)).toThrow(
+          'Cannot get extension point "test.Greeter" because it has 2 contributions, from plugins "token1", "token2". Use getAll or collect instead.'
+        );
+      });
     });
 
     describe('getAll', () => {
-      it('should return every exposed binding exactly once', () => {
-        const owner = createPlugin(token1, ({ expose }) => {
-          expose(Widget).toConstantValue('owner');
+      it('should return every contribution exactly once', () => {
+        const owner = createPlugin(token1, ({ extensions }) => {
+          extensions.contribute(Widget).toConstantValue('owner');
         });
-        const contributor = createPlugin(token2, ({ expose }) => {
-          expose(Widget).toConstantValue('contributor.1');
-          expose(Widget).toConstantValue('contributor.2');
+        const contributor = createPlugin(token2, ({ extensions }) => {
+          extensions.contribute(Widget).toConstantValue('contributor.1');
+          extensions.contribute(Widget).toConstantValue('contributor.2');
         });
         setupStartAndReady(owner, contributor);
 
-        expect(owner.get(SoftDependencies).getAll(Widget).sort()).toEqual([
+        expect(owner.get(ExtensionService).getAll(Widget)).toEqual([
+          'owner',
           'contributor.1',
           'contributor.2',
-          'owner',
         ]);
       });
 
-      it('should return an empty list when no plugin exposes the service', () => {
+      it('should return an empty list when no plugin contributes', () => {
         const owner = createPlugin(token1);
         setupStartAndReady(owner);
 
-        expect(owner.get(SoftDependencies).getAll(Widget)).toEqual([]);
+        expect(owner.get(ExtensionService).getAll(Widget)).toEqual([]);
+      });
+
+      it('should return the plugin contributions inside a request fork', () => {
+        const owner = createPlugin(token1, ({ extensions }) => {
+          extensions.contribute(Widget).toConstantValue('owner');
+        });
+        const contributor = createPlugin(token2, ({ extensions }) => {
+          extensions.contribute(Widget).toConstantValue('contributor');
+        });
+        setupStartAndReady(owner, contributor);
+
+        expect(root.get(Fork)(token1).get(ExtensionService).getAll(Widget)).toEqual([
+          'owner',
+          'contributor',
+        ]);
       });
 
       it('should throw until all plugins started', () => {
         const owner = createPlugin(token1);
         setupAndStart(owner);
 
-        expect(() => owner.get(SoftDependencies).getAll(Widget)).toThrow(
-          /Symbol\(Widget\)" before all plugins started/
+        expect(() => owner.get(ExtensionService).getAll(Widget)).toThrow(
+          'Cannot resolve extension point "test.Widget" before all plugins started. Call it in an OnExtensionsReady hook, a request handler, or later.'
+        );
+      });
+
+      it('should rethrow a contribution build error naming the point and the plugin', () => {
+        const owner = createPlugin(token1);
+        createPlugin(token2, ({ extensions }) => {
+          extensions.contribute(Widget).toDynamicValue(() => {
+            throw new Error('boom');
+          });
+        });
+        setupStartAndReady(owner);
+
+        expect(() => owner.get(ExtensionService).getAll(Widget)).toThrow(
+          'Failed to build the "test.Widget" contribution from plugin "token2": boom'
         );
       });
     });
@@ -375,16 +431,18 @@ describe('PluginModule', () => {
     describe('collect', () => {
       it('should collect contributions from other plugins and the owner exactly once', () => {
         const Registry = Symbol.for('Registry') as ServiceIdentifier<string[]>;
-        const owner = createPlugin(token1, ({ bind, collect, expose }) => {
+        const owner = createPlugin(token1, ({ bind, extensions }) => {
           bind(Registry).toConstantValue([]);
-          collect(Widget, Registry, (_context, widget, registry) => registry.push(widget));
-          expose(Widget).toConstantValue('owner');
+          extensions.collect(Widget, Registry, (_context, widget, registry) =>
+            registry.push(widget)
+          );
+          extensions.contribute(Widget).toConstantValue('owner');
         });
-        const contributor1 = createPlugin(token2, ({ expose }) => {
-          expose(Widget).toConstantValue('contributor1');
+        const contributor1 = createPlugin(token2, ({ extensions }) => {
+          extensions.contribute(Widget).toConstantValue('contributor1');
         });
-        const contributor2 = createPlugin(token3, ({ expose }) => {
-          expose(Widget).toConstantValue('contributor2');
+        const contributor2 = createPlugin(token3, ({ extensions }) => {
+          extensions.contribute(Widget).toConstantValue('contributor2');
         });
         setupStartAndReady(contributor1, owner, contributor2);
 
@@ -393,11 +451,13 @@ describe('PluginModule', () => {
 
       it('should collect a contribution needing start bindings of a contributor that starts after the owner', () => {
         const handler = jest.fn();
-        const owner = createPlugin(token1, ({ collect }) => {
-          collect(Widget, handler);
+        const owner = createPlugin(token1, ({ extensions }) => {
+          extensions.collect(Widget, handler);
         });
-        const contributor = createPlugin(token2, ({ expose }) => {
-          expose(Widget).toResolvedValue((value) => `contributor ${value}`, [StartOnly]);
+        const contributor = createPlugin(token2, ({ extensions }) => {
+          extensions
+            .contribute(Widget)
+            .toResolvedValue((value) => `contributor ${value}`, [StartOnly]);
         });
         setupStartAndReady(owner, contributor);
 
@@ -407,9 +467,9 @@ describe('PluginModule', () => {
 
       it('should collect once when the start contract is resolved again in a fork', () => {
         const handler = jest.fn();
-        const owner = createPlugin(token1, ({ collect, expose }) => {
-          collect(Widget, handler);
-          expose(Widget).toConstantValue('owner');
+        const owner = createPlugin(token1, ({ extensions }) => {
+          extensions.collect(Widget, handler);
+          extensions.contribute(Widget).toConstantValue('owner');
         });
         setupStartAndReady(owner);
         root.get(Fork)(token1).get(Start);
@@ -420,8 +480,8 @@ describe('PluginModule', () => {
 
       it('should not call the handler when there are no contributions', () => {
         const handler = jest.fn();
-        const owner = createPlugin(token1, ({ collect }) => {
-          collect(Widget, handler);
+        const owner = createPlugin(token1, ({ extensions }) => {
+          extensions.collect(Widget, handler);
         });
         setupStartAndReady(owner);
 
@@ -430,75 +490,65 @@ describe('PluginModule', () => {
 
       it('should not collect contributions before all plugins started', () => {
         const handler = jest.fn();
-        const owner = createPlugin(token1, ({ collect }) => {
-          collect(Widget, handler);
+        const owner = createPlugin(token1, ({ extensions }) => {
+          extensions.collect(Widget, handler);
         });
-        const contributor = createPlugin(token2, ({ expose }) => {
-          expose(Widget).toConstantValue('contributor');
+        const contributor = createPlugin(token2, ({ extensions }) => {
+          extensions.contribute(Widget).toConstantValue('contributor');
         });
         setupAndStart(owner, contributor);
 
         expect(handler).not.toHaveBeenCalled();
       });
 
-      it('should not resolve contributions before all plugins started', () => {
-        const contributor = createPlugin(token1, ({ expose }) => {
-          expose(Widget).toConstantValue('contributor');
-        });
-        setupAndStart(contributor);
-
-        expect(() => root.get(Contributions)(Widget)).toThrow(/before all plugins started/);
-      });
-
-      it('should run every collect handler before any OnReady hook', () => {
-        const Registry = Symbol.for('Registry') as ServiceIdentifier<string[]>;
+      it('should run every collect handler before any OnExtensionsReady hook', () => {
+        const Registry = createExtensionPoint<string[]>('test.Registry');
         const seen: string[][] = [];
         const consumer = createPlugin(token1, ({ bind }) => {
-          bind(OnReady).toResolvedValue(
-            (softDependencies) => () => seen.push([...(softDependencies.get(Registry) ?? [])]),
-            [SoftDependencies]
+          bind(OnExtensionsReady).toResolvedValue(
+            (extensionService) => () => seen.push([...(extensionService.get(Registry) ?? [])]),
+            [ExtensionService]
           );
         });
-        const owner = createPlugin(token2, ({ collect, expose }) => {
-          expose(Registry).toConstantValue([]);
-          collect(Widget, Registry, (_context, widget, registry) => registry.push(widget));
+        const owner = createPlugin(token2, ({ extensions }) => {
+          const registry: string[] = [];
+          extensions.contribute(Registry).toConstantValue(registry);
+          extensions.collect(Widget, (_context, widget) => registry.push(widget));
         });
-        const contributor = createPlugin(token3, ({ expose }) => {
-          expose(Widget).toConstantValue('contributor');
+        const contributor = createPlugin(token3, ({ extensions }) => {
+          extensions.contribute(Widget).toConstantValue('contributor');
         });
         setupStartAndReady(consumer, owner, contributor);
 
         expect(seen).toEqual([['contributor']]);
       });
 
-      it('should skip and log a contribution that fails to build', () => {
+      it('should skip and log each contribution that fails to build and pass the others', () => {
         const handler = jest.fn();
         const logger = loggerMock.create();
-        const owner = createPlugin(token1, ({ bind, collect }) => {
+        const owner = createPlugin(token1, ({ bind, extensions }) => {
           bind(Logger).toConstantValue(logger);
-          collect(Widget, handler);
+          extensions.collect(Widget, handler);
         });
-        const broken = createPlugin(token2, ({ expose }) => {
-          expose(Widget).toDynamicValue(() => {
+        const contributor = createPlugin(token2, ({ extensions }) => {
+          extensions.contribute(Widget).toDynamicValue(() => {
             throw new Error('boom');
           });
+          extensions.contribute(Widget).toConstantValue('healthy');
         });
-        const healthy = createPlugin(token3, ({ expose }) => {
-          expose(Widget).toConstantValue('healthy');
-        });
-        setupStartAndReady(owner, broken, healthy);
+        setupStartAndReady(owner, contributor);
 
         expect(handler).toHaveBeenCalledTimes(1);
         expect(handler).toHaveBeenCalledWith(expect.anything(), 'healthy');
         expect(logger.error).toHaveBeenCalledTimes(1);
         expect(logger.error).toHaveBeenCalledWith(
-          expect.stringMatching(/"Symbol\(Widget\)".*"token2".*boom/)
+          'Skipped the "test.Widget" contribution from plugin "token2" because it failed to build: boom'
         );
       });
     });
   });
 
-  describe('OnReady', () => {
+  describe('OnExtensionsReady', () => {
     let pluginModule: PluginModule;
 
     beforeEach(() => {
@@ -512,8 +562,8 @@ describe('PluginModule', () => {
       const plugin2 = root.get(Plugin)(token2);
       const handler1 = jest.fn();
       const handler2 = jest.fn();
-      plugin1.bind(OnReady).toConstantValue(handler1);
-      plugin2.bind(OnReady).toConstantValue(handler2);
+      plugin1.bind(OnExtensionsReady).toConstantValue(handler1);
+      plugin2.bind(OnExtensionsReady).toConstantValue(handler2);
       plugin1.get(Start);
       plugin2.get(Start);
 
@@ -533,8 +583,8 @@ describe('PluginModule', () => {
       root.get(Plugin)(token1);
       const rootHandler = jest.fn();
       const forkHandler = jest.fn();
-      root.bind(OnReady).toConstantValue(rootHandler);
-      root.get(Fork)(token1).bind(OnReady).toConstantValue(forkHandler);
+      root.bind(OnExtensionsReady).toConstantValue(rootHandler);
+      root.get(Fork)(token1).bind(OnExtensionsReady).toConstantValue(forkHandler);
 
       pluginModule.ready();
 
