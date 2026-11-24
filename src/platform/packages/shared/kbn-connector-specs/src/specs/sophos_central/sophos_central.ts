@@ -489,9 +489,11 @@ export const SophosCentral: ConnectorSpec = {
             successCount++;
           } catch (err) {
             if (err instanceof RateLimitExceededError) {
-              // Rate limit exceeds retry budget — stop the batch and mark
-              // the current and all remaining IDs as unattempted.
-              for (let j = i; j < input.ids.length; j++) {
+              // The current alert was sent and rejected (429) — record it as failed.
+              results.push({ alertId, status: 'failed', error: err.message });
+              failureCount++;
+              // Stop the batch — mark all remaining IDs as unattempted.
+              for (let j = i + 1; j < input.ids.length; j++) {
                 results.push({
                   alertId: input.ids[j],
                   status: 'unattempted',

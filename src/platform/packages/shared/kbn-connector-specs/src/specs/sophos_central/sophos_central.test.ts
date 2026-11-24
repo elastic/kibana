@@ -1312,7 +1312,9 @@ describe('actOnAlertsBulk rate-limit batch halt', () => {
     expect(result.successCount).toBe(1);
     expect(result.failureCount).toBe(2);
     expect(result.results[0]).toMatchObject({ alertId: ALERT_ID, status: 'success' });
-    expect(result.results[1]).toMatchObject({ alertId: ALERT_ID_2, status: 'unattempted' });
+    // The alert that received the 429 was attempted — it is 'failed', not 'unattempted'
+    expect(result.results[1]).toMatchObject({ alertId: ALERT_ID_2, status: 'failed' });
+    // The remaining alert was never sent — it is 'unattempted'
     expect(result.results[2]).toMatchObject({ alertId: ALERT_ID_3, status: 'unattempted' });
     // Only 2 requests sent (1 success + 1 that got 429), not 3
     expect(client.request).toHaveBeenCalledTimes(2);
