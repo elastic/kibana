@@ -168,7 +168,7 @@ async function getJoinStep(workflowsApi: WorkflowsApiService, executionId: strin
   );
   const dispatchedExecutionIds = stepExecutions
     .filter((s) => s.stepId === 'dispatch_health_check' && s.stepType === 'workflow.executeAsync')
-    .sort((left, right) => left.startedAt.localeCompare(right.startedAt))
+    .sort((left, right) => left.globalExecutionIndex - right.globalExecutionIndex)
     .map((s) => (s.output as { executionId: string }).executionId);
   const output = joinStep?.output as { results: AwaitedExecutionResult[] } | undefined;
   return { joinStep, dispatchedExecutionIds, results: output?.results ?? [] };
