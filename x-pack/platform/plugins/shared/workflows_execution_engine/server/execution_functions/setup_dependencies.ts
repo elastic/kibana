@@ -220,6 +220,8 @@ export async function setupDependencies(
           spaceId,
           secrets: dependencies.secretsStart,
           authz: dependencies.security?.authz,
+          isGlobalWorkflow: () =>
+            workflowRepository.isGlobalWorkflowRealtime(workflowExecution.workflowId),
         })
       : undefined,
   };

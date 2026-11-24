@@ -17,8 +17,9 @@ import { WorkflowSecretsError } from './workflow_secrets_error';
 /** Gives the steps of one workflow run the values of the secrets they reference. */
 export interface WorkflowSecretsResolver {
   /**
-   * Returns the value of every named secret. Throws `WorkflowSecretsError` when the account
-   * running the workflow may not use secrets, or when any value cannot be obtained.
+   * Returns the value of every named secret. Throws `WorkflowSecretsError` when the workflow is
+   * shared across spaces, when the account running it may not use secrets, or when any value
+   * cannot be obtained.
    */
   resolve(params: { names: readonly string[] }): Promise<ReadonlyMap<string, string>>;
 }
@@ -30,6 +31,11 @@ export interface CreateWorkflowSecretsResolverParams {
   secrets: SecretsPluginStart;
   /** Undefined when security is off. The privilege check then passes, like on routes. */
   authz: SecurityPluginStart['authz'] | undefined;
+  /**
+   * Whether the workflow is stored in the global space. Secrets belong to one space, so such a
+   * workflow cannot use them. It is only called once a step needs a secret.
+   */
+  isGlobalWorkflow: () => Promise<boolean>;
 }
 
 const quote = (names: readonly string[]): string => names.map((name) => `"${name}"`).join(', ');
@@ -43,9 +49,11 @@ export const createWorkflowSecretsResolver = ({
   spaceId,
   secrets,
   authz,
+  isGlobalWorkflow,
 }: CreateWorkflowSecretsResolverParams): WorkflowSecretsResolver => {
   const values = new Map<string, string>();
   let canUseSecrets: Promise<boolean> | undefined;
+  let isGlobal: Promise<boolean> | undefined;
 
   const checkCanUseSecrets = async (): Promise<boolean> => {
     if (!authz?.mode.useRbacForRequest(request)) {
@@ -64,6 +72,15 @@ export const createWorkflowSecretsResolver = ({
 
   return {
     resolve: async ({ names }) => {
+      // Saving refuses secrets in a global workflow. This stops one that got stored anyway.
+      isGlobal ??= isGlobalWorkflow();
+      if (await isGlobal) {
+        throw new WorkflowSecretsError(
+          `Cannot use ${quote(names)}: workflows shared across all spaces cannot use secrets, ` +
+            `because each secret belongs to a single space.`
+        );
+      }
+
       canUseSecrets ??= checkCanUseSecrets();
       if (!(await canUseSecrets)) {
         throw new WorkflowSecretsError(
