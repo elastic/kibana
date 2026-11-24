@@ -32,9 +32,12 @@ type ToIndex = (position: number) => number;
 
 const SURROGATE_PAIR = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
 
+/** Whether the query has a character, such as an emoji, that a string counts as two. */
+export const hasSurrogatePairs = (query: string): boolean => SURROGATE_PAIR.test(query);
+
 /** The parser counts a character such as an emoji as one, while a string counts it as two. */
 const createToIndex = (query: string): ToIndex => {
-  if (!SURROGATE_PAIR.test(query)) {
+  if (!hasSurrogatePairs(query)) {
     return (position) => position;
   }
   const indexes: number[] = [];

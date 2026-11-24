@@ -318,6 +318,20 @@ describe('mapOperatorsToCommands with subqueries', () => {
     ]);
   });
 
+  it('keeps the row of a WHERE with a subquery in IN (...) when it has no operator of its own', () => {
+    const query = 'FROM a | WHERE k IN (FROM b | KEEP k)';
+    const idleHeat = heatOf(query, [
+      { operator: 'LuceneSourceOperator', node: { id: '1', text: 'FROM a' }, nanos: 10 },
+    ]);
+
+    expect(idleHeat.commands.map(({ command }) => command.text)).toEqual([
+      'FROM a',
+      'FROM b',
+      'KEEP k',
+      'WHERE k IN (FROM b | KEEP k)',
+    ]);
+  });
+
   it('reaches the commands of subqueries inside subqueries', () => {
     const query = 'FROM (FROM (FROM logs | LIMIT 5))';
     const nestedHeat = heatOf(query, [

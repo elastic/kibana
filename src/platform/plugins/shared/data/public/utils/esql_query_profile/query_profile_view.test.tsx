@@ -554,15 +554,19 @@ describe('QueryProfileView', () => {
       renderView(<QueryProfileView adapters={{ requests }} search={search} />);
       await screen.findByTestId('esqlQueryProfileDuration');
 
+      // The request is gone, with nothing logged in its place.
       act(() => requests.reset());
+      await screen.findByTestId('esqlQueryProfileRequestChanged');
+      await userEvent.click(screen.getByTestId('esqlQueryProfileByCommandTab'));
+      expect(await screen.findAllByTestId('esqlQueryProfileCommand')).toHaveLength(4);
+
+      // Then another one is logged in its place.
       act(() => {
         logRequest(requests, 'Documents', {
           query: 'FROM untimed',
           include_execution_metadata: true,
         });
       });
-      await screen.findByTestId('esqlQueryProfileRequestChanged');
-      await userEvent.click(screen.getByTestId('esqlQueryProfileByCommandTab'));
 
       const commands = await screen.findAllByTestId('esqlQueryProfileCommand');
       expect(commands).toHaveLength(4);

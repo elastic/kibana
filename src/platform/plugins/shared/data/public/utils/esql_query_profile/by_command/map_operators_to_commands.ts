@@ -11,6 +11,7 @@ import type { AggregatedOperator, PlanNodeSource } from '../profile/types';
 import { shareOf } from '../profile/aggregate_esql_profile';
 import { planNodeKey } from '../profile/plan_node_sources';
 import type { QueryCommand } from './query_commands';
+import { hasSurrogatePairs } from './query_commands';
 
 export interface CommandHeat {
   command: QueryCommand;
@@ -33,6 +34,9 @@ export interface QueryHeat {
   /** True when the query has subqueries, so the commands belong to different queries. */
   hasSubqueries: boolean;
 }
+
+/** The commands that can exist only to hold subqueries. */
+const CONTAINER_COMMANDS = ['FROM', 'FORK'];
 
 interface Entry {
   command: QueryCommand;
@@ -66,6 +70,7 @@ const advance = (query: string, from: number, characters: number): number => {
 const offsetOf = (
   query: string,
   lineStarts: number[],
+  hasSurrogates: boolean,
   { line, column, text }: PlanNodeSource
 ): number | undefined => {
   const lineStart = lineStarts[line - 1];
@@ -73,7 +78,7 @@ const offsetOf = (
     return undefined;
   }
   // Elasticsearch counts the column in characters, so an emoji before the command is one.
-  const offset = advance(query, lineStart, column - 1);
+  const offset = hasSurrogates ? advance(query, lineStart, column - 1) : lineStart + column - 1;
   return query.startsWith(text, offset) ? offset : undefined;
 };
 
@@ -137,12 +142,13 @@ export function mapOperatorsToCommands({
     operatorNanos: new Map(),
   }));
   const lineStarts = lineStartsOf(query);
+  const hasSurrogates = hasSurrogatePairs(query);
   // Operators of many drivers share their plan nodes, so each node is placed once.
   const commandOfNode = new Map<string, CommandAccumulator | undefined>();
   const commandOf = (key: string): CommandAccumulator | undefined => {
     if (!commandOfNode.has(key)) {
       const source = planNodeSources[key];
-      const offset = source && offsetOf(query, lineStarts, source);
+      const offset = source && offsetOf(query, lineStarts, hasSurrogates, source);
       commandOfNode.set(key, offset === undefined ? undefined : commandAt(accumulators, offset));
     }
     return commandOfNode.get(key);
@@ -175,9 +181,11 @@ export function mapOperatorsToCommands({
   }));
 
   return {
-    // The FROM or FORK that holds subqueries is only worth a row when it did work of its own.
+    // The FROM or FORK that holds subqueries is only worth a row when it did work of its own. Any
+    // other command stays, as it can have a subquery in its expressions, such as WHERE a IN (...).
     commands: heats.filter(
-      ({ command, operators: names }) => !command.branches?.length || names.length > 0
+      ({ command, operators: names }) =>
+        !(CONTAINER_COMMANDS.includes(command.name) && command.branches?.length) || names.length > 0
     ),
     unattributedShare: shareOf(unattributedNanos, totalNanos),
     hasSubqueries: commands.some((command) => Boolean(command.branches?.length)),
