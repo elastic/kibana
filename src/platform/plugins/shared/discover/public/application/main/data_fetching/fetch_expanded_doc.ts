@@ -15,7 +15,7 @@ import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { esql } from '@elastic/esql';
-import { getESQLResults, injectWhereClauseAfterSourceCommand } from '@kbn/esql-utils';
+import { injectWhereClauseAfterSourceCommand } from '@kbn/esql-utils';
 import { buildSearchBody } from '@kbn/unified-doc-viewer-plugin/public';
 import type { ExpandedDocRef } from '../utils/expanded_doc';
 
@@ -69,12 +69,8 @@ const fetchEsqlExpandedDoc = async ({
   const esqlQuery = esql(injectWhereClauseAfterSourceCommand(esqlQueryText, whereClause))
     .limit(1)
     .print('basic');
-  const { response } = await getESQLResults({
-    esqlQuery,
-    search: data.search.search,
-    signal: abortSignal,
-  });
-  const [rowValues] = response.values;
+  const { rawResponse } = await data.search.esql({ query: esqlQuery }, { abortSignal });
+  const [rowValues] = rawResponse.values;
 
   if (!rowValues) {
     return undefined;
@@ -82,7 +78,7 @@ const fetchEsqlExpandedDoc = async ({
 
   // Match the row shape produced by the main ES|QL search.
   const row: DatatableRow = zipObject(
-    response.columns.map(({ name }) => name),
+    rawResponse.columns.map(({ name }) => name),
     rowValues
   );
 

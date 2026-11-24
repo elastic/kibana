@@ -7,11 +7,10 @@
 
 /*
  * Temporary. Elasticsearch plans to let `GET _boost/explain` run without an index, returning every
- * index and data stream that isn't a system one, with the rules that match it by rank and whether
- * it's hidden. Until then, this file works that out in Kibana, following the same matching and
- * ranking as Elasticsearch. Once it's available, the rules route calls it in place of
- * `resolveIndices`, `getBoostTargets` and `explainTargets`, mapping its response to
- * `BoostExplanation`, and this file goes away.
+ * index and data stream that isn't a system one, with the rules that match it by rank. Until then,
+ * this file works that out in Kibana, following the same matching and ranking as Elasticsearch.
+ * Once it's available, the rules route calls it in place of `resolveIndices`, `getBoostTargets`
+ * and `explainTargets`, mapping its response to `BoostExplanation`, and this file goes away.
  */
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -25,7 +24,6 @@ export interface BoostTarget {
   name: string;
   /** The type of profile that applies to it. */
   type: BoostProfileType;
-  isHidden: boolean;
 }
 
 export const resolveIndices = async (
@@ -44,23 +42,17 @@ export const resolveIndices = async (
  */
 export const getBoostTargets = (
   indices: estypes.IndicesResolveIndexResolveIndexItem[],
-  /** Resolved names don't say whether a data stream is hidden or a system one. */
+  /** Resolved names don't say whether a data stream is a system one. */
   dataStreams: estypes.IndicesDataStream[]
 ): BoostTarget[] => [
   ...indices
     .filter(
       ({ data_stream: dataStream, attributes }) => !dataStream && !attributes.includes('system')
     )
-    .map(
-      ({ name, attributes }): BoostTarget => ({
-        name,
-        type: 'indices',
-        isHidden: attributes.includes('hidden'),
-      })
-    ),
+    .map(({ name }): BoostTarget => ({ name, type: 'indices' })),
   ...dataStreams
     .filter(({ system }) => !system)
-    .map(({ name, hidden }): BoostTarget => ({ name, type: 'data_streams', isHidden: hidden })),
+    .map(({ name }): BoostTarget => ({ name, type: 'data_streams' })),
 ];
 
 /**

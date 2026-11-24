@@ -41,8 +41,8 @@ const rule = (name: string, boostProfile = 'fast'): BoostRule => ({
 const explanation = (
   name: string,
   matchedRuleNames: string[],
-  { type = 'indices', isHidden = false }: Partial<BoostExplanation> = {}
-): BoostExplanation => ({ name, type, isHidden, matchedRuleNames });
+  { type = 'indices' }: Partial<BoostExplanation> = {}
+): BoostExplanation => ({ name, type, matchedRuleNames });
 
 const getMatches = (rules: BoostRule[], explanations: BoostExplanation[]) =>
   Object.fromEntries(
@@ -66,28 +66,11 @@ describe('getRuleListItems', () => {
         ]
       )
     ).toEqual({
-      exact: [{ name: 'logs', isHidden: false }],
-      wildcard: [
-        { name: 'logs', isHidden: false, outrankedByRuleName: 'exact' },
-        { name: 'lost', isHidden: false },
-      ],
+      exact: [{ name: 'logs' }],
+      wildcard: [{ name: 'logs', outrankedByRuleName: 'exact' }, { name: 'lost' }],
       all: [
-        { name: 'logs', isHidden: false, outrankedByRuleName: 'exact' },
-        { name: 'lost', isHidden: false, outrankedByRuleName: 'wildcard' },
-      ],
-    });
-  });
-
-  it('keeps whether each match is hidden', () => {
-    expect(
-      getMatches(
-        [rule('all')],
-        [explanation('.hidden', ['all'], { isHidden: true }), explanation('visible', ['all'])]
-      )
-    ).toEqual({
-      all: [
-        { name: '.hidden', isHidden: true },
-        { name: 'visible', isHidden: false },
+        { name: 'logs', outrankedByRuleName: 'exact' },
+        { name: 'lost', outrankedByRuleName: 'wildcard' },
       ],
     });
   });
@@ -109,8 +92,6 @@ describe('getRuleListItems', () => {
 
     expect(
       getRuleListItems([rule('all')], PROFILES, [explanation('logs', ['all'])], details)[0].matches
-    ).toEqual([
-      { name: 'logs', isHidden: false, storageSizeInBytes: 2048, retention: { type: 'infinite' } },
-    ]);
+    ).toEqual([{ name: 'logs', storageSizeInBytes: 2048, retention: { type: 'infinite' } }]);
   });
 });

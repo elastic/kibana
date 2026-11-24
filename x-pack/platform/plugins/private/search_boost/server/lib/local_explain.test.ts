@@ -47,11 +47,7 @@ const rule = (
   is_builtin: false,
 });
 
-const index = (name: string, isHidden = false): BoostTarget => ({
-  name,
-  type: 'indices',
-  isHidden,
-});
+const index = (name: string): BoostTarget => ({ name, type: 'indices' });
 
 /** The names of the rules that match each target, highest ranked first. */
 const getMatchedRuleNames = (rules: BoostRule[], targets: BoostTarget[]) =>
@@ -140,18 +136,18 @@ describe('getBoostTargets', () => {
     const indices = await resolveIndices(createClient());
 
     expect(getBoostTargets(indices, DATA_STREAMS)).toEqual([
-      { name: 'products', type: 'indices', isHidden: false },
-      { name: '.hidden-index', type: 'indices', isHidden: true },
-      { name: 'logs', type: 'data_streams', isHidden: false },
-      { name: '.hidden-logs', type: 'data_streams', isHidden: true },
+      { name: 'products', type: 'indices' },
+      { name: '.hidden-index', type: 'indices' },
+      { name: 'logs', type: 'data_streams' },
+      { name: '.hidden-logs', type: 'data_streams' },
     ]);
   });
 });
 
 describe('explainTargets', () => {
-  it('keeps the type and whether the target is hidden', () => {
-    expect(explainTargets([], PROFILES, [index('.hidden', true)])).toEqual([
-      { name: '.hidden', type: 'indices', isHidden: true, matchedRuleNames: [] },
+  it('keeps the type of the target', () => {
+    expect(explainTargets([], PROFILES, [index('products')])).toEqual([
+      { name: 'products', type: 'indices', matchedRuleNames: [] },
     ]);
   });
 
@@ -215,7 +211,7 @@ describe('explainTargets', () => {
     expect(
       getMatchedRuleNames(
         [rule('indices', '*'), rule('dataStreams', '*', 0, 'recent')],
-        [index('logs'), { name: 'logs', type: 'data_streams', isHidden: false }]
+        [index('logs'), { name: 'logs', type: 'data_streams' }]
       )
     ).toEqual([
       ['logs', ['indices']],

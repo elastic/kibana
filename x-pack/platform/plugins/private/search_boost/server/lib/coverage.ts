@@ -18,7 +18,6 @@ import type { TargetDetails } from './target_details';
 export interface BoostExplanation {
   name: string;
   type: BoostProfileType;
-  isHidden: boolean;
   /** The rules that match it, highest ranked first. The first one applies. */
   matchedRuleNames: string[];
 }
@@ -35,12 +34,11 @@ export const getRuleListItems = (
 ): BoostRuleListItem[] => {
   const matchesByRule = new Map(rules.map(({ name }): [string, BoostRuleMatch[]] => [name, []]));
 
-  explanations.forEach(({ name, isHidden, matchedRuleNames }) => {
+  explanations.forEach(({ name, matchedRuleNames }) => {
     const [appliedRuleName] = matchedRuleNames;
     matchedRuleNames.forEach((ruleName) => {
       matchesByRule.get(ruleName)?.push({
         name,
-        isHidden,
         ...details.get(name),
         outrankedByRuleName: ruleName === appliedRuleName ? undefined : appliedRuleName,
       });

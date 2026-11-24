@@ -94,10 +94,6 @@ apiTest.describe('Search boost list API', { tag: ['@local-serverless-vectordb'] 
         ])
       );
       expect(getRule(testData.patternRule)?.matches).toHaveLength(3);
-      expect(
-        getRule(testData.patternRule)?.matches.find(({ name }) => name === testData.hiddenIndex)
-          ?.isHidden
-      ).toBe(true);
 
       // A higher priority beats a more specific pattern.
       expect(getMatchNames(getRule(testData.priorityExactRule))).toStrictEqual([

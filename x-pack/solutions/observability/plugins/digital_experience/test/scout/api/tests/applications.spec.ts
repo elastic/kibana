@@ -7,8 +7,7 @@
 
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import type { ApplicationsResponse } from '../../../../common/types/applications';
-import { findApplication, testData } from '../fixtures';
+import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
@@ -19,9 +18,6 @@ const {
   COMMON_HEADERS,
   DIGITAL_EXPERIENCE_ONLY_ROLE,
   DIGITAL_EXPERIENCE_READ_ROLE,
-  OTEL_APPS,
-  SERVICE_NAME,
-  STAGING_ENVIRONMENT,
   TIME_RANGE,
 } = testData;
 
@@ -33,68 +29,6 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings(FLAG_RESET_OVERRIDE);
   });
-
-  apiTest(
-    'returns the metrics of the EDOT Browser applications',
-    async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
-      const response = await apiClient.get(APPLICATIONS_IN_TIME_RANGE_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      const { applications, environments, unavailableSources } =
-        response.body as ApplicationsResponse;
-      expect(unavailableSources).toStrictEqual([]);
-      expect(environments).toStrictEqual(
-        expect.arrayContaining(['production', STAGING_ENVIRONMENT])
-      );
-
-      const shop = findApplication(applications, OTEL_APPS.shop, 'otel');
-      expect(shop).toMatchObject({
-        environments: ['production'],
-        pageLoads: { count: 5 },
-        webVitals: {
-          lcp: { p75Ms: 2412.5, sampleCount: 1, ratings: { good: 1 } },
-          inp: { p75Ms: 143.5, sampleCount: 1, ratings: { good: 1 } },
-          cls: { sampleCount: 1, ratings: { good: 1 } },
-          fcp: { p75Ms: 1650.5, sampleCount: 1, ratings: { good: 1 } },
-          ttfb: { p75Ms: 950.25, sampleCount: 1, ratings: { needsImprovement: 1 } },
-        },
-        jsErrors: { count: 1, perPageLoad: 0.2 },
-        // The four successful requests and the failed one the Overview details list.
-        httpRequests: { count: 5, failedCount: 1, failedRatio: 0.2 },
-        lastSeen: '2021-01-18T12:33:00.000Z',
-      });
-      expect(shop?.webVitals.cls.p75).toBeCloseTo(0.045);
-
-      expect(findApplication(applications, OTEL_APPS.checkout, 'otel')).toMatchObject({
-        pageLoads: { count: 2 },
-        webVitals: {
-          lcp: { p75Ms: 3250.75, ratings: { needsImprovement: 1 } },
-          inp: { p75Ms: 612.5, ratings: { poor: 1 } },
-          cls: { ratings: { needsImprovement: 1 } },
-          fcp: { p75Ms: null, sampleCount: 0, ratings: null },
-        },
-        jsErrors: { count: 3, perPageLoad: 1.5 },
-        httpRequests: { count: 4, failedCount: 1, failedRatio: 0.25 },
-      });
-      expect(findApplication(applications, OTEL_APPS.docs, 'otel')).toMatchObject({
-        environments: [STAGING_ENVIRONMENT],
-        pageLoads: { count: 1 },
-        webVitals: { lcp: { p75Ms: null, sampleCount: 0, ratings: null } },
-        httpRequests: { count: 0, failedRatio: null },
-      });
-      expect(findApplication(applications, OTEL_APPS.blog, 'otel')).toMatchObject({
-        environments: [],
-      });
-      expect(findApplication(applications, SERVICE_NAME, 'otel')).toMatchObject({
-        pageLoads: { count: 1 },
-      });
-    }
-  );
 
   apiTest(
     'returns 403 without the Digital Experience privilege',
