@@ -14,9 +14,12 @@ import {
 } from '../../../../../detection_engine/routes/__mocks__';
 
 const mockRemoveEntitySourceReference = jest.fn();
+const mockWatchlistGet = jest.fn();
 jest.mock('../../watchlist_config', () => ({
+  ...jest.requireActual('../../watchlist_config'),
   WatchlistConfigClient: jest.fn().mockImplementation(() => ({
     removeEntitySourceReference: mockRemoveEntitySourceReference,
+    get: mockWatchlistGet,
   })),
 }));
 
@@ -51,6 +54,9 @@ describe('DELETE entity source route - deleteEntitySourceRoute', () => {
     mockGetEntitySource.mockReset();
     mockDeleteEntitySource.mockReset();
     mockRemoveEntitySourceReference.mockReset().mockResolvedValue(undefined);
+    mockWatchlistGet.mockReset();
+
+    mockWatchlistGet.mockResolvedValue({ id: WATCHLIST_ID, managed: false });
 
     const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
@@ -94,5 +100,16 @@ describe('DELETE entity source route - deleteEntitySourceRoute', () => {
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ acknowledged: true });
     expect(mockDeleteEntitySource).toHaveBeenCalledWith(SOURCE_ID);
+  });
+
+  it('rejects deletion on a managed watchlist', async () => {
+    mockWatchlistGet.mockResolvedValue({ id: WATCHLIST_ID, managed: true });
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(400);
+    expect(response.body.message).toContain('Cannot modify managed watchlist');
+    expect(mockGetEntitySource).not.toHaveBeenCalled();
+    expect(mockDeleteEntitySource).not.toHaveBeenCalled();
   });
 });

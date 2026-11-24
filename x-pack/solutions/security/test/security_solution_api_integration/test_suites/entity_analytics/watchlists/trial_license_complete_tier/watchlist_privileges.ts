@@ -185,5 +185,37 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
     });
+
+    describe('managed watchlist protection', () => {
+      let managedWatchlistId: string;
+
+      beforeEach(async () => {
+        await watchlistRoutesNoAuth.installPrebuilt(allCreds, 200);
+
+        const listResponse = await watchlistRoutesNoAuth.list(allCreds, 200);
+        const managedWatchlist = listResponse.body.find(
+          (w: { managed?: boolean }) => w.managed === true
+        );
+        expect(managedWatchlist).to.be.ok();
+        managedWatchlistId = managedWatchlist!.id;
+      });
+
+      it('forbids adding entity sources to a managed watchlist', async () => {
+        await watchlistRoutesNoAuth.createEntitySource(
+          allCreds,
+          managedWatchlistId,
+          {
+            type: 'store',
+            name: 'rogue-store-source',
+            queryRule: 'entity.type: "user"',
+          },
+          400
+        );
+      });
+
+      it('forbids deleting a managed watchlist', async () => {
+        await watchlistRoutesNoAuth.delete(allCreds, managedWatchlistId, 400);
+      });
+    });
   });
 };

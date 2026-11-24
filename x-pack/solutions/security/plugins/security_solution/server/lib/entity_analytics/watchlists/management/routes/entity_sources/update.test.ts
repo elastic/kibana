@@ -13,6 +13,14 @@ import {
   requestMock,
 } from '../../../../../detection_engine/routes/__mocks__';
 
+const mockWatchlistGet = jest.fn();
+jest.mock('../../watchlist_config', () => ({
+  ...jest.requireActual('../../watchlist_config'),
+  WatchlistConfigClient: jest.fn().mockImplementation(() => ({
+    get: mockWatchlistGet,
+  })),
+}));
+
 jest.mock('../../../entity_sources/infra/entity_source_client');
 
 const { mockUpdateEntitySource } = jest.requireMock(
@@ -41,6 +49,9 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
     context = requestContextMock.convertContext(ctx);
 
     mockUpdateEntitySource.mockReset();
+    mockWatchlistGet.mockReset();
+
+    mockWatchlistGet.mockResolvedValue({ id: WATCHLIST_ID, managed: false });
 
     const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
@@ -83,5 +94,15 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
 
     expect(response.status).toEqual(500);
     expect(response.body).toEqual(expect.objectContaining({ message: ERROR_MESSAGE }));
+  });
+
+  it('rejects updates on a managed watchlist', async () => {
+    mockWatchlistGet.mockResolvedValue({ id: WATCHLIST_ID, managed: true });
+
+    const response = await server.inject(buildRequest({ name: 'x' }), context);
+
+    expect(response.status).toEqual(400);
+    expect(response.body.message).toContain('Cannot modify managed watchlist');
+    expect(mockUpdateEntitySource).not.toHaveBeenCalled();
   });
 });

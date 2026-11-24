@@ -13,7 +13,7 @@ import { WATCHLISTS_URL } from '../../../../../../common/entity_analytics/watchl
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { GetWatchlistRequestParams as WatchlistIdParams } from '../../../../../../common/api/entity_analytics/watchlists/management/get.gen';
-import { WatchlistConfigClient } from '../watchlist_config';
+import { WatchlistConfigClient, assertWatchlistMutable } from '../watchlist_config';
 import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
 import { getWatchlistSavedObjectClient } from '../../shared/utils';
 
@@ -56,6 +56,14 @@ export const deleteWatchlistRoute = (
             const namespace = secSol.getSpaceId();
             const soClient = getWatchlistSavedObjectClient(core);
             const esClient = core.elasticsearch.client.asCurrentUser;
+
+            const watchlistCheckClient = new WatchlistConfigClient({
+              namespace,
+              soClient,
+              esClient,
+              logger,
+            });
+            await assertWatchlistMutable(watchlistCheckClient, request.params.id);
 
             const entitySourcesService = createEntitySourcesService({
               namespace,

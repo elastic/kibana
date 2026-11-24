@@ -106,6 +106,23 @@ export const createWatchlistValidationError = (
   return error;
 };
 
+/**
+ * Fetches the watchlist and throws if it is managed. Returns the watchlist for reuse.
+ */
+export const assertWatchlistMutable = async (
+  client: WatchlistConfigClient,
+  watchlistId: string
+): Promise<WatchlistObject> => {
+  const watchlist = await client.get(watchlistId);
+  if (watchlist.managed) {
+    throw createWatchlistValidationError(
+      400,
+      `Cannot modify managed watchlist '${watchlistId}'`
+    );
+  }
+  return watchlist;
+};
+
 export class WatchlistConfigClient {
   constructor(private readonly deps: WatchlistConfigClientDeps) {}
 

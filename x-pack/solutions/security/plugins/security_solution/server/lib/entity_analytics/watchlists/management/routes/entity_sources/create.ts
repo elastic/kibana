@@ -16,7 +16,7 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
-import { WatchlistConfigClient } from '../../watchlist_config';
+import { WatchlistConfigClient, assertWatchlistMutable } from '../../watchlist_config';
 import { syncWatchlistInBackground } from '../../../entity_sources/entity_sources_service';
 import {
   WatchlistEntitySourceClient,
@@ -67,6 +67,16 @@ export const createEntitySourceRoute = (
             const core = await context.core;
             const namespace = secSol.getSpaceId();
             const soClient = getWatchlistSavedObjectClient(core);
+
+            const watchlistClient = new WatchlistConfigClient({
+              logger,
+              namespace,
+              soClient,
+              esClient: core.elasticsearch.client.asCurrentUser,
+            });
+
+            await assertWatchlistMutable(watchlistClient, request.params.watchlist_id);
+
             const client = new WatchlistEntitySourceClient({
               soClient,
               namespace,
@@ -78,12 +88,6 @@ export const createEntitySourceRoute = (
 
             const body = await createSourceForType(client, monitoringSource, namespace, request);
 
-            const watchlistClient = new WatchlistConfigClient({
-              logger,
-              namespace,
-              soClient,
-              esClient: core.elasticsearch.client.asCurrentUser,
-            });
             await watchlistClient.addEntitySourceReference(request.params.watchlist_id, body.id);
 
             // Fire-and-forget sync after new source is linked

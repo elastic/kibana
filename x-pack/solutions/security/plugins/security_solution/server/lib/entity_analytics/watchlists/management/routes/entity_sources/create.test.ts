@@ -15,11 +15,14 @@ import {
 
 const mockWatchlistClientCreate = jest.fn();
 const mockAddEntitySourceReference = jest.fn();
+const mockWatchlistGet = jest.fn();
 const mockGetStartServices = jest.fn();
 
 jest.mock('../../watchlist_config', () => ({
+  ...jest.requireActual('../../watchlist_config'),
   WatchlistConfigClient: jest.fn().mockImplementation(() => ({
     addEntitySourceReference: mockAddEntitySourceReference,
+    get: mockWatchlistGet,
   })),
 }));
 
@@ -59,7 +62,10 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
     mockWatchlistClientCreate.mockReset();
     mockAddEntitySourceReference.mockReset();
+    mockWatchlistGet.mockReset();
     mockSyncWatchlistInBackground.mockReset();
+
+    mockWatchlistGet.mockResolvedValue({ id: WATCHLIST_ID, managed: false });
 
     const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
@@ -174,6 +180,51 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
           logContext: 'WatchlistEntitySourceCreate',
         })
       );
+    });
+  });
+
+  describe('managed watchlist protection', () => {
+    it('rejects entity source creation on a managed watchlist', async () => {
+      mockWatchlistGet.mockResolvedValue({ id: WATCHLIST_ID, managed: true });
+
+      const request = buildRequest({
+        type: 'index',
+        name: 'rogue-source',
+        indexPattern: 'logs-*',
+        enabled: true,
+      });
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toContain('Cannot modify managed watchlist');
+      expect(mockWatchlistClientCreate).not.toHaveBeenCalled();
+      expect(mockAddEntitySourceReference).not.toHaveBeenCalled();
+      expect(mockSyncWatchlistInBackground).not.toHaveBeenCalled();
+    });
+
+    it('allows entity source creation on a non-managed watchlist', async () => {
+      mockWatchlistGet.mockResolvedValue({ id: WATCHLIST_ID, managed: false });
+      const sourceResult = {
+        id: 'es-1',
+        type: 'index',
+        name: 'test-source',
+        indexPattern: 'logs-*',
+        enabled: true,
+      };
+      mockWatchlistClientCreate.mockResolvedValue(sourceResult);
+      mockAddEntitySourceReference.mockResolvedValue(undefined);
+
+      const request = buildRequest({
+        type: 'index',
+        name: 'test-source',
+        indexPattern: 'logs-*',
+        enabled: true,
+      });
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
+      expect(mockWatchlistClientCreate).toHaveBeenCalled();
+      expect(mockAddEntitySourceReference).toHaveBeenCalledWith(WATCHLIST_ID, 'es-1');
     });
   });
 

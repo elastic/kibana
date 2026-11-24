@@ -16,7 +16,7 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
-import { WatchlistConfigClient } from '../../watchlist_config';
+import { WatchlistConfigClient, assertWatchlistMutable } from '../../watchlist_config';
 import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
 import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 
@@ -51,12 +51,23 @@ export const deleteEntitySourceRoute = (
         try {
           const secSol = await context.securitySolution;
           const core = await context.core;
+          const namespace = secSol.getSpaceId();
           const soClient = getWatchlistSavedObjectClient(core);
+          const esClient = core.elasticsearch.client.asCurrentUser;
+
+          const watchlistClient = new WatchlistConfigClient({
+            logger,
+            namespace,
+            soClient,
+            esClient,
+          });
+          await assertWatchlistMutable(watchlistClient, request.params.watchlist_id);
+
           const client = new WatchlistEntitySourceClient({
             soClient,
-            namespace: secSol.getSpaceId(),
+            namespace,
             getStartServices,
-            esClient: core.elasticsearch.client.asCurrentUser,
+            esClient,
             logger,
             hasEncryptionKey,
           });
@@ -64,13 +75,7 @@ export const deleteEntitySourceRoute = (
           // Get the source first so we can pass it for validation
           const source = await client.get(request.params.id);
 
-          // Validate and remove the reference (checks watchlist managed, source managed, and link)
-          const watchlistClient = new WatchlistConfigClient({
-            logger,
-            namespace: secSol.getSpaceId(),
-            soClient,
-            esClient: core.elasticsearch.client.asCurrentUser,
-          });
+          // Validate and remove the reference (checks source managed and link)
           await watchlistClient.removeEntitySourceReference(request.params.watchlist_id, source);
           await client.delete(request.params.id);
 

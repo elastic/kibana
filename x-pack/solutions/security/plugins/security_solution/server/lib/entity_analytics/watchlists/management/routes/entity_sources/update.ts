@@ -16,6 +16,7 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
+import { WatchlistConfigClient, assertWatchlistMutable } from '../../watchlist_config';
 import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
 import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 
@@ -56,10 +57,22 @@ export const updateEntitySourceRoute = (
           try {
             const secSol = await context.securitySolution;
             const core = await context.core;
+            const namespace = secSol.getSpaceId();
+            const soClient = getWatchlistSavedObjectClient(core);
+            const esClient = core.elasticsearch.client.asCurrentUser;
+
+            const watchlistClient = new WatchlistConfigClient({
+              logger,
+              namespace,
+              soClient,
+              esClient,
+            });
+            await assertWatchlistMutable(watchlistClient, request.params.watchlist_id);
+
             const client = new WatchlistEntitySourceClient({
-              soClient: getWatchlistSavedObjectClient(core),
-              namespace: secSol.getSpaceId(),
-              esClient: core.elasticsearch.client.asCurrentUser,
+              soClient,
+              namespace,
+              esClient,
               getStartServices,
               logger,
               hasEncryptionKey,
