@@ -205,31 +205,38 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     };
   }, [sourceQuery, timeField, currentTimeFieldIsOption, data.dataViews, http, projectRouting]);
 
-  const fullTimeRangeCallback = useCallback(
-    (range: GetTimeFieldRangeResponse) => {
-      if (range.start !== null && range.end !== null) {
-        onTimeRangeChange({ start: range.start.epoch, end: range.end.epoch });
-      }
-    },
-    [onTimeRangeChange]
-  );
-
   const queryProblems = useMemo(() => validateEsqlQuery(query.esql), [query.esql]);
 
   const execution = useEsqlQueryExecution();
   const { run, isLoading } = execution;
 
+  const runQueryForRange = useCallback(
+    ({ start, end }: TimeRange) => {
+      run({
+        query: query.esql,
+        timeField,
+        timeRange: { from: new Date(start).toISOString(), to: new Date(end).toISOString() },
+        projectRouting,
+      });
+    },
+    [run, query.esql, timeField, projectRouting]
+  );
+
   const runQuery = useCallback(async () => {
-    run({
-      query: query.esql,
-      timeField,
-      timeRange: {
-        from: new Date(timeRange.start).toISOString(),
-        to: new Date(timeRange.end).toISOString(),
-      },
-      projectRouting,
-    });
-  }, [run, query.esql, timeField, timeRange, projectRouting]);
+    runQueryForRange(timeRange);
+  }, [runQueryForRange, timeRange]);
+
+  // "Use full data" sets the range to all the data, so show the results for it straight away
+  const fullTimeRangeCallback = useCallback(
+    (range: GetTimeFieldRangeResponse) => {
+      if (range.start !== null && range.end !== null) {
+        const fullRange = { start: range.start.epoch, end: range.end.epoch };
+        onTimeRangeChange(fullRange);
+        runQueryForRange(fullRange);
+      }
+    },
+    [onTimeRangeChange, runQueryForRange]
+  );
 
   const onNext = useCallback(async () => {
     if (!isEsqlJobCreator(jobCreator)) {
