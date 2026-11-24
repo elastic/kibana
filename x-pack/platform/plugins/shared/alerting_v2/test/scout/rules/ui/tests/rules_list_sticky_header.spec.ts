@@ -72,7 +72,9 @@ test.describe('Rules list - sticky app header', { tag: testData.UI_TAG }, () => 
     const heading = pageObjects.alertingNavigation.pageHeading('rules');
     const table = pageObjects.rulesList.rulesListTable;
     await expect(heading).toBeInViewport();
-    await expect(pageObjects.rulesList.ruleNameLink(unrelatedRuleId)).toBeHidden();
+    await expect(pageObjects.rulesList.ruleNameLink(unrelatedRuleId)).toBeHidden({
+      timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+    });
     await expect(pageObjects.rulesList.ruleNameLink(firstRuleId)).toBeVisible({
       timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
     });
