@@ -179951,7 +179951,7 @@ components:
               type: number
         sending_queue:
           additionalProperties: false
-          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. On the managed OTLP endpoint, settings that you don't set, or set to `null`, get the Elastic defaults.
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.
           nullable: true
           type: object
           properties:
@@ -179993,16 +179993,12 @@ components:
                   enum:
                     - items
                     - bytes
-                    - null
-                  nullable: true
                   type: string
             block_on_overflow:
               description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
-              nullable: true
               type: boolean
             enabled:
               description: 'Whether the exporter uses a sending queue. Default: `true`.'
-              nullable: true
               type: boolean
             num_consumers:
               description: 'Number of consumers that send the data of the queue. Default: `10`.'
@@ -180018,12 +180014,9 @@ components:
                 - requests
                 - items
                 - bytes
-                - null
-              nullable: true
               type: string
             wait_for_result:
               description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
-              nullable: true
               type: boolean
         timeout:
           maxLength: 64
@@ -180232,7 +180225,7 @@ components:
               type: number
         sending_queue:
           additionalProperties: false
-          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. On the managed OTLP endpoint, settings that you don't set, or set to `null`, get the Elastic defaults.
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.
           nullable: true
           type: object
           properties:
@@ -180274,16 +180267,12 @@ components:
                   enum:
                     - items
                     - bytes
-                    - null
-                  nullable: true
                   type: string
             block_on_overflow:
               description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
-              nullable: true
               type: boolean
             enabled:
               description: 'Whether the exporter uses a sending queue. Default: `true`.'
-              nullable: true
               type: boolean
             num_consumers:
               description: 'Number of consumers that send the data of the queue. Default: `10`.'
@@ -180299,12 +180288,9 @@ components:
                 - requests
                 - items
                 - bytes
-                - null
-              nullable: true
               type: string
             wait_for_result:
               description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
-              nullable: true
               type: boolean
         timeout:
           maxLength: 64
@@ -180476,7 +180462,7 @@ components:
               type: number
         sending_queue:
           additionalProperties: true
-          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. On the managed OTLP endpoint, settings that you don't set, or set to `null`, get the Elastic defaults.
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.
           nullable: true
           type: object
           properties:
@@ -180518,16 +180504,12 @@ components:
                   enum:
                     - items
                     - bytes
-                    - null
-                  nullable: true
                   type: string
             block_on_overflow:
               description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
-              nullable: true
               type: boolean
             enabled:
               description: 'Whether the exporter uses a sending queue. Default: `true`.'
-              nullable: true
               type: boolean
             num_consumers:
               description: 'Number of consumers that send the data of the queue. Default: `10`.'
@@ -180543,12 +180525,9 @@ components:
                 - requests
                 - items
                 - bytes
-                - null
-              nullable: true
               type: string
             wait_for_result:
               description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
-              nullable: true
               type: boolean
         timeout:
           maxLength: 64
@@ -180757,7 +180736,7 @@ components:
               type: number
         sending_queue:
           additionalProperties: true
-          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. On the managed OTLP endpoint, settings that you don't set, or set to `null`, get the Elastic defaults.
+          description: The sending queue of the exporter. Set to `null` to use the collector defaults for the whole queue. In an update, a setting that is left out keeps its stored value, and a setting that accepts `null` is reset to its default when set to `null`. To change `enabled`, `sizer`, `wait_for_result`, `block_on_overflow` or `batch.sizer`, send the value you want. On the managed OTLP endpoint, a setting that is reset, or that has no value, gets the Elastic default. Set `batch` to `null` to turn batching off.
           nullable: true
           type: object
           properties:
@@ -180799,16 +180778,12 @@ components:
                   enum:
                     - items
                     - bytes
-                    - null
-                  nullable: true
                   type: string
             block_on_overflow:
               description: 'Whether incoming requests are blocked when the queue is full, instead of rejected. Default: `false`, or `true` on the managed OTLP endpoint.'
-              nullable: true
               type: boolean
             enabled:
               description: 'Whether the exporter uses a sending queue. Default: `true`.'
-              nullable: true
               type: boolean
             num_consumers:
               description: 'Number of consumers that send the data of the queue. Default: `10`.'
@@ -180824,12 +180799,9 @@ components:
                 - requests
                 - items
                 - bytes
-                - null
-              nullable: true
               type: string
             wait_for_result:
               description: 'Whether incoming requests are blocked until they are processed. Default: `false`.'
-              nullable: true
               type: boolean
         timeout:
           maxLength: 64
