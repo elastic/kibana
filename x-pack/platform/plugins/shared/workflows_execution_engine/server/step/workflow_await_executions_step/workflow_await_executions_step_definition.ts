@@ -177,6 +177,13 @@ const throwExecutionsNotFound = (missingIds: string[]): never => {
   );
 };
 
+const LINEAGE_CHECK_FIELDS = [
+  'spaceId',
+  'status',
+  'context.parentWorkflowExecutionId',
+  'context.executionChain',
+] as const;
+
 /**
  * Checks once, when the step starts, that every awaited execution exists and was started by this
  * run (directly or through a descendant), and returns their statuses. Executions started by
@@ -190,7 +197,8 @@ const readStartedExecutionStatuses = async (
   const currentExecutionId = stepExecutionRuntime.workflowExecution.id;
   const executions = await workflowExecutionRepository.getWorkflowExecutionsByIds(
     executionIds,
-    spaceId
+    spaceId,
+    { sourceIncludes: [...LINEAGE_CHECK_FIELDS] }
   );
 
   const missingIds = executionIds.filter((id) => {

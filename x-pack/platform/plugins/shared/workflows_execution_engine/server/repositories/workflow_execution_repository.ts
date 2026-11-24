@@ -12,7 +12,10 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
-import type { WorkflowExecutionsDataClient } from './data_access_layer';
+import type {
+  WorkflowExecutionsDataClient,
+  WorkflowExecutionSourceProjectionField,
+} from './data_access_layer';
 import { getBulkUpdaterWriteResult } from './data_access_layer/lib/bulk/bulk_updater_write_result';
 import {
   getResumeContextRevert,
@@ -68,12 +71,17 @@ export class WorkflowExecutionRepository {
   /**
    * Retrieves several workflow executions by ID in one multi-get, keyed by ID.
    * Executions that are missing or belong to another space are left out of the map.
+   * With `sourceIncludes`, only those fields are read and must include `spaceId`.
    */
   public async getWorkflowExecutionsByIds(
     workflowExecutionIds: string[],
-    spaceId: string
+    spaceId: string,
+    { sourceIncludes }: { sourceIncludes?: WorkflowExecutionSourceProjectionField[] } = {}
   ): Promise<Map<string, EsWorkflowExecution>> {
-    const { items } = await this.workflowExecutionsDataClient.getByIds(workflowExecutionIds);
+    const { items } = await this.workflowExecutionsDataClient.getByIds(
+      workflowExecutionIds,
+      sourceIncludes ? { sourceIncludes } : undefined
+    );
     const executionsById = new Map<string, EsWorkflowExecution>();
     for (const { document } of items) {
       if (document.spaceId === spaceId) {

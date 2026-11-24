@@ -232,6 +232,23 @@ describe('createAwaitExecutionsStepDefinition', () => {
     expect(getWorkflowExecutionsByIds).toHaveBeenCalledWith(['a', 'b'], SPACE_ID);
   });
 
+  it('reads only the lineage fields at start and the full documents once they finish', async () => {
+    const { getWorkflowExecutionsByIds } = dependencies.workflowExecutionRepository;
+    executions = [buildExecution('a', ExecutionStatus.COMPLETED)];
+
+    await start({ 'execution-ids': 'a' });
+
+    expect(getWorkflowExecutionsByIds).toHaveBeenNthCalledWith(1, ['a'], SPACE_ID, {
+      sourceIncludes: [
+        'spaceId',
+        'status',
+        'context.parentWorkflowExecutionId',
+        'context.executionChain',
+      ],
+    });
+    expect(getWorkflowExecutionsByIds).toHaveBeenNthCalledWith(2, ['a'], SPACE_ID);
+  });
+
   it('checks lineage only at start, not on each poll', async () => {
     executions = [
       buildExecution('a', ExecutionStatus.RUNNING, {
