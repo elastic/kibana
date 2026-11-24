@@ -12,7 +12,7 @@ import { readColumnReferencesByQuery } from './template_column_references';
 
 export const CUSTOM_CONTENT_QUERIES_USED_EVALUATOR_NAME = 'Custom Content Queries Used';
 
-/** Every query of a panel with several is read by the template; one it ignores is fetched for nothing. */
+/** Every query of a panel with several is read by the template. */
 export const createQueriesUsedEvaluator = (): CustomContentEvaluator => ({
   name: CUSTOM_CONTENT_QUERIES_USED_EVALUATOR_NAME,
   kind: 'CODE',

@@ -64,7 +64,6 @@ export const createDataEditAppliedEvaluator = ({
       return skippedResult('The panel has no template and query to compare.');
     }
 
-    // The measure can be added to any query of the panel; the template reads it from that one.
     const reads = readColumnReferencesByQuery(template);
     const columnsByQuery: string[][] = [];
     for (const query of queries) {

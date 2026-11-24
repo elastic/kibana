@@ -26,11 +26,7 @@ interface LimitCheck {
   explanation: string;
 }
 
-/**
- * A panel is not truncated by the chart default. Each declared limit must be the exact `LIMIT` of
- * a different query, whatever its position; a query no declared limit matches only has to avoid
- * the chart default of 10.
- */
+/** Each declared limit is the exact `LIMIT` of a different query, and no other query uses the chart default of 10. */
 export const createRowLimitEvaluator = (): CustomContentEvaluator => ({
   name: CUSTOM_CONTENT_ROW_LIMIT_EVALUATOR_NAME,
   kind: 'CODE',
@@ -64,8 +60,6 @@ export const createRowLimitEvaluator = (): CustomContentEvaluator => ({
       };
     });
 
-    // A declared limit no query has was meant for one of the others, which it already fails, so
-    // that query is not scored again; one using the chart default is the least likely to be it.
     const missed = checks.filter(({ passed }) => !passed).length;
     const remaining = [...unmatched]
       .sort(

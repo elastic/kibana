@@ -16,21 +16,30 @@ const TAG = /\{%-?([\s\S]*?)-?%\}|\{\{-?([\s\S]*?)-?\}\}/g;
 const LOOP_HEADER = /^\s*(for|tablerow)\s+(\w+)\s+in\s+([\s\S]+)$/;
 const LOOP_END = /^\s*end(for|tablerow)\s*$/;
 const COLLECTION = /^(?:rows|queries\s*\[\s*(\d+)\s*\]\s*\.\s*rows)\b/;
-const CHAIN = /(?<![\w.])([A-Za-z_]\w*)((?:\s*\.\s*\w+|\s*\[\s*(?:"[^"]*"|'[^']*'|\d+)\s*\])*)/g;
-const SEGMENT = /\.\s*(\w+)|\[\s*(?:"([^"]*)"|'([^']*)'|(\d+))\s*\]/g;
+const CHAIN =
+  /(?<!\w|(?<!\.)\.)([A-Za-z_]\w*)((?:\s*\.\s*\w+|\s*\[\s*(?:"[^"]*"|'[^']*'|\d+|[A-Za-z_][\w.]*)\s*\])*)/g;
+const SEGMENT = /\.\s*(\w+)|\[\s*(?:"([^"]*)"|'([^']*)'|(\d+)|([A-Za-z_][\w.]*))\s*\]/g;
+const BLOCKS_WITHOUT_READS = /\{%-?\s*(comment|raw)\s*-?%\}[\s\S]*?\{%-?\s*end\1\s*-?%\}/g;
+const STRING_LITERAL = /(?<!\[\s*)(["'])(?:(?!\1).)*\1/g;
 
 const isIndexedRow = (segment: Segment | undefined): boolean =>
   typeof segment === 'number' || segment === 'first' || segment === 'last';
 
 const readSegments = (path: string): Segment[] =>
-  [...path.matchAll(SEGMENT)].map(([, dotted, double, single, index]) =>
-    index !== undefined ? Number(index) : dotted ?? double ?? single
-  );
+  [...path.matchAll(SEGMENT)].map(([, dotted, double, single, index, variable]) => {
+    if (variable !== undefined) {
+      return Number.NaN;
+    }
+    return index !== undefined ? Number(index) : dotted ?? double ?? single;
+  });
 
 interface QueryReference {
   query: number;
   column?: string;
 }
+
+const readColumn = (isRow: boolean, name: Segment | undefined): string | undefined =>
+  isRow && name !== undefined && String(name) !== '' ? String(name) : undefined;
 
 /** The query and column a variable path reads, if its first part is a query or one of its rows. */
 const readReference = (
@@ -39,46 +48,27 @@ const readReference = (
   [first, second, third, fourth]: Segment[]
 ): QueryReference | undefined => {
   if (root === 'rows') {
-    return {
-      query: 0,
-      column: isIndexedRow(first) ? String(second ?? '') || undefined : undefined,
-    };
+    return { query: 0, column: readColumn(isIndexedRow(first), second) };
   }
   if (root === 'max') {
-    return { query: 0, column: first === undefined ? undefined : String(first) };
+    return { query: 0, column: readColumn(true, first) };
   }
   if (root === 'queries') {
-    if (typeof first !== 'number') {
+    if (typeof first !== 'number' || !Number.isInteger(first)) {
       return undefined;
     }
     if (second === 'rows') {
-      return {
-        query: first,
-        column: isIndexedRow(third) ? String(fourth ?? '') || undefined : undefined,
-      };
+      return { query: first, column: readColumn(isIndexedRow(third), fourth) };
     }
-    return {
-      query: first,
-      column: second === 'max' && third !== undefined ? String(third) : undefined,
-    };
+    return { query: first, column: readColumn(second === 'max', third) };
   }
   const loop = [...loops].reverse().find(({ variable }) => variable === root);
   return loop?.query === undefined
     ? undefined
-    : { query: loop.query, column: first === undefined ? undefined : String(first) };
+    : { query: loop.query, column: readColumn(true, first) };
 };
 
-/**
- * The columns a template reads from each query it uses, keyed by the position of the query: `rows`
- * and `max` are the first query, `queries[n]` the others. A column is the name that follows a
- * row, such as `host` in `row["host"].value`, `r.host.pct`, `max["host"]`, `rows[0]["host"]` or
- * `queries[1].rows[0].host`. The row is the variable of a `{% for … in rows %}` or
- * `{% for … in queries[n].rows %}` loop, whatever it is called, and it belongs to the query that
- * loop iterates, also when another loop reuses the name for another query. Quoting and dot access
- * do not matter, and neither a property of a cell (`value`, `pct`) nor of anything else
- * (`forloop.index`, an `assign`ed cell) is taken for a column. A query the template only counts
- * (`queries[2].rows.size`) is a key with no columns. A template that does not parse reads none.
- */
+/** The columns a template reads from each query it uses, keyed by query position (`rows` and `max` are query 0). */
 export const readColumnReferencesByQuery = (template: string): Map<number, string[]> => {
   const byQuery = new Map<number, string[]>();
   try {
@@ -95,29 +85,29 @@ export const readColumnReferencesByQuery = (template: string): Map<number, strin
     }
     byQuery.set(query, columns);
   };
+  const noteChains = (body: string) => {
+    for (const [, root, path] of body.replace(STRING_LITERAL, '').matchAll(CHAIN)) {
+      const reference = readReference(loops, root, readSegments(path));
+      if (reference) {
+        note(reference);
+      }
+    }
+  };
 
-  for (const [, tag, output] of template.matchAll(TAG)) {
+  for (const [, tag, output] of template.replace(BLOCKS_WITHOUT_READS, '').matchAll(TAG)) {
     const loop = tag === undefined ? null : LOOP_HEADER.exec(tag);
     if (loop) {
       const [, , variable, collection] = loop;
+      noteChains(collection);
       const matched = COLLECTION.exec(collection.trim());
-      const query = matched ? Number(matched[1] ?? 0) : undefined;
-      loops.push({ variable, query });
-      if (query !== undefined) {
-        note({ query });
-      }
+      loops.push({ variable, query: matched ? Number(matched[1] ?? 0) : undefined });
       continue;
     }
     if (tag !== undefined && LOOP_END.test(tag)) {
       loops.pop();
       continue;
     }
-    for (const [, root, path] of (tag ?? output ?? '').matchAll(CHAIN)) {
-      const reference = readReference(loops, root, readSegments(path));
-      if (reference) {
-        note(reference);
-      }
-    }
+    noteChains(tag ?? output ?? '');
   }
   return byQuery;
 };

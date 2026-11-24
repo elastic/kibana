@@ -13,11 +13,7 @@ import { readColumnReferencesByQuery } from './template_column_references';
 
 export const CUSTOM_CONTENT_TEMPLATE_COLUMNS_EVALUATOR_NAME = 'Custom Content Template Columns';
 
-/**
- * Every column the template reads is a column of the query it reads it from: `rows` and `max` of
- * the first query, `queries[n]` of the others. A template that reads a query the panel does not
- * have fails too.
- */
+/** Every column the template reads is a column of the query it reads it from, and every query it reads exists. */
 export const createTemplateColumnsEvaluator = ({
   runQuery,
 }: {
@@ -69,7 +65,9 @@ export const createTemplateColumnsEvaluator = ({
             .map((column) => (queries.length > 1 ? `${column} (query ${position})` : column))
     );
     const total =
-      read.reduce((sum, [, columns]) => sum + columns.length, 0) + unknownQueries.length;
+      read
+        .filter(([position]) => position < queries.length)
+        .reduce((sum, [, columns]) => sum + columns.length, 0) + unknownQueries.length;
     const failed = missing.length + unknownQueries.length;
     const problems = [
       ...(missing.length > 0

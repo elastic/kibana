@@ -485,6 +485,35 @@ describe('Template columns of several queries', () => {
     expect([...readColumnReferencesByQuery('{{ queries[1].rows.size }}')]).toEqual([[1, []]]);
   });
 
+  it('notes a query only read in the header of a loop', () => {
+    expect([
+      ...readColumnReferencesByQuery('{% for i in (1..queries[1].rows.size) %}x{% endfor %}'),
+    ]).toEqual([[1, []]]);
+  });
+
+  it('reads the column of a row picked by a variable index', () => {
+    expect([
+      ...readColumnReferencesByQuery(
+        '{% for i in (0..2) %}{{ rows[i].host.value }}{{ queries[1].rows[forloop.index0].code }}{% endfor %}'
+      ),
+    ]).toEqual([
+      [0, ['host']],
+      [1, ['code']],
+    ]);
+  });
+
+  it('does not read a query chosen by a variable', () => {
+    expect([...readColumnReferencesByQuery('{{ queries[i].rows[0].host }}')]).toEqual([]);
+  });
+
+  it('ignores comments, raw blocks and text in string literals', () => {
+    const template =
+      '{% comment %}{{ queries[2].rows[0].gone }}{% endcomment %}' +
+      '{% raw %}{{ rows[0].literal }}{% endraw %}' +
+      '{% if kind == "queries[3].rows" %}{{ rows[0].real.value }}{% endif %}';
+    expect([...readColumnReferencesByQuery(template)]).toEqual([[0, ['real']]]);
+  });
+
   it('does not take a loop over something else for a row', () => {
     expect([
       ...readColumnReferencesByQuery(
@@ -528,6 +557,19 @@ describe('Template columns of several queries', () => {
     );
     expect(result).toMatchObject({ score: 0.5, label: 'unbound-columns' });
     expect(result.explanation).toContain('queries[1]');
+  });
+
+  it('does not count the columns of a query the panel does not have', async () => {
+    const evaluator = withColumns({ 'FROM kpis': ['total'] });
+    const result = await run(
+      evaluator,
+      outputWith({
+        esqls: ['FROM kpis'],
+        template:
+          '{{ rows[0].total.value }}{% for r in queries[1].rows %}{{ r.a.value }}{{ r.b.value }}{% endfor %}',
+      })
+    );
+    expect(result.score).toBe(0.5);
   });
 
   it('reports a second query that did not run', async () => {

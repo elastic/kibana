@@ -17,11 +17,7 @@ export type CustomContentDatasetExample = Example<
   {
     /** Whether the panel ends up with live data (a query) or is static (no query). */
     data: 'static' | 'query';
-    /**
-     * Exact `LIMIT` the panel's queries must end with: a number for one query, a list for several,
-     * each matched to a different query whatever its position. A query that matches none must not
-     * use the chart default of 10. When omitted, only that default is rejected.
-     */
+    /** Exact `LIMIT`s, each matched to a different query in any position. Unmatched queries must not use the chart default of 10. */
     limit?: number | number[];
     /** How many queries the panel ends up with: an exact number, or a lower bound. */
     queryCount?: number | { min: number };

@@ -100,8 +100,6 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
       };
     }
 
-    // The queries the edit had no reason to touch, such as the headline numbers when only a
-    // table changes, must come back exactly as they were.
     const touched = (expected?.unchangedQueries ?? []).filter(
       (position) => queriesBefore[position] !== queriesAfter[position]
     );

@@ -165,7 +165,8 @@ export const CUSTOM_CONTENT_MULTI_QUERY_EDIT_EXAMPLES: CustomContentDatasetExamp
   {
     input: {
       question: MULTI_QUERY_BASE_PROMPT,
-      followUp: 'Make the headline numbers larger and use a dark theme for the whole panel.',
+      followUp:
+        'Make the headline numbers larger and show the 5xx errors and the error rate in the danger color.',
     },
     output: { data: 'query', edit: 'style', queryCount: { min: 2 } },
     metadata: { useCase: 'multi-query-style-edit', dataSource: 'logs' },
@@ -181,7 +182,7 @@ export const CUSTOM_CONTENT_MULTI_QUERY_EDIT_EXAMPLES: CustomContentDatasetExamp
       edit: 'data',
       queryCount: 3,
       unchangedQueries: [0, 1],
-      queryContains: ['response'],
+      queryContains: ['BY response'],
       limit: [5, 5],
     },
     metadata: { useCase: 'multi-query-add-section', dataSource: 'logs' },
