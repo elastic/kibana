@@ -12,6 +12,7 @@ import { ActionTypeRegistry } from '../../action_type_registry';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { getConnectorType } from '../../fixtures';
 import type { PluginSetupContract } from '../../plugin';
+import type { ActionTypeExecutorOptions } from '../../types';
 import { ActionExecutor } from '../action_executor';
 import { ConnectorRateLimiter } from '../connector_rate_limiter';
 import { loadFixture } from '../declarative_connectors/__fixtures__/load_fixture';
@@ -20,7 +21,9 @@ import { TaskRunnerFactory } from '../task_runner_factory';
 import { inMemoryMetricsMock } from '../../monitoring/in_memory_metrics.mock';
 import { buildTypeFromStoredSpec } from './build_type_from_stored_spec';
 import { loadCatalogConnectorTypes } from './load_catalog_connector_types';
+import type { VersionedConnectorType } from './versioned_connector_type';
 import type {
+  CatalogActionType,
   CatalogDefinitionRef,
   ConnectorCatalogStorage,
   StoredCatalogDefinition,
@@ -233,41 +236,177 @@ describe('loadCatalogConnectorTypes', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('.declarative-a'));
   });
 
-  it.each([
-    ['1.0.0', '2.0.0'],
-    ['2.0.0', '1.0.0'],
-  ])('builds both stored versions in order: %s, %s', async (firstVersion, secondVersion) => {
-    const buildType = jest.fn((definition: StoredCatalogDefinition) =>
-      buildTypeFromStoredSpec(definition, actions)
-    );
-    const definitions = [
-      createDefinition('.declarative-a', firstVersion),
-      createDefinition('.declarative-a', secondVersion),
-    ];
-    const storage = createStorage({
-      manifest: createManifest([
-        { id: '.declarative-a', version: firstVersion },
-        { id: '.declarative-a', version: secondVersion },
-      ]),
-      definitions,
-    });
+  describe('versions of one id', () => {
+    interface Built {
+      definition: StoredCatalogDefinition;
+      type: CatalogActionType;
+      executor: jest.Mock;
+    }
 
-    await expect(
+    const executorOptions = (specVersion: string) =>
+      ({
+        actionId: 'connector-id',
+        params: {},
+        config: {},
+        secrets: {},
+        specVersion,
+      } as unknown as ActionTypeExecutorOptions<
+        Record<string, unknown>,
+        Record<string, unknown>,
+        Record<string, unknown>
+      >);
+
+    const createRecordingBuildType = (built: Built[]) => (definition: StoredCatalogDefinition) => {
+      const type = buildTypeFromStoredSpec(definition, actions);
+      const executor = jest
+        .fn()
+        .mockResolvedValue({ status: 'ok', actionId: `ran-${definition.version}` });
+      const recorded = { ...type, executor };
+      built.push({ definition, type: recorded, executor });
+      return recorded;
+    };
+
+    const loadWith = (
+      storage: ReturnType<typeof createStorage>,
+      built: Built[],
+      versionedTypes?: Map<string, VersionedConnectorType>
+    ) =>
       loadCatalogConnectorTypes({
         storage,
         actionTypeRegistry: registry,
-        buildType,
+        buildType: createRecordingBuildType(built),
         logger,
         signal: new AbortController().signal,
-      })
-    ).resolves.toBe(1);
+        versionedTypes,
+      });
 
-    expect(buildType).toHaveBeenCalledTimes(2);
-    expect(buildType).toHaveBeenNthCalledWith(1, definitions[0]);
-    expect(buildType).toHaveBeenNthCalledWith(2, definitions[1]);
-    expect(registry.has('.declarative-a')).toBe(true);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already registered'));
+    const storageFor = (id: string, versions: string[], failing: string[] = []) =>
+      createStorage({
+        manifest: createManifest(versions.map((version) => ({ id, version }))),
+        definitions: versions.map((version) =>
+          createDefinition(id, version, failing.includes(version) ? 'id: [unclosed' : undefined)
+        ),
+      });
+
+    it.each([
+      ['1.0.0', '2.0.0'],
+      ['2.0.0', '1.0.0'],
+    ])('builds both stored versions in order and serves both: %s, %s', async (first, second) => {
+      const built: Built[] = [];
+      const registerSpy = jest.spyOn(registry, 'register');
+
+      await expect(loadWith(storageFor('.declarative-a', [first, second]), built)).resolves.toBe(1);
+
+      expect(built.map(({ definition }) => definition.version)).toEqual([first, second]);
+      expect(registerSpy).toHaveBeenCalledTimes(1);
+      expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+      expect(registry.getSpec('.declarative-a', '1.0')).toBeDefined();
+      expect(registry.getSpec('.declarative-a', '2.0')).toBeDefined();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('runs the executor of the pinned version', async () => {
+      const built: Built[] = [];
+      await loadWith(storageFor('.declarative-a', ['1.0.0', '1.1.0']), built);
+      const { executor } = registry.get('.declarative-a');
+
+      const executors = Object.fromEntries(
+        built.map(({ definition, executor: mock }) => [definition.version, mock])
+      );
+
+      await executor?.(executorOptions('1.1'));
+      expect(executors['1.1.0']).toHaveBeenCalledTimes(1);
+      expect(executors['1.0.0']).not.toHaveBeenCalled();
+
+      await executor?.(executorOptions('1.0'));
+      expect(executors['1.0.0']).toHaveBeenCalledTimes(1);
+      expect(executors['1.1.0']).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds a version to the existing entry on a later load with the same handle map', async () => {
+      const versionedTypes = new Map<string, VersionedConnectorType>();
+      const registerSpy = jest.spyOn(registry, 'register');
+      await loadWith(storageFor('.declarative-a', ['1.0.0']), [], versionedTypes);
+      expect(registry.getSpec('.declarative-a', '1.2')).toBeUndefined();
+
+      await expect(
+        loadWith(storageFor('.declarative-a', ['1.2.0']), [], versionedTypes)
+      ).resolves.toBe(0);
+
+      expect(registerSpy).toHaveBeenCalledTimes(1);
+      expect(registry.getSpec('.declarative-a', '1.0')).toBeDefined();
+      expect(registry.getSpec('.declarative-a', '1.2')).toBeDefined();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('skips an id that is registered and has no handle', async () => {
+      await loadWith(storageFor('.declarative-a', ['1.0.0']), []);
+
+      await expect(loadWith(storageFor('.declarative-a', ['1.1.0']), [], new Map())).resolves.toBe(
+        0
+      );
+
+      expect(registry.getSpec('.declarative-a', '1.1')).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already registered'));
+    });
+
+    it.each([
+      ['good first', ['1.0.0', '1.1.0']],
+      ['bad first', ['1.1.0', '1.0.0']],
+    ])('marks a version that fails to build: %s', async (_label, versions) => {
+      await expect(loadWith(storageFor('.declarative-a', versions, ['1.1.0']), [])).resolves.toBe(
+        1
+      );
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1.1.0'));
+      const { specVersions } = registry.get('.declarative-a');
+      expect(specVersions?.resolveExecutionVersion('1.0')).toBe('1.0');
+      expect(() => specVersions?.resolveExecutionVersion('1.1')).toThrow(
+        expect.objectContaining({ reason: 'cannot_build', specVersion: '1.1' })
+      );
+      expect(() => specVersions?.resolveExecutionVersion('1.2')).toThrow(
+        expect.objectContaining({ reason: 'not_loaded' })
+      );
+    });
+
+    it('keeps the first of two definitions with the same major.minor and warns once', async () => {
+      const built: Built[] = [];
+
+      await expect(loadWith(storageFor('.declarative-a', ['1.1.0', '1.1.1']), built)).resolves.toBe(
+        1
+      );
+
+      expect(built).toHaveLength(2);
+      expect(registry.getSpec('.declarative-a', '1.1')).toBe(built[0].type.spec);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1.1.1'));
+    });
+
+    it('skips a stored version with major 0 and warns', async () => {
+      const built: Built[] = [];
+
+      await expect(loadWith(storageFor('.declarative-a', ['0.3.0']), built)).resolves.toBe(0);
+
+      expect(built).toHaveLength(0);
+      expect(registry.has('.declarative-a')).toBe(false);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('0.3.0'));
+    });
+
+    it('uses a stored two-part version as is', async () => {
+      // The YAML parser requires 3 parts, so only the stored row carries the 2-part version.
+      const storage = createStorage({
+        manifest: createManifest([{ id: '.declarative-a', version: '1.4' }]),
+        definitions: [
+          createDefinition('.declarative-a', '1.4', createYaml('.declarative-a', '1.4.0')),
+        ],
+      });
+
+      await expect(loadWith(storage, [])).resolves.toBe(1);
+
+      expect(registry.getSpec('.declarative-a', '1.4')).toBeDefined();
+    });
   });
 
   it('continues to another stored version when a version fails to build', async () => {
