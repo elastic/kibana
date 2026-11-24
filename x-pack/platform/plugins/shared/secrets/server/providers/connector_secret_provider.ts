@@ -8,7 +8,7 @@
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import { SECRET_PROVIDER_TYPE, SecretValidationError } from '@kbn/secrets';
+import { SECRET_PROVIDER_TYPE, SECRET_VALUE_MIN_LENGTH, SecretValidationError } from '@kbn/secrets';
 import type { ConnectorSecretProvider, SecretConnector } from '@kbn/secrets';
 import type { ConnectorSecretReader } from './connector_secret_readers';
 import {
@@ -112,6 +112,12 @@ export const createConnectorSecretProvider = ({
       const value = reader.getValue(result.data);
       if (value === undefined) {
         throw new Error('The secret manager returned no value');
+      }
+      // A shorter value cannot be masked: it would match unrelated text in what a run stores.
+      if (value.length < SECRET_VALUE_MIN_LENGTH) {
+        throw new Error(
+          `The secret manager returned a value shorter than ${SECRET_VALUE_MIN_LENGTH} characters, which cannot be used as a secret`
+        );
       }
       return value;
     },

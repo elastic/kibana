@@ -42,7 +42,8 @@ const getForms = (value: string): string[] => {
  * forms listed in `getForms` and nothing else.
  */
 export const createSecretScrubber = ({ values }: { values: readonly string[] }): SecretScrubber => {
-  // A shorter value would match unrelated text. Secrets stored in Kibana are never shorter.
+  // A shorter value would match unrelated text. No secret is shorter: Kibana refuses to store
+  // one, and to use one that a secret manager returns.
   const scrubbable = values.filter((value) => value.length >= SECRET_VALUE_MIN_LENGTH);
   // Longest first, so that a form containing another one is replaced as a whole.
   const forms = [...new Set(scrubbable.flatMap(getForms))].sort(
