@@ -122,6 +122,8 @@ export class LibraryCache {
 
   markTemplateLoadFailure(slug: string, err: unknown): void {
     if (this.failingTemplates.has(slug)) return;
+    // A load that started before a refresh removed the template no longer counts.
+    if (!this.catalog?.templates.some((template) => template.slug === slug)) return;
     this.failingTemplates.add(slug);
     this.notifyFailure({
       operation: 'template',

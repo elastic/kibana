@@ -8,7 +8,7 @@
 import type { TemplateBody, TemplatesCatalog } from '@kbn/workflows-library';
 
 import { LibraryFetchError } from './errors';
-import { LibraryCache } from './library_cache';
+import { LibraryCache, type LibraryFailureListener } from './library_cache';
 
 const TTL_MS = 60_000;
 
@@ -134,6 +134,16 @@ describe('LibraryCache', () => {
 
   describe('failure listener', () => {
     const fetchError = () => new LibraryFetchError('upstream down', 'timeout', 'https://x');
+    const withSlugs = (...slugs: string[]): TemplatesCatalog => ({
+      ...catalogA,
+      templates: slugs.map((slug) => ({ ...catalogA.templates[0], slug })),
+    });
+    /** A cache whose catalog lists `alpha` and `beta`. */
+    const buildCache = (onFailure: LibraryFailureListener) => {
+      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+      cache.setCatalog(withSlugs('alpha', 'beta'));
+      return cache;
+    };
 
     it('hears only the first catalog failure until a refresh succeeds again', () => {
       const onFailure = jest.fn();
@@ -151,7 +161,7 @@ describe('LibraryCache', () => {
 
     it('hears only the first failure of a template until it loads again', () => {
       const onFailure = jest.fn();
-      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+      const cache = buildCache(onFailure);
 
       cache.markTemplateLoadFailure('alpha', fetchError());
       cache.markTemplateLoadFailure('alpha', fetchError());
@@ -169,7 +179,7 @@ describe('LibraryCache', () => {
 
     it('tracks each template separately, so another template loading does not re-report a broken one', () => {
       const onFailure = jest.fn();
-      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+      const cache = buildCache(onFailure);
 
       cache.markTemplateLoadFailure('alpha', fetchError());
       cache.markTemplateLoadSuccess('beta');
@@ -184,11 +194,7 @@ describe('LibraryCache', () => {
 
     it('stops tracking a failing template once a new catalog no longer lists it', () => {
       const onFailure = jest.fn();
-      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
-      const withSlugs = (...slugs: string[]): TemplatesCatalog => ({
-        ...catalogA,
-        templates: slugs.map((slug) => ({ ...catalogA.templates[0], slug })),
-      });
+      const cache = buildCache(onFailure);
       cache.markTemplateLoadFailure('alpha', fetchError());
       cache.markTemplateLoadFailure('beta', fetchError());
 
@@ -205,9 +211,25 @@ describe('LibraryCache', () => {
       ]);
     });
 
+    it('ignores a failed load that started before a refresh removed the template', () => {
+      const onFailure = jest.fn();
+      const cache = buildCache(onFailure);
+      cache.markTemplateLoadFailure('alpha', fetchError());
+
+      // A refresh drops `alpha` while a load of it is in flight, and that load then fails.
+      cache.setCatalog(withSlugs('beta'));
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(1);
+
+      // Once listed again, its next failure is the first since it came back.
+      cache.setCatalog(withSlugs('alpha', 'beta'));
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(2);
+    });
+
     it('tracks the catalog and template bodies separately', () => {
       const onFailure = jest.fn();
-      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+      const cache = buildCache(onFailure);
 
       cache.markRefreshFailure(fetchError());
       cache.markTemplateLoadFailure('alpha', fetchError());
@@ -228,7 +250,7 @@ describe('LibraryCache', () => {
     });
 
     it('still records the failure when the listener throws', () => {
-      const cache = new LibraryCache(TTL_MS, 'http', () => {
+      const cache = buildCache(() => {
         throw new Error('listener bug');
       });
 
