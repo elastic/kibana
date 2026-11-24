@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useStableCallback } from '@kbn/react-hooks';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ACTION_INSPECT_PANEL, EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
@@ -140,18 +141,15 @@ export function LensWrapper({
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
-  // Lens keeps the first onLoad it receives, so read the latest callback from a ref
   const onChartLoaded = useOnChartLoaded();
-  const onChartLoadedRef = useRef(onChartLoaded);
-  onChartLoadedRef.current = onChartLoaded;
-  const onLoad = useCallback<NonNullable<EmbeddableComponentProps['onLoad']>>(
+  // Lens keeps the first onLoad it receives, a stable callback always calls the latest onChartLoaded
+  const onLoad = useStableCallback<NonNullable<EmbeddableComponentProps['onLoad']>>(
     (isLoading, adapters) => {
       const tables = Object.values(adapters?.tables?.tables ?? {});
       if (!isLoading && tables.some(({ rows }) => rows.length > 0)) {
-        onChartLoadedRef.current?.();
+        onChartLoaded?.();
       }
-    },
-    []
+    }
   );
 
   // EmbeddableRendererContext is the only way to configure the visible quick-action row because
