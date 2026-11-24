@@ -2994,17 +2994,20 @@ const AllEntitiesViewInner = ({
       renderChartFrame: ({
         id,
         title,
+        description,
         chart,
         children,
       }: {
         id: string;
         title: string;
+        description?: string;
         chart?: import('@kbn/entity-centric-lab-flyout').FlyoutChartFrameData;
         children: React.ReactNode;
       }) => (
         <StreamsFlyoutChartPanel
           id={id}
           title={title}
+          description={description}
           chart={chart}
           notifications={notifications}
         >

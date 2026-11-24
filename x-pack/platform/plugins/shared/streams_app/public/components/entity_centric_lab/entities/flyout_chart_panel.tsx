@@ -31,30 +31,28 @@ import {
   type EmbeddablePackageState,
 } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+
+/** Same id as `ON_OPEN_PANEL_MENU`. Kept inline so this plugin does not take a uiActions bundle dependency. */
+const PANEL_MENU_TRIGGER = 'on_open_panel_menu';
 import type { FlyoutChartFrameData } from '@kbn/entity-centric-lab-flyout';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const ADD_TO_DASHBOARD = 'entityCentricLabAddToDashboard';
-const INSPECT = 'entityCentricLabInspect';
-const OPEN_IN_LENS = 'entityCentricLabOpenInLens';
-const EXPLORE = 'entityCentricLabExplore';
+const COPY_TO_DASHBOARD = 'entityCentricLabCopyToDashboard';
+const DOWNLOAD_CSV = 'entityCentricLabDownloadCsv';
 
 const DashboardPicker = withSuspense(LazyDashboardPicker);
 
 const ChartSlot = ({ children }: { readonly children: ReactNode }) => <>{children}</>;
 
-const chartPanelChrome = css`
+/** Size the panel to its chart. A dashboard grid cell has a fixed height; the flyout does not. */
+const chartPanelLayout = css`
   .embPanel__hoverActionsAnchor {
     height: auto;
     overflow: visible;
   }
   .embPanel {
     height: auto;
-    background: transparent;
-    box-shadow: none;
-    border: none !important;
-    outline: none !important;
   }
   .embPanel__content {
     height: auto;
@@ -66,9 +64,19 @@ const chartPanelChrome = css`
     width: 100%;
     min-width: 0;
   }
-  /* Sit on the top edge of the card, same as a dashboard panel hover menu.
-     The flyout lets open accordions overflow so this is not clipped, and
-     the menu stays above the info icon. */
+`;
+
+/**
+ * Golden-signal tiles paint their own title inside the metric, so they keep
+ * the bare hover menu and no panel border.
+ */
+const metricTileChrome = css`
+  .embPanel {
+    background: transparent;
+    box-shadow: none;
+    border: none !important;
+    outline: none !important;
+  }
   .embPanel__hoverActionsAnchor .embPanel__hoverActions {
     top: auto !important;
     bottom: calc(100% - 1px);
@@ -81,12 +89,18 @@ const chartPanelChrome = css`
   }
 `;
 
-const panelApi = (id: string, title: string): DefaultPresentationPanelApi => {
+const panelApi = (
+  id: string,
+  title: string,
+  description: string | undefined,
+  hideTitle: boolean
+): DefaultPresentationPanelApi => {
   const hasLockedHoverActions$ = new BehaviorSubject(false);
   return {
     uuid: id,
     title$: new BehaviorSubject<string | undefined>(title),
-    hideTitle$: new BehaviorSubject<boolean | undefined>(true),
+    description$: new BehaviorSubject<string | undefined>(description),
+    hideTitle$: new BehaviorSubject<boolean | undefined>(hideTitle),
     dataLoading$: new BehaviorSubject<boolean | undefined>(false),
     hasLockedHoverActions$,
     lockHoverActions: (lock: boolean) => {
@@ -308,110 +322,107 @@ const dashboardPanelPackage = (
 });
 
 /**
- * Dashboard panel chrome around a flyout chart, so hover exposes the same
- * kind of actions a dashboard chart has, including Add to dashboard.
+ * Dashboard panel chrome around a flyout chart. Line charts use the panel
+ * header, so the title and description icon are the dashboard ones. Golden
+ * signal tiles keep their own title inside the metric.
  */
 export const StreamsFlyoutChartPanel = ({
   id,
   title,
+  description,
   chart,
   notifications,
   children,
 }: {
   readonly id: string;
   readonly title: string;
+  readonly description?: string;
   readonly chart?: FlyoutChartFrameData;
   readonly notifications: NotificationsStart;
   readonly children: ReactNode;
 }) => {
   const { core } = useKibana();
   const [addOpen, setAddOpen] = useState(false);
-  const api = useMemo(() => panelApi(id, title), [id, title]);
-
-  const unavailable = useCallback(
-    (actionLabel: string) => {
-      notifications.toasts.addInfo({
-        title: i18n.translate('xpack.streams.entityCentricLab.chartActions.previewToast', {
-          defaultMessage: '{action} for {title}',
-          values: { action: actionLabel, title },
-        }),
-        text: i18n.translate('xpack.streams.entityCentricLab.chartActions.previewToastBody', {
-          defaultMessage: 'This preview chart is not a saved visualization yet.',
-        }),
-      });
-    },
-    [notifications, title]
+  const metricTile = chart?.kind === 'metric';
+  const api = useMemo(
+    () => panelApi(id, title, description, metricTile),
+    [id, title, description, metricTile]
   );
 
-  const getActions = useCallback(async () => {
-    return [
-      action(
-        ADD_TO_DASHBOARD,
-        40,
-        'dashboardApp',
-        i18n.translate('xpack.streams.entityCentricLab.chartActions.addToDashboard', {
-          defaultMessage: 'Add to dashboard',
+  const downloadCsv = useCallback(() => {
+    const rows = chartRows(title, chart);
+    if (!rows.length) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.streams.entityCentricLab.chartActions.downloadCsvFailed', {
+          defaultMessage: 'Could not download CSV',
         }),
-        () => setAddOpen(true)
+      });
+      return;
+    }
+    const csv = [
+      'time,value,series',
+      ...rows.map(
+        (row) =>
+          `${row.time},${row.value},"${row.series.replace(/"/g, '""')}"`
       ),
-      action(
-        INSPECT,
-        30,
-        'inspect',
-        i18n.translate('xpack.streams.entityCentricLab.chartActions.inspect', {
-          defaultMessage: 'Inspect',
-        }),
-        () =>
-          unavailable(
-            i18n.translate('xpack.streams.entityCentricLab.chartActions.inspect', {
-              defaultMessage: 'Inspect',
-            })
-          )
-      ),
-      action(
-        OPEN_IN_LENS,
-        20,
-        'lensApp',
-        i18n.translate('xpack.streams.entityCentricLab.chartActions.openInLens', {
-          defaultMessage: 'Open in Lens',
-        }),
-        () =>
-          unavailable(
-            i18n.translate('xpack.streams.entityCentricLab.chartActions.openInLens', {
-              defaultMessage: 'Open in Lens',
-            })
-          )
-      ),
-      action(
-        EXPLORE,
-        10,
-        'discoverApp',
-        i18n.translate('xpack.streams.entityCentricLab.chartActions.explore', {
-          defaultMessage: 'Explore in Discover',
-        }),
-        () =>
-          unavailable(
-            i18n.translate('xpack.streams.entityCentricLab.chartActions.explore', {
-              defaultMessage: 'Explore in Discover',
-            })
-          )
-      ),
-    ];
-  }, [unavailable]);
+    ].join('\n');
+    const url = URL.createObjectURL(new Blob([`${csv}\n`], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    const filename = title.replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '') || 'untitled';
+    link.download = `${filename}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }, [chart, notifications, title]);
+
+  const getActions = useCallback(
+    async (triggerId: string) => {
+      // The panel asks for every trigger with this callback. Badges render in
+      // the chart header, so these two actions stay on the hover menu only.
+      if (triggerId !== PANEL_MENU_TRIGGER) return [];
+      return [
+        action(
+          COPY_TO_DASHBOARD,
+          20,
+          'exit',
+          i18n.translate('xpack.streams.entityCentricLab.chartActions.copyToDashboard', {
+            defaultMessage: 'Copy to dashboard',
+          }),
+          () => setAddOpen(true)
+        ),
+        action(
+          DOWNLOAD_CSV,
+          10,
+          'upload',
+          i18n.translate('xpack.streams.entityCentricLab.chartActions.downloadCsv', {
+            defaultMessage: 'Download CSV',
+          }),
+          downloadCsv
+        ),
+      ];
+    },
+    [downloadCsv]
+  );
 
   return (
-    <div css={chartPanelChrome} data-test-subj={`entityCentricLabChartPanel-${id}`}>
+    <div
+      css={[chartPanelLayout, metricTile ? metricTileChrome : undefined]}
+      data-test-subj={`entityCentricLabChartPanel-${id}`}
+    >
       <EmbeddableRendererContext.Provider
-        value={{ quickActions: { view: [ADD_TO_DASHBOARD, INSPECT] } }}
+        value={{ quickActions: { view: [] } }}
       >
         <PresentationPanel
           Component={ChartSlot}
           componentProps={{ children }}
           componentApi={api}
           getActions={getActions}
-          hideHeader
-          showBorder={false}
+          hideHeader={metricTile}
+          showBorder={!metricTile}
           showShadow={false}
+          showBadges={false}
           showNotifications={false}
         />
       </EmbeddableRendererContext.Provider>
@@ -479,7 +490,7 @@ const AddToDashboardModal = ({
       <EuiModalHeader>
         <EuiModalHeaderTitle id={titleId}>
           {i18n.translate('xpack.streams.entityCentricLab.chartActions.addToDashboardTitle', {
-            defaultMessage: 'Add to dashboard',
+            defaultMessage: 'Copy to dashboard',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -487,7 +498,7 @@ const AddToDashboardModal = ({
         <EuiFormRow
           hasChildLabel={false}
           label={i18n.translate('xpack.streams.entityCentricLab.chartActions.addChartLabel', {
-            defaultMessage: 'Add {chart}',
+            defaultMessage: 'Copy {chart}',
             values: { chart: title },
           })}
         >
@@ -537,7 +548,7 @@ const AddToDashboardModal = ({
           }
         >
           {i18n.translate('xpack.streams.entityCentricLab.chartActions.confirm', {
-            defaultMessage: 'Add and go to dashboard',
+            defaultMessage: 'Copy and go to dashboard',
           })}
         </EuiButton>
       </EuiModalFooter>

@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.29';
+export const PROTOTYPE_VERSION = '1.30';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-24',
+    summary:
+      'Flyout charts use the dashboard panel header, and hover only offers Copy to dashboard and Download CSV.',
+    details:
+      'Line charts in the entity flyout use the dashboard panel header, so the info icon sits on the title. Hovering a chart shows only the ellipsis. That menu has Copy to dashboard and Download CSV, with the same icons as a dashboard panel. Those actions are not repeated in the chart header. Bump to v1.30.',
+  },
   {
     date: '2026-11-24',
     summary:

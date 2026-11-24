@@ -18,11 +18,14 @@ import { useEntityFlyoutServices, type FlyoutChartFrameData } from './services_c
 export const FlyoutChartPanel = ({
   id,
   title,
+  description,
   chart,
   children,
 }: {
   readonly id: string;
   readonly title: string;
+  /** Panel description. The host header appends the info icon to the title. */
+  readonly description?: string;
   readonly chart?: FlyoutChartFrameData;
   readonly children: ReactNode;
 }) => {
@@ -30,5 +33,5 @@ export const FlyoutChartPanel = ({
   if (!renderChartFrame) {
     return <>{children}</>;
   }
-  return <>{renderChartFrame({ id, title, chart, children })}</>;
+  return <>{renderChartFrame({ id, title, description, chart, children })}</>;
 };

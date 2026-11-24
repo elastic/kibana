@@ -359,6 +359,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
     renderRuleDetailFlyout,
     onOpenRuleDetail,
     density,
+    renderChartFrame,
   } = useEntityFlyoutServices();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const timeRange = useResolvedFlyoutTimeRange();
@@ -640,6 +641,13 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
                 defaultMessage: 'Active alerts over time',
               }
             )}
+            description={i18n.translate(
+              'entityCentricLabFlyout.flyout.alerts.overTimeTooltip',
+              {
+                defaultMessage:
+                  'Number of active alerts attributed to this entity over the selected time window.',
+              }
+            )}
             chart={{
               series: [
                 {
@@ -651,42 +659,46 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
               ],
             }}
           >
-            <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                <EuiFlexItem>
-                  <EuiTitle size="xxs">
-                    <h4>
-                      {i18n.translate(
-                        'entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle',
-                        { defaultMessage: 'Active alerts over time' }
-                      )}
-                    </h4>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'entityCentricLabFlyout.flyout.alerts.overTimeTooltip',
-                      {
-                        defaultMessage:
-                          'Number of active alerts attributed to this entity over the selected time window.',
-                      }
-                    )}
-                    position="top"
-                    delay="long"
-                  >
-                    <EuiButtonIcon
-                      iconType="question"
-                      color="text"
-                      aria-label={i18n.translate(
-                        'entityCentricLabFlyout.flyout.alerts.overTimeTooltipAriaLabel',
-                        { defaultMessage: 'Show chart description' }
-                      )}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
+            <EuiPanel hasBorder={!renderChartFrame} hasShadow={false} paddingSize="s">
+              {renderChartFrame ? null : (
+                <>
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                    <EuiFlexItem>
+                      <EuiTitle size="xxs">
+                        <h4>
+                          {i18n.translate(
+                            'entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle',
+                            { defaultMessage: 'Active alerts over time' }
+                          )}
+                        </h4>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'entityCentricLabFlyout.flyout.alerts.overTimeTooltip',
+                          {
+                            defaultMessage:
+                              'Number of active alerts attributed to this entity over the selected time window.',
+                          }
+                        )}
+                        position="top"
+                        delay="long"
+                      >
+                        <EuiButtonIcon
+                          iconType="question"
+                          color="text"
+                          aria-label={i18n.translate(
+                            'entityCentricLabFlyout.flyout.alerts.overTimeTooltipAriaLabel',
+                            { defaultMessage: 'Show chart description' }
+                          )}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                </>
+              )}
               <div style={{ height: 140 }} data-test-subj="entityCentricLabAlertsOverTimeChart">
                 <Chart>
                   <Settings

@@ -96,13 +96,15 @@ export interface EntityFlyoutServices {
     entityName: string
   ) => ReactNode;
   /**
-   * Host wrapper that gives a flyout chart the dashboard panel hover menu
-   * (Add to dashboard, Inspect, and the rest). When omitted, the chart renders
-   * on its own.
+   * Host wrapper that gives a flyout chart the dashboard panel chrome: header
+   * (title and description icon) and hover menu (Add to dashboard, Inspect,
+   * and the rest). When omitted, the chart renders on its own.
    */
   readonly renderChartFrame?: (frame: {
     readonly id: string;
     readonly title: string;
+    /** Shown beside the title, the same way a dashboard panel description is. */
+    readonly description?: string;
     /**
      * Series currently drawn on the chart. The host uses this to add a real
      * dashboard panel that shows the same trend.

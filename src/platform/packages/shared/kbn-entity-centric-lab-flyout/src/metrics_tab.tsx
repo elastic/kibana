@@ -186,7 +186,7 @@ export const MetricChartCard = ({
   readonly events: readonly MetricEvent[];
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { charts, density } = useEntityFlyoutServices();
+  const { charts, density, renderChartFrame } = useEntityFlyoutServices();
   const timeRange = useResolvedFlyoutTimeRange();
   const yLabels = series.yLabels;
   const chartSeries = useMemo(() => {
@@ -222,47 +222,43 @@ export const MetricChartCard = ({
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
-  return (
-    <FlyoutChartPanel
-      id={series.id}
-      title={series.label}
-      chart={{
-        yLabels: chartSeries.yLabels,
-        series: chartSeries.series.map((line) => ({
-          label: line.label,
-          points: line.points,
-        })),
-      }}
-    >
-      <EuiPanel hasBorder hasShadow={false} paddingSize="xs">
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem>
-            <EuiTitle size="xxs">
-              <h4>{series.label}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              type="info"
-              size="s"
-              color="subdued"
-              position="left"
-              content={explainFlyoutMetric(series.description)}
-              aria-label={i18n.translate(
-                'entityCentricLabFlyout.flyout.metrics.descriptionAriaLabel',
-                {
-                  defaultMessage: 'About {metric}',
-                  values: { metric: series.label },
-                }
-              )}
-              anchorProps={{
-                'data-test-subj': `entityCentricLabMetricsDescription-${series.id}`,
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <div
+  // The host panel header owns the title and info icon. Without that frame
+  // (Discover), keep a plain title on the card.
+  const framed = Boolean(renderChartFrame);
+  const plot = (
+    <>
+      {framed ? null : (
+        <>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h4>{series.label}</h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="info"
+                size="s"
+                color="subdued"
+                position="left"
+                content={explainFlyoutMetric(series.description)}
+                aria-label={i18n.translate(
+                  'entityCentricLabFlyout.flyout.metrics.descriptionAriaLabel',
+                  {
+                    defaultMessage: 'About {metric}',
+                    values: { metric: series.label },
+                  }
+                )}
+                anchorProps={{
+                  'data-test-subj': `entityCentricLabMetricsDescription-${series.id}`,
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+        </>
+      )}
+      <div
           style={{ height: chartHeight }}
           data-test-subj={`entityCentricLabMetricsChart-${series.id}`}
         >
@@ -376,7 +372,34 @@ export const MetricChartCard = ({
             ))}
           </EuiFlexGroup>
         ) : null}
-      </EuiPanel>
+    </>
+  );
+  return (
+    <FlyoutChartPanel
+      id={series.id}
+      title={series.label}
+      description={explainFlyoutMetric(series.description)}
+      chart={{
+        yLabels: chartSeries.yLabels,
+        series: chartSeries.series.map((line) => ({
+          label: line.label,
+          points: line.points,
+        })),
+      }}
+    >
+      {framed ? (
+        <div
+          css={css`
+            padding: ${euiTheme.size.xs};
+          `}
+        >
+          {plot}
+        </div>
+      ) : (
+        <EuiPanel hasBorder hasShadow={false} paddingSize="xs">
+          {plot}
+        </EuiPanel>
+      )}
     </FlyoutChartPanel>
   );
 };

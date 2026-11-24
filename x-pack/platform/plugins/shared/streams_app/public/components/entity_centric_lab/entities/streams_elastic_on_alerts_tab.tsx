@@ -282,6 +282,10 @@ export const StreamsElasticOnAlertsTab = ({
             title={i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle', {
               defaultMessage: 'Active alerts over time',
             })}
+            description={i18n.translate('entityCentricLabFlyout.flyout.alerts.overTimeTooltip', {
+              defaultMessage:
+                'Number of active alerts attributed to this entity over the selected time window.',
+            })}
             notifications={notifications}
             chart={{
               series: [
@@ -295,39 +299,11 @@ export const StreamsElasticOnAlertsTab = ({
               ],
             }}
           >
-          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem>
-                <EuiTitle size="xxs">
-                  <h4>
-                    {i18n.translate(
-                      'entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle',
-                      { defaultMessage: 'Active alerts over time' }
-                    )}
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('entityCentricLabFlyout.flyout.alerts.overTimeTooltip', {
-                    defaultMessage:
-                      'Number of active alerts attributed to this entity over the selected time window.',
-                  })}
-                  position="top"
-                  delay="long"
-                >
-                  <EuiButtonIcon
-                    iconType="question"
-                    color="text"
-                    aria-label={i18n.translate(
-                      'entityCentricLabFlyout.flyout.alerts.overTimeTooltipAriaLabel',
-                      { defaultMessage: 'Show chart description' }
-                    )}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
+          <div
+            css={css`
+              padding: ${euiTheme.size.s};
+            `}
+          >
             <div style={{ height: 140 }} data-test-subj="entityCentricLabAlertsOverTimeChart">
               <Chart>
                 <Settings baseTheme={chartBaseTheme} locale={i18n.getLocale()} showLegend={false} />
@@ -350,7 +326,7 @@ export const StreamsElasticOnAlertsTab = ({
                 />
               </Chart>
             </div>
-          </EuiPanel>
+          </div>
           </StreamsFlyoutChartPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
