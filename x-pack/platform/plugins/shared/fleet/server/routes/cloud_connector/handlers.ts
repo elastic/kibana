@@ -366,7 +366,9 @@ export const verifyCloudConnectorIacKeyHandler: FleetRequestHandler<
       newIntegrations,
       { compare }
     );
-    logger.debug(`IaC key verification result for ${cloudConnectorId}: ${JSON.stringify(body)}`);
+    logger.debug(
+      () => `IaC key verification result for ${cloudConnectorId}: ${JSON.stringify(body)}`
+    );
     return response.ok({ body });
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {

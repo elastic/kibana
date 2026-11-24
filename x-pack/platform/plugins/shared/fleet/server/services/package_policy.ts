@@ -3026,7 +3026,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         )
         .catch((error) => logger.error(`Error deleting previous versions: ${error}`));
-      logger.debug(`Attempted to delete previous versions ${JSON.stringify(response)}`);
+      logger.debug(() => `Attempted to delete previous versions ${JSON.stringify(response)}`);
 
       statuses.forEach(({ id, success, error }) => {
         const packagePolicy = packagePolicies.find((p) => p.id === id);

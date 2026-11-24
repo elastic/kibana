@@ -635,5 +635,5 @@ function sendRollbackTelemetry({
   );
   appContextService
     .getLogger()
-    .debug(`Send rollback telemetry: ${JSON.stringify(upgradeTelemetry)}`);
+    .debug(() => `Send rollback telemetry: ${JSON.stringify(upgradeTelemetry)}`);
 }
