@@ -170,6 +170,10 @@ export const parseBody = (value: string): string[] => {
       // skip the opening double quote
       next();
       while (char && !isDoubleQuote(char)) {
+        // skip the escaped char so that \" doesn't close the string
+        if (isBackslash(char)) {
+          next();
+        }
         next();
       }
       if (isDoubleQuote(char)) {
@@ -273,6 +277,11 @@ export const parseBody = (value: string): string[] => {
     next();
     let propertyName = '';
     while (char && !isDoubleQuote(char)) {
+      // keep the escaped char so that \" doesn't close the property name
+      if (isBackslash(char)) {
+        propertyName = propertyName + char;
+        next();
+      }
       propertyName = propertyName + char;
       next();
     }
@@ -500,6 +509,9 @@ const isNewLine = (char: string): boolean => {
 };
 const isDoubleQuote = (char: string): boolean => {
   return char === '"';
+};
+const isBackslash = (char: string): boolean => {
+  return char === '\\';
 };
 const isColon = (char: string): boolean => {
   return char === ':';

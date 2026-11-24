@@ -225,6 +225,16 @@ describe('tokens_utils', () => {
         tokens: ['{', 'description'],
       },
       {
+        // an escaped quote doesn't end the property name
+        value: '{"key\\" /* literal */ : \\"x": {"description": "',
+        tokens: ['{', 'key\\" /* literal */ : \\"x', '{', 'description'],
+      },
+      {
+        // an escaped quote doesn't end the string value
+        value: '{"value": "a\\" // literal", "description": "',
+        tokens: ['{', 'description'],
+      },
+      {
         // add opening curly brackets to tokens
         value: '{',
         tokens: ['{'],
