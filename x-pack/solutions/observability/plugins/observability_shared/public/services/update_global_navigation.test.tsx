@@ -103,11 +103,17 @@ describe('classic rules and alerts read', () => {
     ['an observability nav link', { navLinks: { apm: true } }],
     ['logs show', { logs: { show: true } }],
     ['stack rules show', { stackAlerts: { show: true } }],
-    ['the machine learning app privilege', { navLinks: { ml: true } }],
-    ['data set quality show', { dataQuality: { show: true } }],
   ])('treats %s as rule and alert read', (_label, features) => {
     expect(hasClassicRulesReadCapability(capabilities(features))).toBe(true);
     expect(hasClassicAlertsReadCapability(capabilities(features))).toBe(true);
+  });
+
+  it.each([
+    ['the machine learning app privilege', { navLinks: { ml: true } }],
+    ['data set quality show', { dataQuality: { show: true } }],
+  ])('treats %s as rule read but not alert read', (_label, features) => {
+    expect(hasClassicRulesReadCapability(capabilities(features))).toBe(true);
+    expect(hasClassicAlertsReadCapability(capabilities(features))).toBe(false);
   });
 
   it('treats observability alerts and stack alerts only as alert read', () => {

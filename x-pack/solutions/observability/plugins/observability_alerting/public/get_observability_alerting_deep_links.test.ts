@@ -170,14 +170,21 @@ describe('getObservabilityAlertingDeepLinks', () => {
       expect(visibleIn[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual([]);
     });
 
+    it('offers Alerts in search and the project side nav for stack alerts only', () => {
+      const visibleIn = visibleInById(capabilities({ stackAlertsOnly: { show: true } }));
+
+      expect(visibleIn[OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]).toEqual(SEARCHABLE);
+      expect(visibleIn[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual([]);
+    });
+
     it.each([
       ['data set quality', { dataQuality: { show: true } }],
       ['the machine learning app', { navLinks: { ml: true } }],
-      ['stack alerts only', { stackAlertsOnly: { show: true } }],
-    ])('offers Alerts in search and the project side nav for %s', (_label, features) => {
-      expect(
-        visibleInById(capabilities(features))[OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]
-      ).toEqual(SEARCHABLE);
+    ])('offers Rules V1 and hides Alerts for %s', (_label, features) => {
+      const visibleIn = visibleInById(capabilities(features));
+
+      expect(visibleIn[OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]).toEqual([]);
+      expect(visibleIn[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual(SEARCHABLE);
     });
 
     it('offers Alerts and Rules V1 to a v1 apm navLink user', () => {

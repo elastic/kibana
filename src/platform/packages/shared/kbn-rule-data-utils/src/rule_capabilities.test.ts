@@ -59,7 +59,6 @@ describe('hasPlatformRuleReadCapabilities', () => {
     ['data set quality show', { dataQuality: { show: true } }],
   ])('returns true for %s', (_label, features) => {
     expect(hasPlatformRuleReadCapabilities(capabilities(features))).toBe(true);
-    expect(hasPlatformAlertReadCapabilities(capabilities(features))).toBe(true);
   });
 
   it('returns false for Actions and Connectors, Classic Rules Settings, and management alerts', () => {
@@ -127,11 +126,19 @@ describe('hasPlatformRuleReadCapabilities', () => {
 });
 
 describe('hasPlatformAlertReadCapabilities', () => {
-  it('returns true for alert-only Stack Alerts', () => {
-    const stackAlertsOnly = capabilities({ stackAlertsOnly: { show: true } });
+  it.each([
+    ['stack rules show', { stackAlerts: { show: true } }],
+    ['alert-only Stack Alerts', { stackAlertsOnly: { show: true } }],
+  ])('returns true for %s', (_label, features) => {
+    expect(hasPlatformAlertReadCapabilities(capabilities(features))).toBe(true);
+  });
 
-    expect(hasPlatformAlertReadCapabilities(stackAlertsOnly)).toBe(true);
-    expect(hasPlatformRuleReadCapabilities(stackAlertsOnly)).toBe(false);
+  it.each([
+    ['the machine learning app privilege', { navLinks: { ml: true } }],
+    ['data set quality show', { dataQuality: { show: true } }],
+  ])('returns false for %s, which can read rules but does not grant rac', (_label, features) => {
+    expect(hasPlatformRuleReadCapabilities(capabilities(features))).toBe(true);
+    expect(hasPlatformAlertReadCapabilities(capabilities(features))).toBe(false);
   });
 
   it('returns false without any platform alerts capability', () => {

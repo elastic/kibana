@@ -33,7 +33,10 @@ export const hasPlatformRuleReadCapabilities = (capabilities: Capabilities): boo
   capabilities.navLinks?.[ML_APP_ID] === true ||
   capabilities[DATA_QUALITY_FEATURE_ID]?.show === true;
 
-/** Platform features whose privileges grant classic alert read, including alert-only Stack Alerts. */
+/**
+ * Platform features whose privileges grant classic alert read.
+ * Machine Learning and Data Set Quality can read rules but do not grant the `rac` API the Alerts table needs.
+ */
 export const hasPlatformAlertReadCapabilities = (capabilities: Capabilities): boolean =>
-  hasPlatformRuleReadCapabilities(capabilities) ||
+  capabilities[STACK_ALERTS_FEATURE_ID]?.[STACK_ALERTS_SHOW_UI_CAPABILITY] === true ||
   capabilities[STACK_ALERTS_ONLY_FEATURE_ID]?.show === true;

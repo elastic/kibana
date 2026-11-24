@@ -351,12 +351,8 @@ describe('getAlertsNavPanel', () => {
       });
     });
 
-    it.each([
-      ['stack rules read', { stackAlerts: { show: true } }],
-      ['data set quality', { dataQuality: { show: true } }],
-      ['the machine learning app privilege', { navLinks: { ml: true } }],
-    ])('shows Alerts and a visible v1 Rules link for %s', (_label, features) => {
-      setCapabilities(core, features);
+    it('shows Alerts and a visible v1 Rules link for stack rules read', () => {
+      setCapabilities(core, { stackAlerts: { show: true } });
 
       expect(getSectionByTitle(core)?.children).toEqual([
         expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
@@ -366,6 +362,20 @@ describe('getAlertsNavPanel', () => {
 
       expect(children).toEqual([{ link: 'observabilityAlerting:rules-v1', title: 'Rules' }]);
       // Its own path already prefix-matches the Classic pages, so it needs no custom active state.
+      expect(children?.[0]).not.toHaveProperty('getIsActive');
+    });
+
+    it.each([
+      ['data set quality', { dataQuality: { show: true } }],
+      ['the machine learning app privilege', { navLinks: { ml: true } }],
+    ])('shows a visible v1 Rules link and hides Alerts for %s', (_label, features) => {
+      setCapabilities(core, features);
+
+      expect(getSectionByTitle(core)?.children).toBeUndefined();
+
+      const children = getSectionByTitle(core, 'Rule Management')?.children;
+
+      expect(children).toEqual([{ link: 'observabilityAlerting:rules-v1', title: 'Rules' }]);
       expect(children?.[0]).not.toHaveProperty('getIsActive');
     });
 
