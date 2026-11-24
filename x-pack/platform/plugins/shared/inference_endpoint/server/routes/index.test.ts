@@ -65,12 +65,12 @@ const services = [
   },
 ];
 
-const updateRequestBody = (provider: string): InferenceEndpointRequestBody => ({
+const updateRequestBody = (provider: string, scopes: string[]): InferenceEndpointRequestBody => ({
   config: {
     inferenceId: 'openai-embeddings',
     provider,
     taskType: 'text_embedding',
-    providerConfig: { model_id: 'text-embedding-3-small', scopes: ['api'] },
+    providerConfig: { model_id: 'text-embedding-3-small', scopes },
   },
   secrets: {
     providerSecrets: { api_key: null, client_secret: 'secret' },
@@ -78,7 +78,7 @@ const updateRequestBody = (provider: string): InferenceEndpointRequestBody => ({
 });
 
 describe('PUT /internal/_inference/_update', () => {
-  const setup = (provider: string) => {
+  const setup = (provider: string, scopes: string[] = ['api']) => {
     const router = httpServiceMock.createRouter();
     getInferenceServicesRoute(router, loggingSystemMock.createLogger());
     const handler = router.versioned.getRoute('put', '/internal/_inference/_update').versions['1']
@@ -95,7 +95,7 @@ describe('PUT /internal/_inference/_update', () => {
     } as unknown as RequestHandlerContext;
     const request = httpServerMock.createKibanaRequest({
       method: 'put',
-      body: updateRequestBody(provider),
+      body: updateRequestBody(provider, scopes),
     });
     const response = httpServerMock.createResponseFactory();
 
@@ -118,6 +118,23 @@ describe('PUT /internal/_inference/_update', () => {
       { headers: { 'content-type': 'application/json' } }
     );
     expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('sends a cleared list so the stored list is cleared', async () => {
+    const { handler, esClient, context, request, response } = setup('openai', []);
+
+    await handler(context, request, response);
+
+    expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
+      {
+        method: 'PUT',
+        path: '/_inference/text_embedding/openai-embeddings/_update',
+        body: JSON.stringify({
+          service_settings: { scopes: [], client_secret: 'secret' },
+        }),
+      },
+      { headers: { 'content-type': 'application/json' } }
+    );
   });
 
   it('returns a bad request without updating when the service configuration is missing', async () => {
