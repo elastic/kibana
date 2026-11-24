@@ -17,7 +17,7 @@ import {
   SESSIONS_VERSION,
 } from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
-import { ENVIRONMENT_FIELDS } from '../../lib/otel/queries';
+import { ENVIRONMENT_FIELDS } from '../../../common/otel_data';
 import {
   createSessionsIndex,
   putSessionsIndexTemplate,
@@ -63,6 +63,7 @@ const fullDocument: SessionDocument = {
   geo: { country_iso: 'ES', region: 'Madrid', city: 'Madrid' },
   web_vitals: { lcp: 2100, inp: 120, cls: 0.05, fcp: 900, ttfb: 300 },
   web_vital_samples: { lcp: samples, inp: samples, cls: samples, fcp: samples, ttfb: samples },
+  load_time: { p75: 1800, count: 1 },
   search: ['session-a', 'ana@example.com'],
 };
 

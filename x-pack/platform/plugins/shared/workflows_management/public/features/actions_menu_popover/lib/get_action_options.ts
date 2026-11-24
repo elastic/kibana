@@ -11,7 +11,7 @@ import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { HardcodedIcons, ParallelIcon } from '@kbn/workflows-ui';
 import { buildBuiltInTriggerOptions, buildRegisteredTriggerOptions } from './build_trigger_options';
-import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
+import { getAllConnectors, getStepExposure, isDeprecatedStepType } from '../../../../common/schema';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData, IconVariant } from '../types';
 import { isActionGroup } from '../types';
@@ -373,7 +373,7 @@ export function getActionOptions(
   const baseTypeInstancesCount: Record<string, number> = {};
 
   for (const connector of connectors) {
-    if (!isDeprecatedStepType(connector.type)) {
+    if (!isDeprecatedStepType(connector.type) && getStepExposure(connector.type) === 'open') {
       const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
       if (customStepDefinition) {
         const group = stepGroups[customStepDefinition.category];
