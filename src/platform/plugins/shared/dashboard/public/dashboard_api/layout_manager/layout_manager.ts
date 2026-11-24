@@ -543,7 +543,6 @@ export function initializeLayoutManager(
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
-      childrenLoading$,
       visibleChildren$,
       childApisPending$,
       reset: resetLayout,
