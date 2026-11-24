@@ -266,4 +266,17 @@ describe('Nightshift CI coverage', () => {
     const suiteRoot = Path.dirname(Path.resolve(__dirname, '../../..', configPath));
     for (const file of files) expect(Fs.existsSync(Path.join(suiteRoot, file))).toBe(true);
   });
+
+  it('gates golden goal_pass for the production model, the one the daily run baselines', () => {
+    const suite = suites.find(({ id }) => id === 'nightshift-investigations');
+    // daily_evals.yml runs Sonnet 5.5 on main; the gate compares against that baseline.
+    expect(suite?.defaultModelGroups).toEqual(['eis/anthropic-claude-5.5-sonnet']);
+    expect(suite?.regressionGate).toEqual({
+      dataset: 'ns-investigation-golden-2710',
+      evaluator: 'goal_pass',
+      minAbsoluteDrop: 0.1,
+      alpha: 0.05,
+      maxBaselineAgeDays: 3,
+    });
+  });
 });

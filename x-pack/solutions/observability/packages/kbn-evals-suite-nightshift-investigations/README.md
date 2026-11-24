@@ -297,7 +297,8 @@ investigation starts.
 1. Check the cut on the evaluations cluster: its name, its `customer0` tag, and that its examples
    are investigation questions with distinct `metadata.case_id` values.
 2. Change the `golden` entry's `name` in
-   [`src/datasets/stored_datasets.ts`](src/datasets/stored_datasets.ts), and the table above.
+   [`src/datasets/stored_datasets.ts`](src/datasets/stored_datasets.ts), the table above, and
+   `regressionGate.dataset` in `evals.suites.json` (a test keeps the two in sync).
 3. Run it locally the way CI does. `NIGHTSHIFT_DATASETS` takes the entry's id, so this loads the
    new name and checks its tag:
 
@@ -307,10 +308,34 @@ investigation starts.
      --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
    ```
 
-4. Open a PR with the `evals:nightshift-investigations` and
-   `models:eis/anthropic-claude-5.5-sonnet` labels, so CI scores the new cut on the PR too.
+4. Open a PR with the `evals:nightshift-investigations` label, so CI scores the new cut on the PR
+   too. `main` has no baseline for the new cut yet, so the [regression gate](#pr-evals-gate) reports
+   that PR as inconclusive and doesn't block it.
 5. After the merge, the next daily and weekly builds run the new cut. Its scores start a new
    series, so compare runs within one cut, not across cuts.
+
+## PR evals gate
+
+The suite opts into the [evals decision on PRs](../../../../platform/packages/shared/kbn-evals/README.md#requiring-an-evals-decision-on-prs).
+A PR that changes the investigation harness gets a failing `evals gate` check until it has one of:
+
+- `evals:nightshift-investigations`: runs the suite on Sonnet 5.5 (its `defaultModelGroups`, the
+  model the daily run baselines on `main`).
+- `evals:skip`: a conscious skip.
+
+The paths are under `requireDecisionOnPaths` in
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json): the agents and
+their prompts, tools and connector guides, decision trees, findings recorder, custom context,
+memory, wiki, investigation round, onboarding, workflow triggers and step definitions, the agent
+installers, the managed workflow definitions, model resolution, and the agentic investigations
+hypotheses, impact and investigations code. Tests, online evals, the UI and routes don't need a
+decision. Add a directory there when you add one that changes how the agent investigates.
+
+A run also has to pass the regression gate: `goal_pass` on the pinned golden cut
+(`ns-investigation-golden-2710`) mustn't drop by 0.10 or more with p < 0.05 against the latest
+`main` baseline. A regression blocks the PR until it's fixed or the PR gets
+`evals:accept-regression`. Other evaluators stay advisory in the comparison comment, and a missing
+or stale baseline never blocks.
 
 To run a different stored dataset in CI as well, add an entry naming its shard, and add that shard
 to `evals.suites.json` if it is new. Each entry's id is also a `NIGHTSHIFT_DATASETS` selector,

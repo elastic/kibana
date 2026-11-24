@@ -257,6 +257,11 @@ config test fails when an include glob stops matching any tracked file, and the 
 what the globs miss. `**` doesn't match dot directories or dotfiles (e.g. `server/.agents/` or
 `server/.prompt.md`), so list those with their own glob. Opting in needs no new GitHub labels.
 
+The `nightshift-investigations` entry is a worked example of both fields; its suite README explains
+[which paths it gates and why](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/README.md#pr-evals-gate).
+Owners of agents whose behaviour spans several plugins (for example Agent Builder) are welcome to
+opt in the same way; suites that don't opt in are never flagged.
+
 The eval trigger step reads the labels again once the PR's Kibana build step finishes, so a run
 label added before then takes effect. A label added after that needs a new push or a `/ci` comment.
 

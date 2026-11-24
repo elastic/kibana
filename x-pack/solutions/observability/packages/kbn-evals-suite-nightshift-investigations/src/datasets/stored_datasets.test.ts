@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import Fs from 'fs';
+import Path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   STORED_DATASETS,
   assertStoredDatasetTags,
@@ -64,5 +67,13 @@ describe('stored dataset config', () => {
     const golden = STORED_DATASETS.find(({ id }) => id === 'golden');
     expect(golden?.name).toMatch(/^ns-investigation-golden-\d{4}$/);
     expect(golden?.requiredTags).toEqual(['customer0']);
+  });
+
+  it('gates PRs on the pinned golden cut, so a new cut moves the regression gate with it', () => {
+    const { suites } = JSON.parse(
+      Fs.readFileSync(Path.join(REPO_ROOT, '.buildkite/pipelines/evals/evals.suites.json'), 'utf-8')
+    ) as { suites: Array<{ id: string; regressionGate?: { dataset: string } }> };
+    const gate = suites.find(({ id }) => id === 'nightshift-investigations')?.regressionGate;
+    expect(gate?.dataset).toBe(STORED_DATASETS.find(({ id }) => id === 'golden')?.name);
   });
 });
