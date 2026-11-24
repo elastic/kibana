@@ -20,14 +20,9 @@
  */
 
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { of } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import {
-  ExecutionStatus,
-  StepCategory,
-  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
-} from '@kbn/workflows';
+import { ExecutionStatus, StepCategory } from '@kbn/workflows';
 import {
   createServerStepDefinition,
   type ServerStepDefinition,
@@ -247,9 +242,6 @@ const fakeKibanaSteps = (
   { record }: Recorder
 ): (() => void) => {
   const { coreStart } = engine.dependencies;
-  coreStart.featureFlags.getBooleanValue$.mockImplementation((flag, defaultValue) =>
-    of(flag === WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG || defaultValue)
-  );
   Object.assign(engine.fakeKibanaRequest, {
     headers: { authorization: 'ApiKey managed-workflow-test' },
     isFakeRequest: true,
