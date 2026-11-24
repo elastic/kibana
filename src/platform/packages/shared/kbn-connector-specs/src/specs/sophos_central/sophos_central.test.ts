@@ -192,6 +192,12 @@ describe('input schemas', () => {
       ).toBe(false);
     });
 
+    it('rejects authPua (excluded because it relaxes tenant protection)', () => {
+      expect(
+        ActOnAlertInputSchema.safeParse({ alertId: ALERT_ID, action: 'authPua' }).success
+      ).toBe(false);
+    });
+
     it('rejects message over 1000 chars', () => {
       expect(
         ActOnAlertInputSchema.safeParse({
@@ -577,10 +583,28 @@ describe('listAlerts', () => {
 
     const config = client.request.mock.calls[0][0];
     expect(config.params).toMatchObject({
-      severity: ['high'],
+      severity: 'high',
       pageSize: 50,
       pageFromKey: 'cursor-abc',
     });
+  });
+
+  it('comma-joins array params (Sophos style:form, explode:false)', async () => {
+    const client = makeClient();
+    stubWhoami(client);
+    client.request.mockResolvedValue({ data: {} });
+    const ctx = makeCtx(client);
+
+    await SophosCentral.actions.listAlerts.handler(ctx as never, {
+      severity: ['high', 'medium'],
+      product: ['endpoint', 'server'],
+    });
+
+    const config = client.request.mock.calls[0][0];
+    // Sophos uses OpenAPI style:form, explode:false — arrays must be
+    // comma-joined (severity=high,medium), not repeated or bracketed keys.
+    expect(config.params.severity).toBe('high,medium');
+    expect(config.params.product).toBe('endpoint,server');
   });
 });
 
@@ -842,7 +866,7 @@ describe('scanEndpoint', () => {
 
 describe('getTamperProtection', () => {
   it('calls GET /endpoint/v1/endpoints/:endpointId/tamper-protection', async () => {
-    const tamperData = { enabled: true, password: 'secret123' };
+    const tamperData = { enabled: true, password: 'secret123', previousPasswords: ['old1', 'old2'] };
     const client = makeClient();
     stubWhoami(client);
     client.request.mockResolvedValue({ data: tamperData });
@@ -857,9 +881,10 @@ describe('getTamperProtection', () => {
         url: `${DATA_REGION}/endpoint/v1/endpoints/${ENDPOINT_ID}/tamper-protection`,
       })
     );
-    // Recovery password must be stripped — it is an endpoint credential
+    // Recovery password and password history must be stripped — they are endpoint credentials
     expect(result).toEqual({ enabled: true });
     expect(result).not.toHaveProperty('password');
+    expect(result).not.toHaveProperty('previousPasswords');
   });
 });
 

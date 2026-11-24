@@ -1,0 +1,43 @@
+{
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Detections API"
+  },
+  "openapi": "3.0.0",
+  "paths": {},
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api-{dataRegion}.central.sophos.com/detections/v1",
+      "variables": {
+        "dataRegion": {
+          "default": "eu01",
+          "enum": [
+            "eu01",
+            "eu02",
+            "us01",
+            "us03",
+            "ca01",
+            "au01",
+            "jp01",
+            "in01",
+            "br01",
+            "ae01"
+          ]
+        }
+      }
+    }
+  ]
+}

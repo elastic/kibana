@@ -51,7 +51,7 @@ The Sophos Central connector exposes the following actions:
 :   Retrieve a single Sophos Central alert by UUID. Returns severity, category, managed agent (the affected endpoint), and allowed actions.
 
 `actOnAlert`
-:   Apply a lifecycle action to a single alert. Check the alert's `allowedActions` field first (from `getAlert`) to confirm the action is available. Available actions: `acknowledge`, `cleanPua`, `cleanVirus`, `authPua`, `clearThreat`, `clearHmpa`, `sendMsgPua`, `sendMsgThreat`.
+:   Apply a lifecycle action to a single alert. Check the alert's `allowedActions` field first (from `getAlert`) to confirm the action is available. Available actions: `acknowledge`, `cleanPua`, `cleanVirus`, `clearThreat`, `clearHmpa`, `sendMsgPua`, `sendMsgThreat`. The `authPua` action is excluded because it authorises a potentially unwanted application, which relaxes tenant protection.
 
 `actOnAlertsBulk`
 :   Apply a single lifecycle action to multiple alerts. The connector iterates over each alert ID in turn. Partial failures are returned alongside successes. Rate limit: 100 calls/min.

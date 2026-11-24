@@ -1,157 +1,153 @@
 {
   "operations": {
-    "listAlerts": [
+    "actOnAlert": [],
+    "actOnAlertsBulk": [],
+    "addAllowedItem": [],
+    "addBlockedItem": [],
+    "deisolateEndpoint": [],
+    "deleteBlockedItem": [],
+    "getAlert": [],
+    "getEndpoint": [],
+    "getTamperProtection": [],
+    "isolateEndpoint": [],
+    "listAlerts": [],
+    "listBlockedItems": [],
+    "listDetections": [],
+    "listEndpoints": [],
+    "scanEndpoint": [],
+    "updateTamperProtection": []
+  },
+  "sources": {
+    "common": {
+      "apiVersion": "1.3.1",
+      "fetchedAt": "2026-11-24T11:11:56.395Z",
+      "format": "openapi",
+      "url": "https://developer.sophos.com/assets/specs/common-v1.yaml"
+    },
+    "detections": {
+      "apiVersion": "1.2.0",
+      "fetchedAt": "2026-11-24T11:11:57.634Z",
+      "format": "openapi",
+      "url": "https://developer.sophos.com/assets/specs/detections-v1.yaml"
+    },
+    "endpoint": {
+      "apiVersion": "1.94.0",
+      "fetchedAt": "2026-11-24T11:11:57.010Z",
+      "format": "openapi",
+      "url": "https://developer.sophos.com/assets/specs/endpoint-v1.yaml"
+    }
+  },
+  "unmatched": {
+    "actOnAlert": [
       {
         "method": "get",
-        "path": "/common/v1/alerts",
-        "source": "common"
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
+      }
+    ],
+    "actOnAlertsBulk": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
+      }
+    ],
+    "addAllowedItem": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
+      }
+    ],
+    "addBlockedItem": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
+      }
+    ],
+    "deisolateEndpoint": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
+      }
+    ],
+    "deleteBlockedItem": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
       }
     ],
     "getAlert": [
       {
         "method": "get",
-        "path": "/common/v1/alerts/{alertId}",
-        "source": "common"
-      }
-    ],
-    "actOnAlert": [
-      {
-        "method": "post",
-        "path": "/common/v1/alerts/{alertId}/actions",
-        "source": "common"
-      }
-    ],
-    "actOnAlertsBulk": [
-      {
-        "method": "post",
-        "path": "/common/v1/alerts/{alertId}/actions",
-        "source": "common"
-      }
-    ],
-    "listEndpoints": [
-      {
-        "method": "get",
-        "path": "/endpoint/v1/endpoints",
-        "source": "endpoint"
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
       }
     ],
     "getEndpoint": [
       {
         "method": "get",
-        "path": "/endpoint/v1/endpoints/{endpointId}",
-        "source": "endpoint"
-      }
-    ],
-    "isolateEndpoint": [
-      {
-        "method": "post",
-        "path": "/endpoint/v1/endpoints/isolation",
-        "source": "endpoint"
-      }
-    ],
-    "deisolateEndpoint": [
-      {
-        "method": "post",
-        "path": "/endpoint/v1/endpoints/isolation",
-        "source": "endpoint"
-      }
-    ],
-    "scanEndpoint": [
-      {
-        "method": "post",
-        "path": "/endpoint/v1/endpoints/scans",
-        "source": "endpoint"
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
       }
     ],
     "getTamperProtection": [
       {
         "method": "get",
-        "path": "/endpoint/v1/endpoints/{endpointId}/tamper-protection",
-        "source": "endpoint"
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
       }
     ],
-    "updateTamperProtection": [
+    "isolateEndpoint": [
       {
-        "method": "post",
-        "path": "/endpoint/v1/endpoints/{endpointId}/tamper-protection",
-        "source": "endpoint"
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
+      }
+    ],
+    "listAlerts": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
       }
     ],
     "listBlockedItems": [
       {
         "method": "get",
-        "path": "/endpoint/v1/settings/blocked-items",
-        "source": "endpoint"
-      }
-    ],
-    "addBlockedItem": [
-      {
-        "method": "post",
-        "path": "/endpoint/v1/settings/blocked-items",
-        "source": "endpoint"
-      }
-    ],
-    "addAllowedItem": [
-      {
-        "method": "post",
-        "path": "/endpoint/v1/settings/allowed-items",
-        "source": "endpoint"
-      }
-    ],
-    "deleteBlockedItem": [
-      {
-        "method": "delete",
-        "path": "/endpoint/v1/settings/blocked-items/{blockedItemId}",
-        "source": "endpoint"
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
       }
     ],
     "listDetections": [
       {
-        "method": "post",
-        "path": "/detections/v1/queries/detections",
-        "source": "detections"
-      },
-      {
         "method": "get",
-        "path": "/detections/v1/queries/detections/{runId}",
-        "source": "detections"
-      },
-      {
-        "method": "get",
-        "path": "/detections/v1/queries/detections/{runId}/results",
-        "source": "detections"
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
       }
-    ]
-  },
-  "sources": {
-    "common": {
-      "apiVersion": "2024.12",
-      "fetchedAt": "2026-11-23T00:00:00.000Z",
-      "format": "openapi",
-      "url": "https://developer.sophos.com/docs/common-v1/1/routes/alerts/get",
-      "note": "Sophos Common API v1 — alerts. Sophos publishes interactive API references; no downloadable OpenAPI file is available."
-    },
-    "endpoint": {
-      "apiVersion": "2024.12",
-      "fetchedAt": "2026-11-23T00:00:00.000Z",
-      "format": "openapi",
-      "url": "https://developer.sophos.com/docs/endpoint-v1/1/routes/endpoints/get",
-      "note": "Sophos Endpoint API v1 — endpoints, tamper protection, blocked/allowed items."
-    },
-    "detections": {
-      "apiVersion": "2024.12",
-      "fetchedAt": "2026-11-23T00:00:00.000Z",
-      "format": "openapi",
-      "url": "https://developer.sophos.com/docs/detections-v1/1/routes/queries/detections/post",
-      "note": "Sophos Detections API v1 — XDR detection queries."
-    }
-  },
-  "unmatched": {
-    "actOnAlertsBulk": [
+    ],
+    "listEndpoints": [
       {
-        "method": "post",
-        "path": "/common/v1/alerts/{alertId}/actions",
-        "reason": "actOnAlertsBulk iterates over individual alert IDs, calling the single-alert action endpoint for each. There is no dedicated bulk endpoint in the Sophos Common API."
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
+      }
+    ],
+    "scanEndpoint": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
+      }
+    ],
+    "updateTamperProtection": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "reason": "The whoami endpoint is part of the Sophos Central global API (api.central.sophos.com), not any per-service spec. It is called once per action to discover the tenant ID and regional data-center URL."
       }
     ]
   }

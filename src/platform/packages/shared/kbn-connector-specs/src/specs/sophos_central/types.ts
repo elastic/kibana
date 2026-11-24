@@ -17,12 +17,15 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const uuidString = (desc: string) =>
   z.string().regex(UUID_RE, 'Must be a valid UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)').describe(desc);
 
-/** Alert lifecycle action values from the Sophos Common API v1 spec. */
+/**
+ * Alert lifecycle action values exposed to Agent Builder agents.
+ * `authPua` is intentionally excluded — it authorises a potentially unwanted
+ * application, which relaxes protection (same reason addAllowedItem is isTool: false).
+ */
 const ALERT_ACTIONS = [
   'acknowledge',
   'cleanPua',
   'cleanVirus',
-  'authPua',
   'clearThreat',
   'clearHmpa',
   'sendMsgPua',

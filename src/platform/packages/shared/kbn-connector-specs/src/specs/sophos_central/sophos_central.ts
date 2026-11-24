@@ -123,6 +123,7 @@ async function request<T = unknown>(
     data?: unknown;
     tenantId?: string;
     dataRegion?: string;
+    timeout?: number;
   }
 ): Promise<T> {
   let tenantId = options?.tenantId;
@@ -136,10 +137,16 @@ async function request<T = unknown>(
     method,
     url: `${dataRegion}${path}`,
     headers: { 'X-Tenant-ID': tenantId },
-    timeout: 30_000,
+    timeout: options?.timeout ?? 30_000,
   };
   if (options?.params) {
-    config.params = options.params;
+    // Sophos uses OpenAPI style:form, explode:false — arrays are comma-joined
+    // (severity=high,medium), not repeated keys or bracketed keys.
+    const flatParams: Record<string, string | number | boolean> = {};
+    for (const [key, value] of Object.entries(options.params)) {
+      flatParams[key] = Array.isArray(value) ? value.join(',') : (value as string | number | boolean);
+    }
+    config.params = flatParams;
   }
   if (options?.data !== undefined) config.data = options.data;
   const response = await ctx.client.request<T>(config);
@@ -341,7 +348,7 @@ export const SophosCentral: ConnectorSpec = {
       description:
         'Apply a lifecycle action to a single Sophos Central alert. ' +
         "Check the alert's `allowedActions` field first (from getAlert) to confirm the " +
-        'action is available. Available actions: acknowledge, cleanPua, cleanVirus, authPua, ' +
+        'action is available. Available actions: acknowledge, cleanPua, cleanVirus, ' +
         'clearThreat, clearHmpa, sendMsgPua, sendMsgThreat.',
       input: ActOnAlertInputSchema,
       handler: async (ctx, input: ActOnAlertInput) => {
@@ -772,7 +779,7 @@ export const SophosCentral: ConnectorSpec = {
               ctx,
               'GET',
               `/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
-              { tenantId, dataRegion }
+              { tenantId, dataRegion, timeout: Math.min(30_000, deadline - Date.now()) }
             );
             runState = pollRes?.result ?? pollRes?.status ?? '';
           }
