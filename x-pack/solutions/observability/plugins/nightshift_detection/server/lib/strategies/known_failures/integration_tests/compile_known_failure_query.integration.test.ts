@@ -101,6 +101,7 @@ async function seedScenario({
 
 const runCompiledQuery = async (esClient: ElasticsearchClient, scenario: string) => {
   const query = compileKnownFailureQuery({
+    knowledgeIndicatorId: 'checkout-timeouts',
     esql: `FROM ${getIndex(scenario)} | WHERE log.level == "error" AND message : "timeout"`,
     cpsEnabled: false,
   });

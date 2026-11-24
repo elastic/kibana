@@ -6,7 +6,7 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { groupBy, sortBy } from 'lodash';
+import { groupBy } from 'lodash';
 import type { DetectionSignalGenerator, GenerateResult, GeneratorContext } from '../types';
 import { KNOWN_FAILURES_STRATEGY_ID } from './constants';
 import { getKnownFailureRuleId, getUnwatchableReason } from './known_failure_rule';
@@ -73,9 +73,8 @@ async function readWatchedKnowledgeIndicators({
   ]);
   const enabledRuleIds = new Set(managedRules.filter(({ enabled }) => enabled).map(({ id }) => id));
 
-  // Two indicators with the same query share a rule id; sorted by id, the same one always wins.
   return new Map(
-    sortBy(queries, ({ query }) => query.id)
+    queries
       .filter(({ query }) => getUnwatchableReason(query) === undefined)
       .map((query): [string, QueryLink] => [
         getKnownFailureRuleId({ spaceId, query, cpsEnabled }),

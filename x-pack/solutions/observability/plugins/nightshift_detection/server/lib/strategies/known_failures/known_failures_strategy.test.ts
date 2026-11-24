@@ -104,8 +104,19 @@ describe('KnownFailuresStrategy', () => {
       );
     });
 
+    // A knowledge indicator id is any string; unquoted, a line break in it would end the comment
+    // naming it and run the rest as ES|QL.
+    it('keeps a line break in the knowledge indicator id out of the rule query', async () => {
+      const { resources } = await new KnownFailuresStrategy().resources(
+        createContext([createQuery({ id: 'ki-1\n| LIMIT 0' })])
+      );
+
+      expect(resources[0].data.query.base).not.toMatch(/^\| LIMIT 0/m);
+    });
+
     // Noted, not skipped: a skipped source keeps all its rules, so the old rule of an edited
-    // indicator beside a STATS one would never be deleted.
+    // indicator beside a STATS one would never be deleted. The note is the only place an author
+    // learns why, so it names the actual reason.
     it('notes STATS, non-filter, SET, subquery, self-timed, parameterized and overlong knowledge indicators without skipping their source', async () => {
       const { resources, skipped, notes } = await new KnownFailuresStrategy().resources(
         createContext([
@@ -133,13 +144,13 @@ describe('KnownFailuresStrategy', () => {
       expect(resources).toEqual([]);
       expect(skipped).toEqual([]);
       expect(notes).toEqual([
-        expect.stringMatching(/^source-1: .*\[stats\]/),
-        expect.stringMatching(/^source-1: .*\[limited\]/),
-        expect.stringMatching(/^source-1: .*\[unfiltered\]/),
-        expect.stringMatching(/^source-1: .*\[set\]/),
-        expect.stringMatching(/^source-1: .*\[subquery\]/),
-        expect.stringMatching(/^source-1: .*\[now\]/),
-        expect.stringMatching(/^source-1: .*\[param\]/),
+        expect.stringMatching(/^source-1: .*\[stats\] is a STATS query/),
+        expect.stringMatching(/^source-1: .*\[limited\] uses LIMIT/),
+        expect.stringMatching(/^source-1: .*\[unfiltered\] has no WHERE/),
+        expect.stringMatching(/^source-1: .*\[set\] starts with a SET header/),
+        expect.stringMatching(/^source-1: .*\[subquery\] reads from a subquery/),
+        expect.stringMatching(/^source-1: .*\[now\] bounds its own time/),
+        expect.stringMatching(/^source-1: .*\[param\] uses \? parameters/),
         expect.stringMatching(/^source-1: .*\[long\] is too long/),
       ]);
     });
@@ -186,9 +197,11 @@ describe('getKnownFailureRuleId', () => {
     ).toBe(getId({}));
   });
 
-  it('changes with the query, the source and the routing', () => {
+  // Two indicators sharing one rule would leave one of them unwatched, its rows read as the other's.
+  it('changes with the knowledge indicator, the query, the source and the routing', () => {
     const id = getId({});
 
+    expect(getId({ id: 'ki-2' })).not.toBe(id);
     expect(getId({ esql: 'FROM logs-* | WHERE message : "refused"' })).not.toBe(id);
     expect(getId({ sourceId: 'source-2' })).not.toBe(id);
     expect(getId({}, true)).not.toBe(id);

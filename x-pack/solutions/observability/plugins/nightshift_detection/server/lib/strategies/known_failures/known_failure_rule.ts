@@ -9,10 +9,7 @@ import { MAX_ESQL_QUERY_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { computeRuleId } from '../../rules/rule_identity';
 import type { AlertingRuleResource } from '../types';
-import {
-  canCompileKnownFailureQuery,
-  compileKnownFailureQuery,
-} from './compile_known_failure_query';
+import { compileKnownFailureQuery, getUncountableReason } from './compile_known_failure_query';
 import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants';
 
 /**
@@ -26,14 +23,18 @@ export function getUnwatchableReason(
   if (query.type !== 'match') {
     return `knowledge indicator [${query.id}] is a STATS query, which Known failures does not count yet`;
   }
-  if (!canCompileKnownFailureQuery(query.esql.query)) {
-    return `knowledge indicator [${query.id}] is not a FROM … | WHERE … query (KEEP, DROP and SORT aside)`;
+  const uncountable = getUncountableReason(query.esql.query);
+  if (uncountable) {
+    return `knowledge indicator [${query.id}] ${uncountable}`;
   }
   // The rules API rejects a longer query. The cross-project form is the longest, so a query that
   // fits it fits either way, and the rule id does not flip with the setting.
   if (
-    compileKnownFailureQuery({ esql: query.esql.query, cpsEnabled: true }).length >
-    MAX_ESQL_QUERY_LENGTH
+    compileKnownFailureQuery({
+      knowledgeIndicatorId: query.id,
+      esql: query.esql.query,
+      cpsEnabled: true,
+    }).length > MAX_ESQL_QUERY_LENGTH
   ) {
     return `knowledge indicator [${query.id}] is too long to watch`;
   }
@@ -69,6 +70,7 @@ export function buildKnownFailureRule({
     // No grouping: the query returns one row per run, all of one series.
     query: {
       base: compileKnownFailureQuery({
+        knowledgeIndicatorId: query.id,
         esql: query.esql.query,
         cpsEnabled,
       }),
