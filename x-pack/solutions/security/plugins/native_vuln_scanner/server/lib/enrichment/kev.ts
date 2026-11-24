@@ -225,6 +225,10 @@ export const loadKev = async (
   }
   // A 304 is only sent to a conditional request, which needs a cached copy to revalidate.
   if (!stale) return { status: 'unavailable', reason: 'KEV catalog answered 304 without a cache' };
+  // A concurrent scan may have stored a newer catalog while this 304 was in flight; renewing
+  // the copy this scan revalidated would overwrite it.
+  const current = cache ?? stale;
+  if (current !== stale) return { status: 'ok', entries: current.entries };
   setCachedKev({ ...stale, lastModified: result.lastModified, fetchedAt: nowMs });
   return { status: 'ok', entries: stale.entries };
 };

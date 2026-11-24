@@ -331,6 +331,47 @@ describe('loadKev', () => {
     expect([...refreshed.entries.keys()]).toEqual(['CVE-2026-0001']);
   });
 
+  it('does not overwrite a newer catalog with a late 304 for the copy it revalidated', async () => {
+    const newerCatalog = JSON.stringify({
+      count: 1,
+      vulnerabilities: [
+        {
+          cveID: 'CVE-2026-0001',
+          dateAdded: '2026-11-19',
+          dueDate: '2026-12-10',
+          knownRansomwareCampaignUse: 'Unknown',
+        },
+      ],
+    });
+    let release304: () => void = () => undefined;
+    const late304 = new Promise<Response>((resolve) => {
+      release304 = () => resolve(fakeResponse('', { status: 304 }));
+    });
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce(fakeResponse(fixture, { headers: { 'last-modified': LAST_MODIFIED } }))
+      .mockReturnValueOnce(late304)
+      .mockResolvedValueOnce(
+        fakeResponse(newerCatalog, {
+          headers: { 'last-modified': 'Thu, 19 Nov 2026 08:00:00 GMT' },
+        })
+      ) as unknown as typeof fetch;
+    let nowMs = 1_000;
+    const options = { fetchImpl, now: () => nowMs, feedMirrorUrl: undefined };
+
+    await loadKev(undefined, options);
+    nowMs += KEV_TTL_MS;
+    const revalidating = loadKev(undefined, options);
+    const replaced = await loadKev(undefined, options);
+    release304();
+    await revalidating;
+
+    if (replaced.status !== 'ok') throw new Error('expected ok');
+    expect([...replaced.entries.keys()]).toEqual(['CVE-2026-0001']);
+    expect([...(getCachedKev(nowMs)?.entries.keys() ?? [])]).toEqual(['CVE-2026-0001']);
+    expect(getCachedKev(nowMs)?.lastModified).toBe('Thu, 19 Nov 2026 08:00:00 GMT');
+  });
+
   it('does not cache an unavailable result', async () => {
     const fetchImpl = jest
       .fn()
