@@ -22,5 +22,5 @@ export const CONTENT_CONNECTORS_DESCRIPTION = i18n.translate(
 
 export const SETTINGS_MANAGE_CONNECTORS = i18n.translate(
   'xpack.elasticAssistant.aiSettings.settings.manageConnectors',
-  { defaultMessage: 'Manage connectors' }
+  { defaultMessage: 'Manage content crawlers' }
 );

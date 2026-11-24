@@ -55,7 +55,7 @@ export const AgentlessStepConfigureConnector = ({
 
   const cardDescription = i18n.translate(
     'xpack.fleet.agentlessEnrollmentFlyout.configureConnector.cardDescription',
-    { defaultMessage: 'Configure connector' }
+    { defaultMessage: 'Configure content crawler' }
   );
 
   // A connector may already be associated with the policy. When it is, deep-link
@@ -94,7 +94,7 @@ export const AgentlessStepConfigureConnector = ({
         title={i18n.translate(
           'xpack.fleet.agentlessEnrollmentFlyout.configureConnector.calloutTitle',
           {
-            defaultMessage: 'Configure your connector to start syncing data',
+            defaultMessage: 'Configure your content crawler to start syncing data',
           }
         )}
       />
@@ -103,7 +103,7 @@ export const AgentlessStepConfigureConnector = ({
         <p>
           <FormattedMessage
             id="xpack.fleet.agentlessEnrollmentFlyout.configureConnector.helperDescription"
-            defaultMessage="Your connector has been deployed. Finish setting it up to start syncing data into Elasticsearch."
+            defaultMessage="Your content crawler has been deployed. Finish setting it up to start syncing data into Elasticsearch."
           />
         </p>
       </EuiText>

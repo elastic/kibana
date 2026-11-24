@@ -374,7 +374,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.fleet.policyDetails.packagePoliciesTable.manageConnectorActionTitle"
-              defaultMessage="Manage connector"
+              defaultMessage="Manage content crawler"
             />
           </EuiContextMenuItem>,
         ]

@@ -27,7 +27,7 @@ export function ContentConnectorTab() {
           'xpack.observabilityAiAssistantManagement.searchConnectorTab.searchConnectorsEnablesYouTextLabel',
           {
             defaultMessage:
-              'Connectors enable you to index content from external sources thereby making it available for the AI Assistant. This can greatly improve the relevance of the AI Assistant’s responses.',
+              'Content crawlers enable you to index content from external sources thereby making it available for the AI Assistant. This can greatly improve the relevance of the AI Assistant’s responses.',
           }
         )}
       </EuiText>
@@ -35,7 +35,7 @@ export function ContentConnectorTab() {
       <EuiText>
         <FormattedMessage
           id="xpack.observabilityAiAssistantManagement.searchConnectorTab.searchConnectorsManagementLink"
-          defaultMessage="You can manage connectors under {searchConnectorLink}."
+          defaultMessage="You can manage content crawlers under {searchConnectorLink}."
           values={{
             searchConnectorLink: (
               <EuiLink
@@ -44,7 +44,7 @@ export function ContentConnectorTab() {
               >
                 {i18n.translate(
                   'xpack.observabilityAiAssistantManagement.searchConnectorTab.searchConnectorsManagementPageLinkLabel',
-                  { defaultMessage: 'Connectors' }
+                  { defaultMessage: 'Content crawlers' }
                 )}
               </EuiLink>
             ),

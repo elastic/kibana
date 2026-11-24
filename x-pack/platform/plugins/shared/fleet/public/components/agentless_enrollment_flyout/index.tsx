@@ -218,7 +218,7 @@ export const AgentlessEnrollmentFlyout = ({
                 ? i18n.translate(
                     'xpack.fleet.agentlessEnrollmentFlyout.stepConfigureConnectorTitle',
                     {
-                      defaultMessage: 'Configure connector',
+                      defaultMessage: 'Configure content crawler',
                     }
                   )
                 : i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.stepConfirmDataTitle', {
