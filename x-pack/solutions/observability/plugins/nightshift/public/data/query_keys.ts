@@ -10,6 +10,8 @@ export const automationDetailQueryKey = (id: string) =>
   [...AUTOMATIONS_QUERY_KEY, id, 'detail'] as const;
 export const RUN_QUOTAS_QUERY_KEY = ['nightshiftRunQuotas'] as const;
 export const INVESTIGATION_QUOTAS_QUERY_KEY = ['nightshiftInvestigationQuotas'] as const;
+export const slackDeliveriesQueryKey = (investigationId: string, executionId?: string) =>
+  ['nightshift.slackDeliveries', investigationId, executionId] as const;
 
 export const automationRunActivityQueryKey = (id: string) =>
   [...AUTOMATIONS_QUERY_KEY, id, 'activity'] as const;

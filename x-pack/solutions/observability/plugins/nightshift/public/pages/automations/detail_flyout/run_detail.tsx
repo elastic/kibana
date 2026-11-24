@@ -21,8 +21,10 @@ import type { SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { getNightshiftInvestigationPath } from '../../../common/url_params';
 import { useKibana } from '../../../hooks/use_kibana';
+import { SlackDeliveryStatus } from '../../../components/entities/investigation/slack_delivery_status';
 import { SectionHeader } from '../flyouts/form/section_header';
 import { getRunSourceLabel, RunStatusIndicator, type Run } from './run_history';
 
@@ -119,6 +121,25 @@ const OpenInvestigationButton = ({ investigationId }: { investigationId: string 
   );
 };
 
+const RunSlackDeliveryStatus = ({ investigationId, investigationExecutionId, status }: Run) => {
+  const { application, nightshiftInvestigations } = useKibana().services;
+  if (!investigationId || !investigationExecutionId || !nightshiftInvestigations) return null;
+  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
+  return (
+    <SlackDeliveryStatus
+      investigationsClient={nightshiftInvestigations.investigationsClient}
+      investigationId={investigationId}
+      executionId={investigationExecutionId}
+      settingsHref={
+        canManageAndConfigure
+          ? application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/general' })
+          : undefined
+      }
+      isRunning={status === 'running'}
+    />
+  );
+};
+
 export const RunDetail = ({
   run,
   automationName,
@@ -201,6 +222,7 @@ export const RunDetail = ({
                 { title: labels.automation, description: automationName },
               ]}
             />
+            <RunSlackDeliveryStatus {...run} />
             {run.investigationId && (
               <>
                 <EuiHorizontalRule margin="m" />

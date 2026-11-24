@@ -10,6 +10,7 @@ import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { ensureInvestigationRoute } from './ensure_investigation';
 import { findOrCreateSlackThreadInvestigationRoute } from './find_or_create_slack_thread_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
+import { getSlackDeliveriesRoute } from './get_slack_deliveries';
 import { listWikiPagesRoute } from './list_wiki_pages';
 import { getWikiPageRoute } from './get_wiki_page';
 import { createWikiPageRoute, updateWikiPageRoute } from './write_wiki_page';
@@ -57,6 +58,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...ensureInvestigationRoute,
   ...findOrCreateSlackThreadInvestigationRoute,
   ...getInvestigationAvailabilityRoute,
+  ...getSlackDeliveriesRoute,
   ...listWikiPagesRoute,
   ...getWikiPageRoute,
   ...createWikiPageRoute,

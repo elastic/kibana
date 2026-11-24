@@ -21,6 +21,7 @@ import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { getInvestigationDisplayTitle } from '../to_view_model';
+import type { InvestigationOverviewSection } from '../../../../types';
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
@@ -114,6 +115,7 @@ export const InvestigationOverview: React.FC<
   OverviewSlotRenderProps & {
     /** Present when a solution registered an entity flyout. Entity-store ids open it. */
     onOpenEntity?: (entity: ImpactEntityTarget) => void;
+    overviewSection?: InvestigationOverviewSection;
   }
 > = ({
   conversation,
@@ -121,6 +123,7 @@ export const InvestigationOverview: React.FC<
   proposedActionsContent,
   proposedActionsCount,
   onOpenEntity,
+  overviewSection: OverviewSection,
 }) => {
   const { data } = useInvestigation(conversation.id);
   useRefetchProposalsOnChange(conversation.id, data?.proposals);
@@ -144,14 +147,19 @@ export const InvestigationOverview: React.FC<
     (data?.proposals.length ?? 0) > 0;
 
   return (
-    <OverviewTab
-      investigation={investigation}
-      attachments={conversation.attachments}
-      groupedAttachments={groupedAttachments}
-      proposedActionsContent={proposedActionsContent}
-      proposedActionsCount={proposedActionsCount}
-      sections={sections}
-      showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
-    />
+    <>
+      <OverviewTab
+        investigation={investigation}
+        attachments={conversation.attachments}
+        groupedAttachments={groupedAttachments}
+        proposedActionsContent={proposedActionsContent}
+        proposedActionsCount={proposedActionsCount}
+        sections={sections}
+        showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
+      />
+      {OverviewSection && (
+        <OverviewSection investigationId={conversation.id} isRunning={data?.in_progress ?? false} />
+      )}
+    </>
   );
 };

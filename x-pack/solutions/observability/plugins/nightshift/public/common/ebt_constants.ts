@@ -109,6 +109,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   UNSUPPORTED_SPACE_PROMPT: 'nightshiftUnsupportedSpacePrompt',
   RECOMMENDED_SOURCES_TABLE: 'nightshiftRecommendedSourcesTable',
   SETTINGS: 'nightshiftSettings',
+  SLACK_DELIVERY_STATUS: 'nightshiftSlackDeliveryStatus',
   SEVERITY_TILES: 'nightshiftSeverityTiles',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
   START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',

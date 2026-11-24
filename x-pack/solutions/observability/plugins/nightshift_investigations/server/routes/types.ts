@@ -26,6 +26,7 @@ import type { MemoryPageStore } from '../memory/page_store';
 import type { KnowledgePurgeClient } from '../purge/purge_client';
 import type { GetTriggerEmitter } from '../types';
 import type { InvestigatorServiceAccountService } from '../lib/service_account/investigator_service_account';
+import type { NotificationRoutingClient } from '../lib/notifications/notification_routing_client';
 
 export type GetInvestigationsClient = (
   request: KibanaRequest,
@@ -62,6 +63,12 @@ export type GetKnowledgePurgeClient = (request: KibanaRequest) => KnowledgePurge
 export interface NightshiftInvestigationsRouteHandlerResources
   extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
+  getNotificationRoutingClient: (
+    request: KibanaRequest,
+    spaceId: string,
+    conversationId: string,
+    investigationId: string
+  ) => Promise<Pick<NotificationRoutingClient, 'get'>>;
   getTriggerEmitter: GetTriggerEmitter;
   getAlertsClient: GetAlertsClient;
   getEpisodeLookup: GetEpisodeLookup;

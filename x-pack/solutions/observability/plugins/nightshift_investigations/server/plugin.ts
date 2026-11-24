@@ -788,6 +788,7 @@ export class NightshiftInvestigationsPlugin
         repository: nightshiftInvestigationsRouteRepository,
         dependencies: {
           getInvestigationsClient: this.getInvestigationsClient,
+          getNotificationRoutingClient: this.getNotificationRoutingClient,
           getTriggerEmitter,
           getAlertsClient: this.getAlertsClient,
           getEpisodeLookup: this.getEpisodeLookup,

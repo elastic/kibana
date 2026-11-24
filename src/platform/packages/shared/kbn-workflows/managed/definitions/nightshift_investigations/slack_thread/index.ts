@@ -16,7 +16,7 @@ export const NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID = 'system-nightshift-slack-thre
 export const NIGHTSHIFT_SLACK_THREAD_WORKFLOW = {
   id: NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: removeRunAs(SLACK_THREAD_WORKFLOW_YAML),
   management: {

@@ -221,8 +221,6 @@ steps:
           threadTs: '{{ event.threadId | default: event.messageId }}'
           text: '{{ variables.result_text }}'
           blocks: '${{ variables.result_blocks }}'
-        on-failure:
-          continue: true
 
       - name: set_result_message
         type: data.set
