@@ -271,10 +271,26 @@ const dashboardGridStyles = {
           zIndex: euiTheme.levels.toast,
         },
 
-      // Hide hover actions when dashboard has an overlay
-      '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
-        visibility: 'hidden !important' as 'hidden',
-      },
+      // Hide hover actions when dashboard has an overlay (blurred panels).
+      '.dshDashboardGrid__item--hideHoverActions:not(.dshDashboardGrid__item--focused) .embPanel__hoverActions':
+        {
+          visibility: 'hidden !important' as 'hidden',
+        },
+      // When a panel is focused for flyout edit, keep the drag handle visible and hide the
+      // rest of the default hover actions so they leave layout. Combined-wrapper chrome is
+      // undone in useHoverActionStyles so the remaining handle matches an individual pill.
+      // Overridden hover actions (inline edit chrome) must stay visible — they replace the
+      // default actions and are the editing UI.
+      // https://github.com/elastic/kibana/issues/278578
+      '.dshDashboardGrid__item--hideHoverActions.dshDashboardGrid__item--focused .embPanel__hoverActions:not(.embPanel__hoverActions--overridden)':
+        {
+          visibility: 'visible !important' as 'visible',
+          opacity: 1,
+          zIndex: euiTheme.levels.menu,
+          '& > :not(.embPanel--dragHandle)': {
+            display: 'none',
+          },
+        },
       // ... and do not offer selection on a panel that is being edited in a flyout (the drag handle stays)
       '.dshDashboardGrid__item--hideHoverActions .embPanel__selectPanel': {
         display: 'none',

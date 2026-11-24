@@ -64,7 +64,8 @@ const parseFormat = (flag: string): [string, MarkdownSourceFormat | ProtocolForm
   return [name, parsed.data];
 };
 
-// Repeated `--pages name=prefix` and `--endpoint name=url` flags add up to one list per source.
+// Repeated `--pages name=prefix`, `--endpoint name=url` and `--tool name=url` flags add up to one
+// list per source.
 const groupByName = (option: string, value: string, flags: readonly string[]) => {
   const groups: Record<string, string[]> = {};
   for (const flag of flags) {
@@ -104,6 +105,16 @@ run(
     );
     const pages = groupByName('pages', 'prefix', flagsReader.arrayOfStrings('pages') ?? []);
     const endpoints = groupByName('endpoint', 'url', flagsReader.arrayOfStrings('endpoint') ?? []);
+    const tools = groupByName('tool', 'url', flagsReader.arrayOfStrings('tool') ?? []);
+    const captureFiles = Object.fromEntries(
+      (flagsReader.arrayOfStrings('capture') ?? []).map((flag) =>
+        parseNamed('capture', flag, 'file')
+      )
+    );
+    const notes = Object.fromEntries(
+      (flagsReader.arrayOfStrings('note') ?? []).map((flag) => parseNamed('note', flag, 'text'))
+    );
+    const captureFlagsGiven = Object.keys(captureFiles).length + Object.keys(notes).length > 0;
     const now = () => new Date();
     const cache = createSpecCache({ directory: SPEC_CACHE, fetchText, refresh, now, log });
 
@@ -149,8 +160,19 @@ run(
     }
 
     if (flagsReader.boolean('drift')) {
-      if (check || refresh || flagsReader.boolean('inspect') || Object.keys(sources).length > 0) {
-        throw createFlagError('--drift always fetches the latest specs and writes no artifacts');
+      const sourceFlagsGiven = [sources, formats, pages, endpoints, tools].some(
+        (flags) => Object.keys(flags).length > 0
+      );
+      if (
+        check ||
+        refresh ||
+        flagsReader.boolean('inspect') ||
+        sourceFlagsGiven ||
+        captureFlagsGiven
+      ) {
+        throw createFlagError(
+          '--drift always fetches the latest specs of the manifest sources and writes no artifacts'
+        );
       }
       const driftedId = flagsReader.string('connector');
       const connectors = driftedId
@@ -189,6 +211,11 @@ run(
       if (check) {
         throw createFlagError('--inspect checks nothing; leave out --check');
       }
+      if (captureFlagsGiven) {
+        throw createFlagError(
+          '--inspect skips captured sources and writes no snapshots; record with --capture and --note instead'
+        );
+      }
       const inspectedId = flagsReader.string('connector');
       const directory = inspectedId ? await findVendorApiDirectory(inspectedId) : undefined;
       const { output, manifestUpdated, problems } = await inspectVendorApi({
@@ -217,6 +244,22 @@ run(
     }
 
     const id = flagsReader.requiredString('connector');
+    if (check && captureFlagsGiven) {
+      throw createFlagError('--check writes nothing, so it takes no --capture or --note');
+    }
+    const captures = Object.fromEntries(
+      await Promise.all(
+        Object.entries(captureFiles).map(async ([name, file]) => {
+          try {
+            return [name, await fs.readFile(path.resolve(file), 'utf8')] as const;
+          } catch (error) {
+            throw createFlagError(
+              `--capture ${name}=${file}: ${error instanceof Error ? error.message : String(error)}`
+            );
+          }
+        })
+      )
+    );
     const { connector, directory } = await findConnector(id);
     if (Object.keys(sources).length === 0 && !existsSync(path.join(directory, 'manifest.json'))) {
       throw createFlagError(
@@ -230,6 +273,9 @@ run(
       formats,
       pages,
       endpoints,
+      tools,
+      captures,
+      notes,
       refresh,
       check,
       fetchText: cache.fetchText,
@@ -276,6 +322,9 @@ run(
         'format',
         'pages',
         'endpoint',
+        'tool',
+        'capture',
+        'note',
         'operation',
         'grep',
         'depth',
@@ -296,6 +345,13 @@ run(
                      manifest.json.
         --pages      name=prefix of the reference pages to fetch, absolute or relative to the
                      index, such as an API group's folder; repeatable. Kept in manifest.json.
+        --tool       name=url of one tool document of an mcp source, absolute or relative to its
+                     url, for a vendor that publishes a document per tool rather than a tools/list
+                     result; repeatable. Kept in manifest.json.
+        --capture    name=file of a document the source's url only serves with credentials, fetched
+                     by hand. Records against it, replaces the source's snapshot and marks the
+                     source captured, so it is never fetched; needs a note
+        --note       name=text of the source's note in manifest.json, such as what capturing it took
         --refresh    Fetch every source URL again, instead of using the specs fetched before
         --check     Write nothing; fail if artifacts would change or problems are found
         --inspect    List the operations of the --source specs, or of the connector's manifest

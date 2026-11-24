@@ -298,6 +298,86 @@ function InvestigationGradientLabel({
   );
 }
 
+/** AI-gradient badge: light fill + gradient text (`base`), or hollow + gradient ring (`outlined`). */
+export function AiGradientBadge({
+  children,
+  testSubj,
+  iconType,
+  variant = 'base',
+  /**
+   * Forced-colors text fill when gradients drop out.
+   * `button` — accordion / ButtonFace (In progress count).
+   * `canvas` — page surface (e.g. Investigated status on event rows).
+   */
+  forcedColorsForeground = 'canvas',
+}: {
+  children: React.ReactNode;
+  testSubj?: string;
+  iconType?: React.ComponentProps<typeof EuiBadge>['iconType'];
+  variant?: 'base' | 'outlined';
+  forcedColorsForeground?: 'button' | 'canvas';
+}): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+  const { labelCss } = useAiButtonGradientStyles({ variant });
+  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant });
+
+  const lightFill = `linear-gradient(90deg, ${euiTheme.colors.backgroundLightPrimary} 2.98%, ${euiTheme.colors.backgroundLightAssistance} 66.24%)`;
+  const plateCss =
+    variant === 'outlined'
+      ? css`
+          background: linear-gradient(
+                ${euiTheme.colors.backgroundBasePlain},
+                ${euiTheme.colors.backgroundBasePlain}
+              )
+              padding-box,
+            ${lightFill} border-box;
+          border: ${euiTheme.border.width.thin} solid transparent;
+        `
+      : css`
+          background: ${lightFill};
+          border: ${euiTheme.border.width.thin} solid transparent;
+        `;
+
+  const forcedColorsText = forcedColorsForeground === 'button' ? 'ButtonText' : 'CanvasText';
+
+  // Own span (not `.euiBadge__text`): EuiBadge skips that wrapper for numeric `0`.
+  // Drop AI-button label padding — EuiBadge already pads; the extra xs made counts too wide.
+  // Forced-colors: gradients drop out — use ButtonText on buttons, CanvasText on page surfaces.
+  const labelSpanCss = css`
+    ${labelCss}
+    padding: 0;
+
+    @media (forced-colors: active) {
+      background: none !important;
+      color: ${forcedColorsText} !important;
+      -webkit-text-fill-color: ${forcedColorsText} !important;
+    }
+  `;
+
+  return (
+    <>
+      <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
+      <EuiBadge
+        color="hollow"
+        iconType={iconType}
+        iconSide={iconType != null ? 'left' : undefined}
+        data-test-subj={testSubj}
+        css={[
+          iconType != null ? iconGradientCss : undefined,
+          plateCss,
+          css`
+            border-radius: ${euiTheme.size.l};
+          `,
+        ]}
+      >
+        <span data-test-subj="nightshiftAiGradientBadgeLabel" css={labelSpanCss}>
+          {children}
+        </span>
+      </EuiBadge>
+    </>
+  );
+}
+
 function GradientOutlinedStatusBadge({
   label,
   testSubj,
@@ -305,41 +385,10 @@ function GradientOutlinedStatusBadge({
   label: string;
   testSubj?: string;
 }): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
-  const { labelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
-  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
-
-  const borderGradient = `linear-gradient(90deg, ${euiTheme.colors.backgroundLightPrimary} 2.98%, ${euiTheme.colors.backgroundLightAssistance} 66.24%)`;
-
   return (
-    <>
-      <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
-      <EuiBadge
-        color="hollow"
-        iconType="check"
-        iconSide="left"
-        data-test-subj={testSubj}
-        css={[
-          iconGradientCss,
-          css`
-            background: linear-gradient(
-                  ${euiTheme.colors.backgroundBasePlain},
-                  ${euiTheme.colors.backgroundBasePlain}
-                )
-                padding-box,
-              ${borderGradient} border-box;
-            border: ${euiTheme.border.width.thin} solid transparent;
-            border-radius: ${euiTheme.size.l};
-
-            .euiBadge__text {
-              ${labelCss}
-            }
-          `,
-        ]}
-      >
-        {label}
-      </EuiBadge>
-    </>
+    <AiGradientBadge iconType="check" testSubj={testSubj} variant="outlined">
+      {label}
+    </AiGradientBadge>
   );
 }
 

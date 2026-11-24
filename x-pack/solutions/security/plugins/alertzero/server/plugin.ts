@@ -18,6 +18,7 @@ import { chunk } from 'lodash';
 import type { Subscription } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type { ActionCatalogClient } from '@kbn/proposals-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import {
@@ -27,7 +28,12 @@ import {
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
-import { TRIAGE_GROUPING_FLAG } from './alert_triage/constants';
+import {
+  TRIAGE_DECISION_AUTO_CLOSE_FLAG,
+  TRIAGE_GROUPING_FLAG,
+  toDecisionAutoCloseMode,
+  type DecisionAutoCloseMode,
+} from './alert_triage/constants';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -52,8 +58,12 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
-import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
+import { ALERTZERO_AI_INDICES, type AlertZeroAiIndexId } from './context_engine/ai_index_registry';
+import { registerAiIndices } from './context_engine/register_ai_indices';
+import {
+  installSpaceScopedIndexTemplates,
+  type AiIndexWriteGates,
+} from './context_engine/write_gate';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
@@ -62,7 +72,6 @@ import { createGetWorkerBlockingReasons } from './services/workers/worker_blocki
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
-import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { isSpaceSupported } from './lib/is_space_supported';
@@ -112,7 +121,7 @@ export class AlertZeroPlugin
 
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
-  private actionsService?: ActionsService;
+  private actionsService?: ActionCatalogClient;
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
   private proposals?: AlertZeroStartDependencies['proposals'];
@@ -129,6 +138,8 @@ export class AlertZeroPlugin
   private coreStart?: CoreStart;
   private triageGroupingEnabled = true;
   private triageGroupingFlagSubscription?: Subscription;
+  private decisionAutoCloseMode: DecisionAutoCloseMode = 'off';
+  private decisionAutoCloseFlagSubscription?: Subscription;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
 
@@ -153,21 +164,16 @@ export class AlertZeroPlugin
     this.threatIntelSupplyWorkflowInstaller = installer;
   };
 
-  /**
-   * False while the fingerprint template install is in flight, and after it fails.
-   * `start` cannot return a promise, so the matcher reads this as it changes.
-   */
-  private fingerprintWritesAllowed = true;
+  /** Unset when the config kill switch is off; every index is then writable. */
+  private aiIndexWriteGates?: AiIndexWriteGates<AlertZeroAiIndexId>;
 
-  private readonly alertZeroStartContract = (): AlertZeroPluginStart => {
-    const plugin = this;
-    return {
-      registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
-      get attackFingerprintWritesAllowed() {
-        return plugin.fingerprintWritesAllowed;
-      },
-    };
-  };
+  private readonly isAiIndexWritable = (aiIndexId: AlertZeroAiIndexId): boolean =>
+    this.aiIndexWriteGates?.isWritable(aiIndexId) ?? true;
+
+  private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
+    registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+    isAiIndexWritable: this.isAiIndexWritable,
+  });
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
@@ -201,7 +207,7 @@ export class AlertZeroPlugin
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
     if (contextEngine) {
-      registerInvestigationsAiIndex({ contextEngine });
+      registerAiIndices({ contextEngine });
     }
     // Outside the optional-plugin guard below: the browser offers this step whenever AlertZero is
     // enabled, and an unregistered step type fails the run before `on-failure: continue` applies.
@@ -235,8 +241,8 @@ export class AlertZeroPlugin
       });
       agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
       // `ai.conversation.updated` is opt-in, so Agent Builder only emits it where a consumer
-      // subscribes. Scoped per space, like the routes, so spaces without AlertZero, and Classic
-      // spaces, stay quiet.
+      // subscribes. Scoped per space, like the routes, so spaces without AlertZero, and spaces
+      // with a solution view other than Security or Classic, stay quiet.
       agentBuilder.conversations.enableUpdatedTrigger({
         templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
         isEnabled: async (request) => {
@@ -276,6 +282,7 @@ export class AlertZeroPlugin
         getWorkflowsManagement: () => this.workflowsManagementApi,
         isGroupingEnabled: async () => this.triageGroupingEnabled,
       },
+      getDecisionAutoCloseMode: async () => this.decisionAutoCloseMode,
       logger: stepsLogger,
     });
 
@@ -362,6 +369,13 @@ export class AlertZeroPlugin
       .subscribe((enabled) => {
         this.triageGroupingEnabled = enabled;
       });
+    // The switch for storing and matching decisions. It is `off` unless a deployment sets `shadow`
+    // or `on`, until the follow-ups that `on` needs have landed.
+    this.decisionAutoCloseFlagSubscription = core.featureFlags
+      .getStringValue$<string>(TRIAGE_DECISION_AUTO_CLOSE_FLAG, 'off')
+      .subscribe((mode) => {
+        this.decisionAutoCloseMode = toDecisionAutoCloseMode(mode);
+      });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
@@ -373,17 +387,11 @@ export class AlertZeroPlugin
       return this.alertZeroStartContract();
     }
 
-    // Plugin start cannot return a promise. Writes stay refused until this settles, so a
-    // worker that runs in that gap reviews every attack and does not auto-create the index.
-    this.fingerprintWritesAllowed = false;
-    void ensureFingerprintIndexMapping(core.elasticsearch.client.asInternalUser, this.logger).then(
-      (allowed) => {
-        this.fingerprintWritesAllowed = allowed;
-      },
-      () => {
-        this.fingerprintWritesAllowed = false;
-      }
-    );
+    this.aiIndexWriteGates = installSpaceScopedIndexTemplates({
+      aiIndices: ALERTZERO_AI_INDICES,
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    });
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 
@@ -421,13 +429,9 @@ export class AlertZeroPlugin
     );
 
     this.watchesService = new WatchesService();
-    this.actionsService = new ActionsService(
-      () =>
-        this.workflowsManagementApi
-          ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
-          : undefined,
-      this.logger
-    );
+    // The catalog is shared with every solution that proposes actions. AlertZero lists only the
+    // managed installs (the default), never the space's own workflows.
+    this.actionsService = { list: proposals.listActions };
     this.threatIntelSupplyService =
       management != null
         ? new ThreatIntelSupplyService({
@@ -492,7 +496,7 @@ export class AlertZeroPlugin
     return this.requireStarted(this.watchesService, 'Watches service');
   }
 
-  private requireActionsService(): ActionsService {
+  private requireActionsService(): ActionCatalogClient {
     return this.requireStarted(this.actionsService, 'Actions service');
   }
 
@@ -592,5 +596,6 @@ export class AlertZeroPlugin
 
   stop() {
     this.triageGroupingFlagSubscription?.unsubscribe();
+    this.decisionAutoCloseFlagSubscription?.unsubscribe();
   }
 }

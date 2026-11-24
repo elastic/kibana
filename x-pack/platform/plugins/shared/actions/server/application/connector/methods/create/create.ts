@@ -32,6 +32,7 @@ import {
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
+import { resolveConnectorSpecVersion } from '../../../../lib/resolve_connector_spec_version';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
 import {
   invalidateStoredConnectorEventIdentity,
@@ -75,6 +76,7 @@ async function createConnector({
     name,
     config,
     secrets,
+    specVersion,
     isInboundEventsEnabled: requestedInboundEventsEnabled,
   },
   options,
@@ -132,8 +134,13 @@ async function createConnector({
     requestedEnabled: requestedInboundEventsEnabled,
   });
 
-  const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
+  const { resolvedSpecVersion, actionTypeForValidation: actionType } = resolveConnectorSpecVersion({
+    actionType: context.actionTypeRegistry.get(actionTypeId),
+    specVersion,
+    configurationUtilities,
+  });
+
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
   });
@@ -226,6 +233,7 @@ async function createConnector({
           ...(authMode !== undefined ? { authMode } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
           hasInboundEventIdentity: Boolean(identityAttributes),
+          ...(resolvedSpecVersion !== undefined ? { specVersion: resolvedSpecVersion } : {}),
         },
         { id }
       )
@@ -313,6 +321,9 @@ async function createConnector({
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    ...(result.attributes.specVersion !== undefined
+      ? { specVersion: result.attributes.specVersion }
+      : {}),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
     ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
   };

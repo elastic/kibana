@@ -346,13 +346,22 @@ const ERROR_FIELD_PATHS: Record<DestinationCreationFormField, readonly FormField
 export const getVisibleDestinationFormErrors = ({
   errors,
   touchedFields,
+  dirtyFields,
   isSubmitted,
 }: {
   errors: DestinationCreationFormErrors;
   touchedFields: object;
+  dirtyFields?: object;
   isSubmitted: boolean;
 }): DestinationCreationFormErrors =>
-  getVisibleFormErrors({ errors, touchedFields, isSubmitted, fieldPaths: ERROR_FIELD_PATHS });
+  getVisibleFormErrors({
+    errors,
+    touchedFields,
+    dirtyFields,
+    revealWhenDirty: ['destinationName'],
+    isSubmitted,
+    fieldPaths: ERROR_FIELD_PATHS,
+  });
 
 export const canSubmitDestinationForm = ({
   formData,
