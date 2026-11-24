@@ -6721,13 +6721,57 @@ describe('ConversationClient', () => {
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
 
-      it('refuses a public conversation before looking at the run', async () => {
+      const startedFromUserMessage = {
+        id: 'e1_started',
+        type: TimelineEventType.executionStarted,
+        created_at: '2026-10-26T10:00:01.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: timelineOf('e1'),
+        trigger_event_id: userMessage.id,
+        data: { trigger_type: TimelineTriggerType.userMessage },
+      } as ConversationEvent;
+      const someoneElse = { type: EventActorType.user, id: 'user-2', username: 'other' };
+      const appendSteerAs = (who: typeof actor | typeof someoneElse) =>
+        client.appendSteer(
+          { id: 'conversation-1', message: 'use a table', eventId: steerId, actor: who },
+          { source: 'http_api' }
+        );
+
+      it('admits a steer in a public conversation from the user whose message started the run', async () => {
         mockGetDocumentResponse(
-          documentWithHolder('e1', { accessMode: ConversationAccessControlMode.Public })
+          documentWithHolder('e1', {
+            accessMode: ConversationAccessControlMode.Public,
+            events: [userMessage, startedFromUserMessage],
+          })
         );
         liveHolder();
 
-        const error = await appendSteer().catch((caught: unknown) => caught);
+        const result = await appendSteer();
+
+        expect(result.alreadyStored).toBe(false);
+        expect(result.event.data).toEqual({
+          message: 'use a table',
+          steer: { execution_id: timelineOf('e1') },
+        });
+      });
+
+      it('refuses a steer from anyone but the user whose message started the run', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder('e1', { events: [userMessage, startedFromUserMessage] })
+        );
+        liveHolder();
+
+        const error = await appendSteerAs(someoneElse).catch((caught: unknown) => caught);
+
+        expect(isConversationNotSteerableError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('judges a run that has not stored its start by the last message', async () => {
+        mockGetDocumentResponse(documentWithHolder('e1'));
+        liveHolder();
+
+        const error = await appendSteerAs(someoneElse).catch((caught: unknown) => caught);
 
         expect(isConversationNotSteerableError(error)).toBe(true);
         expect(mockEsClient.index).not.toHaveBeenCalled();
@@ -6750,7 +6794,12 @@ describe('ConversationClient', () => {
         );
         liveHolder();
 
-        const result = await appendSteer();
+        // The paused round belongs to the fixture's user; the resume has not stored its start.
+        const result = await appendSteerAs({
+          type: EventActorType.user,
+          id: 'u1',
+          username: 'user1',
+        });
 
         expect(result.alreadyStored).toBe(false);
         expect(result.event.data).toEqual({

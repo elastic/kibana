@@ -45,8 +45,8 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
-  useIsSharedConversation,
 } from '../../../hooks/use_conversation';
+import { useCanSteerRun } from '../../../hooks/use_can_steer_run';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
 import { getLeadingMention } from './mentions/get_leading_mention';
@@ -226,11 +226,11 @@ const enabledPlaceholder = i18n.translate(
     defaultMessage: 'Ask anything',
   }
 );
-const runningSharedPlaceholder = i18n.translate(
-  'xpack.agentBuilder.conversationInput.textArea.runningSharedPlaceholder',
+const anotherUsersRunPlaceholder = i18n.translate(
+  'xpack.agentBuilder.conversationInput.textArea.anotherUsersRunPlaceholder',
   {
     defaultMessage:
-      "Messages can't be sent to a running agent in a shared conversation. Wait for it to finish, or stop it.",
+      'Only the person whose message started this run can send it messages. Wait for it to finish.',
   }
 );
 
@@ -363,10 +363,10 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
   const { sendSteer, steerIfBusy, isUnansweredSteer, isSending: isSendingSteer } = useSendSteer();
-  // The server refuses steers on a shared conversation, so the composer does not offer them.
-  const isSharedConversation = useIsSharedConversation();
-  const canSteer =
-    canCancel && Boolean(conversationId) && !isAwaitingPrompt && !isSharedConversation;
+  // The server admits steers from the user whose message started the run only, so the composer
+  // does not offer them to anyone else. Drafting stays possible.
+  const canSteerRun = useCanSteerRun();
+  const canSteer = canCancel && Boolean(conversationId) && !isAwaitingPrompt && canSteerRun;
   // Never mode posts to the team instead of steering, attachments included.
   const willSteer = canSteer && triggerMode !== ChatTriggerMode.Never;
 
@@ -420,8 +420,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     ? disabledPlaceholder(agentId)
     : isBoundAgentForbidden
     ? labels.executionIdentity.chatForbiddenPlaceholder
-    : isResponseLoading && isSharedConversation
-    ? runningSharedPlaceholder
+    : isResponseLoading && !canSteerRun
+    ? anotherUsersRunPlaceholder
     : enabledPlaceholder;
 
   const editorContainerStyles = css`
@@ -617,10 +617,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
-      // A send refused as busy is steered instead, unless it carries what a steer cannot or the
-      // conversation is shared.
-      const steerable =
-        steerRefusal === undefined && (attachments?.length ?? 0) === 0 && !isSharedConversation;
+      // A send refused as busy is steered instead, unless it carries what a steer cannot.
+      const steerable = steerRefusal === undefined && (attachments?.length ?? 0) === 0;
       submitMessage(content, {
         onRejected: steerIfBusy(content, { onUnsent: restoreUnsent, steerable }),
       });

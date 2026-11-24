@@ -560,6 +560,24 @@ export const answeredPromptRequestIds = (events: ReadonlyArray<ConversationEvent
   return ids;
 };
 
+/**
+ * The event whose arrival started the run writing under `executionId`, when both it and the run's
+ * `execution_started` event are stored. Its actor is the one who may steer the run.
+ */
+export const runTriggerEvent = (
+  events: ReadonlyArray<ConversationEvent>,
+  executionId: string
+): ConversationEvent | undefined => {
+  const started = events.find(
+    (event) =>
+      event.type === TimelineEventType.executionStarted && event.execution_id === executionId
+  );
+  if (!started?.trigger_event_id) {
+    return undefined;
+  }
+  return events.find((event) => event.id === started.trigger_event_id);
+};
+
 /** The last terminal event of any kind, by array position. */
 export const lastExecutionTerminal = (
   events: ReadonlyArray<ConversationEvent>

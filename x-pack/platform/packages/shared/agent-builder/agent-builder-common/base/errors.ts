@@ -422,7 +422,7 @@ export const createConversationNotSteerableError = ({
 }): AgentBuilderConversationNotSteerableError => {
   return new AgentBuilderError(
     AgentBuilderErrorCode.conversationNotSteerable,
-    `Conversation ${conversationId} cannot be steered`,
+    `Only the user whose message started the run of conversation ${conversationId} can steer it`,
     { ...meta, conversationId, statusCode: 409 }
   );
 };
