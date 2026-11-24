@@ -20,7 +20,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import type { SessionRequest, SessionRequestPhases } from '../../../../common/sessions';
+import type {
+  SessionRequest,
+  SessionRequestPhases,
+  SessionTimelineException,
+} from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import { formatBytes } from '../../../utils/format_bytes';
 import { formatElapsed } from '../utils/visit_activity';
@@ -92,6 +96,11 @@ const VIEW_TRACE_LABEL = i18n.translate(
 const YES = i18n.translate('xpack.digitalExperience.sessionDetail.request.yes', {
   defaultMessage: 'Yes',
 });
+
+const UNCAUGHT_ERROR_LABEL = i18n.translate(
+  'xpack.digitalExperience.sessionDetail.frustration.uncaughtErrorLabel',
+  { defaultMessage: 'Uncaught error' }
+);
 
 /** A bar of the request's phases, each as wide as its share of the duration. */
 function PhaseBar({ phases }: { phases: SessionRequestPhases }) {
@@ -267,46 +276,113 @@ export function RequestDetails({
           </EuiText>
         </>
       )}
-      {traceHref && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiButtonEmpty
-            size="xs"
-            iconType="chartWaterfall"
-            href={traceHref}
-            flush="left"
-            data-test-subj="digitalExperienceRequestTraceLink"
-            {...getEbtProps({
-              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_TRACE,
-              element: SESSIONS_EBT_ELEMENTS.TRACE_LINK,
-            })}
-          >
-            {VIEW_TRACE_LABEL}
-          </EuiButtonEmpty>
-        </>
-      )}
+      <TraceLink href={traceHref} data-test-subj="digitalExperienceRequestTraceLink" />
     </div>
   );
 }
 
-/** The stack trace of an error, or why there is none. */
-export function ErrorDetails({ stacktrace }: { stacktrace: string | null }) {
-  return stacktrace ? (
-    <EuiCodeBlock
-      data-test-subj="digitalExperienceErrorStacktrace"
-      fontSize="s"
-      paddingSize="s"
-      overflowHeight={240}
-      isCopyable
-    >
-      {stacktrace}
-    </EuiCodeBlock>
-  ) : (
-    <EuiText size="xs" color="subdued" data-test-subj="digitalExperienceErrorNoStacktrace">
-      {i18n.translate('xpack.digitalExperience.sessionDetail.error.noStacktrace', {
-        defaultMessage:
-          'The browser reported no stack trace for this error, as for a rejected promise with a plain value.',
-      })}
-    </EuiText>
+/** The link to the trace of a request or an event, when there is one to open. */
+function TraceLink({
+  href,
+  'data-test-subj': dataTestSubj,
+}: {
+  href: string | undefined;
+  'data-test-subj': string;
+}) {
+  if (!href) {
+    return null;
+  }
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiButtonEmpty
+        size="xs"
+        iconType="chartWaterfall"
+        href={href}
+        flush="left"
+        data-test-subj={dataTestSubj}
+        {...getEbtProps({
+          action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_TRACE,
+          element: SESSIONS_EBT_ELEMENTS.TRACE_LINK,
+        })}
+      >
+        {VIEW_TRACE_LABEL}
+      </EuiButtonEmpty>
+    </>
+  );
+}
+
+const Stacktrace = ({ stacktrace }: { stacktrace: string }) => (
+  <EuiCodeBlock
+    data-test-subj="digitalExperienceErrorStacktrace"
+    fontSize="s"
+    paddingSize="s"
+    overflowHeight={240}
+    isCopyable
+  >
+    {stacktrace}
+  </EuiCodeBlock>
+);
+
+/** The stack trace of an error, or why there is none, and its trace. */
+export function ErrorDetails({
+  stacktrace,
+  traceHref,
+}: {
+  stacktrace: string | null;
+  traceHref?: string;
+}) {
+  return (
+    <>
+      {stacktrace ? (
+        <Stacktrace stacktrace={stacktrace} />
+      ) : (
+        <EuiText size="xs" color="subdued" data-test-subj="digitalExperienceErrorNoStacktrace">
+          {i18n.translate('xpack.digitalExperience.sessionDetail.error.noStacktrace', {
+            defaultMessage:
+              'The browser reported no stack trace for this error, as for a rejected promise with a plain value.',
+          })}
+        </EuiText>
+      )}
+      <TraceLink href={traceHref} data-test-subj="digitalExperienceEventTraceLink" />
+    </>
+  );
+}
+
+/**
+ * The uncaught exception behind a frustration signal, as an error click names it, and its trace.
+ * The stack trace shows when the signal carries one; the exception's own event has it otherwise,
+ * so its absence here needs no note.
+ */
+export function FrustrationDetails({
+  exception,
+  traceHref,
+}: {
+  exception: SessionTimelineException | null;
+  traceHref?: string;
+}) {
+  return (
+    <div data-test-subj="digitalExperienceFrustrationDetails">
+      {exception && (
+        <EuiDescriptionList
+          type="column"
+          compressed
+          data-test-subj="digitalExperienceFrustrationException"
+          listItems={[
+            {
+              title: UNCAUGHT_ERROR_LABEL,
+              description: [exception.type, exception.message].filter(Boolean).join(': '),
+            },
+          ]}
+        />
+      )}
+      {exception?.stacktrace && (
+        <>
+          <EuiSpacer size="xs" />
+          <Stacktrace stacktrace={exception.stacktrace} />
+        </>
+      )}
+      <TraceLink href={traceHref} data-test-subj="digitalExperienceEventTraceLink" />
+    </div>
   );
 }

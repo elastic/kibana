@@ -22,7 +22,10 @@ export interface KiWriter {
 export interface StoredKi {
   id?: string;
   governance?: {
-    provenance?: { created_by?: KiWriter; updated_by?: KiWriter };
+    provenance?: {
+      created_by?: KiWriter;
+      updated_by?: KiWriter;
+    };
     lifecycle?: { status?: KiLifecycleStatus };
   };
   [key: string]: unknown;

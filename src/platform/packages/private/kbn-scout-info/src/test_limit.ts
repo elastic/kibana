@@ -16,7 +16,7 @@ import { z, ZodError } from '@kbn/zod/v4';
  * Attribute names must not contain '-': the limit tag format packs the selection
  * method and the attribute into a single '-'-separated pair.
  */
-export const SCOUT_TARGET_ATTRIBUTE_VALUES = ['fips'] as const;
+export const SCOUT_TARGET_ATTRIBUTE_VALUES = ['fips', 'upgradeAssistant'] as const;
 export const ScoutTargetAttributeSchema = z.enum(SCOUT_TARGET_ATTRIBUTE_VALUES);
 export type ScoutTargetAttribute = z.infer<typeof ScoutTargetAttributeSchema>;
 

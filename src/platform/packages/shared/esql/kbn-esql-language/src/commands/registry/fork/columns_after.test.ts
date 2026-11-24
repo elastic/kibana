@@ -57,9 +57,9 @@ describe('FORK', () => {
     );
 
     expect(result).toEqual<ESQLColumnData[]>([
-      { name: 'bar', type: 'integer', userDefined: true, location: { min: 0, max: 0 } },
       { name: 'field1', type: 'double', userDefined: true, location: { min: 0, max: 0 } },
       { name: 'field2', type: 'double', userDefined: false },
+      { name: 'bar', type: 'integer', userDefined: true, location: { min: 0, max: 0 } },
       { name: 'lolz', type: 'integer', userDefined: true, location: { min: 0, max: 0 } },
       {
         name: '_fork',
@@ -141,8 +141,8 @@ describe('FORK', () => {
 
     // foo from branch 1 is userDefined, bar from branch 2 is userDefined
     expect(result).toEqual<ESQLColumnData[]>([
-      { name: 'foo', type: 'integer', userDefined: true, location: { min: 0, max: 0 } },
       { name: 'bar', type: 'integer', userDefined: true, location: { min: 0, max: 0 } },
+      { name: 'foo', type: 'integer', userDefined: true, location: { min: 0, max: 0 } },
       {
         name: '_fork',
         type: 'keyword',

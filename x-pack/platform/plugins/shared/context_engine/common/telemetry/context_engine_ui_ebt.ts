@@ -27,10 +27,10 @@ const ebtElement = {
   aiIndexDetailPageTracesPanel: 'contextEngine.aiIndexDetailPage.tracesPanel',
   aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
   aiIndexDetailPageAutomationsPanel: 'contextEngine.aiIndexDetailPage.automationsPanel',
+  aiIndexDetailPageDreamingPanel: 'contextEngine.aiIndexDetailPage.dreamingPanel',
   aiIndexDetailPageSignalsPanel: 'contextEngine.aiIndexDetailPage.signalsPanel',
   aiIndexDetailPageListKiPanel: 'contextEngine.aiIndexDetailPage.listKiPanel',
   viewKiPage: 'contextEngine.viewKiPage',
-  aiIndexEditFlyoutSourcePicker: 'contextEngine.aiIndexEditFlyout.sourcePicker',
   aiIndexDetailFlyout: 'contextEngine.aiIndexDetailFlyout',
   aiIndexDetailFlyoutSignalGroup: 'contextEngine.aiIndexDetailFlyout.signalGroup',
   aiIndexDetailFlyoutSignalDetail: 'contextEngine.aiIndexDetailFlyout.signalDetail',
@@ -65,7 +65,6 @@ const ebtAction = {
     COPY_PROMPT: 'copy_prompt',
   },
   description: {
-    EDIT: 'edit_description',
     SAVE: 'save_description',
     CANCEL: 'cancel_description',
   },
@@ -81,10 +80,12 @@ const ebtAction = {
   sources: {
     SAVE: 'save_sources',
     CANCEL: 'cancel_sources',
-    ADD_ESQL: 'add_esql',
     CREATE_CONNECTOR: 'create_connector',
     TOGGLE_CONNECTOR: 'toggle_connector',
     REMOVE_SOURCE: 'remove_source',
+  },
+  dreaming: {
+    RUN_NOW: 'run_dreaming',
   },
   automations: {
     SUGGEST: 'suggest_automation',
@@ -107,7 +108,6 @@ const ebtAction = {
     INTERACT_FEEDBACK_AGENT: 'interact_feedback_agent',
   },
   listKi: {
-    DEST_LINK: 'open_destination',
     DISCOVER_LINK: 'open_ki_discover',
     FILTER_TYPE: 'filter_type',
     FILTER_STATUS: 'filter_status',

@@ -40,7 +40,6 @@ test.describe('Stack Management — ingest, security, and stack sections', () =>
     }
   );
 
-  // Pre-migration tag 'skipFIPS'
   test(
     'manage_security sees only the security section with all five links',
     { tag: tags.stateful.classic },
