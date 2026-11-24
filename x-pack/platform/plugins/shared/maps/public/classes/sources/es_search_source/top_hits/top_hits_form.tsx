@@ -20,7 +20,7 @@ import type { OnSourceChangeArgs } from '../../source';
 import { GroupByButtonGroup } from '../../es_geo_line_source/geo_line_form/group_by_button_group';
 import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 
-type TopHitsChange = OnSourceChangeArgs<
+type TopHitsSourceChangeArgs = OnSourceChangeArgs<
   Pick<
     ESSearchSourceDescriptor,
     'topHitsGroupByTimeseries' | 'topHitsSplitField' | 'topHitsSize' | 'sortField' | 'sortOrder'
@@ -31,7 +31,7 @@ interface Props {
   indexPatternId: string;
   isColumnCompressed?: boolean;
   isTimeseries: boolean;
-  onChange: (args: TopHitsChange) => void;
+  onChange: (args: TopHitsSourceChangeArgs) => void;
   sortField: string;
   sortFields: DataViewField[];
   sortOrder: SortDirection;
