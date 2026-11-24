@@ -119,7 +119,7 @@ brew install gh
 
 ### Authenticate with SSO
 
-If `GH_TOKEN` is set in your shell, `gh` uses it instead of the browser login, so unset it first (`unset GH_TOKEN`).
+If your shell profile sets `GH_TOKEN` (for example in `~/.zshrc`), `gh` uses it instead of the browser login, both in your terminal and in Cursor's agent. Remove it from your profile, then open a new terminal and restart Cursor before you log in.
 
 Elastic does not allow HTTPS authentication. When running `gh auth login`, select **Login with a web browser** (not HTTPS):
 ```bash
@@ -169,7 +169,7 @@ x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-gen
 │   ├── example-test-plan-backend.md                # Sibling example for a backend / parser feature without UI and without a linked PR (synthetic issue numbers)
 │   ├── gathering-context.md                        # Step 1 in detail: gh CLI commands, URL handling, images, Figma (metadata-first flow + session budget), sub-issues, PRs, test catalog, AC origin tagging, orphan-PR handling
 │   ├── issue-clarity-assessment.md                 # Rubric, 5 dimensions, grading anchors, per-issue + combined readability scoring, Coverage Ratio (with the no-PR boundary case), stop-and-ask gate, two worked examples
-│   ├── mode-generate.md                            # Generate / regenerate flow (run end-to-end or fill gaps when a draft exists)
+│   ├── mode-generate.md                            # What `generate` does when the issue already has a published plan: check and update, generate from scratch, or cancel
 │   ├── mode-update.md                              # Incremental update flow with PR re-read, Issue Clarity Assessment re-evaluation, and full-document coherence review
 │   ├── optional-scenarios.md                       # Optional sections (RBAC, upgrade, CCS, multi-space, multi-tenant), Gherkin rules, priorities, critical-workflows pointer
 │   ├── output-formats.md                           # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout, per-scenario Execution status block, token usage and cost markers
@@ -328,7 +328,7 @@ Every scenario ends with three checkboxes: `✅ Pass`, `❌ Fail` and `🚫 Bloc
 
 `update`, and the *Check and update if needed* option that `generate` offers when a plan already exists, match scenarios by their exact title within the same feature area. A scenario whose title and steps did not change keeps its ticks. In the steps, whitespace, capitalization and punctuation edits do not count as changes. If the steps change, or the scenario moves to another feature area, its boxes are cleared and it gets a `_Scenario updated on YYYY-MM-DD, please re-execute_` line above them. Any title edit, even punctuation only, makes it a new scenario: its boxes start empty, with no note.
 
-`update` copies the ticks from the comment as it was when the draft was created, and `publish` replaces the whole comment. If someone ticks a box after you run `update` and before you publish, the published plan drops that tick, but you can still find it in the comment's edit history. Before publishing, check the published comment for newer ticks and copy them into the draft. Choosing *Generate from scratch* on an issue that already has a plan clears all the ticks when you publish; only the update flow keeps them.
+The update flow copies the ticks from the comment as it was when the draft was created, and `publish` replaces the whole comment. If someone ticks a box after the draft is created and before you publish, the published plan drops that tick, but you can still find it in the comment's edit history. Before publishing, check the published comment for newer ticks and copy them into the draft. Choosing *Generate from scratch* on an issue that already has a plan clears all the ticks when you publish; only the update flow keeps them.
 
 ### Scenario priorities and your team's critical workflows
 
@@ -344,7 +344,7 @@ When the owning team has a critical-workflows map, the agent uses it to set each
 
 ### "403 SAML enforcement" error when reading issues
 
-Your GitHub token is not authorized for the Elastic organization. If you logged in to `gh` through the browser, sign in to Elastic's SSO at [github.com/orgs/elastic/sso](https://github.com/orgs/elastic/sso), then run `gh auth login` again and authorize the `elastic` org when prompted (Step 4). If you use a personal access token (for the GitHub MCP, or for `gh` through `GH_TOKEN`), go to [github.com/settings/tokens](https://github.com/settings/tokens), find your token, click **"Configure SSO"**, and authorize it for the `elastic` org (Step 1).
+Your GitHub token is not authorized for the Elastic organization. If you logged in to `gh` through the browser, sign in to Elastic's SSO at [github.com/orgs/elastic/sso](https://github.com/orgs/elastic/sso), then run `gh auth login` again and authorize the `elastic` org when prompted (Step 4). If you use a personal access token for the GitHub MCP, go to [github.com/settings/tokens](https://github.com/settings/tokens), find your token, click **"Configure SSO"**, and authorize it for the `elastic` org (Step 1). If `gh` picks up a token from `GH_TOKEN`, remove it as described in Step 4 and log in through the browser.
 
 ### GitHub MCP shows as disconnected in Cursor
 
@@ -394,7 +394,7 @@ When publishing, the agent runs `scripts/publish_test_plan.sh`. If the script fa
 | 69 | `gh` CLI is not installed | Run `brew install gh` (Step 4). |
 | 70 | Unexpected response from GitHub API (could not resolve comment id, or API returned no URL) | Usually a transient API issue. Re-run the publish command. If it persists, check `gh api /repos/<owner>/<repo>/issues/<n>/comments` manually to confirm the comment is reachable. |
 | 77 | `gh` CLI is not authenticated | Run `gh auth login` (Step 4). |
-| 64 | Argument or usage error, or the repository could not be detected from the current folder | Run Cursor from the Kibana repository root, or name the issue by its full URL so the agent passes `--repo`, then re-run the publish command. If it persists, open an issue. |
+| 64 | Argument or usage error, or the repository could not be detected from the current folder | Open the Kibana repository root in Cursor, or name the issue by its full URL so the agent passes `--repo`, then re-run the publish command. If it persists, open an issue. |
 
 ### Cursor hangs or stops responding during generation
 
