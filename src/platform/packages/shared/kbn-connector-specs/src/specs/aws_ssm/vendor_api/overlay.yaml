@@ -1,0 +1,23 @@
+overlay: 1.0.0
+info:
+  title: AWS Systems Manager API corrections
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.SendCommandRequestContent.properties.DocumentName
+    description: &documentArn >-
+      The model caps DocumentARN, which is either a document name or ARN, at 128 characters, too
+      short for a document ARN, but SSM allows 200. In live testing, GetDocument and
+      StartAutomationExecution with a 201-character ARN failed with ValidationException "Member must
+      satisfy regular expression pattern: ^[a-zA-Z0-9_\-.:/]{3,200}$", while a 200-character one got
+      past validation. SendCommand checks IAM before validating, so it could not be tested the same
+      way; it takes the same DocumentARN shape.
+    update:
+      pattern: ^[a-zA-Z0-9_\-.:/]{3,200}$
+  - target: $.components.schemas.StartAutomationExecutionRequestContent.properties.DocumentName
+    description: *documentArn
+    update:
+      pattern: ^[a-zA-Z0-9_\-.:/]{3,200}$
+  - target: $.components.schemas.GetDocumentRequestContent.properties.Name
+    description: *documentArn
+    update:
+      pattern: ^[a-zA-Z0-9_\-.:/]{3,200}$

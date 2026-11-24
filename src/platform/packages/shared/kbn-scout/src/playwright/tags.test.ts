@@ -131,11 +131,15 @@ describe('tags', () => {
     it('exposes limit tags in the @limit/<selection-method>-<target-attr> format', () => {
       expect(tags.limit.only.fips).toBe('@limit/only-fips');
       expect(tags.limit.except.fips).toBe('@limit/except-fips');
+      expect(tags.limit.only.upgradeAssistant).toBe('@limit/only-upgradeAssistant');
+      expect(tags.limit.except.upgradeAssistant).toBe('@limit/except-upgradeAssistant');
     });
 
     it('never overlaps with test target tags', () => {
       expect(tags.deploymentAgnostic).not.toContain(tags.limit.only.fips);
       expect(tags.deploymentAgnostic).not.toContain(tags.limit.except.fips);
+      expect(tags.deploymentAgnostic).not.toContain(tags.limit.only.upgradeAssistant);
+      expect(tags.deploymentAgnostic).not.toContain(tags.limit.except.upgradeAssistant);
     });
   });
 });
@@ -155,6 +159,14 @@ describe('getPlaywrightLimitGrepInvert', () => {
     expect(pattern.test('a test @local-stateful-classic @limit/except-fips')).toBe(true);
     expect(pattern.test('a test @local-stateful-classic @limit/only-fips')).toBe(false);
     expect(pattern.test('a test @local-stateful-classic')).toBe(false);
+  });
+
+  it('excludes only-upgradeAssistant tests unless upgradeAssistant is declared', () => {
+    const tagged = 'a test @local-stateful-classic @limit/only-upgradeAssistant';
+
+    expect(getPlaywrightLimitGrepInvert([])!.test(tagged)).toBe(true);
+    expect(getPlaywrightLimitGrepInvert(['fips'])!.test(tagged)).toBe(true);
+    expect(getPlaywrightLimitGrepInvert(['upgradeAssistant'])!.test(tagged)).toBe(false);
   });
 
   it('does not match tags that merely extend an unsatisfied tag', () => {

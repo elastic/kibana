@@ -54,20 +54,39 @@ describe('getSessionViewLazy', () => {
     closeDetails: jest.fn(),
   };
 
-  it('renders the cross-project unsupported prompt when the session lives in a linked project', () => {
+  it('renders the cross-project unsupported prompt for a linked-project index when CPS is enabled', () => {
     const { render } = createAppRootMockRenderer();
     const { container, unmount } = render(
-      getSessionViewLazy({ ...baseProps, index: `${TEST_CLUSTER}:${ENDPOINT_EVENT_INDEX}` })
+      getSessionViewLazy({
+        ...baseProps,
+        index: `${TEST_CLUSTER}:${ENDPOINT_EVENT_INDEX}`,
+        isCpsEnabled: true,
+      })
     );
 
     expect(container.querySelector(CROSS_PROJECT_TEST_SUBJ)).not.toBeNull();
     unmount();
   });
 
+  it('does not render the unsupported prompt for a CCS remote-cluster index when CPS is disabled', async () => {
+    const { render } = createAppRootMockRenderer();
+    const { container, unmount } = render(
+      getSessionViewLazy({
+        ...baseProps,
+        index: `${TEST_CLUSTER}:${ENDPOINT_EVENT_INDEX}`,
+        isCpsEnabled: false,
+      })
+    );
+
+    expect(container.querySelector(CROSS_PROJECT_TEST_SUBJ)).toBeNull();
+    await act(async () => {});
+    unmount();
+  });
+
   it('does not render the unsupported prompt for a local (origin) session index', async () => {
     const { render } = createAppRootMockRenderer();
     const { container, unmount } = render(
-      getSessionViewLazy({ ...baseProps, index: ENDPOINT_EVENT_INDEX })
+      getSessionViewLazy({ ...baseProps, index: ENDPOINT_EVENT_INDEX, isCpsEnabled: true })
     );
 
     expect(container.querySelector(CROSS_PROJECT_TEST_SUBJ)).toBeNull();

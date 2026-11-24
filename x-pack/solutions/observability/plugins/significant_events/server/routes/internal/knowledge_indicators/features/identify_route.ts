@@ -24,6 +24,7 @@ import {
   MAX_INFERENCE_DOCUMENTS_BYTES,
   MAX_INFERENCE_DOCUMENT_BYTES,
   MAX_INFERENCE_DOCUMENT_FIELDS,
+  MAX_ENTITY_FILTERS,
   MAX_INFERENCE_FIELD_NAME_LENGTH,
   prepareInferredSampling,
 } from '../../../../lib/significant_events/features';
@@ -36,6 +37,19 @@ import { installFeatureIdentificationAgent } from '../../../../agent_builder/age
 import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
 import { trackTelemetryBestEffort } from '../../../../lib/telemetry/track_telemetry_best_effort';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
+import {
+  buildMetricsSourceQuery,
+  getMetricsDatasets,
+  identifyMetricsEntities,
+} from '../../../../lib/significant_events/metrics/identify_metrics_entities';
+import {
+  buildMeasurementDefinitions,
+  getApplicableSignalTemplates,
+  isMetricsTypeKnowledgeIndicator,
+} from '../../../../lib/significant_events/metrics/signals/build_measurement_definitions';
+import { checkSignalFields } from '../../../../lib/significant_events/metrics/signals/check_signal_fields';
+import { runDefinitionPreviews } from '../../../../lib/significant_events/metrics/signals/run_definition_previews';
+import { SIGNAL_TEMPLATES } from '../../../../lib/significant_events/metrics/signals/signal_templates';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -118,7 +132,7 @@ const prepareInferredSamplingRoute = createServerRoute({
         sampleSize: z.number().int().min(1).max(100),
         entityFilteredRatio: z.number().min(0).max(1),
         diverseRatio: z.number().min(0).max(1),
-        maxEntityFilters: z.number().int().min(1).max(50),
+        maxEntityFilters: z.number().int().min(1).max(MAX_ENTITY_FILTERS),
         samplingTimeoutMs: z.number().int().min(1_000).max(240_000),
       }),
     })
@@ -421,6 +435,119 @@ const identifyComputedFeaturesRoute = createServerRoute({
   },
 });
 
+const identifyMetricsEntitiesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/metrics_entities',
+  options: {
+    access: 'internal',
+    summary: 'Extract and persist Kubernetes entities from a metrics source',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+    })
+  ),
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    const { sourceId } = params.path;
+    const routeLogger = logger.get('features_identification', 'metrics_entities', sourceId);
+    const { source } = await sourcesClient.get(sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
+
+    return identifyMetricsEntities({
+      esClient: streamDataEsClient,
+      esql: source.esql,
+      sourceId: source.id,
+      kiClient,
+      logger: routeLogger,
+      signal: getRequestAbortSignal(request),
+    });
+  },
+});
+
+const getMetricsDefinitionsRoute = createServerRoute({
+  endpoint: 'GET /internal/nightshift/sources/{sourceId}/metrics/definitions',
+  options: {
+    access: 'internal',
+    summary: 'Build measurement definitions for a metrics source',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      query: z.object({
+        preview: z
+          .enum(['true', 'false'])
+          .optional()
+          .transform((value) => value === 'true'),
+      }),
+    })
+  ),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await sourcesClient.assertReadable(params.path.sourceId);
+
+    const { source } = await sourcesClient.get(params.path.sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const requestSignal = getRequestAbortSignal(request);
+    const [{ hits: features }, datasets] = await Promise.all([
+      kiClient.getFeatures(source.id),
+      getMetricsDatasets({
+        esClient: streamDataEsClient,
+        sourceQuery: buildMetricsSourceQuery(source.esql),
+        signal: requestSignal,
+      }),
+    ]);
+    const typeKIs = features.filter(isMetricsTypeKnowledgeIndicator);
+    const templates = getApplicableSignalTemplates(typeKIs, SIGNAL_TEMPLATES);
+    const fieldPresence = await checkSignalFields({
+      esClient: streamDataEsClient,
+      esql: source.esql,
+      datasets,
+      templates,
+      signal: requestSignal,
+    });
+
+    const result = buildMeasurementDefinitions({
+      esql: source.esql,
+      typeKIs,
+      templates,
+      fieldPresence,
+    });
+    if (!params.query.preview) {
+      return { definitions: result.definitions, skipped: result.skipped };
+    }
+
+    return {
+      definitions: await runDefinitionPreviews({
+        esClient: streamDataEsClient,
+        definitions: result.definitions,
+        previewPlans: result.previewPlans,
+        signal: requestSignal,
+      }),
+      skipped: result.skipped,
+    };
+  },
+});
+
 const shouldIdentifyRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{sourceId}/features/_should_identify',
   options: {
@@ -465,5 +592,7 @@ export const internalIdentifyKIFeaturesRoutes = {
   ...prepareInferredSamplingRoute,
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
+  ...identifyMetricsEntitiesRoute,
+  ...getMetricsDefinitionsRoute,
   ...shouldIdentifyRoute,
 };

@@ -69,14 +69,16 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     });
   });
 
-  it('names the instance after its AI index and keys its concurrency to it', () => {
+  it('names the instance after its AI index and queues on its memory concurrency key', () => {
     const workflow = render();
 
     expect(workflow.name).toBe('Dreaming: support-cases');
     expect(workflow.settings.concurrency).toEqual({
-      key: 'context-engine-dreaming-support-cases-0123456789abcdef',
-      strategy: 'drop',
+      key: 'context-engine-memory-support-cases-0123456789abcdef',
+      strategy: 'queue',
       max: 1,
+      'queue-size': 10,
+      'queue-ttl': '24h',
     });
   });
 
@@ -293,6 +295,12 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       expect(rendered).not.toContain('"Gone"');
     });
 
+    it('tells the model to leave a person-edited item as it is', () => {
+      expect(prompt()).toContain(
+        'An EXISTING item with attributes["memory.edited_by"] was edited by a person, and its text cannot change. When a memory changes or contradicts what it says, write what the memory says as a new item, and do not return the edited item\'s ref for that memory.'
+      );
+    });
+
     it('tells the model not to create a kind with no types configured', () => {
       expect(prompt({ entityTypes: [] })).toContain(
         'ENTITY TYPES:\nnone: do not create entities.\n\nINSTRUCTIONS:'
@@ -383,8 +391,8 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
 
     expect(readExisting?._source).toEqual(expect.arrayContaining(['description', 'content']));
     expect(readExisting?.query?.bool?.should).toEqual([
-      { prefix: { type: 'fact.' } },
-      { prefix: { type: 'entity.' } },
+      { prefix: { type: { value: 'fact.' } } },
+      { prefix: { type: { value: 'entity.' } } },
     ]);
   });
 
@@ -459,7 +467,9 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
         name: 'latest',
         size: 1,
         sort: [{ updated_at: 'desc' }],
-        _source: expect.arrayContaining(['governance.lifecycle.status', 'permissions']),
+        _source: {
+          includes: expect.arrayContaining(['governance.lifecycle.status', 'permissions']),
+        },
         docvalue_fields: [{ field: 'expires_at', format: 'strict_date_time' }],
       }),
     });
