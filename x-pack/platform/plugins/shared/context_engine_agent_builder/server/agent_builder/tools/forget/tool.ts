@@ -29,11 +29,12 @@ import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 import { getCallerProfileId } from '../memory_caller';
+import { nonBlankStringSchema } from '../non_blank_string_schema';
 
 const forgetSchema = lazySchema(() =>
   z.object({
     ids: z
-      .array(z.string().min(1).max(MAX_MEMORY_ID_LENGTH))
+      .array(nonBlankStringSchema(MAX_MEMORY_ID_LENGTH))
       .min(1)
       .max(MAX_SESSION_MEMORY_FORGET_IDS)
       .describe('The ids of the memories to forget, as returned by the remember tool.'),

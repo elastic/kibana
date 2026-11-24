@@ -27,11 +27,9 @@ describe('forget tool', () => {
   const forget = jest.fn();
   const auditLog = jest.fn();
   const getCurrentProfileId = jest.fn();
-  const memoryEnabled = jest.fn();
 
   const createTool = () => {
     const coreStart = coreMock.createStart();
-    coreStart.uiSettings.globalAsScopedToClient = jest.fn().mockReturnValue({ get: memoryEnabled });
     coreStart.userProfile.getCurrentProfileId = getCurrentProfileId;
     coreStart.security.audit.asScoped = jest.fn().mockReturnValue({ log: auditLog });
     return createForgetTool({
@@ -66,7 +64,6 @@ describe('forget tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     assertContextEngineWriteAccessMock.mockResolvedValue();
-    memoryEnabled.mockResolvedValue(true);
     getCurrentProfileId.mockResolvedValue('profile-1');
   });
 
@@ -81,6 +78,7 @@ describe('forget tool', () => {
     expect(tool.schema.safeParse({ ids: ['a'] }).success).toBe(true);
     expect(tool.schema.safeParse({ ids: [] }).success).toBe(false);
     expect(tool.schema.safeParse({ ids: [''] }).success).toBe(false);
+    expect(tool.schema.safeParse({ ids: ['a', ' \t'] }).success).toBe(false);
     expect(
       tool.schema.safeParse({ ids: Array.from({ length: 101 }, (_, i) => `id-${i}`) }).success
     ).toBe(false);
@@ -99,20 +97,6 @@ describe('forget tool', () => {
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
     expect(forget).toHaveBeenCalledWith({ space: 'space-1', userId: 'profile-1' }, ['a', 'b']);
     expect(result).toEqual({ results: [{ type: ToolResultType.other, data: { results } }] });
-  });
-
-  it('forgets even when memory is turned off', async () => {
-    memoryEnabled.mockResolvedValue(false);
-    forget.mockResolvedValue([{ id: 'a', outcome: 'forgotten' }]);
-
-    const { result } = await run(['a']);
-
-    expect(forget).toHaveBeenCalled();
-    expect(result).toEqual({
-      results: [
-        { type: ToolResultType.other, data: { results: [{ id: 'a', outcome: 'forgotten' }] } },
-      ],
-    });
   });
 
   it('audits one event per result with the outcome mapped to success or failure', async () => {
@@ -161,7 +145,10 @@ describe('forget tool', () => {
     );
     expect(forget).not.toHaveBeenCalled();
     expect(auditLog).toHaveBeenCalledTimes(2);
-    auditLog.mock.calls.forEach(([event]) => expect(event.event.outcome).toBe('failure'));
+    auditLog.mock.calls.forEach(([event]) => {
+      expect(event.event.outcome).toBe('failure');
+      expect(event.error.code).toBe('Forbidden');
+    });
   });
 
   it('returns an error and audits a failure for every id when the service throws', async () => {

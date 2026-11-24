@@ -35,30 +35,23 @@ import {
   isContextEngineMemoryEnabled,
 } from '../ai_index_tools_availability';
 import { getCallerProfileId } from '../memory_caller';
+import { nonBlankStringSchema } from '../non_blank_string_schema';
 
 const rememberSchema = lazySchema(() =>
   z.object({
-    id: z
-      .string()
-      .min(1)
-      .max(MAX_MEMORY_ID_LENGTH)
+    id: nonBlankStringSchema(MAX_MEMORY_ID_LENGTH)
       .optional()
       .describe(
         'The id of an existing memory to revise. The revision replaces that memory in full. Omit when creating a new memory.'
       ),
-    sessionId: z
-      .string()
-      .min(1)
-      .max(MAX_MEMORY_ID_LENGTH)
+    sessionId: nonBlankStringSchema(MAX_MEMORY_ID_LENGTH)
       .optional()
       .describe(
         'For MCP calls only: omit unless continuing a memory session using the sessionId returned by an earlier remember call. Do not invent a value. Agent Builder calls ignore this input and use the current conversation ID.'
       ),
-    content: z
-      .string()
-      .min(1)
-      .max(MAX_KI_CONTENT_LENGTH)
-      .describe('Enough context to use the memory without re-deriving it'),
+    content: nonBlankStringSchema(MAX_KI_CONTENT_LENGTH).describe(
+      'Enough context to use the memory without re-deriving it'
+    ),
     aiIndexIds: z
       .array(aiIndexIdFieldSchema)
       .max(MAX_MEMORY_AI_INDEX_IDS)
@@ -68,7 +61,7 @@ const rememberSchema = lazySchema(() =>
       ),
     attributes: z
       .record(
-        z.string().min(1).max(MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH),
+        nonBlankStringSchema(MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH),
         z.string().max(MAX_SESSION_MEMORY_ATTRIBUTE_VALUE_LENGTH)
       )
       .refine((attributes) => Object.keys(attributes).length <= MAX_SESSION_MEMORY_ATTRIBUTES, {
@@ -153,6 +146,7 @@ export const createRememberTool = ({
         throw new Error('Context Engine memory is disabled.');
       }
 
+      let service: SessionMemoryService;
       try {
         userId = await getCallerProfileId({ coreStart, request });
         await assertAiIndicesWritable({
@@ -161,6 +155,7 @@ export const createRememberTool = ({
           spaceId,
           aiIndexIds,
         });
+        service = await getSessionMemoryService();
       } catch (error) {
         audit({ memoryId: params.id, error: toError(error) });
         throw error;
@@ -168,7 +163,6 @@ export const createRememberTool = ({
 
       const scope = { space: spaceId, userId };
       const memoryId = params.id ?? generateId();
-      const service = await getSessionMemoryService();
       const writeInBackground = async () => {
         try {
           await service.remember(scope, {

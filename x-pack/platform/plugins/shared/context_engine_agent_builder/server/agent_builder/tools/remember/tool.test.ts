@@ -31,6 +31,7 @@ const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('remember tool', () => {
   const remember = jest.fn();
+  const getSessionMemoryService = jest.fn();
   const auditLog = jest.fn();
   const getCurrentProfileId = jest.fn();
   const memoryEnabled = jest.fn();
@@ -43,7 +44,7 @@ describe('remember tool', () => {
     coreStart.security.audit.asScoped = jest.fn().mockReturnValue({ log: auditLog });
     return createRememberTool({
       getAiIndexService: async () => ({} as AiIndexService),
-      getSessionMemoryService: async () => ({ remember } as unknown as SessionMemoryService),
+      getSessionMemoryService,
       getCoreStart: async () => coreStart,
       getSecurityStart: async () => undefined,
       generateId: () => 'generated-memory-id',
@@ -103,6 +104,7 @@ describe('remember tool', () => {
     memoryEnabled.mockResolvedValue(true);
     getCurrentProfileId.mockResolvedValue('profile-1');
     remember.mockResolvedValue({ id: 'generated-memory-id' });
+    getSessionMemoryService.mockResolvedValue({ remember } as unknown as SessionMemoryService);
   });
 
   it('accepts only the store fields and bounds them', () => {
@@ -121,6 +123,10 @@ describe('remember tool', () => {
     expect(schema.safeParse({ content: '' }).success).toBe(false);
     expect(schema.safeParse({ ...params, id: '' }).success).toBe(false);
     expect(schema.safeParse({ ...params, attributes: { '': 'x' } }).success).toBe(false);
+    expect(schema.safeParse({ content: ' \n\t' }).success).toBe(false);
+    expect(schema.safeParse({ ...params, id: '  ' }).success).toBe(false);
+    expect(schema.safeParse({ ...params, sessionId: '  ' }).success).toBe(false);
+    expect(schema.safeParse({ ...params, attributes: { '  ': 'x' } }).success).toBe(false);
     expect(schema.safeParse({ ...params, attributes: { a: 1 } }).success).toBe(false);
     expect(
       schema.safeParse({
@@ -290,7 +296,25 @@ describe('remember tool', () => {
     expect(remember).not.toHaveBeenCalled();
     expect(auditLog).toHaveBeenCalledTimes(1);
     expect(auditLog).toHaveBeenCalledWith(
-      expect.objectContaining({ event: expect.objectContaining({ outcome: 'failure' }) })
+      expect.objectContaining({
+        event: expect.objectContaining({ outcome: 'failure' }),
+        error: expect.objectContaining({ code: 'Forbidden' }),
+      })
+    );
+  });
+
+  it('returns an error and audits a failure when the session memory service is unavailable', async () => {
+    getSessionMemoryService.mockRejectedValue(new Error('index init failed'));
+
+    const { result } = await run();
+
+    expect(result).toEqual(errorResult('Failed to store memory: index init failed'));
+    expect(auditLog).toHaveBeenCalledTimes(1);
+    expect(auditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'memory_remember', outcome: 'failure' }),
+        error: expect.objectContaining({ message: 'index init failed' }),
+      })
     );
   });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { forbiddenError } from '@kbn/context-engine-plugin/server/routes/memory_user';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 
 export const NO_USER_PROFILE_MESSAGE =
@@ -19,7 +20,7 @@ export const getCallerProfileId = async ({
 }): Promise<string> => {
   const profileId = await coreStart.userProfile.getCurrentProfileId({ request });
   if (profileId === null) {
-    throw new Error(NO_USER_PROFILE_MESSAGE);
+    throw forbiddenError(NO_USER_PROFILE_MESSAGE);
   }
   return profileId;
 };
