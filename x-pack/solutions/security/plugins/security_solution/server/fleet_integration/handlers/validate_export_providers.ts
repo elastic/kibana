@@ -66,6 +66,8 @@ const getFieldErrorMessage = (
       return `${field} must be unique within the policy`;
     case 'not_https':
       return `${field} must use https`;
+    case 'not_azure_blob_host':
+      return `${field} must be an Azure Blob Storage endpoint (*.blob.core.windows.net, *.blob.core.usgovcloudapi.net or *.blob.core.chinacloudapi.cn)`;
     case 'unsupported':
       return `${field} must be one of: ${EXPORT_PROVIDER_TYPES.join(', ')}`;
   }
@@ -113,6 +115,60 @@ const getProviderErrors = (
   }
 
   return errors;
+};
+
+/** A policy root key such as `windows.response_actions` or `mac.response_actions.export_providers` */
+const DOTTED_OS_RESPONSE_ACTIONS_KEY_PATTERN = /^(?:windows|mac|linux)\.response_actions(?:\.|$)/;
+
+const findDottedResponseActionsKey = (policy: PolicyConfig): string | undefined => {
+  const rootKey = Object.keys(policy).find((key) =>
+    DOTTED_OS_RESPONSE_ACTIONS_KEY_PATTERN.test(key)
+  );
+
+  if (rootKey !== undefined) {
+    return rootKey;
+  }
+
+  for (const os of POLICY_OPERATING_SYSTEMS) {
+    const osConfig: unknown = policy[os];
+
+    if (isPlainObject(osConfig)) {
+      const osKey = Object.keys(osConfig as Record<string, unknown>).find((key) =>
+        key.startsWith('response_actions.')
+      );
+
+      if (osKey !== undefined) {
+        return osKey;
+      }
+
+      // e.g. `export_providers.0.service_url`, which would override a validated provider
+      const responseActions = (osConfig as Record<string, unknown>).response_actions;
+      const responseActionsKey = isPlainObject(responseActions)
+        ? Object.keys(responseActions as Record<string, unknown>).find((key) => key.includes('.'))
+        : undefined;
+
+      if (responseActionsKey !== undefined) {
+        return responseActionsKey;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+/**
+ * Rejects (400) a policy that sets `response_actions` through a dotted key. Elastic Agent expands
+ * dotted keys into nested ones, so such a key would reach Endpoint without going through
+ * `validateExportProviders()`.
+ */
+export const validateNoDottedResponseActionsKeys = (policy: PolicyConfig): void => {
+  const dottedKey = findDottedResponseActionsKey(policy);
+
+  if (dottedKey !== undefined) {
+    throw new EndpointIntegrationFleetError(
+      `response_actions can't be set with a dotted key (${quoteForMessage(dottedKey)})`
+    );
+  }
 };
 
 /** Rejects (400) a policy whose export providers are invalid. */
