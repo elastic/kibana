@@ -27,6 +27,7 @@ import {
   catchAndReturnBoomErrors,
   logWarnOnExternalRequest,
   throwIfAnyTypeNotVisibleByAPI,
+  stripAcl,
 } from './utils';
 
 interface RouteDependencies {
@@ -109,7 +110,7 @@ For transferring or backing up saved objects, prefer the import and export APIs 
         throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       }
       const savedObject = await savedObjects.client.bulkUpdate(request.body);
-      return response.ok({ body: savedObject });
+      return response.ok({ body: stripAcl(savedObject) });
     })
   );
 };

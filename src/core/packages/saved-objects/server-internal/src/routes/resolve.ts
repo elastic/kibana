@@ -18,7 +18,7 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { throwIfTypeNotVisibleByAPI, logWarnOnExternalRequest } from './utils';
+import { throwIfTypeNotVisibleByAPI, logWarnOnExternalRequest, stripAcl } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -85,7 +85,7 @@ Under certain circumstances, when Kibana is upgraded, saved object migrations ma
       const result = await savedObjects.client.resolve(type, id, {
         migrationVersionCompatibility: 'compatible',
       });
-      return response.ok({ body: result });
+      return response.ok({ body: stripAcl(result) });
     })
   );
 };

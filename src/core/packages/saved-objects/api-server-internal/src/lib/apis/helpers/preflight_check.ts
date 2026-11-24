@@ -87,7 +87,7 @@ export class PreflightCheckHelper {
       .map(({ value: { type, id, fields } }) => ({
         _id: this.serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces', 'accessControl', ...(fields ?? [])],
+        _source: ['type', 'namespaces', 'accessControl', 'acl', ...(fields ?? [])],
       }));
 
     const bulkGetMultiNamespaceDocsResponse = bulkGetMultiNamespaceDocs.length

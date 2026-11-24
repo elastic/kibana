@@ -18,6 +18,7 @@ project:
   sourceRoot: src/core/packages/saved-objects/migration-server-internal
 dependsOn:
   - '@kbn/logging'
+  - '@kbn/ols'
   - '@kbn/std'
   - '@kbn/core-doc-links-server'
   - '@kbn/core-elasticsearch-server'
