@@ -42,15 +42,34 @@ describe('mergeSamples', () => {
     });
   });
 
-  it('keeps each repeated value once', () => {
-    expect(mergeSamples([{ status: 'ok' }, { status: 'ok' }])).toEqual({ status: 'ok' });
+  it('keeps repeated values by default', () => {
+    expect(mergeSamples([{ status: 'ok' }, { status: 'ok' }])).toEqual({ status: ['ok', 'ok'] });
+    expect(mergeSamples([{ tags: ['web', 'web'] }, { tags: 'web' }])).toEqual({
+      tags: ['web', 'web', 'web'],
+    });
+    expect(mergeObjectElements([{ ports: [443, 443] }])).toEqual({ ports: [443, 443] });
+  });
+
+  it('keeps each repeated plain value once when distinct', () => {
+    const distinct = { distinct: true };
+    expect(mergeSamples([{ status: 'ok' }, { status: 'ok' }], distinct)).toEqual({ status: 'ok' });
     expect(
-      mergeSamples([{ f: 'a' }, { f: 1 }, { f: 'a' }, { f: '1' }, { f: ['b', 1, 'b'] }])
+      mergeSamples([{ f: 'a' }, { f: 1 }, { f: 'a' }, { f: '1' }, { f: ['b', 1, 'b'] }], distinct)
     ).toEqual({ f: ['a', 1, '1', 'b'] });
-    expect(mergeSamples([{ tags: ['web', 'web'] }, { tags: 'web' }])).toEqual({ tags: ['web'] });
-    expect(mergeObjectElements([{ score: 1 }, { score: 1 }, { score: 0.5 }])).toEqual({
+    expect(mergeSamples([{ tags: ['web', 'web'] }, { tags: 'web' }], distinct)).toEqual({
+      tags: ['web'],
+    });
+    expect(mergeObjectElements([{ score: 1 }, { score: 1 }, { score: 0.5 }], distinct)).toEqual({
       score: [1, 0.5],
     });
+  });
+
+  it('never deduplicates objects or nested arrays', () => {
+    const shared = { a: 1 };
+    const nested = [1];
+    expect(
+      mergeSamples([{ x: [shared, nested] }, { x: [shared, nested] }], { distinct: true })
+    ).toEqual({ x: [shared, nested, shared, nested] });
   });
 
   it('keeps whole and decimal numbers together in an array', () => {

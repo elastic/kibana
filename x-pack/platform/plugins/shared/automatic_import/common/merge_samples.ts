@@ -19,17 +19,28 @@ const isEmptyValue = (value: unknown): boolean => {
 
 const isScalar = (value: unknown): boolean => value != null && typeof value !== 'object';
 
-/** The values already in each array the merge created, so repeated values are kept once. */
+export interface MergeOptions {
+  /** Keep each repeated plain value once. Objects and nested arrays are always kept. */
+  readonly distinct?: boolean;
+}
+
+/** The plain values already in each array the merge created, used when `distinct` is set. */
 const seenValues = new WeakMap<unknown[], Set<unknown>>();
 
-const appendDistinct = (target: unknown[], values: readonly unknown[]): unknown[] => {
-  let seen = seenValues.get(target);
-  if (!seen) {
-    seen = new Set(target);
+const appendValues = (
+  target: unknown[],
+  values: readonly unknown[],
+  { distinct }: MergeOptions
+): unknown[] => {
+  let seen = distinct ? seenValues.get(target) : undefined;
+  if (distinct && !seen) {
+    seen = new Set(target.filter(isScalar));
     seenValues.set(target, seen);
   }
   for (const value of values) {
-    if (!seen.has(value)) {
+    if (!seen || !isScalar(value)) {
+      target.push(value);
+    } else if (!seen.has(value)) {
       seen.add(value);
       target.push(value);
     }
@@ -38,10 +49,12 @@ const appendDistinct = (target: unknown[], values: readonly unknown[]): unknown[
 };
 
 /** Returns the value to keep when a sample has a plain value (not an object or array) for a key. */
-const mergePlainValue = (target: unknown, source: unknown): unknown => {
+const mergePlainValue = (target: unknown, source: unknown, options: MergeOptions): unknown => {
   if (isEmptyValue(target) && !isEmptyValue(source)) return source;
-  if (Array.isArray(target) && isScalar(source)) return appendDistinct(target, [source]);
-  if (isScalar(target) && isScalar(source)) return target === source ? target : [target, source];
+  if (Array.isArray(target) && isScalar(source)) return appendValues(target, [source], options);
+  if (isScalar(target) && isScalar(source)) {
+    return options.distinct && target === source ? target : [target, source];
+  }
   return target;
 };
 
@@ -52,11 +65,15 @@ export const isUnsafeProperty = (key: string): boolean =>
  * Merges `source` into `target` in place. `target` and the objects and arrays in it are always
  * created here, never taken from a sample, so appending to them leaves the samples unchanged.
  */
-const mergeInto = (target: SampleObject, source: SampleObject): SampleObject => {
+const mergeInto = (
+  target: SampleObject,
+  source: SampleObject,
+  options: MergeOptions
+): SampleObject => {
   const mergeObjectElementsInto = (into: SampleObject, values: readonly unknown[]): void => {
     for (const value of values) {
       if (isObject(value)) {
-        mergeInto(into, value);
+        mergeInto(into, value, options);
       }
     }
   };
@@ -71,24 +88,26 @@ const mergeInto = (target: SampleObject, source: SampleObject): SampleObject => 
             target[key] = [];
           }
         } else if (Array.isArray(targetValue)) {
-          appendDistinct(targetValue, sourceValue);
+          appendValues(targetValue, sourceValue, options);
         } else if (isObject(targetValue) && !isEmptyValue(targetValue)) {
           mergeObjectElementsInto(targetValue, sourceValue);
         } else {
-          target[key] = appendDistinct(isScalar(targetValue) ? [targetValue] : [], sourceValue);
+          const merged = isScalar(targetValue) ? [targetValue] : [];
+          target[key] = appendValues(merged, sourceValue, options);
         }
       } else if (isObject(sourceValue)) {
         if (isObject(targetValue)) {
-          mergeInto(targetValue, sourceValue);
+          mergeInto(targetValue, sourceValue, options);
         } else {
           const merged = Object.create(null) as SampleObject;
           if (Array.isArray(targetValue)) {
             mergeObjectElementsInto(merged, targetValue);
           }
-          target[key] = mergeInto(merged, sourceValue);
+          target[key] = mergeInto(merged, sourceValue, options);
         }
       } else {
-        target[key] = key in target ? mergePlainValue(targetValue, sourceValue) : sourceValue;
+        target[key] =
+          key in target ? mergePlainValue(targetValue, sourceValue, options) : sourceValue;
       }
     }
   }
@@ -97,15 +116,19 @@ const mergeInto = (target: SampleObject, source: SampleObject): SampleObject => 
 };
 
 /**
- * Deep-merges sample objects into one representative object without changing them. Every distinct
- * plain value is kept once: values and arrays under the same key are combined into one array, in
- * sample order, so field types can be inferred from all of them. An object and an array of objects
- * under the same key are merged together, and objects win over plain values.
+ * Deep-merges sample objects into one representative object without changing them. Every plain
+ * value is kept (each repeated one once with `distinct`): values and arrays under the same key are
+ * combined into one array, in sample order, so field types can be inferred from all of them. An
+ * object and an array of objects under the same key are merged together, and objects win over
+ * plain values.
  */
-export const mergeSamples = (samples: readonly SampleObject[]): SampleObject => {
+export const mergeSamples = (
+  samples: readonly SampleObject[],
+  options: MergeOptions = {}
+): SampleObject => {
   const result = Object.create(null) as SampleObject;
   for (const sample of samples) {
-    mergeInto(result, sample);
+    mergeInto(result, sample, options);
   }
   return result;
 };
@@ -115,9 +138,12 @@ export const mergeSamples = (samples: readonly SampleObject[]): SampleObject => 
  * dropped, so a field mapped from an array that mixes objects and plain values can't index those
  * plain values. That's a known limitation: no mapping accepts both.
  */
-export const mergeObjectElements = (values: readonly unknown[]): SampleObject | undefined => {
+export const mergeObjectElements = (
+  values: readonly unknown[],
+  options: MergeOptions = {}
+): SampleObject | undefined => {
   const objectElements = values.filter(isObject);
-  return objectElements.length > 0 ? mergeSamples(objectElements) : undefined;
+  return objectElements.length > 0 ? mergeSamples(objectElements, options) : undefined;
 };
 
 /**

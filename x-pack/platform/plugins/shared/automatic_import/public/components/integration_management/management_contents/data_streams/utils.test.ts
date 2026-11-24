@@ -204,6 +204,12 @@ describe('data stream utils', () => {
       ).toEqual([{ field: 'rules.flag', value: '[true,1,false]', type: 'string' }]);
     });
 
+    it('should show repeated values from an array of objects', () => {
+      expect(flattenPipelineObject({ rules: [{ ports: [443, 443] }] })).toEqual([
+        { field: 'rules.ports', value: '[443,443]', type: 'long' },
+      ]);
+    });
+
     it('should flatten a simple object', () => {
       const input = {
         field1: 'value1',

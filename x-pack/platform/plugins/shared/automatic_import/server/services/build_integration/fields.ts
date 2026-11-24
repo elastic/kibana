@@ -34,7 +34,7 @@ const collectFields = (obj: unknown, parentPath: string): RawField[] => {
   }
 
   if (Array.isArray(obj)) {
-    const mergedElements = mergeObjectElements(obj);
+    const mergedElements = mergeObjectElements(obj, { distinct: true });
     if (mergedElements) {
       return collectFields(mergedElements, parentPath);
     }
@@ -70,7 +70,7 @@ export const generateFieldMappings = async (
 ): Promise<FieldMappingEntry[]> => {
   if (pipelineDocs.length === 0) return [];
 
-  const merged = mergeSamples(pipelineDocs);
+  const merged = mergeSamples(pipelineDocs, { distinct: true });
   const rawFields: RawField[] = [];
 
   for (const [key, value] of Object.entries(merged)) {
