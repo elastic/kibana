@@ -272,7 +272,7 @@
     "global": {
       "apiVersion": "1.0.0",
       "captured": true,
-      "fetchedAt": "2026-11-24T13:21:54.301Z",
+      "fetchedAt": "2026-11-24T13:47:13.024Z",
       "format": "openapi",
       "note": "The Sophos Central whoami endpoint is not published as a machine-readable spec; this snapshot is maintained manually from the documentation at https://developer.sophos.com/getting-started/api/getting-started-api.",
       "url": "https://developer.sophos.com/getting-started/api/getting-started-api"
