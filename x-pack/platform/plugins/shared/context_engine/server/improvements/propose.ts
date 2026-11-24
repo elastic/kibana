@@ -33,7 +33,7 @@ export const proposalAnchorFor = (aiIndexId: string): string => `context-engine:
 
 /**
  * The `improvement_id` already hashes the space in with the AI index, and a proposal's id is
- * unique across spaces rather than within one, so deriving from it keeps two spaces apart.
+ * global rather than per space, so deriving from it keeps two spaces apart.
  */
 export const proposalIdFor = (improvementId: string): string => `context-engine-${improvementId}`;
 

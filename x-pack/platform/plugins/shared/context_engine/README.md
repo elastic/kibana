@@ -538,7 +538,8 @@ reviewer could not do themselves. A proposal carries:
   `hash(space + ai_index_id + change_fingerprint)`. The fingerprint describes the
   proposed fix (for example `remove_ki:<ki_id>`) and contains no free text, so a
   re-run over the same latent problem derives the same id. The space is part of
-  the hash because a proposal id is unique across spaces, not within one;
+  the hash because a proposal id is global: it can exist once in the whole
+  deployment, not once per space;
 - the anchor `context-engine:<ai_index_id>` as its conversation id, which is how
   the proposals of one AI index are listed together. It is not a real
   conversation;
