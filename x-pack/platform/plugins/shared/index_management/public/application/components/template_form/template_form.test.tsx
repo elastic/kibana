@@ -406,7 +406,7 @@ describe('TemplateForm wizard integration', () => {
       ['editing', true],
       ['cloning', false],
     ])(
-      'SHOULD NOT send data_stream_options in the save payload when %s',
+      'SHOULD preserve data_stream_options in the save payload when %s',
       async (_mode, isEditing) => {
         mockIsEditing = isEditing;
         const onSave = jest.fn();
@@ -429,7 +429,9 @@ describe('TemplateForm wizard integration', () => {
         });
 
         const savedTemplate = onSave.mock.calls[0][0] as TemplateDeserialized;
-        expect(savedTemplate.template).not.toHaveProperty('data_stream_options');
+        expect(savedTemplate.template?.data_stream_options).toEqual({
+          failure_store: { enabled: true },
+        });
         expect(savedTemplate.template?.settings).toEqual({ index: { number_of_replicas: 1 } });
       }
     );

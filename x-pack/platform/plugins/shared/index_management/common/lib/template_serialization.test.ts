@@ -239,4 +239,29 @@ describe('Template serialization', () => {
       });
     });
   });
+
+  describe('serialization of template.data_stream_options', () => {
+    const dataStreamOptions = { failure_store: { enabled: true } };
+
+    it('keeps data_stream_options present in the deserialized template', () => {
+      const result = serializeTemplate({
+        ...defaultDeserializedTemplate,
+        template: { data_stream_options: dataStreamOptions },
+      });
+
+      expect(result.template?.data_stream_options).toEqual(dataStreamOptions);
+    });
+
+    it('lets the explicit data_stream_options argument take precedence', () => {
+      const result = serializeTemplate(
+        {
+          ...defaultDeserializedTemplate,
+          template: { data_stream_options: { failure_store: { enabled: false } } },
+        },
+        dataStreamOptions
+      );
+
+      expect(result.template?.data_stream_options).toEqual(dataStreamOptions);
+    });
+  });
 });

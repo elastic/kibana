@@ -21,6 +21,7 @@ export const templateSchema = schema.object({
       settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       mappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+      data_stream_options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       lifecycle: schema.maybe(
         schema.object({
           enabled: schema.boolean(),
