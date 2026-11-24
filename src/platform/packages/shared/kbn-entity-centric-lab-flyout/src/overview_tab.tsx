@@ -64,7 +64,7 @@ const withoutRedundantName = (
 ): readonly EntityDetailRow[] =>
   rows.filter((row) => row.value !== displayName && !IDENTITY_DETAIL_IDS.has(row.id));
 
-/** Shown in Related resources instead of the metadata grid when pivots exist. */
+/** Shown in Related entities instead of the metadata grid when pivots exist. */
 const K8S_RELATED_DETAIL_ROW_IDS: ReadonlySet<string> = new Set([
   'namespace',
   'node',
@@ -272,9 +272,9 @@ export const OverviewTab = ({
             buttonContent={
               <SectionTitle
                 title={i18n.translate(
-                  'entityCentricLabFlyout.flyout.overview.relatedResourcesTitle',
+                  'entityCentricLabFlyout.flyout.overview.relatedEntitiesTitle',
                   {
-                    defaultMessage: 'Related resources',
+                    defaultMessage: 'Related entities',
                   }
                 )}
               />
