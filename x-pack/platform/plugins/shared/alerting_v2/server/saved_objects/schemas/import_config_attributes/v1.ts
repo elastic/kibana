@@ -25,14 +25,14 @@ const tagsSchema = schema.maybe(
  * `connector_id` from the reference, which is the source of truth.
  *
  * `type` is the source platform the import receives events from. It is set on create and never
- * changes, because the type of the import's connector cannot change. Supporting a new source
- * needs a new model version that adds it to this list.
+ * changes, because the type of the import's connector cannot change. It is an open string so
+ * supporting a new source does not need a model version; callers validate the supported values.
  *
  * There is no `enabled` attribute. Whether an import is on comes from the connector's
  * `is_inbound_events_enabled` setting.
  */
 export const importConfigAttributesSchemaV1 = schema.object({
-  type: schema.oneOf([schema.literal('datadog')]),
+  type: schema.string({ maxLength: 256 }),
   kind: schema.oneOf([schema.literal('alert'), schema.literal('signal')]),
   metadata: schema.object({
     name: schema.string({ maxLength: 256 }),

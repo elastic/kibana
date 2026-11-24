@@ -86,7 +86,7 @@ describe('importConfigModelVersions', () => {
     });
 
     it.each([
-      ['an unknown type', { type: 'splunk' }],
+      ['a type over 256 characters', { type: 'a'.repeat(257) }],
       ['a missing type', { type: undefined }],
       ['an unknown kind', { kind: 'rule' }],
       ['a missing connector id', { connector_id: undefined }],
