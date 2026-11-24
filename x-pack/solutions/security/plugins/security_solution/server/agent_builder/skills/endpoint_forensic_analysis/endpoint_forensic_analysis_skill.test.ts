@@ -16,6 +16,7 @@ import {
   ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
   ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
   ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
+  ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
   createEndpointForensicAnalysisSkill,
 } from './endpoint_forensic_analysis_skill';
 
@@ -27,10 +28,10 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(isAllowedBuiltinSkill(ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID)).toBe(true);
   });
 
-  it('exposes ES|QL and index discovery platform registry tools only (read-only scope)', () => {
+  it('exposes the Osquery tools plus the ES|QL platform registry tools', () => {
     const registryTools = endpointForensicAnalysisSkill.getRegistryTools?.() ?? [];
     expect(registryTools).toEqual([
-      platformCoreTools.listIndices,
+      ...ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
       platformCoreTools.getIndexMapping,
       platformCoreTools.generateEsql,
       platformCoreTools.executeEsql,
@@ -273,5 +274,53 @@ describe('endpointForensicAnalysisSkill', () => {
       /follow\s+its parent chain, dropper, or delivering connection backwards/
     );
     expect(content).toContain('patient zero for this incident, not history');
+  });
+
+  it('routes the installed-but-unenrolled state to the ES|QL path (review finding 13)', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      '**If Osquery IS installed but NO agents are enrolled**'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain('enrollment_status: not_enrolled');
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'Do **not** call `osquery.run_live_query` — it has no agent to run on.'
+    );
+  });
+
+  it('distinguishes an inconclusive capability check from "no agents"', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain('`enrollment_status` is `unknown`');
+    expect(endpointForensicAnalysisSkill.content).toContain('NOT the same as "no agents"');
+  });
+
+  it('scopes discover_telemetry to the ES|QL path only (review finding 21)', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      '**On the ES|QL / Defend telemetry path only**'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain('it is ES|QL-only');
+    // The unconditional "call it first" phrasing is what made Process §1 and
+    // Phase 0 contradict each other; it must be gone.
+    expect(endpointForensicAnalysisSkill.content).not.toMatch(
+      /^Call `[^`]+` first with (?:the )?host names/m
+    );
+    expect(endpointForensicAnalysisSkill.content).toMatch(
+      /\*\*On the ES\|QL \/ Defend telemetry path only\*\*, call `[^`]+` first with the host names/
+    );
+  });
+
+  it('requires resolve_agent_ids before dispatching a live query (review finding 16)', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      '**Always** call `osquery.resolve_agent_ids` before `osquery.run_live_query`'
+    );
+  });
+
+  it('falls back to ES|QL when check_integration is not available', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'If `osquery.check_integration` is available, call it'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'go straight to the ES|QL / Defend telemetry path'
+    );
+    expect(endpointForensicAnalysisSkill.content).not.toContain(
+      '1. Call `osquery.check_integration` to see'
+    );
   });
 });

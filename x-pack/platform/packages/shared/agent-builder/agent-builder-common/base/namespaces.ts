@@ -25,6 +25,7 @@ export const internalNamespaces = {
   ml: 'ml',
   search: 'search',
   security: 'security',
+  osquery: 'osquery',
   streams: 'platform.streams',
   workflows: 'platform.workflows',
 } as const;
@@ -48,6 +49,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.proposals,
   internalNamespaces.search,
   internalNamespaces.security,
+  internalNamespaces.osquery,
   internalNamespaces.streams,
   internalNamespaces.workflows,
 ];

@@ -108,6 +108,9 @@
     "@kbn/cps-utils",
     "@kbn/cps",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/app-menu"
+    "@kbn/app-menu",
+    "@kbn/logging-mocks",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server"
   ]
 }
