@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
-import type { Dispatch } from 'redux-v4';
-import { addLicense } from './add_license';
+import type { Dispatch } from '@reduxjs/toolkit';
+import { addLicense } from '../reducers/license';
+import { uploadLicenseStatus } from '../reducers/upload_status';
+import { addUploadErrorMessage } from '../reducers/upload_error_message';
 import { putLicense, type PutLicenseResponse } from '../../lib/es';
-import { addUploadErrorMessage } from './add_error_message';
-import type { UploadStatusState, AppThunkAction, ThunkServices } from '../types';
+import type { AppThunkAction, ThunkServices } from '../types';
 
 const extractErrorReason = (err: unknown): string | undefined => {
   if (typeof err !== 'object' || err === null || !('responseJSON' in err)) {
@@ -55,10 +55,6 @@ const parseLicenseType = (licenseString: string): string | undefined => {
     return undefined;
   }
 };
-
-export const uploadLicenseStatus = createAction<UploadStatusState>(
-  'LICENSE_MANAGEMENT_UPLOAD_LICENSE_STATUS'
-);
 
 const genericUploadError = i18n.translate(
   'xpack.licenseMgmt.uploadLicense.genericUploadErrorMessage',
