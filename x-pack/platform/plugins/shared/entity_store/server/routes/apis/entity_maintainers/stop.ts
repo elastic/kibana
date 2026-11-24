@@ -13,6 +13,7 @@ import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
 import { maintainerIdParamsSchema } from './utils/validator';
+import { LIFECYCLE_ACTION } from '../../../domain/system_events';
 
 export function registerStopMaintainer(router: EntityStorePluginRouter) {
   router.versioned
@@ -37,7 +38,8 @@ export function registerStopMaintainer(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManagerClient, entityMaintainersClient } = entityStoreCtx;
+        const { logger, assetManagerClient, entityMaintainersClient, systemEventsWriter } =
+          entityStoreCtx;
         const { id } = req.params;
 
         logger.debug(`Stop maintainer API invoked for id: ${id}`);
@@ -45,7 +47,18 @@ export function registerStopMaintainer(router: EntityStorePluginRouter) {
         const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
         if (forbidden) return forbidden;
 
-        await entityMaintainersClient.stop(id, req);
+        const event = {
+          action: LIFECYCLE_ACTION.maintainerStop,
+          trigger: 'user',
+          maintainerId: id,
+        } as const;
+        try {
+          await entityMaintainersClient.stop(id, req);
+        } catch (error) {
+          await systemEventsWriter.writeLifecycle({ ...event, outcome: 'failure', error });
+          throw error;
+        }
+        await systemEventsWriter.writeLifecycle({ ...event, outcome: 'success' });
 
         return res.ok({ body: { ok: true } });
       })

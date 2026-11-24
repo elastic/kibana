@@ -143,6 +143,7 @@ export async function createRequestHandlerContext({
         namespace,
         logger,
       }),
+      systemEventsWriter,
     }),
     entityMaintainersClient: new EntityMaintainersClient({
       logger,

@@ -42,6 +42,8 @@ import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_ta
 import { getMergedConfig } from '../domain/config';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 import {
+  LIFECYCLE_ACTION,
+  SYSTEM_EVENT_REASON,
   SystemEventsWriter,
   toExtractionRunEvent,
   type RunEventInput,
@@ -166,6 +168,18 @@ async function bootstrapNonPriorityTask({
     if (descriptor.nonPriorityStatus === null || descriptor.nonPriorityStatus === undefined) {
       await engineDescriptorClient.update(entityType, {
         nonPriorityStatus: dualProcessEnabled ? ENGINE_STATUS.STARTED : ENGINE_STATUS.STOPPED,
+      });
+      await new SystemEventsWriter({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger,
+        namespace,
+      }).writeLifecycle({
+        action: LIFECYCLE_ACTION.nonPriorityToggled,
+        outcome: 'success',
+        trigger: 'system',
+        reason: SYSTEM_EVENT_REASON.initialized,
+        entityType,
+        mode: EXTRACTION_MODE.nonPriority,
       });
     }
   } catch (err) {

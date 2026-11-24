@@ -5,15 +5,26 @@
  * 2.0.
  */
 
-export { SystemEventsWriter, buildRunDoc, truncateErrorMessage } from './system_events_writer';
+export {
+  SystemEventsWriter,
+  buildLifecycleDoc,
+  buildRunDoc,
+  truncateErrorMessage,
+} from './system_events_writer';
 export {
   installSystemEventsStreams,
   uninstallSystemEventsStreams,
   ensureSystemEventsStreamsOnce,
 } from './ensure_system_events_streams';
 export { summarizeExtractionRuns } from './summarize_runs';
-export { SYSTEM_EVENT_ACTION, SYSTEM_EVENT_REASON } from './types';
-export type { RunEventInput, SystemEventDoc, SystemEventTrigger } from './types';
+export { LIFECYCLE_ACTION, SYSTEM_EVENT_ACTION, SYSTEM_EVENT_REASON } from './types';
+export type {
+  LifecycleAction,
+  LifecycleEventInput,
+  RunEventInput,
+  SystemEventDoc,
+  SystemEventTrigger,
+} from './types';
 export { toExtractionRunEvent } from './extraction_run_event';
 export { createSystemEventsDashboardClient } from './dashboard/install_dashboard';
 export type { SystemEventsDashboardClient } from './dashboard/install_dashboard';

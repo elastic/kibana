@@ -12,7 +12,7 @@ import {
 } from '../../../common/domain/system_events';
 import { getErrorMessage } from '../../../common';
 import { ensureSystemEventsStreamsOnce } from './ensure_system_events_streams';
-import type { RunEventInput, SystemEventDoc } from './types';
+import type { LifecycleEventInput, RunEventInput, SystemEventDoc } from './types';
 import { SYSTEM_EVENT_ACTION } from './types';
 
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
@@ -49,6 +49,29 @@ export const buildRunDoc = (namespace: string, input: RunEventInput): SystemEven
   };
 };
 
+/** Builds a lifecycle doc (`event.kind: lifecycle`). */
+export const buildLifecycleDoc = (
+  namespace: string,
+  input: LifecycleEventInput,
+  now: Date = new Date()
+): SystemEventDoc => ({
+  '@timestamp': now.toISOString(),
+  event: {
+    kind: 'lifecycle',
+    action: input.action,
+    outcome: input.outcome,
+    ...(input.reason ? { reason: input.reason } : {}),
+  },
+  ...(input.error !== undefined ? { error: { message: truncateErrorMessage(input.error) } } : {}),
+  entity_store: {
+    namespace,
+    trigger: input.trigger,
+    ...(input.entityType ? { entity_type: input.entityType } : {}),
+    ...(input.mode ? { mode: input.mode } : {}),
+    ...(input.maintainerId ? { maintainer_id: input.maintainerId } : {}),
+  },
+});
+
 /**
  * Writes Entity Store system events: task runs, lifecycle events and daily summaries.
  * Every method is best-effort. A failed write is logged and never thrown, so it cannot fail
@@ -81,6 +104,11 @@ export class SystemEventsWriter {
         ? getExtractionRunsDataStreamName(this.namespace)
         : getSystemEventsDataStreamName(this.namespace);
     await this.write(dataStream, buildRunDoc(this.namespace, input));
+  }
+
+  /** Writes one lifecycle doc to the events stream. */
+  public async writeLifecycle(input: LifecycleEventInput): Promise<void> {
+    await this.writeEvent(buildLifecycleDoc(this.namespace, input));
   }
 
   /**
