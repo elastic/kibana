@@ -23,6 +23,10 @@ post_evals_status() { # $1=state $2=description
 on_trigger_error() {
   if [[ "${BUILDKITE_RETRY_COUNT:-0}" -ge 1 ]]; then
     post_evals_status failure "Failed to trigger the LLM Evals pipeline"
+    # Settle the gated suites as inconclusive, so the evals gate doesn't wait for verdicts that
+    # will never come. GITHUB_PR_LABELS holds the resolved labels once resolving got that far,
+    # and the build-time snapshot otherwise.
+    node .buildkite/scripts/steps/evals/regression_gate.ts fail-runnable "${GITHUB_PR_LABELS:-}" || true
   fi
 }
 trap on_trigger_error ERR

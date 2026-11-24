@@ -9,7 +9,7 @@
 
 import type { EvalsDecisionSuite } from './evals_gate_rules.ts';
 import type { GateApi, GateContext, GatePullRequest } from './evals_gate_workflow.ts';
-import { runEvalsGate } from './evals_gate_workflow.ts';
+import { findGateCommentId, runEvalsGate } from './evals_gate_workflow.ts';
 
 const HEAD = 'ffffffffffffffffffffffffffffffffffffffff';
 const EARLIER = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
@@ -336,5 +336,25 @@ describe('runEvalsGate', () => {
   it('keeps PR file names from breaking out of the code span in the comment', async () => {
     const calls = await run({ changedFiles: ['plugins/agent/x` @elastic/team `y.ts'] });
     expect(calls.comments[0]).toContain('- `plugins/agent/x @elastic/team y.ts`');
+  });
+});
+
+describe('findGateCommentId', () => {
+  const MARKER = '<!-- evals-gate-comment -->';
+
+  it("finds the bot's comment and ignores a person quoting the marker", () => {
+    expect(
+      findGateCommentId([
+        { id: 1, body: `quoting the bot: ${MARKER}`, user: { login: 'dev' } },
+        {
+          id: 2,
+          body: `Evals decision required\n${MARKER}`,
+          user: { login: 'github-actions[bot]' },
+        },
+      ])
+    ).toBe(2);
+    expect(
+      findGateCommentId([{ id: 1, body: `quoting the bot: ${MARKER}`, user: { login: 'dev' } }])
+    ).toBeUndefined();
   });
 });

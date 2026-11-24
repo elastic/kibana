@@ -155,6 +155,10 @@ export const compareCmd: Command<void> = {
     if (verdictOutputPath && !regressionGate) {
       throw createFlagError('--verdict-output requires the --gate-* flags.');
     }
+    if (regressionGate && !suiteId) {
+      // The baseline's age, which the gate checks, is looked up per suite.
+      throw createFlagError('The --gate-* flags require --suite.');
+    }
     const writeVerdict = (verdict: RegressionGateVerdict) => {
       log.info(`Regression gate: ${verdict.state} (${verdict.summary})`);
       if (verdictOutputPath) {
@@ -293,7 +297,8 @@ export const compareCmd: Command<void> = {
           resolveIfNeeded(baselineExperimentId),
         ]);
 
-        if (format === 'markdown') {
+        // The regression gate needs the baseline's age, whatever the output format.
+        if (format === 'markdown' || regressionGate) {
           const baselineBaseId = baselineExperimentId.includes('::')
             ? baselineExperimentId.split('::')[0]
             : baselineExperimentId;
