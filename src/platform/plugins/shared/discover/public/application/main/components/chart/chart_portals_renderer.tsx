@@ -18,7 +18,6 @@ import React, {
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
@@ -252,8 +251,8 @@ const CustomChartSectionWrapper = ({
   }, [setUnifiedHistogramApi, api]);
 
   const fetchAbortController = fetchParams?.abortController;
-  const onChartLoaded = useCallback<NonNullable<ChartSectionProps['onChartLoaded']>>(
-    (options) => onFetchChartLoaded(fetchAbortController, options),
+  const onChartLoaded = useCallback(
+    () => onFetchChartLoaded(fetchAbortController),
     [onFetchChartLoaded, fetchAbortController]
   );
 

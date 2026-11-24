@@ -20,7 +20,7 @@ import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
-import { ChartLoadedProvider } from '../../context/chart_loaded_context';
+import { ChartLoadedContext } from '../../context/chart_loaded_context';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -348,9 +348,9 @@ describe('LensWrapper', () => {
     const renderWithOnChartLoaded = (onChartLoaded?: () => void) => {
       render(
         <EuiThemeProvider>
-          <ChartLoadedProvider onChartLoaded={onChartLoaded}>
+          <ChartLoadedContext.Provider value={onChartLoaded}>
             <LensWrapper {...defaultProps} />
-          </ChartLoadedProvider>
+          </ChartLoadedContext.Provider>
         </EuiThemeProvider>
       );
 
@@ -382,15 +382,12 @@ describe('LensWrapper', () => {
     it.each([
       ['tables without rows', tablesWithoutRows],
       ['no adapters', undefined],
-    ])('reports a chart which finished loading with %s as empty', (_, adapters) => {
+    ])('does not report a chart which finished loading with %s', (_, adapters) => {
       const onChartLoaded = jest.fn();
       const onLoad = renderWithOnChartLoaded(onChartLoaded);
 
-      onLoad(true, adapters);
-      expect(onChartLoaded).not.toHaveBeenCalled();
-
       onLoad(false, adapters);
-      expect(onChartLoaded).toHaveBeenCalledWith({ isEmpty: true });
+      expect(onChartLoaded).not.toHaveBeenCalled();
     });
 
     it('uses the latest callback for a load of a later search', () => {
@@ -398,9 +395,9 @@ describe('LensWrapper', () => {
       const second = jest.fn();
       const renderWrapper = (onChartLoaded: () => void) => (
         <EuiThemeProvider>
-          <ChartLoadedProvider onChartLoaded={onChartLoaded}>
+          <ChartLoadedContext.Provider value={onChartLoaded}>
             <LensWrapper {...defaultProps} />
-          </ChartLoadedProvider>
+          </ChartLoadedContext.Provider>
         </EuiThemeProvider>
       );
       const { rerender } = render(renderWrapper(first));

@@ -159,7 +159,6 @@ export const createChartSection =
         );
       },
       replaceDefaultChart: true,
-      reportsChartLoaded: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
       defaultTopPanelHeight: 'max-content',
     };

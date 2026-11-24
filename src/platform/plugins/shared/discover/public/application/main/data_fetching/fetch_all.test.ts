@@ -291,45 +291,25 @@ describe('test fetchAll', () => {
   describe('ES|QL documents error', () => {
     const error = new Error('This query failed');
 
-    const fetchAllEsql = ({ hideChart = false, isChartMounted = true } = {}) => {
+    const fetchAllEsql = () => {
       deps.internalState.dispatch(
         internalStateActions.updateAppState({
           tabId: deps.getCurrentTab().id,
-          appState: { query: { esql: 'from foo' }, hideChart },
+          appState: { query: { esql: 'from foo' } },
         })
       );
       mockfetchEsql.mockRejectedValue(error);
-      return fetchAll({
-        ...deps,
-        isChartMounted,
-        esqlSource: createMockEsqlSource([], [], '@timestamp'),
-      });
+      return fetchAll({ ...deps, esqlSource: createMockEsqlSource([], [], '@timestamp') });
     };
 
-    test('should set main$ and totalHits$ to ERROR and resolve if the chart is hidden', async () => {
-      await fetchAllEsql({ hideChart: true });
-
-      expect(subjects.documents$.getValue()).toEqual(
-        expect.objectContaining({ fetchStatus: FetchStatus.ERROR, error })
-      );
-      expect(subjects.totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
-      expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
-    });
-
-    test('should set main$ to ERROR if no chart is mounted', async () => {
-      await fetchAllEsql({ isChartMounted: false });
-
-      expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
-    });
-
-    test('should keep main$ loading while a visible chart is pending', async () => {
+    test('should set main$ and totalHits$ to ERROR and resolve', async () => {
       await fetchAllEsql();
 
       expect(subjects.documents$.getValue()).toEqual(
         expect.objectContaining({ fetchStatus: FetchStatus.ERROR, error })
       );
       expect(subjects.totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
-      expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.LOADING });
+      expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
     });
 
     test('should not set main$ to ERROR if a chart is already displayed', async () => {

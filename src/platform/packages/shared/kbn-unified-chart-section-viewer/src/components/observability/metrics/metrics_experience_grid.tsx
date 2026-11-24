@@ -18,7 +18,6 @@ import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/const
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { ChartsGrid } from '../../charts_grid';
 import { EmptyState } from '../../empty_state/empty_state';
-import { useReportChartPanel } from '../../../context/chart_loaded_context';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
@@ -186,13 +185,6 @@ export const MetricsExperienceGrid = ({
     },
     [isFullscreen, onToggleFullscreen]
   );
-
-  // without any chart panel nothing else reports that the section has no data
-  const reportPanel = useReportChartPanel();
-  const hasNoCharts = !isDiscoverLoading && (metricsInfoError != null || metricItems.length === 0);
-  useEffect(() => {
-    reportPanel?.('metricsGrid', hasNoCharts ? 'empty' : 'removed');
-  }, [reportPanel, hasNoCharts]);
 
   if (metricItems.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;

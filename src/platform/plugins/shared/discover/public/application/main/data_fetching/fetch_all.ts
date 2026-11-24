@@ -70,15 +70,12 @@ export interface CommonFetchParams {
 export function fetchAll(
   params: CommonFetchParams & {
     reset: boolean;
-    /** Whether a chart is listening for this fetch, only then it can decide about main$ */
-    isChartMounted?: boolean;
     onFetchRecordsComplete?: () => Promise<void>;
   }
 ): Promise<void> {
   const {
     dataSubjects,
     reset = false,
-    isChartMounted = false,
     initialFetchStatus,
     services,
     scopedProfilesManager,
@@ -151,8 +148,13 @@ export function fetchAll(
       timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
     });
 
+    // TEMP: slow documents, remove
+    const slowResponse = response.finally(
+      () => new Promise((resolve) => setTimeout(resolve, 10000))
+    );
+
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
-    response
+    slowResponse
       .then(
         ({
           records,
@@ -254,11 +256,12 @@ export function fetchAll(
           sendErrorMsg(dataSubjects.totalHits$, e);
         }
 
-        // A visible ES|QL chart may still show results, useChartOutcome then decides about main$
-        const hasVisibleEsqlChart =
-          isEsqlQuery && isChartMounted && !getCurrentTab().appState.hideChart;
+        // A chart of this fetch is already displayed (main$ is PARTIAL): keep it, the error is
+        // shown in place of the documents. A chart loading later replaces the full page error.
+        const isChartDisplayed =
+          isEsqlQuery && dataSubjects.main$.getValue().fetchStatus === FetchStatus.PARTIAL;
 
-        if (!hasVisibleEsqlChart) {
+        if (!isChartDisplayed) {
           sendErrorMsg(dataSubjects.main$, e);
         }
       });
@@ -285,12 +288,7 @@ export function fetchAll(
       // is not already in an ERROR state, e.g. because the document query has failed.
       // This will only complete main$, if it hasn't already been completed previously
       // by a query finding no results.
-      // main$ stays loading while failed documents wait for the chart (useChartOutcome)
-      const isWaitingForChart =
-        dataSubjects.documents$.getValue().fetchStatus === FetchStatus.ERROR &&
-        dataSubjects.main$.getValue().fetchStatus === FetchStatus.LOADING;
-
-      if (dataSubjects.main$.getValue().fetchStatus !== FetchStatus.ERROR && !isWaitingForChart) {
+      if (dataSubjects.main$.getValue().fetchStatus !== FetchStatus.ERROR) {
         sendCompleteMsg(dataSubjects.main$);
       }
     });

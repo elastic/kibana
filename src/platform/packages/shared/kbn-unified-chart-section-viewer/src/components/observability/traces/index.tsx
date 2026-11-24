@@ -8,7 +8,7 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { UnifiedBreakdownFieldSelector, resolveBreakdownField } from '@kbn/unified-histogram';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
@@ -20,7 +20,7 @@ import { ThroughputChart } from './throughput';
 import { ChartsGrid } from '../../charts_grid';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractUsedMetadataFields } from '../../../utils';
-import { ChartLoadedProvider } from '../../../context/chart_loaded_context';
+import { ChartLoadedContext } from '../../../context/chart_loaded_context';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -104,17 +104,12 @@ function TraceMetricsGrid({
   // The source's index pattern, including remote cluster prefixes (`remote:traces-*`).
   const indexPattern = dataSource.title || undefined;
 
-  // without charts nothing else reports that the section has no data
-  useEffect(() => {
-    if (!indexPattern) onChartLoaded?.({ isEmpty: true });
-  }, [indexPattern, onChartLoaded]);
-
   if (!indexPattern) {
     return undefined;
   }
 
   return (
-    <ChartLoadedProvider onChartLoaded={onChartLoaded}>
+    <ChartLoadedContext.Provider value={onChartLoaded}>
       <ChartsGrid
         id="tracesGrid"
         toolbarCss={chartToolbarCss}
@@ -158,7 +153,7 @@ function TraceMetricsGrid({
           </EuiPanel>
         </TraceMetricsProvider>
       </ChartsGrid>
-    </ChartLoadedProvider>
+    </ChartLoadedContext.Provider>
   );
 }
 

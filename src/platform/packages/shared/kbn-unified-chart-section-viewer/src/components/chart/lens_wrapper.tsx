@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useId, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ACTION_INSPECT_PANEL, EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
@@ -18,7 +18,7 @@ import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
 import type { UnifiedMetricsGridProps } from '../../types';
-import { useReportChartPanel } from '../../context/chart_loaded_context';
+import { useOnChartLoaded } from '../../context/chart_loaded_context';
 
 const DEFAULT_QUICK_ACTION_VIEW: QuickActionIds = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -140,21 +140,18 @@ export function LensWrapper({
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
-  const panelId = useId();
-  const reportPanel = useReportChartPanel();
-  // Lens keeps the first onLoad it receives, so read the latest reporter from a ref
-  const reportPanelRef = useRef(reportPanel);
-  reportPanelRef.current = reportPanel;
-
-  useEffect(() => () => reportPanelRef.current?.(panelId, 'removed'), [panelId]);
-
+  // Lens keeps the first onLoad it receives, so read the latest callback from a ref
+  const onChartLoaded = useOnChartLoaded();
+  const onChartLoadedRef = useRef(onChartLoaded);
+  onChartLoadedRef.current = onChartLoaded;
   const onLoad = useCallback<NonNullable<EmbeddableComponentProps['onLoad']>>(
     (isLoading, adapters) => {
       const tables = Object.values(adapters?.tables?.tables ?? {});
-      const hasRows = tables.some(({ rows }) => rows.length > 0);
-      reportPanelRef.current?.(panelId, isLoading ? 'loading' : hasRows ? 'loaded' : 'empty');
+      if (!isLoading && tables.some(({ rows }) => rows.length > 0)) {
+        onChartLoadedRef.current?.();
+      }
     },
-    [panelId]
+    []
   );
 
   // EmbeddableRendererContext is the only way to configure the visible quick-action row because

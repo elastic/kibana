@@ -56,7 +56,6 @@ export const getChartSectionConfiguration =
         return <TraceMetricsGridWrapper {...props} actions={toolkit.actions} />;
       },
       replaceDefaultChart: true,
-      reportsChartLoaded: true,
       defaultTopPanelHeight: 300,
     };
   };
