@@ -30,13 +30,13 @@ export interface UseTabsParams<T extends string> {
    */
   flyoutType?: FlyoutType;
   /**
-   * POC: tab id persisted server-side (User Storage). When `onPersistTabId` is provided it replaces
-   * the localStorage write; the localStorage value is still read as a fallback until it has been
-   * imported into User Storage. An empty string means "nothing stored".
+   * POC: tab id persisted by the caller (for example in User Storage). Read instead of localStorage
+   * when `onPersistTabId` is provided. An empty string means "nothing stored".
    */
   persistedTabId?: string;
   /**
-   * POC: called instead of writing to localStorage when the user explicitly selects a tab.
+   * POC: called instead of writing to localStorage when the user explicitly selects a tab. Providing
+   * it moves persistence to the caller, including importing any legacy localStorage value.
    */
   onPersistTabId?: (tabId: string) => void;
 }
@@ -68,7 +68,8 @@ const resolveTabId = <T extends string>(
  *
  * Resolves the active tab from (in priority order):
  *   1. `initialTabId` (e.g. expandable-flyout URL path or an explicit initial value)
- *   2. The value persisted in localStorage under `storageKey`
+ *   2. The value persisted by the caller (`persistedTabId`) when `onPersistTabId` is provided,
+ *      otherwise the value persisted in localStorage under `storageKey`
  *   3. `validTabIds[0]` as the final fallback
  */
 export const useTabs = <T extends string>({
@@ -85,8 +86,7 @@ export const useTabs = <T extends string>({
   const [selectedTabId, setSelectedTabIdState] = useState<T>(
     () =>
       resolveTabId(validTabIds, initialTabId) ??
-      resolveTabId(validTabIds, persistedTabId) ??
-      resolveTabId(validTabIds, storage.get(storageKey)) ??
+      resolveTabId(validTabIds, onPersistTabId ? persistedTabId : storage.get(storageKey)) ??
       validTabIds[0]
   );
 

@@ -21,7 +21,7 @@ const getQueue = (client: IUserStorageClient): UserSettingsWriteQueue => {
   const existing = queues.get(client);
   if (existing) return existing;
 
-  const queue = new UserSettingsWriteQueue({ writer: client });
+  const queue = new UserSettingsWriteQueue(client);
   queues.set(client, queue);
 
   // Best effort flush when the tab is hidden or closed. A keepalive request is a follow-up
@@ -40,7 +40,7 @@ const LOCAL_FALLBACK_PREFIX = 'securitySolution.userSettings.local.';
 /** Emits the key of every fallback write, so hooks re-render (the write queue is not involved). */
 const localChanges$ = new Subject<string>();
 
-export interface UseUserSettingOptions {
+interface UseUserSettingOptions {
   /**
    * localStorage key this setting used before, holding a value of the same shape. Until the server
    * has a value, the legacy value is returned and imported once (and the legacy key removed).
@@ -48,7 +48,7 @@ export interface UseUserSettingOptions {
   legacyLocalStorageKey?: string;
 }
 
-export type UserSettingSetter<T> = (next: T | ((previous: T) => T)) => void;
+type UserSettingSetter<T> = (next: T | ((previous: T) => T)) => void;
 
 /**
  * POC replacement for `localStorage` reads/writes of UI preferences.
@@ -102,7 +102,8 @@ export const useUserSetting = <T>(
 
   // One-time legacy import, after the server value is known (also covers non-preloaded keys).
   useEffect(() => {
-    if (!available || !legacyLocalStorageKey) return;
+    // nothing to import when no legacy value existed at mount (the common case after migration)
+    if (!available || !legacyLocalStorageKey || legacyRef.current == null) return;
     let cancelled = false;
 
     userStorage

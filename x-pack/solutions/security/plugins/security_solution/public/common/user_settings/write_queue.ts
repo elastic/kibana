@@ -18,8 +18,9 @@ import type { Observable } from 'rxjs';
  * 40/50 same-key writes rejected.
  *
  * What it does: keeps the latest value per key, debounces, and sends one request at a time.
- * Retries on 409 / 5xx / network errors with backoff. It never reverts: the pending value stays
- * readable via `getPending` and failures surface on `errors$`.
+ * Retries on 409 / 5xx / network errors with backoff. While a write is pending or retrying, its value
+ * stays readable via `getPending`, so the UI does not jump. When retries run out, or on a
+ * non-retryable error, the write is dropped silently and reads fall back to the last saved value.
  *
  * Limitation: it only serializes writes within one browser tab. Two tabs can still conflict, which
  * is why 409 is retried here.
@@ -31,27 +32,13 @@ import type { Observable } from 'rxjs';
  * browser client.
  */
 
-export interface UserSettingsWriter {
+interface UserSettingsWriter {
   set: <T>(key: string, value: T) => Promise<T>;
 }
 
-export interface UserSettingsWriteError {
-  key: string;
-  error: Error;
-  /** true when the value was dropped (non-retryable error or retries exhausted) */
-  dropped: boolean;
-}
-
-export interface UserSettingsWriteQueueOptions {
-  writer: UserSettingsWriter;
-  debounceMs?: number;
-  maxRetries?: number;
-  baseBackoffMs?: number;
-}
-
-const DEFAULT_DEBOUNCE_MS = 1000;
-const DEFAULT_MAX_RETRIES = 5;
-const DEFAULT_BASE_BACKOFF_MS = 500;
+const DEBOUNCE_MS = 1000;
+const MAX_RETRIES = 5;
+const BASE_BACKOFF_MS = 500;
 const MAX_BACKOFF_MS = 10000;
 
 const getStatus = (error: unknown): number | undefined => {
@@ -73,34 +60,20 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 export class UserSettingsWriteQueue {
   private readonly writer: UserSettingsWriter;
-  private readonly debounceMs: number;
-  private readonly maxRetries: number;
-  private readonly baseBackoffMs: number;
 
   /** Latest value per key that has not been sent yet. */
   private readonly pending = new Map<string, unknown>();
   /** Values currently being sent (or retried); still readable until confirmed. */
   private readonly inFlight = new Map<string, unknown>();
-  private readonly errorsSubject = new Subject<UserSettingsWriteError>();
   private readonly changesSubject = new Subject<string>();
   private timer: ReturnType<typeof setTimeout> | undefined;
   private draining: Promise<void> | undefined;
 
-  public readonly errors$: Observable<UserSettingsWriteError>;
   /** Emits a key whenever its pending value changes or settles. */
   public readonly changes$: Observable<string>;
 
-  constructor({
-    writer,
-    debounceMs = DEFAULT_DEBOUNCE_MS,
-    maxRetries = DEFAULT_MAX_RETRIES,
-    baseBackoffMs = DEFAULT_BASE_BACKOFF_MS,
-  }: UserSettingsWriteQueueOptions) {
+  constructor(writer: UserSettingsWriter) {
     this.writer = writer;
-    this.debounceMs = debounceMs;
-    this.maxRetries = maxRetries;
-    this.baseBackoffMs = baseBackoffMs;
-    this.errors$ = this.errorsSubject.asObservable();
     this.changes$ = this.changesSubject.asObservable();
   }
 
@@ -132,7 +105,7 @@ export class UserSettingsWriteQueue {
     this.timer = setTimeout(() => {
       this.timer = undefined;
       void this.drain();
-    }, this.debounceMs);
+    }, DEBOUNCE_MS);
   }
 
   /** One drain loop at a time: this is what serializes writes. */
@@ -166,15 +139,9 @@ export class UserSettingsWriteQueue {
       try {
         await this.writer.set(key, value);
         return;
-      } catch (e) {
-        const error = e instanceof Error ? e : new Error(String(e));
-        const exhausted = attempt >= this.maxRetries;
-        if (!isRetryable(e) || exhausted) {
-          this.errorsSubject.next({ key, error, dropped: true });
-          return;
-        }
-        this.errorsSubject.next({ key, error, dropped: false });
-        await sleep(Math.min(this.baseBackoffMs * 2 ** attempt, MAX_BACKOFF_MS));
+      } catch (error) {
+        if (!isRetryable(error) || attempt >= MAX_RETRIES) return;
+        await sleep(Math.min(BASE_BACKOFF_MS * 2 ** attempt, MAX_BACKOFF_MS));
       }
     }
   }

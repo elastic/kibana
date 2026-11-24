@@ -14,7 +14,7 @@ type SectionsState = Record<string, boolean>;
 
 const EMPTY_SECTIONS: SectionsState = {};
 
-export interface UseOverviewSectionExpandedParams {
+interface UseOverviewSectionExpandedParams {
   /** Section id (matches the keys used by the legacy localStorage map). */
   sectionId: string;
   defaultValue: boolean;
