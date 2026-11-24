@@ -258,7 +258,10 @@ export async function pickTestGroupRunOrder() {
 
   if (steps.length) bk.uploadSteps(steps);
   for (const group of functionalStepGroups) bk.uploadSteps([group]);
-  const aggregateStep = buildFunctionalAggregateStep(functionalStepGroups, ftrManifest.default.queue);
+  const aggregateStep = buildFunctionalAggregateStep(
+    functionalStepGroups,
+    ftrManifest.default.queue
+  );
   if (aggregateStep) bk.uploadSteps([aggregateStep]);
 }
 
