@@ -65,6 +65,7 @@ const setup = ({
   runSpace = 'default',
   closeTimedOut = false,
   acknowledgedEarly = [],
+  analystClosed = [],
   acknowledgedDuringTag = [],
   revokedAfterWrite = [],
   expiredAfterWrite = [],
@@ -96,6 +97,8 @@ const setup = ({
   runSpace?: string;
   /** The status route answers 200 but its update-by-query timed out part way. */
   closeTimedOut?: boolean;
+  /** Alerts an analyst closes as a false positive after the sweep let them go. */
+  analystClosed?: string[];
   /** Alerts an analyst acknowledged after the search but before the sweep's own check, so the check sees them as not open. */
   acknowledgedEarly?: string[];
   /** Alerts an analyst acknowledged between the sweep's check and its dismissal tag write. */
@@ -110,6 +113,8 @@ const setup = ({
   conflictingVerdicts?: string[];
 }) => {
   const skipTagged = new Set<string>();
+  // Alerts that lost the closed-by-decision tag: the sweep took it off, as after a failed close.
+  const closedTagRemoved = new Set<string>();
   const callKibanaApi = jest.fn(
     async ({ path, body }: { path: string; body?: Record<string, any> }) => {
       if (path.endsWith('/signals/search')) {
@@ -148,12 +153,17 @@ const setup = ({
         }
         // The check of which alerts are closed as a false positive, after a close of unknown outcome.
         if (body?.query?.bool?.filter?.[1]?.term?.['kibana.alert.workflow_status'] === 'closed') {
-          const ids: string[] = body.query.bool.filter[0].ids.values;
-          return {
-            body: {
-              hits: { hits: ids.filter((_id) => !movedOn.includes(_id)).map((_id) => ({ _id })) },
-            },
-          };
+          const filter: Array<Record<string, any>> = body.query.bool.filter;
+          const ids: string[] = filter[0].ids.values;
+          const closedNow = ids.filter(
+            (_id) => !movedOn.includes(_id) || analystClosed.includes(_id)
+          );
+          // An alert that lost the decision tag is not found when the query asks for the tag.
+          const asksForTag = filter.some((part) => part.term?.['kibana.alert.workflow_tags']);
+          const hits = asksForTag
+            ? closedNow.filter((_id) => !closedTagRemoved.has(_id))
+            : closedNow;
+          return { body: { hits: { hits: hits.map((_id) => ({ _id })) } } };
         }
         if (body?.query?.bool?.filter?.[0]?.ids) {
           const open = closeError ? body.query.bool.filter[0].ids.values : movedOn;
@@ -181,6 +191,9 @@ const setup = ({
           ids: string[];
           tags: { tags_to_add: string[]; tags_to_remove: string[] };
         };
+        if (change.tags_to_remove.some((tag) => tag.startsWith('az:closed_by_decision:'))) {
+          ids.forEach((id) => closedTagRemoved.add(id));
+        }
         if (change.tags_to_add.some((tag) => tag.startsWith('az:skipped_by_decision:'))) {
           ids.forEach((id) => skipTagged.add(id));
         }
@@ -1227,6 +1240,26 @@ describe('triage match decisions step in on mode', () => {
         expect(output).toEqual(
           expect.objectContaining({ closed: 1, close_failures: 1, notes_missing: 0 })
         );
+      });
+
+      it('does not credit the sweep with an alert that an analyst closed after the sweep let it go', async () => {
+        // `b` was moved on, so the cleanup took the decision tag off it. An analyst then closes it as
+        // a false positive. It is closed, but not by the sweep, so it gets no note.
+        const { run, callKibanaApi, notes } = setup({
+          mode: 'on',
+          movedOn: ['b'],
+          analystClosed: ['b'],
+          alerts: [
+            ['a', source('C:\\x.exe')],
+            ['b', source('C:\\x.exe')],
+          ],
+          decisions: approved('C:\\x.exe'),
+        });
+        failingRelease(callKibanaApi);
+
+        await run();
+
+        expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
       });
 
       it('counts the alerts as missing a note when it cannot tell which were closed', async () => {

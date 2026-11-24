@@ -324,14 +324,20 @@ export const createDecisionSweep = ({
   };
 
   /**
-   * Which of the alerts of a close whose outcome is unknown were closed, so that they get their
-   * notes. When that cannot be read they count as alerts with no note. `closed` is not changed: it
-   * counts what the close route reported.
+   * Which of the alerts of a close whose outcome is unknown were closed by this sweep, so that they
+   * get their notes. Only alerts that still carry the decision's tag count: the cleanup after a
+   * failed close took it off the alerts that stayed open, so an alert that an analyst closed since
+   * is not credited to the sweep. When that cannot be read they count as alerts with no note.
+   * `closed` is not changed: it counts what the close route reported.
    */
-  const closedAmong = async (unknownIds: string[]): Promise<string[]> => {
+  const closedAmong = async (id: string, unknownIds: string[]): Promise<string[]> => {
     if (unknownIds.length === 0) return [];
     try {
-      return await findAlertsClosedAsFalsePositive(contextManager, unknownIds);
+      return await findAlertsClosedAsFalsePositive(
+        contextManager,
+        unknownIds,
+        closedByDecisionTag(id)
+      );
     } catch (error) {
       totals.notes_missing += unknownIds.length;
       warn('Could not read which alerts of a failed close were closed; they get no note', error);
@@ -350,7 +356,7 @@ export const createDecisionSweep = ({
   const settleClosed = async (id: string, tagged: string[], progress: CloseProgress) => {
     const { closedIds, unknownIds, counted } = progress;
     if ((await statusAfterWrite(id, 'closed its alerts')) !== 'gone') {
-      const noted = [...closedIds, ...(await closedAmong(unknownIds))];
+      const noted = [...closedIds, ...(await closedAmong(id, unknownIds))];
       if (noted.length > 0) queueNotes(id, noted, 'closed');
       return;
     }

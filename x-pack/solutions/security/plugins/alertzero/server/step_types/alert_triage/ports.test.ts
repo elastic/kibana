@@ -823,7 +823,10 @@ describe('helpers that drive a write, on a partial search result', () => {
     ['findOpenAlertIds', (api) => findOpenAlertIds(api, ['a'])],
     ['findStillOpenAlertIds', (api) => findStillOpenAlertIds(api, ['a'])],
     ['findAlertIdsWithTag', (api) => findAlertIdsWithTag(api, ['a'], 'az:skipped_by_decision:x')],
-    ['findAlertsClosedAsFalsePositive', (api) => findAlertsClosedAsFalsePositive(api, ['a'])],
+    [
+      'findAlertsClosedAsFalsePositive',
+      (api) => findAlertsClosedAsFalsePositive(api, ['a'], 'az:closed_by_decision:fp-decision-1'),
+    ],
     ['findAlertsNotClosedAsFalsePositive', (api) => findAlertsNotClosedAsFalsePositive(api, ['a'])],
     [
       'fetchDecisionCandidates',
@@ -892,6 +895,24 @@ describe('findAlertsClosedWithoutFalsePositiveReason', () => {
     const { query } = callKibanaApi.mock.calls[0][0].body;
     expect(query.bool.must_not).toEqual([
       { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
+    ]);
+  });
+});
+
+describe('findAlertsClosedAsFalsePositive', () => {
+  it('asks for closed false positives that still carry the tag, so an alert closed after the tag was taken off is not one of them', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [{ _id: 'a' }] } } });
+
+    const found = await findAlertsClosedAsFalsePositive({ callKibanaApi }, ['a', 'b'], 'az:x');
+
+    expect(found).toEqual(['a']);
+    expect(callKibanaApi.mock.calls[0][0].body.query.bool.filter).toEqual([
+      { ids: { values: ['a', 'b'] } },
+      { term: { 'kibana.alert.workflow_status': 'closed' } },
+      { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
+      { term: { 'kibana.alert.workflow_tags': 'az:x' } },
     ]);
   });
 });

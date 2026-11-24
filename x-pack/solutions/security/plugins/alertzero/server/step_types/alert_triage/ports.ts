@@ -538,13 +538,16 @@ export const findAlertIdsWithTag = async (
 };
 
 /**
- * Which of the given alerts are closed as a false positive. Used to find out which alerts a close
- * whose outcome is unknown did close. A partial result throws: an alert missed would read as not
- * closed and get no note.
+ * Which of the given alerts are closed as a false positive and carry `carryingTag`. Used to find out
+ * which alerts a close whose outcome is unknown did close: the tag is the evidence that the sweep
+ * did it, because the cleanup after a failed close takes it off the alerts that stayed open, so an
+ * alert that an analyst closes after that does not carry it. A partial result throws: an alert
+ * missed would read as not closed and get no note.
  */
 export const findAlertsClosedAsFalsePositive = async (
   { callKibanaApi }: KibanaApi,
-  alertIds: readonly string[]
+  alertIds: readonly string[],
+  carryingTag: string
 ): Promise<string[]> => {
   const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
     method: 'POST',
@@ -558,6 +561,7 @@ export const findAlertsClosedAsFalsePositive = async (
             { ids: { values: [...alertIds] } },
             { term: { [ALERT_FIELDS.status]: 'closed' } },
             { term: { [ALERT_FIELDS.reason]: 'false_positive' } },
+            { term: { [ALERT_FIELDS.tags]: carryingTag } },
           ],
         },
       },
