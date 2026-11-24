@@ -37,29 +37,33 @@ apiTest.describe(
 
     // A POST that slips past the gate and its endpoint checks writes a `running` defend insight
     // before it reaches the connector; remove it so a regression leaves no data on a shared project.
-    // The background graph can update that doc mid-delete, and ES skips a conflicting doc, so retry.
+    // The background graph can update that doc mid-delete, and ES skips a conflicting doc, so retry
+    // (bounded) only when the first delete reports a conflict or failure.
     apiTest.afterAll(async ({ esClient }) => {
+      const deleteInsights = async (): Promise<number> => {
+        const { version_conflicts: versionConflicts = 0, failures = [] } =
+          await esClient.deleteByQuery({
+            index: DEFEND_INSIGHTS_INDEX_PATTERN,
+            query: { terms: { endpoint_ids: [targetId] } },
+            conflicts: 'proceed',
+            ignore_unavailable: true,
+            allow_no_indices: true,
+            expand_wildcards: 'all',
+            refresh: true,
+          });
+        return versionConflicts + failures.length;
+      };
+
+      if ((await deleteInsights()) === 0) {
+        return;
+      }
+
       await expect
-        .poll(
-          async () => {
-            const { version_conflicts: versionConflicts = 0, failures = [] } =
-              await esClient.deleteByQuery({
-                index: DEFEND_INSIGHTS_INDEX_PATTERN,
-                query: { terms: { endpoint_ids: [targetId] } },
-                conflicts: 'proceed',
-                ignore_unavailable: true,
-                allow_no_indices: true,
-                expand_wildcards: 'all',
-                refresh: true,
-              });
-            return versionConflicts + failures.length;
-          },
-          {
-            message: `Defend insights for ${targetId} were left behind after cleanup`,
-            timeout: CLEANUP_TIMEOUT_MS,
-            intervals: [500, 1_000, 2_000],
-          }
-        )
+        .poll(deleteInsights, {
+          message: `Defend insights for ${targetId} were left behind after cleanup`,
+          timeout: CLEANUP_TIMEOUT_MS,
+          intervals: [500, 1_000, 2_000],
+        })
         .toBe(0);
     });
 
