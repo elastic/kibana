@@ -42,6 +42,17 @@ describe('mergeSamples', () => {
     });
   });
 
+  it('keeps each repeated value once', () => {
+    expect(mergeSamples([{ status: 'ok' }, { status: 'ok' }])).toEqual({ status: 'ok' });
+    expect(
+      mergeSamples([{ f: 'a' }, { f: 1 }, { f: 'a' }, { f: '1' }, { f: ['b', 1, 'b'] }])
+    ).toEqual({ f: ['a', 1, '1', 'b'] });
+    expect(mergeSamples([{ tags: ['web', 'web'] }, { tags: 'web' }])).toEqual({ tags: ['web'] });
+    expect(mergeObjectElements([{ score: 1 }, { score: 1 }, { score: 0.5 }])).toEqual({
+      score: [1, 0.5],
+    });
+  });
+
   it('keeps whole and decimal numbers together in an array', () => {
     expect(mergeSamples([{ score: 3 }, { score: 3.14 }])).toEqual({ score: [3, 3.14] });
     expect(mergeSamples([{ score: 3.14 }, { score: 3 }])).toEqual({ score: [3.14, 3] });

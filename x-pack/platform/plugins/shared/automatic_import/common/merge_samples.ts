@@ -19,14 +19,29 @@ const isEmptyValue = (value: unknown): boolean => {
 
 const isScalar = (value: unknown): boolean => value != null && typeof value !== 'object';
 
+/** The values already in each array the merge created, so repeated values are kept once. */
+const seenValues = new WeakMap<unknown[], Set<unknown>>();
+
+const appendDistinct = (target: unknown[], values: readonly unknown[]): unknown[] => {
+  let seen = seenValues.get(target);
+  if (!seen) {
+    seen = new Set(target);
+    seenValues.set(target, seen);
+  }
+  for (const value of values) {
+    if (!seen.has(value)) {
+      seen.add(value);
+      target.push(value);
+    }
+  }
+  return target;
+};
+
 /** Returns the value to keep when a sample has a plain value (not an object or array) for a key. */
 const mergePlainValue = (target: unknown, source: unknown): unknown => {
   if (isEmptyValue(target) && !isEmptyValue(source)) return source;
-  if (Array.isArray(target) && isScalar(source)) {
-    target.push(source);
-    return target;
-  }
-  if (isScalar(target) && isScalar(source)) return [target, source];
+  if (Array.isArray(target) && isScalar(source)) return appendDistinct(target, [source]);
+  if (isScalar(target) && isScalar(source)) return target === source ? target : [target, source];
   return target;
 };
 
@@ -56,13 +71,11 @@ const mergeInto = (target: SampleObject, source: SampleObject): SampleObject => 
             target[key] = [];
           }
         } else if (Array.isArray(targetValue)) {
-          for (const element of sourceValue) {
-            targetValue.push(element);
-          }
+          appendDistinct(targetValue, sourceValue);
         } else if (isObject(targetValue) && !isEmptyValue(targetValue)) {
           mergeObjectElementsInto(targetValue, sourceValue);
         } else {
-          target[key] = isScalar(targetValue) ? [targetValue, ...sourceValue] : [...sourceValue];
+          target[key] = appendDistinct(isScalar(targetValue) ? [targetValue] : [], sourceValue);
         }
       } else if (isObject(sourceValue)) {
         if (isObject(targetValue)) {
@@ -84,10 +97,10 @@ const mergeInto = (target: SampleObject, source: SampleObject): SampleObject => 
 };
 
 /**
- * Deep-merges sample objects into one representative object without changing them. Every plain
- * value is kept: values and arrays under the same key are combined into one array, in sample
- * order, so field types can be inferred from all of them. An object and an array of objects under
- * the same key are merged together, and objects win over plain values.
+ * Deep-merges sample objects into one representative object without changing them. Every distinct
+ * plain value is kept once: values and arrays under the same key are combined into one array, in
+ * sample order, so field types can be inferred from all of them. An object and an array of objects
+ * under the same key are merged together, and objects win over plain values.
  */
 export const mergeSamples = (samples: readonly SampleObject[]): SampleObject => {
   const result = Object.create(null) as SampleObject;
