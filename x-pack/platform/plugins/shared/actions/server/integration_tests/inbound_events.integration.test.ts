@@ -6,6 +6,7 @@
  */
 
 import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs';
+import { defineTopic, type PubSubEvent, type Topic } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { getSupertest } from '@kbn/core-test-helpers-kbn-server';
@@ -35,20 +36,64 @@ interface ScopedActionAttributes {
   hasInboundEventIdentity?: boolean;
 }
 
+interface InboundWebhookBusData {
+  body: unknown;
+  connectorId: string;
+  connectorTypeId: string;
+  spaceId: string;
+  correlationKey: string;
+}
+
+type InboundWebhookReceivedTopic = Topic<InboundWebhookBusData, 'inboundWebhook.received'>;
+
+const inboundWebhookReceivedTopic =
+  defineTopic<InboundWebhookReceivedTopic>('inboundWebhook.received');
+
+const waitForPublished = async (
+  events: Array<PubSubEvent<InboundWebhookBusData>>,
+  marker: string
+): Promise<PubSubEvent<InboundWebhookBusData>> => {
+  const deadline = Date.now() + 10_000;
+  while (Date.now() < deadline) {
+    const match = events.find((event) => {
+      const { body } = event.data;
+      return (
+        typeof body === 'object' && body !== null && 'marker' in body && body.marker === marker
+      );
+    });
+    if (match) {
+      return match;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  throw new Error(`No inboundWebhook.received event with marker ${marker}`);
+};
+
 describe('Inbound events HTTP API', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
+  const publishedWebhooks: Array<PubSubEvent<InboundWebhookBusData>> = [];
 
   beforeAll(async () => {
-    const setupResult = await setupTestServers({
-      xpack: {
-        actions: {
-          inboundEvents: {
-            enabled: true,
+    const setupResult = await setupTestServers(
+      {
+        xpack: {
+          actions: {
+            inboundEvents: {
+              enabled: true,
+            },
           },
         },
       },
-    });
+      (coreSetup) => {
+        coreSetup.pubsub.subscribe('actions-integration-test', inboundWebhookReceivedTopic, {
+          consumer: 'inbound-webhook',
+          handler: (event) => {
+            publishedWebhooks.push(event);
+          },
+        });
+      }
+    );
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
   });
@@ -195,6 +240,45 @@ describe('Inbound events HTTP API', () => {
 
     await postHub(created.id, ingestToken!).expect(404);
     await postHub(created.id, newToken!).expect(202, { ok: true });
+  });
+
+  it('publishes an accepted inbound webhook on inboundWebhook.received', async () => {
+    const createRes = await getSupertest(kibanaServer.root, 'post', '/api/actions/connector')
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'event-bus-ingress',
+        connector_type_id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+        config: {},
+        secrets: { authType: 'none' },
+      })
+      .expect(200);
+    const created = createRes.body as ConnectorHttpBody;
+
+    const mintRes = await getSupertest(
+      kibanaServer.root,
+      'post',
+      `${INTERNAL_BASE_ACTION_API_PATH}/connector/${created.id}/_rotate_event_token`
+    )
+      .set('kbn-xsrf', 'kibana')
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(200);
+    const ingestToken = (mintRes.body as { ingest_token: string }).ingest_token;
+    const marker = 'event-bus';
+
+    await postHub(created.id, ingestToken, { marker }).expect(202, { ok: true });
+
+    const published = await waitForPublished(publishedWebhooks, marker);
+    expect(published.topic).toBe('inboundWebhook.received');
+    expect(published.data).toEqual({
+      body: { marker },
+      connectorId: created.id,
+      connectorTypeId: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+      spaceId: 'default',
+      correlationKey: expect.any(String),
+    });
+    expect(published.id).toBe(
+      JSON.stringify([published.data.spaceId, created.id, published.data.correlationKey])
+    );
   });
 
   it('decodes a Slack slash command form post and returns an empty HTTP 200 ack', async () => {

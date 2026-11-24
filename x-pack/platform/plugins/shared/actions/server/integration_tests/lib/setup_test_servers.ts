@@ -33,7 +33,13 @@ async function waitForLicense(root: ReturnType<typeof createRootWithCorePlugins>
   throw new Error(`Timed out waiting for license to become available (last status ${lastStatus})`);
 }
 
-export async function setupTestServers(settings = {}) {
+type TestCoreSetup = Awaited<ReturnType<ReturnType<typeof createRootWithCorePlugins>['setup']>>;
+
+/** `subscribe` throws once `start` begins, so a real consumer has to be attached in `beforeStart`. */
+export async function setupTestServers(
+  settings = {},
+  beforeStart?: (coreSetup: TestCoreSetup) => void
+) {
   const { startES } = createTestServers({
     adjustTimeout: (t) => jest.setTimeout(t),
     settings: {
@@ -50,6 +56,7 @@ export async function setupTestServers(settings = {}) {
   try {
     await root.preboot();
     const coreSetup = await root.setup();
+    beforeStart?.(coreSetup);
     const coreStart = await root.start();
 
     await waitForLicense(root);
