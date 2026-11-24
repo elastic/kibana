@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { RUN_ACTIONS_FIELD_PATH } from '@kbn/alerts-ui-shared';
 import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormTestProvider } from '../../components/test_utils';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
@@ -126,6 +127,22 @@ describe('EncryptedFieldsCallout', () => {
       expect(getByText(label)).toBeInTheDocument();
     }
   );
+
+  it('hides the secrets callout while Run actions is off', () => {
+    const { queryByTestId } = render(
+      <FormTestProvider>
+        <UseField
+          path={RUN_ACTIONS_FIELD_PATH}
+          config={{ type: FIELD_TYPES.TOGGLE, defaultValue: false }}
+        />
+        <UseField path="secrets.apiKey" config={{ label: 'API Key' }} />
+        <UseField path="secrets.applicationKey" config={{ label: 'Application Key' }} />
+        <EncryptedFieldsCallout isEdit isMissingSecrets={false} />
+      </FormTestProvider>
+    );
+
+    expect(queryByTestId('edit-connector-secrets-callout')).not.toBeInTheDocument();
+  });
 
   it.each(isEditTests)(
     'shows the edit connector callout correctly with number of secrets %d',

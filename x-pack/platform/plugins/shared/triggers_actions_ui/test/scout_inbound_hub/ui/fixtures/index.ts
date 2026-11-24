@@ -28,6 +28,7 @@ export class ConnectorFlyout {
   readonly receiveEventsSwitch;
   readonly runActionsSwitch;
   readonly outboundSettings;
+  readonly editSecretsCallout;
   readonly createSaveButton;
   readonly editSaveButton;
   readonly toastTitle;
@@ -37,6 +38,7 @@ export class ConnectorFlyout {
     this.receiveEventsSwitch = page.testSubj.locator('inbound-events-enabled-switch');
     this.runActionsSwitch = page.testSubj.locator('outbound-actions-enabled-switch');
     this.outboundSettings = page.testSubj.locator('outbound-settings');
+    this.editSecretsCallout = page.testSubj.locator('edit-connector-secrets-callout');
     this.createSaveButton = page.testSubj.locator('create-connector-flyout-save-btn');
     this.editSaveButton = page.testSubj.locator('edit-connector-flyout-save-btn');
     this.toastTitle = page.testSubj.locator('euiToastHeader__title');
