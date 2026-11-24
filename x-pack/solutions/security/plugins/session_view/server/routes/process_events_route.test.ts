@@ -117,7 +117,9 @@ describe('process_events_route.ts', () => {
       const firstTimestamp = mockEvents[0]['@timestamp'];
       const lastTimestamp = mockEvents[mockEvents.length - 1]['@timestamp'];
       // the gap before the first event of a page stops 1 ms before it, as the page query covers that time
-      const beforeFirstTimestamp = new Date(Date.parse(firstTimestamp) - 1).toISOString();
+      const beforeFirstTimestamp = new Date(
+        new Date(firstTimestamp ?? 0).getTime() - 1
+      ).toISOString();
 
       const fetchAndGetAlertsRanges = async (
         cursor: string | undefined,
@@ -207,7 +209,7 @@ describe('process_events_route.ts', () => {
       it('searches the gap when the process events store their time as epoch milliseconds', async () => {
         const cursor = '2021-11-23T15:25:00.000Z';
         const hits = mockEvents.map((event) => ({
-          _source: { ...event, '@timestamp': Date.parse(event['@timestamp']) },
+          _source: { ...event, '@timestamp': new Date(event['@timestamp'] ?? 0).getTime() },
         }));
         const client = elasticsearchServiceMock.createElasticsearchClient(
           (async () => ({ hits: { total: { value: hits.length, relation: 'eq' }, hits } }))()
