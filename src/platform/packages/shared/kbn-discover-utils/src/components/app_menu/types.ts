@@ -22,6 +22,7 @@ export enum AppMenuActionId {
   export = 'export',
   alerts = 'alerts',
   inspect = 'inspect',
+  history = 'history',
   switchLanguageMode = 'switchLanguageMode',
   createRule = 'createRule',
   backgroundsearch = 'backgroundSearch',

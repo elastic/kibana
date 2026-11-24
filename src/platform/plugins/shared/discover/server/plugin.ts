@@ -18,7 +18,9 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { ChangeHistoryClient } from '@kbn/change-history';
 import { registerRoutes } from './api/register_routes';
+import { startChangeHistoryClient } from './change_history/change_history_service';
 import { changePointGridEmbeddableSchema } from './embeddable/change_point_grid_schema';
 import { getChangePointGridTransforms } from './embeddable/change_point_grid_transforms';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
@@ -35,6 +37,8 @@ import { registerSkill } from './agent_builder/register_skill';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import {
+  DISCOVER_SESSION_CHANGE_HISTORY_DATASET,
+  DISCOVER_SESSION_CHANGE_HISTORY_MODULE,
   METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
@@ -47,10 +51,13 @@ export class DiscoverServerPlugin
   private readonly config: ConfigSchema;
   private readonly logger: Logger;
   private readonly profileStateRegistry = createProfileStateRegistry();
+  private changeHistoryClient: ChangeHistoryClient | undefined;
+  private readonly kibanaVersion: string;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = initializerContext.config.get();
     this.logger = initializerContext.logger.get();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(
@@ -67,7 +74,15 @@ export class DiscoverServerPlugin
     core.capabilities.registerProvider(capabilitiesProvider);
     core.uiSettings.register(getUiSettings(core.docLinks, this.config.enableUiSettingsValidations));
 
+    this.changeHistoryClient = new ChangeHistoryClient({
+      module: DISCOVER_SESSION_CHANGE_HISTORY_MODULE,
+      dataset: DISCOVER_SESSION_CHANGE_HISTORY_DATASET,
+      logger: this.logger,
+      kibanaVersion: this.kibanaVersion,
+    });
+
     registerRoutes(
+      core,
       core.http,
       core.userActivity,
       this.logger,
@@ -132,6 +147,10 @@ export class DiscoverServerPlugin
   }
 
   public start(core: CoreStart, deps: DiscoverServerPluginStartDeps) {
+    if (this.changeHistoryClient) {
+      startChangeHistoryClient(this.changeHistoryClient, core, this.logger);
+    }
+
     return { locator: initializeLocatorServices(core, deps) };
   }
 }

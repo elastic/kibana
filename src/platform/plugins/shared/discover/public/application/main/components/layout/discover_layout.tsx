@@ -46,6 +46,7 @@ import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import type { DiscoverTopNavProps } from '../top_nav/discover_topnav';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
+import { DiscoverChangeHistoryProvider } from '../../../../change_history/discover_change_history_provider';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import type { DataMainMsg } from '../../state_management/discover_data_state_container';
@@ -82,7 +83,9 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   // QueryClientProvider is used to allow querying the authorized rules api hook
   <QueryClientProvider client={queryClient}>
-    <DiscoverTopNav {...props} />
+    <DiscoverChangeHistoryProvider>
+      <DiscoverTopNav {...props} />
+    </DiscoverChangeHistoryProvider>
   </QueryClientProvider>
 ));
 

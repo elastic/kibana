@@ -95,6 +95,10 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
   } as DiscoverServices;
 };
 
+jest.mock('@kbn/change-history-ui', () => ({
+  useChangeHistoryModal: () => ({ openModal: jest.fn() }),
+}));
+
 describe('useTopNavLinks', () => {
   const setup = async (hookAttrs: Partial<UseTopNavLinksParams> = {}) => {
     const services = hookAttrs.services ?? createTestServices();

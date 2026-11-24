@@ -92,6 +92,10 @@ const mockSearchBarCustomizationWithHiddenDataViewPicker: SearchBarCustomization
 
 let mockUseCustomizations = false;
 
+jest.mock('@kbn/change-history-ui', () => ({
+  useChangeHistoryModal: () => ({ openModal: jest.fn() }),
+}));
+
 jest.mock('../../../../customizations', () => ({
   ...jest.requireActual('../../../../customizations'),
   useDiscoverCustomization: jest.fn(),

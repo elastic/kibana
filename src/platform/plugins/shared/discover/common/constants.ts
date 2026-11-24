@@ -77,3 +77,13 @@ export const DISCOVER_SESSION_INTERNAL_API_BASE_PATH = '/internal/discover_sessi
 export const DISCOVER_SESSION_API_ACCESS = 'public' as const;
 export const DISCOVER_SESSION_API_VERSION = '2023-10-31';
 export const DISCOVER_SESSION_INTERNAL_API_VERSION = '1';
+
+/**
+ * Discover session change history
+ */
+export const DISCOVER_SESSION_CHANGE_HISTORY_API_VERSION = '1';
+export const DISCOVER_SESSION_CHANGE_HISTORY_MODULE = 'discover';
+export const DISCOVER_SESSION_CHANGE_HISTORY_DATASET = 'discover-sessions';
+export const DISCOVER_SESSION_CHANGE_HISTORY_OBJECT_TYPE = 'discover-session';
+export const DISCOVER_SESSION_DELETE_ACTION = 'discover_session_delete';
+export const DISCOVER_SESSION_UNSAVED_CHANGES_ACTION = 'discover_session_unsaved_changes';

@@ -9,6 +9,7 @@
 
 import type { CoreSetup, HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { registerChangeHistoryRoutes } from '../change_history/register_routes';
 import { registerCreateRoute } from './register_create_route';
 import { registerDeleteRoute } from './register_delete_route';
 import { registerGetRoute } from './register_get_route';
@@ -18,6 +19,7 @@ import { registerSearchRoute } from './register_search_route';
 import { registerSanitizeRoute } from './register_sanitize_route';
 
 export const registerRoutes = (
+  core: CoreSetup,
   http: HttpServiceSetup,
   userActivity: CoreSetup['userActivity'],
   logger: Logger,
@@ -32,4 +34,5 @@ export const registerRoutes = (
   registerDeleteRoute(versioned, userActivity, logger, usageCounter);
   registerSanitizeRoute(versioned, logger);
   registerInternalRoutes(versioned, userActivity, logger);
+  registerChangeHistoryRoutes(core, versioned, logger);
 };

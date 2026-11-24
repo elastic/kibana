@@ -132,7 +132,9 @@ export const registerInternalRoutes = (
             return response.created({ body });
           }
 
-          const savedObject = await updateStoredDiscoverSession(context, id, storedSession);
+          const savedObject = await updateStoredDiscoverSession(context, id, storedSession, {
+            previousSession: existing,
+          });
           const { body } = toInternalSessionResponse(savedObject);
           trackDiscoverSessionAction(userActivity, 'update', body);
 
