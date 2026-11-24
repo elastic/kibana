@@ -46,6 +46,8 @@ import {
   assertExecutionSuccessRate,
   executionSuccessEvaluator,
   getExecutionFailure,
+  MIN_EXECUTION_SUCCESS_RATE,
+  MIN_SLICE_EXECUTION_SUCCESS_RATE,
 } from './execution_success';
 
 // CI runs the suite on a serverless observability Scout cluster.
@@ -319,9 +321,15 @@ export const registerInvestigationEvaluation = ({
         for (const { caseId, reason } of failures) {
           log.warning(`Investigation ${caseId} did not complete: ${reason}`);
         }
-        assertExecutionSuccessRate(failures, runs.length);
+        const minimumSuccessRate = selectExamples
+          ? MIN_SLICE_EXECUTION_SUCCESS_RATE
+          : MIN_EXECUTION_SUCCESS_RATE;
+        assertExecutionSuccessRate(failures, runs.length, minimumSuccessRate);
         if (orca)
-          assertOrcaReportsWritten(runs.map(({ output }) => output as InvestigationTaskOutput));
+          assertOrcaReportsWritten(
+            runs.map(({ output }) => output as InvestigationTaskOutput),
+            minimumSuccessRate
+          );
         const casesWithOrcaTelemetry: string[] = [];
 
         await pMap(

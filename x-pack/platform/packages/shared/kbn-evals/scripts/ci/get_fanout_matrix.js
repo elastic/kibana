@@ -8,8 +8,9 @@
 
 // Builds the fanout matrix for `run_suite.sh`: one JSON object per line (JSONL) on stdout, each
 // `{ connectorId, shardId, specFiles }` (`specFiles` is an array), plus `judge` when the shard pins
-// its evaluation connector and `concurrencyGroup` when it runs in one of the suite's named groups. `run_suite.sh` reads the fields with `jq`, so there is no positional/tab
-// parsing that could mangle an empty shard id.
+// its evaluation connector and `concurrencyGroup` when it runs in one of the suite's named groups.
+// `run_suite.sh` reads the fields with `jq`, so there is no positional/tab parsing that could
+// mangle an empty shard id.
 //
 // Weekly (`KBN_EVALS_WEEKLY`) + `specModelGroups[]` with models: for each shard (or one virtual
 // batch of `specModelGroups[].files` when there are no shards), each connector matching

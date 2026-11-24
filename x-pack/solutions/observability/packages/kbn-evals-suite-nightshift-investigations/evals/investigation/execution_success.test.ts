@@ -9,6 +9,7 @@ import {
   assertExecutionSuccessRate,
   executionSuccessEvaluator,
   getExecutionFailure,
+  MIN_SLICE_EXECUTION_SUCCESS_RATE,
 } from './execution_success';
 import { NO_CONCLUSION_ERROR } from './task';
 import type { InvestigationTaskOutput } from './types';
@@ -76,6 +77,15 @@ describe('assertExecutionSuccessRate', () => {
     expect(() => assertExecutionSuccessRate(failures, 42)).toThrow(
       /22 of 42 investigations completed \(52%\), below the 80% threshold:\n- case-0: .*\n- case-1:/
     );
+  });
+
+  it('passes a slice that lost a few cases, but fails one an outage emptied', () => {
+    expect(() =>
+      assertExecutionSuccessRate(Array(3).fill(failure), 10, MIN_SLICE_EXECUTION_SUCCESS_RATE)
+    ).not.toThrow();
+    expect(() =>
+      assertExecutionSuccessRate(Array(5).fill(failure), 10, MIN_SLICE_EXECUTION_SUCCESS_RATE)
+    ).toThrow('5 of 10 investigations completed (50%), below the 60% threshold');
   });
 
   it('fails a single-case dataset whose only run failed, and an empty run', () => {

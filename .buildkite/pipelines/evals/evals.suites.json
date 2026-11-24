@@ -160,7 +160,7 @@
         "eis/openai-gpt-5.6-sol",
         "eis/openai-gpt-5.6-terra"
       ],
-      "stepTimeoutInMinutes": 240,
+      "stepTimeoutInMinutes": 120,
       "fanoutConcurrency": 12,
       "concurrencyGroups": {
         "sandbox-heavy": 2

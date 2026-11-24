@@ -1236,8 +1236,9 @@ Every root-cause event of the 755 falls inside the ORCA cluster's data. Its logs
 metrics each cover every hour from 2026-04-19T03:00Z through the 2026-04-24T19:00Z hour, which
 holds ORCA's last snapshot.
 
-The 755 is a periodic baseline, not a CI shard. Each `orcabench-<index>-of-5` shard budgets 240
-minutes for its 10 of the sampled 50 tasks, and release-gate issue elastic/nightshift-program#1893 wants gates under 30 minutes. At
+The 755 is a periodic baseline, not a CI shard. Each `orcabench-<index>-of-5` shard budgets 120
+minutes for its 10 of the sampled 50 tasks, and release-gate issue
+elastic/nightshift-program#1893 wants gates under 30 minutes. At
 eight investigations at a time the 755 needs tens of hours, so run it in slices. The score API
 returns at most 10,000 scores per experiment, so a run that would write more (the unsliced 755
 writes about 13,600) fails before any investigation starts.
@@ -1282,8 +1283,9 @@ themselves don't use it.
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any
   investigation starts, as does a source or key that fails the [preflight](#telemetry-cutoff).
 - Each task runs once, at most eight at a time, and Playwright doesn't retry the test.
-- The eval fails when fewer than 80% of investigations complete, or when none returned ORCA
-  telemetry. Judge scores are advisory.
+- The eval fails when fewer than 80% of investigations complete (60% for one slice, whose 10 tasks
+  are too few for the full-run rate), or when none returned ORCA telemetry. Judge scores are
+  advisory.
 - All shards draw on one sandbox pool. When it runs out, investigations end without a
   conclusion and the eval fails, so leave room for overlapping builds.
 
@@ -1307,7 +1309,13 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** the same shards on PRs, weekly and daily, each on its own Scout server. ORCA runs as five slices of the sampled 50, each on its own agent. The two Customer-0 shards run up to 16 sandbox investigations each, so they share the `sandbox-heavy` concurrency group, capped at 2 across builds; the ORCA slices and reinforcement share a cap of 12. One build runs every shard at once, and when PR runs overlap, only the Customer-0 shards wait:
+- **What runs:** the same shards on PRs, weekly and daily, each on its own Scout server. ORCA
+  runs as five slices of the sampled 50, each on its own agent. The two Customer-0 shards run up
+  to 16 sandbox investigations each, so they share the `sandbox-heavy` concurrency group, capped
+  at 2 across builds; the ORCA slices and reinforcement share a cap of 12. A single-model build
+  runs every shard at once, and when such builds overlap, only the Customer-0 shards wait. The
+  weekly run's three models queue for both caps, and while it runs a PR's Customer-0 shards can
+  wait up to an hour:
 
   | Shard                        | Dataset                                                      | Judge                  |
   | ---------------------------- | ------------------------------------------------------------ | ---------------------- |

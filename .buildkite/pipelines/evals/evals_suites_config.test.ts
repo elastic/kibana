@@ -110,6 +110,18 @@ describe('evals.suites.json shards', () => {
     expect(problems).toEqual([]);
   });
 
+  it('gives fanoutConcurrency a positive integer when set', () => {
+    // run_suite.sh writes it into the fanout YAML as is, so a bad value only fails at upload.
+    const problems = suites
+      .filter(
+        ({ fanoutConcurrency: limit }) =>
+          limit !== undefined && (!Number.isInteger(limit) || limit < 1)
+      )
+      .map(({ id, fanoutConcurrency }) => `${id}: fanoutConcurrency is ${fanoutConcurrency}`);
+
+    expect(problems).toEqual([]);
+  });
+
   it('only names concurrency groups the suite defines, each with a positive limit', () => {
     const problems = shardedSuites.flatMap(
       ({ id: suiteId, shards = [], concurrencyGroups = {} }) => [

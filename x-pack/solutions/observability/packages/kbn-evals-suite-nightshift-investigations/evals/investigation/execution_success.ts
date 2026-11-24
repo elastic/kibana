@@ -18,6 +18,13 @@ export const EXECUTION_SUCCESS_EVALUATOR = 'execution_success';
  */
 export const MIN_EXECUTION_SUCCESS_RATE = 0.8;
 
+/**
+ * The same gate for a run of one slice of a dataset. At 88-92% completion a 10-task slice falls
+ * below 80% 4-11% of the time, so one of five slices would fail 19-44% of builds. At 60% the five
+ * fail together about as often as the unsliced run did, and an outage still fails each of them.
+ */
+export const MIN_SLICE_EXECUTION_SUCCESS_RATE = 0.6;
+
 /** Why a run didn't complete its investigation, or undefined when it did. */
 export const getExecutionFailure = (
   output: InvestigationTaskOutput | null | undefined
