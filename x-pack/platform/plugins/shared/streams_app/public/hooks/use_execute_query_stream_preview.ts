@@ -48,7 +48,7 @@ export function useExecuteQueryStreamPreview() {
       const limitedQuery = esqlQuery.concat(' | limit 100');
       const result = await executeEsqlQuery({
         query: limitedQuery,
-        search: data.search.search,
+        search: data.search,
         start: timeState.start,
         end: timeState.end,
         uiSettings,
@@ -56,7 +56,7 @@ export function useExecuteQueryStreamPreview() {
 
       return esqlResultToPlainObjects<SampleDocument>(result);
     },
-    [data.search.search, timeState.start, timeState.end, uiSettings]
+    [data.search, timeState.start, timeState.end, uiSettings]
   );
 
   return {

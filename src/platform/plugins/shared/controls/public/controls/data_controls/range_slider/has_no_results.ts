@@ -145,7 +145,7 @@ export async function hasNoEsqlResults({
       esqlQuery,
     }),
     signal: abortSignal,
-    search: dataService.search.search,
+    search: dataService.search,
     esqlVariables: esqlVariables ?? [],
     timezone: getControlsTimezone(),
   });

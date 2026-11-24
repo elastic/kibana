@@ -224,6 +224,7 @@ describe('createChatModel', () => {
         bindTo: jest.fn(),
         listConnectors: jest.fn(),
         getConnectorById: jest.fn(),
+        decide: jest.fn(),
       };
       createClientMock.mockReturnValue(inferenceClient);
       const connector: InferenceConnector = {

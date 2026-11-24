@@ -32,6 +32,9 @@ import type {
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerAutomationSuggestionRoutes } from './routes/automation_suggestions';
+import { registerSessionEventsRoutes } from './routes/session_events';
+import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -42,6 +45,10 @@ import { createFeedbackAnalysisChangeHandler } from './feedback_analysis/change_
 import { createDreamingChangeHandler } from './dreaming/change_handler';
 import type { DreamingScheduleService, DreamingWorkflowsApi } from './dreaming/schedule';
 import { createDreamingScheduleService } from './dreaming/schedule';
+import {
+  createSourceAutomationsChangeHandler,
+  type AutomationWorkflowsApi,
+} from './automation_templates/source_automations';
 import { AiIndexChangeNotifier } from './ai_indices/changes';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
@@ -93,7 +100,11 @@ export class ContextEnginePlugin
   private readonly aiIndexChanges: AiIndexChangeNotifier;
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
-    (DeleteWorkflowsApi & KiVerifierWorkflowRunner & DreamingWorkflowsApi) | undefined
+    | (DeleteWorkflowsApi &
+        KiVerifierWorkflowRunner &
+        DreamingWorkflowsApi &
+        AutomationWorkflowsApi)
+    | undefined
   > = Promise.resolve(undefined);
 
   constructor(context: PluginInitializerContext) {
@@ -252,6 +263,31 @@ export class ContextEnginePlugin
         return this.dreamingScheduleService;
       }, isDreamingAvailable)
     );
+    this.aiIndexChanges.register(
+      createSourceAutomationsChangeHandler({
+        logger: this.logger.get('source_automations'),
+        getAiIndexService,
+        getWorkflowsManagement: () => this.workflowsManagementApiPromise,
+        canManageWorkflows: async (request, spaceId, operation) => {
+          const [, { security }] = await coreSetup.getStartServices();
+          if (!security) {
+            return true;
+          }
+          const { hasAllRequested } = await security.authz
+            .checkPrivilegesWithRequest(request)
+            .atSpace(spaceId, {
+              kibana: WorkflowsManagementOperationPrivileges[operation].map((privilege) =>
+                security.authz.actions.api.get(privilege)
+              ),
+            });
+          return hasAllRequested;
+        },
+        getScopedEsClient: async (request) => {
+          const [coreStart] = await coreSetup.getStartServices();
+          return coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+        },
+      })
+    );
 
     const isGlobalSettingEnabled = async (request: KibanaRequest, settingId: string) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -352,6 +388,49 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    registerAutomationSuggestionRoutes({
+      router,
+      getAiIndexService,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSecurity: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.security;
+      },
+      getWorkflows: () => this.workflowsManagementApiPromise,
+    });
+
+    registerSessionEventsRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSessionEventsService: async () => {
+        const [, , contextEngineStart] = await coreSetup.getStartServices();
+        return contextEngineStart.getSessionEventsService();
+      },
+      getAiIndexService,
+      isMemoryEnabled,
+    });
+
+    registerSessionMemoryRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSessionMemoryService: async () => {
+        const [, , contextEngineStart] = await coreSetup.getStartServices();
+        return contextEngineStart.getSessionMemoryService();
+      },
+      getAiIndexService,
+      isMemoryEnabled,
+      logger: this.logger.get('session_memory'),
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
     };
@@ -364,7 +443,10 @@ export class ContextEnginePlugin
       this.workflowsManagementApiPromise = coreSetup.plugins
         .onSetup<{
           workflowsManagement: {
-            management: DeleteWorkflowsApi & KiVerifierWorkflowRunner & DreamingWorkflowsApi;
+            management: DeleteWorkflowsApi &
+              KiVerifierWorkflowRunner &
+              DreamingWorkflowsApi &
+              AutomationWorkflowsApi;
           };
         }>('workflowsManagement')
         .then(({ workflowsManagement }) =>

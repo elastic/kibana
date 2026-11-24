@@ -36,7 +36,7 @@ describe('digitalExperienceRouter', () => {
   });
 
   it('heals an unknown source to the Classic one', () => {
-    const location = { ...locationOf('/my-app'), search: '?source=mobile' };
+    const location = { ...locationOf('/my-app'), search: '?source=unknown' };
 
     expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
       expect.objectContaining({
@@ -47,13 +47,55 @@ describe('digitalExperienceRouter', () => {
   });
 
   it('removes an unknown source filter from the list', () => {
-    const location = { ...locationOf('/'), search: '?rangeFrom=now-15m&sourceFilter=mobile' };
+    const location = { ...locationOf('/'), search: '?rangeFrom=now-15m&sourceFilter=unknown' };
 
     expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
       expect.objectContaining({
         patched: expect.objectContaining({ query: { rangeFrom: 'now-15m' } }),
       })
     );
+  });
+
+  it('removes an OS or release longer than the KPI route accepts, so the page never fails with a 400', () => {
+    const location = {
+      ...locationOf('/my-app'),
+      search: `?source=otel&osName=${'o'.repeat(65)}&release=${'r'.repeat(1025)}`,
+    };
+
+    expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
+      expect.objectContaining({
+        constructor: InvalidRouteParamsException,
+        patched: expect.objectContaining({ query: { source: 'otel' } }),
+      })
+    );
+  });
+
+  it('removes an environment longer than the routes accept', () => {
+    const location = {
+      ...locationOf('/'),
+      search: `?rangeFrom=now-15m&environment=${'e'.repeat(1025)}`,
+    };
+
+    expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
+      expect.objectContaining({
+        patched: expect.objectContaining({ query: { rangeFrom: 'now-15m' } }),
+      })
+    );
+  });
+
+  it('keeps an OS, release and environment up to the longest the routes accept', () => {
+    const query = {
+      environment: 'e'.repeat(1024),
+      source: 'otel',
+      osName: 'o'.repeat(64),
+      release: 'r'.repeat(1024),
+    };
+    const location = { ...locationOf('/my-app'), search: `?${new URLSearchParams(query)}` };
+
+    expect(digitalExperienceRouter.getParams('/{serviceName}', location)).toEqual({
+      path: { serviceName: 'my-app' },
+      query,
+    });
   });
 
   it('links an application with its source', () => {
@@ -98,7 +140,9 @@ describe('digitalExperienceRouter', () => {
   it('removes invalid sessions list params', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
-      search: `?source=otel&withJsErrors=true&withFailedRequests=true&duration=forever&sortField=error_count&page=1001&perPage=30&os=&country=${'X'.repeat(
+      search: `?source=otel&withJsErrors=true&withFailedRequests=true&frustrationTarget=${'X'.repeat(
+        1025
+      )}&frustrationPage=&duration=forever&sortField=error_count&page=1001&perPage=30&os=&country=${'X'.repeat(
         17
       )}&browser=Chrome`,
     };
@@ -121,7 +165,7 @@ describe('digitalExperienceRouter', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
       search:
-        '?source=otel&withJsErrors=true&withFailedRequests=false&sortField=http_failed_request_count&page=2&perPage=50&browser=Chrome',
+        '?source=otel&withJsErrors=true&withFailedRequests=false&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout&sortField=frustration_count&page=2&perPage=50&browser=Chrome',
     };
 
     expect(digitalExperienceRouter.getParams('/{serviceName}/sessions', location)).toEqual({
@@ -130,7 +174,10 @@ describe('digitalExperienceRouter', () => {
         source: 'otel',
         withJsErrors: true,
         withFailedRequests: false,
-        sortField: 'http_failed_request_count',
+        withFrustration: true,
+        frustrationTarget: '#pay',
+        frustrationPage: '/checkout',
+        sortField: 'frustration_count',
         page: 2,
         perPage: 50,
         browser: 'Chrome',

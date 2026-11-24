@@ -19,11 +19,18 @@ export class EndpointListPage {
   readonly table: Locator;
   readonly total: Locator;
   readonly respondMenuItem: Locator;
+  readonly rowActionsMenu: Locator;
+  readonly releaseMenuItem: Locator;
+  /** Respond inside the open row action menu, so a `console` subject elsewhere on the page does not match. */
+  readonly respondInRowActionsMenu: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.table = this.page.testSubj.locator('endpointListTable');
     this.total = this.page.testSubj.locator('endpointListTableTotal');
     this.respondMenuItem = this.page.testSubj.locator('console');
+    this.rowActionsMenu = this.page.testSubj.locator('tableRowActionsMenuPanel');
+    this.releaseMenuItem = this.rowActionsMenu.getByTestId('unIsolateLink');
+    this.respondInRowActionsMenu = this.rowActionsMenu.getByTestId('console');
   }
 
   /** Opens the list; `query` is passed as the `sort_field` / `sort_direction` URL params. */
@@ -79,6 +86,10 @@ export class EndpointListPage {
   /** The action status badge (for example "Isolated") in the row for `hostname`; absent when the host has none. */
   actionStatusesFor(hostname: string): Locator {
     return this.rowFor(hostname).getByTestId('rowHostStatus-actionStatuses');
+  }
+
+  async openRowActions(hostname: string): Promise<void> {
+    await this.rowFor(hostname).getByTestId('endpointTableRowActions').click();
   }
 
   /** Opens the row action menu for `hostname` and chooses Respond. */
