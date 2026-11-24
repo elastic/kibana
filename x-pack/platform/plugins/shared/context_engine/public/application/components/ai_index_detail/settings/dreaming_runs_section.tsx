@@ -80,7 +80,7 @@ export const DreamingRunsSection = ({
         'xpack.contextEngine.aiIndexDetail.dreaming.runs.disabledNoReadExecutionPermission',
         {
           defaultMessage:
-            'You need permission to read managed workflows and their executions to run',
+            'You need the workflowsManagement:read, workflowsManagement:readExecution, and workflowsManagement:managed:readExecution privileges to run',
         }
       );
     }

@@ -147,7 +147,7 @@ describe('DreamingRunsSection', () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByText(
-        'You need permission to read managed workflows and their executions to run'
+        'You need the workflowsManagement:read, workflowsManagement:readExecution, and workflowsManagement:managed:readExecution privileges to run'
       )
     ).not.toBeInTheDocument();
     expect(screen.queryByText('Add fact or entity types to run')).not.toBeInTheDocument();
@@ -165,7 +165,9 @@ describe('DreamingRunsSection', () => {
 
     expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
     expect(
-      screen.getByText('You need permission to read managed workflows and their executions to run')
+      screen.getByText(
+        'You need the workflowsManagement:read, workflowsManagement:readExecution, and workflowsManagement:managed:readExecution privileges to run'
+      )
     ).toBeInTheDocument();
   });
 
@@ -180,7 +182,9 @@ describe('DreamingRunsSection', () => {
 
     expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
     expect(
-      screen.getByText('You need permission to read managed workflows and their executions to run')
+      screen.getByText(
+        'You need the workflowsManagement:read, workflowsManagement:readExecution, and workflowsManagement:managed:readExecution privileges to run'
+      )
     ).toBeInTheDocument();
   });
 
@@ -195,7 +199,9 @@ describe('DreamingRunsSection', () => {
 
     expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
     expect(
-      screen.getByText('You need permission to read managed workflows and their executions to run')
+      screen.getByText(
+        'You need the workflowsManagement:read, workflowsManagement:readExecution, and workflowsManagement:managed:readExecution privileges to run'
+      )
     ).toBeInTheDocument();
   });
 
