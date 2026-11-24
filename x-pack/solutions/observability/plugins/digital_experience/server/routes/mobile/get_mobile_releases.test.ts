@@ -159,16 +159,58 @@ describe('getMobileReleases', () => {
 
     const { series } = await run();
 
-    expect(series).toEqual([
-      {
-        release: '1',
-        isOther: false,
-        points: [
-          { timestamp: START, sessions: 50, errorRate: 0 },
-          { timestamp: START + HOUR, sessions: 40, errorRate: 0.5 },
-        ],
-      },
+    expect(series.map(({ release, isOther }) => ({ release, isOther }))).toEqual([
+      { release: '1', isOther: false },
     ]);
+    expect(series[0].points).toEqual(
+      expect.arrayContaining([
+        { timestamp: START, sessions: 50, errorRate: 0 },
+        { timestamp: START + HOUR, sessions: 40, errorRate: 0.5 },
+      ])
+    );
+  });
+
+  it('gives every release every bucket of the range, an empty one with no sessions nor rate', async () => {
+    const { run } = setup({
+      top: [
+        { release: '1', sessions: 300 },
+        { release: '2', sessions: 200 },
+      ],
+      totals: [total('1', 300), total('2', 200)],
+      // Release 2 has no documents in the first bucket, release 1 none in the second
+      series: [
+        { release_group: '1', bucket: new Date(START).toISOString(), sessions: 50, exceptions: 5 },
+        {
+          release_group: '2',
+          bucket: new Date(START + HOUR).toISOString(),
+          sessions: 20,
+          exceptions: 0,
+        },
+      ],
+    });
+
+    const { series, histogram } = await run();
+
+    expect(histogram.interval.unit).toBe('s');
+    const step = histogram.interval.value * 1000;
+    const timestamps = series[0].points.map(({ timestamp }) => timestamp);
+    // Every bucket of the day, from the one the range starts in
+    expect(timestamps[0]).toBe(Math.floor(START / step) * step);
+    expect(timestamps.length).toBe(Math.ceil((END - timestamps[0]) / step));
+    expect(series[1].points.map(({ timestamp }) => timestamp)).toEqual(timestamps);
+    const pointAt = (index: number, timestamp: number) =>
+      series[index].points.find((point) => point.timestamp === timestamp);
+    expect(pointAt(1, START)).toEqual({ timestamp: START, sessions: 0, errorRate: null });
+    expect(pointAt(0, START + HOUR)).toEqual({
+      timestamp: START + HOUR,
+      sessions: 0,
+      errorRate: null,
+    });
+    expect(pointAt(0, START + step)).toEqual({
+      timestamp: START + step,
+      sessions: 0,
+      errorRate: null,
+    });
   });
 
   it('leaves the error rate of a bucket below 10 sessions out: 9 has none', async () => {
@@ -188,10 +230,12 @@ describe('getMobileReleases', () => {
 
     const { series } = await run();
 
-    expect(series[0].points).toEqual([
-      { timestamp: START, sessions: 10, errorRate: 0.1 },
-      { timestamp: START + HOUR, sessions: 9, errorRate: null },
-    ]);
+    expect(series[0].points).toEqual(
+      expect.arrayContaining([
+        { timestamp: START, sessions: 10, errorRate: 0.1 },
+        { timestamp: START + HOUR, sessions: 9, errorRate: null },
+      ])
+    );
   });
 
   it('marks the releases first seen in the range, not those from before, looking 30 days back', async () => {

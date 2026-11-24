@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sortBy } from 'lodash';
+import { groupBy, keyBy, sortBy, sortedUniq } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { RESULT_COLUMNS } from '../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobile/filters';
@@ -23,12 +23,13 @@ import {
 } from '../../../common/mobile/releases';
 import type {
   MobileReleaseMarker,
+  MobileReleasePoint,
   MobileReleaseRow,
   MobileReleaseSeries,
   MobileReleasesResponse,
 } from '../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../lib/esql';
-import { getHistogramInterval } from '../../lib/helpers/time_series';
+import { getBucketTimestamps, getHistogramInterval } from '../../lib/helpers/time_series';
 import { withReleaseCounts } from '../../lib/mobile/queries';
 import type { ReleaseRow } from '../../lib/mobile/rows';
 
@@ -112,27 +113,45 @@ export const getMobileReleases = async ({
   // Most sessions first, "Other" always last.
   const releases = sortBy(rows, [({ isOther }) => isOther, ({ sessions }) => -sessions]);
 
-  const series: MobileReleaseSeries[] = releases.map(({ release, isOther }) => ({
-    release,
-    isOther,
-    points: sortBy(
-      seriesRows
-        .filter((row) => (row[RESULT_COLUMNS.releaseGroup] ?? OTHER_RELEASE_KEY) === release)
-        .map((row) => {
-          const sessions = row[RESULT_COLUMNS.sessions] ?? 0;
-          return {
-            timestamp: Date.parse(row[RESULT_COLUMNS.bucket]),
-            sessions,
-            // A bucket with few sessions swings from 0 to a spike on one exception.
-            errorRate:
-              sessions >= MIN_BUCKET_SESSIONS
-                ? errorRateOf(sessions, row[RESULT_COLUMNS.exceptions] ?? 0)
-                : null,
-          };
-        }),
+  // The query leaves out a bucket a release has no documents in: charts would draw across it, so
+  // every release gets every bucket, an empty one with no sessions and no error rate.
+  const pointRows = seriesRows.map((row) => {
+    const sessions = row[RESULT_COLUMNS.sessions] ?? 0;
+    const point: MobileReleasePoint = {
+      timestamp: Date.parse(row[RESULT_COLUMNS.bucket]),
+      sessions,
+      // A bucket with few sessions swings from 0 to a spike on one exception.
+      errorRate:
+        sessions >= MIN_BUCKET_SESSIONS
+          ? errorRateOf(sessions, row[RESULT_COLUMNS.exceptions] ?? 0)
+          : null,
+    };
+    return { release: row[RESULT_COLUMNS.releaseGroup] ?? OTHER_RELEASE_KEY, point };
+  });
+  const timestamps =
+    pointRows.length === 0
+      ? []
+      : sortedUniq(
+          sortBy([
+            ...getBucketTimestamps(start, end, histogram.interval),
+            ...pointRows.map(({ point }) => point.timestamp),
+          ])
+        );
+  const pointsByRelease = groupBy(pointRows, 'release');
+
+  const series: MobileReleaseSeries[] = releases.map(({ release, isOther }) => {
+    const byTimestamp = keyBy(
+      (pointsByRelease[release] ?? []).map(({ point }) => point),
       'timestamp'
-    ),
-  }));
+    );
+    return {
+      release,
+      isOther,
+      points: timestamps.map(
+        (timestamp) => byTimestamp[timestamp] ?? { timestamp, sessions: 0, errorRate: null }
+      ),
+    };
+  });
 
   const markers: MobileReleaseMarker[] = sortBy(
     firstSeenRows.map((row) => ({

@@ -15,12 +15,14 @@ import {
   CurveType,
   LineAnnotation,
   LineSeries,
+  type PartialTheme,
   Position,
   ScaleType,
   Settings,
   Tooltip,
 } from '@elastic/charts';
 import {
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -29,7 +31,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { sortBy, uniqBy } from 'lodash';
+import { groupBy, mapValues, sortBy, sortedLastIndex, sumBy, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import {
@@ -40,12 +42,14 @@ import {
 import type { HistogramBuckets } from '../../../../../common/types/applications';
 import type {
   MobileReleaseMarker,
+  MobileReleasePoint,
   MobileReleaseRow,
   MobileReleaseSeries,
 } from '../../../../../common/types/mobile';
 import { ChartArea } from '../../../../components/chart_area';
 import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
 import { useFormatters } from '../../../../hooks/use_formatters';
+import { usePersistedChoice } from '../../../../hooks/use_persisted_choice';
 import { MOBILE_ERROR_RATE_DESCRIPTION } from '../../../../labels';
 import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../../utils/brush_time_range';
@@ -56,6 +60,9 @@ import { getTimeChartXDomain } from '../../../../utils/histogram_interval';
 const CHART_HEIGHT = 240;
 
 const HIDDEN_AXIS_LINES = { tickLine: { visible: false }, axisLine: { visible: false } };
+
+/** Room above the plot for the release markers' labels, which would be clipped at its edge. */
+const MARKER_LABEL_ROOM: PartialTheme = { chartMargins: { top: 20 } };
 
 const ERROR_RATE_TITLE = i18n.translate('xpack.digitalExperience.mobile.releases.errorRate.title', {
   defaultMessage: 'Error rate by release',
@@ -114,6 +121,7 @@ interface ReleaseChartProps {
 function ChartPanel({
   title,
   tooltip,
+  actions,
   hasData,
   emptyMessage,
   'data-test-subj': dataTestSubj,
@@ -121,6 +129,8 @@ function ChartPanel({
 }: {
   title: string;
   tooltip: string;
+  /** Controls at the end of the header, e.g. what the chart plots. */
+  actions?: ReactNode;
   hasData: boolean;
   emptyMessage: string;
   'data-test-subj': string;
@@ -134,9 +144,10 @@ function ChartPanel({
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={!actions}>
           <EuiIconTip content={tooltip} type="info" />
         </EuiFlexItem>
+        {actions && <EuiFlexItem grow={false}>{actions}</EuiFlexItem>}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <ChartArea
@@ -151,25 +162,54 @@ function ChartPanel({
   );
 }
 
-/** A line at each release's first appearance, labelled with the release. */
-function FirstSeenMarkers({ markers, colors }: Pick<ReleaseChartProps, 'markers' | 'colors'>) {
+/** The releases of markers that share a line, e.g. "2.3.0, 2.2.1" or "2.3.0 +2". */
+const markerLabel = (releases: readonly string[]): string =>
+  releases.length <= 2
+    ? releases.join(', ')
+    : i18n.translate('xpack.digitalExperience.mobile.releases.markerMore', {
+        defaultMessage: '{release} +{count}',
+        values: { release: releases[0], count: releases.length - 1 },
+      });
+
+/**
+ * A line where releases first appear, labelled with them. Releases first seen in the same bucket
+ * share one line, in the colour of the first, so their labels don't overlap.
+ */
+function FirstSeenMarkers({
+  markers,
+  colors,
+  bucketTimestamps,
+}: Pick<ReleaseChartProps, 'markers' | 'colors'> & {
+  /** The start of every bucket, sorted. */
+  bucketTimestamps: readonly number[];
+}) {
+  const bucketOf = (time: number) =>
+    bucketTimestamps[sortedLastIndex(bucketTimestamps, time) - 1] ?? time;
+  const groups = Object.values(
+    groupBy(sortBy(markers, 'firstSeen'), ({ firstSeen }) => bucketOf(firstSeen))
+  );
+
   return (
     <>
-      {markers.map(({ release, firstSeen }) => (
-        <LineAnnotation
-          key={release}
-          id={`firstSeen-${release}`}
-          domainType={AnnotationDomainType.XDomain}
-          dataValues={[{ dataValue: firstSeen, details: release }]}
-          style={{ line: { stroke: colors.get(release), strokeWidth: 1, dash: [4, 4] } }}
-          marker={
-            <EuiText size="xs" data-test-subj="digitalExperienceMobileReleaseMarker">
-              {release}
-            </EuiText>
-          }
-          markerPosition={Position.Top}
-        />
-      ))}
+      {groups.map((group) => {
+        const [{ release, firstSeen }] = group;
+        const label = markerLabel(group.map((marker) => marker.release));
+        return (
+          <LineAnnotation
+            key={release}
+            id={`firstSeen-${release}`}
+            domainType={AnnotationDomainType.XDomain}
+            dataValues={[{ dataValue: firstSeen, details: label }]}
+            style={{ line: { stroke: colors.get(release), strokeWidth: 1, dash: [4, 4] } }}
+            marker={
+              <EuiText size="xs" data-test-subj="digitalExperienceMobileReleaseMarker">
+                {label}
+              </EuiText>
+            }
+            markerPosition={Position.Top}
+          />
+        );
+      })}
     </>
   );
 }
@@ -183,6 +223,7 @@ function ReleaseChart({
   renderSeries,
   formatValue,
   yAxisId,
+  yDomain,
 }: Omit<ReleaseChartProps, 'releases'> & {
   renderSeries: (props: {
     series: MobileReleaseSeries;
@@ -191,17 +232,20 @@ function ReleaseChart({
   }) => ReactNode;
   formatValue: (value: number) => string;
   yAxisId: string;
+  /** Fixes the y axis, e.g. 0 to 1 for shares; fitted to the data when unset. */
+  yDomain?: { min: number; max: number };
 }) {
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
-  const xDomain = getTimeChartXDomain({
-    points: sortBy(
-      uniqBy(
-        series.flatMap(({ points }) => points),
-        'timestamp'
-      ),
+  const buckets = sortBy(
+    uniqBy(
+      series.flatMap(({ points }) => points),
       'timestamp'
     ),
+    'timestamp'
+  );
+  const xDomain = getTimeChartXDomain({
+    points: buckets,
     histogram,
     timeZone,
     hasBars: false,
@@ -212,6 +256,7 @@ function ReleaseChart({
       {/* The legend below the plot keeps its width: hover a release to spotlight it, click to hide it. */}
       <Settings
         baseTheme={baseTheme}
+        theme={MARKER_LABEL_ROOM}
         locale={i18n.getLocale()}
         xDomain={xDomain}
         showLegend
@@ -228,8 +273,13 @@ function ReleaseChart({
         ticks={3}
         style={HIDDEN_AXIS_LINES}
         tickFormat={formatValue}
+        domain={yDomain}
       />
-      <FirstSeenMarkers markers={markers} colors={colors} />
+      <FirstSeenMarkers
+        markers={markers}
+        colors={colors}
+        bucketTimestamps={buckets.map(({ timestamp }) => timestamp)}
+      />
       {series.map((item) =>
         renderSeries({ series: item, color: colors.get(item.release), timeZone })
       )}
@@ -277,23 +327,98 @@ export function ReleaseErrorRateChart({ releases, ...props }: ReleaseChartProps)
   );
 }
 
-/** The sessions of each release over time, stacked, to show how fast users move to a release. */
+const ADOPTION_MODE_STORAGE_KEY = 'xpack.digitalExperience.mobile.releaseAdoptionMode';
+
+const ADOPTION_MODES = ['sessions', 'share'] as const;
+
+type AdoptionMode = (typeof ADOPTION_MODES)[number];
+
+const ADOPTION_MODE_LEGEND = i18n.translate(
+  'xpack.digitalExperience.mobile.releases.adoption.modeLegend',
+  { defaultMessage: 'Release adoption as' }
+);
+
+const ADOPTION_MODE_OPTIONS: Array<{ id: AdoptionMode; label: string; 'data-test-subj': string }> =
+  [
+    {
+      id: 'sessions',
+      label: i18n.translate('xpack.digitalExperience.mobile.releases.adoption.sessionsMode', {
+        defaultMessage: 'Sessions',
+      }),
+      'data-test-subj': 'digitalExperienceMobileReleaseAdoptionMode-sessions',
+    },
+    {
+      id: 'share',
+      label: i18n.translate('xpack.digitalExperience.mobile.releases.adoption.shareMode', {
+        defaultMessage: 'Share',
+      }),
+      'data-test-subj': 'digitalExperienceMobileReleaseAdoptionMode-share',
+    },
+  ];
+
+const SHARE_DOMAIN = { min: 0, max: 1 };
+
+/**
+ * Each point with its share of the bucket's sessions across the releases; `null` in a bucket
+ * without sessions. Shares hide the swings of traffic over the day, so a rollout's progress shows.
+ */
+export const withBucketShares = (
+  series: readonly MobileReleaseSeries[]
+): Array<
+  MobileReleaseSeries & { points: Array<MobileReleasePoint & { share: number | null }> }
+> => {
+  const totals = mapValues(
+    groupBy(
+      series.flatMap(({ points }) => points),
+      'timestamp'
+    ),
+    (points) => sumBy(points, 'sessions')
+  );
+  return series.map((item) => ({
+    ...item,
+    points: item.points.map((point) => {
+      const total = totals[point.timestamp] ?? 0;
+      return { ...point, share: total > 0 ? point.sessions / total : null };
+    }),
+  }));
+};
+
+/**
+ * The sessions of each release over time, stacked, to show how fast users move to a release: as
+ * counts, or as shares of each bucket's sessions.
+ */
 export function ReleaseAdoptionChart(props: Omit<ReleaseChartProps, 'releases'>) {
-  const { formatNumber } = useFormatters();
-  const { series } = props;
+  const { formatNumber, formatShare } = useFormatters();
+  // The mode the user last picked, kept across visits; sessions by default.
+  const [mode, setMode] = usePersistedChoice(ADOPTION_MODE_STORAGE_KEY, ADOPTION_MODES, 'sessions');
+  const isShare = mode === 'share';
+  const series = isShare ? withBucketShares(props.series) : props.series;
 
   return (
     <ChartPanel
       data-test-subj="digitalExperienceMobileReleaseAdoptionChart"
       title={ADOPTION_TITLE}
       tooltip={ADOPTION_TOOLTIP}
-      hasData={series.some(({ points }) => points.length > 0)}
+      actions={
+        <EuiButtonGroup
+          data-test-subj="digitalExperienceMobileReleaseAdoptionMode"
+          legend={ADOPTION_MODE_LEGEND}
+          type="single"
+          buttonSize="compressed"
+          options={ADOPTION_MODE_OPTIONS}
+          idSelected={mode}
+          onChange={setMode}
+        />
+      }
+      hasData={series.some(({ points }) => points.some(({ sessions }) => sessions > 0))}
       emptyMessage={ADOPTION_EMPTY}
     >
       <ReleaseChart
         {...props}
+        series={series}
         yAxisId="releaseAdoptionAxis"
-        formatValue={formatNumber}
+        formatValue={isShare ? formatShare : formatNumber}
+        yDomain={isShare ? SHARE_DOMAIN : undefined}
         renderSeries={({ series: { release, isOther, points }, color, timeZone }) => (
           <AreaSeries
             key={release}
@@ -303,7 +428,7 @@ export function ReleaseAdoptionChart(props: Omit<ReleaseChartProps, 'releases'>)
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="timestamp"
-            yAccessors={['sessions']}
+            yAccessors={[isShare ? 'share' : 'sessions']}
             stackAccessors={['timestamp']}
             data={points}
             curve={CurveType.CURVE_MONOTONE_X}

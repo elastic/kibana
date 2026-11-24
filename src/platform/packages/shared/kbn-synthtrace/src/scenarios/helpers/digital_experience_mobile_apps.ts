@@ -48,11 +48,17 @@ export interface DigitalExperienceMobileAppVersion {
   health?: Partial<Omit<MobileHealthProfile, 'name'>>;
   /**
    * Rolls the version out from the start of the run, or `startsAfterHours` into it (none run it
-   * before): `initialAdoption` of all the installations run it from then, and all of them `hours`
-   * later, which replaces its `share`. The others run the older versions by their shares until
-   * their turn. Only the newest version can roll out.
+   * before): `initialAdoption` of all the installations run it from then, and `targetAdoption` of
+   * them (all by default) `hours` later, which replaces its `share`. The others run the older
+   * versions by their shares, so a target below 1 leaves them a long tail, as real rollouts do.
+   * Only the newest version can roll out.
    */
-  rollout?: { initialAdoption: number; hours: number; startsAfterHours?: number };
+  rollout?: {
+    initialAdoption: number;
+    hours: number;
+    startsAfterHours?: number;
+    targetAdoption?: number;
+  };
 }
 
 export interface DigitalExperienceMobileApp {
@@ -402,8 +408,9 @@ if (!releaseTrainBaseApp) {
 
 /**
  * The shop-mobile app on seven releases, for the release health of the mobile page: five show by
- * name and the rest as "Other". The newest, 6.0.0, rolls out 12 hours into the run, so it first
- * appears inside the time range, and more of its HTTP requests fail.
+ * name and the rest as "Other". The newest, 6.0.0, rolls out 12 hours into the run, to 75% of the
+ * installations, so it first appears inside the time range while the older releases keep a tail,
+ * and more of its HTTP requests fail.
  */
 export const DIGITAL_EXPERIENCE_RELEASE_TRAIN_APP: DigitalExperienceMobileApp = {
   ...releaseTrainBaseApp,
@@ -415,7 +422,7 @@ export const DIGITAL_EXPERIENCE_RELEASE_TRAIN_APP: DigitalExperienceMobileApp = 
       serviceVersion: '6.0.0',
       buildNumber: 600,
       share: 0.3,
-      rollout: { initialAdoption: 0.1, hours: 6, startsAfterHours: 12 },
+      rollout: { initialAdoption: 0.1, hours: 6, startsAfterHours: 12, targetAdoption: 0.75 },
       // A regression: many more failed requests, each an exception
       health: { httpFailureRate: 0.15 },
     },
@@ -428,8 +435,9 @@ export const DIGITAL_EXPERIENCE_RELEASE_TRAIN_APP: DigitalExperienceMobileApp = 
   ],
 };
 
-// The newest native versions reach a third of their installations at the start of the run
-const NEWEST_ROLLOUT = { initialAdoption: 0.35, hours: 6 };
+// The newest native versions reach a third of their installations at the start of the run, and
+// most of them, not all, 6 hours later
+const NEWEST_ROLLOUT = { initialAdoption: 0.35, hours: 6, targetAdoption: 0.8 };
 
 const TRAILS_API = 'https://api.trailmap.example.com';
 const RIDES_API = 'https://api.example-rides.com';
@@ -838,15 +846,18 @@ const pickInstalledVersion = (
   if (!rollout || older.length === 0) {
     return pickVersion(random, versions);
   }
-  const { initialAdoption, hours, startsAfterHours = 0 } = rollout;
+  const { initialAdoption, hours, startsAfterHours = 0, targetAdoption = 1 } = rollout;
   const sinceStart = elapsed - startsAfterHours * HOUR_MS;
   if (sinceStart < 0) {
     return 1 + pickVersion(random, older);
   }
   const progress =
     hours <= 0
-      ? 1
-      : Math.min(initialAdoption + ((1 - initialAdoption) * sinceStart) / (hours * HOUR_MS), 1);
+      ? targetAdoption
+      : Math.min(
+          initialAdoption + ((targetAdoption - initialAdoption) * sinceStart) / (hours * HOUR_MS),
+          targetAdoption
+        );
   return random() < progress ? 0 : 1 + pickVersion(random, older);
 };
 

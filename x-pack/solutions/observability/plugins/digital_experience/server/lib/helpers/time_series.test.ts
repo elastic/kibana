@@ -5,11 +5,41 @@
  * 2.0.
  */
 
-import { dateHistogram, getHistogramInterval, toTimeSeries } from './time_series';
+import {
+  dateHistogram,
+  getBucketTimestamps,
+  getHistogramInterval,
+  toTimeSeries,
+} from './time_series';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 const TIME_ZONE = 'America/New_York';
+
+describe('getBucketTimestamps', () => {
+  it('lists the buckets of a fixed interval from the one the range starts in', () => {
+    expect(getBucketTimestamps(HOUR + 1000, 4 * HOUR, { value: 3600, unit: 's' })).toEqual([
+      HOUR,
+      2 * HOUR,
+      3 * HOUR,
+    ]);
+  });
+
+  it('lists calendar days and ISO weeks in UTC, as TBUCKET aligns them', () => {
+    const start = Date.parse('2026-11-18T10:00:00.000Z');
+    expect(
+      getBucketTimestamps(start, Date.parse('2026-11-20T01:00:00.000Z'), { value: 1, unit: 'd' })
+    ).toEqual([
+      Date.parse('2026-11-18T00:00:00.000Z'),
+      Date.parse('2026-11-19T00:00:00.000Z'),
+      Date.parse('2026-11-20T00:00:00.000Z'),
+    ]);
+    // 2026-11-18 is a Wednesday; its week starts on Monday the 16th
+    expect(
+      getBucketTimestamps(start, Date.parse('2026-11-24T00:00:00.000Z'), { value: 1, unit: 'w' })
+    ).toEqual([Date.parse('2026-11-16T00:00:00.000Z'), Date.parse('2026-11-23T00:00:00.000Z')]);
+  });
+});
 
 describe('getHistogramInterval', () => {
   it('rounds sub-day intervals to a readable number of seconds', () => {

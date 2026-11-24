@@ -28,6 +28,8 @@ export interface Formatters {
   formatNumber: (value: number) => string;
   /** A share between 0 and 1, with the `format:percent:defaultPattern` advanced setting. */
   formatPercent: (share: number) => string;
+  /** A share between 0 and 1 with one decimal at most, e.g. "91.7%", for compact labels. */
+  formatShare: (share: number) => string;
   /** `formatNumber` with a sign unless it rounds to 0, e.g. "+1.5", "-1.5" or "0". */
   formatSignedNumber: (value: number) => string;
   /** A relative change with a sign unless it rounds to 0, one decimal at most: "+3.9%", "0%". */
@@ -41,7 +43,8 @@ export interface Formatters {
   timeZone: string;
 }
 
-const SIGNED_PERCENT_PATTERN = '0,0.[0]%';
+/** One decimal at most, for change badges and compact shares. */
+const COMPACT_PERCENT_PATTERN = '0,0.[0]%';
 
 /** The formatters of `uiSettings`, with Kibana's number and percent field formats. */
 export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
@@ -49,10 +52,11 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
     uiSettings.get(key, defaultOverride);
   const number = new NumberFormat({}, getConfig);
   const percent = new PercentFormat({}, getConfig);
+  const compactPercent = new PercentFormat({ pattern: COMPACT_PERCENT_PATTERN }, getConfig);
   const signedNumber = new NumberFormat({ alwaysShowSign: true }, getConfig);
   // A change badge, e.g. "+3.9%": one decimal at most, whatever the percent pattern.
   const signedPercent = new PercentFormat(
-    { pattern: SIGNED_PERCENT_PATTERN, alwaysShowSign: true },
+    { pattern: COMPACT_PERCENT_PATTERN, alwaysShowSign: true },
     getConfig
   );
   const dateFormat = uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT);
@@ -62,7 +66,8 @@ export const createFormatters = (uiSettings: IUiSettingsClient): Formatters => {
 
   return {
     formatNumber: (value) => number.convertToText(value),
-    formatPercent: (share) => percent.convertToText(share),
+    formatPercent: (value) => percent.convertToText(value),
+    formatShare: (value) => compactPercent.convertToText(value),
     formatSignedNumber: (value) => signedNumber.convertToText(value),
     formatSignedPercent: (share) => signedPercent.convertToText(share),
     formatDate: (date) => moment(date).tz(timeZone).format(dateFormat),

@@ -78,6 +78,29 @@ describe('ReleaseTable', () => {
     expect(releasesInOrder()).toEqual(['2.0.0', '1.5.0', '1.0.0', 'Other']);
   });
 
+  it('shows a share with one decimal at most, e.g. 91.7%', () => {
+    render(
+      <ReleaseTable
+        releases={[
+          { release: '2.0.0', isOther: false, sessions: 11, users: 1, errorRate: null },
+          { release: '1.0.0', isOther: false, sessions: 1, users: 1, errorRate: null },
+        ]}
+        colors={new Map()}
+        selectedRelease={undefined}
+        onSelectRelease={onSelectRelease}
+      />,
+      {
+        wrapper: ({ children }) => (
+          <I18nProvider>
+            <EuiProvider>{children}</EuiProvider>
+          </I18nProvider>
+        ),
+      }
+    );
+
+    expect(row('2.0.0')).toHaveTextContent('11 (91.7%)');
+  });
+
   it("shows each release's share of the sessions", () => {
     renderTable();
 

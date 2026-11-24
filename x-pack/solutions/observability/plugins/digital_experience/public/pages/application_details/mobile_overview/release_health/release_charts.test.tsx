@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import type {
   AreaSeriesProps,
@@ -17,7 +17,7 @@ import type {
 import type { MobileReleaseRow, MobileReleaseSeries } from '../../../../../common/types/mobile';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
-import { ReleaseAdoptionChart, ReleaseErrorRateChart } from './release_charts';
+import { ReleaseAdoptionChart, ReleaseErrorRateChart, withBucketShares } from './release_charts';
 import { getReleaseColors } from './release_colors';
 import { TEST_VIS_COLORS } from './release_colors.test_helpers';
 
@@ -82,6 +82,7 @@ beforeEach(() => {
   mockAreas.length = 0;
   mockAnnotations.length = 0;
   mockSettings.length = 0;
+  window.localStorage.clear();
   props.onTimeRangeSelect.mockClear();
   jest.mocked(useKibanaServices).mockReturnValue({
     uiSettings: createUiSettingsMock(),
@@ -168,5 +169,67 @@ describe('release charts', () => {
     const { getByRole } = renderWithTheme(<ReleaseAdoptionChart {...props} />);
 
     expect(getByRole('heading', { level: 3, name: 'Release adoption' })).toBeInTheDocument();
+  });
+
+  it('shares one marker between releases first seen in the same bucket, so labels never overlap', () => {
+    const marker = (release: string, firstSeen: number) => ({ release, firstSeen });
+    renderWithTheme(
+      <ReleaseAdoptionChart
+        {...props}
+        markers={[marker('2.0.0', 3_600_000), marker('1.0.0', 3_660_000), marker('3.0.0', 0)]}
+      />
+    );
+
+    expect(mockAnnotations.map(({ dataValues }) => dataValues)).toEqual([
+      [{ dataValue: 0, details: '3.0.0' }],
+      [{ dataValue: 3_600_000, details: '2.0.0, 1.0.0' }],
+    ]);
+    // In the colour of the first release of the bucket
+    expect(mockAnnotations[1].style?.line?.stroke).toBe(props.colors.get('2.0.0'));
+  });
+
+  it('names the first release and how many more when a bucket has more than two', () => {
+    renderWithTheme(
+      <ReleaseAdoptionChart
+        {...props}
+        markers={['2.0.0', '1.0.0', '0.9.0'].map((release, index) => ({
+          release,
+          firstSeen: 3_600_000 + index,
+        }))}
+      />
+    );
+
+    expect(mockAnnotations[0].dataValues).toEqual([{ dataValue: 3_600_000, details: '2.0.0 +2' }]);
+  });
+
+  it("leaves room above the plot for the markers' labels", () => {
+    renderWithTheme(<ReleaseAdoptionChart {...props} />);
+
+    expect(mockSettings.at(-1)?.theme).toEqual({ chartMargins: { top: 20 } });
+  });
+
+  it('plots the adoption as sessions by default, and as shares of each bucket on demand', () => {
+    renderWithTheme(<ReleaseAdoptionChart {...props} />);
+    expect(mockAreas.every(({ yAccessors }) => yAccessors[0] === 'sessions')).toBe(true);
+
+    mockAreas.length = 0;
+    fireEvent.click(screen.getByTestId('digitalExperienceMobileReleaseAdoptionMode-share'));
+
+    expect(mockAreas.every(({ yAccessors }) => yAccessors[0] === 'share')).toBe(true);
+    // Three releases with 10 sessions each in every bucket
+    expect(mockAreas[0].data).toEqual([
+      expect.objectContaining({ timestamp: 0, share: 1 / 3 }),
+      expect.objectContaining({ timestamp: 3_600_000, share: 1 / 3 }),
+    ]);
+  });
+});
+
+describe('withBucketShares', () => {
+  it('has no share in a bucket without sessions', () => {
+    const [shared] = withBucketShares([
+      { release: '1', isOther: false, points: [{ timestamp: 0, sessions: 0, errorRate: null }] },
+    ]);
+
+    expect(shared.points[0].share).toBeNull();
   });
 });

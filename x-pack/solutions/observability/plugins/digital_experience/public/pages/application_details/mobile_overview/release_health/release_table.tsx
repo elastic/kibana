@@ -91,10 +91,10 @@ export const sortReleases = (
 const formatSessions = (
   sessions: number,
   totalSessions: number,
-  { formatNumber, formatPercent }: Formatters
+  { formatNumber, formatShare }: Formatters
 ): string =>
   totalSessions > 0
-    ? `${formatNumber(sessions)} (${formatPercent(sessions / totalSessions)})`
+    ? `${formatNumber(sessions)} (${formatShare(sessions / totalSessions)})`
     : formatNumber(sessions);
 
 /**

@@ -142,9 +142,12 @@ on serverless and stateful.
   **100 sessions** (`MIN_RELEASE_SESSIONS`) in the range for an error rate: below it the table
   shows "Not enough data" and the error rate chart leaves the release out. The chart also leaves a
   gap for a time bucket with fewer than 10 sessions (`MIN_BUCKET_SESSIONS`), where one exception
-  would swing the rate from 0 to a spike. A release **first
-  appears** at its first document with that `service.version` in the selected environment, looked
-  up 30 days before the range; one first seen before the range start gets no marker. The section
+  would swing the rate from 0 to a spike. Every release gets every bucket of the range: ES|QL's
+  `TBUCKET` leaves out the empty ones, which the route fills with no sessions and no error rate, so
+  the charts never draw across them. A release **first appears** at its first document with that
+  `service.version` in the selected environment, looked up 30 days before the range; one first
+  seen before the range start gets no marker, and releases first seen in the same bucket share one
+  (e.g. `2.3.0, 2.2.1`, or `2.3.0 +2` for more). The section
   loads apart from the KPIs (`GET .../mobile_applications/{serviceName}/releases`, same params as
   the KPI route) and has its own error state with a retry; the toolbar's refresh reloads both.
   The table, in a bordered panel like the KPIs and charts, shows each release's share of the
@@ -152,7 +155,11 @@ on serverless and stateful.
   with two decimals; a release filters the page by it (the `release` filter), or takes the filter
   off when selected. Each chart has a one-line header (an `h3` and an info tip with the
   calculation), so both plots line up, and a legend below it (hover a release to spotlight it,
-  click to hide it); dragging over one narrows the time range. The crash rate (#64) and the cold start (#68) join the table's columns and the charts later.
+  click to hide it); dragging over one narrows the time range. The adoption chart plots sessions,
+  or each release's share of every bucket's sessions (Sessions / Share, kept across visits), so
+  the swings of traffic over the day don't hide a rollout's progress. Shares show one decimal at
+  most (`formatShare`). The crash rate (#64) and the cold start (#68) join the table's columns and
+  the charts later.
 
 ## Pages
 
