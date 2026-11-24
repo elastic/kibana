@@ -275,7 +275,7 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'workflows schema path',
-    changedFiles: ['src/platform/plugins/shared/workflows_management/common/schema/index.ts'],
+    changedFiles: ['x-pack/platform/plugins/shared/workflows_management/common/schema/index.ts'],
   },
   {
     name: 'workflows oom testing step definition path',

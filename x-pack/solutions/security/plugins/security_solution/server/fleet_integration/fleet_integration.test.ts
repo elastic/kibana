@@ -178,7 +178,6 @@ describe('Fleet integrations', () => {
       customYaraSignaturesEnabled: true,
       linuxRansomwareProtection: true,
       endpointAiDataCollection: true,
-      perOsPolicySettings: true,
       registryCredentialHardening: true,
     } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
@@ -1666,16 +1665,8 @@ describe('Fleet integrations', () => {
         licenseEmitter.next(Enterprise);
       });
 
-      it.each([
-        ['linuxRansomwareProtection', { linuxRansomwareProtection: false }],
-        ['perOsPolicySettings', { perOsPolicySettings: false }],
-      ])('should strip linux.ransomware from the policy when %s is off', async (_flag, flags) => {
-        experimentalFeatures = {
-          ...experimentalFeatures,
-          linuxRansomwareProtection: true,
-          perOsPolicySettings: true,
-          ...flags,
-        };
+      it('should strip linux.ransomware from the policy when linuxRansomwareProtection is off', async () => {
+        experimentalFeatures = { ...experimentalFeatures, linuxRansomwareProtection: false };
 
         const mockPolicy = policyFactory();
         const callback = getPackagePolicyUpdateCallback(
@@ -1701,7 +1692,7 @@ describe('Fleet integrations', () => {
         expect(linux.popup).not.toHaveProperty('ransomware');
       });
 
-      it('should keep linux.ransomware on the policy when both experimental flags are on', async () => {
+      it('should keep linux.ransomware on the policy when linuxRansomwareProtection is on', async () => {
         const mockPolicy = policyFactory();
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
@@ -1767,12 +1758,8 @@ describe('Fleet integrations', () => {
           );
         });
 
-        it('should strip linux ransomware before product-feature validation when the flags are off', async () => {
-          experimentalFeatures = {
-            ...experimentalFeatures,
-            linuxRansomwareProtection: false,
-            perOsPolicySettings: false,
-          };
+        it('should strip linux ransomware before product-feature validation when the flag is off', async () => {
+          experimentalFeatures = { ...experimentalFeatures, linuxRansomwareProtection: false };
           const callback = getPackagePolicyUpdateCallback(
             endpointAppContextServiceMock,
             cloudService,
@@ -1793,12 +1780,8 @@ describe('Fleet integrations', () => {
           expect(linux.popup).not.toHaveProperty('ransomware');
         });
 
-        it('should reject the custom linux ransomware message when the flags are on', async () => {
-          experimentalFeatures = {
-            ...experimentalFeatures,
-            linuxRansomwareProtection: true,
-            perOsPolicySettings: true,
-          };
+        it('should reject the custom linux ransomware message when the flag is on', async () => {
+          experimentalFeatures = { ...experimentalFeatures, linuxRansomwareProtection: true };
           const callback = getPackagePolicyUpdateCallback(
             endpointAppContextServiceMock,
             cloudService,
@@ -1837,19 +1820,15 @@ describe('Fleet integrations', () => {
             req
           );
         };
-        const setFlags = (enabled: boolean) => {
-          experimentalFeatures = {
-            ...experimentalFeatures,
-            linuxRansomwareProtection: enabled,
-            perOsPolicySettings: enabled,
-          };
+        const setFlag = (enabled: boolean) => {
+          experimentalFeatures = { ...experimentalFeatures, linuxRansomwareProtection: enabled };
         };
         const deleteLinuxPopup = (policy: PolicyConfig) => {
           delete (policy.linux as Partial<PolicyConfig['linux']>).popup;
         };
 
-        it('should reject with a license 403 under Gold when flags are off and linux.popup is missing', async () => {
-          setFlags(false);
+        it('should reject with a license 403 under Gold when the flag is off and linux.popup is missing', async () => {
+          setFlag(false);
           licenseEmitter.next(Gold);
           const mockPolicy = policyFactoryWithoutPaidFeatures(policyFactory());
           mockPolicy.windows.memory_protection = {
@@ -1865,8 +1844,8 @@ describe('Fleet integrations', () => {
           });
         });
 
-        it('should reject with a license 403 under Platinum when flags are on and linux.popup is missing', async () => {
-          setFlags(true);
+        it('should reject with a license 403 under Platinum when the flag is on and linux.popup is missing', async () => {
+          setFlag(true);
           licenseEmitter.next(Platinum);
           const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures();
           mockPolicy.windows.device_control = {
@@ -1881,8 +1860,8 @@ describe('Fleet integrations', () => {
           });
         });
 
-        it('should reject with a license 403 under Platinum when flags are on and linux.ransomware is null', async () => {
-          setFlags(true);
+        it('should reject with a license 403 under Platinum when the flag is on and linux.ransomware is null', async () => {
+          setFlag(true);
           licenseEmitter.next(Platinum);
           const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures();
           mockPolicy.linux.ransomware = null as unknown as PolicyConfig['linux']['ransomware'];
@@ -1893,8 +1872,8 @@ describe('Fleet integrations', () => {
           });
         });
 
-        it('should strip a null linux.ransomware under Platinum when flags are off', async () => {
-          setFlags(false);
+        it('should strip a null linux.ransomware under Platinum when the flag is off', async () => {
+          setFlag(false);
           licenseEmitter.next(Platinum);
           const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures();
           mockPolicy.linux.ransomware = null as unknown as PolicyConfig['linux']['ransomware'];
@@ -1910,9 +1889,9 @@ describe('Fleet integrations', () => {
           ['on', true],
           ['off', false],
         ])(
-          'should reject with a 400 under Gold when flags are %s, behavior protection is Platinum-only and linux.popup is missing',
+          'should reject with a 400 under Gold when the flag is %s, behavior protection is Platinum-only and linux.popup is missing',
           async (_label, enabled) => {
-            setFlags(enabled);
+            setFlag(enabled);
             licenseEmitter.next(Gold);
             const mockPolicy = policyFactoryWithoutPaidFeatures(policyFactory());
             mockPolicy.windows.behavior_protection = {
@@ -1931,7 +1910,7 @@ describe('Fleet integrations', () => {
         );
 
         it('should reject with a 400 under Gold when an otherwise compliant policy is missing linux.popup', async () => {
-          setFlags(false);
+          setFlag(false);
           licenseEmitter.next(Gold);
           const mockPolicy = policyFactoryWithoutPaidFeatures(policyFactory());
           deleteLinuxPopup(mockPolicy);
@@ -1974,11 +1953,8 @@ describe('Fleet integrations', () => {
         licenseEmitter.next(Enterprise);
       });
 
-      it.each([
-        ['endpointAiDataCollection', { endpointAiDataCollection: false }],
-        ['perOsPolicySettings', { perOsPolicySettings: false }],
-      ])('should strip ai_data_collection from every OS when %s is off', async (_flag, flags) => {
-        experimentalFeatures = { ...experimentalFeatures, ...flags };
+      it('should strip ai_data_collection from every OS when endpointAiDataCollection is off', async () => {
+        experimentalFeatures = { ...experimentalFeatures, endpointAiDataCollection: false };
 
         const policy = await runUpdate();
 
@@ -1987,7 +1963,7 @@ describe('Fleet integrations', () => {
         }
       });
 
-      it('should keep ai_data_collection when both experimental flags are on', async () => {
+      it('should keep ai_data_collection when endpointAiDataCollection is on', async () => {
         const policy = await runUpdate();
 
         for (const os of ['windows', 'mac', 'linux'] as const) {

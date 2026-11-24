@@ -114,6 +114,8 @@ export interface EsqlDataSectionProps {
   /** The position of a blank query that others follow: they would move up if it were left out. */
   emptyQueryPosition?: number;
   esqlVariables?: ESQLControlVariable[];
+  /** Overrides the default, which is open when a query already has text. */
+  initialIsOpen?: boolean;
 }
 
 const toTabKey = (id: number) => `query-${id}`;
@@ -132,8 +134,12 @@ export const EsqlDataSection = ({
   renderError,
   emptyQueryPosition,
   esqlVariables,
+  initialIsOpen,
 }: EsqlDataSectionProps) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'customContentEsql' });
+  // A blank draft is always present so there is a tab to type into; that is not a query yet.
+  const hasQuery = queries.some(({ text }) => text.trim().length > 0);
+  const startsOpen = initialIsOpen ?? hasQuery;
   const [selectedKey, setSelectedKey] = useState(toTabKey(queries[0].id));
 
   const tabs: QueryTab[] = queries.map((draft, index) => ({
@@ -206,6 +212,7 @@ export const EsqlDataSection = ({
     <EuiAccordion
       id={accordionId}
       data-test-subj="customContentEsqlSection"
+      initialIsOpen={startsOpen}
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>

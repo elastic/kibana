@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { node, tracing, resources } from '@elastic/opentelemetry-node/sdk';
 import { trace } from '@opentelemetry/api';
 import {
   initInferenceTracerProvider,
   getInferenceTracer,
   shutdownInferenceTracerProvider,
 } from './inference_tracer_provider';
+import { AlwaysOnSampler, TracerProvider } from '@opentelemetry/sdk-trace';
+import type { SpanProcessor } from '@opentelemetry/sdk-trace';
+import { defaultResource } from '@opentelemetry/resources';
 
-const mockNodeTracerProvider = {
+const mockTracerProvider = {
   getTracer: jest.fn().mockReturnValue({ startActiveSpan: jest.fn() }),
   shutdown: jest.fn().mockResolvedValue(undefined),
 };
 
-jest
-  .spyOn(node, 'NodeTracerProvider')
-  .mockReturnValue(mockNodeTracerProvider as unknown as node.NodeTracerProvider);
+jest.mock('@opentelemetry/sdk-trace', () => ({
+  ...jest.requireActual('@opentelemetry/sdk-trace'),
+  TracerProvider: jest.fn(() => mockTracerProvider),
+}));
 
 describe('inference_tracer_provider', () => {
   afterEach(async () => {
@@ -35,7 +38,7 @@ describe('inference_tracer_provider', () => {
     });
 
     it('returns the inference provider tracer after init', () => {
-      const mockProcessor: tracing.SpanProcessor = {
+      const mockProcessor: SpanProcessor = {
         onStart: jest.fn(),
         onEnd: jest.fn(),
         forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
@@ -44,34 +47,34 @@ describe('inference_tracer_provider', () => {
 
       initInferenceTracerProvider({
         processors: [mockProcessor],
-        resource: resources.defaultResource(),
+        resource: defaultResource(),
       });
 
       const tracer = getInferenceTracer();
-      expect(mockNodeTracerProvider.getTracer).toHaveBeenCalledWith('inference');
-      expect(tracer).toBe(mockNodeTracerProvider.getTracer.mock.results[0].value);
+      expect(mockTracerProvider.getTracer).toHaveBeenCalledWith('inference');
+      expect(tracer).toBe(mockTracerProvider.getTracer.mock.results[0].value);
     });
   });
 
   describe('initInferenceTracerProvider', () => {
-    it('creates a NodeTracerProvider with AlwaysOnSampler', () => {
-      const mockProcessor: tracing.SpanProcessor = {
+    it('creates a TracerProvider with AlwaysOnSampler', () => {
+      const mockProcessor: SpanProcessor = {
         onStart: jest.fn(),
         onEnd: jest.fn(),
         forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
         shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
       };
 
-      const resource = resources.defaultResource();
+      const resource = defaultResource();
 
       initInferenceTracerProvider({
         processors: [mockProcessor],
         resource,
       });
 
-      expect(node.NodeTracerProvider).toHaveBeenCalledWith(
+      expect(TracerProvider).toHaveBeenCalledWith(
         expect.objectContaining({
-          sampler: expect.any(tracing.AlwaysOnSampler),
+          sampler: expect.any(AlwaysOnSampler),
           spanProcessors: [mockProcessor],
           resource,
         })
@@ -81,7 +84,7 @@ describe('inference_tracer_provider', () => {
 
   describe('shutdownInferenceTracerProvider', () => {
     it('calls shutdown on the provider', async () => {
-      const mockProcessor: tracing.SpanProcessor = {
+      const mockProcessor: SpanProcessor = {
         onStart: jest.fn(),
         onEnd: jest.fn(),
         forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
@@ -90,16 +93,16 @@ describe('inference_tracer_provider', () => {
 
       initInferenceTracerProvider({
         processors: [mockProcessor],
-        resource: resources.defaultResource(),
+        resource: defaultResource(),
       });
 
       await shutdownInferenceTracerProvider();
 
-      expect(mockNodeTracerProvider.shutdown).toHaveBeenCalledTimes(1);
+      expect(mockTracerProvider.shutdown).toHaveBeenCalledTimes(1);
     });
 
     it('falls back to global tracer after shutdown', async () => {
-      const mockProcessor: tracing.SpanProcessor = {
+      const mockProcessor: SpanProcessor = {
         onStart: jest.fn(),
         onEnd: jest.fn(),
         forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
@@ -108,7 +111,7 @@ describe('inference_tracer_provider', () => {
 
       initInferenceTracerProvider({
         processors: [mockProcessor],
-        resource: resources.defaultResource(),
+        resource: defaultResource(),
       });
 
       await shutdownInferenceTracerProvider();

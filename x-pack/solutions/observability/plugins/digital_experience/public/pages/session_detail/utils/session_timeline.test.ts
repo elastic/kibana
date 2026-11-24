@@ -24,6 +24,7 @@ const visit = (page: string, startMs: number, durationMs: number): SessionPageVi
   durationMs,
   clickCount: 0,
   errorCount: 0,
+  frustrationCount: 0,
   webVitals: emptyWebVitals(),
   load: null,
 });
@@ -39,6 +40,7 @@ const event = (
   offsetMs,
   page: null,
   detail: null,
+  clickCount: null,
   stacktrace: null,
   traceId: null,
   spanId: null,
@@ -139,6 +141,19 @@ describe('layoutWaterfall', () => {
     ]);
     expect(layout.errorMarkers).toEqual([
       { offsetPercent: 75, event: expect.objectContaining({ name: 'TypeError' }) },
+    ]);
+  });
+
+  it('places frustration on its own markers, apart from errors', () => {
+    const layout = layoutWaterfall(
+      { startTime: START, durationMs: 20_000 },
+      [visit('/', 0, 20_000)],
+      [event('error', 5_000), event('frustration', 15_000, 'browser.frustration.rage_click')]
+    );
+
+    expect(layout.errorMarkers).toHaveLength(1);
+    expect(layout.frustrationMarkers).toEqual([
+      { offsetPercent: 75, event: expect.objectContaining({ kind: 'frustration' }) },
     ]);
   });
 

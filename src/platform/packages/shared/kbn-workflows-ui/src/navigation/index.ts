@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { WorkflowsCreateRouteState } from './create_route_state';
+export type { WorkflowsCreateRouteState, WorkflowsCreateRouteTemplate } from './create_route_state';
 export type { WorkflowsImportRouteState } from './import_route_state';

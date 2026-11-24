@@ -25,12 +25,13 @@ exports[`entities grid query builders count builds the count query with no filte
 
 exports[`entities grid query builders enrich queries alert_count builds its query from the page rows 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
 | SORT entity.id ASC
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
   "SET unmapped_fields=\\"nullify\\";
 FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
@@ -105,6 +106,7 @@ FROM .alerts-security.alerts-default
 | RENAME _ea_entity_id AS \`entity.id\`
 | WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`",
@@ -113,12 +115,13 @@ FROM .alerts-security.alerts-default
 
 exports[`entities grid query builders enrich queries anomaly_count builds its query from the page rows 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
 | SORT entity.id ASC
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
@@ -183,6 +186,7 @@ TRUE, _euid_branch_2_formula, NULL))
 | RENAME derived_euids AS \`entity.id\`
 | WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`",
@@ -220,35 +224,40 @@ Array [
 `;
 
 exports[`entities grid query builders sort by @timestamp builds the sort query 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
 | RENAME group_key AS \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL own_rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | EVAL group_rank = GREATEST(COALESCE(own_rank, alias_rank), COALESCE(alias_rank, own_rank))
 | EVAL asset.criticality = CASE(group_rank == 4, \\"extreme_impact\\", group_rank == 3, \\"high_impact\\", group_rank == 2, \\"medium_impact\\", group_rank == 1, \\"low_impact\\"), entity.source = MV_DEDUPE(COALESCE(MV_APPEND(entity.source, alias_sources), entity.source, alias_sources)), entity.attributes.watchlists = MV_DEDUPE(COALESCE(MV_APPEND(entity.attributes.watchlists, alias_watchlists), entity.attributes.watchlists, alias_watchlists)), entity.lifecycle.first_seen = LEAST(COALESCE(entity.lifecycle.first_seen, alias_first_seen), COALESCE(alias_first_seen, entity.lifecycle.first_seen)), \`@timestamp\` = GREATEST(COALESCE(\`@timestamp\`, alias_last_seen), COALESCE(alias_last_seen, \`@timestamp\`))
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 | LIMIT 9975
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT @timestamp DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by @timestamp builds the sort query with entity filters and no search 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
 | RENAME group_key AS \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL own_rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -256,9 +265,10 @@ exports[`entities grid query builders sort by @timestamp builds the sort query w
 | EVAL asset.criticality = CASE(group_rank == 4, \\"extreme_impact\\", group_rank == 3, \\"high_impact\\", group_rank == 2, \\"medium_impact\\", group_rank == 1, \\"low_impact\\"), entity.source = MV_DEDUPE(COALESCE(MV_APPEND(entity.source, alias_sources), entity.source, alias_sources)), entity.attributes.watchlists = MV_DEDUPE(COALESCE(MV_APPEND(entity.attributes.watchlists, alias_watchlists), entity.attributes.watchlists, alias_watchlists)), entity.lifecycle.first_seen = LEAST(COALESCE(entity.lifecycle.first_seen, alias_first_seen), COALESCE(alias_first_seen, entity.lifecycle.first_seen)), \`@timestamp\` = GREATEST(COALESCE(\`@timestamp\`, alias_last_seen), COALESCE(alias_last_seen, \`@timestamp\`))
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 | LIMIT 9975
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -266,17 +276,18 @@ FROM entities-latest-default
 | SORT @timestamp DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by @timestamp builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | SORT @timestamp ASC NULLS LAST, entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by alert_count builds the sort query 1`] = `
@@ -352,17 +363,20 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT alert_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -370,7 +384,7 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low"
 `;
 
 exports[`entities grid query builders sort by alert_count builds the sort query with entity filters and no search 1`] = `
@@ -446,9 +460,11 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -456,8 +472,9 @@ FROM .alerts-security.alerts-default
 | SORT alert_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -466,16 +483,17 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low"
 `;
 
 exports[`entities grid query builders sort by alert_count builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | LIMIT 10000
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by anomaly_count builds the sort query 1`] = `
@@ -541,17 +559,20 @@ TRUE, _euid_branch_2_formula, NULL))
 | WHERE derived_euids IS NOT NULL
 | RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT anomaly_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -559,7 +580,7 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL anomaly_count = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count"
 `;
 
 exports[`entities grid query builders sort by anomaly_count builds the sort query with entity filters and no search 1`] = `
@@ -625,9 +646,11 @@ TRUE, _euid_branch_2_formula, NULL))
 | WHERE derived_euids IS NOT NULL
 | RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -635,8 +658,9 @@ TRUE, _euid_branch_2_formula, NULL))
 | SORT anomaly_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -645,33 +669,37 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL anomaly_count = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count"
 `;
 
 exports[`entities grid query builders sort by anomaly_count builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | LIMIT 10000
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by asset.criticality builds the sort query 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
 | RENAME group_key AS \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL own_rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | EVAL group_rank = GREATEST(COALESCE(own_rank, alias_rank), COALESCE(alias_rank, own_rank))
 | EVAL asset.criticality = CASE(group_rank == 4, \\"extreme_impact\\", group_rank == 3, \\"high_impact\\", group_rank == 2, \\"medium_impact\\", group_rank == 1, \\"low_impact\\"), entity.source = MV_DEDUPE(COALESCE(MV_APPEND(entity.source, alias_sources), entity.source, alias_sources)), entity.attributes.watchlists = MV_DEDUPE(COALESCE(MV_APPEND(entity.attributes.watchlists, alias_watchlists), entity.attributes.watchlists, alias_watchlists)), entity.lifecycle.first_seen = LEAST(COALESCE(entity.lifecycle.first_seen, alias_first_seen), COALESCE(alias_first_seen, entity.lifecycle.first_seen)), \`@timestamp\` = GREATEST(COALESCE(\`@timestamp\`, alias_last_seen), COALESCE(alias_last_seen, \`@timestamp\`))
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 | LIMIT 9975
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -679,8 +707,9 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -688,8 +717,9 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -697,8 +727,9 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -706,8 +737,9 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -715,15 +747,17 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by asset.criticality builds the sort query with entity filters and no search 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
 | RENAME group_key AS \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL own_rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -731,9 +765,10 @@ exports[`entities grid query builders sort by asset.criticality builds the sort 
 | EVAL asset.criticality = CASE(group_rank == 4, \\"extreme_impact\\", group_rank == 3, \\"high_impact\\", group_rank == 2, \\"medium_impact\\", group_rank == 1, \\"low_impact\\"), entity.source = MV_DEDUPE(COALESCE(MV_APPEND(entity.source, alias_sources), entity.source, alias_sources)), entity.attributes.watchlists = MV_DEDUPE(COALESCE(MV_APPEND(entity.attributes.watchlists, alias_watchlists), entity.attributes.watchlists, alias_watchlists)), entity.lifecycle.first_seen = LEAST(COALESCE(entity.lifecycle.first_seen, alias_first_seen), COALESCE(alias_first_seen, entity.lifecycle.first_seen)), \`@timestamp\` = GREATEST(COALESCE(\`@timestamp\`, alias_last_seen), COALESCE(alias_last_seen, \`@timestamp\`))
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 | LIMIT 9975
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -742,8 +777,9 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -752,8 +788,9 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -762,8 +799,9 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -772,8 +810,9 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -782,19 +821,21 @@ FROM entities-latest-default
 | SORT entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by asset.criticality builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | WHERE asset.criticality IS NULL OR NOT asset.criticality IN (\\"extreme_impact\\", \\"high_impact\\", \\"medium_impact\\", \\"low_impact\\")
 | SORT entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -802,8 +843,9 @@ FROM entities-latest-default
 | WHERE asset.criticality == \\"low_impact\\"
 | SORT entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -811,8 +853,9 @@ FROM entities-latest-default
 | WHERE asset.criticality == \\"medium_impact\\"
 | SORT entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -820,8 +863,9 @@ FROM entities-latest-default
 | WHERE asset.criticality == \\"high_impact\\"
 | SORT entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -829,70 +873,78 @@ FROM entities-latest-default
 | WHERE asset.criticality == \\"extreme_impact\\"
 | SORT entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort query 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT entity.EngineMetadata.Type DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort query with entity filters and no search 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | SORT entity.EngineMetadata.Type DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | SORT entity.EngineMetadata.Type ASC NULLS LAST, entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort query 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
 | RENAME group_key AS \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL own_rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | EVAL group_rank = GREATEST(COALESCE(own_rank, alias_rank), COALESCE(alias_rank, own_rank))
 | EVAL asset.criticality = CASE(group_rank == 4, \\"extreme_impact\\", group_rank == 3, \\"high_impact\\", group_rank == 2, \\"medium_impact\\", group_rank == 1, \\"low_impact\\"), entity.source = MV_DEDUPE(COALESCE(MV_APPEND(entity.source, alias_sources), entity.source, alias_sources)), entity.attributes.watchlists = MV_DEDUPE(COALESCE(MV_APPEND(entity.attributes.watchlists, alias_watchlists), entity.attributes.watchlists, alias_watchlists)), entity.lifecycle.first_seen = LEAST(COALESCE(entity.lifecycle.first_seen, alias_first_seen), COALESCE(alias_first_seen, entity.lifecycle.first_seen)), \`@timestamp\` = GREATEST(COALESCE(\`@timestamp\`, alias_last_seen), COALESCE(alias_last_seen, \`@timestamp\`))
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 | LIMIT 9975
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT entity.lifecycle.first_seen DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort query with entity filters and no search 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
 | RENAME group_key AS \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL own_rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -900,9 +952,10 @@ exports[`entities grid query builders sort by entity.lifecycle.first_seen builds
 | EVAL asset.criticality = CASE(group_rank == 4, \\"extreme_impact\\", group_rank == 3, \\"high_impact\\", group_rank == 2, \\"medium_impact\\", group_rank == 1, \\"low_impact\\"), entity.source = MV_DEDUPE(COALESCE(MV_APPEND(entity.source, alias_sources), entity.source, alias_sources)), entity.attributes.watchlists = MV_DEDUPE(COALESCE(MV_APPEND(entity.attributes.watchlists, alias_watchlists), entity.attributes.watchlists, alias_watchlists)), entity.lifecycle.first_seen = LEAST(COALESCE(entity.lifecycle.first_seen, alias_first_seen), COALESCE(alias_first_seen, entity.lifecycle.first_seen)), \`@timestamp\` = GREATEST(COALESCE(\`@timestamp\`, alias_last_seen), COALESCE(alias_last_seen, \`@timestamp\`))
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 | LIMIT 9975
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -910,60 +963,66 @@ FROM entities-latest-default
 | SORT entity.lifecycle.first_seen DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | SORT entity.lifecycle.first_seen ASC NULLS LAST, entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by entity.name builds the sort query 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT entity.name DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by entity.name builds the sort query with entity filters and no search 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | SORT entity.name DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by entity.name builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | SORT entity.name ASC NULLS LAST, entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
 | SORT entity.relationships.resolution.risk.calculated_score_norm DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -971,11 +1030,12 @@ FROM entities-latest-default
 | SORT entity.risk.calculated_score_norm DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query with entity filters and no search 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -983,8 +1043,9 @@ exports[`entities grid query builders sort by entity.risk.calculated_score_norm 
 | SORT entity.relationships.resolution.risk.calculated_score_norm DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -993,33 +1054,37 @@ FROM entities-latest-default
 | SORT entity.risk.calculated_score_norm DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace"
 `;
 
 exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | SORT entity.risk.calculated_score_norm ASC NULLS LAST, entity.id ASC
 | LIMIT 26
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by group_size builds the sort query 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL \`entity.id\` = entity.relationships.resolution.resolved_to
 | STATS alias_count = COUNT(*) BY \`entity.id\`
 | EVAL group_size = alias_count + 1
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT group_size DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1027,15 +1092,17 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL group_size = 1
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size"
 `;
 
 exports[`entities grid query builders sort by group_size builds the sort query with entity filters and no search 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL \`entity.id\` = entity.relationships.resolution.resolved_to
 | STATS alias_count = COUNT(*) BY \`entity.id\`
 | EVAL group_size = alias_count + 1
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1043,8 +1110,9 @@ exports[`entities grid query builders sort by group_size builds the sort query w
 | SORT group_size DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1053,16 +1121,17 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL group_size = 1
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size"
 `;
 
 exports[`entities grid query builders sort by group_size builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | LIMIT 10000
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort query 1`] = `
@@ -1138,17 +1207,20 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT last_seen_alert DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1156,7 +1228,7 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low"
 `;
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort query with entity filters and no search 1`] = `
@@ -1232,9 +1304,11 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1242,8 +1316,9 @@ FROM .alerts-security.alerts-default
 | SORT last_seen_alert DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1252,20 +1327,22 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low"
 `;
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | LIMIT 10000
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort by risk_score_change builds the sort query 1`] = `
-"FROM (
+"SET unmapped_fields=\\"nullify\\";
+FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
@@ -1291,12 +1368,14 @@ FROM entities-latest-default
 | WHERE risk_score_change IS NOT NULL
 | SORT risk_score_change DESC NULLS LAST, entity.id ASC
 | LIMIT 26
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
 | SORT risk_score_change DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1304,11 +1383,12 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL risk_score_change = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change"
 `;
 
 exports[`entities grid query builders sort by risk_score_change builds the sort query with entity filters and no search 1`] = `
-"FROM (
+"SET unmapped_fields=\\"nullify\\";
+FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
@@ -1335,12 +1415,14 @@ FROM entities-latest-default
 | WHERE risk_score_change IS NOT NULL
 | SORT risk_score_change DESC NULLS LAST, entity.id ASC
 | LIMIT 26
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
 | SORT risk_score_change DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 
+SET unmapped_fields=\\"nullify\\";
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1349,16 +1431,17 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL risk_score_change = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change"
 `;
 
 exports[`entities grid query builders sort by risk_score_change builds the sort query with filters 1`] = `
-"FROM entities-latest-default
+"SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | LIMIT 10000
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name"
 `;
 
 exports[`entities grid query builders sort page by alert_count with value rows runs the queries of the first page ascending 1`] = `
@@ -1435,17 +1518,20 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT alert_count ASC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -1453,7 +1539,7 @@ FROM .alerts-security.alerts-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
 ]
 `;
 
@@ -1531,17 +1617,20 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT alert_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -1549,25 +1638,27 @@ FROM .alerts-security.alerts-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
 ]
 `;
 
 exports[`entities grid query builders sort page by alert_count with value rows runs the queries of the first page with a search 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:h-1\\")
 | SORT entity.id ASC
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
   "SET unmapped_fields=\\"nullify\\";
 FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
@@ -1642,6 +1733,7 @@ FROM .alerts-security.alerts-default
 | RENAME _ea_entity_id AS \`entity.id\`
 | WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:h-1\\")
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`",
@@ -1722,9 +1814,11 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1732,8 +1826,9 @@ FROM .alerts-security.alerts-default
 | SORT alert_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -1742,7 +1837,7 @@ FROM .alerts-security.alerts-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
 ]
 `;
 
@@ -1810,17 +1905,20 @@ TRUE, _euid_branch_2_formula, NULL))
 | WHERE derived_euids IS NOT NULL
 | RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT anomaly_count ASC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -1828,7 +1926,7 @@ TRUE, _euid_branch_2_formula, NULL))
 | LIMIT 26
 | EVAL anomaly_count = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
 ]
 `;
 
@@ -1896,17 +1994,20 @@ TRUE, _euid_branch_2_formula, NULL))
 | WHERE derived_euids IS NOT NULL
 | RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT anomaly_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -1914,25 +2015,27 @@ TRUE, _euid_branch_2_formula, NULL))
 | LIMIT 26
 | EVAL anomaly_count = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
 ]
 `;
 
 exports[`entities grid query builders sort page by anomaly_count with value rows runs the queries of the first page with a search 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:h-1\\")
 | SORT entity.id ASC
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
@@ -1996,6 +2099,7 @@ TRUE, _euid_branch_2_formula, NULL))
 | RENAME derived_euids AS \`entity.id\`
 | WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:h-1\\")
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`",
@@ -2066,9 +2170,11 @@ TRUE, _euid_branch_2_formula, NULL))
 | WHERE derived_euids IS NOT NULL
 | RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2076,8 +2182,9 @@ TRUE, _euid_branch_2_formula, NULL))
 | SORT anomaly_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -2086,25 +2193,28 @@ TRUE, _euid_branch_2_formula, NULL))
 | LIMIT 26
 | EVAL anomaly_count = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, anomaly_count",
 ]
 `;
 
 exports[`entities grid query builders sort page by group_size with value rows runs the queries of the first page ascending 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL \`entity.id\` = entity.relationships.resolution.resolved_to
 | STATS alias_count = COUNT(*) BY \`entity.id\`
 | EVAL group_size = alias_count + 1
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT group_size ASC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -2112,25 +2222,28 @@ Array [
 | LIMIT 26
 | EVAL group_size = 1
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
 ]
 `;
 
 exports[`entities grid query builders sort page by group_size with value rows runs the queries of the first page descending 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL \`entity.id\` = entity.relationships.resolution.resolved_to
 | STATS alias_count = COUNT(*) BY \`entity.id\`
 | EVAL group_size = alias_count + 1
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT group_size DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -2138,19 +2251,20 @@ Array [
 | LIMIT 26
 | EVAL group_size = 1
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
 ]
 `;
 
 exports[`entities grid query builders sort page by group_size with value rows runs the queries of the first page with a search 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IN (\\"host:h-1\\") OR entity.id IN (\\"host:h-1\\")
@@ -2162,11 +2276,13 @@ Array [
 
 exports[`entities grid query builders sort page by group_size with value rows runs the queries of the first page with entity filters 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL \`entity.id\` = entity.relationships.resolution.resolved_to
 | STATS alias_count = COUNT(*) BY \`entity.id\`
 | EVAL group_size = alias_count + 1
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2174,8 +2290,9 @@ Array [
 | SORT group_size DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -2184,7 +2301,7 @@ Array [
 | LIMIT 26
 | EVAL group_size = 1
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, group_size",
 ]
 `;
 
@@ -2262,17 +2379,20 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT last_seen_alert ASC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -2280,7 +2400,7 @@ FROM .alerts-security.alerts-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
 ]
 `;
 
@@ -2358,17 +2478,20 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | SORT last_seen_alert DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -2376,25 +2499,27 @@ FROM .alerts-security.alerts-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
 ]
 `;
 
 exports[`entities grid query builders sort page by last_seen_alert with value rows runs the queries of the first page with a search 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:h-1\\")
 | SORT entity.id ASC
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
   "SET unmapped_fields=\\"nullify\\";
 FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
@@ -2469,6 +2594,7 @@ FROM .alerts-security.alerts-default
 | RENAME _ea_entity_id AS \`entity.id\`
 | WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:h-1\\")
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`",
@@ -2549,9 +2675,11 @@ FROM .alerts-security.alerts-default
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
 | STATS last_seen_alert = MAX(\`@timestamp\`), alert_count = COUNT(*), alert_critical = COUNT(*) WHERE \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE \`kibana.alert.severity\` == \\"low\\" BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
 | STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2559,8 +2687,9 @@ FROM .alerts-security.alerts-default
 | SORT last_seen_alert DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM entities-latest-default
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -2569,13 +2698,14 @@ FROM .alerts-security.alerts-default
 | LIMIT 26
 | EVAL last_seen_alert = null, alert_count = null, alert_critical = null, alert_high = null, alert_medium = null, alert_low = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
 ]
 `;
 
 exports[`entities grid query builders sort page by risk_score_change with value rows runs the queries of the first page ascending 1`] = `
 Array [
-  "FROM (
+  "SET unmapped_fields=\\"nullify\\";
+FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
@@ -2601,12 +2731,14 @@ FROM entities-latest-default
 | WHERE risk_score_change IS NOT NULL
 | SORT risk_score_change ASC NULLS LAST, entity.id ASC
 | LIMIT 26
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
 | SORT risk_score_change ASC NULLS LAST, entity.id ASC
 | LIMIT 26",
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -2614,13 +2746,14 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL risk_score_change = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
 ]
 `;
 
 exports[`entities grid query builders sort page by risk_score_change with value rows runs the queries of the first page descending 1`] = `
 Array [
-  "FROM (
+  "SET unmapped_fields=\\"nullify\\";
+FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
@@ -2646,12 +2779,14 @@ FROM entities-latest-default
 | WHERE risk_score_change IS NOT NULL
 | SORT risk_score_change DESC NULLS LAST, entity.id ASC
 | LIMIT 26
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
 | SORT risk_score_change DESC NULLS LAST, entity.id ASC
 | LIMIT 26",
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE NOT entity.id IN (\\"host:h-1\\")
@@ -2659,19 +2794,20 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL risk_score_change = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
 ]
 `;
 
 exports[`entities grid query builders sort page by risk_score_change with value rows runs the queries of the first page with a search 1`] = `
 Array [
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")
 | LIMIT 10000
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
   "FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE host.risk.id_value IN (\\"host:h-1\\") OR user.risk.id_value IN (\\"host:h-1\\") OR service.risk.id_value IN (\\"host:h-1\\")
@@ -2689,7 +2825,8 @@ Array [
 
 exports[`entities grid query builders sort page by risk_score_change with value rows runs the queries of the first page with entity filters 1`] = `
 Array [
-  "FROM (
+  "SET unmapped_fields=\\"nullify\\";
+FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
@@ -2716,12 +2853,14 @@ FROM entities-latest-default
 | WHERE risk_score_change IS NOT NULL
 | SORT risk_score_change DESC NULLS LAST, entity.id ASC
 | LIMIT 26
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change
 | SORT risk_score_change DESC NULLS LAST, entity.id ASC
 | LIMIT 26",
-  "FROM entities-latest-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -2730,6 +2869,6 @@ FROM entities-latest-default
 | LIMIT 26
 | EVAL risk_score_change = null
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.entity.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, risk_score_change",
 ]
 `;

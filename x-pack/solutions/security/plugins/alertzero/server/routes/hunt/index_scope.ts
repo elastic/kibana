@@ -11,6 +11,8 @@ import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INDEX_SCOPE_URL } from '../../../com
 import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import { isBlockedByPolicyOnly } from '../../services/watches/hunt/common/partition_hunt_universe';
+import { unsearchedPatterns } from '../../services/watches/hunt/common/unsearched_patterns';
 import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
@@ -51,7 +53,11 @@ export const registerHuntIndexScopeRoute = ({
         try {
           const spaceId = getSpaceId(request);
           const esClient = huntEsClient({ getClusterClient, request });
-          const indexPatterns = await resolveHuntUniverse(context, logger);
+          const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger,
+            isCpsEnabled()
+          );
 
           // `discovered` is the datasets stage 1 parsed for the report matcher; the wire
           // scope carries what they matched, not the list itself.
@@ -59,16 +65,43 @@ export const registerHuntIndexScopeRoute = ({
             esClient,
             spaceId,
             indexPatterns,
+            policySkippedPatterns: policySkipped,
             crossProjectSearch: isCpsEnabled(),
             logger,
           });
+          const policySkippedList = scope.policy_skipped ?? [];
+          if (policySkippedList.length > 0) {
+            logger.debug(
+              `Hunt index scope for space ${spaceId} does not search hidden or alerts indices: ${policySkippedList.join(
+                ', '
+              )}`
+            );
+          }
           if (scope.resolution === 'blocked:empty_universe') {
             // `blocked:discovery_failed` already warns inside `resolveHuntScope`.
             logger.warn(
-              `Hunt index scope for space ${spaceId} is ${
-                scope.resolution
-              }: the caller resolved none of ${scope.missing.join(', ')}`
+              isBlockedByPolicyOnly(scope)
+                ? `Hunt index scope for space ${spaceId} is ${
+                    scope.resolution
+                  }: the default data view names only hidden or alerts indices (${policySkippedList.join(
+                    ', '
+                  )})`
+                : `Hunt index scope for space ${spaceId} is ${
+                    scope.resolution
+                  }: the caller resolved none of ${scope.missing.join(', ')}`
             );
+          }
+          if (scope.status !== 'blocked') {
+            const unsearched = unsearchedPatterns(scope, indexPatterns);
+            if (unsearched.length > 0) {
+              logger.debug(
+                `Hunt index scope for space ${spaceId} left ${
+                  unsearched.length
+                } default data view name(s) out of the search because the caller could not read them (no read access, not found, or closed): ${unsearched.join(
+                  ', '
+                )}`
+              );
+            }
           }
           const body: HuntIndexScopeResponse = scope;
 

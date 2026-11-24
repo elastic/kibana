@@ -73,4 +73,17 @@ spaceTest.describe('Discover drag and drop', { tag: tags.deploymentAgnostic }, (
       ).toStrictEqual(['@message']);
     }
   );
+
+  spaceTest(
+    'should support dragging and dropping a field onto the chart as a breakdown',
+    async ({ pageObjects }) => {
+      expect(await pageObjects.discover.getBreakdownFieldValue()).toBe('No breakdown');
+
+      await pageObjects.discover.dragFieldToChart('geo.dest');
+
+      await expect
+        .poll(() => pageObjects.discover.getBreakdownFieldValue())
+        .toBe('Breakdown by geo.dest');
+    }
+  );
 });

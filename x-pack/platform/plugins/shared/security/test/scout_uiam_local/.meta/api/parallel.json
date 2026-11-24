@@ -1,5 +1,5 @@
 {
-  "sha1": "85efda1b9e3bf6358625c20daf2050ece2e05235",
+  "sha1": "db4bdb47bcff651111284478b2e32fbd5917af28",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -262,6 +262,44 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access.spec.ts",
         "line": 128,
         "column": 9
+      }
+    },
+    {
+      "id": "f6d669489dc86bb-d431a7b1d0f5b55",
+      "title": "[NON-MKI] Profile of an internal UIAM API key resolves to the profile of the user who created the key, in-process and over HTTP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_key_profile.spec.ts",
+        "line": 96,
+        "column": 8
+      }
+    },
+    {
+      "id": "f6d669489dc86bb-79b5322b4774d80",
+      "title": "[NON-MKI] Profile of an internal UIAM API key authenticates as the user who created the key, keeping the key identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_key_profile.spec.ts",
+        "line": 126,
+        "column": 18
       }
     },
     {
@@ -551,6 +589,25 @@
       }
     },
     {
+      "id": "a0f2c3b316efae7-d5d1d49d2b166e3",
+      "title": "[NON-MKI] External (user-created) UIAM API key authenticates as the user who created the key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_external_api_key_creator.spec.ts",
+        "line": 34,
+        "column": 23
+      }
+    },
+    {
       "id": "a2e99e58c5b1cc7-0cf9fedf6f86f59",
       "title": "[NON-MKI] Invalidate UIAM session UIAM session tokens should not be usable after logging out",
       "expectedStatus": "passed",
@@ -726,7 +783,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
-        "line": 112,
+        "line": 111,
         "column": 7
       }
     },

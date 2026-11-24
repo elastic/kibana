@@ -1,6 +1,6 @@
 # `workflow_service/`
 
-Thin server-side adapter from `alerting_v2` into [`workflows_extensions`](../../../../../../../src/platform/plugins/shared/workflows_extensions).
+Thin server-side adapter from `alerting_v2` into [`workflows_extensions`](../../../../../../../x-pack/platform/plugins/shared/workflows_extensions).
 
 This folder exposes one service, `WorkflowService`, whose job is narrowly scoped:
 

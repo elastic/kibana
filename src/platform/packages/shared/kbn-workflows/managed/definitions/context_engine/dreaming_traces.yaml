@@ -12,8 +12,10 @@ settings:
   timeout: '30m'
   concurrency:
     key: __CONCURRENCY_KEY__
-    strategy: drop
+    strategy: queue
     max: 1
+    queue-size: 10
+    queue-ttl: '24h'
 consts:
   ai_index_id: __AI_INDEX_ID__
   batch_workflow_id: __BATCH_WORKFLOW_ID__

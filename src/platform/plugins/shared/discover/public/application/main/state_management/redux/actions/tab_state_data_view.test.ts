@@ -9,6 +9,7 @@
 
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { registerEsqlSourceInDataViewsCache, unregisterFromDataViewsCache } from '@kbn/data-source';
 import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
@@ -151,6 +152,130 @@ describe('tab_state_data_view actions', () => {
           internalStateActions.setDataSource({ tabId, dataSource: esqlSource })
         )
       ).toThrow('ES|QL source esql-unregistered must be registered with resolveEsqlSource');
+    });
+  });
+
+  describe('publishFetchedEsqlSource', () => {
+    const column = (name: string, isNull: boolean): DatatableColumn => ({
+      id: name,
+      name,
+      meta: { type: 'string' },
+      isNull,
+    });
+
+    const setupEsqlTab = async (resultColumns: DatatableColumn[] = []) => {
+      const toolkit = await setup();
+      const esqlSource = createMockEsqlSource([], resultColumns, '@timestamp', 'FROM logs-*');
+      const shim = await registerEsqlSourceInDataViewsCache(
+        createMockDataViewsService(),
+        esqlSource
+      );
+      toolkit.internalState.dispatch(
+        internalStateActions.setDataSource({ tabId: toolkit.tabId, dataSource: esqlSource })
+      );
+      const { currentDataSource$ } = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        toolkit.tabId
+      );
+      return { ...toolkit, esqlSource, shim, currentDataSource$ };
+    };
+
+    it('publishes the fetched source when it marks columns as empty', async () => {
+      const { internalState, tabId, esqlSource, shim, currentDataSource$ } = await setupEsqlTab();
+      const fetchedSource = esqlSource.withColumns([column('host', false), column('empty', true)]);
+
+      internalState.dispatch(
+        internalStateActions.publishFetchedEsqlSource({ tabId, dataSource: fetchedSource })
+      );
+
+      const published = currentDataSource$.getValue();
+      expect(published).toBe(fetchedSource);
+      expect(getDataViewOfSource(published)).toBe(shim);
+    });
+
+    it('publishes again when the empty columns change', async () => {
+      const { internalState, tabId, esqlSource, currentDataSource$ } = await setupEsqlTab([
+        column('host', false),
+        column('empty', true),
+      ]);
+      const fetchedSource = esqlSource.withColumns([column('host', false), column('empty', false)]);
+
+      internalState.dispatch(
+        internalStateActions.publishFetchedEsqlSource({ tabId, dataSource: fetchedSource })
+      );
+
+      expect(currentDataSource$.getValue()).toBe(fetchedSource);
+    });
+
+    it('does not publish when no column is empty', async () => {
+      const { internalState, tabId, esqlSource, currentDataSource$ } = await setupEsqlTab();
+      const fetchedSource = esqlSource.withColumns([column('host', false)]);
+      const emissions = jest.fn();
+      currentDataSource$.subscribe(emissions);
+      emissions.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.publishFetchedEsqlSource({ tabId, dataSource: fetchedSource })
+      );
+
+      expect(emissions).not.toHaveBeenCalled();
+      expect(currentDataSource$.getValue()).toBe(esqlSource);
+    });
+
+    it('does not publish when the empty columns are unchanged', async () => {
+      const { internalState, tabId, esqlSource, currentDataSource$ } = await setupEsqlTab([
+        column('host', false),
+        column('empty', true),
+      ]);
+      const fetchedSource = esqlSource.withColumns([column('host', false), column('empty', true)]);
+      const emissions = jest.fn();
+      currentDataSource$.subscribe(emissions);
+      emissions.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.publishFetchedEsqlSource({ tabId, dataSource: fetchedSource })
+      );
+
+      expect(emissions).not.toHaveBeenCalled();
+    });
+
+    it('keeps the pinned DataView when another tab unregistered the source', async () => {
+      const { internalState, tabId, esqlSource, shim, currentDataSource$ } = await setupEsqlTab();
+      unregisterFromDataViewsCache(esqlSource.id);
+      const fetchedSource = esqlSource.withColumns([column('empty', true)]);
+
+      internalState.dispatch(
+        internalStateActions.publishFetchedEsqlSource({ tabId, dataSource: fetchedSource })
+      );
+
+      const published = currentDataSource$.getValue();
+      expect(published).toBe(fetchedSource);
+      expect(getDataViewOfSource(published)).toBe(shim);
+    });
+
+    it('does not publish a source of another query', async () => {
+      const { internalState, tabId, esqlSource, currentDataSource$ } = await setupEsqlTab();
+      const otherSource = esqlSource.withColumns([column('empty', true)]);
+      (otherSource as { id: string }).id = 'another-esql-source';
+
+      internalState.dispatch(
+        internalStateActions.publishFetchedEsqlSource({ tabId, dataSource: otherSource })
+      );
+
+      expect(currentDataSource$.getValue()).toBe(esqlSource);
+    });
+
+    it('does not publish over a classic data view source', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const dataViewSource = currentDataSource$.getValue();
+      const esqlSource = createMockEsqlSource([], [column('empty', true)], '@timestamp');
+
+      internalState.dispatch(
+        internalStateActions.publishFetchedEsqlSource({ tabId, dataSource: esqlSource })
+      );
+
+      expect(currentDataSource$.getValue()).toBe(dataViewSource);
     });
   });
 
