@@ -71,6 +71,57 @@ describe('WorkflowMigrationDetailsFlyout', () => {
     expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Phishing triage elastic');
   });
 
+  describe('description', () => {
+    it('should show the description of the workflow', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('detailsFlyoutDescription')).toHaveTextContent(
+        'Triages reported phishing emails'
+      );
+    });
+
+    it('should prefer the description of the translated workflow', () => {
+      renderFlyout({
+        migrationWorkflow: getWorkflow({
+          elastic_workflow: {
+            id: 'elastic-1',
+            title: 'Phishing triage elastic',
+            description: 'Triages reported phishing emails in Elastic',
+          },
+        }),
+      });
+
+      expect(screen.getByTestId('detailsFlyoutDescription')).toHaveTextContent(
+        'Triages reported phishing emails in Elastic'
+      );
+    });
+
+    it('should not show a description when the workflow has none', () => {
+      renderFlyout({
+        migrationWorkflow: getWorkflow({
+          original_workflow: {
+            id: 'story-1',
+            vendor: 'tines',
+            title: 'Phishing triage',
+            data: '{}',
+            format: 'json',
+          },
+        }),
+      });
+
+      expect(screen.queryByTestId('detailsFlyoutDescription')).not.toBeInTheDocument();
+    });
+
+    it('should show the description below the last updated line', () => {
+      renderFlyout();
+
+      const description = screen.getByTestId('detailsFlyoutDescription');
+      const title = screen.getByTestId('detailsFlyoutTitle');
+
+      expect(title.compareDocumentPosition(description)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+  });
+
   it('should show the Translation and the Summary tabs', () => {
     renderFlyout();
 

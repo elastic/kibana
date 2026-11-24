@@ -15,6 +15,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
   type EuiFlyoutProps,
@@ -74,6 +75,10 @@ export const WorkflowMigrationDetailsFlyout = React.memo(function WorkflowMigrat
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
   const onTabClick = useCallback((tab: EuiTabbedContentTab) => setSelectedTabId(tab.id), []);
 
+  const description =
+    migrationWorkflow.elastic_workflow?.description ??
+    migrationWorkflow.original_workflow.description;
+
   const titleId = useGeneratedHtmlId({ prefix: 'migrationWorkflowsFlyoutTitle' });
 
   return (
@@ -105,6 +110,14 @@ export const WorkflowMigrationDetailsFlyout = React.memo(function WorkflowMigrat
           updatedBy={migrationWorkflow.updated_by ?? migrationWorkflow.created_by}
           updatedAt={migrationWorkflow.updated_at ?? migrationWorkflow['@timestamp']}
         />
+        {description && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued" data-test-subj="detailsFlyoutDescription">
+              <p>{description}</p>
+            </EuiText>
+          </>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ScrollableFlyoutTabbedContent
