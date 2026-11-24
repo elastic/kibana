@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { AsyncLocalStorage } from 'async_hooks';
+
 import type { Principal } from '@kbn/ols';
-import type { AuditEvent } from '@kbn/security-plugin-types-server';
+import type { AuditEvent, AuditLogger } from '@kbn/security-plugin-types-server';
 
 /**
  * The object-level security (OLS) audit actions.
@@ -106,3 +108,79 @@ export const olsAuditEvent = ({
     ...(principal && { user: { id: principal.id, entity: { type: principal.type } } }),
   };
 };
+
+/**
+ * Audit events held until a repository operation completes, together with the objects that
+ * object-level security denied during it.
+ */
+interface AuditScope {
+  events: Array<{ logger: AuditLogger; event: AuditEvent }>;
+  deniedObjects: Set<string>;
+}
+
+const auditScopes = new AsyncLocalStorage<AuditScope>();
+
+/**
+ * Runs an operation with audit events held until it completes, then writes them. An object that
+ * object-level security denied is logged only as that denial: any `saved_object_*` event the
+ * security extension wrote about it during the operation is dropped, so the audit log never shows a
+ * success, or an operation in progress, for an object the caller could not see.
+ *
+ * The scope follows the async context, so concurrent operations on the same request never mix
+ * their events. A nested operation joins the scope of its caller.
+ */
+export const runInAuditScope = async <T>(operation: () => Promise<T>): Promise<T> => {
+  if (auditScopes.getStore()) {
+    return await operation();
+  }
+
+  const scope: AuditScope = { events: [], deniedObjects: new Set() };
+  try {
+    return await auditScopes.run(scope, operation);
+  } finally {
+    for (const { logger, event } of scope.events) {
+      if (!isSupersededByDenial(event, scope.deniedObjects)) {
+        logger.log(event);
+      }
+    }
+  }
+};
+
+/**
+ * Records that object-level security denied an object in the current audit scope, if any.
+ */
+export const recordDeniedObject = (type: string, id: string) => {
+  auditScopes.getStore()?.deniedObjects.add(getObjectKey(type, id));
+};
+
+/**
+ * Wraps an audit logger so that, within an audit scope, its events are held until the scope ends.
+ * Outside a scope it logs immediately, as the wrapped logger does.
+ */
+export const createScopedAuditLogger = (logger: AuditLogger): AuditLogger => ({
+  log: (event) => {
+    const scope = auditScopes.getStore();
+    if (scope && event) {
+      scope.events.push({ logger, event });
+    } else {
+      logger.log(event);
+    }
+  },
+  get enabled() {
+    return logger.enabled;
+  },
+  get includeSavedObjectNames() {
+    return logger.includeSavedObjectNames;
+  },
+});
+
+const isSupersededByDenial = (event: AuditEvent, deniedObjects: Set<string>) => {
+  const savedObject = event.kibana?.saved_object;
+  return (
+    !!savedObject &&
+    !!event.event?.action?.startsWith('saved_object_') &&
+    deniedObjects.has(getObjectKey(savedObject.type, savedObject.id))
+  );
+};
+
+const getObjectKey = (type: string, id: string) => `${type}:${id}`;

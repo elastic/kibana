@@ -34,7 +34,7 @@ import {
 } from '@kbn/ols';
 import type { AuditEvent, AuditLogger } from '@kbn/security-plugin-types-server';
 
-import { olsAuditEvent, type OlsAuditEventParams } from './audit';
+import { olsAuditEvent, type OlsAuditEventParams, recordDeniedObject } from './audit';
 import type { OlsServiceStartParams } from './ols_service';
 import { resolvePrincipal } from './principal';
 import { validateRecipients } from './recipients';
@@ -173,6 +173,10 @@ export interface ScopedOlsServiceContract {
   prepareInitialAcl(params: OlsPrepareInitialAclParams): Promise<Acl | undefined>;
   /** See {@link ScopedOlsService.authorizeChange}. */
   authorizeChange(params: OlsAuthorizeChangeParams): Promise<OlsAuthorizedChange>;
+  /** See {@link ScopedOlsService.getPolicy}. */
+  getPolicy(type: string): AccessPolicy | undefined;
+  /** See {@link ScopedOlsService.getAccessPrivilegeActions}. */
+  getAccessPrivilegeActions(policy: AccessPolicy, access: EntryAccess): string[];
 }
 
 /**
@@ -379,6 +383,9 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
 
       const objectDecision = toObjectDecision(decision, operation);
       decisions.set(id, objectDecision);
+      if (objectDecision.status !== 'allowed') {
+        recordDeniedObject(type, id);
+      }
       this.audit({
         action: objectDecision.status === 'allowed' ? 'ols_admin_override' : 'ols_denied',
         type,
@@ -655,7 +662,10 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
     };
   }
 
-  private getPolicy(type: string) {
+  /**
+   * Returns the access policy of a type, or `undefined` when the type has none.
+   */
+  public getPolicy(type: string) {
     return this.params.policies.getAccessPolicy(type);
   }
 
@@ -663,7 +673,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
    * Returns the privilege actions that every operation an access permits needs. The access doesn't
    * have to be one the type lets entries grant.
    */
-  private getAccessPrivilegeActions(policy: AccessPolicy, access: EntryAccess) {
+  public getAccessPrivilegeActions(policy: AccessPolicy, access: EntryAccess) {
     return [
       ...new Set(
         [...getOperationsAtAccess(policy, access)].flatMap((name) => {
