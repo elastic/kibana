@@ -148,7 +148,7 @@ const prepareDestinationDelivery = async (
   if (uncertainRoot) {
     diagnostic = 'A previous root delivery is unconfirmed; automatic thread creation is blocked';
   } else if (!createsRoot && !threadTs) {
-    diagnostic = MISSING_NOTIFICATION_THREAD;
+    return { diagnostic: MISSING_NOTIFICATION_THREAD, createsRoot: false };
   }
 
   // The terminal phase edits the started message, so the thread keeps a single message.
@@ -279,6 +279,8 @@ const deliverToDestination = async (
 
   const attemptId = randomUUID();
   const identity = `investigation "${investigation.investigation_id}", execution "${executionId}", destination "${destinationId}", phase "${phase}", attempt "${attemptId}"`;
+  const preflightFailure =
+    delivery.diagnostic === MISSING_NOTIFICATION_THREAD ? delivery.diagnostic : undefined;
   let attempt;
   try {
     attempt = await routingClient.claim(
@@ -286,7 +288,8 @@ const deliverToDestination = async (
       destinationId,
       phase,
       attemptId,
-      delivery.createsRoot
+      delivery.createsRoot,
+      preflightFailure
     );
   } catch (error) {
     logger.warn(
@@ -297,6 +300,10 @@ const deliverToDestination = async (
     throw error;
   }
   if (!attempt) {
+    return;
+  }
+  if (preflightFailure) {
+    logger.warn(`Notification delivery for ${identity} is failed: ${preflightFailure}`);
     return;
   }
 

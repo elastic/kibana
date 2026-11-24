@@ -12,7 +12,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RELAY_APP_BINDINGS_QUERY_KEY } from '../../../data/relay_apps/use_relay_app_bindings';
 import { SlackDeliveryStatus } from './slack_delivery_status';
 
-it('refreshes a sending notification and updates the guidance when the channel is connected', async () => {
+it('keeps channel names across delivery states and updates the guidance after reconnecting', async () => {
   jest.useFakeTimers();
   const queryClient = new QueryClient();
   try {
@@ -21,21 +21,26 @@ it('refreshes a sending notification and updates the guidance when the channel i
       channel: 'C0OPS',
       attemptedAt: '2026-11-24T10:00:00.000Z',
     };
+    const review = { ...destination, id: 'slack-review', channel: 'C08REVIEW01' };
     const fetch = jest
       .fn()
       .mockResolvedValueOnce({
-        deliveries: [{ ...destination, status: 'sending', phase: 'started' }],
+        deliveries: [
+          { ...destination, status: 'sending', phase: 'started' },
+          { ...review, status: 'sending', phase: 'started' },
+        ],
       })
       .mockResolvedValueOnce({
-        deliveries: [{ ...destination, status: 'sent', phase: 'started' }],
+        deliveries: [
+          { ...destination, status: 'sent', phase: 'started' },
+          { ...review, status: 'failed', phase: 'completed', reason: 'thread_missing' },
+        ],
       })
       .mockResolvedValue({
         deliveries: [
           { ...destination, status: 'sent', phase: 'completed' },
           {
-            ...destination,
-            id: 'slack-review',
-            channel: 'C0REVIEW',
+            ...review,
             status: 'failed',
             phase: 'completed',
             reason: 'channel_not_connected',
@@ -52,7 +57,7 @@ it('refreshes a sending notification and updates the guidance when the channel i
                   Promise.resolve(
                     path.endsWith('/bindings')
                       ? { bindings: [{ channel: 'C0OPS', displayName: 'ops' }] }
-                      : { channels: [{ channel: 'C0REVIEW', displayName: 'review' }] }
+                      : { channels: [{ channel: review.channel, displayName: 'review' }] }
                   )
                 ),
               } as never
@@ -65,19 +70,21 @@ it('refreshes a sending notification and updates the guidance when the channel i
         </QueryClientProvider>
       </I18nProvider>
     );
-    expect(await screen.findByText('Sending')).toBeInTheDocument();
+    expect(await screen.findAllByText('Sending')).toHaveLength(2);
     expect(await screen.findByText('#ops')).toBeInTheDocument();
+    expect(await screen.findByText('#review')).toBeInTheDocument();
     expect(screen.queryByText(/Slack delivery could not be confirmed/)).not.toBeInTheDocument();
 
     await act(async () => jest.advanceTimersByTime(5_000));
 
     expect(await screen.findByText('Delivered')).toBeInTheDocument();
+    expect(screen.getByText('#review')).toBeVisible();
 
     await act(async () => jest.advanceTimersByTime(30_000));
 
     expect(await screen.findByText('Failed')).toBeInTheDocument();
     expect(await screen.findByText('#review')).toBeVisible();
-    expect(screen.getByRole('link', { name: 'Open Slack settings' })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: 'Open Slack settings' })).toHaveAttribute(
       'href',
       '/app/nightshift/settings/general'
     );
@@ -86,7 +93,7 @@ it('refreshes a sending notification and updates the guidance when the channel i
       queryClient.setQueryData([...RELAY_APP_BINDINGS_QUERY_KEY, 'all'], {
         bindings: [
           { channel: 'C0OPS', displayName: 'ops' },
-          { channel: 'C0REVIEW', displayName: 'review' },
+          { channel: review.channel, displayName: 'review' },
         ],
         isComplete: true,
       });
@@ -108,7 +115,12 @@ it.each(['an HTTP error', 'an invalid response'])(
     const queryClient = new QueryClient({ logger: { ...console, error: jest.fn() } });
     const fetch = jest.fn();
     if (failure === 'an HTTP error') {
-      fetch.mockRejectedValueOnce(new Error('Internal server error'));
+      fetch.mockRejectedValueOnce(
+        Object.assign(new Error('Internal connector details'), {
+          request: {},
+          response: { status: 500 },
+        })
+      );
     } else {
       fetch.mockResolvedValueOnce({});
     }
@@ -138,7 +150,12 @@ it.each(['an HTTP error', 'an invalid response'])(
         </I18nProvider>
       );
 
-      fireEvent.click(await screen.findByRole('button', { name: 'Refresh status' }));
+      const refresh = await screen.findByRole('button', { name: 'Refresh status' });
+      if (failure === 'an HTTP error') {
+        expect(screen.getByText('Slack delivery status is unavailable (HTTP 500).')).toBeVisible();
+        expect(screen.queryByText('Internal connector details')).not.toBeInTheDocument();
+      }
+      fireEvent.click(refresh);
 
       expect(
         await screen.findByText(/Ask a nightshift admin to connect this channel/)

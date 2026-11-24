@@ -8,6 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NotifiableInvestigation, NotificationExecution } from './notification_delivery';
+import { MISSING_NOTIFICATION_THREAD } from './notification_routing';
 import type { NotificationPhase } from './notification_routing';
 import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
 import { createRoutingTestContext, getTestIsomerRuntime } from './notification_routing.mock';
@@ -303,6 +304,23 @@ describe('investigation notification lifecycle', () => {
     expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
     expect(await send('started', 'exec-2')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
     expect(execute).toHaveBeenCalledTimes(2);
+  });
+
+  it('records findings without a thread as failed in the first write', async () => {
+    const { send, execute, client } = setup();
+    execute.mockResolvedValueOnce({ status: 'error', message: 'not_in_channel' } as never);
+    await send('started');
+    const record = jest.spyOn(client, 'record');
+
+    expect(await send('completed')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+    expect((await client.get())?.attempts[1]).toMatchObject({
+      phase: 'completed',
+      status: 'failed',
+      error: MISSING_NOTIFICATION_THREAD,
+    });
+    expect(await send('completed')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(record).not.toHaveBeenCalled();
   });
 
   it('connector exceptions remain unconfirmed with bounded diagnostics', async () => {

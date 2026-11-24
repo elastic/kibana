@@ -23,6 +23,7 @@ import { useQuery } from '@kbn/react-query';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { parseSlackChannelInput } from '../../../common/parse_slack_channel_input';
 import { slackDeliveriesQueryKey } from '../../../data/query_keys';
 import {
   formatChannelLabel,
@@ -31,8 +32,9 @@ import {
 } from '../../../data/relay_apps/use_relay_app_bindings';
 
 const endpoint = 'GET /internal/nightshift/investigations/{id}/slack_deliveries';
-const isInaccessible = (error: unknown): boolean =>
-  isHttpFetchError(error) && [403, 404].includes(error.response?.status ?? 0);
+const getHttpStatus = (error: unknown): number | undefined =>
+  isHttpFetchError(error) ? error.response?.status : undefined;
+const isInaccessible = (error: unknown): boolean => [403, 404].includes(getHttpStatus(error) ?? 0);
 
 const phaseLabels = {
   started: i18n.translate('xpack.nightshift.slackDelivery.startedLabel', {
@@ -177,14 +179,14 @@ export const SlackDeliveryStatus = ({
     !inaccessible &&
     !isLoadingBindings &&
     data?.deliveries.some(
-      ({ channel, reason, status }) =>
-        status === 'failed' &&
-        reason === 'channel_not_connected' &&
+      ({ channel }) =>
+        parseSlackChannelInput(channel) === channel &&
         !bindings.some((binding) => binding.channel === channel)
     ) === true;
   const { channels } = useAvailableChannelsWithHttp(http, canLookUpDisconnectedChannels);
   if (inaccessible || (!data?.deliveries.length && !isError)) return null;
 
+  const httpStatus = getHttpStatus(error);
   const reasonLabels = {
     ...(settingsHref ? settingsReasonLabels : viewerReasonLabels),
     ...otherReasonLabels,
@@ -289,26 +291,37 @@ export const SlackDeliveryStatus = ({
         );
       })}
       {isError && !data && (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.nightshift.slackDelivery.unavailableMessage"
-            defaultMessage="Slack delivery status is unavailable."
-          />{' '}
-          <EuiLink
-            data-test-subj="nightshiftSlackDeliveryRefreshStatus"
-            disabled={isFetching}
-            onClick={() => void refetch()}
-            {...getEbtProps({
-              action: NIGHTSHIFT_EBT_ACTIONS.REFRESH_SLACK_DELIVERY_STATUS,
-              element: NIGHTSHIFT_EBT_ELEMENTS.SLACK_DELIVERY_STATUS,
-            })}
-          >
-            <FormattedMessage
-              id="xpack.nightshift.slackDelivery.refreshStatusButtonLabel"
-              defaultMessage="Refresh status"
-            />
-          </EuiLink>
-        </EuiText>
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {httpStatus === undefined ? (
+              <FormattedMessage
+                id="xpack.nightshift.slackDelivery.unavailableMessage"
+                defaultMessage="Slack delivery status is unavailable."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.nightshift.slackDelivery.unavailableHttpErrorMessage"
+                defaultMessage="Slack delivery status is unavailable (HTTP {status})."
+                values={{ status: String(httpStatus) }}
+              />
+            )}{' '}
+            <EuiLink
+              data-test-subj="nightshiftSlackDeliveryRefreshStatus"
+              disabled={isFetching}
+              onClick={() => void refetch()}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.REFRESH_SLACK_DELIVERY_STATUS,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SLACK_DELIVERY_STATUS,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.nightshift.slackDelivery.refreshStatusButtonLabel"
+                defaultMessage="Refresh status"
+              />
+            </EuiLink>
+          </EuiText>
+        </>
       )}
     </section>
   );
