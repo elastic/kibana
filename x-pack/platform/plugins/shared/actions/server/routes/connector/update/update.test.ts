@@ -19,8 +19,15 @@ import {
 import { createMockConnector } from '../../../application/connector/mocks';
 import { actionsConfigMock } from '../../../actions_config.mock';
 import Boom from '@hapi/boom';
+import type { Type } from '@kbn/config-schema';
 
-const actionsConfigUtils = (inboundEventsFeatureEnabled = false, catalogEnabled = false) => {
+const actionsConfigUtils = ({
+  inboundEventsFeatureEnabled = false,
+  catalogEnabled = false,
+}: {
+  inboundEventsFeatureEnabled?: boolean;
+  catalogEnabled?: boolean;
+} = {}) => {
   const utils = actionsConfigMock.create();
   utils.isInboundEventsEnabled.mockReturnValue(inboundEventsFeatureEnabled);
   utils.isCatalogEnabled.mockReturnValue(catalogEnabled);
@@ -112,7 +119,7 @@ describe('updateConnectorRoute', () => {
     async (specVersion) => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
-      updateConnectorRoute(router, licenseState, actionsConfigUtils(false, true));
+      updateConnectorRoute(router, licenseState, actionsConfigUtils({ catalogEnabled: true }));
       const [, handler] = router.put.mock.calls[0];
       const actionsClient = actionsClientMock.create();
       actionsClient.update.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
@@ -149,7 +156,7 @@ describe('updateConnectorRoute', () => {
   it('forwards omitted config and secrets as empty objects alongside spec_version', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    updateConnectorRoute(router, licenseState, actionsConfigUtils(false, true));
+    updateConnectorRoute(router, licenseState, actionsConfigUtils({ catalogEnabled: true }));
     const [, handler] = router.put.mock.calls[0];
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(createMockConnector({ specVersion: '2.0' }));
@@ -172,30 +179,26 @@ describe('updateConnectorRoute', () => {
     });
   });
 
-  it('rejects spec_version when the connector catalog is disabled', async () => {
+  it('rejects spec_version when the connector catalog is disabled', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    updateConnectorRoute(router, licenseState, actionsConfigUtils());
-    const [, handler] = router.put.mock.calls[0];
-    const actionsClient = actionsClientMock.create();
-    const body = updateConnectorBodySchema.validate({
-      name: 'Versioned connector',
-      config: {},
-      secrets: {},
-      spec_version: '1',
-    });
-    const [context, req, res] = mockHandlerArguments(
-      { actionsClient, isCatalogFeatureFlagEnabled: jest.fn().mockReturnValue(false) },
-      { body, params: { id: '1' } },
-      ['badRequest']
+    updateConnectorRoute(router, licenseState, actionsConfigUtils({ catalogEnabled: false }));
+
+    const [config] = router.put.mock.calls[0];
+    const validateConfig = config.validate as { request?: { body?: Type<unknown> } };
+
+    expect(config.validate).toBeDefined();
+    expect(validateConfig.request?.body).toBeDefined();
+    expect(() =>
+      validateConfig.request?.body!.validate({
+        name: 'Versioned connector',
+        config: {},
+        secrets: {},
+        spec_version: '1.0',
+      })
+    ).toThrow(
+      "[spec_version]: Additional properties are not allowed ('spec_version' was unexpected)"
     );
-
-    await handler(context, req, res);
-
-    expect(res.badRequest).toHaveBeenCalledWith({
-      body: "[request body.spec_version]: Additional properties are not allowed ('spec_version' was unexpected)",
-    });
-    expect(actionsClient.update).not.toHaveBeenCalled();
   });
 
   it('rejects a spec_version past the max length', () => {
@@ -212,7 +215,11 @@ describe('updateConnectorRoute', () => {
   it('forwards is_inbound_events_enabled when the inbound events flag is on', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    updateConnectorRoute(router, licenseState, actionsConfigUtils(true));
+    updateConnectorRoute(
+      router,
+      licenseState,
+      actionsConfigUtils({ inboundEventsFeatureEnabled: true })
+    );
     const [, handler] = router.put.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();
@@ -266,7 +273,11 @@ describe('updateConnectorRoute', () => {
   it('omits is_inbound_events_enabled from the response when the inbound events flag is off', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    updateConnectorRoute(router, licenseState, actionsConfigUtils());
+    updateConnectorRoute(
+      router,
+      licenseState,
+      actionsConfigUtils({ inboundEventsFeatureEnabled: false })
+    );
     const [, handler] = router.put.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();
