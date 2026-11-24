@@ -76,13 +76,19 @@ export interface HasEditorConfig {
 }
 
 export interface ControlGroupEditorConfig {
+  /**
+   * Hides the data view selector. Without `defaultDataViewId`, the data view is picked
+   * automatically: the last used one, the first persisted data view that the parent publishes, or
+   * the default data view. If none is available, the user cannot choose one and cannot save the
+   * control, so provide `defaultDataViewId` when the parent does not publish a persisted data view.
+   */
   hideDataViewSelector?: boolean;
   hideAdditionalSettings?: boolean;
   hideValuesSourceSelector?: boolean;
   /**
-   * The id of the data view that is initially selected in the data control editor when a new
-   * control is created. The user can change it. The id must point to a persisted (saved) data view,
-   * not an ad hoc data view.
+   * An explicit override for the data view that is initially selected when a new control is
+   * created. If it points to an ad hoc data view, the caller must make sure that data view is
+   * available to the data views service, since controls only store its id.
    */
   defaultDataViewId?: string;
   fieldFilterPredicate?: FieldFilterPredicate;
