@@ -53,6 +53,9 @@ export const IGNORE_PATTERNS = [
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 
+  // filename must match the workflow step id, which is usually camelCase (e.g. security.createRule)
+  'x-pack/platform/plugins/shared/workflows_extensions/contracts/steps/*.json',
+
   // generator templates use weird filenames based on the requirements for the files they're generating
   'packages/kbn-generate/templates/**/*',
   'packages/kbn-plugin-generator/template/**/*',
