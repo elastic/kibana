@@ -65,11 +65,12 @@ export const createVisPanelResolver = ({
         if (applyChartRules) {
           throw new Error('Presentation enhancement is only supported for ES|QL Lens panels.');
         }
+        const { spec: existingSpec, ...existingConfig } = existingPanel?.config ?? {};
         const { spec, title, authoringNote } = await buildVegaConfig({
           nlQuery,
           index,
           esql,
-          existingSpec: getVegaSpecText(existingPanel?.config?.spec),
+          existingSpec: getVegaSpecText(existingSpec),
           preserveESQL,
           chartType,
           modelProvider,
@@ -82,7 +83,11 @@ export const createVisPanelResolver = ({
           type: 'success',
           panelContent: {
             type: VEGA_VIS_TYPE,
-            config: { spec: { format: 'hjson', value: spec }, ...(title ? { title } : {}) },
+            config: {
+              ...existingConfig,
+              spec: { format: 'hjson', value: spec },
+              ...(title ? { title } : {}),
+            },
           },
           ...(authoringNote ? { authoringNote } : {}),
         };

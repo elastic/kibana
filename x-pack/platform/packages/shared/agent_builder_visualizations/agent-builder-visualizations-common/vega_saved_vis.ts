@@ -98,7 +98,7 @@ export const extractVegaSpecFromSavedVis = (
     return undefined;
   }
   const spec = savedVis.params?.spec;
-  if (typeof spec !== 'string') {
+  if (typeof spec !== 'string' || spec.length === 0) {
     return undefined;
   }
   return {
