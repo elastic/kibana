@@ -227,6 +227,7 @@ describe('PackQueriesStatusTable — query details flyout failures', () => {
     for (const row of rows) {
       expect(row).toBeInTheDocument();
     }
+
     expect(screen.getByText('query-1')).toBeInTheDocument();
     expect(screen.getByText('query-2')).toBeInTheDocument();
     expect(setErrorToast).toHaveBeenCalledTimes(1);

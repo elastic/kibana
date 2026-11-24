@@ -38,7 +38,7 @@ const expectDetailsShown = () => {
 };
 
 const validationErrors = (spy: jest.SpyInstance) =>
-  spy.mock.calls.filter((args) =>
+  spy.mock.calls.filter((args: Parameters<typeof console.error>) =>
     args.some((arg) => String(arg?.message ?? arg).includes('EuiFlyout validation error'))
   );
 

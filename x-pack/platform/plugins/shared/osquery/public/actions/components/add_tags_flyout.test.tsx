@@ -57,7 +57,7 @@ describe('AddTagsFlyout', () => {
       expect.arrayContaining([expect.objectContaining({ level: 'child', size: 's' })])
     );
     expect(
-      consoleErrorSpy.mock.calls.filter((args) =>
+      consoleErrorSpy.mock.calls.filter((args: Parameters<typeof console.error>) =>
         args.some((arg) => String(arg?.message ?? arg).includes('EuiFlyout validation error'))
       )
     ).toHaveLength(0);

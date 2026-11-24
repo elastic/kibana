@@ -16,6 +16,7 @@ describe('QueryDetailsFlyoutErrorBoundary', () => {
     const ThrowingChild = (): React.ReactElement => {
       throw error;
     };
+
     const onError = jest.fn();
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
