@@ -75,7 +75,6 @@ export function useWorkflowExecuteHitTabSearchState({
   isTableGridFullScreen = false,
   onTableGridFullScreenChange,
 }: UseWorkflowExecuteHitTabSearchStateOptions): UseWorkflowExecuteHitTabSearchStateResult {
-  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
@@ -141,10 +140,7 @@ export function useWorkflowExecuteHitTabSearchState({
   );
 
   const handleQueryChange = useCallback(
-    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
-      if (newQuery) {
-        setQuery(newQuery);
-      }
+    ({ dateRange }: { query?: Query; dateRange: TimeRange }) => {
       setTimeRange((previousTimeRange) =>
         previousTimeRange.from === dateRange.from && previousTimeRange.to === dateRange.to
           ? previousTimeRange
@@ -157,7 +153,6 @@ export function useWorkflowExecuteHitTabSearchState({
   const handleQuerySubmit = useCallback(
     ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
       if (newQuery) {
-        setQuery(newQuery);
         setSubmittedQuery(newQuery);
       }
       setTimeRange(dateRange);
@@ -172,7 +167,7 @@ export function useWorkflowExecuteHitTabSearchState({
   }, [hitSearch.hits.length, isTableGridFullScreen, onTableGridFullScreenChange]);
 
   return {
-    query,
+    query: submittedQuery,
     timeRange,
     submittedQueryString,
     handleQueryChange,
