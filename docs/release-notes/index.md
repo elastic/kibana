@@ -394,6 +394,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix Lens library panels disappearing when you open a dashboard whose saved object is missing the link to the library item. Kibana now recovers these panels [#285476]({{kib-pull}}285476).
 * Fix the dashboard top menu and **Edit** button not appearing in embedded dashboards when `show-top-menu=true` is set [#299599]({{kib-pull}}299599).
 * Fix the first save of a dashboard letting you select **Save** several times before the save dialog opened. The dialog now opens immediately [#289342]({{kib-pull}}289342).
+* Fix the **Try {{esql}}** button on the dashboard empty state doing nothing when you select it before the visualization editor finishes loading. The button is now disabled until the editor is ready [#297237]({{kib-pull}}297237).
 * Fix the Lens editor showing **Save and return** instead of **Save** when you create a visualization from the dashboards listing page without first opening a tab on that page [#295245]({{kib-pull}}295245).
 * Fix the unsaved changes dot on the dashboard **Save** button opening the save dialog twice when you select it [#293087]({{kib-pull}}293087).
 * Switch the open dashboard to edit mode when an agent changes it, so you can review and save the changes. Before, a saved dashboard in view mode took the agent's changes without offering **Save** [#304617]({{kib-pull}}304617).
@@ -806,8 +807,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % Removed from 9.6.0: rolled back before BC1 (revert #283183, rollback #284281) and not re-added.
 % * Support `??` parameters in PromQL [#281486]({{kib-pull}}281486).
 
-% Removed from 9.6.0: internal or not user-facing (test-only fix, internal Canvas route limit, dependency upgrade).
-% * Fix the **Try {{esql}}** button on the dashboard empty state doing nothing when you select it before the visualization editor finishes loading. The button is now disabled until it's ready [#297237]({{kib-pull}}297237).
+% Removed from 9.6.0: internal or not user-facing (internal Canvas route limit, dependency upgrade).
 % * Limit the number of data table cells that the Canvas functions route creates [#287935]({{kib-pull}}287935).
 % * Upgrade `@elastic/charts` to 73.3.1 [#298033]({{kib-pull}}298033), [#296879]({{kib-pull}}296879), [#294108]({{kib-pull}}294108).
 
@@ -920,9 +920,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 
 **Dashboards and Visualizations**:
 * Fix {{esql}} metric visualization background trendlines failing when `EVAL` copies or overwrites the time-bucket column [#299104]({{kib-pull}}299104).
-% !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
-% * Fix the **Try {{esql}}** button on the dashboard empty state doing nothing when you select it before the visualization editor finishes loading. The button is now disabled until it's ready [#297237]({{kib-pull}}297237).
-
 **Data ingestion and {{fleet}}**:
 * Fix the collectors of deleted managed integrations appearing in the {{fleet}} **Agents** list even when you hide managed integration resources [#304146]({{kib-pull}}304146).
 * Fix the **Add Elastic Agent to your hosts** button in the dialog that opens after you add an integration not opening the **Add agent** flyout [#303762]({{kib-pull}}303762).
