@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type {
@@ -167,6 +167,27 @@ describe('RuleFlyout', () => {
       expect(
         await screen.findByText('Select a boost profile to choose targets.')
       ).toBeInTheDocument();
+    });
+
+    it('shows why the target field is disabled to keyboard users too', async () => {
+      renderFlyout();
+      const trigger = screen.getByTestId('searchBoostRuleFlyoutIndexPatternTrigger');
+
+      act(() => trigger.focus());
+
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent('Select a boost profile to choose targets.');
+      expect(trigger).toHaveAttribute('aria-describedby', tooltip.id);
+    });
+
+    it('stops offering the tooltip once a profile is selected', async () => {
+      renderFlyout();
+
+      await selectProfile('storefront-search');
+
+      expect(
+        screen.queryByTestId('searchBoostRuleFlyoutIndexPatternTrigger')
+      ).not.toBeInTheDocument();
     });
 
     it('shows the errors on save, and does not save', async () => {

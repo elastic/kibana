@@ -12,9 +12,8 @@ import { EuiFieldText, EuiFormControlLayout, EuiToolTip } from '@elastic/eui';
 export interface IndexPatternFieldProps {
   value: string;
   placeholder: string;
-  /** Why the field can't be used yet, shown in a tooltip. */
-  disabledReason?: string;
   isDisabled?: boolean;
+  disabledTooltip?: string;
   isInvalid?: boolean;
   inputRef: (element: HTMLInputElement | null) => void;
   onChange: (value: string) => void;
@@ -29,8 +28,8 @@ export interface IndexPatternFieldProps {
 export const IndexPatternField = ({
   value,
   placeholder,
-  disabledReason,
   isDisabled,
+  disabledTooltip,
   isInvalid,
   inputRef,
   onChange,
@@ -40,15 +39,14 @@ export const IndexPatternField = ({
   onFocus,
 }: IndexPatternFieldProps) => {
   const inputElement = useRef<HTMLInputElement | null>(null);
-  const isFieldDisabled = isDisabled || Boolean(disabledReason);
 
   const field = (
     <EuiFormControlLayout
       fullWidth
       isInvalid={isInvalid}
-      isDisabled={isFieldDisabled}
+      isDisabled={isDisabled}
       clear={
-        value && !isFieldDisabled
+        value && !isDisabled
           ? {
               onClick: () => {
                 onChange('');
@@ -67,7 +65,7 @@ export const IndexPatternField = ({
         value={value}
         placeholder={placeholder}
         isInvalid={isInvalid}
-        disabled={isFieldDisabled}
+        disabled={isDisabled}
         inputRef={(element) => {
           inputElement.current = element;
           inputRef(element);
@@ -80,13 +78,16 @@ export const IndexPatternField = ({
     </EuiFormControlLayout>
   );
 
-  return disabledReason ? (
+  return isDisabled && disabledTooltip ? (
     <EuiToolTip
-      content={disabledReason}
+      content={disabledTooltip}
       display="block"
       anchorProps={{ 'data-test-subj': 'searchBoostRuleFlyoutIndexPatternTip' }}
     >
-      {field}
+      {/* The field is disabled, so this wrapper takes focus to show the tooltip. */}
+      <div tabIndex={0} data-test-subj="searchBoostRuleFlyoutIndexPatternTrigger">
+        {field}
+      </div>
     </EuiToolTip>
   ) : (
     field

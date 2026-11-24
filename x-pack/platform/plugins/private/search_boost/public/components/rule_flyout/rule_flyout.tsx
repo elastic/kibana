@@ -311,8 +311,8 @@ export const RuleFlyout = ({
               <IndexPatternField
                 value={indexPatternField.value}
                 placeholder={getIndexPatternPlaceholder(type ?? 'indices')}
-                disabledReason={type ? undefined : SELECT_PROFILE_FIRST_TOOLTIP}
-                isDisabled={isSaving}
+                isDisabled={isSaving || !type}
+                disabledTooltip={type ? undefined : SELECT_PROFILE_FIRST_TOOLTIP}
                 isInvalid={Boolean(indexPatternState.error)}
                 inputRef={indexPatternField.ref}
                 onChange={indexPatternField.onChange}
