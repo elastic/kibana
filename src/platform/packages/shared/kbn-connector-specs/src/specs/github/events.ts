@@ -7,22 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  githubCheckRun,
+  githubDeploymentStatus,
+  githubIssueComment,
+  githubIssues,
+  githubPullRequest,
+  githubPullRequestReview,
+  githubPush,
+  githubRelease,
+} from '@kbn/connector-topics';
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
-import type { ConnectorSpecEvents } from '../../connector_spec_events';
-import { buildEventId } from '../../event_type_id';
+import { toConnectorSpecEvent, type ConnectorSpecEvents } from '../../connector_spec_events';
 import { MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH } from '../../handle_events_result';
-import {
-  GithubIssuesEventSchema,
-  GithubIssueCommentEventSchema,
-  GithubPullRequestEventSchema,
-  GithubPullRequestReviewEventSchema,
-  GithubPushEventSchema,
-  GithubReleaseEventSchema,
-  GithubDeploymentStatusEventSchema,
-  GithubCheckRunEventSchema,
-} from './event_schemas';
 
 const DeliveryHeadersSchema = lazySchema(() =>
   z.object({
@@ -32,8 +31,7 @@ const DeliveryHeadersSchema = lazySchema(() =>
 );
 
 const definitions = {
-  issues: {
-    eventId: buildEventId('.github', 'issues'),
+  issues: toConnectorSpecEvent(githubIssues, {
     title: i18n.translate('connectorSpecs.github.events.issues.title', {
       defaultMessage: 'Issue',
     }),
@@ -41,10 +39,8 @@ const definitions = {
       defaultMessage:
         'An issue was opened, edited, reopened, closed, or otherwise changed. Filter with event.body.action.',
     }),
-    eventSchema: GithubIssuesEventSchema,
-  },
-  issue_comment: {
-    eventId: buildEventId('.github', 'issue_comment'),
+  }),
+  issue_comment: toConnectorSpecEvent(githubIssueComment, {
     title: i18n.translate('connectorSpecs.github.events.issueComment.title', {
       defaultMessage: 'Issue comment',
     }),
@@ -52,10 +48,8 @@ const definitions = {
       defaultMessage:
         'An issue or pull request comment was created, edited, or deleted. Filter with event.body.action.',
     }),
-    eventSchema: GithubIssueCommentEventSchema,
-  },
-  pull_request: {
-    eventId: buildEventId('.github', 'pull_request'),
+  }),
+  pull_request: toConnectorSpecEvent(githubPullRequest, {
     title: i18n.translate('connectorSpecs.github.events.pullRequest.title', {
       defaultMessage: 'Pull request',
     }),
@@ -63,10 +57,8 @@ const definitions = {
       defaultMessage:
         'A pull request was opened, updated, reopened, or closed. Filter with event.body.action; updates use edited or synchronize. Check event.body.pull_request.merged to distinguish a merge from an unmerged close.',
     }),
-    eventSchema: GithubPullRequestEventSchema,
-  },
-  pull_request_review: {
-    eventId: buildEventId('.github', 'pull_request_review'),
+  }),
+  pull_request_review: toConnectorSpecEvent(githubPullRequestReview, {
     title: i18n.translate('connectorSpecs.github.events.pullRequestReview.title', {
       defaultMessage: 'Pull request review submitted',
     }),
@@ -74,10 +66,8 @@ const definitions = {
       defaultMessage:
         'A pull request review was submitted. The review state is available in event.body.review.state.',
     }),
-    eventSchema: GithubPullRequestReviewEventSchema,
-  },
-  push: {
-    eventId: buildEventId('.github', 'push'),
+  }),
+  push: toConnectorSpecEvent(githubPush, {
     title: i18n.translate('connectorSpecs.github.events.push.title', {
       defaultMessage: 'Push received',
     }),
@@ -85,10 +75,8 @@ const definitions = {
       defaultMessage:
         'Commits, a branch, or a tag were pushed. The ref and before and after commit IDs are available in the event body.',
     }),
-    eventSchema: GithubPushEventSchema,
-  },
-  release: {
-    eventId: buildEventId('.github', 'release'),
+  }),
+  release: toConnectorSpecEvent(githubRelease, {
     title: i18n.translate('connectorSpecs.github.events.release.title', {
       defaultMessage: 'Release published',
     }),
@@ -96,10 +84,8 @@ const definitions = {
       defaultMessage:
         'A release was published. The tag, release ID, and prerelease flag are available in event.body.release.',
     }),
-    eventSchema: GithubReleaseEventSchema,
-  },
-  deployment_status: {
-    eventId: buildEventId('.github', 'deployment_status'),
+  }),
+  deployment_status: toConnectorSpecEvent(githubDeploymentStatus, {
     title: i18n.translate('connectorSpecs.github.events.deploymentStatus.title', {
       defaultMessage: 'Deployment status changed',
     }),
@@ -107,10 +93,8 @@ const definitions = {
       defaultMessage:
         'A deployment status changed. Filter with event.body.deployment_status.state to select an outcome.',
     }),
-    eventSchema: GithubDeploymentStatusEventSchema,
-  },
-  check_run: {
-    eventId: buildEventId('.github', 'check_run'),
+  }),
+  check_run: toConnectorSpecEvent(githubCheckRun, {
     title: i18n.translate('connectorSpecs.github.events.checkRun.title', {
       defaultMessage: 'Check run completed',
     }),
@@ -118,8 +102,7 @@ const definitions = {
       defaultMessage:
         'A check run completed. Filter with event.body.check_run.conclusion to select success, failure, or another outcome.',
     }),
-    eventSchema: GithubCheckRunEventSchema,
-  },
+  }),
 };
 
 type GithubEventType = keyof typeof definitions;

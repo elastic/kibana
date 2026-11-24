@@ -7,7 +7,7 @@
 
 import { isEqual, omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isDreamedKiType } from '../../common/dreaming';
+import { EDITED_AT_ATTRIBUTE, EDITED_BY_ATTRIBUTE, isDreamedKiType } from '../../common/dreaming';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiLifecycleStatus, KiPartialFields } from '../../common/step_types/ki';
 import { KiDeletedError, KiNotFoundError, KiValidationError } from './errors';
@@ -26,6 +26,24 @@ export const buildKiApiWriter = (action: KiApiWriterAction, spaceId: string): Ki
   uri: `api://context_engine.ki.${action}`,
   metadata: { space_id: spaceId },
 });
+
+const PERSON_EDITED_FIELDS = ['type', 'title', 'description', 'content', 'attributes'] as const;
+
+const attributesOf = (ki: StoredKi | undefined): Record<string, unknown> | undefined => {
+  const attributes = ki?.attributes;
+  return typeof attributes === 'object' && attributes !== null && !Array.isArray(attributes)
+    ? (attributes as Record<string, unknown>)
+    : undefined;
+};
+
+/** Whether a person edited what the KI says, so automation must leave its text alone. */
+export const isPersonEdited = (ki: StoredKi | undefined): boolean =>
+  attributesOf(ki)?.[EDITED_BY_ATTRIBUTE] !== undefined;
+
+const changesWhatItSays = (source: StoredKi, ki: KiPartialFields): boolean =>
+  PERSON_EDITED_FIELDS.some(
+    (field) => ki[field] !== undefined && !isEqual(source[field], ki[field])
+  );
 
 /** Whether every field in `ki` (and the lifecycle status) matches the stored KI.
  * It doesn't compare other governance fields like provenance.
@@ -66,6 +84,8 @@ export interface UpdateKiOptions {
   kiId: string;
   ki: KiPartialFields;
   writer: KiWriter;
+  /** Marks the KI as edited by a person when the update changes what it says. */
+  personEdit?: boolean;
   backingIndex?: string;
   /** Bypasses the deleted-KI guard, allowing updates to an already soft-deleted KI. */
   force?: boolean;
@@ -85,6 +105,7 @@ export const updateKi = async (
     kiId,
     ki,
     writer,
+    personEdit = false,
     backingIndex,
     force = false,
     lifecycle,
@@ -112,10 +133,21 @@ export const updateKi = async (
   }
 
   const now = new Date().toISOString();
+  const edited = personEdit && changesWhatItSays(revision.source, fields);
   const changes = {
     ...fields,
+    ...(edited && {
+      attributes: {
+        ...fields.attributes,
+        [EDITED_BY_ATTRIBUTE]: writer.uri,
+        [EDITED_AT_ATTRIBUTE]: now,
+      },
+    }),
     updated_at: now,
-    governance: { provenance: { updated_by: writer }, ...(lifecycle && { lifecycle }) },
+    governance: {
+      provenance: { updated_by: writer },
+      ...(lifecycle && { lifecycle }),
+    },
   };
 
   const { result } = await writeKiRevision({
