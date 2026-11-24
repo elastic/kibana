@@ -132,6 +132,7 @@ export const AiIndexDetailPage = () => {
   const {
     summary,
     isLoading: isKiSummaryLoading,
+    isPreviousData: isKiSummaryPreviousData,
     error: kiSummaryError,
   } = useListKi({
     aiIndexId: aiIndex?.id,
@@ -141,8 +142,10 @@ export const AiIndexDetailPage = () => {
     notifyOnError: true,
   });
 
-  const hasLoadedKiSummary = aiIndex !== undefined && !isKiSummaryLoading;
-  const hasKnowledgeIndicators = hasLoadedKiSummary && summary.total > 0;
+  // `useListKi` keeps the previous AI index's response while this one loads.
+  const isKiSummaryPending = isKiSummaryLoading || (isKiSummaryPreviousData && !kiSummaryError);
+  const hasLoadedKiSummary = aiIndex !== undefined && !isKiSummaryPending;
+  const hasKnowledgeIndicators = hasLoadedKiSummary && !kiSummaryError && summary.total > 0;
   const showKnowledgeIndicatorsTabInHeader = isKnowledgeIndicatorsTab || hasKnowledgeIndicators;
 
   const { hideEditControls, showOnboardingPanel, showAutomationsPanel } =
@@ -150,7 +153,8 @@ export const AiIndexDetailPage = () => {
       aiIndex,
       isLoading,
       hasKnowledgeIndicators,
-      isKnowledgeIndicatorsLoading: isKiSummaryLoading,
+      // A failed count does not mean the AI index is empty.
+      isKnowledgeIndicatorsLoading: isKiSummaryPending || kiSummaryError !== undefined,
     });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
@@ -309,7 +313,7 @@ export const AiIndexDetailPage = () => {
             automationsCount={visibleAutomationsCount}
             isManaged={isManaged}
             isMemoryEnabled={isMemoryEnabled}
-            isLoading={isKiSummaryLoading}
+            isLoading={isKiSummaryPending}
           />
           <EuiSpacer size="l" />
         </>

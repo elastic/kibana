@@ -775,6 +775,49 @@ describe('AiIndexDetailPage', () => {
     );
   });
 
+  it('does not show the onboarding panel when the summary request fails', async () => {
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+      error: new Error('Request timed out'),
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextOnboardingConnectAgentPanel')).not.toBeInTheDocument();
+  });
+
+  it('does not show the previous AI index summary while the new one loads', async () => {
+    const otherAiIndex: GetAiIndexResponse = { ...aiIndex, id: 'other-ai-index' };
+    // `useListKi` keeps the previous AI index's response (25 documents) while this one loads.
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      isPreviousData: true,
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(otherAiIndex);
+
+    renderWithProviders(services, undefined, getAiIndexDetailPath(otherAiIndex.id));
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextOverviewStatCard-knowledgeDocuments')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextOverviewStatCardValue-knowledgeDocuments')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewRecentDocuments')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextOverviewDocumentsChart')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextOnboardingConnectAgentPanel')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
+    ).not.toBeInTheDocument();
+  });
+
   it('shows the Manage in Settings link only once the AI index is known to be editable', async () => {
     const services = createServices();
     let resolveAiIndexGet: (value: GetAiIndexResponse) => void = () => {};
