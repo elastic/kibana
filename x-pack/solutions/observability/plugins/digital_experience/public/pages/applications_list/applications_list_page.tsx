@@ -280,17 +280,17 @@ export function ApplicationsListPage() {
     enable: enableSessions,
     enabling: enablingSessions,
     enableError: enableSessionsError,
-    // Sessions are web only: the Mobile tab, when the URL picks it, needs no status.
+    // Sessions are web only: the Mobile tab, when the URL picks it, requests no status.
   } = useSessionsStatus({ enabled: applicationType !== APPLICATION_TYPE.mobile });
-  // The status only refreshes by itself while sessions rebuild, so a refresh also checks it again.
-  const refreshAll = useCallback(() => {
-    refresh();
-    refreshSessionsStatus();
-  }, [refresh, refreshSessionsStatus]);
   // Once sessions are set up and built, the list has applications it was fetched without.
   const sessionsReady = sessionsStatus
     ? sessionsStatus.installed && !sessionsStatus.rebuilding
     : undefined;
+  // Unknown on the Mobile tab the URL picks, which requests no status, unless an earlier visit to
+  // the Web tab has it: sessions may still need setting up there.
+  const mayNeedSessionsSetup =
+    sessionsReady === false ||
+    (sessionsReady === undefined && applicationType === APPLICATION_TYPE.mobile);
   const wereSessionsReady = useRef(sessionsReady);
   useEffect(() => {
     if (wereSessionsReady.current === false && sessionsReady) {
@@ -316,16 +316,25 @@ export function ApplicationsListPage() {
       ? APPLICATION_TYPE.mobile
       : APPLICATION_TYPE.web;
   // Web and mobile applications have their own tab when both have something to show (web rows, a
-  // web retry or sessions still to set up or build, and mobile rows), for the mobile retry or unreadable data prompt whatever the web, and
+  // web retry or sessions still to set up or build, or maybe so, and mobile rows), for the mobile
+  // retry or unreadable data prompt whatever the web, and
   // when the URL picks the type without data, e.g. for the mobile setup docs, with a tab back. The
   // type that alone has data shows no empty tab, e.g. back from a mobile application.
   const showsTabs =
     mobileAvailability === 'unavailable' ||
     showsMobileUnreadableDataPrompt ||
-    ((hasWebApplications || hasWebFailures || sessionsReady === false) && hasMobileApplications) ||
+    ((hasWebApplications || hasWebFailures || mayNeedSessionsSetup) && hasMobileApplications) ||
     (response !== undefined && applicationType !== undefined && applicationType !== typeWithData);
   const selectedType = applicationType ?? typeWithData;
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
+  // The status only refreshes by itself while sessions rebuild, so a refresh also checks it again,
+  // on the Web tab only: sessions are web only.
+  const refreshAll = useCallback(() => {
+    refresh();
+    if (!isMobileTab) {
+      refreshSessionsStatus();
+    }
+  }, [refresh, refreshSessionsStatus, isMobileTab]);
   // A filter in the URL is ignored where its control isn't shown, so it can't hide rows, narrow the
   // other tab's count or follow its links: the source only on the Web tab (and not on serverless),
   // the platform only on the Mobile tab, whatever a shared link or a link back carries.

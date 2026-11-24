@@ -300,6 +300,48 @@ describe('ApplicationsListPage mobile applications', () => {
     }
   );
 
+  it('requests no sessions status on the Mobile tab the URL picks, and keeps a Web tab for their setup', async () => {
+    mockApplicationType('mobile');
+    // Never fetched, as nothing asked for it on this visit
+    mockSessionsStatus({ status: undefined });
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(useSessionsStatus).toHaveBeenCalledWith({ enabled: false });
+    // Sessions may still need setting up, which the Web tab offers
+    expect(screen.getByTestId('digitalExperienceApplicationTypeTab-web')).toBeVisible();
+  });
+
+  it('shows no empty Web tab on the Mobile tab the URL picks once sessions are known to be ready', async () => {
+    mockApplicationType('mobile');
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceApplicationTypeTabs')).toBeNull();
+  });
+
+  it.each([
+    ['Mobile', 'mobile' as const, false],
+    ['Web', 'web' as const, true],
+  ])(
+    'checks the sessions status again on refresh on the %s tab: %s',
+    async (_tab, applicationType, refreshesStatus) => {
+      mockApplicationType(applicationType);
+      respondWith([mobileApp(), webApp()]);
+      renderPage();
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+
+      const { calls } = jest.mocked(TimeRangePicker).mock;
+      const { onRefresh } = calls[calls.length - 1][0];
+      act(() => onRefresh());
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+      expect(refreshSessionsStatus).toHaveBeenCalledTimes(refreshesStatus ? 1 : 0);
+    }
+  );
+
   it('keeps a Mobile tab on a Web tab without rows when the URL picks it', async () => {
     mockApplicationType('web');
     respondWith([mobileApp()]);

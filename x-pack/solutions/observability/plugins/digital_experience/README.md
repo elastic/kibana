@@ -880,7 +880,8 @@ logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status` (fetched by `SessionsStatusProvider` only once
   a web page asks for it, and checked back only while one is open, so mobile pages and the list's
-  Mobile tab request none): whether sessions are set up or turned off, the
+  Mobile tab request none; on that tab, with the status unknown, the list keeps its Web tab, where
+  sessions may still need setting up, and its refresh doesn't check the status again): whether sessions are set up or turned off, the
   task's health, lag and last error, whether it is still building, how many days sessions are kept,
   whether the current user can set them up (`canEnable`) and whether the app should do it for them
   (`autoEnable`), what keeps anyone from
