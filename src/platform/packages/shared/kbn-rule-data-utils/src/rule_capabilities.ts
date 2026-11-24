@@ -8,7 +8,6 @@
  */
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import { ML_APP_ID } from '@kbn/deeplinks-ml';
 import {
   STACK_ALERTS_FEATURE_ID,
   STACK_ALERTS_ONLY_FEATURE_ID,
@@ -17,6 +16,9 @@ import {
 
 /** UI capability for the Stack Management Rules page. */
 export const TRIGGERS_ACTIONS_RULES_CAPABILITY_ID = 'triggersActionsRules' as const;
+
+// Matches ML_APP_ID in src/platform/packages/shared/deeplinks/ml/deep_links.ts.
+const ML_APP_ID = 'ml';
 
 // Matches PLUGIN_FEATURE_ID in x-pack/platform/plugins/shared/data_quality/common/index.ts.
 const DATA_QUALITY_FEATURE_ID = 'dataQuality';

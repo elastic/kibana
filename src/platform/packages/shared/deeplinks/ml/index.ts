@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ML_APP_ID } from './deep_links';
 export type { LinkId, AppId, DeepLinkId } from './deep_links';
