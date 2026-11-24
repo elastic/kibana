@@ -1244,51 +1244,62 @@ describe('NightshiftApp', () => {
     });
 
     it('reports a repeated search again after an intervening search is held back by a failed section', async () => {
-      records = [
-        criticalInvestigation,
-        makeInvestigation('closed-checkout', 'Checkout closed', {
-          metadata: { status: 'closed' },
-        }),
-      ];
-      renderApp({
-        client,
-        initialEntries: [
-          '/?q=checkout&rangeFrom=2026-09-10T00:00:00.000Z&rangeTo=2026-09-12T00:00:00.000Z',
-        ],
-      });
+      jest.useFakeTimers();
+      try {
+        records = [
+          criticalInvestigation,
+          makeInvestigation('closed-checkout', 'Checkout closed', {
+            metadata: { status: 'closed' },
+          }),
+        ];
+        renderApp({
+          client,
+          initialEntries: [
+            '/?q=checkout&rangeFrom=2026-09-10T00:00:00.000Z&rangeTo=2026-09-12T00:00:00.000Z',
+          ],
+        });
 
-      const searchedCalls = () =>
-        reportEvent.mock.calls.filter(
-          ([eventType]) => eventType === 'nightshift_investigations_searched'
+        const searchedCalls = () =>
+          reportEvent.mock.calls.filter(
+            ([eventType]) => eventType === 'nightshift_investigations_searched'
+          );
+
+        await waitFor(() =>
+          expect(searchedCalls()).toEqual([
+            ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
+          ])
         );
 
-      await waitFor(() =>
-        expect(searchedCalls()).toEqual([
-          ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
-        ])
-      );
+        closedRequestFails = true;
+        fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+          target: { value: 'latency' },
+        });
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
 
-      closedRequestFails = true;
-      fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
-        target: { value: 'latency' },
-      });
+        await screen.findByRole('button', {
+          name: 'Retry loading Closed investigations',
+        });
+        expect(searchedCalls()).toHaveLength(1);
 
-      await screen.findByRole('button', {
-        name: 'Retry loading Closed investigations',
-      });
-      expect(searchedCalls()).toHaveLength(1);
+        closedRequestFails = false;
+        fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+          target: { value: 'checkout' },
+        });
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
 
-      closedRequestFails = false;
-      fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
-        target: { value: 'checkout' },
-      });
-
-      await waitFor(() =>
-        expect(searchedCalls()).toEqual([
-          ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
-          ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
-        ])
-      );
+        await waitFor(() =>
+          expect(searchedCalls()).toEqual([
+            ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
+            ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
+          ])
+        );
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 });
