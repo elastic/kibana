@@ -21,6 +21,7 @@ import {
   TRIAGE_PENDING_TAG,
   TRIAGE_WOULD_CLOSE_TAG_PREFIX,
   TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
+  closedByDecisionTag,
   TRIAGE_WOULD_SKIP_TAG_PREFIX,
   VERDICT_TAGS,
   type AlertSeverity,
@@ -644,9 +645,7 @@ export const countClosedByDecision = async (
       query: {
         bool: {
           filter: [
-            {
-              term: { [ALERT_FIELDS.tags]: `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${decisionId}` },
-            },
+            { term: { [ALERT_FIELDS.tags]: closedByDecisionTag(decisionId) } },
             {
               range: {
                 'kibana.alert.workflow_status_updated_at': { gte: new Date(since).toISOString() },

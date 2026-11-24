@@ -6,7 +6,7 @@
  */
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
-import { TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX } from '../../../alert_triage/constants';
+import { closedByDecisionTag } from '../../../alert_triage/constants';
 import { tagInChunks } from '../../../alert_triage/plan_sweep';
 import {
   findAlertsNotClosedAsFalsePositive,
@@ -28,8 +28,6 @@ interface ReleaseParams {
   alertIds: string[];
 }
 
-const closedTag = (id: string) => `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`;
-
 /**
  * Takes the decision's tag off the alerts a failed close left open. Candidates leave out every
  * alert with that tag, so a tag left on an open alert would stop the next sweep from trying again.
@@ -39,7 +37,7 @@ export const untagStillOpen = async ({ api, write, id, alertIds }: ReleaseParams
   if (alertIds.length === 0) return;
   const open = await findOpenAlertIds(api, alertIds);
   if (open.length === 0) return;
-  await tagInChunks(write, { alertIds: open, add: [], remove: [closedTag(id)] });
+  await tagInChunks(write, { alertIds: open, add: [], remove: [closedByDecisionTag(id)] });
 };
 
 /**
@@ -55,7 +53,7 @@ export const releaseMovedOn = async ({
 }: ReleaseParams): Promise<string[]> => {
   const left = await findAlertsNotClosedAsFalsePositive(api, alertIds);
   if (left.length > 0) {
-    await tagInChunks(write, { alertIds: left, add: [], remove: [closedTag(id)] });
+    await tagInChunks(write, { alertIds: left, add: [], remove: [closedByDecisionTag(id)] });
   }
   return left;
 };
@@ -77,6 +75,6 @@ export const undoClosedAlerts = async ({
   closedIds: string[];
 }): Promise<number> => {
   const reopened = await reopenFalsePositiveClosedAlerts(api, closedIds);
-  await tagInChunks(write, { alertIds: tagged, add: [], remove: [closedTag(id)] });
+  await tagInChunks(write, { alertIds: tagged, add: [], remove: [closedByDecisionTag(id)] });
   return reopened;
 };

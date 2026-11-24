@@ -12,9 +12,9 @@ import {
   DECISION_NOTES_PER_SWEEP,
   VERDICT_INCONCLUSIVE_TAG,
   TAG_CHUNK_SIZE,
-  TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
-  TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX,
   TRIAGE_WOULD_CLOSE_TAG_PREFIX,
+  closedByDecisionTag,
+  skippedByDecisionTag,
 } from '../../alert_triage/constants';
 import type { StoredDecision } from '../../alert_triage/fp_decisions';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
@@ -87,8 +87,6 @@ interface CloseProgress {
   /** How many closes this decision added to the totals. */
   counted: number;
 }
-
-const closedTag = (id: string) => `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`;
 
 /**
  * The state and the writes of one match sweep: the totals, the decisions read so far, the daily
@@ -363,7 +361,7 @@ export const createDecisionSweep = ({
       const allowed = await closeAllowance(id, alertIds);
       if (allowed.length === 0) return;
       tagged = allowed;
-      await tagInChunks(write, { alertIds: allowed, add: [closedTag(id)], remove: [] });
+      await tagInChunks(write, { alertIds: allowed, add: [closedByDecisionTag(id)], remove: [] });
       if (await closeAlerts(id, allowed, progress)) {
         countCloseFailure(id);
         logger.warn(`Closing the alerts of decision ${id} timed out part way`);
@@ -426,7 +424,7 @@ export const createDecisionSweep = ({
   const skipDecision = async (id: string, alertIds: string[]) => {
     const allowed = withinNotes(alertIds);
     if (allowed.length === 0) return;
-    const skipTag = `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`;
+    const skipTag = skippedByDecisionTag(id);
     const skipTags = [VERDICT_INCONCLUSIVE_TAG, skipTag];
     const kept: string[] = [];
     try {

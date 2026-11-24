@@ -13,8 +13,8 @@ import {
 } from '../../../common/step_types/alert_triage';
 import {
   MAX_REVOKE_PAGES,
-  TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
-  TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX,
+  closedByDecisionTag,
+  skippedByDecisionTag,
   VERDICT_INCONCLUSIVE_TAG,
 } from '../../alert_triage/constants';
 import { FP_DECISION_ID_PREFIX } from '../../alert_triage/fp_decisions';
@@ -109,9 +109,7 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
       if (failures > 0 || status === 'denied')
         return { output: { status, alerts_reopened: 0, alerts_released: 0, failures } };
 
-      const tag = `${
-        isApproval ? TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX : TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX
-      }${id}`;
+      const tag = isApproval ? closedByDecisionTag(id) : skippedByDecisionTag(id);
       const write = tagAlerts(contextManager);
       let reopened = 0;
       let released = 0;

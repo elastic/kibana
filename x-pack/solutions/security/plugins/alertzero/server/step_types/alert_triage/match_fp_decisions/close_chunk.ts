@@ -6,7 +6,7 @@
  */
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
-import { TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX } from '../../../alert_triage/constants';
+import { closedByDecisionTag } from '../../../alert_triage/constants';
 import { tagInChunks } from '../../../alert_triage/plan_sweep';
 import {
   closeStillOpenAlertsAsFalsePositive,
@@ -50,7 +50,7 @@ export const closeChunk = async ({
     await tagInChunks(write, {
       alertIds: movedEarly,
       add: [],
-      remove: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
+      remove: [closedByDecisionTag(id)],
     });
   }
   if (attempted.length === 0) return { attempted, updated: 0, timedOut: false };

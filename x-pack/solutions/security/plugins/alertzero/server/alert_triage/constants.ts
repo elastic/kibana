@@ -133,6 +133,14 @@ export const TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX = 'az:closed_by_decision:';
 /** Added with `az:inconclusive` to an alert a dismissed pattern kept out of analysis. */
 export const TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX = 'az:skipped_by_decision:';
 /**
+ * The tags of one decision. The sweep writes them and revoke finds the alerts by them, so every
+ * place that needs one builds it here.
+ */
+export const closedByDecisionTag = (decisionId: string): string =>
+  `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${decisionId}`;
+export const skippedByDecisionTag = (decisionId: string): string =>
+  `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${decisionId}`;
+/**
  * Notes one sweep writes at most. Each note is one call and takes about a second, 20 at a time, so
  * this bounds the step to about a minute. A decision closes or skips only as many alerts as notes are
  * left; the rest stay untagged and take the normal path, and are counted in `left_for_notes`.
