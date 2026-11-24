@@ -176,6 +176,18 @@ describe('eval baselines routes', () => {
       );
     });
 
+    it('derives the baseline id from the suite and execution, so retries rewrite the same pin', async () => {
+      search.mockResolvedValue(createSearchResponse([createScoreSource()]));
+      pin.mockResolvedValue({ baseline_id: 'ignored' });
+
+      await handlers[EVAL_BASELINES_PIN_URL](createContext(), pinRequest(), kibanaResponseFactory);
+      await handlers[EVAL_BASELINES_PIN_URL](createContext(), pinRequest(), kibanaResponseFactory);
+
+      const [first, second] = pin.mock.calls.map(([args]) => args.pointer.baseline_id);
+      expect(first).toMatch(/^[0-9a-f]{64}$/);
+      expect(second).toBe(first);
+    });
+
     it('returns 404 when the execution has no scores', async () => {
       search.mockResolvedValue(createSearchResponse([]));
 

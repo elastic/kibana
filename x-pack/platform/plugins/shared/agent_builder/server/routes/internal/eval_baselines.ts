@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { randomUUID } from 'crypto';
+import { createHash } from 'crypto';
 import {
   EVAL_BASELINES_PIN_URL,
   EVAL_BASELINES_LATEST_URL,
@@ -22,6 +22,15 @@ import {
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+
+/**
+ * One execution is one baseline: the id is derived from (suite, execution) rather than
+ * minted per request, so a retried `_pin` rewrites the same document IDs instead of
+ * stranding a pointerless snapshot per failed attempt, and pinning the same execution
+ * twice is a no-op rather than a duplicate.
+ */
+const deterministicBaselineId = (suiteId: string, executionId: string): string =>
+  createHash('sha256').update(`${suiteId}\0${executionId}`).digest('hex');
 import { EVALS_API_PRIVILEGES } from '@kbn/evals-plugin/common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -154,7 +163,7 @@ export function registerEvalBaselineRoutes({
 
       const baseline = await evalBaselines.pin({
         pointer: {
-          baseline_id: randomUUID(),
+          baseline_id: deterministicBaselineId(suiteId, executionId),
           suite_id: suiteId,
           execution_id: executionId,
           task_model: scoreDocuments[0].task.model,
