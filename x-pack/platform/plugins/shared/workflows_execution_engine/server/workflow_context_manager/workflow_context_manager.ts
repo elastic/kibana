@@ -7,7 +7,6 @@
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { JsonValue } from '@kbn/utility-types';
 import {
   type EsWorkflowStepExecution,
   type SerializedError,
@@ -422,7 +421,7 @@ export class WorkflowContextManager {
       );
     });
     for (const step of dataSetSteps) {
-      const output = this.readIoValue(step.id, 'output', fixtureOutput(step));
+      const output = this.readIoValue(step.id, 'output');
       if (output != null && typeof output === 'object' && !Array.isArray(output)) {
         Object.assign(result, output);
       }
@@ -768,11 +767,7 @@ export class WorkflowContextManager {
 
     // Prefer the list snapshotted onto input at enter. Re-evaluate the
     // expression only for older executions that never stored `items`.
-    const foreachInput = this.readIoValue(
-      stepExecution.id,
-      'input',
-      fixtureInput(stepExecution)
-    ) as EsWorkflowStepExecution['input'];
+    const foreachInput = this.readIoValue(stepExecution.id, 'input') as EsWorkflowStepExecution['input'];
     const foreachExpression = this.extractForeachExpression(foreachInput);
     const items =
       this.extractPersistedForeachItems(foreachInput) ??
@@ -870,11 +865,7 @@ export class WorkflowContextManager {
     }
     return {
       runStepResult: {
-        output: this.readIoValue(
-          latestStepExecution.id,
-          'output',
-          fixtureOutput(latestStepExecution)
-        ),
+        output: this.readIoValue(latestStepExecution.id, 'output'),
         error: latestStepExecution.error,
       },
       stepState: latestStepExecution.state,
@@ -882,32 +873,20 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Outputs prefer the batch captured for this snapshot, then execution state, then a
-   * value baked onto the execution (unit-test fixtures). Inputs are never batched into
-   * the snapshot; open-loop foreach reads them from the live map / fixture only.
+   * Outputs prefer the batch captured for this snapshot, then the live map.
+   * Inputs are never batched into the snapshot; open-loop foreach reads them
+   * from the live map only.
    */
   private readIoValue(
     id: string | undefined,
-    type: 'input' | 'output',
-    fixture: JsonValue | null | undefined
+    type: 'input' | 'output'
   ): StepIoBatchValue | undefined {
-    if (type === 'output' && id !== undefined && this.outputBatch?.has(id)) {
+    if (id === undefined) {
+      return undefined;
+    }
+    if (type === 'output' && this.outputBatch?.has(id)) {
       return this.outputBatch.get(id);
     }
-    if (id !== undefined && typeof this.workflowExecutionState.getStepIo === 'function') {
-      const fromState = this.workflowExecutionState.getStepIo(id, type);
-      if (fromState !== undefined) {
-        return fromState;
-      }
-    }
-    return fixture;
+    return this.workflowExecutionState.getStepIo(id, type);
   }
-}
-
-function fixtureInput(step: object): JsonValue | null | undefined {
-  return 'input' in step ? (step.input as JsonValue | null | undefined) : undefined;
-}
-
-function fixtureOutput(step: object): JsonValue | null | undefined {
-  return 'output' in step ? (step.output as JsonValue | null | undefined) : undefined;
 }

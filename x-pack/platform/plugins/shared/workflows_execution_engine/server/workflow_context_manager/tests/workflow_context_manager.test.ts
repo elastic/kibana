@@ -126,8 +126,8 @@ describe('WorkflowContextManager', () => {
         .filter((exec) => exec.stepType === 'data.set')
     );
 
-    // Fixtures bake input and output onto the step execution. readBatch and
-    // state.getStepIo both serve that value.
+    // Tests bake input/output onto step executions. Serve them only through
+    // getStepIo / readBatch — production no longer reads those fields off metadata.
     const readIo = (id: string, field: 'input' | 'output'): unknown => {
       const exec = workflowExecutionState.getStepExecution(id) as
         | { input?: unknown; output?: unknown }
@@ -1064,17 +1064,25 @@ describe('WorkflowContextManager', () => {
             type: 'enter-foreach',
           } as any,
         ]);
+        const outerExecution = {
+          id: 'exec-outerForeachStep',
+          input: { foreach: JSON.stringify(outerItems) },
+          output: { result: 'outerOutput' },
+          state: { index: outerCurrentIndex, total: outerItems.length },
+        };
         testContainer.workflowExecutionState.getLatestStepExecution = jest
           .fn()
-          .mockImplementation((stepId: string) => {
-            if (stepId === 'outerForeachStep') {
-              return {
-                input: { foreach: JSON.stringify(outerItems) },
-                output: { result: 'outerOutput' },
-                state: { index: outerCurrentIndex, total: outerItems.length },
-              };
+          .mockImplementation((stepId: string) =>
+            stepId === 'outerForeachStep' ? outerExecution : undefined
+          );
+        const previousGetStepExecution = testContainer.workflowExecutionState.getStepExecution;
+        testContainer.workflowExecutionState.getStepExecution = jest
+          .fn()
+          .mockImplementation((executionId: string) => {
+            if (executionId === outerExecution.id) {
+              return outerExecution;
             }
-            return undefined;
+            return previousGetStepExecution(executionId);
           });
 
         const context = testContainer.underTest.getContext();
@@ -1492,28 +1500,47 @@ describe('WorkflowContextManager', () => {
         scopeStack: [] as StackFrame[],
       } as EsWorkflowExecution);
 
+      const stepExecutionsById: Record<string, Record<string, unknown>> = {
+        'exec-firstLogStep': {
+          id: 'exec-firstLogStep',
+          state: { stateValue: 'first' },
+          output: 'output1',
+          error: null,
+        },
+        'exec-secondLogStep': {
+          id: 'exec-secondLogStep',
+          state: { stateValue: 'second' },
+          output: null,
+          error: new Error('Error in second step'),
+        },
+        'exec-thirdLogStep': {
+          id: 'exec-thirdLogStep',
+          state: { stateValue: 'third' },
+          output: 'output3',
+          error: null,
+        },
+        'exec-fourthLogStep': {
+          id: 'exec-fourthLogStep',
+          state: { stateValue: 'fourth' },
+          output: 'output4',
+          error: null,
+        },
+      };
+      const latestByStepId: Record<string, string> = {
+        firstLogStep: 'exec-firstLogStep',
+        secondLogStep: 'exec-secondLogStep',
+        thirdLogStep: 'exec-thirdLogStep',
+        fourthLogStep: 'exec-fourthLogStep',
+      };
       testContainer.workflowExecutionState.getLatestStepExecution = jest
         .fn()
-        .mockImplementation((stepId) => {
-          switch (stepId) {
-            case 'firstLogStep':
-              return {
-                state: { stateValue: 'first' },
-                output: 'output1',
-                error: null,
-              };
-            case 'secondLogStep':
-              return {
-                state: { stateValue: 'second' },
-                output: null,
-                error: new Error('Error in second step'),
-              };
-            case 'thirdLogStep':
-              return { state: { stateValue: 'third' }, output: 'output3', error: null };
-            case 'fourthLogStep':
-              return { state: { stateValue: 'fourth' }, output: 'output4', error: null };
-          }
+        .mockImplementation((stepId: string) => {
+          const executionId = latestByStepId[stepId];
+          return executionId ? stepExecutionsById[executionId] : undefined;
         });
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((executionId: string) => stepExecutionsById[executionId]);
     });
 
     it('should return only steps from predecessors', () => {
@@ -1636,18 +1663,20 @@ describe('WorkflowContextManager', () => {
         } as Record<string, any>,
       } as EsWorkflowExecution);
 
+      const fetchDataExecution = {
+        id: 'exec-fetchData',
+        state: { status: 'completed' },
+        output: { data: ['item1', 'item2'], total: 2 },
+        error: null,
+      };
       testContainer.workflowExecutionState.getLatestStepExecution = jest
         .fn()
-        .mockImplementation((stepId) => {
-          if (stepId === 'fetchData') {
-            return {
-              state: { status: 'completed' },
-              output: { data: ['item1', 'item2'], total: 2 },
-              error: null,
-            };
-          }
-          return undefined;
-        });
+        .mockImplementation((stepId) => (stepId === 'fetchData' ? fetchDataExecution : undefined));
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((executionId: string) =>
+          executionId === fetchDataExecution.id ? fetchDataExecution : undefined
+        );
     });
 
     describe('string rendering', () => {
@@ -1734,7 +1763,6 @@ describe('WorkflowContextManager', () => {
           .calls[0][1];
         expect(renderArgs.steps).toEqual({
           fetchData: {
-            input: undefined,
             output: {
               data: ['item1', 'item2'],
               total: 2,
@@ -1758,18 +1786,22 @@ describe('WorkflowContextManager', () => {
       });
 
       it('preserves array shape when both the collection and an indexed item are referenced', () => {
+        const fetchDataExecution = {
+          id: 'exec-fetchData',
+          state: { status: 'completed' },
+          output: { hits: [{ id: 'a' }, { id: 'b' }, { id: 'c' }] },
+          error: null,
+        };
         testContainer.workflowExecutionState.getLatestStepExecution = jest
           .fn()
-          .mockImplementation((stepId) => {
-            if (stepId === 'fetchData') {
-              return {
-                state: { status: 'completed' },
-                output: { hits: [{ id: 'a' }, { id: 'b' }, { id: 'c' }] },
-                error: null,
-              };
-            }
-            return undefined;
-          });
+          .mockImplementation((stepId) =>
+            stepId === 'fetchData' ? fetchDataExecution : undefined
+          );
+        testContainer.workflowExecutionState.getStepExecution = jest
+          .fn()
+          .mockImplementation((executionId: string) =>
+            executionId === fetchDataExecution.id ? fetchDataExecution : undefined
+          );
         testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
           .fn()
           .mockReturnValue([
@@ -2224,6 +2256,7 @@ describe('WorkflowContextManager', () => {
         getDataSetStepExecutions: jest.fn().mockReturnValue([]),
         getDataSetStepExecutionCount: jest.fn().mockReturnValue(0),
         getStepIoVersion: jest.fn().mockReturnValue(0),
+        getStepIo: jest.fn().mockReturnValue(undefined),
         getLatestStepExecution: jest.fn((stepId: string) =>
           stepId === 'step_a' ? { id: 'exec-step-a', stepId: 'step_a', scopeStack: [] } : undefined
         ),
@@ -2352,6 +2385,7 @@ describe('WorkflowContextManager', () => {
           .mockReturnValue([{ id: 'exec-set', stepId: 'set_var', scopeStack: [] }]),
         getDataSetStepExecutionCount: jest.fn().mockReturnValue(1),
         getStepIoVersion: jest.fn().mockReturnValue(0),
+        getStepIo: jest.fn().mockReturnValue(undefined),
         getLatestStepExecution: jest.fn((stepId: string) =>
           stepId === 'producer' ? { id: 'exec-producer', stepId, scopeStack: [] } : undefined
         ),
