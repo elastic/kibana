@@ -62,6 +62,7 @@ export {
   UnifiedTabs,
   ListingTable,
   EmbeddableAlertsTablePage,
+  PanelActions,
 } from './src/playwright/page_objects';
 
 // Scout core types

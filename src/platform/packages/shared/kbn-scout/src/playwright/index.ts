@@ -87,4 +87,5 @@ export {
   EmbeddableAlertsTablePage,
   InspectorPage,
   ListingTable,
+  PanelActions,
 } from './page_objects';

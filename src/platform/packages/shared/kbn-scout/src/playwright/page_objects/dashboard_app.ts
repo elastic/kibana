@@ -14,6 +14,7 @@ import { expect } from '..';
 import { AppMenu } from './app_menu';
 import { Chrome } from './chrome';
 import { RenderablePage } from './utils/renderable_page';
+import { PanelActions } from './panel_actions';
 import { Toasts } from './toasts';
 
 type CommonlyUsedTimeRange =
@@ -41,6 +42,7 @@ export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
   private readonly appMenu: AppMenu;
+  private readonly panelActions: PanelActions;
   private readonly chrome: Chrome;
   // Dashboard shell and mode controls
   private readonly settingsFlyout;
@@ -90,6 +92,7 @@ export class DashboardApp {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
     this.appMenu = new AppMenu(page);
+    this.panelActions = new PanelActions(page);
     this.chrome = new Chrome(page);
 
     // Dashboard shell and mode controls
@@ -828,25 +831,12 @@ export class DashboardApp {
   // ============================================================
 
   /**
-   * Formats a panel title for use in test subject selectors.
-   */
-  private formatTitleForTestSubj(title: string): string {
-    return title.replace(/\s/g, '');
-  }
-
-  /**
    * Gets the hover actions wrapper for a panel by title.
    *
    * @param title - Panel title. If empty, finds first panel by class.
    */
   getPanelHoverActionsLocator(title?: string) {
-    if (!title) {
-      // Fallback: find first panel by class when no title provided
-      return this.page.locator('.embPanel__hoverActionsAnchor');
-    }
-    return this.page.testSubj.locator(
-      `embeddablePanelHoverActions-${this.formatTitleForTestSubj(title)}`
-    );
+    return this.panelActions.getPanelHoverActionsLocator(title);
   }
 
   /**
@@ -854,20 +844,7 @@ export class DashboardApp {
    * Scrolls the panel into view and clicks the menu toggle.
    */
   async openPanelContextMenu(title?: string) {
-    const panelWrapper = this.getPanelHoverActionsLocator(title);
-    await panelWrapper.scrollIntoViewIfNeeded();
-    await panelWrapper.hover();
-
-    const contextMenuOpen = panelWrapper.locator(
-      '[data-test-subj="embeddablePanelContextMenuOpen"]'
-    );
-    if (await contextMenuOpen.isVisible()) {
-      return;
-    }
-
-    const menuIcon = panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
-    await menuIcon.click();
-    await expect(contextMenuOpen).toBeVisible();
+    await this.panelActions.openPanelContextMenu(title);
   }
 
   async navigateToLensEditorFromPanel(title?: string) {
@@ -880,44 +857,10 @@ export class DashboardApp {
   }
 
   /**
-   * Checks if a panel action exists as a descendant of the panel wrapper.
-   */
-  private async panelActionExistsInWrapper(
-    actionTestSubj: string,
-    panelWrapper: ReturnType<typeof this.getPanelHoverActionsLocator>
-  ): Promise<boolean> {
-    // Check if the action is a descendant of the panel wrapper (not globally visible)
-    const actionInPanel = panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
-    return actionInPanel.isVisible();
-  }
-
-  /**
    * Clicks a panel action from the hover actions or context menu.
-   *
-   * Key difference from before: checks if action is DESCENDANT of panel wrapper,
-   * not just globally visible. This prevents clicking wrong panel's actions.
    */
   async clickPanelAction(actionTestSubj: string, title?: string) {
-    const panelWrapper = this.getPanelHoverActionsLocator(title);
-    await panelWrapper.scrollIntoViewIfNeeded();
-    await panelWrapper.hover();
-
-    // Check if action exists as descendant of panel wrapper
-    const existsInWrapper = await this.panelActionExistsInWrapper(actionTestSubj, panelWrapper);
-
-    if (existsInWrapper) {
-      // Click the action within the panel wrapper
-      const actionInPanel = panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
-      await actionInPanel.click();
-    } else {
-      // Open context menu and click action. The menu renders in a portal outside the panel, so it
-      // cannot be panel-scoped; filtering to the visible match skips the hidden quick-action
-      // buttons that every other panel on the dashboard renders under the same test subject.
-      await this.openPanelContextMenu(title);
-      await this.page.testSubj.locator(actionTestSubj).filter({ visible: true }).click();
-      // Wait for context menu to close after clicking the action
-      await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
-    }
+    await this.panelActions.clickPanelAction(actionTestSubj, title);
   }
 
   async editLinkedDiscoverPanel(title: string) {
@@ -1015,13 +958,13 @@ export class DashboardApp {
    * (finds elements even if not visible).
    */
   async panelHasAction(actionTestSubj: string, title?: string): Promise<boolean> {
-    const panelWrapper = this.getPanelHoverActionsLocator(title);
-    await panelWrapper.scrollIntoViewIfNeeded();
-    await panelWrapper.hover();
+    const panelWrapper = await this.panelActions.hoverPanel(title);
 
     // Check if action exists in panel wrapper (hover actions)
-    // Using count() to include hidden elements
-    const existsInWrapper = await this.panelActionExistsInWrapper(actionTestSubj, panelWrapper);
+    const existsInWrapper = await this.panelActions.panelActionExistsInWrapper(
+      actionTestSubj,
+      panelWrapper
+    );
     if (existsInWrapper) {
       return true;
     }
