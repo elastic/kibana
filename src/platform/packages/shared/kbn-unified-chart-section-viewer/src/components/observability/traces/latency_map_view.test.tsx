@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import { getESQLResults } from '@kbn/esql-utils';
 import {
   FAILED_SPAN_CONDITION,
   LatencyMap,
@@ -25,10 +24,6 @@ import type { TracesLatencyMapViewProps } from './latency_map_view';
 jest.mock('@kbn/trace-latency-map', () => ({
   ...jest.requireActual('@kbn/trace-latency-map'),
   LatencyMap: jest.fn(() => null),
-}));
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLResults: jest.fn(),
 }));
 
 const selection = {
@@ -50,9 +45,10 @@ const cell = {
 
 // Unresolved by default: the SET stays until field caps has answered, as in the view.
 const getFieldsForWildcard = jest.fn((): Promise<Array<{ name: string }>> => new Promise(() => {}));
+const esql = jest.fn();
 const services = {
   uiSettings: { get: jest.fn().mockReturnValue('Browser') },
-  data: { search: { search: jest.fn() } },
+  data: { search: { esql } },
   dataViews: { getFieldsForWildcard },
 } as unknown as TracesLatencyMapViewProps['services'];
 
@@ -80,7 +76,27 @@ describe('TracesLatencyMapView', () => {
   beforeEach(() => {
     getFieldsForWildcard.mockImplementation(() => new Promise(() => {}));
     jest.mocked(LatencyMap).mockClear();
-    jest.mocked(getESQLResults).mockReset();
+    esql.mockReset();
+  });
+
+  it('loads the map through the data search service', async () => {
+    const rawResponse = {
+      columns: [{ name: 'count', type: 'long' }],
+      values: [[1]],
+    };
+    esql.mockResolvedValue({ rawResponse });
+    const { mapProps } = renderView();
+    const controller = new AbortController();
+
+    await expect(
+      mapProps.runEsql('FROM traces-apm* | STATS COUNT(*)', {
+        signal: controller.signal,
+      })
+    ).resolves.toEqual(rawResponse);
+    expect(esql).toHaveBeenCalledWith(
+      { query: 'FROM traces-apm* | STATS COUNT(*)' },
+      { abortSignal: controller.signal }
+    );
   });
 
   it('reads the selection from the query and keeps it out of the map source', () => {
@@ -290,22 +306,22 @@ describe('TracesLatencyMapView', () => {
   });
 
   it('opens the newest span of a clicked cell in the document flyout', async () => {
-    jest.mocked(getESQLResults).mockResolvedValue({
-      response: {
+    esql.mockResolvedValue({
+      rawResponse: {
         columns: [{ name: 'service.name', type: 'keyword' }],
         values: [['cart']],
       },
-    } as Awaited<ReturnType<typeof getESQLResults>>);
+    });
     const { actions, mapProps } = renderView({
       filters: ['service.name == "cart"', selectionClause],
     });
     await act(() => mapProps.onCellClick!(cell));
-    const call = jest.mocked(getESQLResults).mock.lastCall?.[0];
+    const call = esql.mock.lastCall?.[0];
     // The cell bounds the span, under the query's own filters but not the selection:
     // cells outside a committed selection must stay clickable.
-    expect(call?.esqlQuery).toContain(selectionToEsqlCondition(cell));
-    expect(call?.esqlQuery).toContain('service.name == "cart"');
-    expect(call?.esqlQuery).not.toContain(selectionClause);
+    expect(call?.query).toContain(selectionToEsqlCondition(cell));
+    expect(call?.query).toContain('service.name == "cart"');
+    expect(call?.query).not.toContain(selectionClause);
     expect(call?.dropNullColumns).toBe(true);
     expect(actions.setExpandedDoc).toHaveBeenCalledWith(
       expect.objectContaining({ flattened: { 'service.name': 'cart' } }),
@@ -315,8 +331,8 @@ describe('TracesLatencyMapView', () => {
   });
 
   it('gives the opened span its real identity when the metadata is there', async () => {
-    jest.mocked(getESQLResults).mockResolvedValue({
-      response: {
+    esql.mockResolvedValue({
+      rawResponse: {
         columns: [
           { name: 'service.name', type: 'keyword' },
           { name: '_id', type: 'keyword' },
@@ -324,7 +340,7 @@ describe('TracesLatencyMapView', () => {
         ],
         values: [['cart', 'span-1', '.ds-traces-apm-000001']],
       },
-    } as Awaited<ReturnType<typeof getESQLResults>>);
+    });
     const { actions, mapProps } = renderView();
     await act(() => mapProps.onCellClick!(cell));
     // The identity lets the traces document profile recognize the record, and the flyout
@@ -339,7 +355,7 @@ describe('TracesLatencyMapView', () => {
   });
 
   it('leaves the view as it is when the cell has no span to open', async () => {
-    jest.mocked(getESQLResults).mockRejectedValue(new Error('shards failed'));
+    esql.mockRejectedValue(new Error('shards failed'));
     const { actions, mapProps } = renderView();
     await act(() => mapProps.onCellClick!(cell));
     expect(actions.setExpandedDoc).not.toHaveBeenCalled();

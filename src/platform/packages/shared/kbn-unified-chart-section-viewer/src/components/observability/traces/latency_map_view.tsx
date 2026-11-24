@@ -10,7 +10,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel } from '@elastic/eui';
-import { getESQLResults } from '@kbn/esql-utils';
 import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -113,12 +112,11 @@ export function TracesLatencyMapView({
   const runEsql: RunEsql = useCallback(
     async (query, options) => {
       try {
-        const { response } = await getESQLResults({
-          esqlQuery: query,
-          search: services.data.search.search,
-          signal: options?.signal,
-        });
-        return response;
+        const { rawResponse } = await services.data.search.esql(
+          { query },
+          { abortSignal: options?.signal }
+        );
+        return rawResponse;
       } catch (error) {
         throw new Error(getSearchErrorReason(error));
       }
@@ -215,13 +213,15 @@ export function TracesLatencyMapView({
       clickAbortRef.current = controller;
       let response;
       try {
-        ({ response } = await getESQLResults({
-          esqlQuery: buildExampleSpanQuery({ indexPattern, filters: baseFilters, cell }),
-          search: services.data.search.search,
-          signal: controller.signal,
-          // One row of wide traces indices: without this every mapped field comes back null.
-          dropNullColumns: true,
-        }));
+        const { rawResponse } = await services.data.search.esql(
+          {
+            query: buildExampleSpanQuery({ indexPattern, filters: baseFilters, cell }),
+            // One row of wide traces indices: without this every mapped field comes back null.
+            dropNullColumns: true,
+          },
+          { abortSignal: controller.signal }
+        );
+        response = rawResponse;
       } catch {
         // Without the span there is nothing to open; the view stays as it is.
         return;
