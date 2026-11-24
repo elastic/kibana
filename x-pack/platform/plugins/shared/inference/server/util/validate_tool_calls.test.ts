@@ -108,11 +108,19 @@ describe('validateToolCalls', () => {
       thrown = error;
     }
 
+    let parseErrorMessage = '';
+    try {
+      JSON.parse(args);
+    } catch (error) {
+      parseErrorMessage = error instanceof Error ? error.message : '';
+    }
+
     if (!(thrown instanceof Error) || !isToolValidationError(thrown)) {
       throw new Error('expected a tool validation error');
     }
+    expect(parseErrorMessage).not.toBe('');
     expect(thrown.meta.arguments).toBe(args);
-    expect(thrown.meta.errorsText).toContain(`Unexpected token '<'`);
+    expect(thrown.meta.errorsText).toBe(parseErrorMessage);
   });
 
   it('throws an error if the function call has invalid arguments', () => {
