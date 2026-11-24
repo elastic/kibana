@@ -35,8 +35,8 @@ export interface RuleDetailsPageProps {
   getProfileLinkProps: (profileName: string) => LinkProps;
   /** Links to the higher-ranked rules that outrank this one. */
   getRuleLinkProps: (ruleName: string) => LinkProps;
-  /** Links to the details of an index or data stream in Index Management. */
-  getMatchLinkProps: (name: string) => LinkProps;
+  /** Left out shows index and data stream names as plain text. */
+  getMatchLinkProps?: (name: string) => LinkProps | undefined;
   /** Whether the matches say which higher-ranked rule outranks this one. */
   isOutrankingComputed?: boolean;
 }
