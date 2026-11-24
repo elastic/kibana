@@ -316,7 +316,6 @@ export const WorkflowExecuteIndexForm = ({
                 key={selectedDataView?.id || 'no-dataview'}
                 appName="workflow_management"
                 useDefaultBehaviors={true}
-                disableSubscribingToGlobalDataServices={true}
                 onQueryChange={handleQueryChange}
                 onQuerySubmit={handleQuerySubmit}
                 query={query}
