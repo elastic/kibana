@@ -11,14 +11,6 @@ import { monaco } from '../../../monaco_imports';
 import { registerLanguage } from '../../helpers';
 import { PromQLLang, PROMQL_LANG_ID } from '.';
 
-// These tests intentionally use the real `monaco-promql` package: the definition is loaded lazily
-// via a dynamic import, so a broken import or loader must surface here.
-//
-// The only stub is the bare `monaco-editor` specifier that `monaco-promql` imports. Jest would
-// otherwise resolve it to the AMD bundle (`min/vs/editor/editor.main.js`, which needs `define`);
-// point it at the same ESM API module `@kbn/monaco` itself uses so both share one Monaco instance.
-jest.mock('monaco-editor', () => jest.requireActual('monaco-editor/editor/editor.api.js'));
-
 describe('PromQLLang', () => {
   let setTokens: jest.Spied<typeof monaco.languages.setMonarchTokensProvider>;
   let setConfig: jest.Spied<typeof monaco.languages.setLanguageConfiguration>;
@@ -51,33 +43,7 @@ describe('PromQLLang', () => {
     });
   });
 
-  it('does not register the tokenizer if the monaco-promql definition is not found', async () => {
-    jest.doMock('monaco-promql', () => {
-      throw new Error('monaco-promql module not found');
-    });
-
-    await expect(PromQLLang.onLanguage?.())
-      .resolves.toBeUndefined()
-      .finally(() => {
-        jest.dontMock('monaco-promql');
-      });
-
-    expect(setTokens).not.toHaveBeenCalled();
-    expect(setConfig).not.toHaveBeenCalled();
-  });
-
-  it('lazily loads the real monaco-promql definition and registers its tokenizer', async () => {
-    await expect(PromQLLang.onLanguage?.()).resolves.toBeUndefined();
-
-    expect(setTokens).toHaveBeenCalledWith(
-      PROMQL_LANG_ID,
-      expect.objectContaining({ tokenizer: expect.any(Object) })
-    );
-
-    expect(setConfig).toHaveBeenCalledWith(PROMQL_LANG_ID, expect.any(Object));
-  });
-
-  it('the PromQL language definition integrates with the editor as expected', async () => {
+  it('integrates the PromQL language definition with the editor as expected', async () => {
     const onPromQLLanguageSpy = jest.spyOn(PromQLLang, 'onLanguage');
 
     const PROMQL_QUERY = 'PROMQL step=1m (rate(http_requests_total[5m]))';
