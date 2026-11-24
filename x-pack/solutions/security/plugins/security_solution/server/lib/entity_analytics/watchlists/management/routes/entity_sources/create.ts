@@ -128,10 +128,6 @@ const createSourceForType = async (
     return createIntegrationSource(client, source.integrationName, namespace);
   }
 
-  if (source.type === 'store' && !source.queryRule) {
-    throw new Error('queryRule is required for store-type sources');
-  }
-
   return client.create(source, request);
 };
 

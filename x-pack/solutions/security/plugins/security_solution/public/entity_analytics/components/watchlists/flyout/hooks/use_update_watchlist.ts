@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { UpdateWatchlistRequestBodyInput } from '../../../../../../common/api/entity_analytics/watchlists/management/update.gen';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEntityAnalyticsRoutes } from '../../../../api/api';
@@ -15,7 +16,6 @@ import {
   EA_EXECUTION_CONTEXT_NAMES,
 } from '../../../../../common/utils/execution_context';
 import { getApiErrorMessage } from '../utils';
-import type { SourceType } from './rule_based_source_helpers';
 
 const WATCHLIST_UPDATE_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
@@ -24,29 +24,49 @@ const WATCHLIST_UPDATE_CONTEXT = buildExecutionContext(
 
 export interface UseUpdateWatchlistOptions {
   watchlistId?: string;
-  ruleBasedSourceIds: Partial<Record<SourceType, string>>;
   watchlist: CreateWatchlistRequestBodyInput;
   spaceId?: string;
+  hasEntitySourceChanges?: boolean;
   onSuccess?: () => void;
 }
 
+/**
+ * Only the rule-based sources (entity store or index) are edited in the form; integration sources
+ * are managed separately. `undefined` leaves the sources as they are, `[]` removes them.
+ */
+const toRuleBasedSources = (
+  entitySources: CreateWatchlistRequestBodyInput['entitySources']
+): UpdateWatchlistRequestBodyInput['entitySources'] =>
+  entitySources?.flatMap((source) => {
+    const type = source.type ?? 'index';
+    if (type !== 'store' && type !== 'index') {
+      return [];
+    }
+    return [
+      {
+        type,
+        name: source.name,
+        indexPattern: source.indexPattern,
+        identifierField: source.identifierField,
+        queryRule: source.queryRule,
+        enabled: source.enabled,
+        ...(type === 'index' ? { range: source.range } : {}),
+      },
+    ];
+  });
+
 export const useUpdateWatchlist = ({
   watchlistId,
-  ruleBasedSourceIds,
   watchlist,
   spaceId,
+  hasEntitySourceChanges = false,
   onSuccess,
 }: UseUpdateWatchlistOptions) => {
   const queryClient = useQueryClient();
   const {
     notifications: { toasts },
   } = useKibana().services;
-  const {
-    updateWatchlist,
-    updateWatchlistEntitySource,
-    createWatchlistEntitySource,
-    deleteWatchlistEntitySource,
-  } = useEntityAnalyticsRoutes();
+  const { updateWatchlist } = useEntityAnalyticsRoutes();
 
   return useMutation({
     mutationFn: async () => {
@@ -54,68 +74,21 @@ export const useUpdateWatchlist = ({
         throw new Error('Missing watchlist id');
       }
 
-      // Process entity sources first so that in case of privilege errors, the watchlist is not modified
-      const isRuleBasedType = (t: string): t is SourceType => t === 'store' || t === 'index';
-      const deletedIds = new Set<string>();
-
-      for (const source of watchlist.entitySources ?? []) {
-        const sourceType = source.type ?? 'index';
-        // Only process rule-based sources; integration sources are managed separately
-        if (isRuleBasedType(sourceType)) {
-          const sourceBody = {
-            name: source.name,
-            indexPattern: source.indexPattern,
-            identifierField: source.identifierField,
-            queryRule: source.queryRule,
-            enabled: source.enabled,
-            ...(sourceType === 'index' ? { range: source.range } : {}),
-          };
-
-          const sameTypeId = ruleBasedSourceIds[sourceType];
-          const otherType: SourceType = sourceType === 'store' ? 'index' : 'store';
-          const otherTypeId = ruleBasedSourceIds[otherType];
-
-          if (sameTypeId) {
-            // Same type exists → update in place
-            await updateWatchlistEntitySource({
-              watchlistId,
-              entitySourceId: sameTypeId,
-              body: sourceBody,
-            });
-          } else {
-            // Type changed → delete old source first
-            if (otherTypeId) {
-              await deleteWatchlistEntitySource({ watchlistId, entitySourceId: otherTypeId });
-              deletedIds.add(otherTypeId);
-            }
-            // Create new source
-            await createWatchlistEntitySource({
-              watchlistId,
-              body: { type: sourceType, ...sourceBody },
-            });
-          }
-        }
-      }
-
-      // Clean up any existing rule-based sources that weren't processed above.
-      // Only run when entitySources is defined (user interacted with the source section).
-      // undefined means entity sources weren't modified at all.
-      if (watchlist.entitySources) {
-        const processedTypes = new Set<string>(watchlist.entitySources.map((s) => s.type));
-        for (const [type, id] of Object.entries(ruleBasedSourceIds)) {
-          if (id && !deletedIds.has(id) && !processedTypes.has(type)) {
-            await deleteWatchlistEntitySource({ watchlistId, entitySourceId: id });
-          }
-        }
-      }
-
-      // Update the watchlist metadata only after entity sources have succeeded
-      const updatedWatchlist = await updateWatchlist(
-        { id: watchlistId, body: watchlist },
+      return updateWatchlist(
+        {
+          id: watchlistId,
+          body: {
+            name: watchlist.name,
+            description: watchlist.description,
+            riskModifier: watchlist.riskModifier,
+            managed: watchlist.managed,
+            entitySources: hasEntitySourceChanges
+              ? toRuleBasedSources(watchlist.entitySources)
+              : undefined,
+          },
+        },
         WATCHLIST_UPDATE_CONTEXT
       );
-
-      return updatedWatchlist;
     },
     onSuccess: async () => {
       toasts.addSuccess({

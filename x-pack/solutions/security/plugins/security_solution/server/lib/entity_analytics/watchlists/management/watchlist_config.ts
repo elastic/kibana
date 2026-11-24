@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   ElasticsearchClient,
   Logger,
@@ -25,8 +24,7 @@ import type {
 import { nodeBuilder } from '@kbn/es-query';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
-import { RESERVED_WATCHLIST_NAMES } from '../../../../../common/entity_analytics/watchlists/constants';
-import { validateWatchlistUpdate } from './validation';
+import { assertWatchlistNameIsAvailable, validateWatchlistUpdate } from './validation';
 import { getIndexForWatchlist } from '../entities/utils';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
@@ -124,7 +122,7 @@ export class WatchlistConfigClient {
     const name = attrs.name.trim();
 
     if (!options?.skipNameValidation) {
-      await this.assertNameIsAvailable(name);
+      await assertWatchlistNameIsAvailable(this.deps.soClient, name);
     }
 
     const so = await this.deps.soClient.create<WatchlistSavedObjectAttributes>(
@@ -161,55 +159,15 @@ export class WatchlistConfigClient {
     return toWatchlistObject(so);
   }
 
-  /**
-   * Throws a 409 when `name` is reserved for a system watchlist or when another watchlist in the
-   * current space already uses it. The comparison is an exact, case-sensitive match on the trimmed
-   * name. Pass `excludeId` to ignore the watchlist being renamed.
-   */
-  private async assertNameIsAvailable(name: string, excludeId?: string): Promise<void> {
-    const trimmed = name.trim();
-
-    if (RESERVED_WATCHLIST_NAMES.includes(trimmed)) {
-      throw createWatchlistValidationError(
-        409,
-        i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.api.nameReserved', {
-          defaultMessage: '"{name}" is reserved for a system watchlist',
-          values: { name: trimmed },
-        })
-      );
-    }
-
-    const response = await this.deps.soClient.find<WatchlistSavedObjectAttributes>({
-      type: watchlistConfigTypeName,
-      filter: nodeBuilder.is(`${watchlistConfigTypeName}.attributes.name`, trimmed),
-      perPage: 2,
-      fields: ['name'],
-    });
-
-    const isTaken = response.saved_objects.some((so) => so.id !== excludeId);
-    if (isTaken) {
-      throw createWatchlistValidationError(
-        409,
-        i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.api.nameAlreadyExists', {
-          defaultMessage: 'A watchlist named "{name}" already exists',
-          values: { name: trimmed },
-        })
-      );
-    }
-  }
-
   async update(id: string, attrs: WatchlistUpdateAttrs): Promise<WatchlistObject> {
     const existing = await this.get(id);
 
-    validateWatchlistUpdate(id, attrs, existing);
-
-    if (attrs.name !== undefined && attrs.name !== existing.name) {
-      await this.assertNameIsAvailable(attrs.name, id);
-    }
+    await validateWatchlistUpdate({ soClient: this.deps.soClient, id, attrs, existing });
 
     const existingAttrs = omitWatchlistMeta(existing);
     const attrsNoMeta = omitWatchlistMeta(attrs);
-    if (attrsNoMeta.name !== undefined) {
+    // Only a new name is trimmed. An unchanged name is kept as stored
+    if (attrsNoMeta.name !== undefined && attrsNoMeta.name !== existing.name) {
       attrsNoMeta.name = attrsNoMeta.name.trim();
     }
     const update: Partial<WatchlistSavedObjectAttributes> = {

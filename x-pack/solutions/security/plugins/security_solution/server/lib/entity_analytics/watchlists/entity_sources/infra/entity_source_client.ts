@@ -48,29 +48,48 @@ interface UpsertResult {
   source: MonitoringEntitySource;
 }
 
+const ENCRYPTION_REQUIRED_ERROR =
+  'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.';
+
 export class WatchlistEntitySourceClient {
   constructor(private readonly dependencies: WatchlistEntitySourceClientDependencies) {}
+
+  /**
+   * Checks everything that can make saving a source fail, without writing anything: a store source
+   * needs a query, an index source needs encrypted saved objects and an index the current user can
+   * read, and the name must be unique. Pass the source's own `id` when it is being updated.
+   */
+  async validate(
+    attributes: Partial<MonitoringEntitySourceAttributes> & { id?: string }
+  ): Promise<void> {
+    if (attributes.type === 'store' && !attributes.queryRule) {
+      throw Boom.badRequest('queryRule is required for store-type sources');
+    }
+
+    if (attributes.type === 'index') {
+      if (!this.dependencies.hasEncryptionKey) {
+        throw new Error(ENCRYPTION_REQUIRED_ERROR);
+      }
+      if (attributes.indexPattern) {
+        await validateIndexPermissions(this.dependencies.esClient, attributes.indexPattern);
+      }
+    }
+
+    await this.assertNameUniqueness(attributes);
+  }
 
   async create(
     attributes: MonitoringEntitySourceAttributes,
     request?: KibanaRequest
   ): Promise<MonitoringEntitySource> {
-    await this.assertNameUniqueness(attributes);
+    await this.validate(attributes);
 
     let apiKey = {};
     if (attributes.type === 'index') {
-      if (!this.dependencies.hasEncryptionKey) {
-        throw new Error(
-          'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.'
-        );
-      }
       if (!request) {
         throw new Error('Cannot create index-type entity source without a request.');
       }
 
-      if (attributes.indexPattern) {
-        await validateIndexPermissions(this.dependencies.esClient, attributes.indexPattern);
-      }
       const [coreStart] = await this.dependencies.getStartServices();
       apiKey = (await grantEntitySourceApiKey(coreStart.security, request, attributes.name)) ?? {};
     }
@@ -136,9 +155,7 @@ export class WatchlistEntitySourceClient {
     // Needs new API key: index pattern changed, type changed from non-index to index, or API key is missing (re-auth)
     if (isNowIndex && (indexPatternChanged || !wasIndex || !currentSource.apiKeyId)) {
       if (!this.dependencies.hasEncryptionKey) {
-        throw new Error(
-          'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.'
-        );
+        throw new Error(ENCRYPTION_REQUIRED_ERROR);
       }
       if (!request) {
         throw new Error('Cannot update index-type entity source without a request.');
@@ -174,9 +191,7 @@ export class WatchlistEntitySourceClient {
     const { esClient, getStartServices, logger, soClient, hasEncryptionKey } = this.dependencies;
 
     if (!hasEncryptionKey) {
-      throw new Error(
-        'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.'
-      );
+      throw new Error(ENCRYPTION_REQUIRED_ERROR);
     }
 
     const source = await this.get(id);
@@ -241,10 +256,12 @@ export class WatchlistEntitySourceClient {
     const [coreStart] = await getStartServices();
     const source = await this.get(id);
 
+    // Delete the saved object first: if that fails, the source still has a working key and can be
+    // deleted again. A key left behind by a failed invalidation is harmless.
+    await this.dependencies.soClient.delete(watchlistEntitySourceTypeName, id);
     if (source.apiKeyId) {
       await invalidateEntitySourceApiKey(coreStart.security, source.apiKeyId, logger);
     }
-    await this.dependencies.soClient.delete(watchlistEntitySourceTypeName, id);
   }
 
   async find({
@@ -352,14 +369,21 @@ export class WatchlistEntitySourceClient {
     return filters.join(' and ');
   }
 
-  private async assertNameUniqueness(attributes: Partial<MonitoringEntitySource>): Promise<void> {
+  /**
+   * Throws a 409 when another entity source already uses `attributes.name`. Pass the source's own
+   * `id` when updating it, so it does not conflict with itself.
+   */
+  async assertNameUniqueness(attributes: Partial<MonitoringEntitySource>): Promise<void> {
     if (attributes.name) {
+      // `name` is a `text` field, so the lookup also returns names that tokenize the same, such as
+      // `test--store` for `test-store`, or names that only differ in case. Keep the exact matches.
+      // Such near matches are few, so the first page of the lookup should be enough.
       const { sources } = await this.list({ name: attributes.name });
 
-      const filtered = attributes.id ? sources.filter((so) => so.id !== attributes.id) : sources;
+      const taken = sources.filter((so) => so.name === attributes.name && so.id !== attributes.id);
 
-      if (filtered.length > 0) {
-        throw new Error(
+      if (taken.length > 0) {
+        throw Boom.conflict(
           `A watchlist entity source with the name "${attributes.name}" already exists.`
         );
       }

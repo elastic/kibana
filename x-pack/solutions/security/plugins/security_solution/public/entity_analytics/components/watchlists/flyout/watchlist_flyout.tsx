@@ -45,8 +45,8 @@ export const WatchlistFlyout = ({ mode, watchlistId, spaceId, onClose }: Watchli
   const {
     watchlist,
     watchlistId: formWatchlistId,
-    ruleBasedSourceIds,
     indexSourceWithMissingApiKey,
+    hasEntitySourceChanges,
     isEditMode,
     isDisabled,
     isNameTooLong,
@@ -61,9 +61,9 @@ export const WatchlistFlyout = ({ mode, watchlistId, spaceId, onClose }: Watchli
   const { mutation } = useWatchlistMutations({
     watchlist,
     watchlistId: formWatchlistId,
-    ruleBasedSourceIds,
     spaceId,
     isEditMode,
+    hasEntitySourceChanges,
     onSuccess: onClose,
   });
 

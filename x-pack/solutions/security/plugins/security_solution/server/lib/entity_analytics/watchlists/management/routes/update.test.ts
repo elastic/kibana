@@ -16,12 +16,14 @@ import { WATCHLIST_API_CALL_EVENT } from '../../../../telemetry/event_based/even
 import { createMockTelemetryEventsSender } from '../../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
-const mockWatchlistUpdate = jest.fn();
+const mockUpdateWatchlistWithSources = jest.fn();
+jest.mock('../update_watchlist_with_sources', () => ({
+  updateWatchlistWithSources: (...args: unknown[]) => mockUpdateWatchlistWithSources(...args),
+}));
 
-jest.mock('../watchlist_config', () => ({
-  WatchlistConfigClient: jest.fn().mockImplementation(() => ({
-    update: mockWatchlistUpdate,
-  })),
+const mockSyncWatchlistInBackground = jest.fn();
+jest.mock('../../entity_sources/entity_sources_service', () => ({
+  syncWatchlistInBackground: (...args: unknown[]) => mockSyncWatchlistInBackground(...args),
 }));
 
 import { updateWatchlistRoute } from './update';
@@ -41,7 +43,8 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
     const { context: ctx } = requestContextMock.createTools();
     context = requestContextMock.convertContext(ctx);
 
-    mockWatchlistUpdate.mockReset();
+    mockUpdateWatchlistWithSources.mockReset();
+    mockSyncWatchlistInBackground.mockReset().mockResolvedValue(undefined);
 
     reportEBT = jest.fn();
     telemetrySenderMock = {
@@ -49,7 +52,7 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
       reportEBT,
     } as unknown as ITelemetryEventsSender;
 
-    updateWatchlistRoute(server.router, logger, telemetrySenderMock);
+    updateWatchlistRoute(server.router, logger, telemetrySenderMock, jest.fn(), true);
   });
 
   afterEach(() => {
@@ -74,14 +77,17 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
       id: watchlistId,
       ...body,
     };
-    mockWatchlistUpdate.mockResolvedValue(updated);
+    mockUpdateWatchlistWithSources.mockResolvedValue({ watchlist: updated, shouldSync: false });
 
     const request = buildRequest(watchlistId, body);
     const response = await server.inject(request, context);
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(updated);
-    expect(mockWatchlistUpdate).toHaveBeenCalledWith(watchlistId, body);
+    expect(mockUpdateWatchlistWithSources).toHaveBeenCalledWith(
+      expect.objectContaining({ watchlistId, watchlist: body, entitySources: undefined })
+    );
+    expect(mockSyncWatchlistInBackground).not.toHaveBeenCalled();
     expect(reportEBT).toHaveBeenCalledTimes(1);
     expect(reportEBT).toHaveBeenCalledWith(
       WATCHLIST_API_CALL_EVENT,
@@ -102,7 +108,7 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
       managed: true,
     };
     const updated = { id: watchlistId, ...body };
-    mockWatchlistUpdate.mockResolvedValue(updated);
+    mockUpdateWatchlistWithSources.mockResolvedValue({ watchlist: updated, shouldSync: false });
 
     const request = buildRequest(watchlistId, body);
     const response = await server.inject(request, context);
@@ -118,8 +124,46 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
     );
   });
 
+  describe('with entitySources', () => {
+    const sources = [{ type: 'store', name: 'test-store', queryRule: 'entity.id: *' }];
+
+    it('saves the data sources with the watchlist and syncs once when they were added or removed', async () => {
+      const body = { name: 'test', riskModifier: 1, entitySources: sources };
+      mockUpdateWatchlistWithSources.mockResolvedValue({
+        watchlist: { id: watchlistId, name: 'test', riskModifier: 1 },
+        shouldSync: true,
+      });
+
+      const response = await server.inject(buildRequest(watchlistId, body), context);
+
+      expect(response.status).toEqual(200);
+      expect(mockUpdateWatchlistWithSources).toHaveBeenCalledWith(
+        expect.objectContaining({
+          watchlistId,
+          watchlist: { name: 'test', riskModifier: 1 },
+          entitySources: sources,
+        })
+      );
+      expect(mockSyncWatchlistInBackground).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects when data source is not a rule-based source', async () => {
+      const response = await server.inject(
+        buildRequest(watchlistId, {
+          name: 'test',
+          riskModifier: 1,
+          entitySources: [{ type: 'entity_analytics_integration', name: 'okta' }],
+        }),
+        context
+      );
+
+      expect(response.status).toEqual(400);
+      expect(mockUpdateWatchlistWithSources).not.toHaveBeenCalled();
+    });
+  });
+
   it('returns an error response and error telemetry when update fails', async () => {
-    mockWatchlistUpdate.mockRejectedValue(new Error('update failed'));
+    mockUpdateWatchlistWithSources.mockRejectedValue(new Error('update failed'));
 
     const request = buildRequest(watchlistId, {
       name: 'x',
@@ -141,5 +185,24 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
         watchlist_id: watchlistId,
       })
     );
+    expect(mockSyncWatchlistInBackground).not.toHaveBeenCalled();
+  });
+
+  it('passes a conflict on with its status, without syncing, when the watchlist name is already in use', async () => {
+    mockUpdateWatchlistWithSources.mockRejectedValue(
+      Object.assign(new Error('A watchlist named "test" already exists'), { statusCode: 409 })
+    );
+
+    const response = await server.inject(
+      buildRequest(watchlistId, { name: 'test', riskModifier: 1 }),
+      context
+    );
+
+    expect(response.status).toEqual(409);
+    expect(response.body).toEqual({
+      message: 'A watchlist named "test" already exists',
+      status_code: 409,
+    });
+    expect(mockSyncWatchlistInBackground).not.toHaveBeenCalled();
   });
 });

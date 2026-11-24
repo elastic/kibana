@@ -13,16 +13,10 @@ import type { UseUpdateWatchlistOptions } from './use_update_watchlist';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 
 const mockUpdateWatchlist = jest.fn().mockResolvedValue({ id: 'wl-1', name: 'Updated' });
-const mockUpdateWatchlistEntitySource = jest.fn().mockResolvedValue({});
-const mockCreateWatchlistEntitySource = jest.fn().mockResolvedValue({});
-const mockDeleteWatchlistEntitySource = jest.fn().mockResolvedValue({});
 
 jest.mock('../../../../api/api', () => ({
   useEntityAnalyticsRoutes: () => ({
     updateWatchlist: mockUpdateWatchlist,
-    updateWatchlistEntitySource: mockUpdateWatchlistEntitySource,
-    createWatchlistEntitySource: mockCreateWatchlistEntitySource,
-    deleteWatchlistEntitySource: mockDeleteWatchlistEntitySource,
   }),
 }));
 
@@ -64,10 +58,16 @@ const makeWatchlist = (
 
 const baseOpts: UseUpdateWatchlistOptions = {
   watchlistId: 'wl-1',
-  ruleBasedSourceIds: {},
   watchlist: makeWatchlist(),
   spaceId: 'default',
   onSuccess: jest.fn(),
+};
+
+const save = async (opts: UseUpdateWatchlistOptions) => {
+  const { result } = renderHook(() => useUpdateWatchlist(opts), { wrapper: createWrapper() });
+  await act(async () => {
+    await result.current.mutateAsync();
+  });
 };
 
 describe('useUpdateWatchlist', () => {
@@ -78,238 +78,150 @@ describe('useUpdateWatchlist', () => {
   it('throws when watchlistId is missing', async () => {
     const { result } = renderHook(
       () => useUpdateWatchlist({ ...baseOpts, watchlistId: undefined }),
-      { wrapper: createWrapper() }
+      {
+        wrapper: createWrapper(),
+      }
     );
 
     await act(async () => {
       await expect(result.current.mutateAsync()).rejects.toThrow('Missing watchlist id');
     });
+    expect(mockUpdateWatchlist).not.toHaveBeenCalled();
   });
 
-  it('updates the watchlist itself', async () => {
-    const { result } = renderHook(() => useUpdateWatchlist(baseOpts), {
-      wrapper: createWrapper(),
+  it('saves the watchlist and its data sources in a single request', async () => {
+    await save({
+      ...baseOpts,
+      hasEntitySourceChanges: true,
+      watchlist: makeWatchlist([
+        { type: 'store', name: 'Test Watchlist-store', queryRule: 'risk > 50' },
+      ]),
     });
 
-    await act(async () => {
-      await result.current.mutateAsync();
-    });
-
+    expect(mockUpdateWatchlist).toHaveBeenCalledTimes(1);
     expect(mockUpdateWatchlist).toHaveBeenCalledWith(
-      { id: 'wl-1', body: baseOpts.watchlist },
       {
-        child: {
-          type: 'security_solution',
-          name: 'entity_analytics:watchlists',
-          id: 'watchlist_update',
+        id: 'wl-1',
+        body: {
+          name: 'Test Watchlist',
+          description: 'desc',
+          riskModifier: 10,
+          managed: false,
+          entitySources: [
+            {
+              type: 'store',
+              name: 'Test Watchlist-store',
+              queryRule: 'risk > 50',
+              indexPattern: undefined,
+              identifierField: undefined,
+              enabled: undefined,
+            },
+          ],
         },
-      }
+      },
+      expect.objectContaining({ child: expect.objectContaining({ id: 'watchlist_update' }) })
     );
   });
 
-  it('creates a new entity source when no existing ID is found', async () => {
-    const watchlist = makeWatchlist([
-      {
-        type: 'store',
-        name: 'Test Watchlist-store',
-        queryRule: 'risk > 50',
-      },
-    ]);
-    const opts: UseUpdateWatchlistOptions = {
+  it('sends the lookback range only for index sources', async () => {
+    const range = { start: 'now-10d', end: 'now' };
+
+    await save({
       ...baseOpts,
-      ruleBasedSourceIds: {},
-      watchlist,
-    };
-
-    const { result } = renderHook(() => useUpdateWatchlist(opts), {
-      wrapper: createWrapper(),
+      hasEntitySourceChanges: true,
+      watchlist: makeWatchlist([
+        {
+          type: 'index',
+          name: 'wl-logs-*',
+          indexPattern: 'logs-*',
+          identifierField: 'host.name',
+          range,
+        },
+      ]),
     });
 
-    await act(async () => {
-      await result.current.mutateAsync();
-    });
-
-    expect(mockCreateWatchlistEntitySource).toHaveBeenCalledWith({
-      watchlistId: 'wl-1',
-      body: {
-        type: 'store',
-        name: 'Test Watchlist-store',
-        queryRule: 'risk > 50',
-        indexPattern: undefined,
-        identifierField: undefined,
-        enabled: undefined,
-      },
-    });
-    expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
+    const [{ body }] = mockUpdateWatchlist.mock.calls[0];
+    expect(body.entitySources[0]).toEqual(expect.objectContaining({ type: 'index', range }));
   });
 
-  it('updates an existing entity source when ID is found in ruleBasedSourceIds', async () => {
-    const watchlist = makeWatchlist([
-      {
-        type: 'store',
-        name: 'Test Watchlist-store',
-        queryRule: 'risk > 75',
-      },
-    ]);
-    const opts: UseUpdateWatchlistOptions = {
-      ...baseOpts,
-      ruleBasedSourceIds: { store: 'es-1' },
-      watchlist,
-    };
+  it('leaves the data sources alone when the form did not change them', async () => {
+    await save(baseOpts);
 
-    const { result } = renderHook(() => useUpdateWatchlist(opts), {
-      wrapper: createWrapper(),
-    });
-
-    await act(async () => {
-      await result.current.mutateAsync();
-    });
-
-    expect(mockUpdateWatchlistEntitySource).toHaveBeenCalledWith({
-      watchlistId: 'wl-1',
-      entitySourceId: 'es-1',
-      body: {
-        name: 'Test Watchlist-store',
-        queryRule: 'risk > 75',
-        indexPattern: undefined,
-        identifierField: undefined,
-        enabled: undefined,
-      },
-    });
-    expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
+    const [{ body }] = mockUpdateWatchlist.mock.calls[0];
+    expect(body.entitySources).toBeUndefined();
   });
 
-  it('deletes old source and creates new one when type changes', async () => {
-    // User switched from store to index — old store source is deleted, new index source created
-    const watchlist = makeWatchlist([
-      {
-        type: 'index',
-        name: 'WL-logs-*',
-        indexPattern: 'logs-*',
-        identifierField: 'host.name',
-      },
-    ]);
-    const opts: UseUpdateWatchlistOptions = {
+  it('omits the data sources when the user did not change them, even though the form holds them', async () => {
+    await save({
       ...baseOpts,
-      ruleBasedSourceIds: { store: 'es-store-1' },
-      watchlist,
-    };
-
-    const { result } = renderHook(() => useUpdateWatchlist(opts), {
-      wrapper: createWrapper(),
+      hasEntitySourceChanges: false,
+      watchlist: makeWatchlist([
+        { type: 'store', name: 'Test Watchlist-store', queryRule: 'risk > 50' },
+      ]),
     });
 
-    await act(async () => {
-      await result.current.mutateAsync();
-    });
-
-    // Old store source should be deleted
-    expect(mockDeleteWatchlistEntitySource).toHaveBeenCalledWith({
-      watchlistId: 'wl-1',
-      entitySourceId: 'es-store-1',
-    });
-    // New index source should be created
-    expect(mockCreateWatchlistEntitySource).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({ type: 'index', indexPattern: 'logs-*' }),
-      })
-    );
-    expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
+    const [{ body }] = mockUpdateWatchlist.mock.calls[0];
+    expect(body.name).toBe('Test Watchlist');
+    expect(body.entitySources).toBeUndefined();
   });
 
-  it('does not process sources when entitySources is empty', async () => {
-    const watchlist = makeWatchlist(undefined);
-    const { result } = renderHook(() => useUpdateWatchlist({ ...baseOpts, watchlist }), {
-      wrapper: createWrapper(),
-    });
+  it('removes the data sources when "None" is selected', async () => {
+    await save({ ...baseOpts, hasEntitySourceChanges: true, watchlist: makeWatchlist([]) });
 
-    await act(async () => {
-      await result.current.mutateAsync();
-    });
-
-    expect(mockUpdateWatchlist).toHaveBeenCalled();
-    expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
-    expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
+    const [{ body }] = mockUpdateWatchlist.mock.calls[0];
+    expect(body.entitySources).toEqual([]);
   });
 
-  it('deletes existing sources when "None" is selected (entitySources is empty array)', async () => {
-    const watchlist = makeWatchlist([]);
-    const opts: UseUpdateWatchlistOptions = {
+  it('does not send integration sources, which are managed separately', async () => {
+    await save({
       ...baseOpts,
-      ruleBasedSourceIds: { store: 'es-1' },
-      watchlist,
-    };
-
-    const { result } = renderHook(() => useUpdateWatchlist(opts), {
-      wrapper: createWrapper(),
+      hasEntitySourceChanges: true,
+      watchlist: makeWatchlist([
+        {
+          type: 'entity_analytics_integration',
+          name: 'okta',
+          integrationName: 'entityanalytics_okta',
+        },
+      ]),
     });
 
-    await act(async () => {
-      await result.current.mutateAsync();
-    });
-
-    expect(mockDeleteWatchlistEntitySource).toHaveBeenCalledWith({
-      watchlistId: 'wl-1',
-      entitySourceId: 'es-1',
-    });
-    expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
-    expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
-  });
-
-  it('does not delete existing sources when entitySources is undefined (not modified)', async () => {
-    const watchlist = makeWatchlist(undefined);
-    const opts: UseUpdateWatchlistOptions = {
-      ...baseOpts,
-      ruleBasedSourceIds: { store: 'es-1', index: 'es-2' },
-      watchlist,
-    };
-
-    const { result } = renderHook(() => useUpdateWatchlist(opts), {
-      wrapper: createWrapper(),
-    });
-
-    await act(async () => {
-      await result.current.mutateAsync();
-    });
-
-    expect(mockDeleteWatchlistEntitySource).not.toHaveBeenCalled();
-    expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
-    expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
+    const [{ body }] = mockUpdateWatchlist.mock.calls[0];
+    expect(body.entitySources).toEqual([]);
   });
 
   describe('callbacks', () => {
-    it('shows success toast on success', async () => {
+    it('shows a success toast and closes on success', async () => {
       const onSuccess = jest.fn();
-      const { result } = renderHook(() => useUpdateWatchlist({ ...baseOpts, onSuccess }), {
-        wrapper: createWrapper(),
-      });
 
-      await act(async () => {
-        await result.current.mutateAsync();
-      });
+      await save({ ...baseOpts, onSuccess });
 
       expect(mockAddSuccess).toHaveBeenCalled();
       expect(onSuccess).toHaveBeenCalled();
     });
 
-    it('shows error toast on failure', async () => {
-      mockUpdateWatchlist.mockRejectedValueOnce(new Error('Network error'));
-      const { result } = renderHook(() => useUpdateWatchlist(baseOpts), {
+    it('shows the reason from the server in an error toast and stays open', async () => {
+      const onSuccess = jest.fn();
+      mockUpdateWatchlist.mockRejectedValueOnce(
+        Object.assign(new Error('Conflict'), {
+          body: { statusCode: 409, message: 'A watchlist named "test-01" already exists' },
+        })
+      );
+      const { result } = renderHook(() => useUpdateWatchlist({ ...baseOpts, onSuccess }), {
         wrapper: createWrapper(),
       });
 
       await act(async () => {
-        try {
-          await result.current.mutateAsync();
-        } catch {
-          // expected
-        }
+        await expect(result.current.mutateAsync()).rejects.toThrow();
       });
 
       expect(mockAddError).toHaveBeenCalledWith(
         expect.any(Error),
-        expect.objectContaining({ title: expect.any(String) })
+        expect.objectContaining({
+          title: 'Failed to update watchlist',
+          toastMessage: 'A watchlist named "test-01" already exists',
+        })
       );
+      expect(onSuccess).not.toHaveBeenCalled();
     });
   });
 });

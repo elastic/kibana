@@ -14,7 +14,7 @@ import {
   WATCHLISTS_URL,
 } from '../../../../../../common/entity_analytics/watchlists/constants';
 
-const OTHER_SPACE_ID = 'watchlist-name-uniqueness';
+const OTHER_SPACE_ID = `watchlist-name-uniqueness-${Date.now()}`;
 const NAME_PREFIX = 'scout-name-uniqueness';
 
 const HEADERS = {
@@ -41,12 +41,17 @@ apiTest.describe(
       await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
     });
 
-    apiTest.afterAll(async ({ apiClient, apiServices }) => {
+    apiTest.afterAll(async ({ apiClient, apiServices, esClient }) => {
       for (const { id, spaceId } of created) {
         await apiClient.delete(urlIn(spaceId, `/${id}`), {
           headers: { ...cookieHeader, ...HEADERS },
         });
       }
+      // The index of the space's watchlists is not removed with the watchlists or the space
+      await esClient.indices.delete({
+        index: `.entity_analytics.watchlists.${OTHER_SPACE_ID}`,
+        ignore_unavailable: true,
+      });
       await apiServices.spaces.delete(OTHER_SPACE_ID);
     });
 
@@ -137,8 +142,21 @@ apiTest.describe(
       async ({ apiClient }) => {
         const response = await createWatchlist(apiClient, PRIVILEGED_USER_WATCHLIST_NAME);
 
+        // The system watchlist can already exist, which is also a 409, so check the reason
         expect(response).toHaveStatusCode(409);
+        expect(response.body.message).toContain('is reserved for a system watchlist');
       }
     );
+
+    apiTest('treats special characters in names as plain text', async ({ apiClient }) => {
+      const base = uniqueName('special');
+      const name = `${base} (EU): "quoted" \\ back`;
+      expect(await createWatchlist(apiClient, name)).toHaveStatusCode(200);
+      expect(await createWatchlist(apiClient, name)).toHaveStatusCode(409);
+
+      // A `*` is not a wildcard: it does not match a longer name that already exists
+      expect(await createWatchlist(apiClient, `${base}-wildcard-longer`)).toHaveStatusCode(200);
+      expect(await createWatchlist(apiClient, `${base}-wildcard*`)).toHaveStatusCode(200);
+    });
   }
 );

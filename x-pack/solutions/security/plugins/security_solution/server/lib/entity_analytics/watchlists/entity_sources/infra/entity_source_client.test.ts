@@ -97,6 +97,7 @@ describe('WatchlistEntitySourceClient', () => {
       const attrs: MonitoringEntitySourceAttributes = {
         type: 'store',
         name: 'Test',
+        queryRule: 'entity.id: *',
       };
 
       const result = await client.create(attrs);
@@ -107,6 +108,17 @@ describe('WatchlistEntitySourceClient', () => {
         { refresh: 'wait_for' }
       );
       expect(result.id).toBe('new-id');
+    });
+
+    it('rejects a store source without a query and creates nothing', async () => {
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+
+      await expect(client.create({ type: 'store', name: 'No query' })).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'queryRule is required for store-type sources',
+      });
+
+      expect(soClient.create).not.toHaveBeenCalled();
     });
 
     it('throws when a source with the same name already exists', async () => {
@@ -157,7 +169,11 @@ describe('WatchlistEntitySourceClient', () => {
     });
 
     it('does not grant an API key when creating a source with type other than index', async () => {
-      const sourceAttributes = { type: 'store' as const, name: 'My Store Source' };
+      const sourceAttributes = {
+        type: 'store' as const,
+        name: 'My Store Source',
+        queryRule: 'entity.id: *',
+      };
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
       soClient.create.mockResolvedValue({
         id: 'new-id',
@@ -207,7 +223,11 @@ describe('WatchlistEntitySourceClient', () => {
     });
 
     it('does not validate index permissions when creating a non-index-type source', async () => {
-      const sourceAttributes = { type: 'store' as const, name: 'My Store Source' };
+      const sourceAttributes = {
+        type: 'store' as const,
+        name: 'My Store Source',
+        queryRule: 'entity.id: *',
+      };
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
       soClient.create.mockResolvedValue({
         id: 'new-id',
@@ -237,6 +257,63 @@ describe('WatchlistEntitySourceClient', () => {
     });
   });
 
+  describe('validate', () => {
+    const noExistingSource = () =>
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+
+    it('accepts a source that can be saved', async () => {
+      noExistingSource();
+
+      await expect(
+        client.validate({ type: 'store', name: 'Store', queryRule: 'entity.id: *' })
+      ).resolves.toBeUndefined();
+    });
+
+    it('rejects a store source without a query', async () => {
+      noExistingSource();
+
+      await expect(client.validate({ type: 'store', name: 'Store' })).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+    });
+
+    it('rejects an index source when the user cannot read the index', async () => {
+      noExistingSource();
+      mockValidateIndexPermissions.mockRejectedValue(new Error('forbidden'));
+
+      await expect(
+        client.validate({ type: 'index', name: 'Index', indexPattern: 'secret-*' })
+      ).rejects.toThrow('forbidden');
+    });
+
+    it('rejects an index source when encrypted saved objects are not available', async () => {
+      noExistingSource();
+      const clientWithoutEncryption = new WatchlistEntitySourceClient({
+        soClient,
+        namespace: 'default',
+        esClient,
+        getStartServices: mockGetStartServices as never,
+        logger,
+        hasEncryptionKey: false,
+      });
+
+      await expect(
+        clientWithoutEncryption.validate({ type: 'index', name: 'Index', indexPattern: 'logs-*' })
+      ).rejects.toThrow('require encrypted saved objects');
+    });
+
+    it('rejects a name another source uses, but not the name of the source itself', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [{ id: 'existing-id', attributes: { name: 'Taken' } }],
+        total: 1,
+      } as never);
+      const store = { type: 'store' as const, queryRule: 'entity.id: *', name: 'Taken' };
+
+      await expect(client.validate(store)).rejects.toMatchObject({ output: { statusCode: 409 } });
+      await expect(client.validate({ ...store, id: 'existing-id' })).resolves.toBeUndefined();
+    });
+  });
+
   describe('upsert', () => {
     it('creates a new source when no existing source is found', async () => {
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
@@ -248,6 +325,7 @@ describe('WatchlistEntitySourceClient', () => {
       const attrs: MonitoringEntitySourceAttributes = {
         type: 'store',
         name: 'New Source',
+        queryRule: 'entity.id: *',
       };
 
       const result = await client.upsert(attrs);
@@ -721,20 +799,37 @@ describe('WatchlistEntitySourceClient', () => {
       expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
     });
 
-    it('invalidates the API key before deleting a source that has one', async () => {
+    describe('for a source that has an API key', () => {
       const sourceId = 'source-id';
       const apiKeyId = 'kid-1';
-      soClient.get.mockResolvedValue({
-        id: sourceId,
-        type: watchlistEntitySourceTypeName,
-        references: [],
-        attributes: { type: 'index', name: 'My Source', apiKeyId },
-      } as never);
 
-      await client.delete(sourceId);
+      beforeEach(() => {
+        soClient.get.mockResolvedValue({
+          id: sourceId,
+          type: watchlistEntitySourceTypeName,
+          references: [],
+          attributes: { type: 'index', name: 'My Source', apiKeyId },
+        } as never);
+      });
 
-      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(mockSecurity, apiKeyId, logger);
-      expect(soClient.delete).toHaveBeenCalledWith(watchlistEntitySourceTypeName, 'source-id');
+      it('deletes the source and invalidates its API key', async () => {
+        await client.delete(sourceId);
+
+        expect(soClient.delete).toHaveBeenCalledWith(watchlistEntitySourceTypeName, sourceId);
+        expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
+          mockSecurity,
+          apiKeyId,
+          logger
+        );
+      });
+
+      it('keeps the API key valid when the source cannot be deleted, so it can be deleted again', async () => {
+        soClient.delete.mockRejectedValue(new Error('delete failed'));
+
+        await expect(client.delete(sourceId)).rejects.toThrow('delete failed');
+
+        expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+      });
     });
   });
 

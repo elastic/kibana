@@ -204,6 +204,21 @@ describe('WatchlistConfigClient', () => {
         );
       });
 
+      it('keeps an unchanged name exactly as stored, even with surrounding spaces', async () => {
+        jest
+          .spyOn(client, 'get')
+          .mockResolvedValue({ id: 'wl-1', name: ' original ', riskModifier: 1, managed: false });
+
+        await client.update('wl-1', { name: ' original ', description: 'new description' });
+
+        expect(soClientMock.update).toHaveBeenCalledWith(
+          'watchlist-config',
+          'wl-1',
+          expect.objectContaining({ name: ' original ' }),
+          expect.anything()
+        );
+      });
+
       it('does not check the name when it is unchanged, so legacy duplicates stay editable', async () => {
         soClientMock.find.mockResolvedValue(findResult(['wl-other']));
 

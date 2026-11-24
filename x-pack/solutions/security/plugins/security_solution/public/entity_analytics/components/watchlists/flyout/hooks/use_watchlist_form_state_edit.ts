@@ -40,11 +40,8 @@ export const useEditWatchlistFormState = ({
     setHasUserEdits(true);
   };
 
-  const {
-    initialWatchlist: fetchedWatchlist,
-    ruleBasedSourceIds,
-    indexSourceWithMissingApiKey,
-  } = useGetWatchlistFormData(watchlistId);
+  const { initialWatchlist: fetchedWatchlist, indexSourceWithMissingApiKey } =
+    useGetWatchlistFormData(watchlistId);
 
   useEffect(() => {
     if (!fetchedWatchlist || hasUserEdits) {
@@ -70,11 +67,13 @@ export const useEditWatchlistFormState = ({
   });
 
   const isMissingId = !watchlistId;
+  const hasEntitySourceChanges =
+    JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
   const hasChanges =
     watchlist.name.trim() !== initialWatchlist.name.trim() ||
     watchlist.description?.trim() !== initialWatchlist.description?.trim() ||
     watchlist.riskModifier !== initialWatchlist.riskModifier ||
-    JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
+    hasEntitySourceChanges;
   const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
   const { isRiskModifierInvalid } = getWatchlistRiskModifierValidation(watchlist);
   const isDisabled =
@@ -90,8 +89,8 @@ export const useEditWatchlistFormState = ({
   return {
     watchlist,
     watchlistId,
-    ruleBasedSourceIds: ruleBasedSourceIds ?? {},
     indexSourceWithMissingApiKey,
+    hasEntitySourceChanges,
     isEditMode: true,
     isDisabled,
     isNameTooLong,

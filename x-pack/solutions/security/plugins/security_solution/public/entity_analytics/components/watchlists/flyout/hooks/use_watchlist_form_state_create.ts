@@ -60,7 +60,6 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
   return {
     watchlist,
     watchlistId: undefined,
-    ruleBasedSourceIds: {},
     isEditMode: false,
     isDisabled,
     isNameTooLong,

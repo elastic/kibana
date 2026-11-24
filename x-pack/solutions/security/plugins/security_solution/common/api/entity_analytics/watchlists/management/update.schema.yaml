@@ -13,7 +13,9 @@ paths:
       x-state: Technical Preview
       operationId: UpdateWatchlist
       summary: Update an existing watchlist
-      description: Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
+      description: >-
+        Updates the name, description, risk modifier, or managed status of an existing entity analytics
+        watchlist. Optionally also sets its rule-based data sources in the same request
       parameters:
         - name: id
           in: path
@@ -48,6 +50,44 @@ paths:
                 managed:
                   type: boolean
                   description: Indicates if the watchlist is managed by the system
+                entitySources:
+                  description: >-
+                    The rule-based data sources (entity store or index) the watchlist should have after
+                    the update, at most one of each type. Omit it to leave the data sources as they are;
+                    an empty array removes them. A watchlist that is not managed can have only one data source.
+                    Integration and managed data sources are not changed.
+                  type: array
+                  maxItems: 2
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - name
+                    additionalProperties: false
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                          - index
+                          - store
+                      name:
+                        type: string
+                        maxLength: 256
+                      indexPattern:
+                        type: string
+                        maxLength: 1000
+                      enabled:
+                        type: boolean
+                      identifierField:
+                        type: string
+                        maxLength: 256
+                        description: Field used to query the entity store for index-type sources
+                      queryRule:
+                        type: string
+                        maxLength: 4096
+                        description: KQL query used to filter data from the provided index patterns
+                      range:
+                        $ref: "../data_source/common.schema.yaml#/components/schemas/DateRange"
             examples:
               UpdateWatchlistRequest:
                 summary: Update watchlist request
@@ -56,6 +96,16 @@ paths:
                   description: High risk vendor watchlist
                   riskModifier: 1.5
                   managed: false
+              UpdateWatchlistWithSourcesRequest:
+                summary: Update watchlist and replace its data source
+                value:
+                  name: High Risk Vendors
+                  description: High risk vendor watchlist
+                  riskModifier: 1.5
+                  entitySources:
+                    - type: store
+                      name: High Risk Vendors-store
+                      queryRule: "entity.attributes.watchlists: *"
       responses:
         "200":
           description: Watchlist updated successfully
@@ -76,8 +126,8 @@ paths:
                     updatedAt: "2026-02-18T12:00:00.000Z"
         "409":
           description: >-
-            Conflict. Another watchlist in the current space already has the new name, or the name
-            is reserved for a system watchlist.
+            Conflict. Another watchlist in the current space already has the new name, the name is
+            reserved for a system watchlist, or a data source name is already used.
           content:
             application/json:
               schema:
