@@ -6363,9 +6363,6 @@ importers:
       '@types/minimist':
         specifier: 1.2.5
         version: 1.2.5
-      '@types/mock-fs':
-        specifier: 4.13.4
-        version: 4.13.4
       '@types/moment-duration-format':
         specifier: 2.2.7
         version: 2.2.7
@@ -6795,9 +6792,6 @@ importers:
       mochawesome-merge:
         specifier: 5.1.1
         version: 5.1.1
-      mock-fs:
-        specifier: 5.5.0
-        version: 5.5.0
       msw:
         specifier: 3.0.1
         version: 3.0.1(@types/node@24.10.13)(graphql@17.0.2)(supports-color@10.2.2)(typescript@6.0.3)
@@ -14946,9 +14940,6 @@ packages:
   '@types/minimist@1.2.5':
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
 
-  '@types/mock-fs@4.13.4':
-    resolution: {integrity: sha512-mXmM0o6lULPI8z3XNnQCpL0BGxPwx1Ul1wXYEPBGl4efShyxW2Rln0JOPEWGyZaYZMM6OVXM/15zUuFMY52ljg==}
-
   '@types/moment-duration-format@2.2.7':
     resolution: {integrity: sha512-BSxkbKI8ucqqxi4ZCfmFPilUDPoL85YVrOvn/AhCQoeqNfnRsRLGkk68TpoC7L6GwU27RltYiQV5dtfPTv/RHw==}
 
@@ -21002,10 +20993,6 @@ packages:
     resolution: {integrity: sha512-fucGSh8643QkSvNRFOaJ3+kfjF0FhA/YtvDncnRAG0A4oCtAzHIFkt/+SgsWil1uwoeT+Nu5fsAnrKkFtnPcZQ==}
     peerDependencies:
       mocha: '>=7'
-
-  mock-fs@5.5.0:
-    resolution: {integrity: sha512-d/P1M/RacgM3dB0sJ8rjeRNXxtapkPCUnMGmIN0ixJ16F/E4GUZCvWcSGfWGz8eaXYvn1s9baUwNjI4LOPEjiA==}
-    engines: {node: '>=12.0.0'}
 
   modern-tar@0.7.7:
     resolution: {integrity: sha512-t9VmxaqrmANnEOBhpSDI6HD192Ge48k8vmWqQQL7hSFEqHEYwZbbsu49+aKLWZeRvFs3j1pMhXOqqF4kPlvjkQ==}
@@ -31018,10 +31005,6 @@ snapshots:
 
   '@types/minimist@1.2.5': {}
 
-  '@types/mock-fs@4.13.4':
-    dependencies:
-      '@types/node': 24.10.13
-
   '@types/moment-duration-format@2.2.7':
     dependencies:
       moment: 2.31.0
@@ -38333,8 +38316,6 @@ snapshots:
       mochawesome-report-generator: 6.3.2
       strip-ansi: 6.0.1
       uuid: 8.3.2
-
-  mock-fs@5.5.0: {}
 
   modern-tar@0.7.7: {}
 
