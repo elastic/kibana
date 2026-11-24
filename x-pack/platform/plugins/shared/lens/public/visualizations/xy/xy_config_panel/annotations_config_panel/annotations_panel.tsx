@@ -25,6 +25,7 @@ import type {
 } from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../../../../common/constants';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS, isEsqlChart } from '../../../../utils';
+import { getTimeRangeFilter } from '../../../../app_plugin/shared/edit_on_the_fly/get_time_range_filter';
 import { updateLayer } from '../../toolbar';
 import { isDataLayer } from '../../visualization_helpers';
 import { EsqlAnnotationControls } from './esql_annotation_controls';
@@ -100,26 +101,30 @@ export const AnnotationsPanel = (
   ]);
 
   const queryInputServices = useKibana<LensAppServices>().services;
-  const { data, http } = queryInputServices;
+  const { data, http, uiSettings } = queryInputServices;
   // Read through a ref: columns do not depend on the time range, so changing it must not
   // refetch. The range is only needed to bind ?_tstart/?_tend if the query uses them.
   const timeRangeRef = useRef({ from: frame.absDateRange.fromDate, to: frame.absDateRange.toDate });
   timeRangeRef.current = { from: frame.absDateRange.fromDate, to: frame.absDateRange.toDate };
   const fetchColumns = useCallback(
     async (query: AggregateQuery, abortSignal: AbortSignal) => {
-      const [columns, timeField] = await Promise.all([
-        getESQLQueryColumns({
-          esqlQuery: query.esql,
-          search: data.search.search,
-          signal: abortSignal,
+      // The time field is resolved first: TBUCKET queries fail to run without a time filter on it
+      const timeField = await getESQLTimeField({ query: query.esql, http });
+      const columns = await getESQLQueryColumns({
+        esqlQuery: query.esql,
+        search: data.search.search,
+        signal: abortSignal,
+        timeRange: timeRangeRef.current,
+        filter: getTimeRangeFilter({
           timeRange: timeRangeRef.current,
-          includeColumnMetadata: true,
+          timeFieldName: timeField,
+          uiSettings,
         }),
-        getESQLTimeField({ query: query.esql, http }),
-      ]);
+        includeColumnMetadata: true,
+      });
       return { columns, timeField };
     },
-    [data.search.search, http]
+    [data.search.search, http, uiSettings]
   );
 
   if (!currentAnnotation) {
