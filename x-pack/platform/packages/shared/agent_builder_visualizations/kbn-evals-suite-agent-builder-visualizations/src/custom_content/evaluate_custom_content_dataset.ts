@@ -22,6 +22,7 @@ import { createEsqlExecutionEvaluator } from '../evaluators/esql_execution';
 import { createEsqlQueryRunner } from '../evaluators/esql_query_runner';
 import {
   findStoredPanel,
+  getQueries,
   getCustomContentToolArgs,
   getOtherRenderers,
   getToolErrors,
@@ -31,7 +32,9 @@ import {
 import { createDataExpectationEvaluator } from './evaluators/data_expectation';
 import { createEditEvaluator } from './evaluators/edit';
 import { createDataEditAppliedEvaluator } from './evaluators/edit_applied';
+import { createQueriesUsedEvaluator } from './evaluators/queries_used';
 import { createQueryContentsEvaluator } from './evaluators/query_contents';
+import { createQueryCountEvaluator } from './evaluators/query_count';
 import { createRowLimitEvaluator } from './evaluators/row_limit';
 import { createRowOrderEvaluator } from './evaluators/row_order';
 import { createStyleEditJudge } from './evaluators/style_edit_judge';
@@ -95,7 +98,7 @@ export function createEvaluateCustomContentDataset({
   return async function evaluateCustomContentDataset({ dataset: { name, description, examples } }) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
 
-    // One runner per dataset run, so three evaluators executing a query hit Elasticsearch once.
+    // One runner per dataset run, so the evaluators executing a query hit Elasticsearch once.
     const runQuery = createEsqlQueryRunner(esClient);
 
     const esqlExecutionEvaluator = createEsqlExecutionEvaluator<
@@ -103,7 +106,7 @@ export function createEvaluateCustomContentDataset({
       CustomContentTaskOutput
     >({
       runQuery,
-      queryExtractor: (output) => (output.after?.esql ? [output.after.esql] : []),
+      queryExtractor: (output) => getQueries(output.after),
       includeHitDetection: true,
     });
 
@@ -193,10 +196,12 @@ export function createEvaluateCustomContentDataset({
       createTemplateValidityEvaluator(),
       createDataExpectationEvaluator(),
       skipStaticExamples(esqlExecutionEvaluator as CustomContentEvaluator),
+      createQueryCountEvaluator(),
       createQueryContentsEvaluator(),
       createRowLimitEvaluator(),
       createRowOrderEvaluator({ runQuery }),
       createTemplateColumnsEvaluator({ runQuery }),
+      createQueriesUsedEvaluator(),
       createEditEvaluator(),
       createDataEditAppliedEvaluator({ runQuery }),
       createStyleEditJudge({ criteria: evaluators.criteria }),

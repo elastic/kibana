@@ -9,11 +9,13 @@ import type { CustomContentTaskOutput, StoredCustomContent } from '../custom_con
 import type { CustomContentDatasetExample, CustomContentEvaluator } from '../types';
 import { createDataExpectationEvaluator } from './data_expectation';
 import { createEditEvaluator } from './edit';
+import { createQueriesUsedEvaluator } from './queries_used';
+import { createQueryCountEvaluator } from './query_count';
 import { createQueryContentsEvaluator } from './query_contents';
 import { createRowLimitEvaluator, readLimit } from './row_limit';
 import { createRowOrderEvaluator, labelsInOrder } from './row_order';
 import { createTemplateColumnsEvaluator } from './template_columns';
-import { readColumnReferences } from './template_column_references';
+import { readColumnReferences, readColumnReferencesByQuery } from './template_column_references';
 import { createDataEditAppliedEvaluator, findMeasureColumns } from './edit_applied';
 import { createStyleEditJudge } from './style_edit_judge';
 import { createTemplateValidityEvaluator } from './template_validity';
@@ -128,6 +130,20 @@ describe('Custom Content Data', () => {
   it('fails when no panel was stored', async () => {
     expect((await run(evaluator, outputWith(undefined))).score).toBe(0);
   });
+
+  it('checks where the panel is stored when the example says so', async () => {
+    const dashboard = outputWith({ esql: QUERY }, { storedIn: 'dashboard' });
+    expect((await run(evaluator, dashboard, { data: 'query', storedIn: 'dashboard' })).score).toBe(
+      1
+    );
+    expect(
+      await run(evaluator, dashboard, { data: 'query', storedIn: 'visualization' })
+    ).toMatchObject({
+      score: 0,
+      label: 'wrong-storage',
+    });
+    expect((await run(evaluator, dashboard, { data: 'query' })).score).toBe(1);
+  });
 });
 
 describe('Custom Content Query Contents', () => {
@@ -161,6 +177,14 @@ describe('Custom Content Query Contents', () => {
     });
     expect(result.score).toBe(0.5);
     expect(result.metadata).toMatchObject({ missing: ['BY machine.os'] });
+  });
+
+  it('finds the text in any query of the panel', async () => {
+    const result = await run(evaluator, outputWith({ esqls: [QUERY, 'FROM logs | LIMIT 8'] }), {
+      data: 'query',
+      queryContains: ['BY host', 'LIMIT 8'],
+    });
+    expect(result.score).toBe(1);
   });
 });
 
@@ -197,6 +221,68 @@ describe('Custom Content Row Limit', () => {
 
   it('skips a panel without a query', async () => {
     expect((await run(evaluator, outputWith({ template: '<p/>' }))).score).toBeNull();
+  });
+
+  describe('with several queries', () => {
+    const panel = {
+      esqls: ['FROM a | STATS c = COUNT(*)', 'FROM a | STATS c = COUNT(*) BY h | LIMIT 5'],
+    };
+    const declared = { data: 'query' as const, limit: 5 };
+
+    it('matches a declared limit to a query whatever its position', async () => {
+      expect((await run(evaluator, outputWith(panel), declared)).score).toBe(1);
+      expect(
+        (await run(evaluator, outputWith({ esqls: [...panel.esqls].reverse() }), declared)).score
+      ).toBe(1);
+    });
+
+    it('fails when no query has the declared limit', async () => {
+      const result = await run(
+        evaluator,
+        outputWith({ esqls: ['FROM a | LIMIT 100', 'FROM b | LIMIT 3'] }),
+        declared
+      );
+      expect(result).toMatchObject({ score: 0.5, label: 'wrong-limit' });
+    });
+
+    it('still rejects the chart default on a query the declared limit does not match', async () => {
+      const result = await run(
+        evaluator,
+        outputWith({ esqls: ['FROM a | LIMIT 10', 'FROM b | LIMIT 5'] }),
+        declared
+      );
+      expect(result).toMatchObject({ score: 0.5, label: 'chart-default-limit' });
+    });
+
+    it('matches each of several declared limits to a different query', async () => {
+      const both = { data: 'query' as const, limit: [5, 8] };
+      expect(
+        (
+          await run(
+            evaluator,
+            outputWith({ esqls: ['FROM a | LIMIT 8', 'FROM b | LIMIT 5'] }),
+            both
+          )
+        ).score
+      ).toBe(1);
+      expect(
+        (
+          await run(
+            evaluator,
+            outputWith({ esqls: ['FROM a | LIMIT 5', 'FROM b | LIMIT 5'] }),
+            both
+          )
+        ).score
+      ).toBe(0.5);
+    });
+
+    it('checks every query for the chart default when no limit is declared', async () => {
+      const result = await run(
+        evaluator,
+        outputWith({ esqls: ['FROM a | STATS c = COUNT(*)', 'FROM b | LIMIT 10'] })
+      );
+      expect(result).toMatchObject({ score: 0.5, label: 'chart-default-limit' });
+    });
   });
 });
 
@@ -361,6 +447,181 @@ describe('Custom Content Template Columns', () => {
     expect(
       (await run(withColumns([]), outputWith({ esql: 'FROM logs', template: '<p>hi</p>' }))).score
     ).toBeNull();
+  });
+});
+
+describe('Template columns of several queries', () => {
+  it('reads the columns of each query the template reads', () => {
+    const template =
+      '{% for r in rows %}{{ r.requests.value }}{% endfor %}' +
+      '{% for h in queries[1].rows %}{{ h.host.value }}{{ h["count"].value }}{% endfor %}' +
+      '{{ queries[2].max["code"] }}{{ queries[1].rows[0].host.value }}';
+    expect([...readColumnReferencesByQuery(template)]).toEqual([
+      [0, ['requests']],
+      [1, ['host', 'count']],
+      [2, ['code']],
+    ]);
+  });
+
+  it('keeps a loop variable reused for another query apart', () => {
+    const template =
+      '{% for r in rows %}{{ r.a.value }}{% endfor %}{% for r in queries[1].rows %}{{ r.b.value }}{% endfor %}{% for r in rows %}{{ r.c.value }}{% endfor %}';
+    expect([...readColumnReferencesByQuery(template)]).toEqual([
+      [0, ['a', 'c']],
+      [1, ['b']],
+    ]);
+  });
+
+  it('reads nested loops over different queries', () => {
+    const template =
+      '{% for a in rows %}{{ a.x.value }}{% for b in queries[1].rows %}{{ b.y.value }}{% endfor %}{{ a.z.value }}{% endfor %}';
+    expect([...readColumnReferencesByQuery(template)]).toEqual([
+      [0, ['x', 'z']],
+      [1, ['y']],
+    ]);
+  });
+
+  it('notes a query that is only counted, without columns', () => {
+    expect([...readColumnReferencesByQuery('{{ queries[1].rows.size }}')]).toEqual([[1, []]]);
+  });
+
+  it('does not take a loop over something else for a row', () => {
+    expect([
+      ...readColumnReferencesByQuery(
+        '{% for i in (1..3) %}{{ i.host }}{% endfor %}{{ rows[0].a.value }}'
+      ),
+    ]).toEqual([[0, ['a']]]);
+  });
+
+  const withColumns = (columnsByQuery: Record<string, string[]>) =>
+    createTemplateColumnsEvaluator({
+      runQuery: jest.fn().mockImplementation(async (query: string) => ({
+        columns: (columnsByQuery[query] ?? []).map((name) => ({ name, type: 'long' })),
+      })),
+    });
+  const panel = {
+    esqls: ['FROM kpis', 'FROM hosts'],
+    template:
+      '{% for r in rows %}{{ r.total.value }}{% endfor %}{% for h in queries[1].rows %}{{ h.host.value }}{% endfor %}',
+  };
+
+  it('passes when each query returns the columns read from it', async () => {
+    const evaluator = withColumns({ 'FROM kpis': ['total'], 'FROM hosts': ['host'] });
+    expect((await run(evaluator, outputWith(panel))).score).toBe(1);
+  });
+
+  it('fails a column read from the wrong query', async () => {
+    const evaluator = withColumns({ 'FROM kpis': ['total', 'host'], 'FROM hosts': ['count'] });
+    const result = await run(evaluator, outputWith(panel));
+    expect(result).toMatchObject({ score: 0.5, label: 'unbound-columns' });
+    expect(result.explanation).toContain('host (query 1)');
+  });
+
+  it('fails a template that reads a query the panel does not have', async () => {
+    const evaluator = withColumns({ 'FROM kpis': ['total'] });
+    const result = await run(
+      evaluator,
+      outputWith({
+        esqls: ['FROM kpis'],
+        template: '{% for r in rows %}{{ r.total.value }}{% endfor %}{{ queries[1].rows.size }}',
+      })
+    );
+    expect(result).toMatchObject({ score: 0.5, label: 'unbound-columns' });
+    expect(result.explanation).toContain('queries[1]');
+  });
+
+  it('reports a second query that did not run', async () => {
+    const evaluator = createTemplateColumnsEvaluator({
+      runQuery: jest.fn().mockImplementation(async (query: string) => {
+        if (query === 'FROM hosts') {
+          throw new Error('boom');
+        }
+        return { columns: [{ name: 'total', type: 'long' }] };
+      }),
+    });
+    expect(await run(evaluator, outputWith(panel))).toMatchObject({
+      score: 0,
+      label: 'query-failed',
+    });
+  });
+});
+
+describe('Custom Content Queries Used', () => {
+  const evaluator = createQueriesUsedEvaluator();
+
+  it('passes when the template reads every query', async () => {
+    const result = await run(
+      evaluator,
+      outputWith({
+        esqls: ['FROM a', 'FROM b'],
+        template: '{{ rows.size }}{{ queries[1].rows.size }}',
+      })
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('fails a query the template never reads', async () => {
+    const result = await run(
+      evaluator,
+      outputWith({
+        esqls: ['FROM a', 'FROM b', 'FROM c'],
+        template: '{% for r in rows %}{{ r.x.value }}{% endfor %}{{ queries[2].rows.size }}',
+      })
+    );
+    expect(result).toMatchObject({ label: 'unused-queries', metadata: { unused: [1] } });
+    expect(result.score).toBeCloseTo(2 / 3);
+  });
+
+  it('skips a panel with one query or none', async () => {
+    expect(
+      (await run(evaluator, outputWith({ esql: 'FROM a', template: '{{ rows.size }}' }))).score
+    ).toBeNull();
+    expect((await run(evaluator, outputWith({ template: '<p/>' }))).score).toBeNull();
+  });
+});
+
+describe('Custom Content Query Count', () => {
+  const evaluator = createQueryCountEvaluator();
+  const two = outputWith({ esqls: ['FROM a', 'FROM b'] });
+
+  it('skips an example that declares no count', async () => {
+    expect((await run(evaluator, two)).score).toBeNull();
+  });
+
+  it('checks an exact count', async () => {
+    expect((await run(evaluator, two, { data: 'query', queryCount: 2 })).score).toBe(1);
+    expect(await run(evaluator, two, { data: 'query', queryCount: 1 })).toMatchObject({
+      score: 0,
+      label: 'too-many-queries',
+    });
+    expect(await run(evaluator, two, { data: 'query', queryCount: 3 })).toMatchObject({
+      score: 0,
+      label: 'too-few-queries',
+    });
+  });
+
+  it('checks a lower bound', async () => {
+    expect((await run(evaluator, two, { data: 'query', queryCount: { min: 2 } })).score).toBe(1);
+    expect(await run(evaluator, two, { data: 'query', queryCount: { min: 3 } })).toMatchObject({
+      score: 0,
+      label: 'too-few-queries',
+    });
+  });
+
+  it('counts a single stored query and a static panel', async () => {
+    expect(
+      (await run(evaluator, outputWith({ esql: 'FROM a' }), { data: 'query', queryCount: 1 })).score
+    ).toBe(1);
+    expect(
+      (await run(evaluator, outputWith({ template: '<p/>' }), { data: 'static', queryCount: 0 }))
+        .score
+    ).toBe(1);
+  });
+
+  it('fails when there is no panel', async () => {
+    expect(
+      await run(evaluator, outputWith(undefined), { data: 'query', queryCount: 2 })
+    ).toMatchObject({ score: 0, label: 'no-panel' });
   });
 });
 
@@ -550,6 +811,72 @@ describe('Custom Content Edit', () => {
     );
     expect(unchanged).toMatchObject({ score: 0, label: 'data-edit-failed' });
   });
+
+  describe('with several queries', () => {
+    const HOSTS = 'FROM logs | STATS c = COUNT(*) BY host | LIMIT 5';
+    const multi = { esqls: [QUERY, HOSTS], template: '<p>old</p>' };
+    const multiOutput = (after: StoredCustomContent) =>
+      editOutput(after, { baselineContent: multi });
+
+    it('fails a style edit that changed only the second query', async () => {
+      const result = await run(
+        evaluator,
+        multiOutput({ esqls: [QUERY, 'FROM logs | LIMIT 3'], template: '<p>new</p>' }),
+        style
+      );
+      expect(result).toMatchObject({ label: 'style-edit-failed' });
+      expect(result.score).toBe(0.5);
+    });
+
+    it('fails a style edit that dropped a query', async () => {
+      const result = await run(
+        evaluator,
+        multiOutput({ esqls: [QUERY], template: '<p>new</p>' }),
+        style
+      );
+      expect(result.score).toBe(0.5);
+    });
+
+    it('passes a style edit that kept every query', async () => {
+      const result = await run(
+        evaluator,
+        multiOutput({ esqls: [QUERY, HOSTS], template: '<p>new</p>' }),
+        style
+      );
+      expect(result.score).toBe(1);
+    });
+
+    it('treats a query added by a data edit as a change', async () => {
+      const result = await run(
+        evaluator,
+        multiOutput({ esqls: [QUERY, HOSTS, 'FROM logs | LIMIT 3'], template: '<p>new</p>' }),
+        { ...data, unchangedQueries: [0, 1] }
+      );
+      expect(result.score).toBe(1);
+    });
+
+    it('fails a data edit that touched a query it had to keep', async () => {
+      const result = await run(
+        evaluator,
+        multiOutput({
+          esqls: [`${QUERY} | KEEP host`, 'FROM logs | LIMIT 8'],
+          template: '<p>new</p>',
+        }),
+        { ...data, unchangedQueries: [0] }
+      );
+      expect(result).toMatchObject({ score: 0, label: 'data-edit-touched-other-queries' });
+      expect(result.metadata).toMatchObject({ touched: [0] });
+    });
+
+    it('passes a data edit that changed one query and kept the other', async () => {
+      const result = await run(
+        evaluator,
+        multiOutput({ esqls: [QUERY, 'FROM logs | LIMIT 8'], template: '<p>new</p>' }),
+        { ...data, unchangedQueries: [0] }
+      );
+      expect(result.score).toBe(1);
+    });
+  });
 });
 
 describe('Custom Content Data Edit Applied', () => {
@@ -692,6 +1019,32 @@ describe('Custom Content Data Edit Applied', () => {
 
   it('skips when the query does not run', async () => {
     expect((await run(evaluator, after('<p/>', 'FROM nowhere'), gold)).score).toBeNull();
+  });
+
+  it('finds the measure added to the second query and the template reading it there', async () => {
+    const hosts = 'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host';
+    const second = (template: string) =>
+      outputWith({ esqls: ['FROM logs | STATS total = COUNT(*)', hosts], template });
+    expect(
+      (
+        await run(
+          evaluator,
+          second(
+            '{{ rows[0].total.value }}{% for h in queries[1].rows %}{{ h.avg_bytes.value }}{% endfor %}'
+          ),
+          gold
+        )
+      ).score
+    ).toBe(1);
+    expect(
+      await run(
+        evaluator,
+        second(
+          '{{ rows[0].total.value }}{% for h in queries[1].rows %}{{ h.requests.value }}{% endfor %}'
+        ),
+        gold
+      )
+    ).toMatchObject({ score: 0, label: 'new-measure-not-shown' });
   });
 });
 
