@@ -438,6 +438,87 @@ describe('useProposal', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBeInstanceOf(Error);
   });
+
+  describe('when a later revision loads', () => {
+    const mockProposals = (proposals: Record<string, object>) => {
+      const http = makeHttp();
+      http.get.mockImplementation(async (url: string) => proposals[url.split('/').pop() ?? '']);
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+      return http;
+    };
+
+    it('refetches the earlier revision in the same chain, so its card reads as replaced', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.data?.status).toBe('pending'));
+
+      proposals['p-1'] = { ...proposals['p-1'], status: 'superseded', supersededBy: 'p-2' };
+      renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(earlier.result.current.data?.status).toBe('superseded'));
+    });
+
+    it('refetches every earlier revision when two revisions land before the card refreshes', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+        'p-3': { id: 'p-3', rootProposalId: 'p-1', revision: 3, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      const second = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
+
+      proposals['p-1'] = { ...proposals['p-1'], status: 'superseded' };
+      proposals['p-2'] = { ...proposals['p-2'], status: 'superseded' };
+      renderHook(() => useProposal('p-3'), { wrapper: Wrapper });
+
+      await waitFor(() => {
+        expect(first.result.current.data?.status).toBe('superseded');
+        expect(second.result.current.data?.status).toBe('superseded');
+      });
+    });
+
+    it('leaves proposals from another chain alone', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+        'q-2': { id: 'q-2', rootProposalId: 'q-1', revision: 2, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const unrelated = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(unrelated.result.current.isSuccess).toBe(true));
+      const other = renderHook(() => useProposal('q-2'), { wrapper: Wrapper });
+      await waitFor(() => expect(other.result.current.isSuccess).toBe(true));
+
+      const fetchesOfUnrelated = http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'));
+      expect(fetchesOfUnrelated).toHaveLength(1);
+    });
+
+    it('does not refetch anything for a first revision', async () => {
+      const proposals: Record<string, object> = {
+        'p-1': { id: 'p-1', rootProposalId: 'p-1', revision: 1, status: 'pending' },
+      };
+      const http = mockProposals(proposals);
+      const { Wrapper } = createWrapper();
+
+      const { result } = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(http.get).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 
 describe('useApproveProposal', () => {
@@ -661,6 +742,38 @@ describe('useApproveProposal', () => {
       'Server error'
     );
   });
+
+  it('refetches the proposal when the API answers 409, so the card shows the settled state', async () => {
+    const http = makeHttp();
+    http.post.mockRejectedValue(makeHttpFetchError(409));
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper, queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await expect(result.current.mutateAsync({ id: 'p-1', body: {} })).rejects.toThrow('HTTP 409');
+
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
+  });
+
+  it('does not refetch for other failures', async () => {
+    const http = makeHttp();
+    http.post.mockRejectedValue(makeHttpFetchError(500));
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper, queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await expect(result.current.mutateAsync({ id: 'p-1', body: {} })).rejects.toThrow('HTTP 500');
+
+    expect(invalidateSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe('after an approval ends, before the new data arrives', () => {
@@ -776,6 +889,24 @@ describe('useDismissProposal', () => {
     await expect(
       result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'no_reason' } })
     ).rejects.toThrow('Conflict');
+  });
+
+  it('refetches the proposal when the API answers 409, so the card shows the settled state', async () => {
+    const http = makeHttp();
+    http.post.mockRejectedValue(makeHttpFetchError(409));
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper, queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useDismissProposal(), { wrapper: Wrapper });
+
+    await expect(
+      result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'no_reason' } })
+    ).rejects.toThrow('HTTP 409');
+
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
   });
 });
 

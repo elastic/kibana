@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { MutationKey, QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
   useInfiniteQuery,
@@ -80,6 +80,42 @@ export const isInFlux = (
 
 const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
   response?.proposals.some(isInFlux) ?? false;
+
+const isConflict = (error: unknown): boolean =>
+  isHttpFetchError(error) && error.response?.status === 409;
+
+const isEarlierRevisionInChain = (
+  cached: unknown,
+  latest: { id: string; rootProposalId: string }
+): boolean =>
+  typeof cached === 'object' &&
+  cached !== null &&
+  'id' in cached &&
+  'rootProposalId' in cached &&
+  cached.id !== latest.id &&
+  cached.rootProposalId === latest.rootProposalId;
+
+/**
+ * A revision supersedes its predecessors without any event reaching their cards, and a pending
+ * card does not poll. When a later revision shows up, refetch the earlier ones so they read as
+ * replaced (with buttons disabled).
+ */
+const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined): void => {
+  const queryClient = useQueryClient();
+  const id = proposal?.id;
+  const rootProposalId = proposal?.rootProposalId;
+  const isRevision = (proposal?.revision ?? 1) > 1;
+
+  useEffect(() => {
+    if (!isRevision || !id || !rootProposalId) {
+      return;
+    }
+    void queryClient.invalidateQueries({
+      queryKey: queryKeys.proposals.details,
+      predicate: ({ state }) => isEarlierRevisionInChain(state.data, { id, rootProposalId }),
+    });
+  }, [queryClient, id, rootProposalId, isRevision]);
+};
 
 /**
  * Retries on transient failures (network errors and 5xx responses), stops
@@ -197,7 +233,7 @@ export const useProposal = (id: string | undefined) => {
   const { services } = useKibana();
   useProposalDecisionSignal();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: queryKeys.proposals.detail(id),
     queryFn: async (): Promise<ProposalWithMetadata> => {
       if (!id) {
@@ -215,6 +251,10 @@ export const useProposal = (id: string | undefined) => {
       data && isInFlux(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
+
+  useRefreshEarlierRevisions(query.data);
+
+  return query;
 };
 
 /**
@@ -306,6 +346,8 @@ export const useApproveProposal = () => {
       await settleDecision(services.http!, 'approve', id);
       await invalidateProposals(queryClient);
     },
+    // Refetch on error so the card shows the real state rather than a decidable one.
+    onError: (error) => (isConflict(error) ? invalidateProposals(queryClient) : undefined),
     onSettled: (_data, _error, { id }) => inFlightDecisions.end('approve', id),
   });
 };
@@ -326,6 +368,8 @@ export const useDismissProposal = () => {
       await settleDecision(services.http!, 'decline', id);
       await invalidateProposals(queryClient);
     },
+    // Refetch so the card shows the real state rather than a decidable one.
+    onError: (error) => (isConflict(error) ? invalidateProposals(queryClient) : undefined),
     onSettled: (_data, _error, { id }) => inFlightDecisions.end('decline', id),
   });
 };
