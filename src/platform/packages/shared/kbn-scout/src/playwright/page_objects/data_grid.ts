@@ -383,8 +383,9 @@ export class DataGrid {
       return 0;
     }
 
-    const badgeText = await selectedRowsMenu.getByText(/^\d+$/).innerText();
-    return Number(badgeText);
+    // the badge shows the count in the configured number format, the attribute holds the raw count
+    const count = await selectedRowsMenu.getAttribute('data-selected-documents');
+    return Number(count);
   }
 
   async getNumberOfSelectedRowsOnCurrentPage(): Promise<number> {
