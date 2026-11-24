@@ -32,9 +32,10 @@ export function useDatePicker({
   );
   const { searchCriteria } = useUnifiedSearchContext();
   const { preferredSchema } = useWaffleOptionsContext();
-  const autoRefreshEnabled = autoRefresh && !autoRefresh.isPaused;
 
   const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const currentAutoRefresh = urlState?.autoRefresh ?? autoRefresh;
+  const autoRefreshEnabled = currentAutoRefresh && !currentAutoRefresh.isPaused;
   const [parsedDateRange, setParsedDateRange] = useState(
     parseDateRange(urlState?.dateRange ?? dateRange)
   );
@@ -101,7 +102,7 @@ export function useDatePicker({
   );
 
   return {
-    autoRefresh: urlState?.autoRefresh ?? autoRefresh,
+    autoRefresh: currentAutoRefresh,
     autoRefreshTick$,
     autoRefreshConfig$,
     dateRange: urlState?.dateRange ?? dateRange,
