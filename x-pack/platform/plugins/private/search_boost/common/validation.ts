@@ -76,7 +76,7 @@ export const validateIndexPattern = (indexPattern: string): IndexPatternError | 
   if (indexPattern.trim().length === 0) {
     return indexPatternError('required');
   }
-  if (indexPattern.length > MAX_INDEX_PATTERN_LENGTH) {
+  if (new TextEncoder().encode(indexPattern).length > MAX_INDEX_PATTERN_LENGTH) {
     return indexPatternError('tooLong');
   }
   return TARGET_SEPARATOR.test(indexPattern) ? indexPatternError('notSingleTarget') : undefined;

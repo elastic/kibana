@@ -69,6 +69,12 @@ describe('validateIndexPattern', () => {
     });
   });
 
+  it('counts the length in bytes, like Elasticsearch does for index names', () => {
+    // "é" takes two bytes.
+    expect(validateIndexPattern('é'.repeat(127))).toBeUndefined();
+    expect(validateIndexPattern('é'.repeat(128))?.code).toBe('tooLong');
+  });
+
   it.each(['logs-*,metrics-*', 'logs-* metrics-*', ' logs-*', 'logs-*\t'])(
     'rejects more than one target in %p',
     (pattern) => {
