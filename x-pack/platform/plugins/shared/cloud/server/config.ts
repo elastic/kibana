@@ -113,6 +113,7 @@ const configSchema = schema.object({
         product_tier: schema.maybe(createProductTiersSchema()),
         orchestrator_target: schema.maybe(schema.string()),
         in_trial: schema.maybe(schema.boolean()),
+        created_at: schema.maybe(schema.string()),
       },
       // avoid future chicken-and-egg situation with the component populating the config
       { unknowns: 'ignore' }
@@ -153,6 +154,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
       product_tier: true,
       orchestrator_target: true,
       in_trial: true,
+      created_at: true,
     },
     onboarding: {
       default_solution: true,

@@ -23,6 +23,16 @@ describe('Cloud plugin config', () => {
   });
 
   describe('Serverless config', () => {
+    test('Accepts created_at as a string and exposes it to the browser', () => {
+      const output = config.schema.validate({
+        serverless: { created_at: '2026-11-04T14:16:56.000Z' },
+      });
+      expect(output.serverless).toEqual({ created_at: '2026-11-04T14:16:56.000Z' });
+      expect(config.exposeToBrowser?.serverless).toEqual(
+        expect.objectContaining({ created_at: true })
+      );
+    });
+
     test('Fails on invalid project_type', () => {
       expect(() =>
         config.schema.validate({

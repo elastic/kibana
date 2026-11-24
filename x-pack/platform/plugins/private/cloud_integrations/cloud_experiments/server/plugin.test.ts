@@ -98,6 +98,56 @@ describe('Cloud Experiments server plugin', () => {
       });
     });
 
+    test('adds created_at, csp and region to the kibana context on Serverless', async () => {
+      const coreSetupMock = coreMock.createSetup();
+      const createdAt = new Date('2026-11-04T14:16:56.000Z');
+      const cloud = cloudMock.createSetup();
+      plugin.setup(coreSetupMock, {
+        cloud: {
+          ...cloud,
+          isServerlessEnabled: true,
+          csp: 'aws',
+          region: 'us-east-1',
+          serverless: { ...cloud.serverless, projectId: 'project-id', createdAt },
+        },
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
+      });
+
+      await jest.advanceTimersByTimeAsync(100); // Remove the debounceTime effect
+      expect(coreSetupMock.featureFlags.appendContext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibana: expect.objectContaining({
+            key: 'project-id',
+            created_at: createdAt,
+            csp: 'aws',
+            region: 'us-east-1',
+          }),
+        })
+      );
+    });
+
+    test('does not add created_at, csp or region to the kibana context outside Serverless', async () => {
+      const coreSetupMock = coreMock.createSetup();
+      plugin.setup(coreSetupMock, {
+        cloud: {
+          ...cloudMock.createSetup(),
+          isCloudEnabled: true,
+          isServerlessEnabled: false,
+          csp: 'aws',
+          region: 'us-east-1',
+        },
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
+      });
+
+      await jest.advanceTimersByTimeAsync(100); // Remove the debounceTime effect
+      const [context] = coreSetupMock.featureFlags.appendContext.mock.calls[0] as [
+        { kibana: Record<string, unknown> }
+      ];
+      expect(context.kibana).not.toHaveProperty('created_at');
+      expect(context.kibana).not.toHaveProperty('csp');
+      expect(context.kibana).not.toHaveProperty('region');
+    });
+
     test('registers the initial feature flags getter to enable bootstrapping', async () => {
       const coreSetupMock = coreMock.createSetup();
       plugin.setup(coreSetupMock, {

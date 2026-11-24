@@ -77,6 +77,21 @@ export interface FlatMetadata {
    */
   orchestrator_target?: string;
   /**
+   * When the Serverless project was created (only available on serverless)
+   * @group Kibana Static Values
+   */
+  created_at?: Date;
+  /**
+   * The cloud service provider hosting the Serverless project (only available on serverless)
+   * @group Kibana Static Values
+   */
+  csp?: string;
+  /**
+   * The provider's region id, without the CSP prefix (only available on serverless)
+   * @group Kibana Static Values
+   */
+  region?: string;
+  /**
    * The Elastic Cloud Organization's ID
    * @group Organization Static Values
    */
@@ -149,6 +164,9 @@ export class MetadataService {
               project_type: metadata.project_type,
               product_tier: metadata.product_tier,
               orchestrator_target: metadata.orchestrator_target,
+              created_at: metadata.created_at,
+              csp: metadata.csp,
+              region: metadata.region,
               has_data: metadata.has_data,
             }),
           }),

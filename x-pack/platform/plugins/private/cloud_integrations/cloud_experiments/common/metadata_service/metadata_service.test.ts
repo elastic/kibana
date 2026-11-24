@@ -77,6 +77,32 @@ describe('MetadataService', () => {
       );
     });
 
+    test('emits created_at, csp and region in the kibana context when provided', async () => {
+      metadataService.setup({
+        ...initialMetadata,
+        created_at: new Date('2026-11-04T14:16:56.000Z'),
+        csp: 'aws',
+        region: 'us-east-1',
+      });
+      await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual({
+        ...multiContextFormat,
+        kibana: {
+          ...multiContextFormat.kibana,
+          created_at: new Date('2026-11-04T14:16:56.000Z'),
+          csp: 'aws',
+          region: 'us-east-1',
+        },
+      });
+    });
+
+    test('omits created_at, csp and region from the kibana context when not provided', async () => {
+      metadataService.setup(initialMetadata);
+      const context = await firstValueFrom(metadataService.userMetadata$);
+      expect(context.kibana).not.toHaveProperty('created_at');
+      expect(context.kibana).not.toHaveProperty('csp');
+      expect(context.kibana).not.toHaveProperty('region');
+    });
+
     test(
       'emits inTrial when trialEndDate is provided',
       fakeSchedulers(async (advance) => {

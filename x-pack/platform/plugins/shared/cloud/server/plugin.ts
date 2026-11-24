@@ -24,6 +24,7 @@ import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_i
 import type { DecodedCloudId } from '../common/decode_cloud_id';
 import { decodeCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
+import { parseCreatedAt } from '../common/parse_created_at';
 import { getFullCloudUrl, withTargetOrganization } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
@@ -191,6 +192,11 @@ export interface CloudSetup {
      * Whether the serverless project belongs to an organization currently in trial.
      */
     organizationInTrial?: boolean;
+    /**
+     * When the serverless project was created.
+     * Undefined if the creation time is unknown or could not be parsed.
+     */
+    createdAt?: Date;
   };
   /**
    * Method to retrieve if the organization is in trial.
@@ -394,6 +400,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         // Use `core.pricing` when checking if a feature is available for the current product tier.
         productTier,
         organizationInTrial: this.config.serverless?.in_trial,
+        createdAt: parseCreatedAt(this.config.serverless?.created_at, this.logger),
       },
       isInTrial: this.isInTrial.bind(this),
       trialDaysLeft: this.trialDaysLeft.bind(this),
