@@ -97,7 +97,8 @@ imports:
 engine:
   id: claude
   version: '2.1.165'
-  model: opus
+  # an exact ID: gh-aw resolves the `opus` alias to the newest Opus, which this Claude Code version rejects
+  model: claude-opus-5
   max-turns: 120
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
