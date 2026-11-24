@@ -19,6 +19,7 @@ import { CloudSecurityGrouping } from '../../components/cloud_security_grouping'
 import { VULNERABILITY_FIELDS } from '../../common/constants';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
 import { VULNERABILITY_KEV_FILTER_CHIP } from './test_subjects';
+import { buildKevFilter } from './utils/build_kev_filter';
 
 export const LatestVulnerabilitiesContainer = () => {
   const SubGrouping = ({
@@ -156,21 +157,7 @@ export const LatestVulnerabilitiesContainer = () => {
       kevFilterActive
         ? { filters: withoutKev }
         : {
-            filters: [
-              ...withoutKev,
-              {
-                meta: {
-                  key: VULNERABILITY_FIELDS.KEV_KNOWN_EXPLOITED,
-                  alias: null,
-                  disabled: false,
-                  negate: false,
-                  type: 'exists',
-                  value: 'exists',
-                  index: dataView.id,
-                },
-                query: { exists: { field: VULNERABILITY_FIELDS.KEV_KNOWN_EXPLOITED } },
-              } as Filter,
-            ],
+            filters: [...withoutKev, buildKevFilter(dataView.id)],
           }
     );
   };

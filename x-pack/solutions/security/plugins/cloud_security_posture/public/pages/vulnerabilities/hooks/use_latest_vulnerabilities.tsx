@@ -42,14 +42,23 @@ interface VulnerabilitiesQuery extends BaseEsQuery {
   pageSize: number;
 }
 
+const NUMERIC_SORT_FIELDS: string[] = [
+  VULNERABILITY_FIELDS.SCORE_RISK,
+  VULNERABILITY_FIELDS.SCORE_BASE,
+];
+
 const getMultiFieldsSort = (sort: string[][]) => {
   return sort.map(([id, direction]) => {
     if (id === VULNERABILITY_FIELDS.PACKAGE_NAME) {
       return getCaseInsensitiveSortScript(id, direction);
     }
 
+    // Scores are floats: a keyword fallback on an index without the field conflicts with the
+    // float mapping on other indices ("incompatible sort types across shards").
+    const unmappedType = NUMERIC_SORT_FIELDS.includes(id) ? 'float' : 'keyword';
+
     return {
-      [id]: { order: direction, unmapped_type: 'keyword' },
+      [id]: { order: direction, unmapped_type: unmappedType },
     };
   });
 };
