@@ -41,6 +41,7 @@
     ],
     "data": "src/platform/plugins/shared/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert-details",
+    "olsUi": "src/platform/packages/shared/kbn-ols-ui",
     "dashboardMarkdown": "src/platform/plugins/shared/dashboard_markdown",
     "dataViews": "src/platform/plugins/shared/data_views",
     "defaultNavigation": [
