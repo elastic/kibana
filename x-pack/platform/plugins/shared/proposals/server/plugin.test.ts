@@ -211,22 +211,41 @@ describe('ProposalsPlugin', () => {
       expect(initializeManagedWorkflows).toHaveBeenCalledTimes(1);
     });
 
-    it('deletes the proposals of a deleted conversation, and swallows a failure', async () => {
+    it('deletes the same-space proposals of a deleted conversation through the registered listener', async () => {
       const { plugin, agentBuilder } = setupPlugin();
-      const { contract } = startPlugin(plugin);
+      const { coreStart } = startPlugin(plugin);
       const [[listener]] = agentBuilder.conversations.onConversationDeleted.mock.calls;
-      const deleteByConversation = jest
-        .spyOn(contract.getProposalsService(), 'deleteByConversation')
-        .mockResolvedValueOnce(undefined)
-        .mockRejectedValueOnce(new Error('boom'));
+      const { deleteByQuery } = coreStart.elasticsearch.client.asInternalUser;
+      (deleteByQuery as jest.Mock).mockResolvedValue({ deleted: 2 });
 
-      await listener({}, { conversationId: 'conversation-1', spaceId: 'default' });
+      await listener({}, { conversationId: 'conversation-1', spaceId: 'space-a' });
+
+      expect(deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { spaceId: 'space-a' } },
+                { term: { conversationId: 'conversation-1' } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('swallows a proposal cleanup failure so the conversation delete is unaffected', async () => {
+      const { plugin, agentBuilder } = setupPlugin();
+      const { coreStart } = startPlugin(plugin);
+      const [[listener]] = agentBuilder.conversations.onConversationDeleted.mock.calls;
+      (coreStart.elasticsearch.client.asInternalUser.deleteByQuery as jest.Mock).mockRejectedValue(
+        new Error('boom')
+      );
+
       await expect(
         listener({}, { conversationId: 'conversation-2', spaceId: 'default' })
       ).resolves.toBeUndefined();
-
-      expect(deleteByConversation).toHaveBeenNthCalledWith(1, 'conversation-1', 'default');
-      expect(deleteByConversation).toHaveBeenNthCalledWith(2, 'conversation-2', 'default');
     });
 
     it('exposes the proposals service for in-process callers', () => {

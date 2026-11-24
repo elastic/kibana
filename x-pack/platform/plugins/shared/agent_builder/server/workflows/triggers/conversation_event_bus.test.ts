@@ -119,15 +119,31 @@ describe('ConversationEventBus conversation deleted events', () => {
   it('waits for every listener before resolving', async () => {
     const bus = createConversationEventBus();
     const request = httpServerMock.createKibanaRequest();
+    let releaseListener: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      releaseListener = resolve;
+    });
     let finished = false;
     bus.onConversationDeleted(async () => {
-      await Promise.resolve();
+      await gate;
       finished = true;
     });
 
-    await bus.emitConversationDeleted(request, payload);
+    let resolved = false;
+    const emitPromise = bus.emitConversationDeleted(request, payload).then(() => {
+      resolved = true;
+    });
+
+    // let any already-settled work flush; the emit must still be pending on the gated listener
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(resolved).toBe(false);
+    expect(finished).toBe(false);
+
+    releaseListener();
+    await emitPromise;
 
     expect(finished).toBe(true);
+    expect(resolved).toBe(true);
   });
 
   it('keeps notifying the other listeners when one fails, and never rejects', async () => {

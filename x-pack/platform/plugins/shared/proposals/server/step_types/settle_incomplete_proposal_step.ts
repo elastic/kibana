@@ -30,11 +30,13 @@ export const getSettleIncompleteProposalStepDefinition = ({
   createServerStepDefinition({
     ...settleIncompleteProposalStepCommonDefinition,
     handler: async (context) => {
+      let settling: { proposalId: string; status?: 'failed' | 'expired' } | undefined;
       try {
         const input = parseStepInput(
           settleIncompleteProposalStepCommonDefinition.inputSchema,
           context.input
         );
+        settling = input;
         const workflowContext = context.contextManager.getContext();
         const spaceId = workflowContext.workflow.spaceId;
         const request = context.contextManager.getFakeRequest();
@@ -42,27 +44,8 @@ export const getSettleIncompleteProposalStepDefinition = ({
 
         // Same adopt the loop does before every write: a revision appended
         // while the gate was parked would leave the carried id superseded.
-        const found = await service
-          .getLatestRevision(input.proposalId, spaceId)
-          .then(async (latest) => ({
-            latest,
-            proposal: await service.get(latest.proposalId, spaceId, request),
-          }))
-          .catch((error) => {
-            if (error instanceof ProposalNotFoundError) {
-              return undefined;
-            }
-            throw error;
-          });
-
-        // The proposal was deleted with its conversation while the gate was parked: nothing is
-        // left to settle, and failing here would end an expired gate as a failed run.
-        if (found === undefined) {
-          return {
-            output: { proposalId: input.proposalId, status: input.status ?? 'expired' },
-          };
-        }
-        const { latest, proposal } = found;
+        const latest = await service.getLatestRevision(input.proposalId, spaceId);
+        const proposal = await service.get(latest.proposalId, spaceId, request);
 
         const status = input.status ?? (proposal.decision !== undefined ? 'failed' : 'expired');
 
@@ -88,6 +71,14 @@ export const getSettleIncompleteProposalStepDefinition = ({
           },
         };
       } catch (error) {
+        // The proposal was deleted with its conversation while the gate was parked, whether
+        // before the lookup or between the lookup and the write: nothing is left to settle, and
+        // failing would end an expired gate as a failed run.
+        if (error instanceof ProposalNotFoundError && settling !== undefined) {
+          return {
+            output: { proposalId: settling.proposalId, status: settling.status ?? 'expired' },
+          };
+        }
         throw toStepError(error, 'Failed to settle incomplete proposal');
       }
     },

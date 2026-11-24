@@ -1320,6 +1320,7 @@ export class ProposalsService {
         bool: { filter: [{ term: { spaceId } }, { term: { conversationId } }] },
       },
       conflicts: 'proceed',
+      ignore_unavailable: true,
       refresh: true,
     });
     if (failures?.length) {
