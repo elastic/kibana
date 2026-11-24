@@ -256,7 +256,8 @@ const getOrCreateWatchlist = async ({
 
   // Genuinely not found — create with the canonical ID.
   logger.info(`Prebuilt watchlist '${attrs.name}' not found, creating...`);
-  const created = await watchlistClient.create(attrs, { id });
+  // The installer owns the reserved prebuilt names, so it skips the user-facing name validation.
+  const created = await watchlistClient.create(attrs, { id, skipNameValidation: true });
   if (!created.id) {
     throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
   }

@@ -128,3 +128,25 @@ paths:
                     managed: false
                     createdAt: "2026-01-28T12:00:00.000Z"
                     updatedAt: "2026-01-28T12:00:00.000Z"
+        "409":
+          description: >-
+            Conflict. Another watchlist in the current space already has this name, or the name is
+            reserved for a system watchlist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - status_code
+                  - message
+              examples:
+                DuplicateWatchlistName:
+                  summary: Name already used
+                  value:
+                    status_code: 409
+                    message: 'A watchlist named "High Risk Vendors" already exists'

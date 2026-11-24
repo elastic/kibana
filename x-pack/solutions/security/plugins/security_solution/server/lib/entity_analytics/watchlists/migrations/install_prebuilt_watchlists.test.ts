@@ -15,6 +15,7 @@ import { installPrebuiltWatchlists, getPrebuiltWatchlists } from './install_preb
 import {
   getPrivilegedUserWatchlistSavedObjectId,
   PRIVILEGED_USER_WATCHLIST_NAME,
+  RESERVED_WATCHLIST_NAMES,
 } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
@@ -195,7 +196,7 @@ describe('installPrebuiltWatchlists', function () {
         description: 'System-managed watchlist for tracking privileged users',
         managed: true,
       }),
-      { id: getPrivilegedUserWatchlistSavedObjectId('default') }
+      { id: getPrivilegedUserWatchlistSavedObjectId('default'), skipNameValidation: true }
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_NAME}' initialized.`)
@@ -451,6 +452,7 @@ describe('installPrebuiltWatchlists', function () {
 
       expect(mockWatchlistCreate).toHaveBeenCalledWith(expect.anything(), {
         id: getPrivilegedUserWatchlistSavedObjectId('default'),
+        skipNameValidation: true,
       });
     });
 
@@ -465,6 +467,7 @@ describe('installPrebuiltWatchlists', function () {
       expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
       expect(mockWatchlistCreate).toHaveBeenCalledWith(expect.anything(), {
         id: getPrivilegedUserWatchlistSavedObjectId('space-1'),
+        skipNameValidation: true,
       });
     });
   });
@@ -488,8 +491,14 @@ describe('installPrebuiltWatchlists', function () {
       expect(mockWatchlistCreate).toHaveBeenCalledTimes(1);
       expect(mockWatchlistCreate).toHaveBeenCalledWith(expect.anything(), {
         id: getPrivilegedUserWatchlistSavedObjectId('my-space'),
+        skipNameValidation: true,
       });
     });
+  });
+
+  it('reserves every prebuilt watchlist name so users cannot take it', () => {
+    const names = getPrebuiltWatchlists('default').map((w) => w.name);
+    expect(RESERVED_WATCHLIST_NAMES).toEqual(expect.arrayContaining(names));
   });
 
   it('has no duplicate prebuilt watchlist names', () => {

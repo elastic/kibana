@@ -11,6 +11,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { PRIVILEGED_USER_WATCHLIST_NAME } from '../../../../../common/entity_analytics/watchlists/constants';
 import { WatchlistConfigClient } from './watchlist_config';
 import { getIndexForWatchlist } from '../entities/utils';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
@@ -68,6 +69,12 @@ describe('WatchlistConfigClient', () => {
     };
 
     beforeEach(() => {
+      soClientMock.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 2,
+      });
       soClientMock.create.mockResolvedValue(savedObjectResult);
       mockCreateOrUpdateIndex.mockResolvedValue(undefined);
     });
@@ -89,6 +96,121 @@ describe('WatchlistConfigClient', () => {
 
       expect(soClientMock.delete).toHaveBeenCalledWith('watchlist-config', SO_ID, {
         refresh: 'wait_for',
+      });
+    });
+  });
+
+  describe('name validation', () => {
+    const findResult = (ids: string[]) => ({
+      saved_objects: ids.map((id) => ({
+        id,
+        type: 'watchlist-config',
+        references: [],
+        score: 0,
+        attributes: { name: 'test-01' },
+      })),
+      total: ids.length,
+      page: 1,
+      per_page: 2,
+    });
+
+    describe('create', () => {
+      beforeEach(() => {
+        soClientMock.create.mockResolvedValue({
+          id: 'new-id',
+          type: 'watchlist-config',
+          references: [],
+          attributes: { name: 'test-01', riskModifier: 0 },
+        });
+        mockCreateOrUpdateIndex.mockResolvedValue(undefined);
+      });
+
+      it('rejects a name already used by another watchlist with a 409 and creates nothing', async () => {
+        soClientMock.find.mockResolvedValue(findResult(['wl-other']));
+
+        await expect(client.create({ name: '  test-01 ', riskModifier: 0 })).rejects.toMatchObject({
+          statusCode: 409,
+          message: 'A watchlist named "test-01" already exists',
+        });
+        expect(soClientMock.create).not.toHaveBeenCalled();
+      });
+
+      it('rejects a name reserved for a system watchlist', async () => {
+        await expect(
+          client.create({ name: PRIVILEGED_USER_WATCHLIST_NAME, riskModifier: 0 })
+        ).rejects.toMatchObject({ statusCode: 409 });
+        expect(soClientMock.create).not.toHaveBeenCalled();
+      });
+
+      it('creates a watchlist when the name is free', async () => {
+        soClientMock.find.mockResolvedValue(findResult([]));
+
+        await expect(client.create({ name: '  test-01 ', riskModifier: 0 })).resolves.toMatchObject(
+          { id: 'new-id' }
+        );
+        expect(soClientMock.create).toHaveBeenCalledWith(
+          'watchlist-config',
+          expect.objectContaining({ name: 'test-01' }),
+          expect.anything()
+        );
+      });
+
+      it('lets system flows create a watchlist with a reserved or taken name', async () => {
+        soClientMock.find.mockResolvedValue(findResult(['wl-user-created']));
+
+        await client.create(
+          { name: PRIVILEGED_USER_WATCHLIST_NAME, riskModifier: 0, managed: true },
+          { id: 'prebuilt-id', skipNameValidation: true }
+        );
+
+        expect(soClientMock.find).not.toHaveBeenCalled();
+        expect(soClientMock.create).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('update', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(client, 'get')
+          .mockResolvedValue({ id: 'wl-1', name: 'original', riskModifier: 1, managed: false });
+      });
+
+      it('rejects renaming onto a name used by another watchlist', async () => {
+        soClientMock.find.mockResolvedValue(findResult(['wl-other']));
+
+        await expect(client.update('wl-1', { name: 'test-01' })).rejects.toMatchObject({
+          statusCode: 409,
+        });
+        expect(soClientMock.update).not.toHaveBeenCalled();
+      });
+
+      it('rejects renaming to a reserved system name', async () => {
+        await expect(
+          client.update('wl-1', { name: PRIVILEGED_USER_WATCHLIST_NAME })
+        ).rejects.toMatchObject({ statusCode: 409 });
+        expect(soClientMock.update).not.toHaveBeenCalled();
+      });
+
+      it('allows the rename when the only match is the watchlist itself', async () => {
+        soClientMock.find.mockResolvedValue(findResult(['wl-1']));
+
+        await client.update('wl-1', { name: ' test-01  ' });
+
+        expect(soClientMock.update).toHaveBeenCalledWith(
+          'watchlist-config',
+          'wl-1',
+          expect.objectContaining({ name: 'test-01' }),
+          expect.anything()
+        );
+      });
+
+      it('does not check the name when it is unchanged, so legacy duplicates stay editable', async () => {
+        soClientMock.find.mockResolvedValue(findResult(['wl-other']));
+
+        await client.update('wl-1', { name: 'original', description: 'new description' });
+
+        expect(soClientMock.find).not.toHaveBeenCalled();
+        expect(soClientMock.update).toHaveBeenCalledTimes(1);
       });
     });
   });

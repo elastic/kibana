@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type {
   ElasticsearchClient,
   Logger,
@@ -24,6 +25,7 @@ import type {
 import { nodeBuilder } from '@kbn/es-query';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
+import { RESERVED_WATCHLIST_NAMES } from '../../../../../common/entity_analytics/watchlists/constants';
 import { validateWatchlistUpdate } from './validation';
 import { getIndexForWatchlist } from '../entities/utils';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
@@ -109,13 +111,25 @@ export const createWatchlistValidationError = (
 export class WatchlistConfigClient {
   constructor(private readonly deps: WatchlistConfigClientDeps) {}
 
+  /**
+   * Creates a watchlist and its backing index.
+   *
+   * The name must be unique in the space and must not be a reserved system name (409 otherwise).
+   * System flows that own the name, such as prebuilt installation, pass `skipNameValidation`.
+   */
   async create(
     attrs: SetOptional<WatchlistSavedObjectAttributes, 'managed'>,
-    options?: { id?: string }
+    options?: { id?: string; skipNameValidation?: boolean }
   ): Promise<WatchlistObject> {
+    const name = attrs.name.trim();
+
+    if (!options?.skipNameValidation) {
+      await this.assertNameIsAvailable(name);
+    }
+
     const so = await this.deps.soClient.create<WatchlistSavedObjectAttributes>(
       watchlistConfigTypeName,
-      { ...attrs, managed: attrs.managed ?? false },
+      { ...attrs, name, managed: attrs.managed ?? false },
       { id: options?.id, refresh: 'wait_for' }
     );
 
@@ -147,13 +161,57 @@ export class WatchlistConfigClient {
     return toWatchlistObject(so);
   }
 
+  /**
+   * Throws a 409 when `name` is reserved for a system watchlist or when another watchlist in the
+   * current space already uses it. The comparison is an exact, case-sensitive match on the trimmed
+   * name. Pass `excludeId` to ignore the watchlist being renamed.
+   */
+  private async assertNameIsAvailable(name: string, excludeId?: string): Promise<void> {
+    const trimmed = name.trim();
+
+    if (RESERVED_WATCHLIST_NAMES.includes(trimmed)) {
+      throw createWatchlistValidationError(
+        409,
+        i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.api.nameReserved', {
+          defaultMessage: '"{name}" is reserved for a system watchlist',
+          values: { name: trimmed },
+        })
+      );
+    }
+
+    const response = await this.deps.soClient.find<WatchlistSavedObjectAttributes>({
+      type: watchlistConfigTypeName,
+      filter: nodeBuilder.is(`${watchlistConfigTypeName}.attributes.name`, trimmed),
+      perPage: 2,
+      fields: ['name'],
+    });
+
+    const isTaken = response.saved_objects.some((so) => so.id !== excludeId);
+    if (isTaken) {
+      throw createWatchlistValidationError(
+        409,
+        i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.api.nameAlreadyExists', {
+          defaultMessage: 'A watchlist named "{name}" already exists',
+          values: { name: trimmed },
+        })
+      );
+    }
+  }
+
   async update(id: string, attrs: WatchlistUpdateAttrs): Promise<WatchlistObject> {
     const existing = await this.get(id);
 
     validateWatchlistUpdate(id, attrs, existing);
 
+    if (attrs.name !== undefined && attrs.name !== existing.name) {
+      await this.assertNameIsAvailable(attrs.name, id);
+    }
+
     const existingAttrs = omitWatchlistMeta(existing);
     const attrsNoMeta = omitWatchlistMeta(attrs);
+    if (attrsNoMeta.name !== undefined) {
+      attrsNoMeta.name = attrsNoMeta.name.trim();
+    }
     const update: Partial<WatchlistSavedObjectAttributes> = {
       ...existingAttrs,
       ...attrsNoMeta,
