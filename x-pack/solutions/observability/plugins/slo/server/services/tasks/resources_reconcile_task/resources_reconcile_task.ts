@@ -80,7 +80,6 @@ export class ResourcesReconcileTask {
         state: {},
         params: {},
       });
-      await plugins.taskManager.runSoon(this.taskId);
     } catch (e) {
       this.logger.debug(`Error scheduling task, error: ${e}`);
     }

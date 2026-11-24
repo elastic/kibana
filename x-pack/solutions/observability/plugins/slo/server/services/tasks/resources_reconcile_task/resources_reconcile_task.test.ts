@@ -45,7 +45,7 @@ describe('ResourcesReconcileTask', () => {
   });
 
   describe('start', () => {
-    it('schedules the task every hour and runs it soon', async () => {
+    it('schedules the task every hour', async () => {
       const { plugins, taskManager } = createStartPlugins();
 
       await task.start(plugins);
@@ -53,7 +53,7 @@ describe('ResourcesReconcileTask', () => {
       expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({ id: TASK_ID, taskType: TYPE, schedule: { interval: '1h' } })
       );
-      expect(taskManager.runSoon).toHaveBeenCalledWith(TASK_ID);
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
     });
 
     it('does not schedule the task without a platinum license', async () => {
