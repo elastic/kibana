@@ -6,6 +6,7 @@
  */
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { set } from '@kbn/safer-lodash-set';
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
@@ -590,6 +591,61 @@ describe('Fleet integrations', () => {
         const packagePolicy = await invokeCallback(manifestManager);
 
         expect(packagePolicy.inputs[0].config!.policy.value.linux.events.dns).toBeUndefined();
+      });
+    });
+
+    describe('dotted response_actions keys', () => {
+      // Called without a request context, which otherwise returns the incoming policy as it is
+      const invokeWithoutRequest = (policyValue: PolicyConfig): Promise<NewPackagePolicy> => {
+        const callback = getPackagePolicyCreateCallback(
+          logger,
+          buildManifestManagerMock(),
+          securitySolutionRequestContextFactory,
+          endpointAppContextStartContract.alerting,
+          licenseService,
+          cloudService,
+          productFeaturesService,
+          telemetryConfigProviderMock,
+          experimentalFeatures
+        );
+
+        return callback(
+          {
+            ...createNewPackagePolicyMock(),
+            inputs: [
+              {
+                type: 'endpoint',
+                enabled: true,
+                streams: [],
+                config: { policy: { value: policyValue } },
+              },
+            ],
+          },
+          soClient,
+          esClient
+        );
+      };
+
+      // `set()` with an array path writes a literal (dotted) key instead of expanding it
+      it.each([
+        ['windows.response_actions', ['windows.response_actions'], {}],
+        ['response_actions.export_providers', ['linux', 'response_actions.export_providers'], []],
+      ])('should reject the dotted key %s', async (key, path, value) => {
+        await expect(invokeWithoutRequest(set(policyFactory(), path, value))).rejects.toMatchObject(
+          {
+            statusCode: 400,
+            apiPassThrough: true,
+            message: `response_actions can't be set with a dotted key ("${key}")`,
+          }
+        );
+      });
+
+      it('should still return the incoming policy when it has no dotted keys', async () => {
+        const policyValue = policyFactory();
+
+        const packagePolicy = await invokeWithoutRequest(policyValue);
+
+        expect(packagePolicy.inputs[0].config!.policy.value).toBe(policyValue);
       });
     });
   });
@@ -2471,6 +2527,38 @@ describe('Fleet integrations', () => {
         ).rejects.toMatchObject({
           statusCode: 403,
           message: 'Platinum license does not support this action. Please upgrade your license.',
+        });
+      });
+
+      describe.each([
+        ['on', true],
+        ['off', false],
+      ])('when the feature flag is %s', (_, flagEnabled) => {
+        beforeEach(() => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            responseActionsEndpointFileExport: flagEnabled,
+          };
+        });
+
+        // `set()` with an array path writes a literal (dotted) key instead of expanding it
+        it.each([
+          [
+            'windows.response_actions',
+            ['windows.response_actions'],
+            { export_providers: [provider] },
+          ],
+          [
+            'response_actions.export_providers',
+            ['mac', 'response_actions.export_providers'],
+            [provider],
+          ],
+        ])('should reject the dotted key %s', async (key, path, value) => {
+          await expect(runUpdate(set(policyFactory(), path, value))).rejects.toMatchObject({
+            statusCode: 400,
+            apiPassThrough: true,
+            message: `response_actions can't be set with a dotted key ("${key}")`,
+          });
         });
       });
     });

@@ -31,6 +31,13 @@ export const AZURE_BLOB_CONTAINER_NAME_PATTERN = /^(?=.{3,63}$)[a-z0-9]+(?:-[a-z
 /** Maximum length of an export provider's `service_url`. */
 export const EXPORT_PROVIDER_SERVICE_URL_MAX_LENGTH = 2048;
 
+/** Azure Blob Storage endpoints (public cloud, Azure Government, Azure China). Every one checks the SAS. */
+export const AZURE_BLOB_SERVICE_URL_HOST_SUFFIXES = [
+  '.blob.core.windows.net',
+  '.blob.core.usgovcloudapi.net',
+  '.blob.core.chinacloudapi.cn',
+] as const;
+
 export type ExportProviderFieldName = 'id' | 'type' | 'account_name' | 'container' | 'service_url';
 
 export type ExportProviderFieldError =
@@ -39,6 +46,7 @@ export type ExportProviderFieldError =
   | 'invalid_format'
   | 'duplicate'
   | 'not_https'
+  | 'not_azure_blob_host'
   | 'unsupported';
 
 /**
@@ -95,7 +103,9 @@ const getPatternFieldError = (
 /**
  * `service_url` is optional. When present it must be a well-formed, credential-free `https` URL
  * within the length limit: a SAS token or `user:pass@` in the URL would put a credential into the
- * policy that every host receives.
+ * policy that every host receives. Its host must be an Azure Blob Storage endpoint: a pending export
+ * follows the policy's current destination, and only Azure Blob Storage rejects a SAS signed for
+ * another account or container.
  */
 const getServiceUrlFieldError = (serviceUrl: unknown): ExportProviderFieldError | undefined => {
   if (serviceUrl === undefined) {
@@ -127,6 +137,14 @@ const getServiceUrlFieldError = (serviceUrl: unknown): ExportProviderFieldError 
   }
   if (!/^https:\/\/[^/]/.test(serviceUrl)) {
     return 'invalid_format';
+  }
+  // `URL` lowercases the hostname but accepts characters such as `;` or `&` in it, which another
+  // parser could treat as the end of the host. A trailing dot or an empty label fails.
+  if (
+    !/^[a-z0-9-]+(?:\.[a-z0-9-]+)*$/.test(url.hostname) ||
+    !AZURE_BLOB_SERVICE_URL_HOST_SUFFIXES.some((suffix) => url.hostname.endsWith(suffix))
+  ) {
+    return 'not_azure_blob_host';
   }
   return undefined;
 };

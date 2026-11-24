@@ -40,7 +40,10 @@ import { createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datast
 import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
-import { validateExportProviders } from './handlers/validate_export_providers';
+import {
+  validateExportProviders,
+  validateNoDottedResponseActionsKeys,
+} from './handlers/validate_export_providers';
 import {
   filterExportProviderKeyReferences,
   rejectExportProviderCredentialsOnCreate,
@@ -160,11 +163,16 @@ export const getPackagePolicyCreateCallback = (
     context,
     request
   ): Promise<NewPackagePolicy> => {
-    // The plaintext key must never reach the policy, and overrides bypass every other check, so
-    // both are rejected even when there is no request to attach an audit trail to.
+    // The plaintext key must never reach the policy, and overrides and dotted `response_actions`
+    // keys bypass every other check, so all are rejected before the early return below, even when
+    // there is no request to attach an audit trail to.
+    const incomingPolicyValue = newPackagePolicy.inputs?.[0]?.config?.policy?.value;
     if (isEndpointPackagePolicy(newPackagePolicy)) {
       rejectResponseActionsInOverrides(newPackagePolicy);
-      rejectExportProviderCredentialsOnCreate(newPackagePolicy.inputs?.[0]?.config?.policy?.value);
+      if (incomingPolicyValue) {
+        validateNoDottedResponseActionsKeys(incomingPolicyValue as PolicyConfig);
+      }
+      rejectExportProviderCredentialsOnCreate(incomingPolicyValue);
     }
 
     // callback is called outside request context
@@ -399,6 +407,9 @@ export const getPackagePolicyUpdateCallback = (
         const policyConfig = endpointIntegrationData.inputs[0].config.policy;
         const packagePolicyId = endpointIntegrationData.id as string;
         const exportProvidersPolicyValue = policyConfig.value as PolicyConfig;
+
+        // Runs whatever the feature flag: `removeExportProviders()` doesn't remove dotted keys
+        validateNoDottedResponseActionsKeys(exportProvidersPolicyValue);
 
         // Reject a plaintext key or a malformed reference before deciding which references to keep
         validateExportProviderCredentials(exportProvidersPolicyValue);
