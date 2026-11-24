@@ -34,11 +34,13 @@ const SUITES_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 const COMMENT_MARKER = '<!-- evals-gate-comment -->';
 const ERROR_DESCRIPTION = 'Evals gate errored, not enforced (see the workflow logs)';
 const MAX_LISTED_FILES = 20;
+const GATED_BASE_BRANCH = 'main';
 // GitHub truncates a comparison's file list at this many files.
 const COMPARE_FILES_LIMIT = 300;
 
 export interface GatePullRequest {
   number: number;
+  baseRef: string;
   headSha: string;
   draft: boolean;
   author: string;
@@ -98,6 +100,7 @@ export const createGateApi = (
     const { data } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
     return {
       number: data.number,
+      baseRef: data.base.ref,
       headSha: data.head.sha,
       draft: Boolean(data.draft),
       author: data.user?.login ?? '',
@@ -391,6 +394,12 @@ export const runEvalsGate = async ({
     let headSha: string | undefined;
     try {
       const pr = await api.getPullRequest(prNumber);
+      // The workflow's branch filter only covers PR events; a status event finds PRs by commit,
+      // including backports. The baselines and suite config are main's, so only gate main.
+      if (pr.baseRef !== GATED_BASE_BRANCH) {
+        core.info(`Skipping #${prNumber}: it targets ${pr.baseRef}, not ${GATED_BASE_BRANCH}.`);
+        continue;
+      }
       headSha = pr.headSha;
       await evaluatePullRequest({ api, core, pr, suites: readSuites() });
     } catch (error) {

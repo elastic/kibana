@@ -17,6 +17,16 @@ post_evals_status() { # $1=state $2=description
     --silent || true
 }
 
+# Only mark failure on the final attempt (retry limit is 1); an earlier transient failure is
+# retried and the pending status below holds until then. Set before resolving the suites, so an
+# unexpected failure there is visible too. Best-effort; never mask the original error.
+on_trigger_error() {
+  if [[ "${BUILDKITE_RETRY_COUNT:-0}" -ge 1 ]]; then
+    post_evals_status failure "Failed to trigger the LLM Evals pipeline"
+  fi
+}
+trap on_trigger_error ERR
+
 echo "--- Resolving the eval suites to run"
 # Re-reads the PR labels live (a decision label added while CI ran still counts) and skips gated
 # suites whose earlier verdict still holds. This step is also emitted for PRs that touch a suite's
@@ -35,15 +45,6 @@ post_evals_status pending "Triggering the LLM Evals pipeline"
 # then dies before posting a verdict, the evals gate settles it as inconclusive once kibana-evals
 # turns terminal, instead of waiting forever.
 node .buildkite/scripts/steps/evals/regression_gate.ts pending-runnable "$RESOLVED_PR_LABELS" || true
-
-# Only mark failure on the final attempt (retry limit is 1); an earlier transient failure is
-# retried and the pending status above holds until then. Best-effort; never mask the original error.
-on_trigger_error() {
-  if [[ "${BUILDKITE_RETRY_COUNT:-0}" -ge 1 ]]; then
-    post_evals_status failure "Failed to trigger the LLM Evals pipeline"
-  fi
-}
-trap on_trigger_error ERR
 
 echo "--- Triggering LLM Evals pipeline (kibana-evals-pr-llm-evals)"
 

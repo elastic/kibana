@@ -81,6 +81,16 @@ describe('evaluateRegressionGate', () => {
     expect(evaluate([makeResult({ direction: 'minimize' })]).state).toBe('pass');
   });
 
+  it('treats a baseline just past the age limit as stale, without rounding the age down', () => {
+    expect(evaluate([makeResult()], { baselineTimestamp: '2026-11-15T13:00:00Z' })).toEqual({
+      state: 'inconclusive',
+      summary: 'baseline is 3 days old',
+    });
+    expect(evaluate([makeResult()], { baselineTimestamp: '2026-11-16T12:00:00Z' }).state).toBe(
+      'regression'
+    );
+  });
+
   it('only looks at the gated dataset and evaluator', () => {
     expect(evaluate([makeResult({ evaluatorName: 'truthfulness' })])).toEqual({
       state: 'inconclusive',

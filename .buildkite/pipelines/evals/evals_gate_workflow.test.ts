@@ -64,6 +64,7 @@ const createFake = ({
   const api: GateApi = {
     getPullRequest: async (prNumber) => ({
       number: prNumber,
+      baseRef: 'main',
       headSha: HEAD,
       draft: false,
       author: 'dev',
@@ -261,6 +262,19 @@ describe('runEvalsGate', () => {
   const STARTED = {
     [`${HEAD}:kibana-evals/gated`]: { state: 'pending', description: 'Running gated evals' },
   };
+
+  it('leaves PRs against other branches alone when a status event finds them', async () => {
+    const calls = await run(
+      { pr: { baseRef: '9.6' }, changedFiles: ['plugins/gated/b.ts'], openPrNumbers: [7] },
+      {
+        eventName: 'status',
+        repo: { owner: 'elastic', repo: 'kibana' },
+        payload: { sha: HEAD, context: 'kibana-evals' },
+      }
+    );
+    expect(calls.statuses).toEqual([]);
+    expect(calls.comments).toEqual([]);
+  });
 
   it('stops waiting when the eval build finished after the suite started', async () => {
     const calls = await run({

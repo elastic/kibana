@@ -61,9 +61,10 @@ export const evaluateRegressionGate = ({
   if (!Number.isFinite(baselineTime)) {
     return inconclusiveVerdict('baseline age unknown');
   }
-  const baselineAgeDays = Math.floor((now.getTime() - baselineTime) / DAY_MS);
+  // Compare the exact age, so 3 days and 23 hours is over a 3-day limit; round only for the message.
+  const baselineAgeDays = (now.getTime() - baselineTime) / DAY_MS;
   if (baselineAgeDays > maxBaselineAgeDays) {
-    return inconclusiveVerdict(`baseline is ${baselineAgeDays} days old`);
+    return inconclusiveVerdict(`baseline is ${Math.floor(baselineAgeDays)} days old`);
   }
 
   const result = results.find(
