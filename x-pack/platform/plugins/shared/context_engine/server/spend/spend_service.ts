@@ -141,6 +141,12 @@ export class SpendService implements SpendServiceApi {
       return cached.usage;
     }
 
+    for (const [key, entry] of this.usageCache) {
+      if (entry.expiresAtMs <= now.getTime()) {
+        this.usageCache.delete(key);
+      }
+    }
+
     const usage = this.loadUsage(spaceId, period, targets);
     this.usageCache.set(cacheKey, {
       expiresAtMs: now.getTime() + (this.deps.usageCacheTtlMs ?? DEFAULT_USAGE_CACHE_TTL_MS),

@@ -37,7 +37,6 @@ export type PriceCatalogFetch = (
 
 const PRICE_CATALOG_PATH = '/api/v1/prices/base_prices';
 const TOKEN_UNIT = '1M Token';
-/** `global.inference-chat-input_anthropic-claude-4-5-haiku`, optionally with a `_<tier>` suffix. */
 const CHAT_PRICE_ID_PATTERN =
   /^global\.inference-chat-(input|output|cache-read)_([a-z0-9-]+?)(?:_[a-z0-9+-]+)?$/;
 
@@ -53,10 +52,6 @@ interface CatalogRow {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/**
- * Tiered models list a price per prompt-size tier; spend prices every call at the
- * lower (`<=`) tier, since Context Engine prompts stay well under the tier boundaries.
- */
 const isUpperTier = (tokenTier: unknown): boolean =>
   typeof tokenTier === 'string' && tokenTier.trim().startsWith('>');
 
@@ -128,6 +123,7 @@ export const createPriceCatalog = ({
   getNow = () => new Date(),
   cacheTtlMs = 6 * 60 * 60 * 1000,
   timeoutMs = 10_000,
+  failureBackoffMs = 5 * 60 * 1000,
   maxBodyBytes = 20 * 1024 * 1024,
 }: {
   fetchFn: PriceCatalogFetch;
@@ -136,10 +132,12 @@ export const createPriceCatalog = ({
   getNow?: () => Date;
   cacheTtlMs?: number;
   timeoutMs?: number;
+  failureBackoffMs?: number;
   maxBodyBytes?: number;
 }): PriceCatalog => {
   const url = `${baseUrl.replace(/\/+$/, '')}${PRICE_CATALOG_PATH}`;
   let cache: { snapshot: PriceSnapshot; fetchedAtMs: number } | undefined;
+  let lastFailureMs: number | undefined;
   let inFlight: Promise<PriceSnapshot | undefined> | undefined;
 
   const refresh = async (): Promise<PriceSnapshot | undefined> => {
@@ -165,8 +163,10 @@ export const createPriceCatalog = ({
       }
       const snapshot: PriceSnapshot = { prices, fetchedAt: now.toISOString(), stale: false };
       cache = { snapshot, fetchedAtMs: now.getTime() };
+      lastFailureMs = undefined;
       return snapshot;
     } catch (error) {
+      lastFailureMs = now.getTime();
       const message = error instanceof Error ? error.message : String(error);
       if (cache) {
         logger.warn(
@@ -183,8 +183,12 @@ export const createPriceCatalog = ({
 
   return {
     getPrices: async () => {
-      if (cache && getNow().getTime() - cache.fetchedAtMs < cacheTtlMs) {
+      const nowMs = getNow().getTime();
+      if (cache && nowMs - cache.fetchedAtMs < cacheTtlMs) {
         return cache.snapshot;
+      }
+      if (lastFailureMs !== undefined && nowMs - lastFailureMs < failureBackoffMs) {
+        return cache && { ...cache.snapshot, stale: true };
       }
       if (!inFlight) {
         inFlight = refresh().finally(() => {

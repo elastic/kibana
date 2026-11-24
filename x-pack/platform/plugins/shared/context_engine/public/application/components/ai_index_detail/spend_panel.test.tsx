@@ -97,7 +97,14 @@ describe('SpendPanel', () => {
 
   it('explains that spend cannot be estimated when prices are unavailable', () => {
     mockUseAiIndexSpend.mockReturnValue({
-      spend: spendResponse({ pricing: { source: 'unavailable' } }),
+      spend: spendResponse({
+        pricing: { source: 'unavailable' },
+        space: {
+          cost_usd: 0,
+          unpriced_tokens: 0,
+          tokens: { input_tokens: 90_000, output_tokens: 10_000, cached_tokens: 0 },
+        },
+      }),
       isLoading: false,
       error: undefined,
     });
@@ -108,6 +115,7 @@ describe('SpendPanel', () => {
     const summary = screen.getByTestId('contextAiIndexSpendSummary');
     expect(summary).not.toHaveTextContent('$');
     expect(summary).toHaveTextContent('15K tokens');
+    expect(summary).toHaveTextContent('All AI indices in this space: 100K tokens');
   });
 
   it('shows a skeleton while loading', () => {

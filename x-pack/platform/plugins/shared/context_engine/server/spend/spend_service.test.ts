@@ -15,13 +15,11 @@ const HAIKU = '.anthropic-claude-4.5-haiku-chat_completion';
 const NOW = new Date('2026-10-13T10:00:00.000Z');
 
 const prices: PriceSnapshot = {
-  // $1 per 1M input tokens, $10 per 1M output tokens.
   prices: new Map([['anthropic-claude-4-5-haiku', { input: 1, output: 10 }]]),
   fetchedAt: NOW.toISOString(),
   stale: false,
 };
 
-/** `usd` dollars of input tokens on a priced connector. */
 const usage = (aiIndexId: string, usd: number, connectorId: string = HAIKU): UsageRecord => ({
   aiIndexId,
   connectorId,

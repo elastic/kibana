@@ -14,7 +14,6 @@ export const WORKFLOW_EXECUTIONS_INDEX = '.workflows-executions';
 export const WORKFLOW_EXECUTIONS_SPEND_SOURCE_ID = 'workflow_executions';
 
 const UNKNOWN_CONNECTOR = '__unknown__';
-/** Bounded by `MAX_AI_INDICES` × `MAX_AI_INDEX_AUTOMATIONS`. */
 const MAX_WORKFLOW_BUCKETS = 10_000;
 const MAX_CONNECTOR_BUCKETS = 100;
 
@@ -82,6 +81,7 @@ export const createWorkflowExecutionsSpendSource = ({
         size: 0,
         track_total_hits: false,
         ignore_unavailable: true,
+        allow_partial_search_results: false,
         query: {
           bool: {
             filter: [
@@ -121,6 +121,10 @@ export const createWorkflowExecutionsSpendSource = ({
       throw error;
     }
 
+    if (response.timed_out) {
+      throw new Error('Workflow executions spend search timed out');
+    }
+
     const records: UsageRecord[] = [];
     for (const workflowBucket of response.aggregations?.by_workflow.buckets ?? []) {
       const aiIndexId = aiIndexByWorkflowId.get(workflowBucket.key);
@@ -139,7 +143,6 @@ export const createWorkflowExecutionsSpendSource = ({
           ...tokens,
         });
       }
-      // Usage on the execution aggregate that no step itemized (older executions) is unpriced.
       const executionTotals = toTokens(workflowBucket);
       const remainder = {
         inputTokens: Math.max(0, executionTotals.inputTokens - stepTotals.inputTokens),

@@ -72,7 +72,6 @@ import { resolveSpaceId } from './utils/resolve_space_id';
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
 
-/** Public Elastic Cloud host serving the inference price catalog, used outside Elastic Cloud. */
 const DEFAULT_PRICE_CATALOG_BASE_URL = 'https://cloud.elastic.co';
 
 export class ContextEnginePlugin

@@ -36,9 +36,14 @@ describe('createWorkflowExecutionsSpendSource', () => {
     await source.getUsage(query);
 
     const [request] = esClient.search.mock.calls[0] as unknown as [
-      { index: string; query: { bool: { filter: unknown[]; must_not: unknown[] } } }
+      {
+        index: string;
+        allow_partial_search_results: boolean;
+        query: { bool: { filter: unknown[]; must_not: unknown[] } };
+      }
     ];
     expect(request.index).toBe('.workflows-executions');
+    expect(request.allow_partial_search_results).toBe(false);
     expect(request.query.bool.filter).toEqual([
       { term: { spaceId: 'default' } },
       { terms: { workflowId: ['wf-tickets', 'wf-docs-a', 'wf-docs-b'] } },
@@ -119,6 +124,15 @@ describe('createWorkflowExecutionsSpendSource', () => {
       source.getUsage({ ...query, aiIndices: [{ id: 'empty', automationWorkflowIds: [] }] })
     ).resolves.toEqual([]);
     expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('fails instead of reporting usage from a timed out search', async () => {
+    esClient.search.mockResolvedValue({
+      timed_out: true,
+      aggregations: { by_workflow: { buckets: [] } },
+    } as never);
+
+    await expect(source.getUsage(query)).rejects.toThrow('timed out');
   });
 
   it('reports no usage before the executions index exists', async () => {

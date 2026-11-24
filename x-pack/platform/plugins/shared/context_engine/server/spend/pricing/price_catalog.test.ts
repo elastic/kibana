@@ -172,6 +172,31 @@ describe('createPriceCatalog', () => {
     await expect(catalog.getPrices()).resolves.toBeUndefined();
   });
 
+  it('does not retry an unreachable catalog until the backoff has passed', async () => {
+    let now = NOW;
+    const fetchFn = jest
+      .fn<ReturnType<PriceCatalogFetch>, Parameters<PriceCatalogFetch>>()
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockImplementationOnce(() => okResponse(catalogRows));
+    const catalog = createPriceCatalog({
+      fetchFn,
+      baseUrl: 'https://cloud.example.com',
+      logger,
+      getNow: () => now,
+      failureBackoffMs: 1000,
+    });
+
+    await expect(catalog.getPrices()).resolves.toBeUndefined();
+    await expect(catalog.getPrices()).resolves.toBeUndefined();
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+
+    now = new Date(NOW.getTime() + 2000);
+    const snapshot = await catalog.getPrices();
+
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(snapshot?.stale).toBe(false);
+  });
+
   it('rejects responses over the size limit', async () => {
     const catalog = createPriceCatalog({
       fetchFn: () =>

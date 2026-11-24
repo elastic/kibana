@@ -17,6 +17,7 @@ import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_descripti
 const SpendSummary = ({ spend }: { spend: AiIndexSpendResponse }) => {
   const { ai_index: aiIndex, space } = spend;
   const totalTokens = aiIndex.tokens.input_tokens + aiIndex.tokens.output_tokens;
+  const spaceTokens = space.tokens.input_tokens + space.tokens.output_tokens;
   const hasPrices = spend.pricing.source !== 'unavailable';
   const isPartial = (totals: { unpriced_tokens: number }) =>
     hasPrices && totals.unpriced_tokens > 0;
@@ -65,6 +66,14 @@ const SpendSummary = ({ spend }: { spend: AiIndexSpendResponse }) => {
               values: { total: formatTokens(totalTokens) },
             })}
       </EuiText>
+      {!hasPrices && (
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('xpack.contextEngine.aiIndexDetail.spend.spaceTokens', {
+            defaultMessage: 'All AI indices in this space: {total} tokens',
+            values: { total: formatTokens(spaceTokens) },
+          })}
+        </EuiText>
+      )}
     </div>
   );
 };

@@ -11,8 +11,7 @@ import { getAiIndexSpend } from '../api/spend';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
-/** Spend reads are cached server-side for a minute, so refetching sooner shows nothing new. */
-const SPEND_STALE_TIME_MS = 60_000;
+const SPEND_REFRESH_INTERVAL_MS = 60_000;
 
 interface UseAiIndexSpendResult {
   spend: AiIndexSpendResponse | undefined;
@@ -30,7 +29,8 @@ export const useAiIndexSpend = (aiIndexId: string | undefined): UseAiIndexSpendR
     queryKey: contextEngineQueryKeys.spend.aiIndex(aiIndexId ?? ''),
     queryFn: ({ signal }) => getAiIndexSpend(http, { aiIndexId: aiIndexId ?? '', signal }),
     enabled: aiIndexId !== undefined,
-    staleTime: SPEND_STALE_TIME_MS,
+    staleTime: SPEND_REFRESH_INTERVAL_MS,
+    refetchInterval: SPEND_REFRESH_INTERVAL_MS,
   });
 
   return {
