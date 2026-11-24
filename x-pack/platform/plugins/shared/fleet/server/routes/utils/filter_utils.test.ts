@@ -447,14 +447,17 @@ describe('Filter Utils', () => {
 
     describe('with many sibling clauses', () => {
       const CLAUSE_COUNT = 10_000;
-      const siblingKuery = (clause: (index: number) => string) =>
-        Array.from({ length: CLAUSE_COUNT }, (_, index) => clause(index)).join(' or ');
+      // Built with `nodeBuilder` rather than parsed, so KQL parsing time doesn't hide the walker's.
+      const siblingClauses = (count: number, fieldName: (index: number) => string) =>
+        esKuery.nodeBuilder.or(
+          Array.from({ length: count }, (_, index) =>
+            esKuery.nodeBuilder.is(fieldName(index), `title-${index}`)
+          )
+        );
 
       it('returns one result per clause, in order', () => {
         const validationObject = validateFilterKueryNode({
-          astFilter: esKuery.fromKueryExpression(
-            siblingKuery((index) => `foo.attributes.title:"title-${index}"`)
-          ),
+          astFilter: siblingClauses(CLAUSE_COUNT, () => 'foo.attributes.title'),
           types: ['foo'],
           indexMapping: mockMappings,
           storeValue: true,
@@ -475,12 +478,8 @@ describe('Filter Utils', () => {
       it('reports the invalid clause among them at its position', () => {
         const invalidIndex = CLAUSE_COUNT / 2;
         const validationObject = validateFilterKueryNode({
-          astFilter: esKuery.fromKueryExpression(
-            siblingKuery((index) =>
-              index === invalidIndex
-                ? 'foo.attributes.not_a_field:value'
-                : `foo.attributes.title:"title-${index}"`
-            )
+          astFilter: siblingClauses(CLAUSE_COUNT, (index) =>
+            index === invalidIndex ? 'foo.attributes.not_a_field' : 'foo.attributes.title'
           ),
           types: ['foo'],
           indexMapping: mockMappings,
@@ -512,6 +511,25 @@ describe('Filter Utils', () => {
         expect(second).not.toBe(first);
         first.pop();
         expect(second).toHaveLength(3);
+      });
+
+      it('validates them in linear time', () => {
+        // At this size a linear walker takes ~0.2 s locally, while one that copies its results for
+        // every clause took ~9 s. The limit leaves headroom for slower CI machines.
+        const clauseCount = 100_000;
+        const astFilter = siblingClauses(clauseCount, () => 'foo.attributes.title');
+
+        const start = Date.now();
+        const validationObject = validateFilterKueryNode({
+          astFilter,
+          types: ['foo'],
+          indexMapping: mockMappings,
+          storeValue: true,
+        });
+        const elapsedMs = Date.now() - start;
+
+        expect(validationObject).toHaveLength(clauseCount);
+        expect(elapsedMs).toBeLessThan(2_000);
       });
     });
   });
