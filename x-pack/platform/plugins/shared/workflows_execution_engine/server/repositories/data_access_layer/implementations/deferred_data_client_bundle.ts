@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { instrumentAsyncMethods } from '@kbn/apm-utils';
+import { withSpan } from '@kbn/apm-utils';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { DataStreamDataClientBundle } from './data_stream/data_stream_data_client_bundle';
 import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
@@ -28,13 +28,21 @@ export class DeferredDataClientBundle implements DataClientBundle {
   private source: ExecutionStorageSource;
   private generation = 0;
   private switchChain: Promise<void> = Promise.resolve();
-  private startPromise: Promise<void> | undefined;
+  private initialStart: Promise<void> | undefined;
   private setupPromise: Promise<void> | undefined;
   private coreStart: CoreStart | undefined;
+  private stopped = false;
+  private pendingBundle: DataClientBundle | undefined;
+  /** Resolves for the backend that is active. An aborted startup init does not reject it. */
+  private ready: Promise<void>;
+  private markReady!: () => void;
+  private failReady!: (error: unknown) => void;
+  private readySettled = false;
 
   constructor(private readonly deps: DeferredDataClientBundleDeps) {
     this.source = deps.source;
     this.dataClientBundle = this.createDataClientBundle(deps.source);
+    this.ready = this.createReady();
   }
 
   /** Registers both backends once. Later switches only start the selected one. */
@@ -57,16 +65,36 @@ export class DeferredDataClientBundle implements DataClientBundle {
 
     this.coreStart = coreStart;
 
-    if (!this.startPromise) {
-      const bundle = this.dataClientBundle;
-      const setupPromise = this.setupPromise;
-      this.startPromise = setupPromise.then(() => bundle.initStart(coreStart));
+    if (this.initialStart) {
+      return this.initialStart;
     }
-    return this.startPromise;
+
+    const bundle = this.dataClientBundle;
+    const setupPromise = this.setupPromise;
+    const run = setupPromise.then(() => bundle.initStart(coreStart));
+    this.initialStart = run;
+    void run.then(
+      () => {
+        if (this.dataClientBundle === bundle) {
+          this.markReady();
+        }
+      },
+      (error: unknown) => {
+        if (this.dataClientBundle === bundle && !this.stopped) {
+          this.failReady(error);
+        }
+      }
+    );
+    return run;
   }
 
+  /** Stops the active backend and cancels a switch that is still initializing. */
   stop(): Promise<void> {
-    return this.enqueue(() => this.dataClientBundle.stop());
+    this.stopped = true;
+    this.failReady(new Error('Workflow execution storage has stopped'));
+    const pending = this.pendingBundle?.stop() ?? Promise.resolve();
+    const current = this.dataClientBundle.stop();
+    return Promise.all([pending, current]).then(() => undefined);
   }
 
   /** Points deferred clients at `source`, initializing that backend when setup or start has already run. */
@@ -92,19 +120,32 @@ export class DeferredDataClientBundle implements DataClientBundle {
   }
 
   private async applySource(source: ExecutionStorageSource): Promise<void> {
-    if (source === this.source) {
+    if (this.stopped || source === this.source) {
       return;
     }
 
     const next = this.createDataClientBundle(source);
     if (this.coreStart) {
-      await next.initStart(this.coreStart);
+      this.pendingBundle = next;
+      try {
+        await next.initStart(this.coreStart);
+      } finally {
+        if (this.pendingBundle === next) {
+          this.pendingBundle = undefined;
+        }
+      }
+    }
+
+    if (this.stopped) {
+      await next.stop();
+      return;
     }
 
     const previous = this.dataClientBundle;
     this.dataClientBundle = next;
     this.source = source;
     this.generation += 1;
+    this.markReady();
     await previous.stop();
   }
 
@@ -122,46 +163,63 @@ export class DeferredDataClientBundle implements DataClientBundle {
     }
   }
 
+  private createReady(): Promise<void> {
+    this.readySettled = false;
+    const ready = new Promise<void>((resolve, reject) => {
+      this.markReady = () => {
+        if (!this.readySettled) {
+          this.readySettled = true;
+          resolve();
+        }
+      };
+      this.failReady = (error: unknown) => {
+        if (!this.readySettled) {
+          this.readySettled = true;
+          reject(error);
+        }
+      };
+    });
+    void ready.catch(() => undefined);
+    return ready;
+  }
+
   private deferClient<TExecution extends { id: string }>(
     factory: () => DataClient<TExecution>
   ): DataClient<TExecution> {
-    if (!this.startPromise) {
+    if (!this.initialStart) {
       throw new Error('initStart must be called before creating data clients');
     }
 
     let resolved: DataClient<TExecution> | undefined;
     let resolvedGeneration = -1;
-    const get = (): Promise<DataClient<TExecution>> => {
-      const start = this.startPromise;
-      if (!start) {
-        return Promise.reject(new Error('initStart must be called before creating data clients'));
-      }
-
-      return start.then(() => {
-        const chain = this.switchChain;
-        return chain.then(() => {
-          if (this.switchChain !== chain) {
-            return get();
-          }
-          const client =
-            resolved !== undefined && resolvedGeneration === this.generation ? resolved : factory();
-          resolved = client;
-          resolvedGeneration = this.generation;
-          return client;
-        });
+    const get = (): Promise<{ client: DataClient<TExecution>; source: ExecutionStorageSource }> => {
+      return this.ready.then(() => {
+        if (this.stopped) {
+          throw new Error('Workflow execution storage has stopped');
+        }
+        const source = this.source;
+        const client =
+          resolved !== undefined && resolvedGeneration === this.generation ? resolved : factory();
+        resolved = client;
+        resolvedGeneration = this.generation;
+        return { client, source };
       });
     };
-    const deferredClient: DataClient<TExecution> = {
-      search: async (r) => get().then((c) => c.search(r)),
-      count: async (r) => get().then((c) => c.count(r)),
-      getByIds: async (ids, opts) => get().then((c) => c.getByIds(ids, opts)),
-      bulk: async (r) => get().then((c) => c.bulk(r)),
-      deleteByQuery: async (r) => get().then((c) => c.deleteByQuery(r)),
-      refresh: async () => get().then((c) => c.refresh()),
+    const call = <T>(
+      method: string,
+      operation: (client: DataClient<TExecution>) => Promise<T>
+    ): Promise<T> =>
+      get().then(({ client, source }) =>
+        withSpan(`DataClientBundle(${source}).${method}`, () => operation(client))
+      );
+
+    return {
+      search: (request) => call('search', (client) => client.search(request)),
+      count: (request) => call('count', (client) => client.count(request)),
+      getByIds: (ids, options) => call('getByIds', (client) => client.getByIds(ids, options)),
+      bulk: (request) => call('bulk', (client) => client.bulk(request)),
+      deleteByQuery: (request) => call('deleteByQuery', (client) => client.deleteByQuery(request)),
+      refresh: () => call('refresh', (client) => client.refresh()),
     };
-
-    instrumentAsyncMethods(`DataClientBundle(${this.deps.source})`, deferredClient);
-
-    return deferredClient;
   }
 }

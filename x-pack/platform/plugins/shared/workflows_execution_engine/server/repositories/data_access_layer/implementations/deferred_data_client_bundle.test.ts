@@ -351,6 +351,122 @@ describe('DeferredDataClientBundle', () => {
       expect(dataStreamBundle.stop).toHaveBeenCalledTimes(1);
     });
 
+    it('serves the replacement when the original init is aborted at startup', async () => {
+      let rejectOriginalStart!: (error: Error) => void;
+      innerBundle.initStart.mockReturnValue(
+        new Promise((_resolve, reject) => {
+          rejectOriginalStart = reject;
+        })
+      );
+      innerBundle.stop.mockImplementation(() => {
+        rejectOriginalStart(new Error('Index initialization aborted: plugin stopped'));
+        return Promise.resolve();
+      });
+
+      const streamClient = createMockWorkflowDataClient();
+      streamClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+      const dataStreamBundle = createInnerBundle();
+      dataStreamBundle.createWorkflowDataClient.mockReturnValue(streamClient);
+      MockDataStreamBundle.mockImplementation(
+        () => dataStreamBundle as unknown as DataStreamDataClientBundle
+      );
+
+      await bundle.initSetup(coreSetup);
+      const startPromise = bundle.initStart(coreStart);
+      const startResult = startPromise.then(
+        () => 'resolved',
+        () => 'rejected'
+      );
+      const client = bundle.createWorkflowDataClient();
+
+      await bundle.switchSource('data_stream');
+
+      await expect(startResult).resolves.toBe('rejected');
+      await client.search({ query: { match_all: {} } });
+
+      expect(streamClient.search).toHaveBeenCalledWith({ query: { match_all: {} } });
+    });
+
+    it('serves the current backend while the next one is still initializing', async () => {
+      const plainClient = createMockWorkflowDataClient();
+      plainClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+      innerBundle.createWorkflowDataClient.mockReturnValue(plainClient);
+
+      let resolveNextStart!: () => void;
+      const streamClient = createMockWorkflowDataClient();
+      streamClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+      const dataStreamBundle = createInnerBundle();
+      dataStreamBundle.createWorkflowDataClient.mockReturnValue(streamClient);
+      dataStreamBundle.initStart.mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveNextStart = resolve;
+        })
+      );
+      MockDataStreamBundle.mockImplementation(
+        () => dataStreamBundle as unknown as DataStreamDataClientBundle
+      );
+
+      await bundle.initSetup(coreSetup);
+      await bundle.initStart(coreStart);
+      const client = bundle.createWorkflowDataClient();
+
+      const switching = bundle.switchSource('data_stream');
+      await flushMicrotasks();
+      await client.search({ query: { match_all: {} } });
+
+      expect(plainClient.search).toHaveBeenCalledTimes(1);
+      expect(streamClient.search).not.toHaveBeenCalled();
+
+      resolveNextStart();
+      await switching;
+      await client.search({ query: { match_all: {} } });
+
+      expect(streamClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops an initializing backend without waiting for it, and does not make it active', async () => {
+      const plainClient = createMockWorkflowDataClient();
+      plainClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+      innerBundle.createWorkflowDataClient.mockReturnValue(plainClient);
+
+      let resolveNextStart!: () => void;
+      const streamClient = createMockWorkflowDataClient();
+      streamClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+      const dataStreamBundle = createInnerBundle();
+      dataStreamBundle.createWorkflowDataClient.mockReturnValue(streamClient);
+      dataStreamBundle.initStart.mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveNextStart = resolve;
+        })
+      );
+      MockDataStreamBundle.mockImplementation(
+        () => dataStreamBundle as unknown as DataStreamDataClientBundle
+      );
+
+      await bundle.initSetup(coreSetup);
+      await bundle.initStart(coreStart);
+      const client = bundle.createWorkflowDataClient();
+
+      const switching = bundle.switchSource('data_stream');
+      await flushMicrotasks();
+
+      await bundle.stop();
+
+      expect(dataStreamBundle.stop).toHaveBeenCalledTimes(1);
+      expect(dataStreamBundle.initStart.mock.invocationCallOrder[0]).toBeLessThan(
+        dataStreamBundle.stop.mock.invocationCallOrder[0]
+      );
+
+      resolveNextStart();
+      await switching;
+
+      await expect(client.search({ query: { match_all: {} } })).rejects.toThrow(
+        'Workflow execution storage has stopped'
+      );
+      expect(streamClient.search).not.toHaveBeenCalled();
+      expect(plainClient.search).not.toHaveBeenCalled();
+    });
+
     it('starts a returning data_stream bundle without registering it again', async () => {
       const returning = new DeferredDataClientBundle({
         source: 'data_stream',
