@@ -668,6 +668,7 @@ Follow them. A signal `description` is copied from grounding, which owns its con
 **Final response.** Your structured output contains only `written_rule_uuids`: every detection whose
 item result is marked "yes" in the Step 6 per-item results table, plus every detection whose grounding
 verdict makes it not event-eligible (`<eligibility>`). Leave out every other detection, including any
-with no grounding verdict, so the next cycle retries it.
+with no grounding verdict, so the next cycle retries it. Each entry is a `rule_uuid` taken character
+for character from the detection batch, once per rule.
 
 </field_rules>
