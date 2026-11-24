@@ -105,6 +105,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse());
 
     const result = await getDiverseSampleDocuments({
@@ -125,7 +126,7 @@ describe('getDiverseSampleDocuments', () => {
     expect(categorizeQuery).toContain('WHERE count >');
     expect(categorizeQuery).toContain('| SORT count ASC | LIMIT 1000');
 
-    const fetchQuery = esql.mock.calls[2][1].query;
+    const fetchQuery = esql.mock.calls[3][1].query;
     expect(fetchQuery).toContain('FROM logs-a, logs-b METADATA _id, _source');
     expect(fetchQuery).toContain(
       'WHERE (MATCH_PHRASE(message, "error one") OR MATCH_PHRASE(message, "warn two")) ' +
@@ -139,11 +140,12 @@ describe('getDiverseSampleDocuments', () => {
     ]);
   });
 
-  it('keeps the source-fetch filter param time-bounded only, with matching pushed inline', async () => {
+  it('sends every query with an inline time range and no request filter', async () => {
     const { esClient, esql } = createEsClient();
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse());
 
     await getDiverseSampleDocuments({
@@ -156,10 +158,23 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
-    expect(esql.mock.calls[2][1].query).toContain('MATCH_PHRASE(message,');
-    const fetchFilter = esql.mock.calls[2][1].filter;
-    expect(fetchFilter.bool.filter).toBeDefined();
-    expect(fetchFilter.bool.should).toBeUndefined();
+    const timeRange =
+      'WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z"';
+    expect(esql.mock.calls[0][1].query).toBe(
+      `FROM logs-a | ${timeRange} | WHERE message IS NOT NULL | STATS total = COUNT(*)`
+    );
+    expect(esql.mock.calls[1][1].query).toContain(
+      `FROM logs-a | ${timeRange} | WHERE message IS NOT NULL`
+    );
+    expect(esql.mock.calls[2][1].query).toContain(
+      `FROM logs-a | ${timeRange} | WHERE message IS NOT NULL AND NOT MATCH(message,`
+    );
+    expect(esql.mock.calls[3][1].query).toContain(
+      `FROM logs-a METADATA _id, _source | ${timeRange} | WHERE (MATCH_PHRASE(message,`
+    );
+    for (const [, params] of esql.mock.calls) {
+      expect(params).not.toHaveProperty('filter');
+    }
   });
 
   it('probes only the message field candidates, under the caller signal', async () => {
@@ -167,6 +182,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse());
 
     const { signal } = new AbortController();
@@ -184,7 +200,7 @@ describe('getDiverseSampleDocuments', () => {
 
     expect(schemaQuery).toHaveBeenCalledTimes(1);
     expect(schemaQuery.mock.calls[0][0].query).toBe(
-      'SET unmapped_fields = "NULLIFY"; FROM logs-* | KEEP message, body.text | LIMIT 0'
+      'SET unmapped_fields = "NULLIFY"; FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | KEEP message, body.text | LIMIT 0'
     );
     expect(schemaQuery.mock.calls[0][1]).toEqual({ signal });
   });
@@ -194,6 +210,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(viewFetchResponse());
 
     const result = await getDiverseSampleDocuments({
@@ -219,6 +236,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(aliasFetchResponse());
 
     const result = await getDiverseSampleDocuments({
@@ -264,7 +282,6 @@ describe('getDiverseSampleDocuments', () => {
   it("returns no hits when no message field exists (backfilled by the caller's random arm)", async () => {
     const { esClient, esql, schemaQuery } = createEsClient();
     schemaQuery.mockResolvedValueOnce(schemaResponse([{ name: 'host.name', type: 'keyword' }]));
-    esql.mockResolvedValueOnce(countResponse(10));
 
     const result = await getDiverseSampleDocuments({
       esClient,
@@ -277,7 +294,7 @@ describe('getDiverseSampleDocuments', () => {
     });
 
     expect(schemaQuery).toHaveBeenCalledTimes(1);
-    expect(esql).toHaveBeenCalledTimes(1);
+    expect(esql).not.toHaveBeenCalled();
     expect(result).toEqual({ hits: [] });
   });
 
@@ -292,6 +309,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse([[10, 'body value', 'body pattern']]))
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { body: { text: 'body value' } }]]));
 
     const result = await getDiverseSampleDocuments({
@@ -307,7 +325,7 @@ describe('getDiverseSampleDocuments', () => {
     expect(esql.mock.calls[1][1].query).toContain(
       'CATEGORIZE(body.text, {"output_format": "tokens"})'
     );
-    expect(esql.mock.calls[2][1].query).toContain(
+    expect(esql.mock.calls[3][1].query).toContain(
       'WHERE MATCH_PHRASE(body.text, "body value") AND (body.text::KEYWORD IN ("body value"))'
     );
     expect(result.hits).toEqual([
@@ -327,6 +345,7 @@ describe('getDiverseSampleDocuments', () => {
             [5, 'warn two', 'warn'],
           ])
         )
+        .mockResolvedValueOnce(categorizeResponse([]))
         .mockResolvedValueOnce(
           concreteFetchResponse([
             ['doc-1', { message: 'error one' }],
@@ -360,6 +379,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { message: 'error one' }]]))
       .mockResolvedValueOnce(concreteFetchResponse([]));
 
@@ -373,11 +393,11 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
-    expect(esql.mock.calls[2][1].query).toContain(
+    expect(esql.mock.calls[3][1].query).toContain(
       'WHERE (MATCH_PHRASE(message, "error one") OR MATCH_PHRASE(message, "warn two")) ' +
         'AND (message::KEYWORD IN ("error one", "warn two"))'
     );
-    expect(esql.mock.calls[3][1].query).toContain(
+    expect(esql.mock.calls[4][1].query).toContain(
       'WHERE MATCH_PHRASE(message, "warn two") AND (message::KEYWORD IN ("warn two"))'
     );
     expect(result.hits).toEqual([{ _index: '', _id: 'doc-1', _source: { message: 'error one' } }]);

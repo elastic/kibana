@@ -1768,6 +1768,7 @@ Object {
   "template": Object {
     "mappings": Object {
       "_meta": Object {
+        "latestMappingsVersion": 1,
         "mappingsVersion": 1,
       },
       "date_detection": false,
@@ -2842,6 +2843,9 @@ Object {
         "user.email": Object {
           "type": "keyword",
         },
+        "user.entity.id": Object {
+          "type": "keyword",
+        },
         "user.full_name": Object {
           "fields": Object {
             "text": Object {
@@ -3035,6 +3039,9 @@ Object {
           "type": "keyword",
         },
         "user.entity.attributes.storage_class": Object {
+          "type": "keyword",
+        },
+        "user.entity.id": Object {
           "type": "keyword",
         },
         "user.entity.lifecycle.last_activity": Object {

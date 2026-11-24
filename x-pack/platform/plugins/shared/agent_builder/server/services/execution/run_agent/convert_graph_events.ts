@@ -23,6 +23,7 @@ import {
   createSubstitutionAppliedEvent,
   isBackgroundAgentCompleteStep,
   isCompactionStep,
+  isModelReasoningStep,
   isDeliveredMessageStep,
   isReasoningStep,
   isSubagentRosterUpdatedStep,
@@ -31,6 +32,8 @@ import {
 import {
   createBrowserToolCallEvent,
   createMessageEvent,
+  createModelReasoningChunkEvent,
+  createModelReasoningEvent,
   createPromptRequestEvent,
   createReasoningEvent,
   createTextChunkEvent,
@@ -39,6 +42,7 @@ import {
   createSubagentRosterUpdatedEvent,
   createToolCallEvent,
   createToolResultEvent,
+  extractReasoningContent,
   extractTextContent,
   hasTag,
   matchEvent,
@@ -78,11 +82,19 @@ interface ExecuteToolNodeOutput {
  */
 const stepUpdatesToEvents = (
   updates: RunStepUpdate[],
-  renderState: ToolRenderStateUpdate
+  renderState: ToolRenderStateUpdate,
+  messageId: string
 ): ChatAgentEvent[] => {
   const events: ChatAgentEvent[] = [];
   for (const update of updates) {
-    if (update.type === 'append' && isReasoningStep(update.step)) {
+    if (update.type === 'append' && isModelReasoningStep(update.step)) {
+      events.push(
+        createModelReasoningEvent(update.step.reasoning, {
+          messageId,
+          toolCallGroupId: update.step.tool_call_group_id,
+        })
+      );
+    } else if (update.type === 'append' && isReasoningStep(update.step)) {
       events.push(
         createReasoningEvent(update.step.reasoning, {
           toolCallId: update.step.tool_call_id,
@@ -201,6 +213,14 @@ export const convertGraphEvents = ({
           (hasTag(event, tags.answerAgent) || hasTag(event, tags.researchAgent))
         ) {
           const chunk: AIMessageChunk = event.data.chunk;
+          const chunkEvents: ChatAgentEvent[] = [];
+          // only research turns persist their reasoning as a `model_reasoning` step
+          const reasoningContent = hasTag(event, tags.researchAgent)
+            ? extractReasoningContent(chunk)
+            : undefined;
+          if (reasoningContent) {
+            chunkEvents.push(createModelReasoningChunkEvent(reasoningContent, { messageId }));
+          }
           const textContent = extractTextContent(chunk);
           if (textContent) {
             if (
@@ -210,7 +230,10 @@ export const convertGraphEvents = ({
             ) {
               currentTurnFirstChunkAt = Date.now();
             }
-            return of(createTextChunkEvent(textContent, { messageId }));
+            chunkEvents.push(createTextChunkEvent(textContent, { messageId }));
+          }
+          if (chunkEvents.length > 0) {
+            return of(...chunkEvents);
           }
         }
 
@@ -222,7 +245,8 @@ export const convertGraphEvents = ({
           const output = event.data.output as ResearchNodeOutput;
           const events: ChatAgentEvent[] = stepUpdatesToEvents(
             output.steps ?? [],
-            output.toolRenderState ?? {}
+            output.toolRenderState ?? {},
+            messageId
           );
 
           // Backdated thinking-complete: when the research agent's terminal turn

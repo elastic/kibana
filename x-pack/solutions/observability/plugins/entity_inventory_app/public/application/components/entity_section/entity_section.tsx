@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -23,6 +23,7 @@ import type {
   UnsupportedMetric,
 } from '@kbn/entity-inventory-plugin/common';
 import { useEntityList } from '../../hooks/use_entity_list';
+import { useIsNearViewport } from '../../hooks/use_is_near_viewport';
 import { EntityTable } from '../entity_table/entity_table';
 import {
   ENTITY_COUNT_LABEL,
@@ -74,7 +75,11 @@ export interface EntitySectionProps {
 export const EntitySection = ({ entityType, onTruncatedChange }: EntitySectionProps) => {
   const { type, name } = entityType;
   const accordionId = useGeneratedHtmlId({ prefix: 'entityInventoryTypeSection' });
-  const listResult = useEntityList(type);
+  const [panelElement, setPanelElement] = useState<HTMLDivElement | null>(null);
+  // The list is requested once the section is in or near the viewport, and a loaded list is kept
+  // when it scrolls out. Until then the section shows its loading skeleton and no count.
+  const isNearViewport = useIsNearViewport(panelElement);
+  const listResult = useEntityList(type, { enabled: isNearViewport });
   const { data: list, loading, error } = listResult;
   const { truncated } = list;
   const showEntityCount = !error && (!loading || list.rows.length > 0);
@@ -93,6 +98,7 @@ export const EntitySection = ({ entityType, onTruncatedChange }: EntitySectionPr
       hasBorder
       hasShadow={false}
       paddingSize="m"
+      panelRef={setPanelElement}
       data-test-subj="entityInventoryTypeSection"
       data-entity-type={type}
     >

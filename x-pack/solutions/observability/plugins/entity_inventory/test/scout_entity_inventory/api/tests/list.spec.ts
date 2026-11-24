@@ -46,7 +46,6 @@ interface ListResponse {
   rows: Array<Record<string, unknown>>;
   provenance: Record<string, Record<string, string>>;
   truncated: boolean;
-  took: number;
   queries: Array<{
     indexPattern: string;
     engine: string;
@@ -149,8 +148,6 @@ apiTest.describe(
         });
         // The OpenTelemetry time-series index holds no 2026-11-01 documents, so its `TS` plan reads none.
         expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 3, 0, 3]);
-        expect(typeof body.took).toBe('number');
-        expect('documentFilterWarnings' in body).toBe(false);
       }
     );
 
@@ -178,7 +175,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns the columns in column order, the same as the types route',
+      'returns the columns in column order, the same names and kinds as the types route',
       async ({ apiClient }) => {
         const response = await postList(apiClient, WINDOW);
         const typesResponse = await apiClient.get(TYPES_PATH, {
@@ -220,7 +217,11 @@ apiTest.describe(
           },
           { name: 'last_seen', kind: 'last_seen' },
         ]);
-        expect(columns).toStrictEqual(types.find(({ type }) => type === 'k8s.deployment')?.columns);
+        expect(columns).toStrictEqual(
+          types
+            .find(({ type }) => type === 'k8s.deployment')
+            ?.columns.map(({ name, kind }) => ({ name, kind }))
+        );
       }
     );
 
@@ -399,166 +400,154 @@ apiTest.describe(
     );
 
     // Scenarios: scout-metrics-test-scenarios.md (M1–M5) — available/desired/restarts use max.
-    apiTest.describe('metrics', () => {
-      apiTest(
-        'returns archive max available, desired and restarts when deployment.name is present',
-        async ({ apiClient }) => {
-          const response = await postList(apiClient, WINDOW);
+    apiTest(
+      'returns archive max available, desired and restarts when deployment.name is present',
+      async ({ apiClient }) => {
+        const response = await postList(apiClient, WINDOW);
 
-          expect(response).toHaveStatusCode(200);
-          const { rows, columns, unsupportedMetrics }: ListResponse = response.body;
+        expect(response).toHaveStatusCode(200);
+        const { rows, columns, unsupportedMetrics }: ListResponse = response.body;
 
-          expect(unsupportedMetrics).toStrictEqual([]);
-          expect(columns.find(({ name }) => name === 'k8s.deployment.available')).toStrictEqual({
-            name: 'k8s.deployment.available',
-            kind: 'metric',
-            agg: 'max',
-            unit: 'count',
-          });
-          expect(columns.find(({ name }) => name === 'k8s.deployment.desired')).toStrictEqual({
-            name: 'k8s.deployment.desired',
-            kind: 'metric',
-            agg: 'max',
-            unit: 'count',
-          });
-          expect(columns.find(({ name }) => name === 'k8s.container.restarts')).toStrictEqual({
-            name: 'k8s.container.restarts',
-            kind: 'metric',
-            agg: 'max',
-            unit: 'count',
-          });
+        expect(unsupportedMetrics).toStrictEqual([]);
+        expect(columns.find(({ name }) => name === 'k8s.deployment.available')).toStrictEqual({
+          name: 'k8s.deployment.available',
+          kind: 'metric',
+          agg: 'max',
+          unit: 'count',
+        });
+        expect(columns.find(({ name }) => name === 'k8s.deployment.desired')).toStrictEqual({
+          name: 'k8s.deployment.desired',
+          kind: 'metric',
+          agg: 'max',
+          unit: 'count',
+        });
+        expect(columns.find(({ name }) => name === 'k8s.container.restarts')).toStrictEqual({
+          name: 'k8s.container.restarts',
+          kind: 'metric',
+          agg: 'max',
+          unit: 'count',
+        });
 
-          const cartApi = rows.find((row) => row['entity.id'] === CART_API_ID);
-          expect(cartApi?.['kubernetes.deployment.name']).toBe('cart-api');
-          expect(cartApi?.['k8s.deployment.available']).toBe(3);
-          expect(cartApi?.['k8s.deployment.desired']).toBe(3);
-          expect(cartApi?.['k8s.container.restarts']).toBe(5);
+        const cartApi = rows.find((row) => row['entity.id'] === CART_API_ID);
+        expect(cartApi?.['kubernetes.deployment.name']).toBe('cart-api');
+        expect(cartApi?.['k8s.deployment.available']).toBe(3);
+        expect(cartApi?.['k8s.deployment.desired']).toBe(3);
+        expect(cartApi?.['k8s.container.restarts']).toBe(5);
 
-          const payments = rows.find(
-            (row) => row['entity.id'] === 'k8s.deployment:checkout/payments'
-          );
-          expect(payments?.['kubernetes.deployment.name']).toBe('payments');
-          expect(payments?.['k8s.deployment.available']).toBe(2);
-          expect(payments?.['k8s.deployment.desired']).toBe(3);
-          expect(payments?.['k8s.container.restarts']).toBe(1);
+        const payments = rows.find(
+          (row) => row['entity.id'] === 'k8s.deployment:checkout/payments'
+        );
+        expect(payments?.['kubernetes.deployment.name']).toBe('payments');
+        expect(payments?.['k8s.deployment.available']).toBe(2);
+        expect(payments?.['k8s.deployment.desired']).toBe(3);
+        expect(payments?.['k8s.container.restarts']).toBe(1);
 
-          const ingress = rows.find(
-            (row) => row['entity.id'] === 'k8s.deployment:platform/ingress'
-          );
-          expect(ingress?.['kubernetes.deployment.name']).toBe('ingress');
-          expect(ingress?.['k8s.deployment.available']).toBe(1);
-          expect(ingress?.['k8s.deployment.desired']).toBe(1);
-          expect(ingress?.['k8s.container.restarts']).toBe(0);
-        }
+        const ingress = rows.find((row) => row['entity.id'] === 'k8s.deployment:platform/ingress');
+        expect(ingress?.['kubernetes.deployment.name']).toBe('ingress');
+        expect(ingress?.['k8s.deployment.available']).toBe(1);
+        expect(ingress?.['k8s.deployment.desired']).toBe(1);
+        expect(ingress?.['k8s.container.restarts']).toBe(0);
+      }
+    );
+
+    apiTest('uses the max sample inside the window for cart-api metrics', async ({ apiClient }) => {
+      const through1000 = await postList(apiClient, {
+        from: '2026-11-01T09:00:00.000Z',
+        to: '2026-11-01T10:00:30.000Z',
+      });
+      const through1001 = await postList(apiClient, WINDOW);
+
+      expect(through1000).toHaveStatusCode(200);
+      expect(through1001).toHaveStatusCode(200);
+
+      const earlier = through1000.body.rows.find(
+        (row: Record<string, unknown>) => row['entity.id'] === CART_API_ID
       );
+      expect(earlier?.['k8s.deployment.available']).toBe(3);
+      expect(earlier?.['k8s.deployment.desired']).toBe(3);
+      expect(earlier?.['k8s.container.restarts']).toBe(4);
 
-      apiTest(
-        'uses the max sample inside the window for cart-api metrics',
-        async ({ apiClient }) => {
-          const through1000 = await postList(apiClient, {
-            from: '2026-11-01T09:00:00.000Z',
-            to: '2026-11-01T10:00:30.000Z',
-          });
-          const through1001 = await postList(apiClient, WINDOW);
-
-          expect(through1000).toHaveStatusCode(200);
-          expect(through1001).toHaveStatusCode(200);
-
-          const earlier = through1000.body.rows.find(
-            (row: Record<string, unknown>) => row['entity.id'] === CART_API_ID
-          );
-          expect(earlier?.['k8s.deployment.available']).toBe(3);
-          expect(earlier?.['k8s.deployment.desired']).toBe(3);
-          expect(earlier?.['k8s.container.restarts']).toBe(4);
-
-          const later = through1001.body.rows.find(
-            (row: Record<string, unknown>) => row['entity.id'] === CART_API_ID
-          );
-          expect(later?.['k8s.deployment.available']).toBe(3);
-          expect(later?.['k8s.deployment.desired']).toBe(3);
-          expect(later?.['k8s.container.restarts']).toBe(5);
-        }
+      const later = through1001.body.rows.find(
+        (row: Record<string, unknown>) => row['entity.id'] === CART_API_ID
       );
+      expect(later?.['k8s.deployment.available']).toBe(3);
+      expect(later?.['k8s.deployment.desired']).toBe(3);
+      expect(later?.['k8s.container.restarts']).toBe(5);
+    });
 
-      apiTest('returns metric values from a time-series-only window', async ({ apiClient }) => {
+    apiTest('returns metric values from a time-series-only window', async ({ apiClient }) => {
+      const response = await postList(apiClient, {
+        from: '2026-11-05T13:00:00.000Z',
+        to: '2026-11-05T15:00:00.000Z',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { rows, unsupportedMetrics }: ListResponse = response.body;
+
+      const tsWindow = rows.find(
+        (row) => row['entity.id'] === 'k8s.deployment:timeseries/ts-window'
+      );
+      expect(tsWindow?.['k8s.deployment.available']).toBe(2);
+      expect(tsWindow?.['k8s.deployment.desired']).toBe(2);
+      expect(tsWindow?.['k8s.container.restarts']).toBe(8);
+      expect(unsupportedMetrics).toStrictEqual([]);
+    });
+
+    apiTest(
+      'returns metrics when the same entity has samples in both standard and TSDS schemas',
+      async ({ apiClient }) => {
         const response = await postList(apiClient, {
-          from: '2026-11-05T13:00:00.000Z',
-          to: '2026-11-05T15:00:00.000Z',
+          from: '2026-11-05T09:00:00.000Z',
+          to: '2026-11-05T11:00:00.000Z',
         });
 
         expect(response).toHaveStatusCode(200);
-        const { rows, unsupportedMetrics }: ListResponse = response.body;
+        const { rows }: ListResponse = response.body;
 
-        const tsWindow = rows.find(
-          (row) => row['entity.id'] === 'k8s.deployment:timeseries/ts-window'
+        // TSDS 10:01 (5 / 12), not standard-index 10:00 (4 / 10).
+        const shared = rows.find(
+          (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-shared'
         );
-        expect(tsWindow?.['k8s.deployment.available']).toBe(2);
-        expect(tsWindow?.['k8s.deployment.desired']).toBe(2);
-        expect(tsWindow?.['k8s.container.restarts']).toBe(8);
-        expect(unsupportedMetrics).toStrictEqual([]);
+        expect(shared?.['k8s.deployment.available']).toBe(5);
+        expect(shared?.['k8s.deployment.desired']).toBe(5);
+        expect(shared?.['k8s.container.restarts']).toBe(12);
+
+        const standardOnly = rows.find(
+          (row) => row['entity.id'] === 'k8s.deployment:streaming/standard-only'
+        );
+        expect(standardOnly?.['k8s.deployment.available']).toBe(1);
+        expect(standardOnly?.['k8s.deployment.desired']).toBe(5);
+        expect(standardOnly?.['k8s.container.restarts']).toBe(3);
+
+        const tsdsOnly = rows.find(
+          (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-only'
+        );
+        expect(tsdsOnly?.['k8s.deployment.available']).toBe(2);
+        expect(tsdsOnly?.['k8s.deployment.desired']).toBe(5);
+        expect(tsdsOnly?.['k8s.container.restarts']).toBe(7);
+      }
+    );
+
+    apiTest('returns metric values for entities a filtered alias keeps', async ({ apiClient }) => {
+      const response = await postList(apiClient, {
+        from: '2026-11-07T09:00:00.000Z',
+        to: '2026-11-07T11:00:00.000Z',
       });
 
-      apiTest(
-        'returns metrics when the same entity has samples in both standard and TSDS schemas',
-        async ({ apiClient }) => {
-          const response = await postList(apiClient, {
-            from: '2026-11-05T09:00:00.000Z',
-            to: '2026-11-05T11:00:00.000Z',
-          });
+      expect(response).toHaveStatusCode(200);
+      const { rows }: ListResponse = response.body;
 
-          expect(response).toHaveStatusCode(200);
-          const { rows }: ListResponse = response.body;
-
-          // TSDS 10:01 (5 / 12), not standard-index 10:00 (4 / 10).
-          const shared = rows.find(
-            (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-shared'
-          );
-          expect(shared?.['k8s.deployment.available']).toBe(5);
-          expect(shared?.['k8s.deployment.desired']).toBe(5);
-          expect(shared?.['k8s.container.restarts']).toBe(12);
-
-          const standardOnly = rows.find(
-            (row) => row['entity.id'] === 'k8s.deployment:streaming/standard-only'
-          );
-          expect(standardOnly?.['k8s.deployment.available']).toBe(1);
-          expect(standardOnly?.['k8s.deployment.desired']).toBe(5);
-          expect(standardOnly?.['k8s.container.restarts']).toBe(3);
-
-          const tsdsOnly = rows.find(
-            (row) => row['entity.id'] === 'k8s.deployment:streaming/tsds-only'
-          );
-          expect(tsdsOnly?.['k8s.deployment.available']).toBe(2);
-          expect(tsdsOnly?.['k8s.deployment.desired']).toBe(5);
-          expect(tsdsOnly?.['k8s.container.restarts']).toBe(7);
-        }
+      const keptStandard = rows.find(
+        (row) => row['entity.id'] === 'k8s.deployment:aliased/kept-standard'
       );
+      expect(keptStandard?.['k8s.deployment.available']).toBe(1);
+      expect(keptStandard?.['k8s.deployment.desired']).toBe(1);
+      expect(keptStandard?.['k8s.container.restarts']).toBe(9);
 
-      apiTest(
-        'returns metric values for entities a filtered alias keeps',
-        async ({ apiClient }) => {
-          const response = await postList(apiClient, {
-            from: '2026-11-07T09:00:00.000Z',
-            to: '2026-11-07T11:00:00.000Z',
-          });
-
-          expect(response).toHaveStatusCode(200);
-          const { rows }: ListResponse = response.body;
-
-          const keptStandard = rows.find(
-            (row) => row['entity.id'] === 'k8s.deployment:aliased/kept-standard'
-          );
-          expect(keptStandard?.['k8s.deployment.available']).toBe(1);
-          expect(keptStandard?.['k8s.deployment.desired']).toBe(1);
-          expect(keptStandard?.['k8s.container.restarts']).toBe(9);
-
-          const keptTsds = rows.find(
-            (row) => row['entity.id'] === 'k8s.deployment:aliased/kept-tsds'
-          );
-          expect(keptTsds?.['k8s.deployment.available']).toBe(2);
-          expect(keptTsds?.['k8s.deployment.desired']).toBe(2);
-          expect(keptTsds?.['k8s.container.restarts']).toBe(11);
-        }
-      );
+      const keptTsds = rows.find((row) => row['entity.id'] === 'k8s.deployment:aliased/kept-tsds');
+      expect(keptTsds?.['k8s.deployment.available']).toBe(2);
+      expect(keptTsds?.['k8s.deployment.desired']).toBe(2);
+      expect(keptTsds?.['k8s.container.restarts']).toBe(11);
     });
 
     apiTest('rejects from equal to or after to with 400', async ({ apiClient }) => {

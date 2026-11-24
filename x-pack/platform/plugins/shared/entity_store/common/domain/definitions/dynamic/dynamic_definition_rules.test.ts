@@ -7,10 +7,10 @@
 
 import { omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
-import { type DynamicBlock } from './dynamic_block_schema';
+import { MAX_DYNAMIC_IDENTITY_FIELDS, type DynamicBlock } from './dynamic_block_schema';
 import { isNotEmptyCondition } from '../common_fields';
 import {
-  MAX_DYNAMIC_IDENTITY_FIELDS,
+  DISPLAY_LABEL_RULE,
   METRIC_CONSISTENCY_RULE,
   METRIC_NAME_RULE,
   NO_IDENTITY_ATTRIBUTE_RULE,
@@ -18,6 +18,7 @@ import {
   RESERVED_ENTITY_ID_FIELD,
   RESERVED_LAST_SEEN_FIELD,
   SERVABLE_IDENTITY_RULE,
+  SUGGESTED_FILTER_RULE,
   getIdentityCompositions,
   getPresenceFilter,
 } from './dynamic_definition_rules';
@@ -369,6 +370,98 @@ describe('dynamic definition rules', () => {
 
     it('accepts an attribute on a different field', () => {
       expectAccepted(withAttribute(hostIdentity, 'host.os.name'));
+    });
+  });
+
+  describe('display labels are identity fields or attributes', () => {
+    const withLabels = (displayLabels: Array<{ name: string; label: string }>) =>
+      definition(hostIdentity, {
+        dynamic: {
+          sources: [
+            {
+              indexPattern: 'metrics-a-*',
+              attributes: [{ name: 'os_name', field: 'host.os.name' }],
+            },
+            {
+              indexPattern: 'metrics-b-*',
+              attributes: [{ name: 'arch', field: 'host.arch' }],
+            },
+          ],
+          displayLabels,
+        },
+      });
+
+    it('accepts a label for an attribute of any source', () => {
+      expectAccepted(
+        withLabels([
+          { name: 'os_name', label: 'OS' },
+          { name: 'arch', label: 'Architecture' },
+        ])
+      );
+    });
+
+    it('accepts a label for an identity field', () => {
+      expectAccepted(withLabels([{ name: 'host.name', label: 'Host name' }]));
+    });
+
+    it('rejects a label for a name that is neither, with a path to its name', () => {
+      expectRejected(
+        withLabels([
+          { name: 'os_name', label: 'OS' },
+          { name: 'host.unknown', label: 'Unknown' },
+        ]),
+        ['dynamic', 'displayLabels', 1, 'name'],
+        DISPLAY_LABEL_RULE
+      );
+    });
+
+    it('rejects a label for the generated last_seen column', () => {
+      expectRejected(
+        withLabels([{ name: RESERVED_LAST_SEEN_FIELD, label: 'Last seen' }]),
+        ['dynamic', 'displayLabels', 0, 'name'],
+        DISPLAY_LABEL_RULE
+      );
+    });
+
+    it('rejects a label for the generated entity.id column', () => {
+      expectRejected(
+        withLabels([{ name: 'entity.id', label: 'ID' }]),
+        ['dynamic', 'displayLabels', 0, 'name'],
+        DISPLAY_LABEL_RULE
+      );
+    });
+  });
+
+  describe('suggested filters are attributes or identity fields', () => {
+    const withSuggestedFilters = (identityField: EntityIdentity, suggestedFilters: string[]) =>
+      definition(identityField, { dynamic: { ...dynamic, suggestedFilters } });
+
+    it('accepts an attribute of a source', () => {
+      expectAccepted(withSuggestedFilters(hostIdentity, ['os_name']));
+    });
+
+    it('accepts the single identity field', () => {
+      expectAccepted(withSuggestedFilters({ singleField: 'k8s.pod.uid' }, ['k8s.pod.uid']));
+    });
+
+    it('accepts a field of a ranking and an attribute together', () => {
+      expectAccepted(withSuggestedFilters(hostIdentity, ['host.name', 'os_name']));
+    });
+
+    it('rejects the entity id, even when it is the identity field', () => {
+      expectRejected(
+        withSuggestedFilters({ singleField: 'entity.id' }, ['entity.id']),
+        ['dynamic', 'suggestedFilters', 0],
+        SUGGESTED_FILTER_RULE
+      );
+    });
+
+    it('rejects a name that is neither an attribute nor an identity field', () => {
+      expectRejected(
+        withSuggestedFilters(hostIdentity, ['os_name', 'missing']),
+        ['dynamic', 'suggestedFilters', 1],
+        SUGGESTED_FILTER_RULE
+      );
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { createBurnRateRule } from '../fixtures/rule';
-import { buildQuery } from './build_query';
+import { buildCandidatesQuery, buildQuery } from './build_query';
 import {
   createKQLCustomIndicator,
   createSLO,
@@ -25,13 +25,13 @@ describe('buildQuery()', () => {
     expect(buildQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
   });
 
-  it('should return a valid query with afterKey', () => {
-    const slo = createSLO({
-      id: 'test-slo',
-      indicator: createKQLCustomIndicator(),
-    });
+  it('should continue after the given key', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
     const rule = createBurnRateRule(slo);
-    expect(buildQuery(STARTED_AT, slo, rule, { instanceId: 'example' })).toMatchSnapshot();
+
+    const { aggs } = buildQuery(STARTED_AT, slo, rule, { instanceId: 'example' });
+
+    expect(aggs.instances.composite.after).toEqual({ instanceId: 'example' });
   });
 
   it('should return a valid query for timeslices', () => {
@@ -41,5 +41,56 @@ describe('buildQuery()', () => {
     });
     const rule = createBurnRateRule(slo);
     expect(buildQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
+  });
+
+  it('should only evaluate the given instances', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+
+    const { query } = buildQuery(STARTED_AT, slo, rule, undefined, ['host-a', 'host-b']);
+
+    expect(query.bool.filter).toContainEqual({
+      terms: { 'slo.instanceId': ['host-a', 'host-b'] },
+    });
+  });
+});
+
+describe('buildCandidatesQuery()', () => {
+  it('should look up the instances breaching a short window for occurrences', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+    expect(buildCandidatesQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
+  });
+
+  it('should cover the longest short window, whatever the windows order', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+    const reversedRule = { ...rule, windows: [...rule.windows].reverse() };
+
+    [rule, reversedRule].forEach((ruleParams) => {
+      expect(buildCandidatesQuery(STARTED_AT, slo, ruleParams).query.bool.filter).toContainEqual({
+        range: {
+          '@timestamp': { gte: '2022-12-31T17:57:00.000Z', lt: '2022-12-31T23:57:00.000Z' },
+        },
+      });
+    });
+  });
+
+  it('should look up the instances breaching a short window from their bad slices for timeslices', () => {
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      id: 'test-slo',
+      indicator: createKQLCustomIndicator(),
+    });
+    const rule = createBurnRateRule(slo);
+    expect(buildCandidatesQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
+  });
+
+  it('should continue after the given key', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+
+    const { aggs } = buildCandidatesQuery(STARTED_AT, slo, rule, { instanceId: 'host-a' });
+
+    expect(aggs.instances.composite.after).toEqual({ instanceId: 'host-a' });
   });
 });

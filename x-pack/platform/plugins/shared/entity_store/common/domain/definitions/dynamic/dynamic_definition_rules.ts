@@ -8,9 +8,14 @@
 import { isEqual } from 'lodash';
 import type { z } from '@kbn/zod/v4';
 import type { Condition } from '@kbn/streamlang';
-import { isLiteralFieldPath, type DynamicMetric, type DynamicSource } from './dynamic_block_schema';
+import {
+  isLiteralFieldPath,
+  MAX_DYNAMIC_IDENTITY_FIELDS,
+  type DynamicMetric,
+  type DynamicSource,
+} from './dynamic_block_schema';
 import { areMetricAggsEquivalent } from './metric_measurement';
-import { isNotEmptyCondition } from '../common_fields';
+import { ENTITY_ID_FIELD, isNotEmptyCondition } from '../common_fields';
 import type {
   CalculatedEntityIdentity,
   EntityDefinitionWithoutId,
@@ -30,6 +35,10 @@ export const METRIC_NAME_RULE = 'metric names';
  * `areMetricAggsEquivalent`); e.g. `avg` vs `max` is rejected, `sum_rate` vs `last` is allowed.
  */
 export const METRIC_CONSISTENCY_RULE = 'metric consistency across sources';
+/** Name of the rule that a display label is for an attribute of a source or an identity field. */
+export const DISPLAY_LABEL_RULE = 'display labels are identity fields or attributes';
+/** Name of the rule that a suggested filter is an attribute of a source or an identity field. */
+export const SUGGESTED_FILTER_RULE = 'suggested filters are attributes or identity fields';
 /** Name of the rule restricting `identityField` to what the inventory can group by. */
 export const SERVABLE_IDENTITY_RULE = 'servable identity';
 
@@ -37,9 +46,6 @@ export const SERVABLE_IDENTITY_RULE = 'servable identity';
 export const RESERVED_LAST_SEEN_FIELD = 'last_seen';
 /** Column the inventory writes the entity id to, so no metric may take its name. */
 export const RESERVED_ENTITY_ID_FIELD = 'entity.id';
-
-/** Most distinct identity fields a definition with `dynamic` may group by. */
-export const MAX_DYNAMIC_IDENTITY_FIELDS = 8;
 
 type DefinitionWithDynamic = Pick<EntityDefinitionWithoutId, 'identityField' | 'dynamic'>;
 
@@ -241,9 +247,10 @@ const checkMetricNamesAndFields = (
 /**
  * Whole-definition rules for a definition carrying `dynamic`: its identity must be servable as
  * ES|QL `BY` keys, no attribute or metric may read an identity field, metric names stay off
- * attributes and reserved columns, and the same metric name keeps one measurement class and unit
- * across sources.
- * A definition without `dynamic` is never checked.
+ * attributes and reserved columns, the same metric name keeps one measurement class and unit
+ * across sources, every display label is for an attribute or an identity field, and every
+ * suggested filter is an attribute or an identity field. A definition without `dynamic` is never
+ * checked.
  */
 export const assertDynamicDefinitionRules = (
   definition: DefinitionWithDynamic,
@@ -290,4 +297,25 @@ export const assertDynamicDefinitionRules = (
     dynamic.sources.flatMap(({ attributes = [] }) => attributes.map(({ name }) => name))
   );
   checkMetricNamesAndFields(dynamic.sources, identityFields, attributeNames, addIssue);
+  (dynamic.displayLabels ?? []).forEach(({ name }, index) => {
+    if (!attributeNames.has(name) && !identityFields.has(name)) {
+      addIssue(
+        ['dynamic', 'displayLabels', index, 'name'],
+        `${DISPLAY_LABEL_RULE}: "${name}" is neither an attribute of a source nor an identity field`
+      );
+    }
+  });
+  (dynamic.suggestedFilters ?? []).forEach((name, index) => {
+    if (name === ENTITY_ID_FIELD) {
+      addIssue(
+        ['dynamic', 'suggestedFilters', index],
+        `${SUGGESTED_FILTER_RULE}: "${name}" is the entity id column and cannot be a suggested filter`
+      );
+    } else if (!attributeNames.has(name) && !identityFields.has(name)) {
+      addIssue(
+        ['dynamic', 'suggestedFilters', index],
+        `${SUGGESTED_FILTER_RULE}: "${name}" is neither an attribute of a source nor an identity field`
+      );
+    }
+  });
 };

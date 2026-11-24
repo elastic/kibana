@@ -13,8 +13,10 @@ export {
   MAX_FIELD_PATH_LENGTH,
   MAX_FILTER_LENGTH,
   MAX_INDEX_PATTERN_LENGTH,
+  MAX_DYNAMIC_IDENTITY_FIELDS,
   MAX_METRICS_PER_SOURCE,
   MAX_SOURCES,
+  MAX_SUGGESTED_FILTERS,
   MAX_VALUE_LABEL_LENGTH,
   MAX_VALUE_LABELS,
   METRIC_AGGS,
@@ -30,6 +32,7 @@ export {
 export type {
   DynamicAttribute,
   DynamicBlock,
+  DynamicDisplayLabel,
   DynamicMetric,
   DynamicMetricAgg,
   DynamicMetricUnit,
@@ -37,7 +40,7 @@ export type {
   DynamicValueLabels,
 } from './dynamic_block_schema';
 export {
-  MAX_DYNAMIC_IDENTITY_FIELDS,
+  SUGGESTED_FILTER_RULE,
   assertDynamicDefinitionRules,
   getIdentityCompositions,
   getIdentityFields,

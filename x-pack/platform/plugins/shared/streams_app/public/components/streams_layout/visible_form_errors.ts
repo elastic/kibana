@@ -7,16 +7,21 @@
 
 import { get } from 'lodash';
 
-/** Errors the user should see: those of touched fields, or all of them once the form was submitted. */
+/** Errors to show: of touched fields, of dirty `revealWhenDirty` fields, or all once submitted. */
 export const getVisibleFormErrors = <TErrors extends object>({
   errors,
   touchedFields,
+  dirtyFields = {},
+  revealWhenDirty = [],
   isSubmitted,
   fieldPaths = {},
 }: {
   errors: TErrors;
   /** `formState.touchedFields` from react-hook-form. */
   touchedFields: object;
+  dirtyFields?: object;
+  /** Errors already final for a partly typed value, so they show before the input is left. */
+  revealWhenDirty?: ReadonlyArray<keyof TErrors>;
   isSubmitted: boolean;
   /** Inputs that reveal an error, when it isn't named after its input. */
   fieldPaths?: Partial<Record<keyof TErrors, readonly string[]>>;
@@ -27,7 +32,11 @@ export const getVisibleFormErrors = <TErrors extends object>({
   const visibleErrors = { ...errors };
   for (const field of Object.keys(errors) as Array<keyof TErrors>) {
     const paths = fieldPaths[field] ?? [String(field)];
-    if (!paths.some((path) => Boolean(get(touchedFields, path)))) {
+    const isMarkedIn = (fields: object) => paths.some((path) => Boolean(get(fields, path)));
+    if (
+      !isMarkedIn(touchedFields) &&
+      !(revealWhenDirty.includes(field) && isMarkedIn(dirtyFields))
+    ) {
       delete visibleErrors[field];
     }
   }

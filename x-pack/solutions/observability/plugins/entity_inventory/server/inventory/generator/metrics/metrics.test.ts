@@ -39,10 +39,7 @@ const ALL_AGGS: DynamicMetricAgg[] = [
 const RATE_AGGS: DynamicMetricAgg[] = ['sum_rate', 'max_rate', 'avg_rate', 'min_rate'];
 
 describe('buildMetricStatsAgg', () => {
-  const expectedByEngine: Record<
-    DynamicMetricAgg,
-    Record<QueryEngine, string | undefined>
-  > = {
+  const expectedByEngine: Record<DynamicMetricAgg, Record<QueryEngine, string | undefined>> = {
     last: {
       TS: '`m` = LAST(`f`, `@timestamp`) WHERE `f` IS NOT NULL',
       FROM: '`m` = LAST(`f`, `@timestamp`) WHERE `f` IS NOT NULL',
@@ -91,7 +88,9 @@ describe('buildMetricStatsAgg', () => {
 
   it.each(
     ALL_AGGS.flatMap((agg) =>
-      (['TS', 'FROM'] as const).map((engine) => [agg, engine, expectedByEngine[agg][engine]] as const)
+      (['TS', 'FROM'] as const).map(
+        (engine) => [agg, engine, expectedByEngine[agg][engine]] as const
+      )
     )
   )('%s under %s', (agg, engine, expected) => {
     expect(buildMetricStatsAgg('m', 'f', agg, engine)).toBe(expected);
@@ -166,10 +165,12 @@ describe('groupSourceMetricsByFilterForPlans', () => {
       ],
       'metrics-*'
     );
-    expect(groups.map(({ canonicalMetricFilter, metrics }) => ({
-      canonicalMetricFilter,
-      names: metrics.map(({ name }) => name),
-    }))).toEqual([
+    expect(
+      groups.map(({ canonicalMetricFilter, metrics }) => ({
+        canonicalMetricFilter,
+        names: metrics.map(({ name }) => name),
+      }))
+    ).toEqual([
       { canonicalMetricFilter: '', names: ['unfiltered'] },
       { canonicalMetricFilter: 'state == "idle"', names: ['filtered_a'] },
       { canonicalMetricFilter: 'state == "user"', names: ['filtered_b'] },
@@ -178,7 +179,10 @@ describe('groupSourceMetricsByFilterForPlans', () => {
 
   it('has no unfiltered group when every metric is filtered', () => {
     const groups = groupSourceMetricsByFilterForPlans(
-      [metric('a', 'a', 'last', { filter: 'x == 1' }), metric('b', 'b', 'last', { filter: 'y == 2' })],
+      [
+        metric('a', 'a', 'last', { filter: 'x == 1' }),
+        metric('b', 'b', 'last', { filter: 'y == 2' }),
+      ],
       'metrics-*'
     );
     expect(groups.map(({ canonicalMetricFilter }) => canonicalMetricFilter)).toEqual([

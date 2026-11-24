@@ -11,7 +11,7 @@ import type { EntityStoreEuidApi, EntityType } from '@kbn/entity-store/public';
 import {
   combineEntityGroupFilters,
   getEntityGroupRecords,
-} from '../../flyout/entity_details/shared/entity_store_group_utils';
+} from '../../flyout_v2/entity/shared/utils/entity_store_group_utils';
 
 /**
  * Picks host / user / service / generic from flattened identity field keys for CSP/EUID queries.

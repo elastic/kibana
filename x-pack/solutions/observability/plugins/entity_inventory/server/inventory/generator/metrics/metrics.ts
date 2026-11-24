@@ -17,11 +17,11 @@ const TIMESTAMP = quoteIdentifier('@timestamp');
 const NO_METRIC_FILTER = '';
 
 /** Metrics that share one list-query plan: same canonical metric filter (empty = unfiltered). */
-export type MetricFilterPlanGroup = {
+export interface MetricFilterPlanGroup {
   /** Canonical metric filter text, or empty when the group is unfiltered. */
   canonicalMetricFilter: string;
   metrics: DynamicMetric[];
-};
+}
 
 /**
  * Groups a source's metrics into list-query plan groups: unfiltered metrics first (when any),

@@ -144,12 +144,14 @@ export {
 export type { EntityDefinitionManagedBy } from './domain/definitions/entity_schema';
 export type {
   DynamicAttribute,
+  DynamicDisplayLabel,
   DynamicMetric,
   DynamicMetricAgg,
   DynamicMetricUnit,
   DynamicSource,
 } from './domain/definitions/dynamic';
 export {
+  MAX_FIELD_PATH_LENGTH,
   METRIC_AGGS,
   METRIC_UNITS,
   CUMULATIVE_COUNT_AGGS,

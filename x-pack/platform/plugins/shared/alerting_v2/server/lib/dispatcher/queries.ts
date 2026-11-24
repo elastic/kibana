@@ -27,7 +27,7 @@ export const ESQL_QUERY_ROW_LIMIT = 10_000;
  * Rows are told apart by `type` / `action_type` rather than `_index LIKE`, which returns 0 rows
  * before `STATS`. See: https://github.com/elastic/elasticsearch/issues/146318
  *
- * No `_source` or `data` is read: HydrateAlertDataStep (`getAlertDataQueries`) fetches it for
+ * No `_source` or `data` is read: HydrateAlertDataStep (`getAlertDataQuery`) fetches it for
  * the surviving dispatchable alerts only, at most `ESQL_QUERY_ROW_LIMIT`, rather than for the
  * whole multi-million-row window. See: https://github.com/elastic/rna-program/issues/838
  *
@@ -340,24 +340,28 @@ export const getLastNotifiedTimestampsQueries = (
 // LAST(data_json, @timestamp) picks the same event the scan reported as
 // last_event_timestamp = MAX(@timestamp), so `data` matches the alert's other fields.
 //
-// Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
-// STATS aggregates by alert_id.
-export const getAlertDataQueries = (
+// Builds a single request without chunking: the caller must pass ids that fit the statement
+// budget, i.e. one chunk of `chunkInClauseLiterals` or a slice of it. Safe to concat: STATS
+// aggregates by alert_id.
+export interface TimestampBounds {
+  gte: string;
+  lte: string;
+}
+
+export const getAlertDataQuery = (
   alertIds: readonly string[],
-  { gte, lte }: { gte: string; lte: string }
-): EsqlRequest[] => {
-  return chunkInClauseLiterals(alertIds).map((chunk) => {
-    return esql`FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
-        | WHERE type == ${ALERT_EVENT_TYPE}
-            AND alert.id IN (${toUniqueString(chunk)})
-            AND @timestamp >= ${gte}::datetime
-            AND @timestamp <= ${lte}::datetime
-        | EVAL alert_id = alert.id, data_json = JSON_EXTRACT(_source, "$.data")
-        | DROP _source
-        | STATS data_json = LAST(data_json, @timestamp) BY alert_id
-        | KEEP alert_id, data_json
-        | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
-  });
+  { gte, lte }: TimestampBounds
+): EsqlRequest => {
+  return esql`FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
+      | WHERE type == ${ALERT_EVENT_TYPE}
+          AND alert.id IN (${toUniqueString(alertIds)})
+          AND @timestamp >= ${gte}::datetime
+          AND @timestamp <= ${lte}::datetime
+      | EVAL alert_id = alert.id, data_json = JSON_EXTRACT(_source, "$.data")
+      | DROP _source
+      | STATS data_json = LAST(data_json, @timestamp) BY alert_id
+      | KEEP alert_id, data_json
+      | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
 };
 
 // Returns one request per chunk (see ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES). The group
