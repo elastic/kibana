@@ -199,6 +199,25 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
+    const { server: significantEventsServer } = this;
+    plugins.nightshiftInvestigations?.registerSlackChannelBindingChecker(
+      async (request, channelId) => {
+        try {
+          return await new SlackAppService(significantEventsServer).isChannelBound(
+            request,
+            channelId
+          );
+        } catch (error) {
+          this.logger.warn(
+            `Could not check the Slack channel binding: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return undefined;
+        }
+      }
+    );
+
     plugins.nightshiftInvestigations?.registerDetectionSnapshotContributor(
       async ({ spaceId, request, signal }) => {
         const [coreStart, pluginsStart] = await core.getStartServices();

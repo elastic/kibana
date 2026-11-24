@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   investigationNotificationDestinationSchema,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
@@ -30,8 +30,10 @@ export const automationCompletionUpdateSchema = automationCompletionInputSchema.
   connectorId: automationCompletionInputSchema.shape.connectorId.nullable(),
 });
 
-export const automationCompletionSchema = automationCompletionInputSchema.superRefine(
-  (completion, context) => {
+const SLACK_USER_OR_DM_ID_PATTERN = /^[UWD][A-Z0-9]+$/;
+
+export const automationCompletionSchema = lazySchema(() =>
+  automationCompletionInputSchema.superRefine((completion, context) => {
     if (
       completion.action === 'post_to_slack' &&
       completion.targetMode === 'channel' &&
@@ -43,5 +45,21 @@ export const automationCompletionSchema = automationCompletionInputSchema.superR
         message: 'A Slack channel destination is required',
       });
     }
-  }
+  })
+);
+
+export const savedAutomationCompletionSchema = lazySchema(() =>
+  automationCompletionSchema.superRefine((completion, context) => {
+    if (
+      completion.action === 'post_to_slack' &&
+      completion.targetMode === 'channel' &&
+      SLACK_USER_OR_DM_ID_PATTERN.test(completion.destination?.trim() ?? '')
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['destination'],
+        message: 'Slack destinations must be a channel, not a user',
+      });
+    }
+  })
 );

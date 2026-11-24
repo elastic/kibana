@@ -135,6 +135,9 @@ const toWorkspaceDetails = (
   };
 };
 
+const BINDINGS_PAGE_SIZE = 200;
+const MAX_BINDING_PAGES = 10;
+
 /** Pagination options for a single page of connected channels. */
 export interface ListBindingsOptions {
   /** Opaque cursor from a previous page's `nextCursor`; omit for the first page. */
@@ -812,6 +815,28 @@ export class SlackAppService {
       throw new SlackAppUnavailableError('Connection is not in a connected state');
     }
     return { relayClient, tenantKey: connection.tenantKey };
+  }
+
+  async isChannelBound(request: KibanaRequest, channelId: string): Promise<boolean | undefined> {
+    let connected;
+    try {
+      connected = await this.requireConnectedTenant(request);
+    } catch (error) {
+      if (error instanceof SlackAppUnavailableError) return undefined;
+      throw error;
+    }
+    const { relayClient, tenantKey } = connected;
+    let cursor: string | undefined;
+    for (let page = 0; page < MAX_BINDING_PAGES; page++) {
+      const result = await relayClient.listBindings(tenantKey, {
+        cursor,
+        limit: BINDINGS_PAGE_SIZE,
+      });
+      if (result.bindings.some((entry) => entry.scope_id === channelId)) return true;
+      if (!result.nextCursor) return false;
+      cursor = result.nextCursor;
+    }
+    return undefined;
   }
 
   async bindChannel(request: KibanaRequest, channelId: string): Promise<void> {

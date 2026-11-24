@@ -28,6 +28,8 @@ const body = {
   runtime: { dailyDispatchLimit: 20 },
 };
 
+const checkChannelBound = jest.fn();
+
 const call = (overrides: Record<string, unknown> = {}, user?: Record<string, string>) =>
   handler({
     request: httpServerMock.createKibanaRequest(),
@@ -35,6 +37,7 @@ const call = (overrides: Record<string, unknown> = {}, user?: Record<string, str
     getAutomationsSoClient,
     getWorkflowsManagement,
     isUniversalAlertingAvailable: () => true,
+    getSlackChannelBindingChecker: () => checkChannelBound,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(user),
   } as never);
@@ -43,6 +46,7 @@ let serviceAccountService = createServiceAccountService();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  checkChannelBound.mockResolvedValue(true);
   serviceAccountService = createServiceAccountService();
   soClient.create.mockResolvedValue({ id: 'automation-1' });
   createWorkflow.mockResolvedValue({ id: 'workflow-1' });
@@ -243,4 +247,46 @@ it('refuses callers who cannot write a bound workflow before writing anything', 
   await expect(call()).rejects.toThrow('manage_security');
   expect(soClient.create).not.toHaveBeenCalled();
   expect(createWorkflow).not.toHaveBeenCalled();
+});
+
+describe('Slack destinations', () => {
+  const channelCompletion = (overrides: Record<string, unknown> = {}) => ({
+    action: 'post_to_slack',
+    targetMode: 'channel',
+    destination: 'C012ABCDEF',
+    ...overrides,
+  });
+
+  it('rejects a channel that is not bound before any write', async () => {
+    checkChannelBound.mockResolvedValue(false);
+
+    await expect(call({ completions: [channelCompletion()] })).rejects.toThrow(
+      'Slack channel C012ABCDEF is not connected to Nightshift.'
+    );
+    expect(soClient.create).not.toHaveBeenCalled();
+  });
+
+  it('saves when the bindings cannot be read', async () => {
+    checkChannelBound.mockResolvedValue(undefined);
+
+    await call({ completions: [channelCompletion()] });
+
+    expect(soClient.create).toHaveBeenCalled();
+  });
+
+  it('does not check a channel posted through a custom connector', async () => {
+    checkChannelBound.mockResolvedValue(false);
+
+    await call({ completions: [channelCompletion({ connectorId: 'my-slack' })] });
+
+    expect(checkChannelBound).not.toHaveBeenCalled();
+    expect(soClient.create).toHaveBeenCalled();
+  });
+
+  it('rejects a thread reply on an alert trigger before any write', async () => {
+    await expect(
+      call({ completions: [{ action: 'post_to_slack', targetMode: 'thread' }] })
+    ).rejects.toThrow('Replying in a thread requires a Slack trigger.');
+    expect(soClient.create).not.toHaveBeenCalled();
+  });
 });

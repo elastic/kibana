@@ -33,6 +33,8 @@ const existing = {
   updatedAt: '2026-10-01T00:00:00.000Z',
 };
 
+const checkChannelBound = jest.fn();
+
 const call = (body: Record<string, unknown>) =>
   handler({
     request: httpServerMock.createKibanaRequest(),
@@ -40,6 +42,7 @@ const call = (body: Record<string, unknown>) =>
     getAutomationsSoClient,
     getWorkflowsManagement,
     isUniversalAlertingAvailable: () => true,
+    getSlackChannelBindingChecker: () => checkChannelBound,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(),
   } as never);
@@ -132,6 +135,7 @@ it('replaces a non-empty completions array', async () => {
   soClient.get.mockResolvedValue({
     attributes: {
       ...existing,
+      trigger: { rows: [{ kind: 'slack' }] },
       completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
     },
   });
@@ -401,4 +405,32 @@ it('uses the read version so a stale Pause cannot overwrite a repaired workflow 
     if (options.version === 'before-repair') throw conflict('Automation changed');
   });
   await expect(call({ isEnabled: false })).rejects.toMatchObject({ output: { statusCode: 409 } });
+});
+
+it('rejects a trigger change that leaves a thread reply without a Slack trigger', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      trigger: { rows: [{ kind: 'slack' }] },
+      completions: [{ action: 'post_to_slack', targetMode: 'thread' }],
+    },
+  });
+
+  await expect(call({ trigger: { rows: [{ kind: 'alert' }] } })).rejects.toThrow(
+    'Replying in a thread requires a Slack trigger.'
+  );
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('rejects a replacement channel that is not bound before any write', async () => {
+  checkChannelBound.mockResolvedValue(false);
+
+  await expect(
+    call({
+      completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: 'C012ABCDEF' }],
+    })
+  ).rejects.toThrow('Slack channel C012ABCDEF is not connected to Nightshift.');
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
 });
