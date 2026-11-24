@@ -113,7 +113,7 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -138,7 +138,7 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
@@ -180,7 +180,7 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
@@ -212,7 +212,7 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
@@ -260,7 +260,7 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       shouldRunTasks: true,
@@ -303,7 +303,7 @@ describe('healthRoute', () => {
         },
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -380,7 +380,7 @@ describe('healthRoute', () => {
         },
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -472,7 +472,7 @@ describe('healthRoute', () => {
         },
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -551,7 +551,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -642,7 +642,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -708,7 +708,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 5000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -787,7 +787,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -884,7 +884,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -940,7 +940,7 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: id,
       config,
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
@@ -970,7 +970,7 @@ describe('healthRoute', () => {
 
   describe('monitoring privileges', () => {
     const callHandlerWithTaskTypeStats = async (
-      params: Pick<HealthRouteParams, 'getClusterClient' | 'getIsSecurityEnabled'>
+      params: Pick<HealthRouteParams, 'getClusterClient' | 'getIsSecurityDisabled'>
     ) => {
       summarizeMonitoringStats.mockReturnValue(createRawMonitoringStatsWithTaskTypes());
       const router = httpServiceMock.createRouter();
@@ -1001,7 +1001,7 @@ describe('healthRoute', () => {
 
       const res = await callHandlerWithTaskTypeStats({
         getClusterClient: () => Promise.resolve(mockClusterClient),
-        getIsSecurityEnabled: () => true,
+        getIsSecurityDisabled: () => false,
       });
 
       const { stats: redactedStats } = redactHealth({
@@ -1025,7 +1025,7 @@ describe('healthRoute', () => {
 
       const res = await callHandlerWithTaskTypeStats({
         getClusterClient: () => Promise.resolve(mockClusterClient),
-        getIsSecurityEnabled: () => true,
+        getIsSecurityDisabled: () => false,
       });
 
       expect(res.ok).toHaveBeenCalledWith({
@@ -1040,13 +1040,29 @@ describe('healthRoute', () => {
 
       const res = await callHandlerWithTaskTypeStats({
         getClusterClient: () => Promise.resolve(mockClusterClient),
-        getIsSecurityEnabled: () => false,
+        getIsSecurityDisabled: () => true,
       });
 
       expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
       expect(res.ok).toHaveBeenCalledWith({
         body: expect.objectContaining({ stats: createRawMonitoringStatsWithTaskTypes().stats }),
       });
+    });
+
+    it('does not count the request as admin access when security is disabled', async () => {
+      const { mockClusterClient } = createMockClusterClient(createPrivilegesResponse({}));
+
+      await callHandlerWithTaskTypeStats({
+        getClusterClient: () => Promise.resolve(mockClusterClient),
+        getIsSecurityDisabled: () => true,
+      });
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'taskManagerHealthApiAccess' })
+      );
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'taskManagerHealthApiAdminAccess' })
+      );
     });
   });
 });

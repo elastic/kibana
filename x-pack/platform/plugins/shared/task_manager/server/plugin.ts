@@ -244,8 +244,8 @@ export class TaskManagerPlugin
 
     // Routes
     const router = core.http.createRouter();
-    // Until start() creates the license subscriber, assume security is enabled so the privilege check still runs.
-    const getIsSecurityEnabled = () => this.licenseSubscriber?.getIsSecurityEnabled() ?? true;
+    // Until start() creates the license subscriber, don't assume security is disabled so the privilege check still runs.
+    const getIsSecurityDisabled = () => this.licenseSubscriber?.getIsSecurityDisabled() ?? false;
     const { serviceStatus$, monitoredHealth$ } = healthRoute({
       router,
       monitoringStats$: this.monitoringStats$,
@@ -255,7 +255,7 @@ export class TaskManagerPlugin
       usageCounter: this.usageCounter!,
       kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () => clusterClientPromise,
-      getIsSecurityEnabled,
+      getIsSecurityDisabled,
       shouldRunTasks: this.shouldRunBackgroundTasks,
       docLinks: core.docLinks,
       numOfKibanaInstances$: this.numOfKibanaInstances$,
@@ -278,7 +278,7 @@ export class TaskManagerPlugin
       taskManagerId: this.taskManagerId,
       kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () => clusterClientPromise,
-      getIsSecurityEnabled,
+      getIsSecurityDisabled,
     });
     executionControlRoutes({
       router,

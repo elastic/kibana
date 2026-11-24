@@ -21,6 +21,8 @@ paths:
       summary: Get the task manager health
       description: |
         Get the health status of the Kibana task manager.
+
+        Per-task-type details are returned only to users with the `manage_taskManager` Kibana privilege (included in the `all` base privilege) or the `monitor` cluster privilege. For other users, fields keyed by task type, such as `workload.task_types`, `workload.schedule`, `runtime.drift_by_type`, and the per-type `runtime.execution` stats, are returned empty, so an empty value does not mean there are no tasks of that type.
       operationId: task-manager-health
       tags:
         - task manager

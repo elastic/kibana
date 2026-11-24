@@ -36,7 +36,7 @@ export interface MetricsRouteParams {
   taskManagerId: string;
   kibanaIndexName: string;
   getClusterClient: () => Promise<IClusterClient>;
-  getIsSecurityEnabled: () => boolean;
+  getIsSecurityDisabled: () => boolean;
 }
 
 const QuerySchema = schema.object({
@@ -52,7 +52,7 @@ export function metricsRoute(params: MetricsRouteParams) {
     taskManagerId,
     kibanaIndexName,
     getClusterClient,
-    getIsSecurityEnabled,
+    getIsSecurityDisabled,
   } = params;
 
   let lastMetrics: NodeMetrics | null = null;
@@ -96,7 +96,7 @@ export function metricsRoute(params: MetricsRouteParams) {
         request: req,
         getClusterClient,
         kibanaIndexName,
-        getIsSecurityEnabled,
+        getIsSecurityDisabled,
         logger,
       });
 

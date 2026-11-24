@@ -23,13 +23,13 @@ export interface CheckMonitoringPrivilegesOpts {
   request: KibanaRequest;
   getClusterClient: () => Promise<IClusterClient>;
   kibanaIndexName: string;
-  getIsSecurityEnabled: () => boolean;
+  getIsSecurityDisabled: () => boolean;
   logger: Logger;
 }
 
 const SECURITY_DISABLED_PRIVILEGES: MonitoringPrivileges = {
   isPrivileged: true,
-  hasManageTaskManager: true,
+  hasManageTaskManager: false,
 };
 
 const NO_PRIVILEGES: MonitoringPrivileges = {
@@ -55,10 +55,10 @@ export const checkMonitoringPrivileges = async ({
   request,
   getClusterClient,
   kibanaIndexName,
-  getIsSecurityEnabled,
+  getIsSecurityDisabled,
   logger,
 }: CheckMonitoringPrivilegesOpts): Promise<MonitoringPrivileges> => {
-  if (!getIsSecurityEnabled()) {
+  if (getIsSecurityDisabled()) {
     return SECURITY_DISABLED_PRIVILEGES;
   }
 
@@ -84,7 +84,7 @@ export const checkMonitoringPrivileges = async ({
 
     return { isPrivileged: hasManageTaskManager || hasClusterMonitor, hasManageTaskManager };
   } catch (error) {
-    if (isSecurityDisabledError(error) || !getIsSecurityEnabled()) {
+    if (isSecurityDisabledError(error) || getIsSecurityDisabled()) {
       return SECURITY_DISABLED_PRIVILEGES;
     }
     logger.warn(

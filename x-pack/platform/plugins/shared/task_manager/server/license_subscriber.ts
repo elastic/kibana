@@ -15,6 +15,7 @@ export class LicenseSubscriber {
 
   constructor(license: Observable<ILicense>) {
     this.getIsSecurityEnabled = this.getIsSecurityEnabled.bind(this);
+    this.getIsSecurityDisabled = this.getIsSecurityDisabled.bind(this);
     this.updateState = this.updateState.bind(this);
 
     this.subscription = license.subscribe(this.updateState);
@@ -30,6 +31,17 @@ export class LicenseSubscriber {
     }
 
     return this.licenseState.getFeature('security').isEnabled;
+  }
+
+  /**
+   * Returns true only when an available license reports security as disabled; an unknown license is not treated as disabled.
+   */
+  public getIsSecurityDisabled() {
+    if (!this.licenseState || !this.licenseState.isAvailable) {
+      return false;
+    }
+
+    return !this.licenseState.getFeature('security').isEnabled;
   }
 
   public cleanup() {

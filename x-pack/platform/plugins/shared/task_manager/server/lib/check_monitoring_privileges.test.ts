@@ -35,8 +35,8 @@ const createHasPrivilegesResponse = ({
 });
 
 const setup = ({
-  getIsSecurityEnabled = () => true,
-}: { getIsSecurityEnabled?: () => boolean } = {}) => {
+  getIsSecurityDisabled = () => false,
+}: { getIsSecurityDisabled?: () => boolean } = {}) => {
   const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
   const clusterClient = elasticsearchServiceMock.createClusterClient();
   clusterClient.asScoped.mockReturnValue(scopedClusterClient);
@@ -51,7 +51,7 @@ const setup = ({
         request,
         getClusterClient: () => Promise.resolve(clusterClient),
         kibanaIndexName: '.kibana',
-        getIsSecurityEnabled,
+        getIsSecurityDisabled,
         logger,
       }),
     clusterClient,
@@ -97,9 +97,9 @@ describe('checkMonitoringPrivileges', () => {
   );
 
   it('treats the caller as privileged without checking privileges when security is disabled', async () => {
-    const { hasPrivileges, check } = setup({ getIsSecurityEnabled: () => false });
+    const { hasPrivileges, check } = setup({ getIsSecurityDisabled: () => true });
 
-    expect(await check()).toEqual({ isPrivileged: true, hasManageTaskManager: true });
+    expect(await check()).toEqual({ isPrivileged: true, hasManageTaskManager: false });
     expect(hasPrivileges).not.toHaveBeenCalled();
   });
 
@@ -116,16 +116,16 @@ describe('checkMonitoringPrivileges', () => {
       )
     );
 
-    expect(await check()).toEqual({ isPrivileged: true, hasManageTaskManager: true });
+    expect(await check()).toEqual({ isPrivileged: true, hasManageTaskManager: false });
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('treats the caller as privileged when security is reported disabled after the check fails', async () => {
-    const getIsSecurityEnabled = jest.fn().mockReturnValueOnce(true).mockReturnValue(false);
-    const { hasPrivileges, check } = setup({ getIsSecurityEnabled });
+    const getIsSecurityDisabled = jest.fn().mockReturnValueOnce(false).mockReturnValue(true);
+    const { hasPrivileges, check } = setup({ getIsSecurityDisabled });
     hasPrivileges.mockRejectedValue(createEsResponseError(500));
 
-    expect(await check()).toEqual({ isPrivileged: true, hasManageTaskManager: true });
+    expect(await check()).toEqual({ isPrivileged: true, hasManageTaskManager: false });
   });
 
   it.each([

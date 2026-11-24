@@ -60,7 +60,7 @@ export interface HealthRouteParams {
   kibanaIndexName: string;
   shouldRunTasks: boolean;
   getClusterClient: () => Promise<IClusterClient>;
-  getIsSecurityEnabled: () => boolean;
+  getIsSecurityDisabled: () => boolean;
   usageCounter?: UsageCounter;
   docLinks: DocLinksServiceSetup;
   numOfKibanaInstances$: Observable<number>;
@@ -78,7 +78,7 @@ export function healthRoute(params: HealthRouteParams): {
     config,
     kibanaIndexName,
     getClusterClient,
-    getIsSecurityEnabled,
+    getIsSecurityDisabled,
     usageCounter,
     shouldRunTasks,
     docLinks,
@@ -186,7 +186,7 @@ export function healthRoute(params: HealthRouteParams): {
         request: req,
         getClusterClient,
         kibanaIndexName,
-        getIsSecurityEnabled,
+        getIsSecurityDisabled,
         logger,
       });
 

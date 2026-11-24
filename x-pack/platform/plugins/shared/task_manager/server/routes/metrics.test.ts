@@ -70,7 +70,7 @@ describe('metricsRoute', () => {
       taskManagerId: uuidv4(),
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
     });
 
     const [config] = router.get.mock.calls[0];
@@ -95,7 +95,7 @@ describe('metricsRoute', () => {
       taskManagerId: uuidv4(),
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
     });
 
     const [config, handler] = router.get.mock.calls[0];
@@ -124,7 +124,7 @@ describe('metricsRoute', () => {
       taskManagerId: uuidv4(),
       kibanaIndexName: '.kibana',
       getClusterClient: getPrivilegedClusterClient,
-      getIsSecurityEnabled: () => true,
+      getIsSecurityDisabled: () => false,
     });
 
     const [config, handler] = router.get.mock.calls[0];
@@ -139,7 +139,7 @@ describe('metricsRoute', () => {
 
   describe('monitoring privileges', () => {
     const callHandlerWithTaskTypeMetrics = async (
-      params: Pick<MetricsRouteParams, 'getClusterClient' | 'getIsSecurityEnabled'>
+      params: Pick<MetricsRouteParams, 'getClusterClient' | 'getIsSecurityDisabled'>
     ) => {
       const resetMetrics$ = new Subject<boolean>();
       const onReset = jest.fn();
@@ -165,7 +165,7 @@ describe('metricsRoute', () => {
     it('returns redacted metrics and ignores reset when user has neither the cluster monitor nor the manage_taskManager privilege', async () => {
       const { res, onReset } = await callHandlerWithTaskTypeMetrics({
         getClusterClient: getUnprivilegedClusterClient,
-        getIsSecurityEnabled: () => true,
+        getIsSecurityDisabled: () => false,
       });
 
       expect(onReset).not.toHaveBeenCalled();
@@ -187,7 +187,7 @@ describe('metricsRoute', () => {
 
       const { res, onReset } = await callHandlerWithTaskTypeMetrics({
         getClusterClient: () => Promise.resolve(mockClusterClient),
-        getIsSecurityEnabled: () => true,
+        getIsSecurityDisabled: () => false,
       });
 
       expect(onReset).not.toHaveBeenCalled();
@@ -202,7 +202,7 @@ describe('metricsRoute', () => {
       const { res, onReset } = await callHandlerWithTaskTypeMetrics({
         getClusterClient: () =>
           Promise.resolve(createMockClusterClient({ monitor: true }).mockClusterClient),
-        getIsSecurityEnabled: () => true,
+        getIsSecurityDisabled: () => false,
       });
 
       expect(onReset).toHaveBeenCalledTimes(1);
@@ -215,7 +215,7 @@ describe('metricsRoute', () => {
       const { res, onReset } = await callHandlerWithTaskTypeMetrics({
         getClusterClient: () =>
           Promise.resolve(createMockClusterClient({ manageTaskManager: true }).mockClusterClient),
-        getIsSecurityEnabled: () => true,
+        getIsSecurityDisabled: () => false,
       });
 
       expect(onReset).toHaveBeenCalledTimes(1);
@@ -229,7 +229,7 @@ describe('metricsRoute', () => {
 
       const { res, onReset } = await callHandlerWithTaskTypeMetrics({
         getClusterClient: () => Promise.resolve(mockClusterClient),
-        getIsSecurityEnabled: () => false,
+        getIsSecurityDisabled: () => true,
       });
 
       expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
