@@ -139,8 +139,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   onSettingsChange: (settings: DateRangePickerSettings) => void;
   /** Current auto-refresh state. */
   autoRefresh?: AutoRefreshSettings;
-  /** Called when the user changes the auto-refresh state. */
-  onAutoRefreshChange?: (autoRefresh: AutoRefreshSettings) => void;
+  /** Called when the user changes the auto-refresh state. No-op when the prop is not set. */
+  onAutoRefreshChange: (autoRefresh: AutoRefreshSettings) => void;
   /**
    * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
    * Used for calendar day boundaries and displayed in the panel footer.
@@ -200,7 +200,7 @@ export function DateRangePickerProvider({
   settings = { roundRelativeTime: false },
   onSettingsChange,
   autoRefresh,
-  onAutoRefreshChange,
+  onAutoRefreshChange: onAutoRefreshChangeProp,
   timeZone,
   onRefresh,
   refreshEpoch,
@@ -316,10 +316,15 @@ export function DateRangePickerProvider({
     refreshEpoch,
   });
 
+  const onAutoRefreshChange = useCallback(
+    (next: AutoRefreshSettings) => onAutoRefreshChangeProp?.(next),
+    [onAutoRefreshChangeProp]
+  );
+
   const toggleAutoRefresh = useCallback(() => {
     if (!autoRefresh) return;
 
-    onAutoRefreshChange?.({ ...autoRefresh, isPaused: !autoRefresh.isPaused });
+    onAutoRefreshChange({ ...autoRefresh, isPaused: !autoRefresh.isPaused });
   }, [autoRefresh, onAutoRefreshChange]);
 
   /** Apply a range: parse it, call `onChange`, and exit editing mode. */

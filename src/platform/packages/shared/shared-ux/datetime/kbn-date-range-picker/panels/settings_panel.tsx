@@ -21,7 +21,7 @@ import {
   PanelBodySectionInfo,
   SubPanelHeading,
 } from '../date_range_picker_panel_ui';
-import { AutoRefresh } from '../settings/auto_refresh';
+import { RefreshInterval } from '../refresh_interval/refresh_interval';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { settingsPanelTexts } from '../translations';
 import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
@@ -55,6 +55,7 @@ export function SettingsPanel() {
     settings,
     onSettingsChange,
     autoRefresh,
+    onAutoRefreshChange,
     hasAutoRefresh,
     timeZone,
     prependBasePath,
@@ -90,7 +91,9 @@ export function SettingsPanel() {
       <PanelBody spacingSide="both">
         <PanelBodySection>
           <EuiFlexGroup gutterSize="l" direction="column">
-            {hasAutoRefresh && autoRefresh ? <AutoRefresh autoRefresh={autoRefresh} /> : null}
+            {hasAutoRefresh && autoRefresh ? (
+              <RefreshInterval value={autoRefresh} onChange={onAutoRefreshChange} />
+            ) : null}
             <PanelBodySectionInfo
               heading={settingsPanelTexts.timeFormatHeading}
               markdown={timeZoneDescription}

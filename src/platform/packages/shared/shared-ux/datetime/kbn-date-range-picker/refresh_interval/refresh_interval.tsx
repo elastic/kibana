@@ -12,8 +12,7 @@ import { css } from '@emotion/react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch } from '@elastic/eui';
 
-import { useDateRangePickerContext } from '../date_range_picker_context';
-import { settingsPanelTexts } from '../translations';
+import { refreshIntervalTexts } from '../translations';
 import type { AutoRefreshIntervalUnit, AutoRefreshSettings } from '../types';
 import { msToAutoRefreshInterval, autoRefreshIntervalToMs } from '../utils';
 
@@ -26,46 +25,42 @@ const unitSelectFlexItemCss = css`
 `;
 
 const AUTO_REFRESH_UNIT_OPTIONS: Array<{ value: AutoRefreshIntervalUnit; text: string }> = [
-  { value: 's', text: settingsPanelTexts.autoRefreshUnitSeconds },
-  { value: 'm', text: settingsPanelTexts.autoRefreshUnitMinutes },
-  { value: 'h', text: settingsPanelTexts.autoRefreshUnitHours },
+  { value: 's', text: refreshIntervalTexts.unitSeconds },
+  { value: 'm', text: refreshIntervalTexts.unitMinutes },
+  { value: 'h', text: refreshIntervalTexts.unitHours },
 ];
 
+export interface RefreshIntervalProps {
+  /** Current auto-refresh state. */
+  value: AutoRefreshSettings;
+  /** Called with the next auto-refresh state when the user changes it. */
+  onChange: (value: AutoRefreshSettings) => void;
+}
+
 /**
- * "Refresh every" row which contains switch toggle to enable/disable auto-refresh, count input and unit select.
+ * "Refresh every" form: a switch to turn auto-refresh on and off, an interval count and a unit.
+ * Turning auto-refresh on also starts the timer, so a second click on play is not needed.
  */
-export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings }) {
-  const { onAutoRefreshChange } = useDateRangePickerContext();
-
-  const onChange = useCallback(
-    (next: AutoRefreshSettings) => onAutoRefreshChange?.(next),
-    [onAutoRefreshChange]
-  );
-
-  const derived = msToAutoRefreshInterval(autoRefresh.intervalMs, autoRefresh.intervalDisplayUnit);
+export function RefreshInterval({ value, onChange }: RefreshIntervalProps) {
+  const derived = msToAutoRefreshInterval(value.intervalMs, value.intervalDisplayUnit);
 
   const [countInput, setCountInput] = useState<number | ''>(derived.count);
 
   // Sync count input when interval or display unit changes externally (not only interval ms).
-  const prevAutoRefreshDisplayKeyRef = useRef(
-    `${autoRefresh.intervalMs}\0${autoRefresh.intervalDisplayUnit}`
-  );
+  const prevDisplayKeyRef = useRef(`${value.intervalMs}\0${value.intervalDisplayUnit}`);
 
   useEffect(() => {
-    const key = `${autoRefresh.intervalMs}\0${autoRefresh.intervalDisplayUnit}`;
-    if (key !== prevAutoRefreshDisplayKeyRef.current) {
-      setCountInput(
-        msToAutoRefreshInterval(autoRefresh.intervalMs, autoRefresh.intervalDisplayUnit).count
-      );
-      prevAutoRefreshDisplayKeyRef.current = key;
+    const key = `${value.intervalMs}\0${value.intervalDisplayUnit}`;
+    if (key !== prevDisplayKeyRef.current) {
+      setCountInput(msToAutoRefreshInterval(value.intervalMs, value.intervalDisplayUnit).count);
+      prevDisplayKeyRef.current = key;
     }
-  }, [autoRefresh.intervalMs, autoRefresh.intervalDisplayUnit]);
+  }, [value.intervalMs, value.intervalDisplayUnit]);
 
-  // Turning auto-refresh on also starts the timer, so a second click on play is not needed.
   const handleToggle = useCallback(() => {
-    const isEnabled = !autoRefresh.isEnabled;
-    onChange({ ...autoRefresh, isEnabled, isPaused: !isEnabled });
-  }, [onChange, autoRefresh]);
+    const isEnabled = !value.isEnabled;
+    onChange({ ...value, isEnabled, isPaused: !isEnabled });
+  }, [onChange, value]);
 
   const handleCountChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -76,10 +71,10 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
       setCountInput(parsed);
 
       if (typeof parsed === 'number' && !isNaN(parsed) && parsed > 0) {
-        onChange({ ...autoRefresh, intervalMs: autoRefreshIntervalToMs(parsed, derived.unit) });
+        onChange({ ...value, intervalMs: autoRefreshIntervalToMs(parsed, derived.unit) });
       }
     },
-    [onChange, autoRefresh, derived.unit]
+    [onChange, value, derived.unit]
   );
 
   const handleUnitChange = useCallback(
@@ -88,20 +83,20 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
       const currentCount = typeof countInput === 'number' && countInput > 0 ? countInput : 1;
 
       onChange({
-        ...autoRefresh,
+        ...value,
         intervalMs: autoRefreshIntervalToMs(currentCount, newUnit),
         intervalDisplayUnit: newUnit,
       });
     },
-    [onChange, autoRefresh, countInput]
+    [onChange, value, countInput]
   );
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
       <EuiFlexItem grow={false}>
         <EuiSwitch
-          label={settingsPanelTexts.autoRefreshLabel}
-          checked={autoRefresh.isEnabled}
+          label={refreshIntervalTexts.label}
+          checked={value.isEnabled}
           onChange={handleToggle}
           compressed
           data-test-subj="dateRangePickerAutoRefreshToggle"
@@ -114,8 +109,8 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
           value={countInput}
           min={1}
           onChange={handleCountChange}
-          disabled={!autoRefresh.isEnabled}
-          aria-label={settingsPanelTexts.autoRefreshIntervalCountAriaLabel}
+          disabled={!value.isEnabled}
+          aria-label={refreshIntervalTexts.intervalCountAriaLabel}
           data-test-subj="dateRangePickerAutoRefreshIntervalCount"
         />
       </EuiFlexItem>
@@ -124,10 +119,10 @@ export function AutoRefresh({ autoRefresh }: { autoRefresh: AutoRefreshSettings 
           compressed
           fullWidth
           value={derived.unit}
-          disabled={!autoRefresh.isEnabled}
+          disabled={!value.isEnabled}
           options={AUTO_REFRESH_UNIT_OPTIONS}
           onChange={handleUnitChange}
-          aria-label={settingsPanelTexts.autoRefreshIntervalUnitAriaLabel}
+          aria-label={refreshIntervalTexts.intervalUnitAriaLabel}
           data-test-subj="dateRangePickerAutoRefreshIntervalUnit"
         />
       </EuiFlexItem>

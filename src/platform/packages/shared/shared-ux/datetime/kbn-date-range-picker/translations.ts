@@ -236,30 +236,6 @@ export const settingsPanelTexts = {
   heading: i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.heading', {
     defaultMessage: 'Settings',
   }),
-  autoRefreshLabel: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshLabel',
-    { defaultMessage: 'Refresh every' }
-  ),
-  autoRefreshIntervalCountAriaLabel: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshIntervalCountAriaLabel',
-    { defaultMessage: 'Refresh interval count' }
-  ),
-  autoRefreshIntervalUnitAriaLabel: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshIntervalUnitAriaLabel',
-    { defaultMessage: 'Refresh interval unit' }
-  ),
-  autoRefreshUnitSeconds: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitSeconds',
-    { defaultMessage: 'seconds' }
-  ),
-  autoRefreshUnitMinutes: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitMinutes',
-    { defaultMessage: 'minutes' }
-  ),
-  autoRefreshUnitHours: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.autoRefreshUnitHours',
-    { defaultMessage: 'hours' }
-  ),
   roundRelativeTimeLabel: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel',
     { defaultMessage: 'Round relative time ranges' }
@@ -338,6 +314,29 @@ export const autoRefreshButtonTexts = {
         'Auto-refresh paused, refresh interval is {intervalCountdownLabel}. Activate to resume.',
       values: { intervalCountdownLabel },
     }),
+};
+
+export const refreshIntervalTexts = {
+  label: i18n.translate('sharedUXPackages.dateRangePicker.refreshInterval.label', {
+    defaultMessage: 'Refresh every',
+  }),
+  intervalCountAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.refreshInterval.intervalCountAriaLabel',
+    { defaultMessage: 'Refresh interval count' }
+  ),
+  intervalUnitAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.refreshInterval.intervalUnitAriaLabel',
+    { defaultMessage: 'Refresh interval unit' }
+  ),
+  unitSeconds: i18n.translate('sharedUXPackages.dateRangePicker.refreshInterval.unitSeconds', {
+    defaultMessage: 'seconds',
+  }),
+  unitMinutes: i18n.translate('sharedUXPackages.dateRangePicker.refreshInterval.unitMinutes', {
+    defaultMessage: 'minutes',
+  }),
+  unitHours: i18n.translate('sharedUXPackages.dateRangePicker.refreshInterval.unitHours', {
+    defaultMessage: 'hours',
+  }),
 };
 
 export const mainPanelTexts = {
