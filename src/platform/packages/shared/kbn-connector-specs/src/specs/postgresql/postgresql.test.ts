@@ -938,18 +938,39 @@ describe('PostgresqlConnector', () => {
       expect(driverRows).toHaveLength(1);
     });
 
-    it('fails the action, not the process, when a row cannot be serialized', async () => {
+    it('fails the action, not the process, when a row cannot be serialized, once the statements finish', async () => {
       const unserializable = {
         toJSON: () => {
           throw new Error('Invalid string length');
         },
       };
-      const { pool, client } = makePool([{ command: 'SELECT', rows: [unserializable] }]);
+      const { pool, client } = makePool();
+      let driverRows: Row[] = [];
+      let callbackRan = false;
+      client.query.mockImplementationOnce(async (query) => {
+        const submitted = query as SubmittedQuery;
+        const result = { command: 'SELECT', rowCount: 3, rows: [] as Row[] };
+        [unserializable, { id: 1 }, { id: 2 }].forEach((row) => {
+          submitted.emit('row', row, result);
+          result.rows.push(row);
+        });
+        driverRows = result.rows;
+        // The connection must still be open until the server reports the end of the batch.
+        expect(client.release).not.toHaveBeenCalled();
+        callbackRan = true;
+        submitted.callback(null, result);
+        return submitted;
+      });
 
       await expect(
         PostgresqlConnector.actions.executeSql.handler(makeContext(pool), { sql: 'SELECT x' })
-      ).rejects.toThrow('Invalid string length');
+      ).rejects.toThrow(
+        'The statements completed, but a result row could not be returned: Invalid string length'
+      );
 
+      expect(callbackRan).toBe(true);
+      // Rows after the failure are still dropped from the driver's copy.
+      expect(driverRows).toHaveLength(1);
       expect(client.release).toHaveBeenCalledWith(true);
     });
 

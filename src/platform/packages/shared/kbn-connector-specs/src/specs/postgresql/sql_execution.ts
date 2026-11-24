@@ -167,14 +167,26 @@ export const runUnrestricted = async (
   try {
     outcome = await new Promise<QueryResult | QueryResult[]>((resolve, reject) => {
       // A callback is needed to surface timeouts and connection errors, and makes the driver also accumulate rows.
-      const query = new Query(sql, (err, result) => (err ? reject(err) : resolve(result)));
       let rowError: Error | undefined;
+      const query = new Query(sql, (err, result) => {
+        if (err) return reject(err);
+        // Reported only once the server has finished, so a failing row cannot cut a write batch short.
+        if (rowError) {
+          return reject(
+            new Error(
+              `The statements completed, but a result row could not be returned: ${rowError.message}`
+            )
+          );
+        }
+        return resolve(result);
+      });
       query.on('row', (row, result) => {
-        if (!result || rowError) return;
+        if (!result) return;
+        // Drop the driver's own copy of the previous row, even after a failure; only the capped copy below is kept.
+        result.rows.length = 0;
+        if (rowError) return;
         // This runs on the driver's socket event stack, where a throw would crash the process, so fail the action.
         try {
-          // Drop the driver's own copy of the previous row; only the capped copy below is kept.
-          result.rows.length = 0;
           const statement = kept.get(result) ?? { rows: [], truncated: false };
           kept.set(result, statement);
           if (statement.truncated) return;
@@ -188,7 +200,6 @@ export const runUnrestricted = async (
           remainingBytes -= rowBytes;
         } catch (err) {
           rowError = err instanceof Error ? err : new Error(String(err));
-          reject(rowError);
         }
       });
       client.query(query);
