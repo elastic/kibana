@@ -15,6 +15,7 @@ import { MetricsExperienceStateProvider } from './context/metrics_experience_sta
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 import { ChartSectionInspectorProvider } from '../../../context/chart_section_inspector';
 import { ExternalServicesProvider } from '../../../context/external_services';
+import { ChartLoadedProvider } from '../../../context/chart_loaded_context';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
@@ -22,7 +23,9 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
     <PerformanceContextProvider>
       <EventBasedTelemetryProvider analytics={props.services.analytics}>
         <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
-          <MetricsExperienceGrid {...props} />
+          <ChartLoadedProvider onChartLoaded={props.onChartLoaded}>
+            <MetricsExperienceGrid {...props} />
+          </ChartLoadedProvider>
         </ChartSectionInspectorProvider>
       </EventBasedTelemetryProvider>
     </PerformanceContextProvider>

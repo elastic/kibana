@@ -585,6 +585,7 @@ export function getDataStateContainer({
           await fetchAll({
             ...commonFetchParams,
             reset: options.reset,
+            isChartMounted: fetchChart$.observed,
             abortController,
             onFetchRecordsComplete: async () => {
               const { dataSource } = dataSubjects.documents$.getValue();

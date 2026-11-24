@@ -13,6 +13,7 @@ import { act, fireEvent, render } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from './hooks';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
+import { ChartLoadedProvider } from '../../../context/chart_loaded_context';
 
 const useFetchMetricsDataMock = useFetchMetricsData as jest.MockedFunction<
   typeof useFetchMetricsData
@@ -354,6 +355,44 @@ describe('MetricsExperienceGrid', () => {
     unmount();
 
     expect(setBreakdownFieldNames).toHaveBeenLastCalledWith(undefined);
+  });
+
+  describe('onChartLoaded', () => {
+    const renderWithOnChartLoaded = () => {
+      const onChartLoaded = jest.fn();
+      render(
+        <ChartLoadedProvider onChartLoaded={onChartLoaded}>
+          <MetricsExperienceGrid {...defaultProps} />
+        </ChartLoadedProvider>,
+        { wrapper: TestWrapper }
+      );
+      return onChartLoaded;
+    };
+    const mockFetch = (loading: boolean, error: Error | null) => {
+      useFetchMetricsDataMock.mockReturnValue({
+        metricItems: [],
+        allDimensions: [],
+        activeDimensions: [],
+        loading,
+        error,
+      });
+      useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+    };
+
+    it.each([
+      ['fails', new Error('Network error')],
+      ['returns no metrics', null],
+    ])('reports an empty section when the fetch %s', (_, error) => {
+      mockFetch(false, error);
+
+      expect(renderWithOnChartLoaded()).toHaveBeenCalledWith({ isEmpty: true });
+    });
+
+    it('does not report while the fetch is in progress', () => {
+      mockFetch(true, null);
+
+      expect(renderWithOnChartLoaded()).not.toHaveBeenCalled();
+    });
   });
 
   it('renders Discover ErrorCallout when METRICS_INFO fetch fails with a network error', () => {

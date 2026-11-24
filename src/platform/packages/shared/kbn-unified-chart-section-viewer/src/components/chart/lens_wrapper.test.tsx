@@ -20,6 +20,7 @@ import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import { ChartLoadedProvider } from '../../context/chart_loaded_context';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -337,6 +338,85 @@ describe('LensWrapper', () => {
       });
 
       expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL]);
+    });
+  });
+
+  describe('onChartLoaded', () => {
+    const tablesWithRows = { tables: { tables: { layer1: { rows: [{ a: 1 }] } } } };
+    const tablesWithoutRows = { tables: { tables: { layer1: { rows: [] } } } };
+
+    const renderWithOnChartLoaded = (onChartLoaded?: () => void) => {
+      render(
+        <EuiThemeProvider>
+          <ChartLoadedProvider onChartLoaded={onChartLoaded}>
+            <LensWrapper {...defaultProps} />
+          </ChartLoadedProvider>
+        </EuiThemeProvider>
+      );
+
+      return mockEmbeddableComponent.mock.calls[0][0].onLoad;
+    };
+
+    it('reports a chart which finished loading with data', () => {
+      const onChartLoaded = jest.fn();
+      const onLoad = renderWithOnChartLoaded(onChartLoaded);
+
+      onLoad(true, tablesWithRows);
+      expect(onChartLoaded).not.toHaveBeenCalled();
+
+      onLoad(false, tablesWithRows);
+      expect(onChartLoaded).toHaveBeenCalledTimes(1);
+      expect(onChartLoaded).toHaveBeenCalledWith();
+    });
+
+    it('reports a chart when only one of several layers has data', () => {
+      const onChartLoaded = jest.fn();
+      const onLoad = renderWithOnChartLoaded(onChartLoaded);
+
+      onLoad(false, {
+        tables: { tables: { layer1: { rows: [] }, layer2: { rows: [{ a: 1 }] } } },
+      });
+      expect(onChartLoaded).toHaveBeenCalledWith();
+    });
+
+    it.each([
+      ['tables without rows', tablesWithoutRows],
+      ['no adapters', undefined],
+    ])('reports a chart which finished loading with %s as empty', (_, adapters) => {
+      const onChartLoaded = jest.fn();
+      const onLoad = renderWithOnChartLoaded(onChartLoaded);
+
+      onLoad(true, adapters);
+      expect(onChartLoaded).not.toHaveBeenCalled();
+
+      onLoad(false, adapters);
+      expect(onChartLoaded).toHaveBeenCalledWith({ isEmpty: true });
+    });
+
+    it('uses the latest callback for a load of a later search', () => {
+      const first = jest.fn();
+      const second = jest.fn();
+      const renderWrapper = (onChartLoaded: () => void) => (
+        <EuiThemeProvider>
+          <ChartLoadedProvider onChartLoaded={onChartLoaded}>
+            <LensWrapper {...defaultProps} />
+          </ChartLoadedProvider>
+        </EuiThemeProvider>
+      );
+      const { rerender } = render(renderWrapper(first));
+      const onLoad = mockEmbeddableComponent.mock.calls[0][0].onLoad;
+
+      rerender(renderWrapper(second));
+      onLoad(false, tablesWithRows);
+
+      expect(first).not.toHaveBeenCalled();
+      expect(second).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not fail without a callback', () => {
+      const onLoad = renderWithOnChartLoaded();
+
+      expect(() => onLoad(false, tablesWithRows)).not.toThrow();
     });
   });
 

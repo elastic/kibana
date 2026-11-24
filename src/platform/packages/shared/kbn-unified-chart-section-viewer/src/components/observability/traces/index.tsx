@@ -8,7 +8,7 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { UnifiedBreakdownFieldSelector, resolveBreakdownField } from '@kbn/unified-histogram';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
@@ -20,6 +20,7 @@ import { ThroughputChart } from './throughput';
 import { ChartsGrid } from '../../charts_grid';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractUsedMetadataFields } from '../../../utils';
+import { ChartLoadedProvider } from '../../../context/chart_loaded_context';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -36,6 +37,7 @@ function TraceMetricsGrid({
   isComponentVisible,
   breakdownField,
   onBreakdownFieldChange,
+  onChartLoaded,
 }: UnifiedMetricsGridProps) {
   const { query, dataSource, columns } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
@@ -102,54 +104,61 @@ function TraceMetricsGrid({
   // The source's index pattern, including remote cluster prefixes (`remote:traces-*`).
   const indexPattern = dataSource.title || undefined;
 
+  // without charts nothing else reports that the section has no data
+  useEffect(() => {
+    if (!indexPattern) onChartLoaded?.({ isEmpty: true });
+  }, [indexPattern, onChartLoaded]);
+
   if (!indexPattern) {
     return undefined;
   }
 
   return (
-    <ChartsGrid
-      id="tracesGrid"
-      toolbarCss={chartToolbarCss}
-      toolbar={toolbar}
-      isComponentVisible={isComponentVisible}
-    >
-      <TraceMetricsProvider
-        value={{
-          indexes: indexPattern,
-          filters,
-          metadataFields: usedMetadataFields,
-          services,
-          onBrushEnd,
-          onFilter,
-          fetchParams,
-          discoverFetch$,
-          actions,
-          profileId,
-          breakdownField: breakdownDataViewField?.name,
-        }}
+    <ChartLoadedProvider onChartLoaded={onChartLoaded}>
+      <ChartsGrid
+        id="tracesGrid"
+        toolbarCss={chartToolbarCss}
+        toolbar={toolbar}
+        isComponentVisible={isComponentVisible}
       >
-        <EuiPanel
-          hasBorder={false}
-          hasShadow={false}
-          css={css`
-            height: 100%;
-            align-content: center;
-          `}
+        <TraceMetricsProvider
+          value={{
+            indexes: indexPattern,
+            filters,
+            metadataFields: usedMetadataFields,
+            services,
+            onBrushEnd,
+            onFilter,
+            fetchParams,
+            discoverFetch$,
+            actions,
+            profileId,
+            breakdownField: breakdownDataViewField?.name,
+          }}
         >
-          <EuiFlexGrid columns={3} gutterSize="s">
-            <EuiFlexItem>
-              <LatencyChart />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ErrorRateChart />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ThroughputChart />
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        </EuiPanel>
-      </TraceMetricsProvider>
-    </ChartsGrid>
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            css={css`
+              height: 100%;
+              align-content: center;
+            `}
+          >
+            <EuiFlexGrid columns={3} gutterSize="s">
+              <EuiFlexItem>
+                <LatencyChart />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ErrorRateChart />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ThroughputChart />
+              </EuiFlexItem>
+            </EuiFlexGrid>
+          </EuiPanel>
+        </TraceMetricsProvider>
+      </ChartsGrid>
+    </ChartLoadedProvider>
   );
 }
 

@@ -316,6 +316,10 @@ export interface ChartSectionProps {
    */
   isChartLoading?: boolean;
   /**
+   * Callback to report that the charts of the section finished loading, `isEmpty` if none has data
+   */
+  onChartLoaded?: (options?: { isEmpty?: boolean }) => void;
+  /**
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;

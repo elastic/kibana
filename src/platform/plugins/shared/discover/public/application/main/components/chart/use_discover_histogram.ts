@@ -32,6 +32,7 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
+import { useChartOutcome } from './use_chart_outcome';
 import {
   type DiscoverAppState,
   selectTabCombinedFilters,
@@ -91,7 +92,13 @@ export interface UseUnifiedHistogramOptions {
 
 export const useDiscoverHistogram = (
   options?: UseUnifiedHistogramOptions
-): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
+): UseUnifiedHistogramProps & {
+  setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void;
+  onChartLoaded: (
+    fetchAbortController: AbortController | undefined,
+    options?: { isEmpty?: boolean }
+  ) => void;
+} => {
   const services = useDiscoverServices();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const {
@@ -103,9 +110,23 @@ export const useDiscoverHistogram = (
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const documentsState = useDataState(documents$);
-  const isChartLoading = useMemo(() => {
-    return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
-  }, [isEsqlMode, documentsState?.fetchStatus]);
+  // The abort controller of the fetch for which a chart finished loading with results
+  const [chartLoadedFor, setChartLoadedFor] = useState<AbortController>();
+  const isChartLoading =
+    isEsqlMode &&
+    documentsState?.fetchStatus === FetchStatus.LOADING &&
+    chartLoadedFor !== getAbortController();
+
+  const reportChartOutcome = useChartOutcome({ main$, documents$, getAbortController, isEsqlMode });
+
+  const onChartLoaded = useCallback(
+    (fetchAbortController: AbortController | undefined, { isEmpty = false } = {}) => {
+      if (reportChartOutcome(fetchAbortController, isEmpty ? 'empty' : 'loaded') && !isEmpty) {
+        setChartLoadedFor(fetchAbortController);
+      }
+    },
+    [reportChartOutcome]
+  );
 
   /**
    * API initialization
@@ -155,6 +176,8 @@ export const useDiscoverHistogram = (
     }
   }, [chartHidden, unifiedHistogramApi]);
 
+  const previousFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);
+
   /**
    * Total hits
    */
@@ -165,7 +188,20 @@ export const useDiscoverHistogram = (
     const subscription = createTotalHitsObservable(unifiedHistogramApi?.state$)?.subscribe(
       ({ status, result }) => {
         if (isEsqlMode) {
-          // ignore histogram's total hits updates for ES|QL as Discover manages them during docs fetching
+          // Discover manages ES|QL total hits during docs fetching, a completed chart with results
+          // is only used to reveal it while documents continue loading
+          if (
+            status === UnifiedHistogramFetchStatus.complete &&
+            typeof result === 'number' &&
+            result > 0
+          ) {
+            onChartLoaded(previousFetchParamsRef.current?.abortController);
+          } else if (
+            status === UnifiedHistogramFetchStatus.complete ||
+            status === UnifiedHistogramFetchStatus.error
+          ) {
+            reportChartOutcome(previousFetchParamsRef.current?.abortController, 'empty');
+          }
           return;
         }
 
@@ -209,7 +245,15 @@ export const useDiscoverHistogram = (
     return () => {
       subscription?.unsubscribe();
     };
-  }, [isEsqlMode, main$, totalHits$, setTotalHitsError, unifiedHistogramApi?.state$]);
+  }, [
+    isEsqlMode,
+    main$,
+    totalHits$,
+    setTotalHitsError,
+    unifiedHistogramApi?.state$,
+    onChartLoaded,
+    reportChartOutcome,
+  ]);
 
   /**
    * Request params
@@ -277,8 +321,6 @@ export const useDiscoverHistogram = (
     visContext,
     getModifiedVisAttributes,
   ]);
-
-  const previousFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
@@ -351,6 +393,11 @@ export const useDiscoverHistogram = (
       nextVisContext: UnifiedHistogramVisContext | undefined,
       externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
     ) => {
+      if (!nextVisContext) {
+        // no chart for this query (e.g. no time field), it never reports back
+        reportChartOutcome(getAbortController(), 'empty');
+      }
+
       switch (externalVisContextStatus) {
         case UnifiedHistogramExternalVisContextStatus.manuallyCustomized:
           // if user customized the visualization manually
@@ -394,7 +441,13 @@ export const useDiscoverHistogram = (
           break;
       }
     },
-    [dispatch, setOverriddenVisContextAfterInvalidation, updateAttributes]
+    [
+      dispatch,
+      setOverriddenVisContextAfterInvalidation,
+      updateAttributes,
+      getAbortController,
+      reportChartOutcome,
+    ]
   );
 
   const onBreakdownFieldChange = useCallback<
@@ -437,6 +490,7 @@ export const useDiscoverHistogram = (
       withDefaultActions: histogramCustomization?.withDefaultActions,
       disabledActions: histogramCustomization?.disabledActions,
       isChartLoading,
+      onChartLoaded,
       onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
       onBreakdownFieldChange,
       onTimeIntervalChange,
@@ -449,6 +503,7 @@ export const useDiscoverHistogram = (
       histogramCustomization?.withDefaultActions,
       isEsqlMode,
       isChartLoading,
+      onChartLoaded,
       onBreakdownFieldChange,
       onTimeIntervalChange,
       onVisContextChanged,

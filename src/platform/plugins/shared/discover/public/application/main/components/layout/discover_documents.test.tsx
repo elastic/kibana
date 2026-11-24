@@ -59,11 +59,13 @@ async function mountComponent({
   hits,
   toolkit,
   isEsqlMode,
+  error,
 }: {
   fetchStatus: FetchStatus;
   hits: EsHitRecord[];
   toolkit?: InternalStateMockToolkit;
   isEsqlMode?: boolean;
+  error?: Error;
 }) {
   if (!toolkit) {
     ({ toolkit } = await setup());
@@ -83,6 +85,7 @@ async function mountComponent({
 
   const testDocuments = {
     fetchStatus,
+    error,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     ...(isEsqlMode
       ? {
@@ -136,6 +139,17 @@ describe('Discover documents layout', () => {
   test('render loading when loading and no documents', async () => {
     await mountComponent({ fetchStatus: FetchStatus.LOADING, hits: [] });
     expect(screen.getByText('Loading documents')).toBeVisible();
+    expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  });
+
+  test('render the error instead of the documents when fetching them failed', async () => {
+    await mountComponent({
+      fetchStatus: FetchStatus.ERROR,
+      hits: [],
+      isEsqlMode: true,
+      error: new Error('This query failed'),
+    });
+    expect(screen.getByText('This query failed')).toBeVisible();
     expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
   });
 

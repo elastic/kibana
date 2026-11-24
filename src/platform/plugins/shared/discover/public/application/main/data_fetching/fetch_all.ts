@@ -70,12 +70,15 @@ export interface CommonFetchParams {
 export function fetchAll(
   params: CommonFetchParams & {
     reset: boolean;
+    /** Whether a chart is listening for this fetch, only then it can decide about main$ */
+    isChartMounted?: boolean;
     onFetchRecordsComplete?: () => Promise<void>;
   }
 ): Promise<void> {
   const {
     dataSubjects,
     reset = false,
+    isChartMounted = false,
     initialFetchStatus,
     services,
     scopedProfilesManager,
@@ -245,7 +248,19 @@ export function fetchAll(
       // but their errors will be shown in-place (e.g. of the chart).
       .catch((e) => {
         sendErrorMsg(dataSubjects.documents$, e, { query });
-        sendErrorMsg(dataSubjects.main$, e);
+
+        if (isEsqlQuery) {
+          // ES|QL total hits are derived from the documents request, complete them to resolve the fetch
+          sendErrorMsg(dataSubjects.totalHits$, e);
+        }
+
+        // A visible ES|QL chart may still show results, useChartOutcome then decides about main$
+        const hasVisibleEsqlChart =
+          isEsqlQuery && isChartMounted && !getCurrentTab().appState.hideChart;
+
+        if (!hasVisibleEsqlChart) {
+          sendErrorMsg(dataSubjects.main$, e);
+        }
       });
 
     // Return a promise that will resolve once all the requests have finished or failed, or no results are found
@@ -270,7 +285,12 @@ export function fetchAll(
       // is not already in an ERROR state, e.g. because the document query has failed.
       // This will only complete main$, if it hasn't already been completed previously
       // by a query finding no results.
-      if (dataSubjects.main$.getValue().fetchStatus !== FetchStatus.ERROR) {
+      // main$ stays loading while failed documents wait for the chart (useChartOutcome)
+      const isWaitingForChart =
+        dataSubjects.documents$.getValue().fetchStatus === FetchStatus.ERROR &&
+        dataSubjects.main$.getValue().fetchStatus === FetchStatus.LOADING;
+
+      if (dataSubjects.main$.getValue().fetchStatus !== FetchStatus.ERROR && !isWaitingForChart) {
         sendCompleteMsg(dataSubjects.main$);
       }
     });
