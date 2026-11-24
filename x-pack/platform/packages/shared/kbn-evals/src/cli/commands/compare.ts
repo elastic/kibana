@@ -316,6 +316,7 @@ export const compareCmd: Command<void> = {
             spaceId: spaceIds?.[0],
             baselineExecutionId: baselineExperimentId,
             targetExecutionId: targetExperimentId,
+            repetitionPolicy,
           })
         : undefined;
       if (effectiveKibanaUrl && !comparePageUrl) {

@@ -25,6 +25,8 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/repo-info'
   - '@kbn/proposals-common'
+  - '@kbn/test'
+  - '@kbn/security-solution-plugin'
   - '@kbn/utility-types'
 tags:
   - functional-tests

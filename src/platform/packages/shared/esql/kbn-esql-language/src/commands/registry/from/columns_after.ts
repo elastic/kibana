@@ -58,6 +58,13 @@ export const columnsAfter = async (
 
   const promises: Array<Promise<ESQLColumnData[]>> = [];
 
+  // Elasticsearch orders LET columns before plain sources and inline subqueries.
+  for (const namedSubquery of referencedNamedSubqueries) {
+    promises.push(
+      getNamedSubqueryColumns(namedSubquery, query, memoizedFields, unmappedFieldsStrategy)
+    );
+  }
+
   // Batch all plain sources into a single FROM s1, s2, ... request instead of N individual
   // ones. ES returns the column-union in one round-trip, which is identical to merging N results.
   if (sources.length > 0) {
@@ -68,13 +75,6 @@ export const columnsAfter = async (
 
   for (const subquery of subqueries) {
     promises.push(processSubquery(subquery.child, query, memoizedFields, unmappedFieldsStrategy));
-  }
-
-  // For each LET used in FROM, compute its body's output columns using only previously declared LET bindings.
-  for (const namedSubquery of referencedNamedSubqueries) {
-    promises.push(
-      getNamedSubqueryColumns(namedSubquery, query, memoizedFields, unmappedFieldsStrategy)
-    );
   }
 
   const metadataNeedsNamedSubquerySources =

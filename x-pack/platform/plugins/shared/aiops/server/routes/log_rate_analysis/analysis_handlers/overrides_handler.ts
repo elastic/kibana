@@ -9,7 +9,7 @@ import {
   resetResults,
   resetErrors,
   resetGroups,
-} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+} from '@kbn/aiops-log-rate-analysis/api/stream_actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';

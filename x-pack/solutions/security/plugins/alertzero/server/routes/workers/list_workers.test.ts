@@ -21,6 +21,7 @@ const setupRoute = (list: jest.Mock) => {
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => 'default',
     getWorkersService: () => ({ list }),
+    isCpsEnabled: () => false,
   } as unknown as RouteDependencies);
 
   const handler = addVersion.mock.calls[0][1] as (
@@ -47,5 +48,29 @@ describe('registerListWorkersRoute', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: { workers: [], canModifyWorkers: false },
     });
+  });
+
+  it('hands the service a universe callback that returns the filtered patterns', async () => {
+    const list = jest.fn().mockResolvedValue({ workers: [] });
+    const { handler } = setupRoute(list);
+    const context = {
+      ...(createRouteContextMock({ manageSecurity: true }) as object),
+      core: Promise.resolve({
+        uiSettings: {
+          client: {
+            get: jest.fn().mockResolvedValue(['logs-*', '.alerts-security.alerts-default']),
+          },
+        },
+      }),
+    };
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    const getHuntUniverse = list.mock.calls[0][2] as () => Promise<string[]>;
+    await expect(getHuntUniverse()).resolves.toEqual(['logs-*']);
   });
 });
