@@ -317,8 +317,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-CBMxaHcPsXR8PrO+nlcPFfu2ppV8yxvMhebNzO2x3Ys=
-
 importers:
 
   .:
@@ -3397,7 +3395,7 @@ importers:
         version: 3.2.2(@types/react@18.2.79)(react@17.0.2)(xstate@4.38.3)
       '@xstate5/react':
         specifier: npm:@xstate/react@5.0.3
-        version: '@xstate/react@5.0.3(@types/react@18.2.79)(react@17.0.2)'
+        version: '@xstate/react@5.0.3(@types/react@18.2.79)(react@17.0.2)(xstate@4.38.3)'
       '@xterm/xterm':
         specifier: 6.0.0
         version: 6.0.0
@@ -3898,7 +3896,7 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@4.2.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
@@ -3907,10 +3905,10 @@ importers:
         version: 2.0.2
       redux-thunk:
         specifier: 2.4.2
-        version: 2.4.2
+        version: 2.4.2(redux@4.2.1)
       redux-thunks:
         specifier: 1.0.0
-        version: 1.0.0(redux-thunk@2.4.2)
+        version: 1.0.0(redux-thunk@2.4.2(redux@4.2.1))
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
@@ -5224,8 +5222,8 @@ importers:
         specifier: 2.4.28
         version: 2.4.28
       '@types/selenium-webdriver':
-        specifier: 4.35.6
-        version: 4.35.6
+        specifier: 4.35.7
+        version: 4.35.7
       '@types/semver':
         specifier: 7.8.0
         version: 7.8.0
@@ -5371,8 +5369,8 @@ importers:
         specifier: 1.1.13
         version: 1.1.13
       chromedriver:
-        specifier: 154.0.1
-        version: 154.0.1(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+        specifier: 157.0.0
+        version: 157.0.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       clean-webpack-plugin:
         specifier: 4.0.0
         version: 4.0.0(webpack@5.96.1)
@@ -5515,8 +5513,8 @@ importers:
         specifier: 4.0.6
         version: 4.0.6
       geckodriver:
-        specifier: 6.1.1
-        version: 6.1.1(supports-color@8.1.1)
+        specifier: 8.0.0
+        version: 8.0.0(@wdio/logger@9.18.0)
       globby:
         specifier: 11.1.0
         version: 11.1.0
@@ -5716,8 +5714,8 @@ importers:
         specifier: 10.5.2
         version: 10.5.2(webpack@5.96.1)
       selenium-webdriver:
-        specifier: 4.48.0
-        version: 4.48.0
+        specifier: 4.52.0
+        version: 4.52.0
       sharp:
         specifier: 0.35.5
         version: 0.35.5(@types/node@24.10.13)
@@ -13077,8 +13075,8 @@ packages:
   '@types/seedrandom@2.4.28':
     resolution: {integrity: sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==}
 
-  '@types/selenium-webdriver@4.35.6':
-    resolution: {integrity: sha512-8nfyMRi4VvkY9QrQGyY/zkleAhnjnmE8YtdEeoCrWe3izp1P9vo9f5VTNRYF0up+l+kn+VuZah+je+bLddNV+g==}
+  '@types/selenium-webdriver@4.35.7':
+    resolution: {integrity: sha512-TVduvRhQrIdjPWEC6YJLxwZWegWLD3uDOsqMuWk2U9+TiXw6wAH9RlKEtuHO8kioZkJ5MWGC9pQDY0nXvgi0nA==}
 
   '@types/semver@7.8.0':
     resolution: {integrity: sha512-1mAINjtQCXXeLkJ9ehXkwOcBpqtLxiVtKhpUf83DdRNdQKV0iXZpaHYqRr7nj+wvxuJzoAmAwXI+sCNMv1CzLQ==}
@@ -13563,7 +13561,7 @@ packages:
     resolution: {integrity: sha512-Zdnn0VTPcVdoaAiW0OX6Nkvdoe7SNGjfaZqM61NKhjt2aNULqiicmDu2tOd1ChzlRWYDxGTdbzVqqVyMLpoHJw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-      xstate: '*'
+      xstate: ^5.19.2
     peerDependenciesMeta:
       xstate:
         optional: true
@@ -13586,8 +13584,8 @@ packages:
   '@xyflow/system@0.0.50':
     resolution: {integrity: sha512-HVUZd4LlY88XAaldFh2nwVxDOcdIBxGpQ5txzwfJPf+CAjj2BfYug1fHs2p4yS7YO8H6A3EFJQovBE8YuHkAdg==}
 
-  '@zip.js/zip.js@2.8.11':
-    resolution: {integrity: sha512-0fztsk/0ryJ+2PPr9EyXS5/Co7OK8q3zY/xOoozEWaUsL5x+C0cyZ4YyMuUffOO2Dx/rAdq4JMPqW0VUtm+vzA==}
+  '@zip.js/zip.js@2.25.0':
+    resolution: {integrity: sha512-oNRqUuU1XFu6G5d7Z0jufJ9dS9WteO0xiU/PNxsUrb4itZCsSbn191jpJzU00Gmc6S680X3DPZeF5EV4zAEMAg==}
     engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=18.0.0'}
 
   a-sync-waterfall@1.0.1:
@@ -14597,8 +14595,8 @@ packages:
     resolution: {integrity: sha512-9e/zx1jw7B4CO+c/RXoCsfg/x1AfUBioy4owYH0bJprEYAx5hRFLRhWBqHAG57D0ZM4H7vxbP7bPe0VwhQRYDQ==}
     engines: {node: '>=6.0'}
 
-  chromedriver@154.0.1:
-    resolution: {integrity: sha512-QtK+E8xDBt6+dBOALfbILJX2VoRngV6elAh47uZCGWKVKf7n3DyO/IpBo/x5PafLgpZ0LZKTWQQtB+DYq0ixHA==}
+  chromedriver@157.0.0:
+    resolution: {integrity: sha512-IwYuey+2f+yczWMxei84oF2MMKbrrDU+G4AQT95fXLG3rURvB7pemRgZWDLVZHDMV6g5eDPKE0TT9s6Lw45Kbg==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -16726,10 +16724,12 @@ packages:
     resolution: {integrity: sha512-zV/5HKTfCeKWnxG0Dmrw51hEWFGfcF2xiXqcA3+J90WDuP0SvoiSO5ORvcBsifmx/FoIjgQN3oNOGaQ5PhLFkg==}
     engines: {node: '>=18'}
 
-  geckodriver@6.1.1:
-    resolution: {integrity: sha512-/AcCyc9o9o6hUbudaSJM2iOtXbxSLqQPOb4GrPvEN40cjraUeaX/j5kH3mSgwiroyMn7qzx2wM61AQ2XY8j3sA==}
-    engines: {node: '>=20.0.0'}
+  geckodriver@8.0.0:
+    resolution: {integrity: sha512-2jGCA6deI5MAjODxmHljPqvaUccGbeeqMUHXlW4k3FNDp4YDpxSI+P5QG+w5KIsnCeuGEfTTNi2euKqHI1eD6Q==}
+    engines: {node: '>=22.19.0'}
     hasBin: true
+    peerDependencies:
+      '@wdio/logger': ^9.18.0 || ^10.0.0
 
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
@@ -18219,8 +18219,8 @@ packages:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
     engines: {node: '>=4.0'}
 
-  jszip@3.10.1:
-    resolution: {integrity: sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g==}
+  jszip@3.10.2:
+    resolution: {integrity: sha512-3l+rb15IOWtUhU0H5MFqES/T6Kh7abYwjosBey/vD6hDt8zoEffkSC5Ws5SGtgVw3gBx2NEbhTeSW1+kWkpyTQ==}
 
   just-curry-it@3.1.0:
     resolution: {integrity: sha512-mjzgSOFzlrurlURaHVjnQodyPNvrHrf1TbQP2XU9NSqBtHQPuHZ+Eb6TAJP7ASeJN9h9K0KXoRTs8u6ouHBKvg==}
@@ -19005,12 +19005,12 @@ packages:
     resolution: {integrity: sha512-1/JjbLoGwv87xVsutkX0XJc0M0W4kb40cZl/K41xtTViBOD9JuFPKfyMNTrLJ/ivYAd0aPqu/vduamXO0emTFQ==}
     engines: {node: '>= 0.4'}
 
-  modern-tar@0.7.7:
-    resolution: {integrity: sha512-t9VmxaqrmANnEOBhpSDI6HD192Ge48k8vmWqQQL7hSFEqHEYwZbbsu49+aKLWZeRvFs3j1pMhXOqqF4kPlvjkQ==}
-    engines: {node: '>=18.0.0'}
-
   modern-tar@0.8.4:
     resolution: {integrity: sha512-gN54ddmyzEg10orwZ2u4OOv+bjpMWdIl5jIkodK97bMq8QBSL5c0D7YX0lT1Ooz+99S7+PvFbnxzdjgHo1r41g==}
+    engines: {node: '>=18.0.0'}
+
+  modern-tar@0.8.6:
+    resolution: {integrity: sha512-LYSks0tNVqbtez/9OB0YFP6qLRSqkdAxJWOQpVaR67lNTbj2zNLyYpowkRMia5lXLCZKzxwoxkxH2MbbBR2aEg==}
     engines: {node: '>=18.0.0'}
 
   module-definition@6.0.1:
@@ -20662,6 +20662,8 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga-testing@2.0.2:
     resolution: {integrity: sha512-8IVPTaEw0Typ9TGCAsktFrrU+I5ACbmwPmzW0DQjUgZvja0k1jP2ILnUn+fZDF1gT8c0L/Ubj//bsej5X3OkaQ==}
@@ -20671,6 +20673,8 @@ packages:
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunks@1.0.0:
     resolution: {integrity: sha512-/obl3xW0jc3cCnWxOyVlLkJ0b/jokBkqXKWE0DSqbuwdDZq0JMCLpRl7PSUfgpup0Eu2x8hzD6OPe45lv/ngBQ==}
@@ -21209,9 +21213,9 @@ packages:
   select-hose@2.0.0:
     resolution: {integrity: sha512-mEugaLK+YfkijB4fx0e6kImuJdCIt2LxCRcbEYPqRGCs4F2ogyfZU5IAZRdjCP8JPq2AtdNoC/Dux63d9Kiryg==}
 
-  selenium-webdriver@4.48.0:
-    resolution: {integrity: sha512-rKM9uXFRWcF9aThrZQDNQH2/9Et/WvMZbg3/x1rnSYWoXiwJuShYeH0IAli8Cuw+c3lEV0UWPfUz88H+fvW9Hg==}
-    engines: {node: '>= 22.0.0'}
+  selenium-webdriver@4.52.0:
+    resolution: {integrity: sha512-+7AJZ85CUiSK4J8HDEKFAcZ+fIPB2krOWncOq0Stg/Ywc7phb85FkhWRdX/WXZtqOCSzvrF/Q34rWX6zFEnGOw==}
+    engines: {node: ^22.23.4 || ^24.22.1 || >= 26.12.1}
 
   self-signed-cert@1.0.1:
     resolution: {integrity: sha512-86d1jYydqaRdUEyR9tj5nQ0d059RUWB9gdZrzDy2MJaUHii1h9EyzbAepkV1rOLO2AkSkQbXtUrqWRH4FDYWHA==}
@@ -22369,6 +22373,10 @@ packages:
     resolution: {integrity: sha512-mLyPQnHwUxaM/rideoK/+KL8DaAJLRl4aBCfmX444aCSLnIaomqPLtNRe2jdCYcsk5wZzXrDIQC8ZeYNRAYyIA==}
     engines: {node: '>=20.18.1'}
 
+  undici@8.13.1:
+    resolution: {integrity: sha512-Kt7EaPjh0s93lJH/PmW3d5rhkcpUa6fS3jqZ7+YGxNd9L7Xy/i827xe4C2uhhq+pJebM4tQOl5AgHmW11G5Skg==}
+    engines: {node: '>=22.19.0'}
+
   unherit@1.1.0:
     resolution: {integrity: sha512-TqB2ZB44rZ/lUYkoYjo0LKmw+4HIMbUJSiN3iIJO1oHVieA2kbUyMe01rzsCBQ4gqeoAjn9edj9/fc4N8b7trA==}
 
@@ -23080,6 +23088,18 @@ packages:
 
   ws@8.21.3:
     resolution: {integrity: sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  ws@8.23.0:
+    resolution: {integrity: sha512-wCkmX8QMOrKjgO8HW2WyDbTSGeqkocxgDzS9iR79rEAexty6/2qzilx3Ag8Tqf9ykop3irLKle0MtVn5qjVnoQ==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -28080,7 +28100,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 17.0.2
@@ -29553,7 +29573,7 @@ snapshots:
 
   '@types/seedrandom@2.4.28': {}
 
-  '@types/selenium-webdriver@4.35.6':
+  '@types/selenium-webdriver@4.35.7':
     dependencies:
       '@types/node': 24.10.13
       '@types/ws': 8.5.12
@@ -30113,12 +30133,13 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@xstate/react@5.0.3(@types/react@18.2.79)(react@17.0.2)':
+  '@xstate/react@5.0.3(@types/react@18.2.79)(react@17.0.2)(xstate@4.38.3)':
     dependencies:
       react: 17.0.2
       use-isomorphic-layout-effect: 1.2.1(@types/react@18.2.79)(react@17.0.2)
       use-sync-external-store: 1.4.0(react@17.0.2)
-      xstate: 5.19.2
+    optionalDependencies:
+      xstate: 4.38.3
     transitivePeerDependencies:
       - '@types/react'
 
@@ -30149,7 +30170,7 @@ snapshots:
       d3-selection: 3.0.0
       d3-zoom: 3.0.0
 
-  '@zip.js/zip.js@2.8.11': {}
+  '@zip.js/zip.js@2.25.0': {}
 
   a-sync-waterfall@1.0.1: {}
 
@@ -31289,7 +31310,7 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  chromedriver@154.0.1(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
+  chromedriver@157.0.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
     dependencies:
       '@testim/chrome-version': 1.1.4
       adm-zip: 0.6.1
@@ -33899,16 +33920,13 @@ snapshots:
       - encoding
       - supports-color
 
-  geckodriver@6.1.1(supports-color@8.1.1):
+  geckodriver@8.0.0(@wdio/logger@9.18.0):
     dependencies:
       '@wdio/logger': 9.18.0
-      '@zip.js/zip.js': 2.8.11
+      '@zip.js/zip.js': 2.25.0
       decamelize: 6.0.1
-      http-proxy-agent: 7.0.2(supports-color@8.1.1)
-      https-proxy-agent: 7.0.6(supports-color@8.1.1)
-      modern-tar: 0.7.7
-    transitivePeerDependencies:
-      - supports-color
+      modern-tar: 0.8.6
+      undici: 8.13.1
 
   gensync@1.0.0-beta.2: {}
 
@@ -35712,7 +35730,7 @@ snapshots:
       object.assign: 4.1.7
       object.values: 1.1.6
 
-  jszip@3.10.1:
+  jszip@3.10.2:
     dependencies:
       lie: 3.3.0
       pako: 1.0.11
@@ -36629,9 +36647,9 @@ snapshots:
       isarray: 2.0.5
       object-inspect: 1.13.4
 
-  modern-tar@0.7.7: {}
-
   modern-tar@0.8.4: {}
+
+  modern-tar@0.8.6: {}
 
   module-definition@6.0.1:
     dependencies:
@@ -38507,7 +38525,7 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@4.2.1):
     dependencies:
       redux: 4.2.1
 
@@ -38517,13 +38535,13 @@ snapshots:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
 
-  redux-thunks@1.0.0(redux-thunk@2.4.2):
+  redux-thunks@1.0.0(redux-thunk@2.4.2(redux@4.2.1)):
     dependencies:
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
 
   redux@4.2.1:
     dependencies:
@@ -39076,12 +39094,12 @@ snapshots:
 
   select-hose@2.0.0: {}
 
-  selenium-webdriver@4.48.0:
+  selenium-webdriver@4.52.0:
     dependencies:
       '@bazel/runfiles': 6.5.0
-      jszip: 3.10.1
+      jszip: 3.10.2
       tmp: 0.2.7
-      ws: 8.21.3
+      ws: 8.23.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -40465,6 +40483,8 @@ snapshots:
 
   undici@7.30.2: {}
 
+  undici@8.13.1: {}
+
   unherit@1.1.0:
     dependencies:
       inherits: 2.0.4
@@ -41406,6 +41426,8 @@ snapshots:
   ws@7.5.12: {}
 
   ws@8.21.3: {}
+
+  ws@8.23.0: {}
 
   wsl-utils@0.4.0:
     dependencies:
