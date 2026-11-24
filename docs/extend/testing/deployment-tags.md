@@ -167,7 +167,9 @@ These are the available tags:
 | `tags.limit.only.upgradeAssistant`   | needs a stack upgrade environment for Upgrade Assistant (skipped everywhere else)                                   |
 | `tags.limit.except.upgradeAssistant` | is relevant everywhere except in that upgrade environment (skipped there)                                           |
 
+::::::{note}
 No CI pipeline declares `upgradeAssistant` yet, so `tags.limit.only.upgradeAssistant` suites don't run on CI. Use it instead of `.skip` for Upgrade Assistant suites that wait on that environment.
+::::::
 
 If a test would need more `except` tags than there are environments it actually applies to, it's an `only` test.
 
