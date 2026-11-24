@@ -182,6 +182,8 @@ export function ServiceMap({
     nodes: nodesForGraph,
     edges: edgesForGraph,
     countLine: groupingCountLine,
+    openGroup,
+    closeGroup,
   } = useServiceMapClosedGroups({
     nodes: nodesWithBadges,
     edges: data.edges,
@@ -307,6 +309,8 @@ export function ServiceMap({
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
               groupingCountLine={isLoading ? undefined : groupingCountLine}
+              onOpenGroup={openGroup}
+              onCloseGroup={closeGroup}
             />
           </div>
         </EuiPanel>

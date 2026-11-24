@@ -6,10 +6,16 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
-import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
+import {
+  FIT_VIEW_DEFER_MS,
+  MOCK_EUI_THEME_FOR_USE_THEME,
+  OPENED_GROUP_MAX_ZOOM,
+} from './constants';
 import { ServiceMapGraph } from './graph';
+
+const mockFitView = jest.fn();
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -95,9 +101,13 @@ jest.mock('@xyflow/react', () => {
     ]),
     useEdgesState: jest.fn((initialEdges: unknown[]) => [initialEdges, jest.fn(), jest.fn()]),
     useReactFlow: jest.fn(() => ({
-      fitView: jest.fn(),
+      fitView: mockFitView,
       zoomIn: jest.fn(),
       zoomOut: jest.fn(),
+      getViewport: () => ({ x: 0, y: 0, zoom: 0.5 }),
+      getNodes: () => [],
+      getNodesBounds: () => ({ x: 0, y: 0, width: 0, height: 0 }),
+      setCenter: jest.fn(),
     })),
   };
 });
@@ -119,10 +129,15 @@ jest.mock('./use_reduced_motion', () => ({
   }),
 }));
 
-jest.mock('./use_keyboard_navigation', () => ({
-  useKeyboardNavigation: () => ({
+const mockUseKeyboardNavigation = jest.fn(
+  (_options: { onNodeSelect: (node: ServiceMapNode | null) => void }) => ({
     screenReaderAnnouncement: '',
-  }),
+  })
+);
+
+jest.mock('./use_keyboard_navigation', () => ({
+  useKeyboardNavigation: (options: { onNodeSelect: (node: ServiceMapNode | null) => void }) =>
+    mockUseKeyboardNavigation(options),
 }));
 
 jest.mock('./service_map_minimap', () => ({
@@ -329,5 +344,158 @@ describe('ServiceMapGraph request flyout selection', () => {
     fireEvent.click(screen.getByTestId('serviceMapEdge-opbeans-java~postgresql'));
 
     expect(screen.queryByTestId('requestFlyoutMock')).not.toBeInTheDocument();
+  });
+});
+
+describe('ServiceMapGraph service groups', () => {
+  const closedGroup: ServiceMapNode = {
+    id: 'service.namespace:shop',
+    type: 'serviceGroup',
+    position: { x: 0, y: 0 },
+    data: {
+      id: 'service.namespace:shop',
+      label: 'shop',
+      isService: false,
+      isServiceGroup: true,
+      groupKind: 'attribute',
+      memberServiceIds: ['frontend', 'cart'],
+      memberCount: 2,
+    },
+  };
+
+  const box: ServiceMapNode = {
+    id: 'service.namespace:shop',
+    type: 'serviceGroupBox',
+    position: { x: 0, y: 0 },
+    data: {
+      id: 'service.namespace:shop',
+      label: 'shop',
+      isService: false,
+      isServiceGroupBox: true,
+      groupKind: 'attribute',
+      memberServiceIds: ['frontend', 'cart'],
+      memberCount: 2,
+    },
+  };
+
+  const groupProps = { ...defaultProps, nodes: [closedGroup], edges: [] };
+
+  beforeEach(() => {
+    mockUseKeyboardNavigation.mockClear();
+  });
+
+  const getOnNodeSelect = () => {
+    const calls = mockUseKeyboardNavigation.mock.calls;
+    return calls[calls.length - 1][0].onNodeSelect;
+  };
+
+  it('opens a closed group on click, without selecting it', () => {
+    const onOpenGroup = jest.fn();
+    render(<ServiceMapGraph {...groupProps} onOpenGroup={onOpenGroup} />);
+
+    fireEvent.click(screen.getByTestId('serviceMapNode-service.namespace:shop'));
+
+    expect(onOpenGroup).toHaveBeenCalledWith('service.namespace:shop');
+    expect(screen.queryByTestId('serviceMapPopoverMock')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('opens a closed group with Enter or Space', () => {
+    const onOpenGroup = jest.fn();
+    render(<ServiceMapGraph {...groupProps} onOpenGroup={onOpenGroup} />);
+
+    act(() => getOnNodeSelect()(closedGroup));
+
+    expect(onOpenGroup).toHaveBeenCalledWith('service.namespace:shop');
+  });
+
+  it('only selects a closed group when the map cannot open groups', () => {
+    render(<ServiceMapGraph {...groupProps} />);
+
+    fireEvent.click(screen.getByTestId('serviceMapNode-service.namespace:shop'));
+
+    expect(screen.queryByTestId('serviceMapPopoverMock')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('does not close an open group when its box is clicked', () => {
+    const onCloseGroup = jest.fn();
+    render(<ServiceMapGraph {...groupProps} nodes={[box]} onCloseGroup={onCloseGroup} />);
+
+    fireEvent.click(screen.getByTestId('serviceMapNode-service.namespace:shop'));
+
+    expect(onCloseGroup).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('serviceMapPopoverMock')).not.toBeInTheDocument();
+  });
+
+  it('closes an open group with Enter or Space on its box', () => {
+    const onCloseGroup = jest.fn();
+    render(<ServiceMapGraph {...groupProps} nodes={[box]} onCloseGroup={onCloseGroup} />);
+
+    act(() => getOnNodeSelect()(box));
+
+    expect(onCloseGroup).toHaveBeenCalledWith('service.namespace:shop');
+  });
+
+  describe('moving the view when a group opens or closes', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      mockFitView.mockClear();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const settle = () => act(() => jest.advanceTimersByTime(FIT_VIEW_DEFER_MS));
+
+    it('frames the group that was opened instead of fitting the whole map', () => {
+      const { rerender } = render(<ServiceMapGraph {...groupProps} />);
+      settle();
+      mockFitView.mockClear();
+
+      rerender(<ServiceMapGraph {...groupProps} nodes={[box]} />);
+      settle();
+
+      expect(mockFitView).toHaveBeenCalledTimes(1);
+      expect(mockFitView).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nodes: [{ id: 'service.namespace:shop' }],
+          maxZoom: OPENED_GROUP_MAX_ZOOM,
+        })
+      );
+    });
+
+    it('keeps the zoom and centres on the group that was closed', () => {
+      const { rerender } = render(<ServiceMapGraph {...groupProps} nodes={[box]} />);
+      settle();
+      mockFitView.mockClear();
+
+      rerender(<ServiceMapGraph {...groupProps} />);
+      settle();
+
+      expect(mockFitView).toHaveBeenCalledTimes(1);
+      expect(mockFitView).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nodes: [{ id: 'service.namespace:shop' }],
+          minZoom: 0.5,
+          maxZoom: 0.5,
+        })
+      );
+    });
+
+    it('fits the whole map when the change is not a group opening or closing', () => {
+      const { rerender } = render(<ServiceMapGraph {...groupProps} />);
+      settle();
+      mockFitView.mockClear();
+
+      rerender(<ServiceMapGraph {...groupProps} nodes={[closedGroup, serviceNode]} />);
+      settle();
+
+      expect(mockFitView).toHaveBeenCalledTimes(1);
+      expect(mockFitView).not.toHaveBeenCalledWith(
+        expect.objectContaining({ nodes: expect.anything() })
+      );
+    });
   });
 });

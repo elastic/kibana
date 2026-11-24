@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   groupServiceNodes,
+  isServiceGroupBoxNode,
   isServiceGroupNode,
   type ServiceMapEdge,
   type ServiceMapGrouping,
@@ -20,10 +21,13 @@ export interface UseServiceMapClosedGroupsResult {
   nodes: ServiceMapNode[];
   edges: ServiceMapEdge[];
   countLine?: string;
+  openGroup: (groupId: string) => void;
+  closeGroup: (groupId: string) => void;
 }
 
 /**
- * After badge merge: collapse groups of 2+ using API `serviceGrouping`.
+ * After badge merge: collapse groups of 2+ using API `serviceGrouping`, except the ones the user
+ * has opened, which are drawn as a box around their members.
  */
 export function useServiceMapClosedGroups({
   nodes,
@@ -35,22 +39,41 @@ export function useServiceMapClosedGroups({
   serviceGrouping?: ServiceMapGrouping;
 }): UseServiceMapClosedGroupsResult {
   const isGroupingEnabled = useServiceMapGroupingEnabled();
+  const [openGroupIds, setOpenGroupIds] = useState<ReadonlySet<string>>(() => new Set());
 
-  return useMemo(() => {
+  const openGroup = useCallback((groupId: string) => {
+    setOpenGroupIds((previous) => new Set(previous).add(groupId));
+  }, []);
+
+  const closeGroup = useCallback((groupId: string) => {
+    setOpenGroupIds((previous) => {
+      const next = new Set(previous);
+      next.delete(groupId);
+      return next;
+    });
+  }, []);
+
+  const grouped = useMemo(() => {
     if (!isGroupingEnabled || !serviceGrouping) {
       return { nodes, edges };
     }
 
-    const grouped = groupServiceNodes(nodes, edges, serviceGrouping);
-    const closedGroupCount = grouped.nodes.filter((node) => isServiceGroupNode(node)).length;
+    // `source` is `undefined` for the automatic strategy: there is no group-by picker yet.
+    const result = groupServiceNodes(nodes, edges, serviceGrouping, undefined, openGroupIds);
+    // Open groups count too: they are still groups, just drawn as a box.
+    const drawnGroupCount = result.nodes.filter(
+      (node) => isServiceGroupNode(node) || isServiceGroupBoxNode(node)
+    ).length;
     return {
-      nodes: grouped.nodes,
-      edges: grouped.edges,
-      // No squares drawn → no count line (avoids "N services in 0 groups").
+      nodes: result.nodes,
+      edges: result.edges,
+      // No squares or boxes drawn → no count line (avoids "N services in 0 groups").
       countLine:
-        closedGroupCount > 0
-          ? formatServiceGroupingCountLine(serviceGrouping, closedGroupCount)
+        drawnGroupCount > 0
+          ? formatServiceGroupingCountLine(serviceGrouping, drawnGroupCount)
           : undefined,
     };
-  }, [nodes, edges, serviceGrouping, isGroupingEnabled]);
+  }, [nodes, edges, serviceGrouping, isGroupingEnabled, openGroupIds]);
+
+  return { ...grouped, openGroup, closeGroup };
 }

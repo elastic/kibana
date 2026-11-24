@@ -334,6 +334,8 @@ export function ServiceMapEmbeddable({
     nodes: nodesForGraph,
     edges: edgesForGraph,
     countLine: groupingCountLine,
+    openGroup,
+    closeGroup,
   } = useServiceMapClosedGroups({
     nodes: nodesWithBadges,
     edges: data.edges,
@@ -569,6 +571,8 @@ export function ServiceMapEmbeddable({
             onViewFiltersChange={onViewFiltersChange}
             flyoutOptions={flyoutOptions}
             groupingCountLine={isLoading ? undefined : groupingCountLine}
+            onOpenGroup={openGroup}
+            onCloseGroup={closeGroup}
           />
         )}
       </div>
