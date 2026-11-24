@@ -21,6 +21,8 @@ export interface EvalsSuiteShard {
   specFiles: string[];
   /** Evaluation connector for this shard's steps, overriding the suite-wide judge. */
   judge?: string;
+  /** A key of the suite's `concurrencyGroups`, whose limit this shard's steps share instead. */
+  concurrencyGroup?: string;
 }
 
 export interface EvalsSuiteSpecModelGroup {
@@ -41,8 +43,13 @@ export interface EvalsSuiteMetadataEntry {
   defaultJudge?: string;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
-  /** How many of the suite's fanout steps run at once, across builds; 4 when unset. */
+  /**
+   * How many of the suite's fanout steps run at once, across builds; 4 when unset. Shards in one of
+   * `concurrencyGroups` count against that group's limit instead.
+   */
   fanoutConcurrency?: number;
+  /** Named concurrency limits, across builds, for shards that set `concurrencyGroup`. */
+  concurrencyGroups?: Record<string, number>;
   specModelGroups?: EvalsSuiteSpecModelGroup[];
 }
 

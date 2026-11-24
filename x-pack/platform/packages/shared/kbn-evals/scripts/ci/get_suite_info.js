@@ -36,6 +36,7 @@ process.stdout.write(
     shards: Array.isArray(suite.shards) ? suite.shards : [],
     stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
     fanoutConcurrency: suite.fanoutConcurrency,
+    concurrencyGroups: suite.concurrencyGroups,
     scoutHook: suite.scoutHook,
     vaultSecret: suite.vaultSecret,
     scoutArch: suite.scoutArch,

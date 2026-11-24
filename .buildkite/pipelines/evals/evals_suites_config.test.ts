@@ -110,6 +110,26 @@ describe('evals.suites.json shards', () => {
     expect(problems).toEqual([]);
   });
 
+  it('only names concurrency groups the suite defines, each with a positive limit', () => {
+    const problems = shardedSuites.flatMap(
+      ({ id: suiteId, shards = [], concurrencyGroups = {} }) => [
+        ...Object.entries(concurrencyGroups)
+          .filter(([, limit]) => !Number.isInteger(limit) || limit < 1)
+          .map(([group, limit]) => `${suiteId}: concurrency group "${group}" has limit ${limit}`),
+        ...shards
+          .filter(
+            ({ concurrencyGroup }) => concurrencyGroup && !(concurrencyGroup in concurrencyGroups)
+          )
+          .map(
+            ({ id, concurrencyGroup }) =>
+              `${suiteId}: shard "${id}" names undefined concurrency group "${concurrencyGroup}"`
+          ),
+      ]
+    );
+
+    expect(problems).toEqual([]);
+  });
+
   it('numbers the slices of a shard 1 to count, each once', () => {
     const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) => {
       const slicesByBase = new Map<string, Array<{ index: number; count: number }>>();
@@ -216,8 +236,22 @@ describe('Nightshift CI coverage', () => {
       'orcabench-5-of-5',
       'reinforcement',
     ]);
-    // Every shard of one model can run at once.
-    expect(suite?.fanoutConcurrency).toBeGreaterThanOrEqual(suite?.shards?.length ?? 0);
+    // Every shard of one model can run at once, and the shards that run 16 sandbox investigations
+    // each are capped together across builds, so overlapping PR runs can't overload the pool.
+    const shardsByGroup = new Map<string | undefined, number>();
+    for (const { concurrencyGroup } of suite?.shards ?? []) {
+      shardsByGroup.set(concurrencyGroup, (shardsByGroup.get(concurrencyGroup) ?? 0) + 1);
+    }
+    for (const [group, count] of shardsByGroup) {
+      const limit = group ? suite?.concurrencyGroups?.[group] : suite?.fanoutConcurrency;
+      expect(limit).toBeGreaterThanOrEqual(count);
+    }
+    expect(
+      suite?.shards
+        ?.filter(({ concurrencyGroup }) => concurrencyGroup === 'sandbox-heavy')
+        .map(({ id }) => id)
+    ).toEqual(['customer0-golden', 'customer0-connector-probes']);
+    expect(suite?.concurrencyGroups).toEqual({ 'sandbox-heavy': 2 });
     const files = [...new Set(suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [])];
     expect(files).toEqual([
       'evals/investigation/stored.spec.ts',

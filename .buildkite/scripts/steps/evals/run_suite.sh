@@ -272,6 +272,20 @@ EOF
         row_judge="$(jq -r '.judge // ""' <<<"$row")"
         step_judge_connector="${row_judge:-${EVAL_CONNECTOR_ID:-}}"
 
+        # A shard in one of the suite's `concurrencyGroups` shares that group's limit, across builds,
+        # instead of the suite-wide one, so heavy shards can be capped without holding back the rest.
+        step_concurrency_group="kbn-evals-${group_key_safe}"
+        step_concurrency="${EVAL_FANOUT_CONCURRENCY}"
+        row_concurrency_group="$(jq -r '.concurrencyGroup // ""' <<<"$row")"
+        if [[ -n "$row_concurrency_group" ]]; then
+          step_concurrency="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --arg group "$row_concurrency_group" '.concurrencyGroups[$group] // empty')"
+          if [[ ! "$step_concurrency" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Shard ${shard_id} names concurrencyGroup \"${row_concurrency_group}\", which the suite's concurrencyGroups does not define" >&2
+            exit 1
+          fi
+          step_concurrency_group="${step_concurrency_group}-$(printf '%s' "$row_concurrency_group" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+        fi
+
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${step_label}"
         key: "${step_key}"
@@ -299,8 +313,8 @@ EOF
           EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
           EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
         timeout_in_minutes: ${timeout_in_minutes}
-        concurrency_group: "kbn-evals-${group_key_safe}"
-        concurrency: ${EVAL_FANOUT_CONCURRENCY}
+        concurrency_group: "${step_concurrency_group}"
+        concurrency: ${step_concurrency}
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod

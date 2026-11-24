@@ -1307,7 +1307,7 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** the same shards on PRs, weekly and daily, each on its own Scout server. ORCA runs as five slices of the sampled 50, each on its own agent, and `fanoutConcurrency: 8` lets every shard of one model run at once:
+- **What runs:** the same shards on PRs, weekly and daily, each on its own Scout server. ORCA runs as five slices of the sampled 50, each on its own agent. The two Customer-0 shards run up to 16 sandbox investigations each, so they share the `sandbox-heavy` concurrency group, capped at 2 across builds; the ORCA slices and reinforcement share a cap of 12. One build runs every shard at once, and when PR runs overlap, only the Customer-0 shards wait:
 
   | Shard                        | Dataset                                                      | Judge                  |
   | ---------------------------- | ------------------------------------------------------------ | ---------------------- |
