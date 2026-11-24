@@ -132,13 +132,15 @@ export const buildScenarioListResponse = (
       };
     }
     case 'partialSources':
-      // A partial probe, and a query that is both partial and unusable.
+      // A partial probe, and a query that is both partial and unusable. The system source's query
+      // is usable, so it accounts for the rows.
       return {
         ...base,
         rows: buildRows(NORMAL_ROW_COUNT),
         truncated: false,
         probes: [probe(SYSTEM_PATTERN, null, true)],
         queries: [
+          { ...query(SYSTEM_PATTERN, {}), rowCount: NORMAL_ROW_COUNT },
           query(OTEL_PATTERN, {
             isPartial: true,
             error: {
