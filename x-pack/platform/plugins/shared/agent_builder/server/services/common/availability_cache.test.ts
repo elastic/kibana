@@ -149,6 +149,113 @@ describe('AvailabilityCache', () => {
     });
   });
 
+  describe('concurrent evaluations', () => {
+    const createDeferred = () => {
+      let resolve!: (result: AvailabilityResult) => void;
+      let reject!: (error: Error) => void;
+      const promise = new Promise<AvailabilityResult>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    };
+
+    it('shares one handler call between concurrent misses for the same key', async () => {
+      const deferred = createDeferred();
+      handler.mockReturnValue(deferred.promise);
+      const config = createConfig({ cacheMode: 'space' });
+
+      const results = Promise.all([
+        cache.getOrCompute('tool-1', config, createContext()),
+        cache.getOrCompute('tool-1', config, createContext()),
+        cache.getOrCompute('tool-1', config, createContext()),
+      ]);
+      deferred.resolve(unavailable);
+
+      expect(await results).toEqual([unavailable, unavailable, unavailable]);
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not share a handler call between principals', async () => {
+      const deferred = createDeferred();
+      handler.mockReturnValue(deferred.promise);
+      const config = createConfig();
+
+      const results = Promise.all([
+        cache.getOrCompute('tool-1', config, createContext({ principalKey: 'user:jane' })),
+        cache.getOrCompute('tool-1', config, createContext({ principalKey: 'user:jane' })),
+        cache.getOrCompute('tool-1', config, createContext({ principalKey: 'user:john' })),
+      ]);
+      deferred.resolve(available);
+      await results;
+
+      expect(handler).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not share a handler call when the result cannot be cached', async () => {
+      const config = createConfig({ cacheMode: 'none' });
+      const context = createContext();
+
+      await Promise.all([
+        cache.getOrCompute('tool-1', config, context),
+        cache.getOrCompute('tool-1', config, context),
+      ]);
+
+      expect(handler).toHaveBeenCalledTimes(2);
+    });
+
+    it('fails every concurrent caller when the handler fails, without caching the failure', async () => {
+      const deferred = createDeferred();
+      handler.mockReturnValueOnce(deferred.promise);
+      const config = createConfig({ cacheMode: 'space' });
+      const context = createContext();
+
+      const first = cache.getOrCompute('tool-1', config, context);
+      const second = cache.getOrCompute('tool-1', config, context);
+      deferred.reject(new Error('es unavailable'));
+
+      await expect(first).rejects.toThrow('es unavailable');
+      await expect(second).rejects.toThrow('es unavailable');
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      expect(await cache.getOrCompute('tool-1', config, context)).toEqual(available);
+      expect(handler).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not cache the failure of a handler that throws synchronously', async () => {
+      handler.mockImplementationOnce(() => {
+        throw new Error('sync failure');
+      });
+      const config = createConfig({ cacheMode: 'space' });
+      const context = createContext();
+
+      await expect(cache.getOrCompute('tool-1', config, context)).rejects.toThrow('sync failure');
+      expect(await cache.getOrCompute('tool-1', config, context)).toEqual(available);
+    });
+
+    it('stops waiting on a computation that looks stuck', async () => {
+      const dateNow = jest.spyOn(Date, 'now').mockReturnValue(0);
+      try {
+        const stuck = createDeferred();
+        handler.mockReturnValueOnce(stuck.promise);
+        const config = createConfig({ cacheMode: 'space' });
+        const context = createContext();
+
+        const stuckResult = cache.getOrCompute('tool-1', config, context);
+
+        dateNow.mockReturnValue(5_000);
+        expect(await cache.getOrCompute('tool-1', config, context)).toEqual(available);
+        expect(handler).toHaveBeenCalledTimes(2);
+
+        // The late result of the stuck computation is still delivered to its caller.
+        stuck.resolve(unavailable);
+        expect(await stuckResult).toEqual(unavailable);
+      } finally {
+        dateNow.mockRestore();
+      }
+    });
+  });
+
   describe('has', () => {
     it('reports results cached per principal', async () => {
       const config = createConfig();
