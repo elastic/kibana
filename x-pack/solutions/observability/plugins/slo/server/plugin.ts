@@ -60,7 +60,7 @@ import { ResourcesReconcileTask } from './services/tasks/resources_reconcile_tas
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task/temp_summary_cleanup_task';
 import { createTransformGenerators } from './services/transform_generators';
-import { REQUEST_RETRY_OPTIONS } from './utils/retry';
+import { DEFAULT_RETRY_OPTIONS, REQUEST_RETRY_OPTIONS } from './utils/retry';
 import type {
   SLOConfig,
   SLOPluginSetupDependencies,
@@ -191,18 +191,19 @@ export class SLOPlugin
     registerDataProviders({ core, plugins, logger: this.logger });
 
     const resourceInstallState = new ResourceInstallState({
-      installerFactory: async () => {
+      installerFactory: async (retryOptions) => {
         const [coreStart] = await core.getStartServices();
         return new DefaultResourceInstaller(
           coreStart.elasticsearch.client.asInternalUser,
-          this.logger
+          this.logger,
+          retryOptions
         );
       },
       lockManager,
       logger: this.logger,
     });
 
-    resourceInstallState.ensureInstalled().catch((err) => {
+    resourceInstallState.ensureInstalled(DEFAULT_RETRY_OPTIONS).catch((err) => {
       this.logger.error(`Failed to install SLO common resources: ${err.message}`);
     });
 

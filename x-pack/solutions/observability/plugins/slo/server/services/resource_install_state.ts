@@ -10,6 +10,8 @@ import type { LockManagerService } from '@kbn/lock-manager';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../../common/constants';
 import { SLOResourcesNotInstalled } from '../errors';
+import type { RetryOptions } from '../utils/retry';
+import { REQUEST_RETRY_OPTIONS } from '../utils/retry';
 import type { ResourceInstaller } from './resource_installer';
 
 const LOCK_RETRY_INTERVAL_MS = 2_000;
@@ -17,7 +19,7 @@ const LOCK_RETRY_INTERVAL_MS = 2_000;
 const LOCK_WAIT_TIMEOUT_MS = 30_000;
 
 interface ResourceInstallStateDependencies {
-  installerFactory: () => Promise<ResourceInstaller>;
+  installerFactory: (retryOptions: RetryOptions) => Promise<ResourceInstaller>;
   lockManager: Pick<LockManagerService, 'withLock'>;
   logger: Logger;
 }
@@ -31,12 +33,13 @@ export class ResourceInstallState {
 
   constructor(private readonly dependencies: ResourceInstallStateDependencies) {}
 
-  public async ensureInstalled(): Promise<void> {
+  // Defaults to request-bounded retries; a caller joining an in-flight install waits on that install's retries.
+  public async ensureInstalled(retryOptions: RetryOptions = REQUEST_RETRY_OPTIONS): Promise<void> {
     if (this.installed) {
       return;
     }
 
-    this.inFlight ??= this.install()
+    this.inFlight ??= this.install(retryOptions)
       .then(() => {
         this.installed = true;
       })
@@ -47,11 +50,11 @@ export class ResourceInstallState {
     return this.inFlight;
   }
 
-  private async install(): Promise<void> {
+  private async install(retryOptions: RetryOptions): Promise<void> {
     const { installerFactory, logger } = this.dependencies;
 
     try {
-      const installer = await installerFactory();
+      const installer = await installerFactory(retryOptions);
       const deadline = Date.now() + LOCK_WAIT_TIMEOUT_MS;
       while (!(await this.installUnderLock(installer))) {
         if (Date.now() >= deadline) {

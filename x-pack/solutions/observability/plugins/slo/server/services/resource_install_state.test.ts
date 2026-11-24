@@ -10,6 +10,7 @@ import { LockAcquisitionError } from '@kbn/lock-manager';
 import { loggerMock } from '@kbn/logging-mocks';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../../common/constants';
 import { SLOResourcesNotInstalled } from '../errors';
+import { DEFAULT_RETRY_OPTIONS, REQUEST_RETRY_OPTIONS } from '../utils/retry';
 import { createResourceInstallerMock } from './mocks';
 import { ResourceInstallState } from './resource_install_state';
 
@@ -17,12 +18,13 @@ const setup = () => {
   const installer = createResourceInstallerMock();
   const lockManager: jest.Mocked<Pick<LockManagerService, 'withLock'>> = { withLock: jest.fn() };
   lockManager.withLock.mockImplementation((_lockId, callback) => callback());
+  const installerFactory = jest.fn(async () => installer);
   const state = new ResourceInstallState({
-    installerFactory: async () => installer,
+    installerFactory,
     lockManager,
     logger: loggerMock.create(),
   });
-  return { installer, lockManager, state };
+  return { installer, installerFactory, lockManager, state };
 };
 
 describe('ResourceInstallState', () => {
@@ -42,6 +44,24 @@ describe('ResourceInstallState', () => {
       expect.any(Function)
     );
     expect(installer.install).toHaveBeenCalledTimes(1);
+  });
+
+  it('builds the installer with request retry options by default', async () => {
+    const { installer, installerFactory, state } = setup();
+    installer.install.mockResolvedValue();
+
+    await state.ensureInstalled();
+
+    expect(installerFactory).toHaveBeenCalledWith(REQUEST_RETRY_OPTIONS);
+  });
+
+  it('builds the installer with the given retry options', async () => {
+    const { installer, installerFactory, state } = setup();
+    installer.install.mockResolvedValue();
+
+    await state.ensureInstalled(DEFAULT_RETRY_OPTIONS);
+
+    expect(installerFactory).toHaveBeenCalledWith(DEFAULT_RETRY_OPTIONS);
   });
 
   it('shares one install between concurrent calls', async () => {

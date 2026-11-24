@@ -27,7 +27,8 @@ import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_te
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
 import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
 import { SLOResourcesNotInstalled } from '../errors';
-import { retryTransientEsErrors } from '../utils/retry';
+import type { RetryOptions } from '../utils/retry';
+import { DEFAULT_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
   install(): Promise<void>;
@@ -56,7 +57,11 @@ const BASE_INDICES: readonly string[] = [
 ];
 
 export class DefaultResourceInstaller implements ResourceInstaller {
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger,
+    private retryOptions: RetryOptions = DEFAULT_RETRY_OPTIONS
+  ) {}
 
   // Every Elasticsearch call retries transient errors; the install stops at the first resource that still fails.
   public async install(): Promise<void> {
@@ -153,7 +158,10 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   }
 
   private async execute<T>(esCall: () => Promise<T>): Promise<T> {
-    return await retryTransientEsErrors(esCall, { logger: this.logger });
+    return await retryTransientEsErrors(esCall, {
+      logger: this.logger,
+      retryOptions: this.retryOptions,
+    });
   }
 
   private async fetchComponentTemplateVersion(name: string) {
