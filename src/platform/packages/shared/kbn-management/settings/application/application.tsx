@@ -251,7 +251,7 @@ export const SettingsApplication = () => {
                 onChangeSelectedTab={() => setRequestedTabId(id)}
                 isSelected={id === selectedTabId}
                 // The form unmounts while a tab loads, which drops its unsaved changes.
-                disabled={id !== selectedTabId && isTabLoading(id)}
+                isLoading={id !== selectedTabId && isTabLoading(id)}
               />
             ))}
           </EuiTabs>

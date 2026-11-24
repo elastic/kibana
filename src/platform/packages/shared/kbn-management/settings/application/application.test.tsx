@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 import { of, Subject } from 'rxjs';
 import type {
   IUiSettingsMetadataClient,
@@ -30,7 +30,7 @@ import {
   DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE,
   DATA_TEST_SUBJ_SETTINGS_CLEAR_SEARCH_LINK,
 } from './empty_state';
-import { DATA_TEST_SUBJ_PREFIX_TAB } from './tab';
+import { DATA_TEST_SUBJ_PREFIX_TAB, DATA_TEST_SUBJ_TAB_LOADING } from './tab';
 import { DATA_TEST_SUBJ_SETTINGS_CATEGORY } from '@kbn/management-settings-components-field-category/category';
 import { DATA_TEST_SUBJ_SAVE_BUTTON } from '@kbn/management-settings-components-form/bottom_bar/bottom_bar';
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
@@ -676,7 +676,7 @@ describe('Settings application', () => {
       }
     });
 
-    it('disables a tab that is not selected while its settings load', async () => {
+    it('disables a tab that is not selected and shows a spinner on it while its settings load', async () => {
       let resolveGlobal: () => void = () => {};
       const services: SettingsApplicationServices = {
         ...createSettingsApplicationServicesMock(true),
@@ -692,17 +692,22 @@ describe('Settings application', () => {
         },
       };
 
-      const { findByTestId, getByTestId } = render(wrap(<SettingsApplication />, services));
+      const { findByTestId, getByTestId, queryByTestId } = render(
+        wrap(<SettingsApplication />, services)
+      );
 
       await findByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${spaceCategories[0]}`);
+      const globalTab = getByTestId(globalSettingsTestSubj);
       expect(getByTestId(spaceSettingsTestSubj)).toBeEnabled();
-      expect(getByTestId(globalSettingsTestSubj)).toBeDisabled();
+      expect(globalTab).toBeDisabled();
+      expect(within(globalTab).getByTestId(DATA_TEST_SUBJ_TAB_LOADING)).toBeInTheDocument();
 
       await act(async () => {
         resolveGlobal();
       });
 
       expect(getByTestId(globalSettingsTestSubj)).toBeEnabled();
+      expect(queryByTestId(DATA_TEST_SUBJ_TAB_LOADING)).toBeNull();
     });
 
     it('saves space settings when the selected Global tab goes away because there are no global settings', async () => {
