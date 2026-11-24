@@ -39,7 +39,7 @@ const SCENARIOS: Record<string, (minutesAgo: number) => Level> = {
 };
 
 /** A deterministic wobble of one around the level, so medians are stable and the series is not flat. */
-const toCount = (level: Level, minutesAgo: number): number => {
+const toCount = ({ level, minutesAgo }: { level: Level; minutesAgo: number }): number => {
   const wobble = (((minutesAgo % 3) + 3) % 3) - 1;
   if (level === BASE) {
     return 2 + wobble;
@@ -78,7 +78,7 @@ async function seedScenario({
   const documents = Array.from({ length: SEEDED_MINUTES + FUTURE_MINUTES + 1 }, (_, offset) => {
     const minutesAgo = SEEDED_MINUTES - offset;
     const minuteStart = nowMinute - minutesAgo * MINUTE_MS;
-    const count = toCount(shape(minutesAgo), minutesAgo);
+    const count = toCount({ level: shape(minutesAgo), minutesAgo });
     const matches = Array.from({ length: count }, (__, position) => ({
       '@timestamp': new Date(minuteStart + Math.floor(((position + 0.5) / count) * MINUTE_MS)),
       message: `upstream request timeout after 30s (${position})`,
@@ -111,8 +111,9 @@ const runCompiledQuery = async (esClient: ElasticsearchClient, scenario: string)
   );
 };
 
-const getCounts = (newestCounts: unknown): number[] =>
-  ([newestCounts].flat() as string[]).sort().map((minute) => Number(minute.split('=')[1]));
+/** The counts of `newest_minute_counts`, in the order the rule returned them. */
+const getCounts = (newestMinuteCounts: unknown): number[] =>
+  ([newestMinuteCounts].flat() as string[]).map((minute) => Number(minute.split('=')[1]));
 
 // The rule's query is the measurement every Known failures signal is judged on: a wrong count, a
 // normal level read over the wrong minutes or a missing row misjudges every indicator. This runs it
@@ -147,24 +148,26 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
     const rows = await runCompiledQuery(esClient, 'quiet');
 
     expect(rows).toHaveLength(1);
-    expect(getCounts(rows[0].newest_counts)).toEqual([0, 0, 0, 0, 0, 0, 0]);
+    expect(getCounts(rows[0].newest_minute_counts)).toEqual([0, 0, 0, 0, 0, 0, 0]);
     expect(rows[0]).toEqual(
-      expect.objectContaining({ baseline_median: 0, baseline_minutes: 60, change_at: null })
+      expect.objectContaining({ baseline_median: 0, change_point_at: null, earlier_median: 0 })
     );
   });
 
   it('returns a spike among the newest counts, measured against the hour before them', async () => {
     const [row] = await runCompiledQuery(esClient, 'spike');
 
-    expect(getCounts(row.newest_counts)).toContain(80);
+    const newest = [row.newest_minute_counts].flat() as string[];
+    expect(getCounts(newest)).toContain(80);
+    // Oldest first, so the row reads in time order.
+    expect(newest).toEqual([...newest].sort());
     expect(row).toEqual(
       expect.objectContaining({
         // The wobble of one around 2, over every minute of the hour, empty or not.
         baseline_median: 2,
         baseline_mad: 1,
-        baseline_minutes: 60,
         // A spike is the baseline check's to judge, not a change of level.
-        change_at: null,
+        change_point_at: null,
       })
     );
   });
@@ -174,13 +177,14 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
 
     expect(row).toEqual(
       expect.objectContaining({
-        change_type: 'step_change',
-        before_change_median: 2,
-        after_change_median: 25,
+        change_point_type: 'step_change',
+        change_point_median_before: 2,
+        change_point_median_after: 25,
         recent_median: 25,
+        earlier_median: 2,
       })
     );
-    expect(row.before_change_minutes).toBeGreaterThan(300);
+    expect(row.change_point_minutes_before).toBeGreaterThan(300);
   });
 
   it('keeps reporting a step up after a later one-minute spike', async () => {
@@ -188,9 +192,9 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
 
     expect(row).toEqual(
       expect.objectContaining({
-        change_type: 'step_change',
-        before_change_median: 2,
-        after_change_median: 25,
+        change_point_type: 'step_change',
+        change_point_median_before: 2,
+        change_point_median_after: 25,
       })
     );
   });

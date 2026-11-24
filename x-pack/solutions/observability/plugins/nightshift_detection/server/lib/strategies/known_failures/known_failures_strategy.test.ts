@@ -7,6 +7,7 @@
 
 import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
 import type { QueryLink, QueryType } from '@kbn/significant-events-schema';
+import { computeRuleId } from '../../rules/rule_identity';
 import type { ResourceContext } from '../types';
 import { getKnownFailureRuleId } from './known_failure_rule';
 import { KnownFailuresStrategy } from './known_failures_strategy';
@@ -59,10 +60,13 @@ describe('KnownFailuresStrategy', () => {
           enabled: true,
           data: expect.objectContaining({
             kind: 'signal',
-            metadata: { name: 'Checkout timeouts' },
+            metadata: {
+              name: 'Checkout timeouts',
+              description: expect.stringMatching(/^Measures how often knowledge indicator ki-1 /),
+            },
             query: {
               base: expect.stringMatching(
-                /^FROM logs-\*\n\| WHERE service\.name == "checkout" AND message : "timeout"\n\| WHERE @timestamp >= .*CHANGE_POINT count ON bucket/s
+                /\nFROM logs-\*\n\| WHERE service\.name == "checkout" AND message : "timeout"\n.*\| WHERE @timestamp >= .*CHANGE_POINT count ON minute/s
               ),
             },
           }),
@@ -81,7 +85,7 @@ describe('KnownFailuresStrategy', () => {
       );
 
       expect(resources[0].data.query.base).toMatch(
-        /^FROM logs-\*\n\| WHERE message : "timeout"\n\| WHERE @timestamp >= /
+        /\nFROM logs-\*\n\| WHERE message : "timeout"\n\/\/ [^\n]*\n\| WHERE @timestamp >= /
       );
     });
 
@@ -95,13 +99,13 @@ describe('KnownFailuresStrategy', () => {
       );
 
       expect(resources[0].data.query.base).toMatch(
-        /^FROM logs-\*\n\| WHERE message : "🔥 failed" AND code == 12\n/
+        /\nFROM logs-\*\n\| WHERE message : "🔥 failed" AND code == 12\n/
       );
     });
 
     // Noted, not skipped: a skipped source keeps all its rules, so the old rule of an edited
     // indicator beside a STATS one would never be deleted.
-    it('notes STATS, non-filter, SET, subquery and overlong knowledge indicators without skipping their source', async () => {
+    it('notes STATS, non-filter, SET, subquery, self-timed, parameterized and overlong knowledge indicators without skipping their source', async () => {
       const { resources, skipped, notes } = await new KnownFailuresStrategy().resources(
         createContext([
           createQuery({ id: 'stats', type: 'stats' }),
@@ -112,6 +116,12 @@ describe('KnownFailuresStrategy', () => {
             id: 'subquery',
             esql: 'FROM logs-*, (FROM other | STATS c = COUNT(*)) | WHERE a == 1',
           }),
+          // Minutes outside its own time bound would count as zeros; the rule binds no parameters.
+          createQuery({
+            id: 'now',
+            esql: 'FROM logs-* | WHERE a == 1 AND @timestamp > NOW() - 1h',
+          }),
+          createQuery({ id: 'param', esql: 'FROM logs-* | WHERE a == ?value' }),
           createQuery({
             id: 'long',
             esql: `FROM logs-* | WHERE message == "${'a'.repeat(9_500)}"`,
@@ -127,6 +137,8 @@ describe('KnownFailuresStrategy', () => {
         expect.stringMatching(/^source-1: .*\[unfiltered\]/),
         expect.stringMatching(/^source-1: .*\[set\]/),
         expect.stringMatching(/^source-1: .*\[subquery\]/),
+        expect.stringMatching(/^source-1: .*\[now\]/),
+        expect.stringMatching(/^source-1: .*\[param\]/),
         expect.stringMatching(/^source-1: .*\[long\] is too long/),
       ]);
     });
@@ -145,26 +157,43 @@ describe('KnownFailuresStrategy', () => {
         cpsEnabled: true,
       });
 
-      expect(resources[0].data.query.base).toMatch(/^SET project_routing="[^"]+";\nFROM logs-\*/);
+      expect(resources[0].data.query.base).toMatch(/^SET project_routing="[^"]+";\n/);
     });
   });
+});
 
-  // The generator finds a rule's rows by recomputing its id, so any input the rule depends on must
-  // move it, and nothing else may.
-  describe('getKnownFailureRuleId', () => {
-    const getId = (overrides: Parameters<typeof createQuery>[0], cpsEnabled = false) =>
-      getKnownFailureRuleId({ spaceId: 'default', query: createQuery(overrides), cpsEnabled });
+// The generator finds a rule's rows by recomputing its id, so any input the rule depends on must
+// move it, and nothing else may.
+describe('getKnownFailureRuleId', () => {
+  const getId = (overrides: Parameters<typeof createQuery>[0], cpsEnabled = false) =>
+    getKnownFailureRuleId({ spaceId: 'default', query: createQuery(overrides), cpsEnabled });
 
-    it('changes with the query, the source and the routing', () => {
-      const id = getId({});
+  // Different ids mean the generator reads no rows at all, and nothing says so.
+  it('is the id the reconciler gives the rule the strategy wants', async () => {
+    const strategy = new KnownFailuresStrategy();
+    const {
+      resources: [resource],
+    } = await strategy.resources(createContext([createQuery()]));
 
-      expect(getId({ esql: 'FROM logs-* | WHERE message : "refused"' })).not.toBe(id);
-      expect(getId({ sourceId: 'source-2' })).not.toBe(id);
-      expect(getId({}, true)).not.toBe(id);
-    });
+    expect(
+      computeRuleId({
+        spaceId: 'default',
+        strategy: strategy.descriptor.id,
+        sourceId: resource.source_id,
+        data: resource.data,
+      })
+    ).toBe(getId({}));
+  });
 
-    it('keeps the id when only the title changes', () => {
-      expect(getId({ title: 'Renamed' })).toBe(getId({}));
-    });
+  it('changes with the query, the source and the routing', () => {
+    const id = getId({});
+
+    expect(getId({ esql: 'FROM logs-* | WHERE message : "refused"' })).not.toBe(id);
+    expect(getId({ sourceId: 'source-2' })).not.toBe(id);
+    expect(getId({}, true)).not.toBe(id);
+  });
+
+  it('keeps the id when only the title changes', () => {
+    expect(getId({ title: 'Renamed' })).toBe(getId({}));
   });
 });
