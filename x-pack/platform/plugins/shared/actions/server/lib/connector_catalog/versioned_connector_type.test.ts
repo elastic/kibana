@@ -291,6 +291,42 @@ describe('createVersionedConnectorType', () => {
     });
   });
 
+  describe('markUnbuildable', () => {
+    test('a marked version gives cannot_build from resolveExecutionVersion, resolveSchema and the executor', async () => {
+      const { versioned, stubs } = build(['1.0']);
+      versioned.markUnbuildable('1.4');
+      const { specVersions, validate } = versioned.actionType;
+
+      expect(() => specVersions?.resolveExecutionVersion('1.4')).toThrow(
+        expect.objectContaining({ reason: 'cannot_build', specVersion: '1.4', actionTypeId: ID })
+      );
+      expect(() => validate.config.resolveSchema?.(services('1.4'))).toThrow(
+        expect.objectContaining({ reason: 'cannot_build' })
+      );
+      await expect(run(versioned, '1.4')).rejects.toMatchObject({ reason: 'cannot_build' });
+      expect(stubs[0].executor).not.toHaveBeenCalled();
+    });
+
+    test('a version that was never seen gives not_loaded', () => {
+      const { versioned } = build(['1.0']);
+      versioned.markUnbuildable('1.4');
+
+      expect(() => versioned.actionType.specVersions?.resolveExecutionVersion('1.5')).toThrow(
+        expect.objectContaining({ reason: 'not_loaded' })
+      );
+    });
+
+    test('a built version wins over a mark for the same version', () => {
+      const { versioned } = build(['1.0']);
+      versioned.markUnbuildable('1.0');
+      expect(versioned.actionType.specVersions?.resolveExecutionVersion('1.0')).toBe('1.0');
+
+      versioned.markUnbuildable('1.1');
+      versioned.addVersion(createStubType('1.1'));
+      expect(versioned.actionType.specVersions?.resolveExecutionVersion('1.1')).toBe('1.1');
+    });
+  });
+
   describe('input checks', () => {
     test('throws without versions', () => {
       expect(() => createVersionedConnectorType({ id: ID, versions: [] })).toThrow();

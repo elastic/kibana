@@ -37,6 +37,7 @@ import {
   getErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running';
 import { ConnectorAuthorizationError } from '@kbn/connector-specs';
+import { SpecVersionUnavailableError } from './errors';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
@@ -93,8 +94,10 @@ const securityMockStart = securityServiceMock.createStart();
 
 const authorizationMock = actionsAuthorizationMock.create();
 const getActionsAuthorizationWithRequest = jest.fn();
+const KIBANA_VERSION = '9.5.0';
 const actionExecutorInitializationParams = {
   logger: loggerMock,
+  kibanaVersion: KIBANA_VERSION,
   spaces: spacesMock,
   security: securityMockStart,
   getServices: () => services,
@@ -3120,5 +3123,107 @@ describe('execute() - spec version dispatch', () => {
     expect(executor.mock.calls[0][0]).not.toHaveProperty('specVersion');
     expect(customValidator).toHaveBeenCalledTimes(1);
     expect(customValidator.mock.calls[0][1]).not.toHaveProperty('specVersion');
+  });
+
+  describe('when the version is unavailable', () => {
+    const buildUnavailableType = (reason: 'not_loaded' | 'cannot_build') => {
+      const resolveSchema = jest.fn(() => z.object({}).passthrough());
+      const executor = jest.fn();
+      const { versionedType } = buildVersionedType(
+        jest.fn(() => {
+          throw new SpecVersionUnavailableError({
+            reason,
+            actionTypeId: 'test',
+            specVersion: '1.4',
+          });
+        })
+      );
+      const unavailableType: ConnectorType = {
+        ...versionedType,
+        validate: {
+          config: { schema: z.object({}).passthrough(), resolveSchema },
+          secrets: { schema: z.object({}).passthrough(), resolveSchema },
+          params: { schema: z.object({}).passthrough(), resolveSchema },
+        },
+        executor,
+      };
+      return { unavailableType, resolveSchema, executor };
+    };
+
+    test('not_loaded returns a retryable error that names the version', async () => {
+      const { unavailableType, resolveSchema, executor } = buildUnavailableType('not_loaded');
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        savedObjectWithPin('1.4')
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(unavailableType);
+
+      const result = await actionExecutor.execute(executeParams);
+
+      expect(result).toEqual({
+        actionId: CONNECTOR_ID,
+        status: 'error',
+        retry: true,
+        errorSource: TaskErrorSource.FRAMEWORK,
+        message: expect.stringContaining('"1.4"'),
+      });
+      expect(result.message).toMatch(/retry/i);
+      expect(executor).not.toHaveBeenCalled();
+      expect(resolveSchema).not.toHaveBeenCalled();
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ event: expect.objectContaining({ action: 'execute-start' }) })
+      );
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'execute', outcome: 'failure' }),
+          error: { message: result.message },
+        })
+      );
+    });
+
+    test('cannot_build returns a non-retryable error with the version and the Kibana version', async () => {
+      const { unavailableType, resolveSchema, executor } = buildUnavailableType('cannot_build');
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        savedObjectWithPin('1.4')
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(unavailableType);
+
+      const result = await actionExecutor.execute(executeParams);
+
+      expect(result).toEqual({
+        actionId: CONNECTOR_ID,
+        status: 'error',
+        retry: false,
+        errorSource: TaskErrorSource.FRAMEWORK,
+        message: expect.stringContaining('"1.4"'),
+      });
+      expect(result.message).toContain(KIBANA_VERSION);
+      expect(executor).not.toHaveBeenCalled();
+      expect(resolveSchema).not.toHaveBeenCalled();
+    });
+
+    test('records the metric with errorType other', async () => {
+      const { unavailableType } = buildUnavailableType('not_loaded');
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        savedObjectWithPin('1.4')
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(unavailableType);
+
+      const addSpy = jest.spyOn(connectorExecuteCounter, 'add').mockImplementation(() => {});
+
+      await actionExecutor.execute(executeParams);
+
+      expect(addSpy).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({
+          success: false,
+          'error.type': 'other',
+          'error.source': 'framework',
+        })
+      );
+      addSpy.mockRestore();
+    });
   });
 });

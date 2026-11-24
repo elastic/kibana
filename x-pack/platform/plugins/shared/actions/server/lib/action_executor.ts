@@ -70,6 +70,7 @@ import type { ActionExecutionSource, ActionExecutionSourceType } from './action_
 import type { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
+import { SpecVersionUnavailableError } from './errors/spec_version_unavailable_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 
@@ -89,6 +90,7 @@ export interface ActionExecutorContext {
   inMemoryConnectors: InMemoryConnector[];
   getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
   getCurrentUserProfileIdFromAPIKey: (request: KibanaRequest) => Promise<string | undefined>;
+  kibanaVersion: string;
 }
 
 export interface TaskInfo {
@@ -568,16 +570,18 @@ export class ActionExecutor {
 
         eventLogger.logEvent(startEvent);
 
-        // Only types with `specVersions` get a version. Other types see no change.
-        const resolvedSpecVersion = actionType.specVersions?.resolveExecutionVersion(
-          rawAction.specVersion
-        );
-        const specVersionFields = resolvedSpecVersion ? { specVersion: resolvedSpecVersion } : {};
-
+        let specVersionFields: { specVersion?: string } = {};
         let validatedParams: Record<string, unknown>;
         let validatedConfig: Record<string, unknown>;
         let validatedSecrets: Record<string, unknown>;
         try {
+          // Only types with `specVersions` get a version. Other types see no change.
+          specVersionFields = resolveSpecVersionFields({
+            actionId,
+            actionType,
+            pin: rawAction.specVersion,
+            kibanaVersion: this.actionExecutorContext!.kibanaVersion,
+          });
           const validationResult = validateAction(
             {
               actionId,
@@ -593,6 +597,9 @@ export class ActionExecutor {
           validatedConfig = validationResult.validatedConfig;
           validatedSecrets = validationResult.validatedSecrets;
         } catch (err) {
+          if (!(err instanceof ActionExecutionError)) {
+            throw err;
+          }
           eventLogger.stopTiming(event);
           span?.setOutcome('failure');
           event.event!.outcome = 'failure';
@@ -612,7 +619,7 @@ export class ActionExecutor {
             connectorType: actionTypeId,
             specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
             origin: getConnectorExecuteOrigin(source?.type),
-            errorType: 'invalid',
+            errorType: err.reason === ActionExecutionErrorReason.SpecVersion ? 'other' : 'invalid',
             errorSource: err.result?.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
           });
           return err.result;
@@ -929,6 +936,47 @@ function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): str
   }
 
   return message;
+}
+
+/**
+ * Asks a type with `specVersions` which version this connector runs. Other types get no version.
+ * An unavailable version becomes an error result: a retry helps only when the version is not
+ * loaded yet. The text is in `message` because the task runner keeps only the message.
+ */
+function resolveSpecVersionFields({
+  actionId,
+  actionType,
+  pin,
+  kibanaVersion,
+}: {
+  actionId: string;
+  actionType: ActionType;
+  pin: string | undefined;
+  kibanaVersion: string;
+}): { specVersion?: string } {
+  if (!actionType.specVersions) {
+    return {};
+  }
+
+  try {
+    return { specVersion: actionType.specVersions.resolveExecutionVersion(pin) };
+  } catch (err) {
+    if (!(err instanceof SpecVersionUnavailableError)) {
+      throw err;
+    }
+    const { reason, specVersion, actionTypeId } = err;
+    const isNotLoaded = reason === 'not_loaded';
+    const message = isNotLoaded
+      ? `Spec version "${specVersion}" of connector type "${actionTypeId}" is not loaded on this node. Retry the execution.`
+      : `Spec version "${specVersion}" of connector type "${actionTypeId}" could not be built by Kibana ${kibanaVersion}. The execution will not be retried.`;
+    throw new ActionExecutionError(message, ActionExecutionErrorReason.SpecVersion, {
+      actionId,
+      status: 'error',
+      message,
+      retry: isNotLoaded,
+      errorSource: TaskErrorSource.FRAMEWORK,
+    });
+  }
 }
 
 interface ValidateActionOpts {

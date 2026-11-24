@@ -93,6 +93,7 @@ const unsecuredServices = {
 
 const actionExecutorInitializerParams = {
   logger: loggingSystemMock.create().get(),
+  kibanaVersion: '9.5.0',
   getServices: jest.fn().mockReturnValue(services),
   getUnsecuredServices: jest.fn().mockReturnValue(unsecuredServices),
   actionTypeRegistry,
@@ -976,6 +977,43 @@ describe('Task Runner Factory', () => {
       }
     );
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
+  });
+
+  test(`will throw a non-retryable error with the message when the spec version cannot be built`, async () => {
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: { ...mockedTaskInstance, attempts: 0 } })
+    );
+    const message =
+      'Spec version "1.4" of connector type "test" could not be built by Kibana 9.5.0. The execution will not be retried.';
+
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [{ id: '2', name: 'actionRef', type: 'action' }],
+    });
+    mockedActionExecutor.execute.mockResolvedValueOnce({
+      status: 'error',
+      actionId: '2',
+      message,
+      retry: false,
+      errorSource: TaskErrorSource.FRAMEWORK,
+    });
+
+    let err;
+    try {
+      await taskRunner.run();
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeDefined();
+    expect(isRetryableError(err)).toEqual(false);
+    expect(err.message).toBe(message);
   });
 
   test(`will throw an error and log the error message with the serviceMessage`, async () => {

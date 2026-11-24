@@ -36,6 +36,8 @@ export interface VersionedConnectorType {
   hasVersion(version: string): boolean;
   /** Adds a built version. A version that is already present is ignored. */
   addVersion(built: BuiltSpecVersion): void;
+  /** Records a stored version that this node could not build. */
+  markUnbuildable(version: string): void;
 }
 
 interface ParsedVersion {
@@ -63,6 +65,7 @@ export const createVersionedConnectorType = ({
   // Same Map object for the lifetime of the entry. The registry keeps it and sees new versions.
   const specs = new Map<string, ConnectorSpec>();
   const latestPerMajor = new Map<number, ParsedVersion>();
+  const unbuildable = new Set<string>();
 
   const addVersion = ({ version, type }: BuiltSpecVersion): void => {
     if (type.id !== id) {
@@ -117,7 +120,8 @@ export const createVersionedConnectorType = ({
     const type = types.get(version);
     if (!type) {
       throw new SpecVersionUnavailableError({
-        reason: 'not_loaded',
+        // A version that is built wins over a mark, so only a missing version gets here.
+        reason: unbuildable.has(version) ? 'cannot_build' : 'not_loaded',
         actionTypeId: id,
         specVersion: version,
       });
@@ -220,5 +224,8 @@ export const createVersionedConnectorType = ({
     actionType,
     hasVersion: (version) => types.has(version),
     addVersion,
+    markUnbuildable: (version) => {
+      unbuildable.add(version);
+    },
   };
 };
