@@ -79,6 +79,11 @@ export const getPackActionText = (action: PackAction): string => {
 };
 
 export const getPackDifferenceText = ({ code, queryId }: PackDifference): string => {
+  if (queryId === undefined && code.startsWith('query_')) {
+    return i18n.translate('xpack.csp.nativeVulnScanner.packDifference.queryUnnamed', {
+      defaultMessage: 'A query in the pack differs from the expected definition.',
+    });
+  }
   const query = queryId ?? '';
   switch (code) {
     case 'pack_disabled':

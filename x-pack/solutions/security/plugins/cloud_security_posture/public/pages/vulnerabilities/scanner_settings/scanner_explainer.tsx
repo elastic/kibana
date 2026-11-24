@@ -22,13 +22,13 @@ export const ScannerExplainer = () => (
         <p>
           {i18n.translate('xpack.csp.nativeVulnScanner.explainer.inventory', {
             defaultMessage:
-              'Osquery reads the installed package list (deb and rpm), the OS release and the kernel version once a day. The scanner matches that inventory against vendor vulnerability feeds.',
+              'Once a day, Osquery reads the installed package list (deb and rpm) with the OS release and kernel version on Linux, and the OS build and installed updates on Windows. The scanner matches that inventory against vendor vulnerability feeds.',
           })}
         </p>
         <p>
           {i18n.translate('xpack.csp.nativeVulnScanner.explainer.coverage', {
             defaultMessage:
-              'It covers Ubuntu and RHEL-family releases that have a vendor OVAL feed. The feeds are downloaded daily from Canonical and Red Hat.',
+              'It covers Ubuntu, RHEL 8 and later, and Windows releases that have a vendor feed. The feeds are downloaded daily from Canonical, Red Hat and Microsoft. CVEs on the CISA Known Exploited Vulnerabilities list are flagged.',
           })}
         </p>
         <p>
@@ -39,7 +39,8 @@ export const ScannerExplainer = () => (
         </p>
         <p>
           {i18n.translate('xpack.csp.nativeVulnScanner.explainer.limits', {
-            defaultMessage: 'It does not cover language packages, containers, Windows or macOS.',
+            defaultMessage:
+              'It does not match language packages and does not cover containers or macOS.',
           })}
         </p>
       </>
