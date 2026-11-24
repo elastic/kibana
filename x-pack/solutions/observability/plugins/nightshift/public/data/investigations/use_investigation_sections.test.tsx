@@ -344,7 +344,7 @@ describe('useInvestigationSections', () => {
     ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined]);
   });
 
-  it('refetches the open sections without refetching Closed when work leaves the in-progress section', () => {
+  it('refetches the other sections including Closed when work leaves the in-progress section', () => {
     const refetchCritical = jest.fn();
     const refetchClosed = jest.fn();
     mockUseFetchInvestigations.mockImplementation(
@@ -352,15 +352,16 @@ describe('useInvestigationSections', () => {
     );
     const { rerender } = renderSections();
     expect(refetchCritical).not.toHaveBeenCalled();
+    expect(refetchClosed).not.toHaveBeenCalled();
 
-    // One finished as another started: the total stays flat, but an id left.
+    // One left In progress (finished or closed while running): the total stays flat, but an id left.
     mockUseFetchInvestigations.mockImplementation(
       withInProgress({ ids: ['running-b', 'running-c'], refetchCritical, refetchClosed })
     );
     rerender({ query: undefined });
 
     expect(refetchCritical).toHaveBeenCalledTimes(1);
-    expect(refetchClosed).not.toHaveBeenCalled();
+    expect(refetchClosed).toHaveBeenCalledTimes(1);
   });
 
   it('refetches when the API total drops even if the capped loaded rows stay the same', () => {

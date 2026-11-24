@@ -209,6 +209,7 @@ export const useInvestigationSections = ({
   const { refetch: refetchMedium } = medium;
   const { refetch: refetchLow } = low;
   const { refetch: refetchNotRated } = notRated;
+  const { refetch: refetchClosed } = closed;
   const { refetch: refetchSeverityCounts } = severityCountsQuery;
   const { refetch: refetchUnfilteredSeverityCounts } = unfilteredSeverityCountsQuery;
 
@@ -248,6 +249,7 @@ export const useInvestigationSections = ({
     refetchMedium();
     refetchLow();
     refetchNotRated();
+    refetchClosed();
     void refetchSeverityCounts();
     if (hasSearchQuery) {
       void refetchUnfilteredSeverityCounts();
@@ -263,6 +265,7 @@ export const useInvestigationSections = ({
     refetchMedium,
     refetchLow,
     refetchNotRated,
+    refetchClosed,
     refetchSeverityCounts,
     refetchUnfilteredSeverityCounts,
   ]);

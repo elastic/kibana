@@ -365,15 +365,19 @@ export function NightshiftApp({
     });
   }, [analytics, isInitialLoading, selectedInvestigationId]);
 
-  // Searching is typing, not clicking. Reported once the debounced term's results have landed,
-  // so an empty result set is distinguishable from a hit. The term itself is never reported.
+  // Searching is typing, not clicking. Reported once every section has settled for the debounced
+  // term without an unloadable error, so a failed section is not reported as a partial count.
+  // The term itself is never reported.
+  const hasUnloadableSection = sections.some(
+    (section) => section.error != null && section.investigations.length === 0
+  );
   useEffect(() => {
     const query = debouncedSearchQuery;
     if (!query) {
       reportedSearchQuery.current = undefined;
       return;
     }
-    if (isFetching || reportedSearchQuery.current === query) {
+    if (isFetching || hasUnloadableSection || reportedSearchQuery.current === query) {
       return;
     }
     reportedSearchQuery.current = query;
@@ -381,7 +385,7 @@ export function NightshiftApp({
       queryLength: query.length,
       resultCount: totalCount,
     });
-  }, [analytics, debouncedSearchQuery, isFetching, totalCount]);
+  }, [analytics, debouncedSearchQuery, hasUnloadableSection, isFetching, totalCount]);
 
   usePageReady({
     isReady: !isInitialLoading && !allFailed,

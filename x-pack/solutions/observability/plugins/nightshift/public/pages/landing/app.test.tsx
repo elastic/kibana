@@ -1195,5 +1195,52 @@ describe('NightshiftApp', () => {
         screen.getByTestId('nightshiftInvestigationSectionSkeleton-closed')
       ).toBeInTheDocument();
     });
+
+    it('withholds search telemetry while Closed fails and reports the full count after retry', async () => {
+      closedRequestFails = true;
+      records = [
+        criticalInvestigation,
+        makeInvestigation('closed-checkout', 'Checkout closed', {
+          metadata: { status: 'closed' },
+        }),
+      ];
+      renderApp({
+        client,
+        initialEntries: [
+          '/?q=checkout&rangeFrom=2026-09-10T00:00:00.000Z&rangeTo=2026-09-12T00:00:00.000Z',
+        ],
+      });
+
+      const retry = await screen.findByRole('button', {
+        name: 'Retry loading Closed investigations',
+      });
+      expect(screen.getByRole('region', { name: 'Critical' })).toHaveTextContent(
+        'Checkout is down'
+      );
+      expect(reportEvent).not.toHaveBeenCalledWith(
+        'nightshift_investigations_searched',
+        expect.anything()
+      );
+
+      closedRequestFails = false;
+      fireEvent.click(retry);
+
+      await waitFor(() =>
+        expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent(
+          '1'
+        )
+      );
+      await waitFor(() =>
+        expect(reportEvent).toHaveBeenCalledWith('nightshift_investigations_searched', {
+          query_length: 8,
+          result_count: 2,
+        })
+      );
+      expect(
+        reportEvent.mock.calls.filter(
+          ([eventType]) => eventType === 'nightshift_investigations_searched'
+        )
+      ).toHaveLength(1);
+    });
   });
 });
