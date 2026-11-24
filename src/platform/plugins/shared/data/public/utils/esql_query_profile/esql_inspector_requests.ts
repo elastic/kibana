@@ -12,14 +12,13 @@ import { disambiguateRequestNames } from '@kbn/inspector-plugin/public';
 import { isRecord } from './shared/json_helpers';
 
 /**
- * True when an inspector request is the body logged by the ES|QL expression.
- * SQL also logs a string `query`, but only ES|QL sets `include_execution_metadata`.
+ * True when an inspector request is the body logged for an ES|QL search. SQL also logs a string
+ * `query`, but only ES|QL always has the `include_execution_metadata` key, with no value when the
+ * caller did not set it, so the key is what is looked for and not its value.
  */
 const isEsqlInspectorRequest = (request: Request): boolean => {
   const json = request.json;
-  return (
-    isRecord(json) && typeof json.query === 'string' && json.include_execution_metadata === true
-  );
+  return isRecord(json) && typeof json.query === 'string' && 'include_execution_metadata' in json;
 };
 
 /**

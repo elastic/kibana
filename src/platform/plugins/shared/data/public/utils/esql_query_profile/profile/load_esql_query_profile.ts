@@ -45,6 +45,9 @@ export async function loadEsqlQueryProfile({
         : {}),
       ...(typeof requestJson.time_zone === 'string' ? { timeZone: requestJson.time_zone } : {}),
       ...(typeof requestJson.locale === 'string' ? { locale: requestJson.locale } : {}),
+      ...(typeof requestJson.dropNullColumns === 'boolean'
+        ? { dropNullColumns: requestJson.dropNullColumns }
+        : {}),
       profile: true,
       includeExecutionMetadata: requestJson.include_execution_metadata === true,
       columnMetadata: settings?.column_metadata === true,

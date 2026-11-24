@@ -141,6 +141,8 @@ export const useTimelineStyles = () => {
         position: absolute;
         top: 0;
         bottom: 0;
+        /* A wait is drawn inside the bar, as a part of its driver's span, and never past it. */
+        overflow: hidden;
       `,
       laneBarSelected: css`
         box-shadow: inset 0 0 0 2px ${euiTheme.colors.text};

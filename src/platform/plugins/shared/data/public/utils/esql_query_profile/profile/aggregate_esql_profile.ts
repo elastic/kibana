@@ -43,24 +43,24 @@ function formatOperatorLabel(operator: string): { title: string; detail?: string
 
 /** Turns an ES|QL `profile` payload into the summary the query profile view renders. */
 export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
-  const parsed = parseProfile(profile);
-  const queryTookMillis = readTookMillis(parsed?.query);
-  const planningTookMillis = readTookMillis(parsed?.planning);
+  const esqlProfile = asEsqlProfile(profile);
+  const queryTookMillis = readTookMillis(esqlProfile?.query);
+  const planningTookMillis = readTookMillis(esqlProfile?.planning);
   const executionTookMillis =
     queryTookMillis === undefined || planningTookMillis === undefined
       ? undefined
       : Math.max(0, queryTookMillis - planningTookMillis);
 
-  const drivers = parsed?.drivers ?? [];
+  const drivers = esqlProfile?.drivers ?? [];
   const readings = drivers.map(readOperatorReadings);
   const operators = aggregateOperators(readings);
-  const timeline = readTimeline(parsed, drivers, readings);
+  const timeline = readTimeline(esqlProfile, drivers, readings);
 
   return {
     queryTookMillis,
     planningTookMillis,
     executionTookMillis,
-    planningPhases: readPlanningPhases(parsed),
+    planningPhases: readPlanningPhases(esqlProfile),
     driverCount: drivers.length,
     operators,
     hasTimeline: timeline.drivers.length > 0,
@@ -68,12 +68,9 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
   };
 }
 
-function parseProfile(profile: unknown): EsqlQueryProfile | undefined {
-  if (!profile || typeof profile !== 'object') {
-    return undefined;
-  }
-  return profile as EsqlQueryProfile;
-}
+/** Types the profile. It checks only that the profile is an object, and does not validate its fields. */
+const asEsqlProfile = (profile: unknown): EsqlQueryProfile | undefined =>
+  isRecord(profile) ? (profile as EsqlQueryProfile) : undefined;
 
 function readTookMillis(span: { took_millis?: number } | null | undefined): number | undefined {
   const tookMillis = span?.took_millis;
@@ -110,8 +107,8 @@ function readOperatorReadings(driver: EsqlProfileDriver): OperatorReading[] {
         operator: entry.operator,
         processNanos: reportedNanos ?? 0,
         timeReported: reportedNanos !== undefined,
-        rowsReceived: readFinite(status.rows_received) ?? 0,
-        rowsEmitted: readFinite(status.rows_emitted) ?? 0,
+        rowsReceived: readFinite(status.rows_received),
+        rowsEmitted: readFinite(status.rows_emitted),
         rawStatus: status,
       },
     ];
@@ -127,6 +124,10 @@ function readOperatorNanos(status: Record<string, unknown>): number | undefined 
   return phases.length > 0 ? phases.reduce((sum, nanos) => sum + nanos, 0) : undefined;
 }
 
+/** Adds a counter to a total that has nothing until a counter is reported. */
+const addReported = (total: number | undefined, count: number | undefined): number | undefined =>
+  count === undefined ? total : (total ?? 0) + count;
+
 function aggregateOperators(readingsByDriver: OperatorReading[][]): AggregatedOperator[] {
   const byOperator = new Map<string, OperatorAccumulator>();
 
@@ -136,14 +137,12 @@ function aggregateOperators(readingsByDriver: OperatorReading[][]): AggregatedOp
         operator,
         processNanos: 0,
         timeReported: false,
-        rowsReceived: 0,
-        rowsEmitted: 0,
       };
 
       current.processNanos += reading.processNanos;
       current.timeReported = current.timeReported || reading.timeReported;
-      current.rowsReceived += reading.rowsReceived;
-      current.rowsEmitted += reading.rowsEmitted;
+      current.rowsReceived = addReported(current.rowsReceived, reading.rowsReceived);
+      current.rowsEmitted = addReported(current.rowsEmitted, reading.rowsEmitted);
       byOperator.set(operator, current);
     });
   });

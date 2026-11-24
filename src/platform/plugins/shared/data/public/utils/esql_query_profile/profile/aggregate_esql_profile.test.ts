@@ -88,6 +88,29 @@ describe('aggregateEsqlProfile', () => {
     expect(view.operators[1].share).toBe(0.25);
   });
 
+  it('tells a row counter that an operator does not report apart from a reported zero', () => {
+    const { operators } = aggregateEsqlProfile({
+      drivers: [
+        {
+          operators: [
+            { operator: 'LuceneSourceOperator', status: { rows_emitted: 100 } },
+            { operator: 'OutputOperator', status: {} },
+            { operator: 'ExchangeSinkOperator', status: { rows_received: 0, rows_emitted: 0 } },
+          ],
+        },
+        { operators: [{ operator: 'LuceneSourceOperator', status: { rows_emitted: 50 } }] },
+      ],
+    });
+    const byTitle = Object.fromEntries(operators.map((operator) => [operator.title, operator]));
+
+    expect(byTitle.LuceneSource.rowsReceived).toBeUndefined();
+    expect(byTitle.LuceneSource.rowsEmitted).toBe(150);
+    expect(byTitle.Output.rowsReceived).toBeUndefined();
+    expect(byTitle.Output.rowsEmitted).toBeUndefined();
+    expect(byTitle.ExchangeSink.rowsReceived).toBe(0);
+    expect(byTitle.ExchangeSink.rowsEmitted).toBe(0);
+  });
+
   it('returns an empty view when the profile is missing', () => {
     expect(aggregateEsqlProfile(undefined)).toMatchObject({
       queryTookMillis: undefined,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiComboBox,
@@ -59,24 +59,40 @@ const useEsqlRequests = (adapters: Adapters): Request[] => {
   return requests;
 };
 
-/** A loaded profile, or the reason it failed, with the request and run it belongs to. */
+/** A loaded profile, or the reason it failed, with the run it belongs to and the request it profiled. */
 interface LoadedProfile {
-  requestJson: object;
-  reloadKey: number;
+  runKey: string;
+  request: Request;
   view?: QueryProfileViewModel;
   error?: string;
 }
 
+/**
+ * Profiles the request when a run is asked for: when the view opens, when another request is picked
+ * and when the user profiles again, all of which change `runKey`. The panel being inspected can
+ * fetch again by itself, as with auto-refresh, and that logs a new request. It must not send
+ * another profiled run to the cluster, nor replace the profile that is being read.
+ */
 const useQueryProfile = (
   search: Pick<ISearchStart, 'esql'>,
   request: Request | undefined,
-  reloadKey: number
-): { view?: QueryProfileViewModel; error?: string; loading: boolean } => {
+  runKey: string
+): {
+  view?: QueryProfileViewModel;
+  error?: string;
+  /** The request that the profile on show was taken for. */
+  profiledRequest?: Request;
+  loading: boolean;
+} => {
   const [loaded, setLoaded] = useState<LoadedProfile | undefined>();
-  const requestJson = request?.json;
+  const latestRequest = useRef(request);
+  latestRequest.current = request;
+  const needsRun = Boolean(request?.json) && loaded?.runKey !== runKey;
 
   useEffect(() => {
-    if (!requestJson) {
+    const target = latestRequest.current;
+    const requestJson = target?.json;
+    if (!needsRun || !target || !requestJson) {
       return;
     }
 
@@ -84,7 +100,7 @@ const useQueryProfile = (
     loadEsqlQueryProfile({ search, requestJson, abortSignal: controller.signal })
       .then((view) => {
         if (!controller.signal.aborted) {
-          setLoaded({ requestJson, reloadKey, view });
+          setLoaded({ runKey, request: target, view });
         }
       })
       .catch((caught: unknown) => {
@@ -92,8 +108,8 @@ const useQueryProfile = (
           return;
         }
         setLoaded({
-          requestJson,
-          reloadKey,
+          runKey,
+          request: target,
           error: readErrorMessage(
             caught,
             i18n.translate('data.inspector.queryProfile.unknownErrorMessage', {
@@ -106,12 +122,16 @@ const useQueryProfile = (
     return () => {
       controller.abort();
     };
-  }, [requestJson, search, reloadKey]);
+  }, [needsRun, runKey, search]);
 
-  // What was loaded for another request or run is not shown, not even for a moment.
-  const current =
-    loaded?.requestJson === requestJson && loaded?.reloadKey === reloadKey ? loaded : undefined;
-  return { view: current?.view, error: current?.error, loading: Boolean(requestJson) && !current };
+  // What was loaded for another run is not shown, not even for a moment.
+  const current = loaded?.runKey === runKey ? loaded : undefined;
+  return {
+    view: current?.view,
+    error: current?.error,
+    profiledRequest: current?.request,
+    loading: needsRun,
+  };
 };
 
 const RequestPicker = ({
@@ -204,8 +224,14 @@ export const QueryProfileView = ({
     [requests, selectedId]
   );
   const [reloadKey, setReloadKey] = useState(0);
-  const { view, error, loading } = useQueryProfile(search, selected, reloadKey);
-  const completedTime = completedRequestTime(selected);
+  const { view, error, profiledRequest, loading } = useQueryProfile(
+    search,
+    selected,
+    `${selectedId ?? ''}:${reloadKey}`
+  );
+  const completedTime = completedRequestTime(profiledRequest);
+  // The inspected panel fetched again since the profile was taken, or its request is gone.
+  const hasRequestChanged = Boolean(profiledRequest && selected?.json !== profiledRequest.json);
 
   return (
     <div data-test-subj="esqlQueryProfile">
@@ -241,6 +267,19 @@ export const QueryProfileView = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {hasRequestChanged ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileRequestChanged">
+            <p>
+              <FormattedMessage
+                id="data.inspector.queryProfile.requestChangedDescription"
+                defaultMessage="The request has changed since this profile was taken. Profile again to see the new one."
+              />
+            </p>
+          </EuiText>
+        </>
+      ) : null}
       {requests.length > 1 && selected ? (
         <>
           <EuiSpacer size="s" />
@@ -260,6 +299,11 @@ export const QueryProfileView = ({
           })}
           text={<p>{error}</p>}
         />
+      ) : view ? (
+        <>
+          <ProfileSummary view={view} />
+          <ProfileDetails view={view} requestId={profiledRequest?.id} />
+        </>
       ) : !selected?.json ? (
         <EuiText size="s" color="subdued" data-test-subj="esqlQueryProfileNoRequest">
           <p>
@@ -269,13 +313,8 @@ export const QueryProfileView = ({
             />
           </p>
         </EuiText>
-      ) : loading || !view ? (
-        <ProfileLoading />
       ) : (
-        <>
-          <ProfileSummary view={view} />
-          <ProfileDetails view={view} requestId={selected?.id} />
-        </>
+        <ProfileLoading />
       )}
     </div>
   );
