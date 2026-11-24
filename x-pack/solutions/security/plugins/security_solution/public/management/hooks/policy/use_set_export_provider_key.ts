@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { useMutation } from '@kbn/react-query';
+import { useCallback, useState } from 'react';
 import { EXPORT_PROVIDER_KEY_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   SetExportProviderKeyRequestBody,
@@ -25,39 +23,52 @@ interface SetExportProviderKeyParams {
   packagePolicyVersion: string;
 }
 
-export type UseSetExportProviderKeyOptions = Omit<
-  UseMutationOptions<SetExportProviderKeyResponse, IHttpFetchError, SetExportProviderKeyParams>,
-  'mutationFn'
->;
+export interface UseSetExportProviderKeyResult {
+  /** Rejects with the `IHttpFetchError` of the request */
+  setExportProviderKey: (
+    params: SetExportProviderKeyParams
+  ) => Promise<SetExportProviderKeyResponse>;
+  isLoading: boolean;
+}
 
-export type UseSetExportProviderKeyResult = UseMutationResult<
-  SetExportProviderKeyResponse,
-  IHttpFetchError,
-  SetExportProviderKeyParams
->;
-
-/** Sets or replaces the stored storage account key of one export provider of a policy. */
-export const useSetExportProviderKey = (
-  options?: UseSetExportProviderKeyOptions
-): UseSetExportProviderKeyResult => {
+/**
+ * Sets or replaces the stored storage account key of one export provider of a policy. Not a
+ * react-query mutation on purpose: mutation state keeps its variables (here the plaintext key) in
+ * the shared query client after the request has finished.
+ */
+export const useSetExportProviderKey = (): UseSetExportProviderKeyResult => {
   const http = useHttp();
+  const [isLoading, setIsLoading] = useState(false);
 
-  return useMutation<SetExportProviderKeyResponse, IHttpFetchError, SetExportProviderKeyParams>(
-    ({ packagePolicyId, providerId, accountKey, packagePolicyVersion }) => {
+  const setExportProviderKey = useCallback(
+    async ({
+      packagePolicyId,
+      providerId,
+      accountKey,
+      packagePolicyVersion,
+    }: SetExportProviderKeyParams): Promise<SetExportProviderKeyResponse> => {
       const body: SetExportProviderKeyRequestBody = {
         type: 'account_key',
         account_key: accountKey,
         package_policy_version: packagePolicyVersion,
       };
 
-      return http.put<SetExportProviderKeyResponse>(
-        resolvePathVariables(EXPORT_PROVIDER_KEY_ROUTE, {
-          package_policy_id: packagePolicyId,
-          provider_id: providerId,
-        }),
-        { version: '1', body: JSON.stringify(body) }
-      );
+      setIsLoading(true);
+
+      try {
+        return await http.put<SetExportProviderKeyResponse>(
+          resolvePathVariables(EXPORT_PROVIDER_KEY_ROUTE, {
+            package_policy_id: packagePolicyId,
+            provider_id: providerId,
+          }),
+          { version: '1', body: JSON.stringify(body) }
+        );
+      } finally {
+        setIsLoading(false);
+      }
     },
-    options
+    [http]
   );
+
+  return { setExportProviderKey, isLoading };
 };

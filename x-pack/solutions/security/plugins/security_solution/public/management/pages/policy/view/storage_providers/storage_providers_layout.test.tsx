@@ -1102,6 +1102,46 @@ describe('When rendering the StorageProvidersLayout', () => {
       });
     });
 
+    it('should retry the key against the provider as the server saved it, when the server dropped its key reference', async () => {
+      // e.g. a copied policy: the reference belongs to another policy, so the server drops it
+      const copied = createProvider('azure-1', {
+        credentials: { type: 'account_key', key_id: 'foreign-key' },
+      });
+      await render([copied], 'policy-version-3');
+      mockPolicyUpdateResponse(
+        [createProvider('azure-1', { container: 'new-container' })],
+        'policy-version-4'
+      );
+      keyApiMocks.responseProvider.setExportProviderKey.mockImplementationOnce(() => {
+        throw Object.assign(new Error('Service Unavailable'), {
+          body: { statusCode: 503, message: 'Encryption service unavailable' },
+        });
+      });
+
+      await clickRowAction('azure-1', 'storageProvidersEditAction');
+      await setFieldValue('storageProviderFlyout-containerInput', 'new-container');
+      await userEvent.click(renderResult.getByTestId('storageProviderFlyout-replaceKeyButton'));
+      await setFieldValue('storageProviderFlyout-accountKeyInput', VALID_ACCOUNT_KEY);
+      await userEvent.click(renderResult.getByTestId('storageProviderFlyout-saveButton'));
+      await waitForUpdateRequest();
+      await waitForKeyRequest();
+      expect(renderResult.getByTestId('storageProviderFlyout-keySaveError')).toBeInTheDocument();
+
+      await userEvent.click(renderResult.getByTestId('storageProviderFlyout-saveButton'));
+
+      await waitFor(() => {
+        expect(keyApiMocks.responseProvider.setExportProviderKey.mock.calls).toHaveLength(2);
+      });
+      expect(apiMocks.responseProvider.updateEndpointPolicy.mock.calls).toHaveLength(1);
+      const retryBody: { package_policy_version: string } = JSON.parse(
+        keyApiMocks.responseProvider.setExportProviderKey.mock.calls[1][0].body as string
+      );
+      expect(retryBody.package_policy_version).toBe('policy-version-4');
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('storageProviderFlyout')).not.toBeInTheDocument();
+      });
+    });
+
     it('should show the policy-changed message on a 409 and never silently retry with a newer version', async () => {
       const existing = createProvider('azure-1');
       await render([existing], 'policy-version-5');

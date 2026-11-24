@@ -134,11 +134,8 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
     error: saveError,
     reset: resetSaveState,
   } = useUpdateEndpointPolicy();
-  const {
-    mutateAsync: sendSetExportProviderKey,
-    isLoading: isSavingKey,
-    reset: resetKeySaveState,
-  } = useSetExportProviderKey();
+  const { setExportProviderKey: sendSetExportProviderKey, isLoading: isSavingKey } =
+    useSetExportProviderKey();
   const isSaving = isSavingPolicy || isSavingKey;
 
   const [flyoutState, setFlyoutState] = useState<FlyoutState | undefined>();
@@ -211,9 +208,8 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
 
   const resetDialogErrors = useCallback(() => {
     resetSaveState();
-    resetKeySaveState();
     setIsProviderGone(false);
-  }, [resetKeySaveState, resetSaveState]);
+  }, [resetSaveState]);
 
   const openAddFlyout = useCallback(() => {
     resetDialogErrors();
@@ -302,14 +298,19 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
         .then(({ item: policyItem }) => {
           dispatch({ type: 'serverReturnedPolicyDetailsData', payload: { policyItem } });
           const packagePolicyVersion = policyItem.version ?? '';
-          // The fields are saved from here on; a key failure retries against the saved provider
+          // The fields are saved from here on, as the server stored them (it drops a key reference
+          // it doesn't accept), so a key retry compares against that provider
+          const storedProvider =
+            getExportProviders(policyItem.inputs[0].config.policy.value).find(
+              ({ id }) => id === savedProvider.id
+            ) ?? savedProvider;
           setFlyoutState((prev) =>
             prev
-              ? { ...prev, provider: savedProvider, openedPolicyVersion: packagePolicyVersion }
+              ? { ...prev, provider: storedProvider, openedPolicyVersion: packagePolicyVersion }
               : prev
           );
           saveProviderKey({
-            provider: savedProvider,
+            provider: storedProvider,
             accountKey,
             packagePolicyVersion,
             successMessage: messages.successMessage,
