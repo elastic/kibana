@@ -21,7 +21,6 @@ import { useSelector } from '@xstate/react';
 import {
   useEdgesState,
   useNodesState,
-  type IsValidConnection,
   type NodeChange,
   type NodeMouseHandler,
   type OnConnect,
@@ -55,8 +54,10 @@ import { FlowHighlightProvider, useHoveredFlow } from './canvas_flow_highlight';
 import { applyCanvasSearch, resolveCanvasSearch } from './canvas_search';
 import { CanvasSearchBar } from './canvas_search_bar';
 import { CanvasSearchOverlay } from './canvas_search_overlay';
+import { CanvasConnectionTip } from './canvas_connection_tip';
 import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
-import { ConnectionTargetsProvider } from './nodes/connection_handle';
+import { PendingConnectionProvider } from './canvas_connection_highlight';
+import { usePendingConnection } from './use_pending_connection';
 import { CanvasToolbar } from './canvas_toolbar';
 import { CanvasReadOnlyProvider } from './canvas_read_only_context';
 import { UnitReadOnlyCallout } from '../../../streams_layout/unit_read_only_callout';
@@ -130,15 +131,10 @@ import {
   withUnitDestinations,
 } from '../../../streams_layout/destinations/destination_models';
 import {
-  canConnectLine,
-  canMoveLine,
   connectLine,
   disconnectLine,
   moveLine,
   removeComponentFromPipelines,
-  type UnitLineMove,
-  type UnitLineOrigin,
-  type UnitLineTarget,
 } from '../../../../services/unit_connections';
 import { RoutingFlyout } from '../../../stream_routing_flyout';
 import { ProcessingFlyout } from '../../../stream_processing_flyout';
@@ -588,7 +584,14 @@ function StreamsCanvasInner() {
     [closeContextMenu]
   );
 
-  const [connectionTargetIds, setConnectionTargetIds] = useState<ReadonlySet<string> | null>(null);
+  const {
+    pendingConnection,
+    startConnection,
+    endConnection,
+    startReconnect,
+    endReconnect,
+    isValidConnection,
+  } = usePendingConnection(graph.nodes, unitDefinition);
 
   const readConnectionOrigin = useCallback(
     (nodeId: string | null | undefined, handleId: string | null | undefined) =>
@@ -600,34 +603,15 @@ function StreamsCanvasInner() {
     [graph.nodes]
   );
 
-  // The line being moved, if any. Drops are then checked as a move of that line,
-  // so a rule can swap its one connection for another target.
-  const reconnectingRef = useRef<Pick<UnitLineMove, 'previousOrigin' | 'previousTarget'> | null>(
-    null
-  );
-
-  const canDropConnection = useCallback(
-    (origin: UnitLineOrigin, target: UnitLineTarget): boolean => {
-      const reconnecting = reconnectingRef.current;
-      return reconnecting
-        ? canMoveLine(unitDefinition, { ...reconnecting, origin, target })
-        : canConnectLine(unitDefinition, origin, target);
-    },
-    [unitDefinition]
-  );
-
   const onReconnectStart = useCallback<
     NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectStart']>
   >(
     (_event, edge) => {
       // A line grabbed next to a hovered node would otherwise keep the drop targets faded.
       clearHoveredFlow();
-      const previousOrigin = readConnectionOrigin(edge.source, edge.sourceHandle);
-      const previousTarget = readConnectionTarget(edge.target);
-      reconnectingRef.current =
-        previousOrigin && previousTarget ? { previousOrigin, previousTarget } : null;
+      startReconnect(edge);
     },
-    [clearHoveredFlow, readConnectionOrigin, readConnectionTarget]
+    [clearHoveredFlow, startReconnect]
   );
 
   const onConnect = useCallback<OnConnect>(
@@ -643,39 +627,12 @@ function StreamsCanvasInner() {
   );
 
   const onConnectStart = useCallback<OnConnectStart>(
-    (_event, params) => {
+    (event, params) => {
       // The line starts on a hovered node, whose highlight would fade the drop targets.
       clearHoveredFlow();
-      const origin =
-        params.handleType === 'source'
-          ? readConnectionOrigin(params.nodeId, params.handleId)
-          : undefined;
-      if (!origin) {
-        setConnectionTargetIds(null);
-        return;
-      }
-      const targets = graph.nodes
-        .map(({ id }) => id)
-        .filter((id) => {
-          const target = readConnectionTarget(id);
-          return target && canDropConnection(origin, target);
-        });
-      setConnectionTargetIds(new Set(targets));
+      startConnection(event, params);
     },
-    [canDropConnection, clearHoveredFlow, graph.nodes, readConnectionOrigin, readConnectionTarget]
-  );
-
-  const clearConnectionTargets = useCallback(() => {
-    setConnectionTargetIds(null);
-  }, []);
-
-  const isValidConnection = useCallback<IsValidConnection>(
-    (connection) => {
-      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
-      const target = readConnectionTarget(connection.target);
-      return origin !== undefined && target !== undefined && canDropConnection(origin, target);
-    },
-    [canDropConnection, readConnectionOrigin, readConnectionTarget]
+    [clearHoveredFlow, startConnection]
   );
 
   const onReconnect = useCallback<OnReconnect>(
@@ -704,7 +661,7 @@ function StreamsCanvasInner() {
     NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectEnd']>
   >(
     (_event, edge, _handleType, connectionState) => {
-      reconnectingRef.current = null;
+      endReconnect();
       // Dropping on a handle keeps or moves the line. Releasing on the canvas unhooks it.
       if (!canEditConnections || connectionState.toHandle) {
         return;
@@ -721,7 +678,14 @@ function StreamsCanvasInner() {
       }
       stageUserEdit(next);
     },
-    [canEditConnections, readConnectionOrigin, readConnectionTarget, stageUserEdit, unitDefinition]
+    [
+      canEditConnections,
+      endReconnect,
+      readConnectionOrigin,
+      readConnectionTarget,
+      stageUserEdit,
+      unitDefinition,
+    ]
   );
 
   const onNodesDelete = useCallback<OnNodesDelete<ClassicCanvasNode>>(
@@ -942,7 +906,7 @@ function StreamsCanvasInner() {
         </EuiFlexGroup>
       )}
       <CanvasReadOnlyProvider value={readOnly}>
-        <ConnectionTargetsProvider value={connectionTargetIds}>
+        <PendingConnectionProvider value={pendingConnection}>
           <FlowHighlightProvider value={hoveredFlow}>
             <CanvasShell<ClassicCanvasNode, ClassicCanvasEdge>
               nodes={visible.nodes}
@@ -960,7 +924,7 @@ function StreamsCanvasInner() {
               }
               onConnect={onConnect}
               onConnectStart={onConnectStart}
-              onConnectEnd={clearConnectionTargets}
+              onConnectEnd={endConnection}
               onReconnect={onReconnect}
               onReconnectStart={onReconnectStart}
               onReconnectEnd={onReconnectEnd}
@@ -995,6 +959,10 @@ function StreamsCanvasInner() {
               )}
               {nodes.length === 0 && <CanvasEmptyState onAddSource={addSource} />}
               <CanvasSearchOverlay flow={searchedFlow} />
+              <CanvasConnectionTip
+                connection={pendingConnection}
+                shownNodeIds={searchedFlow?.nodeIds}
+              />
               {flyoutDestination ? (
                 <UnitDestinationFlyout
                   destination={flyoutDestination}
@@ -1088,7 +1056,7 @@ function StreamsCanvasInner() {
               />
             </CanvasShell>
           </FlowHighlightProvider>
-        </ConnectionTargetsProvider>
+        </PendingConnectionProvider>
       </CanvasReadOnlyProvider>
     </div>
   );
