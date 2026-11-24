@@ -46,6 +46,7 @@ import * as i18n from './translations';
 import type { RulesFilterOptions, RuleMigrationStats, RuleMigrationSettings } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
+import { getRelatedIntegrationsForMigrationRule } from './utils/related_integrations';
 import { UpdateIndexPatternForm } from './update_index_pattern';
 import { EmptyMigration, MemoizedBasicTable, SearchField } from '../../../common/components';
 import {
@@ -352,17 +353,17 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const getRuleIntegrations = useCallback(
       (migrationRule: RuleMigrationRule) => {
         if (!isRulesLoading) {
-          let relatedIntegrations: RelatedIntegration[] = [];
-          const integrationIds = migrationRule.elastic_rule?.integration_ids;
-          if (integrations && integrationIds) {
-            relatedIntegrations = integrationIds
-              .map((integrationId) => integrations[integrationId])
-              .filter((integration) => integration != null);
-          }
-          return { relatedIntegrations, isIntegrationsLoading };
+          return {
+            relatedIntegrations: getRelatedIntegrationsForMigrationRule({
+              migrationRule,
+              matchedPrebuiltRule: getMatchedPrebuiltRule(migrationRule),
+              integrations,
+            }),
+            isIntegrationsLoading,
+          };
         }
       },
-      [integrations, isIntegrationsLoading, isRulesLoading]
+      [getMatchedPrebuiltRule, integrations, isIntegrationsLoading, isRulesLoading]
     );
 
     const {
