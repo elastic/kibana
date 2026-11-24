@@ -596,9 +596,36 @@ export async function getFleetServerHostsForAgentPolicy(
 
   // getDefaultFleetServerHost() reads the host without decrypting it, so it has no `ssl`. Read it
   // again decrypted, as for an explicitly selected host, so the policy gets its SSL settings.
+  const decryptedDefault = await getDecryptedDefaultFleetServerHost(defaultFleetServerHost);
+  if (decryptedDefault) {
+    return decryptedDefault;
+  }
+
+  // The host was deleted after it was looked up, so resolve the default host again.
+  const currentDefault = await fleetServerHostService.getDefaultFleetServerHost();
+  const decryptedCurrentDefault =
+    currentDefault && currentDefault.id !== defaultFleetServerHost.id
+      ? await getDecryptedDefaultFleetServerHost(currentDefault)
+      : undefined;
+  if (!decryptedCurrentDefault) {
+    throw new FleetServerHostNotFoundError('Default Fleet Server host is not setup');
+  }
+  return decryptedCurrentDefault;
+}
+
+/**
+ * Reads the default Fleet Server host decrypted. Returns undefined when it no longer exists, and
+ * the host as given, without its SSL settings, when they cannot be decrypted.
+ */
+async function getDecryptedDefaultFleetServerHost(
+  defaultFleetServerHost: FleetServerHost
+): Promise<FleetServerHost | undefined> {
   try {
     return await fleetServerHostService.get(defaultFleetServerHost.id);
   } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
     // Its URLs and proxy were read, so keep the host rather than losing it over its SSL settings.
     appContextService
       .getLogger()
