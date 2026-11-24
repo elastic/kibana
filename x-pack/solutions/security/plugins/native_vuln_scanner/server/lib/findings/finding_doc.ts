@@ -62,7 +62,8 @@ export interface FindingDoc {
     /** Absent on unfixed findings: the vendor has shipped no fix yet. */
     fixed_version?: string;
     architecture?: string;
-    type: 'deb' | 'rpm';
+    /** Absent on Windows findings: the package is an OS build, not an installable package. */
+    type?: 'deb' | 'rpm';
   };
   vulnerability: {
     id: string;
@@ -110,6 +111,13 @@ export interface FindingDoc {
     /** Set while the vendor has not fixed the CVE; such findings never alert. */
     unfixed?: boolean;
     vendor_reason?: string;
+    /** Windows findings only; the KB of the update that clears the CVE. */
+    remediation_kb?: string;
+    superseded_kbs?: string[];
+    fixed_build?: string;
+    installed_build?: string;
+    msrc_product_id?: string;
+    remediation_kind?: 'security_update' | 'hotpatch';
   };
 }
 
@@ -143,16 +151,32 @@ const SEVERITY_BY_VENDOR_LABEL: Readonly<Record<string, FindingSeverity>> = {
 
 /**
  * Flyout key for the CVSS block. Ubuntu's OVAL CVSS attributes are copied from NVD by the
- * Ubuntu CVE tracker, and the flyout only renders the `nvd`, `redhat` and `ghsa` keys.
+ * Ubuntu CVE tracker, and MSRC's CVRF scores are Microsoft's own per-product CVSS, mapped to the
+ * `nvd` slot because the flyout only renders the `nvd`, `redhat` and `ghsa` keys.
  */
 const CVSS_KEY: Readonly<Record<AdvisorySource, 'nvd' | 'redhat'>> = {
   ubuntu: 'nvd',
   redhat: 'redhat',
+  msrc: 'nvd',
 };
 
 const DATA_SOURCE_NAME: Readonly<Record<AdvisorySource, string>> = {
   ubuntu: 'Ubuntu OVAL',
   redhat: 'Red Hat OVAL',
+  msrc: 'Microsoft Security Update Guide',
+};
+
+/** The advisory source implied by the version scheme, for a finding with no advisory attached. */
+const SOURCE_BY_SCHEME: Readonly<Record<Finding['scheme'], AdvisorySource>> = {
+  dpkg: 'ubuntu',
+  rpm: 'redhat',
+  windows_build: 'msrc',
+};
+
+const PACKAGE_TYPE_BY_SCHEME: Readonly<Record<Finding['scheme'], 'deb' | 'rpm' | undefined>> = {
+  dpkg: 'deb',
+  rpm: 'rpm',
+  windows_build: undefined,
 };
 
 /** Vendor priority/impact label -> CNVM severity; `untriaged` and anything unknown -> UNKNOWN. */
@@ -241,8 +265,7 @@ export const toFindingDoc = (
   }
   const { cve, package: pkg, advisories } = finding;
   const [primary] = advisories;
-  const source: AdvisorySource =
-    primary?.source ?? (finding.scheme === 'dpkg' ? 'ubuntu' : 'redhat');
+  const source: AdvisorySource = primary?.source ?? SOURCE_BY_SCHEME[finding.scheme];
   const id = findingId(finding);
   const name = host.name ?? host.id;
   const risk = toRiskScore({ base: cve.cvss?.score, kev: kev !== undefined });
@@ -274,7 +297,9 @@ export const toFindingDoc = (
       version: pkg.version,
       ...(finding.fixedVersion ? { fixed_version: finding.fixedVersion } : {}),
       ...(pkg.arch ? { architecture: pkg.arch } : {}),
-      type: finding.scheme === 'dpkg' ? 'deb' : 'rpm',
+      ...(PACKAGE_TYPE_BY_SCHEME[finding.scheme]
+        ? { type: PACKAGE_TYPE_BY_SCHEME[finding.scheme] }
+        : {}),
     },
     vulnerability: {
       id: cve.id,
@@ -321,6 +346,18 @@ export const toFindingDoc = (
       ...(finding.unfixed ? { unfixed: true } : {}),
       ...(finding.vendorReason ? { vendor_reason: finding.vendorReason } : {}),
       advisories: advisories.map(toDocAdvisory),
+      ...(finding.windows
+        ? {
+            remediation_kb: finding.windows.kb,
+            ...(finding.windows.supersededKbs.length
+              ? { superseded_kbs: finding.windows.supersededKbs }
+              : {}),
+            fixed_build: finding.windows.fixedBuild,
+            installed_build: finding.windows.installedBuild,
+            msrc_product_id: finding.windows.productId,
+            remediation_kind: finding.windows.kind,
+          }
+        : {}),
     },
   };
 };

@@ -52,6 +52,12 @@ export const KNOWLEDGE_LICENSES: Readonly<Record<AdvisorySource, KnowledgeLicens
     license_url: 'https://creativecommons.org/licenses/by/4.0/',
     attribution: 'Red Hat, Inc.',
   },
+  // Not an SPDX licence: the MSRC Security Update Guide data is published under Microsoft's terms of use.
+  msrc: {
+    license: 'Microsoft Terms of Use',
+    license_url: 'https://www.microsoft.com/legal/terms-of-use',
+    attribution: 'Microsoft Corporation',
+  },
 };
 
 /** Id-safe form of an OS release (`noble`, `9`, `10`). */

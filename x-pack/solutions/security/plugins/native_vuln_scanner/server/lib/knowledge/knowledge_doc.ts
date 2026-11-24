@@ -65,6 +65,10 @@ const SOURCE_URL: Readonly<
     cve: (id) => `https://access.redhat.com/security/cve/${id}`,
     advisory: (id) => `https://access.redhat.com/errata/${id}`,
   },
+  msrc: {
+    cve: (id) => `https://msrc.microsoft.com/update-guide/vulnerability/${id}`,
+    advisory: (id) => `https://support.microsoft.com/help/${id.replace(/^KB/i, '')}`,
+  },
 };
 
 /** Cuts `value` to `max` and reports whether anything was lost. */

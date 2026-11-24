@@ -33,7 +33,7 @@ const MAX_TITLE_CHARS = 1024;
 const PRODUCT_TREE_LAST = 'MSRC CVRF lists vulnerabilities before its product tree';
 
 /** Newer rows replace older KBs; a chain longer than this is cut, as findings bound it too. */
-const MAX_SUPERSEDED_KBS = 32;
+export const MAX_SUPERSEDED_KBS = 32;
 
 /** `Windows 10 Version 22H2 for x64-based Systems`, `Windows Server 2025 (Server Core installation)`. */
 const WINDOWS_PRODUCT_NAME = /^Windows (?:10|11|Server)/;
@@ -46,7 +46,10 @@ const KB_NUMBER = /^\d{1,9}$/;
 /** MSRC `Remediation.Type`: 2 is a vendor fix (an update), the only kind that carries a build. */
 const REMEDIATION_VENDOR_FIX = 2;
 
-const HOTPATCH_SUB_TYPE = 'Security Hotpatch Update';
+export const HOTPATCH_SUB_TYPE = 'Security Hotpatch Update';
+
+/** The cumulative update's `SubType`; the matcher picks the regular fix by it, not by `!hotpatch`. */
+export const SECURITY_UPDATE_SUB_TYPE = 'Security Update';
 
 /** One fix for one Windows product: the host is affected below `fixedBuild` on the same `build`. */
 export interface MsrcAdvisoryRow {

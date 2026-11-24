@@ -7,6 +7,8 @@
 
 export type { AdvisoryIndex } from './match';
 export { buildAdvisoryIndex, matchHost, rhelKernelEvr, sourceRpmName } from './match';
+export type { WindowsAdvisoryIndex, WindowsHostInventory } from './windows_match';
+export { buildWindowsAdvisoryIndex, matchWindowsHost } from './windows_match';
 export type {
   Finding,
   HostInventory,

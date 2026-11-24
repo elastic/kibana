@@ -404,4 +404,81 @@ describe('toFindingDoc', () => {
     });
     expect(doc.resource).toEqual({ id: 'h2', name: 'h2' });
   });
+
+  describe('a Windows finding', () => {
+    const windowsFinding = (overrides: Partial<Finding> = {}): Finding => ({
+      hostId: 'w1',
+      cve: { id: 'CVE-2026-100223', cvss: { version: '3.1', score: 7.8, vector: 'CVSS:3.1/AV:L' } },
+      kind: 'package',
+      package: { name: '12390', version: '10.0.26100.9911' },
+      fixedVersion: '10.0.26100.9974',
+      scheme: 'windows_build',
+      advisories: [],
+      why: 'Windows 11 24H2 build 10.0.26100.9911 is below 10.0.26100.9974 (KB5132061)',
+      windows: {
+        kb: '5132061',
+        supersededKbs: ['5127648', '5132043'],
+        fixedBuild: '10.0.26100.9974',
+        installedBuild: '10.0.26100.9911',
+        productId: '12390',
+        kind: 'security_update',
+      },
+      ...overrides,
+    });
+    const WINDOWS_HOST: HostMeta = {
+      id: 'w1',
+      name: 'desk-1',
+      os: { family: 'windows', version: '10.0.26100' },
+    };
+
+    it('writes only mapped fields, and the remediation facts', () => {
+      const doc = toFindingDoc(windowsFinding(), WINDOWS_HOST, CTX);
+
+      expect(unmappedPaths(JSON.parse(JSON.stringify(doc)), findingsMappings)).toEqual([]);
+      expect(doc.native_vuln_scanner).toMatchObject({
+        remediation_kb: '5132061',
+        superseded_kbs: ['5127648', '5132043'],
+        fixed_build: '10.0.26100.9974',
+        installed_build: '10.0.26100.9911',
+        msrc_product_id: '12390',
+        remediation_kind: 'security_update',
+      });
+    });
+
+    it('has no package type and falls back to the Microsoft data source', () => {
+      const doc = toFindingDoc(windowsFinding(), WINDOWS_HOST, CTX);
+
+      expect(doc.package).toEqual({
+        name: '12390',
+        version: '10.0.26100.9911',
+        fixed_version: '10.0.26100.9974',
+      });
+      expect(doc.vulnerability.data_source.Name).toBe('Microsoft Security Update Guide');
+      expect(doc.vulnerability.cvss).toEqual({ nvd: { V3Score: 7.8, V3Vector: 'CVSS:3.1/AV:L' } });
+    });
+
+    it('leaves superseded_kbs out when the update replaces nothing', () => {
+      const base = windowsFinding();
+      const doc = toFindingDoc(
+        windowsFinding({ windows: { ...base.windows!, supersededKbs: [] } }),
+        WINDOWS_HOST,
+        CTX
+      );
+
+      expect(doc.native_vuln_scanner.superseded_kbs).toBeUndefined();
+    });
+
+    it('has an id of its own: product and installed build are the package name and version', () => {
+      const id = findingId(windowsFinding());
+
+      expect(id).toMatch(/^[0-9a-f]{64}$/);
+      expect(id).toBe(findingId(windowsFinding()));
+      expect(id).not.toBe(findingId(finding({ hostId: 'w1' })));
+      const base = windowsFinding();
+      expect(
+        findingId({ ...base, package: { ...base.package, version: '10.0.26100.9912' } })
+      ).not.toBe(id);
+      expect(findingId({ ...base, package: { ...base.package, name: '20438' } })).not.toBe(id);
+    });
+  });
 });

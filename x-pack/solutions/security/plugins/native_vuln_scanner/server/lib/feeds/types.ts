@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export type AdvisorySource = 'ubuntu' | 'redhat';
+export type AdvisorySource = 'ubuntu' | 'redhat' | 'msrc';
 
-export type VersionScheme = 'dpkg' | 'rpm';
+export type VersionScheme = 'dpkg' | 'rpm' | 'windows_build';
 
 export interface CvssScore {
   version: string;
@@ -70,7 +70,7 @@ export interface AdvisoryRecord {
     /** Every `<reference>` of the definition (advisory, CVEs, vendor notices), capped at 10. */
     refs?: Array<{ id: string; url: string }>;
   };
-  os: { family: 'ubuntu' | 'rhel'; version: string };
+  os: { family: 'ubuntu' | 'rhel' | 'windows'; version: string };
   kind: 'package' | 'running_kernel';
   package: {
     name: string;
@@ -118,7 +118,7 @@ export interface KnowledgeEntry {
 }
 
 export interface FeedParseResult {
-  os: { family: 'ubuntu' | 'rhel'; version: string };
+  os: { family: 'ubuntu' | 'rhel' | 'windows'; version: string };
   snapshotTime?: string;
   definitions: number;
   records: AdvisoryRecord[];

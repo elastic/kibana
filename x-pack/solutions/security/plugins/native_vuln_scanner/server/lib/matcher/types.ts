@@ -50,6 +50,21 @@ export type MatchedAdvisory = Pick<
   'id' | 'source' | 'definition_id' | 'title' | 'url' | 'severity' | 'refs'
 >;
 
+/** Windows facts of a finding: which update clears it and why that one was chosen. */
+export interface WindowsRemediation {
+  /** The update to install (KB digits): the window's latest cumulative update, or the latest hotpatch for an enrolled host. */
+  kb: string;
+  /** Older KBs the remediation update replaces, at most 32. */
+  supersededKbs: string[];
+  /** `10.0.<build>.<ubr>` of the update that first fixed this CVE; a host at or above it has no finding. */
+  fixedBuild: string;
+  installedBuild: string;
+  productId: string;
+  kind: 'security_update' | 'hotpatch';
+  /** The hotpatch KB in `patches` that made the host count as enrolled; set for enrolled hosts only. */
+  enrolmentKb?: string;
+}
+
 export interface Finding {
   hostId: string;
   cve: AdvisoryCve;
@@ -66,6 +81,8 @@ export interface Finding {
   /** Human-readable reason for the lowest-fix match. */
   why: string;
   feedSnapshotTime?: string;
+  /** Windows findings only. */
+  windows?: WindowsRemediation;
 }
 
 /** Counts of matches that could not be decided, keyed by reason (e.g. `unknown_module_enabled`). */

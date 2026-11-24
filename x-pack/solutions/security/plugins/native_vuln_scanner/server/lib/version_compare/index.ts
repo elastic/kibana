@@ -11,3 +11,5 @@ export type { DpkgVersion } from './dpkg';
 export { compareDpkg, dpkgKey, parseDpkg } from './dpkg';
 export type { Evr } from './rpm';
 export { compareRpm, parseEvr, rpmKey, rpmvercmp } from './rpm';
+export type { WindowsBuild } from './windows_build';
+export { compareWindowsBuild, parseWindowsBuild, windowsBuildKey } from './windows_build';
