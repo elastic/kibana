@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import queryString from 'query-string';
 export interface EsqlResponse {
   columns: Array<{ name: string }>;
   values: unknown[][];
@@ -20,3 +21,19 @@ export const columnValues = ({ columns, values }: EsqlResponse, name: string): u
 export const spaceScoped = (spaceId: string) => ({
   permissions: { kibana: { privileges: [{ space: spaceId }] } },
 });
+
+/** Request body that registers an AI index backed by `dest`, with no automations or sources. */
+export const registerAiIndex = (
+  id: string,
+  dest: { type: 'index' | 'data_stream'; value: string }
+) => ({
+  id,
+  dest,
+  automations: [],
+  sources: [],
+});
+
+export const withQuery = (path: string, query: Record<string, string | number>) => {
+  const search = queryString.stringify(query, { arrayFormat: 'none' });
+  return search ? `${path}?${search}` : path;
+};

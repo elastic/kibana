@@ -13,7 +13,11 @@ import {
   NewAgentPolicySchema,
 } from '../models';
 import { inputsFormat } from '../../../common/constants';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '../../constants';
+import {
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_MAPPINGS,
+  FLEET_SCHEMA_NAME_MAX_LENGTH,
+} from '../../constants';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 
@@ -27,7 +31,12 @@ export const GetAgentPoliciesRequestSchema = {
       perPage: schema.maybe(
         schema.number({ defaultValue: 20, meta: { description: 'Number of results per page' } })
       ),
-      sortField: schema.maybe(schema.string({ meta: { description: 'Field to sort results by' } })),
+      sortField: schema.maybe(
+        schema.querySortField.warn({
+          label: 'fleet.agent_policies.sortField',
+          meta: { description: 'Field to sort results by' },
+        })
+      ),
       sortOrder: schema.maybe(
         schema.oneOf([schema.literal('desc'), schema.literal('asc')], {
           meta: { description: 'Sort order, ascending or descending' },
@@ -39,7 +48,8 @@ export const GetAgentPoliciesRequestSchema = {
         })
       ),
       kuery: schema.maybe(
-        schema.string({
+        schema.searchFilter.warn({
+          label: 'fleet.agent_policies.kuery',
           meta: { description: 'A KQL query string to filter results' },
           validate: (value: string) => {
             const validationObj = validateKuery(
@@ -146,7 +156,11 @@ export const GetAgentPoliciesPackagePoliciesSummaryResponseSchema = schema.objec
 
 export const GetOneAgentPolicyRequestSchema = {
   params: schema.object({
-    agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
+    agentPolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agent_policies.agentPolicyId',
+      meta: { description: 'The ID of the agent policy' },
+    }),
   }),
   query: schema.object({
     format: schema.maybe(
@@ -159,7 +173,11 @@ export const GetOneAgentPolicyRequestSchema = {
 
 export const GetAutoUpgradeAgentsStatusRequestSchema = {
   params: schema.object({
-    agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
+    agentPolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agent_policies.auto_upgrade_agents_status.agentPolicyId',
+      meta: { description: 'The ID of the agent policy' },
+    }),
   }),
 };
 
@@ -202,8 +220,14 @@ export const CopyAgentPolicyRequestSchema = {
   ...GetOneAgentPolicyRequestSchema,
   body: schema.object(
     {
-      name: schema.string({ minLength: 1 }),
-      description: schema.maybe(schema.string()),
+      name: schema.displayName.warn({
+        minLength: 1,
+        maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+        label: 'fleet.agent_policies.copy.name',
+      }),
+      description: schema.maybe(
+        schema.description.warn({ label: 'fleet.agent_policies.copy.description' })
+      ),
     },
     { meta: { id: 'copy_agent_policy_request' } }
   ),
@@ -212,7 +236,11 @@ export const CopyAgentPolicyRequestSchema = {
 export const DeleteAgentPolicyRequestSchema = {
   body: schema.object(
     {
-      agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
+      agentPolicyId: schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.agent_policies.delete.agentPolicyId',
+        meta: { description: 'The ID of the agent policy' },
+      }),
       force: schema.maybe(
         schema.boolean({
           meta: { description: 'bypass validation checks that can prevent agent policy deletion' },
@@ -233,7 +261,11 @@ export const DeleteAgentPolicyResponseSchema = schema.object(
 
 export const GetFullAgentPolicyRequestSchema = {
   params: schema.object({
-    agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
+    agentPolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agent_policies.full.agentPolicyId',
+      meta: { description: 'The ID of the agent policy' },
+    }),
   }),
   query: schema.object({
     download: schema.maybe(
@@ -296,17 +328,24 @@ export const GetK8sManifestResponseScheme = schema.object(
 
 export const GetAgentPolicyOutputsRequestSchema = {
   params: schema.object({
-    agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
+    agentPolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agent_policies.outputs.agentPolicyId',
+      meta: { description: 'The ID of the agent policy' },
+    }),
   }),
 };
 
 export const GetListAgentPolicyOutputsRequestSchema = {
   body: schema.object(
     {
-      ids: schema.arrayOf(schema.string(), {
-        meta: { description: 'list of package policy ids' },
-        maxSize: 1000,
-      }),
+      ids: schema.arrayOf(
+        schema.savedObjectId.warn({ minLength: 0, label: 'fleet.agent_policies.outputs.ids' }),
+        {
+          meta: { description: 'list of package policy ids' },
+          maxSize: 1000,
+        }
+      ),
     },
     { meta: { id: 'get_list_agent_policy_outputs_request' } }
   ),

@@ -16,7 +16,6 @@ const STRUCTURAL_BASE_TYPES = new Set([
   'while',
   'parallel',
   'switch',
-  'merge',
   'wait',
   'waitForInput',
   'waitForApproval',
@@ -25,7 +24,6 @@ const STRUCTURAL_BASE_TYPES = new Set([
   'alert',
   'scheduled',
   'data',
-  'console',
 ]);
 
 /** Distinct base connector types used by a workflow definition, in first-seen order. */

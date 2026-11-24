@@ -19,23 +19,24 @@ jest.mock('@kbn/es-query', () => ({
 }));
 
 jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
+  ...jest.requireActual('@kbn/esql-utils'),
   getESQLTimeField: jest.fn(),
 }));
 
 import type { HttpStart } from '@kbn/core/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { fetchEsqlData } from './fetch_esql_data';
 
 const mockBuildEsQuery = buildEsQuery as jest.MockedFunction<typeof buildEsQuery>;
-const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
 const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getESQLTimeField>;
 
 const mockHttp = {} as HttpStart;
-const mockSearch = jest.fn();
+const mockEsql = jest.fn();
+const mockSearch = { esql: mockEsql };
 const mockSignal = new AbortController().signal;
 const esqlQuery = 'FROM logs | STATS count = COUNT(*)';
 const mockResponse = { columns: [], values: [], all_columns: [] };
@@ -47,24 +48,19 @@ const emptyBoolQuery = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockBuildEsQuery.mockReturnValue(emptyBoolQuery as ReturnType<typeof buildEsQuery>);
-  mockGetESQLResults.mockResolvedValue({
-    response: mockResponse,
-    params: { query: esqlQuery },
-  } as Awaited<ReturnType<typeof getESQLResults>>);
+  mockEsql.mockResolvedValue({ rawResponse: mockResponse });
   mockGetESQLTimeField.mockResolvedValue(undefined);
 });
 
 describe('fetchEsqlData', () => {
   describe('no constraints', () => {
-    it('passes filter: undefined to getESQLResults when no filters, query, or time range', async () => {
+    it('omits the filter from the esql search when no filters, query, or time range', async () => {
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: undefined })
-      );
+      expect(mockEsql.mock.calls[0][0]).not.toHaveProperty('filter');
     });
 
-    it('returns the response from getESQLResults', async () => {
+    it('returns the rawResponse from the esql search', async () => {
       const result = await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
       expect(result).toBe(mockResponse);
     });
@@ -130,9 +126,7 @@ describe('fetchEsqlData', () => {
 
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, timeRange, mockSignal);
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: undefined })
-      );
+      expect(mockEsql.mock.calls[0][0]).not.toHaveProperty('filter');
     });
 
     it('merges the time range filter into esBoolQuery.bool.filter', async () => {
@@ -144,7 +138,7 @@ describe('fetchEsqlData', () => {
 
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, timeRange, mockSignal);
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect(mockEsql).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: {
             bool: {
@@ -154,7 +148,8 @@ describe('fetchEsqlData', () => {
               should: [],
             },
           },
-        })
+        }),
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
 
@@ -163,7 +158,7 @@ describe('fetchEsqlData', () => {
 
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, timeRange, mockSignal);
 
-      const call = mockGetESQLResults.mock.calls[0][0];
+      const call = mockEsql.mock.calls[0][0];
       const filter = call.filter as { bool: { filter: unknown[] } };
       expect(filter).toBeDefined();
       expect(filter.bool.filter).toHaveLength(1);
@@ -177,9 +172,7 @@ describe('fetchEsqlData', () => {
 
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, timeRange, mockSignal);
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: undefined })
-      );
+      expect(mockEsql.mock.calls[0][0]).not.toHaveProperty('filter');
     });
   });
 
@@ -191,8 +184,9 @@ describe('fetchEsqlData', () => {
 
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: expect.objectContaining({ bool: expect.any(Object) }) })
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: expect.objectContaining({ bool: expect.any(Object) }) }),
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
 
@@ -203,30 +197,22 @@ describe('fetchEsqlData', () => {
 
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: expect.objectContaining({ bool: expect.any(Object) }) })
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: expect.objectContaining({ bool: expect.any(Object) }) }),
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
   });
 
   describe('esqlVariables passthrough', () => {
-    it('omits variables from getESQLResults when not provided', async () => {
+    it('leaves esqlVariables undefined in the query context when not provided', async () => {
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
 
-      const call = mockGetESQLResults.mock.calls[0][0];
-      expect(call).not.toHaveProperty('variables');
+      const call = mockEsql.mock.calls[0][0];
+      expect(call.kibanaQueryContext.esqlVariables).toBeUndefined();
     });
 
-    it('omits variables from getESQLResults when an empty array is provided', async () => {
-      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
-        esqlVariables: [],
-      });
-
-      const call = mockGetESQLResults.mock.calls[0][0];
-      expect(call).not.toHaveProperty('variables');
-    });
-
-    it('forwards esqlVariables to getESQLResults as variables when provided', async () => {
+    it('forwards esqlVariables to the query context when provided', async () => {
       const esqlVariables = [
         { key: '?threshold', value: 100, type: ESQLVariableType.VALUES },
         { key: '?env', value: 'production', type: ESQLVariableType.VALUES },
@@ -236,27 +222,31 @@ describe('fetchEsqlData', () => {
         esqlVariables,
       });
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ variables: esqlVariables })
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibanaQueryContext: expect.objectContaining({ esqlVariables }),
+        }),
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
   });
 
   describe('approximation and projectRouting passthrough', () => {
-    it('omits approximation from getESQLResults when not provided', async () => {
+    it('omits approximation from the esql search when not provided', async () => {
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
 
-      const call = mockGetESQLResults.mock.calls[0][0];
+      const call = mockEsql.mock.calls[0][0];
       expect(call).not.toHaveProperty('approximation');
     });
 
-    it('forwards isApproximate: true to getESQLResults as approximation', async () => {
+    it('forwards isApproximate: true as approximation', async () => {
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
         isApproximate: true,
       });
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ approximation: true })
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ approximation: true }),
+        expect.objectContaining({ abortSignal: mockSignal })
       );
     });
 
@@ -267,14 +257,120 @@ describe('fetchEsqlData', () => {
         projectRouting,
       });
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(expect.objectContaining({ projectRouting }));
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ projectRouting }),
+        expect.objectContaining({ abortSignal: mockSignal })
+      );
     });
 
-    it('omits projectRouting from getESQLResults when not provided', async () => {
+    it('omits projectRouting from the esql search when not provided', async () => {
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
 
-      const call = mockGetESQLResults.mock.calls[0][0];
+      const call = mockEsql.mock.calls[0][0];
       expect(call).not.toHaveProperty('projectRouting');
+    });
+  });
+
+  describe('inspector request adapter', () => {
+    it('hands the adapter to the esql search so it records the request', async () => {
+      const requestAdapter = new RequestAdapter();
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          abortSignal: mockSignal,
+          inspector: expect.objectContaining({ adapter: requestAdapter }),
+        })
+      );
+    });
+
+    it('names the request by the title it is given, else "Data"', async () => {
+      const requestAdapter = new RequestAdapter();
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+        requestTitle: 'Data (query 2)',
+      });
+
+      expect(mockEsql.mock.calls.map(([, options]) => options?.inspector?.title)).toEqual([
+        'Data',
+        'Data (query 2)',
+      ]);
+    });
+
+    it("leaves the adapter's earlier requests in place when keepRequests is set", async () => {
+      const requestAdapter = new RequestAdapter();
+      const resetSpy = jest.spyOn(requestAdapter, 'reset');
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+        keepRequests: true,
+      });
+
+      expect(resetSpy).not.toHaveBeenCalled();
+    });
+
+    it('describes the request for the Inspect action', async () => {
+      const requestAdapter = new RequestAdapter();
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+
+      expect(mockEsql.mock.calls[0][1].inspector).toEqual({
+        adapter: requestAdapter,
+        title: 'Data',
+        description: 'This request queries Elasticsearch to fetch the data for the custom panel.',
+      });
+    });
+
+    it('rethrows an abort as it is, so a superseded fetch can be told apart from a failure', async () => {
+      const abort = new DOMException('The operation was aborted', 'AbortError');
+      mockEsql.mockRejectedValue(abort);
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+          requestAdapter: new RequestAdapter(),
+        })
+      ).rejects.toBe(abort);
+    });
+
+    it('does not pass an inspector without an adapter', async () => {
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
+
+      expect(mockEsql.mock.calls[0][1]).not.toHaveProperty('inspector');
+    });
+
+    it('resets the adapter before each fetch, so refetches do not pile up', async () => {
+      const requestAdapter = new RequestAdapter();
+      const resetSpy = jest.spyOn(requestAdapter, 'reset');
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+
+      expect(resetSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('rethrows a failed search', async () => {
+      const error = new Error('boom');
+      mockEsql.mockRejectedValue(error);
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+          requestAdapter: new RequestAdapter(),
+        })
+      ).rejects.toBe(error);
     });
   });
 });

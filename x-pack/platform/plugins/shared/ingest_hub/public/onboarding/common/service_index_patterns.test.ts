@@ -13,7 +13,6 @@ function makeEntry(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsServiceMa
     id: 'test',
     name: 'Test',
     packageName: 'aws',
-    category: 'compute',
     dataStreams: [],
     signalTypes: [],
     deploymentMethods: [],

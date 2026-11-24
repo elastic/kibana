@@ -97,4 +97,54 @@ describe('security telemetry - detection rule alerts task test', () => {
     expect(mockTaskMetrics.start).toHaveBeenCalled();
     expect(mockTaskMetrics.end).toHaveBeenCalled();
   });
+
+  test('ml alerts: strips influencer values and apply filterlist in influencers_sanitized', async () => {
+    const testTaskExecutionPeriod = {
+      last: undefined,
+      current: new Date().toISOString(),
+    };
+    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
+    mockTelemetryEventsSender.getTelemetryUsageCluster = jest
+      .fn()
+      .mockReturnValue(telemetryUsageCounter);
+    const spyOnSend = jest
+      .spyOn(mockTelemetryEventsSender, 'sendOnDemand')
+      .mockResolvedValue(undefined);
+    const mockTelemetryReceiver = createMockTelemetryReceiver();
+    const mlAlert = {
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+      'kibana.alert.rule.type': 'machine_learning',
+      influencers: [
+        { influencer_field_name: 'process.name', influencer_field_values: ['bash'] },
+        { influencer_field_name: 'user.name', influencer_field_values: ['jsmith'] },
+      ],
+    };
+    mockTelemetryReceiver.fetchPrebuiltRuleAlertsBatch = jest
+      .fn()
+      .mockImplementation(async function* () {
+        yield [mlAlert];
+      });
+    const telemetryDetectionRuleAlertsTaskConfig = createTelemetryPrebuiltRuleAlertsTaskConfig(10);
+    const mockTaskMetrics = createMockTaskMetrics();
+
+    await telemetryDetectionRuleAlertsTaskConfig.runTask(
+      'test-id',
+      logger,
+      mockTelemetryReceiver,
+      mockTelemetryEventsSender,
+      mockTaskMetrics,
+      testTaskExecutionPeriod
+    );
+
+    expect(spyOnSend).toHaveBeenCalled();
+    const finalAlert = spyOnSend.mock.calls[0][1][0] as Record<string, unknown>;
+
+    expect(finalAlert.influencers).toEqual([
+      { influencer_field_name: 'process.name' },
+      { influencer_field_name: 'user.name' },
+    ]);
+    expect(finalAlert.influencers_sanitized).toEqual([
+      { influencer_field_name: 'process.name', influencer_field_values: ['bash'] },
+    ]);
+  });
 });

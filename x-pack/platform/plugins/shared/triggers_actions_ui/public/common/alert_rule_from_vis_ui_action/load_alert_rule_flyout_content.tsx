@@ -46,7 +46,7 @@ export const loadAlertRuleFlyoutContent = async ({
   const datatable = getDataTableFromEmbeddable(embeddable);
   const dataView = query
     ? undefined
-    : embeddable.dataViews$.getValue()?.find((view) => view.id === datatable?.meta?.source);
+    : embeddable.dataSources$.getValue()?.find((view) => view.id === datatable?.meta?.source);
 
   // TODO: refactor this to use the new Lens api format
   const { state } = embeddable.getLegacySerializedState().attributes ?? {};
@@ -135,8 +135,8 @@ const getDataTableFromEmbeddable = (embeddable: LensApi) =>
     | undefined;
 
 const getDataFromEmbeddable = (embeddable: LensApi): AlertRuleFromVisUIActionData => {
-  const queryValue = embeddable.query$.getValue();
-  const query = queryValue && 'esql' in queryValue ? queryValue.esql : null;
+  const [esqlQuery] = embeddable.esql$.getValue();
+  const query = esqlQuery?.esql ?? null;
   const datatable = getDataTableFromEmbeddable(embeddable);
   const thresholdValues = datatable
     ? datatable.columns

@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 jest.mock('react-use/lib/useSessionStorage');
 
@@ -20,7 +21,6 @@ jest.mock('../use_aws_service_matrix', () => {
     {
       id: 'cloudtrail',
       name: 'AWS CloudTrail',
-      category: 'management_governance',
       signalTypes: ['logs'],
       dataStreams: [],
       deploymentMethods: [{ method: 'ecf', preferred: true }],
@@ -31,7 +31,6 @@ jest.mock('../use_aws_service_matrix', () => {
     {
       id: 'ec2',
       name: 'Amazon EC2',
-      category: 'compute',
       signalTypes: ['logs', 'metrics'],
       dataStreams: [],
       deploymentMethods: [{ method: 'managed_integration', preferred: true }],
@@ -48,10 +47,17 @@ jest.mock('../use_aws_service_matrix', () => {
 
 // Stub heavy step components — we only care about shell-level stepper and navigation.
 jest.mock('../step_components', () => ({
-  ServicesStep: ({ onContinue }: { onContinue: () => void }) => (
-    <button data-test-subj="servicesStep-continue" onClick={onContinue}>
-      Continue
-    </button>
+  ServicesStep: ({ onContinue, onBack }: { onContinue: () => void; onBack?: () => void }) => (
+    <>
+      <button data-test-subj="servicesStep-continue" onClick={onContinue}>
+        Continue
+      </button>
+      {onBack && (
+        <button data-test-subj="servicesStep-back" onClick={onBack}>
+          Back
+        </button>
+      )}
+    </>
   ),
   ServiceSettingsStep: ({ onContinue }: { onContinue: () => void }) => (
     <button data-test-subj="serviceSettingsStep-continue" onClick={onContinue}>
@@ -68,6 +74,7 @@ jest.mock('../step_components', () => ({
 
 import { OnboardingFlowProvider, useOnboardingFlow } from '../onboarding_flow_context';
 import { OnboardingShell } from './onboarding_shell';
+import { discardMarkedSessions } from './onboarding_session_storage';
 import {
   AWS_ONBOARDING_TITLE,
   AWS_ONBOARDING_DESCRIPTION,
@@ -233,5 +240,111 @@ describe('OnboardingShell — provider metadata', () => {
 
     expect(history.location.pathname).toBe('/');
     expect(screen.queryByTestId('onboardingShell')).not.toBeInTheDocument();
+  });
+});
+
+describe('OnboardingShell — cancelling the flow from the first step', () => {
+  const navigateToUrl = jest.fn();
+  const navigateToApp = jest.fn();
+
+  function renderAt(path: string) {
+    const history = createMemoryHistory({ initialEntries: [path] });
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={{ application: { navigateToUrl, navigateToApp } }}>
+          <OnboardingFlowProvider>
+            <Router history={history}>
+              <Route path="/:integrationId">
+                <OnboardingShell />
+              </Route>
+            </Router>
+          </OnboardingFlowProvider>
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+    return history;
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sessionStorage.clear();
+  });
+
+  it('offers Back on the first step only', () => {
+    const history = renderAt('/aws#services');
+    expect(screen.getByTestId('servicesStep-back')).toBeInTheDocument();
+
+    act(() => history.push('/aws#service-settings'));
+    expect(screen.queryByTestId('servicesStep-back')).not.toBeInTheDocument();
+  });
+
+  it('asks for confirmation that changes are lost before cancelling', () => {
+    renderAt('/aws#services');
+    expect(screen.queryByTestId('onboardingCancelModal')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('servicesStep-back'));
+
+    expect(screen.getByTestId('onboardingCancelModal')).toHaveTextContent(
+      'Your changes will be lost if you cancel the flow.'
+    );
+    expect(navigateToUrl).not.toHaveBeenCalled();
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('says the deployed services stay when the flow is resumed with ?deploymentId=', () => {
+    renderAt('/aws?deploymentId=dep-1#services');
+    fireEvent.click(screen.getByTestId('servicesStep-back'));
+
+    const modal = screen.getByTestId('onboardingCancelModal');
+    expect(modal).toHaveTextContent('Leave onboarding?');
+    expect(modal).toHaveTextContent('Your deployed services stay in place.');
+    expect(modal).not.toHaveTextContent('Your changes will be lost if you cancel the flow.');
+    expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent('Leave onboarding');
+  });
+
+  it('keeps the plain wording while nothing is deployed', () => {
+    renderAt('/aws#services');
+    fireEvent.click(screen.getByTestId('servicesStep-back'));
+
+    expect(screen.getByTestId('onboardingCancelModal')).toHaveTextContent('Cancel onboarding?');
+    expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent('Cancel onboarding');
+  });
+
+  it('stays in the flow when the user keeps editing', () => {
+    renderAt('/aws#services');
+    fireEvent.click(screen.getByTestId('servicesStep-back'));
+    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+    expect(screen.queryByTestId('onboardingCancelModal')).not.toBeInTheDocument();
+    expect(navigateToUrl).not.toHaveBeenCalled();
+    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(screen.getByTestId('servicesStep-continue')).toBeInTheDocument();
+  });
+
+  it('returns to the page the flow was opened from and drops the session once the app unmounts', () => {
+    sessionStorage.setItem('onboarding.aws.returnUrl', '/app/integrations/browse?q=aws');
+    sessionStorage.setItem('onboarding.aws.stepState', '{"services":"complete"}');
+    renderAt('/aws#services');
+
+    fireEvent.click(screen.getByTestId('servicesStep-back'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/integrations/browse?q=aws');
+    // Still there: clearing now would be undone by the mounted persistence hooks.
+    expect(sessionStorage.getItem('onboarding.aws.stepState')).not.toBeNull();
+
+    // What the app does after it has unmounted.
+    discardMarkedSessions();
+    expect(sessionStorage.getItem('onboarding.aws.stepState')).toBeNull();
+    expect(sessionStorage.getItem('onboarding.aws.returnUrl')).toBeNull();
+  });
+
+  it('falls back to the integrations app when there is no return url', () => {
+    renderAt('/aws#services');
+    fireEvent.click(screen.getByTestId('servicesStep-back'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    expect(navigateToApp).toHaveBeenCalledWith('integrations');
+    expect(navigateToUrl).not.toHaveBeenCalled();
   });
 });

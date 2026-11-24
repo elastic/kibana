@@ -794,4 +794,21 @@ steps:
     expect(onFailureStep.branchKey).toBe('on-failure.fallback');
     expect(iterationOnFailureStep.branchKey).toBe('iteration-on-failure.fallback');
   });
+
+  it('keeps a step named __proto__', () => {
+    const yaml = `
+steps:
+  - name: __proto__
+    type: elasticsearch.indices.delete
+    steps:
+      - name: child
+        type: console
+`;
+    const lineCounter = new LineCounter();
+    const result = buildWorkflowLookup(parseDocument(yaml, { lineCounter }), lineCounter);
+
+    expect(Object.keys(result.steps).sort()).toEqual(['__proto__', 'child']);
+    expect(result.steps.__proto__.stepType).toBe('elasticsearch.indices.delete');
+    expect(result.steps.child.parentStepId).toBe('__proto__');
+  });
 });

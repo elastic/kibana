@@ -8,13 +8,14 @@
 import type { AttachmentAttributesV2 } from '../../../common/types/domain';
 import type {
   AttachmentDeleteTarget,
-  GetRelatedAttachments,
   RelatedAttachmentIds,
+  RelatedAttachmentsDefinition,
 } from '../../attachment_framework/types';
 import type { CasesClientArgs } from '../types';
+import { buildAttachmentTypeFilter } from './type_filter';
 
 /**
- * Returns the ids, by attachment type, that the `getRelatedAttachments` hooks of the deleted
+ * Returns the ids, by attachment type, that the `relatedAttachments` hooks of the deleted
  * attachment types take along with them.
  */
 export const collectRelatedAttachmentIds = async ({
@@ -36,12 +37,12 @@ export const collectRelatedAttachmentIds = async ({
   // a hook, so it takes nothing along with it.
   const targetsByType = new Map<
     string,
-    { hook: GetRelatedAttachments; targets: AttachmentDeleteTarget[] }
+    { hook: RelatedAttachmentsDefinition; targets: AttachmentDeleteTarget[] }
   >();
   for (const { id, attributes } of attachments) {
     const hook =
       attributes != null && unifiedAttachmentTypeRegistry.has(attributes.type)
-        ? unifiedAttachmentTypeRegistry.get(attributes.type).getRelatedAttachments
+        ? unifiedAttachmentTypeRegistry.get(attributes.type).relatedAttachments
         : undefined;
 
     if (attributes != null && hook != null) {
@@ -55,14 +56,23 @@ export const collectRelatedAttachmentIds = async ({
   }
 
   const deletedIds = new Set(attachments.map(({ id }) => id));
-  const { saved_objects: caseAttachments } = await caseService.getAllCaseComments({ id: caseId });
+  const readTypes = new Set([...targetsByType.values()].flatMap(({ hook }) => hook.readTypes));
+  const { saved_objects: caseAttachments } = await caseService.getAllCaseComments({
+    id: caseId,
+    options: { filter: buildAttachmentTypeFilter([...readTypes]) },
+  });
   const remainingAttachments = caseAttachments
     .filter(({ id }) => !deletedIds.has(id))
     .map(({ id, attributes }) => ({ id, attributes }));
 
   const idsByType = new Map<string, Set<string>>();
   for (const { hook, targets } of targetsByType.values()) {
-    const related = await hook({ caseId, request, attachments: targets, remainingAttachments });
+    const related = await hook.get({
+      caseId,
+      request,
+      attachments: targets,
+      remainingAttachments,
+    });
 
     for (const { type, attachmentIds } of related) {
       const ids = idsByType.get(type) ?? new Set<string>();

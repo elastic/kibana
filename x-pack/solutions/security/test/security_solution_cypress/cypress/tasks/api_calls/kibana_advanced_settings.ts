@@ -10,7 +10,6 @@ import {
   SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING,
   SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID,
 } from '@kbn/management-settings-ids';
-import { ENABLE_NEW_FLYOUT_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from './common';
 
 export const setKibanaSetting = (key: string, value: boolean | number | string) => {
@@ -50,8 +49,4 @@ export const setPreferredChatExperienceToClassic = () => {
     body: { changes: { [AI_CHAT_EXPERIENCE_TYPE]: 'classic' } },
     failOnStatusCode: false,
   });
-};
-
-export const disableNewFlyout = () => {
-  setKibanaSetting(ENABLE_NEW_FLYOUT_SETTING, false);
 };

@@ -10,15 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
-import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
-import type {
-  HostVmExecResponse,
-  HostVmTransferResponse,
-} from '../../../scripts/endpoint/common/types';
-import type {
-  DeletedEndpointHeartbeats,
-  IndexedEndpointHeartbeats,
-} from '../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
+import type { HostVmTransferResponse } from '../../../scripts/endpoint/common/types';
 import type { SecuritySolutionDescribeBlockFtrConfig } from '../../../scripts/run_cypress/utils';
 import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
 import type {
@@ -30,7 +22,6 @@ import type {
   IsAgentAndEndpointUninstalledFromHostTaskOptions,
   LogItTaskOptions,
   CaptureHostVmAgentDiagnosticsOptions,
-  ExecuteCommandOnHostOptions,
 } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
@@ -126,36 +117,6 @@ declare global {
       ): Chainable<IndexedCase['data']>;
 
       task(
-        name: 'indexEndpointHeartbeats',
-        arg?: { count?: number },
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<IndexedEndpointHeartbeats['data']>;
-
-      task(
-        name: 'deleteIndexedEndpointHeartbeats',
-        arg: IndexedEndpointHeartbeats['data'],
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<DeletedEndpointHeartbeats>;
-
-      task(
-        name: 'startTransparentApiProxy',
-        arg?: { port?: number },
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<null>;
-
-      task(
-        name: 'getInterceptedRequestsFromTransparentApiProxy',
-        arg?: {},
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<UsageRecord[][]>;
-
-      task(
-        name: 'stopTransparentProxyApi',
-        arg?: {},
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<null>;
-
-      task(
         name: 'deleteIndexedCase',
         arg: IndexedCase['data'],
         options?: Partial<Loggable & Timeoutable>
@@ -204,20 +165,14 @@ declare global {
       ): Chainable<null>;
 
       task(
-        name: 'uploadFileToEndpoint',
-        arg: { hostname: string; srcPath: string; destPath: string },
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<null>;
-
-      task(
         name: 'installPackagesOnEndpoint',
         arg: { hostname: string; packages: string[] },
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<null>;
 
       task(
-        name: 'readZippedFileContentOnEndpoint',
-        arg: { hostname: string; path: string; password?: string },
+        name: 'readZippedFileContent',
+        arg: { path: string; password?: string },
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<string>;
 
@@ -262,12 +217,6 @@ declare global {
         arg: CaptureHostVmAgentDiagnosticsOptions,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<Omit<HostVmTransferResponse, 'delete'>>;
-
-      task(
-        name: 'executeCommandOnHost',
-        arg: ExecuteCommandOnHostOptions,
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<HostVmExecResponse>;
     }
   }
 }

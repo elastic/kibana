@@ -21,6 +21,7 @@ import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { LENS_LAYER_TYPES } from '@kbn/lens-common';
 import * as getApplicationUserMessagesModule from '../../get_application_user_messages';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
@@ -47,34 +48,6 @@ jest.mock('../../../data_views_service/create_esql_ad_hoc_data_view', () => ({
 
 jest.mock('@kbn/esql-utils', () => {
   return {
-    getESQLResults: jest.fn().mockResolvedValue({
-      response: {
-        columns: [
-          {
-            name: '@timestamp',
-            id: '@timestamp',
-            meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
-        values: [],
-      },
-    }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     formatESQLColumns: jest.fn().mockReturnValue([
       {
@@ -158,6 +131,37 @@ jest.spyOn(getApplicationUserMessagesModule, 'useApplicationUserMessages');
 
 const data = {
   ...mockDataPlugin(),
+  search: {
+    ...mockDataPlugin().search,
+    esql: jest.fn().mockResolvedValue({
+      rawResponse: {
+        columns: [
+          {
+            name: '@timestamp',
+            id: '@timestamp',
+            meta: {
+              type: 'date',
+            },
+          },
+          {
+            name: 'bytes',
+            id: 'bytes',
+            meta: {
+              type: 'number',
+            },
+          },
+          {
+            name: 'memory',
+            id: 'memory',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        values: [],
+      },
+    }),
+  },
   query: {
     ...mockDataPlugin().query,
     timefilter: {
@@ -245,6 +249,35 @@ describe('LensEditConfigurationFlyout', () => {
     await waitFor(() => container.querySelector('lnsEditFlyoutBody'));
     return { container, ...rest };
   }
+
+  describe.each([false, true])('helper layers with ES|QL=%s', (isEsql) => {
+    it.each([LENS_LAYER_TYPES.REFERENCELINE, LENS_LAYER_TYPES.ANNOTATIONS])(
+      'renders %s configuration without the visualization parameters accordion',
+      async (layerType) => {
+        const getLayerTypeMock = jest.mocked(visualizationMap.testVis.getLayerType);
+        const originalImplementation = getLayerTypeMock.getMockImplementation();
+        getLayerTypeMock.mockReturnValue(layerType);
+        try {
+          await renderConfigFlyout(
+            { attributes: isEsql ? esqlLensAttributes : lensAttributes },
+            isEsql ? { esql: 'from index1 | limit 10' } : undefined,
+            { activeDatasourceId: isEsql ? 'textBased' : 'formBased' }
+          );
+          expect(screen.queryByText('Visualization parameters')).not.toBeInTheDocument();
+          expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
+          expect(screen.queryByTestId('InlineEditingSuggestions')).not.toBeInTheDocument();
+        } finally {
+          getLayerTypeMock.mockImplementation(originalImplementation!);
+        }
+      }
+    );
+  });
+
+  it('retains the visualization parameters accordion for data layers', async () => {
+    await renderConfigFlyout();
+    expect(screen.getByText('Visualization parameters')).toBeInTheDocument();
+    expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
+  });
 
   it('should display the header and the link to editor if necessary props are given', async () => {
     const navigateToLensEditorSpy = jest.fn();

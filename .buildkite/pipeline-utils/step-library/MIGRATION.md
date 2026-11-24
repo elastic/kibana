@@ -11,7 +11,11 @@ fragment is ported. For how steps are written once ported, see the
    "Writing a step" in the README for helpers, presets and where it lives. Carry
    the YAML's comments over as `//` comments above the step they describe. Use
    `genericStep` only if no helper fits, and say why in a comment. Export the
-   function from `index.ts`, which is what `pipeline.ts` imports.
+   function from `index.ts`, which is what `pipeline.ts` imports. A fragment
+   under `pull_request/<area>/` (e.g., `pull_request/security_solution/`) goes in
+   the matching `steps/<area>/` subfolder, keeping its name: the YAML at
+   `pull_request/security_solution/explore.yml` becomes
+   `steps/security_solution/explore.ts`. Do not prefix filenames.
 2. In `pull_request/pipeline.ts`, replace the fragment's `getPipeline` call
    using the table below. Keep the call where it is: the order of the emitted
    steps must not change.
@@ -61,11 +65,6 @@ changed form, and the labels to use for a real build that exercises the suite.
   for cancel-on-gate, so its fragment must not be loaded with
   `cancelOnGateFailure`.
 - **`wait: ~`:** use `waitStep`, which keeps `wait: null`.
-- **A fragment uploaded directly by `pipeline.sh`** (`store_moon_cache.yml`)
-  never passes through `pipeline.ts`. Print its rendered document with
-  `renderSteps(steps, { header: true })` from a small script, and pipe that into
-  `buildkite-agent pipeline upload`.
-
 ## Transitional pieces
 
 - `header: true` exists because the remaining YAML fragments are still joined

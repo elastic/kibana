@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, PluginInitializerContext } from '@kbn/core/server';
-import { PluginInitializer } from '@kbn/core-di-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
-import type { PluginConfig } from '../../../config';
 import { parseDurationToMs } from '../../duration';
+import { ConfigService } from '../../services/config_service/config_service';
 import { EsServiceInternalToken } from '../../services/es_service/tokens';
 import type { AlertingTaskRunner } from '../../services/task_run_scope_service/create_task_runner';
 import {
@@ -25,19 +24,17 @@ type TaskRunParams = Pick<RunContext, 'signal'>;
 
 @injectable()
 export class AlertActionsCleanupTaskRunner implements AlertingTaskRunner {
-  private readonly config: PluginConfig;
+  private readonly dataRetention: string;
 
   constructor(
     @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(ConfigService) configService: ConfigService
   ) {
-    this.config = pluginConfigAccessor.get<PluginConfig>();
+    this.dataRetention = configService.get('retention.alertActions.dispatcher').dataRetention;
   }
 
   public async run({ signal }: TaskRunParams): Promise<RunResult> {
-    const { dataRetention } = this.config.retention.alertActions.dispatcher;
-    const cutoff = new Date(Date.now() - parseDurationToMs(dataRetention)).toISOString();
+    const cutoff = new Date(Date.now() - parseDurationToMs(this.dataRetention)).toISOString();
 
     try {
       await this.esClient.deleteByQuery(

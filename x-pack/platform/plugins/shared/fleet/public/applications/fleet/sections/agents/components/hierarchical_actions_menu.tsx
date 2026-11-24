@@ -33,6 +33,8 @@ export interface MenuItem {
   iconColor?: EuiIconProps['color'];
   /** Whether the item is disabled */
   disabled?: boolean;
+  /** Optional tooltip content, e.g. to explain why the item is disabled */
+  toolTipContent?: React.ReactNode;
   /** Click handler for action items (not used if children are present) */
   onClick?: (event: React.MouseEvent) => void;
   /** Nested menu items - if present, this item becomes a submenu trigger */
@@ -137,6 +139,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
             <EuiIcon type={item.icon} size="m" color={item.iconColor} aria-hidden={true} />
           ) : undefined,
           disabled: item.disabled,
+          toolTipContent: item.toolTipContent,
           onClick: (event: React.MouseEvent) => {
             if (item.onClick) {
               item.onClick(event);
@@ -179,6 +182,9 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
     return result;
   }, [items, closeMenu]);
 
+  // Nothing to show (for example no action is available for the item): disable the button
+  const isEmpty = items.length === 0;
+
   // Render the button
   const buttonElement = button ? (
     <EuiButton
@@ -187,6 +193,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
       color={button.props?.color}
       fill={button.props?.fill}
       isLoading={button.props?.isLoading}
+      isDisabled={isEmpty}
       onClick={toggleMenu}
       data-test-subj={dataTestSubj}
     >
@@ -201,6 +208,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
     >
       <EuiButtonIcon
         iconType="boxesVertical"
+        isDisabled={isEmpty}
         onClick={toggleMenu}
         aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
           defaultMessage: 'Open menu',

@@ -14,7 +14,7 @@ import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 const triggerModeLabels: Readonly<Record<ChatTriggerMode, string>> = {
   [ChatTriggerMode.Always]: i18n.translate(
     'xpack.agentBuilder.conversationInput.triggerModeSelector.includeAgent',
-    { defaultMessage: 'Include agent' }
+    { defaultMessage: 'Ask agent' }
   ),
   [ChatTriggerMode.Never]: i18n.translate(
     'xpack.agentBuilder.conversationInput.triggerModeSelector.skipAgent',
@@ -24,12 +24,12 @@ const triggerModeLabels: Readonly<Record<ChatTriggerMode, string>> = {
 
 const selectorAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.triggerModeSelector.ariaLabel',
-  { defaultMessage: 'Include or skip the agent' }
+  { defaultMessage: 'Ask or skip the agent' }
 );
 
 const getButtonAriaLabel = (mode: string) =>
   i18n.translate('xpack.agentBuilder.conversationInput.triggerModeSelector.buttonAriaLabel', {
-    defaultMessage: 'Include or skip the agent, {mode}',
+    defaultMessage: 'Ask or skip the agent, {mode}',
     values: { mode },
   });
 

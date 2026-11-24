@@ -27,7 +27,7 @@ export const completionCommand = {
   metadata: {
     docPreserving: true,
     preview: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.completionDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.completionDoc', {
       defaultMessage:
         'Send prompts to an LLM. Requires an inference endpoint set up for `completion` tasks.',
     }),

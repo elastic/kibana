@@ -11,7 +11,7 @@ import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import {
   FileAttachmentPayloadSchema,
   type FileAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/file/v2';
+} from '../../../../common/types/domain/attachment/file/v2';
 import {
   AttachmentActionType,
   defineAttachment,

@@ -14,6 +14,7 @@ export const SESSION_KEY_SUFFIXES = [
   'stepState',
   'ecfLaunchStep',
   'hydratedDeploymentId',
+  'returnUrl',
 ] as const;
 
 export type SessionKeySuffix = (typeof SESSION_KEY_SUFFIXES)[number];
@@ -33,4 +34,21 @@ export function clearOnboardingSession(integrationId: string): void {
   } catch {
     // sessionStorage unavailable (private mode, quota exceeded, etc.) — silently no-op
   }
+}
+
+const sessionsToDiscard = new Set<string>();
+
+/**
+ * Marks a session to be cleared once the app has unmounted. Clearing it right away is not enough:
+ * the mounted persistence hooks (`useSessionStorage`) write their state back on the next render,
+ * which still happens before navigation unmounts the app.
+ */
+export function discardSessionOnUnmount(integrationId: string): void {
+  sessionsToDiscard.add(integrationId);
+}
+
+/** Clears the sessions marked by `discardSessionOnUnmount`. Call it after the app has unmounted. */
+export function discardMarkedSessions(): void {
+  sessionsToDiscard.forEach(clearOnboardingSession);
+  sessionsToDiscard.clear();
 }

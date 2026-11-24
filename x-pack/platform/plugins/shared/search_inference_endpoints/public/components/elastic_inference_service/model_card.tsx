@@ -24,11 +24,12 @@ import {
   getModelEOLDate,
   getModelTitle,
   getProviderKeyForCreator,
+  getTaskTypeCategoryLabel,
   isModelEndOfLifeReached,
   isModelNearingEndOfLife,
 } from '../../utils/eis_utils';
 import { getModelId } from '../../utils/get_model_id';
-import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
+import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_unavailable_under_region_policy';
 import { ModelBlockedBadge } from '../model_status/model_blocked_badge';
 import { ModelDateTooltipContent } from '../model_status/model_date_tooltip_content';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
@@ -97,7 +98,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
                 color="hollow"
                 data-test-subj={`eisModelCardCategory-${modelName}-${cat}`}
               >
-                {cat}
+                {getTaskTypeCategoryLabel(cat)}
               </EuiBadge>
             ))}
             {isModelUnavailableUnderRegionPolicy(model.endpoints, modelId ?? '') && (

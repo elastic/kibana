@@ -3,6 +3,11 @@
 set -uo pipefail
 # Note, -e is not set above, so we can capture all errors, and attempt purge individually
 
+source .buildkite/scripts/common/util.sh
+
+load_cloud_deploy_credentials
+load_project_deploy_credentials
+
 echo '--- Purging Cloud deployments'
 node .buildkite/scripts/steps/cloud/purge_deployments.ts
 EXIT_CODE_CLOUD=$?

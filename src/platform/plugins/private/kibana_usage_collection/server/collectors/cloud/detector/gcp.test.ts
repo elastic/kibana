@@ -10,7 +10,7 @@
 /* eslint-disable dot-notation */
 jest.mock('node-fetch');
 import { GCPCloudService } from './gcp';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const fetchMock = require('node-fetch') as jest.Mock;
 
 describe('GCP', () => {

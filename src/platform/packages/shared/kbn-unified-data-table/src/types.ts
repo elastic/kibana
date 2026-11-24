@@ -68,10 +68,11 @@ export type CustomGridColumnsConfiguration = Record<
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
 /**
- * Render mode of the grid: 'interactive' (default) or 'print', which renders it without
- * interactive controls (sorting, column actions/resizing, drag-and-drop, etc.)
+ * Render mode of the grid: 'interactive' (default), 'non-interactive', which renders it without
+ * interactive controls (sorting, column actions/resizing, drag-and-drop, etc.) but keeps pagination
+ * and the full screen selector, or 'print', which additionally removes those and the footer.
  */
-export type DataGridRenderMode = 'interactive' | 'print';
+export type DataGridRenderMode = 'interactive' | 'non-interactive' | 'print';
 
 export type DocumentsDisplayMode = 'table' | 'json';
 

@@ -85,6 +85,7 @@ describe('discardInvalidChanges', () => {
     expect(result.failures).toEqual([
       {
         type: 'validate_dashboard',
+        kind: 'panel',
         identifier: 'b',
         error:
           'Panel was not added because the result does not match the dashboard schema: config.invalid: Unrecognized key',
@@ -135,6 +136,7 @@ describe('discardInvalidChanges', () => {
       expect.objectContaining({ identifier: 'b' }),
       {
         type: 'validate_dashboard',
+        kind: 'section',
         identifier: 'section',
         error: 'Section "Errors" was not added because none of its panels are valid.',
       },
@@ -179,6 +181,7 @@ describe('discardInvalidChanges', () => {
     expect(result.failures).toEqual([
       {
         type: 'validate_dashboard',
+        kind: 'panel',
         identifier: 'a',
         error:
           'Panel was reverted to its state before this call because the result does not match the dashboard schema: config.invalid: Unrecognized key',
@@ -187,7 +190,7 @@ describe('discardInvalidChanges', () => {
     expect(result.discardedPanelIds).toEqual(new Set(['a']));
   });
 
-  it('ignores invalid panels the operations did not change, including ones moved into a section', () => {
+  it('ignores invalid panels the change did not touch, including ones moved into a section', () => {
     const untouchedPanel = createInvalidPanel('a');
     const movedPanel = createInvalidPanel('b');
     const originalDashboardData = { title: 'Dashboard', panels: [untouchedPanel, movedPanel] };
@@ -205,7 +208,7 @@ describe('discardInvalidChanges', () => {
     expect(result).toEqual({ dashboardData, failures: [], discardedPanelIds: new Set() });
   });
 
-  it('ignores invalid panels and controls the operations copied without changing them', () => {
+  it('ignores invalid panels and controls the change copied without editing them', () => {
     const originalDashboardData = {
       title: 'Dashboard',
       panels: [createInvalidPanel('a')],
@@ -239,7 +242,7 @@ describe('discardInvalidChanges', () => {
     expect(result.discardedPanelIds).toEqual(new Set(['a']));
   });
 
-  it('names a panel by its title in failures', () => {
+  it('names a panel by its id in failures', () => {
     const result = discardInvalidChanges({
       originalDashboardData: { title: 'Dashboard', panels: [] },
       dashboardData: {
@@ -249,7 +252,7 @@ describe('discardInvalidChanges', () => {
       validator,
     });
 
-    expect(result.failures).toEqual([expect.objectContaining({ identifier: '"Errors" (b)' })]);
+    expect(result.failures).toEqual([expect.objectContaining({ identifier: 'b' })]);
   });
 
   it('drops invalid new controls and keeps invalid controls that already existed', () => {
@@ -278,9 +281,10 @@ describe('discardInvalidChanges', () => {
     expect(result.failures).toEqual([
       {
         type: 'validate_dashboard',
-        identifier: 'pinned_panels',
+        kind: 'control',
+        identifier: 'new',
         error:
-          'Invalid control changes were discarded because the result does not match the dashboard schema: 1.invalid: Unrecognized key',
+          'Control was not added because the result does not match the dashboard schema: invalid: Unrecognized key',
       },
     ]);
   });
@@ -326,6 +330,7 @@ describe('discardInvalidChanges', () => {
     expect(result.failures).toEqual([
       {
         type: 'validate_dashboard',
+        kind: 'dashboard',
         identifier: 'title',
         error:
           'Change to "title" was reverted because the result does not match the dashboard schema: Too small',
@@ -396,6 +401,7 @@ describe('discardInvalidChanges', () => {
       failures: [
         {
           type: 'validate_dashboard',
+          kind: 'dashboard',
           identifier: 'dashboard',
           error:
             'All changes were discarded because the result does not match the dashboard schema: panels: 5 panels',

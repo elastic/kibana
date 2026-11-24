@@ -75,7 +75,6 @@ export const entityDetailsHighlightsRoute = ({
 
             const coreContext = await context.core;
             const soClient = coreContext.savedObjects.client;
-            const riskEngineClient = securitySolution.getRiskEngineDataClient();
             const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
             const entityStoreClient = entityStore.createCRUDClient(esClient, spaceId);
 
@@ -89,7 +88,6 @@ export const entityDetailsHighlightsRoute = ({
 
             const { getV1Data, getV2Data, getLocalReplacements } =
               entityDetailsHighlightsServiceFactory({
-                riskEngineClient,
                 entityStoreClient,
                 experimentalFeatures: config.experimentalFeatures,
                 mitreDataClient,

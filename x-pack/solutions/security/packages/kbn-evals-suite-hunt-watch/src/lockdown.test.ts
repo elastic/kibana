@@ -22,8 +22,8 @@ describe('lockdown scan', () => {
     const files = listLockdownFiles();
     expect(files).toEqual(
       expect.arrayContaining([
-        'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt.yaml',
-        'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt_proposal_gate.yaml',
+        'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt/hunt.yaml',
+        'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt/hunt_proposal_gate.yaml',
         'x-pack/solutions/security/plugins/alertzero/server/services/watches/hunt/hunt_coordinator.ts',
       ])
     );

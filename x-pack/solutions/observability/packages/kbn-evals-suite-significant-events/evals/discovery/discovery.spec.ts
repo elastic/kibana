@@ -27,6 +27,7 @@ import {
 import { RULE_EVENTS_DATA_STREAM } from '../../src/data_generators/snapshot_indices';
 import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
 import { seedChronicBackground } from '../../src/data_generators/seed_chronic_background';
+import { seedDetections } from '../../src/data_generators/seed_detections';
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
@@ -128,6 +129,10 @@ evaluate.describe(
           expectReuse?: boolean;
           expectTopologyEventSearch?: boolean;
           seedStatus?: 'inactive';
+          /** Rewrites the seeded event's signals so the event holds the rule only with this verdict. */
+          seedVerdict?: 'off_topic';
+          /** Also seeds a second live event on the same topology that holds no rule. */
+          seedCompetingEvent?: boolean;
           stripSeedTopology?: boolean;
         }
 
@@ -355,6 +360,12 @@ evaluate.describe(
                     ...detection,
                     source_id: sourceForEvaluation.id,
                   }));
+                  await seedDetections({
+                    esClient,
+                    detections: stampedDetections,
+                    spaceId: 'default',
+                    log,
+                  });
                   // Same message shape as the production batch.
                   const agentInput = buildDiscoveryInput({ detections: stampedDetections });
 
@@ -408,6 +419,19 @@ evaluate.describe(
               'a detection starts a new significant event after the prior event closes; the new write must include topology arrays',
             includesPath: (path: string) => path === 'rule-uuid-inactive',
           },
+          {
+            title: 'continuation - active significant event holding the rule only as off_topic',
+            description:
+              'the same rule confirms while an active event holds it only as off_topic; the agent must continue that event instead of opening a second one',
+            includesPath: (path: string) => path === 'rule-uuid-off-topic-holder',
+          },
+          {
+            title:
+              'continuation - rule held by an event while another live event shares its topology',
+            description:
+              'the same rule confirms in an active event while a second active event overlaps its topology; the agent must continue the event that holds the rule',
+            includesPath: (path: string) => path === 'rule-uuid-held-with-competing-event',
+          },
         ] as const;
 
         for (const continuationSuite of continuationSuites) {
@@ -449,6 +473,16 @@ evaluate.describe(
                     expectReuse: false,
                     seedStatus: 'inactive',
                   },
+                  {
+                    path: 'rule-uuid-off-topic-holder',
+                    sequence: [detections[0], detections[0]],
+                    seedVerdict: 'off_topic',
+                  },
+                  {
+                    path: 'rule-uuid-held-with-competing-event',
+                    sequence: [detections[0], detections[0]],
+                    seedCompetingEvent: true,
+                  },
                   ...continuationChains
                     .filter(([path]) => path === 'cascade')
                     .map(
@@ -462,7 +496,10 @@ evaluate.describe(
                     ),
                 ];
                 const plans = allPlans.filter(
-                  (plan) => plan.sequence.length >= 2 && continuationSuite.includesPath(plan.path)
+                  (plan) =>
+                    plan.sequence.length >= 2 &&
+                    continuationSuite.includesPath(plan.path) &&
+                    (scenario.continuationPaths?.includes(plan.path) ?? true)
                 );
 
                 return plans.map((plan) => ({
@@ -473,6 +510,8 @@ evaluate.describe(
                   expectReuse: plan.expectReuse,
                   expectTopologyEventSearch: plan.expectTopologyEventSearch,
                   seedStatus: plan.seedStatus,
+                  seedVerdict: plan.seedVerdict,
+                  seedCompetingEvent: plan.seedCompetingEvent,
                   stripSeedTopology: plan.stripSeedTopology,
                 }));
               });
@@ -508,6 +547,8 @@ evaluate.describe(
                           continuation_expect_topology_event_search:
                             run.expectTopologyEventSearch ?? false,
                           continuation_seed_status: run.seedStatus,
+                          continuation_seed_verdict: run.seedVerdict,
+                          continuation_seed_competing_event: run.seedCompetingEvent,
                           continuation_without_topology: run.stripSeedTopology,
                         },
                       })),
@@ -614,6 +655,12 @@ evaluate.describe(
                             : {}),
                           detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
                         };
+                        await seedDetections({
+                          esClient,
+                          detections: [detection],
+                          spaceId: 'default',
+                          log,
+                        });
                         const agentInput = buildDiscoveryInput({ detections: [detection] });
 
                         const converseResult = await agentBuilderClient.converse({
@@ -652,11 +699,69 @@ evaluate.describe(
 
                         // Seed a SignificantEvent per produced event so event_search resolves it
                         // as an active episode in subsequent cycles.
-                        for (const event of significantEvents) {
+                        const seedVerdict = i === 0 ? run.seedVerdict : undefined;
+                        // A second live event on the same topology that confirms a different rule. It
+                        // passes the prompt's confirming-signal pre-check, so a topology search returns
+                        // an eligible event that does not hold the detection's rule.
+                        const competingEvents: SignificantEvent[] =
+                          i === 0 && run.seedCompetingEvent
+                            ? significantEvents
+                                .filter((event) => event.event_id)
+                                .slice(0, 1)
+                                .map((event) => ({
+                                  ...event,
+                                  event_id: `${event.event_id}-competing`,
+                                  title: 'Competing event on the same topology',
+                                  signals: (event.signals ?? []).flatMap((signal) =>
+                                    signal.type === 'detection'
+                                      ? [
+                                          {
+                                            ...signal,
+                                            verdict: 'confirms' as const,
+                                            metadata: {
+                                              ...signal.metadata,
+                                              rule_uuid: `${
+                                                signal.metadata.rule_uuid ?? 'rule'
+                                              }-competing`,
+                                            },
+                                          },
+                                        ]
+                                      : []
+                                  ),
+                                }))
+                            : [];
+                        for (const event of [...significantEvents, ...competingEvents]) {
                           if (!event.event_id) continue;
                           const seededEvent: SignificantEvent = {
                             ...event,
                             '@timestamp': event['@timestamp'] ?? new Date().toISOString(),
+                            // An off_topic holder is an event written from a sampled error that is not
+                            // the rule's own failure: its narrative and topology describe another
+                            // failure. Without that mismatch the event would match the confirming
+                            // detection and the run could not tell a continuation from a duplicate.
+                            ...(seedVerdict
+                              ? {
+                                  signals: (event.signals ?? []).map((signal) => ({
+                                    ...signal,
+                                    verdict: seedVerdict,
+                                  })),
+                                  title: 'Batch exporter: HTTP 504 on export requests',
+                                  summary:
+                                    'Export requests to the batch exporter return HTTP 504 after the upstream storage call times out.',
+                                  symptom_hypothesis:
+                                    'The batch exporter calls object storage, and those calls time out, so export requests return HTTP 504.',
+                                  causal_features: [
+                                    {
+                                      feature_id: 'batch-exporter',
+                                      type: 'entity',
+                                      subtype: 'service',
+                                      name: 'batch-exporter',
+                                      source_id: sourceForEvaluation.id,
+                                    },
+                                  ],
+                                  blast_radius: [],
+                                }
+                              : {}),
                             ...(run.stripSeedTopology
                               ? { causal_features: [], blast_radius: [] }
                               : {}),

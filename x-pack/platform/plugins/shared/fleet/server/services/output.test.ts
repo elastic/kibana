@@ -31,7 +31,7 @@ import {
   checkKafkaKerberosAllowed,
   checkKafkaOAuth2Allowed,
 } from './outputs/helpers';
-import { outputSavedObjectToOutput } from './output';
+import { outputSavedObjectToOutput, withRemovedOtlpHeaders } from './output';
 import {
   extractAndWriteOutputSecrets,
   extractAndUpdateOutputSecrets,
@@ -303,6 +303,38 @@ function getMockedSoClient(
         });
       }
 
+      // outputs that keep a credential as a secret, to check that an update that does not touch it
+      // keeps it (see `withSavedSecrets`)
+      case outputIdToUuid('existing-kafka-output-with-password-secret'): {
+        return mockOutputSO('existing-kafka-output-with-password-secret', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'user_pass',
+          username: 'kafka',
+          secrets: { password: { id: 'kafka-password-secret-id' } },
+        });
+      }
+
+      case outputIdToUuid('existing-remote-es-output-with-secret'): {
+        return mockOutputSO('existing-remote-es-output-with-secret', {
+          type: 'remote_elasticsearch',
+          is_default: false,
+          secrets: { service_token: { id: 'service-token-secret-id' } },
+        });
+      }
+
+      case outputIdToUuid('existing-otlp-output-with-secret'): {
+        return mockOutputSO('existing-otlp-output-with-secret', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+          secrets: { otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } } },
+        });
+      }
+
       case outputIdToUuid('existing-otlp-output'): {
         return mockOutputSO('existing-otlp-output', {
           type: 'otlp',
@@ -539,6 +571,38 @@ function getMockedEncryptedSoClient() {
           type: 'remote_elasticsearch',
           is_default: false,
           service_token: 'plain',
+        });
+      }
+
+      // outputs that keep a credential as a secret, to check that an update that does not touch it
+      // keeps it (see `withSavedSecrets`)
+      case outputIdToUuid('existing-kafka-output-with-password-secret'): {
+        return mockOutputSO('existing-kafka-output-with-password-secret', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'user_pass',
+          username: 'kafka',
+          secrets: { password: { id: 'kafka-password-secret-id' } },
+        });
+      }
+
+      case outputIdToUuid('existing-remote-es-output-with-secret'): {
+        return mockOutputSO('existing-remote-es-output-with-secret', {
+          type: 'remote_elasticsearch',
+          is_default: false,
+          secrets: { service_token: { id: 'service-token-secret-id' } },
+        });
+      }
+
+      case outputIdToUuid('existing-otlp-output-with-secret'): {
+        return mockOutputSO('existing-otlp-output-with-secret', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+          secrets: { otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } } },
         });
       }
       case outputIdToUuid('existing-otlp-output'): {
@@ -1957,7 +2021,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.create).toBeCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             type: 'otlp',
@@ -2019,7 +2083,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.create).toBeCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             type: 'otlp',
@@ -2037,7 +2101,7 @@ describe('Output Service', () => {
           }),
           expect.anything()
         );
-        expect(soClient.create).not.toBeCalledWith(
+        expect(soClient.create).not.toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({ otlp_exporter_secrets: expect.anything() }),
           expect.anything()
@@ -2075,7 +2139,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({
@@ -2116,7 +2180,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({
@@ -2152,7 +2216,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({ sending_queue: null }),
@@ -2180,7 +2244,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.not.objectContaining({
@@ -2211,7 +2275,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({
@@ -2251,7 +2315,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({
@@ -2702,7 +2766,7 @@ describe('Output Service', () => {
       await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
         secrets: { ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } } as any,
       });
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
 
     it('rejects update when ssl.certificate_authorities contains a path with whitespace', async () => {
@@ -2815,10 +2879,10 @@ describe('Output Service', () => {
         { fromPreconfiguration: true }
       );
 
-      expect(mockedLogger.warn).toBeCalledWith(
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Preconfigured output failed validation')
       );
-      expect(soClient.create).toBeCalled();
+      expect(soClient.create).toHaveBeenCalled();
     });
 
     it('bypasses ssl path validation for preconfigured update and logs a warning', async () => {
@@ -2833,10 +2897,10 @@ describe('Output Service', () => {
         { fromPreconfiguration: true }
       );
 
-      expect(mockedLogger.warn).toBeCalledWith(
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Preconfigured output failed validation')
       );
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
   });
 
@@ -3128,7 +3192,7 @@ describe('Output Service', () => {
 
       // config_yaml !== undefined triggers recompute even without a type change (item 1 fix).
       // No explicit `type` in the update data proves mergedType is resolved from the stored output (item 4).
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({ config_yaml: 'logging.level: warning', preset: 'balanced' })
@@ -3144,7 +3208,7 @@ describe('Output Service', () => {
 
       // Preset must not be computed when config_yaml is absent — doing so would clobber a
       // stored 'custom' preset with 'balanced' on any innocuous rename.
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'elasticsearch',
         name: 'Renamed ES',
       });
@@ -4733,7 +4797,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
           hosts: null,
@@ -4764,7 +4828,7 @@ describe('Output Service', () => {
           hosts: ['http://test:9200'],
         });
 
-        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
           type: 'elasticsearch',
           hosts: ['http://test:9200'],
           otlp_exporter: null,
@@ -4782,7 +4846,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
         });
@@ -4800,7 +4864,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -4838,7 +4902,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -4887,7 +4951,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -4897,6 +4961,100 @@ describe('Output Service', () => {
             }),
           })
         );
+      });
+
+      describe('headers', () => {
+        const mockStoredHeaders = (headers: Record<string, string | null> | null) =>
+          esoClientMock.getDecryptedAsInternalUser.mockResolvedValueOnce(
+            mockOutputSO('existing-otlp-output', {
+              type: 'otlp',
+              is_default: false,
+              otlp_exporter: {
+                endpoint: 'https://otel.example.com:4317',
+                protocol: 'grpc',
+                headers,
+              },
+            })
+          );
+
+        it('Should remove the stored headers that the update leaves out', async () => {
+          const soClient = getMockedSoClient({});
+          mockStoredHeaders({ 'x-a': '1', 'x-b': '2' });
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+              headers: { 'x-a': '1', 'x-c': '3' },
+            },
+          });
+
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                headers: { 'x-a': '1', 'x-b': null, 'x-c': '3' },
+              }),
+            })
+          );
+        });
+
+        it('Should not touch the stored headers when the update leaves headers out', async () => {
+          const soClient = getMockedSoClient({});
+          mockStoredHeaders({ 'x-a': '1' });
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+          });
+
+          expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+          });
+        });
+
+        it('Should keep headers: null, which removes all the stored headers', async () => {
+          const soClient = getMockedSoClient({});
+          mockStoredHeaders({ 'x-a': '1' });
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+              headers: null,
+            },
+          });
+
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({ headers: null }),
+            })
+          );
+        });
+
+        it('Should not remove again the headers that a previous update removed', async () => {
+          const soClient = getMockedSoClient({});
+          mockStoredHeaders({ 'x-a': '1', 'x-b': null });
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+              headers: { 'x-a': '1' },
+            },
+          });
+
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({ headers: { 'x-a': '1' } }),
+            })
+          );
+        });
       });
 
       it('Should propagate a null container to soClient.update untouched on OTLP partial update', async () => {
@@ -4910,7 +5068,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -4934,7 +5092,7 @@ describe('Output Service', () => {
           otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
         });
 
-        expect(soClient.update).toBeCalled();
+        expect(soClient.update).toHaveBeenCalled();
       });
 
       it('accepts changing type to OTLP when all using policies have only OTel inputs', async () => {
@@ -4961,7 +5119,7 @@ describe('Output Service', () => {
           otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
         });
 
-        expect(soClient.update).toBeCalled();
+        expect(soClient.update).toHaveBeenCalled();
       });
 
       it('Should always write tls secrets as fleet-secret refs regardless of storage state', async () => {
@@ -5000,7 +5158,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -5018,7 +5176,7 @@ describe('Output Service', () => {
             },
           })
         );
-        expect(soClient.update).not.toBeCalledWith(
+        expect(soClient.update).not.toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({ otlp_exporter_secrets: expect.anything() })
@@ -5124,7 +5282,7 @@ describe('Output Service', () => {
             },
           });
 
-          expect(soClient.update).toBeCalledWith(
+          expect(soClient.update).toHaveBeenCalledWith(
             expect.anything(),
             expect.anything(),
             expect.objectContaining({
@@ -5141,6 +5299,341 @@ describe('Output Service', () => {
               }),
             })
           );
+        });
+      });
+    });
+
+    describe('credentials kept as secrets', () => {
+      beforeEach(() => {
+        mockedExtractAndUpdateOutputSecrets.mockReset();
+        mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
+        mockedExtractAndUpdateOutputSecrets.mockImplementation(
+          async ({ outputUpdate }) =>
+            ({ outputUpdate, secretReferences: [], secretsToDelete: [] } as any)
+        );
+      });
+
+      const sentSecrets = () => mockedExtractAndUpdateOutputSecrets.mock.calls[0][0].outputUpdate;
+
+      describe('an update that does not touch the credential keeps it', () => {
+        it('keeps the ssl key of a Logstash output when renaming it', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            name: 'renamed',
+          });
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } });
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({
+              secrets: { ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } },
+            })
+          );
+        });
+
+        it('keeps the ssl key when the update sends ssl without a key', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            ssl: { certificate: 'NEW_CERT' },
+          });
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } });
+        });
+
+        it('keeps the password of a Kafka output using user_pass', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { name: 'renamed' }
+          );
+
+          expect(sentSecrets().secrets).toEqual({
+            password: { id: 'kafka-password-secret-id' },
+          });
+        });
+
+        it('keeps the service token of a remote Elasticsearch output', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-remote-es-output-with-secret',
+            {
+              name: 'renamed',
+            }
+          );
+
+          expect(sentSecrets().secrets).toEqual({
+            service_token: { id: 'service-token-secret-id' },
+          });
+        });
+
+        it('keeps the TLS key of an OTLP output', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output-with-secret', {
+            name: 'renamed',
+          });
+
+          expect(sentSecrets().secrets).toEqual({
+            otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } },
+          });
+        });
+
+        it('does not add secrets to an output that has none', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+            name: 'renamed',
+          });
+
+          expect(sentSecrets().secrets).toBeUndefined();
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output'),
+            expect.not.objectContaining({ secrets: expect.anything() })
+          );
+        });
+
+        it('does not keep the credential when secret storage is not enabled', async () => {
+          mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            name: 'renamed',
+          });
+
+          expect(mockedExtractAndUpdateOutputSecrets).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('an update that sends a plain text value stores it as a secret', () => {
+        it('moves a plain text ssl key under secrets and does not store it in plain text', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            ssl: {
+              certificate: 'NEW_CERT',
+              certificate_authorities: ['NEW_CA'],
+              key: 'PLAIN_KEY',
+            },
+          });
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: 'PLAIN_KEY' } });
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({
+              ssl: JSON.stringify({
+                certificate: 'NEW_CERT',
+                certificate_authorities: ['NEW_CA'],
+              }),
+            })
+          );
+        });
+
+        it('moves a plain text Kafka password under secrets', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { password: 'PLAIN PASSWORD' }
+          );
+
+          expect(sentSecrets().secrets).toEqual({ password: 'PLAIN PASSWORD' });
+        });
+
+        it('moves a plain text service token under secrets', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-remote-es-output-with-secret',
+            {
+              service_token: 'PLAIN TOKEN',
+            }
+          );
+
+          expect(sentSecrets().secrets).toEqual({ service_token: 'PLAIN TOKEN' });
+        });
+
+        it('leaves a plain text value alone when the output keeps no secret', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+            ssl: { key: 'PLAIN_KEY' },
+          });
+
+          expect(sentSecrets().secrets).toBeUndefined();
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output'),
+            expect.objectContaining({ ssl: JSON.stringify({ key: 'PLAIN_KEY' }) })
+          );
+        });
+
+        it('still rejects an update that sends both a plain text value and a secret', async () => {
+          const soClient = getMockedSoClient({});
+
+          await expect(
+            outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+              ssl: { key: 'PLAIN_KEY' },
+              secrets: { ssl: { key: 'SECRET_KEY' } },
+            })
+          ).rejects.toThrow('Cannot specify both ssl.key and secrets.ssl.key');
+        });
+      });
+
+      describe('a preconfigured update declares every secret', () => {
+        it('removes a secret the Kibana config file no longer declares', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-logstash-output-with-ssl',
+            {
+              name: 'n',
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: { certificate: 'CERT' },
+              is_preconfigured: true,
+            } as any,
+            { fromPreconfiguration: true, declaresAllSecrets: true }
+          );
+
+          // the saved secrets are not kept: the config file is authoritative
+          expect(sentSecrets().secrets).toBeUndefined();
+        });
+
+        it('stores a plain text value as plain text, as the config file declares it', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-logstash-output-with-ssl',
+            {
+              name: 'n',
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: { key: 'PLAIN_KEY' },
+              is_preconfigured: true,
+            } as any,
+            { fromPreconfiguration: true, declaresAllSecrets: true }
+          );
+
+          expect(sentSecrets().secrets).toBeUndefined();
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({ ssl: JSON.stringify({ key: 'PLAIN_KEY' }) })
+          );
+        });
+
+        it('keeps the saved secrets for an internal partial update', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-logstash-output-with-ssl',
+            { is_preconfigured: false },
+            { fromPreconfiguration: true }
+          );
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } });
+        });
+      });
+
+      describe('an update that clears the credential removes it', () => {
+        it('lets an explicit null ssl remove the stored key', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            ssl: null,
+          });
+
+          expect(sentSecrets().secrets).toBeUndefined();
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({ ssl: null })
+          );
+        });
+
+        it('lets a new secret replace the stored one', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            secrets: { ssl: { key: 'NEW_KEY' } },
+          });
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: 'NEW_KEY' } });
+        });
+
+        it('lets an explicit null secret remove the stored key and keep the other ssl settings', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            ssl: { certificate: 'NEW_CERT' },
+            secrets: { ssl: { key: null } },
+          } as any);
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: null } });
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({ ssl: JSON.stringify({ certificate: 'NEW_CERT' }) })
+          );
+        });
+
+        it('lets an explicit null remove the TLS key of an OTLP output', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-otlp-output-with-secret', {
+            secrets: { otlp_exporter: { tls: { key_pem: null } } },
+          } as any);
+
+          expect(sentSecrets().secrets).toEqual({ otlp_exporter: { tls: { key_pem: null } } });
+        });
+
+        it('removes the Kafka password when the authentication type changes', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { auth_type: 'ssl' } as any
+          );
+
+          expect(sentSecrets().secrets).toBeUndefined();
+        });
+
+        it('keeps the Kafka password when the update names user_pass again', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { auth_type: 'user_pass', username: 'kafka' } as any
+          );
+
+          expect(sentSecrets().secrets).toEqual({
+            password: { id: 'kafka-password-secret-id' },
+          });
         });
       });
     });
@@ -5889,6 +6382,21 @@ describe('Output Service', () => {
       expect(output.id).toBe('otlp-output-test');
     });
 
+    it('OTLP branch: drops the headers that an update removed', () => {
+      const so = mockOutputSO('otlp-output-test', {
+        type: 'otlp',
+        otlp_exporter: {
+          endpoint: 'https://otel.example.com:4317',
+          protocol: 'grpc',
+          headers: { 'x-a': '1', 'x-b': null },
+        },
+      });
+
+      const output = outputSavedObjectToOutput(so);
+
+      expect((output as any).otlp_exporter.headers).toEqual({ 'x-a': '1' });
+    });
+
     it('OTLP branch: uses so.id fallback when output_id absent and attributes.id is poisoned', () => {
       const so = {
         id: 'otlp-uuid-fallback',
@@ -6081,5 +6589,25 @@ describe('Output Service', () => {
       expect(mockedGetAgentCountForAgentPolicies.mock.calls[0][1]).toHaveLength(1000);
       expect(mockedGetAgentCountForAgentPolicies.mock.calls[1][1]).toHaveLength(500);
     });
+  });
+});
+
+describe('withRemovedOtlpHeaders', () => {
+  it('sets the stored headers missing from the update to null', () => {
+    expect(withRemovedOtlpHeaders({ 'x-a': '1' }, { 'x-a': '0', 'x-b': '2' })).toEqual({
+      'x-a': '1',
+      'x-b': null,
+    });
+  });
+
+  it('returns the headers as they are when no stored header is removed', () => {
+    const headers = { 'x-a': '1' };
+    expect(withRemovedOtlpHeaders(headers, { 'x-a': '0' })).toBe(headers);
+    expect(withRemovedOtlpHeaders(headers, null)).toBe(headers);
+    expect(withRemovedOtlpHeaders(headers, undefined)).toBe(headers);
+  });
+
+  it('removes every stored header with an empty map', () => {
+    expect(withRemovedOtlpHeaders({}, { 'x-a': '1' })).toEqual({ 'x-a': null });
   });
 });
