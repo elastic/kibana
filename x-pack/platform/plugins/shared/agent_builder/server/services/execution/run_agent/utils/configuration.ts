@@ -31,6 +31,8 @@ export const resolveConfiguration = async (
     aiIndices: configuration.ai_indices ?? [],
     capabilities: {
       attachmentTools: configuration.capabilities?.attachment_tools?.enabled !== false,
+      apiTools: configuration.capabilities?.api_tools?.enabled !== false,
+      bashTool: configuration.capabilities?.bash_tool?.enabled !== false,
     },
   };
 

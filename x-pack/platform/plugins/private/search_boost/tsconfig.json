@@ -20,7 +20,16 @@
     "@kbn/app-header",
     "@kbn/scout",
     "@kbn/storybook",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/content-list",
+    "@kbn/content-list-provider",
+    "@kbn/content-list-toolbar",
+    "@kbn/data-lifecycle-phases",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/react-query",
+    "@kbn/shared-ux-router",
+    "@kbn/core-security-server"
   ],
   "exclude": [
     "target/**/*"

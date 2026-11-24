@@ -62,6 +62,17 @@ const isInboundEventsEnabledResponseField = {
   ),
 };
 
+const specVersionResponseField = {
+  spec_version: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'The exact major.minor schema version pinned to the connector. Present for versioned connector types.',
+      },
+    })
+  ),
+};
+
 const referencedByCountField = {
   referenced_by_count: schema.number({
     meta: {
@@ -72,29 +83,39 @@ const referencedByCountField = {
 };
 
 /** Connector response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
-export const getConnectorResponseSchema = (includeInboundEventsField: boolean) =>
+export const getConnectorResponseSchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
   schema.object(
     {
       ...connectorResponseFields,
       ...(includeInboundEventsField ? isInboundEventsEnabledResponseField : {}),
+      ...(includeSpecVersionField ? specVersionResponseField : {}),
     },
     { meta: { id: 'connector_response' } }
   );
 
 /** Get-all connectors response schema; omit `is_inbound_events_enabled` unless inbound events are enabled. */
-export const getGetAllConnectorsResponseSchema = (includeInboundEventsField: boolean) =>
+export const getGetAllConnectorsResponseSchema = (
+  includeInboundEventsField: boolean,
+  includeSpecVersionField: boolean
+) =>
   // codeql[js/kibana/unbounded-array-in-schema] Response schema for the connector list; Kibana builds the array, it is not request input
   schema.arrayOf(
-    getConnectorResponseSchema(includeInboundEventsField).extends(referencedByCountField, {
-      meta: { id: 'connector_response_with_references_count' },
-    })
+    getConnectorResponseSchema(includeInboundEventsField, includeSpecVersionField).extends(
+      referencedByCountField,
+      {
+        meta: { id: 'connector_response_with_references_count' },
+      }
+    )
   );
 
 /** Flag-on schema so TypeOf includes the optional field. */
-export const connectorResponseSchema = getConnectorResponseSchema(true);
+export const connectorResponseSchema = getConnectorResponseSchema(true, true);
 
 /** Flag-on schema so TypeOf includes the optional field. */
-export const getAllConnectorsResponseSchema = getGetAllConnectorsResponseSchema(true);
+export const getAllConnectorsResponseSchema = getGetAllConnectorsResponseSchema(true, true);
 
 export const connectorTypeResponseSchema = schema.object(
   {

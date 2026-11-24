@@ -32,6 +32,7 @@ import {
 } from '@xyflow/react';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { usePageLeavePrompt } from '../../../../hooks/use_page_leave_prompt';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useUnitId } from '../../../../hooks/use_unit_id';
@@ -63,6 +64,7 @@ import { applyLayout, getConnectedNodeIds } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata, syncCanvasEdgeData } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
+import { useStagedSourceConnectedDestinationIds } from './use_staged_source_connected_destination_ids';
 import { useSyncStatsWithSavedUnit } from './use_sync_stats_with_saved_unit';
 import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout';
 import type { IndexInspectTabId } from '../../../index_inspect/types';
@@ -90,6 +92,7 @@ import {
   useCanvasIsUnitUnavailable,
   useCanvasNodePositions,
   useCanvasUnitDefinition,
+  useCanvasPersistedUnit,
   useCanvasDestinationsRef,
   useCanvasSourcesRef,
   useCanvasUrlRef,
@@ -106,6 +109,7 @@ import { createUnitRepository, type Unit } from '../../../../services/unit_repos
 import type { SourceType, SourceViewModel } from '../../../streams_layout/sources/types';
 import { SOURCE_TYPE_CONFIG_BY_TYPE } from '../../../streams_layout/sources/source_type_config';
 import {
+  connectedDestinations,
   getSourceDisplaySignals,
   getUnitSources,
   withUnitSources,
@@ -229,6 +233,7 @@ function StreamsCanvasInner() {
   } = useCanvasEvents();
   const unitDefinition = useCanvasUnitDefinition();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
+  usePageLeavePrompt({ hasUnsavedChanges: hasUnsavedChanges && !readOnly });
   const isSaving = useCanvasIsSaving();
   const isSavingProcessing = useCanvasIsSavingProcessing();
   const routingStagedUnit = useCanvasRoutingStagedUnit();
@@ -287,6 +292,19 @@ function StreamsCanvasInner() {
     [openFlyout]
   );
 
+  // Stats describe the deployed unit, so the saved unit decides which destinations are requested.
+  const savedUnit = useCanvasPersistedUnit();
+  const savedConnectedDestinationIds = useMemo(
+    () =>
+      new Set(
+        Object.values(connectedDestinations(savedUnit))
+          .flat()
+          .map(({ id }) => id)
+      ),
+    [savedUnit]
+  );
+  const stagedSourceConnectedDestinationIds = useStagedSourceConnectedDestinationIds();
+
   const graph = useMemo<ClassicCanvasGraph>(() => {
     const { processingNodes, routingNodes, edges } = buildUnitCanvasGraph(
       unitDefinition,
@@ -304,7 +322,8 @@ function StreamsCanvasInner() {
       buildConfiguredDestinationNode(
         destination,
         connectedDestinationIds.has(destination.id),
-        resolvedIndicesByDestination.get(destination.id)?.map((index) => index.name) ?? []
+        resolvedIndicesByDestination.get(destination.id)?.map((index) => index.name) ?? [],
+        savedConnectedDestinationIds.has(destination.id)
       )
     );
     const graphNodes = [
@@ -317,7 +336,14 @@ function StreamsCanvasInner() {
       nodes: applyLayout(graphNodes, edges),
       edges,
     };
-  }, [destinations, resolvedIndicesByDestination, routingDiagnostics, sources, unitDefinition]);
+  }, [
+    destinations,
+    resolvedIndicesByDestination,
+    routingDiagnostics,
+    savedConnectedDestinationIds,
+    sources,
+    unitDefinition,
+  ]);
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
   // Metadata-only updates (e.g. index count after resolved indices reload) are
@@ -977,6 +1003,7 @@ function StreamsCanvasInner() {
                   }
                   indicesStatus={resolvedIndicesStatus}
                   indicesError={resolvedIndicesError}
+                  hasConnectedSource={stagedSourceConnectedDestinationIds.has(flyoutDestination.id)}
                   destinationDetailRef={destinationsController.destinationDetailRefs.get(
                     flyoutDestination.id
                   )}
@@ -1128,7 +1155,8 @@ const getEndpointHost = (endpoint: string): string => {
 export const buildConfiguredDestinationNode = (
   destination: DestinationViewModel,
   hasConnectedSource: boolean,
-  targetedIndexNames: string[]
+  targetedIndexNames: string[],
+  hasSavedSource: boolean
 ): DestinationNode => {
   const signal = destination.signals.map((value) => DESTINATION_SIGNAL_LABELS[value]).join(', ');
   const noSourceLabel = i18n.translate(
@@ -1163,6 +1191,7 @@ export const buildConfiguredDestinationNode = (
       data: {
         destinationId: destination.id,
         destinationType: destination.type,
+        hasSavedSource,
         signals: destination.signals,
         ...location,
         title: destination.name,
@@ -1202,6 +1231,7 @@ export const buildConfiguredDestinationNode = (
     data: {
       destinationId: destination.id,
       destinationType: destination.type,
+      hasSavedSource,
       signals: destination.signals,
       streamName: getDestinationIndices(destination).join(' ') || undefined,
       indexCount: targetedIndexNames.length,

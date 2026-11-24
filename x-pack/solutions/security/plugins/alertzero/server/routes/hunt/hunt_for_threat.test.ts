@@ -224,6 +224,97 @@ describe('registerHuntForThreatRoute', () => {
     });
   });
 
+  const NOTHING_VISIBLE =
+    "No index in the space's default data view is visible to this hunt (checked: logs-*, filebeat-*, -*elastic-cloud-logs-*).";
+  it.each([
+    [
+      'only skipped entries',
+      ['.siem-signals-x'],
+      [],
+      'The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.',
+    ],
+    ['skipped and missing', ['.siem-signals-x'], ['custom-1'], NOTHING_VISIBLE],
+    ['nothing skipped', [], ['custom-1'], NOTHING_VISIBLE],
+  ])('words the 409 for a blocked scope with %s', async (_label, policySkipped, missing, text) => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:empty_universe',
+      index_patterns: [],
+      missing,
+      policy_skipped: policySkipped,
+    });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 409,
+      body: { message: `Hunt scope is blocked (blocked:empty_universe): ${text}` },
+    });
+  });
+
+  it('says a data view of only exclusions holds only exclusions', async () => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:empty_universe',
+      index_patterns: [],
+      missing: [],
+    });
+    const { handler, context } = makeDeps({ indexPatterns: ['-logs-elastic_agent*'] });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 409,
+      body: {
+        message:
+          'Hunt scope is blocked (blocked:empty_universe): The default data view has no pattern this hunt may search: it holds only exclusions.',
+      },
+    });
+  });
+
+  it('says the resolve failed for discovery_failed, whatever was skipped', async () => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:discovery_failed',
+      index_patterns: [],
+      missing: [],
+      policy_skipped: ['.siem-signals-x'],
+    });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 409,
+      body: {
+        message:
+          'Hunt scope is blocked (blocked:discovery_failed): Hunt scope resolution failed, so no index was searched (checked: logs-*, filebeat-*, -*elastic-cloud-logs-*).',
+      },
+    });
+  });
+
+  it('hands the filtered universe and the skipped list to resolveHuntScope', async () => {
+    const { handler, context } = makeDeps({
+      indexPatterns: ['logs-*', '.alerts-security.alerts-default'],
+    });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(resolveHuntScopeMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: ['logs-*'],
+        policySkippedPatterns: ['.alerts-security.alerts-default'],
+      })
+    );
+  });
+
   it('omits internal grounding digests from the response body', async () => {
     huntForThreatMock.mockResolvedValue({
       ...tier1Result,
@@ -237,6 +328,45 @@ describe('registerHuntForThreatRoute', () => {
     const { body } = response.ok.mock.calls[0][0] as { body: { result: Record<string, unknown> } };
     expect(body.result).not.toHaveProperty('sample_event_summaries');
     expect(body.result).toEqual(tier1Result);
+  });
+
+  it('reports a name the scope dropped as an index_not_searched gap, ahead of the search gaps', async () => {
+    const searchGap = { reason: 'search_partial' as const, detail: 'one shard failed' };
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      index_patterns: ['logs-*'],
+      missing: ['custom-edr-1'],
+    });
+    huntForThreatMock.mockResolvedValue({ ...tier1Result, incomplete: [searchGap] });
+    const { handler, context } = makeDeps({ indexPatterns: ['logs-*', 'custom-edr-1'] });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    // The search gets what the scope kept, not the data view that still names the dropped index.
+    expect(huntForThreatMock.mock.calls[0][1].scope.search_patterns).toEqual(['logs-*']);
+    const { body } = response.ok.mock.calls[0][0] as {
+      body: { result: { incomplete?: unknown[] } };
+    };
+    expect(body.result.incomplete).toEqual([
+      {
+        reason: 'index_not_searched',
+        detail:
+          'The default data view names `custom-edr-1`, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.',
+      },
+      searchGap,
+    ]);
+  });
+
+  it('adds no gap for an unresolved wildcard, which stays in the searched list', async () => {
+    resolveHuntScopeMock.mockResolvedValue({ ...okScope, missing: [UNIVERSE[0]] });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    const { body } = response.ok.mock.calls[0][0] as { body: { result: object } };
+    expect(body.result).not.toHaveProperty('incomplete');
   });
 
   it('returns the resolved scope without discovered alongside the result', async () => {

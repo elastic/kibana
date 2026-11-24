@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { EuiHealthProps } from '@elastic/eui';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
@@ -18,6 +20,12 @@ import {
   AlertingV2RulesLocatorDefinition,
   createAlertingV2HostApp,
 } from '../../../../../common/locators';
+
+interface MockAgentBuilder {
+  openChat?: jest.Mock;
+  addAttachment?: jest.Mock;
+  events?: { ui: { activeConversation$: Observable<{ id: string } | null> } };
+}
 
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
@@ -45,6 +53,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
   useRuleAutoAttach: jest.fn(),
 }));
 
@@ -68,23 +77,41 @@ jest.mock('../../../../services/user_capabilities', () => ({
 
 jest.mock('@kbn/core-di-browser', () => {
   const canRead = jest.fn(() => true);
+  let agentBuilder: MockAgentBuilder = {};
+  let agentBuilderShow = false;
   return {
-    useService: (token: unknown) => {
+    useService: (token: string | symbol) => {
       if (token === 'http') {
         return { basePath: { prepend: (p: string) => `/base${p}` } };
       }
+      if (token === 'application') {
+        return { capabilities: { agentBuilder: { show: agentBuilderShow } } };
+      }
       if (token === 'UserCapabilities') {
         return { canRead, canWrite: () => true };
+      }
+      if (token === Symbol.for('plugin.start.agentBuilder')) {
+        return agentBuilder;
       }
       return {};
     },
     CoreStart: (key: string) => key,
     mockCanRead: canRead,
+    setMockAgentBuilder: (next: MockAgentBuilder) => {
+      agentBuilder = next;
+    },
+    setMockAgentBuilderShow: (show: boolean) => {
+      agentBuilderShow = show;
+    },
   };
 });
 
-const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
+const { mockCanRead, setMockAgentBuilder, setMockAgentBuilderShow } = jest.requireMock(
+  '@kbn/core-di-browser'
+) as {
   mockCanRead: jest.Mock;
+  setMockAgentBuilder: (agentBuilder: MockAgentBuilder) => void;
+  setMockAgentBuilderShow: (show: boolean) => void;
 };
 
 jest.mock('../../rule_conditions', () => ({
@@ -125,6 +152,7 @@ const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
 
 const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
   const props: RuleSummaryFlyoutProps = {
+    ruleId: 'rule-1',
     rule: baseRule,
     onClose: jest.fn(),
     onEdit: jest.fn(),
@@ -149,6 +177,8 @@ const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
 
 describe('RuleSummaryFlyout', () => {
   beforeEach(() => {
+    setMockAgentBuilder({});
+    setMockAgentBuilderShow(false);
     mockCanRead.mockImplementation(() => true);
     mockUseFetchRuleExecutions.mockReturnValue({
       data: { items: [], total: 0, page: 1, per_page: 1 },
@@ -168,16 +198,15 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDescription')).toHaveTextContent('A rule description');
     expect(screen.getByTestId('ruleSummaryInvestigation')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
     await waitFor(() => {
       expect(
         within(screen.getByTestId('ruleSummaryInvestigation')).getByRole('button')
       ).toHaveAttribute('aria-expanded', 'true');
+      expect(
+        within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')
+      ).toHaveAttribute('aria-expanded', 'true');
     });
-    expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
-    expect(within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')).toHaveAttribute(
-      'aria-expanded',
-      'false'
-    );
     expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockRuleConditions')).toHaveAttribute('data-variant', 'summary');
     expect(screen.getByTestId('mockDashboardArtifacts')).toBeInTheDocument();
@@ -186,6 +215,48 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleSummaryFlyoutFooterCloseButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockRuleMetadata')).not.toBeInTheDocument();
+  });
+
+  describe('when the rule is loading', () => {
+    it('keeps the flyout open with a loading header and body', () => {
+      renderFlyout({ rule: undefined, isLoading: true });
+
+      expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutHeaderTitleLoading')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryFlyoutNotFound')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('universalRulesBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeDisabled();
+    });
+
+    it('calls onClose when the flyout is closed', () => {
+      const { props } = renderFlyout({ rule: undefined, isLoading: true });
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(props.onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when the rule is not found', () => {
+    it('renders the not found prompt without header parts or actions', () => {
+      renderFlyout({ rule: undefined });
+
+      expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutNotFound')).toHaveTextContent('Rule not found');
+      expect(screen.queryByTestId('ruleSummaryFlyoutLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('flyoutHeaderTitleLoading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('universalRulesBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeDisabled();
+    });
+
+    it('calls onClose when the flyout is closed', () => {
+      const { props } = renderFlyout({ rule: undefined });
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(props.onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('omits action policies under Artifacts when the user cannot read them', () => {
@@ -363,6 +434,7 @@ describe('RuleSummaryFlyout', () => {
     it('forwards the raw rule id to the details locator', () => {
       const { rulesLocators } = mockLocators;
       renderFlyout({
+        ruleId: 'rule with spaces/and slash',
         rule: { ...baseRule, id: 'rule with spaces/and slash' },
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
@@ -378,6 +450,7 @@ describe('RuleSummaryFlyout', () => {
 
     it('rule id with special characters resolves to a properly encoded URL', async () => {
       renderFlyout({
+        ruleId: 'rule with spaces/and slash',
         rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
@@ -504,6 +577,83 @@ describe('RuleSummaryFlyout', () => {
       renderFlyout();
 
       expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
+    });
+  });
+
+  describe('Add to chat', () => {
+    const ruleAttachment = {
+      id: 'rule:rule-1',
+      type: RULE_ATTACHMENT_TYPE,
+      origin: 'rule-1',
+      data: baseRule,
+    };
+
+    it('hides the button when Agent Builder cannot open chat', () => {
+      setMockAgentBuilderShow(true);
+
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryFlyoutAddToChatButton')).not.toBeInTheDocument();
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
+    });
+
+    it('hides the button when the user cannot show Agent Builder', () => {
+      setMockAgentBuilder({
+        openChat: jest.fn(),
+        addAttachment: jest.fn(),
+        events: { ui: { activeConversation$: new BehaviorSubject(null) } },
+      });
+
+      renderFlyout();
+
+      expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryFlyoutAddToChatButton')).not.toBeInTheDocument();
+    });
+
+    it('opens a new conversation with the rule when chat is unbound', () => {
+      const openChat = jest.fn();
+      const addAttachment = jest.fn();
+      setMockAgentBuilderShow(true);
+      setMockAgentBuilder({
+        openChat,
+        addAttachment,
+        events: { ui: { activeConversation$: new BehaviorSubject(null) } },
+      });
+
+      renderFlyout();
+
+      const footer = screen.getByTestId('ruleSummaryFlyoutFooter');
+      const text = footer.textContent ?? '';
+      expect(text.indexOf('Add to chat')).toBeLessThan(text.indexOf('Take action'));
+
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutAddToChatButton'));
+
+      expect(openChat).toHaveBeenCalledWith({
+        autoSendInitialMessage: false,
+        newConversation: true,
+        attachments: [ruleAttachment],
+      });
+      expect(addAttachment).not.toHaveBeenCalled();
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
+    });
+
+    it('attaches the rule to the bound conversation', () => {
+      const openChat = jest.fn();
+      const addAttachment = jest.fn();
+      setMockAgentBuilderShow(true);
+      setMockAgentBuilder({
+        openChat,
+        addAttachment,
+        events: { ui: { activeConversation$: new BehaviorSubject({ id: 'conv-1' }) } },
+      });
+
+      renderFlyout();
+
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutAddToChatButton'));
+
+      expect(addAttachment).toHaveBeenCalledWith(ruleAttachment);
+      expect(openChat).not.toHaveBeenCalled();
     });
   });
 });

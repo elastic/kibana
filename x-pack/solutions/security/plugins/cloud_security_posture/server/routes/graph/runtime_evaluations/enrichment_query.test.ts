@@ -277,3 +277,88 @@ describe('buildIntegrationRuntimeEvals — integration actor and target fields',
     }
   );
 });
+
+describe('buildIntegrationRuntimeEvals — flattened subfields', () => {
+  // A dotted path to a key of a flattened field resolves to null under unmapped_fields="NULLIFY" on
+  // ES versions that cannot read it, while FIELD_EXTRACT returns null where the key is mapped as a
+  // regular field (an index created without the integration package). Each read tries both.
+  const flattenedSubfields: Array<{
+    integration: string;
+    root: string;
+    dottedPath: string;
+    key: string;
+  }> = [
+    {
+      integration: 'm365_defender',
+      root: 'm365_defender.event.additional_fields',
+      dottedPath: 'm365_defender.event.additional_fields.SourceAccountSid',
+      key: 'SourceAccountSid',
+    },
+    {
+      integration: 'm365_defender',
+      root: 'm365_defender.event.additional_fields',
+      dottedPath: 'm365_defender.event.additional_fields.DestinationComputerObjectGuid',
+      key: 'DestinationComputerObjectGuid',
+    },
+    {
+      integration: 'snyk',
+      root: 'snyk.audit_logs.content',
+      dottedPath: 'snyk.audit_logs.content.email',
+      key: 'email',
+    },
+    {
+      integration: 'snyk',
+      root: 'snyk.audit_logs.content',
+      dottedPath: 'snyk.audit_logs.content.targetId',
+      key: 'targetId',
+    },
+    {
+      integration: 'snyk',
+      root: 'snyk.audit_logs.content',
+      dottedPath: 'snyk.audit_logs.content.serviceAccountPublicId',
+      key: 'serviceAccountPublicId',
+    },
+    {
+      integration: 'greenhouse',
+      root: 'greenhouse.audit.event.meta',
+      dottedPath: 'greenhouse.audit.event.meta.name',
+      key: 'name',
+    },
+    {
+      integration: 'cisco_meraki',
+      root: '`cisco_meraki.8021x_eap_success`',
+      dottedPath: '`cisco_meraki.8021x_eap_success.vap`',
+      key: 'vap',
+    },
+    {
+      integration: 'cisco_meraki',
+      root: 'cisco_meraki.wpa_auth',
+      dottedPath: 'cisco_meraki.wpa_auth.vap',
+      key: 'vap',
+    },
+    {
+      integration: 'cisco_meraki',
+      root: 'cisco_meraki.splash_auth',
+      dottedPath: 'cisco_meraki.splash_auth.vap',
+      key: 'vap',
+    },
+  ];
+
+  it.each(flattenedSubfields)(
+    'reads $dottedPath by dotted path, falling back to FIELD_EXTRACT',
+    ({ integration, root, dottedPath, key }) => {
+      const query = buildIntegrationRuntimeEvals({ integrations: [integration] });
+      expect(query).toContain(`COALESCE(${dottedPath}, FIELD_EXTRACT(${root}, "${key}"))`);
+    }
+  );
+
+  it('reads every flattened subfield through COALESCE', () => {
+    const query = buildIntegrationRuntimeEvals({
+      integrations: ['m365_defender', 'snyk', 'greenhouse', 'cisco_meraki'],
+    });
+    const extractCount = query.match(/FIELD_EXTRACT\(/g)?.length ?? 0;
+    const coalescedExtractCount = query.match(/COALESCE\([^,]+, FIELD_EXTRACT\(/g)?.length ?? 0;
+    expect(extractCount).toBeGreaterThan(0);
+    expect(coalescedExtractCount).toBe(extractCount);
+  });
+});

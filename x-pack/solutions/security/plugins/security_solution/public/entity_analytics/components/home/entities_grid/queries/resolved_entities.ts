@@ -23,6 +23,7 @@ import type { QueryArgs, Row } from '../common';
 import {
   ENTITY_TYPE_FILTER,
   ESQL_MAX_RESULT_ROWS,
+  SET_UNMAPPED_NULLIFY,
   buildFilterClause,
   buildLookupJoinClause,
   buildRowFieldsSteps,
@@ -365,6 +366,7 @@ export const withEntityAliases = async (
   do {
     const afterId = aliases.length ? getEntityId(aliases[aliases.length - 1]) : undefined;
     page = await runQuery([
+      SET_UNMAPPED_NULLIFY,
       `FROM ${getEntityAlias(args.namespace)}`,
       `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(ids)})`,
       ...buildFilterClause(afterId && `${ENTITY_ID_FIELD} > ${escapeStringValue(afterId)}`),

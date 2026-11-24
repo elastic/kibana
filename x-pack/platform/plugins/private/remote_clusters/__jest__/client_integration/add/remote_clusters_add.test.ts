@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { screen, within, waitFor, fireEvent } from '@testing-library/react';
+import { screen, within, waitFor, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -142,10 +143,126 @@ describe('Create Remote cluster', () => {
 
         await user.click(nextButton);
 
-        expect(await screen.findByTestId('remoteClusterFormGlobalError')).toBeInTheDocument();
+        const globalError = await screen.findByTestId('remoteClusterFormGlobalError');
+        expect(
+          within(globalError).getByText('Some fields require your attention.', { selector: 'p' })
+        ).toBeInTheDocument();
         expect(screen.getByText('Name is required.')).toBeInTheDocument();
         expect(screen.getByText('At least one seed node is required.')).toBeInTheDocument();
         expect(screen.getByTestId('remoteClusterFormNextButton')).toBeDisabled();
+      });
+
+      test('should announce form errors when clicking "next" without filling the form', async () => {
+        await goToFormStep({ securityModel: 'api' });
+
+        jest.useFakeTimers();
+        try {
+          const userWithFakeTimers = userEvent.setup({
+            delay: null,
+            advanceTimers: jest.advanceTimersByTime,
+          });
+          await userWithFakeTimers.click(screen.getByTestId('remoteClusterFormNextButton'));
+          act(() => jest.advanceTimersByTime(100));
+
+          expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveTextContent(
+            'Some fields require your attention. Name is required.'
+          );
+          expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveAttribute(
+            'aria-live',
+            'assertive'
+          );
+          expect(screen.getByTestId('remoteClusterFormNameInput')).toHaveFocus();
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
+      test('should not re-announce form errors while the user edits fields', async () => {
+        await goToFormStep({ securityModel: 'api' });
+
+        jest.useFakeTimers();
+        try {
+          const userWithFakeTimers = userEvent.setup({
+            delay: null,
+            advanceTimers: jest.advanceTimersByTime,
+          });
+          await userWithFakeTimers.click(screen.getByTestId('remoteClusterFormNextButton'));
+          act(() => jest.advanceTimersByTime(100));
+
+          const announcement = screen.getByTestId('remoteClusterFormErrorAnnouncement');
+          await userWithFakeTimers.type(screen.getByTestId('remoteClusterFormNameInput'), 'a');
+          expect(announcement).toHaveTextContent(
+            'Some fields require your attention. Name is required.'
+          );
+
+          act(() => jest.advanceTimersByTime(2000));
+          expect(announcement).toBeEmptyDOMElement();
+
+          await userWithFakeTimers.type(screen.getByTestId('remoteClusterFormNameInput'), 'b');
+          act(() => jest.advanceTimersByTime(100));
+          expect(announcement).toBeEmptyDOMElement();
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
+      test('should announce seed node errors when the name is valid', async () => {
+        await goToFormStep({ securityModel: 'api' });
+
+        jest.useFakeTimers();
+        try {
+          const userWithFakeTimers = userEvent.setup({
+            delay: null,
+            advanceTimers: jest.advanceTimersByTime,
+          });
+          await userWithFakeTimers.type(
+            screen.getByTestId('remoteClusterFormNameInput'),
+            'test-cluster'
+          );
+          await userWithFakeTimers.click(screen.getByTestId('remoteClusterFormNextButton'));
+          act(() => jest.advanceTimersByTime(100));
+
+          expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveTextContent(
+            'Some fields require your attention. At least one seed node is required.'
+          );
+          expect(
+            within(screen.getByTestId('remoteClusterFormSeedsInput')).getByTestId(
+              'comboBoxSearchInput'
+            )
+          ).not.toHaveFocus();
+          expect(screen.getByTestId('remoteClusterFormGlobalError')).toHaveFocus();
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
+      test('should focus the error callout when seed nodes and node connections are both invalid', async () => {
+        await goToFormStep({ securityModel: 'api' });
+
+        jest.useFakeTimers();
+        try {
+          const userWithFakeTimers = userEvent.setup({
+            delay: null,
+            advanceTimers: jest.advanceTimersByTime,
+          });
+          await userWithFakeTimers.type(
+            screen.getByTestId('remoteClusterFormNameInput'),
+            'test-cluster'
+          );
+          fireEvent.change(screen.getByTestId('remoteClusterFormNodeConnectionsInput'), {
+            target: { value: String(MAX_NODE_CONNECTIONS + 1) },
+          });
+          await userWithFakeTimers.click(screen.getByTestId('remoteClusterFormNextButton'));
+          act(() => jest.advanceTimersByTime(100));
+
+          expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveTextContent(
+            'Some fields require your attention. At least one seed node is required.'
+          );
+          expect(screen.getByTestId('remoteClusterFormNodeConnectionsInput')).not.toHaveFocus();
+          expect(screen.getByTestId('remoteClusterFormGlobalError')).toHaveFocus();
+        } finally {
+          jest.useRealTimers();
+        }
       });
 
       test('renders no switch for cloud advanced options', async () => {

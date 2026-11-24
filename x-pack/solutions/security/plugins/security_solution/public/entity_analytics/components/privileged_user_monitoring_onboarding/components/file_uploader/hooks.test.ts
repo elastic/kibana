@@ -6,7 +6,7 @@
  */
 
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { TestProviders } from '../../../../../common/mock/timeline';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFileValidation } from './hooks';
 import { useKibana as mockUseKibana } from '../../../../../common/lib/kibana/__mocks__';

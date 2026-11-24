@@ -177,14 +177,17 @@ describe('Exceptions List Api Client', () => {
       const exceptionItem = {
         ...new ExceptionsListItemGenerator('seed').generate(),
         list_id: getFakeListId(),
+        meta: { temporaryUuid: 'temporary-uuid' },
       };
+      const { meta, ...expectedBody } = exceptionItem;
       await exceptionsListApiClientInstance.create(exceptionItem);
 
       expect(fakeHttpServices.post).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.post).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
         version: apiVersion,
-        body: JSON.stringify(exceptionItem),
+        body: JSON.stringify(expectedBody),
       });
+      expect(exceptionItem.meta).toEqual(meta);
     });
 
     it('Throws when create method has wrong listId', async () => {

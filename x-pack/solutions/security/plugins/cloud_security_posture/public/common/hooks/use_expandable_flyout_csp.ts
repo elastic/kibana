@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useSecuritySolutionContext } from '../../application/security_solution_context';
@@ -18,34 +18,14 @@ export const useExpandableFlyoutCsp = (
   const securitySolutionContext = useSecuritySolutionContext();
   // Tracks the currently open system flyout (if any), so it can be closed when the table row is
   // deselected, and so we can reset `expandedDoc` when the user closes it directly (e.g. the
-  // flyout's own close button), which the legacy `useOnExpandableFlyoutClose` event never fires
-  // for. We intentionally never close a *previous* system flyout to open a new one — see
-  // `trackSystemFlyoutHandle` below.
+  // flyout's own close button). We intentionally never close a *previous* system flyout to open a
+  // new one — see `trackSystemFlyoutHandle` below.
   const systemFlyoutHandleRef = useRef<OpenFindingInSystemFlyoutHandle | null>(null);
 
-  const setFlyoutCloseCallback = useCallback(
-    (onChange: (value: DataTableRecord | undefined) => void) => {
-      // Check if the context and required methods exist
-      if (securitySolutionContext && securitySolutionContext.useOnExpandableFlyoutClose) {
-        securitySolutionContext.useOnExpandableFlyoutClose({
-          callback: () => onChange(undefined),
-        });
-      }
-    },
-    [securitySolutionContext]
-  );
+  if (!securitySolutionContext) return { onExpandDocClick: null };
 
-  if (!securitySolutionContext || !securitySolutionContext.useExpandableFlyoutApi)
-    return { onExpandDocClick: null };
-
-  const { openFlyout, closeFlyout } = securitySolutionContext.useExpandableFlyoutApi();
-
-  // When the new flyout system is enabled, the security solution injects openers that render the
-  // finding as a primary "system flyout". Otherwise this is `undefined` and we fall back to the
-  // legacy expandable-flyout panels.
-  const openInSystemFlyout = securitySolutionContext.useOpenFindingInSystemFlyout?.();
-
-  setFlyoutCloseCallback(setExpandedDoc);
+  // The security solution injects openers that render the finding as a primary "system flyout".
+  const openInSystemFlyout = securitySolutionContext.useOpenFindingInSystemFlyout();
 
   const closeActiveSystemFlyout = () => {
     systemFlyoutHandleRef.current?.close();
@@ -64,11 +44,7 @@ export const useExpandableFlyoutCsp = (
 
   const onExpandDocClick = (record?: DataTableRecord | undefined) => {
     if (!record) {
-      if (openInSystemFlyout) {
-        closeActiveSystemFlyout();
-      } else {
-        closeFlyout();
-      }
+      closeActiveSystemFlyout();
       setExpandedDoc(undefined);
       return;
     }
@@ -83,11 +59,7 @@ export const useExpandableFlyoutCsp = (
         packageVersion: finding?.package?.version,
         eventId: finding?.event?.id,
       };
-      if (openInSystemFlyout) {
-        trackSystemFlyoutHandle(openInSystemFlyout.openVulnerabilityFinding(params));
-      } else {
-        openFlyout({ right: { id: 'findings-vulnerability-panel', params } });
-      }
+      trackSystemFlyoutHandle(openInSystemFlyout.openVulnerabilityFinding(params));
     } else {
       const finding = record?.raw?._source as unknown as CspFinding;
       setExpandedDoc(record);
@@ -95,11 +67,7 @@ export const useExpandableFlyoutCsp = (
         resourceId: finding.resource.id,
         ruleId: finding.rule.id,
       };
-      if (openInSystemFlyout) {
-        trackSystemFlyoutHandle(openInSystemFlyout.openMisconfigurationFinding(params));
-      } else {
-        openFlyout({ right: { id: 'findings-misconfiguration-panel', params } });
-      }
+      trackSystemFlyoutHandle(openInSystemFlyout.openMisconfigurationFinding(params));
     }
   };
 

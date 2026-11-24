@@ -20,34 +20,36 @@ import {
   type OverviewFilterOptions,
   type OverviewFilters,
 } from '../../../common/overview_filters';
-import { EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
-import { SOURCE_URL_FIELD } from '../../sessions/source_fields';
+import { ENVIRONMENT_FIELDS, EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
+import {
+  DEVICE_DESKTOP_LABEL,
+  DEVICE_MOBILE_LABEL,
+  SOURCE_APP_VERSION_FIELDS,
+  SOURCE_MOBILE_FIELDS,
+  SOURCE_URL_FIELD,
+} from '../../../common/otel_source_fields';
 import { environmentFilter } from '../helpers/environment';
-import { ENVIRONMENT_FIELDS, eventCount } from './queries';
-
-/**
- * Whether the browser runs on a mobile device. EDOT Browser records it even where no device model
- * or type is, so the device falls back to "Mobile" or "Desktop" rather than to nothing.
- */
-const MOBILE_FIELDS = ['resource.attributes.browser.mobile', 'attributes.browser.mobile'] as const;
+import { eventCount } from './queries';
 
 /** What a field that is not a name says, per value: the device name of `browser.mobile`. */
-const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
-  MOBILE_FIELDS.map((field) => [field, { true: 'Mobile', false: 'Desktop' }])
+export const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEntries(
+  SOURCE_MOBILE_FIELDS.map((field) => [
+    field,
+    { true: DEVICE_MOBILE_LABEL, false: DEVICE_DESKTOP_LABEL },
+  ])
 );
 
 /**
- * The fields each filter reads, in priority order. The sessions' lists come first, so a browser,
- * OS, device or country means the same in the Overview and the Sessions where they have one; the
- * device then falls back to `browser.mobile`.
+ * The fields each filter reads, in priority order. The session summaries' lists come first, so a
+ * browser, OS, device or country means the same in the Overview and the Sessions where they have
+ * one; the device then falls back to `browser.mobile`.
  */
-const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
+export const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
   browser: SESSION_ATTRIBUTE_FIELDS.browser,
   os: SESSION_ATTRIBUTE_FIELDS.os,
-  device: [...SESSION_ATTRIBUTE_FIELDS.device, ...MOBILE_FIELDS],
+  device: [...SESSION_ATTRIBUTE_FIELDS.device, ...SOURCE_MOBILE_FIELDS],
   country: SESSION_ATTRIBUTE_FIELDS.countryIso,
-  // The version the application reports, a resource attribute of OpenTelemetry.
-  appVersion: ['resource.attributes.service.version', 'attributes.service.version'],
+  appVersion: SOURCE_APP_VERSION_FIELDS,
   pageUrl: [SOURCE_URL_FIELD],
   pageContains: [SOURCE_URL_FIELD],
 };
@@ -60,7 +62,7 @@ export const filterFieldOf = (name: OverviewFilterName): string =>
   FILTER_SOURCE_FIELDS[name].length > 1 ? runtimeFieldOf(name) : FILTER_SOURCE_FIELDS[name][0];
 
 /**
- * Takes the first non-empty value of the fields, like the sessions do, so a
+ * Takes the first non-empty value of the fields, like the session summaries do, so a
  * document with the same value in both scopes is counted once. Unmapped fields are skipped: the
  * OTel indices map only what their data had. A field with `params.labels` says its value in other
  * words, e.g. `true` as "Mobile"; a value without a label is skipped.

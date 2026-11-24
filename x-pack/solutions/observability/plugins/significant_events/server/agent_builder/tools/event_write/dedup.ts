@@ -22,7 +22,14 @@ import {
   extractRuleUuids,
   makeIdentity,
 } from './episode_context';
-import type { BulkResults, DedupCandidate, EventsWriteInput, WriteCandidate } from './types';
+import type {
+  BulkResults,
+  DedupCandidate,
+  EventsWriteInput,
+  HeldRule,
+  LoadedCandidate,
+  WriteCandidate,
+} from './types';
 
 /** How far back a closed series is still a candidate for reuse: its latest version must be newer. */
 export const DEFAULT_INACTIVE_LOOKBACK_MS = INACTIVE_SERIES_LOOKBACK_HOURS * 60 * 60 * 1000;
@@ -164,13 +171,25 @@ export const fetchInactiveEventsForReuse = async ({
 };
 
 /**
+ * The rules an event holds for matching a candidate. A candidate with confirmed rules compares only
+ * confirmed rules, except against a closed series that holds none: a series closed while recovering
+ * stores only `refutes` verdicts, so it holds every rule it ended with, and a recurrence of any of
+ * them must still reopen it.
+ */
+const heldRuleUuids = (candidate: DedupCandidate, ev: SignificantEvent): string[] => {
+  const confirmed = extractRuleUuids(confirmedSignals(ev.signals));
+  const holdsNoConfirmed = ev.status === ALERT_EPISODE_STATUS.INACTIVE && confirmed.length === 0;
+  return candidate.confirmedOnly && !holdsNoConfirmed ? confirmed : extractRuleUuids(ev.signals);
+};
+
+/**
  * Returns true when the candidate's dedup rule set is entirely contained in the event's rule set,
  * the event has one of `statuses`, and at least one source id is shared — meaning this detection
  * is already tracked (by a live event) or recurs a series that has closed (by an inactive one).
  *
- * Candidates with confirmed rules compare only confirmed rules on both sides. Candidates without
- * confirmed rules retain all-verdict subset matching. A new identity rule not present in the event
- * still produces a new event.
+ * Candidates with confirmed rules compare only confirmed rules against a live event (see
+ * `heldRuleUuids`). Candidates without confirmed rules retain all-verdict subset matching. A new
+ * identity rule not present in the event still produces a new event.
  *
  * Empty-rule candidates only match empty-rule events to avoid false-matching any event on source
  * overlap alone.
@@ -190,9 +209,7 @@ const isCoveredByEvent = (
   const sourcesOverlap = (ev.source_ids ?? []).some((s) => candidateSourceSet.has(s));
   if (!sourcesOverlap) return false;
 
-  const eventRuleUuids = extractRuleUuids(
-    candidate.confirmedOnly ? confirmedSignals(ev.signals) : ev.signals
-  );
+  const eventRuleUuids = heldRuleUuids(candidate, ev);
   if (candidate.ruleUuids.length === 0) return eventRuleUuids.length === 0;
 
   const eventRuleSet = new Set(eventRuleUuids);
@@ -258,7 +275,8 @@ interface CoveringSeries {
 /**
  * The closed series that cover a dedup candidate, newest first: they share a source with it and
  * hold every one of its confirmed rules (the coverage rule live dedup uses, applied to inactive
- * series). It expects `series` already paired with their latest episode (see `seriesWithHeads`).
+ * series; see `heldRuleUuids` for which rules a closed series holds). It expects `series` already
+ * paired with their latest episode (see `seriesWithHeads`).
  */
 const coveringInactiveSeries = ({
   candidate,
@@ -272,9 +290,7 @@ const coveringInactiveSeries = ({
   return series
     .filter(({ event }) => isCoveredByEvent(candidate, event, [ALERT_EPISODE_STATUS.INACTIVE]))
     .map(({ event, head }) => {
-      const heldRules = new Set(
-        extractRuleUuids(candidate.confirmedOnly ? confirmedSignals(event.signals) : event.signals)
-      );
+      const heldRules = new Set(heldRuleUuids(candidate, event));
       return { event, head, extraRules: heldRules.size - new Set(candidate.ruleUuids).size };
     });
 };
@@ -354,4 +370,65 @@ export const reopenMatchingInactiveSeries = ({
       },
     };
   });
+};
+
+/** The rules of an item that other live events confirm, and the newest event that holds one. */
+export interface RulesHeldByOtherEvents {
+  holder: IdentifiedEvent;
+  heldRules: HeldRule[];
+}
+
+type IdentifiedEvent = SignificantEvent & { event_id: string };
+
+const isLiveStatus = (status: SignificantEvent['status']): boolean =>
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((live) => live === status);
+
+/**
+ * The one predicate of the invariant that a rule is a confirmed member of at most one live event.
+ * It returns the item's incoming rules that another live event confirms, whatever the incoming
+ * verdict is, or `undefined` when none is. A rule counts only when the holder's latest verdict for
+ * it is `confirms`, so `refutes`, `off_topic` and `inconclusive` holders never block. A live target
+ * is exempt for the rules it already confirms, so an existing duplicate can still write, and for the
+ * rules it holds without confirming as long as the incoming verdict does not confirm them; a closed
+ * series being reopened is not live and has no exemption. The newest holder is `holder`.
+ */
+export const findRulesHeldByOtherEvents = ({
+  candidate,
+  liveEvents,
+}: {
+  candidate: LoadedCandidate;
+  liveEvents: SignificantEvent[];
+}): RulesHeldByOtherEvents | undefined => {
+  const { latest, eventId, input } = candidate;
+  const targetSignals =
+    latest !== undefined && isLiveStatus(latest.status) ? latest.signals : undefined;
+  const targetHolds = new Set(extractRuleUuids(targetSignals));
+  const targetConfirms = new Set(extractRuleUuids(confirmedSignals(targetSignals)));
+  const incomingConfirms = new Set(extractRuleUuids(confirmedSignals(input.signals)));
+  // A write that confirms a rule the target only holds non-confirming would make it a second
+  // confirmed member, so only the target's own confirmed rules and non-confirming writes are exempt.
+  const isExempt = (uuid: string): boolean =>
+    targetConfirms.has(uuid) || (targetHolds.has(uuid) && !incomingConfirms.has(uuid));
+  const checked = extractRuleUuids(input.signals).filter((uuid) => !isExempt(uuid));
+  if (checked.length === 0) return undefined;
+
+  const others = liveEvents
+    .filter(
+      (ev): ev is IdentifiedEvent =>
+        isLiveStatus(ev.status) && ev.event_id !== undefined && ev.event_id !== eventId
+    )
+    .toSorted(newestFirst)
+    .map((ev) => ({ ev, confirmed: new Set(extractRuleUuids(confirmedSignals(ev.signals))) }));
+
+  const held = checked.flatMap((uuid) => {
+    const found = others.find(({ confirmed }) => confirmed.has(uuid));
+    return found ? [{ uuid, ev: found.ev }] : [];
+  });
+  const [newest] = held.map(({ ev }) => ev).toSorted(newestFirst);
+  if (newest === undefined) return undefined;
+
+  return {
+    holder: newest,
+    heldRules: held.map(({ uuid, ev }) => ({ rule_uuid: uuid, event_id: ev.event_id })),
+  };
 };

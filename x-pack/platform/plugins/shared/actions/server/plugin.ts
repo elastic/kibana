@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
@@ -109,7 +110,11 @@ import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profi
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
-import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
+import {
+  ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
+  ACTIONS_FEATURE_ID,
+  AlertHistoryEsIndexConnectorId,
+} from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { UserConnectorTokenClient } from './lib/user_connector_token_client';
@@ -134,6 +139,12 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
+import {
+  buildTypeFromStoredSpec,
+  createConnectorCatalogStorage,
+  startConnectorCatalog,
+  type ConnectorCatalogHandle,
+} from './lib/connector_catalog';
 
 export interface PluginSetupContract {
   registerType<
@@ -262,6 +273,9 @@ export interface PluginStartContract {
     request: KibanaRequest,
     connectorIds: string[]
   ) => Promise<Set<string>>;
+
+  /** Resolves when the first connector catalog load is done, failed, or timed out. Never rejects. */
+  whenCatalogReady(): Promise<void>;
 }
 
 export interface ActionsPluginsSetup {
@@ -327,6 +341,12 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private setupContract?: PluginSetupContract;
+  private isCatalogFeatureFlagEnabled = false;
+  private connectorCatalogFeatureFlagSubscription?: Subscription;
+  private connectorCatalog?: ConnectorCatalogHandle;
+  private catalogReady: Promise<void> = Promise.resolve();
+  private isStopping = false;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -535,7 +555,7 @@ export class ActionsPlugin
       inboundEvents,
     });
 
-    return {
+    const setupContract: PluginSetupContract = {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -620,6 +640,9 @@ export class ActionsPlugin
         this.connectorEventEmitter = emitter;
       },
     };
+    // Kept for start(): catalog types are built with the same setup helpers that stack_connectors uses.
+    this.setupContract = setupContract;
+    return setupContract;
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
@@ -629,6 +652,14 @@ export class ActionsPlugin
         '`xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity. Relay requests will fail until `xpack.security.uiam` is configured with a client certificate (`ssl.certificate` and `ssl.key`).'
       );
     }
+
+    const connectorCatalog = this.startConnectorCatalog(core);
+    this.connectorCatalogFeatureFlagSubscription = core.featureFlags
+      .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
+      .subscribe((isCatalogEnabled: boolean) => {
+        this.isCatalogFeatureFlagEnabled = isCatalogEnabled;
+      });
+
     const {
       logger,
       licenseState,
@@ -892,7 +923,7 @@ export class ActionsPlugin
       }).catch(() => {});
     }
 
-    this.validateEnabledConnectorTypes(plugins);
+    this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
 
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
@@ -931,6 +962,7 @@ export class ActionsPlugin
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
       getRelayClient: () => this.relayClient,
+      whenCatalogReady: () => this.catalogReady,
       getUsableUserOAuthConnectorIds: async (request: KibanaRequest, connectorIds: string[]) => {
         throwIfCannotEncrypt();
         const profileUid = await getCurrentUserProfileId(request);
@@ -1110,6 +1142,7 @@ export class ActionsPlugin
       actionsConfig,
     } = this;
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
+    const isCatalogFeatureFlagEnabled = () => this.isCatalogFeatureFlagEnabled;
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
@@ -1184,20 +1217,84 @@ export class ActionsPlugin
           return actionTypeRegistry!.list({ featureId });
         },
         getSkippedPreconfiguredConnectorIds: getSkippedPreconfiguredIds,
+        isCatalogFeatureFlagEnabled,
       };
     };
   };
 
-  private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
+  private startConnectorCatalog(core: CoreStart): ConnectorCatalogHandle {
+    const { setupContract, actionTypeRegistry, logger } = this;
+    const isEnabled = this.actionsConfig.catalog.enabled;
+    const handle = startConnectorCatalog({
+      isEnabled,
+      storage: createConnectorCatalogStorage({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger,
+      }),
+      actionTypeRegistry: actionTypeRegistry!,
+      buildType: (definition) => {
+        if (!setupContract) {
+          throw new Error('The actions plugin setup contract is not available.');
+        }
+        return buildTypeFromStoredSpec(definition, setupContract);
+      },
+      logger,
+    });
+    this.connectorCatalog = handle;
+    this.catalogReady = handle.ready;
+    return handle;
+  }
+
+  /** Checks the serverless connector type allowlist; catalog types are checked again after the catalog load. */
+  private validateEnabledConnectorTypes = (
+    plugins: ActionsPluginsStart,
+    catalogReady: Promise<void>
+  ): void => {
+    const { enabledActionTypes } = this.actionsConfig;
     if (
-      !!plugins.serverless &&
-      this.actionsConfig.enabledActionTypes.length > 0 &&
-      this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
+      !plugins.serverless ||
+      enabledActionTypes.length === 0 ||
+      enabledActionTypes[0] === AllowedHosts.Any
     ) {
-      this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
+      return;
+    }
+
+    if (!this.actionsConfig.catalog.enabled) {
+      enabledActionTypes.forEach((connectorType) => {
         // Throws error if action type doesn't exist
         this.actionTypeRegistry?.get(connectorType);
       });
+      return;
+    }
+
+    const pendingTypes = enabledActionTypes.filter(
+      (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+    );
+    if (pendingTypes.length === 0) {
+      return;
+    }
+
+    void this.warnAboutUnregisteredConnectorTypes(pendingTypes, catalogReady);
+  };
+
+  private warnAboutUnregisteredConnectorTypes = async (
+    pendingTypes: string[],
+    catalogReady: Promise<void>
+  ): Promise<void> => {
+    // Catalog types register after start(), so check again once the load has ended.
+    await catalogReady;
+    if (this.isStopping) {
+      return;
+    }
+    const unavailableTypes = pendingTypes.filter(
+      (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+    );
+    if (unavailableTypes.length > 0) {
+      this.logger.warn(
+        `Connector types [${unavailableTypes.join(
+          ', '
+        )}] in xpack.actions.enabledActionTypes are not registered.`
+      );
     }
   };
 
@@ -1258,6 +1355,11 @@ export class ActionsPlugin
   };
 
   public stop() {
+    this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
+    this.connectorCatalogFeatureFlagSubscription = undefined;
+    this.isCatalogFeatureFlagEnabled = false;
+    this.isStopping = true;
+    this.connectorCatalog?.stop();
     if (this.licenseState) {
       this.licenseState.clean();
     }

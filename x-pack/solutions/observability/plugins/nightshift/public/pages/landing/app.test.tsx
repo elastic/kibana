@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { usePageReady } from '@kbn/ebt-tools/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -27,6 +27,22 @@ jest.mock('../../components/entities/investigation/use_investigation_assignees',
   useInvestigationAssignees: () => () => null,
 }));
 jest.mock('./use_detection_setup_banner');
+jest.mock('../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: ({
+    start,
+    end,
+    showRefreshButton,
+  }: {
+    start: string;
+    end: string;
+    showRefreshButton?: boolean;
+  }) => (
+    <div data-test-subj="nightshiftInvestigationsTimeRangePicker">
+      {`${start} to ${end}`}
+      {showRefreshButton && <button data-test-subj="stubRefresh" type="button" />}
+    </div>
+  ),
+}));
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
@@ -142,16 +158,21 @@ function setSections({
   };
   const resolvedActiveCount =
     activeInvestigationCount ?? (hasActiveInvestigations ? sectionTotal('in-progress') : 0);
+  const totalCount = sections.reduce((sum, section) => sum + section.total, 0);
   mockUseInvestigationSections.mockReturnValue({
     sections,
     severityCounts,
+    // Tests without a search treat filtered and unfiltered counts as the same.
+    unfilteredSeverityCounts: severityCounts,
     areSeverityCountsLoading,
+    areUnfilteredSeverityCountsLoading: false,
+    areSeverityCountsStale: false,
     hasSeverityCountsError,
     hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
     activeInvestigationCount: resolvedActiveCount,
     isInitialLoading,
     isFetching,
-    totalCount: sections.reduce((sum, section) => sum + section.total, 0),
+    totalCount,
     loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   });
@@ -251,6 +272,42 @@ describe('NightshiftApp', () => {
         }),
       })
     );
+  });
+
+  it('filters investigations to those modified in the last 48 hours by default', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-09T12:00:30.000Z'));
+    try {
+      renderApp();
+
+      expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toHaveTextContent(
+        'now-48h to now'
+      );
+      expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          updatedAfter: '2026-11-07T12:00:30.000Z',
+          updatedBefore: undefined,
+        })
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('offers a refresh button next to the time range', () => {
+    renderApp();
+
+    expect(screen.getByTestId('stubRefresh')).toBeInTheDocument();
+  });
+
+  it('filters by the time range in the URL', () => {
+    renderApp({ initialEntries: ['/?rangeFrom=now-7d&rangeTo=now-1d'] });
+
+    expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toHaveTextContent(
+      'now-7d to now-1d'
+    );
+    const [{ updatedAfter, updatedBefore }] = mockUseInvestigationSections.mock.calls.at(-1)!;
+    expect(updatedAfter).toBeDefined();
+    expect(updatedBefore).toBeDefined();
   });
 
   it('shows the finished open severity sum when nothing is in progress', () => {
@@ -450,7 +507,7 @@ describe('NightshiftApp', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows a single empty state when there are no investigations', () => {
+  it('shows a single empty state when there are no investigations, with filters still available', () => {
     setSections({ sections: defaultSections() });
 
     renderApp();
@@ -458,41 +515,145 @@ describe('NightshiftApp', () => {
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
       'No open investigations'
     );
-    expect(screen.queryByTestId('nightshiftInvestigationsSearchInput')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
   });
 
-  it('keeps search mounted when clearing an empty-result query', async () => {
+  it('keeps filters mounted when clearing an empty-result query', () => {
+    jest.useFakeTimers();
+    try {
+      setSections({
+        sections: defaultSections({
+          'in-progress': { investigations: [investigation], total: 1 },
+        }),
+        hasActiveInvestigations: true,
+      });
+      renderApp();
+
+      fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+        target: { value: 'zzz' },
+      });
+      setSections({ sections: defaultSections() });
+
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+      expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+        'No open investigations found'
+      );
+
+      const searchInput = screen.getByTestId('nightshiftInvestigationsSearchInput');
+      fireEvent.change(searchInput, { target: { value: '' } });
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('keeps filters when a search load fails so the query can be cleared', () => {
+    const error = new Error('query too long');
+    setSections({
+      sections: defaultSections({
+        'in-progress': { error },
+        critical: { error },
+        high: { error },
+        medium: { error },
+        low: { error },
+        'not-rated': { error },
+      }),
+    });
+
+    renderApp({ initialEntries: ['/?q=broken'] });
+
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
+  });
+
+  it('caps an overlong search from the URL at the list API max', () => {
     setSections({
       sections: defaultSections({
         'in-progress': { investigations: [investigation], total: 1 },
       }),
       hasActiveInvestigations: true,
     });
+
+    renderApp({ initialEntries: [`/?q=${'a'.repeat(300)}`] });
+
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('a'.repeat(256));
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'a'.repeat(256) })
+    );
+  });
+
+  it('normalizes an overlong shared search once for the input and the request', () => {
+    setSections({
+      sections: defaultSections({
+        'in-progress': { investigations: [investigation], total: 1 },
+      }),
+      hasActiveInvestigations: true,
+    });
+
+    // Leading spaces push the real term past the max if truncated before trimming.
+    renderApp({
+      initialEntries: [`/?q=${encodeURIComponent(`${' '.repeat(256)}checkout`)}`],
+    });
+
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('checkout');
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'checkout' })
+    );
+  });
+
+  it('does not leave a lone surrogate when capping a shared search URL', () => {
+    setSections({
+      sections: defaultSections({
+        'in-progress': { investigations: [investigation], total: 1 },
+      }),
+      hasActiveInvestigations: true,
+    });
+
+    // 255 BMP chars + emoji (2 UTF-16 units) → naive slice(0, 256) leaves a high surrogate.
+    renderApp({ initialEntries: [`/?q=${encodeURIComponent(`${'a'.repeat(255)}😀`)}`] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'a'.repeat(255) })
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('a'.repeat(255));
+  });
+
+  it('shows the unavailable callout when every section returns 404', () => {
+    const notFoundError = Object.assign(new Error('Not Found'), {
+      name: 'HttpFetchError',
+      request: {},
+      response: { status: 404 },
+    });
+    setSections({
+      sections: defaultSections({
+        'in-progress': { error: notFoundError },
+        critical: { error: notFoundError },
+        high: { error: notFoundError },
+        medium: { error: notFoundError },
+        low: { error: notFoundError },
+        'not-rated': { error: notFoundError },
+      }),
+    });
+
     renderApp();
 
-    fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
-      target: { value: 'zzz' },
-    });
-    setSections({ sections: defaultSections() });
-
-    await waitFor(() =>
-      expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
-        'No open investigations found'
-      )
-    );
-
-    // Leave totals at the filtered empty result so visibility cannot ride on totalCount.
-    fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
-      target: { value: '' },
-    });
-    // Wait past the 300 ms search debounce: without the unfiltered latch, search would unmount here.
-    await new Promise((resolve) => {
-      window.setTimeout(resolve, 350);
-    });
-    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+    expect(
+      screen.getByText('Investigations are not available in this deployment')
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationsSearchInput')).not.toBeInTheDocument();
   });
 
   it('does not scroll from a severity tile with no investigations', () => {
@@ -633,6 +794,17 @@ describe('NightshiftApp', () => {
     ).toHaveLength(1);
   });
 
+  it('shows no tile counts until the counts query lands, even when the sections have rows', () => {
+    const sections = defaultSections({
+      critical: { investigations: [criticalInvestigation], total: 1 },
+    });
+    setSections({ sections, areSeverityCountsLoading: true });
+
+    renderApp();
+
+    expect(screen.queryByTestId('nightshiftSeverityTileCount-critical')).toBeNull();
+  });
+
   it('waits for the severity counts before reporting the landing page view', () => {
     const sections = defaultSections({
       critical: { investigations: [criticalInvestigation], total: 1 },
@@ -684,6 +856,23 @@ describe('NightshiftApp', () => {
         'nightshift_investigation_viewed',
         expect.objectContaining({ investigation_id: 'conversation-9', source: 'deepLink' })
       )
+    );
+  });
+
+  it('does not send a whitespace-only search term to the API', () => {
+    renderApp({ initialEntries: ['/?q=%20%20'] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: undefined })
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('  ');
+  });
+
+  it('sends the trimmed search term to the API', () => {
+    renderApp({ initialEntries: ['/?q=%20checkout%20'] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'checkout' })
     );
   });
 
