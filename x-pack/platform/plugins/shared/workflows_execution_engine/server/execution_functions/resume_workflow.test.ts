@@ -234,18 +234,25 @@ describe('resumeWorkflow', () => {
         const retryAt = new Date(startedAt.getTime() + 60_000);
         const expectedRetryAt = timeout ? new Date(startedAt.getTime() + 10_000) : retryAt;
         const resume = jest.fn();
+        // Step metadata is only available after load(); returning resumeAt earlier
+        // would hide a missing early-resume load.
+        let stepDocsLoaded = false;
+        const load = jest.fn().mockImplementation(async () => {
+          stepDocsLoaded = true;
+        });
         mockSetupDependencies.mockResolvedValue({
           workflowRuntime: { resume, getCurrentNode: () => ({ type: 'wait', stepId: 'pause' }) },
           workflowExecutionGraph: { getWorkflowLevelTimeout: () => timeout },
           workflowExecutionCursor: { currentStackFrames: [] },
           workflowExecutionState: {
-            load: jest.fn().mockResolvedValue(undefined),
+            load,
             getWorkflowExecution: () => ({
               status: ExecutionStatus.WAITING,
               currentNodeId: 'pause',
               startedAt: startedAt.toISOString(),
             }),
-            getLatestStepExecution: () => ({ state: { resumeAt: retryAt.toISOString() } }),
+            getLatestStepExecution: () =>
+              stepDocsLoaded ? { state: { resumeAt: retryAt.toISOString() } } : undefined,
           },
         } as never);
         const result = await resumeWorkflow({
@@ -266,6 +273,7 @@ describe('resumeWorkflow', () => {
           ),
           stepExecutionRepository: mockStepExecutionRepositoryForResume,
         });
+        expect(load).toHaveBeenCalledTimes(1);
         expect(result).toEqual({ retryAt: expectedRetryAt });
         expect(resume).not.toHaveBeenCalled();
         expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
@@ -278,6 +286,10 @@ describe('resumeWorkflow', () => {
         jest.setSystemTime(new Date('2025-06-01T12:00:15.000Z'));
         const startedAt = '2025-06-01T12:00:00.000Z';
         const resume = jest.fn();
+        let stepDocsLoaded = false;
+        const load = jest.fn().mockImplementation(async () => {
+          stepDocsLoaded = true;
+        });
         mockSetupDependencies.mockResolvedValue({
           workflowRuntime: {
             resume,
@@ -293,16 +305,19 @@ describe('resumeWorkflow', () => {
           },
           workflowExecutionCursor: { currentStackFrames: [] },
           workflowExecutionState: {
-            load: jest.fn().mockResolvedValue(undefined),
+            load,
             getWorkflowExecution: () => ({
               status: ExecutionStatus.WAITING_FOR_INPUT,
               currentNodeId: 'await_decision',
               startedAt,
             }),
-            getLatestStepExecution: () => ({
-              startedAt,
-              state: { [DYNAMIC_TIMEOUT_STATE_KEY]: '30s' },
-            }),
+            getLatestStepExecution: () =>
+              stepDocsLoaded
+                ? {
+                    startedAt,
+                    state: { [DYNAMIC_TIMEOUT_STATE_KEY]: '30s' },
+                  }
+                : undefined,
           },
         } as never);
 
@@ -325,6 +340,7 @@ describe('resumeWorkflow', () => {
           stepExecutionRepository: mockStepExecutionRepositoryForResume,
         });
 
+        expect(load).toHaveBeenCalledTimes(1);
         expect(result).toEqual({ retryAt: new Date('2025-06-01T12:00:30.000Z') });
         expect(resume).not.toHaveBeenCalled();
         expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
