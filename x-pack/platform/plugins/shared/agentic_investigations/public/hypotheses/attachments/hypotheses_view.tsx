@@ -193,8 +193,8 @@ const FOUND_LABEL = i18n.translate('xpack.agenticInvestigations.hypotheses.found
 const RESULT_CHART_LABEL = i18n.translate('xpack.agenticInvestigations.hypotheses.resultChart', {
   defaultMessage: 'The result',
 });
-const DETAIL_LABEL = i18n.translate('xpack.agenticInvestigations.hypotheses.detailLabel', {
-  defaultMessage: 'Details',
+const BLIND_SPOT_LABEL = i18n.translate('xpack.agenticInvestigations.hypotheses.blindSpot', {
+  defaultMessage: 'The blind spot',
 });
 const EFFECT_LABEL = i18n.translate('xpack.agenticInvestigations.hypotheses.effectLabel', {
   defaultMessage: 'How it affects confidence',
@@ -207,7 +207,9 @@ const HOW_TO_CLOSE_LABEL = i18n.translate('xpack.agenticInvestigations.hypothese
 });
 
 /** A blind spot as parts; one saved as a bare string has only its text. */
-const toUnknownParts = (unknown: HypothesisUnknown) =>
+const toUnknownParts = (
+  unknown: HypothesisUnknown
+): Exclude<HypothesisUnknown, string> =>
   typeof unknown === 'string' ? { text: unknown } : unknown;
 
 /** A whole row that opens a detail flyout, so the scan list stays short. */
@@ -281,14 +283,54 @@ const CheckRow = ({ check, onOpen }: { check: HypothesisCheck; onOpen: () => voi
 
 const FlyoutSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <>
-    <SectionLabel>{label}</SectionLabel>
+    <EuiTitle size="xs">
+      <h3>{label}</h3>
+    </EuiTitle>
     <EuiSpacer size="xs" />
     {children}
     <EuiSpacer size="l" />
   </>
 );
 
-type OpenDetail = { kind: 'check'; index: number } | { kind: 'unknown'; index: number };
+/**
+ * What to know about one blind spot: what it is, how it limits confidence, where to look and how
+ * to close the gap. In the blind spot's own flyout, and inline where an action closes it.
+ */
+export const BlindSpotDetail = ({ unknown }: { unknown: HypothesisUnknown }) => {
+  const parts = toUnknownParts(unknown);
+  return (
+    <div data-test-subj="investigationBlindSpotDetail">
+      <FlyoutSection label={BLIND_SPOT_LABEL}>
+        <EuiText size="s">
+          <EventMarkdown text={parts.explanation ?? parts.text} />
+        </EuiText>
+      </FlyoutSection>
+      {parts.effect && (
+        <FlyoutSection label={EFFECT_LABEL}>
+          <EuiText size="s">
+            <EventMarkdown text={parts.effect} />
+          </EuiText>
+        </FlyoutSection>
+      )}
+      {parts.where_to_look && (
+        <FlyoutSection label={WHERE_TO_LOOK_LABEL}>
+          <EuiText size="s">
+            <EventMarkdown text={parts.where_to_look} />
+          </EuiText>
+        </FlyoutSection>
+      )}
+      {parts.how_to_close && (
+        <FlyoutSection label={HOW_TO_CLOSE_LABEL}>
+          <EuiText size="s">
+            <EventMarkdown text={parts.how_to_close} />
+          </EuiText>
+        </FlyoutSection>
+      )}
+    </div>
+  );
+};
+
+export type OpenDetail = { kind: 'check'; index: number } | { kind: 'unknown'; index: number };
 
 /**
  * The detail of one check or blind spot, in a child flyout over the hypothesis panel: a check
@@ -297,7 +339,7 @@ type OpenDetail = { kind: 'check'; index: number } | { kind: 'unknown'; index: n
  */
 const EVENT_LINK = /\]\(event:([^)\s]*)\)/;
 
-const HypothesisDetailFlyout = ({
+export const HypothesisDetailFlyout = ({
   open,
   checks,
   unknowns,
@@ -321,7 +363,7 @@ const HypothesisDetailFlyout = ({
   const parts = unknown !== undefined ? toUnknownParts(unknown) : undefined;
   // The event a check's own text links, else the one its hypothesis's reason links.
   const eventId = check
-    ? [check.found, check.detail, check.expected, reason]
+    ? [check.found, check.expected, reason]
         .map((text) => (text ? EVENT_LINK.exec(text.replace(/\\n/g, '\n'))?.[1] : undefined))
         .find(Boolean)
     : undefined;
@@ -382,40 +424,9 @@ const HypothesisDetailFlyout = ({
                   <EventChartAndSource event={linkedEvent} allEvents={allEvents} />
                 </FlyoutSection>
               )}
-              {check.detail?.trim() && (
-                <FlyoutSection label={DETAIL_LABEL}>
-                  <EuiText size="s">
-                    <EventMarkdown text={check.detail} />
-                  </EuiText>
-                </FlyoutSection>
-              )}
             </>
           )}
-          {parts && (
-            <>
-              {parts.effect && (
-                <FlyoutSection label={EFFECT_LABEL}>
-                  <EuiText size="s">
-                    <EventMarkdown text={parts.effect} />
-                  </EuiText>
-                </FlyoutSection>
-              )}
-              {parts.where_to_look && (
-                <FlyoutSection label={WHERE_TO_LOOK_LABEL}>
-                  <EuiText size="s">
-                    <EventMarkdown text={parts.where_to_look} />
-                  </EuiText>
-                </FlyoutSection>
-              )}
-              {parts.how_to_close && (
-                <FlyoutSection label={HOW_TO_CLOSE_LABEL}>
-                  <EuiText size="s">
-                    <EventMarkdown text={parts.how_to_close} />
-                  </EuiText>
-                </FlyoutSection>
-              )}
-            </>
-          )}
+          {unknown !== undefined && <BlindSpotDetail unknown={unknown} />}
         </EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>

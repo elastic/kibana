@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseProposalComment } from '@kbn/agentic-investigations-plugin/common';
 import {
   MAX_HYPOTHESES,
   MAX_IMPACT_TOOL_ENTITIES,
@@ -214,8 +215,30 @@ describe('proposals', () => {
     expect(parse(many)).toHaveLength(3);
     const [long] = parse([{ title: 'x'.repeat(400), comment: 'y'.repeat(9_000) }]) ?? [];
     expect(long.title).toHaveLength(256);
-    expect(long.comment).toHaveLength(8_192);
+    expect(long.comment).toHaveLength(4_000);
     expect(parse([{ title: ' trimmed ', comment: 'c' }])?.[0].title).toBe('trimmed');
+  });
+
+  it('keeps the what as the comment and the events, hypotheses and blind spot behind it, capped', () => {
+    const [proposal] =
+      parse([
+        {
+          title: 't',
+          comment: 'Lower the batch size.',
+          how: 'On the collector:\n\n```\nset batch=8MB\n```',
+          why: 'Batches pass the **16 MB** limit, so this lowers them.',
+          event_ids: Array.from({ length: 12 }, (_, i) => `failure:kafka:${i}`),
+          hypotheses: ['Oversized records rejected by Kafka'],
+          blind_spot: 'Why the batch grew',
+        },
+      ]) ?? [];
+    const { what, why } = parseProposalComment(proposal.comment);
+    expect(what).toBe('Lower the batch size.');
+    expect(why?.explanation).toBe('Batches pass the **16 MB** limit, so this lowers them.');
+    expect(why?.how).toBe('On the collector:\n\n```\nset batch=8MB\n```');
+    expect(why?.event_ids).toHaveLength(8);
+    expect(why?.hypotheses).toEqual(['Oversized records rejected by Kafka']);
+    expect(why?.blind_spot).toBe('Why the batch grew');
   });
 
   it('keeps an impact and a confidence the store knows, and leaves out one it does not', () => {
@@ -636,7 +659,6 @@ describe('limitFindings hypothesis card fields', () => {
             expected: `e${i}`,
             found: `f${i}`,
             outcome: 'supported',
-            detail: 'ids and windows',
           })),
           unknowns: [
             { text: 'a', effect: 'e', where_to_look: 'w', how_to_close: 'h' },
@@ -651,7 +673,6 @@ describe('limitFindings hypothesis card fields', () => {
     if (!parsed.success) return;
     const [hypothesis] = limitFindings(parsed.data).hypotheses;
     expect(hypothesis.checks).toHaveLength(6);
-    expect(hypothesis.checks?.[0].detail).toBe('ids and windows');
     expect(hypothesis.unknowns).toEqual([
       { text: 'a', effect: 'e', where_to_look: 'w', how_to_close: 'h' },
       'bare',

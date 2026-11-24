@@ -18,6 +18,13 @@ import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { firstParagraph } from '../../utils/to_plain_summary';
 
+/**
+ * A summary longer than this is folded to its first paragraph until the reader asks for the rest.
+ * The recorder writes a sentence and at most three bullets, well under it, and that is shown in
+ * full: there is nothing to fold away.
+ */
+export const SUMMARY_CONDENSE_LENGTH = 600;
+
 export interface WhatsHappenedBlockProps {
   summary?: string;
   attachments: VersionedAttachment[] | undefined;
@@ -43,7 +50,10 @@ export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
       () => (trimmedSummary ? firstParagraph(trimmedSummary) : undefined),
       [trimmedSummary]
     );
-    const isCondensed = leadParagraph !== undefined && leadParagraph !== trimmedSummary;
+    const isCondensed =
+      leadParagraph !== undefined &&
+      leadParagraph !== trimmedSummary &&
+      (trimmedSummary?.length ?? 0) > SUMMARY_CONDENSE_LENGTH;
     const displayedSummary = isCondensed && !expanded ? leadParagraph : summary;
 
     if (!summary && !hasAttachments) {

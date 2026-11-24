@@ -43,6 +43,12 @@ export interface ApprovalModalProps {
   basePath?: IBasePath;
   /** See `ApprovalContentProps.secondaryActions`. */
   secondaryActions?: ApprovalAction[];
+  /** See `ApprovalContentProps.commentTitle`. */
+  commentTitle?: string;
+  /** How wide the modal may be, in pixels. Defaults to 640. */
+  width?: number;
+  /** See `ApprovalContentProps.commentFooter`. */
+  commentFooter?: React.ReactNode;
   'data-test-subj'?: string;
 }
 
@@ -73,6 +79,9 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     isReopening,
     basePath,
     secondaryActions,
+    commentTitle,
+    commentFooter,
+    width = 640,
     'data-test-subj': dataTestSubj,
   }) => {
     const titleId = useGeneratedHtmlId({ prefix: 'ApprovalModal' });
@@ -81,7 +90,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
       <EuiModal
         aria-labelledby={titleId}
         onClose={onClose}
-        css={css({ maxWidth: 640, width: '100%' })}
+        css={css({ maxWidth: width, width: '100%' })}
         data-test-subj={dataTestSubj}
       >
         <ApprovalContent
@@ -98,6 +107,8 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           isReopening={isReopening}
           basePath={basePath}
           secondaryActions={secondaryActions}
+          commentTitle={commentTitle}
+          commentFooter={commentFooter}
         />
       </EuiModal>
     );

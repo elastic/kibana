@@ -27,6 +27,9 @@ export const hypothesisCheckOutcomeSchema = z.enum(HYPOTHESIS_CHECK_OUTCOMES);
 export type HypothesisCheckOutcome = z.infer<typeof hypothesisCheckOutcomeSchema>;
 
 const MAX_HYPOTHESIS_LINE_LENGTH = 400;
+/** The longest explanation or effect of a blind spot, and the longest list of places or steps. */
+export const MAX_HYPOTHESIS_UNKNOWN_EXPLANATION_LENGTH = 700;
+export const MAX_HYPOTHESIS_UNKNOWN_STEPS_LENGTH = 1200;
 
 /**
  * A blind spot: what could not be seen. A bare string is one saved before the parts below
@@ -35,14 +38,16 @@ const MAX_HYPOTHESIS_LINE_LENGTH = 400;
 export const hypothesisUnknownSchema = z.union([
   z.string().min(1).max(MAX_HYPOTHESIS_LINE_LENGTH),
   z.object({
-    /** What is unknown, in one line. */
+    /** What is unknown, in one line: the title of the row and of its flyout. */
     text: z.string().min(1).max(MAX_HYPOTHESIS_LINE_LENGTH),
-    /** How it limits the confidence in this hypothesis. */
-    effect: z.string().max(MAX_HYPOTHESIS_LINE_LENGTH).optional(),
-    /** Where to look for the answer. */
-    where_to_look: z.string().max(MAX_HYPOTHESIS_LINE_LENGTH).optional(),
-    /** How to close the gap. */
-    how_to_close: z.string().max(MAX_HYPOTHESIS_LINE_LENGTH).optional(),
+    /** What we can see and what we cannot, in a few sentences of Markdown. */
+    explanation: z.string().max(MAX_HYPOTHESIS_UNKNOWN_EXPLANATION_LENGTH).optional(),
+    /** How it limits the confidence in this hypothesis. Markdown. */
+    effect: z.string().max(MAX_HYPOTHESIS_UNKNOWN_EXPLANATION_LENGTH).optional(),
+    /** Where to look for the answer: the cluster, namespace or resources. Markdown. */
+    where_to_look: z.string().max(MAX_HYPOTHESIS_UNKNOWN_STEPS_LENGTH).optional(),
+    /** How to close the gap, as steps with any commands in code blocks. Markdown. */
+    how_to_close: z.string().max(MAX_HYPOTHESIS_UNKNOWN_STEPS_LENGTH).optional(),
   }),
 ]);
 export type HypothesisUnknown = z.infer<typeof hypothesisUnknownSchema>;
@@ -55,11 +60,6 @@ export const hypothesisCheckSchema = z.object({
   found: z.string().min(1).max(MAX_HYPOTHESIS_LINE_LENGTH),
   /** Whether the result supports the hypothesis, contradicts it, or the check was not run. */
   outcome: hypothesisCheckOutcomeSchema,
-  /**
-   * The ids, thresholds, counts and windows behind the row, in Markdown, shown when it opens. The
-   * chart and the query come from the event the row's `found` text links to.
-   */
-  detail: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
 });
 export type HypothesisCheck = z.infer<typeof hypothesisCheckSchema>;
 

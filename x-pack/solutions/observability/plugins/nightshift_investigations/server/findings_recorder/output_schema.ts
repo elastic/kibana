@@ -46,6 +46,7 @@ import {
   type ImpactMapRelationshipType,
   sanitizeDataSource,
   clockTimeToIso,
+  buildProposalComment,
   type InvestigationEvidence,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
@@ -109,7 +110,6 @@ export const findingsOutputSchema = lazySchema(() => {
           expected: z.string().min(1),
           found: z.string().min(1),
           outcome: z.enum(['supported', 'contradicted', 'not_tested']),
-          detail: z.string().optional(),
         })
       )
       .optional(),
@@ -119,6 +119,7 @@ export const findingsOutputSchema = lazySchema(() => {
           z.string().min(1),
           z.object({
             text: z.string().min(1),
+            explanation: z.string().optional(),
             effect: z.string().optional(),
             where_to_look: z.string().optional(),
             how_to_close: z.string().optional(),
@@ -153,6 +154,11 @@ export const findingsOutputSchema = lazySchema(() => {
         z.object({
           title: z.string().min(1),
           comment: z.string().min(1),
+          how: z.string().optional(),
+          why: z.string().optional(),
+          event_ids: z.array(z.string()).optional(),
+          hypotheses: z.array(z.string()).optional(),
+          blind_spot: z.string().optional(),
           impact: z.string().optional(),
           confidence: z.string().optional(),
         })
@@ -637,8 +643,16 @@ const MAX_EVENT_DESCRIPTION_BULLETS = 4;
 const MAX_SUMMARY_BULLETS = 3;
 /** The longest one line of a hypothesis card (why, a check, a blind spot, the chart note). */
 const MAX_HYPOTHESIS_LINE = 240;
-/** The longest detail text behind one check. */
-const MAX_CHECK_DETAIL = 1200;
+/** What a proposal's comment may hold: the "what", the "why", and the events and names behind it. */
+const MAX_PROPOSAL_WHAT = 4000;
+const MAX_PROPOSAL_WHY = 300;
+const MAX_PROPOSAL_HOW = 1800;
+const MAX_PROPOSAL_EVENTS = 8;
+const MAX_PROPOSAL_HYPOTHESES = 4;
+const MAX_PROPOSAL_NAME = 160;
+/** The longest explanation or effect of a blind spot, and the longest list of places or steps. */
+const MAX_UNKNOWN_EXPLANATION = 700;
+const MAX_UNKNOWN_STEPS = 1200;
 
 const MAX_EVENT_BULLET_LENGTH = 200;
 
@@ -836,9 +850,25 @@ export const limitFindings = (
       ? {
           proposals: rawProposals
             .slice(0, MAX_PROPOSALS)
-            .map(({ title, comment, impact, confidence }) => ({
+            .map(({ title, comment, how, why, event_ids: eventIds, hypotheses, blind_spot, impact, confidence }) => ({
               title: truncate(title.trim(), MAX_TITLE_LENGTH),
-              comment: truncate(comment, MAX_COMMENT_LENGTH),
+              // The "what", then the "why" behind it as a hidden reference, within the comment limit.
+              comment: truncate(
+                buildProposalComment(truncate(comment, MAX_PROPOSAL_WHAT), {
+                  how: how ? truncate(how.trim(), MAX_PROPOSAL_HOW) : undefined,
+                  explanation: why ? clipAtWord(normalizeEventLinks(why.trim()), MAX_PROPOSAL_WHY) : undefined,
+                  event_ids: eventIds
+                    ?.map((id) => id.trim())
+                    .filter(Boolean)
+                    .slice(0, MAX_PROPOSAL_EVENTS),
+                  hypotheses: hypotheses
+                    ?.map((name) => truncate(name.trim(), MAX_PROPOSAL_NAME))
+                    .filter(Boolean)
+                    .slice(0, MAX_PROPOSAL_HYPOTHESES),
+                  blind_spot: blind_spot ? truncate(blind_spot.trim(), MAX_PROPOSAL_NAME) : undefined,
+                }),
+                MAX_COMMENT_LENGTH
+              ),
               // A value the proposal store does not know is left out, not sent to fail the write.
               ...(impact && proposalImpactSchema.safeParse(impact).success ? { impact } : {}),
               ...(confidence && proposalConfidenceSchema.safeParse(confidence).success
@@ -869,9 +899,6 @@ export const limitFindings = (
                   expected: clipAtWord(normalizeEventLinks(check.expected), MAX_HYPOTHESIS_LINE),
                   found: clipAtWord(normalizeEventLinks(check.found), MAX_HYPOTHESIS_LINE),
                   outcome: check.outcome,
-                  ...(check.detail !== undefined
-                    ? { detail: truncate(normalizeEventLinks(check.detail), MAX_CHECK_DETAIL) }
-                    : {}),
                 };
               }),
             }
@@ -879,17 +906,23 @@ export const limitFindings = (
         ...(hypothesis.unknowns !== undefined
           ? {
               unknowns: hypothesis.unknowns.slice(0, MAX_HYPOTHESIS_UNKNOWNS).map((unknown) => {
-                const part = (text?: string) =>
-                  text !== undefined
-                    ? clipAtWord(normalizeEventLinks(text), MAX_HYPOTHESIS_LINE)
+                const part = (text: string | undefined, max: number) =>
+                  text !== undefined && text.trim()
+                    ? clipAtWord(normalizeEventLinks(text.trim()), max)
                     : undefined;
-                if (typeof unknown === 'string') return part(unknown) as string;
-                const { effect, where_to_look: where, how_to_close: how } = unknown;
+                if (typeof unknown === 'string') {
+                  return part(unknown, MAX_HYPOTHESIS_LINE) as string;
+                }
+                const explanation = part(unknown.explanation, MAX_UNKNOWN_EXPLANATION);
+                const effect = part(unknown.effect, MAX_UNKNOWN_EXPLANATION);
+                const where = part(unknown.where_to_look, MAX_UNKNOWN_STEPS);
+                const how = part(unknown.how_to_close, MAX_UNKNOWN_STEPS);
                 return {
-                  text: part(unknown.text) as string,
-                  ...(effect ? { effect: part(effect) } : {}),
-                  ...(where ? { where_to_look: part(where) } : {}),
-                  ...(how ? { how_to_close: part(how) } : {}),
+                  text: part(unknown.text, MAX_HYPOTHESIS_LINE) as string,
+                  ...(explanation ? { explanation } : {}),
+                  ...(effect ? { effect } : {}),
+                  ...(where ? { where_to_look: where } : {}),
+                  ...(how ? { how_to_close: how } : {}),
                 };
               }),
             }
@@ -1048,7 +1081,34 @@ export const FINDINGS_JSON_SCHEMA = {
           comment: {
             type: 'string',
             description:
-              'What to do and why, in Markdown: the concrete steps and the findings that support them.',
+              'What to do, in Markdown: start with the action as an instruction that begins with a verb, then the steps as a short list. No code, no findings or reasoning: how to do it goes in how, and the reasons in why, event_ids and hypotheses.',
+          },
+          how: {
+            type: 'string',
+            description:
+              'How to do it, in Markdown, under 1200 characters: where it applies (the system, cluster, service, index or environment), who should do it when the findings say, and any code, query or command in a fenced code block. Only what the tool results support: never invent a command, a name or an owner.',
+          },
+          why: {
+            type: 'string',
+            description:
+              'Why to do this, in one plain sentence of at most 30 words: what the findings show and what the action settles. No list, no heading. The details sit below it for the reader to open.',
+          },
+          event_ids: {
+            type: 'array',
+            description:
+              'The ids of the events you recorded that support the action, at most 8, in the form kind:entity:time. The reader opens them under Why.',
+            items: { type: 'string' },
+          },
+          hypotheses: {
+            type: 'array',
+            description:
+              'The names of the confirmed hypotheses that led to the action, exactly as in the hypotheses list, at most 4. Leave out one still being tested or dismissed.',
+            items: { type: 'string' },
+          },
+          blind_spot: {
+            type: 'string',
+            description:
+              'Only when the action is meant to close a blind spot: the title of that blind spot, exactly as in its hypothesis unknowns.',
           },
           impact: {
             type: 'string',
@@ -1101,11 +1161,6 @@ export const FINDINGS_JSON_SCHEMA = {
                     'One line, at most 25 words. Link the words that make the claim to the event that backs it, as [words](event:id); its chart and the query behind it open with the row.',
                 },
                 outcome: { type: 'string', enum: ['supported', 'contradicted', 'not_tested'] },
-                detail: {
-                  type: 'string',
-                  description:
-                    'Shown when the row opens: the ids, thresholds, counts, time window and signal behind the check, in at most 80 words of Markdown.',
-                },
               },
               required: ['expected', 'found', 'outcome'],
             },
@@ -1116,13 +1171,31 @@ export const FINDINGS_JSON_SCHEMA = {
             items: {
               type: 'object',
               properties: {
-                text: { type: 'string', description: 'What is unknown, one line.' },
+                text: {
+                  type: 'string',
+                  description:
+                    'The title: what is unknown, as one line of at most 15 words, a plain question or statement.',
+                },
+                explanation: {
+                  type: 'string',
+                  description:
+                    'What we can see and what we cannot, in two or three sentences of Markdown. Use inline code for names and ids.',
+                },
                 effect: {
                   type: 'string',
-                  description: 'How it limits the confidence in this hypothesis, one line.',
+                  description:
+                    'How it limits the confidence in this hypothesis: whether it changes how likely this is the cause and what it does affect. One or two sentences.',
                 },
-                where_to_look: { type: 'string', description: 'Where to look for the answer.' },
-                how_to_close: { type: 'string', description: 'How to close the gap.' },
+                where_to_look: {
+                  type: 'string',
+                  description:
+                    'Where the answer lives, as Markdown lines of Label: value, for whatever kind of thing it is: a system or data source, an index, stream or service, a dashboard, a log, a repository, a team or a person. Only what the tool results name. When it lives in a system the agent could not reach, name that system and say it was not available.',
+                },
+                how_to_close: {
+                  type: 'string',
+                  description:
+                    'How to close the gap, as a short numbered Markdown list. Put a command in a fenced code block under its step. Only steps that follow from the findings.',
+                },
               },
               required: ['text'],
             },

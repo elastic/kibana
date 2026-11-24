@@ -8,9 +8,12 @@
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiAccordion,
   EuiCallOut,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
+  EuiTitle,
+  useGeneratedHtmlId,
   getDefaultEuiMarkdownProcessingPlugins,
   useEuiTheme,
 } from '@elastic/eui';
@@ -24,6 +27,13 @@ interface ApprovalContentBodyProps {
   mode: 'view' | 'declining';
   /** The proposal's own markdown. Omitted entirely renders no comment block at all. */
   comment?: string;
+  /**
+   * A title that makes the comment a collapsible section, open to begin with, and lays the comment
+   * out as a short instruction and a list. Only while viewing.
+   */
+  commentTitle?: string;
+  /** Shown under the comment, such as why it is proposed. Only while viewing. */
+  commentFooter?: React.ReactNode;
   /** `undefined` for a still-pending decision, which has no outcome to report yet. */
   banner?: ApprovalOutcomeBanner;
   /** Appended to the banner title after a ` • `: who decided and when, then any reason. */
@@ -58,6 +68,8 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
   ({
     mode,
     comment,
+    commentTitle,
+    commentFooter,
     banner,
     bannerSuffix,
     actionError,
@@ -66,6 +78,17 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
   }) => {
     const { euiTheme } = useEuiTheme();
     const processingPluginList = useMemo(() => buildProcessingPluginList(basePath), [basePath]);
+    const commentAccordionId = useGeneratedHtmlId({ prefix: 'approvalComment' });
+    const markdown =
+      comment !== undefined ? (
+        <EuiMarkdownFormat
+          textSize="s"
+          processingPluginList={processingPluginList}
+          data-test-subj={dataTestSubj ? `${dataTestSubj}-comment` : undefined}
+        >
+          {comment}
+        </EuiMarkdownFormat>
+      ) : null;
 
     // Declining with no banner or error leaves nothing to show, so no empty padded box sits
     // between the header and the reason form.
@@ -78,7 +101,7 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
       <div
         css={css({
           padding: `0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}`,
-          maxBlockSize: '50vh',
+          maxBlockSize: commentTitle ? '75vh' : '50vh',
           overflowY: 'auto',
         })}
       >
@@ -87,13 +110,33 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
             reason form below takes its place rather than sitting alongside it. */}
         {mode === 'view' && comment !== undefined && (
           <div css={css({ marginBottom: euiTheme.size.m })}>
-            <EuiMarkdownFormat
-              textSize="s"
-              processingPluginList={processingPluginList}
-              data-test-subj={dataTestSubj ? `${dataTestSubj}-comment` : undefined}
-            >
-              {comment}
-            </EuiMarkdownFormat>
+            {commentTitle ? (
+              <EuiAccordion
+                id={commentAccordionId}
+                initialIsOpen
+                paddingSize="s"
+                buttonContent={
+                  <EuiTitle size="xs">
+                    <h3>{commentTitle}</h3>
+                  </EuiTitle>
+                }
+                data-test-subj={dataTestSubj ? `${dataTestSubj}-comment-section` : undefined}
+              >
+                <div
+                  css={css({
+                    // A short instruction and a list: closer than the default, which suits prose.
+                    '& p': { marginBlockEnd: euiTheme.size.s },
+                    '& ul, & ol': { marginBlockEnd: 0 },
+                    '& li + li': { marginBlockStart: euiTheme.size.xs },
+                  })}
+                >
+                  {markdown}
+                </div>
+              </EuiAccordion>
+            ) : (
+              markdown
+            )}
+            {commentFooter}
           </div>
         )}
 

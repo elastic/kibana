@@ -20,6 +20,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton, ProposedActionsList } from '@kbn/agentic-investigations-common';
 import { createCopyInstructionsAction } from './copy_instructions_action';
+import { getProposalWhyParts } from '../../../proposals/proposal_why';
 import { decisionErrorMessage } from './decision_errors';
 import { useProposalDecision } from './use_proposal_decision';
 import {
@@ -56,9 +57,13 @@ const ProposedActionRow = ({
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
     useProposalDecision(proposal.id, proposal);
 
+  const whyParts = getProposalWhyParts(conversationId, proposal.comment);
   return (
     <ProposedActionButton
       proposal={proposal}
+      commentTitle={whyParts?.title}
+      commentFooter={whyParts?.footer}
+      modalWidth={whyParts?.modalWidth}
       readOnly={readOnly}
       isSubmitting={isSubmitting}
       onConfirm={async () => {

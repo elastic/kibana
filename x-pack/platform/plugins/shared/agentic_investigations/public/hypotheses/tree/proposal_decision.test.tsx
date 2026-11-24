@@ -104,11 +104,11 @@ describe('ProposalDecision', () => {
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')).toBeEnabled();
   });
 
-  it('offers Mark as applied and Decline for a to-do proposal', () => {
+  it('offers Mark as done and Decline for a to-do proposal', () => {
     setup({ data: { ...proposal, category: 'todo' } });
 
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toHaveTextContent(
-      'Mark as applied'
+      'Mark as done'
     );
     expect(
       screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')

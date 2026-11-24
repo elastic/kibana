@@ -755,9 +755,11 @@ const EVIDENCE_NONE = i18n.translate('xpack.agenticInvestigations.impactMap.even
 });
 
 /** Where an event's data came from and how it was asked for; closed until a reader wants it. */
-export const EventDataSource: React.FC<{ dataSource?: ImpactMapEvent['data_source'] }> = ({
-  dataSource,
-}) => {
+export const EventDataSource: React.FC<{
+  dataSource?: ImpactMapEvent['data_source'];
+  /** Label above value, for a narrow space such as a small flyout; the default is two columns. */
+  stacked?: boolean;
+}> = ({ dataSource, stacked = false }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'impactMapEventEvidence' });
   const call = dataSource?.api_call;
   const callLine = [call?.method, call?.endpoint].filter(Boolean).join(' ');
@@ -771,8 +773,16 @@ export const EventDataSource: React.FC<{ dataSource?: ImpactMapEvent['data_sourc
       {dataSource ? (
         <EuiDescriptionList
           compressed
-          type="column"
-          columnWidths={[1, 4]}
+          type={stacked ? 'row' : 'column'}
+          {...(stacked ? {} : { columnWidths: [1, 4] as [number, number] })}
+          css={css`
+            /* A long metric or field name has no space to wrap at, so it breaks anywhere. */
+            pre,
+            code {
+              overflow-wrap: anywhere;
+              word-break: break-word;
+            }
+          `}
           listItems={[
             {
               title: EVIDENCE_SOURCE,
@@ -902,7 +912,7 @@ export const EventChartAndSource: React.FC<{
     {event.data_source && (
       <>
         <EuiSpacer size="m" />
-        <EventDataSource dataSource={event.data_source} />
+        <EventDataSource dataSource={event.data_source} stacked />
       </>
     )}
   </div>

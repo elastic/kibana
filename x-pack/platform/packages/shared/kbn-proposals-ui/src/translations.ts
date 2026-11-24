@@ -13,11 +13,11 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   /** To-do primary: analyst confirms they carried it out. */
   markApplied: i18n.translate('xpack.proposals.approvalModal.markApplied', {
-    defaultMessage: 'Mark as applied',
+    defaultMessage: 'Mark as done',
   }),
   /** Re-offers a marked-applied to-do. */
   markNotApplied: i18n.translate('xpack.proposals.approvalModal.markNotApplied', {
-    defaultMessage: 'Mark as not applied',
+    defaultMessage: 'Mark as not done',
   }),
   dismiss: i18n.translate('xpack.proposals.approvalModal.dismiss', {
     defaultMessage: 'Decline',
@@ -98,7 +98,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   markedAppliedBannerTitle: i18n.translate(
     'xpack.proposals.approvalModal.outcome.markedAppliedTitle',
-    { defaultMessage: 'Marked as applied' }
+    { defaultMessage: 'Marked as done' }
   ),
   /** Caption label for `todo` (avoids sentence-cased "Todo"). */
   todoCategory: i18n.translate('xpack.proposals.approvalModal.caption.todoCategory', {

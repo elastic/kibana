@@ -166,12 +166,12 @@ describe('HypothesesView', () => {
               expected: 'Failures begin with the rollout',
               found: 'Began 10s after',
               outcome: 'supported',
-              detail: 'ReplicaSet shipping-789 appeared 18:08:29Z.',
             },
           ],
           unknowns: [
             {
               text: 'What set the hostname is unknown',
+              explanation: 'Nothing we collect records what set the address.',
               effect: 'Caps confidence at moderate.',
               where_to_look: 'The deployment manifest.',
               how_to_close: 'Read the env vars.',
@@ -186,10 +186,11 @@ describe('HypothesesView', () => {
     fireEvent.click(screen.getByTestId('investigationHypothesisCheck-supported'));
     const checkFlyout = screen.getByTestId('investigationHypothesisDetailFlyout');
     expect(checkFlyout).toHaveTextContent('Began 10s after');
-    expect(checkFlyout).toHaveTextContent('ReplicaSet shipping-789 appeared 18:08:29Z.');
 
     fireEvent.click(screen.getByTestId('investigationHypothesisBlindSpot'));
     const spotFlyout = screen.getByTestId('investigationHypothesisDetailFlyout');
+    expect(spotFlyout).toHaveTextContent('The blind spot');
+    expect(spotFlyout).toHaveTextContent('Nothing we collect records what set the address.');
     expect(spotFlyout).toHaveTextContent('Caps confidence at moderate.');
     expect(spotFlyout).toHaveTextContent('The deployment manifest.');
     expect(spotFlyout).toHaveTextContent('Read the env vars.');

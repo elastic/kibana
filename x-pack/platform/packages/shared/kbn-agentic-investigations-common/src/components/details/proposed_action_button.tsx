@@ -61,6 +61,11 @@ export interface ProposedActionButtonProps {
   basePath?: IBasePath;
   /** Extra buttons in the modal's footer, beside Decline. */
   secondaryActions?: ApprovalAction[];
+  /** Makes the comment a collapsible section, and what is shown under it, in the modal. */
+  commentTitle?: string;
+  commentFooter?: React.ReactNode;
+  /** How wide the modal may be, in pixels. */
+  modalWidth?: number;
   'data-test-subj'?: string;
 }
 
@@ -160,6 +165,9 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     isReopening,
     basePath,
     secondaryActions,
+    commentTitle,
+    commentFooter,
+    modalWidth,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -283,6 +291,9 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             isReopening={isReopening}
             basePath={basePath}
             secondaryActions={secondaryActions}
+            commentTitle={commentTitle}
+            commentFooter={commentFooter}
+            width={modalWidth}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}

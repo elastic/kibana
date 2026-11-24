@@ -417,14 +417,23 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
               data-test-subj="investigationHypothesisTreeDetail"
               css={css`
                 width: ${DETAIL_PANEL_WIDTH}px;
-                /* The canvas clips what it holds, so the panel is held to the canvas's own height
-                   (not the window's) and scrolls inside its card when its content is longer. */
+                display: flex;
+                flex-direction: column;
+                /* The canvas clips what it holds, so the card is held to the canvas's own height
+                   (not the window's). The card's own border and shadow stay put; only the body
+                   below the title scrolls. */
                 max-height: ${Math.max(canvasHeight - DETAIL_PANEL_MARGIN * 2, 200)}px;
-                overflow-x: hidden;
-                overflow-y: auto;
+                overflow: hidden;
               `}
             >
-              <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
+              <EuiFlexGroup
+                alignItems="flexStart"
+                gutterSize="s"
+                responsive={false}
+                css={css`
+                  flex: 0 0 auto;
+                `}
+              >
                 <EuiFlexItem>
                   <EuiTitle size="xs">
                     <h3>{getDetailTitle(selectedNode.data)}</h3>
@@ -443,12 +452,22 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
-              <NodeDetail
-                investigationId={input.id}
-                data={selectedNode.data}
-                selectedActionIndex={selectedActionIndex}
-                isRunning={isRunning}
-              />
+              <div
+                data-test-subj="investigationHypothesisTreeDetailBody"
+                css={css`
+                  flex: 1 1 auto;
+                  min-block-size: 0;
+                  overflow-x: hidden;
+                  overflow-y: auto;
+                `}
+              >
+                <NodeDetail
+                  investigationId={input.id}
+                  data={selectedNode.data}
+                  selectedActionIndex={selectedActionIndex}
+                  isRunning={isRunning}
+                />
+              </div>
             </EuiPanel>
           </Panel>
         )}

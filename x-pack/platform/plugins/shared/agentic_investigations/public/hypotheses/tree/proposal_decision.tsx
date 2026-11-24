@@ -13,6 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApprovalContent, type DeclineParams } from '@kbn/proposals-ui';
 import { useProposal } from '@kbn/proposals-plugin/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { getProposalWhyParts } from '../../proposals/proposal_why';
 import { createCopyInstructionsAction } from '../../conversation_templates/shared/proposed_actions/copy_instructions_action';
 import { decisionErrorMessage } from '../../conversation_templates/shared/proposed_actions/decision_errors';
 import { PROPOSED_ACTIONS_LOAD_ERROR_LABEL } from '../../conversation_templates/shared/proposed_actions/translations';
@@ -86,9 +87,12 @@ export const ProposalDecision = ({
     return <KbnDangerCallout size="s" title={PROPOSED_ACTIONS_LOAD_ERROR_LABEL} />;
   }
 
+  const whyParts = getProposalWhyParts(investigationId, proposal.comment);
   return (
     <ApprovalContent
       proposal={proposal}
+      commentTitle={whyParts?.title}
+      commentFooter={whyParts?.footer}
       readOnly={readOnly}
       isSubmitting={isSubmitting}
       currentActorName={currentActorName}

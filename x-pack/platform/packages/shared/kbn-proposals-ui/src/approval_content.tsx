@@ -64,19 +64,23 @@ export interface ApprovalContentProps {
    */
   readOnly?: boolean;
   /**
-   * Approves the proposal. Label is "Approve", or "Mark as applied" for a to-do
+   * Approves the proposal. Label is "Approve", or "Mark as done" for a to-do
    * (`isTodoProposal`). Disabled when expired. Omit to hide the button.
    */
   onApprove?: () => void | Promise<void>;
   /** Extra empty buttons beside Approve/Decline. */
   secondaryActions?: ApprovalAction[];
+  /** Makes the proposal's comment a collapsible section. See `ApprovalContentBodyProps.commentTitle`. */
+  commentTitle?: string;
+  /** Shown under the proposal's comment. See `ApprovalContentBodyProps.commentFooter`. */
+  commentFooter?: React.ReactNode;
   /**
    * Built-in Decline flow: shows Decline next to the primary, then swaps in
    * `DeclineReasonForm` with Cancel/Decline. Disabled with the primary.
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
   /**
-   * Re-offers a marked-applied to-do ("Mark as not applied").
+   * Re-offers a marked-applied to-do ("Mark as not done").
    * Disabled when `readOnly`.
    */
   onReopen?: () => Promise<void>;
@@ -123,6 +127,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     readOnly,
     onApprove,
     secondaryActions,
+    commentTitle,
+    commentFooter,
     onDismiss,
     onReopen,
     isReopening = false,
@@ -330,6 +336,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         <ApprovalContentBody
           mode={contentMode}
           comment={proposal.comment}
+          commentTitle={commentTitle}
+          commentFooter={commentFooter}
           banner={banner}
           bannerSuffix={bannerSuffix}
           actionError={actionError}

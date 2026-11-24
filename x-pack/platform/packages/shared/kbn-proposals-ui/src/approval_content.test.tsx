@@ -344,10 +344,10 @@ describe('ApprovalContent', () => {
   });
 
   describe('to-do proposal', () => {
-    it('offers Mark as applied and Decline instead of Approve', () => {
+    it('offers Mark as done and Decline instead of Approve', () => {
       renderContent({ proposal: todoProposal, secondaryActions: undefined, onDismiss: jest.fn() });
 
-      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Mark as applied');
+      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Mark as done');
       expect(screen.queryByText('Approve')).not.toBeInTheDocument();
       expect(screen.getByTestId('approvalContent-dismiss')).toBeInTheDocument();
     });
@@ -360,13 +360,13 @@ describe('ApprovalContent', () => {
       status: 'no_action',
     };
 
-    it('offers Mark as not applied once marked as applied, and calls onReopen', async () => {
+    it('offers Mark as not done once marked as applied, and calls onReopen', async () => {
       const onReopen = jest.fn().mockResolvedValue(undefined);
       renderContent({ proposal: appliedTodo, onReopen });
 
       fireEvent.click(screen.getByTestId('approvalContent-reopen'));
 
-      expect(screen.getByTestId('approvalContent-reopen')).toHaveTextContent('Mark as not applied');
+      expect(screen.getByTestId('approvalContent-reopen')).toHaveTextContent('Mark as not done');
       await waitFor(() => expect(onReopen).toHaveBeenCalledTimes(1));
     });
 
@@ -386,19 +386,19 @@ describe('ApprovalContent', () => {
         { proposal: { ...baseProposal, decision: 'approved', status: 'succeeded' } },
       ],
       ['a replaced one', { proposal: { ...appliedTodo, supersededBy: 'successor' } }],
-    ])('does not offer Mark as not applied for %s', (_, props) => {
+    ])('does not offer Mark as not done for %s', (_, props) => {
       renderContent({ ...props, onReopen: jest.fn() });
 
       expect(screen.queryByTestId('approvalContent-reopen')).not.toBeInTheDocument();
     });
 
-    it('disables Mark as not applied when read-only', () => {
+    it('disables Mark as not done when read-only', () => {
       renderContent({ proposal: appliedTodo, onReopen: jest.fn(), readOnly: true });
 
       expect(screen.getByTestId('approvalContent-reopen')).toBeDisabled();
     });
 
-    it('records the application through onApprove when Mark as applied is clicked', async () => {
+    it('records the application through onApprove when Mark as done is clicked', async () => {
       const onApprove = jest.fn();
       renderContent({ proposal: todoProposal, onApprove });
 
@@ -433,7 +433,7 @@ describe('ApprovalContent', () => {
       });
 
       expect(screen.getByText('Applied')).toBeInTheDocument();
-      expect(screen.getByText('Marked as applied')).toBeInTheDocument();
+      expect(screen.getByText('Marked as done')).toBeInTheDocument();
       expect(screen.queryByText('Approved')).not.toBeInTheDocument();
     });
   });

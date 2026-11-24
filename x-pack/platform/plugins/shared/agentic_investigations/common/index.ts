@@ -317,3 +317,6 @@ export {
   appendWorkflowExecutionIdStepInputSchema,
   appendWorkflowExecutionIdStepOutputSchema,
 } from './workflow_execution/step_types';
+
+export { buildProposalComment, parseProposalComment } from './proposals/proposal_why';
+export type { ProposalWhy } from './proposals/proposal_why';

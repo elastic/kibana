@@ -85,34 +85,48 @@ describe('WhatsHappenedBlock', () => {
     expect(screen.getByText('second sign-in').tagName).toBe('STRONG');
   });
 
-  it('shows only the first paragraph of a multi-paragraph summary until expanded', () => {
+  it('shows a short summary in full: a sentence and three bullets', () => {
     render(
       <WhatsHappenedBlock
-        summary={'First paragraph.\n\nSecond paragraph.'}
+        summary={'It dropped points.\n\n- About 5.9 million were lost.\n- The alert fired at 17:05Z.\n- None after 19:00Z.'}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+      />
+    );
+
+    expect(screen.getByText('It dropped points.')).toBeInTheDocument();
+    expect(screen.getByText('None after 19:00Z.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Show more' })).not.toBeInTheDocument();
+  });
+
+  it('shows only the first paragraph of a long multi-paragraph summary until expanded', () => {
+    render(
+      <WhatsHappenedBlock
+        summary={`First paragraph.\n\nSecond paragraph. ${'More detail. '.repeat(60)}`}
         attachments={[]}
         groupedAttachments={groupedAttachments}
       />
     );
 
     expect(screen.getByText('First paragraph.')).toBeInTheDocument();
-    expect(screen.queryByText('Second paragraph.')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Second paragraph\./)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Show more' }));
-    expect(screen.getByText('Second paragraph.')).toBeInTheDocument();
+    expect(screen.getByText(/Second paragraph\./)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Show less' }));
-    expect(screen.queryByText('Second paragraph.')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Second paragraph\./)).not.toBeInTheDocument();
   });
 
   it('ignores leading blank lines when it picks the first paragraph', () => {
     render(
       <WhatsHappenedBlock
-        summary={'\n\nFirst paragraph.\n\nSecond paragraph.'}
+        summary={`\n\nFirst paragraph.\n\nSecond paragraph. ${'More detail. '.repeat(60)}`}
         attachments={[]}
         groupedAttachments={groupedAttachments}
       />
     );
 
     expect(screen.getByText('First paragraph.')).toBeInTheDocument();
-    expect(screen.queryByText('Second paragraph.')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Second paragraph\./)).not.toBeInTheDocument();
   });
 
   it('does not offer to expand an empty summary', () => {
