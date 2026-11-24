@@ -5,12 +5,32 @@
  * 2.0.
  */
 
+import {
+  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
+  SERVICE_ENVIRONMENT,
+} from '@kbn/apm-types';
+
+/**
+ * The environment fields of the OTel indices: `service.environment` aliases the deprecated
+ * `deployment.environment`, which newer SDKs replace with `deployment.environment.name`.
+ */
+export const ENVIRONMENT_FIELDS: readonly string[] = [
+  SERVICE_ENVIRONMENT,
+  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
+];
+
 /** Local indices only: remote clusters are not searched. */
 export const OTEL_LOGS_INDEX = 'logs-*.otel-*';
 export const OTEL_TRACES_INDEX = 'traces-*.otel-*';
 
 /** `telemetry.sdk.language` of the browser SDKs; the OTel indices also hold backend services. */
 export const BROWSER_SDK_LANGUAGE = 'webjs';
+
+/** `telemetry.distro.name` of the Elastic distributions, EDOT Android and iOS included. */
+export const ELASTIC_DISTRO_NAME = 'elastic';
+
+/** `MOBILE_SDK_NAMES` per platform, to tell an older SDK's platform from its name. */
+export const MOBILE_SDK_NAME_BY_PLATFORM = { android: 'android', ios: 'iOS' } as const;
 
 /**
  * `telemetry.sdk.name` of EDOT Android and EDOT iOS, which EDOT React Native runs on. Not the
@@ -49,6 +69,9 @@ export const attributeField = (name: string): string => `attributes.${name}`;
 /** A resource attribute as stored in the OTel indices, e.g. `resource.attributes.service.name`. */
 export const resourceAttributeField = (name: string): string => `resource.attributes.${name}`;
 
+/** One per install of a mobile app, which `@kbn/apm-types` doesn't name. */
+export const APP_INSTALLATION_ID = 'app.installation.id';
+
 /** Span name in the OTel traces indices; events are named in `event_name` instead. */
 export const OTEL_SPAN_NAME = 'name';
 export const OTEL_SPAN_ID = 'span_id';
@@ -69,9 +92,21 @@ export const EVENT_CLICK = 'click';
 export const EVENT_USER_ACTION_CLICK = 'browser.user_action.click';
 export const EVENT_RESOURCE_TIMING = 'browser.resource_timing';
 
+/**
+ * EDOT Browser frustration signals, one log event per occurrence, timestamped at the first click.
+ * Not clicks: the clicks they summarize are `browser.user_action.click` events already.
+ */
+export const EVENT_RAGE_CLICK = 'browser.frustration.rage_click';
+export const EVENT_DEAD_CLICK = 'browser.frustration.dead_click';
+export const EVENT_ERROR_CLICK = 'browser.frustration.error_click';
+export const FRUSTRATION_EVENTS = [EVENT_RAGE_CLICK, EVENT_DEAD_CLICK, EVENT_ERROR_CLICK] as const;
+
 /** Page loads and in-app navigations, which sessions count as page views. */
 export const PAGE_VIEW_EVENTS = [EVENT_DOCUMENT_LOAD, EVENT_NAVIGATION] as const;
 export const CLICK_EVENTS = [EVENT_CLICK, EVENT_USER_ACTION_CLICK] as const;
+
+/** Clicks in a rage click burst. */
+export const FRUSTRATION_CLICK_COUNT = 'browser.frustration.click_count';
 
 /** Fields of the browser events, not in `@kbn/apm-types`. */
 export const EXCEPTION_STACKTRACE = 'exception.stacktrace';

@@ -19,7 +19,19 @@ const catalogue = fixture as ComponentCatalogue;
 
 describe('catalogue selectors', () => {
   it('lists components by kind', () => {
-    expect(listComponents(catalogue, 'processor').map(({ type }) => type)).toEqual(['add_fields']);
+    expect(listComponents(catalogue, 'processor').map(({ type }) => type)).toEqual([
+      'add_fields',
+      'delete_fields',
+      'filter',
+      'move_fields',
+      'rename_fields',
+      'set',
+      'transform',
+    ]);
+    expect(listComponents(catalogue, 'destination').map(({ type }) => type)).toEqual([
+      'elasticsearch',
+      'remote_elasticsearch',
+    ]);
   });
 
   it('finds a definition by kind and type', () => {

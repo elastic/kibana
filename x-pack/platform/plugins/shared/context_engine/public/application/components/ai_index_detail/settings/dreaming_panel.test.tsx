@@ -11,14 +11,59 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexDreamingConfig } from '../../../../../common/dreaming';
 import type { AiIndexHttpItem } from '../../../../../common/http_api/ai_indices';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { useAiIndexDreaming } from '../../../hooks/use_ai_index_dreaming';
 import { useDreamingTemplates } from '../../../hooks/use_dreaming_templates';
+import type { LatestWorkflowExecution } from '../../../hooks/use_latest_workflow_execution';
 import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
 import { DreamingPanel } from './dreaming_panel';
 
 jest.mock('../../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
+const mockUseLatestWorkflowExecution = jest.fn(
+  (
+    _workflowIds: readonly string[],
+    _options?: {
+      enabled?: boolean;
+      awaitedExecutionIds?: readonly string[];
+      onAwaitedObserved?: () => void;
+    }
+  ): LatestWorkflowExecution => ({
+    executions: [],
+    unavailableWorkflowIds: [],
+    isRunning: false,
+    activeExecutionId: undefined,
+    isError: false,
+    isLoading: false,
+  })
+);
+jest.mock('../../../hooks/use_latest_workflow_execution', () => ({
+  useLatestWorkflowExecution: (
+    workflowIds: string[],
+    options?: {
+      enabled?: boolean;
+      awaitedExecutionIds?: readonly string[];
+      onAwaitedObserved?: () => void;
+    }
+  ) => mockUseLatestWorkflowExecution(workflowIds, options),
+}));
+jest.mock('../../../hooks/use_workflow_summaries', () => ({
+  useWorkflowSummaries: () => ({
+    summaries: new Map(),
+    isLoading: false,
+    missingReadPrivilege: false,
+  }),
+}));
 jest.mock('../../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
 jest.mock('../../../hooks/use_dreaming_templates', () => ({ useDreamingTemplates: jest.fn() }));
+jest.mock('../../../hooks/use_run_dreaming', () => ({
+  useRunDreaming: () => ({ runDreaming: jest.fn(), isLoading: false }),
+}));
+const mockUseWorkflowsCapabilities = jest.fn(() => createMockWorkflowsCapabilities());
+
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+}));
 const navigateToContextEngine = jest.fn();
 jest.mock('../../../hooks/use_navigation', () => ({
   useNavigation: () => ({ navigateToContextEngine }),
@@ -59,7 +104,11 @@ const renderPanel = (
   { aiIndex, dreaming }: ReturnType<typeof aiIndexWith>,
   isLoading: boolean = false
 ) => {
-  jest.mocked(useAiIndexDreaming).mockReturnValue({ dreaming, isLoading });
+  jest.mocked(useAiIndexDreaming).mockReturnValue({
+    dreaming,
+    workflowIds: dreaming?.enabled ? ['wf-dreaming'] : [],
+    isLoading,
+  });
   return render(
     <I18nProvider>
       <EuiProvider>
@@ -72,6 +121,7 @@ const renderPanel = (
 describe('DreamingPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     saveConfig.mockResolvedValue(true);
     jest.mocked(useSaveDreamingConfig).mockReturnValue({ saveConfig, isSaving: false });
     jest.mocked(useDreamingTemplates).mockReturnValue({
@@ -175,10 +225,11 @@ describe('DreamingPanel', () => {
     renderPanel(aiIndexWith({ ...factsOnly, schedule: { interval: '1h' } }));
 
     expect(screen.getByTestId('contextAiIndexDreamingInterval')).toHaveValue('1h');
-    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
+    // Change interval before toggling the switch; the field is hidden while the schedule is off.
     fireEvent.change(screen.getByTestId('contextAiIndexDreamingInterval'), {
       target: { value: '6h' },
     });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
 
     await waitFor(() =>
@@ -187,6 +238,15 @@ describe('DreamingPanel', () => {
         config: expect.objectContaining({ enabled: false, schedule: { interval: '6h' } }),
       })
     );
+  });
+
+  it('hides the interval while the schedule is off', () => {
+    renderPanel(aiIndexWith({ ...factsOnly, enabled: false }));
+
+    expect(screen.queryByTestId('contextAiIndexDreamingInterval')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
+
+    expect(screen.getByTestId('contextAiIndexDreamingInterval')).toBeInTheDocument();
   });
 
   it('does not save an interval shorter than the floor', () => {
@@ -288,6 +348,22 @@ describe('DreamingPanel', () => {
     expect(screen.queryByTestId('contextAiIndexDreamingSave')).not.toBeInTheDocument();
   });
 
+  it('disables discard while saving', () => {
+    jest.mocked(useSaveDreamingConfig).mockReturnValue({ saveConfig, isSaving: true });
+    renderPanel(aiIndexWith(factsOnly));
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigFact-policy-delete'));
+
+    expect(screen.getByTestId('contextAiIndexDreamingDiscard')).toBeDisabled();
+  });
+
+  it('shows the runs section when dreaming is set up', () => {
+    renderPanel(aiIndexWith(factsOnly));
+
+    expect(screen.getByTestId('contextAiIndexDreamingRunsSection')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeInTheDocument();
+  });
+
   it('lets a managed AI index’s dreaming be edited', () => {
     renderPanel(aiIndexWith({ ...factsOnly, entities: SUPPORT_ENTITIES }, { managed: true }));
 
@@ -295,5 +371,18 @@ describe('DreamingPanel', () => {
       'readonly'
     );
     expect(screen.getByTestId('contextDreamingConfigFact-policy-delete')).toBeInTheDocument();
+  });
+
+  it('does not look up workflow runs without execution read privileges', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...createMockWorkflowsCapabilities(),
+      canReadWorkflowExecution: false,
+    });
+    renderPanel(aiIndexWith(factsOnly));
+
+    expect(mockUseLatestWorkflowExecution).toHaveBeenCalledWith(
+      ['wf-dreaming'],
+      expect.objectContaining({ enabled: false })
+    );
   });
 });

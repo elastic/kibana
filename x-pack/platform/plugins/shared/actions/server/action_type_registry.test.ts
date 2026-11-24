@@ -172,6 +172,20 @@ describe('actionTypeRegistry', () => {
       );
     });
 
+    test('registers nothing when the licensing feature usage API throws', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      jest
+        .mocked(actionTypeRegistryParams.licensing.featureUsage.register)
+        .mockImplementationOnce(() => {
+          throw new Error('already registered with another license type');
+        });
+      expect(() =>
+        actionTypeRegistry.register(getConnectorType({ minimumLicenseRequired: 'gold' }))
+      ).toThrow('already registered with another license type');
+      expect(actionTypeRegistry.has('my-connector-type')).toEqual(false);
+      expect(mockTaskManager.registerTaskDefinitions).not.toHaveBeenCalled();
+    });
+
     test(`doesn't register basic connector types to the licensing feature usage API`, () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(getConnectorType());
