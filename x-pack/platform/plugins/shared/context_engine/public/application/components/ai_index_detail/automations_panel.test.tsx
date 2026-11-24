@@ -208,7 +208,7 @@ describe('AutomationsPanel', () => {
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
     expect(screen.getByText('No automations configured.')).toBeInTheDocument();
     expect(
-      screen.getByText('Automations keep Knowledge Indicators current as your sources change.')
+      screen.getByText('Automations keep knowledge documents current as your sources change.')
     ).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
   });

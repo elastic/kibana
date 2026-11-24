@@ -223,7 +223,7 @@ export const AutomationsPanel = ({
   const panelDescription = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.description',
     {
-      defaultMessage: 'Automations keep Knowledge Indicators current as your sources change.',
+      defaultMessage: 'Automations keep knowledge documents current as your sources change.',
     }
   );
 
