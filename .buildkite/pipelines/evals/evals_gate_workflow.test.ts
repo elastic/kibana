@@ -257,4 +257,70 @@ describe('runEvalsGate', () => {
     ]);
     expect(fake.calls.errors[0]).toMatch(/boom/);
   });
+
+  const STARTED = {
+    [`${HEAD}:kibana-evals/gated`]: { state: 'pending', description: 'Running gated evals' },
+  };
+
+  it('stops waiting when the eval build finished after the suite started', async () => {
+    const calls = await run({
+      pr: { labels: ['evals:gated'] },
+      changedFiles: ['plugins/gated/b.ts'],
+      statuses: {
+        ...STARTED,
+        [`${HEAD}:kibana-evals`]: { state: 'failure', description: 'Build failed' },
+      },
+    });
+    expect(calls.statuses[0]).toEqual({
+      sha: HEAD,
+      state: 'success',
+      description: 'gated inconclusive, not enforced: the eval build finished without a verdict',
+    });
+  });
+
+  it('keeps waiting when a finished eval build never started the suite', async () => {
+    // e.g. a build that only ran smoke-tests, before the gated suite's run label was added
+    const calls = await run({
+      pr: { labels: ['evals:gated'] },
+      changedFiles: ['plugins/gated/b.ts'],
+      statuses: { [`${HEAD}:kibana-evals`]: { state: 'success', description: 'Passed' } },
+    });
+    expect(calls.statuses[0].state).toBe('pending');
+  });
+
+  it('re-evaluates when the eval build status arrives', async () => {
+    const calls = await run(
+      {
+        pr: { labels: ['evals:gated'] },
+        changedFiles: ['plugins/gated/b.ts'],
+        statuses: {
+          ...STARTED,
+          [`${HEAD}:kibana-evals`]: { state: 'error', description: 'Build canceled' },
+        },
+        openPrNumbers: [7],
+      },
+      {
+        eventName: 'status',
+        repo: { owner: 'elastic', repo: 'kibana' },
+        payload: { sha: HEAD, context: 'kibana-evals' },
+      }
+    );
+    expect(calls.statuses[0].state).toBe('success');
+  });
+
+  it('keeps a regression on the head blocking after evals:skip is added', async () => {
+    const calls = await run({
+      pr: { labels: ['evals:gated', 'evals:skip'] },
+      changedFiles: ['plugins/gated/b.ts'],
+      statuses: {
+        [`${HEAD}:kibana-evals/gated`]: { state: 'failure', description: 'goal_pass 0.55 → 0.32' },
+      },
+    });
+    expect(calls.statuses[0].state).toBe('failure');
+  });
+
+  it('keeps PR file names from breaking out of the code span in the comment', async () => {
+    const calls = await run({ changedFiles: ['plugins/agent/x` @elastic/team `y.ts'] });
+    expect(calls.comments[0]).toContain('- `plugins/agent/x @elastic/team y.ts`');
+  });
 });

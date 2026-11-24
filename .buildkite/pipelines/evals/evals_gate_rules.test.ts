@@ -94,10 +94,24 @@ describe('decideSuite', () => {
   });
 
   it('lets a skip win over a run label', () => {
-    expect(decide(GATED_SUITE, ['evals:skip', 'evals:gated'], verdict('failure'))).toMatchObject({
+    expect(decide(GATED_SUITE, ['evals:skip', 'evals:gated'])).toMatchObject({
       kind: 'skipped',
       state: 'success',
     });
+    expect(decide(GATED_SUITE, ['evals:skip'], verdict('failure', 'abcdef0123'))).toMatchObject({
+      kind: 'skipped',
+    });
+  });
+
+  it('keeps a regression on the head commit blocking after a skip or a dropped run label', () => {
+    expect(decide(GATED_SUITE, ['evals:skip', 'evals:gated'], verdict('failure'))).toMatchObject({
+      kind: 'regression',
+      state: 'failure',
+    });
+    expect(decide(GATED_SUITE, [], verdict('failure'))).toMatchObject({ kind: 'regression' });
+    expect(
+      decide(GATED_SUITE, ['evals:skip', 'evals:accept-regression'], verdict('failure'))
+    ).toMatchObject({ kind: 'accepted', state: 'success' });
   });
 
   it('passes on a run label alone for a suite without a regression gate', () => {
@@ -109,6 +123,22 @@ describe('decideSuite', () => {
     expect(decide(GATED_SUITE, ['evals:gated'])).toMatchObject({ state: 'pending' });
     expect(decide(GATED_SUITE, ['evals:gated'], verdict('pending'))).toMatchObject({
       state: 'pending',
+    });
+  });
+
+  it('stops waiting once the eval build finished without a verdict', () => {
+    expect(
+      decideSuite({
+        suite: GATED_SUITE,
+        labels: ['evals:gated'],
+        verdict: undefined,
+        headSha: HEAD,
+        evalsBuildFinished: true,
+      })
+    ).toMatchObject({
+      kind: 'inconclusive',
+      state: 'success',
+      description: 'gated inconclusive, not enforced: the eval build finished without a verdict',
     });
   });
 
@@ -206,16 +236,28 @@ describe('findReusableVerdict', () => {
     listFilesBetween: async (base) => files[base],
   });
 
-  it('reuses the newest conclusive verdict when no decision paths changed since', async () => {
+  it('reuses the newest pass when no decision paths changed since', async () => {
     const lookup = createLookup({
       shas: ['a', 'b', 'c', HEAD],
-      verdicts: { a: 'success', b: 'failure', c: 'pending' },
+      verdicts: { a: 'failure', b: 'success', c: 'error' },
       files: { b: ['plugins/agent/server/a.test.ts', 'docs/readme.md'] },
     });
 
     await expect(
       findReusableVerdict({ lookup, headSha: HEAD, suite: GATED_SUITE })
-    ).resolves.toEqual(verdict('failure', 'b'));
+    ).resolves.toEqual(verdict('success', 'b'));
+  });
+
+  it('never reuses a regression, nor an older pass behind it', async () => {
+    const lookup = createLookup({
+      shas: ['a', 'b', HEAD],
+      verdicts: { a: 'success', b: 'failure' },
+      files: { a: [], b: [] },
+    });
+
+    await expect(
+      findReusableVerdict({ lookup, headSha: HEAD, suite: GATED_SUITE })
+    ).resolves.toBeUndefined();
   });
 
   it('does not reuse a verdict when a decision path changed since', async () => {

@@ -249,15 +249,16 @@ matched files. The comment is removed once the PR has a decision:
 
 - `evals:<suite-id>` runs the suite.
 - `evals:skip` skips every suite that requires a decision. It doesn't affect other suites, such as
-  `smoke-tests`. A skip always wins over a run label.
+  `smoke-tests`. A skip wins over a run label, but not over a regression already measured on the
+  head commit (see [Regression gate](#regression-gate)).
 
 Prefer directory globs over file lists, so new files are covered without editing the config. A
 config test fails when an include glob stops matching any tracked file, and the weekly runs catch
-what the globs miss. Opting in needs no new GitHub labels.
+what the globs miss. `**` doesn't match dot directories or dotfiles (e.g. `server/.agents/` or
+`server/.prompt.md`), so list those with their own glob. Opting in needs no new GitHub labels.
 
-A run label added while the PR's CI is running takes effect: the eval trigger step reads the labels
-again once the Kibana build is done. A label added after CI finished needs a new push or a `/ci`
-comment.
+The eval trigger step reads the labels again once the PR's Kibana build step finishes, so a run
+label added before then takes effect. A label added after that needs a new push or a `/ci` comment.
 
 ##### Regression gate
 
@@ -278,15 +279,20 @@ The comparison against the latest `main` baseline for the suite's first `default
 posts a `kibana-evals/<suite-id>` status, which the `evals gate` reads:
 
 - **Regression**: the metric got worse by at least `minAbsoluteDrop`, with p < `alpha`. The gate
-  fails until the regression is fixed or the PR gets `evals:accept-regression`.
+  fails until the regression is fixed or the PR gets `evals:accept-regression`. Adding `evals:skip`
+  or removing the run label doesn't clear a regression measured on the PR's head commit. A new
+  push while `evals:skip` is on the PR does: the new head has no verdict, and the suite is skipped.
 - **Pass**: anything else. All other evaluators stay advisory in the comparison comment.
 - **Inconclusive**: no baseline, a baseline older than `maxBaselineAgeDays`, too few paired
-  examples, or a failed comparison. The gate passes and says the result was not enforced; infra
-  problems never block a PR.
+  examples, a PR run with no scores, a failed comparison, or an eval build that finished without a
+  verdict. The gate passes and says the result was not enforced; infra problems never block a PR.
+  A run with no scores can't be told apart from an infra failure, so it doesn't block; a broken
+  agent that still runs scores low and does block.
 
 `models:*` labels add models to a gated suite's run instead of replacing its default model, so they
-can't bypass the gate. A verdict from an earlier PR commit is reused when no file under
-`requireDecisionOnPaths` changed since, so unrelated pushes don't re-run the suite.
+can't bypass the gate. A passing verdict from an earlier PR commit is reused when no file under
+`requireDecisionOnPaths` changed since, so unrelated pushes don't re-run the suite. A regression is
+never reused: the next commit re-runs the suite, so a noisy result can clear.
 
 #### Per-spec model groups
 

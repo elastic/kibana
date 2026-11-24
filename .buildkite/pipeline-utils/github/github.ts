@@ -151,16 +151,17 @@ export const getPrCommitShas = async (): Promise<string[]> => {
   return commits.map(({ sha }) => sha);
 };
 
-/** The newest commit status with `context` on `sha`, if any. */
+/** The latest commit status with `context` on `sha`, if any. */
 export const getCommitStatus = async (sha: string, context: string) => {
   const { owner, repo } = getPrContext();
-  const { data } = await github.repos.listCommitStatusesForRef({
+  // The combined status holds the latest status per context, unlike the paginated history.
+  const { data } = await github.repos.getCombinedStatusForRef({
     owner,
     repo,
     ref: sha,
     per_page: 100,
   });
-  return data.find((status) => status.context === context);
+  return data.statuses.find((status) => status.context === context);
 };
 
 // GitHub truncates a comparison's file list at this many files.

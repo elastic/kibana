@@ -207,6 +207,15 @@ describe('evals.suites.json evals decision', () => {
     expect(problems).toEqual([]);
   });
 
+  it('gives every suite that requires a decision a default model', () => {
+    // Without one, the run label satisfies the gate but selects nothing to run.
+    const problems = decisionSuites
+      .filter(({ defaultModelGroups }) => !defaultModelGroups?.length)
+      .map(({ id }) => `${id}: requireDecisionOnPaths needs defaultModelGroups`);
+
+    expect(problems).toEqual([]);
+  });
+
   it('gives every regression gate a default model, decision paths and sane thresholds', () => {
     const problems = gatedSuites.flatMap(
       ({ id, regressionGate, defaultModelGroups, requireDecisionOnPaths }) => {

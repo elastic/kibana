@@ -313,11 +313,19 @@ export const compareCmd: Command<void> = {
       evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
     ]);
 
+    // Inconclusive rather than a regression: a run without scores can't be told apart from an infra
+    // failure. A broken agent that still runs gets low scores, which the gate does catch.
     if (targetExperimentScores.length === 0) {
+      if (regressionGate) {
+        writeVerdict(inconclusiveVerdict('the PR run produced no scores'));
+      }
       throw new Error(`No scores found for experiment ID: ${targetExperimentId}`);
     }
 
     if (baselineExperimentScores.length === 0) {
+      if (regressionGate) {
+        writeVerdict(inconclusiveVerdict('the baseline has no scores'));
+      }
       throw new Error(`No scores found for experiment ID: ${baselineExperimentId}`);
     }
 

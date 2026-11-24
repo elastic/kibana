@@ -46,6 +46,12 @@ export const EVALS_ACCEPT_REGRESSION_LABEL = 'evals:accept-regression';
 /** Required commit status context posted by the `evals-gate` workflow. */
 export const EVALS_GATE_STATUS_CONTEXT = 'evals gate';
 export const EVALS_VERDICT_STATUS_CONTEXT_PREFIX = 'kibana-evals/';
+/** Overall status of the `kibana-evals-pr-llm-evals` build, posted by Buildkite. */
+export const EVALS_BUILD_STATUS_CONTEXT = 'kibana-evals';
+
+/** Commit status contexts the `evals gate` reacts to. */
+export const isEvalsStatusContext = (context: string): boolean =>
+  context === EVALS_BUILD_STATUS_CONTEXT || context.startsWith(EVALS_VERDICT_STATUS_CONTEXT_PREFIX);
 
 /** GitHub rejects commit status descriptions longer than this. */
 export const STATUS_DESCRIPTION_MAX_LENGTH = 140;
@@ -155,20 +161,48 @@ const shortSha = (sha: string): string => sha.slice(0, 7);
 const reusedSuffix = (verdict: EvalsVerdict, headSha: string): string =>
   verdict.sha === headSha ? '' : ` (from ${shortSha(verdict.sha)})`;
 
-/** The gate's decision for one suite whose decision paths the PR touches. */
+const regressionDecision = (
+  id: string,
+  labels: readonly string[],
+  verdict: EvalsVerdict,
+  headSha: string
+): SuiteDecision =>
+  labels.includes(EVALS_ACCEPT_REGRESSION_LABEL)
+    ? toDecision(id, 'accepted', `${id} regression accepted (${EVALS_ACCEPT_REGRESSION_LABEL})`)
+    : toDecision(
+        id,
+        'regression',
+        `${id} regressed: ${verdict.description}${reusedSuffix(
+          verdict,
+          headSha
+        )}. Fix or add ${EVALS_ACCEPT_REGRESSION_LABEL}`
+      );
+
+/**
+ * The gate's decision for one suite whose decision paths the PR touches. `evalsBuildFinished` says
+ * the head commit's `kibana-evals` build reached a terminal state, so a verdict that is still
+ * missing will never arrive.
+ */
 export const decideSuite = ({
   suite,
   labels,
   verdict,
   headSha,
+  evalsBuildFinished = false,
 }: {
   suite: EvalsDecisionSuite;
   labels: readonly string[];
   verdict: EvalsVerdict | undefined;
   headSha: string;
+  evalsBuildFinished?: boolean;
 }): SuiteDecision => {
   const { id } = suite;
 
+  // A regression measured on this very commit stands until it is fixed or accepted; skipping or
+  // dropping the run label afterwards doesn't clear it.
+  if (suite.regressionGate && verdict?.state === 'failure' && verdict.sha === headSha) {
+    return regressionDecision(id, labels, verdict, headSha);
+  }
   if (isSuiteSkipped(labels, suite)) {
     return toDecision(id, 'skipped', `Evals skipped: ${id}`);
   }
@@ -183,7 +217,17 @@ export const decideSuite = ({
     return toDecision(id, 'requested', `${id}: evals requested`);
   }
   if (!verdict || verdict.state === 'pending') {
-    return toDecision(id, 'pending', `Waiting for ${id} eval results (comment /ci if CI finished)`);
+    return evalsBuildFinished
+      ? toDecision(
+          id,
+          'inconclusive',
+          `${id} inconclusive, not enforced: the eval build finished without a verdict`
+        )
+      : toDecision(
+          id,
+          'pending',
+          `Waiting for ${id} eval results (push or comment /ci if the Kibana build already finished)`
+        );
   }
 
   const suffix = reusedSuffix(verdict, headSha);
@@ -197,18 +241,7 @@ export const decideSuite = ({
       `${id} inconclusive, not enforced: ${verdict.description}${suffix}`
     );
   }
-  if (labels.includes(EVALS_ACCEPT_REGRESSION_LABEL)) {
-    return toDecision(
-      id,
-      'accepted',
-      `${id} regression accepted (${EVALS_ACCEPT_REGRESSION_LABEL})`
-    );
-  }
-  return toDecision(
-    id,
-    'regression',
-    `${id} regressed: ${verdict.description}${suffix}. Fix or add ${EVALS_ACCEPT_REGRESSION_LABEL}`
-  );
+  return regressionDecision(id, labels, verdict, headSha);
 };
 
 export const truncateDescription = (description: string): string =>
@@ -264,8 +297,10 @@ export interface VerdictLookup {
 const MAX_VERDICT_LOOKBACK = 20;
 
 /**
- * The newest conclusive verdict on an earlier PR commit, when nothing changed since then under the
- * suite's decision paths. Inconclusive and pending verdicts are never reused, so those re-run.
+ * The newest passing verdict on an earlier PR commit, when nothing changed since then under the
+ * suite's decision paths. Only passes are reused: a regression re-runs on the next commit so a noisy
+ * result can clear, and the search stops there so an older pass behind it isn't picked up.
+ * Inconclusive and pending verdicts are skipped over.
  */
 export const findReusableVerdict = async ({
   lookup,
@@ -286,7 +321,10 @@ export const findReusableVerdict = async ({
 
   for (const sha of earlier) {
     const verdict = await lookup.getVerdict(sha, context);
-    if (verdict?.state !== 'success' && verdict?.state !== 'failure') {
+    if (verdict?.state === 'failure') {
+      return undefined;
+    }
+    if (verdict?.state !== 'success') {
       continue;
     }
     const files = await lookup.listFilesBetween(sha, headSha);

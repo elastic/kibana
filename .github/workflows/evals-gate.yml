@@ -2,9 +2,13 @@ name: evals-gate
 
 # Posts the `evals gate` commit status: PRs that touch an eval suite's `requireDecisionOnPaths`
 # (.buildkite/pipelines/evals/evals.suites.json) need a run or skip label, and a gated suite's run
-# must not regress. Re-runs when a `kibana-evals/<suite>` verdict status arrives from Buildkite.
+# must not regress. Re-runs when a `kibana-evals/<suite>` verdict or the `kibana-evals` build status
+# arrives from Buildkite.
 on:
   pull_request_target:
+    # The regression baselines only exist for main.
+    branches:
+      - main
     types:
       - opened
       - reopened
@@ -17,14 +21,25 @@ on:
 
 permissions: {}
 
+# Workflow-level concurrency also applies to runs whose job is skipped, so every unrelated status
+# event gets its own group; sharing one per SHA would let them cancel an in-progress verdict run.
 concurrency:
-  group: evals-gate-${{ github.event.pull_request.number || format('status-{0}', github.event.sha) }}
+  group: >-
+    evals-gate-${{
+      github.event.pull_request.number
+      || ((github.event.context == 'kibana-evals' || startsWith(github.event.context, 'kibana-evals/'))
+        && format('status-{0}', github.event.sha))
+      || format('ignored-{0}', github.run_id)
+    }}
   cancel-in-progress: true
 
 jobs:
   gate:
     name: Evals gate
-    if: github.event_name != 'status' || startsWith(github.event.context, 'kibana-evals/')
+    if: >-
+      github.event_name != 'status'
+      || github.event.context == 'kibana-evals'
+      || startsWith(github.event.context, 'kibana-evals/')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

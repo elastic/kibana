@@ -16,14 +16,15 @@ import {
   DRAFT_DESCRIPTION,
   EVALS_ACCEPT_REGRESSION_LABEL,
   EVALS_GATE_STATUS_CONTEXT,
+  EVALS_BUILD_STATUS_CONTEXT,
   EVALS_SKIP_LABEL,
-  EVALS_VERDICT_STATUS_CONTEXT_PREFIX,
   combineDecisions,
   decideSuite,
   findReusableVerdict,
   getDecisionPathMatches,
   getSuiteRunLabels,
   getVerdictStatusContext,
+  isEvalsStatusContext,
   isSuiteRunRequested,
   isSuiteSkipped,
   toVerdict,
@@ -138,13 +139,15 @@ export const createGateApi = (
       })
     ).map(({ sha }) => sha),
   getStatus: async (sha, context) => {
-    const { data } = await github.rest.repos.listCommitStatusesForRef({
+    // The combined status holds the latest status per context, so a verdict can't be pushed off
+    // the page by newer statuses the way it can in the full status history.
+    const { data } = await github.rest.repos.getCombinedStatusForRef({
       owner,
       repo,
       ref: sha,
       per_page: 100,
     });
-    return data.find((status) => status.context === context);
+    return data.statuses.find((status) => status.context === context);
   },
   listFilesBetween: async (baseSha, headSha) => {
     const { data } = await github.rest.repos.compareCommitsWithBasehead({
@@ -200,9 +203,13 @@ interface SuiteReport {
   decision: SuiteDecision;
 }
 
+// File names come from the PR, so they must not be able to end the code span (and e.g. mention a
+// team) or inject lines into the comment.
+const toCodeSpan = (file: string): string => `\`${file.replace(/[`\r\n]/g, '')}\``;
+
 const formatFileList = (files: string[]): string =>
   [
-    ...files.slice(0, MAX_LISTED_FILES).map((file) => `- \`${file}\``),
+    ...files.slice(0, MAX_LISTED_FILES).map((file) => `- ${toCodeSpan(file)}`),
     ...(files.length > MAX_LISTED_FILES ? [`- …and ${files.length - MAX_LISTED_FILES} more`] : []),
   ].join('\n');
 
@@ -254,10 +261,17 @@ const formatSummary = (
       ? [
           `Add a suite's run label (e.g. \`${
             getSuiteRunLabels(reports[0].suite)[0]
-          }\`) to run it, \`${EVALS_SKIP_LABEL}\` to skip every suite, or \`${EVALS_ACCEPT_REGRESSION_LABEL}\` to accept a gated regression. A run label added after CI finished needs a new push or a \`/ci\` comment to start the evals.`,
+          }\`) to run it, \`${EVALS_SKIP_LABEL}\` to skip every suite, or \`${EVALS_ACCEPT_REGRESSION_LABEL}\` to accept a gated regression. A run label added after the PR's Kibana build step finished needs a new push or a \`/ci\` comment to start the evals.`,
         ]
       : []),
   ].join('\n');
+
+// The build posts `kibana-evals` itself, so it settles even when a lost agent, a timeout or a
+// failed bootstrap kept the post-comparison step from posting a verdict.
+const isEvalsBuildFinished = async (api: GateApi, sha: string): Promise<boolean> => {
+  const status = await api.getStatus(sha, EVALS_BUILD_STATUS_CONTEXT);
+  return status !== undefined && status.state !== 'pending';
+};
 
 const evaluatePullRequest = async ({
   api,
@@ -295,19 +309,37 @@ const evaluatePullRequest = async ({
       continue;
     }
 
-    const needsVerdict =
+    // A gated suite's head verdict is read even when skipped: a regression measured on the head
+    // keeps blocking after a skip. Earlier verdicts only stand in for a run that was requested.
+    const headVerdict = suite.regressionGate
+      ? await lookup.getVerdict(pr.headSha, getVerdictStatusContext(suite.id))
+      : undefined;
+    const awaitsVerdict =
       suite.regressionGate !== undefined &&
       isSuiteRunRequested(pr.labels, suite) &&
       !isSuiteSkipped(pr.labels, suite);
-    const verdict = needsVerdict
-      ? (await lookup.getVerdict(pr.headSha, getVerdictStatusContext(suite.id))) ??
-        (await findReusableVerdict({ lookup, headSha: pr.headSha, suite }))
-      : undefined;
+    const verdict =
+      headVerdict ??
+      (awaitsVerdict
+        ? await findReusableVerdict({ lookup, headSha: pr.headSha, suite })
+        : undefined);
+    // Only a pending verdict on the head proves the suite started there; a finished build without
+    // one may have run other suites only (e.g. before the run label was added).
+    const evalsBuildFinished =
+      awaitsVerdict && headVerdict?.state === 'pending'
+        ? await isEvalsBuildFinished(api, pr.headSha)
+        : false;
 
     reports.push({
       suite,
       files,
-      decision: decideSuite({ suite, labels: pr.labels, verdict, headSha: pr.headSha }),
+      decision: decideSuite({
+        suite,
+        labels: pr.labels,
+        verdict,
+        headSha: pr.headSha,
+        evalsBuildFinished,
+      }),
     });
   }
 
@@ -329,7 +361,7 @@ const evaluatePullRequest = async ({
 const resolvePullRequestNumbers = async (api: GateApi, context: GateContext): Promise<number[]> => {
   if (context.eventName === 'status') {
     const { sha, context: statusContext } = context.payload;
-    if (!sha || !statusContext?.startsWith(EVALS_VERDICT_STATUS_CONTEXT_PREFIX)) {
+    if (!sha || !statusContext || !isEvalsStatusContext(statusContext)) {
       return [];
     }
     return api.findOpenPullRequestNumbers(sha);

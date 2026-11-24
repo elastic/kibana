@@ -31,6 +31,10 @@ export GITHUB_PR_LABELS="$RESOLVED_PR_LABELS"
 # ERR traps don't run on SIGTERM (the 10-min timeout), agent loss, or `set -u` aborts, so post
 # pending up front: any death then leaves a visible kibana-evals. The child overwrites it on success.
 post_evals_status pending "Triggering the LLM Evals pipeline"
+# After kibana-evals is pending, mark each gated suite as started on this commit: if the child build
+# then dies before posting a verdict, the evals gate settles it as inconclusive once kibana-evals
+# turns terminal, instead of waiting forever.
+node .buildkite/scripts/steps/evals/regression_gate.ts pending-runnable "$RESOLVED_PR_LABELS" || true
 
 # Only mark failure on the final attempt (retry limit is 1); an earlier transient failure is
 # retried and the pending status above holds until then. Best-effort; never mask the original error.
