@@ -8,8 +8,8 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
-import { HYPOTHESES_ATTACHMENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { ALERT_RECOVERED_MESSAGE_PREFIX } from '../client/build_investigation_message';
 import { NO_CAUSAL_VERDICT } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { createOptimizeModel } from '../lib/create_optimize_model';
@@ -208,6 +208,7 @@ describe('decisionTreePrepareStepDefinition', () => {
           tree_count: 1,
           turn_kind: 'feedback_reinforcement',
           skipped: false,
+          round_kind: 'follow_up',
           opened_ids: ['symptom:checkout-latency'],
         },
       });
@@ -217,7 +218,18 @@ describe('decisionTreePrepareStepDefinition', () => {
       conversationsGet.mockResolvedValue({ rounds: [savedRound('round-1')] });
       jest.mocked(prepareReinforcementTurn).mockResolvedValue({ skipped: true });
 
-      await expect(run(investigatorRound)).resolves.toEqual(skipped);
+      await expect(run(investigatorRound)).resolves.toEqual({
+        output: { ...skipped.output, round_kind: 'follow_up' },
+      });
+    });
+
+    // The optimize hook gets no run context, so the recovery message the client wrote tells it.
+    it('is an alert recovery when the client wrote the recovery message', async () => {
+      conversationsGet.mockResolvedValue({ rounds: [savedRound('round-1')] });
+
+      await expect(
+        run({ ...investigatorRound, prompt: `${ALERT_RECOVERED_MESSAGE_PREFIX} checkout-latency` })
+      ).resolves.toMatchObject({ output: { round_kind: 'alert_recovery' } });
     });
   });
 
@@ -304,6 +316,28 @@ describe('decisionTreePrepareStepDefinition', () => {
       await expect(preparedWith().checkCausal!()).resolves.toEqual(NO_CAUSAL_VERDICT);
     });
 
+    // As in Deductive, online evals grades the first round against a confirmed cause, so a
+    // follow-up with no tree to reinforce still hands its verdict on.
+    it('reports the verdict of a follow-up with no tree to build on', async () => {
+      jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+        skipped: true,
+        verdict: { ...verdict, causalConfirmed: true },
+      });
+
+      await expect(run(followUp)).resolves.toEqual({
+        output: {
+          ...skipped.output,
+          round_kind: 'follow_up',
+          causal_check: {
+            is_feedback: true,
+            causal_confirmed: true,
+            causal_summary: verdict.causalSummary,
+            learning: verdict.learning,
+          },
+        },
+      });
+    });
+
     it('reports the verdict with the prepared turn', async () => {
       jest.mocked(prepareReinforcementTurn).mockResolvedValue({
         skipped: false,
@@ -361,7 +395,7 @@ describe('decisionTreePrepareStepDefinition', () => {
         expect(reportDecisionTreeCausalCheck).not.toHaveBeenCalled();
       });
 
-      it('reports confirmed outcome with recorder transition, structured ECS labels, and span attributes', async () => {
+      it('reports confirmed outcome with structured ECS labels and span attributes', async () => {
         conversationsGet.mockResolvedValue({
           rounds: [
             { id: 'round-1', started_at: '2026-11-02T10:00:00.000Z', steps: [] },
@@ -370,25 +404,6 @@ describe('decisionTreePrepareStepDefinition', () => {
               started_at: '2026-11-02T10:10:00.000Z',
               input: { message: 'Confirmed: api.paygate-eu.net timed out on charge calls.' },
               steps: [],
-            },
-          ],
-          attachments: [
-            {
-              type: HYPOTHESES_ATTACHMENT_TYPE,
-              versions: [
-                {
-                  created_at: '2026-11-02T10:05:00.000Z',
-                  data: {
-                    hypotheses: [{ candidate: 'Paygate timeout', status: 'investigating' }],
-                  },
-                },
-                {
-                  created_at: '2026-11-02T10:12:00.000Z',
-                  data: {
-                    hypotheses: [{ candidate: 'Paygate timeout', status: 'confirmed' }],
-                  },
-                },
-              ],
             },
           ],
         });
@@ -415,8 +430,6 @@ describe('decisionTreePrepareStepDefinition', () => {
             has_learning: true,
             tree_count: 2,
             opened_tree_count: 1,
-            recorder_outcome: 'found',
-            recorder_has_confirmed_cause: true,
             duration_ms: expect.any(Number),
           })
         );
@@ -429,30 +442,18 @@ describe('decisionTreePrepareStepDefinition', () => {
           expect(JSON.stringify(sink)).not.toContain('Check external payment gateway latency.');
         }
         expect(logger.info).toHaveBeenCalledWith(
-          expect.stringContaining('outcome=confirmed feedback=true confirmed=true recorder=found'),
+          expect.stringContaining('outcome=confirmed feedback=true confirmed=true trees=2'),
           expect.objectContaining({
             tags: ['nightshift', 'decision_trees', 'causal_check'],
-            labels: expect.objectContaining({
-              outcome: 'confirmed',
-              recorder_outcome: 'found',
-              recorder_has_confirmed_cause: true,
-            }),
+            labels: expect.objectContaining({ outcome: 'confirmed' }),
           })
         );
         // The step logger drops labels, so it only gets the readable line for the run's log view.
         expect(stepLogger.info).toHaveBeenCalledWith(
-          expect.stringContaining('outcome=confirmed feedback=true confirmed=true recorder=found')
+          expect.stringContaining('outcome=confirmed feedback=true confirmed=true trees=2')
         );
         expect(stepLogger.info).not.toHaveBeenCalledWith(expect.any(String), expect.anything());
         expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.outcome', 'confirmed');
-        expect(setAttribute).toHaveBeenCalledWith(
-          'nightshift.causal_check.recorder_outcome',
-          'found'
-        );
-        expect(setAttribute).toHaveBeenCalledWith(
-          'nightshift.causal_check.recorder_has_confirmed_cause',
-          true
-        );
         expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.confirmed', true);
         expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.has_learning', true);
         expect(setAttribute).toHaveBeenCalledWith(
@@ -494,22 +495,28 @@ describe('decisionTreePrepareStepDefinition', () => {
         );
       });
 
-      it('reports skipped_no_trees when a follow-up has no editable trees', async () => {
-        jest.mocked(prepareReinforcementTurn).mockResolvedValue({ skipped: true });
+      it('reports the verdict of a follow-up with no editable trees, with no trees counted', async () => {
+        jest.mocked(prepareReinforcementTurn).mockImplementation(async ({ checkCausal }) => ({
+          skipped: true,
+          verdict: await checkCausal!(),
+        }));
 
-        await expect(run(followUp)).resolves.toEqual(skipped);
+        await expect(run(followUp)).resolves.toMatchObject({ output: { skipped: true } });
 
         expect(reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
           expect.objectContaining({
-            outcome: 'skipped_no_trees',
+            outcome: 'unconfirmed_feedback',
+            is_feedback: true,
+            causal_confirmed: false,
             tree_count: 0,
             opened_tree_count: 0,
-            recorder_outcome: 'unknown',
+            duration_ms: expect.any(Number),
           })
         );
+        expect(setAttribute).toHaveBeenCalledWith('nightshift.skipped', true);
         expect(setAttribute).toHaveBeenCalledWith(
           'nightshift.causal_check.outcome',
-          'skipped_no_trees'
+          'unconfirmed_feedback'
         );
       });
 

@@ -214,15 +214,19 @@ describe('prepareReinforcementTurn', () => {
       expect(turn.skipped === false && turn.message).not.toContain(confirmed.causalSummary);
     });
 
-    // A recovery or a reply has nothing new to seed a tree from.
-    it('is skipped when the investigation has no tree to build on', async () => {
-      const checkCausal = jest.fn();
+    // A recovery or a reply has nothing new to seed a tree from. Its causal check still runs, as
+    // in Deductive: online evals grades the first round against a confirmed cause.
+    it('is skipped when the investigation has no tree to build on, with its causal check', async () => {
+      const checkCausal = jest.fn().mockResolvedValue(confirmed);
 
-      await expect(prepare({ checkCausal })).resolves.toEqual({ skipped: true });
+      await expect(prepare({ checkCausal })).resolves.toEqual({
+        skipped: true,
+        verdict: confirmed,
+      });
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('it has no decision tree to build on')
       );
-      expect(checkCausal).not.toHaveBeenCalled();
+      expect(checkCausal).toHaveBeenCalledTimes(1);
     });
   });
 

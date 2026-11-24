@@ -91,7 +91,7 @@ const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
   kind: 'llm',
   direction: 'maximize',
   description:
-    "Reference-based: how well an investigation's first-round conclusion matches the cause confirmed when its alert recovered, or whether it asserted a cause the recovery refuted.",
+    "Reference-based: how well an investigation's first-round conclusion matches the cause confirmed when its alert recovered, or by a human follow-up the investigation data backs, or whether it asserted a cause that outcome refuted.",
   evidenceSchema: roundEvidenceSchema,
   referenceDataSchema: alertOutcomeReferenceDataSchema,
   async evaluate({ round, referenceData, inferenceClient }) {
