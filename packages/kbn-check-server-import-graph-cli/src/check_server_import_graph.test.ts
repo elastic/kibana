@@ -34,7 +34,7 @@ describe('checkServerImportGraph', () => {
 
     expect(passed).toBe(false);
     expect(output).toContain('1 banned import(s)');
-    expect(output).toContain('imports @elastic/eui (`@elastic/eui/lib/services`)');
+    expect(output).toContain('imports @elastic/eui (`@elastic/eui/es/services`)');
 
     const chain = [
       ['plugin', 'server', 'index.ts'],

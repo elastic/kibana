@@ -24,7 +24,7 @@ import {
 
 /**
  * Node modules that must never be loaded by the Kibana server. Matched against the resolved node
- * module name, so `@elastic/eui/lib/...` is caught while the pure `@elastic/eui-theme-*` packages
+ * module name, so `@elastic/eui/es/...` is caught while the pure `@elastic/eui-theme-*` packages
  * are not.
  */
 export const BANNED_NODE_MODULES: ReadonlySet<string> = new Set([

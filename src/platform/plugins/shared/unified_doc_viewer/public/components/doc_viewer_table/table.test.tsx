@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { render } from '@elastic/eui/lib/test/rtl';
+import { render } from '@elastic/eui/es/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsqlSource } from '@kbn/data-source';

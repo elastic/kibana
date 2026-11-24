@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { focusEuiToolTipTrigger } from '@elastic/eui/lib/test/rtl';
+import { focusEuiToolTipTrigger } from '@elastic/eui/es/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import type {
   BudgetGroupCost,

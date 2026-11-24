@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/es/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ProfilingSchema } from '@kbn/profiling-utils';
 import type { SchemaSelectorProps } from '.';

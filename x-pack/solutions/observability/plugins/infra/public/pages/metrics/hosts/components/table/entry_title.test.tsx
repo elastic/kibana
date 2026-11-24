@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import { focusEuiToolTipTrigger } from '@elastic/eui/lib/test/rtl';
+import { focusEuiToolTipTrigger } from '@elastic/eui/es/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EntryTitle } from './entry_title';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
