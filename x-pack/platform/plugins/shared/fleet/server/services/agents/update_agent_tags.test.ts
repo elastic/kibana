@@ -6,7 +6,6 @@
  */
 import type {
   BulkIndexByScrollFailure,
-  UpdateByQueryRequest,
   UpdateByQueryResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -19,6 +18,7 @@ import type { Agent } from '../../types';
 import { FleetVersionConflictError, UpdateByQueryIncompleteError } from '../../errors';
 
 import { createClientMock } from './action.mock';
+import { CANCELLED, TIMED_OUT, idsOfRun, scriptUpdateRuns } from './update_tags_by_query.mock';
 import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateAgentTags } from './update_agent_tags';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
@@ -423,44 +423,9 @@ describe('update_agent_tags', () => {
     expect(esClient.create).not.toHaveBeenCalled();
   });
 
-  // The runs of the update of a batch: the first is the whole batch, and the ones after it are its
-  // chunks. Each ends with every agent of its ids updated, unless `outcomes` has another for it.
-  const CANCELLED = { canceled: 'by user request', updated: 3, total: 5 };
-  const TIMED_OUT = { timed_out: true, updated: 0, total: 0 };
-
-  // the ids of a request, which also has the filter of the space when the spaces are enabled
-  const idsOfRequest = (request: UpdateByQueryRequest) => {
-    const query = request.query as {
-      terms?: { _id: string[] };
-      bool?: { filter: Array<{ terms: { _id: string[] } }> };
-    };
-    return (query.terms ?? query.bool!.filter[0].terms)._id;
-  };
-  const idsOfRun = (run: number) =>
-    idsOfRequest(esClient.updateByQuery.mock.calls[run][0] as UpdateByQueryRequest);
-
-  const scriptUpdateRuns = (outcomes: Record<number, Partial<UpdateByQueryResponse>> = {}) => {
-    const sizes: number[] = [];
-    esClient.updateByQuery.mockReset();
-    esClient.updateByQuery.mockImplementation((async (request: UpdateByQueryRequest) => {
-      sizes.push(idsOfRequest(request).length);
-      return { task: `node1:${sizes.length - 1}` };
-    }) as never);
-    esClient.tasks.get.mockImplementation((async ({ task_id: taskId }: { task_id: string }) => {
-      const run = Number(taskId.split(':')[1]);
-      return {
-        completed: true,
-        task: {},
-        response: {
-          failures: [],
-          version_conflicts: 0,
-          total: sizes[run],
-          updated: sizes[run],
-          ...outcomes[run],
-        },
-      };
-    }) as never);
-  };
+  const scriptRuns = (outcomes: Record<number, Partial<UpdateByQueryResponse>> = {}) =>
+    scriptUpdateRuns(esClient, outcomes);
+  const idsOfRunOfBatch = (run: number) => idsOfRun(esClient, run);
 
   const failure = (id: string, reason: string): BulkIndexByScrollFailure => ({
     id,
@@ -499,12 +464,12 @@ describe('update_agent_tags', () => {
         ['cancelled', CANCELLED],
         ['timed out', TIMED_OUT],
       ])('should run again for the same agents when it %s, and record that run', async (_, run) => {
-        scriptUpdateRuns({ 0: run });
+        scriptRuns({ 0: run });
 
         const res = await batch(agentsOf(5));
 
         expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
-        expect(idsOfRun(1)).toEqual(idsOfRun(0));
+        expect(idsOfRunOfBatch(1)).toEqual(idsOfRunOfBatch(0));
         // every agent is recorded once, by the run that went through all of them, none as skipped
         expect(res).toEqual(expect.objectContaining({ updated: 5 }));
         expect(recordedAgents()).toHaveLength(5);
@@ -512,7 +477,7 @@ describe('update_agent_tags', () => {
       });
 
       it('should not record what the run that was cancelled did, failures included', async () => {
-        scriptUpdateRuns({
+        scriptRuns({
           0: { ...CANCELLED, failures: [failure('agent2', 'failed in the cancelled run')] },
           1: { updated: 4, failures: [failure('agent3', 'failed in the run that finished')] },
         });
@@ -526,7 +491,7 @@ describe('update_agent_tags', () => {
 
       it('should record every agent as skipped when an update that went through found none', async () => {
         // all of them left the space: a total of 0 that is a count, as the update did not time out
-        scriptUpdateRuns({ 0: { updated: 0, total: 0 } });
+        scriptRuns({ 0: { updated: 0, total: 0 } });
 
         await batch(agentsOf(2));
 
@@ -546,7 +511,7 @@ describe('update_agent_tags', () => {
       };
 
       it('should record every agent once', async () => {
-        scriptUpdateRuns({ 0: CANCELLED });
+        scriptRuns({ 0: CANCELLED });
 
         const res = await batch(agentsOf(2500));
 
@@ -556,7 +521,7 @@ describe('update_agent_tags', () => {
       });
 
       it('should record the failures of every chunk, and retry for the version conflicts of them', async () => {
-        scriptUpdateRuns({ 0: CANCELLED, ...chunksWithConflictsAndFailures });
+        scriptRuns({ 0: CANCELLED, ...chunksWithConflictsAndFailures });
 
         await expect(batch(agentsOf(2500))).rejects.toBeInstanceOf(FleetVersionConflictError);
 
@@ -570,7 +535,7 @@ describe('update_agent_tags', () => {
       });
 
       it('should record the version conflicts of the chunks when no retry is left', async () => {
-        scriptUpdateRuns({ 0: CANCELLED, ...chunksWithConflictsAndFailures });
+        scriptRuns({ 0: CANCELLED, ...chunksWithConflictsAndFailures });
 
         await expect(batch(agentsOf(2500), MAX_RETRY_COUNT)).rejects.toThrow(
           'Version conflict of 2 agents'
@@ -586,7 +551,7 @@ describe('update_agent_tags', () => {
 
       describe('one of which is cancelled too', () => {
         it('should record what the chunks before it did, and fail for the retry of the action', async () => {
-          scriptUpdateRuns({ 0: CANCELLED, 2: CANCELLED });
+          scriptRuns({ 0: CANCELLED, 2: CANCELLED });
 
           await expect(batch(agentsOf(2500))).rejects.toBeInstanceOf(UpdateByQueryIncompleteError);
 
@@ -598,7 +563,7 @@ describe('update_agent_tags', () => {
         });
 
         it('should record the failures and conflicts of the chunks before it', async () => {
-          scriptUpdateRuns({ 0: CANCELLED, ...chunksWithConflictsAndFailures, 3: CANCELLED });
+          scriptRuns({ 0: CANCELLED, ...chunksWithConflictsAndFailures, 3: CANCELLED });
 
           await expect(batch(agentsOf(2500))).rejects.toBeInstanceOf(FleetVersionConflictError);
 
@@ -608,7 +573,7 @@ describe('update_agent_tags', () => {
         });
 
         it('should record nothing when it is the first chunk', async () => {
-          scriptUpdateRuns({ 0: CANCELLED, 1: CANCELLED });
+          scriptRuns({ 0: CANCELLED, 1: CANCELLED });
 
           await expect(batch(agentsOf(2500))).rejects.toBeInstanceOf(UpdateByQueryIncompleteError);
 
@@ -622,7 +587,7 @@ describe('update_agent_tags', () => {
         updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], []);
 
       it('should be run again, and recorded', async () => {
-        scriptUpdateRuns({ 0: CANCELLED });
+        scriptRuns({ 0: CANCELLED });
 
         const res = await updateByIds();
 
@@ -632,7 +597,7 @@ describe('update_agent_tags', () => {
       });
 
       it('should fail without a retry of the request on top of the one in chunks, and record nothing', async () => {
-        scriptUpdateRuns({ 0: CANCELLED, 1: CANCELLED });
+        scriptRuns({ 0: CANCELLED, 1: CANCELLED });
 
         await expect(updateByIds()).rejects.toBeInstanceOf(UpdateByQueryIncompleteError);
 
@@ -1067,7 +1032,7 @@ describe('update_agent_tags', () => {
       });
 
       it('should check the space again when the update is run again after being cancelled', async () => {
-        scriptUpdateRuns({ 0: CANCELLED });
+        scriptRuns({ 0: CANCELLED });
 
         await batch('myspace');
 
