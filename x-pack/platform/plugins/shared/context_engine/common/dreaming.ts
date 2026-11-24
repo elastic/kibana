@@ -199,7 +199,7 @@ export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined
 
 const DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES: readonly string[] = [
   'system-context-engine-dreaming-',
-  'system-context-engine-trace-dreaming-',
+  'system-context-engine-transcript-dreaming-',
   'system-context-engine-relationships-',
 ];
 

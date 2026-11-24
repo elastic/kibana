@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ReadTraceTranscriptsOutput,
-  TraceTranscriptMemory,
-} from '../../common/step_types/read_trace_transcripts';
+import type { DreamingMemory } from '../../common/step_types/dreaming_memory';
 import type {
   SessionEventPosition,
   SessionEventsService,
@@ -16,14 +13,14 @@ import type {
   StoredSessionEvent,
 } from '../session_events/types';
 import { SESSION_TURN_ID_PREFIX } from './ids';
-import { estimateTokens } from './trace_batches';
+import { estimateTokens } from './transcript_batches';
 import {
   MAX_TEXT_PART_CHARS,
   MAX_TOOL_ARGUMENTS_CHARS,
   MAX_TOOL_RESULT_CHARS,
   capRound,
   truncate,
-} from './trace_transcripts';
+} from './transcript_text';
 
 /** The memory type of a turn read from session events. */
 export const SESSION_TURN_TYPE = 'session.turn';
@@ -78,7 +75,7 @@ const toMemory = (
   { sessionId, turnId, endedAt }: SessionTurn,
   transcript: string,
   spaceId: string
-): TraceTranscriptMemory => ({
+): DreamingMemory => ({
   id: `${SESSION_TURN_ID_PREFIX}${sessionId}/${turnId}`,
   type: SESSION_TURN_TYPE,
   title: `Agent conversation, turn ending ${endedAt}`,
@@ -133,9 +130,12 @@ export const readSessionTranscripts = async ({
   size: number;
   /** The read stops before its transcripts exceed this many estimated tokens. */
   maxTokens?: number;
-}): Promise<
-  Pick<ReadTraceTranscriptsOutput, 'memories' | 'resume_from' | 'resume_after' | 'skipped'>
-> => {
+}): Promise<{
+  memories: DreamingMemory[];
+  resume_from: string;
+  resume_after?: string;
+  skipped: number;
+}> => {
   const afterEvent = after ? decodeAfter(after) : undefined;
   if (Date.parse(until) <= Date.parse(since)) {
     return { memories: [], resume_from: since, ...(after && { resume_after: after }), skipped: 0 };
@@ -150,7 +150,7 @@ export const readSessionTranscripts = async ({
     size,
   });
 
-  const memories: TraceTranscriptMemory[] = [];
+  const memories: DreamingMemory[] = [];
   const left = new Set<string>();
   let skipped = 0;
   let tokens = 0;

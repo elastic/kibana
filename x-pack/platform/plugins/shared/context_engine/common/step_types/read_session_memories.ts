@@ -10,7 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
 import { aiIndexIdSchema } from './ki';
-import { traceTranscriptMemorySchema } from './read_trace_transcripts';
+import { dreamingMemorySchema } from './dreaming_memory';
 
 export const READ_SESSION_MEMORIES_STEP_ID = 'context-engine.readSessionMemories' as const;
 
@@ -50,7 +50,7 @@ export const readSessionMemoriesInputSchema = lazySchema(() =>
 export const readSessionMemoriesOutputSchema = lazySchema(() =>
   z.object({
     memories: z
-      .array(traceTranscriptMemorySchema)
+      .array(dreamingMemorySchema)
       .describe(
         'The latest revision of each memory, oldest first, shaped as the memories applyDreamChanges takes'
       ),

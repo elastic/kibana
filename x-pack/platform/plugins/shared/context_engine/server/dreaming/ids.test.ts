@@ -20,10 +20,10 @@ import {
 } from './ids';
 
 describe('dreaming ids', () => {
-  it('cites memory KIs as ki:// and rounds read from traces as trace://', () => {
+  it('cites memory KIs as ki:// and session turns as session://', () => {
     expect(memoryUri('m-1')).toBe('ki://m-1');
-    expect(memoryUri('trace:51fff8a2')).toBe('trace://51fff8a2');
-    for (const id of ['m-1', 'trace:51fff8a2']) {
+    expect(memoryUri('session:s-1/turn-2')).toBe('session://s-1/turn-2');
+    for (const id of ['m-1', 'session:s-1/turn-2']) {
       expect(memoryIdFromUri(memoryUri(id))).toBe(id);
     }
     expect(memoryIdFromUri('https://example.com')).toBeUndefined();
@@ -94,7 +94,6 @@ describe('dreaming ids', () => {
 
   it('cites each source of memories by a scheme of its own, and reads the citation back', () => {
     for (const [memoryId, uri] of [
-      ['trace:abc', 'trace://abc'],
       ['session-memory:m-1', 'session-memory://m-1'],
       ['session:s-1/turn-2', 'session://s-1/turn-2'],
       ['mem-1', 'ki://mem-1'],
@@ -107,7 +106,6 @@ describe('dreaming ids', () => {
 
   it('tells a memory KI of the AI index from a memory read from outside it', () => {
     expect(isMemoryKiId('mem-1')).toBe(true);
-    expect(isMemoryKiId('trace:abc')).toBe(false);
     expect(isMemoryKiId('session-memory:m-1')).toBe(false);
     expect(isMemoryKiId('session:s-1/turn-2')).toBe(false);
   });

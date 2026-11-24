@@ -87,7 +87,7 @@ steps:
             includeOutput: true
             omitStepExecutions: true
 
-  - name: read_traces
+  - name: read_transcripts
     type: context-engine.readSessionTranscripts
     with:
       ai_index_id: '{{ consts.ai_index_id }}'
@@ -100,10 +100,10 @@ steps:
   - name: active
     type: data.set
     with:
-      memories: '${{ steps.read_traces.output.memories }}'
-      batches: '${{ steps.read_traces.output.batches }}'
-      resume_from: '{{ steps.read_traces.output.resume_from }}'
-      resume_after: '{{ steps.read_traces.output.resume_after }}'
+      memories: '${{ steps.read_transcripts.output.memories }}'
+      batches: '${{ steps.read_transcripts.output.batches }}'
+      resume_from: '{{ steps.read_transcripts.output.resume_from }}'
+      resume_after: '{{ steps.read_transcripts.output.resume_after }}'
       created: 0
       updated: 0
       deleted: 0

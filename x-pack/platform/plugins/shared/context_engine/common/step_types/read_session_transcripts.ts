@@ -11,13 +11,13 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
 import { aiIndexIdSchema } from './ki';
 import {
-  DEFAULT_TRACE_SETTLE_MINUTES,
-  DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS,
-  DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS,
-  MAX_TRACE_TRANSCRIPTS_BATCH_TOKENS,
-  MAX_TRACE_TRANSCRIPTS_READ_TOKENS,
-  traceTranscriptMemorySchema,
-} from './read_trace_transcripts';
+  DEFAULT_TRANSCRIPT_SETTLE_MINUTES,
+  DEFAULT_TRANSCRIPTS_BATCH_TOKENS,
+  DEFAULT_TRANSCRIPTS_READ_TOKENS,
+  MAX_TRANSCRIPTS_BATCH_TOKENS,
+  MAX_TRANSCRIPTS_READ_TOKENS,
+  dreamingMemorySchema,
+} from './dreaming_memory';
 
 export const READ_SESSION_TRANSCRIPTS_STEP_ID = 'context-engine.readSessionTranscripts' as const;
 
@@ -55,19 +55,19 @@ export const readSessionTranscriptsInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(1)
-      .max(MAX_TRACE_TRANSCRIPTS_READ_TOKENS)
+      .max(MAX_TRANSCRIPTS_READ_TOKENS)
       .optional()
       .describe(
-        `Stop the read before its transcripts exceed this many estimated tokens. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS}.`
+        `Stop the read before its transcripts exceed this many estimated tokens. Defaults to ${DEFAULT_TRANSCRIPTS_READ_TOKENS}.`
       ),
     batch_tokens: z
       .number()
       .int()
       .min(1)
-      .max(MAX_TRACE_TRANSCRIPTS_BATCH_TOKENS)
+      .max(MAX_TRANSCRIPTS_BATCH_TOKENS)
       .optional()
       .describe(
-        `The most estimated tokens of one batch: what one model call reads. Defaults to ${DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS}.`
+        `The most estimated tokens of one batch: what one model call reads. Defaults to ${DEFAULT_TRANSCRIPTS_BATCH_TOKENS}.`
       ),
     settle_minutes: z
       .number()
@@ -76,7 +76,7 @@ export const readSessionTranscriptsInputSchema = lazySchema(() =>
       .max(60)
       .optional()
       .describe(
-        `Leave events saved this recently for the next run: their turn may still be running. Defaults to ${DEFAULT_TRACE_SETTLE_MINUTES}.`
+        `Leave events saved this recently for the next run: their turn may still be running. Defaults to ${DEFAULT_TRANSCRIPT_SETTLE_MINUTES}.`
       ),
   })
 );
@@ -84,12 +84,12 @@ export const readSessionTranscriptsInputSchema = lazySchema(() =>
 export const readSessionTranscriptsOutputSchema = lazySchema(() =>
   z.object({
     memories: z
-      .array(traceTranscriptMemorySchema)
+      .array(dreamingMemorySchema)
       .describe(
         'One transcript per turn, oldest first, shaped as the memories applyDreamChanges takes'
       ),
     batches: z
-      .array(z.array(traceTranscriptMemorySchema))
+      .array(z.array(dreamingMemorySchema))
       .describe(
         'The memories in batches for the model, a call each: each session together and in order, whole sessions up to batch_tokens'
       ),

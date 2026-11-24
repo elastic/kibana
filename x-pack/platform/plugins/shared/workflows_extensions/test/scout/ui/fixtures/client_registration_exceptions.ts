@@ -63,7 +63,6 @@ export const CLIENT_REGISTRATION_EXCEPTIONS: readonly string[] = [
   'context-engine.getFeedbackContext',
   'context-engine.readSessionMemories',
   'context-engine.readSessionTranscripts',
-  'context-engine.readTraceTranscripts',
   'context-engine.recordImprovements',
   'context-engine.updateKi',
 ];

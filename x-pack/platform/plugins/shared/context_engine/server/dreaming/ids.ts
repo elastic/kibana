@@ -61,8 +61,6 @@ export const kiUri = (kiId: string): string => `${KI_URI_PREFIX}${kiId}`;
 export const kiIdFromUri = (uri: string): string | undefined =>
   uri.startsWith(KI_URI_PREFIX) ? uri.slice(KI_URI_PREFIX.length) : undefined;
 
-/** Memory ids of agent rounds read from traces: the prefix, then the trace id. */
-export const TRACE_ROUND_ID_PREFIX = 'trace:';
 /** Memory ids of session memories: the prefix, then the id the memory was saved under. */
 export const SESSION_MEMORY_ID_PREFIX = 'session-memory:';
 /** Memory ids of session turns: the prefix, then the session id, a slash and the turn id. */
@@ -70,7 +68,6 @@ export const SESSION_TURN_ID_PREFIX = 'session:';
 
 /** The memories dreaming reads from outside the AI index, each cited by a URI scheme of its own. */
 const EXTERNAL_MEMORY_SOURCES = [
-  { idPrefix: TRACE_ROUND_ID_PREFIX, uriPrefix: 'trace://' },
   { idPrefix: SESSION_MEMORY_ID_PREFIX, uriPrefix: 'session-memory://' },
   { idPrefix: SESSION_TURN_ID_PREFIX, uriPrefix: 'session://' },
 ] as const;

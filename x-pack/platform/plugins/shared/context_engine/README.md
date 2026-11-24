@@ -519,7 +519,7 @@ writes to or from traces.
   since the last run, across all users of the space. A memory revised since is read once, as its
   latest revision. A forgotten memory, or one whose latest revision no longer lists the AI index,
   is left out.
-- The trace dreaming workflow reads **transcripts** with `context-engine.readSessionTranscripts`.
+- The transcript dreaming workflow reads **transcripts** with `context-engine.readSessionTranscripts`.
   It finds the events that list the AI index and were saved since the last run, then rebuilds
   each turn they belong to from all its events. A turn that continues after a run is read again,
   whole, by a later run. Reasoning and meta events are left out of a transcript, and a turn

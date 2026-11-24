@@ -8,7 +8,7 @@
 jest.mock('../dreaming/session_transcripts');
 
 import { DEFAULT_SESSION_TRANSCRIPTS_READ_SIZE } from '../../common/step_types/read_session_transcripts';
-import { DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS } from '../../common/step_types/read_trace_transcripts';
+import { DEFAULT_TRANSCRIPTS_READ_TOKENS } from '../../common/step_types/dreaming_memory';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import { readSessionTranscripts } from '../dreaming/session_transcripts';
@@ -60,7 +60,7 @@ describe('readSessionTranscripts step', () => {
       after: '["s","e"]',
       until: '2026-11-11T13:15:00.000Z',
       size: 20,
-      maxTokens: DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS,
+      maxTokens: DEFAULT_TRANSCRIPTS_READ_TOKENS,
     });
   });
 

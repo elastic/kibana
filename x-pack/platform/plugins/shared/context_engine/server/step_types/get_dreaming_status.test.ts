@@ -26,7 +26,7 @@ describe('getDreamingStatusStepDefinition', () => {
     memoryEnabled?: boolean;
     canRead?: boolean;
     get?: jest.Mock;
-    source?: 'memories' | 'transcripts' | 'traces' | 'relationships' | 'maintenance';
+    source?: 'memories' | 'transcripts' | 'relationships' | 'maintenance';
   } = {}) =>
     getDreamingStatusStepDefinition({
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
@@ -46,7 +46,7 @@ describe('getDreamingStatusStepDefinition', () => {
     await expect(run()).resolves.toEqual({ output: { dream: true } });
   });
 
-  it('dreams on transcripts without trace sources, which they no longer read', async () => {
+  it('dreams on transcripts, which need no sources configured on the AI index', async () => {
     await expect(run({ source: 'transcripts' })).resolves.toEqual({ output: { dream: true } });
   });
 
@@ -86,33 +86,6 @@ describe('getDreamingStatusStepDefinition', () => {
     ).resolves.toEqual({
       output: { dream: false, reason: "AI index 'support' does not exist." },
     });
-  });
-
-  it('dreams on traces only for an AI index that dreams and has trace sources', async () => {
-    const trace = { type: 'elastic_agent', value: 'elastic-ai-agent', query: 'FROM traces' };
-
-    await expect(
-      run({
-        source: 'traces',
-        get: jest.fn().mockResolvedValue({ id: 'support', dreaming, traces: [trace] }),
-      })
-    ).resolves.toEqual({ output: { dream: true } });
-    await expect(run({ source: 'traces' })).resolves.toEqual({
-      output: { dream: false, reason: "AI index 'support' has no trace sources to dream on." },
-    });
-    await expect(
-      run({
-        source: 'traces',
-        get: jest.fn().mockResolvedValue({
-          id: 'support',
-          dreaming: { ...dreaming, enabled: false },
-          traces: [trace],
-        }),
-      })
-    ).resolves.toEqual({
-      output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
-    });
-    await expect(run()).resolves.toEqual({ output: { dream: true } });
   });
 
   it('links relationships only for an AI index that dreams with relationship types', async () => {

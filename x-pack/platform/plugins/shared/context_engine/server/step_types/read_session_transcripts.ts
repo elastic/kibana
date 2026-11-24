@@ -7,15 +7,15 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
-  DEFAULT_TRACE_SETTLE_MINUTES,
-  DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS,
-  DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS,
-} from '../../common/step_types/read_trace_transcripts';
+  DEFAULT_TRANSCRIPT_SETTLE_MINUTES,
+  DEFAULT_TRANSCRIPTS_BATCH_TOKENS,
+  DEFAULT_TRANSCRIPTS_READ_TOKENS,
+} from '../../common/step_types/dreaming_memory';
 import {
   DEFAULT_SESSION_TRANSCRIPTS_READ_SIZE,
   readSessionTranscriptsStepCommonDefinition,
 } from '../../common/step_types/read_session_transcripts';
-import { batchByConversation } from '../dreaming/trace_batches';
+import { batchByConversation } from '../dreaming/transcript_batches';
 import { readSessionTranscripts } from '../dreaming/session_transcripts';
 import type { DreamingStepDependencies } from './helpers';
 import { assertAiIndexReadable } from './read_session_helpers';
@@ -39,9 +39,9 @@ export const getReadSessionTranscriptsStepDefinition = (
         since,
         after,
         size = DEFAULT_SESSION_TRANSCRIPTS_READ_SIZE,
-        max_tokens: maxTokens = DEFAULT_TRACE_TRANSCRIPTS_READ_TOKENS,
-        batch_tokens: batchTokens = DEFAULT_TRACE_TRANSCRIPTS_BATCH_TOKENS,
-        settle_minutes: settleMinutes = DEFAULT_TRACE_SETTLE_MINUTES,
+        max_tokens: maxTokens = DEFAULT_TRANSCRIPTS_READ_TOKENS,
+        batch_tokens: batchTokens = DEFAULT_TRANSCRIPTS_BATCH_TOKENS,
+        settle_minutes: settleMinutes = DEFAULT_TRANSCRIPT_SETTLE_MINUTES,
       } = context.input;
       if (!(await assertAiIndexReadable(deps, context, aiIndexId, spaceId))) {
         return { output: { memories: [], batches: [], resume_from: since, skipped: 0 } };

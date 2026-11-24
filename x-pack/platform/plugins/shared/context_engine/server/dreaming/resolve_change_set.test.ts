@@ -285,18 +285,18 @@ describe('resolveChangeSet', () => {
     ]);
   });
 
-  it('takes a round cited without its trace: prefix as the round', () => {
+  it('takes a round cited without its session-memory: prefix as the round', () => {
     const { operations, rejected } = resolveChangeSet(
       changeSet({
         entities: [
-          { ref: 'new:1', type: 'team', title: 'A', source_memory_ids: ['abc', 'trace:abc'] },
+          { ref: 'new:1', type: 'team', title: 'A', source_memory_ids: ['abc', 'session-memory:abc'] },
         ],
       }),
-      context({ memories: new Map([['trace:abc', '2026-10-01T10:00:00.000Z']]) })
+      context({ memories: new Map([['session-memory:abc', '2026-10-01T10:00:00.000Z']]) })
     );
 
     expect(rejected).toEqual([]);
-    expect((operations[0] as UpsertEntityOperation).sourceMemoryIds).toEqual(['trace:abc']);
+    expect((operations[0] as UpsertEntityOperation).sourceMemoryIds).toEqual(['session-memory:abc']);
   });
 
   it('takes a new fact keyed otherwise than new:, such as fact:1, as a new fact', () => {

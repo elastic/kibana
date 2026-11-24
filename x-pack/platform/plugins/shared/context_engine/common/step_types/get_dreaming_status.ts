@@ -17,10 +17,10 @@ export const getDreamingStatusInputSchema = lazySchema(() =>
   z.object({
     ai_index_id: aiIndexIdSchema,
     source: z
-      .enum(['memories', 'transcripts', 'traces', 'relationships', 'maintenance'])
+      .enum(['memories', 'transcripts', 'relationships', 'maintenance'])
       .optional()
       .describe(
-        'What the run dreams on: session memories (the default); session transcripts; the traces configured on the AI index, which also need a trace source; its facts and entities, to link with relationships, which also need relationship types; or its facts and entities, to maintain, which also needs maintenance turned on'
+        'What the run dreams on: session memories (the default); session transcripts; its facts and entities, to link with relationships, which also need relationship types; or its facts and entities, to maintain, which also needs maintenance turned on'
       ),
   })
 );

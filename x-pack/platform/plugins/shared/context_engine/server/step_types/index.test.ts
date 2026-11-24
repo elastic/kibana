@@ -55,7 +55,6 @@ describe('registerStepDefinitions', () => {
       'context-engine.getFeedbackContext',
       'context-engine.recordImprovements',
       'context-engine.getDreamingStatus',
-      'context-engine.readTraceTranscripts',
       'context-engine.readSessionMemories',
       'context-engine.readSessionTranscripts',
       'context-engine.applyDreamChanges',
