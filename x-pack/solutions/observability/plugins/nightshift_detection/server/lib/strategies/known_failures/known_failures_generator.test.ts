@@ -31,6 +31,7 @@ const createQuery = (id: string, esql: string): QueryLink => ({
 });
 
 const WATCHED = createQuery('watched', 'FROM logs | WHERE message : "timeout"');
+const CREATED_AT = new Date(WINDOW.from - 60 * MINUTE_MS).toISOString();
 const RULE_ID = getKnownFailureRuleId({ spaceId: 'default', query: WATCHED, cpsEnabled: false });
 
 /** A run of the watched rule whose seven newest minutes, from `firstMinute` past the window start, hold `counts`. */
@@ -80,10 +81,21 @@ const createContext = ({
       ],
     },
     rules: {
-      listManaged: async () => [{ id: RULE_ID, enabled: true }],
+      listManaged: async () => [{ id: RULE_ID, enabled: true, created_at: CREATED_AT }],
       readRows: async () => rows,
     },
-    history: { readHistory: async () => new Map([[SERIES_KEY, history]]) },
+    // Filtered by time like the store, so a test sees what a too-narrow lookback would miss.
+    history: {
+      readHistory: async ({ from, to }: { from: number; to: number }) =>
+        new Map([
+          [
+            SERIES_KEY,
+            history.filter(
+              ({ bucket_start: bucketStart }) => bucketStart >= from && bucketStart < to
+            ),
+          ],
+        ]),
+    },
   } as unknown as GeneratorContext);
 
 describe('KnownFailuresGenerator', () => {
@@ -99,10 +111,10 @@ describe('KnownFailuresGenerator', () => {
       knowledge: { listQueries: async () => [WATCHED, offRule] },
       rules: {
         listManaged: async () => [
-          { id: getId(WATCHED), enabled: true },
-          { id: getId(offRule), enabled: false },
+          { id: getId(WATCHED), enabled: true, created_at: CREATED_AT },
+          { id: getId(offRule), enabled: false, created_at: CREATED_AT },
           // The rule of a knowledge indicator deleted since: nothing to describe its rows.
-          { id: 'orphan', enabled: true },
+          { id: 'orphan', enabled: true, created_at: CREATED_AT },
         ],
         readRows,
       },
@@ -153,6 +165,43 @@ describe('KnownFailuresGenerator', () => {
       }),
     ]);
     expect(result.notes).toEqual([]);
+  });
+
+  // A rule reconciled during the window has had no chance to run.
+  it('does not note a rule created during the window as not running', async () => {
+    const result = await new KnownFailuresGenerator().generate({
+      ...createContext({ rows: [] }),
+      rules: {
+        listManaged: async () => [
+          {
+            id: RULE_ID,
+            enabled: true,
+            created_at: new Date(WINDOW.from + MINUTE_MS).toISOString(),
+          },
+        ],
+        readRows: async () => [],
+      },
+    } as unknown as GeneratorContext);
+
+    expect(result.notes).toEqual([]);
+  });
+
+  // The newest minutes of a run start before the window; a minute an earlier tick reported there
+  // must be found, whichever check reported it, or it is reported twice.
+  it('does not report again a minute an earlier tick reported just before the window', async () => {
+    const reportedMinute = WINDOW.from - 4 * MINUTE_MS;
+    const earlierReading = {
+      status: 'breached',
+      rule_id: RULE_ID,
+      bucket_start: reportedMinute,
+      details: { check: 'lasting_rise', threshold: 3 },
+    } as unknown as DetectionSignalReading;
+
+    const result = await new KnownFailuresGenerator().generate(
+      createContext({ rows: [createRow(-4, [40, 2, 2, 2, 2, 2, 2])], history: [earlierReading] })
+    );
+
+    expect(result.readings).toEqual([]);
   });
 
   // An edited query gets a new rule; the old rule's threshold describes another condition.

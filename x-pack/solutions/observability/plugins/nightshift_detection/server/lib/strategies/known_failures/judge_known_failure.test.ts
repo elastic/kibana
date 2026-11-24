@@ -35,7 +35,8 @@ const findMinutes = (measurements: KnownFailureMeasurement[], options = {}) =>
   ]);
 
 describe('getBaselineThreshold', () => {
-  it('keeps at least three matches above a flat hour', () => {
+  // A zero mean must not turn the burstiness ratio into NaN.
+  it('keeps a finite threshold, three matches up, over an hour with no matches', () => {
     expect(getBaselineThreshold({ median: 0, mad: 0, mean: 0, std_dev: 0 })).toBe(3);
   });
 
@@ -61,6 +62,7 @@ describe('findUnusualMinutes', () => {
     expect(findMinutes([createRun(0, [2, justAbove, 2, justAbove, 2, 2, 2])])).toEqual([
       [3, justAbove],
     ]);
+    expect(findMinutes([createRun(0, [2, justAbove, 2, 2, justAbove, 2, 2])])).toEqual([]);
   });
 
   // A late minute is judged again on the newer run's full count.
@@ -117,14 +119,14 @@ describe('getLastingRise', () => {
   };
 
   it('reports the rise of a step up that still holds', () => {
-    expect(getLastingRise(STEP)).toBe(5);
+    expect(getLastingRise(STEP)).toEqual({ rise: 5, floor: 3 });
   });
 
   it.each([
     ['faded back', { recent_median: 6 }],
     ['a step down', { after_median: 2, recent_median: 2 }],
     ['too small for its level', { after_median: 7, recent_median: 7 }],
-    ['not confident', { pvalue: 0.2 }],
+    ['not confident', { pvalue: 0.05 }],
     ['measured from too few minutes', { before_minutes: 5 }],
     ['a spike, which the minute check judges', { type: 'spike' }],
   ])('reports nothing for a change %s', (_label, override) => {

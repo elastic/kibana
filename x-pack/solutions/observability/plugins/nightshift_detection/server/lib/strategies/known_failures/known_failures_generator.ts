@@ -19,6 +19,7 @@ import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants
 import {
   findUnusualMinutes,
   getLastingRise,
+  type LastingRise,
   type OpenKnownFailure,
   type UnusualMinute,
 } from './judge_known_failure';
@@ -34,12 +35,15 @@ import {
 const MINUTE_MS = 60_000;
 /**
  * How far back the history read reaches before the window: the newest minutes a run returns start
- * before the window, and an event opened up to a quiet period before them may still be open.
+ * before the window, and an event opened up to a quiet period before them may still be open. One
+ * more minute because a run is stamped when its row is indexed, a little after its query read
+ * `NOW()`.
  */
 const HISTORY_LOOKBACK_MS =
   (KNOWN_FAILURES_SETTINGS.newest_minutes +
     KNOWN_FAILURES_SETTINGS.quiet_period_minutes +
-    KNOWN_FAILURES_SETTINGS.end_margin_minutes) *
+    KNOWN_FAILURES_SETTINGS.end_margin_minutes +
+    1) *
   MINUTE_MS;
 
 /** The runs of one Known failures rule in the window, decoded, with the indicator it watches. */
@@ -52,7 +56,7 @@ interface MeasuredKnownFailure {
 /** What the judgement found for one knowledge indicator. */
 interface JudgedKnownFailure extends MeasuredKnownFailure {
   unusual: UnusualMinute[];
-  rise?: number;
+  rise?: LastingRise;
 }
 
 /**
@@ -104,7 +108,9 @@ async function readMeasuredFailures(context: GeneratorContext): Promise<{
   const { spaceId, window, rules, abortSignal } = context;
 
   // 1.
-  const knowledgeIndicatorByRuleId = await readWatchedKnowledgeIndicators(context);
+  const { knowledgeIndicatorByRuleId, createdAtByRuleId } = await readWatchedKnowledgeIndicators(
+    context
+  );
   if (knowledgeIndicatorByRuleId.size === 0) {
     return { measured: [], notes: [], truncated: false };
   }
@@ -125,6 +131,10 @@ async function readMeasuredFailures(context: GeneratorContext): Promise<{
   const measured = [...knowledgeIndicatorByRuleId].flatMap(([ruleId, knowledgeIndicator]) => {
     const ruleRows = rowsByRuleId[ruleId] ?? [];
     if (ruleRows.length === 0) {
+      // A rule created during the window, just reconciled, has had no chance to run yet.
+      if ((createdAtByRuleId.get(ruleId) ?? 0) >= window.from) {
+        return [];
+      }
       notes.push(
         `rule [${ruleId}] of knowledge indicator [${knowledgeIndicator.query.id}] wrote no row in the window, so it may not be running`
       );
@@ -143,8 +153,8 @@ async function readMeasuredFailures(context: GeneratorContext): Promise<{
 
 /**
  * The knowledge indicator each enabled rule watches, by rule id, joined on the id the reconciler
- * gives the indicator's rule. Only the tick's enabled sources are read. A disabled rule, or an
- * indicator without a rule, gives nothing.
+ * gives the indicator's rule, and when each rule was created. Only the tick's enabled sources are
+ * read. A disabled rule, or an indicator without a rule, gives nothing.
  */
 async function readWatchedKnowledgeIndicators({
   spaceId,
@@ -152,23 +162,31 @@ async function readWatchedKnowledgeIndicators({
   knowledge,
   rules,
   cpsEnabled,
-}: GeneratorContext): Promise<Map<string, QueryLink>> {
+}: GeneratorContext): Promise<{
+  knowledgeIndicatorByRuleId: Map<string, QueryLink>;
+  createdAtByRuleId: Map<string, number>;
+}> {
   const [managedRules, queries] = await Promise.all([
     rules.listManaged({ strategy: KNOWN_FAILURES_STRATEGY_ID }),
     knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) }),
   ]);
-  const enabledRuleIds = new Set(managedRules.filter(({ enabled }) => enabled).map(({ id }) => id));
+  const createdAtByRuleId = new Map(
+    managedRules
+      .filter(({ enabled }) => enabled)
+      .map(({ id, created_at: createdAt }): [string, number] => [id, Date.parse(createdAt)])
+  );
 
   // Two indicators with the same query share a rule id; sorted by id, the same one always wins.
-  return new Map(
+  const knowledgeIndicatorByRuleId = new Map(
     sortBy(queries, ({ query }) => query.id)
       .filter(({ query }) => getUnwatchableReason(query) === undefined)
       .map((query): [string, QueryLink] => [
         getKnownFailureRuleId({ spaceId, query, cpsEnabled }),
         query,
       ])
-      .filter(([ruleId]) => enabledRuleIds.has(ruleId))
+      .filter(([ruleId]) => createdAtByRuleId.has(ruleId))
   );
+  return { knowledgeIndicatorByRuleId, createdAtByRuleId };
 }
 
 /**
@@ -208,9 +226,11 @@ async function judgeMeasuredFailures({
 }
 
 /**
- * The unusual minutes already reported for a knowledge indicator, and the event they left open. The
- * open event counts only when the same rule reported it: an edited query gets a new rule, and the
- * threshold saved for the old query says nothing about the new one.
+ * The minutes already reported for a knowledge indicator, and the event its unusual minutes left
+ * open. Every breached minute counts as reported, whichever check or rule reported it: the store
+ * keeps one reading per series and minute, so a second one would hide the first. The open event
+ * counts only when the same rule reported it: an edited query gets a new rule, and the threshold
+ * saved for the old query says nothing about the new one.
  */
 function readPastMinutes({
   readings,
@@ -219,19 +239,19 @@ function readPastMinutes({
   readings: DetectionSignalReading[];
   ruleId: string;
 }): { reported: Set<number>; open?: OpenKnownFailure } {
-  const unusual = readings.filter(
-    ({ status, details }) => status === 'breached' && details.check === 'unusual_minute'
-  );
+  const breached = readings.filter(({ status }) => status === 'breached');
   const last = sortBy(
-    unusual.filter(
+    breached.filter(
       ({ rule_id: readingRuleId, details }) =>
-        readingRuleId === ruleId && typeof details.threshold === 'number'
+        readingRuleId === ruleId &&
+        details.check === 'unusual_minute' &&
+        typeof details.threshold === 'number'
     ),
     ({ bucket_start: bucketStart }) => bucketStart
   ).pop();
 
   return {
-    reported: new Set(unusual.map(({ bucket_start: bucketStart }) => bucketStart)),
+    reported: new Set(breached.map(({ bucket_start: bucketStart }) => bucketStart)),
     open: last && { threshold: last.details.threshold as number, last_minute: last.bucket_start },
   };
 }
@@ -251,9 +271,13 @@ function toReadings({
   const context = { knowledgeIndicator, ruleId: newest.rule_id, entity, cpsEnabled };
   const lastMinute = newest.minutes[newest.minutes.length - 1]?.minute;
 
+  // The rise sits on the newest minute; when that minute is unusual too, its reading already
+  // keeps the event open, and a second reading for the minute would replace it in the store.
+  const isRiseMinuteTaken = unusual.some(({ minute }) => minute === lastMinute);
+
   return [
     ...unusual.map((minute) => toUnusualMinuteReading({ ...context, unusual: minute })),
-    ...(rise !== undefined && newest.change && lastMinute !== undefined
+    ...(rise !== undefined && newest.change && lastMinute !== undefined && !isRiseMinuteTaken
       ? [toLastingRiseReading({ ...context, change: newest.change, rise, lastMinute })]
       : []),
   ];

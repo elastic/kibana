@@ -46,7 +46,12 @@ const CHANGE = {
   after_median: 10,
   recent_median: 11,
 };
-const RISE = { ...CONTEXT, change: CHANGE, rise: 5, lastMinute: Date.UTC(2026, 10, 20, 10, 30) };
+const RISE = {
+  ...CONTEXT,
+  change: CHANGE,
+  rise: { rise: 5, floor: 3 },
+  lastMinute: Date.UTC(2026, 10, 20, 10, 30),
+};
 
 describe('toUnusualMinuteReading', () => {
   it('reports the minute with the threshold it was judged against', () => {
@@ -64,13 +69,14 @@ describe('toUnusualMinuteReading', () => {
       description: 'Checkout calls time out',
       importance: 70,
       evidence_esql:
-        'FROM logs | WHERE message : "timeout"\n| WHERE @timestamp >= "2026-11-20T10:27:00.000Z" AND @timestamp < "2026-11-20T10:28:00.000Z"',
+        'FROM logs\n| WHERE message : "timeout"\n| WHERE @timestamp >= "2026-11-20T10:27:00.000Z" AND @timestamp < "2026-11-20T10:28:00.000Z"',
       role: 'primary',
       compare_with_normal: false,
       quiet_period_minutes: 10,
       details: {
         check: 'unusual_minute',
         threshold: 8,
+        normal_level: 2,
         baseline: BASELINE,
         ki_id: 'ki-timeouts',
         linked_feature_ids: ['checkout'],
@@ -91,6 +97,23 @@ describe('toUnusualMinuteReading', () => {
     });
 
     expect(edited.fingerprint).toBe('known_failures:ki-timeouts');
+  });
+
+  // A KEEP without `@timestamp` would make the time filter after it fail.
+  it('leaves the output-only commands out of the evidence query', () => {
+    const reading = toUnusualMinuteReading({
+      ...CONTEXT,
+      knowledgeIndicator: {
+        ...KNOWLEDGE_INDICATOR,
+        query: {
+          ...KNOWLEDGE_INDICATOR.query,
+          esql: { query: 'FROM logs | WHERE message : "timeout" | KEEP message' },
+        },
+      },
+      unusual: UNUSUAL,
+    });
+
+    expect(reading.evidence_esql).not.toMatch(/KEEP/);
   });
 
   it('routes the evidence query across projects when cross-project search is on', () => {
@@ -118,10 +141,11 @@ describe('toUnusualMinuteReading', () => {
 });
 
 describe('toLastingRiseReading', () => {
-  it('reports the recent minutes that show the rise holds, with evidence from the change', () => {
+  // The newest minute, so the reading cannot land on a minute an unusual-minute reading holds.
+  it('reports the rise on the newest minute, with evidence from the change', () => {
     expect(toLastingRiseReading(RISE)).toEqual(
       expect.objectContaining({
-        bucket_start: Date.UTC(2026, 10, 20, 10, 16),
+        bucket_start: Date.UTC(2026, 10, 20, 10, 30),
         bucket_end: Date.UTC(2026, 10, 20, 10, 31),
         value: 11,
         evidence_esql: expect.stringContaining(
@@ -129,9 +153,10 @@ describe('toLastingRiseReading', () => {
         ),
         details: expect.objectContaining({
           check: 'lasting_rise',
+          threshold: 3,
+          normal_level: 5,
           change_type: 'step_change',
           change_at: '2026-11-20T09:50:00.000Z',
-          before_change_median: 5,
           after_change_median: 10,
           rise: 5,
         }),

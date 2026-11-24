@@ -102,7 +102,10 @@ export function findUnusualMinutes({
   let event = open;
   const unusual: UnusualMinute[] = [];
   for (const { minute, count, baseline, threshold: own } of minutes) {
-    const isOpen = event !== undefined && minute - event.last_minute <= quietMinutes * MINUTE_MS;
+    // Open only from the event's last unusual minute on: an overlap minute before it, read back from
+    // history, was judged before the event opened and keeps that judgement's threshold.
+    const sinceLast = event ? minute - event.last_minute : -1;
+    const isOpen = event !== undefined && sinceLast >= 0 && sinceLast <= quietMinutes * MINUTE_MS;
     const threshold = isOpen && event ? event.threshold : own;
     // 2. and 3.
     const isUnusual = isOpen
@@ -119,13 +122,21 @@ export function findUnusualMinutes({
   return unusual;
 }
 
+/** A rise that still holds, and the floor it had to clear. */
+export interface LastingRise {
+  rise: number;
+  /** `max(min_rise, √(before + 1))`; the last minutes had to stay half of it above the level before. */
+  floor: number;
+}
+
 /**
  * The rise of a step or trend change that still holds, or `undefined`. The change must be confident
- * and measured from enough minutes, the level after it must clear `max(min_rise, √(before + 1))`,
- * a Poisson-like floor that grows with the level, and the last minutes must still sit at least half
- * that above the level before it, so a rise that faded back reports nothing.
+ * (p-value below `max_pvalue`) and measured from enough minutes, the level after it must clear
+ * `max(min_rise, √(before + 1))`, a Poisson-like floor that grows with the level, and the last
+ * minutes must still sit at least half that above the level before it, so a rise that faded back
+ * reports nothing.
  */
-export function getLastingRise(change: KnownFailureChange | undefined): number | undefined {
+export function getLastingRise(change: KnownFailureChange | undefined): LastingRise | undefined {
   const {
     max_pvalue: maxPvalue,
     min_before_minutes: minBefore,
@@ -134,7 +145,7 @@ export function getLastingRise(change: KnownFailureChange | undefined): number |
   if (
     !change ||
     !LEVEL_CHANGE_TYPES.has(change.type) ||
-    change.pvalue > maxPvalue ||
+    change.pvalue >= maxPvalue ||
     change.before_minutes < minBefore
   ) {
     return undefined;
@@ -142,6 +153,6 @@ export function getLastingRise(change: KnownFailureChange | undefined): number |
   const floor = Math.max(minRise, Math.sqrt(change.before_median + 1));
   const rise = change.after_median - change.before_median;
   return rise >= floor && change.recent_median - change.before_median >= floor / 2
-    ? rise
+    ? { rise, floor }
     : undefined;
 }

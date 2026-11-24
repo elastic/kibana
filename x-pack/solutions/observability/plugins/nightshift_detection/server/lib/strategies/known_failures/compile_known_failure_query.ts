@@ -135,8 +135,11 @@ export function compileKnownFailureQuery({
 }
 
 /**
- * The knowledge indicator's own query over `[from, to)`, with literal timestamps, so the judge can
- * run it later and see the documents that made the count rise.
+ * The knowledge indicator's filters over `[from, to)`, with literal timestamps, so the judge can
+ * run it later and see the documents that made the count rise. Built from the same `FROM` and
+ * `WHERE` commands the rule counts, so a `KEEP` or `DROP` that removes `@timestamp` cannot break it.
+ *
+ * @throws Error when the indicator cannot be counted, as {@link compileKnownFailureQuery} does.
  */
 export function compileEvidenceQuery({
   esql,
@@ -151,9 +154,16 @@ export function compileEvidenceQuery({
   to: number;
   cpsEnabled: boolean;
 }): string {
-  const query = `${esql.trim()}\n| WHERE @timestamp >= "${new Date(
-    from
-  ).toISOString()}" AND @timestamp < "${new Date(to).toISOString()}"`;
+  const filterCommands = getFilterCommands(esql);
+  if (!filterCommands) {
+    throw new Error('Known failures counts FROM … | WHERE … queries only');
+  }
+  const query = [
+    ...filterCommands,
+    `WHERE @timestamp >= "${new Date(from).toISOString()}" AND @timestamp < "${new Date(
+      to
+    ).toISOString()}"`,
+  ].join('\n| ');
   return withProjectRouting({ query, cpsEnabled });
 }
 

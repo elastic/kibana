@@ -9,7 +9,7 @@ import type { QueryLink } from '@kbn/significant-events-schema';
 import type { DetectionSignalReading } from '../types';
 import { compileEvidenceQuery } from './compile_known_failure_query';
 import { KNOWN_FAILURES_SETTINGS, KNOWN_FAILURES_STRATEGY_ID } from './constants';
-import type { UnusualMinute } from './judge_known_failure';
+import type { LastingRise, UnusualMinute } from './judge_known_failure';
 import type { KnownFailureChange } from './known_failure_row';
 
 const MINUTE_MS = 60_000;
@@ -44,11 +44,15 @@ export function toUnusualMinuteReading({
     value: count,
     // `check` and `threshold` are read back from history: an open event is judged against the
     // threshold saved when it opened.
-    details: { check: 'unusual_minute', threshold, baseline },
+    details: { check: 'unusual_minute', threshold, normal_level: baseline.median, baseline },
   });
 }
 
-/** The breached reading of a rise that still holds, over the minutes that show it holds. */
+/**
+ * The breached reading of a rise that still holds, on the newest minute the rule counted, with the
+ * median of the recent minutes as its value. The newest minute because the store keeps one reading
+ * per series and minute: an earlier minute may already hold an unusual minute's reading.
+ */
 export function toLastingRiseReading({
   change,
   rise,
@@ -56,25 +60,28 @@ export function toLastingRiseReading({
   ...context
 }: ReadingContext & {
   change: KnownFailureChange;
-  rise: number;
+  rise: LastingRise;
   /** Start of the newest minute the rule counted, in epoch milliseconds. */
   lastMinute: number;
 }): DetectionSignalReading {
-  const to = lastMinute + MINUTE_MS;
   return toReading({
     ...context,
-    from: to - KNOWN_FAILURES_SETTINGS.recent_minutes * MINUTE_MS,
-    to,
+    from: lastMinute,
+    to: lastMinute + MINUTE_MS,
     evidenceFrom: change.at,
     value: change.recent_median,
     details: {
       check: 'lasting_rise',
+      // The rise had to clear `threshold`, and the recent minutes half of it, over the level before.
+      threshold: rise.floor,
+      normal_level: change.before_median,
+      rise: rise.rise,
       change_type: change.type,
       p_value: change.pvalue,
       change_at: new Date(change.at).toISOString(),
-      before_change_median: change.before_median,
+      before_change_minutes: change.before_minutes,
       after_change_median: change.after_median,
-      rise,
+      recent_minutes: KNOWN_FAILURES_SETTINGS.recent_minutes,
     },
   });
 }
