@@ -110,8 +110,9 @@ echo "--- Create kibana-ci docker cloud image archives"
 ./gradlew :distribution:docker:cloud-ess-docker-export:assemble \
   -x :distribution:tools:server-launcher:nativeImageLinuxX64 \
   -x :distribution:tools:server-launcher:nativeImageLinuxAarch64 && {
-  ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch/elasticsearch-cloud-ess" --format "{{.ID}}")
-  ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch/elasticsearch-cloud-ess" --format "{{.Tag}}")
+  # Since elastic/elasticsearch#161755 the cloud-ess image is tagged under the elasticsearch-ci namespace
+  ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud-ess" --format "{{.ID}}")
+  ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud-ess" --format "{{.Tag}}")
   KIBANA_ES_CLOUD_VERSION="$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
   KIBANA_ES_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:$KIBANA_ES_CLOUD_VERSION"
   echo $ES_CLOUD_ID $ES_CLOUD_VERSION $KIBANA_ES_CLOUD_VERSION $KIBANA_ES_CLOUD_IMAGE

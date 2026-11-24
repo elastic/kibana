@@ -24,6 +24,7 @@ The `security.attack-discovery.run` step exposes the same underlying pipeline to
 - Multiple Attack Discovery runs can be composed into a single workflow (e.g., separate runs per tenant or time window).
 - Custom alert retrieval workflows can feed their results into the step via the `alerts` input.
 - The validation step can be replaced with a custom workflow by setting `validation_workflow_id`.
+- The generation-phase ground-truth gate can be turned off with `ground_truth_gate_enabled: false` when a later step owns the false-positive decision, as the AlertZero Attack Discovery Worker's review does.
 
 ## Key design decisions
 

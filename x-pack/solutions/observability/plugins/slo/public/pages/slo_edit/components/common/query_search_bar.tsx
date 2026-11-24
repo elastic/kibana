@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
-import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
+import { is, kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -51,15 +51,14 @@ export function QuerySearchBar({
       name={name}
       control={control}
       rules={{
-        required: Boolean(required) && Boolean(dataView),
+        required: Boolean(required),
         validate: (value) => {
+          const kqlQuery = is(kqlWithFiltersSchema, value) ? value.kqlQuery : value;
+          if (typeof kqlQuery !== 'string') return;
+
           try {
-            if (!dataView) return;
-            if (typeof value === 'string') {
-              const ast = fromKueryExpression(value);
-              toElasticsearchQuery(ast, dataView);
-            } else if (kqlWithFiltersSchema.is(value)) {
-              const ast = fromKueryExpression(value.kqlQuery);
+            const ast = fromKueryExpression(kqlQuery);
+            if (dataView) {
               toElasticsearchQuery(ast, dataView);
             }
           } catch (e) {
@@ -73,7 +72,7 @@ export function QuerySearchBar({
             setRange?.(nRange);
           }
 
-          if (kqlQuerySchema.is(field.value)) {
+          if (is(kqlQuerySchema, field.value)) {
             field.onChange(String(value?.query));
           } else {
             field.onChange({
@@ -112,7 +111,7 @@ export function QuerySearchBar({
                 isDisabled={!dataView}
                 placeholder={placeholder}
                 query={{
-                  query: kqlQuerySchema.is(field.value)
+                  query: is(kqlQuerySchema, field.value)
                     ? String(field.value)
                     : field.value.kqlQuery,
                   language: 'kuery',
@@ -139,7 +138,7 @@ export function QuerySearchBar({
 
                   dataService.query.filterManager.setFilters(updatedFilters);
 
-                  if (kqlQuerySchema.is(field.value)) {
+                  if (is(kqlQuerySchema, field.value)) {
                     field.onChange({
                       filters: updatedFilters,
                       kqlQuery: field.value,
@@ -167,7 +166,7 @@ export function QuerySearchBar({
                 showQueryInput={true}
                 disableQueryLanguageSwitcher={true}
                 onClearSavedQuery={() => {}}
-                filters={kqlQuerySchema.is(field.value) ? [] : field.value?.filters ?? []}
+                filters={is(kqlQuerySchema, field.value) ? [] : field.value?.filters ?? []}
                 allowSavingQueries={true}
                 showSavedQueryControls={true}
               />

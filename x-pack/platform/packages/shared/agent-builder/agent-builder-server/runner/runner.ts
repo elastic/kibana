@@ -31,6 +31,19 @@ export interface RunToolReturn {
 }
 
 /**
+ * Return of `execute_dynamic_tool`: the inner tool's return, tagged with the inner tool id so the
+ * call's result content is attributed to the inner tool (its token budget, its filestore path).
+ */
+export interface DynamicToolRunReturn extends RunToolReturn {
+  dynamicToolId: string;
+}
+
+export const isDynamicToolRunReturn = (
+  toolReturn: RunToolReturn
+): toolReturn is DynamicToolRunReturn =>
+  'dynamicToolId' in toolReturn && typeof toolReturn.dynamicToolId === 'string';
+
+/**
  * Represents a runner, which is the entry point to execute all agentBuilder primitives,
  * such as tools or agents.
  *

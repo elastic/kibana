@@ -15,14 +15,11 @@ import { AiopsProvider } from './aiops';
 import { CanvasElementProvider } from './canvas_element';
 import { CasesServiceProvider } from './cases';
 import { DataStreamProvider } from './data_stream';
-import { GrokDebuggerProvider } from './grok_debugger';
 import { MachineLearningProvider } from './ml';
 import { PipelineEditorProvider } from './pipeline_editor';
 import { PipelineListProvider } from './pipeline_list';
 import { RandomProvider } from './random';
 import { RulesServiceProvider } from './rules';
-import { SampleDataServiceProvider } from './sample_data';
-import { TransformProvider } from './transform';
 import { UserMenuProvider } from './user_menu';
 
 import {
@@ -75,10 +72,7 @@ export const services = {
   userMenu: UserMenuProvider,
   aceEditor: AceEditorProvider,
   rules: RulesServiceProvider,
-  sampleData: SampleDataServiceProvider,
-  grokDebugger: GrokDebuggerProvider,
   ml: MachineLearningProvider,
-  transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
   random: RandomProvider,
   pipelineList: PipelineListProvider,

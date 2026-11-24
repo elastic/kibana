@@ -21,6 +21,11 @@ jest.mock('../indices/lead_index_service', () => ({
   createLeadIndexService: () => ({ createIndex: mockCreateIndices }),
 }));
 
+const mockGetUserLeadPrivileges = jest.fn();
+jest.mock('../get_user_lead_privileges', () => ({
+  getUserLeadPrivileges: (...args: unknown[]) => mockGetUserLeadPrivileges(...args),
+}));
+
 const mockStartTask = jest.fn();
 jest.mock('../tasks', () => ({
   startLeadGenerationTask: (...args: unknown[]) => mockStartTask(...args),
@@ -35,11 +40,14 @@ describe('enableLeadGenerationRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetUserLeadPrivileges.mockResolvedValue({ has_write_permissions: true });
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     context = requestContextMock.convertContext(requestContextMock.create({ ...clients }));
     mockTaskManagerStart = taskManagerMock.createStart();
-    getStartServicesMock = jest.fn().mockResolvedValue([{}, { taskManager: mockTaskManagerStart }]);
+    getStartServicesMock = jest
+      .fn()
+      .mockResolvedValue([{}, { taskManager: mockTaskManagerStart, security: {} }]);
     enableLeadGenerationRoute(server.router, logger, getStartServicesMock);
   });
 
@@ -69,6 +77,21 @@ describe('enableLeadGenerationRoute', () => {
         namespace: expect.any(String),
       })
     );
+  });
+
+  it('returns 403 without creating indices or starting the task when the user lacks write permissions', async () => {
+    mockGetUserLeadPrivileges.mockResolvedValue({ has_write_permissions: false });
+
+    const request = requestMock.create({
+      method: 'post',
+      path: ENABLE_LEAD_GENERATION_URL,
+      body: { connectorId: 'test-connector-id' },
+    });
+
+    const response = await server.inject(request, context);
+    expect(response.status).toEqual(403);
+    expect(mockCreateIndices).not.toHaveBeenCalled();
+    expect(mockStartTask).not.toHaveBeenCalled();
   });
 
   it('returns 500 when Task Manager is not available', async () => {

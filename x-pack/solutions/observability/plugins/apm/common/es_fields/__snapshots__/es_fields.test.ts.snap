@@ -25,6 +25,8 @@ exports[`Error ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
 
 exports[`Error ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
+exports[`Error ATTRIBUTE_RPC_GRPC_STATUS_CODE 1`] = `undefined`;
+
 exports[`Error CHILD_ID 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_CITY_NAME 1`] = `undefined`;
@@ -332,6 +334,8 @@ exports[`Error RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME 1`] = `undefined`
 
 exports[`Error RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
+exports[`Error RPC_GRPC_STATUS_CODE 1`] = `undefined`;
+
 exports[`Error SERVER_ADDRESS 1`] = `undefined`;
 
 exports[`Error SERVER_PORT 1`] = `undefined`;
@@ -496,6 +500,8 @@ exports[`Span ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
 exports[`Span ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
 
 exports[`Span ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_RPC_GRPC_STATUS_CODE 1`] = `undefined`;
 
 exports[`Span CHILD_ID 1`] = `undefined`;
 
@@ -791,6 +797,8 @@ exports[`Span RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME 1`] = `undefined`;
 
 exports[`Span RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
+exports[`Span RPC_GRPC_STATUS_CODE 1`] = `undefined`;
+
 exports[`Span SERVER_ADDRESS 1`] = `undefined`;
 
 exports[`Span SERVER_PORT 1`] = `undefined`;
@@ -951,6 +959,8 @@ exports[`Transaction ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
 exports[`Transaction ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
 
 exports[`Transaction ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_RPC_GRPC_STATUS_CODE 1`] = `undefined`;
 
 exports[`Transaction CHILD_ID 1`] = `undefined`;
 
@@ -1259,6 +1269,8 @@ exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
 exports[`Transaction RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME 1`] = `undefined`;
 
 exports[`Transaction RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
+
+exports[`Transaction RPC_GRPC_STATUS_CODE 1`] = `undefined`;
 
 exports[`Transaction SERVER_ADDRESS 1`] = `undefined`;
 

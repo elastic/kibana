@@ -155,7 +155,10 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('indexes with the provided ki_id so re-runs replace the same KI', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'logs-index-profile' }) };
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      index: jest.fn().mockResolvedValue({ _id: 'logs-index-profile' }),
+    };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
       esClient,
@@ -182,6 +185,85 @@ describe('getCreateKiStepDefinition', () => {
     );
   });
 
+  it('keeps the stored user_id on a rerun', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'logs-index-profile',
+              _index: 'ai-index-idx-my-ai-index',
+              _source: { ...kiInput, id: 'logs-index-profile', user_id: 'alice' },
+            },
+          ],
+        },
+      }),
+      index: jest.fn().mockResolvedValue({ _id: 'logs-index-profile' }),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'logs-index-profile',
+        ki: { ...kiInput, user_id: null },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      verifyKi,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({ document: expect.objectContaining({ user_id: 'alice' }) }),
+      { signal: context.abortSignal }
+    );
+  });
+
+  it('rejects a user_id change on a rerun', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'logs-index-profile',
+              _index: 'ai-index-idx-my-ai-index',
+              _source: { ...kiInput, id: 'logs-index-profile', user_id: 'alice' },
+            },
+          ],
+        },
+      }),
+      index: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'logs-index-profile',
+        ki: { ...kiInput, user_id: 'bob' },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      verifyKi,
+      ...mockKiStepTelemetry(),
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('ValidationError');
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
   it('uses the generated id as both _id and the id field on an index dest', async () => {
     const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ignored' }) };
     const context = createMockStepContext({
@@ -206,7 +288,10 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('appends a data stream document carrying ki_id as its logical id', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'generated' }) };
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      index: jest.fn().mockResolvedValue({ _id: 'generated' }),
+    };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
       esClient,
@@ -620,9 +705,9 @@ describe('getCreateKiStepDefinition', () => {
       expect(esClient.index).toHaveBeenCalledTimes(1);
     });
 
-    it('skips the write when verification fails', async () => {
+    it('writes the KI as verification_failed when verification fails', async () => {
       verifyKi.mockResolvedValue(failed);
-      const esClient = { index: jest.fn() };
+      const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
         esClient,
@@ -639,13 +724,13 @@ describe('getCreateKiStepDefinition', () => {
       });
       const result = await handler(context);
 
-      expect(result).toEqual({ output: { verification: failed } });
-      expect(service.get).not.toHaveBeenCalled();
-      expect(esClient.index).not.toHaveBeenCalled();
-      expect(telemetry.analyticsService.reportKiWrite).not.toHaveBeenCalled();
-      expect(telemetry.logger.debug).toHaveBeenCalledWith(
-        "KI create skipped in AI index 'my-ai-index'"
-      );
+      expect(result).toEqual({ output: { id: expect.any(String), verification: failed } });
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect(esClient.index.mock.calls[0][0].document.governance).toEqual({
+        provenance: { created_by: mockKiWriter, updated_by: mockKiWriter },
+        lifecycle: { status: 'verification_failed' },
+      });
+      expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
     });
 
     it('checks the write privilege before running verifiers', async () => {

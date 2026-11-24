@@ -7,7 +7,8 @@
 
 import type { z } from '@kbn/zod';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { KbnPalette, getPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import { getPalettes } from '@kbn/palettes';
 import type { ChartTypeRegistry } from './chart_type_registry';
 
 type ConfigInput<T extends SupportedChartType> = z.input<ChartTypeRegistry[T]['schema']>;
@@ -129,7 +130,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
         title: '<Measure> over time',
         axis: { x: { scale: 'temporal', ...hiddenAxisTitle }, y: hiddenAxisTitle },
         legend: listLegend,
-        styling: { areas: { fill: 'gradient' } },
         layers: [
           {
             type: 'area',
@@ -152,7 +152,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
           visibility: 'visible',
           statistics: ['avg', 'min', 'max'],
         },
-        styling: { areas: { fill: 'gradient' } },
         layers: [
           {
             type: 'area',
@@ -219,7 +218,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
         title: '<Measure> over time',
         axis: { x: { scale: 'temporal', ...hiddenAxisTitle }, y: hiddenAxisTitle },
         legend: listLegend,
-        styling: { areas: { fill: 'gradient' } },
         layers: [
           {
             type: 'area',

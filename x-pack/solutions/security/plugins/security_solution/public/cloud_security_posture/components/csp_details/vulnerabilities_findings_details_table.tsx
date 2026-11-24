@@ -58,8 +58,8 @@ import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/
 import {
   combineEntityGroupFilters,
   getEntityGroupRecords,
-} from '../../../flyout/entity_details/shared/entity_store_group_utils';
-import type { EntityViewMode } from '../../../flyout/entity_details/shared/types';
+} from '../../../flyout_v2/entity/shared/utils/entity_store_group_utils';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 type VulnerabilitySortFieldType =

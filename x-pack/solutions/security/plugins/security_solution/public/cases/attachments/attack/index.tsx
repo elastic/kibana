@@ -8,6 +8,7 @@
 import React, { Suspense, type ComponentType } from 'react';
 import type {
   CommonAttachmentListViewProps,
+  RelatedRemovalChoice,
   UnifiedReferenceAttachmentViewProps,
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
@@ -76,7 +77,6 @@ const ShowAttackButton = React.lazy(async () => {
   const { ShowAttackButton: Component } = await import('./components/show_attack_button');
   return { default: Component };
 });
-
 const AttackTabContentWrapper: ComponentType<CommonAttachmentListViewProps> = (props) => (
   <Suspense fallback={null}>
     <AttackTabContentLazy {...props} />
@@ -92,11 +92,44 @@ const DISPLAY_NAME = i18n.translate('xpack.securitySolution.attackDiscovery.case
   defaultMessage: 'Attacks',
 });
 
+const getAttackCountLabel = (count: number): string =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.attacksCount', {
+    defaultMessage: '{count, plural, one {# attack} other {# attacks}}',
+    values: { count },
+  });
+
+const getAttackRelatedRemoval = (count: number): RelatedRemovalChoice => ({
+  description: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.relatedRemoval.description',
+    {
+      defaultMessage:
+        'Also remove the alerts {count, plural, one {this attack} other {these attacks}} added to the case? Alerts that also belong to another attack in this case stay.',
+      values: { count },
+    }
+  ),
+  removeOnlyLabel: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.relatedRemoval.removeOnlyButtonLabel',
+    {
+      defaultMessage: 'Remove {count, plural, one {attack} other {attacks}} only',
+      values: { count },
+    }
+  ),
+  removeWithRelatedLabel: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.relatedRemoval.removeWithAlertsButtonLabel',
+    {
+      defaultMessage: 'Remove {count, plural, one {attack} other {attacks}} and alerts',
+      values: { count },
+    }
+  ),
+});
+
 export const getAttackAttachment = () =>
   defineAttachment({
     id: SECURITY_ATTACK_ATTACHMENT_TYPE,
     getIcon: () => 'securitySignalDetected',
     getLabel: () => DISPLAY_NAME,
+    getCountLabel: ({ count }) => getAttackCountLabel(count),
+    getRelatedRemoval: ({ count }) => getAttackRelatedRemoval(count),
     schema: AttackAttachmentPayloadSchema,
     getCreationActivity: () => ({
       eventColor: 'subdued' as const,
@@ -214,7 +247,7 @@ export type AttackAttachmentWithoutOwner = Omit<AttackAttachmentPayload, 'owner'
 export interface AlertAttachmentWithoutOwner {
   type: typeof SECURITY_ALERT_ATTACHMENT_TYPE;
   attachmentId: string[];
-  metadata: { index: string };
+  metadata: { index: string; sourceAttachmentIds: string[] };
 }
 
 /** How many attacks one add-to-case may carry; each attack takes two bulk-create attachments. */
@@ -347,7 +380,8 @@ export const buildAttacksAttachments = (
       attachments.push({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: attachedAlertIds,
-        metadata: { index: attack.alertsIndex },
+        // Records the attack that brought these alerts, so removing it can take them along.
+        metadata: { index: attack.alertsIndex, sourceAttachmentIds: [attack.id] },
       });
     }
   }

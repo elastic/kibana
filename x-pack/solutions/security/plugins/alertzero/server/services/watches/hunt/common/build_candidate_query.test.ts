@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { HUNT_USABLE_FILTER } from '@kbn/alertzero-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { buildCandidateQuery } from './build_candidate_query';
+import { NOTHING_TO_HUNT_FILTER } from './nothing_to_hunt_filter';
 import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
+import { buildHuntSpaceFilterTerms } from './space_filter';
+import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -40,6 +44,23 @@ const servePool = (pool: string[]) => async (request: unknown) => {
   const remaining = pool.filter((id) => !excluded.has(id));
   return searchResponseOf(remaining.slice(0, size), remaining.length);
 };
+
+/** A response whose hits carry the per-space ledger flag the sweep reads. */
+const searchResponseWithCoverage = (
+  hits: Array<{ id: string; spaceId: string; coveragePending: boolean }>
+): SearchResponse<unknown, unknown> => ({
+  ...searchResponseOf(hits.map(({ id }) => id)),
+  hits: {
+    hits: hits.map(
+      ({ id, spaceId, coveragePending }): SearchHit<unknown> => ({
+        _index: 'reports',
+        _id: id,
+        _source: { evidence: [{ space_id: spaceId, coverage_pending: coveragePending }] },
+      })
+    ),
+    total: { value: hits.length, relation: 'eq' },
+  },
+});
 
 describe('buildCandidateQuery', () => {
   it('returns empty ids when no reports exist', async () => {
@@ -121,7 +142,12 @@ describe('buildCandidateQuery', () => {
           esClient,
           logger,
           { trigger: 'scheduled', spaceId: 'default', limit: 100 },
-          async () => new Set(pool.map(buildHuntInvestigationConversationId))
+          async () =>
+            new Set(
+              pool.map((reportId) =>
+                buildHuntInvestigationConversationId({ spaceId: 'default', reportId })
+              )
+            )
         )
       ).rejects.toThrow('timed out');
     });
@@ -217,6 +243,67 @@ describe('buildCandidateQuery', () => {
     expect(JSON.stringify(searchBodyOf(esClient).query)).not.toContain('last_hunted_at');
   });
 
+  describe('the publish-date lookback', () => {
+    const lookbackFilter = (range: string) => ({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { range: { 'content.published_at': { gte: range } } },
+          {
+            bool: {
+              filter: [{ range: { '@timestamp': { gte: range } } }],
+              must_not: [{ exists: { field: 'content.published_at' } }],
+            },
+          },
+        ],
+      },
+    });
+
+    const filtersFor = async (params: Partial<Parameters<typeof buildCandidateQuery>[2]>) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'scheduled',
+        spaceId: 'default',
+        ...params,
+      });
+      return JSON.stringify(searchBodyOf(esClient).query.bool.filter);
+    };
+
+    it('defaults a scheduled sweep to 30 days', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'default' });
+      expect(searchBodyOf(esClient).query.bool.filter).toContainEqual(lookbackFilter('now-30d'));
+    });
+
+    it('uses the requested lookbackDays', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'scheduled',
+        spaceId: 'default',
+        lookbackDays: 14,
+      });
+      expect(searchBodyOf(esClient).query.bool.filter).toContainEqual(lookbackFilter('now-14d'));
+    });
+
+    it('does not age-gate a request that names report ids', async () => {
+      const filters = await filtersFor({
+        trigger: 'manual',
+        report_ids: ['rpt-old'],
+        lookbackDays: 14,
+      });
+      expect(filters).not.toContain('content.published_at');
+      expect(filters).not.toContain('@timestamp');
+    });
+
+    it('treats a manual trigger with empty report_ids as a sweep', async () => {
+      const filters = await filtersFor({ trigger: 'manual', report_ids: [] });
+      expect(filters).toContain('now-30d');
+    });
+  });
+
   describe('the hunt-once gate', () => {
     // The report mapping is `dynamic: strict` and has no top-level `feedback`
     // field: hunt outcomes live in the per-space nested `evidence[]` array. A flat
@@ -242,6 +329,7 @@ describe('buildCandidateQuery', () => {
                       { term: { 'evidence.space_id': 'hunt-a' } },
                       { exists: { field: 'evidence.last_hunted_at' } },
                     ],
+                    must_not: [{ term: { 'evidence.coverage_pending': true } }],
                   },
                 },
               },
@@ -249,6 +337,30 @@ describe('buildCandidateQuery', () => {
           ],
         },
       });
+    });
+
+    it('lets a hunted report back in when an earlier run left its coverage pending', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'scheduled',
+        spaceId: 'hunt-a',
+      });
+      // The gate excludes a hunted report only when its flag is not set, so a report without the
+      // flag, including every one hunted before the flag existed, stays retired.
+      expect(JSON.stringify(searchBodyOf(esClient).query)).toContain(
+        '"must_not":[{"term":{"evidence.coverage_pending":true}}]'
+      );
+    });
+
+    it('asks for the per-space ledger flag, and nothing else, from each hit', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'hunt-a' });
+      expect(searchBodyOf(esClient)._source).toEqual([
+        'evidence.space_id',
+        'evidence.coverage_pending',
+      ]);
     });
 
     it('never gates on the unmapped flat feedback field', async () => {
@@ -268,10 +380,27 @@ describe('buildCandidateQuery', () => {
         trigger: 'scheduled',
         spaceId: 'hunt-a',
       });
-      expect(searchBodyOf(esClient).sort[0]).toEqual({
+      expect(searchBodyOf(esClient).sort[1]).toEqual({
         'evidence.corroborated_rank_score': {
           order: 'desc',
           missing: 0,
+          nested: { path: 'evidence', filter: { term: { 'evidence.space_id': 'hunt-a' } } },
+        },
+      });
+    });
+
+    it('sorts reports by this space retry count before rank, so a retry never displaces a new report', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'scheduled',
+        spaceId: 'hunt-a',
+      });
+      expect(searchBodyOf(esClient).sort[0]).toEqual({
+        'evidence.hunt_retry_count': {
+          order: 'asc',
+          missing: 0,
+          unmapped_type: 'integer',
           nested: { path: 'evidence', filter: { term: { 'evidence.space_id': 'hunt-a' } } },
         },
       });
@@ -281,7 +410,21 @@ describe('buildCandidateQuery', () => {
   describe('the open-proposal guard', () => {
     const hunted = 'rpt-open';
     const free = 'rpt-free';
-    const readOpenProposals = async () => new Set([buildHuntInvestigationConversationId(hunted)]);
+    const readOpenProposals = async () =>
+      new Set([buildHuntInvestigationConversationId({ spaceId: 'default', reportId: hunted })]);
+
+    it("does not skip a report because another space's Hunt Proposal is open", async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([hunted, free]));
+      const result = await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        async () =>
+          new Set([buildHuntInvestigationConversationId({ spaceId: 'hunt-b', reportId: hunted })])
+      );
+      expect(result.ids).toEqual([hunted, free]);
+    });
 
     it('drops a report whose Hunt Proposal is still open', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -293,6 +436,53 @@ describe('buildCandidateQuery', () => {
         readOpenProposals
       );
       expect(result.ids).toEqual([free]);
+    });
+
+    it('does not park a report with pending coverage behind its open Proposal', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(
+        searchResponseWithCoverage([
+          { id: hunted, spaceId: 'default', coveragePending: true },
+          { id: free, spaceId: 'default', coveragePending: false },
+        ])
+      );
+      const result = await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        readOpenProposals
+      );
+      expect(result.ids).toEqual([hunted, free]);
+      expect(result.skipped).toEqual([]);
+    });
+
+    it('still parks a report whose pending flag belongs to another space', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(
+        searchResponseWithCoverage([{ id: hunted, spaceId: 'hunt-b', coveragePending: true }])
+      );
+      const result = await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        readOpenProposals
+      );
+      expect(result.ids).toEqual([]);
+      expect(result.skipped).toEqual([{ id: hunted, reason: 'open_proposal' }]);
+    });
+
+    it('still parks a report with an open Proposal whose coverage is not pending', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(
+        searchResponseWithCoverage([{ id: hunted, spaceId: 'default', coveragePending: false }])
+      );
+      const result = await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        readOpenProposals
+      );
+      expect(result.skipped).toEqual([{ id: hunted, reason: 'open_proposal' }]);
     });
 
     it('reports the dropped report under skipped with reason open_proposal', async () => {
@@ -344,7 +534,11 @@ describe('buildCandidateQuery', () => {
     // reports behind that run permanently out of reach.
     const parkedIds = (count: number) => Array.from({ length: count }, (_, i) => `rpt-parked-${i}`);
     const readOpenProposals = (parked: string[]) => async () =>
-      new Set(parked.map((id) => buildHuntInvestigationConversationId(id)));
+      new Set(
+        parked.map((id) =>
+          buildHuntInvestigationConversationId({ spaceId: 'default', reportId: id })
+        )
+      );
 
     it('selects reports ranked behind a full page of open Proposals', async () => {
       const parked = parkedIds(30);
@@ -522,11 +716,317 @@ describe('buildCandidateQuery', () => {
         esClient,
         logger,
         { trigger: 'scheduled', spaceId: 'default' },
-        async () => new Set([buildHuntInvestigationConversationId('rpt-open')])
+        async () =>
+          new Set([
+            buildHuntInvestigationConversationId({ spaceId: 'default', reportId: 'rpt-open' }),
+          ])
       );
       expect(result.ids).toEqual(['rpt-free']);
       expect(result.skipped).toEqual([{ id: 'rpt-open', reason: 'open_proposal' }]);
       expect(result.truncated).toBe(false);
+    });
+  });
+
+  describe('the hunt-usable bar', () => {
+    /** First search answers with `usable`, the ids-only lookup with `existing`. */
+    const serveNamed = (usable: string[], existing: string[]) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search
+        .mockResolvedValueOnce(searchResponseOf(usable))
+        .mockResolvedValueOnce(searchResponseOf(existing));
+      return esClient;
+    };
+
+    it('applies to the scheduled request', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'default' });
+      expect(searchBodyOf(esClient).query.bool.filter).toContain(HUNT_USABLE_FILTER);
+    });
+
+    it('applies to the manual request alongside the ids clause', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf(['rpt-1']));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-1'],
+        spaceId: 'default',
+      });
+      const { filter } = searchBodyOf(esClient).query.bool;
+      expect(filter).toContain(HUNT_USABLE_FILTER);
+      expect(filter).toContainEqual({ ids: { values: ['rpt-1'] } });
+    });
+
+    it('skips a named report that exists but is filtered out as not_usable', async () => {
+      const esClient = serveNamed(['rpt-ok'], ['rpt-pending']);
+      const result = await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-ok', 'rpt-pending'],
+        spaceId: 'default',
+      });
+      expect(result.ids).toEqual(['rpt-ok']);
+      expect(result.skipped).toEqual([{ id: 'rpt-pending', reason: 'not_usable' }]);
+    });
+
+    it('looks up only the missing ids, in the same space, without source or totals', async () => {
+      const esClient = serveNamed(['rpt-ok'], ['rpt-pending']);
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-ok', 'rpt-pending'],
+        spaceId: 'default',
+      });
+      expect(searchBodyOf(esClient, 1)).toEqual({
+        index: HUNT_REPORTS_INDEX,
+        size: 1,
+        ignore_unavailable: false,
+        track_total_hits: false,
+        _source: false,
+        query: {
+          bool: {
+            filter: [buildHuntSpaceFilterTerms('default'), { ids: { values: ['rpt-pending'] } }],
+          },
+        },
+      });
+    });
+
+    it('keeps a named id that neither search returns as not_found', async () => {
+      const esClient = serveNamed([], []);
+      const result = await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-ghost'],
+        spaceId: 'default',
+      });
+      expect(result.skipped).toEqual([{ id: 'rpt-ghost', reason: 'not_found' }]);
+    });
+
+    it('issues no second search when every named id came back', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf(['rpt-1', 'rpt-2']));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-1', 'rpt-2'],
+        spaceId: 'default',
+      });
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails closed when the lookup throws', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search
+        .mockResolvedValueOnce(searchResponseOf([]))
+        .mockRejectedValueOnce(new Error('lookup boom'));
+      await expect(
+        buildCandidateQuery(esClient, logger, {
+          trigger: 'manual',
+          report_ids: ['rpt-1'],
+          spaceId: 'default',
+        })
+      ).rejects.toThrow('lookup boom');
+    });
+
+    it.each([
+      ['timed out', { timed_out: true }, 'named report lookup timed out'],
+      [
+        'lost a shard',
+        { _shards: { total: 3, successful: 2, skipped: 0, failed: 1 } },
+        'shards failed on the named report lookup',
+      ],
+    ])('fails closed when the lookup %s', async (_label, partial, message) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search
+        .mockResolvedValueOnce(searchResponseOf([]))
+        .mockResolvedValueOnce({ ...searchResponseOf(['rpt-1']), ...partial });
+      await expect(
+        buildCandidateQuery(esClient, logger, {
+          trigger: 'manual',
+          report_ids: ['rpt-1'],
+          spaceId: 'default',
+        })
+      ).rejects.toThrow(message);
+    });
+
+    it('reports a named report that is unusable and has an open proposal as not_usable only', async () => {
+      const esClient = serveNamed([], ['rpt-both']);
+      const result = await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'manual', report_ids: ['rpt-both'], spaceId: 'default' },
+        async () =>
+          new Set([
+            buildHuntInvestigationConversationId({ spaceId: 'default', reportId: 'rpt-both' }),
+          ])
+      );
+      expect(result.skipped).toEqual([{ id: 'rpt-both', reason: 'not_usable' }]);
+    });
+  });
+
+  describe('the nothing-to-hunt gate', () => {
+    const pendingInSpace = (spaceId: string) => ({
+      nested: {
+        path: 'evidence',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'evidence.space_id': spaceId } },
+              { term: { 'evidence.coverage_pending': true } },
+            ],
+          },
+        },
+      },
+    });
+    const gateBody = (spaceId: string) => ({
+      bool: { filter: [NOTHING_TO_HUNT_FILTER], must_not: [pendingInSpace(spaceId)] },
+    });
+
+    const mockCount = (
+      esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>,
+      count: number
+    ) =>
+      esClient.count.mockResolvedValue({
+        count,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      });
+
+    const runScheduled = async (
+      params: Partial<Parameters<typeof buildCandidateQuery>[2]> = {},
+      scopedLogger = loggingSystemMock.createLogger()
+    ) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      mockCount(esClient, 4);
+      await buildCandidateQuery(esClient, scopedLogger, {
+        trigger: 'scheduled',
+        spaceId: 'hunt-a',
+        ...params,
+      });
+      return { esClient, scopedLogger };
+    };
+
+    it('holds back nothing-to-hunt reports on a scheduled sweep, except ones pending in this space', async () => {
+      const { esClient } = await runScheduled();
+      expect(searchBodyOf(esClient).query.bool.filter).toContainEqual({
+        bool: { must_not: [gateBody('hunt-a')] },
+      });
+    });
+
+    it('applies to a manual trigger with empty or absent report_ids, which is a sweep', async () => {
+      const empty = await runScheduled({ trigger: 'manual', report_ids: [] });
+      const absent = await runScheduled({ trigger: 'manual' });
+      expect(JSON.stringify(searchBodyOf(empty.esClient).query)).toContain('extracted.relevance');
+      expect(JSON.stringify(searchBodyOf(absent.esClient).query)).toContain('extracted.relevance');
+    });
+
+    it('does not apply to named ids', async () => {
+      const { esClient } = await runScheduled({ trigger: 'manual', report_ids: ['rpt-1'] });
+      expect(JSON.stringify(searchBodyOf(esClient).query)).not.toContain('extracted.relevance');
+    });
+
+    it('cuts strictly below 0.5', async () => {
+      const { esClient } = await runScheduled();
+      const query = JSON.stringify(searchBodyOf(esClient).query);
+      expect(query).toContain('"lt":0.5');
+      expect(query).not.toContain('"lte"');
+    });
+
+    describe('the held-back count', () => {
+      it('counts usable, unhunted, in-lookback reports that match the gate', async () => {
+        const { esClient } = await runScheduled({ lookbackDays: 14 });
+        expect(esClient.count).toHaveBeenCalledTimes(1);
+        const [request] = esClient.count.mock.calls[0];
+        expect(request?.index).toBe(HUNT_REPORTS_INDEX);
+        expect(request?.ignore_unavailable).toBe(false);
+        const filter = (request?.query?.bool?.filter ?? []) as unknown[];
+        expect(filter).toContain(HUNT_USABLE_FILTER);
+        expect(filter).toContainEqual(gateBody('hunt-a'));
+        // the gate is matched here, not excluded
+        expect(filter).not.toContainEqual({ bool: { must_not: [gateBody('hunt-a')] } });
+        // the same hunted and lookback clauses the selection used
+        const selected = searchBodyOf(esClient).query.bool.filter;
+        const clausesNotInCount = selected.filter(
+          (clause: unknown) =>
+            !filter.some((c: unknown) => JSON.stringify(c) === JSON.stringify(clause))
+        );
+        expect(clausesNotInCount).toEqual([{ bool: { must_not: [gateBody('hunt-a')] } }]);
+      });
+
+      it('logs the count at info', async () => {
+        const { scopedLogger } = await runScheduled();
+        expect(scopedLogger.info).toHaveBeenCalledWith(
+          expect.stringContaining(
+            '4 report(s) held back: nothing to hunt (relevance below 0.5, no indicators, no techniques)'
+          )
+        );
+      });
+
+      it('says nothing at info when the gate held nothing back', async () => {
+        const scopedLogger = loggingSystemMock.createLogger();
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.search.mockResolvedValue(searchResponseOf([]));
+        mockCount(esClient, 0);
+
+        await buildCandidateQuery(esClient, scopedLogger, {
+          trigger: 'scheduled',
+          spaceId: 'hunt-a',
+        });
+
+        expect(scopedLogger.info).not.toHaveBeenCalled();
+        expect(scopedLogger.warn).not.toHaveBeenCalled();
+        expect(scopedLogger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('0 report(s) held back')
+        );
+      });
+
+      it('gets one short attempt, so a stalled count cannot hold the selection', async () => {
+        const { esClient } = await runScheduled();
+        const [, options] = esClient.count.mock.calls[0];
+        expect(options).toEqual({ requestTimeout: 5_000, maxRetries: 0 });
+      });
+
+      it('warns instead of logging a partial count when a shard failed', async () => {
+        const scopedLogger = loggingSystemMock.createLogger();
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.search.mockResolvedValue(searchResponseOf(['rpt-1']));
+        esClient.count.mockResolvedValue({
+          count: 2,
+          _shards: { total: 3, successful: 2, skipped: 0, failed: 1 },
+        });
+
+        const result = await buildCandidateQuery(esClient, scopedLogger, {
+          trigger: 'scheduled',
+          spaceId: 'hunt-a',
+        });
+
+        expect(result.ids).toEqual(['rpt-1']);
+        expect(scopedLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('1 of 3 shards failed on the count')
+        );
+        expect(scopedLogger.info).not.toHaveBeenCalled();
+      });
+
+      it('is not issued for named ids', async () => {
+        const { esClient, scopedLogger } = await runScheduled({
+          trigger: 'manual',
+          report_ids: ['rpt-1'],
+        });
+        expect(esClient.count).not.toHaveBeenCalled();
+        expect(scopedLogger.info).not.toHaveBeenCalled();
+      });
+
+      it('never fails the sweep: a count error is a warning and the selection stands', async () => {
+        const scopedLogger = loggingSystemMock.createLogger();
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        esClient.search.mockResolvedValue(searchResponseOf(['rpt-1']));
+        esClient.count.mockRejectedValue(new Error('count boom'));
+
+        const result = await buildCandidateQuery(esClient, scopedLogger, {
+          trigger: 'scheduled',
+          spaceId: 'hunt-a',
+        });
+
+        expect(result.ids).toEqual(['rpt-1']);
+        expect(scopedLogger.warn).toHaveBeenCalledWith(expect.stringContaining('count boom'));
+        expect(scopedLogger.info).not.toHaveBeenCalled();
+      });
     });
   });
 });

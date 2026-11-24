@@ -8,15 +8,13 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
+import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../shared/components/test_ids';
 import {
   mockUserEntityRiskScores,
   mockUserEntityRiskScoresWithResolution,
   mockUserRiskScoreState,
-} from '../../../../flyout/entity_details/mocks';
-import {
-  mockObservedUser,
-  mockManagedUserData,
-} from '../../../../flyout/entity_details/user_right/mocks';
+} from '../../shared/mocks';
+import { mockObservedUser, mockManagedUserData } from '../mocks';
 import type { UserEntity } from '../../../../../common/api/entity_analytics';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { User } from '.';
@@ -33,32 +31,62 @@ const mockProps = {
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
 jest.mock('../../../use_flyout_api');
+
+let mockIsEntityStoreV2Enabled = false;
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  const { FF_ENABLE_ENTITY_STORE_V2 } = jest.requireActual('@kbn/entity-store/public');
+  return {
+    ...actual,
+    useUiSetting: (key: string, defaultValue?: unknown) => {
+      const value = actual.useUiSetting(key, defaultValue);
+      return key === FF_ENABLE_ENTITY_STORE_V2 && mockIsEntityStoreV2Enabled ? true : value;
+    },
+  };
+});
 const mockFlyoutApi = createFlyoutApiMock();
 
-// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the CSP tools.
+// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the tools.
+const mockContentProps = jest.fn();
 jest.mock('./content', () => {
   const actual = jest.requireActual('./content');
   const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
     '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header'
   );
-  const Content = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => (
-    <>
-      {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
+  const Content = (props: {
+    openDetailsPanel: (path: EntityDetailsPath) => void;
+    graphEntryPoint?: string;
+  }) => {
+    mockContentProps(props);
+    return (
+      <>
         <button
-          key={subTab as string}
           type="button"
-          data-test-subj={`openCspInsights-${subTab}`}
-          onClick={() =>
-            props.openDetailsPanel({
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: subTab as typeof CspInsightLeftPanelSubTab,
-            })
-          }
+          data-test-subj="openAnomalyInsights"
+          onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES })}
         />
-      ))}
-      <actual.Content {...props} />
-    </>
-  );
+        <button
+          type="button"
+          data-test-subj="openGraphView"
+          onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW })}
+        />
+        {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
+          <button
+            key={subTab as string}
+            type="button"
+            data-test-subj={`openCspInsights-${subTab}`}
+            onClick={() =>
+              props.openDetailsPanel({
+                tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+                subTab: subTab as typeof CspInsightLeftPanelSubTab,
+              })
+            }
+          />
+        ))}
+        <actual.Content {...props} />
+      </>
+    );
+  };
   return { ...actual, Content };
 });
 
@@ -82,7 +110,7 @@ jest.mock('./hooks/use_observed_user', () => ({
 }));
 
 const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUserData);
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_managed_user', () => ({
+jest.mock('../../shared/hooks/use_managed_user', () => ({
   useManagedUser: () => mockedUseManagedUser(),
 }));
 
@@ -151,6 +179,7 @@ const aliasRecord: UserEntity = {
 describe('<User />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsEntityStoreV2Enabled = false;
     (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
     mockedUserRiskScore.mockReturnValue(mockUserRiskScoreState);
     mockedEntityRiskScores.mockReturnValue(mockUserEntityRiskScores);
@@ -292,6 +321,32 @@ describe('<User />', () => {
       expect(queryByTestId('asset-criticality-edit-chevron')).not.toBeInTheDocument();
     });
 
+    it('shows the Table tab when there are no aliases', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord);
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('hides the Table tab in the group view', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).not.toBeInTheDocument();
+    });
+
     it('shows the "Resolved from N records" badge counting the target and its aliases', () => {
       mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
       withStoreRecords(targetRecord, [aliasRecord]);
@@ -304,6 +359,25 @@ describe('<User />', () => {
 
       expect(getByTestId('user-panel-header-observed-badge')).toHaveTextContent(
         'Resolved from 2 records'
+      );
+    });
+
+    it('counts every group member in the badge even when the loaded aliases are capped', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+      mockedUseEntityFromStore.mockReturnValue({
+        ...mockedUseEntityFromStore(),
+        aliasCount: 250,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId('user-panel-header-observed-badge')).toHaveTextContent(
+        'Resolved from 251 records'
       );
     });
 
@@ -410,9 +484,7 @@ describe('<User />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
-          'Entity risk contributions'
-        );
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
       });
 
       it('keeps showing the resolution group score next to the individual score when the feature flag is off', () => {
@@ -447,7 +519,7 @@ describe('<User />', () => {
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
       });
     });
-    describe('CSP insights tools', () => {
+    describe('detail tools', () => {
       const renderResolved = () => {
         mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
         withStoreRecords(targetRecord, [aliasRecord]);
@@ -458,6 +530,13 @@ describe('<User />', () => {
         );
       };
 
+      it('passes the panel mode and scope to the anomaly insights tool', () => {
+        fireEvent.click(renderResolved().getByTestId('openAnomalyInsights'));
+        expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
+          expect.objectContaining({ value: 'test', mode: 'resolved', scopeId: 'test-scope-id' })
+        );
+      });
+
       it('passes the panel mode and scope to the alerts insights tool', () => {
         fireEvent.click(renderResolved().getByTestId('openCspInsights-alertsTabId'));
         expect(mockFlyoutApi.openEntityAlertsInsights).toHaveBeenCalledWith(
@@ -467,6 +546,51 @@ describe('<User />', () => {
             mode: 'resolved',
             scopeId: 'test-scope-id',
           })
+        );
+      });
+
+      it('opens the graph view from the entity flyout entry point', () => {
+        mockIsEntityStoreV2Enabled = true;
+        fireEvent.click(renderResolved().getByTestId('openGraphView'));
+        expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+          expect.objectContaining({
+            entityId: targetEntityId,
+            scopeId: 'test-scope-id',
+            entryPoint: 'entity_flyout',
+          })
+        );
+      });
+
+      it('opens the graph view and renders the content with the graph entry point it was opened with', () => {
+        mockIsEntityStoreV2Enabled = true;
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord, [aliasRecord]);
+        const { getByTestId } = render(
+          <TestProviders>
+            <User
+              {...mockProps}
+              entityId={targetEntityId}
+              mode="resolved"
+              graphEntryPoint="ai_chat_attachment"
+            />
+          </TestProviders>
+        );
+
+        expect(mockContentProps).toHaveBeenLastCalledWith(
+          expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+        );
+        fireEvent.click(getByTestId('openGraphView'));
+        expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+          expect.objectContaining({ entityId: targetEntityId, entryPoint: 'ai_chat_attachment' })
+        );
+      });
+
+      it('renders the content with the entity flyout entry point when none is given', () => {
+        mockIsEntityStoreV2Enabled = true;
+        renderResolved();
+
+        expect(mockContentProps).toHaveBeenLastCalledWith(
+          expect.objectContaining({ graphEntryPoint: 'entity_flyout' })
         );
       });
 

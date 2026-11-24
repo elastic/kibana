@@ -7,7 +7,12 @@
 
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
-import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
+import type {
+  DashboardApi,
+  DashboardRendererProps,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
 import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -100,7 +105,11 @@ const createMockDashboardApi = (
     filters$,
     query$,
     timeRange$,
+    getAppContext: () => ({ currentAppId: 'dashboards' }),
+    isEditableByUser: true,
+    isManaged: false,
     setState,
+    setViewMode: jest.fn(),
     getSerializedState,
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     emitSave: (event: DashboardSaveEvent) => onSave$.next(event),
@@ -178,6 +187,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
+      removeAttachment: jest.fn(),
       updateAttachmentOrigin,
       events: {
         getChatEvents$: jest.fn((conversationId: string) =>
@@ -196,6 +206,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const dashboardPlugin: DashboardStart = {
       dashboardAppClientApi$,
       findDashboardsService,
+      areEqual: jest.fn().mockResolvedValue(false),
     } as unknown as DashboardStart;
 
     const data = dataPluginMock.createStartContract();
@@ -212,7 +223,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       data,
       dashboardPlugin,
       unifiedSearch,
-      dashboardLocator: undefined,
+      dashboardLocator: undefined as DashboardRendererProps['locator'],
       dashboardAppClientApi$,
       addAttachmentType,
       updateAttachmentOrigin,
@@ -223,6 +234,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       },
       currentAppId$,
       draftAttachmentId: createIdGenerator(),
+      toasts: notificationServiceMock.createStartContract().toasts,
     };
   };
 
@@ -296,6 +308,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       agentBuilder: {
         attachments: { addAttachmentType },
         addAttachment: jest.fn(),
+        removeAttachment: jest.fn(),
         updateAttachmentOrigin: jest.fn().mockResolvedValue(undefined),
         events: {
           getChatEvents$: jest.fn(() => new Subject<ChatEvent>().asObservable()),
@@ -316,12 +329,14 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       dashboardPlugin: {
         dashboardAppClientApi$,
         findDashboardsService,
+        areEqual: jest.fn().mockResolvedValue(false),
       } as unknown as DashboardStart,
       data: dataPluginMock.createStartContract(),
       unifiedSearch: {
         ui: { SearchBar: jest.fn() },
       } as unknown as UnifiedSearchPublicPluginStart,
       draftAttachmentId: createIdGenerator(),
+      toasts: notificationServiceMock.createStartContract().toasts,
     };
 
     let cleanup: (() => void) | undefined;
@@ -546,7 +561,8 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       deps.emitChatEvent('conversation-1', createMockDashboardUpdatedEvent('attachment-1'));
 
       expect(mockApi.setState).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'Updated Dashboard' })
+        expect.objectContaining({ title: 'Updated Dashboard' }),
+        { changedBy: ['agent'] }
       );
 
       cleanup?.();
@@ -700,6 +716,35 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       });
       expect(normalButtons).toHaveLength(1);
       expect(normalButtons[0]).toMatchObject({ label: 'Preview', icon: 'eye' });
+    });
+
+    const clickPreview = async (attachment: DashboardAttachment, isSidebar = false) => {
+      const [previewButton] = uiDefinition.getActionButtons!({
+        attachment,
+        isSidebar,
+        isCanvas: false,
+        updateOrigin: jest.fn(),
+      });
+      await previewButton.handler();
+    };
+
+    it('opens the dashboard from the sidebar as an agent change', async () => {
+      const navigate = jest.fn().mockResolvedValue(undefined);
+      unregister();
+      deps = createMockDeps();
+      deps.dashboardLocator = { navigate } as unknown as DashboardRendererProps['locator'];
+      unregister = registerDashboardAttachmentUiDefinition(deps);
+      uiDefinition = deps.addAttachmentType.mock.calls[0][1];
+
+      await clickPreview(createMockAttachment('1').attachment, true);
+
+      expect(navigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Test Dashboard',
+          viewMode: 'edit',
+          changedBy: ['agent'],
+        })
+      );
     });
   });
 });

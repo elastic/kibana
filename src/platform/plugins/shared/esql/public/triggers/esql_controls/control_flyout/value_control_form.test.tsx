@@ -15,7 +15,6 @@ import type { monaco } from '@kbn/code-editor';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
-import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
@@ -29,22 +28,10 @@ import { setupEuiMatchers } from '@elastic/eui/lib/test/rtl/matchers';
 jest.mock('@kbn/esql-utils', () => {
   const actual = jest.requireActual('@kbn/esql-utils');
   return {
-    getESQLResults: jest.fn().mockResolvedValue({
-      response: {
-        columns: [
-          {
-            name: 'field',
-            type: 'keyword',
-          },
-        ],
-        values: [['v1'], ['v2']],
-      },
-    }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
-    getVariableNamePrefix: actual.getVariableNamePrefix,
     ESQLValuesPreview: actual.ESQLValuesPreview,
     appendStatsByToQuery: actual.appendStatsByToQuery,
   };
@@ -52,7 +39,16 @@ jest.mock('@kbn/esql-utils', () => {
 
 describe('ValueControlForm', () => {
   const dataMock = dataPluginMock.createStartContract();
-  const searchMock = dataMock.search.search;
+  const esqlMock = dataMock.search.esql as jest.Mock;
+
+  beforeEach(() => {
+    esqlMock.mockResolvedValue({
+      rawResponse: {
+        columns: [{ name: 'field', type: 'keyword' }],
+        values: [['v1'], ['v2']],
+      },
+    });
+  });
 
   const uiConfig: Record<string, any> = {};
   const uiSettings = {
@@ -78,7 +74,7 @@ describe('ValueControlForm', () => {
     onSaveControl: jest.fn(),
     closeFlyout: jest.fn(),
     onCancelControl: jest.fn(),
-    search: searchMock,
+    search: dataMock.search,
     esqlVariables: [],
     ariaLabelledBy: 'esqlControlsFlyoutTitle',
     telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
@@ -276,7 +272,7 @@ describe('ValueControlForm', () => {
         expect(identifiersOptionsDropdown).toBeInTheDocument();
       });
 
-      it('should call getESQLResults with the provided timeRange when query is submitted', async () => {
+      it('should search with the provided timeRange when query is submitted', async () => {
         const mockTimeRange = { from: '2023-01-01', to: '2023-01-02' };
 
         render(
@@ -293,11 +289,11 @@ describe('ValueControlForm', () => {
         );
 
         await waitFor(() => {
-          expect(getESQLResults).toHaveBeenCalledWith(
+          expect(esqlMock).toHaveBeenCalledWith(
             expect.objectContaining({
-              timeRange: mockTimeRange,
-              signal: expect.any(AbortSignal),
-            })
+              kibanaQueryContext: expect.objectContaining({ timeRange: mockTimeRange }),
+            }),
+            expect.objectContaining({ abortSignal: expect.any(AbortSignal) })
           );
         });
       });
@@ -315,8 +311,7 @@ describe('ValueControlForm', () => {
           control_type: EsqlControlType.VALUES_FROM_QUERY,
         } as OptionsListESQLControlState;
 
-        const getESQLResultsMock = getESQLResults as jest.Mock;
-        getESQLResultsMock.mockClear();
+        esqlMock.mockClear();
 
         render(
           <KibanaContextProvider services={services}>
@@ -332,11 +327,12 @@ describe('ValueControlForm', () => {
         );
 
         await waitFor(() => {
-          // Verify that getESQLResults was called with the custom query
-          expect(getESQLResultsMock).toHaveBeenCalledWith(
+          // Verify that the search was called with the custom query
+          expect(esqlMock).toHaveBeenCalledWith(
             expect.objectContaining({
-              esqlQuery: customQuery,
-            })
+              query: customQuery,
+            }),
+            expect.anything()
           );
         });
 
@@ -350,8 +346,8 @@ describe('ValueControlForm', () => {
       });
 
       it("should show the 'no results' callout", async () => {
-        (getESQLResults as jest.Mock).mockResolvedValueOnce({
-          response: {
+        esqlMock.mockResolvedValueOnce({
+          rawResponse: {
             columns: [],
           },
         });

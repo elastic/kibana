@@ -1,0 +1,2042 @@
+{
+  "components": {
+    "schemas": {
+      "AccessTier": {
+        "enum": [
+          "P4",
+          "P6",
+          "P10",
+          "P15",
+          "P20",
+          "P30",
+          "P40",
+          "P50",
+          "P60",
+          "P70",
+          "P80",
+          "Hot",
+          "Cool",
+          "Archive",
+          "Premium"
+        ],
+        "type": "string"
+      },
+      "ArchiveStatus": {
+        "enum": [
+          "rehydrate-pending-to-hot",
+          "rehydrate-pending-to-cool"
+        ],
+        "type": "string"
+      },
+      "BlobFlatListSegment": {
+        "properties": {
+          "BlobItems": {
+            "items": {
+              "$ref": "#/components/schemas/BlobItemInternal"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "BlobItems"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Blobs"
+        }
+      },
+      "BlobItemInternal": {
+        "properties": {
+          "BlobTags": {
+            "$ref": "#/components/schemas/BlobTags"
+          },
+          "Deleted": {
+            "type": "boolean"
+          },
+          "HasVersionsOnly": {
+            "type": "boolean"
+          },
+          "IsCurrentVersion": {
+            "type": "boolean"
+          },
+          "Metadata": {
+            "$ref": "#/components/schemas/BlobMetadata"
+          },
+          "Name": {
+            "$ref": "#/components/schemas/BlobName"
+          },
+          "ObjectReplicationMetadata": {
+            "$ref": "#/components/schemas/ObjectReplicationMetadata"
+          },
+          "Properties": {
+            "$ref": "#/components/schemas/BlobPropertiesInternal"
+          },
+          "Snapshot": {
+            "type": "string"
+          },
+          "VersionId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name",
+          "Deleted",
+          "Snapshot",
+          "Properties"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Blob"
+        }
+      },
+      "BlobMetadata": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "properties": {
+          "Encrypted": {
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "Metadata"
+        }
+      },
+      "BlobName": {
+        "properties": {
+          "Encoded": {
+            "type": "boolean",
+            "xml": {
+              "attribute": true,
+              "name": "Encoded"
+            }
+          },
+          "content": {
+            "type": "string",
+            "xml": {}
+          }
+        },
+        "type": "object"
+      },
+      "BlobPropertiesInternal": {
+        "properties": {
+          "AccessTier": {
+            "$ref": "#/components/schemas/AccessTier"
+          },
+          "AccessTierChangeTime": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "AccessTierInferred": {
+            "type": "boolean"
+          },
+          "ArchiveStatus": {
+            "$ref": "#/components/schemas/ArchiveStatus"
+          },
+          "BlobType": {
+            "enum": [
+              "BlockBlob",
+              "PageBlob",
+              "AppendBlob"
+            ],
+            "type": "string"
+          },
+          "Cache-Control": {
+            "type": "string"
+          },
+          "Content-Disposition": {
+            "type": "string"
+          },
+          "Content-Encoding": {
+            "type": "string"
+          },
+          "Content-Language": {
+            "type": "string"
+          },
+          "Content-Length": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "Content-MD5": {
+            "format": "byte",
+            "type": "string"
+          },
+          "Content-Type": {
+            "type": "string"
+          },
+          "CopyCompletionTime": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "CopyId": {
+            "type": "string"
+          },
+          "CopyProgress": {
+            "type": "string"
+          },
+          "CopySource": {
+            "type": "string"
+          },
+          "CopyStatus": {
+            "$ref": "#/components/schemas/CopyStatus"
+          },
+          "CopyStatusDescription": {
+            "type": "string"
+          },
+          "Creation-Time": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "CustomerProvidedKeySha256": {
+            "type": "string"
+          },
+          "DeletedTime": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "DestinationSnapshot": {
+            "type": "string"
+          },
+          "EncryptionScope": {
+            "type": "string"
+          },
+          "Etag": {
+            "type": "string"
+          },
+          "Expiry-Time": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "ImmutabilityPolicyMode": {
+            "enum": [
+              "Mutable",
+              "Unlocked",
+              "Locked"
+            ],
+            "type": "string"
+          },
+          "ImmutabilityPolicyUntilDate": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "IncrementalCopy": {
+            "type": "boolean"
+          },
+          "Last-Modified": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "LastAccessTime": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "LeaseDuration": {
+            "$ref": "#/components/schemas/LeaseDuration"
+          },
+          "LeaseState": {
+            "$ref": "#/components/schemas/LeaseState"
+          },
+          "LeaseStatus": {
+            "$ref": "#/components/schemas/LeaseStatus"
+          },
+          "LegalHold": {
+            "type": "boolean"
+          },
+          "RehydratePriority": {
+            "$ref": "#/components/schemas/RehydratePriority"
+          },
+          "RemainingRetentionDays": {
+            "type": "integer"
+          },
+          "Sealed": {
+            "type": "boolean"
+          },
+          "ServerEncrypted": {
+            "type": "boolean"
+          },
+          "TagCount": {
+            "type": "integer"
+          },
+          "x-ms-blob-sequence-number": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "Etag",
+          "Last-Modified"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Properties"
+        }
+      },
+      "BlobTag": {
+        "properties": {
+          "Key": {
+            "type": "string"
+          },
+          "Value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Key",
+          "Value"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Tag"
+        }
+      },
+      "BlobTags": {
+        "properties": {
+          "BlobTagSet": {
+            "items": {
+              "$ref": "#/components/schemas/BlobTag"
+            },
+            "type": "array",
+            "xml": {
+              "name": "TagSet",
+              "wrapped": true
+            }
+          }
+        },
+        "required": [
+          "BlobTagSet"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Tags"
+        }
+      },
+      "ContainerItem": {
+        "properties": {
+          "Deleted": {
+            "type": "boolean"
+          },
+          "Metadata": {
+            "$ref": "#/components/schemas/ContainerMetadata"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Properties": {
+            "$ref": "#/components/schemas/ContainerProperties"
+          },
+          "Version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name",
+          "Properties"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Container"
+        }
+      },
+      "ContainerMetadata": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object",
+        "xml": {
+          "name": "Metadata"
+        }
+      },
+      "ContainerProperties": {
+        "properties": {
+          "DefaultEncryptionScope": {
+            "type": "string"
+          },
+          "DeletedTime": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "DenyEncryptionScopeOverride": {
+            "type": "boolean"
+          },
+          "Etag": {
+            "type": "string"
+          },
+          "HasImmutabilityPolicy": {
+            "type": "boolean"
+          },
+          "HasLegalHold": {
+            "type": "boolean"
+          },
+          "ImmutableStorageWithVersioningEnabled": {
+            "type": "boolean"
+          },
+          "Last-Modified": {
+            "format": "date-time-rfc1123",
+            "type": "string"
+          },
+          "LeaseDuration": {
+            "$ref": "#/components/schemas/LeaseDuration"
+          },
+          "LeaseState": {
+            "$ref": "#/components/schemas/LeaseState"
+          },
+          "LeaseStatus": {
+            "$ref": "#/components/schemas/LeaseStatus"
+          },
+          "PublicAccess": {
+            "$ref": "#/components/schemas/PublicAccessType"
+          },
+          "RemainingRetentionDays": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "Last-Modified",
+          "Etag"
+        ],
+        "type": "object"
+      },
+      "CopyStatus": {
+        "enum": [
+          "pending",
+          "success",
+          "aborted",
+          "failed"
+        ],
+        "type": "string"
+      },
+      "LeaseDuration": {
+        "enum": [
+          "infinite",
+          "fixed"
+        ],
+        "type": "string"
+      },
+      "LeaseState": {
+        "enum": [
+          "available",
+          "leased",
+          "expired",
+          "breaking",
+          "broken"
+        ],
+        "type": "string"
+      },
+      "LeaseStatus": {
+        "enum": [
+          "locked",
+          "unlocked"
+        ],
+        "type": "string"
+      },
+      "ListBlobsFlatSegmentResponse": {
+        "properties": {
+          "ContainerName": {
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          },
+          "Marker": {
+            "type": "string"
+          },
+          "MaxResults": {
+            "type": "integer"
+          },
+          "NextMarker": {
+            "type": "string"
+          },
+          "Prefix": {
+            "type": "string"
+          },
+          "Segment": {
+            "$ref": "#/components/schemas/BlobFlatListSegment"
+          },
+          "ServiceEndpoint": {
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "required": [
+          "ServiceEndpoint",
+          "ContainerName",
+          "Segment"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "EnumerationResults"
+        }
+      },
+      "ListContainersSegmentResponse": {
+        "properties": {
+          "ContainerItems": {
+            "items": {
+              "$ref": "#/components/schemas/ContainerItem"
+            },
+            "type": "array",
+            "xml": {
+              "name": "Containers",
+              "wrapped": true
+            }
+          },
+          "Marker": {
+            "type": "string"
+          },
+          "MaxResults": {
+            "type": "integer"
+          },
+          "NextMarker": {
+            "type": "string"
+          },
+          "Prefix": {
+            "type": "string"
+          },
+          "ServiceEndpoint": {
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "required": [
+          "ServiceEndpoint",
+          "ContainerItems"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "EnumerationResults"
+        }
+      },
+      "ObjectReplicationMetadata": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object",
+        "xml": {
+          "name": "OrMetadata"
+        }
+      },
+      "PublicAccessType": {
+        "enum": [
+          "container",
+          "blob"
+        ],
+        "type": "string"
+      },
+      "RehydratePriority": {
+        "enum": [
+          "High",
+          "Standard"
+        ],
+        "type": "string",
+        "xml": {
+          "name": "RehydratePriority"
+        }
+      },
+      "StorageError": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Azure Blob Storage"
+  },
+  "openapi": "3.0.3",
+  "paths": {},
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "x-ms-paths": {
+    "/?comp=list": {
+      "get": {
+        "operationId": "Service_ListContainersSegment",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "comp",
+            "required": true,
+            "schema": {
+              "enum": [
+                "list"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prefix",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "marker",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxresults",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "include",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "metadata",
+                  "deleted",
+                  "system"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeout",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "2021-04-10"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-client-request-id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListContainersSegmentResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-ms-client-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-version": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageError"
+                }
+              }
+            },
+            "headers": {
+              "x-ms-error-code": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "NextMarker"
+        }
+      }
+    },
+    "/{containerName}/{blob}": {
+      "get": {
+        "operationId": "Blob_Download",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "containerName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "blob",
+            "required": true,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]+(?:/[a-zA-Z0-9]+)*(?:\\.[a-zA-Z0-9]+){0,1}$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "snapshot",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "versionid",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeout",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-range",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-lease-id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-range-get-content-md5",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-range-get-content-crc64",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-encryption-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-encryption-key-sha256",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-encryption-algorithm",
+            "required": false,
+            "schema": {
+              "enum": [
+                "AES256"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Modified-Since",
+            "required": false,
+            "schema": {
+              "format": "date-time-rfc1123",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Unmodified-Since",
+            "required": false,
+            "schema": {
+              "format": "date-time-rfc1123",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-if-tags",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "2021-04-10"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-client-request-id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "format": "file",
+                  "type": "object"
+                }
+              }
+            },
+            "headers": {
+              "Accept-Ranges": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Language": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "Content-MD5": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              },
+              "Content-Range": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Last-Modified": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-blob-committed-block-count": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "x-ms-blob-content-md5": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              },
+              "x-ms-blob-sealed": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-blob-sequence-number": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "x-ms-blob-type": {
+                "schema": {
+                  "enum": [
+                    "BlockBlob",
+                    "PageBlob",
+                    "AppendBlob"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-client-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-completion-time": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-progress": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-source": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-status": {
+                "schema": {
+                  "enum": [
+                    "pending",
+                    "success",
+                    "aborted",
+                    "failed"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-status-description": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-encryption-key-sha256": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-encryption-scope": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-immutability-policy-mode": {
+                "schema": {
+                  "enum": [
+                    "Mutable",
+                    "Unlocked",
+                    "Locked"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-immutability-policy-until-date": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-is-current-version": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-last-access-time": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-lease-duration": {
+                "schema": {
+                  "enum": [
+                    "infinite",
+                    "fixed"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-lease-state": {
+                "schema": {
+                  "enum": [
+                    "available",
+                    "leased",
+                    "expired",
+                    "breaking",
+                    "broken"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-lease-status": {
+                "schema": {
+                  "enum": [
+                    "locked",
+                    "unlocked"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-legal-hold": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-meta": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-or": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-or-policy-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-server-encrypted": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-tag-count": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "x-ms-version": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-version-id": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "206": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "format": "file",
+                  "type": "object"
+                }
+              }
+            },
+            "headers": {
+              "Accept-Ranges": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Language": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "Content-MD5": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              },
+              "Content-Range": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Last-Modified": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-blob-committed-block-count": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "x-ms-blob-content-md5": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              },
+              "x-ms-blob-sealed": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-blob-sequence-number": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "x-ms-blob-type": {
+                "schema": {
+                  "enum": [
+                    "BlockBlob",
+                    "PageBlob",
+                    "AppendBlob"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-client-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-content-crc64": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-completion-time": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-progress": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-source": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-status": {
+                "schema": {
+                  "enum": [
+                    "pending",
+                    "success",
+                    "aborted",
+                    "failed"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-status-description": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-encryption-key-sha256": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-encryption-scope": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-immutability-policy-mode": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-immutability-policy-until-date": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-is-current-version": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-last-access-time": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-lease-duration": {
+                "schema": {
+                  "enum": [
+                    "infinite",
+                    "fixed"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-lease-state": {
+                "schema": {
+                  "enum": [
+                    "available",
+                    "leased",
+                    "expired",
+                    "breaking",
+                    "broken"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-lease-status": {
+                "schema": {
+                  "enum": [
+                    "locked",
+                    "unlocked"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-legal-hold": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-meta": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-or": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-or-policy-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-server-encrypted": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-tag-count": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "x-ms-version": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-version-id": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageError"
+                }
+              }
+            },
+            "headers": {
+              "x-ms-error-code": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "operationId": "Blob_GetProperties",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "containerName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "blob",
+            "required": true,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9]+(?:/[a-zA-Z0-9]+)*(?:\\.[a-zA-Z0-9]+){0,1}$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "snapshot",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "versionid",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeout",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-lease-id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-encryption-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-encryption-key-sha256",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-encryption-algorithm",
+            "required": false,
+            "schema": {
+              "enum": [
+                "AES256"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Modified-Since",
+            "required": false,
+            "schema": {
+              "format": "date-time-rfc1123",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Unmodified-Since",
+            "required": false,
+            "schema": {
+              "format": "date-time-rfc1123",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-if-tags",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "2021-04-10"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-client-request-id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "headers": {
+              "Accept-Ranges": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Encoding": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Language": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "Content-MD5": {
+                "schema": {
+                  "format": "byte",
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Last-Modified": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-access-tier": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-access-tier-change-time": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-access-tier-inferred": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-archive-status": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-blob-committed-block-count": {
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "x-ms-blob-sealed": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-blob-sequence-number": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "x-ms-blob-type": {
+                "schema": {
+                  "enum": [
+                    "BlockBlob",
+                    "PageBlob",
+                    "AppendBlob"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-client-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-completion-time": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-destination-snapshot": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-progress": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-source": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-status": {
+                "schema": {
+                  "enum": [
+                    "pending",
+                    "success",
+                    "aborted",
+                    "failed"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-copy-status-description": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-creation-time": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-encryption-key-sha256": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-encryption-scope": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-expiry-time": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-immutability-policy-mode": {
+                "schema": {
+                  "enum": [
+                    "Mutable",
+                    "Unlocked",
+                    "Locked"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-immutability-policy-until-date": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-incremental-copy": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-is-current-version": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-last-access-time": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-lease-duration": {
+                "schema": {
+                  "enum": [
+                    "infinite",
+                    "fixed"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-lease-state": {
+                "schema": {
+                  "enum": [
+                    "available",
+                    "leased",
+                    "expired",
+                    "breaking",
+                    "broken"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-lease-status": {
+                "schema": {
+                  "enum": [
+                    "locked",
+                    "unlocked"
+                  ],
+                  "type": "string"
+                }
+              },
+              "x-ms-legal-hold": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-meta": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-or": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-or-policy-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-rehydrate-priority": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-server-encrypted": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-ms-tag-count": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "x-ms-version": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-version-id": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageError"
+                }
+              }
+            },
+            "headers": {
+              "x-ms-error-code": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{containerName}?restype=container&comp=list&flat": {
+      "get": {
+        "operationId": "Container_ListBlobFlatSegment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "containerName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "restype",
+            "required": true,
+            "schema": {
+              "enum": [
+                "container"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comp",
+            "required": true,
+            "schema": {
+              "enum": [
+                "list"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prefix",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "marker",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxresults",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "include",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "copy",
+                  "deleted",
+                  "metadata",
+                  "snapshots",
+                  "uncommittedblobs",
+                  "versions",
+                  "tags",
+                  "immutabilitypolicy",
+                  "legalhold",
+                  "deletedwithversions"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeout",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "2021-04-10"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-ms-client-request-id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBlobsFlatSegmentResponse"
+                }
+              }
+            },
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Date": {
+                "schema": {
+                  "format": "date-time-rfc1123",
+                  "type": "string"
+                }
+              },
+              "x-ms-client-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-request-id": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-ms-version": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageError"
+                }
+              }
+            },
+            "headers": {
+              "x-ms-error-code": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "NextMarker"
+        }
+      }
+    }
+  }
+}

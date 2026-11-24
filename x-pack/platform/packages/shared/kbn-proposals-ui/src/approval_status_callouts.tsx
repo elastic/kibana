@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
+import { InlineCalloutTitle } from './inline_callout_title';
 
 interface ApprovalStatusCalloutsProps {
   /** Only shown while still pending — a decided proposal's outcome banner already covers it. */
@@ -60,11 +61,14 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
               <KbnDangerCallout
                 announceOnMount
                 size="s"
-                title={APPROVAL_MODAL_TRANSLATIONS.previousFailureCalloutTitle}
+                title={
+                  <InlineCalloutTitle
+                    title={APPROVAL_MODAL_TRANSLATIONS.previousFailureCalloutTitle}
+                    description={previousExecutionError}
+                  />
+                }
                 data-test-subj={dataTestSubj ? `${dataTestSubj}-previous-failure` : undefined}
-              >
-                {previousExecutionError}
-              </KbnDangerCallout>
+              />
               <EuiSpacer size="m" />
             </div>
           </>
@@ -77,11 +81,14 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
               <KbnDangerCallout
                 announceOnMount
                 size="s"
-                title={APPROVAL_MODAL_TRANSLATIONS.failedAttemptCalloutTitle}
+                title={
+                  <InlineCalloutTitle
+                    title={APPROVAL_MODAL_TRANSLATIONS.failedAttemptCalloutTitle}
+                    description={failedAttemptError}
+                  />
+                }
                 data-test-subj={dataTestSubj ? `${dataTestSubj}-failed-attempt` : undefined}
-              >
-                {failedAttemptError}
-              </KbnDangerCallout>
+              />
               <EuiSpacer size="m" />
             </div>
           </>
@@ -94,11 +101,14 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
               <KbnWarningCallout
                 announceOnMount
                 size="s"
-                title={APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitle}
+                title={
+                  <InlineCalloutTitle
+                    title={APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitle}
+                    description={expiredReason}
+                  />
+                }
                 data-test-subj={dataTestSubj ? `${dataTestSubj}-expired` : undefined}
-              >
-                {expiredReason}
-              </KbnWarningCallout>
+              />
               <EuiSpacer size="m" />
             </div>
           </>

@@ -7,27 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ERROR_CONFIGURE_FAILURE, ERROR_OUTSIDE_PREBOOT_STAGE } from '../../../../common';
 import {
   CONFIGURE_ROUTE,
+  INTERNAL_API_HEADERS,
   KIBANA_BOOT_TIMEOUT_MS,
   KIBANA_SYSTEM_USER,
   SETUP_SPEC_TIMEOUT_MS,
 } from '../../../helpers/constants';
-import { isFipsEnabled } from '../../../helpers/fips';
 import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup_state';
 import { getElasticsearchCaCertificate } from '../../../helpers/tls_tools';
 
 apiTest.describe(
   'Interactive setup - manual configuration flow',
-  { tag: ['@local-stateful-classic'] },
+  // Interactive setup reconfigures Kibana's crypto and reboots, which FIPS mode doesn't support.
+  { tag: ['@local-stateful-classic', tags.limit.except.fips] },
   () => {
-    // Interactive setup reconfigures Kibana's crypto and reboots — unsupported under FIPS (pre-migration 'skipFIPS').
-    apiTest.skip(isFipsEnabled, 'Interactive setup is not supported under FIPS');
-
     let verificationCode: string;
     let elasticsearchHost: string;
     let caCert: string;
@@ -44,7 +42,7 @@ apiTest.describe(
 
     apiTest('rejects configuration with an invalid verification code', async ({ apiClient }) => {
       const response = await apiClient.post(CONFIGURE_ROUTE, {
-        headers: { 'kbn-xsrf': 'xxx' },
+        headers: INTERNAL_API_HEADERS,
         body: { host: elasticsearchHost, code: '000000', caCert, ...KIBANA_SYSTEM_USER },
       });
 
@@ -58,7 +56,7 @@ apiTest.describe(
 
     apiTest('rejects configuration with a corrupt CA certificate', async ({ apiClient }) => {
       const response = await apiClient.post(CONFIGURE_ROUTE, {
-        headers: { 'kbn-xsrf': 'xxx' },
+        headers: INTERNAL_API_HEADERS,
         body: {
           host: elasticsearchHost,
           code: verificationCode,
@@ -78,7 +76,7 @@ apiTest.describe(
 
     apiTest('rejects configuration with invalid credentials', async ({ apiClient }) => {
       const response = await apiClient.post(CONFIGURE_ROUTE, {
-        headers: { 'kbn-xsrf': 'xxx' },
+        headers: INTERNAL_API_HEADERS,
         body: {
           host: elasticsearchHost,
           code: verificationCode,
@@ -111,7 +109,7 @@ apiTest.describe(
 
       await apiTest.step('configuration is accepted', async () => {
         const response = await apiClient.post(CONFIGURE_ROUTE, {
-          headers: { 'kbn-xsrf': 'xxx' },
+          headers: INTERNAL_API_HEADERS,
           body: payload,
         });
 
@@ -120,7 +118,7 @@ apiTest.describe(
 
       await apiTest.step('a second attempt is rejected as outside the preboot stage', async () => {
         const response = await apiClient.post(CONFIGURE_ROUTE, {
-          headers: { 'kbn-xsrf': 'xxx' },
+          headers: INTERNAL_API_HEADERS,
           body: payload,
         });
 

@@ -35,7 +35,7 @@ import { EsqlFunctionNames } from './function_names';
 const bucketDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.BUCKET,
-  description: i18n.translate('kbn-esql-language.esql.definitions.bucket', {
+  description: i18n.translate('esqlLanguage.esql.definitions.bucket', {
     defaultMessage:
       'Creates groups of values - buckets - out of a datetime or numeric input.\nThe size of the buckets can either be provided directly, or chosen based on a recommended count and values range.',
   }),
@@ -133,12 +133,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'keyword',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date',
@@ -203,6 +301,55 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
           type: 'keyword',
           optional: false,
           hint: {
@@ -219,6 +366,55 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date',
@@ -293,12 +489,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'text',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date',
@@ -373,12 +667,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'keyword',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date',
@@ -433,6 +825,55 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
           type: 'long',
           optional: false,
           hint: {
@@ -459,6 +900,55 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date',
@@ -533,12 +1023,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'text',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date',
@@ -613,6 +1201,55 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'keyword',
           optional: false,
           hint: {
@@ -653,7 +1290,145 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
           optional: false,
           hint: {
             kind: 'constant',
@@ -699,6 +1474,15 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date',
@@ -773,12 +1557,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'text',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date',
@@ -895,12 +1777,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'keyword',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -965,6 +1945,55 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
           type: 'keyword',
           optional: false,
           hint: {
@@ -981,6 +2010,55 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -1055,12 +2133,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'text',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -1135,12 +2311,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'keyword',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -1195,6 +2469,55 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
           type: 'long',
           optional: false,
           hint: {
@@ -1221,6 +2544,55 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -1295,12 +2667,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'text',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -1375,7 +2845,145 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
           type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
           optional: false,
           hint: {
             kind: 'constant',
@@ -1421,6 +3029,15 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -1495,7 +3112,145 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'text',
           optional: false,
           hint: {
             kind: 'constant',
@@ -1541,6 +3296,15 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -1678,12 +3442,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'integer',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -1748,6 +3610,55 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
           type: 'integer',
           optional: false,
           hint: {
@@ -1764,6 +3675,55 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -1838,12 +3798,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'long',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -1918,7 +3976,145 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
           type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
           optional: false,
           hint: {
             kind: 'constant',
@@ -1964,6 +4160,15 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -2524,12 +4729,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'integer',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -2594,6 +4897,55 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
           type: 'integer',
           optional: false,
           hint: {
@@ -2644,7 +4996,145 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
           optional: false,
           hint: {
             kind: 'constant',
@@ -2690,6 +5180,15 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -2764,7 +5263,145 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
           optional: false,
           hint: {
             kind: 'constant',
@@ -2810,6 +5447,15 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -2947,12 +5593,110 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
           type: 'integer',
           optional: false,
           hint: {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -3017,6 +5761,55 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
           type: 'integer',
           optional: false,
           hint: {
@@ -3067,7 +5860,145 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
           type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
           optional: false,
           hint: {
             kind: 'constant',
@@ -3113,6 +6044,15 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -3187,7 +6127,145 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'double',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
           type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Numeric, date or histogram expression from which to derive buckets.',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.',
+        },
+        {
+          name: 'from',
+          type: 'long',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'to',
+          type: 'long',
           optional: false,
           hint: {
             kind: 'constant',
@@ -3233,6 +6311,15 @@ const bucketDefinition: FunctionDefinition = {
             kind: 'constant',
           },
           description: 'End of the range. Can be a number, a date or a date expressed as a string.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the four-argument (range) form of `BUCKET`. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'double',
@@ -3694,6 +6781,7 @@ const bucketDefinition: FunctionDefinition = {
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
     'FROM employees\n| STATS s1 = b1 + 1, s2 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)\n| SORT b1, b2\n| KEEP s1, b1, s2, b2',
     'FROM employees\n| STATS dates = MV_SORT(VALUES(birth_date)) BY b = BUCKET(birth_date + 1 HOUR, 1 YEAR) - 1 HOUR\n| EVAL d_count = MV_COUNT(dates)',
+    'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hires_per_month = COUNT(*), total_salary = SUM(salary)\n  BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z", {"include_empty_buckets": true})',
     'TS exp_histo_sample\n| WHERE instance == "instance-0"\n| STATS count = COUNT(responseTime, bucket) BY bucket = BUCKET(responseTime, 1)\n| SORT RANGE_MIN(bucket)',
   ],
 };
@@ -3702,7 +6790,7 @@ const bucketDefinition: FunctionDefinition = {
 const categorizeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.CATEGORIZE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.categorize', {
+  description: i18n.translate('esqlLanguage.esql.definitions.categorize', {
     defaultMessage: 'Groups text messages into categories of similarly formatted text values.',
   }),
   preview: false,
@@ -3747,7 +6835,7 @@ const categorizeDefinition: FunctionDefinition = {
 const tbucketDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.TBUCKET,
-  description: i18n.translate('kbn-esql-language.esql.definitions.tbucket', {
+  description: i18n.translate('esqlLanguage.esql.definitions.tbucket', {
     defaultMessage:
       'Creates groups of values - buckets - out of a `@timestamp` attribute.\nThe size of the buckets can be provided directly as a duration or period.\nAlternatively, the bucket size can be chosen based on a recommended count\nand a range.\n\nWhen using ES|QL in Kibana, the range can be derived automatically from the\n`@timestamp` filter\nthat Kibana adds to the query.',
   }),
@@ -3878,6 +6966,94 @@ const tbucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
           type: 'keyword',
           optional: true,
           hint: {
@@ -3920,6 +7096,94 @@ const tbucketDefinition: FunctionDefinition = {
           },
           description:
             'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -4008,6 +7272,94 @@ const tbucketDefinition: FunctionDefinition = {
         },
         {
           name: 'from',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
           type: 'keyword',
           optional: true,
           hint: {
@@ -4088,6 +7440,94 @@ const tbucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
           type: 'keyword',
           optional: true,
           hint: {
@@ -4158,6 +7598,94 @@ const tbucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
           type: 'text',
           optional: true,
           hint: {
@@ -4200,6 +7728,94 @@ const tbucketDefinition: FunctionDefinition = {
           },
           description:
             'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -4298,6 +7914,94 @@ const tbucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
           type: 'keyword',
           optional: true,
           hint: {
@@ -4368,6 +8072,94 @@ const tbucketDefinition: FunctionDefinition = {
         },
         {
           name: 'to',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
           type: 'text',
           optional: true,
           hint: {
@@ -4410,6 +8202,94 @@ const tbucketDefinition: FunctionDefinition = {
           },
           description:
             'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          hint: {
+            kind: 'constant',
+          },
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='include_empty_buckets', values=[true, false], description='When `true`, empty buckets (filled with default aggregate values) are output across the `from`..`to` range (`from` inclusive, `to` exclusive). Requires the `from` and `to` arguments. Defaults to `false`.', type=[boolean]}",
+          description:
+            '(Optional) Additional options as <<esql-function-named-params,function named parameters>>.',
         },
       ],
       returnType: 'date_nanos',
@@ -4451,6 +8331,7 @@ const tbucketDefinition: FunctionDefinition = {
     'FROM sample_data\n| STATS count = COUNT(*) BY bucket = TBUCKET(20, "2023-10-23T12:00:00Z", "2023-10-23T14:00:00Z")\n| SORT bucket',
     'FROM sample_data\n| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TBUCKET(1 hour)\n| SORT min',
     'FROM sample_data\n| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TBUCKET("1 hour")\n| SORT min',
+    'TS k8s\n| STATS max_cost = MAX(MAX_OVER_TIME(network.cost))\n  BY time_bucket = TBUCKET(6, "2024-05-10T00:00:00Z", "2024-05-10T00:30:00Z", {"include_empty_buckets": true})',
   ],
 };
 
@@ -4458,7 +8339,7 @@ const tbucketDefinition: FunctionDefinition = {
 const tstepDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.TSTEP,
-  description: i18n.translate('kbn-esql-language.esql.definitions.tstep', {
+  description: i18n.translate('esqlLanguage.esql.definitions.tstep', {
     defaultMessage:
       'Creates groups of values - buckets - out of a `@timestamp` attribute using either a fixed step width\nor a target bucket count.\nUnlike `TBUCKET`,\nwhich aligns buckets to calendar boundaries, TSTEP uses a fixed-width UTC grid anchored at the start\nof the query range. Each bucket is labeled by its right boundary.\nWhen a target bucket count is provided, TSTEP derives a fixed step width from the query range.\nThe derived step is rounded up so that the result uses no more than the target number of buckets.\n\nWhen using ES|QL in Kibana, the range can be derived automatically from the\n`@timestamp` filter\nthat Kibana adds to the query.',
   }),
@@ -6345,7 +10226,7 @@ const tstepDefinition: FunctionDefinition = {
 const withoutDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: EsqlFunctionNames.WITHOUT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.without', {
+  description: i18n.translate('esqlLanguage.esql.definitions.without', {
     defaultMessage:
       'Groups by all time-series dimensions except the specified ones. When called with no arguments, groups by all dimensions.',
   }),

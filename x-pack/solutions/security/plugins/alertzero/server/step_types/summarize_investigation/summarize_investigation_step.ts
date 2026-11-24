@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ExecuteAgentParams, ExecuteAgentResult } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -13,12 +12,14 @@ import { summarizeInvestigationStepCommonDefinition } from '../../../common/step
 import {
   runInvestigationSummary,
   type InvestigationConversationReader,
+  type RunInvestigationSummaryDeps,
 } from '../../services/investigation_summary/run_summary';
 
 export interface SummarizeInvestigationStepDependencies {
   getConversationClient: (request: KibanaRequest) => Promise<InvestigationConversationReader>;
-  executeAgent: (params: ExecuteAgentParams) => Promise<ExecuteAgentResult>;
-  resolveConnectorId?: (request: KibanaRequest) => Promise<string | undefined>;
+  resolveChatModel: RunInvestigationSummaryDeps['resolveChatModel'];
+  getProposals?: RunInvestigationSummaryDeps['getProposals'];
+  logger?: RunInvestigationSummaryDeps['logger'];
 }
 
 export const getSummarizeInvestigationStepDefinition = (
@@ -36,9 +37,12 @@ export const getSummarizeInvestigationStepDefinition = (
             message: 'No request available in workflow context',
           });
         }
+        const { spaceId } = context.contextManager.getContext().workflow;
         const output = await runInvestigationSummary({
           request,
+          spaceId,
           conversationId: input.conversation_id,
+          abortSignal: context.abortSignal,
           deps,
         });
         return { output };

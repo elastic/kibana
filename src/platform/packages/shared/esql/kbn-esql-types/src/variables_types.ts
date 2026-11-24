@@ -11,11 +11,15 @@ import type { BehaviorSubject } from 'rxjs';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
+// Mirrors `PublishingSubject` of `@kbn/presentation-publishing`, which this package cannot depend on.
+type PublishingSubject<T extends unknown = unknown> = Omit<
+  BehaviorSubject<T>,
+  'next' | 'observers'
+>;
 
 /**
  * Prefix a variable name carries in an ES|QL query. Determined by the variable's
- * {@link ESQLVariableType} — derive it with `getVariableNamePrefix` from `@kbn/esql-utils`
+ * {@link ESQLVariableType} — derive it with `getVariableNamePrefix` from `@kbn/esql-controls-utils`
  * rather than hardcoding a prefix.
  */
 export enum VariableNamePrefix {

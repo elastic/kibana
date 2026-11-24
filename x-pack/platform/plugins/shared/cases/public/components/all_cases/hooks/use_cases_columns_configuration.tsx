@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import * as i18n from '../translations';
 import { ALERTS, EVENTS } from '../../../common/translations';
 import { useCasesFeatures } from '../../../common/use_cases_features';
@@ -35,110 +36,118 @@ export const useCasesColumnsConfiguration = (
   // legacy customFields config — this surfaces new global fields and reads live migrated values.
   const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
 
-  const canDisplayDefault = true;
+  return useMemo(() => {
+    const canDisplayDefault = true;
 
-  const result: CasesColumnsConfiguration = {
-    title: {
-      field: 'title',
-      name: i18n.NAME,
-      canDisplay: canDisplayDefault,
-      isCheckedDefault: true,
-    },
-    assignees: {
-      field: 'assignees',
-      name: i18n.ASSIGNEES,
-      canDisplay: caseAssignmentAuthorized && !isSelectorView,
-      isCheckedDefault: true,
-    },
-    tags: {
-      field: 'tags',
-      name: i18n.TAGS,
-      canDisplay: canDisplayDefault && !isSelectorView,
-      isCheckedDefault: true,
-    },
-    totalAlerts: {
-      field: 'totalAlerts',
-      name: ALERTS,
-      canDisplay: !isSelectorView,
-      isCheckedDefault: true,
-    },
-    totalEvents: {
-      field: 'totalEvents',
-      name: EVENTS,
-      canDisplay: !isSelectorView,
-      isCheckedDefault: true,
-    },
-    totalComment: {
-      field: 'totalComment',
-      name: i18n.COMMENTS,
-      canDisplay: canDisplayDefault && !isSelectorView,
-      isCheckedDefault: true,
-    },
-    category: {
-      field: 'category',
-      name: i18n.CATEGORY,
-      canDisplay: canDisplayDefault,
-      isCheckedDefault: true,
-    },
-    closedAt: {
-      field: 'closedAt',
-      name: i18n.CLOSED_ON,
-      canDisplay: canDisplayDefault && !isSelectorView,
-      isCheckedDefault: false,
-    },
-    createdAt: {
-      field: 'createdAt',
-      name: i18n.CREATED_ON,
-      canDisplay: canDisplayDefault,
-      isCheckedDefault: true,
-    },
-    updatedAt: {
-      field: 'updatedAt',
-      name: i18n.UPDATED_ON,
-      canDisplay: canDisplayDefault && !isSelectorView,
-      isCheckedDefault: true,
-    },
-    externalIncident: {
-      field: 'externalIncident',
-      name: i18n.EXTERNAL_INCIDENT,
-      canDisplay: canDisplayDefault && !isSelectorView,
-      isCheckedDefault: true,
-    },
-    status: {
-      field: 'status',
-      name: i18n.STATUS,
-      canDisplay: canDisplayDefault,
-      isCheckedDefault: true,
-    },
-    severity: {
-      field: 'severity',
-      name: i18n.SEVERITY,
-      canDisplay: canDisplayDefault,
-      isCheckedDefault: true,
-    },
-  };
-
-  if (templatesEnabled) {
-    globalInlineFields.forEach((field) => {
-      const key = getExtendedFieldColumnKey(field);
-      result[key] = {
-        field: key,
-        name: field.label ?? field.name,
+    const result: CasesColumnsConfiguration = {
+      title: {
+        field: 'title',
+        name: i18n.NAME,
+        canDisplay: canDisplayDefault,
+        isCheckedDefault: true,
+      },
+      assignees: {
+        field: 'assignees',
+        name: i18n.ASSIGNEES,
+        canDisplay: caseAssignmentAuthorized && !isSelectorView,
+        isCheckedDefault: true,
+      },
+      tags: {
+        field: 'tags',
+        name: i18n.TAGS,
+        canDisplay: canDisplayDefault && !isSelectorView,
+        isCheckedDefault: true,
+      },
+      totalAlerts: {
+        field: 'totalAlerts',
+        name: ALERTS,
+        canDisplay: !isSelectorView,
+        isCheckedDefault: true,
+      },
+      totalEvents: {
+        field: 'totalEvents',
+        name: EVENTS,
+        canDisplay: !isSelectorView,
+        isCheckedDefault: true,
+      },
+      totalComment: {
+        field: 'totalComment',
+        name: i18n.COMMENTS,
+        canDisplay: canDisplayDefault && !isSelectorView,
+        isCheckedDefault: true,
+      },
+      category: {
+        field: 'category',
+        name: i18n.CATEGORY,
+        canDisplay: canDisplayDefault,
+        isCheckedDefault: true,
+      },
+      closedAt: {
+        field: 'closedAt',
+        name: i18n.CLOSED_ON,
         canDisplay: canDisplayDefault && !isSelectorView,
         isCheckedDefault: false,
-      };
-    });
-  } else {
-    // we need to extend the configuration with the customFields
-    customFields.forEach(({ key, label }) => {
-      result[key] = {
-        field: key,
-        name: label,
+      },
+      createdAt: {
+        field: 'createdAt',
+        name: i18n.CREATED_ON,
+        canDisplay: canDisplayDefault,
+        isCheckedDefault: true,
+      },
+      updatedAt: {
+        field: 'updatedAt',
+        name: i18n.UPDATED_ON,
         canDisplay: canDisplayDefault && !isSelectorView,
-        isCheckedDefault: false,
-      };
-    });
-  }
+        isCheckedDefault: true,
+      },
+      externalIncident: {
+        field: 'externalIncident',
+        name: i18n.EXTERNAL_INCIDENT,
+        canDisplay: canDisplayDefault && !isSelectorView,
+        isCheckedDefault: true,
+      },
+      status: {
+        field: 'status',
+        name: i18n.STATUS,
+        canDisplay: canDisplayDefault,
+        isCheckedDefault: true,
+      },
+      severity: {
+        field: 'severity',
+        name: i18n.SEVERITY,
+        canDisplay: canDisplayDefault,
+        isCheckedDefault: true,
+      },
+    };
 
-  return result;
+    if (templatesEnabled) {
+      globalInlineFields.forEach((field) => {
+        const key = getExtendedFieldColumnKey(field);
+        result[key] = {
+          field: key,
+          name: field.label ?? field.name,
+          canDisplay: canDisplayDefault && !isSelectorView,
+          isCheckedDefault: false,
+        };
+      });
+    } else {
+      // we need to extend the configuration with the customFields
+      customFields.forEach(({ key, label }) => {
+        result[key] = {
+          field: key,
+          name: label,
+          canDisplay: canDisplayDefault && !isSelectorView,
+          isCheckedDefault: false,
+        };
+      });
+    }
+
+    return result;
+  }, [
+    caseAssignmentAuthorized,
+    templatesEnabled,
+    customFields,
+    globalInlineFields,
+    isSelectorView,
+  ]);
 };

@@ -99,6 +99,14 @@ jest.mock('../../../hooks/use_fetch_rule_routing_tags', () => ({
   useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
+jest.mock('../../../hooks/use_fetch_workflow', () => ({
+  useFetchWorkflow: (id: string) => ({
+    data: { id, name: `Workflow ${id}` },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {
@@ -119,8 +127,13 @@ jest.mock('../../../hooks/use_fetch_workflows', () => ({
       size: 100,
     },
     isLoading: false,
+    isError: false,
     refetch: jest.fn(),
   }),
+}));
+
+jest.mock('../../../hooks/use_fetch_workflows_by_ids', () => ({
+  useFetchWorkflowsByIds: () => [],
 }));
 
 const TEST_SUBJ = {
@@ -210,11 +223,9 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
-  it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
+  it('collapses the notification controls section by default', () => {
     renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
 
-    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
-    expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
     expect(
       within(screen.getByTestId('actionPolicyFormSection-notificationControls'))
         .getByText('Notification controls')

@@ -49,6 +49,8 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/ui-chrome-layout'
   - '@kbn/app-header'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/core-notifications-browser-mocks'
 tags:
   - shared-browser
   - package
@@ -61,6 +63,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

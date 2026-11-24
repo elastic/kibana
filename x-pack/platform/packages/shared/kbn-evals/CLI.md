@@ -78,7 +78,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--suite <id>`                   |           | Suite to run (interactive prompt if omitted)                                    |
 | `--config <path>`                |           | Playwright config path (alternative to `--suite`)                               |
 | `--project <id>`                 | `--model` | Connector/model to evaluate (comma-separated for multiple)                      |
-| `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators                                    |
+| `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators (defaults to the shared judge)     |
 | `--profile <name>`               |           | Profile for config resolution (see table above)                                 |
 | `--datasets-profile <name>`      |           | Override dataset settings (sets `EVAL_KBN_URL`/`EVAL_KBN_API_KEY`)              |
 | `--export-profile <name>`        |           | Override export settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)           |
@@ -132,6 +132,8 @@ node scripts/evals stop --service scout
 node scripts/evals stop --service edot
 ```
 
+Stopping Scout also removes the serverless Elasticsearch and UIAM Docker containers (`es01`, `es02`, `uiam-cosmosdb`, `uiam`) when Scout ran serverless, or when no Scout is tracked so containers orphaned by an earlier stop are cleaned up. An `es01` running a non-serverless image, such as one started with `yarn es docker`, is left alone.
+
 | Flag               | Description                                     |
 | ------------------ | ----------------------------------------------- |
 | `--service <name>` | Stop only `edot` or `scout` (default: stop all) |
@@ -151,7 +153,7 @@ node scripts/evals logs --service edot --from-start
 
 ### `scout` -- Start Scout standalone
 
-Convenience wrapper around `node scripts/scout.js start-server` with evals defaults (`--arch stateful --domain classic --serverConfigSet evals_tracing`). `--suite` uses a suite's `serverConfigSet` and `scoutArch` / `scoutDomain`, and runs its `scoutHook` on the `--profile` config; `--serverConfigSet`, `--arch` and `--domain` override them. Positional arguments are forwarded to Scout.
+Convenience wrapper around `node scripts/scout.js start-server` with evals defaults (`--arch stateful --domain classic --serverConfigSet evals_tracing`). `--suite` uses a suite's `serverConfigSet` and `scoutArch` / `scoutDomain`, and runs its `scoutHook` on the `--profile` config (with `dev-vault`, on the suite's `vaultSecret` when it has one); `--serverConfigSet`, `--arch` and `--domain` override them. Positional arguments are forwarded to Scout.
 
 ```bash
 node scripts/evals scout
@@ -175,7 +177,7 @@ node scripts/evals run --suite streams --dry-run
 | `--suite <id>`                    |           | Suite to run (interactive prompt if omitted)                                    |
 | `--config <path>`                 |           | Playwright config path (alternative to `--suite`)                               |
 | `--project <id>`                  | `--model` | Connector/model to evaluate                                                     |
-| `--evaluation-connector-id <id>`  | `--judge` | Connector for LLM-as-a-judge evaluators                                         |
+| `--evaluation-connector-id <id>`  | `--judge` | Connector for LLM-as-a-judge evaluators (defaults to the shared judge)          |
 | `--grep <pattern>`                |           | Filter tests by name (passed to Playwright `--grep`)                            |
 | `--repetitions <n>`               |           | Repeat each example N times                                                     |
 | `--concurrency <n>`               |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
@@ -216,8 +218,14 @@ node scripts/evals doctor --fix
 ### `compare` -- Compare eval runs
 
 ```bash
-node scripts/evals compare <run-id-a> <run-id-b>
+node scripts/evals compare <target-run-id> <baseline-run-id>
 ```
+
+| Flag                  | Description                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------- |
+| `--repetition-policy` | `mean` (default) or `median` compares one score per example, aggregated over its repetitions. |
+
+Rows marked `N*` have examples with a different number of valid repetitions in the two runs, or null scores. See the evals plugin README for the details.
 
 ### `env` -- List environment variables
 

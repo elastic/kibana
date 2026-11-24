@@ -20,28 +20,9 @@ import {
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 import { endsWithNonWhitespace, matchesWildcardPattern } from '../../../definitions/utils/regex';
 
-export const METADATA_FIELDS = [
-  '_version',
-  '_id',
-  '_index',
-  '_source',
-  '_ignored',
-  '_index_mode',
-  '_score',
-  '_size',
-  '_slice',
-  '_name',
-  '_class',
-];
+import { METADATA_FIELDS, CPS_METADATA_FIELDS } from './fields';
 
-export const CPS_METADATA_FIELDS = [
-  '_project._id',
-  '_project._alias',
-  '_project._type',
-  '_project._organization',
-  '_project._csp',
-  '_project._region',
-];
+export { METADATA_FIELDS, CPS_METADATA_FIELDS } from './fields';
 
 const PROJECT_TAG_PREFIX = '_project.';
 
@@ -63,7 +44,7 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'METADATA',
   text: 'METADATA ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-language.esql.definitions.metadataDoc', {
+  detail: i18n.translate('esqlLanguage.esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
   category: SuggestionCategory.VALUE,

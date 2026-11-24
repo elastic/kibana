@@ -164,7 +164,7 @@ export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> 
 
   return (
     <KibanaPageTemplate.EmptyPrompt
-      iconType="managementApp"
+      iconType="gear"
       title={
         <h2 data-test-subj="apiKeysEmptyPromptTitle">
           <FormattedMessage

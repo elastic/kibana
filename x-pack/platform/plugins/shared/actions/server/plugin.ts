@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
@@ -109,7 +110,11 @@ import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profi
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
-import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
+import {
+  ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
+  ACTIONS_FEATURE_ID,
+  AlertHistoryEsIndexConnectorId,
+} from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { UserConnectorTokenClient } from './lib/user_connector_token_client';
@@ -327,6 +332,8 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private isCatalogFeatureFlagEnabled = false;
+  private connectorCatalogFeatureFlagSubscription?: Subscription;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -629,6 +636,13 @@ export class ActionsPlugin
         '`xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity. Relay requests will fail until `xpack.security.uiam` is configured with a client certificate (`ssl.certificate` and `ssl.key`).'
       );
     }
+
+    this.connectorCatalogFeatureFlagSubscription = core.featureFlags
+      .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
+      .subscribe((isCatalogEnabled: boolean) => {
+        this.isCatalogFeatureFlagEnabled = isCatalogEnabled;
+      });
+
     const {
       logger,
       licenseState,
@@ -670,7 +684,7 @@ export class ActionsPlugin
     }: {
       request: KibanaRequest;
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
-      spaceId?: string;
+      spaceId?: SpaceId;
     }) => {
       return new ActionsClient({
         publicBaseUrl: core.http.basePath.publicBaseUrl,
@@ -1110,6 +1124,7 @@ export class ActionsPlugin
       actionsConfig,
     } = this;
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
+    const isCatalogFeatureFlagEnabled = () => this.isCatalogFeatureFlagEnabled;
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
@@ -1184,6 +1199,7 @@ export class ActionsPlugin
           return actionTypeRegistry!.list({ featureId });
         },
         getSkippedPreconfiguredConnectorIds: getSkippedPreconfiguredIds,
+        isCatalogFeatureFlagEnabled,
       };
     };
   };
@@ -1258,6 +1274,9 @@ export class ActionsPlugin
   };
 
   public stop() {
+    this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
+    this.connectorCatalogFeatureFlagSubscription = undefined;
+    this.isCatalogFeatureFlagEnabled = false;
     if (this.licenseState) {
       this.licenseState.clean();
     }

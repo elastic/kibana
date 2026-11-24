@@ -16,7 +16,8 @@ const BULK_STATUS_ENDPOINT = 'internal/streams/onboarding/_bulk_status';
 // through core's ~10s dynamic config poll.
 const FLAG_PROPAGATION_POLL_OPTIONS = { timeout: 45_000, intervals: [1_000] };
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/273971
+apiTest.describe.skip(
   'Onboarding bulk status API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

@@ -7,14 +7,13 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiDataGridCellValueElementProps, EuiThemeComputed } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type {
   ColumnHeaderOptions,
   TimelineItem,
   TimelineNonEcsData,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-common';
 import type { SortColumnTable, SortDirectionTable } from '../../common/types';
 
 /**
@@ -84,11 +83,11 @@ export const mapSortingColumns = ({
 
 export const addBuildingBlockStyle = (
   ecs: Ecs,
-  theme: EuiTheme,
+  theme: EuiThemeComputed,
   setCellProps: EuiDataGridCellValueElementProps['setCellProps']
 ) => {
   if (isEventBuildingBlockType(ecs)) {
-    setCellProps({ style: { backgroundColor: `${theme.eui.euiColorHighlight}` } });
+    setCellProps({ style: { backgroundColor: theme.colors.highlight } });
   } else {
     // reset cell style
     setCellProps({ style: { backgroundColor: 'inherit' } });

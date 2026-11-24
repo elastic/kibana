@@ -117,8 +117,9 @@ const rules: readonly SetFieldRule[] = [
       regex(/^(windows|mac|linux)\.memory_protection\.custom_yara_signatures$/)(path),
     domain: () => bool(),
     createsMissing: true,
-    apply: (policy, _path, value) => {
-      setCustomYaraSignatures(policy, value as boolean, ['windows', 'mac', 'linux']);
+    apply: (policy, _path, value, match) => {
+      if (match.os === undefined) throw new Error('Invalid custom YARA rule match');
+      setCustomYaraSignatures(policy, value as boolean, [match.os]);
     },
   },
   {
@@ -140,12 +141,25 @@ const rules: readonly SetFieldRule[] = [
     },
   },
   {
+    kind: 'ai_data_collection_enabled',
+    match: regex(/^(windows|mac|linux)\.ai_data_collection\.enabled$/),
+    domain: () => bool(),
+    createsMissing: true,
+    apply: (policy, _path, value, match) => {
+      const { os } = match;
+      if (os === undefined) throw new Error('Invalid ai_data_collection rule match');
+      policy[os].ai_data_collection = { enabled: value as boolean };
+    },
+  },
+  {
     kind: 'device_control_usb_storage',
     match: regex(/^(windows|mac)\.device_control\.usb_storage$/),
     domain: () => ({ type: 'enum', values: deviceValues }),
     createsMissing: false,
-    apply: (policy, _path, value) => {
-      setDeviceControlUsbStorage(policy, value as DeviceControlAccessLevel);
+    apply: (policy, _path, value, match) => {
+      if (match.os !== 'windows' && match.os !== 'mac')
+        throw new Error('Invalid device control USB rule match');
+      setDeviceControlUsbStorage(policy, value as DeviceControlAccessLevel, [match.os]);
     },
   },
   {
@@ -153,21 +167,20 @@ const rules: readonly SetFieldRule[] = [
     match: (path) => {
       const r = /^(windows|mac|linux)\.popup\.([^.]+)\.enabled$/.exec(path);
       return r && POLICY_COUPLING_PROTECTIONS.includes(r[2] as PolicyCouplingProtection)
-        ? { protection: r[2] }
+        ? { os: policyOsKey(r[1]), protection: r[2] }
         : undefined;
     },
     domain: () => bool(),
     createsMissing: false,
     apply: (policy, _path, value, match) => {
-      if (match.protection === undefined) throw new Error('Invalid popup rule match');
-      const ref = protectionRef(match.protection);
-      if (ref)
-        setPopupEnabled(
-          policy,
-          match.protection as PolicyCouplingProtection,
-          ref.osList,
-          value as boolean
-        );
+      if (match.protection === undefined || match.os === undefined)
+        throw new Error('Invalid popup rule match');
+      setPopupEnabled(
+        policy,
+        match.protection as PolicyCouplingProtection,
+        [match.os],
+        value as boolean
+      );
     },
   },
   {
@@ -176,28 +189,29 @@ const rules: readonly SetFieldRule[] = [
       const r = /^(windows|mac|linux)\.malware\.([^.]+)$/.exec(path);
       return r &&
         POLICY_COUPLING_MALWARE_BOOLEAN_FIELDS.includes(r[2] as PolicyCouplingMalwareBooleanField)
-        ? { field: r[2] }
+        ? { os: policyOsKey(r[1]), field: r[2] }
         : undefined;
     },
     domain: () => bool(),
     createsMissing: false,
     apply: (policy, _path, value, match) => {
+      if (match.os === undefined) throw new Error('Invalid malware boolean rule match');
       setMalwareBoolean(
         policy,
         match.field as PolicyCouplingMalwareBooleanField,
         value as boolean,
-        ['windows', 'mac', 'linux']
+        [match.os]
       );
     },
   },
   {
     kind: 'behavior_reputation_service',
-    match: (path) =>
-      /^(windows|mac|linux)\.behavior_protection\.reputation_service$/.test(path) ? {} : undefined,
+    match: regex(/^(windows|mac|linux)\.behavior_protection\.reputation_service$/),
     domain: () => bool(),
     createsMissing: false,
-    apply: (policy, _path, value) => {
-      setBehaviorReputationService(policy, value as boolean);
+    apply: (policy, _path, value, match) => {
+      if (match.os === undefined) throw new Error('Invalid behavior reputation rule match');
+      setBehaviorReputationService(policy, value as boolean, [match.os]);
     },
   },
   {
@@ -261,6 +275,7 @@ export type ClassifiedSetFieldValue =
     }
   | { readonly kind: 'antivirus_registration_mode'; readonly value: AntivirusRegistrationModes }
   | { readonly kind: 'device_control_enabled'; readonly value: boolean }
+  | { readonly kind: 'ai_data_collection_enabled'; readonly value: boolean }
   | { readonly kind: 'device_control_usb_storage'; readonly value: DeviceControlAccessLevel }
   | { readonly kind: 'custom_yara_signatures'; readonly value: boolean }
   | {

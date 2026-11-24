@@ -102,6 +102,19 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'error';
     values: { displayName: string; id: string };
   };
+  // -- service accounts ---------------------------------------------------------
+  /** `settings.run_as` names a service account that does not exist. */
+  serviceAccountNotFound: {
+    owner: 'service-account-validation';
+    defaultSeverity: 'error';
+    values: { id: string };
+  };
+  /** `settings.run_as` names a service account that is disabled or cannot be assumed. */
+  serviceAccountUnavailable: {
+    owner: 'service-account-validation';
+    defaultSeverity: 'warning';
+    values: { name: string };
+  };
   // -- step properties ----------------------------------------------------------
   invalidStepProperty: {
     owner: 'step-property-validation';
@@ -212,9 +225,33 @@ export interface WorkflowValidationRules {
     values: { stepName: string };
   };
 
+  // -- step exposure ------------------------------------------------------------
+  /** An `internal` step used in a workflow that isn't managed. */
+  internalStepType: {
+    owner: 'step-exposure-validation';
+    defaultSeverity: 'warning';
+    values: { stepType: string };
+  };
+  /** A `managed_only` step used in a workflow that isn't managed. */
+  managedOnlyStepType: {
+    owner: 'step-exposure-validation';
+    defaultSeverity: 'error';
+    values: { stepType: string };
+  };
+
   // -- es|ql --------------------------------------------------------------------
   /** A diagnostic forwarded from the ES|QL validator. */
   esqlDiagnostic: {
+    owner: 'esql-validation';
+    defaultSeverity: 'error';
+    values: { reason: string };
+  };
+  /**
+   * The ES|QL validator found no index, alias or data stream for a source. Kept
+   * apart from `esqlDiagnostic` because the source can still exist where and
+   * when the workflow runs, so callers like workflow generation may accept it.
+   */
+  esqlUnknownSource: {
     owner: 'esql-validation';
     defaultSeverity: 'error';
     values: { reason: string };
@@ -262,6 +299,9 @@ export const WORKFLOW_VALIDATION_RULES: {
 
   connectorNotFound: { owner: 'connector-id-validation', defaultSeverity: 'error' },
 
+  serviceAccountNotFound: { owner: 'service-account-validation', defaultSeverity: 'error' },
+  serviceAccountUnavailable: { owner: 'service-account-validation', defaultSeverity: 'warning' },
+
   invalidStepProperty: { owner: 'step-property-validation', defaultSeverity: 'error' },
 
   unknownInputKey: { owner: 'workflow-inputs-validation', defaultSeverity: 'warning' },
@@ -290,7 +330,11 @@ export const WORKFLOW_VALIDATION_RULES: {
   deprecatedStepType: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
   ignoredFetcherSetting: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
 
+  internalStepType: { owner: 'step-exposure-validation', defaultSeverity: 'warning' },
+  managedOnlyStepType: { owner: 'step-exposure-validation', defaultSeverity: 'error' },
+
   esqlDiagnostic: { owner: 'esql-validation', defaultSeverity: 'error' },
+  esqlUnknownSource: { owner: 'esql-validation', defaultSeverity: 'error' },
 };
 
 /** Every registered rule ID, sorted. Stable ordering keeps the snapshot test readable. */

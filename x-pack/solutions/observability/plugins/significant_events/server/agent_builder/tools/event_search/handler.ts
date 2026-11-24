@@ -6,8 +6,9 @@
  */
 
 import {
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_TEXT_LENGTH,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  type Severity,
   type SignificantEvent,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
@@ -17,14 +18,15 @@ import {
 } from '../../../lib/significant_events/events';
 import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { getSignalCollectedAt } from '../../../lib/significant_events/events/signal_collected_at';
+import { StatusError } from '../../../lib/errors/status_error';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
 export const EVENT_SEARCH_MAX_PER_PAGE = 50;
 export const EVENT_SEARCH_SIGNAL_PAGE_SIZE = 10;
 
 export const DESCRIPTION_TRUNCATION_SUFFIX = '… [truncated]';
-export const DESCRIPTION_CONTENT_LENGTH =
-  MAX_SIGNAL_DESCRIPTION_LENGTH - DESCRIPTION_TRUNCATION_SUFFIX.length;
+export const DESCRIPTION_CONTENT_LENGTH = MAX_TEXT_LENGTH - DESCRIPTION_TRUNCATION_SUFFIX.length;
 
 export type EventSearchView = 'compact' | 'full';
 
@@ -99,6 +101,7 @@ interface DetailedEventSearchItem
     SignificantEvent,
     | '@timestamp'
     | 'confidence'
+    | 'summary'
     | 'event_id'
     | 'severity'
     | 'status'
@@ -139,7 +142,7 @@ const byMemberThenRecency = (left: Signal, right: Signal): number => {
   if (leftIsMember !== rightIsMember) {
     return leftIsMember ? -1 : 1;
   }
-  return (right.collected_at ?? '').localeCompare(left.collected_at ?? '');
+  return (getSignalCollectedAt(right) ?? '').localeCompare(getSignalCollectedAt(left) ?? '');
 };
 
 const getRuleUuid = (signal: Signal): string | undefined =>
@@ -177,6 +180,7 @@ const toEventSearchItemBase = (
   SignificantEvent,
   | '@timestamp'
   | 'confidence'
+  | 'summary'
   | 'event_id'
   | 'severity'
   | 'status'
@@ -192,6 +196,7 @@ const toEventSearchItemBase = (
   severity: event.severity,
   confidence: event.confidence,
   source_ids: event.source_ids,
+  summary: event.summary,
 });
 
 const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
@@ -199,7 +204,6 @@ const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
   const { ruleUuids, signalCounts } = collectSignalMetadata(signals);
   return {
     ...toEventSearchItemBase(event),
-    summary: event.summary,
     signal_counts: signalCounts,
     signal_rule_uuids: [...ruleUuids].sort(),
     causal_features: event.causal_features,
@@ -208,7 +212,7 @@ const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
 };
 
 const truncateSignalDescription = (description: string | undefined): string | undefined =>
-  description !== undefined && description.length > MAX_SIGNAL_DESCRIPTION_LENGTH
+  description !== undefined && description.length > MAX_TEXT_LENGTH
     ? `${description.slice(0, DESCRIPTION_CONTENT_LENGTH)}${DESCRIPTION_TRUNCATION_SUFFIX}`
     : description;
 
@@ -227,7 +231,7 @@ const toDetailedEvent = (
       rule_uuid: getRuleUuid(signal),
       verdict: signal.verdict,
       description: truncateSignalDescription(signal.description),
-      collected_at: signal.collected_at,
+      collected_at: getSignalCollectedAt(signal),
     })),
     signals_page: signalsPage,
     signals_per_page: signalsPerPage,
@@ -272,17 +276,22 @@ const toEnvelope = (response: {
 export async function searchEventsToolHandler<V extends EventSearchView = 'compact'>({
   eventSearchClient,
   params,
+  reconcileSeverities,
 }: {
   eventSearchClient: RuleEventsClient;
   params: EventSearchInput & { view?: V };
+  /** Gives the returned events the severity of their investigations, so they agree with the list. */
+  reconcileSeverities?: <T extends { event_id: string; severity: Severity; status?: string }>(
+    hits: T[]
+  ) => Promise<T[]>;
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';
   if (view === 'full' && params.event_ids?.length !== 1) {
-    throw new Error('Full event search requires exactly one event ID');
+    throw new StatusError('Full event search requires exactly one event ID', 400);
   }
 
   const sharedParams = buildSearchParams(view, params);
-  const response = hasEventSearchFilters(params)
+  const found = hasEventSearchFilters(params)
     ? await eventSearchClient.findLatestByCurrentStatePaginated({
         ...sharedParams,
         status: toStatusFilter(params.status),
@@ -291,6 +300,10 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
         topologyFeatureIds: params.topology_feature_ids,
       })
     : await eventSearchClient.findLatestPaginated(sharedParams);
+  const response = {
+    ...found,
+    hits: reconcileSeverities ? await reconcileSeverities(found.hits) : found.hits,
+  };
 
   const envelope = toEnvelope(response);
 

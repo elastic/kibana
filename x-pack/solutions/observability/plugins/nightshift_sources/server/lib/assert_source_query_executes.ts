@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getSourceCommandQuery, hasMultipleSourceIndices } from '@kbn/nightshift-shared';
+import {
+  getSourceCommandQuery,
+  getTimestampColumnProblem,
+  hasMultipleSourceIndices,
+} from '@kbn/nightshift-shared';
 import { isEsqlUnknownIndexError, isEsqlVerificationError, toBoom } from './es_errors';
 
 // ES|QL answers a wildcard that matches nothing with a single placeholder column of this name.
@@ -14,6 +19,9 @@ const ESQL_EMPTY_RELATION_COLUMN = '<no-fields>';
 
 // Trailing `--` / `//` on the stored query would swallow `| LIMIT 0` if it sat on the same line.
 const appendLimitZero = (query: string): string => `${query}\n| LIMIT 0`;
+
+const isEmptyRelation = (columns: ReadonlyArray<{ name: string }>): boolean =>
+  columns.every(({ name }) => name === ESQL_EMPTY_RELATION_COLUMN);
 
 /**
  * True when nothing exists yet behind the query's source command. A concrete name that does not
@@ -34,7 +42,7 @@ export const hasNoIndicesBehind = async ({
       query: appendLimitZero(getSourceCommandQuery(esql)),
       format: 'json',
     });
-    return columns.every((column) => column.name === ESQL_EMPTY_RELATION_COLUMN);
+    return isEmptyRelation(columns);
   } catch (error) {
     if (isEsqlVerificationError(error)) {
       // One missing concrete name is not an empty relation when other sources may exist.
@@ -45,8 +53,10 @@ export const hasNoIndicesBehind = async ({
 };
 
 /**
- * Runs `<esql> | LIMIT 0` as the current user. A query over indices that do not exist yet is
- * accepted, which also means field names in `WHERE` are only checked once data exists.
+ * Runs `<esql> | LIMIT 0` as the current user and refuses a query whose output has no usable
+ * `@timestamp`. A query over indices that do not exist yet is accepted with `indexExists: false`,
+ * which also means field names in `WHERE` and the `@timestamp` column are only checked once data
+ * exists.
  */
 export const assertSourceQueryExecutes = async ({
   esClient,
@@ -54,20 +64,39 @@ export const assertSourceQueryExecutes = async ({
 }: {
   esClient: ElasticsearchClient;
   esql: string;
-}): Promise<void> => {
+}): Promise<{ indexExists: boolean }> => {
+  const { indexExists, columns } = await runLimitZero({ esClient, esql });
+  const timestampProblem = indexExists ? getTimestampColumnProblem(columns) : undefined;
+  if (timestampProblem) {
+    throw badRequest(timestampProblem);
+  }
+  return { indexExists };
+};
+
+const runLimitZero = async ({
+  esClient,
+  esql,
+}: {
+  esClient: ElasticsearchClient;
+  esql: string;
+}): Promise<{ indexExists: boolean; columns: Array<{ name: string; type: string }> }> => {
   try {
-    await esClient.esql.query({ query: appendLimitZero(esql), format: 'json' });
+    const { columns = [] } = await esClient.esql.query({
+      query: appendLimitZero(esql),
+      format: 'json',
+    });
+    return { indexExists: !isEmptyRelation(columns), columns };
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {
       if (hasMultipleSourceIndices(esql)) {
         throw toBoom(error, 'ES|QL query cannot be executed');
       }
-      return;
+      return { indexExists: false, columns: [] };
     }
     if (isEsqlVerificationError(error)) {
       try {
         if (await hasNoIndicesBehind({ esClient, esql })) {
-          return;
+          return { indexExists: false, columns: [] };
         }
       } catch (probeError) {
         throw toBoom(probeError, 'ES|QL query cannot be executed');

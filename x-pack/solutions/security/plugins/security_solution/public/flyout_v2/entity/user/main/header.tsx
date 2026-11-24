@@ -25,16 +25,16 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { FlyoutHeaderActions } from '../../../shared/components/flyout_header_actions';
 import type { FirstLastSeenData } from '../../shared/components/observed_entity/types';
-import type { ManagedUserData } from '../../../../flyout/entity_details/shared/hooks/use_managed_user';
+import type { ManagedUserData } from '../../shared/hooks/use_managed_user';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
-import { getResolvedFromRecordCount } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+import { EntitySourceBadge } from '../../shared/components/entity_source_badge';
+import { getResolvedFromRecordCount } from '../../shared/utils/entity_store_group_utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
+import { RiskLevelBadge } from '../../shared/components/risk_level_badge';
 import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
 import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface HeaderProps {
   /** User name displayed as the flyout title. */
@@ -47,6 +47,8 @@ export interface HeaderProps {
   entityId?: string;
   /** Records resolving to `entityId` (aliases); when known, the "Resolved from N" badge counts them. */
   aliasRecords?: readonly EntityStoreRecord[];
+  /** Total number of aliases in the store, so the badge is right when `aliasRecords` is capped. */
+  aliasCount?: number;
   /** Key-value map of identity fields used to resolve the user. */
   identityFields?: IdentityFields;
   /** Whether the user exists in the entity store. */
@@ -70,6 +72,7 @@ export const Header = ({
   lastSeen,
   entityId,
   aliasRecords,
+  aliasCount,
   identityFields,
   isEntityInStore,
   riskLevel,
@@ -87,7 +90,7 @@ export const Header = ({
   const isLoading = lastSeen?.isLoading ?? false;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
-  const resolvedFromCount = getResolvedFromRecordCount(aliasRecords);
+  const resolvedFromCount = getResolvedFromRecordCount(aliasRecords, aliasCount);
   const lastSeenDate = useMemo(
     () =>
       max(

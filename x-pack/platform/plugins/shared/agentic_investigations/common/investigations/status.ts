@@ -43,6 +43,17 @@ export interface ClosePreviewProposal {
 export interface InvestigationClosePreviewResponse {
   pending_proposal_count: number;
   pending_proposals: ClosePreviewProposal[];
+  /**
+   * True when at least one pending proposal needs its decline justified. False for an
+   * investigation whose pending proposals are all to-dos the analyst carries out themselves:
+   * closing it asks for nothing, and the server accepts the close without a `dismiss_reason`.
+   */
+  requires_discard_reason: boolean;
+  /**
+   * Approved proposals whose action is still running. Closing does not change them: they
+   * finish on their own.
+   */
+  running_proposal_count: number;
 }
 
 export const setEscalationStatusRequestSchema = z.object({

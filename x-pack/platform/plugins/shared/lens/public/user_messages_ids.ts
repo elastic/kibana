@@ -11,6 +11,7 @@ export const PRECISION_ERROR_ASC_COUNT_PRECISION = 'precision_error_asc_count_pr
 export const TSDB_UNSUPPORTED_COUNTER_OP = 'tsdb_unsupported_counter_op';
 export const LAYER_SETTINGS_RANDOM_SAMPLING_INFO = 'random_sampling_info';
 export const LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS = 'ignoring-global-filters-layers';
+export const EDITOR_LOAD_ERROR = 'editor_load_error';
 export const EDITOR_MISSING_VIS_TYPE = 'editor_missing_vis_type';
 export const EDITOR_UNKNOWN_VIS_TYPE = 'editor_unknown_vis_type';
 export const EDITOR_UNKNOWN_DATASOURCE_TYPE = 'editor_unknown_datasource_type';

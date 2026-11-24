@@ -113,6 +113,30 @@ actions:
             examples:
               updateIndexConnectorRequest:
                 $ref: '../examples/update_index_connector_request.yaml'
+  - target: "$.paths['/api/actions/events/{connector_type_id}/{connector_id}']['post']"
+    description: 'Add examples to ingest events API'
+    update:
+      requestBody:
+        content:
+          'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
+            examples:
+              ingestEventsRequest:
+                $ref: '../examples/ingest_events_request.yaml'
+              ingestEventsChallengeRequest:
+                $ref: '../examples/ingest_events_challenge_request.yaml'
+      responses:
+        '200':
+          content:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
+              examples:
+                ingestEventsAckResponse:
+                  $ref: '../examples/ingest_events_ack_response.yaml'
+        '202':
+          content:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
+              examples:
+                ingestEventsResponse:
+                  $ref: '../examples/ingest_events_response.yaml'
   # Remove the automated empty connector config and secrets
   # (targets component schemas because the request bodies now use $ref)
   - target: "$.components.schemas.Kibana_HTTP_APIs_new_connector.properties.config"

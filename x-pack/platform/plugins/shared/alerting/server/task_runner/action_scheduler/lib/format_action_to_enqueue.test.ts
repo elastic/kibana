@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 import { formatActionToEnqueue } from './format_action_to_enqueue';
@@ -25,7 +26,7 @@ describe('formatActionToEnqueue', () => {
       ruleConsumer: 'rule-consumer',
       ruleId: 'aaa',
       ruleTypeId: 'security-rule',
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
     });
     expect(result.uiamApiKeyExternal).toBe(true);
   });
@@ -44,7 +45,7 @@ describe('formatActionToEnqueue', () => {
       ruleConsumer: 'rule-consumer',
       ruleId: 'aaa',
       ruleTypeId: 'security-rule',
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
     });
     expect(result).not.toHaveProperty('uiamApiKeyExternal');
   });
@@ -64,7 +65,7 @@ describe('formatActionToEnqueue', () => {
       ruleConsumer: 'rule-consumer',
       ruleId: 'aaa',
       ruleTypeId: 'security-rule',
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
     });
     expect(result.uiamApiKeyId).toBe('uiam-key-id');
   });
@@ -83,7 +84,7 @@ describe('formatActionToEnqueue', () => {
       ruleConsumer: 'rule-consumer',
       ruleId: 'aaa',
       ruleTypeId: 'security-rule',
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
     });
     expect(result).not.toHaveProperty('uiamApiKeyId');
   });
@@ -109,7 +110,7 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
       })
     ).toEqual({
       id: '1',
@@ -121,7 +122,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {
@@ -165,7 +166,7 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         priority: TaskPriority.Maintenance,
       })
     ).toEqual({
@@ -178,7 +179,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {
@@ -224,7 +225,7 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         priority: TaskPriority.Maintenance,
       })
     ).toEqual({
@@ -237,7 +238,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {
@@ -283,7 +284,7 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
       })
     ).toEqual({
       id: '1',
@@ -295,7 +296,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: null,
       consumer: 'rule-consumer',
       source: {
@@ -339,7 +340,7 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'my-special-space',
+        spaceId: asSpaceId('my-special-space'),
       })
     ).toEqual({
       id: '1',
@@ -351,7 +352,7 @@ describe('formatActionToEnqueue', () => {
         alertVal:
           'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
       },
-      spaceId: 'my-special-space',
+      spaceId: asSpaceId('my-special-space'),
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {
@@ -388,13 +389,13 @@ describe('formatActionToEnqueue', () => {
         ruleConsumer: 'rule-consumer',
         ruleId: 'aaa',
         ruleTypeId: 'security-rule',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
       })
     ).toEqual({
       id: '1',
       uuid: 'xxxyyyyzzzz',
       params: { myParams: 'test' },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       apiKey: 'MTIzOmFiYw==',
       consumer: 'rule-consumer',
       source: {

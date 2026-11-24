@@ -216,7 +216,8 @@ export function resultsServiceProvider(mlApi: MlApi) {
       earliestMs: number,
       latestMs: number,
       interval: string,
-      overallScore?: number
+      overallScore?: number,
+      signal?: AbortSignal
     ): Promise<OverallBucketScoresResults> {
       return new Promise((resolve, reject) => {
         const obj: OverallBucketScoresResults = { success: true, results: {} };
@@ -229,6 +230,7 @@ export function resultsServiceProvider(mlApi: MlApi) {
             start: earliestMs,
             end: latestMs,
             overallScore,
+            signal,
           })
           .then((resp) => {
             const dataByTime = get(resp, ['overall_buckets'], []);
@@ -349,7 +351,8 @@ export function resultsServiceProvider(mlApi: MlApi) {
       earliestMs: number,
       latestMs: number,
       intervalMs: number,
-      actualPlotFunctionIfMetric?: string
+      actualPlotFunctionIfMetric?: string,
+      signal?: AbortSignal
     ): Promise<RecordMaxScoreByTimeResults> {
       return new Promise((resolve, reject) => {
         const obj: RecordMaxScoreByTimeResults = {
@@ -428,7 +431,8 @@ export function resultsServiceProvider(mlApi: MlApi) {
                 },
               },
             },
-            [jobId]
+            [jobId],
+            signal
           )
           .then((resp) => {
             const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);

@@ -78,19 +78,21 @@ export function CasesTableServiceProvider(
     return dataTestSubj.replace('case-action-popover-button-', '');
   };
 
-  const waitForStatusOptionToStopMoving = async (status: CaseStatuses) => {
-    const optionSubj = `cases-bulk-action-status-${status}`;
+  // `EuiContextMenu` keeps the incoming sub-panel at `pointer-events: none` until the outgoing
+  // panel's `animationend` fires, so a settled option can still swallow the click.
+  const waitForMenuOptionToBeActionable = async (optionSubj: string) => {
     let stableSamples = 0;
     let previousPosition = await (await testSubjects.find(optionSubj)).getPosition();
 
-    await retry.waitFor(`status option ${status} to stop animating`, async () => {
-      const currentPosition = await (await testSubjects.find(optionSubj)).getPosition();
+    await retry.waitFor(`menu option ${optionSubj} to become actionable`, async () => {
+      const option = await testSubjects.find(optionSubj);
+      const currentPosition = await option.getPosition();
       stableSamples =
         currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y
           ? stableSamples + 1
           : 0;
       previousPosition = currentPosition;
-      return stableSamples >= 2;
+      return stableSamples >= 2 && (await option.getComputedStyle('pointer-events')) !== 'none';
     });
   };
 
@@ -376,7 +378,7 @@ export function CasesTableServiceProvider(
       await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
-      await waitForStatusOptionToStopMoving(status);
+      await waitForMenuOptionToBeActionable(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
       await header.waitUntilLoadingHasFinished();
       await this.waitForTableToFinishLoading();
@@ -386,6 +388,7 @@ export function CasesTableServiceProvider(
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
+      const caseId = await getCaseIdByRowIndex(index);
       await this.openRowActions(index);
 
       await retry.waitFor('severity panel exists', async () => {
@@ -399,10 +402,13 @@ export function CasesTableServiceProvider(
       await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
+      await waitForMenuOptionToBeActionable(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
       await header.waitUntilLoadingHasFinished();
       await this.waitForTableToFinishLoading();
-      await testSubjects.existOrFail(`case-severity-badge-${severity}`);
+      await find.byCssSelector(
+        `[data-test-subj="cases-table-row-${caseId}"] [data-test-subj="case-severity-badge-${severity}"]`
+      );
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
@@ -411,6 +417,7 @@ export function CasesTableServiceProvider(
       await testSubjects.existOrFail('case-bulk-action-status');
       await testSubjects.click('case-bulk-action-status');
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
+      await waitForMenuOptionToBeActionable(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
     },
 
@@ -420,6 +427,7 @@ export function CasesTableServiceProvider(
       await testSubjects.existOrFail('case-bulk-action-severity');
       await testSubjects.click('case-bulk-action-severity');
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
+      await waitForMenuOptionToBeActionable(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
     },
 

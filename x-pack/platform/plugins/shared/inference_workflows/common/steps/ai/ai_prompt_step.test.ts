@@ -53,6 +53,15 @@ describe('ai_prompt_step common', () => {
         ConfigSchema.safeParse({ 'connector-id': '', 'connector-id-by-feature': '' }).success
       ).toBe(true);
     });
+
+    it('accepts a feature list next to connector-id', () => {
+      expect(
+        ConfigSchema.safeParse({
+          'connector-id': 'my-connector',
+          'connector-id-by-feature': ['alertzero_template_models', 'my_feature'],
+        }).success
+      ).toBe(true);
+    });
   });
 
   describe('ConfigSchema telemetry fields', () => {

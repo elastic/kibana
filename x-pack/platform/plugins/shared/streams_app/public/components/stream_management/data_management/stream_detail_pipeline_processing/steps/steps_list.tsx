@@ -7,13 +7,14 @@
 
 import { useSelector } from '@xstate/react';
 import React from 'react';
+import { DraggableStepWrapper, useDescendantIdsGetter } from '../../../../draggable_steps';
 import type { StepsProcessingSummaryMap } from '../hooks/use_steps_processing_summary';
 import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
 import type { RootLevelMap } from '../state_management/stream_enrichment_state_machine/utils';
+import { collectDescendantStepIds } from '../state_management/utils';
 import type { PipelineStepWithUIAttributes } from '../types';
 import { isPipelineConditionStep } from '../types';
 import { ActionBlock } from './blocks/action';
-import { DraggableStepWrapper } from './draggable_step_wrapper';
 import { useInteractiveModeSelector } from '../state_management/stream_enrichment_state_machine';
 
 export interface StepConfigurationProps {
@@ -31,6 +32,8 @@ export const StepsListItem = (props: StepConfigurationProps) => {
   const step = useSelector(props.stepRef, (snapshot) => snapshot.context.step);
   const stepRefs = useInteractiveModeSelector((snapshot) => snapshot.context.stepRefs);
   const isCondition = isPipelineConditionStep(step);
+  const stepId = step.customIdentifier;
+  const getDescendantIds = useDescendantIdsGetter(stepRefs, stepId, collectDescendantStepIds);
 
   if (isCondition) {
     // Condition blocks are parked in the native ingest-pipeline UI until
@@ -51,10 +54,10 @@ export const StepsListItem = (props: StepConfigurationProps) => {
 
   return (
     <DraggableStepWrapper
-      stepId={step.customIdentifier}
+      stepId={stepId}
       index={stepIndex}
       level={props.level}
-      stepRefs={stepRefs}
+      getDescendantIds={getDescendantIds}
       isBlocked={true}
       hasChildren={false}
       isDragEnabled={isDragEnabled}

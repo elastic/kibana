@@ -381,7 +381,7 @@ export const configSchema = schema.object({
     ),
   }),
   inboundEvents: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     maxBodyBytes: schema.byteSize({ defaultValue: '1mb' }),
     maxEmitted: schema.number({
       defaultValue: INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
@@ -394,6 +394,14 @@ export const configSchema = schema.object({
   }),
   connectorSigningKeys: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
+  }),
+  catalog: schema.object({
+    enabled: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      schema.boolean({ defaultValue: false }),
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
   }),
 });
 

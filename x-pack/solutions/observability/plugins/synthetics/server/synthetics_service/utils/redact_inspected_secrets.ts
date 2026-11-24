@@ -22,9 +22,13 @@ const INSPECT_UNREDACTED_SECRET_KEYS = new Set<string>([
   ConfigKey.SOURCE_PROJECT_CONTENT,
 ]);
 
-export const INSPECT_REDACTED_SECRET_KEYS: ReadonlySet<string> = new Set(
-  secretKeys.filter((key) => !INSPECT_UNREDACTED_SECRET_KEYS.has(key))
-);
+export const INSPECT_REDACTED_SECRET_KEYS: ReadonlySet<string> = new Set([
+  ...secretKeys.filter((key) => !INSPECT_UNREDACTED_SECRET_KEYS.has(key)),
+  // The Fleet `secret_stores` var carries the base64 connection blob (Vault
+  // credentials). It is never attached on the inspect path, but redact it as
+  // defense in depth.
+  'secret_stores',
+]);
 
 /**
  * Fleet policy `vars` entries have a `{ value, type }` shape. Redact those in

@@ -191,6 +191,7 @@ const DashboardRendererComponent = ({
     setDashboardContainerRenderer(
       <DashboardContainerRenderer
         locator={locator}
+        publishAsAppClientApi
         onApiAvailable={onDashboardContainerLoaded}
         savedObjectId={savedObjectId}
         getCreationOptions={getCreationOptions}

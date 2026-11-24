@@ -232,12 +232,9 @@ async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCom
             label: '60',
             text: '60',
             kind: 'Value',
-            detail: i18n.translate(
-              'kbn-esql-language.esql.autocomplete.fuse.rank_constant_default',
-              {
-                defaultMessage: 'Default value',
-              }
-            ),
+            detail: i18n.translate('esqlLanguage.esql.autocomplete.fuse.rank_constant_default', {
+              defaultMessage: 'Default value',
+            }),
           },
         ],
       },
@@ -272,7 +269,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
       {
         label: 'linear',
         kind: 'Value',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.fuse.linear', {
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.fuse.linear', {
           defaultMessage: 'Linear combination of scores',
         }),
         text: 'linear ',
@@ -281,7 +278,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
       {
         label: 'rrf',
         kind: 'Value',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.fuse.rrf', {
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.fuse.rrf', {
           defaultMessage: 'Reciprocal rank fusion',
         }),
         text: 'rrf ',
@@ -294,7 +291,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
     suggestions.push({
       label: 'SCORE BY',
       kind: 'Reference',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.fuse.scoreBy', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.fuse.scoreBy', {
         defaultMessage:
           'Defaults to _score. Designates which column to use to retrieve the relevance scores of the input',
       }),
@@ -306,7 +303,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
     suggestions.push({
       label: 'GROUP BY',
       kind: 'Reference',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.fuse.groupBy', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.fuse.groupBy', {
         defaultMessage: 'Defaults to _fork. Designates which column represents the result set',
       }),
       text: 'GROUP BY ',
@@ -317,7 +314,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
     suggestions.push({
       label: 'KEY BY',
       kind: 'Reference',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.fuse.keyBy', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.fuse.keyBy', {
         defaultMessage: 'Defaults to _id, _index. Rows with matching key_columns values are merged',
       }),
       text: 'KEY BY ',

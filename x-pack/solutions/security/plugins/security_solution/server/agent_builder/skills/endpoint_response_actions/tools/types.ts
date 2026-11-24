@@ -5,23 +5,49 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
+import ipaddr from 'ipaddr.js';
+import type { Logger } from '@kbn/logging';
+import type { RunContext } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { HostInfo } from '../../../../../common/endpoint/types';
+import type { HostInfo, ActionDetails } from '../../../../../common/endpoint/types';
+import type { LicenseService } from '../../../../../common/license/license';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import { getActionDetailsById } from '../../../../endpoint/services/actions';
 
 export type { HostInfo };
 
 /**
  * Schema bounds shared across the response-action tools. These limits keep
- * user/LLM input from generating oversized KQL queries or chat responses while
- * staying generous enough for real hostnames.
+ * user/LLM input from generating oversized KQL queries, action payloads, or
+ * chat responses while staying generous enough for real hostnames and paths.
  */
 export const MAX_HOSTNAME_LENGTH = 256;
 export const MAX_HOSTNAME_FILTER_LENGTH = 256;
+/**
+ * Keeps the IP echoed in result messages and other model-visible values in one
+ * spelling: IPv6 lowercase and RFC 5952 compressed (`fe80::1`), IPv4 unchanged.
+ * (`united.endpoint.host.ip` is an `ip` field, so Elasticsearch already matches
+ * any IPv6 spelling; this is about output, not matching.) Anything that is not a
+ * four-part decimal IPv4 or an IPv6 address, including legacy IPv4 forms such as
+ * `010.0.0.1`, is returned unchanged so it is never retargeted to another host.
+ */
+export const canonicalizeIp = (ip: string): string =>
+  ipaddr.IPv4.isValidFourPartDecimal(ip) || ipaddr.IPv6.isValid(ip)
+    ? ipaddr.parse(ip).toString()
+    : ip;
+
 /** Fleet agent IDs are UUIDs/ULIDs; generous bound for schema validation. */
 export const MAX_AGENT_ID_LENGTH = 64;
+/** Bounds file/directory path arguments (e.g. execute, runscript). */
+export const MAX_FILE_PATH_LENGTH = 4096;
+/** Bounds the free-text comment recorded on dispatched response actions. */
+export const MAX_ACTION_COMMENT_LENGTH = 2048;
 
 /**
  * Endpoints returned per page by `list_endpoints`. The tool exposes a `page`
@@ -75,6 +101,139 @@ export const MAX_AGENT_STATE_ENTRIES = MAX_OUTPUT_AGENTS;
  */
 export const MAX_AGENT_STATE_TOTAL_CHARS = 24_000;
 
+// Code points that are invisible or misleading when rendered in the
+// confirmation card's Markdown: control characters (C0, DEL, C1 — a newline
+// renders as a space or a line break, so `/tmp/a\nb` would display as `/tmp/a b`
+// while the real path is what gets dispatched), bidi controls (RTLO U+202E can
+// visually reverse a filename — a spoofing vector on an approval card),
+// zero-width and joiner characters, and the Unicode tag block (U+E0000–E007F,
+// which can encode hidden ASCII). Everything else — including backslashes in
+// Windows paths — is left exactly as typed.
+//
+// Matched by Unicode property so the list cannot drift from the database:
+// `Cf` covers the bidi controls, zero-width characters, variation selectors
+// and tags; `Default_Ignorable_Code_Point` adds the ones reserved to stay
+// invisible in future versions.
+const MISLEADING_CODE_POINTS = /[\p{Cc}\p{Cf}\p{Default_Ignorable_Code_Point}\p{Zl}\p{Zp}]/u;
+
+const isMisleadingCodePoint = (cp: number): boolean =>
+  MISLEADING_CODE_POINTS.test(String.fromCodePoint(cp));
+
+const escapeForCodeSpan = (cp: number): string => {
+  if (cp === 0x0a) return '\\n';
+  if (cp === 0x0d) return '\\r';
+  if (cp === 0x09) return '\\t';
+  return `\\u{${cp.toString(16).toUpperCase().padStart(4, '0')}}`;
+};
+
+/**
+ * Renders model-authored free text (scan paths, action comments) inside the
+ * confirmation card: wrapped in a plain double-quoted code span with every
+ * invisible or misleading code point shown as an escape. The card is the only
+ * human check before dispatch, so what the analyst reads must be exactly the
+ * text that will be recorded or dispatched — a newline in a comment would
+ * otherwise render as a space and let a crafted comment forge extra card lines.
+ */
+export function formatForConfirmationCard(value: string): string {
+  let formatted = '';
+  for (const ch of value) {
+    const cp = ch.codePointAt(0) ?? ch.charCodeAt(0);
+    if (isMisleadingCodePoint(cp) || cp === 0x60 /* backtick breaks the code span */) {
+      formatted += escapeForCodeSpan(cp);
+    } else {
+      formatted += ch;
+    }
+  }
+  return `"${formatted}"`;
+}
+
+// Markdown that could change how the card renders when a value is placed inside
+// the bold span. The renderer (EuiMarkdownFormat) parses with remark-parse 8 in
+// its default gfm, non-commonmark mode, where a backslash only escapes
+// \ ` * _ [ ] { } ( ) # + - . ! > ~ | — so `\&`, `\<`, `\:` and `\@` would
+// show the backslash and still be parsed. Each character below is therefore
+// escaped the way that parser honours (verified against remark-parse-no-trim
+// 8.0.4 in types.test.ts), and the label shows exactly the name.
+//
+// Covered: emphasis, code, strikethrough, links, tables, the backslash itself,
+// and GFM extended autolinks. A bare `https://…`, `www.…` or `user@host.tld`
+// only becomes a link when its domain contains a dot, so every `.` is escaped;
+// that is the one character all three locators depend on, and it keeps
+// `web-01.corp.local` readable. `<` and `&` cannot be backslash-escaped in this
+// mode, so they are written as the entities `&lt;` and `&amp;` (the latter also
+// stops a character reference such as `&#x202E;` being decoded into a code
+// point the predicate above refuses).
+//
+// `:` is also an entity (`&#58;`). EuiMarkdownFormat runs remark-emoji over the
+// parsed text, so `a:fire:b` would render as `a🔥b`, and a backslash does not
+// help (`\:` is not escapable here and shows the backslash). The entity is
+// decoded by the parser into separate text nodes, so the shortcode regex never
+// sees a `:name:` run. The formatter emits `&#58;` itself, so the `&` rule
+// below does not touch it.
+const MARKDOWN_BACKSLASH_ESCAPED = new Set<number>([
+  0x2a, // *
+  0x5f, // _
+  0x60, // `
+  0x7e, // ~
+  0x5b, // [
+  0x5d, // ]
+  0x3e, // >
+  0x7c, // |
+  0x5c, // backslash, so an escaped sequence cannot be forged
+  0x2e, // . — breaks the url, www and email autolink tokenizers
+]);
+
+const MARKDOWN_ENTITY_ESCAPED = new Map<number, string>([
+  [0x3c, '&lt;'],
+  [0x26, '&amp;'],
+  [0x3a, '&#58;'],
+]);
+
+/**
+ * Renders an endpoint-reported value (the hostname or agent id resolved for the
+ * target) inside the card's bold label. Unlike {@link formatForConfirmationCard}
+ * this is not a code span: a host is shown in bold so it reads as the heading
+ * of the card, and the value itself comes from the endpoint (`host.name`,
+ * `host.hostname`) rather than the model — a machine can legitimately be named
+ * `web-01** [approved by CISO]` or `https://evil.example/approved`, and an
+ * unescaped name would restructure the approval card or become a clickable
+ * link, and emoji shortcodes such as `:fire:` would be replaced by a glyph.
+ * Markdown structure, autolinks and shortcodes are escaped (see above) and every
+ * misleading code point is shown as an escape, so the label the analyst reads
+ * is the exact name that will be acted on.
+ */
+export function formatHostForConfirmationCard(value: string): string {
+  let formatted = '';
+  let escapes = '';
+  // Markdown consumes the backslash that escapes a literal backslash, so a bare
+  // `\u{202E}` would render the same for an invisible code point and for a name
+  // that literally contains that text. Escapes are therefore shown as a code
+  // span (one per run, so adjacent backticks cannot merge into a longer
+  // delimiter), which a literal name never produces.
+  const flushEscapes = () => {
+    if (escapes) {
+      formatted += `\`${escapes}\``;
+      escapes = '';
+    }
+  };
+  for (const ch of value) {
+    const cp = ch.codePointAt(0) ?? ch.charCodeAt(0);
+    if (isMisleadingCodePoint(cp)) {
+      escapes += escapeForCodeSpan(cp);
+    } else {
+      flushEscapes();
+      const entity = MARKDOWN_ENTITY_ESCAPED.get(cp);
+      if (entity) {
+        formatted += entity;
+      } else {
+        formatted += MARKDOWN_BACKSLASH_ESCAPED.has(cp) ? `\\${ch}` : ch;
+      }
+    }
+  }
+  flushEscapes();
+  return formatted;
+}
+
 /**
  * Errors reported for one action. `getActionCompletionInfo` appends every
  * unsuccessful agent response's errors into this aggregate array, so a large
@@ -118,6 +277,16 @@ export const MAX_OUTPUT_TOTAL_CHARS = 64_000;
 export const GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS = 60_000;
 
 /**
+ * Tool-result token budget for `get_running_processes`. The result carries only
+ * `outputs` (held to `MAX_OUTPUT_TOTAL_CHARS`, 64k chars = 16k tokens) and the
+ * bounded `hosts` map for a single dispatched endpoint, so 30_000 tokens
+ * (120k chars) leaves room for the envelope and `hosts` without letting the
+ * platform's truncated preview replace the structured truncation counters the
+ * model relies on.
+ */
+export const RUNNING_PROCESSES_MAX_RESULT_TOKENS = 30_000;
+
+/**
  * Typed error codes for all response-action tools. Keeping a closed union lets
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.
@@ -125,6 +294,9 @@ export const GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS = 60_000;
 export type ResponseActionErrorType =
   | 'insufficient_privileges'
   | 'invalid_argument'
+  | 'license_tier_required'
+  | 'license_unavailable'
+  | 'product_feature_disabled'
   | 'unknown_error';
 
 /**
@@ -154,18 +326,196 @@ export function responseActionErrorResult(
 
 /**
  * Standard tool result returned when the caller lacks the endpoint privilege
- * required to read response-action state. The agent-dispatched path reuses the
- * platform's internal (automated) response-actions client, which does not run
- * the per-user privilege checks the HTTP routes enforce — so each tool must
+ * required to dispatch or read response-action state. The agent-dispatched path
+ * goes through the platform's internal response-actions client, which does not
+ * run the per-user privilege checks the HTTP routes enforce — so each tool must
  * assert the caller's endpoint authz (via `getEndpointAuthz(request)`) itself
  * and return this when the privilege is absent, mirroring the route's
- * `withEndpointAuthz(...)` gate.
+ * `withEndpointAuthz(...)` gate. (The client itself is no longer automated or
+ * unsecured: it is built with `isAutomated: false` for chat-dispatched actions,
+ * and the username comes from the caller's request.)
  */
 export function insufficientPrivilegesResult(privilege: string) {
   return responseActionErrorResult(
     'insufficient_privileges',
     `Insufficient privileges: this action requires the '${privilege}' endpoint privilege. Ask an administrator to grant it, or perform the action from the Security UI.`,
     { privilege }
+  );
+}
+
+/**
+ * Standard tool result returned when the license tier, not the caller's role,
+ * is what withholds the privilege. In `calculateEndpointAuthz` several
+ * response-action privileges are conjunctioned with a license check
+ * (`canIsolateHost: ... && isPlatinumPlusLicense`, `canWriteScanOperations` /
+ * `canGetRunningProcesses`: `... && isEnterpriseLicense`), so below that tier
+ * the flag is false even for a superuser. Reporting that as
+ * `insufficient_privileges` sends the analyst to an administrator for a grant
+ * that cannot exist — only a license upgrade changes the answer, and the
+ * Security UI enforces the same gate, so neither half of the usual
+ * "ask an administrator / use the Security UI" advice applies.
+ */
+export function licenseTierRequiredResult(privilege: string, tier: 'platinum' | 'enterprise') {
+  const tierName = tier === 'platinum' ? 'Platinum' : 'Enterprise';
+  return responseActionErrorResult(
+    'license_tier_required',
+    `License limit: the '${privilege}' capability requires a ${tierName} license or higher, and this deployment's license tier does not include it. No role grant can supply it — an administrator would need to upgrade the Elastic license. Nothing was dispatched.`,
+    { privilege, requiredLicenseTier: tier }
+  );
+}
+
+/**
+ * Standard tool result returned when the license itself — not its tier, not
+ * the caller's role — is what withholds the privilege: it has expired, or it
+ * could not be read at all. `LicenseService.isPlatinumPlus()` /
+ * `isEnterprise()` fold `isAvailable && isActive` into the tier comparison
+ * (see `isAtLeast` in `common/license/license.ts`), so an expired Enterprise
+ * license fails `isEnterprise()` exactly like a Gold one and would otherwise
+ * be told to upgrade to Enterprise — when what restores the capability is
+ * renewing the license it already has.
+ */
+export function licenseUnavailableResult(privilege: string, expired: boolean) {
+  return responseActionErrorResult(
+    'license_unavailable',
+    expired
+      ? `License limit: this deployment's Elastic license has expired, so the '${privilege}' capability is disabled regardless of role. Renewing the license is what restores it — a role grant will not, and while it is expired a tier upgrade is not the issue. Nothing was dispatched.`
+      : `License limit: this deployment's Elastic license could not be read, so the '${privilege}' capability is disabled regardless of role. An administrator needs to restore license availability; a role grant will not help. Nothing was dispatched.`,
+    { privilege, licenseState: expired ? 'expired' : 'unavailable' }
+  );
+}
+
+/**
+ * The product feature(s) a gated privilege registers under, mirroring how
+ * `hasAuth` gates on action registration. Not uniform: the shared
+ * `hostIsolation` sub-feature — which registers `writeHostIsolationRelease` —
+ * is contributed by both `endpointHostIsolation` and
+ * `endpointResponseActions`, while isolate, scan, running-processes, and the
+ * actions log register only under `endpointResponseActions`. Serverless
+ * Security Essentials enables `endpointHostIsolation` but not
+ * `endpointResponseActions`, so there a missing release privilege is a role
+ * gap (grantable), not a product-tier limit.
+ */
+const PRIVILEGE_PRODUCT_FEATURES: Record<string, readonly ProductFeatureSecurityKey[]> = {
+  canIsolateHost: [ProductFeatureSecurityKey.endpointResponseActions],
+  canUnIsolateHost: [
+    ProductFeatureSecurityKey.endpointHostIsolation,
+    ProductFeatureSecurityKey.endpointResponseActions,
+  ],
+  canWriteScanOperations: [ProductFeatureSecurityKey.endpointResponseActions],
+  canGetRunningProcesses: [ProductFeatureSecurityKey.endpointResponseActions],
+  canAccessEndpointActionsLogManagement: [ProductFeatureSecurityKey.endpointResponseActions],
+};
+
+/**
+ * Standard tool result returned when the deployment's product configuration —
+ * not the caller's role, not the license tier — is what withholds the
+ * privilege: no product feature that registers the privilege's action is
+ * enabled (see `PRIVILEGE_PRODUCT_FEATURES`), so `calculateEndpointAuthz.hasAuth`
+ * returns false for every role while the serverless license is always
+ * Enterprise. Reporting that as `insufficient_privileges` or
+ * `license_tier_required` would both be wrong: no grant and no license change
+ * can enable it — only the deployment's product tier can.
+ */
+export function productFeatureDisabledResult(privilege: string) {
+  return responseActionErrorResult(
+    'product_feature_disabled',
+    `Not available on this deployment: response actions are part of the Endpoint Complete product tier, and this deployment's product configuration does not include them, so the '${privilege}' capability is disabled regardless of role or license. An administrator would need to upgrade this project to a product tier that includes response actions. Nothing was dispatched.`,
+    { privilege, productFeature: ProductFeatureSecurityKey.endpointResponseActions }
+  );
+}
+
+/**
+ * Whether any product feature that registers this privilege's action is
+ * enabled (see `PRIVILEGE_PRODUCT_FEATURES`). `false` means no enabled feature
+ * can grant the privilege, so the product configuration — not the role — is
+ * the honest explanation when `authz[privilege]` is false and the license
+ * raises no objection.
+ *
+ * `undefined` when the check cannot be answered (the product-features service
+ * has not been configured, e.g. some test contexts): callers treat that as
+ * "not the explanation" rather than picking a feature.
+ */
+export function responseActionsProductFeatureEnabled(
+  productFeaturesService: {
+    isEnabled(key: string): boolean;
+  },
+  privilege: string
+): boolean | undefined {
+  const features = PRIVILEGE_PRODUCT_FEATURES[privilege] ?? [
+    ProductFeatureSecurityKey.endpointResponseActions,
+  ];
+  try {
+    return features.some((feature) => productFeaturesService.isEnabled(feature));
+  } catch {
+    // `isEnabled` throws before `setProductFeaturesConfigurator` has run;
+    // an unconfigured service says nothing about the feature.
+    return undefined;
+  }
+}
+
+/**
+ * What the license — as opposed to the caller's role — says about a privilege
+ * gated on a license tier: either the active license is genuinely below the
+ * required tier, or the license itself is expired/unreadable and no tier
+ * comparison is meaningful yet. `undefined` when the license raises no
+ * objection.
+ */
+export type LicenseLimit =
+  | { kind: 'tier'; tier: 'platinum' | 'enterprise' }
+  | { kind: 'state'; expired: boolean };
+
+/**
+ * Splits a failed `isPlatinumPlus()` / `isEnterprise()` check into its two
+ * causes. Both fold `isAvailable && isActive` into the tier comparison, so
+ * the license information is inspected before attributing the failure to the
+ * tier: a license that is present and active is honestly below the tier,
+ * anything else (missing, unreadable, expired, invalid) is a license-state
+ * problem that renewal or restoration — not a tier upgrade — addresses.
+ */
+export function licenseLimitOf(
+  licenseService: Pick<LicenseService, 'isPlatinumPlus' | 'isEnterprise' | 'getLicenseInformation'>,
+  requiredTier: 'platinum' | 'enterprise'
+): LicenseLimit | undefined {
+  const atTier =
+    requiredTier === 'platinum' ? licenseService.isPlatinumPlus() : licenseService.isEnterprise();
+  if (atTier) {
+    return undefined;
+  }
+
+  const license = licenseService.getLicenseInformation();
+
+  if (license?.isAvailable && license.isActive) {
+    return { kind: 'tier', tier: requiredTier };
+  }
+  // `expired` only when the license exists but is not active; a missing or
+  // unreadable one is reported as unavailable.
+  return { kind: 'state', expired: Boolean(license?.isAvailable) };
+}
+
+/**
+ * Error result for a dispatching tool whose handler threw.
+ *
+ * `dispatchAttempted` marks the point where the response-actions client was
+ * called. The client sends the command through Fleet before it writes the
+ * action request document, so a throw from there on (a failed write, a failed
+ * follow-up read) does NOT mean nothing was sent. The result then says so and
+ * tells the model to check the action status instead of retrying, which would
+ * dispatch a second action. Before that point nothing was sent and a retry is
+ * safe.
+ */
+export function dispatchErrorResult(
+  verb: string,
+  error: unknown,
+  { dispatchAttempted }: { dispatchAttempted: boolean }
+) {
+  const detail = error instanceof Error ? error.message : String(error);
+
+  return responseActionErrorResult(
+    'unknown_error',
+    dispatchAttempted
+      ? `Error ${verb}: ${detail}. The action may already have been sent to the endpoint. Do NOT retry the call; it could dispatch a second action. Check the Response Actions history (get_response_action_status) for the host before doing anything else.`
+      : `Error ${verb}: ${detail}`,
+    dispatchAttempted ? { actionMayHaveBeenSent: true } : undefined
   );
 }
 
@@ -203,6 +553,8 @@ export interface EndpointNotFoundResult {
   hostName?: string;
   /** Set when the lookup was by agent ID only. */
   agentId?: string;
+  /** Set when the lookup was by IP address. */
+  ip?: string;
   found: false;
   reason: 'endpoint_not_found';
   /** Human-readable explanation for the agent's response text. */
@@ -216,13 +568,20 @@ export interface EndpointNotFoundResult {
  * answer claim a host is not isolated when nothing was found at all.
  */
 export function endpointNotFoundData(
-  lookup: { hostName: string } | { agentId: string }
+  lookup: { hostName: string } | { agentId: string } | { ip: string }
 ): EndpointNotFoundResult {
   const base = {
     kind: 'response_action_result' as const,
     found: false as const,
     reason: 'endpoint_not_found' as const,
   };
+  if ('ip' in lookup) {
+    return {
+      ...base,
+      ip: lookup.ip,
+      message: `No endpoint found with IP address '${lookup.ip}'.`,
+    };
+  }
   if ('hostName' in lookup) {
     return {
       ...base,
@@ -747,4 +1106,139 @@ export function resolveAgentTypeFromPackages(packages: string[] = []): ResponseA
   }
 
   return 'endpoint';
+}
+
+/** Lets the audit log tell an agent-dispatched action from an analyst's own. */
+const AI_AGENT_COMMENT_MARKER = 'Executed by AI agent';
+
+/**
+ * Builds the comment recorded on a dispatched response action so its entry in
+ * the Response Actions audit log links back to the originating agent
+ * conversation. The conversation id (falling back to the always-present run id
+ * used for tracing) is the correlation anchor; the endpoint action document has
+ * no structured "source conversation" field, so the free-text comment — the
+ * established place for analyst context — carries it.
+ *
+ * The conversation id lives on the agent entry of the run-context stack, so it
+ * is resolved via `getAgentFromRunContext`. An analyst-supplied comment is
+ * preserved and the marker and anchor are appended to it.
+ */
+export function buildResponseActionComment(
+  defaultComment: string,
+  runContext: RunContext,
+  analystComment?: string
+): string {
+  const base = analystComment ?? defaultComment;
+  const correlationId = getAgentFromRunContext(runContext)?.conversationId ?? runContext.runId;
+  const marked = `${base} [${AI_AGENT_COMMENT_MARKER}]`;
+  return correlationId ? `${marked} [AI agent conversation: ${correlationId}]` : marked;
+}
+
+/**
+ * Retry/timeout budget for {@link waitForActionCompletion}. Elastic Defend
+ * dispatches a fleet action and returns immediately — the endpoint agent
+ * typically takes anywhere from a few seconds up to ~90s to check in, execute
+ * the action, and write its response back. Without polling, a tool returns
+ * whatever status was true the instant the action document was written
+ * (almost always `pending`), which is what the chat UI showed for
+ * `running-processes`, `isolate`, `unisolate`, and `scan` before this fix.
+ *
+ * 300ms → 480ms → 768ms → ... doubling, capped at 5s, for up to ~85s total —
+ * long enough to observe real completions without holding the agent turn
+ * open indefinitely (the agent-builder execution runner's own idle/overall
+ * timeouts, `FOLLOW_EXECUTION_IDLE_TIMEOUT_MS` / `FOLLOW_EXECUTION_TIMEOUT_MS`,
+ * are both several minutes, so this budget sits comfortably inside them).
+ */
+const ACTION_COMPLETION_POLL_CONFIG = {
+  retries: 20,
+  minTimeout: 300,
+  maxTimeout: 5000,
+  factor: 1.6,
+};
+
+/**
+ * Polls `getActionDetailsById` until the dispatched response action reaches
+ * a terminal state (`successful`, `failed`, or `canceled`) or the retry
+ * budget is exhausted, then returns whatever the latest fetch produced.
+ *
+ * This mirrors the polling pattern the Microsoft Defender for Endpoint
+ * client already uses (`p-retry` in `ms_defender_endpoint_actions_client.ts`)
+ * and the polling the console UI does client-side via
+ * `useConsoleActionSubmitter` (`ACTION_DETAILS_REFRESH_INTERVAL`) — the agent
+ * tools had neither, so they surfaced the action's write-time snapshot
+ * instead of its outcome.
+ *
+ * Never throws when a snapshot of the action is available: on error or
+ * exhausted retries it returns the last known `ActionDetails` (still
+ * `pending`) so the tool can report an honest, non-final status rather than
+ * failing the whole tool call. When no poll ever succeeded and no
+ * `dispatchedFallback` was supplied it rethrows — a caller with no snapshot at
+ * all has nothing truthful to report.
+ */
+export async function waitForActionCompletion<T extends ActionDetails = ActionDetails>(
+  endpointAppContextService: EndpointAppContextService,
+  spaceId: string,
+  actionId: string,
+  logger: Logger,
+  /**
+   * The dispatch response for `actionId`, used when no completion read ever
+   * succeeds.
+   *
+   * Dispatching the action is the write; polling is a best-effort read of its
+   * outcome. A monitoring outage must not be reported as a failed dispatch —
+   * without this fallback the tool returns `unknown_error` and drops the
+   * action ID, so a queued (and possibly executing) action looks like one that
+   * never happened and invites a duplicate re-issue. The snapshot carries the
+   * action ID and its write-time status, so the model can report "dispatched,
+   * completion unknown" and re-check with `get_response_action_status`.
+   */
+  dispatchedFallback?: T
+): Promise<T> {
+  let lastKnown: T | undefined;
+
+  try {
+    return await pRetry(
+      async () => {
+        const actionDetails = await getActionDetailsById<T>(
+          endpointAppContextService,
+          spaceId,
+          actionId,
+          // bypassSpaceValidation is safe here: the action was already
+          // validated to be in the caller's space before dispatch (see
+          // endpoint_lookup.ts -> ensureInCurrentSpace). Polling just reads
+          // back the action we already dispatched.
+          { bypassSpaceValidation: true }
+        );
+        lastKnown = actionDetails;
+
+        if (!actionDetails.isCompleted) {
+          throw new Error(`Action [${actionId}] is still pending`);
+        }
+
+        return actionDetails;
+      },
+      {
+        ...ACTION_COMPLETION_POLL_CONFIG,
+        onFailedAttempt: ({ attemptNumber, retriesLeft }) => {
+          logger.debug(
+            `Waiting for action [${actionId}] to complete (attempt ${attemptNumber}, ${retriesLeft} retries left)`
+          );
+        },
+      }
+    );
+  } catch (error) {
+    if (lastKnown) {
+      return lastKnown;
+    }
+
+    if (dispatchedFallback) {
+      logger.warn(
+        `Could not read completion status for dispatched action [${actionId}]; returning the dispatch snapshot: ${error.message}`
+      );
+      return dispatchedFallback;
+    }
+
+    logger.error(`Failed to fetch completion status for action [${actionId}]: ${error.message}`);
+    throw error;
+  }
 }

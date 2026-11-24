@@ -79,6 +79,13 @@ const mockedGetIsEndpointExceptionsPerPolicyEnabled =
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
 
+const disableCustomYaraSignaturesFF = (context: ManifestManagerContext) => {
+  context.experimentalFeatures = {
+    ...context.experimentalFeatures,
+    customYaraSignaturesEnabled: false,
+  };
+};
+
 describe('ManifestManager', () => {
   const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
   const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
@@ -446,6 +453,7 @@ describe('ManifestManager', () => {
 
     test(`Builds fully new manifest if no baseline parameter passed and no exception list items`, async () => {
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
@@ -492,6 +500,7 @@ describe('ManifestManager', () => {
         tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -576,6 +585,7 @@ describe('ManifestManager', () => {
         tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -663,6 +673,7 @@ describe('ManifestManager', () => {
         tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       const duplicatedEventFilterInDifferentPolicy = {
@@ -799,6 +810,7 @@ describe('ManifestManager', () => {
         tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
       });
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -904,6 +916,7 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({}, [
         ProductFeatureKey.endpointArtifactManagement,
       ]);
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -985,6 +998,7 @@ describe('ManifestManager', () => {
         ProductFeatureKey.endpointArtifactManagement,
         ProductFeatureKey.endpointHostIsolationExceptions,
       ]);
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -1069,6 +1083,7 @@ describe('ManifestManager', () => {
         tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({}, []);
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -1148,6 +1163,7 @@ describe('ManifestManager', () => {
 
     test('builds manifest with trusted devices', async () => {
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
@@ -1198,6 +1214,7 @@ describe('ManifestManager', () => {
       });
 
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -1274,6 +1291,7 @@ describe('ManifestManager', () => {
 
     test('does not build custom YARA signature artifacts when the feature flag is disabled', async () => {
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
@@ -1767,6 +1785,7 @@ describe('ManifestManager', () => {
 
     beforeEach(() => {
       context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
 
       globalEndpointException = getExceptionListItemSchemaMock({
         os_types: ['windows'],
@@ -3181,6 +3200,7 @@ describe('ManifestManager', () => {
     describe('when customYaraSignaturesEnabled feature flag is disabled', () => {
       beforeEach(() => {
         context = buildManifestManagerContextMock({});
+        disableCustomYaraSignaturesFF(context);
         context.licenseService = createLicenseServiceMock();
         manifestManager = new ManifestManager(context);
       });

@@ -17,6 +17,21 @@ spec:
     kind: ClusterIssuer
     name: ecp-issuer
 ---
+# The distributor serves the source registry only to client certs whose DNS SAN is in service.source_readers.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: motel-config-distributor-client
+  namespace: motel-ingest-collector
+spec:
+  secretName: motel-config-distributor-client
+  commonName: motel-ingest-collector
+  dnsNames: [motel-ingest-collector.motel-ingest-collector.svc]
+  usages: [client auth]
+  issuerRef:
+    kind: ClusterIssuer
+    name: ecp-issuer
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -25,6 +40,22 @@ metadata:
 data:
   config.yaml: |
     extensions:
+      telemetrymiddleware: {}
+      # Admits a request only for a source the distributor's registry lists for the target. An
+      # unregistered source gets 403, and a registry that cannot be read gets 503.
+      sourcevalidationmiddleware:
+        endpoint: https://streams-config-distributor-service.streams-config-distributor.svc.cluster.local
+        timeout: 2s
+        cache:
+          capacity: 8192
+          max_snapshot_age: 5m
+          refresh_interval: 10s
+        cold_cache_fail_open: false
+        tls:
+          ca_file: /secrets/kafka/ca.crt
+          reload_interval: 5m
+          cert_file: /secrets/distributor/tls.crt
+          key_file: /secrets/distributor/tls.key
       ecproutingmiddleware:
         url_format: https://%s.es.svc.cluster.local:9200
       compressedotlpencoding:
@@ -38,8 +69,15 @@ data:
           input_routes:
             namespace: inputs
           targets:
-            - path: /inputs/otlphttp/{source_id}/v1/logs
+            # UI-generated managed OTLP source: {managed_otlp.url}/inputs/otlp/{sourceId}/v1/{signal}
+            - path: /inputs/otlp/{source_id}/v1/logs
               backend_path: /v1/logs
+              endpoint: :4318
+            - path: /inputs/otlp/{source_id}/v1/metrics
+              backend_path: /v1/metrics
+              endpoint: :4318
+            - path: /inputs/otlp/{source_id}/v1/traces
+              backend_path: /v1/traces
               endpoint: :4318
     receivers:
       otlp:
@@ -48,7 +86,9 @@ data:
             endpoint: :4318
             include_metadata: true
             middlewares:
+              - id: telemetrymiddleware
               - id: ecproutingmiddleware
+              - id: sourcevalidationmiddleware
     processors:
       errorsanitizationprocessor: {}
       elasticapm:
@@ -94,12 +134,16 @@ data:
           key_file: /secrets/kafka/tls.key
           server_name_override: warpstream.warpstream.svc.cluster.local
     service:
-      extensions: [ingress, ecproutingmiddleware, compressedotlpencoding]
+      extensions: [ingress, ecproutingmiddleware, compressedotlpencoding, telemetrymiddleware, sourcevalidationmiddleware]
       pipelines:
         logs:
           receivers: [otlp]
           processors: [errorsanitizationprocessor, elasticapm, kafkatopicprocessor]
           exporters: [kafka]
+  # Source metrics (streams.source.*). streams_full_dev.sh fills this from the collector chart at the
+  # commit of the image, and it merges over config.yaml as a second --config. Empty, the collector
+  # still validates sources but emits no source metrics.
+  streams-telemetry.yaml: "{}"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -119,17 +163,23 @@ spec:
       containers:
         - name: collector
           image: docker.elastic.co/observability-ci/hosted-otel-collector:__COLLECTOR_TAG__
-          args: [--config=/conf/config.yaml]
+          args:
+            - --config=/conf/config.yaml
+            - --config=/conf/streams-telemetry.yaml
+            - --feature-gates=telemetry.newPipelineTelemetry
           ports:
             - containerPort: 8443
           volumeMounts:
             - {name: conf, mountPath: /conf}
             - {name: kafka, mountPath: /secrets/kafka, readOnly: true}
+            - {name: distributor, mountPath: /secrets/distributor, readOnly: true}
       volumes:
         - name: conf
           configMap: {name: motel-ingest-collector}
         - name: kafka
           secret: {secretName: motel-kafka-client}
+        - name: distributor
+          secret: {secretName: motel-config-distributor-client}
 ---
 apiVersion: v1
 kind: Service

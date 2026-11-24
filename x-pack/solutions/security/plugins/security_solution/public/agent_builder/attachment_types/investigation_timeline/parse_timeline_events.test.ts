@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseTimelineEvents } from './parse_timeline_events';
+import { parseTimelineEvents, parseTimelineWindow } from './parse_timeline_events';
 
 const validEvent = {
   timestamp: '2025-01-01T00:00:00.000Z',
@@ -106,5 +106,23 @@ describe('parseTimelineEvents', () => {
 
   it('returns an empty array when no events are valid', () => {
     expect(parseTimelineEvents({ events: [{}, null, { host: 'h' }] })).toEqual([]);
+  });
+});
+
+describe('parseTimelineWindow', () => {
+  const window = { start: '2025-01-01T00:00:00.000Z', end: '2025-01-01T04:00:00.000Z' };
+
+  it('returns the window when both bounds are non-empty strings', () => {
+    expect(parseTimelineWindow({ events: [], window })).toEqual(window);
+  });
+
+  it.each([
+    ['missing', { events: [] }],
+    ['half-open', { events: [], window: { start: window.start } }],
+    ['blank', { events: [], window: { start: '', end: window.end } }],
+    ['not strings', { events: [], window: { start: 1, end: 2 } }],
+    ['not an object', null],
+  ])('returns undefined when the window is %s', (_label, data) => {
+    expect(parseTimelineWindow(data)).toBeUndefined();
   });
 });

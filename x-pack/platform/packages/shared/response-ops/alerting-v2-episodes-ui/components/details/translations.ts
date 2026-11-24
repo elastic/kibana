@@ -93,7 +93,7 @@ export const FLYOUT_TAB_TIMELINE = i18n.translate(
 export const FLYOUT_TAB_METADATA = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.metadata',
   {
-    defaultMessage: 'Metadata',
+    defaultMessage: 'Data container',
   }
 );
 
@@ -204,6 +204,13 @@ export const FLYOUT_VIEW_DETAILS = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.viewDetails',
   {
     defaultMessage: 'View details',
+  }
+);
+
+export const FLYOUT_ADD_TO_CHAT = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.addToChat',
+  {
+    defaultMessage: 'Add to chat',
   }
 );
 
