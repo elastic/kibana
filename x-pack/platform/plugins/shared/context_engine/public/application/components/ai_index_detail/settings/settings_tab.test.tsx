@@ -9,6 +9,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { useMemoryEnabled } from '../../../hooks/use_memory_enabled';
 import { SettingsTab } from './settings_tab';
@@ -59,15 +60,17 @@ const renderTab = (
   return render(
     <I18nProvider>
       <EuiProvider>
-        <SettingsTab
-          isLoading={false}
-          aiIndex={undefined}
-          aiIndexId="tickets"
-          onSaved={jest.fn()}
-          isAutomationsUnlocked={false}
-          indexManagementHref={undefined}
-          {...props}
-        />
+        <MemoryRouter>
+          <SettingsTab
+            isLoading={false}
+            aiIndex={undefined}
+            aiIndexId="tickets"
+            onSaved={jest.fn()}
+            isAutomationsUnlocked={false}
+            indexManagementHref={undefined}
+            {...props}
+          />
+        </MemoryRouter>
       </EuiProvider>
     </I18nProvider>
   );

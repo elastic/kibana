@@ -24,7 +24,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
@@ -37,16 +37,11 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
-import { AUTOMATIONS_HASH } from '../../paths';
 import { getVisibleAutomations, getVisibleWorkflowIds } from '../../utils/visible_automations';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
-import {
-  AUTOMATIONS_HEADING_ID,
-  AUTOMATIONS_PANEL_ID,
-  goToAutomations,
-} from './automations_panel_id';
+import { AUTOMATIONS_HEADING_ID, AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 
 /**
  * Builds the query string that tells the Workflows app to send its back button
@@ -103,15 +98,7 @@ export const AutomationsPanel = ({
 
   const canCreateWorkflow = application.capabilities.workflowsManagement?.createWorkflow === true;
 
-  const { pathname, hash, key: locationKey } = useLocation();
-  const isAutomationsLinkTarget = hash === AUTOMATIONS_HASH;
-
-  // Wait for the AI index, so the sections above the panel have their height before we scroll.
-  useEffect(() => {
-    if (isAutomationsLinkTarget && !isLoading) {
-      goToAutomations();
-    }
-  }, [isAutomationsLinkTarget, isLoading, locationKey]);
+  const { pathname } = useLocation();
   const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(pathname)}` : '';
 
   const handleCreate = async () => {

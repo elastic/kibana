@@ -7,11 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { AutomationsLockedDescription } from './automations_locked_description';
+import { AUTOMATIONS_HASH } from '../../paths';
 import { AutomationsPanel } from './automations_panel';
+import {
+  AUTOMATIONS_HEADING_ID,
+  AUTOMATIONS_PANEL_ID,
+  goToAutomations,
+} from './automations_panel_id';
 import { LockedSectionPanel } from './locked_section_panel';
 
 const automationsLockedAriaLabel = i18n.translate(
@@ -37,8 +44,18 @@ export const AutomationsSection = ({
   onSaved,
   isUnlocked,
   headerAction,
-}: AutomationsSectionProps) =>
-  isUnlocked ? (
+}: AutomationsSectionProps) => {
+  const { hash, key: locationKey } = useLocation();
+  const isAutomationsLinkTarget = hash === AUTOMATIONS_HASH;
+
+  // Wait for the AI index, so the sections above have their height before we scroll.
+  useEffect(() => {
+    if (isAutomationsLinkTarget && !isLoading) {
+      goToAutomations();
+    }
+  }, [isAutomationsLinkTarget, isLoading, locationKey]);
+
+  return isUnlocked ? (
     <AutomationsPanel
       isLoading={isLoading}
       aiIndex={aiIndex}
@@ -48,6 +65,8 @@ export const AutomationsSection = ({
     />
   ) : (
     <LockedSectionPanel
+      id={AUTOMATIONS_PANEL_ID}
+      headingId={AUTOMATIONS_HEADING_ID}
       data-test-subj="contextAutomationsLocked"
       ariaLabel={automationsLockedAriaLabel}
       title={
@@ -59,3 +78,4 @@ export const AutomationsSection = ({
       description={<AutomationsLockedDescription aiIndexId={aiIndexId} />}
     />
   );
+};

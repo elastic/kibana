@@ -59,7 +59,7 @@ const RecentKnowledgeDocumentRow = ({
 
   return (
     <li data-test-subj="contextOverviewRecentDocumentRow">
-      {hasDivider ? <EuiHorizontalRule margin="s" /> : null}
+      {hasDivider ? <EuiHorizontalRule margin="s" aria-hidden={true} /> : null}
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="document" color="subdued" aria-hidden={true} />
