@@ -427,10 +427,11 @@ describe('EnterParallelNodeImpl', () => {
     expect(branchRunCalls).toEqual([0, 1]);
   });
 
-  // Regression: `finish` reads each branch's terminal output directly rather
-  // than through a template, so context preparation never pre-warms it. A
+  // Regression: `finish` reads each branch's terminal output via the IO service
+  // rather than through a template, so context preparation never pre-warms it. A
   // parallel step advances at most `concurrency` branches per tick, so the
-  // aggregate must read every branch runtime, including ones from earlier waves.
+  // aggregate must call getCurrentStepOutput for every branch runtime, including
+  // ones from earlier waves. Metadata alone does not carry the output.
   it('reads every branch runtime, so earlier waves are not lost', async () => {
     node = makeNode({
       foreach: JSON.stringify(['a', 'b', 'c']),
@@ -438,11 +439,14 @@ describe('EnterParallelNodeImpl', () => {
       mode: 'settled',
     });
 
+    const outputSpies: Array<jest.Mock> = [];
     factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
       const index = Number(scopeId ?? 0);
       const stepExecutionId = `exec_branch_${index}`;
+      const getCurrentStepOutput = jest.fn(async () => ({ branch: index }));
+      outputSpies[index] = getCurrentStepOutput;
       return {
         abortController: new AbortController(),
         contextManager: {
@@ -453,11 +457,12 @@ describe('EnterParallelNodeImpl', () => {
         get stepExecution() {
           return { status: branchOutcome(index), state: {} };
         },
+        // Output is not resident on step metadata — aggregation must go through IO.
         getCurrentStepResult: () => ({
-          output: { branch: index },
+          output: undefined,
           error: undefined,
         }),
-        getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+        getCurrentStepOutput,
         getCurrentStepError: jest.fn(async () => undefined),
         timeoutStep: jest.fn(),
       } as unknown as StepExecutionRuntime;
@@ -479,6 +484,10 @@ describe('EnterParallelNodeImpl', () => {
       { branch: 1 },
       { branch: 2 },
     ]);
+    expect(outputSpies).toHaveLength(3);
+    expect(outputSpies[0]).toHaveBeenCalled();
+    expect(outputSpies[1]).toHaveBeenCalled();
+    expect(outputSpies[2]).toHaveBeenCalled();
   });
 
   it('count-waiting:true keeps a parked branch holding its slot so `max` still binds', async () => {

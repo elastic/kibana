@@ -95,6 +95,7 @@ const buildUnderAdmitEvictionYaml = (
       sizeBytes: ${sizeBytes}`
   ).join('');
 
+  const recentProducerIndex = producerCount - 1;
   const consumers = Array.from(
     { length: earlyConsumerCount },
     (_, i) => `
@@ -114,6 +115,10 @@ steps:${producers}
     type: wait
     with:
       duration: 1s
+  - name: read_recent
+    type: console
+    with:
+      message: 'recent-size={{ steps.produce_${recentProducerIndex}.output.payload | size }}'
 ${consumers}
 `;
 };
@@ -271,12 +276,21 @@ describe('StepIoService (LRU): cache retention', () => {
       'fake_workflow_execution_id'
     );
     const producers = leafStepsNamed(fixture, 'produce_');
+    const recentProducer = producers.find(
+      (step) => step.stepId === `produce_${LRU_PRODUCER_COUNT - 1}`
+    );
+    const readRecent = Array.from(
+      fixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).find((step) => step.stepId === 'read_recent');
     const earlyReadSnapshots = leafStepsNamed(fixture, 'read_early_').map((step) => ({
       stepId: step.stepId,
       status: step.status,
       output: step.output,
     }));
     const outputFetchCalls = countOutputFetches(getByIdsSpy);
+    const fetchedIds = getByIdsSpy.mock.calls
+      .filter((call) => Array.isArray(call[1]) && call[1].includes('output'))
+      .flatMap((call) => call[0] as string[]);
     const { liveOutputs, cacheEntries, cacheBytes } = stepIoCapture.getResident();
     stepIoCapture.restore();
     jest.clearAllMocks();
@@ -291,6 +305,11 @@ describe('StepIoService (LRU): cache retention', () => {
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(execution?.error).toBeUndefined();
     expect(producers).toHaveLength(LRU_PRODUCER_COUNT);
+    // Recent producer must still be in the LRU after flush; if admit rejected every
+    // producer, this read would also hit ES and the id would appear below.
+    expect(readRecent?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(String(readRecent?.output)).toBe(`recent-size=${UNDER_ADMIT_OUTPUT_BYTES}`);
+    expect(fetchedIds).not.toContain(recentProducer?.id);
     expect(outputFetchCalls).toBeGreaterThanOrEqual(LRU_EARLY_CONSUMER_COUNT);
     expect(earlyReadSnapshots).toHaveLength(LRU_EARLY_CONSUMER_COUNT);
     for (const read of earlyReadSnapshots) {

@@ -260,11 +260,12 @@ steps:
       expect(finalStep?.status).toBe(ExecutionStatus.COMPLETED);
     });
 
-    it('resume load() fetched steps with output excluded (memory optimization)', () => {
-      // The first call to getStepExecutionsByIds is from load(), which uses sourceExcludes: ['output']
+    it('resume load() fetched steps with input and output excluded (memory optimization)', () => {
+      // The first call to getStepExecutionsByIds is from load(), which uses
+      // sourceExcludes: ['input', 'output'].
       const loadCall = getByIdsSpy.mock.calls[0];
       expect(loadCall[1]).toBeUndefined(); // sourceIncludes: undefined
-      expect(loadCall[2]).toEqual(['output']); // sourceExcludes: ['output']
+      expect(loadCall[2]).toEqual(['input', 'output']);
     });
 
     it('setup_step and then_step were rehydrated for final_step', () => {
@@ -314,17 +315,17 @@ describe('output eviction: on-failure:retry + eviction boundary + targeted rehyd
   let fixture: WorkflowRunFixture;
 
   // Workflow:
-  //   step_large (20KB) → step_small (slack1, ~50 bytes) →
+  //   step_large (20KB) → step_small (console token) →
   //   step_retry_target (slack1, retries 2x with 1s delay, template references step_large only) →
-  //   pause (wait: 20m) → step_consumer (references step_large and step_retry_target outputs)
+  //   pause (wait: 20m) → step_consumer (references step_large and step_small outputs)
   //
   // The 1-byte cache keeps neither producer. The retry always succeeds on attempt 1
   // (slack1 = success connector), so retries won't fire. Pause + resume drops live
   // outputs (load omits them); the consumer fetches what it names from ES.
   //
   // Key invariants tested:
-  //   - step_large is fetched on resume because the consumer names it
-  //   - step_small's stored output remains intact in ES
+  //   - consumer renders both large and small values after resume
+  //   - both named producers are fetched (neither fits the cache)
   //   - the retry target succeeds on the first attempt, so there is no failed attempt
   const yaml = `
 name: retry-eviction-boundary-resume
@@ -339,10 +340,9 @@ steps:
       sizeBytes: 20000
 
   - name: step_small
-    type: slack
-    connector-id: ${FakeConnectors.slack1.name}
+    type: console
     with:
-      message: 'small step output'
+      message: 'small-unique-token'
 
   - name: step_retry_target
     type: slack
@@ -411,19 +411,21 @@ steps:
       expect(exec?.error).toBeUndefined();
     });
 
-    it('step_consumer completed using rehydrated step_large output (non-zero size)', () => {
+    it('step_consumer renders both the large and small rehydrated outputs', () => {
       const stepConsumer = Array.from(
         fixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).find((s) => s.stepId === 'step_consumer');
       expect(stepConsumer?.status).toBe(ExecutionStatus.COMPLETED);
+      const rendered = String(stepConsumer?.output);
       // 20000 chars in payload → size filter returns 20000
-      expect(stepConsumer?.output as string).toContain('20000');
+      expect(rendered).toContain('20000');
+      expect(rendered).toContain('small-unique-token');
     });
 
-    it('step_large was fetched because the consumer names it', () => {
-      const stepLargeExec = Array.from(
-        fixture.stepExecutionRepositoryMock.stepExecutions.values()
-      ).find((s) => s.stepId === 'step_large');
+    it('fetches both named producers because neither fits the 1-byte cache', () => {
+      const steps = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values());
+      const stepLargeExec = steps.find((s) => s.stepId === 'step_large');
+      const stepSmallExec = steps.find((s) => s.stepId === 'step_small');
 
       const rehydrationCalls = getByIdsSpy.mock.calls.filter(
         (call) => Array.isArray(call[1]) && call[1].includes('output')
@@ -431,19 +433,7 @@ steps:
       expect(rehydrationCalls.length).toBeGreaterThan(0);
       const rehydratedIds = rehydrationCalls.flatMap((call) => call[0] as string[]);
       expect(rehydratedIds).toContain(stepLargeExec?.id);
-    });
-
-    it('step_small output is intact after resume', () => {
-      // load() omits every output, whatever its size. step_small remains durable in
-      // the repository (fake ES) and can be fetched when a later node names it.
-      const stepSmallExec = Array.from(
-        fixture.stepExecutionRepositoryMock.stepExecutions.values()
-      ).find((s) => s.stepId === 'step_small');
-      expect(stepSmallExec?.output).toBeDefined();
-      const exec = fixture.workflowExecutionRepositoryMock.workflowExecutions.get(
-        'fake_workflow_execution_id'
-      );
-      expect(exec?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(rehydratedIds).toContain(stepSmallExec?.id);
     });
   });
 });

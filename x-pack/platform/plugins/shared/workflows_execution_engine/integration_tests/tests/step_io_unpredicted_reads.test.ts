@@ -6,15 +6,16 @@
  */
 
 /**
- * Step-output reads across a flush, including paths the static template scanner used to miss.
+ * Step-output reads across a persistence boundary, including paths the static
+ * template scanner used to miss.
  *
- * After flush, outputs leave the live map. `prepareContext` only loads ids the scanner names
- * (or every predecessor when analysis returns `null`). A miss leaves the consumer blank even
- * if the LRU still holds the value, because the snapshot never asks for that id.
+ * After resume, `load()` omits outputs from the live map. `prepareContext` only
+ * loads ids the scanner names (or every predecessor when analysis returns `null`).
+ * A miss leaves the consumer blank even if the LRU still holds the value, because
+ * the snapshot never asks for that id.
  *
- * Each workflow has a small (100 byte) producer output and a `wait` of 1s between producer and
- * consumer. The persistence loop flushes every 500ms, so at least one flush lands between the
- * two steps. The `wait` is short enough to run inline: one process, no resume, no cold cache.
+ * Each workflow pauses between producer and consumer so the boundary is
+ * deterministic — not a timed flush race.
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
@@ -33,10 +34,10 @@ steps:
     with:
       sizeBytes: 100
 
-  - name: let_flush_run
+  - name: pause
     type: wait
     with:
-      duration: 1s
+      duration: 20m
 
   - name: consume
     type: console
@@ -44,9 +45,21 @@ steps:
       message: '${reference}'
 `;
 
-const runAndGetConsumerOutput = async (reference: string, producerName = 'produce') => {
+const runAcrossPersistenceBoundary = async (reference: string, producerName = 'produce') => {
   const fixture = new WorkflowRunFixture();
   await fixture.runWorkflow({ workflowYaml: buildYaml(reference, producerName) });
+
+  expect(
+    fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id')
+      ?.status
+  ).toBe(ExecutionStatus.WAITING);
+
+  const producer = Array.from(
+    fixture.stepExecutionRepositoryMock.stepExecutions.values()
+  ).find((step) => step.stepId === producerName);
+
+  const getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
+  await fixture.resumeWorkflowAtScheduledTime();
 
   const execution = fixture.workflowExecutionRepositoryMock.workflowExecutions.get(
     'fake_workflow_execution_id'
@@ -54,36 +67,43 @@ const runAndGetConsumerOutput = async (reference: string, producerName = 'produc
   const consumer = Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).find(
     (step) => step.stepId === 'consume'
   );
-  return { execution, consumer };
+  const outputFetches = getByIdsSpy.mock.calls.filter(
+    (call) => Array.isArray(call[1]) && call[1].includes('output')
+  );
+  const fetchedIds = outputFetches.flatMap((call) => call[0] as string[]);
+
+  return { execution, consumer, producer, fetchedIds };
 };
 
-describe('StepIoService (LRU): reads across a flush', () => {
+describe('StepIoService (LRU): reads across a persistence boundary', () => {
   // Control: `steps.produce` is recognised by the scanner, so the output is pre-loaded.
-  it('renders a dot reference after a flush', async () => {
-    const { execution, consumer } = await runAndGetConsumerOutput(
+  it('renders a dot reference after resume', async () => {
+    const { execution, consumer, producer, fetchedIds } = await runAcrossPersistenceBoundary(
       '{{ steps.produce.output.payload | slice: 0, 3 }}'
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(consumer?.status).toBe(ExecutionStatus.COMPLETED);
     expect(consumer?.output).toBe('xxx');
+    expect(fetchedIds).toContain(producer?.id);
   });
 
   // Control: the scanner normalises literal bracket references to `steps.produce`.
-  it('renders a literal bracket reference after a flush', async () => {
-    const { execution, consumer } = await runAndGetConsumerOutput(
+  it('renders a literal bracket reference after resume', async () => {
+    const { execution, consumer, producer, fetchedIds } = await runAcrossPersistenceBoundary(
       '{{ steps["produce"].output.payload | slice: 0, 3 }}'
     );
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(consumer?.status).toBe(ExecutionStatus.COMPLETED);
     expect(consumer?.output).toBe('xxx');
+    expect(fetchedIds).toContain(producer?.id);
   });
 
   // A step name with a dot can only be referenced with brackets. Liquid keeps
   // `steps['my.produce']` (does not rewrite to dots); the scanner must extract the full id.
-  it('renders a bracket reference to a dotted step name after a flush', async () => {
-    const { execution, consumer } = await runAndGetConsumerOutput(
+  it('renders a bracket reference to a dotted step name after resume', async () => {
+    const { execution, consumer, producer, fetchedIds } = await runAcrossPersistenceBoundary(
       '{{ steps["my.produce"].output.payload | slice: 0, 3 }}',
       'my.produce'
     );
@@ -91,13 +111,14 @@ describe('StepIoService (LRU): reads across a flush', () => {
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(consumer?.status).toBe(ExecutionStatus.COMPLETED);
     expect(consumer?.output).toBe('xxx');
+    expect(fetchedIds).toContain(producer?.id);
   });
 
-  // Control for the case above: same step name, same flush, same bracket reference. A dynamic
+  // Control for the case above: same step name, same boundary, same bracket reference. A dynamic
   // `steps[k]` access in the template makes the scanner give up (`null`), which pre-loads every
   // predecessor. Only the prediction differs, so a pass here points at the prepared set.
   it('renders the dotted step name when a dynamic access forces the predecessor fallback', async () => {
-    const { execution, consumer } = await runAndGetConsumerOutput(
+    const { execution, consumer, producer, fetchedIds } = await runAcrossPersistenceBoundary(
       '{% assign k = "none" %}{{ steps[k].output }}{{ steps["my.produce"].output.payload | slice: 0, 3 }}',
       'my.produce'
     );
@@ -105,6 +126,7 @@ describe('StepIoService (LRU): reads across a flush', () => {
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(consumer?.status).toBe(ExecutionStatus.COMPLETED);
     expect(consumer?.output).toBe('xxx');
+    expect(fetchedIds).toContain(producer?.id);
   });
 });
 
@@ -114,7 +136,7 @@ describe('StepIoService (LRU): reads across a flush', () => {
 //
 // `steps[k]` is a dynamic access, so the scanner cannot name the step and the context
 // falls back to every predecessor. Branch steps that did not run have no execution and
-// are skipped. The `wait` lets a flush land between the branch and the reader.
+// are skipped. Pause + resume drops the live map between the branch and the reader.
 // ---------------------------------------------------------------------------
 describe('StepIoService (LRU): reading the executed switch branch after the join', () => {
   const switchYaml = `
@@ -150,10 +172,10 @@ steps:
         with:
           message: 'gamma-ran'
 
-  - name: let_flush_run
+  - name: pause
     type: wait
     with:
-      duration: 1s
+      duration: 20m
 
   - name: after_join
     type: console
@@ -168,6 +190,16 @@ steps:
   ])('route "%s" renders the output of the branch that ran', async (route, expectedOutput) => {
     const fixture = new WorkflowRunFixture();
     await fixture.runWorkflow({ workflowYaml: switchYaml.replace('__ROUTE__', route) });
+    expect(
+      fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id')
+        ?.status
+    ).toBe(ExecutionStatus.WAITING);
+
+    const branch = Array.from(
+      fixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).find((step) => step.stepId === `branch_${route}`);
+    const getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
+    await fixture.resumeWorkflowAtScheduledTime();
 
     const execution = fixture.workflowExecutionRepositoryMock.workflowExecutions.get(
       'fake_workflow_execution_id'
@@ -177,11 +209,15 @@ steps:
       .filter((step) => step.stepId.startsWith('branch_'))
       .map((step) => step.stepId);
     const afterJoin = steps.find((step) => step.stepId === 'after_join');
+    const fetchedIds = getByIdsSpy.mock.calls
+      .filter((call) => Array.isArray(call[1]) && call[1].includes('output'))
+      .flatMap((call) => call[0] as string[]);
 
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
     // Only the selected branch ran.
     expect(executedBranches).toEqual([`branch_${route}`]);
     expect(afterJoin?.status).toBe(ExecutionStatus.COMPLETED);
     expect(afterJoin?.output).toBe(expectedOutput);
+    expect(fetchedIds).toContain(branch?.id);
   });
 });

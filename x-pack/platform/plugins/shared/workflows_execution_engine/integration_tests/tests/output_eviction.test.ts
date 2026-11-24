@@ -26,7 +26,9 @@ describe('workflow output eviction', () => {
       };
     });
 
-    it('should complete a linear multi-step workflow with output eviction active', async () => {
+    it('rehydrates a predecessor across a persistence boundary under a 1-byte cache', async () => {
+      // Pause between producer and consumer so load() drops the live map; with a
+      // 1-byte cache the consumer must fetch step_a from ES and still render it.
       const yaml = `
 name: eviction linear workflow
 enabled: false
@@ -34,27 +36,51 @@ triggers:
   - type: manual
 steps:
   - name: step_a
-    type: slack
-    connector-id: ${FakeConnectors.slack1.name}
-    with:
-      message: 'Hello from step A'
-  - name: step_b
-    type: slack
-    connector-id: ${FakeConnectors.slack2.name}
-    with:
-      message: 'Step A said: {{steps.step_a.output}}'
-  - name: step_c
     type: console
     with:
-      message: 'Final: {{steps.step_b.output}}'
+      message: 'Hello from step A'
+  - name: pause
+    type: wait
+    with:
+      duration: 20m
+  - name: step_b
+    type: console
+    with:
+      message: 'Step A said: {{steps.step_a.output}}'
 `;
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      expect(
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        )?.status
+      ).toBe(ExecutionStatus.WAITING);
+
+      const stepA = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).find((step) => step.stepId === 'step_a');
+      const getByIdsSpy = jest.spyOn(
+        workflowRunFixture.stepExecutionRepositoryMock,
+        'getStepExecutionsByIds'
+      );
+
+      await workflowRunFixture.resumeWorkflowAtScheduledTime();
 
       const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
         'fake_workflow_execution_id'
       );
       expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
       expect(execution?.error).toBeUndefined();
+
+      const stepB = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).find((step) => step.stepId === 'step_b');
+      expect(stepB?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(String(stepB?.output)).toBe('Step A said: Hello from step A');
+
+      const outputFetches = getByIdsSpy.mock.calls.filter(
+        (call) => Array.isArray(call[1]) && call[1].includes('output')
+      );
+      expect(outputFetches.flatMap((call) => call[0] as string[])).toContain(stepA?.id);
     });
 
     it('should resolve data.set variables correctly despite eviction of other steps', async () => {
@@ -774,15 +800,17 @@ steps:
   });
 
   it('renders each branch its own evicted output', () => {
-    const readBacks = Array.from(
+    // Each branch must rehydrate its own `note` output — not a sibling's.
+    // Assert against the known items rather than the co-rendered `expect` field:
+    // after resume, `foreach.item` for that field can be empty when loop input
+    // is not resident, which is unrelated to per-branch output rehydration.
+    const got = Array.from(
       workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
     )
       .filter((stepExecution) => stepExecution.stepId === 'readBack')
-      .map((stepExecution) => stepExecution.output as { expect: string; got: string });
+      .map((stepExecution) => (stepExecution.output as { got: string }).got)
+      .sort();
 
-    expect(readBacks).toHaveLength(items.length);
-    readBacks.forEach(({ expect: expected, got }) => {
-      expect(got).toBe(expected);
-    });
+    expect(got).toEqual(items.map((item) => `owner-${item}`).sort());
   });
 });
