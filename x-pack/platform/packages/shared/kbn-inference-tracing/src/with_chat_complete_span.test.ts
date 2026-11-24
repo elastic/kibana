@@ -8,7 +8,10 @@
 import type { Span } from '@opentelemetry/api';
 import { lastValueFrom, of } from 'rxjs';
 import { ChatCompletionEventType } from '@kbn/inference-common';
-import type { ChatCompleteCompositeResponse } from '@kbn/inference-common';
+import type {
+  ChatCompletionTokenCount,
+  ChatCompletionTokenCountEvent,
+} from '@kbn/inference-common';
 import { GenAISemanticConventions } from './types';
 import { withChatCompleteSpan } from './with_chat_complete_span';
 
@@ -43,60 +46,59 @@ describe('withChatCompleteSpan token attributes', () => {
   });
 
   describe.each([
-    [
-      'observable',
-      async (tokens: {
-        prompt: number;
-        completion: number;
-        cached?: number;
-        cacheWrite?: number;
-      }) =>
+    {
+      name: 'observable',
+      run: (tokens: ChatCompletionTokenCount) =>
         lastValueFrom(
-          withChatCompleteSpan(
-            options,
-            () =>
-              of({
-                type: ChatCompletionEventType.ChatCompletionTokenCount,
-                tokens: { total: tokens.prompt + tokens.completion, ...tokens },
-              }) as unknown as ChatCompleteCompositeResponse
-          ) as ReturnType<typeof of>
+          withChatCompleteSpan(options, () =>
+            of<ChatCompletionTokenCountEvent>({
+              type: ChatCompletionEventType.ChatCompletionTokenCount,
+              tokens,
+            })
+          )
         ),
-    ],
-    [
-      'promise',
-      async (tokens: {
-        prompt: number;
-        completion: number;
-        cached?: number;
-        cacheWrite?: number;
-      }) =>
-        withChatCompleteSpan(
-          options,
-          () =>
-            Promise.resolve({
-              content: '',
-              toolCalls: [],
-              tokens: { total: tokens.prompt + tokens.completion, ...tokens },
-            }) as unknown as ChatCompleteCompositeResponse
+    },
+    {
+      name: 'promise',
+      run: (tokens: ChatCompletionTokenCount) =>
+        withChatCompleteSpan(options, () =>
+          Promise.resolve({ content: '', toolCalls: [], tokens })
         ),
-    ],
-  ])('%s response', (_name, run) => {
+    },
+  ])('$name response', ({ run }) => {
+    it.each([
+      { thinking: 12, output: 22 },
+      { thinking: 0, output: 10 },
+    ])('includes $thinking reasoning tokens in the output total', async ({ thinking, output }) => {
+      await run({ prompt: 100, completion: 10, thinking, total: 100 + output });
+      const attributes = getTokenAttributes();
+      expect(attributes[GenAISemanticConventions.GenAIUsageOutputTokens]).toBe(output);
+      expect(attributes[GenAISemanticConventions.GenAIUsageReasoningOutputTokens]).toBe(thinking);
+    });
+
+    it('records the completion count alone when reasoning usage is absent', async () => {
+      await run({ prompt: 100, completion: 10, total: 110 });
+      const attributes = getTokenAttributes();
+      expect(attributes[GenAISemanticConventions.GenAIUsageOutputTokens]).toBe(10);
+      expect(GenAISemanticConventions.GenAIUsageReasoningOutputTokens in attributes).toBe(false);
+    });
+
     it('records the cache read and write tokens', async () => {
-      await run({ prompt: 100, completion: 10, cached: 40, cacheWrite: 20 });
+      await run({ prompt: 100, completion: 10, total: 110, cached: 40, cacheWrite: 20 });
       const attributes = getTokenAttributes();
       expect(attributes[CACHE_READ]).toBe(40);
       expect(attributes[CACHE_WRITE]).toBe(20);
     });
 
     it('records a cache write of zero', async () => {
-      await run({ prompt: 100, completion: 10, cached: 0, cacheWrite: 0 });
+      await run({ prompt: 100, completion: 10, total: 110, cached: 0, cacheWrite: 0 });
       const attributes = getTokenAttributes();
       expect(attributes[CACHE_READ]).toBe(0);
       expect(attributes[CACHE_WRITE]).toBe(0);
     });
 
     it('omits the cache write attribute when it is absent', async () => {
-      await run({ prompt: 100, completion: 10, cached: 40 });
+      await run({ prompt: 100, completion: 10, total: 110, cached: 40 });
       const attributes = getTokenAttributes();
       expect(attributes[CACHE_READ]).toBe(40);
       expect(CACHE_WRITE in attributes).toBe(false);
