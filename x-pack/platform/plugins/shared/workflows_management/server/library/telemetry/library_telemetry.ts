@@ -6,37 +6,50 @@
  */
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
-import type { TemplateOriginFields } from '@kbn/workflows';
+import type { TemplateOriginFields, WorkflowTemplateOrigin } from '@kbn/workflows';
 import type { InstallFormField, Template } from '@kbn/workflows-library';
 
-import type {
-  LibraryCatalogFailedEvent,
-  TemplateInstalledEvent,
-  TemplateInstallSource,
-  TemplateLoadFailedEvent,
-} from './events';
-import {
-  LIBRARY_CATALOG_FAILED_EVENT_TYPE,
-  TEMPLATE_INSTALLED_EVENT_TYPE,
-  TEMPLATE_LOAD_FAILED_EVENT_TYPE,
-} from './events';
+import type { LibraryCatalogFailedEvent, TemplateInstalledEvent } from './events';
+import { LIBRARY_CATALOG_FAILED_EVENT_TYPE, TEMPLATE_INSTALLED_EVENT_TYPE } from './events';
 import { classifyLibraryError } from '../classify_library_error';
-import type { LibraryFailure } from '../library_cache';
-import type { LibraryService } from '../library_service';
+import type { LibraryFailure, LibraryHealth } from '../library_cache';
 
-type LibraryReader = Pick<LibraryService, 'getHealth' | 'getCachedTemplates'>;
+/** What the telemetry reads from the library it reports on. */
+export interface LibraryTelemetryReader {
+  getHealth(): LibraryHealth;
+  getCachedTemplates(): Template[] | undefined;
+}
+
+export interface LibraryTelemetryDeps {
+  analytics: Pick<AnalyticsServiceSetup, 'reportEvent'>;
+  logger: Logger;
+  library: LibraryTelemetryReader;
+}
 
 /**
- * What an install route knows about the template it installs. The route fills
- * in the template fields as it reads them, so a failure reports only what was
- * known when it happened.
+ * What a route knows about the template it creates a workflow from. The route
+ * fills in the template fields as it reads them, so a failure reports only what
+ * was known when it happened.
  */
 export interface TemplateInstallDetails {
-  source: TemplateInstallSource;
+  /** How the workflow is created from the template, known before the template is read. */
+  origin: WorkflowTemplateOrigin;
   /** The template origin stored on the workflow: the same slug and version reach the event. */
-  templateOrigin?: TemplateOriginFields;
+  storedOrigin?: TemplateOriginFields;
+  /** The template's install form. Remix has none. */
   installForm?: InstallFormField[];
 }
+
+/** The workflow a route created. Creation accepts invalid YAML and stores it with `valid: false`. */
+export interface CreatedWorkflow {
+  id: string;
+  valid: boolean;
+}
+
+type TemplateInstallFailureFields = Pick<
+  TemplateInstalledEvent,
+  'errorType' | 'fetchErrorReason' | 'invalidFields'
+>;
 
 const findCatalogTemplate = (
   templates: Template[] | undefined,
@@ -50,47 +63,54 @@ const getRequiredConnectorTypes = (form: InstallFormField[]): string[] => [
   ),
 ];
 
-const getInvalidFields = (error: unknown): string[] | undefined => {
+/** `describeForm` is false when the form's field names are free text (an uploaded file). */
+const getFailureFields = (error: unknown, describeForm: boolean): TemplateInstallFailureFields => {
   const classified = classifyLibraryError(error);
   switch (classified.type) {
+    case 'fetch_failed':
+      return { errorType: classified.type, fetchErrorReason: classified.error.reason };
     case 'form_validation':
-      return [...new Set(classified.error.errors.map(({ field }) => field))];
+      return {
+        errorType: classified.type,
+        ...(describeForm
+          ? { invalidFields: [...new Set(classified.error.errors.map(({ field }) => field))] }
+          : {}),
+      };
     case 'missing_form_field':
-      return classified.error.fields;
+      return {
+        errorType: classified.type,
+        ...(describeForm ? { invalidFields: classified.error.fields } : {}),
+      };
     default:
-      return undefined;
+      return { errorType: classified.type };
   }
 };
 
 const buildTemplateInstalledEvent = (
-  library: LibraryReader,
-  { source, templateOrigin, installForm }: TemplateInstallDetails,
-  outcome: { workflowId: string } | { error: unknown }
+  library: LibraryTelemetryReader,
+  { origin, storedOrigin, installForm }: TemplateInstallDetails,
+  outcome: { workflow: CreatedWorkflow } | { error: unknown }
 ): TemplateInstalledEvent => {
-  // Form field names and connector types in an uploaded file are free text, so
-  // only a catalog template sends them.
-  const fromCatalog = source === 'catalog';
-  const catalogTemplate = findCatalogTemplate(
-    library.getCachedTemplates(),
-    templateOrigin?.templateSlug
-  );
-  const invalidFields = 'error' in outcome ? getInvalidFields(outcome.error) : undefined;
+  // Only a catalog template's form is described: the field names and connector
+  // types in an uploaded file are free text.
+  const describeForm = origin === 'install';
+  const { templateSlug, templateVersion }: TemplateOriginFields = storedOrigin ?? {};
+  const catalogTemplate = findCatalogTemplate(library.getCachedTemplates(), templateSlug);
 
   return {
-    success: 'workflowId' in outcome,
-    source,
+    success: 'workflow' in outcome,
+    templateOrigin: origin,
     sourceMode: library.getHealth().sourceMode,
-    ...(templateOrigin?.templateSlug ? { templateSlug: templateOrigin.templateSlug } : {}),
-    ...(templateOrigin?.templateVersion ? { templateVersion: templateOrigin.templateVersion } : {}),
+    ...(templateSlug ? { templateSlug } : {}),
+    ...(templateVersion ? { templateVersion } : {}),
     ...(catalogTemplate ? { solutions: catalogTemplate.solutions ?? [] } : {}),
     ...(installForm ? { formFieldCount: installForm.length } : {}),
-    ...(fromCatalog && installForm
+    ...(describeForm && installForm
       ? { requiredConnectorTypes: getRequiredConnectorTypes(installForm) }
       : {}),
-    ...('workflowId' in outcome
-      ? { workflowId: outcome.workflowId }
-      : { errorType: classifyLibraryError(outcome.error).type }),
-    ...(fromCatalog && invalidFields ? { invalidFields } : {}),
+    ...('workflow' in outcome
+      ? { workflowId: outcome.workflow.id, workflowValid: outcome.workflow.valid }
+      : getFailureFields(outcome.error, describeForm)),
   };
 };
 
@@ -99,59 +119,42 @@ const buildTemplateInstalledEvent = (
  * must not change the outcome of the request that sends it.
  */
 export class LibraryTelemetry {
-  constructor(
-    private readonly analytics: Pick<AnalyticsServiceSetup, 'reportEvent'>,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly deps: LibraryTelemetryDeps) {}
 
-  reportTemplateInstalled(
-    library: LibraryReader,
-    details: TemplateInstallDetails,
-    workflowId: string
-  ): void {
+  reportTemplateInstalled(details: TemplateInstallDetails, workflow: CreatedWorkflow): void {
     this.report(TEMPLATE_INSTALLED_EVENT_TYPE, () =>
-      buildTemplateInstalledEvent(library, details, { workflowId })
+      buildTemplateInstalledEvent(this.deps.library, details, { workflow })
     );
   }
 
-  reportTemplateInstallFailed(
-    library: LibraryReader,
-    details: TemplateInstallDetails,
-    error: unknown
-  ): void {
+  reportTemplateInstallFailed(details: TemplateInstallDetails, error: unknown): void {
     this.report(TEMPLATE_INSTALLED_EVENT_TYPE, () =>
-      buildTemplateInstalledEvent(library, details, { error })
+      buildTemplateInstalledEvent(this.deps.library, details, { error })
     );
   }
 
   /**
-   * The slug comes from the URL, so it is sent only when it names a catalog
-   * template. Errors that are not about loading the template send nothing.
+   * Listener for {@link LibraryCache} status changes. The event is built field
+   * by field, so nothing else added to the failure later can reach telemetry.
    */
-  reportTemplateLoadFailed(library: LibraryReader, slug: string, error: unknown): void {
-    const { type } = classifyLibraryError(error);
-    if (type !== 'template_not_found' && type !== 'catalog_unavailable') return;
-
-    this.report(TEMPLATE_LOAD_FAILED_EVENT_TYPE, (): TemplateLoadFailedEvent => {
-      const inCatalog = findCatalogTemplate(library.getCachedTemplates(), slug) !== undefined;
-      return {
-        reason: type === 'template_not_found' ? 'not_found' : 'fetch_error',
-        ...(inCatalog ? { templateSlug: slug } : {}),
-      };
-    });
-  }
-
-  /** Listener for {@link LibraryCache} status changes. */
   readonly reportCatalogFailed = (failure: LibraryFailure): void => {
-    this.report(LIBRARY_CATALOG_FAILED_EVENT_TYPE, (): LibraryCatalogFailedEvent => failure);
+    this.report(
+      LIBRARY_CATALOG_FAILED_EVENT_TYPE,
+      (): LibraryCatalogFailedEvent => ({
+        operation: failure.operation,
+        fetchErrorReason: failure.reason,
+        sourceMode: this.deps.library.getHealth().sourceMode,
+        ...(failure.operation === 'template' ? { templateSlug: failure.templateSlug } : {}),
+      })
+    );
   };
 
   private report<T extends object>(eventType: string, buildEvent: () => T): void {
     try {
-      this.analytics.reportEvent(eventType, buildEvent());
+      this.deps.analytics.reportEvent(eventType, buildEvent());
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`Failed to report the ${eventType} event: ${message}`);
+      this.deps.logger.warn(`Failed to report the ${eventType} event: ${message}`);
     }
   }
 }

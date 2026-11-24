@@ -6,7 +6,11 @@
  */
 
 export { registerLibraryEventTypes } from './events';
-export type { TemplateInstallSource } from './events';
 export { LibraryTelemetry } from './library_telemetry';
-export type { TemplateInstallDetails } from './library_telemetry';
+export type {
+  CreatedWorkflow,
+  LibraryTelemetryDeps,
+  LibraryTelemetryReader,
+  TemplateInstallDetails,
+} from './library_telemetry';
 export { registerLibraryUsageCollector } from './usage_collector';

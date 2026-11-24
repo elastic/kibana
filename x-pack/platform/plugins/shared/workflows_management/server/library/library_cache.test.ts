@@ -142,33 +142,44 @@ describe('LibraryCache', () => {
       cache.markRefreshFailure(fetchError());
       cache.markRefreshFailure(fetchError());
       expect(onFailure).toHaveBeenCalledTimes(1);
-      expect(onFailure).toHaveBeenCalledWith({
-        operation: 'catalog',
-        reason: 'timeout',
-        sourceMode: 'bundle',
-      });
+      expect(onFailure).toHaveBeenCalledWith({ operation: 'catalog', reason: 'timeout' });
 
       cache.markRefreshSuccess();
       cache.markRefreshFailure(fetchError());
       expect(onFailure).toHaveBeenCalledTimes(2);
     });
 
-    it('hears only the first template load failure until a template loads again', () => {
+    it('hears only the first failure of a template until it loads again', () => {
       const onFailure = jest.fn();
       const cache = new LibraryCache(TTL_MS, 'http', onFailure);
 
-      cache.markTemplateLoadFailure(fetchError());
-      cache.markTemplateLoadFailure(fetchError());
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadFailure('alpha', fetchError());
       expect(onFailure).toHaveBeenCalledTimes(1);
       expect(onFailure).toHaveBeenCalledWith({
         operation: 'template',
         reason: 'timeout',
-        sourceMode: 'http',
+        templateSlug: 'alpha',
       });
 
-      cache.markTemplateLoadSuccess();
-      cache.markTemplateLoadFailure(fetchError());
+      cache.markTemplateLoadSuccess('alpha');
+      cache.markTemplateLoadFailure('alpha', fetchError());
       expect(onFailure).toHaveBeenCalledTimes(2);
+    });
+
+    it('tracks each template separately, so another template loading does not re-report a broken one', () => {
+      const onFailure = jest.fn();
+      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadSuccess('beta');
+      cache.markTemplateLoadFailure('alpha', fetchError());
+      cache.markTemplateLoadFailure('beta', fetchError());
+
+      expect(onFailure.mock.calls.map(([failure]) => failure.templateSlug)).toEqual([
+        'alpha',
+        'beta',
+      ]);
     });
 
     it('tracks the catalog and template bodies separately', () => {
@@ -176,7 +187,7 @@ describe('LibraryCache', () => {
       const cache = new LibraryCache(TTL_MS, 'http', onFailure);
 
       cache.markRefreshFailure(fetchError());
-      cache.markTemplateLoadFailure(fetchError());
+      cache.markTemplateLoadFailure('alpha', fetchError());
 
       expect(onFailure.mock.calls.map(([failure]) => failure.operation)).toEqual([
         'catalog',
@@ -191,6 +202,18 @@ describe('LibraryCache', () => {
       cache.markRefreshFailure(new Error('bug'));
 
       expect(onFailure).toHaveBeenCalledWith(expect.objectContaining({ reason: 'unknown' }));
+    });
+
+    it('still records the failure when the listener throws', () => {
+      const cache = new LibraryCache(TTL_MS, 'http', () => {
+        throw new Error('listener bug');
+      });
+
+      expect(() => cache.markRefreshFailure(fetchError())).not.toThrow();
+      expect(() => cache.markTemplateLoadFailure('alpha', fetchError())).not.toThrow();
+      expect(cache.getHealth().lastError).toEqual(
+        expect.objectContaining({ message: 'upstream down' })
+      );
     });
   });
 });

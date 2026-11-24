@@ -143,7 +143,7 @@ export class LibraryFetcher extends LibrarySource {
     try {
       const body = await this.fetchTemplateBody(row);
       this.cache.setBody(slug, body);
-      this.cache.markTemplateLoadSuccess();
+      this.cache.markTemplateLoadSuccess(slug);
       return body;
     } catch (err) {
       if (
@@ -154,7 +154,7 @@ export class LibraryFetcher extends LibrarySource {
         await this.refresh();
         return this.loadTemplateBody(slug, false);
       }
-      this.cache.markTemplateLoadFailure(err);
+      this.cache.markTemplateLoadFailure(slug, err);
       throw err;
     }
   }

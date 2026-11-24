@@ -17,10 +17,10 @@ import {
   LIBRARY_CATALOG_FAILED_EVENT_TYPE,
   registerLibraryEventTypes,
   TEMPLATE_INSTALLED_EVENT_TYPE,
-  TEMPLATE_LOAD_FAILED_EVENT_TYPE,
 } from './events';
 import { LibraryTelemetry, type TemplateInstallDetails } from './library_telemetry';
 import { LibraryFetchError, LibraryNotFoundError } from '../errors';
+import type { LibraryFailure } from '../library_cache';
 
 const catalogRow: Template = {
   slug: 'triage-alerts',
@@ -44,8 +44,8 @@ const installForm: InstallFormField[] = [
 ];
 
 const catalogInstall: TemplateInstallDetails = {
-  source: 'catalog',
-  templateOrigin: {
+  origin: 'install',
+  storedOrigin: {
     templateSlug: 'triage-alerts',
     templateVersion: '1.2.0',
     templateOrigin: 'install',
@@ -53,18 +53,26 @@ const catalogInstall: TemplateInstallDetails = {
   installForm,
 };
 
-const setup = ({ cachedTemplates = [catalogRow] }: { cachedTemplates?: Template[] } = {}) => {
+const setup = ({
+  cachedTemplates = [catalogRow],
+  sourceMode = 'http',
+}: { cachedTemplates?: Template[]; sourceMode?: 'http' | 'bundle' } = {}) => {
   const analytics = { reportEvent: jest.fn() };
   const logger = loggerMock.create();
   const library = {
-    getHealth: jest.fn().mockReturnValue({ sourceMode: 'http', lastRefreshAt: null }),
+    getHealth: jest.fn().mockReturnValue({ sourceMode, lastRefreshAt: null }),
     getCachedTemplates: jest.fn().mockReturnValue(cachedTemplates),
   };
-  return { analytics, logger, library, telemetry: new LibraryTelemetry(analytics, logger) };
+  return {
+    analytics,
+    logger,
+    library,
+    telemetry: new LibraryTelemetry({ analytics, logger, library }),
+  };
 };
 
 describe('registerLibraryEventTypes', () => {
-  it('registers the three library events', () => {
+  it('registers the library events', () => {
     const analytics = { registerEventType: jest.fn() };
 
     registerLibraryEventTypes(analytics);
@@ -72,7 +80,6 @@ describe('registerLibraryEventTypes', () => {
     expect(analytics.registerEventType.mock.calls.map(([{ eventType }]) => eventType)).toEqual([
       TEMPLATE_INSTALLED_EVENT_TYPE,
       LIBRARY_CATALOG_FAILED_EVENT_TYPE,
-      TEMPLATE_LOAD_FAILED_EVENT_TYPE,
     ]);
   });
 });
@@ -80,13 +87,13 @@ describe('registerLibraryEventTypes', () => {
 describe('LibraryTelemetry', () => {
   describe('reportTemplateInstalled', () => {
     it('reports a catalog install with its solutions, form size and connector types', () => {
-      const { analytics, library, telemetry } = setup();
+      const { analytics, telemetry } = setup();
 
-      telemetry.reportTemplateInstalled(library, catalogInstall, 'workflow-1');
+      telemetry.reportTemplateInstalled(catalogInstall, { id: 'workflow-1', valid: true });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
         success: true,
-        source: 'catalog',
+        templateOrigin: 'install',
         sourceMode: 'http',
         templateSlug: 'triage-alerts',
         templateVersion: '1.2.0',
@@ -94,15 +101,16 @@ describe('LibraryTelemetry', () => {
         formFieldCount: 4,
         requiredConnectorTypes: ['.slack', '.cases'],
         workflowId: 'workflow-1',
+        workflowValid: true,
       });
     });
 
     it('reports an empty solution list for a cross-solution catalog template', () => {
-      const { analytics, library, telemetry } = setup({
+      const { analytics, telemetry } = setup({
         cachedTemplates: [{ ...catalogRow, solutions: undefined }],
       });
 
-      telemetry.reportTemplateInstalled(library, catalogInstall, 'workflow-1');
+      telemetry.reportTemplateInstalled(catalogInstall, { id: 'workflow-1', valid: true });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(
         TEMPLATE_INSTALLED_EVENT_TYPE,
@@ -110,36 +118,59 @@ describe('LibraryTelemetry', () => {
       );
     });
 
-    it('never reports the field names or connector types of an uploaded file', () => {
-      const { analytics, library, telemetry } = setup();
+    it('reports a created workflow that failed validation', () => {
+      const { analytics, telemetry } = setup();
 
-      telemetry.reportTemplateInstallFailed(
-        library,
+      telemetry.reportTemplateInstalled(catalogInstall, { id: 'workflow-1', valid: false });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        TEMPLATE_INSTALLED_EVENT_TYPE,
+        expect.objectContaining({ success: true, workflowId: 'workflow-1', workflowValid: false })
+      );
+    });
+
+    it('reports a remix with the template it started from, and no form', () => {
+      const { analytics, telemetry } = setup({ sourceMode: 'bundle' });
+
+      telemetry.reportTemplateInstalled(
         {
-          source: 'file',
-          templateOrigin: { templateSlug: 'custom', templateOrigin: 'import' },
-          installForm,
+          origin: 'remix',
+          storedOrigin: { templateSlug: 'triage-alerts', templateOrigin: 'remix' },
         },
-        new InstallFormValidationError([{ field: 'acme-secret-field', reason: 'required' }])
+        { id: 'workflow-2', valid: true }
       );
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
-        success: false,
-        source: 'file',
+        success: true,
+        templateOrigin: 'remix',
+        sourceMode: 'bundle',
+        templateSlug: 'triage-alerts',
+        solutions: ['security'],
+        workflowId: 'workflow-2',
+        workflowValid: true,
+      });
+    });
+
+    it('reports a remix saved while the library is off without a template', () => {
+      const { analytics, telemetry } = setup();
+
+      telemetry.reportTemplateInstalled({ origin: 'remix' }, { id: 'workflow-3', valid: true });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: true,
+        templateOrigin: 'remix',
         sourceMode: 'http',
-        templateSlug: 'custom',
-        formFieldCount: 4,
-        errorType: 'form_validation',
+        workflowId: 'workflow-3',
+        workflowValid: true,
       });
     });
   });
 
   describe('reportTemplateInstallFailed', () => {
     it('reports the field names that failed validation, once each', () => {
-      const { analytics, library, telemetry } = setup();
+      const { analytics, telemetry } = setup();
 
       telemetry.reportTemplateInstallFailed(
-        library,
         catalogInstall,
         new InstallFormValidationError([
           { field: 'index', reason: 'required' },
@@ -159,10 +190,9 @@ describe('LibraryTelemetry', () => {
     });
 
     it('reports the fields the template body uses but its form does not declare', () => {
-      const { analytics, library, telemetry } = setup();
+      const { analytics, telemetry } = setup();
 
       telemetry.reportTemplateInstallFailed(
-        library,
         catalogInstall,
         new MissingInstallFormFieldError(['threshold'])
       );
@@ -173,120 +203,139 @@ describe('LibraryTelemetry', () => {
       );
     });
 
-    it('reports no template before the template is read', () => {
-      const { analytics, library, telemetry } = setup();
+    it('never reports the field names or connector types of an uploaded file', () => {
+      const { analytics, telemetry } = setup();
 
       telemetry.reportTemplateInstallFailed(
-        library,
-        { source: 'catalog' },
+        {
+          origin: 'import',
+          storedOrigin: { templateSlug: 'custom', templateOrigin: 'import' },
+          installForm,
+        },
+        new InstallFormValidationError([{ field: 'acme-secret-field', reason: 'required' }])
+      );
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: false,
+        templateOrigin: 'import',
+        sourceMode: 'http',
+        templateSlug: 'custom',
+        formFieldCount: 4,
+        errorType: 'form_validation',
+      });
+    });
+
+    it('reports why the template could not be fetched', () => {
+      const { analytics, telemetry } = setup();
+
+      telemetry.reportTemplateInstallFailed(
+        catalogInstall,
+        new LibraryFetchError('body failed its integrity check', 'integrity')
+      );
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        TEMPLATE_INSTALLED_EVENT_TYPE,
+        expect.objectContaining({
+          success: false,
+          errorType: 'fetch_failed',
+          fetchErrorReason: 'integrity',
+        })
+      );
+    });
+
+    it('reports no template before the template is read', () => {
+      const { analytics, telemetry } = setup();
+
+      telemetry.reportTemplateInstallFailed(
+        { origin: 'install' },
         new LibraryNotFoundError('acme-internal')
       );
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
         success: false,
-        source: 'catalog',
+        templateOrigin: 'install',
         sourceMode: 'http',
         errorType: 'template_not_found',
       });
     });
 
     it('reports an uploaded file that cannot be parsed as template_parse', () => {
-      const { analytics, library, telemetry } = setup();
+      const { analytics, telemetry } = setup();
 
       telemetry.reportTemplateInstallFailed(
-        library,
-        { source: 'file' },
+        { origin: 'import' },
         new TemplateParseError('bad yaml', 'invalid-yaml')
       );
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
         success: false,
-        source: 'file',
+        templateOrigin: 'import',
         sourceMode: 'http',
         errorType: 'template_parse',
       });
     });
   });
 
-  describe('reportTemplateLoadFailed', () => {
-    it('reports a slug that is not in the catalog as not_found, without the slug', () => {
-      const { analytics, library, telemetry } = setup();
+  describe('reportCatalogFailed', () => {
+    it('reports a catalog failure with the source mode', () => {
+      const { analytics, telemetry } = setup({ sourceMode: 'bundle' });
 
-      telemetry.reportTemplateLoadFailed(
-        library,
-        'acme-internal',
-        new LibraryNotFoundError('acme-internal')
-      );
+      telemetry.reportCatalogFailed({ operation: 'catalog', reason: 'unavailable' });
 
-      expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_LOAD_FAILED_EVENT_TYPE, {
-        reason: 'not_found',
+      expect(analytics.reportEvent).toHaveBeenCalledWith(LIBRARY_CATALOG_FAILED_EVENT_TYPE, {
+        operation: 'catalog',
+        fetchErrorReason: 'unavailable',
+        sourceMode: 'bundle',
       });
     });
 
-    it('reports a catalog template whose body failed to load with its slug', () => {
-      const { analytics, library, telemetry } = setup();
+    it('reports which template body failed to load', () => {
+      const { analytics, telemetry } = setup();
 
-      telemetry.reportTemplateLoadFailed(
-        library,
-        'triage-alerts',
-        new LibraryFetchError('body failed', 'integrity')
-      );
+      telemetry.reportCatalogFailed({
+        operation: 'template',
+        reason: 'integrity',
+        templateSlug: 'triage-alerts',
+      });
 
-      expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_LOAD_FAILED_EVENT_TYPE, {
-        reason: 'fetch_error',
+      expect(analytics.reportEvent).toHaveBeenCalledWith(LIBRARY_CATALOG_FAILED_EVENT_TYPE, {
+        operation: 'template',
+        fetchErrorReason: 'integrity',
+        sourceMode: 'http',
         templateSlug: 'triage-alerts',
       });
     });
 
-    it('leaves the slug out when no catalog was available to check it', () => {
-      const { analytics, library, telemetry } = setup();
-      library.getCachedTemplates.mockReturnValue(undefined);
-
-      telemetry.reportTemplateLoadFailed(
-        library,
-        'triage-alerts',
-        new LibraryFetchError('catalog down', 'unavailable')
-      );
-
-      expect(analytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_LOAD_FAILED_EVENT_TYPE, {
-        reason: 'fetch_error',
-      });
-    });
-
-    it('reports nothing for an error that is not about loading the template', () => {
-      const { analytics, library, telemetry } = setup();
-
-      telemetry.reportTemplateLoadFailed(library, 'triage-alerts', new Error('boom'));
-
-      expect(analytics.reportEvent).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('reportCatalogFailed', () => {
-    it('reports the failure as it is', () => {
+    it('sends only the event fields, whatever else the failure carries', () => {
       const { analytics, telemetry } = setup();
-
-      telemetry.reportCatalogFailed({
+      const failure = {
         operation: 'catalog',
-        reason: 'timeout',
-        sourceMode: 'http',
-      });
+        reason: 'connection',
+        message: 'Failed to reach https://mirror.acme.internal/v1',
+      } as LibraryFailure;
+
+      telemetry.reportCatalogFailed(failure);
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(LIBRARY_CATALOG_FAILED_EVENT_TYPE, {
         operation: 'catalog',
-        reason: 'timeout',
+        fetchErrorReason: 'connection',
         sourceMode: 'http',
       });
     });
   });
 
   it('logs instead of throwing when the event cannot be reported', () => {
-    const { analytics, logger, library, telemetry } = setup();
+    const { analytics, logger, telemetry } = setup();
     analytics.reportEvent.mockImplementation(() => {
       throw new Error('event type not registered');
     });
 
-    expect(() => telemetry.reportTemplateInstalled(library, catalogInstall, 'id')).not.toThrow();
+    expect(() =>
+      telemetry.reportTemplateInstalled(catalogInstall, { id: 'id', valid: true })
+    ).not.toThrow();
+    expect(() =>
+      telemetry.reportCatalogFailed({ operation: 'catalog', reason: 'timeout' })
+    ).not.toThrow();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('event type not registered'));
   });
 });

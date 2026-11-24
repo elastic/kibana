@@ -20,13 +20,22 @@ export interface LibraryHealth {
 /** What failed to load: the catalog, or a template body listed in it. */
 export type LibraryOperation = 'catalog' | 'template';
 
-export interface LibraryFailure {
-  operation: LibraryOperation;
-  reason: LibraryFetchErrorReason | 'unknown';
-  sourceMode: LibrarySourceMode;
-}
+/** The fetch error reason, or `unknown` for an error that is not a {@link LibraryFetchError}. */
+export type LibraryFailureReason = LibraryFetchErrorReason | 'unknown';
 
-/** Called when an operation starts failing, not again until it has succeeded once. */
+export type LibraryFailure =
+  | { operation: 'catalog'; reason: LibraryFailureReason }
+  | {
+      operation: 'template';
+      reason: LibraryFailureReason;
+      /** Slug of the catalog row whose body failed to load. */
+      templateSlug: string;
+    };
+
+/**
+ * Called when the catalog, or one template body, starts failing to load; not
+ * again for it until it has loaded once.
+ */
 export type LibraryFailureListener = (failure: LibraryFailure) => void;
 
 /**
@@ -44,8 +53,9 @@ export type LibraryFailureListener = (failure: LibraryFailure) => void;
  * a slug at a different `definitionUrl`.
  *
  * The optional failure listener hears only status changes: the first failure
- * after a success (or after startup), so a failing upstream read again on every
- * request reports once rather than per read.
+ * after a success (or after startup), tracked separately for the catalog and
+ * for each template body. A failing upstream read again on every request
+ * therefore reports once rather than per read.
  */
 export class LibraryCache {
   public catalog?: TemplatesCatalog;
@@ -53,7 +63,8 @@ export class LibraryCache {
   private readonly bodies = new Map<string, TemplateBody>();
   private lastRefreshAt?: Date;
   private lastError?: { message: string; at: Date };
-  private templateLoadFailing = false;
+  /** Slugs whose body failed to load and hasn't loaded since. */
+  private readonly failingTemplates = new Set<string>();
 
   constructor(
     private readonly ttlMs: number,
@@ -95,26 +106,31 @@ export class LibraryCache {
       at: new Date(),
     };
     if (!wasFailing) {
-      this.notifyFailure('catalog', err);
+      this.notifyFailure({ operation: 'catalog', reason: getFailureReason(err) });
     }
   }
 
-  markTemplateLoadSuccess(): void {
-    this.templateLoadFailing = false;
+  markTemplateLoadSuccess(slug: string): void {
+    this.failingTemplates.delete(slug);
   }
 
-  markTemplateLoadFailure(err: unknown): void {
-    if (this.templateLoadFailing) return;
-    this.templateLoadFailing = true;
-    this.notifyFailure('template', err);
-  }
-
-  private notifyFailure(operation: LibraryOperation, err: unknown): void {
-    this.onFailure?.({
-      operation,
-      reason: err instanceof LibraryFetchError ? err.reason : 'unknown',
-      sourceMode: this.sourceMode,
+  markTemplateLoadFailure(slug: string, err: unknown): void {
+    if (this.failingTemplates.has(slug)) return;
+    this.failingTemplates.add(slug);
+    this.notifyFailure({
+      operation: 'template',
+      reason: getFailureReason(err),
+      templateSlug: slug,
     });
+  }
+
+  private notifyFailure(failure: LibraryFailure): void {
+    try {
+      this.onFailure?.(failure);
+    } catch {
+      // The listener handles its own errors. One that escapes is dropped, so it
+      // can't change how the failed load is handled (such as serving the stale catalog).
+    }
   }
 
   getHealth(): LibraryHealth {
@@ -127,3 +143,6 @@ export class LibraryCache {
     };
   }
 }
+
+const getFailureReason = (err: unknown): LibraryFailureReason =>
+  err instanceof LibraryFetchError ? err.reason : 'unknown';

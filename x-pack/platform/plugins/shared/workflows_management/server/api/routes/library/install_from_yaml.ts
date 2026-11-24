@@ -13,7 +13,6 @@ import { mapLibraryError } from './error_mapper';
 import {
   LibraryDisabledError,
   type LibraryService,
-  type LibraryTelemetry,
   resolveTemplateOrigin,
   type TemplateInstallDetails,
 } from '../../../library';
@@ -41,8 +40,7 @@ const bodySchema = schema.object({
 
 export function registerInstallFromYamlRoute(
   { router, api, spaces, audit, logger }: RouteDependencies,
-  libraryService: LibraryService,
-  telemetry: LibraryTelemetry
+  libraryService: LibraryService
 ) {
   router.versioned
     .post({
@@ -60,7 +58,7 @@ export function registerInstallFromYamlRoute(
       },
       withAvailabilityCheck(async (context, request, response) => {
         // Filled in as the file is read, so a failure reports only what was known.
-        const installDetails: TemplateInstallDetails = { source: 'file' };
+        const installDetails: TemplateInstallDetails = { origin: 'import' };
         try {
           const { uiSettings } = await context.core;
           const enabled = await uiSettings.globalClient.get<boolean>(
@@ -79,7 +77,7 @@ export function registerInstallFromYamlRoute(
             version: template.metadata.version,
             origin: 'import',
           });
-          installDetails.templateOrigin = templateOrigin;
+          installDetails.storedOrigin = templateOrigin;
           installDetails.installForm = template.metadata.install?.form ?? [];
 
           const { yaml } = renderInstall({ template, values: request.body.values });
@@ -98,11 +96,11 @@ export function registerInstallFromYamlRoute(
             throw error;
           }
           audit.logWorkflowCreated(request, { id: createdWorkflow.id });
-          telemetry.reportTemplateInstalled(libraryService, installDetails, createdWorkflow.id);
+          libraryService.telemetry.reportTemplateInstalled(installDetails, createdWorkflow);
 
           return response.ok({ body: { workflowId: createdWorkflow.id } });
         } catch (error) {
-          telemetry.reportTemplateInstallFailed(libraryService, installDetails, error);
+          libraryService.telemetry.reportTemplateInstallFailed(installDetails, error);
           return mapLibraryError(response, error);
         }
       })

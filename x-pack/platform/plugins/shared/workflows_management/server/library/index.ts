@@ -19,6 +19,7 @@ export type { LibrarySource } from './library_source';
 export type {
   LibraryFailure,
   LibraryFailureListener,
+  LibraryFailureReason,
   LibraryHealth,
   LibraryOperation,
   LibrarySourceMode,
@@ -38,4 +39,4 @@ export {
   registerLibraryEventTypes,
   registerLibraryUsageCollector,
 } from './telemetry';
-export type { TemplateInstallDetails, TemplateInstallSource } from './telemetry';
+export type { TemplateInstallDetails } from './telemetry';

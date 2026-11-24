@@ -26,7 +26,7 @@ describe('classifyLibraryError', () => {
     ['missing_form_field', new MissingInstallFormFieldError(['index'])],
     ['template_parse', new TemplateParseError('bad yaml', 'invalid-yaml')],
     ['template_not_found', new LibraryNotFoundError('demo')],
-    ['catalog_unavailable', new LibraryFetchError('down', 'timeout')],
+    ['fetch_failed', new LibraryFetchError('down', 'timeout')],
     ['workflow_invalid', new InvalidYamlSyntaxError('bad yaml')],
     ['workflow_invalid', new InvalidYamlSchemaError('bad schema')],
     ['workflow_invalid', new WorkflowValidationError('invalid', [])],

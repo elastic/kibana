@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { Template, TemplateBody } from '@kbn/workflows-library';
 
 import { LibraryBundleReader } from './library_bundle_reader';
-import type { LibraryFailureListener, LibraryHealth } from './library_cache';
+import type { LibraryHealth } from './library_cache';
 import { LibraryFetcher } from './library_fetcher';
 import type { LibrarySource } from './library_source';
+import { LibraryTelemetry } from './telemetry/library_telemetry';
 import type { WorkflowsManagementConfig } from '../config';
 
 interface LibraryServiceDeps {
@@ -19,8 +20,7 @@ interface LibraryServiceDeps {
   logger: Logger;
   kibanaVersion: string;
   isServerless: boolean;
-  /** Hears when the catalog or a template body starts failing to load. */
-  onFailure?: LibraryFailureListener;
+  analytics: Pick<AnalyticsServiceSetup, 'reportEvent'>;
 }
 
 export interface TemplateFilters {
@@ -38,12 +38,20 @@ export interface TemplateFilters {
  * (instead of inside the source) keeps each source focused on retrieval; the
  * service is the natural home for business-level read concerns like
  * solution/category/search filters.
+ *
+ * The service also owns the library's {@link LibraryTelemetry}: it reports
+ * catalog and template body failures itself, and routes report what only they
+ * know (install outcomes) through `telemetry`.
  */
 export class LibraryService {
+  readonly telemetry: LibraryTelemetry;
   private readonly source: LibrarySource;
 
   constructor(deps: LibraryServiceDeps) {
     const logger = deps.logger.get('library');
+    // The telemetry reads the service only when it reports, after construction.
+    this.telemetry = new LibraryTelemetry({ analytics: deps.analytics, logger, library: this });
+    const onFailure = this.telemetry.reportCatalogFailed;
     const { bundlePath, registryUrl, ttlMs } = deps.config.library;
     this.source = bundlePath
       ? new LibraryBundleReader({
@@ -51,7 +59,7 @@ export class LibraryService {
           kibanaVersion: deps.kibanaVersion,
           isServerless: deps.isServerless,
           logger,
-          onFailure: deps.onFailure,
+          onFailure,
         })
       : new LibraryFetcher({
           registryUrl,
@@ -59,7 +67,7 @@ export class LibraryService {
           isServerless: deps.isServerless,
           ttlMs,
           logger,
-          onFailure: deps.onFailure,
+          onFailure,
         });
   }
 

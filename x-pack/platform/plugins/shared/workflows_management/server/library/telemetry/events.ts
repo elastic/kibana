@@ -6,20 +6,18 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/server';
+import type { WorkflowTemplateOrigin } from '@kbn/workflows';
 
 import type { LibraryErrorType } from '../classify_library_error';
-import type { LibraryFailure, LibrarySourceMode } from '../library_cache';
+import type { LibraryFetchErrorReason } from '../errors';
+import type { LibraryFailureReason, LibraryOperation, LibrarySourceMode } from '../library_cache';
 
 export const TEMPLATE_INSTALLED_EVENT_TYPE = 'workflows_template_installed';
 export const LIBRARY_CATALOG_FAILED_EVENT_TYPE = 'workflows_library_catalog_failed';
-export const TEMPLATE_LOAD_FAILED_EVENT_TYPE = 'workflows_template_load_failed';
-
-/** Where the installed template came from: the catalog (Install) or an uploaded file (Import template). */
-export type TemplateInstallSource = 'catalog' | 'file';
 
 export interface TemplateInstalledEvent {
   success: boolean;
-  source: TemplateInstallSource;
+  templateOrigin: WorkflowTemplateOrigin;
   sourceMode: LibrarySourceMode;
   templateSlug?: string;
   templateVersion?: string;
@@ -27,39 +25,46 @@ export interface TemplateInstalledEvent {
   formFieldCount?: number;
   requiredConnectorTypes?: string[];
   workflowId?: string;
+  workflowValid?: boolean;
   errorType?: LibraryErrorType;
+  fetchErrorReason?: LibraryFetchErrorReason;
   invalidFields?: string[];
 }
 
-export type LibraryCatalogFailedEvent = LibraryFailure;
-
-export interface TemplateLoadFailedEvent {
-  reason: 'not_found' | 'fetch_error';
+export interface LibraryCatalogFailedEvent {
+  operation: LibraryOperation;
+  fetchErrorReason: LibraryFailureReason;
+  sourceMode: LibrarySourceMode;
   templateSlug?: string;
 }
+
+const SOURCE_MODE_DESCRIPTION =
+  'How the library reads its catalog: `http` (registry) or `bundle` (local files)';
+
+const FETCH_ERROR_REASONS =
+  'http-error, connection, timeout, malformed, integrity, too-large or unavailable';
 
 const templateInstalledSchema: RootSchema<TemplateInstalledEvent> = {
   success: {
     type: 'boolean',
     _meta: { description: 'Whether the workflow was created from the template' },
   },
-  source: {
+  templateOrigin: {
     type: 'keyword',
     _meta: {
-      description: 'Where the template came from: `catalog` (Install) or `file` (Import template)',
+      description:
+        'How the workflow was created from the template: install (setup form), import (template file upload), or remix (Remix with AI)',
     },
   },
   sourceMode: {
     type: 'keyword',
-    _meta: {
-      description: 'How the library reads its catalog: `http` (registry) or `bundle` (local files)',
-    },
+    _meta: { description: SOURCE_MODE_DESCRIPTION },
   },
   templateSlug: {
     type: 'keyword',
     _meta: {
       description:
-        'Catalog slug of the template; `custom` when it is not in the catalog, `unresolved` when no catalog was available to check it. Absent until the template is read.',
+        'Workflow Template library slug, the same one stored on the workflow: `custom` for a template outside the catalog, `unresolved` when no catalog was available to check it. Absent until the template is read.',
       optional: true,
     },
   },
@@ -84,16 +89,19 @@ const templateInstalledSchema: RootSchema<TemplateInstalledEvent> = {
   },
   formFieldCount: {
     type: 'integer',
-    _meta: { description: 'Number of fields in the template install form', optional: true },
+    _meta: {
+      description: 'Number of fields in the template install form (install and import only)',
+      optional: true,
+    },
   },
   requiredConnectorTypes: {
     type: 'array',
     items: {
       type: 'keyword',
-      _meta: { description: 'Connector type a catalog template install form asks for' },
+      _meta: { description: 'Connector type the catalog template install form asks for' },
     },
     _meta: {
-      description: 'Connector types the install form asks for (catalog templates only)',
+      description: 'Connector types the install form asks for (install only)',
       optional: true,
     },
   },
@@ -101,11 +109,26 @@ const templateInstalledSchema: RootSchema<TemplateInstalledEvent> = {
     type: 'keyword',
     _meta: { description: 'ID of the created workflow, on success', optional: true },
   },
+  workflowValid: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'On success, whether the created workflow passed validation. An invalid workflow is still created, with `valid: false`, and cannot run until fixed.',
+      optional: true,
+    },
+  },
   errorType: {
     type: 'keyword',
     _meta: {
       description:
-        'Why the install failed: form_validation, missing_form_field, template_parse, workflow_invalid, template_not_found, catalog_unavailable, library_disabled or unknown',
+        'Why it failed: form_validation, missing_form_field, template_parse, workflow_invalid, template_not_found, fetch_failed (the catalog or the template body failed to load), library_disabled or unknown',
+      optional: true,
+    },
+  },
+  fetchErrorReason: {
+    type: 'keyword',
+    _meta: {
+      description: `Why the catalog or the template body failed to load, when errorType is fetch_failed: ${FETCH_ERROR_REASONS}`,
       optional: true,
     },
   },
@@ -117,7 +140,7 @@ const templateInstalledSchema: RootSchema<TemplateInstalledEvent> = {
     },
     _meta: {
       description:
-        'Install form field names (never values) that failed validation or are missing from the form (catalog templates only)',
+        'Install form field names (never values) that failed validation or are missing from the form (install only)',
       optional: true,
     },
   },
@@ -128,33 +151,18 @@ const libraryCatalogFailedSchema: RootSchema<LibraryCatalogFailedEvent> = {
     type: 'keyword',
     _meta: { description: 'What failed to load: `catalog` or `template` (a template body)' },
   },
-  reason: {
+  fetchErrorReason: {
     type: 'keyword',
-    _meta: {
-      description:
-        'Why it failed: http-error, connection, timeout, malformed, integrity, too-large, unavailable or unknown',
-    },
+    _meta: { description: `Why it failed: ${FETCH_ERROR_REASONS}, or unknown` },
   },
   sourceMode: {
     type: 'keyword',
-    _meta: {
-      description: 'How the library reads its catalog: `http` (registry) or `bundle` (local files)',
-    },
-  },
-};
-
-const templateLoadFailedSchema: RootSchema<TemplateLoadFailedEvent> = {
-  reason: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'Why the template could not be shown: `not_found` (no such slug) or `fetch_error` (the catalog or template body failed to load)',
-    },
+    _meta: { description: SOURCE_MODE_DESCRIPTION },
   },
   templateSlug: {
     type: 'keyword',
     _meta: {
-      description: 'Catalog slug of the template, sent only when it is in the catalog',
+      description: 'Catalog slug of the template whose body failed to load (operation `template`)',
       optional: true,
     },
   },
@@ -171,9 +179,5 @@ export const registerLibraryEventTypes = (
   analytics.registerEventType<LibraryCatalogFailedEvent>({
     eventType: LIBRARY_CATALOG_FAILED_EVENT_TYPE,
     schema: libraryCatalogFailedSchema,
-  });
-  analytics.registerEventType<TemplateLoadFailedEvent>({
-    eventType: TEMPLATE_LOAD_FAILED_EVENT_TYPE,
-    schema: templateLoadFailedSchema,
   });
 };

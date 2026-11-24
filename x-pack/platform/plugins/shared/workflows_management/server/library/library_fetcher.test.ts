@@ -573,7 +573,6 @@ describe('LibraryFetcher failure notifications', () => {
     expect(onFailure).toHaveBeenCalledWith({
       operation: 'catalog',
       reason: 'http-error',
-      sourceMode: 'http',
     });
 
     queueRefresh(sampleManifest, sampleCatalog());
@@ -599,7 +598,7 @@ describe('LibraryFetcher failure notifications', () => {
     expect(onFailure).toHaveBeenCalledWith({
       operation: 'template',
       reason: 'http-error',
-      sourceMode: 'http',
+      templateSlug: 'demo',
     });
   });
 

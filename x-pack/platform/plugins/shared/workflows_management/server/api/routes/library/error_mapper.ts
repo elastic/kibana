@@ -59,7 +59,7 @@ export function mapLibraryError(response: KibanaResponseFactory, error: unknown)
     case 'template_not_found':
       return response.notFound({ body: { message: classified.error.message } });
 
-    case 'catalog_unavailable':
+    case 'fetch_failed':
       // 'unavailable' and 'connection' both mean "upstream not reachable / not
       // ready"; surface as 503 so callers can retry.
       // 'http-error' and 'malformed' mean the upstream gave us something

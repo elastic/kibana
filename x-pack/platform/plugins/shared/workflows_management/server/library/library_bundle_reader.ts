@@ -99,11 +99,11 @@ export class LibraryBundleReader extends LibrarySource {
     try {
       body = await this.readTemplateBody(row);
     } catch (err) {
-      this.cache.markTemplateLoadFailure(err);
+      this.cache.markTemplateLoadFailure(slug, err);
       throw err;
     }
     this.cache.setBody(slug, body);
-    this.cache.markTemplateLoadSuccess();
+    this.cache.markTemplateLoadSuccess(slug);
     return body;
   }
 

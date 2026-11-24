@@ -412,7 +412,6 @@ describe('LibraryBundleReader', () => {
       expect(onFailure).toHaveBeenCalledWith({
         operation: 'catalog',
         reason: 'unavailable',
-        sourceMode: 'bundle',
       });
     });
 
@@ -428,7 +427,7 @@ describe('LibraryBundleReader', () => {
       expect(onFailure).toHaveBeenCalledWith({
         operation: 'template',
         reason: 'unavailable',
-        sourceMode: 'bundle',
+        templateSlug: 'demo',
       });
     });
   });
