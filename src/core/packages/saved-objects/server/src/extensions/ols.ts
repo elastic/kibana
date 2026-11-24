@@ -58,15 +58,19 @@ export interface ISavedObjectsOlsExtension {
 
   /**
    * Returns one query clause per type with an access policy, built for the given spaces and keyed
-   * by type. Types without a policy have no entry and need no clause.
+   * by type. The result has an entry for every requested type with an access policy. Types without
+   * a policy have no entry and need no clause. A missing entry for a type with a policy is a
+   * provider bug: Core must fail the request, never read it as allowed.
    */
   getReadFilters(params: {
     namespacesByType: Map<string, string[]>;
   }): Promise<Map<string, estypes.QueryDslQueryContainer>>;
 
   /**
-   * Decides an operation for each object, keyed by {@link getOlsObjectKey}. Objects of types
-   * without an access policy have no entry, which means allowed.
+   * Decides an operation for each object, keyed by {@link getOlsObjectKey}. The result has an entry
+   * for every requested object of a type with an access policy. Objects of types without a policy
+   * have no entry, which means allowed. A missing entry for an object of a type with a policy is a
+   * provider bug: Core must fail the request, never read it as allowed.
    */
   authorizeObjects(params: {
     operation: OlsRepositoryOperation;

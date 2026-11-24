@@ -13,12 +13,10 @@ import type { Principal } from '../principals';
 /**
  * A stored change that a principal can't fully use yet, returned with a successful ACL change.
  * The change applies as soon as the principal gets the feature privileges it needs.
- *
- * - `entry`: a grant to a principal who lacks the feature privileges of its access.
- * - `owner`: a new owner who lacks the feature privileges to manage access or transfer the object.
  */
 export type AclWarning =
   | {
+      /** A grant whose recipient lacks the feature privileges of its access. */
       target: 'entry';
       /** The recipient of the grant. */
       principal: Principal;
@@ -28,6 +26,10 @@ export type AclWarning =
       reason: 'missing_feature_privileges';
     }
   | {
+      /**
+       * A new owner who lacks the feature privileges of the `view` and `edit` operations, which
+       * managing access and transferring the object need.
+       */
       target: 'owner';
       /** The new owner. */
       principal: Principal;
