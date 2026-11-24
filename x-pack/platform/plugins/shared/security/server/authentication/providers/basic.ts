@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import type { AuthenticationOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
@@ -93,16 +94,23 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Performs request authentication using Basic HTTP Authentication.
+   * Authenticates the request with the Basic credentials stored in its session.
+   * During session renewal, ignore the expired token that Core put in the Authorization header.
+   * Use the supplied session and contact Elasticsearch, even on minimal-authentication routes.
+   * The request headers stay unchanged.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+  public async authenticate(
+    request: KibanaRequest,
+    state?: ProviderState | null,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
 
-    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+    if (!options?.reauthenticate && HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
