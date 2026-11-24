@@ -689,6 +689,100 @@ describe('ProcessorEditor', () => {
     });
   });
 
+  // The actions stay in view on a long form, so what a submit reports can be scrolled out of it.
+  describe('bringing what a submit reports into view', () => {
+    const scrollIntoView = jest.fn();
+    const original = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView');
+
+    /** The elements scrolled into view, in order. */
+    const scrolledElements = () => scrollIntoView.mock.contexts as Element[];
+
+    beforeEach(() => {
+      scrollIntoView.mockReset();
+      // jsdom does not implement it.
+      Object.defineProperty(Element.prototype, 'scrollIntoView', {
+        configurable: true,
+        writable: true,
+        value: scrollIntoView,
+      });
+    });
+
+    afterEach(() => {
+      if (original) {
+        Object.defineProperty(Element.prototype, 'scrollIntoView', original);
+      } else {
+        Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+      }
+    });
+
+    it('scrolls to the first field the client validation rejects', async () => {
+      renderEditor();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+      expect(scrolledElements()[0].getAttribute('aria-invalid')).toBe('true');
+    });
+
+    it.each([
+      [
+        'a rejection',
+        'streamsProcessingFlyoutEditorDiagnostics',
+        jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [{ severity: 'error', code: 'E030', message: 'not allowed here' }],
+        }),
+      ],
+      [
+        'warnings',
+        'streamsProcessingFlyoutEditorWarnings',
+        jest.fn().mockResolvedValue({
+          valid: true,
+          diagnostics: [{ severity: 'warning', code: 'W001', message: 'This field is deprecated' }],
+        }),
+      ],
+      [
+        'a failed check',
+        'streamsProcessingFlyoutEditorCheckFailed',
+        jest.fn().mockRejectedValue(httpError(500, 'Something broke')),
+      ],
+    ])('scrolls to %s from the configuration service', async (_, calloutTestSubj, fetchCheck) => {
+      renderEditor({ fetchCheck });
+      fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+      const callout = await screen.findByTestId(calloutTestSubj);
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+      expect(scrolledElements()[0].contains(callout)).toBe(true);
+    });
+
+    it('does not scroll when the processor commits', async () => {
+      const { onCommit } = renderEditor();
+      fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+      await waitFor(() => expect(onCommit).toHaveBeenCalled());
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it('does not scroll again when a rejected processor is edited', async () => {
+      renderEditor({
+        fetchCheck: jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [{ severity: 'error', code: 'E030', message: 'not allowed here' }],
+        }),
+      });
+      fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+
+      fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
+        target: { value: 'platform' },
+      });
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('deletes an existing processor once confirmed', async () => {
     mockOpenConfirm.mockResolvedValue(true);
     const onDelete = jest.fn();
