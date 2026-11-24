@@ -14,6 +14,7 @@ import {
   SecretsUnavailableError,
 } from '@kbn/secrets';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { createAuditedSecretsClient } from './audit/audited_secrets_client';
 import { createConnectorSecretProvider } from './providers/connector_secret_provider';
 import { createConnectorSecretReaders } from './providers/connector_secret_readers';
 import { registerSecretType, SECRET_SAVED_OBJECT_TYPE } from './saved_objects/secret_saved_object';
@@ -79,7 +80,7 @@ export class SecretsPlugin
           );
         }
         const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        return createSecretsClient({
+        const client = createSecretsClient({
           storage: createSavedObjectsSecretsStorage({
             spaceId,
             savedObjectsClient,
@@ -98,6 +99,12 @@ export class SecretsPlugin
                 })
               : undefined,
           },
+        });
+        return createAuditedSecretsClient({
+          client,
+          auditLogger: core.security.audit.asScoped(request),
+          consumer,
+          spaceId,
         });
       },
     };
