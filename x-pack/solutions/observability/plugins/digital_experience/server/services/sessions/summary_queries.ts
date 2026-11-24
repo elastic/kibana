@@ -24,26 +24,37 @@ import {
 import {
   BROWSER_SDK_LANGUAGE,
   CLICK_EVENTS,
+  EVENT_DEAD_CLICK,
+  EVENT_ERROR_CLICK,
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
+  EVENT_RAGE_CLICK,
   EVENT_WEB_VITAL,
+  FRUSTRATION_EVENTS,
   OTEL_SPAN_NAME,
   PAGE_VIEW_EVENTS,
   SPAN_KIND_CLIENT,
   SPAN_STATUS_ERROR,
 } from '../../../common/otel_data';
-import { SESSIONS_JOURNEY_URL_CANDIDATES, SESSIONS_SOURCE_INDICES } from '../../../common/sessions';
+import {
+  SESSIONS_FRUSTRATION_URL_CANDIDATES,
+  SESSIONS_FRUSTRATION_VALUES,
+  SESSIONS_JOURNEY_URL_CANDIDATES,
+  SESSIONS_SOURCE_INDICES,
+} from '../../../common/sessions';
 import {
   SESSION_ATTRIBUTE_FIELDS,
   type SessionAttribute,
 } from '../../../common/session_attribute_fields';
 import {
+  SOURCE_CSS_SELECTOR_FIELD,
+  SOURCE_LOAD_EVENT_END_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
   SOURCE_WEB_VITAL_NAME_FIELD,
   SOURCE_WEB_VITAL_VALUE_FIELD,
-} from '../../lib/otel/source_fields';
+} from '../../../common/otel_source_fields';
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import { HASH_SPACE, hashPrefix, type HashRange } from './hash_ranges';
 
@@ -80,7 +91,10 @@ export const SESSION_ATTRIBUTE_GROUPS = {
   environment: ['environment'],
   user: ['user'],
   user_agent: ['browser', 'browserVersion', 'os', 'device'],
+  // Own group: an event with only this flag would otherwise blank the browser and OS.
+  mobile: ['mobile'],
   geo: ['countryIso', 'region', 'city'],
+  app: ['appVersion'],
 } as const satisfies Record<string, readonly SessionAttribute[]>;
 
 /** The `FROM` and `WHERE` of a platform's events, from `?from` up to `?to`. */
@@ -283,22 +297,32 @@ const SESSION_STATS: Stat[] = [
   ['page_load_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_NAVIGATION_TIMING)}`],
   ['click_count', 'COUNT(*) WHERE is_click'],
   ['js_error_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_EXCEPTION)}`],
+  ['rage_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_RAGE_CLICK)}`],
+  ['dead_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_DEAD_CLICK)}`],
+  ['error_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_ERROR_CLICK)}`],
+  ['frustration_count', 'COUNT(*) WHERE is_frustration'],
   ...HTTP_REQUEST_STATS,
   ...ATTRIBUTE_STATS,
 ];
 
+const FRUSTRATION_FILTER = `${OTEL_EVENT_NAME} IN (${texts(FRUSTRATION_EVENTS)})`;
+
 const VITAL_STATS: Stat[] = CORE_WEB_VITALS.flatMap(vitalStatsOf);
 
-// A session without a web vital has no row in the vitals branch.
-const VITAL_COUNT_EVALS = VITAL_STATS.flatMap(([column, aggregation]) =>
+const LOAD_TIME_STATS: Stat[] = [
+  ['load_time_p75', 'PERCENTILE(load_time, 75)'],
+  ['load_time_samples', 'COUNT(load_time)'],
+];
+
+// A session without a web vital or a timed page load has no row in that branch.
+const BRANCH_COUNT_EVALS = [...VITAL_STATS, ...LOAD_TIME_STATS].flatMap(([column, aggregation]) =>
   aggregation.startsWith('COUNT(') ? [`${column} = COALESCE(${column}, 0)`] : []
 );
 
 // Only one branch has each of these columns, so its row is the only non-null value.
-const MERGED_STATS: Stat[] = [...SESSION_STATS, ...VITAL_STATS].map(([column]) => [
-  column,
-  `MAX(${column})`,
-]);
+const MERGED_STATS: Stat[] = [...SESSION_STATS, ...VITAL_STATS, ...LOAD_TIME_STATS].map(
+  ([column]) => [column, `MAX(${column})`]
+);
 
 // The branch filters are on the source fields: the COALESCE of `event` and `span` keeps Lucene
 // from applying them.
@@ -310,6 +334,10 @@ const WEB_VITAL_FILTER = `(${OTEL_EVENT_NAME} == ${escapeStringValue(
 )} OR ${OTEL_SPAN_NAME} == ${escapeStringValue(
   EVENT_WEB_VITAL
 )}) AND ${SOURCE_WEB_VITAL_VALUE_FIELD} IS NOT NULL`;
+// Page loads without a load event are counted but have no load time, as in the Overview.
+const LOAD_TIME_FILTER = `${OTEL_EVENT_NAME} == ${escapeStringValue(
+  EVENT_NAVIGATION_TIMING
+)} AND ${SOURCE_LOAD_EVENT_END_FIELD} IS NOT NULL`;
 
 export const renderStats = (stats: readonly Stat[], indent: string): string =>
   stats.map(([column, aggregation]) => `${column} = ${aggregation}`).join(`,\n${indent}`);
@@ -329,9 +357,9 @@ export type SummaryQueryOf = (
 
 /**
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
- * times, latest attributes and web vitals, and its journey. One branch aggregates per session, one
- * the first and last view of each page and one the web vitals, which the last stage merges per
- * session. Counts what the applications list counts, with the same event names and request
+ * times, latest attributes, web vitals and load time, and its journey. One branch aggregates per
+ * session, one the first and last view of each page, one the web vitals and one the load time,
+ * which the last stage merges per session. Counts what the applications list counts, with the same event names and request
  * outcomes. Design: "Summary query" in the plugin README; measurements: `query_performance.md`.
  */
 export const sessionSummaryQuery: SummaryQueryOf = (
@@ -345,10 +373,17 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
 | EVAL event = COALESCE(${OTEL_EVENT_NAME}, ""), span = COALESCE(${OTEL_SPAN_NAME}, "")
 | EVAL is_page_view = event IN (${texts(PAGE_VIEW_EVENTS)}) OR span IN (${texts(PAGE_VIEW_EVENTS)}),
        is_click = event IN (${texts(CLICK_EVENTS)}) OR span IN (${texts(CLICK_EVENTS)}),
+       is_frustration = event IN (${texts(FRUSTRATION_EVENTS)}),
        ${HTTP_REQUEST_EVALS},
        ${SEEN_EVALS.join(',\n       ')}
 | FORK (STATS ${renderStats(SESSION_STATS, '              ')}
           BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
+       (WHERE ${FRUSTRATION_FILTER} AND ${SOURCE_CSS_SELECTOR_FIELD} IS NOT NULL
+        | STATS target_signals = COUNT(*)
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, target = ${SOURCE_CSS_SELECTOR_FIELD})
+       (WHERE ${FRUSTRATION_FILTER} AND ${SOURCE_URL_FIELD} IS NOT NULL
+        | STATS url_signals = COUNT(*)
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, frustration_url = ${SOURCE_URL_FIELD})
        (WHERE ${PAGE_VIEW_FILTER}
         | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
             BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}, page_url = ${SOURCE_URL_FIELD})
@@ -357,12 +392,18 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
         | EVAL ${VITAL_EVALS.join(', ')}
         | STATS ${renderStats(VITAL_STATS, '                ')}
             BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
+       (WHERE ${LOAD_TIME_FILTER}
+        | EVAL load_time = TO_DOUBLE(${SOURCE_LOAD_EVENT_END_FIELD})
+        | STATS ${renderStats(LOAD_TIME_STATS, '                ')}
+            BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
 | STATS ${renderStats(MERGED_STATS, '        ')},
+        frustration_targets = TOP(target_signals, ${SESSIONS_FRUSTRATION_VALUES}, "desc", target) WHERE target IS NOT NULL,
+        frustration_urls = TOP(url_signals, ${SESSIONS_FRUSTRATION_URL_CANDIDATES}, "desc", frustration_url) WHERE frustration_url IS NOT NULL,
         pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc", page_url) WHERE page_url IS NOT NULL,
         exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
   BY service, session
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}
-| EVAL ${VITAL_COUNT_EVALS.join(', ')}
+| EVAL ${BRANCH_COUNT_EVALS.join(', ')}
 | DROP ${RAW_PREFIX}*
 | LIMIT ${maxRows}`,
   params: [{ rebuild_from: rebuildFrom }, { changed_to: changedTo }],

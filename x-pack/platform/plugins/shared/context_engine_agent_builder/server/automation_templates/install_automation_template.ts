@@ -10,24 +10,25 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
-import { assertContextEngineWriteAccess } from '../agent_builder/assert_context_engine_write_access';
-import {
-  parseWorkflowNameFromYaml,
-  saveWorkflowToAiIndex,
-  type SaveAutomationResult,
-} from '../agent_builder/tools/save_automation/handler';
 import {
   AUTOMATION_TEMPLATE_TAGS,
   renderDocumentOrchestrationTemplate,
   renderIndexMetadataTemplate,
   renderTargetedKiWriterTemplate,
   renderUnitProfileTemplate,
+  setWorkflowName,
   type AutomationTemplateId,
   type DocumentOrchestrationTemplateValues,
   type IndexMetadataTemplateValues,
   type TargetedKiWriterTemplateValues,
   type UnitProfileTemplateValues,
-} from '../agent_builder/tools/install_automation_template/render';
+} from '@kbn/context-engine-plugin/server/automation_templates/render';
+import { assertContextEngineWriteAccess } from '../agent_builder/assert_context_engine_write_access';
+import {
+  parseWorkflowNameFromYaml,
+  saveWorkflowToAiIndex,
+  type SaveAutomationResult,
+} from '../agent_builder/tools/save_automation/handler';
 import { InvalidTemplateParamsError } from '../errors';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -99,7 +100,7 @@ export const renderAutomationTemplate = (
   } catch (error) {
     throw new InvalidTemplateParamsError(error instanceof Error ? error.message : String(error));
   }
-  return yaml.replace(/^name: .*/m, `name: ${JSON.stringify(params.name)}`);
+  return setWorkflowName(yaml, params.name);
 };
 
 /**
