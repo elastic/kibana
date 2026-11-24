@@ -33,6 +33,14 @@ describe('riskEngineCleanupRoute', () => {
       path: RISK_ENGINE_CLEANUP_URL,
     });
 
+  const privilegeCheck = (granted: boolean) => ({
+    username: 'test-user',
+    has_all_requested: granted,
+    cluster: {},
+    index: {},
+    application: {},
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
@@ -41,9 +49,9 @@ describe('riskEngineCleanupRoute', () => {
     context = requestContextMock.convertContext(tools.context);
     clients.riskScoreDataClient.tearDown.mockResolvedValue([]);
     (deleteSavedObjects as jest.Mock).mockResolvedValue(undefined);
-    clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-      has_all_requested: true,
-    });
+    clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
+      privilegeCheck(true)
+    );
     clients.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue({
       version_conflicts: 0,
       failures: [],
@@ -141,9 +149,9 @@ describe('riskEngineCleanupRoute', () => {
   });
 
   it('does not stop scoring when the caller cannot write entity documents', async () => {
-    clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-      has_all_requested: false,
-    });
+    clients.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
+      privilegeCheck(false)
+    );
 
     const response = await server.inject(buildRequest(), context);
 
@@ -170,7 +178,14 @@ describe('riskEngineCleanupRoute', () => {
   it('does not report success when the entity risk update returns failures', async () => {
     clients.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue({
       version_conflicts: 0,
-      failures: [{ id: 'entity-1' }],
+      failures: [
+        {
+          cause: { type: 'version_conflict_engine_exception', reason: 'conflict' },
+          id: 'entity-1',
+          index: 'entities-latest-default',
+          status: 409,
+        },
+      ],
       timed_out: false,
     });
 
