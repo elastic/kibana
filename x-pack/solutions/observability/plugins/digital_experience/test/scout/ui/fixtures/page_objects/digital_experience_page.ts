@@ -56,6 +56,7 @@ export class DigitalExperiencePage {
   public readonly networkHttpRequests: Locator;
   public readonly networkSlowestResources: Locator;
   public readonly otelOverviewTopClicks: Locator;
+  public readonly otelOverviewFrustration: Locator;
   public readonly overviewClearFilters: Locator;
   public readonly overviewAllFilters: Locator;
   public readonly overviewFiltersFlyout: Locator;
@@ -73,6 +74,7 @@ export class DigitalExperiencePage {
   public readonly sessionsTable: EuiBasicTableObject;
   public readonly sessionsSearch: Locator;
   public readonly sessionsJsErrorsFilter: Locator;
+  public readonly sessionsFrustrationFilter: Locator;
   public readonly sessionsClearFilters: Locator;
   public readonly sessionsKpis: Locator;
   public readonly sessionsEmpty: Locator;
@@ -128,6 +130,7 @@ export class DigitalExperiencePage {
     this.networkHttpRequests = page.getByTestId('digitalExperienceNetworkHttpRequests');
     this.networkSlowestResources = page.getByTestId('digitalExperienceNetworkSlowestResources');
     this.otelOverviewTopClicks = page.getByTestId('digitalExperienceOverviewTopClicks');
+    this.otelOverviewFrustration = page.getByTestId('digitalExperienceOverviewFrustration');
     this.overviewClearFilters = page.getByTestId('digitalExperienceOverviewClearFilters');
     this.overviewAllFilters = page.getByTestId('digitalExperienceOverviewAllFilters');
     this.overviewFiltersFlyout = page.getByTestId('digitalExperienceOverviewFiltersFlyout');
@@ -146,6 +149,7 @@ export class DigitalExperiencePage {
     this.sessionsTable = page.components.basicTable('digitalExperienceSessionsTable');
     this.sessionsSearch = page.getByTestId('digitalExperienceSessionsSearch');
     this.sessionsJsErrorsFilter = page.getByTestId('digitalExperienceSessionsJsErrorsFilter');
+    this.sessionsFrustrationFilter = page.getByTestId('digitalExperienceSessionsFrustrationFilter');
     this.sessionsClearFilters = page.getByTestId('digitalExperienceSessionsClearFilters');
     this.sessionsKpis = page.getByTestId('digitalExperienceSessionsKpis');
     this.sessionsEmpty = page.getByTestId('digitalExperienceSessionsEmpty');
@@ -378,6 +382,16 @@ export class DigitalExperiencePage {
     await this.sourceList.selectOption(label);
   }
 
+  /** The row of an element in the Overview's Frustration panel, found by its CSS selector. */
+  frustrationRow(selector: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFrustrationRow-${selector}`);
+  }
+
+  /** The "Open sessions" link of an element's row in the Frustration panel. */
+  frustrationSessionsLink(selector: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFrustrationSessionsLink-${selector}`);
+  }
+
   sessionRow(sessionId: string): Locator {
     return this.page.getByTestId(`digitalExperienceSessionRow-${sessionId}`);
   }
@@ -391,6 +405,7 @@ export class DigitalExperiencePage {
       | 'total'
       | 'withJsErrors'
       | 'withFailedRequests'
+      | 'withFrustration'
       | 'medianDuration'
       | 'avgPageViews'
       | 'bounceRate'
