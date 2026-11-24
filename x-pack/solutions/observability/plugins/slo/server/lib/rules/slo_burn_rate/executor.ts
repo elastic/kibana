@@ -103,7 +103,14 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     // We only need the end timestamp to base all of queries on. The length of the time range
     // doesn't matter for our use case since we allow the user to customize the window sizes,
     const { dateEnd } = getTimeRange('1m');
-    const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
+    const alertLimit = alertsClient.getAlertLimitValue();
+    const { results, hasReachedLimit } = await evaluate(
+      esClient.asCurrentUser,
+      slo,
+      params,
+      new Date(dateEnd),
+      { maxResults: alertLimit }
+    );
 
     const suppressResults =
       params.dependencies && results.some((res) => res.shouldAlert)
@@ -119,9 +126,6 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         : [];
 
     if (results.length > 0) {
-      const alertLimit = alertsClient.getAlertLimitValue();
-      let hasReachedLimit = false;
-      let scheduledActionsCount = 0;
       for (const result of results) {
         const {
           instanceId,
@@ -151,12 +155,6 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         );
         if (shouldAlert) {
           const shouldSuppress = shouldSuppressInstanceId(suppressResults, instanceId);
-          if (scheduledActionsCount >= alertLimit) {
-            // need to set this so that warning is displayed in the UI and in the logs
-            hasReachedLimit = true;
-            break; // once limit is reached, we break out of the loop and don't schedule any more alerts
-          }
-
           const sloSummary = await getSloSummary(esClient.asCurrentUser, slo, instanceId);
 
           const reason = buildReason(
@@ -217,12 +215,12 @@ export const getRuleExecutor = (basePath: IBasePath) =>
           };
 
           alertsClient.setAlertData({ id: alertId, context });
-          scheduledActionsCount++;
         }
       }
-
-      alertsClient.setAlertLimitReached(hasReachedLimit);
     }
+
+    // The framework requires the limit to be reported once its value has been requested.
+    alertsClient.setAlertLimitReached(hasReachedLimit);
 
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
