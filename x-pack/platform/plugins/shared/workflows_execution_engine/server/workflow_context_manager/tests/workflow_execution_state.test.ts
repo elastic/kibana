@@ -539,6 +539,42 @@ describe('WorkflowExecutionState', () => {
       expect(underTest.getStepIo('io-step', 'output')).toEqual({ version: 2 });
     });
 
+    it('should requeue a failed flush and prefer newer in-flight IO on retry', async () => {
+      underTest.upsertStep({
+        id: 'io-step',
+        stepId: 'test-step-execution-id',
+        status: ExecutionStatus.RUNNING,
+      } as EsWorkflowStepExecution);
+      underTest.setStepIo('io-step', { output: { version: 1 } });
+
+      (stepExecutionRepository.bulkUpsert as jest.Mock).mockImplementationOnce(async () => {
+        underTest.upsertStep({
+          id: 'io-step',
+          status: ExecutionStatus.COMPLETED,
+        } as EsWorkflowStepExecution);
+        underTest.setStepIo('io-step', { output: { version: 2 } });
+        throw new Error('bulk upsert failed');
+      });
+
+      await expect(underTest.flushStepChanges()).rejects.toThrow('bulk upsert failed');
+
+      // Failed flush must not clear live IO; the newer write stays readable.
+      expect(underTest.getStepIo('io-step', 'output')).toEqual({ version: 2 });
+
+      (stepExecutionRepository.bulkUpsert as jest.Mock).mockResolvedValueOnce(undefined);
+      await underTest.flushStepChanges();
+
+      // Retry sends the restored pending changes with the in-flight write winning.
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenLastCalledWith([
+        expect.objectContaining({
+          id: 'io-step',
+          status: ExecutionStatus.COMPLETED,
+          output: { version: 2 },
+        }),
+      ]);
+      expect(underTest.getStepIo('io-step', 'output')).toBeUndefined();
+    });
+
     it('should flush step changes before a terminal workflow status', async () => {
       const callOrder: string[] = [];
       (stepExecutionRepository.bulkUpsert as jest.Mock).mockImplementation(async () => {
