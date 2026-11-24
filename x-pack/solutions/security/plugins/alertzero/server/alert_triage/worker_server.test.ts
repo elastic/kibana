@@ -8,7 +8,33 @@
 import { getTriageLoadAlertsStepDefinition } from '../step_types/alert_triage/alert_triage_steps';
 import { WORKER_SERVER_DEFINITIONS } from '../workers';
 import { createWorkerServerContextMock } from '../workers/worker_server_context.mock';
-import { TRIAGE_GROUPING_KILL_SWITCH, alertTriageServerDefinition } from './worker_server';
+import { getTriageMatchFpDecisionsStepDefinition } from '../step_types/alert_triage/match_fp_decisions_step';
+import { getTriageStoreFpDecisionsStepDefinition } from '../step_types/alert_triage/store_fp_decisions_step';
+import {
+  TRIAGE_DECISION_AUTO_CLOSE,
+  TRIAGE_GROUPING_KILL_SWITCH,
+  alertTriageServerDefinition,
+} from './worker_server';
+
+jest.mock('../step_types/alert_triage/store_fp_decisions_step', () => {
+  const actual = jest.requireActual('../step_types/alert_triage/store_fp_decisions_step');
+  return {
+    ...actual,
+    getTriageStoreFpDecisionsStepDefinition: jest.fn(
+      actual.getTriageStoreFpDecisionsStepDefinition
+    ),
+  };
+});
+
+jest.mock('../step_types/alert_triage/match_fp_decisions_step', () => {
+  const actual = jest.requireActual('../step_types/alert_triage/match_fp_decisions_step');
+  return {
+    ...actual,
+    getTriageMatchFpDecisionsStepDefinition: jest.fn(
+      actual.getTriageMatchFpDecisionsStepDefinition
+    ),
+  };
+});
 
 jest.mock('../step_types/alert_triage/alert_triage_steps', () => {
   const actual = jest.requireActual('../step_types/alert_triage/alert_triage_steps');
@@ -95,5 +121,23 @@ describe('alertTriageServerDefinition', () => {
     expect(() => loadAlertsDeps.getWorkflowsManagement()).toThrow(
       'Workflows management is not available'
     );
+  });
+
+  it('hands the decision steps the live auto-close mode, and an unknown value as off', async () => {
+    const mode = { value: 'shadow' };
+    const getFeatureFlag = jest.fn(({ key }: { key: string }) =>
+      key === TRIAGE_DECISION_AUTO_CLOSE.key ? mode.value : true
+    );
+    stepsFor(createWorkerServerContextMock({ getFeatureFlag } as never));
+    const [storeDeps] = jest.mocked(getTriageStoreFpDecisionsStepDefinition).mock.lastCall ?? [];
+    const [matchDeps] = jest.mocked(getTriageMatchFpDecisionsStepDefinition).mock.lastCall ?? [];
+    if (!storeDeps || !matchDeps) throw new Error('decision steps were not built');
+
+    await expect(storeDeps.getMode()).resolves.toBe('shadow');
+    mode.value = 'on';
+    await expect(matchDeps.getMode()).resolves.toBe('on');
+    mode.value = 'unexpected';
+    await expect(storeDeps.getMode()).resolves.toBe('off');
+    await expect(matchDeps.getMode()).resolves.toBe('off');
   });
 });

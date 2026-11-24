@@ -7,10 +7,10 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import { Subscription } from 'rxjs';
-import type { WorkerFeatureFlag } from './types';
+import type { WorkerFeatureFlag, WorkerFeatureFlagValue } from './types';
 
 export interface WorkerFeatureFlagValues {
-  get: <T extends boolean | string>(flag: WorkerFeatureFlag<T>) => T;
+  get: <T extends boolean | string>(flag: WorkerFeatureFlag<T>) => WorkerFeatureFlagValue<T>;
   followCoreFeatureFlags: (featureFlags: CoreStart['featureFlags']) => Subscription;
 }
 
@@ -32,7 +32,10 @@ export const createWorkerFeatureFlagValues = (
   const followedFlags = [...values].map(([key, fallback]) => ({ key, fallback }));
 
   return {
-    get: <T extends boolean | string>({ key, fallback }: WorkerFeatureFlag<T>): T => {
+    get: <T extends boolean | string>({
+      key,
+      fallback,
+    }: WorkerFeatureFlag<T>): WorkerFeatureFlagValue<T> => {
       const value = values.get(key);
       if (value === undefined) {
         throw new Error(`Feature flag ${key} is not declared by any AlertZero Worker`);
@@ -41,7 +44,7 @@ export const createWorkerFeatureFlagValues = (
         throw new Error(`Feature flag ${key} is declared as a ${typeof value} flag`);
       }
       // The value comes from the observable matching the declared fallback's type.
-      return value as T;
+      return value as WorkerFeatureFlagValue<T>;
     },
     followCoreFeatureFlags: (featureFlags) => {
       const subscription = new Subscription();

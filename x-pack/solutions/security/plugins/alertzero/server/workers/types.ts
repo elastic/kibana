@@ -21,6 +21,11 @@ export type WorkerStepDefinition = Parameters<
   WorkflowsExtensionsServerPluginSetup['registerStepDefinition']
 >[0];
 
+/** A flag value is any boolean or string at run time, whatever literal its fallback has. */
+export type WorkerFeatureFlagValue<T extends boolean | string> = T extends boolean
+  ? boolean
+  : string;
+
 export interface WorkerFeatureFlag<T extends boolean | string = boolean | string> {
   key: string;
   /** The value until the first flag value arrives, and wherever no flag provider exists. */
@@ -52,7 +57,9 @@ export interface WorkerServerContext {
    */
   assertStarted: () => void;
   /** The latest value of a declared flag. Throws for a flag no Worker declares. */
-  getFeatureFlag: <T extends boolean | string>(flag: WorkerFeatureFlag<T>) => T;
+  getFeatureFlag: <T extends boolean | string>(
+    flag: WorkerFeatureFlag<T>
+  ) => WorkerFeatureFlagValue<T>;
 }
 
 export interface WorkerServerDefinition {
