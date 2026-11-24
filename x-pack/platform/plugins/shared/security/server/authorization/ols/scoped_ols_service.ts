@@ -271,24 +271,27 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       ])
     );
 
-    // Recovery counts only with the login action, as in every other recovery check.
+    // Nothing counts without the login action in the space, neither an operation nor recovery, as
+    // in every other Kibana privilege check.
     const { privileges } = await this.params.authz
       .checkPrivilegesWithRequest(this.request)
       .atSpace(spaceId, {
         kibana: [
           ...new Set([
             ...[...operationActions.values()].flat(),
-            ...(enabled ? [recoveryAction, authzActions.login] : []),
+            ...(enabled ? [recoveryAction] : []),
+            authzActions.login,
           ]),
         ],
       });
     const granted = new Set(
       privileges.kibana.filter(({ authorized }) => authorized).map(({ privilege }) => privilege)
     );
+    const loggedIn = granted.has(authzActions.login);
 
     let decision: AclDecision;
     if (enabled) {
-      const recovery = granted.has(recoveryAction) && granted.has(authzActions.login);
+      const recovery = loggedIn && granted.has(recoveryAction);
       this.primeRecovery(type, [spaceId], recovery);
       decision = evaluateAcl({ policy, acl, principal: await this.getPrincipal(), recovery });
     } else {
@@ -309,7 +312,7 @@ export class ScopedOlsService implements ScopedOlsServiceContract {
       const actions = (RESERVED_OPERATIONS as readonly string[]).includes(operation)
         ? operationActions.get('edit')
         : operationActions.get(operation);
-      return !!actions && actions.every((action) => granted.has(action));
+      return loggedIn && !!actions && actions.every((action) => granted.has(action));
     };
     return {
       ...decision,

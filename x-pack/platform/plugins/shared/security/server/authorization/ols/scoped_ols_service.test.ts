@@ -513,18 +513,31 @@ describe('ScopedOlsService', () => {
       });
     });
 
-    it('reports no recovery without the login action', async () => {
-      asPrincipal(STRANGER);
+    it.each([
+      ['ownership', OWNER, PRIVATE_ACL],
+      ['a named grant', GRANTEE, SHARED_ACL],
+      ['general access', STRANGER, undefined],
+      ['recovery', STRANGER, PRIVATE_ACL],
+    ] as const)('allows nothing through %s without the login action', async (_, principal, acl) => {
+      asPrincipal(principal);
       grantedActions = new Set([...FEATURE_ACTIONS, RECOVERY_ACTION]);
 
-      const decision = await evaluate(PRIVATE_ACL);
+      const decision = await evaluate(acl);
 
+      expect(decision.operations.size).toBe(0);
       expect(decision.operationsViaRecovery.size).toBe(0);
-      expect(decision.operations.has('view')).toBe(false);
+    });
+
+    it('allows nothing without the login action while OLS is disabled', async () => {
+      grantedActions = new Set(FEATURE_ACTIONS);
+
+      const decision = await evaluate(PRIVATE_ACL, createOlsService({ enabled: false }));
+
+      expect(decision.operations.size).toBe(0);
     });
 
     it('drops operations the caller lacks feature privileges for', async () => {
-      grantedActions = new Set([VIEW_ACTION, USE_ACTION]);
+      grantedActions = new Set([VIEW_ACTION, USE_ACTION, LOGIN_ACTION]);
 
       const decision = await evaluate(PRIVATE_ACL);
 
@@ -533,7 +546,7 @@ describe('ScopedOlsService', () => {
     });
 
     it('requires the privileges of `edit` for access management and transfer', async () => {
-      grantedActions = new Set([VIEW_ACTION, USE_ACTION, EDIT_ACTION]);
+      grantedActions = new Set([VIEW_ACTION, USE_ACTION, EDIT_ACTION, LOGIN_ACTION]);
 
       const decision = await evaluate(PRIVATE_ACL);
 
@@ -565,7 +578,7 @@ describe('ScopedOlsService', () => {
     });
 
     it('ignores the ACL and recovery, and resolves no principal, when OLS is disabled', async () => {
-      grantedActions = new Set([VIEW_ACTION, USE_ACTION, RECOVERY_ACTION]);
+      grantedActions = new Set([VIEW_ACTION, USE_ACTION, RECOVERY_ACTION, LOGIN_ACTION]);
 
       const decision = await evaluate(PRIVATE_ACL, createOlsService({ enabled: false }));
 
@@ -574,7 +587,9 @@ describe('ScopedOlsService', () => {
       );
       expect([...decision.operations]).toEqual(['view', 'use']);
       expect(decision.operationsViaRecovery.size).toBe(0);
-      expect(checkPrivileges.atSpace).toHaveBeenCalledWith('default', { kibana: FEATURE_ACTIONS });
+      expect(checkPrivileges.atSpace).toHaveBeenCalledWith('default', {
+        kibana: [...FEATURE_ACTIONS, LOGIN_ACTION],
+      });
       expect(userProfiles.getCurrentProfileId).not.toHaveBeenCalled();
     });
 
@@ -586,7 +601,7 @@ describe('ScopedOlsService', () => {
           archive: { access: 'manage', privileges: { api: ['archive-widget'] } },
         },
       });
-      grantedActions = new Set([...FEATURE_ACTIONS, 'api:archive-widget']);
+      grantedActions = new Set([...FEATURE_ACTIONS, LOGIN_ACTION, 'api:archive-widget']);
 
       const decision = await evaluate(PRIVATE_ACL, createOlsService({ enabled: false }));
 
