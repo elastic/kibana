@@ -280,6 +280,79 @@ describe('MigrationWorkflowsTable', () => {
     });
   });
 
+  describe('details flyout navigation', () => {
+    const openFirstWorkflow = async () =>
+      fireEvent.click((await screen.findAllByTestId('workflowName'))[0]);
+
+    it('should go to the next workflow with the next button', async () => {
+      renderTable();
+      await openFirstWorkflow();
+
+      fireEvent.click(await screen.findByTestId('flyoutPrevNextNavNextButton'));
+
+      expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Enrich IOCs');
+    });
+
+    it('should go back to the previous workflow with the previous button', async () => {
+      renderTable();
+      await openFirstWorkflow();
+      fireEvent.click(await screen.findByTestId('flyoutPrevNextNavNextButton'));
+
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavPreviousButton'));
+
+      expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Phishing triage');
+    });
+
+    it('should not offer a previous workflow on the first one', async () => {
+      renderTable();
+      await openFirstWorkflow();
+
+      expect(await screen.findByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
+    });
+
+    it('should skip the workflows that failed', async () => {
+      mockWorkflows([
+        getWorkflow(),
+        getWorkflow({
+          id: 'item-failed',
+          original_workflow: {
+            id: 'story-failed',
+            vendor: 'tines',
+            title: 'Broken story',
+            data: '{}',
+            format: 'json',
+          },
+          status: 'failed',
+          translation_result: undefined,
+        }),
+        getWorkflow({
+          id: 'item-3',
+          original_workflow: {
+            id: 'story-3',
+            vendor: 'tines',
+            title: 'Enrich IOCs',
+            data: '{}',
+            format: 'json',
+          },
+        }),
+      ]);
+      renderTable();
+      await openFirstWorkflow();
+
+      fireEvent.click(await screen.findByTestId('flyoutPrevNextNavNextButton'));
+
+      expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Enrich IOCs');
+    });
+
+    it('should not offer a next workflow on the last one that did not fail', async () => {
+      renderTable();
+      await openFirstWorkflow();
+      fireEvent.click(await screen.findByTestId('flyoutPrevNextNavNextButton'));
+
+      expect(screen.getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
+    });
+  });
+
   describe('tooltips', () => {
     it('should show the full description when hovering the description', async () => {
       renderTable();

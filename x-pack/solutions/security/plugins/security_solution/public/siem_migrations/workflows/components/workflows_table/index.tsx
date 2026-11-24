@@ -33,6 +33,8 @@ import type { FilterOptionsBase } from '../../../common/types';
 import { useGetMigrationTranslationStats } from '../../service/hooks/use_get_migration_translation_stats';
 import { useGetMigrationWorkflows } from '../../service/hooks/use_get_migration_workflows';
 import type { WorkflowMigrationStats } from '../../types';
+import { useFlyoutPrevNextNav } from '../../../../common/flyout_prev_next_nav';
+import { isMigrationItemNavigableWithFlyout } from '../../../common/utils';
 import { WorkflowMigrationDetailsFlyout } from '../workflow_details_flyout';
 import { getWorkflowsTableColumns } from './columns';
 import { convertFilterOptions } from './convert_filter_options';
@@ -88,6 +90,13 @@ export const MigrationWorkflowsTable = React.memo<MigrationWorkflowsTableProps>(
       []
     );
     const closeWorkflowDetailsFlyout = useCallback(() => setOpenedWorkflowId(undefined), []);
+    // previous and next walk through the loaded page and skip the workflows without details
+    const navigation = useFlyoutPrevNextNav({
+      items: migrationWorkflows,
+      openedItemId: openedWorkflowId,
+      isNavigable: isMigrationItemNavigableWithFlyout,
+      onNavigate: openWorkflowDetailsFlyout,
+    });
     // the details are shown only while the workflow is part of the loaded page
     const openedWorkflow = useMemo(
       () => migrationWorkflows.find((workflow) => workflow.id === openedWorkflowId),
@@ -224,6 +233,7 @@ export const MigrationWorkflowsTable = React.memo<MigrationWorkflowsTableProps>(
                 <WorkflowMigrationDetailsFlyout
                   migrationWorkflow={openedWorkflow}
                   closeFlyout={closeWorkflowDetailsFlyout}
+                  navigation={navigation}
                 />
               )}
             </div>

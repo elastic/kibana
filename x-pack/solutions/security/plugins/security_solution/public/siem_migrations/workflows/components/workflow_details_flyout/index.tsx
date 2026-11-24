@@ -29,12 +29,16 @@ import {
   ScrollableFlyoutTabbedContent,
   TabContentPadding,
 } from '../../../common/components/details_flyout/utils';
+import type { FlyoutPrevNextNavigation } from '../../../../common/flyout_prev_next_nav';
+import { FlyoutPrevNextNav } from '../../../../common/flyout_prev_next_nav';
 import { UpdatedByLabel } from '../../../common/components/updated_by_label';
 import * as i18n from './translations';
 
 export interface WorkflowMigrationDetailsFlyoutProps {
   migrationWorkflow: WorkflowMigrationWorkflow;
   closeFlyout: () => void;
+  /** Goes to the previous and the next workflow of the table */
+  navigation: FlyoutPrevNextNavigation;
   size?: EuiFlyoutProps['size'];
 }
 
@@ -45,6 +49,7 @@ const SUMMARY_TAB_ID = 'summary';
 export const WorkflowMigrationDetailsFlyout = React.memo(function WorkflowMigrationDetailsFlyout({
   migrationWorkflow,
   closeFlyout,
+  navigation,
   size,
 }: WorkflowMigrationDetailsFlyoutProps) {
   const tabs = useMemo<EuiTabbedContentTab[]>(
@@ -82,11 +87,19 @@ export const WorkflowMigrationDetailsFlyout = React.memo(function WorkflowMigrat
     >
       <EuiFlyoutHeader>
         <EuiSpacer size="s" />
-        <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
-          <h2 id={titleId}>
-            {migrationWorkflow.elastic_workflow?.title || migrationWorkflow.original_workflow.title}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" direction="row">
+          <EuiFlexItem grow={false}>
+            <FlyoutPrevNextNav navigation={navigation} isDisabled={false} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
+              <h2 id={titleId}>
+                {migrationWorkflow.elastic_workflow?.title ||
+                  migrationWorkflow.original_workflow.title}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <UpdatedByLabel
           updatedBy={migrationWorkflow.updated_by ?? migrationWorkflow.created_by}

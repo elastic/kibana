@@ -9,7 +9,18 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { WorkflowMigrationWorkflow } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
 import { TestProviders } from '../../../../common/mock';
+import type { FlyoutPrevNextNavigation } from '../../../../common/flyout_prev_next_nav';
 import { WorkflowMigrationDetailsFlyout } from '.';
+
+const getNavigation = (
+  overrides: Partial<FlyoutPrevNextNavigation> = {}
+): FlyoutPrevNextNavigation => ({
+  hasNext: true,
+  hasPrevious: true,
+  goToNext: jest.fn(),
+  goToPrevious: jest.fn(),
+  ...overrides,
+});
 
 const getWorkflow = (overrides: Partial<WorkflowMigrationWorkflow> = {}) =>
   ({
@@ -37,6 +48,7 @@ const renderFlyout = (
     <WorkflowMigrationDetailsFlyout
       migrationWorkflow={getWorkflow()}
       closeFlyout={jest.fn()}
+      navigation={getNavigation()}
       {...props}
     />,
     { wrapper: TestProviders }
@@ -87,5 +99,37 @@ describe('WorkflowMigrationDetailsFlyout', () => {
     fireEvent.click(screen.getByTestId('detailsFlyoutCloseButton'));
 
     expect(closeFlyout).toHaveBeenCalled();
+  });
+
+  describe('navigation', () => {
+    it('should go to the next workflow when the next button is clicked', () => {
+      const navigation = getNavigation();
+      renderFlyout({ navigation });
+
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavNextButton'));
+
+      expect(navigation.goToNext).toHaveBeenCalled();
+    });
+
+    it('should go to the previous workflow when the previous button is clicked', () => {
+      const navigation = getNavigation();
+      renderFlyout({ navigation });
+
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavPreviousButton'));
+
+      expect(navigation.goToPrevious).toHaveBeenCalled();
+    });
+
+    it('should disable the previous button on the first workflow', () => {
+      renderFlyout({ navigation: getNavigation({ hasPrevious: false }) });
+
+      expect(screen.getByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
+    });
+
+    it('should disable the next button on the last workflow', () => {
+      renderFlyout({ navigation: getNavigation({ hasNext: false }) });
+
+      expect(screen.getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
+    });
   });
 });
