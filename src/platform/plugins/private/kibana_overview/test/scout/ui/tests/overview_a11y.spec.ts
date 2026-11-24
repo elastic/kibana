@@ -10,6 +10,7 @@
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ES_ARCHIVE, KBN_ARCHIVE } from '../constants';
+import { gotoOverviewApp } from '../helpers';
 
 test.describe('Kibana Overview - Accessibility (with data)', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
@@ -23,7 +24,7 @@ test.describe('Kibana Overview - Accessibility (with data)', { tag: tags.statefu
 
   test('overview page has no accessibility violations', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
 
     const appCards = page.locator('[data-test-subj^="kbnOverviewAppCard-"]');
     await expect(appCards).not.toHaveCount(0);

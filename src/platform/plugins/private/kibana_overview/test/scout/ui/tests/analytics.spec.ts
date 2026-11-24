@@ -10,6 +10,7 @@
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ES_ARCHIVE, KBN_ARCHIVE } from '../constants';
+import { gotoOverviewApp } from '../helpers';
 
 test.describe('Kibana Overview - Analytics Apps', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
@@ -23,7 +24,7 @@ test.describe('Kibana Overview - Analytics Apps', { tag: tags.stateful.classic }
 
   test('displays analytics app cards', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
 
     const appCards = page.locator('[data-test-subj^="kbnOverviewAppCard-"]');
     await expect(appCards).not.toHaveCount(0);
@@ -31,7 +32,7 @@ test.describe('Kibana Overview - Analytics Apps', { tag: tags.stateful.classic }
 
   test('click on a card navigates to the appropriate app', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
 
     const dashboardCard = page.testSubj.locator('kbnOverviewAppCard-dashboards');
     await expect(dashboardCard).toBeVisible();
