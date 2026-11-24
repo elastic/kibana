@@ -9,18 +9,18 @@ import type { ObjectType } from '@kbn/config-schema';
 import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
 import { EXTERNAL_SOURCE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
-import { importConfigMappings } from '../import_config_mappings';
-import { importConfigModelVersions } from './import_config_model_versions';
+import { externalSourceMappings } from '../external_source_mappings';
+import { externalSourceModelVersions } from './external_source_model_versions';
 
-const importConfigType: SavedObjectsType = {
+const externalSourceType: SavedObjectsType = {
   name: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   hidden: true,
   namespaceType: 'multiple-isolated',
-  mappings: importConfigMappings,
-  modelVersions: importConfigModelVersions,
+  mappings: externalSourceMappings,
+  modelVersions: externalSourceModelVersions,
 };
 
-const createImportConfigDocument = (overrides: Record<string, unknown> = {}): SavedObject => ({
+const createExternalSourceDocument = (overrides: Record<string, unknown> = {}): SavedObject => ({
   id: 'import-1',
   type: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
   attributes: {
@@ -43,16 +43,16 @@ const createImportConfigDocument = (overrides: Record<string, unknown> = {}): Sa
   references: [{ name: 'connector', type: 'action', id: 'connector-1' }],
 });
 
-describe('importConfigModelVersions', () => {
-  const migrator = createModelVersionTestMigrator({ type: importConfigType });
+describe('externalSourceModelVersions', () => {
+  const migrator = createModelVersionTestMigrator({ type: externalSourceType });
 
   it('defines model version 1 with no changes', () => {
-    expect(Object.keys(importConfigModelVersions)).toEqual(['1']);
-    expect(importConfigModelVersions['1']).toMatchObject({ changes: [] });
+    expect(Object.keys(externalSourceModelVersions)).toEqual(['1']);
+    expect(externalSourceModelVersions['1']).toMatchObject({ changes: [] });
   });
 
   it('keeps the document and its connector reference unchanged at version 1', () => {
-    const document = createImportConfigDocument();
+    const document = createExternalSourceDocument();
 
     const migrated = migrator.migrate({ document, fromVersion: 0, toVersion: 1 });
 
@@ -61,9 +61,9 @@ describe('importConfigModelVersions', () => {
   });
 
   it('drops attributes it does not know when read by an older version', () => {
-    const forwardCompatibility = importConfigModelVersions['1']?.schemas
+    const forwardCompatibility = externalSourceModelVersions['1']?.schemas
       ?.forwardCompatibility as ObjectType;
-    const { attributes } = createImportConfigDocument({ added_by_a_newer_version: 'value' });
+    const { attributes } = createExternalSourceDocument({ added_by_a_newer_version: 'value' });
 
     expect(forwardCompatibility.validate(attributes)).not.toHaveProperty(
       'added_by_a_newer_version'
@@ -71,16 +71,16 @@ describe('importConfigModelVersions', () => {
   });
 
   describe('create schema', () => {
-    const create = importConfigModelVersions['1']?.schemas?.create as ObjectType;
+    const create = externalSourceModelVersions['1']?.schemas?.create as ObjectType;
 
     it('accepts a valid import', () => {
-      const { attributes } = createImportConfigDocument();
+      const { attributes } = createExternalSourceDocument();
 
       expect(() => create.validate(attributes)).not.toThrow();
     });
 
     it('accepts an import with only a name in its metadata', () => {
-      const { attributes } = createImportConfigDocument({ metadata: { name: 'Minimal' } });
+      const { attributes } = createExternalSourceDocument({ metadata: { name: 'Minimal' } });
 
       expect(() => create.validate(attributes)).not.toThrow();
     });
@@ -103,7 +103,7 @@ describe('importConfigModelVersions', () => {
       ],
       ['a name over 256 characters', { metadata: { name: 'x'.repeat(257) } }],
     ])('rejects %s', (_, overrides) => {
-      const { attributes } = createImportConfigDocument(overrides);
+      const { attributes } = createExternalSourceDocument(overrides);
 
       expect(() => create.validate(attributes)).toThrow();
     });

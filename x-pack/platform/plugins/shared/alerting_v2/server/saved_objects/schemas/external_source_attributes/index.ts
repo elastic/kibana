@@ -6,9 +6,9 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { importConfigAttributesSchemaV1 } from './v1';
+import { externalSourceAttributesSchemaV1 } from './v1';
 
 /** Latest attributes shape, introduced by model version 1. */
-export type ImportConfigSavedObjectAttributes = TypeOf<typeof importConfigAttributesSchemaV1>;
+export type ExternalSourceSavedObjectAttributes = TypeOf<typeof externalSourceAttributesSchemaV1>;
 
-export { importConfigAttributesSchemaV1 };
+export { externalSourceAttributesSchemaV1 };

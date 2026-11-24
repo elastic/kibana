@@ -75,7 +75,7 @@ describe('registerFeaturePrivileges', () => {
     }
   });
 
-  it('grants write access to import configs on alerts `all` and read access on alerts `read`', () => {
+  it('grants write access to external sources on alerts `all` and read access on alerts `read`', () => {
     const alertsFeature = getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id);
 
     expect(alertsFeature.privileges?.all.savedObject).toEqual({

@@ -6,14 +6,14 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { importConfigAttributesSchemaV1 } from '../schemas/import_config_attributes';
+import { externalSourceAttributesSchemaV1 } from '../schemas/external_source_attributes';
 
-export const importConfigModelVersions: SavedObjectsModelVersionMap = {
+export const externalSourceModelVersions: SavedObjectsModelVersionMap = {
   '1': {
     changes: [],
     schemas: {
-      forwardCompatibility: importConfigAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
-      create: importConfigAttributesSchemaV1,
+      forwardCompatibility: externalSourceAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+      create: externalSourceAttributesSchemaV1,
     },
   },
 };

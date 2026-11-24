@@ -8,10 +8,10 @@
 import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
 
 /**
- * Mappings for the import config saved object.
- * For the full list of attributes, see ./schemas/import_config_attributes/v1.ts
+ * Mappings for the external source saved object.
+ * For the full list of attributes, see ./schemas/external_source_attributes/v1.ts
  */
-export const importConfigMappings: SavedObjectsTypeMappingDefinition = {
+export const externalSourceMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
     type: { type: 'keyword', ignore_above: 256 },

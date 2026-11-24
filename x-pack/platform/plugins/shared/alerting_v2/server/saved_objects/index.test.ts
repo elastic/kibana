@@ -16,8 +16,8 @@ import {
   registerSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
-import { importConfigMappings } from './import_config_mappings';
-import { importConfigModelVersions } from './model_versions';
+import { externalSourceMappings } from './external_source_mappings';
+import { externalSourceModelVersions } from './model_versions';
 
 describe('registerSavedObjects', () => {
   const createDeps = () => {
@@ -37,7 +37,7 @@ describe('registerSavedObjects', () => {
     };
   };
 
-  it('registers the rule, action policy, import config, API-key, and ESO types', () => {
+  it('registers the rule, action policy, external source, API-key, and ESO types', () => {
     const { logger, savedObjects, encryptedSavedObjects } = createDeps();
 
     registerSavedObjects({ savedObjects, encryptedSavedObjects, logger });
@@ -60,7 +60,7 @@ describe('registerSavedObjects', () => {
     );
   });
 
-  it('registers import configs as hidden, space-isolated and not importable', () => {
+  it('registers external sources as hidden, space-isolated and not importable', () => {
     const { logger, savedObjects, encryptedSavedObjects } = createDeps();
 
     registerSavedObjects({ savedObjects, encryptedSavedObjects, logger });
@@ -70,8 +70,8 @@ describe('registerSavedObjects', () => {
         name: EXTERNAL_SOURCE_SAVED_OBJECT_TYPE,
         hidden: true,
         namespaceType: 'multiple-isolated',
-        mappings: importConfigMappings,
-        modelVersions: importConfigModelVersions,
+        mappings: externalSourceMappings,
+        modelVersions: externalSourceModelVersions,
         management: expect.objectContaining({ importableAndExportable: false }),
       })
     );

@@ -31,7 +31,7 @@ const tagsSchema = schema.maybe(
  * There is no `enabled` attribute. Whether an import is on comes from the connector's
  * `is_inbound_events_enabled` setting.
  */
-export const importConfigAttributesSchemaV1 = schema.object({
+export const externalSourceAttributesSchemaV1 = schema.object({
   type: schema.string({ maxLength: 256 }),
   kind: schema.oneOf([schema.literal('alert'), schema.literal('signal')]),
   metadata: schema.object({
