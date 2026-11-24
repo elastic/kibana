@@ -725,6 +725,16 @@ describe('ScopedOlsService', () => {
           ordinarySpaces: [],
         })
       );
+      // With recovery in every space, the filter doesn't use the principal: the audit events do.
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      for (const [event] of auditLogger.log.mock.calls) {
+        expect(event).toEqual(
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'ols_admin_override' }),
+            user: { id: OWNER.id, entity: { type: 'user' } },
+          })
+        );
+      }
     });
 
     it('checks recovery globally for a search across all spaces', async () => {
