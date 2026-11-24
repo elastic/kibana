@@ -442,7 +442,13 @@ describe('useProposal', () => {
   describe('when a later revision loads', () => {
     const mockProposals = (proposals: Record<string, object>) => {
       const http = makeHttp();
-      http.get.mockImplementation(async (url: string) => proposals[url.split('/').pop() ?? '']);
+      http.get.mockImplementation(async (url: string) => {
+        const proposal = proposals[url.split('/').pop() ?? ''];
+        if (proposal instanceof Error) {
+          throw proposal;
+        }
+        return proposal;
+      });
       useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
         typeof useKibana
       >);
@@ -510,6 +516,36 @@ describe('useProposal', () => {
 
       const fetchesOfReplaced = http.get.mock.calls.filter(([url]) => url.endsWith('/p-1'));
       expect(fetchesOfReplaced).toHaveLength(1);
+    });
+
+    it('refetches an earlier revision whose card shows a load error, even if its old data reads as replaced', async () => {
+      const replaced = {
+        id: 'p-1',
+        rootProposalId: 'p-1',
+        revision: 1,
+        status: 'superseded',
+        supersededBy: 'p-2',
+      };
+      const proposals: Record<string, object> = {
+        'p-1': replaced,
+        'p-2': { id: 'p-2', rootProposalId: 'p-1', revision: 2, status: 'pending' },
+      };
+      mockProposals(proposals);
+      const { Wrapper, queryClient } = createWrapper();
+
+      const earlier = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+      await waitFor(() => expect(earlier.result.current.isSuccess).toBe(true));
+
+      proposals['p-1'] = makeHttpFetchError(404);
+      await act(async () => {
+        await queryClient.refetchQueries({ queryKey: queryKeys.proposals.detail('p-1') });
+      });
+      await waitFor(() => expect(earlier.result.current.isError).toBe(true));
+
+      proposals['p-1'] = replaced;
+      renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
+
+      await waitFor(() => expect(earlier.result.current.isError).toBe(false));
     });
 
     it('leaves proposals from another chain alone', async () => {

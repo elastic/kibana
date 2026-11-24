@@ -104,8 +104,11 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
     });
     for (const [queryKey, cached] of cachedDetails) {
       const isOtherInChain = cached?.rootProposalId === rootProposalId && cached.id !== id;
-      const isAlreadyReplaced = Boolean(cached?.supersededBy) || cached?.status === 'superseded';
-      if (isOtherInChain && !isAlreadyReplaced) {
+      const isReplaced = Boolean(cached?.supersededBy) || cached?.status === 'superseded';
+      // A failed refetch keeps the old data, but the card shows a load error instead of it.
+      const isShowingError = queryClient.getQueryState(queryKey)?.status === 'error';
+      const isShowingReplacement = isReplaced && !isShowingError;
+      if (isOtherInChain && !isShowingReplacement) {
         void queryClient.invalidateQueries({ queryKey, exact: true });
       }
     }
