@@ -93,4 +93,4 @@ The Sophos Central connector exposes the following actions:
 :   Remove a blocked item from the tenant's global blocked list by its item ID. Deletion is permanent.
 
 `listDetections`
-:   Query XDR detections (requires XDR licence). On the first call the connector submits the query, polls until it completes (up to 90 s), and returns the first page of results along with `runId`. To fetch subsequent pages, pass the same `runId` with the desired `page` number — the connector skips submission and returns results directly.
+:   Query XDR detections (requires XDR licence). On the first call the connector submits the query, polls until it completes (up to 90 s), and returns the first page of results along with `runId`. To fetch subsequent pages, pass the same `runId` with the desired `page` number and the same `pageSize` used on the first call — the connector skips submission and returns results directly. Using a different `pageSize` on a continuation call changes the server's page boundaries and may cause rows to be skipped or duplicated.

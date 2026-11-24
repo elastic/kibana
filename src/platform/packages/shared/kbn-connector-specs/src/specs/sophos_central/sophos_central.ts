@@ -113,25 +113,41 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3, idempotent = true): Promise<T> {
-  const effectiveMax = idempotent ? maxAttempts : 1;
   let lastError: unknown;
-  for (let attempt = 0; attempt < effectiveMax; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       return await fn();
     } catch (err) {
-      const status = (err as AxiosError)?.response?.status;
+      const axiosErr = err as AxiosError;
+      const status = axiosErr?.response?.status;
       if (status !== undefined && NO_RETRY_ON.has(status)) {
         throw err;
       }
       if (status !== undefined && !RETRY_ON.has(status)) {
         throw err;
       }
+      // A 429 means the server did not process the request, so it is always
+      // safe to retry regardless of idempotency. For other retryable errors
+      // (5xx) only retry when the call is idempotent.
+      if (!idempotent && status !== 429) {
+        throw err;
+      }
       lastError = err;
-      if (attempt < effectiveMax - 1) {
-        // Full-jitter backoff: random(0, min(30000, 1000 * 2^attempt))
+      if (attempt < maxAttempts - 1) {
+        // Honor Retry-After header on 429 when present, otherwise use
+        // full-jitter backoff: random(0, min(30000, 1000 * 2^attempt))
         const cap = 30_000;
-        const base = 1_000 * Math.pow(2, attempt);
-        const delay = Math.random() * Math.min(cap, base);
+        let delay: number;
+        if (status === 429) {
+          const retryAfter = axiosErr?.response?.headers?.['retry-after'];
+          const retryAfterSec = retryAfter ? Number(retryAfter) : NaN;
+          delay = Number.isFinite(retryAfterSec)
+            ? Math.min(cap, retryAfterSec * 1_000)
+            : Math.min(cap, 1_000 * Math.pow(2, attempt));
+        } else {
+          const base = 1_000 * Math.pow(2, attempt);
+          delay = Math.random() * Math.min(cap, base);
+        }
         await sleep(delay);
       }
     }
@@ -763,8 +779,9 @@ export const SophosCentral: ConnectorSpec = {
         'Query XDR detections for the Sophos Central tenant (requires XDR licence). ' +
         'On the first call the connector submits the query, polls until it completes ' +
         '(up to 90 s), and returns the first page of results along with `runId`. ' +
-        'To fetch subsequent pages, pass the same `runId` with the desired `page` — ' +
-        'the connector skips submission and returns results directly.',
+        'To fetch subsequent pages, pass the same `runId` with the desired `page` and ' +
+        'the same `pageSize` used on the first call — the connector skips submission ' +
+        'and returns results directly.',
       input: ListDetectionsInputSchema,
       handler: async (ctx, input: ListDetectionsInput) => {
         const { tenantId, dataRegion } = await whoami(ctx);
@@ -834,7 +851,7 @@ export const SophosCentral: ConnectorSpec = {
             }
             const pollRes = await ctx.client.request<{ result?: string; status?: string }>({
               method: 'GET',
-              url: `${dataRegion}/detections/v1/queries/detections/${runId}`,
+              url: `${dataRegion}/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
               headers,
               timeout: Math.min(30_000, Math.max(1_000, deadline - Date.now())),
             });
@@ -851,7 +868,7 @@ export const SophosCentral: ConnectorSpec = {
         // Step 3: retrieve results page
         const resultsRes = await ctx.client.request({
           method: 'GET',
-          url: `${dataRegion}/detections/v1/queries/detections/${runId}/results`,
+          url: `${dataRegion}/detections/v1/queries/detections/${encodeURIComponent(runId)}/results`,
           headers,
           params: {
             page: input.page ?? 1,

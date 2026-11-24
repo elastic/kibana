@@ -180,7 +180,7 @@ export type DeleteBlockedItemInput = z.infer<typeof DeleteBlockedItemInputSchema
 
 export const ListDetectionsInputSchema = lazySchema(() =>
   z.object({
-    runId: z.string().max(256).optional(),
+    runId: z.string().regex(/^[A-Za-z0-9-]+$/).max(256).optional(),
     severity: z.array(z.string().max(50)).max(10).optional(),
     type: z.array(z.string().max(100)).max(10).optional(),
     category: z.array(z.string().max(100)).max(20).optional(),

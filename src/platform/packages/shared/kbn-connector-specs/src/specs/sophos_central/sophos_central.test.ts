@@ -1026,6 +1026,56 @@ describe('listDetections', () => {
     );
   });
 
+  it('skips submit and poll when runId is provided (pagination shortcut)', async () => {
+    const RUN_ID = 'run-abc-123';
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } },
+    });
+    // Only the results call — no submit, no poll
+    client.request.mockResolvedValueOnce({ data: { items: [{ id: 'det-2' }] } });
+
+    const ctx = makeCtx(client);
+    const result = await SophosCentral.actions.listDetections.handler(ctx as never, {
+      runId: RUN_ID,
+      page: 2,
+      pageSize: 10,
+    });
+
+    // Only one request call (the results GET), no submit POST or poll GET
+    expect(client.request).toHaveBeenCalledTimes(1);
+    expect(client.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: `${DATA_REGION}/detections/v1/queries/detections/${RUN_ID}/results`,
+        params: expect.objectContaining({ page: 2, pageSize: 10 }),
+      })
+    );
+    // runId is returned in the result
+    expect(result).toEqual({ items: [{ id: 'det-2' }], runId: RUN_ID });
+  });
+
+  it('returns runId in the first-call result for use in pagination', async () => {
+    const RUN_ID = 'run-first-call';
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } },
+    });
+    // submit → poll (succeeded) → results
+    client.request
+      .mockResolvedValueOnce({ data: { runId: RUN_ID } })
+      .mockResolvedValueOnce({ data: { result: 'succeeded' } })
+      .mockResolvedValueOnce({ data: { items: [] } });
+
+    jest.useFakeTimers();
+    const ctx = makeCtx(client);
+    const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {});
+    await jest.runAllTimersAsync();
+    const result = await resultPromise;
+
+    expect(result.runId).toBe(RUN_ID);
+  });
+
   it('throws when query run ends in a non-succeeded terminal state', async () => {
     const client = makeClient();
     client.get.mockResolvedValue({
@@ -1103,5 +1153,60 @@ describe('error handling', () => {
     await jest.runAllTimersAsync();
     await expectation;
     jest.useRealTimers();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Retry behaviour for non-idempotent actions
+// ---------------------------------------------------------------------------
+
+describe('non-idempotent retry behaviour', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('does not retry a non-idempotent action on 500 (sends exactly one request)', async () => {
+    const client = makeClient();
+    stubWhoami(client);
+    client.request.mockRejectedValue(
+      Object.assign(new Error('Server Error'), {
+        response: { status: 500, data: {} },
+      })
+    );
+    const ctx = makeCtx(client);
+
+    await expect(
+      SophosCentral.actions.actOnAlert.handler(ctx as never, {
+        alertId: ALERT_ID,
+        action: 'acknowledge',
+      })
+    ).rejects.toThrow();
+
+    // Non-idempotent POST must NOT be retried on 5xx
+    expect(client.request).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a non-idempotent action on 429 (request was not processed)', async () => {
+    const client = makeClient();
+    stubWhoami(client);
+    client.request
+      .mockRejectedValueOnce(
+        Object.assign(new Error('Too Many Requests'), {
+          response: { status: 429, data: {}, headers: { 'retry-after': '1' } },
+        })
+      )
+      .mockResolvedValueOnce({ data: { action: 'acknowledge', result: 'success' } });
+    const ctx = makeCtx(client);
+
+    jest.useFakeTimers();
+    const resultPromise = SophosCentral.actions.actOnAlert.handler(ctx as never, {
+      alertId: ALERT_ID,
+      action: 'acknowledge',
+    });
+    await jest.runAllTimersAsync();
+    await resultPromise;
+
+    // Should have retried after the 429
+    expect(client.request).toHaveBeenCalledTimes(2);
   });
 });
