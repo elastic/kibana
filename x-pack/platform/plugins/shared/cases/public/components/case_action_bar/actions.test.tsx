@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import {
   noDeleteCasesPermissions,
   noUpdateCasesPermissions,
-  TestProviders,
+  renderWithTestingProviders,
 } from '../../common/mock';
 import { basicCase, basicPush } from '../../containers/mock';
 import { Actions } from './actions';
 import * as i18n from '../case_view/translations';
 import * as api from '../../containers/api';
-import { waitFor } from '@testing-library/react';
 import { KibanaServices } from '../../common/lib/kibana';
 import type { CasesPermissions } from '../../../common';
 
@@ -59,27 +59,24 @@ const defaultProps = {
 };
 
 describe('CaseView actions', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
   beforeEach(() => {
     jest.resetAllMocks();
+    // the popover menu is briefly `pointer-events: none` while it animates in
+    user = userEvent.setup({ pointerEventsCheck: 0 });
   });
 
-  it('clicking trash toggles modal', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
+  it('clicking trash toggles modal', async () => {
+    renderWithTestingProviders(<Actions {...defaultProps} />);
 
-    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
-    wrapper
-      .find('button[data-test-subj="property-actions-case-ellipses"]')
-      .first()
-      .simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-case-trash"]').simulate('click');
-    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
+    expect(screen.queryByTestId('confirm-delete-case-modal')).not.toBeInTheDocument();
+    await user.click(screen.getByTestId('property-actions-case-ellipses'));
+    await user.click(screen.getByTestId('property-actions-case-trash'));
+    expect(screen.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
   });
 
-  it('clicking copy icon copies case id', () => {
+  it('clicking copy icon copies case id', async () => {
     const originalClipboard = global.window.navigator.clipboard;
 
     Object.defineProperty(navigator, 'clipboard', {
@@ -89,17 +86,10 @@ describe('CaseView actions', () => {
       writable: true,
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<Actions {...defaultProps} />);
 
-    wrapper
-      .find('button[data-test-subj="property-actions-case-ellipses"]')
-      .first()
-      .simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-case-copy"]').simulate('click');
+    await user.click(screen.getByTestId('property-actions-case-ellipses'));
+    await user.click(screen.getByTestId('property-actions-case-copy'));
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
 
@@ -108,20 +98,15 @@ describe('CaseView actions', () => {
     });
   });
 
-  it('does not show trash icon when user does not have deletion privileges', () => {
-    const wrapper = mount(
-      <TestProviders permissions={noDeleteCasesPermissions()}>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
+  it('does not show trash icon when user does not have deletion privileges', async () => {
+    renderWithTestingProviders(<Actions {...defaultProps} />, {
+      wrapperProps: { permissions: noDeleteCasesPermissions() },
+    });
 
-    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
-    wrapper
-      .find('button[data-test-subj="property-actions-case-ellipses"]')
-      .first()
-      .simulate('click');
-    expect(wrapper.find('[data-test-subj="property-actions-case-trash"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="property-actions-case-copy"]').exists()).toBeTruthy();
+    expect(screen.queryByTestId('confirm-delete-case-modal')).not.toBeInTheDocument();
+    await user.click(screen.getByTestId('property-actions-case-ellipses'));
+    expect(screen.queryByTestId('property-actions-case-trash')).not.toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-case-copy')).toBeInTheDocument();
   });
 
   it('toggle delete modal and confirm', async () => {
@@ -129,20 +114,13 @@ describe('CaseView actions', () => {
       .spyOn(api, 'deleteCases')
       .mockRejectedValue(new Error('useDeleteCases: Test error'));
 
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<Actions {...defaultProps} />);
 
-    wrapper
-      .find('button[data-test-subj="property-actions-case-ellipses"]')
-      .first()
-      .simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-case-trash"]').simulate('click');
+    await user.click(screen.getByTestId('property-actions-case-ellipses'));
+    await user.click(screen.getByTestId('property-actions-case-trash'));
 
-    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
-    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    expect(screen.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
+    await user.click(screen.getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
       expect(deleteCasesSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
@@ -157,62 +135,37 @@ describe('CaseView actions', () => {
           typeof KibanaServices.getConfig
         >);
 
-    it('does not show the apply template action when templates v2 is disabled', () => {
+    it('does not show the apply template action when templates v2 is disabled', async () => {
       jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
 
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} />
-        </TestProviders>
-      );
+      renderWithTestingProviders(<Actions {...defaultProps} />);
 
-      wrapper
-        .find('button[data-test-subj="property-actions-case-ellipses"]')
-        .first()
-        .simulate('click');
+      await user.click(screen.getByTestId('property-actions-case-ellipses'));
 
-      expect(
-        wrapper.find('button[data-test-subj="property-actions-case-indexEdit"]').exists()
-      ).toBeFalsy();
+      expect(screen.queryByTestId('property-actions-case-indexEdit')).not.toBeInTheDocument();
     });
 
-    it('shows the apply template action when templates v2 is enabled', () => {
+    it('shows the apply template action when templates v2 is enabled', async () => {
       enableTemplatesV2();
 
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} />
-        </TestProviders>
-      );
+      renderWithTestingProviders(<Actions {...defaultProps} />);
 
-      wrapper
-        .find('button[data-test-subj="property-actions-case-ellipses"]')
-        .first()
-        .simulate('click');
+      await user.click(screen.getByTestId('property-actions-case-ellipses'));
 
-      expect(
-        wrapper.find('button[data-test-subj="property-actions-case-indexEdit"]').exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('property-actions-case-indexEdit')).toBeInTheDocument();
     });
 
-    it('clicking apply template opens the modal', () => {
+    it('clicking apply template opens the modal', async () => {
       enableTemplatesV2();
 
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} />
-        </TestProviders>
-      );
+      renderWithTestingProviders(<Actions {...defaultProps} />);
 
-      expect(wrapper.find('[data-test-subj="apply-template-modal"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('apply-template-modal')).not.toBeInTheDocument();
 
-      wrapper
-        .find('button[data-test-subj="property-actions-case-ellipses"]')
-        .first()
-        .simulate('click');
-      wrapper.find('button[data-test-subj="property-actions-case-indexEdit"]').simulate('click');
+      await user.click(screen.getByTestId('property-actions-case-ellipses'));
+      await user.click(screen.getByTestId('property-actions-case-indexEdit'));
 
-      expect(wrapper.find('[data-test-subj="apply-template-modal"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('apply-template-modal')).toBeInTheDocument();
     });
   });
 
@@ -224,89 +177,67 @@ describe('CaseView actions', () => {
           typeof KibanaServices.getConfig
         >);
 
-    const openActions = (permissions?: CasesPermissions) => {
-      const wrapper = mount(
-        <TestProviders permissions={permissions}>
-          <Actions {...defaultProps} />
-        </TestProviders>
-      );
+    const openActions = async (permissions?: CasesPermissions) => {
+      renderWithTestingProviders(<Actions {...defaultProps} />, {
+        wrapperProps: { permissions },
+      });
 
-      wrapper
-        .find('button[data-test-subj="property-actions-case-ellipses"]')
-        .first()
-        .simulate('click');
-
-      return wrapper;
+      await user.click(screen.getByTestId('property-actions-case-ellipses'));
     };
 
     beforeEach(() => {
       mockCanExecuteWorkflow.mockReturnValue(true);
     });
 
-    it('shows the run workflow action and opens the modal', () => {
+    it('shows the run workflow action and opens the modal', async () => {
       enableRunWorkflows();
 
-      const wrapper = openActions();
+      await openActions();
 
-      expect(wrapper.find('[data-test-subj="cases-run-workflow-modal"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('cases-run-workflow-modal')).not.toBeInTheDocument();
 
-      wrapper.find('button[data-test-subj="property-actions-case-play"]').simulate('click');
+      await user.click(screen.getByTestId('property-actions-case-play'));
 
-      expect(wrapper.find('[data-test-subj="cases-run-workflow-modal"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('cases-run-workflow-modal')).toBeInTheDocument();
     });
 
-    it('does not show the run workflow action when running workflows is disabled', () => {
+    it('does not show the run workflow action when running workflows is disabled', async () => {
       jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
 
-      const wrapper = openActions();
+      await openActions();
 
-      expect(
-        wrapper.find('button[data-test-subj="property-actions-case-play"]').exists()
-      ).toBeFalsy();
+      expect(screen.queryByTestId('property-actions-case-play')).not.toBeInTheDocument();
     });
 
-    it('does not show the run workflow action without update permissions', () => {
+    it('does not show the run workflow action without update permissions', async () => {
       enableRunWorkflows();
 
-      const wrapper = openActions(noUpdateCasesPermissions());
+      await openActions(noUpdateCasesPermissions());
 
-      expect(
-        wrapper.find('button[data-test-subj="property-actions-case-play"]').exists()
-      ).toBeFalsy();
+      expect(screen.queryByTestId('property-actions-case-play')).not.toBeInTheDocument();
     });
 
-    it('does not show the run workflow action when the user cannot execute workflows', () => {
+    it('does not show the run workflow action when the user cannot execute workflows', async () => {
       enableRunWorkflows();
       mockCanExecuteWorkflow.mockReturnValue(false);
 
-      const wrapper = openActions();
+      await openActions();
 
-      expect(
-        wrapper.find('button[data-test-subj="property-actions-case-play"]').exists()
-      ).toBeFalsy();
+      expect(screen.queryByTestId('property-actions-case-play')).not.toBeInTheDocument();
     });
   });
 
-  it('displays active incident link', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions
-          {...defaultProps}
-          currentExternalIncident={{
-            ...basicPush,
-          }}
-        />
-      </TestProviders>
+  it('displays active incident link', async () => {
+    renderWithTestingProviders(
+      <Actions {...defaultProps} currentExternalIncident={{ ...basicPush }} />
     );
 
-    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+    expect(screen.queryByTestId('confirm-delete-case-modal')).not.toBeInTheDocument();
 
-    wrapper
-      .find('button[data-test-subj="property-actions-case-ellipses"]')
-      .first()
-      .simulate('click');
-    expect(
-      wrapper.find('[data-test-subj="property-actions-case-external"]').first().prop('aria-label')
-    ).toEqual(i18n.VIEW_INCIDENT(basicPush.externalTitle));
+    await user.click(screen.getByTestId('property-actions-case-ellipses'));
+    expect(screen.getByTestId('property-actions-case-external')).toHaveAttribute(
+      'aria-label',
+      i18n.VIEW_INCIDENT(basicPush.externalTitle)
+    );
   });
 });

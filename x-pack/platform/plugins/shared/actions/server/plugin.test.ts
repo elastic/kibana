@@ -8,9 +8,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
-import { of, Subject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { defer } from '@kbn/kibana-utils-plugin/common';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -50,7 +49,7 @@ import { defaultInboundEventsLimitConfigs } from './config';
 import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
 import { errors } from '@elastic/elasticsearch';
 import {
-  CATALOG_FIRST_LOAD_TIMEOUT_MS,
+  CATALOG_START_LOAD_TIMEOUT_MS,
   CATALOG_REQUEST_WAIT_MS,
   CONNECTOR_TYPE_CATALOG_INDEX,
 } from './lib/connector_catalog';
@@ -485,7 +484,7 @@ describe('Actions Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           eventLog: eventLogMock.createStart(),
         };
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
 
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(slackConnectorType);
@@ -521,7 +520,7 @@ describe('Actions Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           eventLog: eventLogMock.createStart(),
         };
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
 
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(indexConnectorType);
@@ -542,7 +541,7 @@ describe('Actions Plugin', () => {
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           eventLog: eventLogMock.createStart(),
         };
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
 
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(indexConnectorType);
@@ -631,7 +630,7 @@ describe('Actions Plugin', () => {
       };
     });
 
-    it('should warn when there is an invalid connector type in enabledActionTypes', async () => {
+    it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
       const pluginSetup = await plugin.setup(coreSetup, {
         ...pluginsSetup,
         encryptedSavedObjects: {
@@ -645,22 +644,20 @@ describe('Actions Plugin', () => {
 
       pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
 
-      const pluginStart = plugin.start(coreStart, {
-        ...pluginsStart,
-        serverless: serverlessPluginMock.createStartContract(),
-      });
-      await pluginStart.whenCatalogReady();
-      await new Promise(process.nextTick);
-
-      expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'Enabled connector types [non-existing] are not registered.'
+      await expect(async () =>
+        plugin.start(coreStart, {
+          ...pluginsStart,
+          serverless: serverlessPluginMock.createStartContract(),
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"non-existing\\" is not registered."`
       );
     });
 
     describe('connector catalog feature flag', () => {
       it('subscribes to the connector catalog feature flag with a false fallback', async () => {
         await plugin.setup(coreSetup, pluginsSetup);
-        await plugin.start(coreStart, pluginsStart);
+        plugin.start(coreStart, pluginsStart);
 
         expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
           ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
@@ -669,11 +666,11 @@ describe('Actions Plugin', () => {
       });
 
       it('unsubscribes from the connector catalog feature flag on stop', async () => {
-        const connectorCatalogEnabled$ = new Subject<boolean>();
+        const connectorCatalogEnabled$ = new BehaviorSubject(false);
         coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
 
         await plugin.setup(coreSetup, pluginsSetup);
-        await plugin.start(coreStart, pluginsStart);
+        plugin.start(coreStart, pluginsStart);
         expect(connectorCatalogEnabled$.observed).toBe(true);
 
         plugin.stop();
@@ -744,58 +741,14 @@ describe('Actions Plugin', () => {
       const getTypeIds = (pluginStart: PluginStartContract) => pluginStart.getAllTypes();
 
       describe('config on', () => {
-        it('returns from start() while the catalog read is still pending', async () => {
-          seedCatalog();
-          const catalogRead = defer<object>();
-          getEsClient().get.mockReturnValue(catalogRead.promise);
-          await setupPlugin();
-
-          const pluginStart = plugin.start(coreStart, pluginsStart);
-          expect(pluginStart).not.toBeInstanceOf(Promise);
-          if (pluginStart instanceof Promise) {
-            throw new Error('Expected start to remain synchronous for the wildcard allowlist.');
-          }
-          const state = await Promise.race([
-            pluginStart.whenCatalogReady().then(() => 'ready'),
-            flush().then(() => 'pending'),
-          ]);
-
-          expect(state).toBe('pending');
-          expect(getEsClient().get).toHaveBeenCalledTimes(1);
-
-          const catalogFlagCalls = coreStart.featureFlags.getBooleanValue$.mock.calls.filter(
-            ([flagKey]) => flagKey === ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG
-          );
-          expect(catalogFlagCalls).toHaveLength(1);
-
-          catalogRead.resolve({
-            _index: CONNECTOR_TYPE_CATALOG_INDEX,
-            _id: 'manifest',
-            found: false,
-          });
-          await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
-        });
-
-        it('loads the catalog without waiting for the feature flag', async () => {
-          coreStart.featureFlags.getBooleanValue$.mockReturnValue(new Subject<boolean>());
-          seedCatalog();
-          await setupPlugin();
-
-          const pluginStart = await plugin.start(coreStart, pluginsStart);
-
-          await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
-          expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
-          expect(getEsClient().get).toHaveBeenCalledTimes(1);
-        });
-
         it('knows in-tree types only before ready, and the spec type after', async () => {
           seedCatalog();
-          const catalogRead = defer<object>();
+          const catalogRead = Promise.withResolvers<object>();
           getEsClient().get.mockReturnValue(catalogRead.promise);
           await setupPlugin();
           const registerSpy = jest.spyOn(ActionTypeRegistry.prototype, 'register');
 
-          const pluginStart = await plugin.start(coreStart, pluginsStart);
+          const pluginStart = plugin.start(coreStart, pluginsStart);
           await flush();
 
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
@@ -812,7 +765,7 @@ describe('Actions Plugin', () => {
           registerSpy.mockRestore();
         });
 
-        it('registers 0 types and writes nothing when the catalog index is missing', async () => {
+        it('registers no catalog types and writes nothing when the catalog index is missing', async () => {
           seedCatalog();
           const missing = new errors.ResponseError({
             statusCode: 404,
@@ -824,7 +777,7 @@ describe('Actions Plugin', () => {
           getEsClient().get.mockRejectedValue(missing);
           await setupPlugin();
 
-          const pluginStart = await plugin.start(coreStart, pluginsStart);
+          const pluginStart = plugin.start(coreStart, pluginsStart);
 
           await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
@@ -839,7 +792,7 @@ describe('Actions Plugin', () => {
           getEsClient().get.mockRejectedValue(new Error('read failed'));
           await setupPlugin();
 
-          const pluginStart = await plugin.start(coreStart, pluginsStart);
+          const pluginStart = plugin.start(coreStart, pluginsStart);
 
           await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
@@ -847,18 +800,29 @@ describe('Actions Plugin', () => {
 
         it('starts synchronously and accepts a configured type after a delayed catalog load', async () => {
           seedCatalog();
-          const catalogRead = defer<object>();
-          getEsClient().get.mockReturnValue(catalogRead.promise);
 
           await setupPlugin([SPEC_TYPE_ID]);
           const pluginStart = startServerlessPlugin();
-          expect(pluginStart).not.toBeInstanceOf(Promise);
 
-          catalogRead.resolve(manifestDoc);
           await pluginStart.whenCatalogReady();
           await flush();
 
           expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
+          expect(context.logger.get().warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('are not registered')
+          );
+        });
+
+        it('does not warn about a configured type when the plugin stops before the catalog load ends', async () => {
+          const read = Promise.withResolvers<object>();
+          getEsClient().get.mockReturnValue(read.promise);
+
+          await setupPlugin([SPEC_TYPE_ID]);
+          const pluginStart = startServerlessPlugin();
+          plugin.stop();
+          await pluginStart.whenCatalogReady();
+          await flush();
+
           expect(context.logger.get().warn).not.toHaveBeenCalledWith(
             expect.stringContaining('are not registered')
           );
@@ -873,13 +837,11 @@ describe('Actions Plugin', () => {
 
           await setupPlugin(['non-existing']);
           const pluginStart = startServerlessPlugin();
-          expect(pluginStart).not.toBeInstanceOf(Promise);
 
           await pluginStart.whenCatalogReady();
-          await flush();
 
           expect(context.logger.get().warn).toHaveBeenCalledWith(
-            'Enabled connector types [non-existing] are not registered.'
+            'Connector types [non-existing] in xpack.actions.enabledActionTypes are not registered.'
           );
         });
       });
@@ -1002,7 +964,7 @@ describe('Actions Plugin', () => {
           const pluginStart = plugin.start(coreStart, pluginsStart);
           const ready = trackSettled(pluginStart.whenCatalogReady());
 
-          await jest.advanceTimersByTimeAsync(CATALOG_FIRST_LOAD_TIMEOUT_MS - 1);
+          await jest.advanceTimersByTimeAsync(CATALOG_START_LOAD_TIMEOUT_MS - 1);
           expect(ready.settled).toBe(false);
 
           await jest.advanceTimersByTimeAsync(1);
@@ -1057,11 +1019,19 @@ describe('Actions Plugin', () => {
           coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
         });
 
+        it('throws on start when a catalog type is in the allowlist', async () => {
+          await setupPlugin([SPEC_TYPE_ID], { catalogEnabled: false });
+
+          expect(() => startServerlessPlugin()).toThrow(
+            `Action type "${SPEC_TYPE_ID}" is not registered.`
+          );
+        });
+
         it('does not call Elasticsearch for the catalog index, even when the flag is on', async () => {
           seedCatalog();
           await setupPlugin(undefined, { catalogEnabled: false });
 
-          const pluginStart = await plugin.start(coreStart, pluginsStart);
+          const pluginStart = plugin.start(coreStart, pluginsStart);
           await pluginStart.whenCatalogReady();
 
           const esClient = getEsClient();
@@ -1071,16 +1041,6 @@ describe('Actions Plugin', () => {
           expect(esClient.indices.create).not.toHaveBeenCalled();
           expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
-        });
-
-        it('resolves whenCatalogReady() when the flag Observable never emits', async () => {
-          coreStart.featureFlags.getBooleanValue$.mockReturnValue(new Subject<boolean>());
-          await setupPlugin(undefined, { catalogEnabled: false });
-
-          const pluginStart = await plugin.start(coreStart, pluginsStart);
-
-          await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
-          expect(getEsClient().get).not.toHaveBeenCalled();
         });
       });
     });
@@ -1331,7 +1291,7 @@ describe('Actions Plugin', () => {
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
           pluginSetup.registerType(serverLogConnectorType);
 
-          await plugin.start(coreStart, pluginsStart);
+          plugin.start(coreStart, pluginsStart);
 
           await new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -1568,7 +1528,7 @@ describe('Actions Plugin', () => {
 
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         pluginSetup.registerType(actionType);
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
 
         pluginStart.isActionTypeEnabled('my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
@@ -1598,7 +1558,7 @@ describe('Actions Plugin', () => {
             },
           })
         );
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
 
         const result = pluginStart.listTypes('alerting');
         expect(result).toEqual([
@@ -1655,7 +1615,7 @@ describe('Actions Plugin', () => {
 
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         pluginSetup.registerType(actionType);
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
 
         pluginStart.isActionExecutable('123', 'my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(

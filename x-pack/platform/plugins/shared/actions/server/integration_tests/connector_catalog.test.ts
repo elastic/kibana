@@ -9,6 +9,7 @@ import type { IncomingHttpHeaders, Server } from 'http';
 import { createServer } from 'http';
 import type { AddressInfo } from 'net';
 import axios from 'axios';
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
@@ -18,7 +19,7 @@ import {
   createConnectorCatalogStorage,
 } from '../lib/connector_catalog';
 import { loadFixture } from '../lib/declarative_connectors/__fixtures__/load_fixture';
-import { setupTestServers } from './lib';
+import { retry, setupTestServers } from './lib';
 
 const mockCaptured: { start?: PluginStartContract } = {};
 
@@ -83,18 +84,11 @@ describe('Connector catalog at start', () => {
         );
     } catch (error) {
       // The event log index is created lazily.
-      return [];
+      if (error instanceof errors.ResponseError && error.statusCode === 404) {
+        return [];
+      }
+      throw error;
     }
-  };
-
-  const waitFor = async <T>(read: () => Promise<T>, isDone: (value: T) => boolean): Promise<T> => {
-    const deadline = Date.now() + 60_000;
-    let value = await read();
-    while (!isDone(value) && Date.now() < deadline) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      value = await read();
-    }
-    return value;
   };
 
   beforeAll(async () => {
@@ -190,9 +184,10 @@ describe('Connector catalog at start', () => {
       ]);
     expect(response.errors).toBe(false);
 
-    const events = await waitFor(findSuccessfulExecuteEvents, (found) => found.length > 0);
-
-    expect(events.length).toBeGreaterThan(0);
+    await retry(async () => {
+      const events = await findSuccessfulExecuteEvents();
+      expect(events.length).toBeGreaterThan(0);
+    });
 
     const checkIpRequests = receivedRequests.filter(
       ({ method, path }) => method === 'GET' && path === '/api/v2/check'

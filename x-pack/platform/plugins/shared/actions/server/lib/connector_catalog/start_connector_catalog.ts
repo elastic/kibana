@@ -7,15 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ActionTypeRegistry } from '../../action_type_registry';
-import { CATALOG_FIRST_LOAD_TIMEOUT_MS } from './constants';
+import { getErrorMessage } from './get_error_message';
+import { CATALOG_START_LOAD_TIMEOUT_MS } from './constants';
 import { loadCatalogConnectorTypes } from './load_catalog_connector_types';
 import type { CatalogActionType, ConnectorCatalogStorage, StoredCatalogDefinition } from './types';
 
-const getErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
 export interface ConnectorCatalogHandle {
-  /** Resolves when the first load is done, failed, timed out, or skipped. Never rejects. */
+  /** Resolves when the load is done, failed, timed out, or skipped. Never rejects. */
   ready: Promise<void>;
   /** Aborts a running load and resolves ready without logs. */
   stop: () => void;
@@ -31,22 +29,13 @@ interface StartConnectorCatalogDeps {
   timeoutMs?: number;
 }
 
-/**
- * Runs the first catalog load 1 time, in the background. It reads the catalog index and
- * registers its types. It never writes. With the config off, nothing is read.
- *
- * Timeline:
- *   start -> load ------------------------------> ready
- *   start -> deadline (timeoutMs) -> abort ------> ready (warn)
- *   start -> stop() -> abort ---------------------> ready (no logs)
- */
 export const startConnectorCatalog = ({
   isEnabled,
   storage,
   actionTypeRegistry,
   buildType,
   logger,
-  timeoutMs = CATALOG_FIRST_LOAD_TIMEOUT_MS,
+  timeoutMs = CATALOG_START_LOAD_TIMEOUT_MS,
 }: StartConnectorCatalogDeps): ConnectorCatalogHandle => {
   if (!isEnabled) {
     return { ready: Promise.resolve(), stop: () => {} };
@@ -80,20 +69,23 @@ export const startConnectorCatalog = ({
     signal.addEventListener('abort', () => resolve(), { once: true });
   });
 
-  const ready = Promise.race([firstLoad(), aborted])
-    .catch((error: unknown) => {
+  const run = async (): Promise<void> => {
+    try {
+      await Promise.race([firstLoad(), aborted]);
+    } catch (error) {
       if (!signal.aborted) {
         logger.warn(`The first connector catalog load failed: ${getErrorMessage(error)}`);
       }
-    })
-    .finally(() => clearTimeout(deadline))
-    .then(() => {
-      if (timedOut) {
-        logger.warn(
-          `The first connector catalog load timed out after ${timeoutMs} ms. Only in-tree connector types are available.`
-        );
-      }
-    });
+    } finally {
+      clearTimeout(deadline);
+    }
+    if (timedOut) {
+      logger.warn(
+        `The first connector catalog load timed out after ${timeoutMs} ms. Only in-tree connector types are available.`
+      );
+    }
+  };
+  const ready = run();
 
   return {
     ready,

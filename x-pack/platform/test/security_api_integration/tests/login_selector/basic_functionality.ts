@@ -87,7 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.authentication_type).to.be(authenticationType);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/218378
   describe('Login Selector', () => {
     afterEach(async () => {
       // Wait for the index to be available

@@ -289,13 +289,16 @@ describe('TaskManagerMetricsCollector', () => {
       },
     });
     const pollInterval = 100;
-    const taskTypes = new Set(['taskType1']);
+    const getTaskTypes = jest
+      .fn<string[], []>()
+      .mockReturnValueOnce(['taskType1'])
+      .mockReturnValue(['taskType1', 'lateRegisteredTaskType']);
 
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
-      getTaskTypes: () => Array.from(taskTypes),
+      getTaskTypes,
       excludedTypes: new Set(),
     });
     taskManagerMetricsCollector.events.subscribe(jest.fn());
@@ -303,7 +306,6 @@ describe('TaskManagerMetricsCollector', () => {
     await new Promise((resolve) => setImmediate(resolve));
     expect(mockTaskStore.aggregate).toHaveBeenCalledTimes(1);
 
-    taskTypes.add('lateRegisteredTaskType');
     clock.tick(pollInterval);
     await new Promise((resolve) => setImmediate(resolve));
 
@@ -359,12 +361,12 @@ describe('TaskManagerMetricsCollector', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    const taskTypes = new Set([]);
+    const taskTypes = new Set<string>();
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
-      getTaskTypes: () => Array.from(taskTypes),
+      getTaskTypes: () => [],
       excludedTypes: taskTypes,
     });
     const handler = jest.fn();
@@ -428,12 +430,12 @@ describe('TaskManagerMetricsCollector', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    const taskTypes = new Set([]);
+    const taskTypes = new Set<string>();
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
-      getTaskTypes: () => Array.from(taskTypes),
+      getTaskTypes: () => [],
       excludedTypes: taskTypes,
     });
     const handler = jest.fn();

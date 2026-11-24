@@ -160,10 +160,16 @@ Tags follow this shape:
 
 These are the available tags:
 
-| Helper                   | Use when the test…                                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `tags.limit.only.fips`   | is designed for [FIPS mode](../contributing/ci-and-build/debugging-fips-test-failures.md) (skipped everywhere else) |
-| `tags.limit.except.fips` | is relevant everywhere except in FIPS mode (skipped there)                                                          |
+| Helper                               | Use when the test…                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `tags.limit.only.fips`               | is designed for [FIPS mode](../contributing/ci-and-build/debugging-fips-test-failures.md) (skipped everywhere else) |
+| `tags.limit.except.fips`             | is relevant everywhere except in FIPS mode (skipped there)                                                          |
+| `tags.limit.only.upgradeAssistant`   | needs a stack upgrade environment for Upgrade Assistant (skipped everywhere else)                                   |
+| `tags.limit.except.upgradeAssistant` | is relevant everywhere except in that upgrade environment (skipped there)                                           |
+
+::::::{note}
+No CI pipeline declares `upgradeAssistant` yet, so `tags.limit.only.upgradeAssistant` suites don't run on CI. Use it instead of `.skip` for Upgrade Assistant suites that wait on that environment.
+::::::
 
 If a test would need more `except` tags than there are environments it actually applies to, it's an `only` test.
 

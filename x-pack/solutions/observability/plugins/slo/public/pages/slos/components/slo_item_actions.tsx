@@ -9,8 +9,8 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexItem,
   EuiIcon,
-  EuiPanel,
   EuiPopover,
   useEuiShadow,
 } from '@elastic/eui';
@@ -25,6 +25,23 @@ import type { BurnRateRuleParams } from '../../../typings';
 import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
 import { useActionModal } from '../../../context/action_modal';
 
+function ActionsButtonFrame({ children }: { children: JSX.Element }) {
+  const shadow = useEuiShadow('s');
+
+  return (
+    <EuiFlexItem
+      grow={false}
+      css={({ euiTheme }) => css`
+        ${shadow}
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border-radius: ${euiTheme.border.radius.control};
+      `}
+    >
+      {children}
+    </EuiFlexItem>
+  );
+}
+
 interface Props {
   slo: SLOWithSummaryResponse;
   isActionsPopoverOpen: boolean;
@@ -34,24 +51,6 @@ interface Props {
   setDashboardAttachmentReady?: (value: boolean) => void;
   btnProps?: Partial<EuiButtonIconProps>;
   rules?: Array<Rule<BurnRateRuleParams>>;
-}
-
-function IconPanel({ children }: { children: JSX.Element }) {
-  const shadow = useEuiShadow('s');
-  return (
-    <EuiPanel
-      color="plain"
-      element="button"
-      grow={false}
-      paddingSize="none"
-      hasShadow={false}
-      css={css`
-        ${shadow}
-      `}
-    >
-      {children}
-    </EuiPanel>
-  );
 }
 
 export function SloItemActions({
@@ -184,7 +183,7 @@ export function SloItemActions({
         defaultMessage: 'SLO item actions',
       })}
       anchorPosition="downLeft"
-      button={btnProps ? <IconPanel>{btn}</IconPanel> : btn}
+      button={btnProps ? <ActionsButtonFrame>{btn}</ActionsButtonFrame> : btn}
       panelPaddingSize="m"
       closePopover={handleClickActions}
       isOpen={isActionsPopoverOpen}
@@ -316,7 +315,7 @@ export function SloItemActions({
         ].concat(
           !isDashboardContext && !!setDashboardAttachmentReady ? (
             <EuiContextMenuItem
-              icon="dashboardApp"
+              icon="productDashboard"
               key="addToDashboard"
               onClick={handleAddToDashboard}
               data-test-subj="sloActionsAddToDashboard"

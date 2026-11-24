@@ -47,6 +47,11 @@ export abstract class LibrarySource {
     return this.cache.getHealth();
   }
 
+  /** The last validated catalog, without fetching; `undefined` until the first successful load. */
+  getCachedTemplates(): Template[] | undefined {
+    return this.cache.catalog?.templates;
+  }
+
   /**
    * Integrity guard against list/detail drift and corruption: the fetched body
    * bytes must hash to the `contentHash` recorded on the catalog row. The

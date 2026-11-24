@@ -38,6 +38,7 @@ import type {
 } from '@kbn/saved-search-plugin/common/types';
 import type { EsqlSource } from '@kbn/data-source';
 import type { BehaviorSubject } from 'rxjs';
+import type { IDslPagination } from '@kbn/search-types';
 import type { PublishesWritableDataSources } from '@kbn/presentation-publishing/interfaces/publishes_data_sources';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
@@ -73,6 +74,8 @@ export type SearchEmbeddablePublicState = Pick<
   resultDataSource: EsqlSource | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
+  pagination: IDslPagination | undefined;
+  isLoadingMore: boolean;
 };
 
 export type SearchEmbeddableStateManager = {
@@ -83,7 +86,13 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddablePublicState,
-  'rows' | 'resultDataSource' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
+  | 'rows'
+  | 'resultDataSource'
+  | 'totalHitCount'
+  | 'searchSource'
+  | 'inspectorAdapters'
+  | 'pagination'
+  | 'isLoadingMore'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource' | 'tabTypeState'>;
 
