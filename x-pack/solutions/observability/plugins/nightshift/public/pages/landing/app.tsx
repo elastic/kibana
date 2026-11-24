@@ -144,8 +144,10 @@ export function NightshiftApp({
     hasSeverityCountsError,
     activeInvestigationCount,
     isInitialLoading,
+    isOpenInitialLoading,
     isFetching,
     totalCount,
+    openTotalCount,
     loadedCount,
     refetchAll,
   } = useInvestigationSections({
@@ -388,7 +390,7 @@ export function NightshiftApp({
       key1: 'investigation_count',
       value1: loadedCount,
       key2: 'investigation_total',
-      value2: totalCount,
+      value2: openTotalCount,
       key3: 'active_investigation_count',
       value3: loadedInvestigations.filter(({ in_progress: inProgress }) => inProgress).length,
       key4: 'unrated_investigation_count',
@@ -445,7 +447,9 @@ export function NightshiftApp({
       `}
     >
       <NightshiftHeader
-        isLoading={isInitialLoading || (activeInvestigationCount === 0 && areSeverityCountsLoading)}
+        isLoading={
+          isOpenInitialLoading || (activeInvestigationCount === 0 && areSeverityCountsLoading)
+        }
         hasSeverityCountsError={hasSeverityCountsError}
         activeInvestigationCount={activeInvestigationCount}
         needsYouCount={needsYouCount}
@@ -510,7 +514,7 @@ export function NightshiftApp({
             // change) a number would be a default 0 or the previous filter's, contradicting the
             // rows below, so all four tiles show a skeleton and reveal together.
             isLoading={
-              isInitialLoading ||
+              isOpenInitialLoading ||
               areSeverityCountsLoading ||
               areSeverityCountsStale ||
               areUnfilteredSeverityCountsLoading

@@ -62,9 +62,13 @@ export interface InvestigationSectionsResult {
   /** Running investigations per the API total (not capped by the in-progress page size). */
   activeInvestigationCount: number;
   isInitialLoading: boolean;
+  /** True while any open section is still on its first load (ignores Closed). */
+  isOpenInitialLoading: boolean;
   isFetching: boolean;
   /** Investigations matching the current filters, each counted once: the sections are disjoint. */
   totalCount: number;
+  /** Open investigations matching the current filters (excludes Closed). */
+  openTotalCount: number;
   /** Open investigations loaded across the open sections (excludes Closed). */
   loadedCount: number;
   refetchAll: () => void;
@@ -205,7 +209,6 @@ export const useInvestigationSections = ({
   const { refetch: refetchMedium } = medium;
   const { refetch: refetchLow } = low;
   const { refetch: refetchNotRated } = notRated;
-  const { refetch: refetchClosed } = closed;
   const { refetch: refetchSeverityCounts } = severityCountsQuery;
   const { refetch: refetchUnfilteredSeverityCounts } = unfilteredSeverityCountsQuery;
 
@@ -245,7 +248,6 @@ export const useInvestigationSections = ({
     refetchMedium();
     refetchLow();
     refetchNotRated();
-    refetchClosed();
     void refetchSeverityCounts();
     if (hasSearchQuery) {
       void refetchUnfilteredSeverityCounts();
@@ -261,12 +263,11 @@ export const useInvestigationSections = ({
     refetchMedium,
     refetchLow,
     refetchNotRated,
-    refetchClosed,
     refetchSeverityCounts,
     refetchUnfilteredSeverityCounts,
   ]);
 
-  const sections = useMemo(
+  const openSections = useMemo(
     () => [
       toSectionState({ id: 'in-progress', queryResult: inProgress }),
       toSectionState({ id: 'critical', queryResult: critical }),
@@ -274,9 +275,13 @@ export const useInvestigationSections = ({
       toSectionState({ id: 'medium', queryResult: medium }),
       toSectionState({ id: 'low', queryResult: low }),
       toSectionState({ id: 'not-rated', queryResult: notRated }),
-      toSectionState({ id: 'closed', queryResult: closed }),
     ],
-    [inProgress, critical, high, medium, low, notRated, closed]
+    [inProgress, critical, high, medium, low, notRated]
+  );
+
+  const sections = useMemo(
+    () => [...openSections, toSectionState({ id: 'closed', queryResult: closed })],
+    [openSections, closed]
   );
 
   const severityCounts = useMemo(
@@ -324,12 +329,11 @@ export const useInvestigationSections = ({
     hasActiveInvestigations,
     activeInvestigationCount,
     isInitialLoading: sections.some((section) => section.isInitialLoading),
+    isOpenInitialLoading: openSections.some((section) => section.isInitialLoading),
     isFetching: sections.some((section) => section.isFetching),
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),
-    loadedCount: sections.reduce(
-      (sum, section) => (section.id === 'closed' ? sum : sum + section.investigations.length),
-      0
-    ),
+    openTotalCount: openSections.reduce((sum, section) => sum + section.total, 0),
+    loadedCount: openSections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   };
 };

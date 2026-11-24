@@ -317,7 +317,7 @@ describe('useInvestigationSections', () => {
     await waitFor(() => expect(result.current.totalCount).toBe(5));
   });
 
-  it('includes Closed in totalCount while keeping loadedCount open-only', () => {
+  it('includes Closed in totalCount while keeping openTotalCount and loadedCount open-only', () => {
     mockUseFetchInvestigations.mockImplementation((params) => {
       if (params.inProgress) {
         return sectionResult({ ids: ['running-a'] });
@@ -331,6 +331,7 @@ describe('useInvestigationSections', () => {
     const { result } = renderSections();
 
     expect(result.current.totalCount).toBe(4);
+    expect(result.current.openTotalCount).toBe(1);
     expect(result.current.loadedCount).toBe(1);
   });
 
@@ -343,7 +344,7 @@ describe('useInvestigationSections', () => {
     ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined]);
   });
 
-  it('refetches the other sections when work leaves the in-progress section', () => {
+  it('refetches the open sections without refetching Closed when work leaves the in-progress section', () => {
     const refetchCritical = jest.fn();
     const refetchClosed = jest.fn();
     mockUseFetchInvestigations.mockImplementation(
@@ -359,7 +360,7 @@ describe('useInvestigationSections', () => {
     rerender({ query: undefined });
 
     expect(refetchCritical).toHaveBeenCalledTimes(1);
-    expect(refetchClosed).toHaveBeenCalledTimes(1);
+    expect(refetchClosed).not.toHaveBeenCalled();
   });
 
   it('refetches when the API total drops even if the capped loaded rows stay the same', () => {
@@ -409,7 +410,7 @@ describe('useInvestigationSections', () => {
     expect(refetchCritical).not.toHaveBeenCalled();
   });
 
-  it('refetches every open section and the severity counts when the status signal bumps', async () => {
+  it('refetches every section and the severity counts when the status signal bumps', async () => {
     const refetchBySeverity = {
       inProgress: jest.fn(),
       critical: jest.fn(),
@@ -417,11 +418,15 @@ describe('useInvestigationSections', () => {
       medium: jest.fn(),
       low: jest.fn(),
       none: jest.fn(),
+      closed: jest.fn(),
     };
 
     mockUseFetchInvestigations.mockImplementation((params) => {
       if (params.inProgress) {
         return sectionResult({ ids: ['running-a'], refetch: refetchBySeverity.inProgress });
+      }
+      if (params.status === 'closed') {
+        return sectionResult({ refetch: refetchBySeverity.closed });
       }
 
       const severity = params.severities?.[0];
@@ -458,6 +463,7 @@ describe('useInvestigationSections', () => {
     expect(refetchBySeverity.medium).toHaveBeenCalledTimes(1);
     expect(refetchBySeverity.low).toHaveBeenCalledTimes(1);
     expect(refetchBySeverity.none).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.closed).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
   });
 });

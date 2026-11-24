@@ -139,7 +139,7 @@ describe('InvestigationList', () => {
     );
 
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
-      'No open investigations found'
+      'No investigations found'
     );
     expect(screen.getByTestId('nightshiftInvestigationsEmptyInvestigate')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationsEmptyCreateAutomation')).toBeInTheDocument();

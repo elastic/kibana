@@ -139,6 +139,7 @@ function setSections({
   hasActiveInvestigations = false,
   activeInvestigationCount,
   isInitialLoading = false,
+  isOpenInitialLoading = isInitialLoading,
   isFetching = false,
   areSeverityCountsLoading = false,
   hasSeverityCountsError = false,
@@ -147,6 +148,7 @@ function setSections({
   hasActiveInvestigations?: boolean;
   activeInvestigationCount?: number;
   isInitialLoading?: boolean;
+  isOpenInitialLoading?: boolean;
   isFetching?: boolean;
   areSeverityCountsLoading?: boolean;
   hasSeverityCountsError?: boolean;
@@ -162,6 +164,7 @@ function setSections({
   };
   const resolvedActiveCount =
     activeInvestigationCount ?? (hasActiveInvestigations ? sectionTotal('in-progress') : 0);
+  const openSections = sections.filter((section) => section.id !== 'closed');
   const totalCount = sections.reduce((sum, section) => sum + section.total, 0);
   mockUseInvestigationSections.mockReturnValue({
     sections,
@@ -175,12 +178,11 @@ function setSections({
     hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
     activeInvestigationCount: resolvedActiveCount,
     isInitialLoading,
+    isOpenInitialLoading,
     isFetching,
     totalCount,
-    loadedCount: sections.reduce(
-      (sum, section) => (section.id === 'closed' ? sum : sum + section.investigations.length),
-      0
-    ),
+    openTotalCount: openSections.reduce((sum, section) => sum + section.total, 0),
+    loadedCount: openSections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   });
 }
@@ -555,7 +557,7 @@ describe('NightshiftApp', () => {
         jest.advanceTimersByTime(300);
       });
       expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
-        'No open investigations found'
+        'No investigations found'
       );
 
       const searchInput = screen.getByTestId('nightshiftInvestigationsSearchInput');
@@ -927,17 +929,22 @@ describe('NightshiftApp', () => {
     let records: InvestigationSummary[];
     let client: QueryClient;
     let closedRequestFails: boolean;
+    let closedRequestPending: boolean;
 
     beforeEach(() => {
       window.localStorage.clear();
       client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       records = [];
       closedRequestFails = false;
+      closedRequestPending = false;
       mockUseInvestigationSections.mockImplementation(
         jest.requireActual('../../data/investigations/use_investigation_sections')
           .useInvestigationSections
       );
       const httpGet = jest.fn(async (url: string, { query }: { query: ListQuery }) => {
+        if (closedRequestPending && query.status === 'closed') {
+          return new Promise(() => {});
+        }
         if (closedRequestFails && query.status === 'closed') {
           throw Object.assign(new Error('Closed investigations unavailable'), {
             request: {},
@@ -1077,7 +1084,7 @@ describe('NightshiftApp', () => {
       expect(within(closedSection()).getAllByRole('listitem')).toHaveLength(3);
       expect(mockUsePageReady).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          customMetrics: expect.objectContaining({ value1: 0, value2: 4 }),
+          customMetrics: expect.objectContaining({ value1: 0, value2: 0 }),
         })
       );
       expect(
@@ -1167,7 +1174,7 @@ describe('NightshiftApp', () => {
             key1: 'investigation_count',
             value1: 2,
             key2: 'investigation_total',
-            value2: 4,
+            value2: 2,
             key3: 'active_investigation_count',
             value3: 0,
             key4: 'unrated_investigation_count',
@@ -1175,6 +1182,18 @@ describe('NightshiftApp', () => {
           }),
         })
       );
+    });
+
+    it('renders header and severity tiles once open data loads even while Closed is still loading', async () => {
+      closedRequestPending = true;
+      records = [criticalInvestigation];
+      renderApp({ client, initialEntries: [fixedWindowUrl] });
+
+      await screen.findByText('1 investigation needs you');
+      expect(screen.getByTestId('nightshiftSeverityTileCount-critical')).toHaveTextContent('1');
+      expect(
+        screen.getByTestId('nightshiftInvestigationSectionSkeleton-closed')
+      ).toBeInTheDocument();
     });
   });
 });
