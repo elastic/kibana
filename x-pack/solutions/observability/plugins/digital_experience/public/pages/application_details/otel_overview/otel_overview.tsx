@@ -52,6 +52,7 @@ import { OverviewToolbar } from './components/overview_toolbar';
 import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
+import { VitalsTrendPanel } from './components/vitals_trend_panel';
 import { usePickerOptions } from './hooks/use_picker_options';
 import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
 
@@ -387,6 +388,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           onTimeRangeSelect={setTimeRange}
         />
       )}
+      {/* Its own Lens query, so it loads, fails and refreshes apart from the Overview's request. */}
+      <VitalsTrendPanel serviceName={serviceName} />
       <EuiSpacer size="m" />
       <UsageAndErrorsPanels
         serviceName={serviceName}

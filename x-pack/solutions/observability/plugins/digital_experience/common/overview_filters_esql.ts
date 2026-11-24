@@ -6,16 +6,16 @@
  */
 
 import { escapeStringValue } from '@kbn/esql-utils';
-import { partitionFilterValues } from '../../../common/filter_values';
+import { partitionFilterValues } from './filter_values';
 import {
   OVERVIEW_FILTER_NAMES,
   URL_FILTER_NAMES,
   isFreeTextFilter,
   type OverviewFilterName,
   type OverviewFilters,
-} from '../../../common/overview_filters';
-import { cleanedValue } from '../esql';
-import { FIELD_VALUE_LABELS, FILTER_SOURCE_FIELDS } from './overview_filters';
+} from './overview_filters';
+import { cleanedValue } from './esql_values';
+import { FIELD_VALUE_LABELS, FILTER_SOURCE_FIELDS } from './overview_filter_fields';
 
 // The ES|QL form of the Overview's filters (`overview_filters.ts`), which match the same
 // documents: ES|QL can't read the runtime fields the searches coalesce the alternatives into.
