@@ -9,16 +9,16 @@ import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import { DatasetPreview } from './dataset_preview';
+import { DatasetPreview, type DatasetPreviewProps } from './dataset_preview';
 
-export function StepPreview() {
+export function StepPreview({ gridState, onGridStateChange }: DatasetPreviewProps) {
   return (
     <div data-test-subj="createDatasetWizardPreviewStep">
       <EuiTitle size="m">
         <h2>{createDatasetWizardStrings.previewStepLabel}</h2>
       </EuiTitle>
       <EuiSpacer size="l" />
-      <DatasetPreview />
+      <DatasetPreview gridState={gridState} onGridStateChange={onGridStateChange} />
     </div>
   );
 }

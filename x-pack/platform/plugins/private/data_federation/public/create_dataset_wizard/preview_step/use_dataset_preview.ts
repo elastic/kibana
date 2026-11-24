@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLRow } from '@kbn/es-types';
-import { formatESQLColumns, getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import { formatESQLColumns, getESQLAdHocDataview } from '@kbn/esql-utils';
 
 import type { DataFederationKibanaServices } from '../../types';
 
@@ -44,13 +44,8 @@ export const useDatasetPreview = (esqlQuery: string): DatasetPreviewState => {
     const runPreview = async () => {
       setState({ isLoading: true });
       try {
-        const [{ response }, dataView] = await Promise.all([
-          getESQLResults({
-            esqlQuery,
-            includeColumnMetadata: true,
-            search: data.search.search,
-            signal,
-          }),
+        const [{ rawResponse: response }, dataView] = await Promise.all([
+          data.search.esql({ query: esqlQuery, columnMetadata: true }, { abortSignal: signal }),
           getESQLAdHocDataview({
             dataViewsService: data.dataViews,
             http,

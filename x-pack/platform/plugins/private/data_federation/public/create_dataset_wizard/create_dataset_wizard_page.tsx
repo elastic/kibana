@@ -19,6 +19,7 @@ import { AppHeader } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ESQLDataGridState } from '@kbn/esql-datagrid/public';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
@@ -97,6 +98,7 @@ export function CreateDatasetWizardPage({
 
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [stepContent, setStepContent] = useState(INITIAL_STEP_CONTENT);
+  const [previewGridState, setPreviewGridState] = useState<ESQLDataGridState>({});
   // Field rules only run while their step is mounted, so a step can only be skipped over once it
   // has passed validation, and its result is re-recorded whenever it is left in either direction.
   // A saved dataset's steps start out validated when its values pass them; a new dataset's
@@ -269,7 +271,12 @@ export function CreateDatasetWizardPage({
                   )}
                   {activeStepId === 'settings' && <StepAdditional />}
                   {activeStepId === 'mapping' && <StepMapping />}
-                  {activeStepId === 'preview' && <StepPreview />}
+                  {activeStepId === 'preview' && (
+                    <StepPreview
+                      gridState={previewGridState}
+                      onGridStateChange={setPreviewGridState}
+                    />
+                  )}
                   {activeStepId === 'review' && <StepReview dataSources={dataSources} />}
                 </div>
               </WizardStepProvider>

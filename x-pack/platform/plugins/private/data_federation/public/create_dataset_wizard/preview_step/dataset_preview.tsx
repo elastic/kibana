@@ -7,6 +7,7 @@
 
 import React, { Suspense } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import type { ESQLDataGridState } from '@kbn/esql-datagrid/public';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { useDatasetPreview } from './use_dataset_preview';
@@ -28,7 +29,12 @@ const LoadingPrompt = ({ dataTestSubj }: { dataTestSubj: string }) => (
   />
 );
 
-export const DatasetPreview = () => {
+export interface DatasetPreviewProps {
+  gridState?: ESQLDataGridState;
+  onGridStateChange?: (state: ESQLDataGridState) => void;
+}
+
+export const DatasetPreview = ({ gridState, onGridStateChange }: DatasetPreviewProps) => {
   const { isLoading, error, result } = useDatasetPreview(DATASET_PREVIEW_QUERY);
 
   if (isLoading) {
@@ -69,9 +75,13 @@ export const DatasetPreview = () => {
           dataView={result.dataView}
           flyoutType="overlay"
           initialRowHeight={0}
+          initialState={gridState}
           isTableView
+          onStateChange={onGridStateChange}
           query={result.query}
           rows={result.rows}
+          showColumnTokens
+          showOpenInDiscoverLink={false}
         />
       </Suspense>
     </div>

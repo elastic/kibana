@@ -10,47 +10,48 @@ import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 
-import { DATASET_PREVIEW_QUERY, DatasetPreview } from './dataset_preview';
+import { DATASET_PREVIEW_QUERY, DatasetPreview, type DatasetPreviewProps } from './dataset_preview';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
   getESQLAdHocDataview: jest.fn(),
-  getESQLResults: jest.fn(),
 }));
+
+const mockEsqlDataGridProps = jest.fn();
 
 jest.mock('@kbn/esql-datagrid/public', () => ({
-  ESQLDataGrid: ({ rows }: { rows: unknown[] }) => (
-    <div data-test-subj="mockEsqlDataGrid">{rows.length} rows</div>
-  ),
+  ESQLDataGrid: (props: { rows: unknown[] }) => {
+    mockEsqlDataGridProps(props);
+    return <div data-test-subj="mockEsqlDataGrid">{props.rows.length} rows</div>;
+  },
 }));
 
-const getESQLResultsMock = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
 const getESQLAdHocDataviewMock = getESQLAdHocDataview as jest.MockedFunction<
   typeof getESQLAdHocDataview
 >;
 
-const search = jest.fn();
+const esql = jest.fn();
 const dataViews = {};
 const http = {};
 
-const renderPreview = () =>
+const renderPreview = (props: DatasetPreviewProps = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <KibanaContextProvider services={{ data: { search: { search }, dataViews }, http }}>
-          <DatasetPreview />
+        <KibanaContextProvider services={{ data: { search: { esql }, dataViews }, http }}>
+          <DatasetPreview {...props} />
         </KibanaContextProvider>
       </I18nProvider>
     </EuiProvider>
   );
 
 const mockResults = (values: unknown[][]) => {
-  getESQLResultsMock.mockResolvedValue({
-    response: { columns: [{ name: 'message', type: 'keyword' }], values },
-    params: { query: DATASET_PREVIEW_QUERY },
-  } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+  esql.mockResolvedValue({
+    rawResponse: { columns: [{ name: 'message', type: 'keyword' }], values },
+    requestParams: { query: DATASET_PREVIEW_QUERY },
+  });
   getESQLAdHocDataviewMock.mockResolvedValue(
     {} as unknown as Awaited<ReturnType<typeof getESQLAdHocDataview>>
   );
@@ -68,12 +69,9 @@ describe('DatasetPreview', () => {
     expect(screen.getByTestId('createDatasetWizardPreviewLoading')).toBeInTheDocument();
     expect(await screen.findByTestId('mockEsqlDataGrid')).toHaveTextContent('1 rows');
 
-    expect(getESQLResultsMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        esqlQuery: 'FROM kibana_sample_data_ecommerce',
-        includeColumnMetadata: true,
-        search,
-      })
+    expect(esql).toHaveBeenCalledWith(
+      { query: 'FROM kibana_sample_data_ecommerce', columnMetadata: true },
+      { abortSignal: expect.any(AbortSignal) }
     );
     expect(getESQLAdHocDataviewMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -81,6 +79,18 @@ describe('DatasetPreview', () => {
         http,
         query: 'FROM kibana_sample_data_ecommerce',
       })
+    );
+  });
+
+  it('restores the grid from the persisted state and reports changes back', async () => {
+    mockResults([['hello']]);
+    const gridState = { columns: ['message'], rowsPerPage: 25 };
+    const onGridStateChange = jest.fn();
+    renderPreview({ gridState, onGridStateChange });
+
+    await screen.findByTestId('mockEsqlDataGrid');
+    expect(mockEsqlDataGridProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ initialState: gridState, onStateChange: onGridStateChange })
     );
   });
 
@@ -92,7 +102,7 @@ describe('DatasetPreview', () => {
   });
 
   it('shows the error when the query fails', async () => {
-    getESQLResultsMock.mockRejectedValue(new Error('Unknown index [kibana_sample_data_ecommerce]'));
+    esql.mockRejectedValue(new Error('Unknown index [kibana_sample_data_ecommerce]'));
     getESQLAdHocDataviewMock.mockResolvedValue(
       {} as unknown as Awaited<ReturnType<typeof getESQLAdHocDataview>>
     );

@@ -48,7 +48,7 @@ import {
   mockRowAdditionalLeadingControls,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
 import { useColumns } from '../hooks/use_data_grid_columns';
 import { UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS } from '../hooks/use_full_screen_watcher';
@@ -2560,5 +2560,84 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+  });
+
+  describe('horizontal scroll restoration', () => {
+    type GridScrollEvent = Parameters<
+      NonNullable<NonNullable<EuiDataGridProps['virtualizationOptions']>['onScroll']>
+    >[0];
+
+    const createScrollEvent = (scrollLeft: number): GridScrollEvent => ({
+      scrollLeft,
+      scrollTop: 0,
+      horizontalScrollDirection: 'forward',
+      verticalScrollDirection: 'forward',
+      scrollUpdateWasRequested: false,
+      scrollHeight: 0,
+      scrollWidth: 0,
+      clientHeight: 0,
+      clientWidth: 0,
+      isScrolledToBlockStart: true,
+      isScrolledToBlockEnd: false,
+      isScrolledToInlineStart: scrollLeft === 0,
+      isScrolledToInlineEnd: false,
+    });
+
+    const renderWithRestorableState = (
+      restorableProps: Pick<
+        React.ComponentProps<typeof UnifiedDataTable>,
+        'initialState' | 'onInitialStateChange'
+      >
+    ) =>
+      render(
+        <KibanaContextProvider services={servicesMock}>
+          <IntlProvider locale="en">
+            <UnifiedDataTable {...getProps()} {...restorableProps} />
+          </IntlProvider>
+        </KibanaContextProvider>
+      );
+
+    it('scrolls to the restored horizontal position only after the first cells rendered', async () => {
+      const scrollLeftSetter = jest.spyOn(Element.prototype, 'scrollLeft', 'set');
+      renderWithRestorableState({ initialState: { scrollLeft: 120 } });
+      await waitForDataGridRender();
+
+      expect(getLastEuiDataGridProps().virtualizationOptions?.initialScrollLeft).toBeUndefined();
+      await waitFor(() => expect(scrollLeftSetter).toHaveBeenCalledWith(120));
+      scrollLeftSetter.mockRestore();
+    });
+
+    it('keeps the restored horizontal position if unmounted before it was applied', async () => {
+      const onInitialStateChange = jest.fn();
+      const { unmount } = renderWithRestorableState({
+        initialState: { scrollLeft: 120 },
+        onInitialStateChange,
+      });
+      await waitForDataGridRender();
+
+      act(() => {
+        getLastEuiDataGridProps().virtualizationOptions?.onScroll?.(createScrollEvent(0));
+      });
+      unmount();
+
+      expect(onInitialStateChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ scrollLeft: 120 })
+      );
+    });
+
+    it('reports the latest horizontal scroll position when unmounted', async () => {
+      const onInitialStateChange = jest.fn();
+      const { unmount } = renderWithRestorableState({ onInitialStateChange });
+      await waitForDataGridRender();
+
+      act(() => {
+        getLastEuiDataGridProps().virtualizationOptions?.onScroll?.(createScrollEvent(80));
+      });
+      unmount();
+
+      expect(onInitialStateChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ scrollLeft: 80 })
+      );
+    });
   });
 });

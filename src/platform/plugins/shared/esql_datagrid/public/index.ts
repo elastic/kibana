@@ -9,6 +9,7 @@
 
 import { ESQLDataGridPlugin } from './plugin';
 export { ESQLDataGrid } from './create_datagrid';
+export type { ESQLDataGridState } from './types';
 
 export function plugin() {
   return new ESQLDataGridPlugin();
