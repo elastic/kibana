@@ -1,0 +1,11 @@
+cache disabled for @kbn/swc-register (CODEX_SANDBOX is set)
+ info node scripts/jest --config x-pack/platform/plugins/shared/osquery/jest.config.js x-pack/platform/plugins/shared/osquery/public/live_queries/form/query_details_flyout.test.tsx --runInBand
+PASS x-pack/platform/plugins/shared/osquery/public/live_queries/form/query_details_flyout.test.tsx
+  QueryDetailsFlyout
+    ✓ renders inside a managed size m parent flyout without throwing (55 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        3.458 s
+Ran all test suites matching /x-pack\/platform\/plugins\/shared\/osquery\/public\/live_queries\/form\/query_details_flyout.test.tsx/i.
