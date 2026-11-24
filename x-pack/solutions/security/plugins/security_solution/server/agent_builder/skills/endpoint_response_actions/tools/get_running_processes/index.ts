@@ -16,7 +16,7 @@ import {
   buildResponseActionComment,
   MAX_ACTION_COMMENT_LENGTH,
   dispatchErrorResult,
-  summarizeActionErrors,
+  summarizeQueuedOrErrors,
   RUNNING_PROCESSES_MAX_RESULT_TOKENS,
   summarizeActionHosts,
   summarizeActionOutputs,
@@ -134,15 +134,10 @@ export const getRunningProcessesTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
-                ...(isOffline
-                  ? {
-                      queued: true,
-                      message:
-                        'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.',
-                    }
-                  : // Why a failed action failed (bounded); without it the model
-                    // sees only `status: failed`.
-                    summarizeActionErrors(actionDetails.errors) ?? {}),
+                // Queued marker for a pending offline action; otherwise why a
+                // failed action failed (bounded), else the model sees only
+                // `status: failed`.
+                ...summarizeQueuedOrErrors(isOffline, actionDetails),
                 // Bounded: `outputs` carries one entry per running process, each
                 // with its full command line, so a busy host would otherwise blow
                 // the result budget and have generic truncation discard process

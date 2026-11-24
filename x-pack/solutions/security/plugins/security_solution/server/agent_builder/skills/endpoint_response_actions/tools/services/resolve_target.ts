@@ -25,7 +25,7 @@ export type DispatchActionName = 'isolate' | 'unisolate' | 'scan' | 'running-pro
  * agent ID and retry") is something the schema can actually carry out.
  */
 export const IP_DESCRIPTION =
-  'The exact IPv4 or IPv6 address the analyst gave. Pass it whenever they gave one, including alongside an agent ID (the tool checks that both name the same host); use it as the only identifier only when they gave no hostname or agent ID. Shared addresses return an ambiguity result instead of selecting a host.';
+  'The exact IPv4 or IPv6 address the analyst gave. Pass it whenever they gave one, including alongside a hostname or an agent ID (the tool checks that they name the same host); it may also be the only identifier. Shared addresses return an ambiguity result instead of selecting a host.';
 
 export const hostTargetFields = (hostNameDescription: string) => ({
   hostName: z
@@ -47,10 +47,10 @@ export const hostTargetFields = (hostNameDescription: string) => ({
 
 export const requireHostTarget = {
   check: (value: { hostName?: string; ip?: string; agentId?: string }) =>
-    Boolean(value.hostName || value.ip || value.agentId) &&
-    // A resolved agent ID takes precedence, so retaining the IP from an
-    // ambiguity response must not make the model's retry invalid.
-    !(value.ip && value.hostName && !value.agentId),
+    // `hostName` + `ip` without an agent ID is valid: the skill tells the model to
+    // pass the analyst's IP alongside the hostname, and the dispatch resolves
+    // by IP then refuses a hostName that is not one of that endpoint's names.
+    Boolean(value.hostName || value.ip || value.agentId),
   message: 'Provide ip or hostName, or identify the target with agentId.',
 };
 
@@ -128,27 +128,6 @@ const refuseGoneEndpoint = (
         },
       }
     : undefined;
-
-/**
- * Whether the agent is one of the holders of an exact IP. Used when a call
- * names both an `ip` and an `agentId`: the agent id wins the resolution, so the
- * address must be shown to belong to it rather than silently dropped. A holder
- * list the lookup knows to be partial that omits the agent fails closed.
- */
-export async function agentHoldsIp(
-  lookup: EndpointLookupService,
-  ip: string,
-  agentId: string
-): Promise<boolean> {
-  const resolved = await lookup.resolveByIp(ip);
-  if (resolved.kind === 'found') {
-    return resolved.endpoint.agentId === agentId;
-  }
-  if (resolved.kind === 'ambiguous') {
-    return resolved.candidates.some((candidate) => candidate.agentId === agentId);
-  }
-  return false;
-}
 
 /**
  * Resolves the host a dispatching tool will act on. A supplied `agentId` wins:

@@ -909,6 +909,66 @@ describe('isolateHostTool', () => {
       );
     });
 
+    describe('metadata that has not caught up with a just-completed opposite action', () => {
+      const stubCompletedRelease = (completedAt: string) =>
+        mockGetActionListByStatus.mockImplementation(async ({ statuses }: { statuses: string[] }) =>
+          statuses.includes('successful')
+            ? { data: [{ command: 'unisolate', completedAt }] }
+            : { data: [] }
+        );
+
+      it('asks for confirmation instead of reporting a no-op when a release completed after the metadata was written', async () => {
+        stubFleetAgent({ id: 'agent-123', status: 'online', packages: ['endpoint'] });
+        const entry = metadataEntry('agent-123', true);
+        stubMetadata([
+          {
+            ...entry,
+            metadata: { ...entry.metadata, '@timestamp': Date.parse('2026-01-01T10:00:00Z') },
+          },
+        ]);
+        stubCompletedRelease('2026-01-01T10:05:00Z');
+
+        const { card, result } = await confirmThenHandle(
+          isolateHostTool(mockEndpointAppContextService),
+          {
+            hostName: 'my-host',
+          }
+        );
+
+        expect(card).toMatchObject({ color: 'danger' });
+        expect(JSON.stringify(result)).not.toContain('noOp');
+        expect(mockGetActionListByStatus).toHaveBeenCalledWith(
+          expect.objectContaining({
+            commands: ['unisolate'],
+            statuses: ['successful'],
+            elasticAgentIds: ['agent-123'],
+          })
+        );
+      });
+
+      it('still reports a no-op when the metadata is newer than the last completed release', async () => {
+        stubFleetAgent({ id: 'agent-123', status: 'online', packages: ['endpoint'] });
+        const entry = metadataEntry('agent-123', true);
+        stubMetadata([
+          {
+            ...entry,
+            metadata: { ...entry.metadata, '@timestamp': Date.parse('2026-01-01T10:10:00Z') },
+          },
+        ]);
+        stubCompletedRelease('2026-01-01T10:05:00Z');
+
+        const { card, result } = await confirmThenHandle(
+          isolateHostTool(mockEndpointAppContextService),
+          {
+            hostName: 'my-host',
+          }
+        );
+
+        expect(card).toBeUndefined();
+        expect(assertStandardReturn(result)[0].data).toMatchObject({ noOp: true, isolated: true });
+      });
+    });
+
     it('refuses a call whose ip is not held by the supplied agent id', async () => {
       const isolate = jest.fn();
       stubFleetAgent({ id: 'agent-other', status: 'online', packages: ['endpoint'] });
@@ -958,6 +1018,57 @@ describe('isolateHostTool', () => {
       });
 
       expect(card).toMatchObject({ color: 'danger' });
+    });
+
+    describe('hostName together with ip and no agentId', () => {
+      const stubIpHolder = () => {
+        mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+          agent: {
+            getAgent: jest
+              .fn()
+              .mockResolvedValue({ id: 'agent-ip', status: 'online', packages: ['endpoint'] }),
+          },
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+        stubMetadata([metadataEntry('agent-ip')]);
+      };
+
+      it('passes schema validation', () => {
+        const { schema } = isolateHostTool(mockEndpointAppContextService);
+
+        expect(schema.safeParse({ hostName: 'agent-ip-host', ip: '10.0.0.7' }).success).toBe(true);
+        expect(schema.safeParse({}).success).toBe(false);
+      });
+
+      it('resolves by ip and asks for confirmation when the hostName belongs to that endpoint', async () => {
+        stubIpHolder();
+
+        const { card } = await confirmThenHandle(isolateHostTool(mockEndpointAppContextService), {
+          hostName: 'agent-ip-host',
+          ip: '10.0.0.7',
+        });
+
+        expect(card).toMatchObject({ color: 'danger' });
+      });
+
+      it('refuses a hostName that is not a name of the endpoint holding the ip', async () => {
+        stubIpHolder();
+        const isolate = jest.fn();
+        mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+          () => ({ isolate } as never)
+        ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+        const { card, result } = await confirmThenHandle(
+          isolateHostTool(mockEndpointAppContextService),
+          { hostName: 'some-other-host', ip: '10.0.0.7' }
+        );
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+        expect(card).toBeUndefined();
+        expect(data).toMatchObject({ error: 'invalid_argument' });
+        expect(data.message).toContain("'some-other-host'");
+        expect(isolate).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -1509,6 +1620,40 @@ describe('isolateHostTool', () => {
           'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.',
       });
       expect(mockGetActionDetailsById).not.toHaveBeenCalled();
+    });
+
+    it('does not report an offline endpoint as queued when the dispatched action already failed', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-offline', packages: ['endpoint'], status: 'offline' }],
+        }),
+      };
+      const isolate = jest.fn().mockResolvedValue({
+        id: 'action-failed',
+        status: 'failed',
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['host rejected the action'],
+        hosts: { 'agent-offline': { name: 'offline-host' } },
+      });
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { result } = await confirmThenHandle(tool, { hostName: 'offline-host' });
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(data).toMatchObject({
+        actionId: 'action-failed',
+        status: 'failed',
+        errors: ['host rejected the action'],
+      });
+      expect(data).not.toHaveProperty('queued');
     });
 
     it('uses a default comment when none is provided', async () => {

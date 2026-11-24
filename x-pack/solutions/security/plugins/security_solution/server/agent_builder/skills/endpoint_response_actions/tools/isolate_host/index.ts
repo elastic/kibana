@@ -17,7 +17,7 @@ import {
   buildResponseActionComment,
   MAX_ACTION_COMMENT_LENGTH,
   dispatchErrorResult,
-  summarizeActionErrors,
+  summarizeQueuedOrErrors,
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
@@ -143,13 +143,7 @@ export const isolateHostTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
-                ...(target.endpoint.status === 'offline'
-                  ? {
-                      queued: true,
-                      message:
-                        'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.',
-                    }
-                  : summarizeActionErrors(actionDetails.errors) ?? {}),
+                ...summarizeQueuedOrErrors(target.endpoint.status === 'offline', actionDetails),
                 hosts: actionDetails.hosts,
                 comment,
               },
