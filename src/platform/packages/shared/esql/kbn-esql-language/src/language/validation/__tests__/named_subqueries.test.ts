@@ -22,12 +22,18 @@ it('keeps SET unmapped_fields for the columns of an IN subquery in a LET body', 
 });
 
 // The integration cluster uses a Basic license, which cannot run FUSE.
-it('reports missing METADATA on FUSE even when it inherits it from a LET', async () => {
-  const { expectErrors } = await setup();
-  const query =
-    'LET a = (FROM index METADATA _id, _index, _score | KEEP _id, _index, _score); FROM a | FORK (LIMIT 10) (LIMIT 10) | FUSE';
+const missingFuseMetadata =
+  '[FUSE] The FROM command is missing the _id, _index, _score METADATA field.';
 
-  await expectErrors(query, [
-    '[FUSE] The FROM command is missing the _id, _index, _score METADATA field.',
-  ]);
+it.each([
+  ['LET a = (FROM index METADATA _id, _index, _score)', []],
+  ['LET a = (FROM index)', [missingFuseMetadata]],
+  [
+    'LET a = (FROM index | WHERE keywordField IN (FROM other_index METADATA _id, _index, _score | KEEP keywordField))',
+    [missingFuseMetadata],
+  ],
+])('validates the METADATA FUSE inherits from %s', async (letCommand, expectedErrors) => {
+  const { expectErrors } = await setup();
+
+  await expectErrors(`${letCommand}; FROM a | FORK (LIMIT 10) (LIMIT 10) | FUSE`, expectedErrors);
 });
