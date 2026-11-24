@@ -28,6 +28,7 @@ const configurations = {
   scopes: createField({ type: FieldType.LIST }),
   'rate_limit.requests_per_minute': createField({ type: FieldType.INTEGER }),
   num_allocations: createField({ type: FieldType.INTEGER }),
+  adaptive_allocations: createField({ type: FieldType.MAP }),
   api_key: createField({ sensitive: true }),
   client_secret: createField({ sensitive: true }),
 };
@@ -74,6 +75,10 @@ describe('getUpdatableServiceSettings', () => {
         { api_key: '', client_secret: null }
       )
     ).toEqual({});
+  });
+
+  it('keeps an empty list so a cleared list is saved', () => {
+    expect(getUpdatableServiceSettings(configurations, { scopes: [] })).toEqual({ scopes: [] });
   });
 
   it('nests dotted keys', () => {
