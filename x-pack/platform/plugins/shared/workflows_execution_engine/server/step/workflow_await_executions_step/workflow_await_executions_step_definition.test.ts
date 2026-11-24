@@ -249,6 +249,19 @@ describe('createAwaitExecutionsStepDefinition', () => {
     expect(getWorkflowExecutionsByIds).toHaveBeenNthCalledWith(2, ['a'], SPACE_ID);
   });
 
+  it('reads only the lineage fields when an execution is still running at start', async () => {
+    const { getWorkflowExecutionsByIds } = dependencies.workflowExecutionRepository;
+    executions = [buildExecution('a', ExecutionStatus.RUNNING)];
+
+    await expect(start({ 'execution-ids': 'a' })).resolves.toEqual({
+      state: { executionIds: ['a'], mode: 'fail-fast' },
+    });
+    expect(getWorkflowExecutionsByIds).toHaveBeenCalledTimes(1);
+    expect(getWorkflowExecutionsByIds).toHaveBeenCalledWith(['a'], SPACE_ID, {
+      sourceIncludes: expect.any(Array),
+    });
+  });
+
   it('checks lineage only at start, not on each poll', async () => {
     executions = [
       buildExecution('a', ExecutionStatus.RUNNING, {
