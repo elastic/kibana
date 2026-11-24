@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 import type { FilterableSource } from '@kbn/data-source';
-import { getPublishedDataViewId } from './create_data_control_panel_action';
+import { getFirstPersistedDataViewId } from './create_data_control_panel_action';
 
 const getSource = (id: string, isPersisted: boolean) =>
   ({ id, isPersisted: () => isPersisted } as unknown as FilterableSource);
@@ -25,10 +25,10 @@ const getEmbeddable = (dataSources?: FilterableSource[]) => ({
   dataSources$: new BehaviorSubject<FilterableSource[] | undefined>(dataSources),
 });
 
-describe('getPublishedDataViewId', () => {
+describe('getFirstPersistedDataViewId', () => {
   test('returns the first persisted data view', () => {
     expect(
-      getPublishedDataViewId(
+      getFirstPersistedDataViewId(
         getEmbeddable([getSource('persisted-1', true), getSource('persisted-2', true)])
       )
     ).toBe('persisted-1');
@@ -36,27 +36,29 @@ describe('getPublishedDataViewId', () => {
 
   test('skips ad hoc data views', () => {
     expect(
-      getPublishedDataViewId(
+      getFirstPersistedDataViewId(
         getEmbeddable([getSource('ad-hoc', false), getSource('persisted', true)])
       )
     ).toBe('persisted');
   });
 
   test('skips ES|QL sources', () => {
-    expect(getPublishedDataViewId(getEmbeddable([esqlSource, getSource('persisted', true)]))).toBe(
-      'persisted'
-    );
+    expect(
+      getFirstPersistedDataViewId(getEmbeddable([esqlSource, getSource('persisted', true)]))
+    ).toBe('persisted');
   });
 
   test('returns undefined when only ad hoc data views are published', () => {
-    expect(getPublishedDataViewId(getEmbeddable([getSource('ad-hoc', false)]))).toBeUndefined();
+    expect(
+      getFirstPersistedDataViewId(getEmbeddable([getSource('ad-hoc', false)]))
+    ).toBeUndefined();
   });
 
   test('returns undefined when no data sources are published', () => {
-    expect(getPublishedDataViewId(getEmbeddable(undefined))).toBeUndefined();
+    expect(getFirstPersistedDataViewId(getEmbeddable(undefined))).toBeUndefined();
   });
 
   test('returns undefined when the embeddable does not publish data sources', () => {
-    expect(getPublishedDataViewId({})).toBeUndefined();
+    expect(getFirstPersistedDataViewId({})).toBeUndefined();
   });
 });
