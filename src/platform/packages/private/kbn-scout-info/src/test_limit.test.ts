@@ -136,6 +136,15 @@ describe('testLimits', () => {
         '@limit/except-fips',
       ]);
     });
+
+    it('leaves out every except tag when the run has both attributes', () => {
+      const unsatisfied = testLimits.unsatisfiedBy(['fips', 'upgradeAssistant']);
+
+      expect(unsatisfied.map((limit) => limit.playwrightTag)).toEqual([
+        '@limit/except-fips',
+        '@limit/except-upgradeAssistant',
+      ]);
+    });
   });
 });
 
