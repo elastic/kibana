@@ -378,9 +378,36 @@ describe('digital experience mobile scenarios', () => {
       const firstSeen = Math.min(...newest.map((doc) => Number(doc['@timestamp'])));
 
       expect(newest.length).toBeGreaterThan(0);
-      // React Native sessions end at their time, so the first ones started a few minutes before
-      expect(firstSeen).toBeGreaterThan(rolloutStart - 30 * MINUTE_MS);
+      // Not even a session that ends after the start but started before it
+      expect(firstSeen).toBeGreaterThanOrEqual(rolloutStart);
       expect(firstSeen).toBeLessThan(to);
+    });
+
+    it('raises the error rate of the newest release on Android too, where only transport failures are exceptions', async () => {
+      const androidDocs = await run(releases, {
+        scenarioOpts: { seed: 'releases-android', scale: 0.25, platform: 'android' },
+        from,
+        to,
+      });
+      // Exceptions per session, as the mobile error rate counts them
+      const errorRateOf = (isNewest: boolean) => {
+        const ofRelease = androidDocs.filter((doc) => (versionOf(doc) === '6.0.0') === isNewest);
+        const sessions = new Set(
+          ofRelease.flatMap((doc) => {
+            const sessionId = attributesOf(doc)['session.id'];
+            return sessionId === undefined ? [] : [sessionId];
+          })
+        );
+        const exceptions = ofRelease.filter(
+          (doc) => attributesOf(doc)['exception.type'] !== undefined
+        );
+        return exceptions.length / sessions.size;
+      };
+
+      expect(new Set(androidDocs.map((doc) => resourceOf(doc)['os.name']))).toEqual(
+        new Set(['Android'])
+      );
+      expect(errorRateOf(true)).toBeGreaterThan(2 * errorRateOf(false));
     });
   });
 });

@@ -410,7 +410,7 @@ if (!releaseTrainBaseApp) {
  * The shop-mobile app on seven releases, for the release health of the mobile page: five show by
  * name and the rest as "Other". The newest, 6.0.0, rolls out 12 hours into the run, to 75% of the
  * installations, so it first appears inside the time range while the older releases keep a tail,
- * and more of its HTTP requests fail.
+ * and more of its HTTP requests fail, on both platforms.
  */
 export const DIGITAL_EXPERIENCE_RELEASE_TRAIN_APP: DigitalExperienceMobileApp = {
   ...releaseTrainBaseApp,
@@ -423,8 +423,9 @@ export const DIGITAL_EXPERIENCE_RELEASE_TRAIN_APP: DigitalExperienceMobileApp = 
       buildNumber: 600,
       share: 0.3,
       rollout: { initialAdoption: 0.1, hours: 6, startsAfterHours: 12, targetAdoption: 0.75 },
-      // A regression: many more failed requests, each an exception
-      health: { httpFailureRate: 0.15 },
+      // A regression: many more failed requests. iOS reports a 4xx/5xx as an exception, Android
+      // only a transport failure, so both rise for the error rate to rise on every platform.
+      health: { httpFailureRate: 0.15, networkErrorRate: 0.15 },
     },
     { serviceVersion: '5.4.0', buildNumber: 540, share: 0.35 },
     { serviceVersion: '5.3.2', buildNumber: 532, share: 0.25 },
@@ -847,6 +848,9 @@ const pickInstalledVersion = (
     return pickVersion(random, versions);
   }
   const { initialAdoption, hours, startsAfterHours = 0, targetAdoption = 1 } = rollout;
+  // The turn is drawn before the rollout starts too, so an installation picks the same older
+  // version before and after it, and only ever moves to the newest
+  const turn = random();
   const sinceStart = elapsed - startsAfterHours * HOUR_MS;
   if (sinceStart < 0) {
     return 1 + pickVersion(random, older);
@@ -858,7 +862,7 @@ const pickInstalledVersion = (
           initialAdoption + ((targetAdoption - initialAdoption) * sinceStart) / (hours * HOUR_MS),
           targetAdoption
         );
-  return random() < progress ? 0 : 1 + pickVersion(random, older);
+  return turn < progress ? 0 : 1 + pickVersion(random, older);
 };
 
 type GenerateSessionsOpts = DigitalExperienceMobileScenarioOpts & {
@@ -1005,9 +1009,8 @@ const generateSessions = (
         installationCount ??
         Math.max(Math.ceil(perMinute * MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION), 1);
 
-      // The session at `time`: it starts there with proposed signals, and ends there without
-      const createSession = (index: number, time: number) => {
-        // An installation keeps its device and app version across sessions
+      // An installation keeps its device and app version across sessions: the same draws each time
+      const installationOf = (index: number) => {
         const installationRandom = createSeededRandom(
           `${seed}:${serviceName}:installation:${index % installations}`
         );
@@ -1019,11 +1022,19 @@ const generateSessions = (
         const [installationId, deviceId] = Array.from({ length: 2 }, () =>
           randomUuid(installationRandom)
         );
-        const {
-          app,
-          model: versionModel,
-          health: versionHealth,
-        } = versionApps[pickInstalledVersion(installationRandom, versions, time - from)];
+        return { installationRandom, profile, installationId, deviceId };
+      };
+      const versionAt = (index: number, elapsed: number) =>
+        pickInstalledVersion(installationOf(index).installationRandom, versions, elapsed);
+      // When the newest version starts rolling out inside the run, if it does
+      const { startsAfterHours } = versions[0].rollout ?? {};
+      const rolloutStart = startsAfterHours ? from + startsAfterHours * HOUR_MS : undefined;
+
+      // The session at `time` on version `versionIndex`: it starts there with proposed signals, and
+      // ends there without
+      const createSessionOn = (index: number, time: number, versionIndex: number) => {
+        const { profile, installationId, deviceId } = installationOf(index);
+        const { app, model: versionModel, health: versionHealth } = versionApps[versionIndex];
 
         const random = createSeededRandom(`${seed}:${serviceName}:${index}`);
         // Everything below is drawn even when it isn't used, so that options don't change the
@@ -1061,6 +1072,21 @@ const generateSessions = (
           random,
           ...(proposedSignals ? { start: time, dwell: NATIVE_DWELL } : { end: time }),
         });
+      };
+
+      const createSession = (index: number, time: number) => {
+        const versionIndex = versionAt(index, time - from);
+        const session = createSessionOn(index, time, versionIndex);
+        if (proposedSignals || versionIndex !== 0 || rolloutStart === undefined) {
+          return session;
+        }
+        // A React Native session ends at `time`, so it started earlier: one that started before
+        // the rollout runs the version the installation had then, so no event of the newest
+        // version comes before its rollout
+        const start = Math.min(...session.map(getTimestamp));
+        return start >= rolloutStart
+          ? session
+          : createSessionOn(index, time, versionAt(index, start - from));
       };
 
       if (proposedSignals) {

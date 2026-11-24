@@ -713,6 +713,57 @@ describe('digital experience mobile apps', () => {
       expect(startsOn(older[0].serviceVersion).some((time) => time < rolloutStart)).toBe(true);
     });
 
+    it('keeps each installation on its older version until it upgrades, across a delayed start', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, ...older] = app.versions;
+      const delayed = {
+        ...app,
+        versions: [
+          {
+            ...newest,
+            rollout: { initialAdoption: 0.6, hours: 0, startsAfterHours: 1.5, targetAdoption: 0.6 },
+          },
+          ...older,
+        ],
+      };
+      // Longer than a cycle of the installations on both sides of the start
+      const run = timerange(range.from, new Date(FROM + 4 * 60 * 60_000));
+      const starts = logsOf(
+        generateEdotNativeSessions(run, {
+          environment: 'test',
+          from: FROM,
+          scale: 0.25,
+          platform: 'both',
+          seed: 'digital-experience-native-delayed-no-downgrade',
+          apps: [delayed],
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+        )
+      ).filter((doc) => doc.event_name === EVENT_SESSION_START);
+      const versionsByInstallation = new Map<unknown, string[]>();
+      [...starts]
+        .sort((a, b) => Number(a['@timestamp']) - Number(b['@timestamp']))
+        .forEach(({ resource }) => {
+          const installationId = resource?.attributes?.['app.installation.id'];
+          versionsByInstallation.set(installationId, [
+            ...(versionsByInstallation.get(installationId) ?? []),
+            String(resource?.attributes?.['service.version']),
+          ]);
+        });
+
+      const repeated = [...versionsByInstallation.values()].filter(({ length }) => length > 1);
+      expect(repeated.length).toBeGreaterThan(0);
+      repeated.forEach((installed) => {
+        const upgradedAt = installed.indexOf(newest.serviceVersion);
+        const beforeUpgrade = upgradedAt === -1 ? installed : installed.slice(0, upgradedAt);
+        // One older version until the upgrade, and the newest from then on
+        expect(new Set(beforeUpgrade).size).toBeLessThanOrEqual(1);
+        if (upgradedAt !== -1) {
+          expect(new Set(installed.slice(upgradedAt))).toEqual(new Set([newest.serviceVersion]));
+        }
+      });
+    });
+
     it('keeps the sessions in progress of apps that share a service name apart', () => {
       const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
       const withVersion = (serviceVersion: string, appId: string) => ({

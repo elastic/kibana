@@ -1037,7 +1037,7 @@ node scripts/synthtrace digital_experience_mobile_native --live --scenarioOpts p
 
 #### `digital_experience_mobile_releases`
 
-Generates one EDOT React Native app, `release-train-mobile` (the `shop-mobile` app), on seven releases, for the release health section of the Digital Experience mobile page: the five with most sessions show by name and the rest as "Other". The newest, `6.0.0`, rolls out 12 hours into the run, to 75% of the installations 6 hours later, so it first appears inside the time range while older releases keep a tail, and more of its HTTP requests fail, so its error rate rises above the others'. Use a run of at least a day. Takes the options of `digital_experience_mobile`. `digital_experience_mixed` includes this app too.
+Generates one EDOT React Native app, `release-train-mobile` (the `shop-mobile` app), on seven releases, for the release health section of the Digital Experience mobile page: the five with most sessions show by name and the rest as "Other". The newest, `6.0.0`, rolls out 12 hours into the run, to 75% of the installations 6 hours later, so it first appears inside the time range (no session that started before then runs it) while older releases keep a tail, and more of its HTTP requests fail, answered with an error or not at all, so its error rate rises above the others' on both platforms. Use a run of at least a day. Takes the options of `digital_experience_mobile`. `digital_experience_mixed` includes this app too.
 
 ```sh
 node scripts/synthtrace digital_experience_mobile_releases --from=now-24h --to=now

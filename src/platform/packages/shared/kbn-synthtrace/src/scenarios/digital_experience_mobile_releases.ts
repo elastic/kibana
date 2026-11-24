@@ -12,8 +12,8 @@
  * Digital Experience mobile page:
  * - release-train-mobile: the shop-mobile app on seven releases, so the five with most sessions
  *   show by name and the other two as "Other". The newest, 6.0.0, rolls out halfway into the run,
- *   so it first appears inside the time range, and more of its HTTP requests fail, so its error
- *   rate rises above the others'.
+ *   so it first appears inside the time range, and more of its HTTP requests fail, on Android and
+ *   iOS, so its error rate rises above the others'.
  *
  * `digital_experience_mixed` includes this app too, so don't run both in one invocation.
  *
