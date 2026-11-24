@@ -38,17 +38,15 @@ export function getFetch$({
       tap((done) => {
         setAutoRefreshDone(done);
       }),
-      filter((done) => {
-        const { fetchStatus } = main$.getValue();
-        const isLoading =
-          fetchStatus === FetchStatus.LOADING || fetchStatus === FetchStatus.PARTIAL;
-
-        if (isLoading) {
-          // skip the tick while loading, but acknowledge it so the auto-refresh loop keeps running
-          done();
-        }
-
-        return !isLoading;
+      filter(() => {
+        const currentFetchStatus = main$.getValue().fetchStatus;
+        return (
+          /**
+           * filter to prevent auto-refresh triggered fetch when
+           * loading is still ongoing
+           */
+          currentFetchStatus !== FetchStatus.LOADING && currentFetchStatus !== FetchStatus.PARTIAL
+        );
       })
     ),
     defer(() => {

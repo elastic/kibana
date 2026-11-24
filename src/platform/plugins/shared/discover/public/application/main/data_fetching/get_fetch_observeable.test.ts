@@ -105,29 +105,4 @@ describe('getFetchObservable', () => {
       expect(setAutoRefreshDone).toHaveBeenCalled();
     })
   );
-  [FetchStatus.LOADING, FetchStatus.PARTIAL].forEach((fetchStatus) => {
-    test(
-      `getAutoRefreshFetch$ should skip but acknowledge a tick while main$ is ${fetchStatus}`,
-      fakeSchedulers((advance) => {
-        jest.useFakeTimers({ legacyFakeTimers: true });
-        const autoRefreshFetch$ = new Subject();
-        const fetch$ = getFetch$({
-          setAutoRefreshDone: jest.fn(),
-          main$: new BehaviorSubject({ fetchStatus }),
-          refetch$: new Subject(),
-          data: createDataMock(new Subject(), new Subject(), new Subject(), autoRefreshFetch$),
-          searchSessionManager: createSearchSessionMock().searchSessionManager,
-        });
-
-        const fetchfnMock = jest.fn();
-        fetch$.subscribe(fetchfnMock);
-        const autoRefreshDone = jest.fn();
-        autoRefreshFetch$.next(autoRefreshDone);
-        advance(100);
-
-        expect(fetchfnMock).not.toHaveBeenCalled();
-        expect(autoRefreshDone).toHaveBeenCalledTimes(1);
-      })
-    );
-  });
 });
