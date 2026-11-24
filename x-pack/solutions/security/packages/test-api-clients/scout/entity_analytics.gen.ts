@@ -1447,7 +1447,7 @@ Updates the details of an existing monitored privileged user by their document I
     });
   },
   /**
-   * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
+   * Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist. Optionally also sets its rule-based data sources in the same request
    */
   async updateWatchlist<TResponseType extends ScoutResponseType = 'json'>(
     props: UpdateWatchlistProps,
