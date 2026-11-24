@@ -9,6 +9,7 @@
 
 import { last } from 'lodash';
 import moment from 'moment';
+import { parseTimeRange } from '@kbn/datemath';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { type AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -80,15 +81,24 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
   const min = event.range[0];
   const max = last(event.range);
 
-  if (min === max) {
+  if (max === undefined || min === max) {
     return [];
   }
 
   const isDate = field.type === 'date';
 
+  // Brushed bounds carry incidental sub-second precision; round them like relative time ranges
+  const { min: roundedMin, max: roundedMax } = isDate
+    ? parseTimeRange(moment(min).toISOString(), moment(max).toISOString(), {
+        roundAbsoluteBounds: true,
+      })
+    : { min: undefined, max: undefined };
+  const gte = roundedMin?.valueOf() ?? min;
+  const lt = roundedMax?.valueOf() ?? max;
+
   const range: RangeFilterParams = {
-    gte: isDate ? moment(min).toISOString() : min,
-    lt: isDate ? moment(max).toISOString() : max,
+    gte: isDate ? moment(gte).toISOString() : gte,
+    lt: isDate ? moment(lt).toISOString() : lt,
   };
 
   if (isDate) {

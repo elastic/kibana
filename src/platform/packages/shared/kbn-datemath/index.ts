@@ -190,18 +190,20 @@ const isAbsoluteFinerThan = (value: string, resolution: Unit): boolean => {
  * rounded-up relative ends (e.g. `now/d`) end on the last whole unit. Returns `null`
  * when a relative bound uses a finer unit (e.g. `now-500ms` at second resolution) or an
  * absolute ISO bound carries finer precision (e.g. `2025-07-15T12:00:00.500Z`), so the
- * range keeps full precision.
+ * range keeps full precision. `ignoreAbsolutePrecision` skips the absolute-bound check.
  */
 export function getTimeRangeResolution(
   from: string,
   to: string,
-  resolution: Unit = TIME_RANGE_RESOLUTION
+  resolution: Unit = TIME_RANGE_RESOLUTION,
+  { ignoreAbsolutePrecision = false }: { ignoreAbsolutePrecision?: boolean } = {}
 ): Unit | null {
   const { weight } = unitsMap[resolution];
   const usesFinerUnit = [...getRelativeUnits(from), ...getRelativeUnits(to)].some(
     (unit) => unitsMap[unit].weight < weight
   );
-  const hasFinerAbsoluteBound = [from, to].some((bound) => isAbsoluteFinerThan(bound, resolution));
+  const hasFinerAbsoluteBound =
+    !ignoreAbsolutePrecision && [from, to].some((bound) => isAbsoluteFinerThan(bound, resolution));
   return usesFinerUnit || hasFinerAbsoluteBound ? null : resolution;
 }
 
@@ -209,13 +211,19 @@ export function getTimeRangeResolution(
  * Resolves a time range to bounds rounded to the time range resolution: `now` is truncated to it
  * and rounded-up relative ends (e.g. `now/d`) end on the last whole unit. Absolute bounds, and
  * ranges using a finer unit than the resolution, keep full precision.
+ *
+ * With `roundAbsoluteBounds`, absolute bounds are rounded to the resolution too. Use it for bounds
+ * whose sub-resolution precision is incidental (e.g. a chart brush) rather than user-entered. A
+ * range narrower than the resolution keeps full precision so it doesn't collapse to empty.
  */
 export function parseTimeRange(
   from: string,
   to: string,
-  { forceNow }: { forceNow?: Date } = {}
+  { forceNow, roundAbsoluteBounds = false }: { forceNow?: Date; roundAbsoluteBounds?: boolean } = {}
 ): { min: moment.Moment | undefined; max: moment.Moment | undefined } {
-  const resolution = getTimeRangeResolution(from, to);
+  const resolution = getTimeRangeResolution(from, to, TIME_RANGE_RESOLUTION, {
+    ignoreAbsolutePrecision: roundAbsoluteBounds,
+  });
   if (!resolution) {
     return {
       min: parse(from, { forceNow }),
@@ -226,12 +234,19 @@ export function parseTimeRange(
   const roundedNow = moment(forceNow ?? new Date())
     .startOf(resolution)
     .toDate();
-  const max = parse(to, { roundUp: true, forceNow: roundedNow });
-  return {
-    min: parse(from, { forceNow: roundedNow }),
-    // Rounding up (`/d`, `/h`, ...) lands on `.999`; end on the last whole unit instead.
-    max: max && to.includes('now') ? max.clone().startOf(resolution) : max,
-  };
+  const rawMin = parse(from, { forceNow: roundedNow });
+  const rawMax = parse(to, { roundUp: true, forceNow: roundedNow });
+  const min = rawMin && roundAbsoluteBounds ? rawMin.clone().startOf(resolution) : rawMin;
+  // Rounding up (`/d`, `/h`, ...) lands on `.999`; end on the last whole unit instead.
+  const max =
+    rawMax && (roundAbsoluteBounds || to.includes('now'))
+      ? rawMax.clone().startOf(resolution)
+      : rawMax;
+
+  if (roundAbsoluteBounds && min && max && !min.isBefore(max)) {
+    return { min: rawMin, max: rawMax };
+  }
+  return { min, max };
 }
 
 // eslint-disable-next-line import/no-default-export

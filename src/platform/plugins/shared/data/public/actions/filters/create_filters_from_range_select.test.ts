@@ -135,6 +135,24 @@ describe('brushEvent', () => {
         expect(filter).toEqual([]);
       });
 
+      test('by truncating brushed bounds to whole seconds', async () => {
+        baseEvent.range = [JAN_01_2014 + 123, JAN_01_2014 + DAY_IN_MS + 987];
+        const filter = await createFiltersFromRangeSelectAction(baseEvent);
+        const rangeFilter = filter[0] as RangeFilter;
+        expect(rangeFilter.query.range.time.gte).toBe(new Date(JAN_01_2014).toISOString());
+        expect(rangeFilter.query.range.time.lt).toBe(
+          new Date(JAN_01_2014 + DAY_IN_MS).toISOString()
+        );
+      });
+
+      test('by keeping full precision for sub-second brushes', async () => {
+        baseEvent.range = [JAN_01_2014 + 123, JAN_01_2014 + 456];
+        const filter = await createFiltersFromRangeSelectAction(baseEvent);
+        const rangeFilter = filter[0] as RangeFilter;
+        expect(rangeFilter.query.range.time.gte).toBe(new Date(JAN_01_2014 + 123).toISOString());
+        expect(rangeFilter.query.range.time.lt).toBe(new Date(JAN_01_2014 + 456).toISOString());
+      });
+
       test('by updating the timefilter', async () => {
         baseEvent.range = [JAN_01_2014, JAN_01_2014 + DAY_IN_MS];
         const filter = await createFiltersFromRangeSelectAction(baseEvent);

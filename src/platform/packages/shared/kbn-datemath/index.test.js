@@ -465,3 +465,25 @@ describe('parseTimeRange', function () {
     expect(max.toISOString()).toBe('2026-10-22T12:34:56.000Z');
   });
 });
+
+describe('parseTimeRange with roundAbsoluteBounds', function () {
+  const { parseTimeRange } = dateMath;
+  const base = Date.parse('2026-10-22T12:34:56.000Z');
+  const iso = (ms) => new Date(ms).toISOString();
+
+  it('rounds absolute bounds to whole seconds', function () {
+    const { min, max } = parseTimeRange(iso(base + 123), iso(base + 60000 + 987), {
+      roundAbsoluteBounds: true,
+    });
+    expect(min.valueOf()).toBe(base);
+    expect(max.valueOf()).toBe(base + 60000);
+  });
+
+  it('keeps full precision when the range is narrower than the resolution', function () {
+    const { min, max } = parseTimeRange(iso(base + 123), iso(base + 456), {
+      roundAbsoluteBounds: true,
+    });
+    expect(min.valueOf()).toBe(base + 123);
+    expect(max.valueOf()).toBe(base + 456);
+  });
+});
