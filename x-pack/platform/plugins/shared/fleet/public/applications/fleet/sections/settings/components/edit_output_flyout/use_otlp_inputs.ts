@@ -18,6 +18,7 @@ import {
   otlpCompressionType,
   otlpProtocol,
 } from '../../../../../../../common/constants';
+import { getOtlpExporterEndpoints } from '../../../../../../../common/services/otlp_auth';
 
 import { useInput, useKeyValueInput, useSwitchInput } from '../../../../hooks';
 
@@ -220,17 +221,14 @@ export function useOtlpInputs(
   const otlpCookiesEnabledInput = useSwitchInput(http?.cookies?.enabled ?? false, disabled);
 
   // the managed OTLP endpoint has no authentication, whichever signal is sent to it
-  const endpoints = [
-    otlpEndpointInput.value,
-    ...(otlpProtocolInput.value === otlpProtocol.HttpProtobuf
-      ? [
-          otlpTracesEndpointInput.value,
-          otlpMetricsEndpointInput.value,
-          otlpLogsEndpointInput.value,
-          otlpProfilesEndpointInput.value,
-        ]
-      : []),
-  ];
+  const endpoints = getOtlpExporterEndpoints({
+    protocol: otlpProtocolInput.value as OtlpProtocol,
+    endpoint: otlpEndpointInput.value,
+    traces_endpoint: otlpTracesEndpointInput.value,
+    metrics_endpoint: otlpMetricsEndpointInput.value,
+    logs_endpoint: otlpLogsEndpointInput.value,
+    profiles_endpoint: otlpProfilesEndpointInput.value,
+  });
   const authHeaderName = isOtlpAuthAvailable(endpoints, auth.managedOtlpUrl)
     ? auth.headerName
     : undefined;
@@ -314,17 +312,15 @@ const httpTextInputs = (inputs: OtlpInputs) => [
 ];
 
 /** The URLs the exporter sends data to: the endpoint, and for HTTP the endpoints of the signals. */
-export const getOtlpInputEndpoints = (inputs: OtlpInputs): string[] => [
-  inputs.otlpEndpointInput.value,
-  ...(isOtlpGrpc(inputs)
-    ? []
-    : [
-        inputs.otlpTracesEndpointInput.value,
-        inputs.otlpMetricsEndpointInput.value,
-        inputs.otlpLogsEndpointInput.value,
-        inputs.otlpProfilesEndpointInput.value,
-      ]),
-];
+export const getOtlpInputEndpoints = (inputs: OtlpInputs): string[] =>
+  getOtlpExporterEndpoints({
+    protocol: inputs.otlpProtocolInput.value as OtlpProtocol,
+    endpoint: inputs.otlpEndpointInput.value,
+    traces_endpoint: inputs.otlpTracesEndpointInput.value,
+    metrics_endpoint: inputs.otlpMetricsEndpointInput.value,
+    logs_endpoint: inputs.otlpLogsEndpointInput.value,
+    profiles_endpoint: inputs.otlpProfilesEndpointInput.value,
+  });
 
 /** Whether a gRPC setting is set, other than to its default. */
 export const hasOtlpGrpcSettings = (inputs: OtlpInputs) =>

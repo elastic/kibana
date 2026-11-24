@@ -822,10 +822,13 @@ const OtlpAuthResponseSchema = schema.discriminatedUnion('type', [
 ]);
 
 // the credential is sent in a single header: it is bounded to what servers accept for a header
+// a reference is the id of the secret document, bounded as Elasticsearch bounds document ids
+const SECRET_REFERENCE_MAX_LENGTH = 512;
+
 const OtlpAuthCredentialSchema = schema.oneOf([
   schema.object({
-    id: schema.string(),
-    hash: schema.maybe(schema.string()),
+    id: schema.string({ minLength: 1, maxLength: SECRET_REFERENCE_MAX_LENGTH }),
+    hash: schema.maybe(schema.string({ maxLength: SECRET_REFERENCE_MAX_LENGTH })),
   }),
   schema.string({ minLength: 1, maxLength: OTLP_AUTH_CREDENTIAL_MAX_LENGTH }),
 ]);
