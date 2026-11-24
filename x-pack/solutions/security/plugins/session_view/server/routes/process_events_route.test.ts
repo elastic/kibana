@@ -199,6 +199,31 @@ describe('process_events_route.ts', () => {
         expect(ranges).toEqual([{ gte: cursor, lte: firstTimestamp }, { gte: firstTimestamp }]);
       });
 
+      it('searches the gap when the process events store their time as epoch milliseconds', async () => {
+        const cursor = '2021-11-23T15:25:00.000Z';
+        const hits = mockEvents.map((event) => ({
+          _source: { ...event, '@timestamp': Date.parse(event['@timestamp']) },
+        }));
+        const client = elasticsearchServiceMock.createElasticsearchClient(
+          (async () => ({ hits: { total: { value: hits.length, relation: 'eq' }, hits } }))()
+        );
+        const alertsClient = getAlertsClientMockInstance();
+        const find = jest.spyOn(alertsClient, 'find');
+
+        await fetchEventsAndScopedAlerts(
+          client,
+          alertsClient,
+          TEST_PROCESS_INDEX,
+          'mockId',
+          TEST_SESSION_START_TIME,
+          cursor,
+          true,
+          mockEvents.length
+        );
+
+        expect(find).toHaveBeenCalledTimes(2);
+      });
+
       it('does not search a gap when the first event is at the cursor', async () => {
         // normal paging: the cursor is the time of the last event of the previous page
         const range = await fetchAndGetAlertsRange(firstTimestamp, true, mockEvents.length);

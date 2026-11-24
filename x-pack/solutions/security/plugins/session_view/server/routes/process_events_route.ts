@@ -230,7 +230,7 @@ export const fetchEventsAndScopedAlerts = async (
       // A forward page starts at its cursor, so it also covers the alerts between its cursor and its first
       // event. That gap only exists when Session View opens from an alert. It has its own query so that its
       // alerts cannot take the result slots of the alerts inside the page.
-      if (forward && alertsCursor && cursorTime < Date.parse(range[0])) {
+      if (forward && alertsCursor && cursorTime < new Date(range[0]).getTime()) {
         gapRange = [alertsCursor, range[0]];
       }
     }
