@@ -98,11 +98,19 @@ spaceTest.describe('Dashboard replay cache', { tag: '@local-stateful-classic' },
       await dashboard.waitForRenderComplete();
       // Pinning changes the context the session was registered with, without starting a new one.
       await filterBar.toggleFilterPinned(OS_FILTER.field);
+      const pinnedOsFilter = {
+        field: OS_FILTER.field,
+        value: OS_FILTER.value,
+        pinned: true,
+        enabled: true,
+      };
 
       expect(await countSearchesOnReturn(dashboard, network)).toBeGreaterThan(0);
+      await expect.poll(() => filterBar.hasFilter(pinnedOsFilter)).toBe(true);
       const results = await readResults(page, controls);
 
       expect(await countSearchesOnReturn(dashboard, network)).toBe(0);
+      await expect.poll(() => filterBar.hasFilter(pinnedOsFilter)).toBe(true);
       expect(await readResults(page, controls)).toStrictEqual(results);
     }
   );

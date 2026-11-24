@@ -140,11 +140,11 @@ describe('Dashboard search sessions', () => {
 
   test('starts and registers a new session instead of continuing one sent to background', () => {
     jest.mocked(replayCache.get).mockReturnValue(replay);
-    jest.mocked(session.getSearchOptions).mockReturnValue({
-      sessionId: 'cached-session',
-      isRestore: false,
-      isStored: true,
-    });
+    jest
+      .mocked(session.getSearchOptions)
+      .mockImplementation((sessionId) =>
+        sessionId ? { sessionId, isRestore: false, isStored: sessionId === replay.sessionId } : null
+      );
     const { api } = setup();
 
     expect(session.continue).not.toHaveBeenCalled();

@@ -95,6 +95,8 @@ export const readResults = async (page: ScoutPage, controls: PageObjects['contro
   const lowerBound = page.testSubj.locator('rangeSlider__lowerBoundFieldNumber');
   const upperBound = page.testSubj.locator('rangeSlider__upperBoundFieldNumber');
   await expect(metrics).toHaveText([/\d/, /\d/]);
+  await expect(lowerBound).toHaveAttribute('placeholder', /\d/);
+  await expect(upperBound).toHaveAttribute('placeholder', /\d/);
 
   const [esqlControlId] = await controls.getControlIds();
   await controls.optionsList.openPopover(esqlControlId);
