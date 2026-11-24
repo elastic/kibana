@@ -507,7 +507,17 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     );
     let result: { token: string; expires_in?: string };
     try {
-      result = await this.uiam.exchangeServiceAccountToken(serviceAccountId);
+      // A call can fail on our side when Kibana was busy (for example, a blocked event loop), and a
+      // retry on a fresh connection usually works. Asking for a token again is safe.
+      result = await this.uiam.exchangeServiceAccountToken(serviceAccountId).catch((e) => {
+        if (!isRetryableTransportFailure(e)) {
+          throw e;
+        }
+        this.logger.debug(
+          `Retrying the token exchange for service account ${serviceAccountId} after a transport failure`
+        );
+        return this.uiam.exchangeServiceAccountToken(serviceAccountId);
+      });
     } catch (e) {
       const cause =
         e instanceof Error ? e : new Error('Unknown token exchange failure.', { cause: e });
@@ -649,6 +659,19 @@ const getUiamErrorCode = (error: Error): string | undefined => {
   return parsed.success ? parsed.data.error.code : undefined;
 };
 
+/** Whether the exchange failed before UIAM answered, for example on a dropped or timed out socket. */
+const isRetryableTransportFailure = (error: unknown): boolean =>
+  error instanceof Error &&
+  // Native fetch wraps transport failures in a TypeError with the socket error as its cause.
+  [error, error.cause].some(
+    (cause) =>
+      typeof cause === 'object' &&
+      cause !== null &&
+      'code' in cause &&
+      typeof cause.code === 'string' &&
+      RETRYABLE_TRANSPORT_CODES.has(cause.code)
+  );
+
 const getExchangeRetryDelay = (error: Error): number | null => {
   if (Boom.isBoom(error)) {
     const { statusCode, payload, headers } = error.output;
@@ -671,15 +694,5 @@ const getExchangeRetryDelay = (error: Error): number | null => {
     return Number.isFinite(delay) && delay > 0 ? delay : 0;
   }
 
-  // Native fetch wraps transport failures in a TypeError with the socket error as its cause.
-  return [error, error.cause].some(
-    (cause) =>
-      typeof cause === 'object' &&
-      cause !== null &&
-      'code' in cause &&
-      typeof cause.code === 'string' &&
-      RETRYABLE_TRANSPORT_CODES.has(cause.code)
-  )
-    ? 0
-    : null;
+  return isRetryableTransportFailure(error) ? 0 : null;
 };

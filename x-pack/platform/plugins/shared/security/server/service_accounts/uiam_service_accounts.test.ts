@@ -1346,6 +1346,31 @@ describe('UiamServiceAccounts', () => {
           statusCode: undefined,
           message: 'Error occurred during service account token exchange.',
         });
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(2);
+      });
+
+      it('recovers from a transport failure with one immediate retry', async () => {
+        mockUiam.exchangeServiceAccountToken.mockRejectedValueOnce(
+          new TypeError('fetch failed', {
+            cause: Object.assign(new Error('socket closed'), { code: 'UND_ERR_SOCKET' }),
+          })
+        );
+
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(2);
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+
+      it('leaves the retry to the caller when UIAM answers with an error', async () => {
+        mockUiam.exchangeServiceAccountToken.mockRejectedValueOnce(Boom.serverUnavailable());
+
+        await expect(
+          serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
+        ).rejects.toMatchObject({ retryable: true });
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(1);
       });
 
       it.each(['ENOTFOUND', 'CERT_HAS_EXPIRED', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'UNCLASSIFIED'])(
