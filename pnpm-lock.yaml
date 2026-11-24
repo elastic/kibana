@@ -3439,8 +3439,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0(@hapi/hapi@21.4.13)
       byte-size:
-        specifier: 9.0.1
-        version: 9.0.1
+        specifier: 9.0.2
+        version: 9.0.2
       cacheable-lookup:
         specifier: '6'
         version: 6.1.0
@@ -14389,8 +14389,8 @@ packages:
     resolution: {integrity: sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==}
     engines: {node: '>=18'}
 
-  byte-size@9.0.1:
-    resolution: {integrity: sha512-YLe9x3rabBrcI0cueCdLS2l5ONUKywcRpTs02B8KP9/Cimhj7o3ZccGrPnRvcbyHMbb7W79/3MUJl7iGgTXKEw==}
+  byte-size@9.0.2:
+    resolution: {integrity: sha512-awINQonvLawPPCIWKIoYwPlUJc2ysiRsYIIJfJoIyWMbqdceKHhhZsT3226exJYoDqpuI6sInkEo1B5Rrjbs+g==}
     engines: {node: '>=12.17'}
     peerDependencies:
       '@75lb/nature': latest
@@ -31090,7 +31090,7 @@ snapshots:
     dependencies:
       run-applescript: 7.0.0
 
-  byte-size@9.0.1: {}
+  byte-size@9.0.2: {}
 
   bytes@3.1.2: {}
 
