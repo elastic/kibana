@@ -90,6 +90,7 @@ const suggestResult = (
   overrides: Partial<UseSuggestAutomationResult> = {}
 ): UseSuggestAutomationResult => ({
   canSuggest: false,
+  isSuggesting: false,
   suggestAutomation: jest.fn(),
   ...overrides,
 });

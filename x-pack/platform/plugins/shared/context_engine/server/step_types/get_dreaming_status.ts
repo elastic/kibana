@@ -13,7 +13,7 @@ import {
 } from '../../common/step_types/get_dreaming_status';
 import { dreamingTypesOf } from '../../common/dreaming';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
-import { shouldDream } from '../dreaming/schedule';
+import { shouldDream, shouldMaintain } from '../dreaming/schedule';
 import type { DreamingStepDependencies } from './helpers';
 
 export const getDreamingStatusStepDefinition = ({
@@ -56,6 +56,9 @@ export const getDreamingStatusStepDefinition = ({
           (!aiIndex.dreaming || dreamingTypesOf(aiIndex.dreaming).relationships.length === 0)
         ) {
           return skip(`AI index '${aiIndexId}' has no relationship types to link with.`);
+        }
+        if (source === 'maintenance' && !shouldMaintain(aiIndex)) {
+          return skip(`Memory maintenance is not turned on for AI index '${aiIndexId}'.`);
         }
       } catch (error) {
         if (error instanceof AiIndexNotFoundError) {

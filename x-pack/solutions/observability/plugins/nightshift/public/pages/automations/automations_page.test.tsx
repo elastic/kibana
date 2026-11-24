@@ -59,14 +59,10 @@ jest.mock('../../data/run_quotas/use_investigation_quotas', () => ({
   useInvestigationQuotas: jest.fn(),
 }));
 jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+let mockConnectedChannels: Record<string, unknown> = {};
 jest.mock('../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../data/relay_apps/use_relay_app_bindings'),
-  useAllRelayAppBindings: () => ({
-    bindings: [],
-    isLoading: false,
-    isError: false,
-    isComplete: true,
-  }),
+  useAllRelayAppBindings: () => mockConnectedChannels,
 }));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
@@ -97,6 +93,12 @@ describe('AutomationsPage', () => {
     (useAutomationRunActivity as jest.Mock).mockReturnValue({ data: { isRunning: false } });
     (useRunAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
 
+    mockConnectedChannels = {
+      bindings: [],
+      isLoading: false,
+      isError: false,
+      isComplete: true,
+    };
     mockServiceAccount = {
       data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: true },
     };
@@ -143,6 +145,90 @@ describe('AutomationsPage', () => {
       ),
     };
   };
+
+  describe('Slack channel binding', () => {
+    const slackAutomation = (id: string, trigger: Record<string, unknown>) => ({
+      id,
+      name: `Automation ${id}`,
+      isEnabled: true,
+      tags: [],
+      trigger: { rows: [trigger] },
+      execution: { promptTemplate: 'Look into it.' },
+      completions: [],
+      runtime: {},
+      author: 'alice',
+    });
+    const connected = (bindings: Array<{ channel: string; displayName: string }>) => ({
+      bindings: bindings.map((binding) => ({ ...binding, status: 'bound_to_self' })),
+      isLoading: false,
+      isError: false,
+      isComplete: true,
+    });
+
+    beforeEach(() => {
+      mockUseFetchAutomations.mockReturnValue({
+        data: {
+          automations: [
+            slackAutomation('both', { kind: 'slack', event: 'message', channels: ['C1', 'C2'] }),
+            slackAutomation('kept', { kind: 'slack', event: 'message', channels: ['C2'] }),
+            slackAutomation('alert', { kind: 'alert' }),
+            slackAutomation('schedule', { kind: 'schedule', schedulePreset: 'hourly' }),
+          ],
+        },
+        isInitialLoading: false,
+      });
+    });
+
+    it('flags only automations on a channel that is no longer connected', async () => {
+      mockConnectedChannels = connected([{ channel: 'C2', displayName: 'oncall' }]);
+      renderPage();
+
+      const flags = screen.getAllByTestId('automationBrokenSlackChannel');
+      expect(flags).toHaveLength(1);
+      expect(screen.getByText('Automation both').closest('tr')).toContainElement(flags[0]);
+      fireEvent.mouseOver(flags[0]);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'Slack channel not connected: C1. Messages there will not start this automation.'
+      );
+    });
+
+    it('flags Slack automations after the only binding was deleted', () => {
+      mockConnectedChannels = connected([]);
+      renderPage();
+
+      expect(screen.getAllByTestId('automationBrokenSlackChannel')).toHaveLength(2);
+    });
+
+    it.each([
+      ['fails to load', { isError: true }],
+      ['is still loading', { isLoading: true }],
+    ])('flags nothing when the connected list %s', (_state, state) => {
+      mockConnectedChannels = { ...connected([]), ...state };
+      renderPage();
+
+      expect(screen.queryByTestId('automationBrokenSlackChannel')).not.toBeInTheDocument();
+    });
+
+    it('shows a callout with a Settings link in the detail flyout', () => {
+      mockConnectedChannels = connected([{ channel: 'C2', displayName: 'oncall' }]);
+      renderPage('/automations/both');
+
+      expect(screen.getByTestId('automationBrokenSlackChannelCallout')).toHaveTextContent(
+        'Slack channel not connected: C1. Messages there will not start this automation.'
+      );
+      expect(screen.getByTestId('automationBrokenSlackChannelCalloutLink')).toHaveAttribute(
+        'href',
+        '/app/nightshift/settings/general'
+      );
+    });
+
+    it('shows no callout in the detail flyout when every channel is connected', () => {
+      mockConnectedChannels = connected([{ channel: 'C2', displayName: 'oncall' }]);
+      renderPage('/automations/kept');
+
+      expect(screen.queryByTestId('automationBrokenSlackChannelCallout')).not.toBeInTheDocument();
+    });
+  });
 
   it('runs an enabled scheduled automation immediately from the row menu', async () => {
     const automation = {

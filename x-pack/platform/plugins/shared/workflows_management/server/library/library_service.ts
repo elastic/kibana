@@ -71,6 +71,11 @@ export class LibraryService {
   getHealth(): LibraryHealth {
     return this.source.getHealth();
   }
+
+  /** The last validated catalog, without fetching or filtering; `undefined` until the first successful load. */
+  getCachedTemplates(): Template[] | undefined {
+    return this.source.getCachedTemplates();
+  }
 }
 
 function filterTemplates(templates: Template[], filters?: TemplateFilters): Template[] {

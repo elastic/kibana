@@ -57,7 +57,11 @@ import { aiIndicesIndexName } from '../ai_indices/storage';
 import { kiIdQuery } from '../ai_indices/ki_get';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 import { apiPrivileges } from '../../common/features';
-import type { AiIndexHttpItem, DescribeAiIndexResponse } from '../../common/http_api/ai_indices';
+import type {
+  AiIndexHttpItem,
+  AiIndexSaveWarning,
+  DescribeAiIndexResponse,
+} from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import {
   InvalidAiIndexDestError,
@@ -146,7 +150,7 @@ describe('ai indices routes', () => {
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
   let workflowsManagementApi: jest.Mocked<DeleteWorkflowsApi>;
   let scheduleService: jest.Mocked<FeedbackAnalysisScheduleService>;
-  const onAiIndexChange = jest.fn<Promise<void>, [AiIndexChangeEvent]>();
+  const onAiIndexChange = jest.fn<Promise<void | AiIndexSaveWarning[]>, [AiIndexChangeEvent]>();
   let readService: jest.Mocked<AiIndexDataReadServiceApi>;
   let readServiceParams: GetAiIndexDataReadServiceParams[];
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
@@ -611,6 +615,24 @@ describe('ai indices routes', () => {
       });
     });
 
+    it('returns 400 without creating when an ES|QL source is circular', async () => {
+      await callRoute('POST', AI_INDEX_PATH, {
+        body: {
+          ...postBody,
+          dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+          sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support' }],
+        },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message:
+            "ES|QL source 'FROM ai-index-ds-customer_support' reads from the AI index's own dest 'ai-index-ds-customer_support'",
+        },
+      });
+    });
+
     it('does not consult the actions client when there are no connector sources', async () => {
       aiIndexService.create.mockResolvedValue(undefined);
 
@@ -772,6 +794,25 @@ describe('ai indices routes', () => {
       expect(response.badRequest).toHaveBeenCalledWith({
         body: {
           message: expect.stringMatching(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /),
+        },
+      });
+    });
+
+    it('returns 400 without updating when an ES|QL source is circular', async () => {
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        ...putRequest,
+        body: {
+          ...putRequest.body,
+          dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+          sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support' }],
+        },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message:
+            "ES|QL source 'FROM ai-index-ds-customer_support' reads from the AI index's own dest 'ai-index-ds-customer_support'",
         },
       });
     });
@@ -1856,6 +1897,7 @@ describe('ai indices routes', () => {
           dest: aiIndexItem.dest,
           kiId: 'ki-1',
           ki: { content: 'Updated content' },
+          personEdit: true,
         })
       );
       expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
@@ -2928,6 +2970,50 @@ describe('ai indices routes', () => {
 
       expect(response.conflict).toHaveBeenCalled();
       expect(onAiIndexChange).not.toHaveBeenCalled();
+    });
+
+    describe('warnings', () => {
+      const warning: AiIndexSaveWarning = {
+        source: { type: 'esql', value: 'FROM logs-*' },
+        message: 'No index matching logs-* was found, or you do not have read access to it.',
+      };
+
+      it('returns what the handlers warn about when an AI index is created', async () => {
+        aiIndexService.create.mockResolvedValue(undefined);
+        onAiIndexChange.mockResolvedValueOnce([warning]);
+
+        await callRoute('POST', AI_INDEX_PATH, { body: { id: 'customer_support', ...body } });
+
+        expect(response.created).toHaveBeenCalledWith({
+          body: { status: 'created', warnings: [warning] },
+        });
+      });
+
+      it('returns what the handlers warn about when an AI index is replaced', async () => {
+        aiIndexService.put.mockResolvedValue('updated');
+        onAiIndexChange.mockResolvedValueOnce([warning]);
+
+        await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body,
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({
+          body: { status: 'updated', warnings: [warning] },
+        });
+      });
+
+      it('leaves warnings out of the response when there are none', async () => {
+        aiIndexService.put.mockResolvedValue('updated');
+        onAiIndexChange.mockResolvedValueOnce([]);
+
+        await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body,
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
+      });
     });
 
     it('keeps the save and logs when the AI index cannot be read back', async () => {

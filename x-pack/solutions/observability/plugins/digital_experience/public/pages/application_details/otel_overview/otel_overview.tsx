@@ -43,6 +43,7 @@ import { useApplicationErrors } from '../../errors/hooks/use_application_errors'
 import { AllFiltersFlyout } from './components/all_filters_flyout';
 import { BreakdownsPanel } from './components/breakdowns_panel';
 import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
+import { FrustrationPanel } from './components/frustration_panel';
 import { OverviewFilterPills } from './components/overview_filters';
 import { OverviewKpis } from './components/overview_kpis';
 import { OverviewToolbar } from './components/overview_toolbar';
@@ -50,10 +51,11 @@ import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
 import { usePickerOptions } from './hooks/use_picker_options';
+import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
 
 const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
   defaultMessage:
-    'The page filters apply to page loads only, with their load time, trend, pages and breakdowns: web vitals, JS errors, clicks and HTTP requests carry no page URL yet.',
+    'The page filters apply to page loads, with their load time, trend, pages and breakdowns, and to frustration signals only: web vitals, JS errors, other clicks and HTTP requests carry no page URL yet.',
 });
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
@@ -64,13 +66,6 @@ const USAGE_FETCH_ERROR_TITLE = i18n.translate(
   'xpack.digitalExperience.overview.usageFetchErrorTitle',
   { defaultMessage: 'Could not load the pages, browsers and clicks' }
 );
-
-const EMPTY_USAGE: ApplicationUsageResponse = {
-  topPages: [],
-  breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
-  topClicks: [],
-  totalClicks: 0,
-};
 
 /** The most frequent error groups on the Overview; the Errors tab lists the rest. */
 const TOP_ERRORS_ROWS = 5;
@@ -85,18 +80,6 @@ const overviewRequestOf = (
     return apiClient.fetch(
       'GET /internal/digital_experience/applications/{serviceName}/overview',
       withOverviewFilters(options, searchParams, { percentile, timeZone })
-    );
-  };
-};
-
-/** The request for the pages, breakdowns and clicks narrowed by `searchParams`. */
-const usageRequestOf = (
-  searchParams: OverviewSearchParams
-): ApplicationRequest<ApplicationUsageResponse> => {
-  return (apiClient, options) => {
-    return apiClient.fetch(
-      'GET /internal/digital_experience/applications/{serviceName}/usage',
-      withOverviewFilters(options, searchParams)
     );
   };
 };
@@ -176,7 +159,15 @@ function UsageAndErrorsPanels({
   onSelectFilter: (name: OverviewFilterName, value: string) => void;
 }) {
   const { errorsHref, sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
-  const { topPages, breakdowns, topClicks, totalClicks } = response ?? EMPTY_USAGE;
+  const {
+    topPages,
+    breakdowns,
+    topClicks,
+    totalClicks,
+    frustration,
+    frustratedElements,
+    frustratedPages,
+  } = response ?? EMPTY_USAGE;
 
   return (
     <>
@@ -239,6 +230,22 @@ function UsageAndErrorsPanels({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {!error && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="m" alignItems="stretch">
+            <EuiFlexItem>
+              <FrustrationPanel
+                frustration={frustration}
+                frustratedElements={frustratedElements}
+                frustratedPages={frustratedPages}
+                isLoading={isLoading}
+                sessionsHref={sessionsHref}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 }
