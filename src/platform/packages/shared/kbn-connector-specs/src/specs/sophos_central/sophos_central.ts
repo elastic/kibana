@@ -15,7 +15,7 @@
  *
  * Authentication: OAuth 2.0 client credentials (clientId + clientSecret).
  * Token endpoint: https://id.sophos.com/api/v2/oauth2/token
- * Regional routing: GET {apiUrl}/whoami/v1 → tenantId + regional base URL.
+ * Regional routing: GET https://api.central.sophos.com/whoami/v1 → tenantId + regional base URL.
  * Every action call uses the regional base URL with X-Tenant-ID header.
  *
  * https://developer.sophos.com
@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { UISchemas } from '../../connector_spec_ui';
 import {
   ActOnAlertInputSchema,
   ActOnAlertsBulkInputSchema,
@@ -62,17 +61,11 @@ import {
 } from './types';
 
 // ---------------------------------------------------------------------------
-// Config
+// Constants
 // ---------------------------------------------------------------------------
 
-interface SophosCentralConfig {
-  apiUrl?: string;
-}
-
-const getGlobalApiUrl = (ctx: ActionContext): string => {
-  const cfg = ctx.config as SophosCentralConfig | undefined;
-  return (cfg?.apiUrl ?? 'https://api.central.sophos.com').replace(/\/+$/, '');
-};
+const GLOBAL_API_URL = 'https://api.central.sophos.com';
+const REGIONAL_URL_RE = /^https:\/\/api(-[a-z0-9]+)?\.central\.sophos\.com$/;
 
 // ---------------------------------------------------------------------------
 // Whoami discovery (called once per action to resolve tenant + regional host)
@@ -84,10 +77,10 @@ interface WhoamiResult {
 }
 
 async function whoami(ctx: ActionContext): Promise<WhoamiResult> {
-  const globalUrl = getGlobalApiUrl(ctx);
-  const response = await ctx.client.get(`${globalUrl}/whoami/v1`, { timeout: 10_000 });
+  const response = await ctx.client.get(`${GLOBAL_API_URL}/whoami/v1`, { timeout: 10_000 });
   const data = response.data as {
     id?: string;
+    idType?: string;
     apiHosts?: { dataRegion?: string };
   };
   const tenantId = data?.id;
@@ -95,124 +88,62 @@ async function whoami(ctx: ActionContext): Promise<WhoamiResult> {
   if (!tenantId || !dataRegion) {
     throw new Error(
       'Sophos Central whoami response is missing tenantId or dataRegion. ' +
-        'Confirm the API URL and credentials are correct.'
+        'Confirm the credentials are correct.'
+    );
+  }
+  if (data?.idType && data.idType !== 'tenant') {
+    throw new Error(
+      `Sophos Central only supports tenant-level credentials, but whoami returned idType "${data.idType}". ` +
+        'Please use a tenant API credential, not a partner or organization credential.'
+    );
+  }
+  if (!REGIONAL_URL_RE.test(dataRegion)) {
+    throw new Error(
+      `Sophos Central whoami returned an unexpected regional URL: ${dataRegion}. ` +
+        'Expected https://api-<region>.central.sophos.com.'
     );
   }
   return { tenantId, dataRegion };
 }
 
 // ---------------------------------------------------------------------------
-// Request helper with retry (exponential backoff + full jitter)
+// Request helper (no retry — errors go straight through throwApiError)
 // ---------------------------------------------------------------------------
-
-const RETRY_ON = new Set([429, 500, 502, 503, 504]);
-const NO_RETRY_ON = new Set([400, 401, 403, 404, 405, 409, 413, 422]);
-
-/** Thrown when a 429 Retry-After exceeds the local retry budget. Callers that
- *  iterate (e.g. actOnAlertsBulk) should stop the batch on this error. */
-class RateLimitExceededError extends Error {
-  public readonly retryAfterMs: number;
-  constructor(retryAfterMs: number) {
-    super(`Rate limited: server asked to wait ${Math.ceil(retryAfterMs / 1_000)}s, exceeding retry budget`);
-    this.name = 'RateLimitExceededError';
-    this.retryAfterMs = retryAfterMs;
-  }
-}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3, idempotent = true): Promise<T> {
-  let lastError: unknown;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      const axiosErr = err as AxiosError;
-      const status = axiosErr?.response?.status;
-      if (status !== undefined && NO_RETRY_ON.has(status)) {
-        throw err;
-      }
-      if (status !== undefined && !RETRY_ON.has(status)) {
-        throw err;
-      }
-      // A 429 means the server did not process the request, so it is always
-      // safe to retry regardless of idempotency. For other retryable errors
-      // (5xx) only retry when the call is idempotent.
-      if (!idempotent && status !== 429) {
-        throw err;
-      }
-      lastError = err;
-      if (attempt < maxAttempts - 1) {
-        // Full-jitter backoff: random(0, min(cap, 1000 * 2^attempt)).
-        // On 429, honor the Retry-After header (seconds or HTTP-date).
-        // If the server asks to wait longer than the cap, surface the
-        // rate-limit error immediately instead of retrying too early.
-        const cap = 30_000;
-        const base = 1_000 * Math.pow(2, attempt);
-        let delay: number;
-        if (status === 429) {
-          const retryAfter = axiosErr?.response?.headers?.['retry-after'];
-          let waitMs = NaN;
-          if (retryAfter) {
-            const asNum = Number(retryAfter);
-            if (Number.isFinite(asNum)) {
-              waitMs = asNum * 1_000;
-            } else {
-              // Try HTTP-date format (RFC 7231)
-              const date = Date.parse(retryAfter);
-              if (!Number.isNaN(date)) {
-                waitMs = Math.max(0, date - Date.now());
-              }
-            }
-          }
-          if (Number.isFinite(waitMs) && waitMs > cap) {
-            // Server wants us to wait longer than our budget — stop retrying.
-            // Throw RateLimitExceededError so batch callers can halt early.
-            throw new RateLimitExceededError(waitMs);
-          }
-          delay = Number.isFinite(waitMs)
-            ? waitMs
-            : Math.random() * Math.min(cap, base);
-        } else {
-          delay = Math.random() * Math.min(cap, base);
-        }
-        await sleep(delay);
-      }
-    }
-  }
-  throw lastError;
 }
 
 async function request<T = unknown>(
   ctx: ActionContext,
   method: string,
   path: string,
-  options?: { params?: Record<string, unknown>; data?: unknown; idempotent?: boolean }
+  options?: {
+    params?: Record<string, unknown>;
+    data?: unknown;
+    tenantId?: string;
+    dataRegion?: string;
+  }
 ): Promise<T> {
-  const { tenantId, dataRegion } = await whoami(ctx);
-  const idempotent = options?.idempotent ?? (method === 'GET' || method === 'DELETE');
-  return withRetry(
-    async () => {
-      const config: AxiosRequestConfig = {
-        method,
-        url: `${dataRegion}${path}`,
-        headers: { 'X-Tenant-ID': tenantId },
-        timeout: 30_000,
-      };
-      if (options?.params) {
-        config.params = options.params;
-        // Sophos APIs expect repeated keys (severity=a&severity=b), not brackets
-        config.paramsSerializer = { indexes: null };
-      }
-      if (options?.data !== undefined) config.data = options.data;
-      const response = await ctx.client.request<T>(config);
-      return response.data;
-    },
-    3,
-    idempotent
-  );
+  let tenantId = options?.tenantId;
+  let dataRegion = options?.dataRegion;
+  if (!tenantId || !dataRegion) {
+    const resolved = await whoami(ctx);
+    tenantId = resolved.tenantId;
+    dataRegion = resolved.dataRegion;
+  }
+  const config: AxiosRequestConfig = {
+    method,
+    url: `${dataRegion}${path}`,
+    headers: { 'X-Tenant-ID': tenantId },
+    timeout: 30_000,
+  };
+  if (options?.params) {
+    config.params = options.params;
+  }
+  if (options?.data !== undefined) config.data = options.data;
+  const response = await ctx.client.request<T>(config);
+  return response.data;
 }
 
 // ---------------------------------------------------------------------------
@@ -297,7 +228,8 @@ export const SophosCentral: ConnectorSpec = {
                     'Sophos Central API client ID. Create in Sophos Central under ' +
                     'My Products > General Settings > API Credentials > Add Credential. ' +
                     'The credential needs alerts:read, alerts:action, endpoint-state:read, ' +
-                    'endpoint-state:update, and detections.queries.detections:create scopes.',
+                    'endpoint-state:update, and detections.queries.detections:create scopes. ' +
+                    'Only tenant-level credentials are supported.',
                 }
               ),
             },
@@ -307,28 +239,7 @@ export const SophosCentral: ConnectorSpec = {
     ],
   },
 
-  schema: lazySchema(() =>
-    z.object({
-      apiUrl: UISchemas.url('https://api.central.sophos.com')
-        .max(2048)
-        .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.sophosCentral.config.apiUrlLabel', {
-            defaultMessage: 'API URL',
-          }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.sophosCentral.config.apiUrlHelpText',
-            {
-              defaultMessage:
-                'Sophos Central global API base URL. The connector discovers your ' +
-                'tenant ID and regional host automatically. Use the default unless ' +
-                'Sophos Support instructs otherwise.',
-            }
-          ),
-          placeholder: 'https://api.central.sophos.com',
-          validate: { allowedHosts: true },
-        }),
-    })
-  ),
+  schema: lazySchema(() => z.object({})),
 
   test: {
     enabled: true,
@@ -353,11 +264,10 @@ export const SophosCentral: ConnectorSpec = {
     '3. Call `actOnAlert` with an action from `allowedActions` (e.g. `acknowledge` or `clearThreat`) to close the alert.',
     '',
     '### Endpoint containment',
-    '1. Call `listEndpoints` with `isolationStatus=notIsolated` to find endpoints that are not yet isolated.',
-    '2. Call `getEndpoint` to confirm the isolation state and read health status.',
-    '3. Call `isolateEndpoint` with the endpoint IDs to block network access.',
-    '4. Call `scanEndpoint` to trigger an on-demand malware scan. The scan runs asynchronously.',
-    '5. Call `deisolateEndpoint` only after an analyst confirms the threat is remediated.',
+    '1. Call `getEndpoint` to confirm the endpoint\'s isolation state and health status.',
+    '2. Call `isolateEndpoint` with the endpoint IDs to block network access.',
+    '3. Call `scanEndpoint` to trigger an on-demand malware scan. The scan runs asynchronously.',
+    '4. Call `deisolateEndpoint` only after an analyst confirms the threat is remediated.',
     '',
     '### IOC management',
     '- Call `addBlockedItem` with a SHA-256 hash to add a file to the tenant-wide block list.',
@@ -441,7 +351,6 @@ export const SophosCentral: ConnectorSpec = {
               action: input.action,
               ...(input.message !== undefined && { message: input.message }),
             },
-            idempotent: false,
           });
         } catch (err) {
           throwApiError(err, `Failed to act on alert ${input.alertId}`);
@@ -465,44 +374,19 @@ export const SophosCentral: ConnectorSpec = {
         let successCount = 0;
         let failureCount = 0;
 
-        for (let i = 0; i < input.ids.length; i++) {
-          const alertId = input.ids[i];
+        for (const alertId of input.ids) {
           try {
-            await withRetry(
-              async () => {
-                const response = await ctx.client.request({
-                  method: 'POST',
-                  url: `${dataRegion}/common/v1/alerts/${alertId}/actions`,
-                  headers: { 'X-Tenant-ID': tenantId },
-                  data: {
-                    action: input.action,
-                    ...(input.message !== undefined && { message: input.message }),
-                  },
-                  timeout: 30_000,
-                });
-                return response.data;
+            await request(ctx, 'POST', `/common/v1/alerts/${alertId}/actions`, {
+              tenantId,
+              dataRegion,
+              data: {
+                action: input.action,
+                ...(input.message !== undefined && { message: input.message }),
               },
-              3,
-              false
-            );
+            });
             results.push({ alertId, status: 'success' });
             successCount++;
           } catch (err) {
-            if (err instanceof RateLimitExceededError) {
-              // The current alert was sent and rejected (429) — record it as failed.
-              results.push({ alertId, status: 'failed', error: err.message });
-              failureCount++;
-              // Stop the batch — mark all remaining IDs as unattempted.
-              for (let j = i + 1; j < input.ids.length; j++) {
-                results.push({
-                  alertId: input.ids[j],
-                  status: 'unattempted',
-                  error: err.message,
-                });
-                failureCount++;
-              }
-              break;
-            }
             const axiosErr = err as AxiosError<{ error?: string; message?: string }>;
             const status = axiosErr?.response?.status;
             const body = axiosErr?.response?.data;
@@ -590,7 +474,6 @@ export const SophosCentral: ConnectorSpec = {
               ids: input.ids,
               ...(input.comment !== undefined && { comment: input.comment }),
             },
-            idempotent: true,
           });
         } catch (err) {
           throwApiError(err, 'Failed to isolate endpoints');
@@ -620,7 +503,6 @@ export const SophosCentral: ConnectorSpec = {
               ids: input.ids,
               ...(input.comment !== undefined && { comment: input.comment }),
             },
-            idempotent: true,
           });
         } catch (err) {
           throwApiError(err, 'Failed to de-isolate endpoints');
@@ -646,7 +528,6 @@ export const SophosCentral: ConnectorSpec = {
             errors?: Array<{ id?: string; errorCode?: string; errorMessage?: string }>;
           }>(ctx, 'POST', '/endpoint/v1/endpoints/scans', {
             data: { ids: input.ids },
-            idempotent: false,
           });
         } catch (err) {
           throwApiError(err, 'Failed to trigger endpoint scan');
@@ -662,7 +543,7 @@ export const SophosCentral: ConnectorSpec = {
       description:
         'Read the tamper protection status for a Sophos Central endpoint. ' +
         'A disabled state (`enabled: false`) is a risk signal. ' +
-        'The recovery password is not returned to agents.',
+        'Returns only the enabled flag — passwords are never exposed.',
       input: GetTamperProtectionInputSchema,
       handler: async (ctx, input: GetTamperProtectionInput) => {
         try {
@@ -671,10 +552,9 @@ export const SophosCentral: ConnectorSpec = {
             'GET',
             `/endpoint/v1/endpoints/${input.endpointId}/tamper-protection`
           );
-          // Strip the recovery password — it is an endpoint credential
-          // that must not be exposed in Agent Builder tool context.
-          const { password: _password, ...safe } = data;
-          return safe;
+          // Return only the enabled flag — the response contains password
+          // and previousPasswords which must not be exposed to agents.
+          return { enabled: data.enabled };
         } catch (err) {
           throwApiError(err, `Failed to get tamper protection for endpoint ${input.endpointId}`);
         }
@@ -702,7 +582,6 @@ export const SophosCentral: ConnectorSpec = {
                   regeneratePassword: input.regeneratePassword,
                 }),
               },
-              idempotent: false,
             }
           );
         } catch (err) {
@@ -749,9 +628,8 @@ export const SophosCentral: ConnectorSpec = {
             data: {
               type: 'sha256',
               properties: { sha256: input.sha256 },
-              ...(input.comment !== undefined && { comment: input.comment }),
+              comment: input.comment,
             },
-            idempotent: false,
           });
         } catch (err) {
           const status = (err as AxiosError)?.response?.status;
@@ -779,9 +657,8 @@ export const SophosCentral: ConnectorSpec = {
             data: {
               type: input.type,
               properties: input.properties,
-              ...(input.comment !== undefined && { comment: input.comment }),
+              comment: input.comment,
             },
-            idempotent: false,
           });
         } catch (err) {
           const status = (err as AxiosError)?.response?.status;
@@ -805,8 +682,7 @@ export const SophosCentral: ConnectorSpec = {
           return await request(
             ctx,
             'DELETE',
-            `/endpoint/v1/settings/blocked-items/${encodeURIComponent(input.blockedItemId)}`,
-            { idempotent: false }
+            `/endpoint/v1/settings/blocked-items/${encodeURIComponent(input.blockedItemId)}`
           );
         } catch (err) {
           throwApiError(err, `Failed to delete blocked item ${input.blockedItemId}`);
@@ -831,20 +707,18 @@ export const SophosCentral: ConnectorSpec = {
       input: ListDetectionsInputSchema,
       handler: async (ctx, input: ListDetectionsInput) => {
         const { tenantId, dataRegion } = await whoami(ctx);
-        const headers = { 'X-Tenant-ID': tenantId };
 
         let runId = input.runId;
 
         if (!runId) {
           // Step 1: submit the detection query
-          const submitRes = await ctx.client.request<{
+          const submitRes = await request<{
             id?: string;
             runId?: string;
             result?: string;
-          }>({
-            method: 'POST',
-            url: `${dataRegion}/detections/v1/queries/detections`,
-            headers,
+          }>(ctx, 'POST', '/detections/v1/queries/detections', {
+            tenantId,
+            dataRegion,
             data: {
               ...(input.severity?.length && { severity: input.severity }),
               ...(input.type?.length && { type: input.type }),
@@ -852,16 +726,15 @@ export const SophosCentral: ConnectorSpec = {
               ...(input.from && { from: input.from }),
               ...(input.to && { to: input.to }),
             },
-            timeout: 30_000,
           });
 
-          runId = submitRes.data?.id ?? submitRes.data?.runId;
+          runId = submitRes?.id ?? submitRes?.runId;
           if (!runId) {
             throw new Error('Sophos Central listDetections: submit did not return a query id');
           }
 
           // If the submit itself already reports a terminal state, check it now
-          const submitResult = submitRes.data?.result;
+          const submitResult = submitRes?.result;
           if (submitResult === 'notAvailable') {
             throw new Error(
               'Sophos Central listDetections: XDR detections are not available for this tenant. ' +
@@ -895,13 +768,13 @@ export const SophosCentral: ConnectorSpec = {
                 'Sophos Central listDetections: query run did not complete within 90 seconds'
               );
             }
-            const pollRes = await ctx.client.request<{ result?: string; status?: string }>({
-              method: 'GET',
-              url: `${dataRegion}/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
-              headers,
-              timeout: Math.min(30_000, Math.max(1_000, deadline - Date.now())),
-            });
-            runState = pollRes.data?.result ?? pollRes.data?.status ?? '';
+            const pollRes = await request<{ result?: string; status?: string }>(
+              ctx,
+              'GET',
+              `/detections/v1/queries/detections/${encodeURIComponent(runId)}`,
+              { tenantId, dataRegion }
+            );
+            runState = pollRes?.result ?? pollRes?.status ?? '';
           }
 
           if (runState !== 'succeeded') {
@@ -912,18 +785,21 @@ export const SophosCentral: ConnectorSpec = {
         }
 
         // Step 3: retrieve results page
-        const resultsRes = await ctx.client.request({
-          method: 'GET',
-          url: `${dataRegion}/detections/v1/queries/detections/${encodeURIComponent(runId)}/results`,
-          headers,
-          params: {
-            page: input.page ?? 1,
-            pageSize: input.pageSize ?? 50,
-          },
-          timeout: 30_000,
-        });
+        const resultsData = await request(
+          ctx,
+          'GET',
+          `/detections/v1/queries/detections/${encodeURIComponent(runId)}/results`,
+          {
+            tenantId,
+            dataRegion,
+            params: {
+              page: input.page ?? 1,
+              pageSize: input.pageSize ?? 50,
+            },
+          }
+        );
 
-        return { ...resultsRes.data, runId };
+        return { ...(resultsData as Record<string, unknown>), runId };
       },
     },
   },

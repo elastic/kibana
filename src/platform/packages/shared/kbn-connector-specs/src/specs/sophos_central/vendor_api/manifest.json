@@ -4,132 +4,146 @@
       {
         "method": "get",
         "path": "/common/v1/alerts",
-        "source": "default"
+        "source": "common"
       }
     ],
     "getAlert": [
       {
         "method": "get",
         "path": "/common/v1/alerts/{alertId}",
-        "source": "default"
+        "source": "common"
       }
     ],
     "actOnAlert": [
       {
         "method": "post",
         "path": "/common/v1/alerts/{alertId}/actions",
-        "source": "default"
+        "source": "common"
       }
     ],
     "actOnAlertsBulk": [
       {
         "method": "post",
         "path": "/common/v1/alerts/{alertId}/actions",
-        "source": "default"
+        "source": "common"
       }
     ],
     "listEndpoints": [
       {
         "method": "get",
         "path": "/endpoint/v1/endpoints",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "getEndpoint": [
       {
         "method": "get",
         "path": "/endpoint/v1/endpoints/{endpointId}",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "isolateEndpoint": [
       {
         "method": "post",
         "path": "/endpoint/v1/endpoints/isolation",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "deisolateEndpoint": [
       {
         "method": "post",
         "path": "/endpoint/v1/endpoints/isolation",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "scanEndpoint": [
       {
         "method": "post",
         "path": "/endpoint/v1/endpoints/scans",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "getTamperProtection": [
       {
         "method": "get",
         "path": "/endpoint/v1/endpoints/{endpointId}/tamper-protection",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "updateTamperProtection": [
       {
         "method": "post",
         "path": "/endpoint/v1/endpoints/{endpointId}/tamper-protection",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "listBlockedItems": [
       {
         "method": "get",
         "path": "/endpoint/v1/settings/blocked-items",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "addBlockedItem": [
       {
         "method": "post",
         "path": "/endpoint/v1/settings/blocked-items",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "addAllowedItem": [
       {
         "method": "post",
         "path": "/endpoint/v1/settings/allowed-items",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "deleteBlockedItem": [
       {
         "method": "delete",
         "path": "/endpoint/v1/settings/blocked-items/{blockedItemId}",
-        "source": "default"
+        "source": "endpoint"
       }
     ],
     "listDetections": [
       {
         "method": "post",
         "path": "/detections/v1/queries/detections",
-        "source": "default"
+        "source": "detections"
       },
       {
         "method": "get",
         "path": "/detections/v1/queries/detections/{runId}",
-        "source": "default"
+        "source": "detections"
       },
       {
         "method": "get",
         "path": "/detections/v1/queries/detections/{runId}/results",
-        "source": "default"
+        "source": "detections"
       }
     ]
   },
   "sources": {
-    "default": {
+    "common": {
       "apiVersion": "2024.12",
       "fetchedAt": "2026-11-23T00:00:00.000Z",
-      "format": "html-reference",
-      "url": "https://developer.sophos.com/docs/common-v1/1/overview",
-      "note": "Sophos does not publish a downloadable OpenAPI spec. This URL is the human-readable API reference; see snapshots/README.md."
+      "format": "openapi",
+      "url": "https://developer.sophos.com/docs/common-v1/1/routes/alerts/get",
+      "note": "Sophos Common API v1 — alerts. Sophos publishes interactive API references; no downloadable OpenAPI file is available."
+    },
+    "endpoint": {
+      "apiVersion": "2024.12",
+      "fetchedAt": "2026-11-23T00:00:00.000Z",
+      "format": "openapi",
+      "url": "https://developer.sophos.com/docs/endpoint-v1/1/routes/endpoints/get",
+      "note": "Sophos Endpoint API v1 — endpoints, tamper protection, blocked/allowed items."
+    },
+    "detections": {
+      "apiVersion": "2024.12",
+      "fetchedAt": "2026-11-23T00:00:00.000Z",
+      "format": "openapi",
+      "url": "https://developer.sophos.com/docs/detections-v1/1/routes/queries/detections/post",
+      "note": "Sophos Detections API v1 — XDR detection queries."
     }
   },
   "unmatched": {

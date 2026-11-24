@@ -25,11 +25,8 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 Sophos Central connectors have the following configuration properties:
 
-API URL
-:   The Sophos Central global API base URL. Defaults to `https://api.central.sophos.com`. The connector discovers your tenant ID and regional host automatically via the whoami endpoint. Use the default unless Sophos Support instructs otherwise. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure all three hosts are added to the allowed hosts: `id.sophos.com` (OAuth token endpoint), `api.central.sophos.com` (global API / whoami), and the regional data-center host returned by whoami (for example `api-us03.central.sophos.com`).
-
 Authentication
-:   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret from Sophos Central (My Products > General Settings > API Credentials > Add Credential). The credential needs `alerts:read`, `alerts:action`, `endpoint-state:read`, `endpoint-state:update`, and `detections.queries.detections:create` scopes.
+:   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret from Sophos Central (My Products > General Settings > API Credentials > Add Credential). Only tenant-level credentials are supported — partner or organization credentials are rejected. The credential needs `alerts:read`, `alerts:action`, `endpoint-state:read`, `endpoint-state:update`, and `detections.queries.detections:create` scopes. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure all three hosts are added to the allowed hosts: `id.sophos.com` (OAuth token endpoint), `api.central.sophos.com` (global API / whoami), and the regional data-center host returned by whoami (for example `api-us03.central.sophos.com`).
 
 ### Get API credentials [sophos-central-api-credentials]
 
@@ -75,7 +72,7 @@ The Sophos Central connector exposes the following actions:
 :   Trigger an on-demand malware scan on one or more endpoints. The scan runs asynchronously; the action returns a scan ID immediately. Accepts 1 to 500 endpoint UUIDs.
 
 `getTamperProtection`
-:   Read the tamper protection status for an endpoint. A disabled state is a risk signal. The recovery password is not returned.
+:   Read the tamper protection status for an endpoint. Returns only the `enabled` flag — a disabled state is a risk signal. Passwords are never exposed.
 
 `updateTamperProtection` _(not yet available)_
 :   Enable or disable tamper protection for an endpoint. Optionally regenerate the recovery password. Only use after analyst approval.
@@ -84,13 +81,15 @@ The Sophos Central connector exposes the following actions:
 :   List the items on the tenant's global blocked list. Returns a page-numbered list. Increment `page` until `page > pages.total` to retrieve all pages.
 
 `addBlockedItem`
-:   Add a SHA-256 file hash to the tenant's global blocked list. If the hash is already blocked the action returns a soft success.
+:   Add a SHA-256 file hash to the tenant's global blocked list. A comment is required. If the hash is already blocked the action returns a soft success.
 
 `addAllowedItem` _(not yet available)_
-:   Add an item to the tenant's global allowed list. Supported types: `path`, `sha256`, `certificateSigner`, `posixPath`. Only use after analyst approval — adding an allowed item relaxes protection across the tenant.
+:   Add an item to the tenant's global allowed list. Supported types: `path`, `sha256`, `certificateSigner`, `posixPath`. A comment is required. Only use after analyst approval — adding an allowed item relaxes protection across the tenant.
 
 `deleteBlockedItem` _(not yet available)_
 :   Remove a blocked item from the tenant's global blocked list by its item ID. Deletion is permanent.
 
 `listDetections`
-:   Query XDR detections (requires XDR licence). On the first call the connector submits the query, polls until it completes (up to 90 s), and returns the first page of results along with `runId`. To fetch subsequent pages, pass the same `runId` with the desired `page` number and the same `pageSize` used on the first call — the connector skips submission and returns results directly. Using a different `pageSize` on a continuation call changes the server's page boundaries and may cause rows to be skipped or duplicated.
+:   Query XDR detections (requires XDR licence). On the first call the connector submits the query via `POST /detections/v1/queries/detections`, polls until it completes (up to 90 s), and returns the first page of results along with `runId`. To fetch subsequent pages, pass the same `runId` with the desired `page` number and the same `pageSize` used on the first call — the connector skips submission and returns results directly. Using a different `pageSize` on a continuation call changes the server's page boundaries and may cause rows to be skipped or duplicated.
+
+Not exposed to Agent Builder agents (marked _not yet available_ above): `updateTamperProtection`, `addAllowedItem`, and `deleteBlockedItem`.

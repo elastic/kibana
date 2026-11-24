@@ -38,6 +38,7 @@ const DATA_REGION = 'https://api-us01.central.sophos.com';
 const ENDPOINT_ID = 'aaaabbbb-cccc-dddd-eeee-ffffaaaabbbb';
 const ALERT_ID = '11112222-3333-4444-5555-666677778888';
 const GLOBAL_API_URL = 'https://api.central.sophos.com';
+const RUN_ID = '99998888-7777-6666-5555-444433332222';
 
 // ---------------------------------------------------------------------------
 // Mock helpers
@@ -66,9 +67,9 @@ const stubWhoami = (client: MockClient) => {
   });
 };
 
-const makeCtx = (client: MockClient, configOverride?: Record<string, unknown>) => ({
+const makeCtx = (client: MockClient) => ({
   client,
-  config: configOverride ?? { apiUrl: GLOBAL_API_URL },
+  config: {},
   secrets: {},
   log: { debug: jest.fn(), error: jest.fn(), warn: jest.fn(), info: jest.fn() },
 });
@@ -157,14 +158,12 @@ describe('input schemas', () => {
       expect(ListAlertsInputSchema.safeParse({}).success).toBe(true);
     });
 
-    it('accepts severity array up to 10 items', () => {
+    it('accepts severity array with valid enum values', () => {
       expect(ListAlertsInputSchema.safeParse({ severity: ['high', 'medium'] }).success).toBe(true);
     });
 
-    it('rejects severity array over 10 items', () => {
-      expect(
-        ListAlertsInputSchema.safeParse({ severity: new Array(11).fill('high') }).success
-      ).toBe(false);
+    it('rejects severity with invalid enum value', () => {
+      expect(ListAlertsInputSchema.safeParse({ severity: ['critical'] }).success).toBe(false);
     });
 
     it('rejects pageSize above 100', () => {
@@ -245,6 +244,18 @@ describe('input schemas', () => {
       expect(ListEndpointsInputSchema.safeParse({ isolationStatus: 'unknown' }).success).toBe(
         false
       );
+    });
+
+    it('accepts valid healthStatus enum values', () => {
+      expect(
+        ListEndpointsInputSchema.safeParse({ healthStatus: ['bad', 'good'] }).success
+      ).toBe(true);
+    });
+
+    it('rejects invalid healthStatus enum value', () => {
+      expect(
+        ListEndpointsInputSchema.safeParse({ healthStatus: ['critical'] }).success
+      ).toBe(false);
     });
 
     it('rejects pageSize above 100', () => {
@@ -331,23 +342,31 @@ describe('input schemas', () => {
   });
 
   describe('AddBlockedItemInputSchema', () => {
-    it('accepts a valid 64-char SHA-256 hex string', () => {
+    it('accepts a valid SHA-256 hex string with required comment', () => {
       expect(
         AddBlockedItemInputSchema.safeParse({ sha256: 'a'.repeat(64), comment: 'test' }).success
       ).toBe(true);
     });
 
+    it('rejects input without required comment', () => {
+      expect(AddBlockedItemInputSchema.safeParse({ sha256: 'a'.repeat(64) }).success).toBe(false);
+    });
+
     it('rejects a non-64-char string', () => {
-      expect(AddBlockedItemInputSchema.safeParse({ sha256: 'abc' }).success).toBe(false);
+      expect(
+        AddBlockedItemInputSchema.safeParse({ sha256: 'abc', comment: 'test' }).success
+      ).toBe(false);
     });
 
     it('rejects non-hex characters', () => {
-      expect(AddBlockedItemInputSchema.safeParse({ sha256: 'z'.repeat(64) }).success).toBe(false);
+      expect(
+        AddBlockedItemInputSchema.safeParse({ sha256: 'z'.repeat(64), comment: 'test' }).success
+      ).toBe(false);
     });
   });
 
   describe('AddAllowedItemInputSchema', () => {
-    it('accepts valid type and properties', () => {
+    it('accepts valid type, properties, and required comment', () => {
       expect(
         AddAllowedItemInputSchema.safeParse({
           type: 'sha256',
@@ -357,11 +376,21 @@ describe('input schemas', () => {
       ).toBe(true);
     });
 
+    it('rejects input without required comment', () => {
+      expect(
+        AddAllowedItemInputSchema.safeParse({
+          type: 'path',
+          properties: { path: '/usr/bin/example' },
+        }).success
+      ).toBe(false);
+    });
+
     it('rejects an unknown type', () => {
       expect(
         AddAllowedItemInputSchema.safeParse({
           type: 'md5',
           properties: { md5: 'abc' },
+          comment: 'test',
         }).success
       ).toBe(false);
     });
@@ -391,23 +420,46 @@ describe('input schemas', () => {
       expect(ListDetectionsInputSchema.safeParse({ pageSize: 1001 }).success).toBe(false);
     });
 
-    it('rejects a malformed runId (path traversal)', () => {
+    it('accepts a valid UUID runId', () => {
+      expect(ListDetectionsInputSchema.safeParse({ runId: RUN_ID }).success).toBe(true);
+    });
+
+    it('rejects a non-UUID runId', () => {
+      expect(ListDetectionsInputSchema.safeParse({ runId: 'not-a-uuid' }).success).toBe(false);
+    });
+
+    it('rejects a runId with path traversal', () => {
       expect(ListDetectionsInputSchema.safeParse({ runId: '../../../etc/passwd' }).success).toBe(
         false
       );
     });
 
-    it('rejects a runId with spaces or special characters', () => {
-      expect(ListDetectionsInputSchema.safeParse({ runId: 'run id with spaces' }).success).toBe(
-        false
-      );
-      expect(ListDetectionsInputSchema.safeParse({ runId: 'run;drop' }).success).toBe(false);
+    it('accepts severity as integer array (0-10)', () => {
+      expect(ListDetectionsInputSchema.safeParse({ severity: [0, 5, 10] }).success).toBe(true);
     });
 
-    it('accepts a valid UUID-style runId', () => {
+    it('rejects severity above 10', () => {
+      expect(ListDetectionsInputSchema.safeParse({ severity: [11] }).success).toBe(false);
+    });
+
+    it('accepts valid detection type enum', () => {
+      expect(ListDetectionsInputSchema.safeParse({ type: ['process', 'threat'] }).success).toBe(
+        true
+      );
+    });
+
+    it('rejects invalid detection type', () => {
+      expect(ListDetectionsInputSchema.safeParse({ type: ['malware'] }).success).toBe(false);
+    });
+
+    it('accepts valid detection category enum', () => {
       expect(
-        ListDetectionsInputSchema.safeParse({ runId: 'abc-123-def-456' }).success
+        ListDetectionsInputSchema.safeParse({ category: ['endpoint', 'network'] }).success
       ).toBe(true);
+    });
+
+    it('rejects invalid detection category', () => {
+      expect(ListDetectionsInputSchema.safeParse({ category: ['server'] }).success).toBe(false);
     });
   });
 });
@@ -448,22 +500,40 @@ describe('test handler', () => {
     client.get.mockResolvedValue({ data: { id: '', apiHosts: { dataRegion: DATA_REGION } } });
     const ctx = makeCtx(client);
 
-    // whoami throws a plain Error (no axios response body); throwApiError falls back
     await expect(SophosCentral.test.handler(ctx as never)).rejects.toThrow(
       'Sophos Central connection test failed'
     );
   });
 
-  it('uses apiUrl config override for the whoami endpoint', async () => {
+  it('throws when whoami returns non-tenant idType', async () => {
     const client = makeClient();
-    stubWhoami(client);
-    const ctx = makeCtx(client, { apiUrl: 'https://api.eu.central.sophos.com' });
+    client.get.mockResolvedValue({
+      data: {
+        id: TENANT_ID,
+        idType: 'partner',
+        apiHosts: { dataRegion: DATA_REGION },
+      },
+    });
+    const ctx = makeCtx(client);
 
-    await SophosCentral.test.handler(ctx as never);
+    await expect(SophosCentral.test.handler(ctx as never)).rejects.toThrow(
+      'tenant-level credentials'
+    );
+  });
 
-    expect(client.get).toHaveBeenCalledWith(
-      'https://api.eu.central.sophos.com/whoami/v1',
-      expect.anything()
+  it('throws when whoami returns an unexpected regional URL', async () => {
+    const client = makeClient();
+    client.get.mockResolvedValue({
+      data: {
+        id: TENANT_ID,
+        idType: 'tenant',
+        apiHosts: { dataRegion: 'https://evil.example.com' },
+      },
+    });
+    const ctx = makeCtx(client);
+
+    await expect(SophosCentral.test.handler(ctx as never)).rejects.toThrow(
+      'unexpected regional URL'
     );
   });
 });
@@ -849,17 +919,7 @@ describe('listBlockedItems', () => {
 describe('addBlockedItem', () => {
   const SHA256 = 'a'.repeat(64);
 
-  it('accepts input without optional comment', () => {
-    const result = AddBlockedItemInputSchema.safeParse({ sha256: SHA256 });
-    expect(result.success).toBe(true);
-  });
-
-  it('accepts input with optional comment', () => {
-    const result = AddBlockedItemInputSchema.safeParse({ sha256: SHA256, comment: 'block it' });
-    expect(result.success).toBe(true);
-  });
-
-  it('POSTs sha256 to /endpoint/v1/settings/blocked-items', async () => {
+  it('POSTs sha256 with required comment to /endpoint/v1/settings/blocked-items', async () => {
     const client = makeClient();
     stubWhoami(client);
     client.request.mockResolvedValue({ data: { id: 'item-1', type: 'sha256' } });
@@ -867,12 +927,17 @@ describe('addBlockedItem', () => {
 
     const result = await SophosCentral.actions.addBlockedItem.handler(ctx as never, {
       sha256: SHA256,
+      comment: 'Block malicious hash',
     });
 
     expect(client.request).toHaveBeenCalledWith(
       expect.objectContaining({
         method: 'POST',
-        data: expect.objectContaining({ type: 'sha256', properties: { sha256: SHA256 } }),
+        data: expect.objectContaining({
+          type: 'sha256',
+          properties: { sha256: SHA256 },
+          comment: 'Block malicious hash',
+        }),
       })
     );
     expect(result).toEqual({ id: 'item-1', type: 'sha256' });
@@ -888,6 +953,7 @@ describe('addBlockedItem', () => {
 
     const result = await SophosCentral.actions.addBlockedItem.handler(ctx as never, {
       sha256: SHA256,
+      comment: 'Block malicious hash',
     });
 
     expect(result).toEqual({ alreadyBlocked: true, sha256: SHA256 });
@@ -899,24 +965,7 @@ describe('addBlockedItem', () => {
 // ---------------------------------------------------------------------------
 
 describe('addAllowedItem', () => {
-  it('accepts input without optional comment', () => {
-    const result = AddAllowedItemInputSchema.safeParse({
-      type: 'path',
-      properties: { path: '/usr/bin/example' },
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it('accepts input with optional comment', () => {
-    const result = AddAllowedItemInputSchema.safeParse({
-      type: 'path',
-      properties: { path: '/usr/bin/example' },
-      comment: 'allow it',
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it('POSTs to /endpoint/v1/settings/allowed-items', async () => {
+  it('POSTs to /endpoint/v1/settings/allowed-items with required comment', async () => {
     const client = makeClient();
     stubWhoami(client);
     client.request.mockResolvedValue({ data: { id: 'allowed-1' } });
@@ -925,13 +974,18 @@ describe('addAllowedItem', () => {
     await SophosCentral.actions.addAllowedItem.handler(ctx as never, {
       type: 'path',
       properties: { path: '/usr/bin/example' },
+      comment: 'Allow trusted binary',
     });
 
     expect(client.request).toHaveBeenCalledWith(
       expect.objectContaining({
         method: 'POST',
         url: `${DATA_REGION}/endpoint/v1/settings/allowed-items`,
-        data: { type: 'path', properties: { path: '/usr/bin/example' } },
+        data: {
+          type: 'path',
+          properties: { path: '/usr/bin/example' },
+          comment: 'Allow trusted binary',
+        },
       })
     );
   });
@@ -947,6 +1001,7 @@ describe('addAllowedItem', () => {
     const result = await SophosCentral.actions.addAllowedItem.handler(ctx as never, {
       type: 'sha256',
       properties: { sha256: 'a'.repeat(64) },
+      comment: 'Allow known file',
     });
 
     expect(result).toEqual({ alreadyAllowed: true, type: 'sha256' });
@@ -987,11 +1042,10 @@ describe('listDetections', () => {
   });
 
   it('submits query, polls for completion, then fetches results', async () => {
-    const RUN_ID = 'run-abc-123';
     const client = makeClient();
 
     client.get.mockResolvedValue({
-      data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } },
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
     });
 
     // submit → poll (running) → poll (succeeded) → results
@@ -1004,8 +1058,6 @@ describe('listDetections', () => {
     jest.useFakeTimers();
     const ctx = makeCtx(client);
 
-    // Attach the resolution handler before running timers to prevent
-    // any intermediate settled promise from going unhandled.
     const resultPromise = SophosCentral.actions.listDetections.handler(ctx as never, {
       pageSize: 10,
     });
@@ -1035,7 +1087,7 @@ describe('listDetections', () => {
   it('throws when submit returns no runId', async () => {
     const client = makeClient();
     client.get.mockResolvedValue({
-      data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } },
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
     });
     client.request.mockResolvedValueOnce({ data: {} }); // no runId
 
@@ -1046,10 +1098,9 @@ describe('listDetections', () => {
   });
 
   it('skips submit and poll when runId is provided (pagination shortcut)', async () => {
-    const RUN_ID = 'run-abc-123';
     const client = makeClient();
     client.get.mockResolvedValue({
-      data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } },
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
     });
     // Only the results call — no submit, no poll
     client.request.mockResolvedValueOnce({ data: { items: [{ id: 'det-2' }] } });
@@ -1075,10 +1126,9 @@ describe('listDetections', () => {
   });
 
   it('returns runId in the first-call result for use in pagination', async () => {
-    const RUN_ID = 'run-first-call';
     const client = makeClient();
     client.get.mockResolvedValue({
-      data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } },
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
     });
     // submit → poll (succeeded) → results
     client.request
@@ -1098,16 +1148,15 @@ describe('listDetections', () => {
   it('throws when query run ends in a non-succeeded terminal state', async () => {
     const client = makeClient();
     client.get.mockResolvedValue({
-      data: { id: TENANT_ID, apiHosts: { dataRegion: DATA_REGION } },
+      data: { id: TENANT_ID, idType: 'tenant', apiHosts: { dataRegion: DATA_REGION } },
     });
     client.request
-      .mockResolvedValueOnce({ data: { runId: 'run-xyz' } }) // submit
+      .mockResolvedValueOnce({ data: { runId: RUN_ID } }) // submit
       .mockResolvedValueOnce({ data: { result: 'failed' } }); // poll → terminal
 
     jest.useFakeTimers();
     const ctx = makeCtx(client);
 
-    // Attach rejection handler BEFORE advancing timers to avoid unhandled rejection.
     const expectation = expect(
       SophosCentral.actions.listDetections.handler(ctx as never, {})
     ).rejects.toThrow('ended with state "failed"');
@@ -1164,159 +1213,8 @@ describe('error handling', () => {
     );
     const ctx = makeCtx(client);
 
-    // 500 is retryable; use fake timers to skip the backoff sleeps
-    jest.useFakeTimers();
-    const expectation = expect(
+    await expect(
       SophosCentral.actions.getEndpoint.handler(ctx as never, { endpointId: ENDPOINT_ID })
     ).rejects.toThrow(`Failed to get endpoint ${ENDPOINT_ID} (HTTP 500)`);
-    await jest.runAllTimersAsync();
-    await expectation;
-    jest.useRealTimers();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Retry behaviour for non-idempotent actions
-// ---------------------------------------------------------------------------
-
-describe('non-idempotent retry behaviour', () => {
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('does not retry a non-idempotent action on 500 (sends exactly one request)', async () => {
-    const client = makeClient();
-    stubWhoami(client);
-    client.request.mockRejectedValue(
-      Object.assign(new Error('Server Error'), {
-        response: { status: 500, data: {} },
-      })
-    );
-    const ctx = makeCtx(client);
-
-    await expect(
-      SophosCentral.actions.actOnAlert.handler(ctx as never, {
-        alertId: ALERT_ID,
-        action: 'acknowledge',
-      })
-    ).rejects.toThrow();
-
-    // Non-idempotent POST must NOT be retried on 5xx
-    expect(client.request).toHaveBeenCalledTimes(1);
-  });
-
-  it('retries a non-idempotent action on 429 (request was not processed)', async () => {
-    const client = makeClient();
-    stubWhoami(client);
-    client.request
-      .mockRejectedValueOnce(
-        Object.assign(new Error('Too Many Requests'), {
-          response: { status: 429, data: {}, headers: { 'retry-after': '1' } },
-        })
-      )
-      .mockResolvedValueOnce({ data: { action: 'acknowledge', result: 'success' } });
-    const ctx = makeCtx(client);
-
-    jest.useFakeTimers();
-    const resultPromise = SophosCentral.actions.actOnAlert.handler(ctx as never, {
-      alertId: ALERT_ID,
-      action: 'acknowledge',
-    });
-    await jest.runAllTimersAsync();
-    await resultPromise;
-
-    // Should have retried after the 429
-    expect(client.request).toHaveBeenCalledTimes(2);
-  });
-
-  it('honours an HTTP-date Retry-After header on 429', async () => {
-    const client = makeClient();
-    stubWhoami(client);
-    // Retry-After is an HTTP-date 2 seconds in the future
-    const futureDate = new Date(Date.now() + 2_000).toUTCString();
-    client.request
-      .mockRejectedValueOnce(
-        Object.assign(new Error('Too Many Requests'), {
-          response: { status: 429, data: {}, headers: { 'retry-after': futureDate } },
-        })
-      )
-      .mockResolvedValueOnce({ data: { action: 'acknowledge', result: 'success' } });
-    const ctx = makeCtx(client);
-
-    jest.useFakeTimers();
-    const resultPromise = SophosCentral.actions.actOnAlert.handler(ctx as never, {
-      alertId: ALERT_ID,
-      action: 'acknowledge',
-    });
-
-    // After the first timer tick the 429 delay should be pending —
-    // the second request should not have been sent yet.
-    await jest.advanceTimersByTimeAsync(500);
-    expect(client.request).toHaveBeenCalledTimes(1);
-
-    // Drain remaining timers to let the retry complete
-    await jest.runAllTimersAsync();
-    await resultPromise;
-    expect(client.request).toHaveBeenCalledTimes(2);
-  });
-
-  it('throws immediately when Retry-After exceeds the retry budget', async () => {
-    const client = makeClient();
-    stubWhoami(client);
-    // Retry-After of 60s exceeds the 30s cap
-    client.request.mockRejectedValueOnce(
-      Object.assign(new Error('Too Many Requests'), {
-        response: { status: 429, data: {}, headers: { 'retry-after': '60' } },
-      })
-    );
-    const ctx = makeCtx(client);
-
-    await expect(
-      SophosCentral.actions.actOnAlert.handler(ctx as never, {
-        alertId: ALERT_ID,
-        action: 'acknowledge',
-      })
-    ).rejects.toThrow('Rate limited');
-
-    // Only one request — no retry attempted
-    expect(client.request).toHaveBeenCalledTimes(1);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// actOnAlertsBulk — rate limit halts the batch
-// ---------------------------------------------------------------------------
-
-describe('actOnAlertsBulk rate-limit batch halt', () => {
-  const ALERT_ID_2 = '22223333-4444-5555-6666-777788889999';
-  const ALERT_ID_3 = '33334444-5555-6666-7777-888899990000';
-
-  it('stops the batch and marks remaining IDs as unattempted on rate limit', async () => {
-    const client = makeClient();
-    stubWhoami(client);
-    // First alert succeeds, second gets 429 with Retry-After > budget
-    client.request
-      .mockResolvedValueOnce({ data: { result: 'success' } })
-      .mockRejectedValueOnce(
-        Object.assign(new Error('Too Many Requests'), {
-          response: { status: 429, data: {}, headers: { 'retry-after': '60' } },
-        })
-      );
-    const ctx = makeCtx(client);
-
-    const result = await SophosCentral.actions.actOnAlertsBulk.handler(ctx as never, {
-      ids: [ALERT_ID, ALERT_ID_2, ALERT_ID_3],
-      action: 'acknowledge',
-    });
-
-    expect(result.successCount).toBe(1);
-    expect(result.failureCount).toBe(2);
-    expect(result.results[0]).toMatchObject({ alertId: ALERT_ID, status: 'success' });
-    // The alert that received the 429 was attempted — it is 'failed', not 'unattempted'
-    expect(result.results[1]).toMatchObject({ alertId: ALERT_ID_2, status: 'failed' });
-    // The remaining alert was never sent — it is 'unattempted'
-    expect(result.results[2]).toMatchObject({ alertId: ALERT_ID_3, status: 'unattempted' });
-    // Only 2 requests sent (1 success + 1 that got 429), not 3
-    expect(client.request).toHaveBeenCalledTimes(2);
   });
 });
