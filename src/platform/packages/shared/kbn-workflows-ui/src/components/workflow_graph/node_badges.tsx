@@ -195,27 +195,20 @@ export function NodeConfigWarningIndicator({
         },
       }}
     >
-      <span
+      <EuiBadge
+        color="warning"
+        // The icon is a child, not `iconType`: an icon-only badge uses tight padding and reads as a
+        // cramped square, while this keeps the default inset on both sides.
         tabIndex={0}
-        role="img"
         aria-label={message}
         data-test-subj="workflowGraphNodeIncomplete"
         css={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxSizing: 'border-box',
-          width: euiTheme.size.l,
-          height: euiTheme.size.l,
-          borderRadius: '50%',
-          background: euiTheme.colors.backgroundLightWarning,
-          border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongWarning}`,
-          lineHeight: 0,
+          cursor: 'default',
           '&:focus-visible': { outline: `2px solid ${euiTheme.colors.primary}` },
         }}
       >
-        <EuiIcon type="warning" size="m" color={euiTheme.colors.textWarning} aria-hidden />
-      </span>
+        <EuiIcon type="warning" size="s" aria-hidden />
+      </EuiBadge>
     </EuiToolTip>
   );
 }
