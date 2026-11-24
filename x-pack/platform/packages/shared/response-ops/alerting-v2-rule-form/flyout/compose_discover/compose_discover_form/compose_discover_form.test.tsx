@@ -164,12 +164,12 @@ describe('step validation', () => {
   describe('details step validation', () => {
     const detailsStep = getSteps(false).steps.find((s) => s.id === 'details')!;
 
-    it('declares metadata.name fields and no custom validate', () => {
-      expect(detailsStep.fields).toEqual(['metadata.name']);
+    it('declares the name and reason fields and no custom validate', () => {
+      expect(detailsStep.fields).toEqual(['metadata.name', 'reason.template']);
       expect(detailsStep.validate).toBeUndefined();
     });
 
-    it('delegates to methods.trigger with metadata.name', async () => {
+    it('delegates to methods.trigger with the name and reason', async () => {
       const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(true),
@@ -177,7 +177,7 @@ describe('step validation', () => {
 
       const result = await validateStep(detailsStep, methods, state);
 
-      expect(methods.trigger).toHaveBeenCalledWith(['metadata.name']);
+      expect(methods.trigger).toHaveBeenCalledWith(['metadata.name', 'reason.template']);
       expect(result).toBe(true);
     });
 

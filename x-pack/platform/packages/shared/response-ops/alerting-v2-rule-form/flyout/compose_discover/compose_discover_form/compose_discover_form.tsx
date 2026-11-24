@@ -88,7 +88,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Details & Artifacts',
     }),
     render: () => <DetailsAndArtifactsStep />,
-    fields: ['metadata.name'],
+    fields: ['metadata.name', 'reason.template'],
   },
   notifications: {
     id: 'notifications',
