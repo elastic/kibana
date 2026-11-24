@@ -52,7 +52,7 @@ export const ENTERPRISE_SEARCH_DATA_PLUGIN = {
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.data.description', {
     defaultMessage:
-      'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
+      'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or third party content crawlers.', // TODO: Make sure this content is correct.
   }),
   URL: '/app/elasticsearch/content',
   LOGO: 'logoElasticsearch',
