@@ -14,8 +14,12 @@ import {
   EuiPortal,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
+  useHasActiveSession,
+  useIsInsideParentFlyout,
 } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface QueryDetailsFlyoutProps {
@@ -26,46 +30,71 @@ interface QueryDetailsFlyoutProps {
   onClose: () => void;
 }
 
-const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action, onClose }) => (
-  <EuiPortal>
-    <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 id="flyoutTitle">
-            <FormattedMessage
-              id="xpack.osquery.liveQueryActions.details.title"
-              defaultMessage="Query Details"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFlexItem grow={false}>
-          <strong>
-            <FormattedMessage id="xpack.osquery.liveQueryActions.details.id" defaultMessage="Id" />
-          </strong>
-          <EuiSpacer size="xs" />
-          <EuiCodeBlock fontSize="m" paddingSize="s" isCopyable={true}>
-            {action.id}
-          </EuiCodeBlock>
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiFlexItem grow={false}>
-          <strong>
-            <FormattedMessage
-              id="xpack.osquery.liveQueryActions.details.query"
-              defaultMessage="Query"
-            />
-          </strong>
-          <EuiSpacer size="xs" />
-          <EuiCodeBlock language="sql" fontSize="m" paddingSize="s" isCopyable={true}>
-            {action.query}
-          </EuiCodeBlock>
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
-      </EuiFlyoutBody>
-    </EuiFlyout>
-  </EuiPortal>
-);
+const QUERY_DETAILS_TITLE = i18n.translate('xpack.osquery.liveQueryActions.details.title', {
+  defaultMessage: 'Query Details',
+});
+
+const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action, onClose }) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'osqueryQueryDetailsFlyoutTitle' });
+  const isInsideParentFlyout = useIsInsideParentFlyout();
+  const hasActiveSession = useHasActiveSession();
+  const isNested = isInsideParentFlyout && hasActiveSession;
+
+  return (
+    <EuiPortal>
+      <EuiFlyout
+        data-test-subj="osquery-query-details-flyout"
+        {...(isNested
+          ? { session: 'inherit' as const, size: 's' as const, 'aria-label': QUERY_DETAILS_TITLE }
+          : {
+              session: 'never' as const,
+              size: 'm' as const,
+              'aria-labelledby': titleId,
+            })}
+        ownFocus
+        onClose={onClose}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2 id={titleId}>
+              <FormattedMessage
+                id="xpack.osquery.liveQueryActions.details.title"
+                defaultMessage="Query Details"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiFlexItem grow={false}>
+            <strong>
+              <FormattedMessage
+                id="xpack.osquery.liveQueryActions.details.id"
+                defaultMessage="Id"
+              />
+            </strong>
+            <EuiSpacer size="xs" />
+            <EuiCodeBlock fontSize="m" paddingSize="s" isCopyable={true}>
+              {action.id}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+          <EuiFlexItem grow={false}>
+            <strong>
+              <FormattedMessage
+                id="xpack.osquery.liveQueryActions.details.query"
+                defaultMessage="Query"
+              />
+            </strong>
+            <EuiSpacer size="xs" />
+            <EuiCodeBlock language="sql" fontSize="m" paddingSize="s" isCopyable={true}>
+              {action.query}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    </EuiPortal>
+  );
+};
 
 export const QueryDetailsFlyout = React.memo(QueryDetailsFlyoutComponent);

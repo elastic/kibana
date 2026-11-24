@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { EuiFlyout, EuiProvider } from '@elastic/eui';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { EuiFlyout, EuiProvider, getFlyoutManagerStore } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { noop } from 'lodash';
 
@@ -20,23 +20,122 @@ jest.mock('@elastic/eui', () =>
   )
 );
 
+const action = { id: 'action-1', query: 'select * from uptime;' };
+
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(
+    <EuiProvider>
+      <IntlProvider locale="en">{ui}</IntlProvider>
+    </EuiProvider>
+  );
+
+const expectDetailsShown = () => {
+  expect(screen.getByTestId('osquery-query-details-flyout')).toBeInTheDocument();
+  expect(screen.getByText('Query Details')).toBeVisible();
+  expect(screen.getByText('action-1')).toBeVisible();
+  // the SQL block is syntax highlighted, so the text is split across spans
+  expect(screen.getByTestId('osquery-query-details-flyout')).toHaveTextContent(action.query);
+};
+
+const validationErrors = (spy: jest.SpyInstance) =>
+  spy.mock.calls.filter((args) =>
+    args.some((arg) => String(arg?.message ?? arg).includes('EuiFlyout validation error'))
+  );
+
 describe('QueryDetailsFlyout', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error');
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
   it('renders inside a managed size m parent flyout without throwing', () => {
-    render(
-      <EuiProvider>
-        <IntlProvider locale="en">
-          <EuiFlyout session="start" size="m" aria-label="parent" onClose={noop}>
-            <QueryDetailsFlyout
-              action={{ id: 'action-1', query: 'select * from uptime;' }}
-              onClose={jest.fn()}
-            />
-          </EuiFlyout>
-        </IntlProvider>
-      </EuiProvider>
+    renderWithProviders(
+      <EuiFlyout session="start" size="m" aria-label="parent" onClose={noop}>
+        <QueryDetailsFlyout action={action} onClose={jest.fn()} />
+      </EuiFlyout>
     );
 
-    expect(screen.getByText('Query Details')).toBeVisible();
-    expect(screen.getByText('action-1')).toBeVisible();
-    expect(screen.getByText('select * from uptime;')).toBeVisible();
+    expectDetailsShown();
+    expect(validationErrors(consoleErrorSpy)).toHaveLength(0);
+    expect(getFlyoutManagerStore().getState().flyouts).toEqual(
+      expect.arrayContaining([expect.objectContaining({ level: 'child', size: 's' })])
+    );
+  });
+
+  it('renders standalone size m outside a managed session', () => {
+    renderWithProviders(<QueryDetailsFlyout action={action} onClose={jest.fn()} />);
+
+    expectDetailsShown();
+    expect(getFlyoutManagerStore().getState().flyouts).toHaveLength(0);
+  });
+
+  it('close button calls onClose once', () => {
+    const onClose = jest.fn();
+    renderWithProviders(
+      <EuiFlyout session="start" size="m" aria-label="parent" onClose={noop}>
+        <div data-test-subj="parent-content">parent</div>
+        <QueryDetailsFlyout action={action} onClose={onClose} />
+      </EuiFlyout>
+    );
+
+    const details = screen.getByTestId('osquery-query-details-flyout');
+    fireEvent.click(within(details).getByTestId('euiFlyoutCloseButton'));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('parent-content')).toBeInTheDocument();
+  });
+
+  it('Escape calls onClose once', () => {
+    const onClose = jest.fn();
+    renderWithProviders(
+      <EuiFlyout session="start" size="m" aria-label="parent" onClose={noop}>
+        <div data-test-subj="parent-content">parent</div>
+        <QueryDetailsFlyout action={action} onClose={onClose} />
+      </EuiFlyout>
+    );
+
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('parent-content')).toBeInTheDocument();
+  });
+
+  it('stays standalone when an unrelated managed session is active', () => {
+    renderWithProviders(
+      <>
+        <EuiFlyout session="start" size="m" aria-label="other" onClose={noop}>
+          other
+        </EuiFlyout>
+        <QueryDetailsFlyout action={action} onClose={jest.fn()} />
+      </>
+    );
+
+    expect(getFlyoutManagerStore().getState().flyouts).toHaveLength(1);
+    expectDetailsShown();
+    expect(validationErrors(consoleErrorSpy)).toHaveLength(0);
+  });
+
+  it('does not throw inside an unmanaged parent while a session is active', () => {
+    renderWithProviders(
+      <>
+        <EuiFlyout session="start" size="m" aria-label="other" onClose={noop}>
+          other
+        </EuiFlyout>
+        <EuiFlyout session="never" size="m" aria-label="unmanaged" onClose={noop}>
+          <QueryDetailsFlyout action={action} onClose={jest.fn()} />
+        </EuiFlyout>
+      </>
+    );
+
+    expectDetailsShown();
+    expect(validationErrors(consoleErrorSpy)).toHaveLength(0);
+    expect(getFlyoutManagerStore().getState().flyouts).toEqual(
+      expect.arrayContaining([expect.objectContaining({ level: 'child', size: 's' })])
+    );
   });
 });
