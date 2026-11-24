@@ -506,7 +506,12 @@ describe('EditOutputFlyout', () => {
 
       change(utils, 'kafkaKerberosConfigPathInput', '/etc/krb5.conf');
       change(utils, 'kafkaKerberosRealmInput', 'EXAMPLE.COM');
+      // the username is the principal to look up in the keytab
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaKerberosUsernameInput')
+      ).toBeInTheDocument();
       change(utils, 'kafkaKerberosKeytabInput', '/etc/kafka.keytab');
+      change(utils, 'kafkaKerberosUsernameInput', 'kafka/host@EXAMPLE.COM');
       change(utils, 'kafkaKerberosServiceNameInput', 'kafka');
       save(utils);
 
@@ -520,6 +525,7 @@ describe('EditOutputFlyout', () => {
               config_path: '/etc/krb5.conf',
               realm: 'EXAMPLE.COM',
               keytab: '/etc/kafka.keytab',
+              username: 'kafka/host@EXAMPLE.COM',
               service_name: 'kafka',
             },
           })
@@ -581,6 +587,7 @@ describe('EditOutputFlyout', () => {
         expect(utils.getByText('Kerberos configuration file is required')).toBeInTheDocument();
         expect(utils.getByText('Realm is required')).toBeInTheDocument();
         expect(utils.getByText('Keytab file is required')).toBeInTheDocument();
+        expect(utils.getByText('Username is required')).toBeInTheDocument();
       });
       expect(mockSendPutOutput).not.toHaveBeenCalled();
     });
@@ -654,6 +661,7 @@ describe('EditOutputFlyout', () => {
         auth_type: 'keytab',
         config_path: '/etc/krb5.conf',
         keytab: '/etc/kafka.keytab',
+        username: 'kafka',
         realm: 'EXAMPLE.COM',
       };
       const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'kerberos', kerberos });

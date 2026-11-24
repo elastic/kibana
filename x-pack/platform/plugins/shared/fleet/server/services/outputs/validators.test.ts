@@ -152,6 +152,7 @@ describe('validateKafkaKerberos', () => {
     auth_type: 'keytab',
     config_path: '/etc/krb5.conf',
     keytab: '/etc/kafka.keytab',
+    username: 'kafka',
     realm: 'EXAMPLE.COM',
   };
   const passwordKerberos = {
@@ -216,6 +217,14 @@ describe('validateKafkaKerberos', () => {
     );
   });
 
+  it('requires a username (the principal) for the keytab authentication', () => {
+    expect(() =>
+      validateKafkaKerberos(
+        kafkaOutput({ auth_type: 'kerberos', kerberos: { ...keytabKerberos, username: undefined } })
+      )
+    ).toThrow(new OutputInvalidError('kerberos.username is required'));
+  });
+
   it('requires a username and a password for the password authentication', () => {
     expect(() =>
       validateKafkaKerberos(
@@ -225,9 +234,7 @@ describe('validateKafkaKerberos', () => {
           secrets: { kerberos: { password: { id: 'secret-id' } } },
         })
       )
-    ).toThrow(
-      new OutputInvalidError('kerberos.username is required when kerberos.auth_type is password')
-    );
+    ).toThrow(new OutputInvalidError('kerberos.username is required'));
     expect(() =>
       validateKafkaKerberos(kafkaOutput({ auth_type: 'kerberos', kerberos: passwordKerberos }))
     ).toThrow(

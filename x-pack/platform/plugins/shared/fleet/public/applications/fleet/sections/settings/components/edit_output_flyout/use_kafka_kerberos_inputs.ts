@@ -68,7 +68,7 @@ export function useKafkaKerberosInputs(
   );
   const kafkaKerberosUsernameInput = useInput(
     config?.username,
-    isSelected && isPassword ? validateKafkaKerberosUsername : undefined,
+    isSelected ? validateKafkaKerberosUsername : undefined,
     disabled
   );
   const kafkaKerberosPasswordInput = useSecretInput(
@@ -114,9 +114,8 @@ export function extractKafkaKerberosSecrets(
 }
 
 /**
- * Builds the Kerberos settings of the payload. The keytab is only sent for the keytab
- * authentication, and the username for the password one. Settings this form does not edit are
- * kept as they are.
+ * Builds the Kerberos settings of the payload. The username is sent for both authentication types,
+ * the keytab only for the keytab one. Settings this form does not edit are kept as they are.
  */
 export function buildKafkaKerberosConfig(
   original: KafkaKerberosConfig | null | undefined,
@@ -134,9 +133,8 @@ export function buildKafkaKerberosConfig(
     realm: inputs.kafkaKerberosRealmInput.value.trim(),
     ...defined({
       service_name: text(inputs.kafkaKerberosServiceNameInput),
-      ...(isPassword
-        ? { username: text(inputs.kafkaKerberosUsernameInput) }
-        : { keytab: text(inputs.kafkaKerberosKeytabInput) }),
+      username: text(inputs.kafkaKerberosUsernameInput),
+      ...(isPassword ? {} : { keytab: text(inputs.kafkaKerberosKeytabInput) }),
     }),
     // the default is only sent when it was set before
     ...(inputs.kafkaKerberosEnableFastInput.value || original?.enable_krb5_fast !== undefined

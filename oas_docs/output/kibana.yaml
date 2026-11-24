@@ -182701,7 +182701,7 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
               type: string
           required:
             - auth_type
@@ -185191,7 +185191,7 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
               type: string
           required:
             - auth_type
@@ -193080,7 +193080,7 @@ components:
               description: Kerberos service name of the Kafka brokers.
               type: string
             username:
-              description: Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.
+              description: Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.
               type: string
           required:
             - auth_type
