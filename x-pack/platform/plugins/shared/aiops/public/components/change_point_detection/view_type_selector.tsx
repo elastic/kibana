@@ -40,6 +40,7 @@ export interface ViewTypeSelectorProps {
   onChange: (update: ChangePointDetectionViewType) => void;
   showTableOption?: boolean;
   isDisabled?: boolean;
+  fullWidth?: boolean;
 }
 
 export const ViewTypeSelector: FC<ViewTypeSelectorProps> = ({
@@ -47,6 +48,7 @@ export const ViewTypeSelector: FC<ViewTypeSelectorProps> = ({
   onChange,
   showTableOption = true,
   isDisabled = false,
+  fullWidth = true,
 }) => {
   const options = showTableOption
     ? viewTypeOptions
@@ -54,6 +56,7 @@ export const ViewTypeSelector: FC<ViewTypeSelectorProps> = ({
 
   return (
     <EuiFormRow
+      fullWidth={fullWidth}
       label={i18n.translate('xpack.aiops.embeddableChangePointChart.viewTypeLabel', {
         defaultMessage: 'View type',
       })}
@@ -61,8 +64,9 @@ export const ViewTypeSelector: FC<ViewTypeSelectorProps> = ({
       <EuiButtonGroup
         data-test-subj="aiopsChangePointViewTypeSelector"
         isDisabled={isDisabled}
+        isFullWidth={fullWidth}
         legend={i18n.translate('xpack.aiops.embeddableChangePointChart.viewTypeLegend', {
-          defaultMessage: 'Chart view or table view',
+          defaultMessage: 'View type',
         })}
         options={options}
         idSelected={value}

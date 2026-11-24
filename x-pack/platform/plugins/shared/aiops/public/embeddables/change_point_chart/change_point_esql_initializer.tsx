@@ -201,7 +201,7 @@ export const ChangePointEsqlInitializer: FC<ChangePointEsqlInitializerProps> = (
   const [viewType, setViewType] = useState<ChangePointDetectionViewType>(
     CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS
   );
-  const [inputMode, setInputMode] = useState<'form' | 'esql'>(initialMode);
+  const [inputMode, setInputMode] = useState(initialMode);
   const [dataViewId, setDataViewId] = useState(initialFormConfiguration?.data_view_id ?? '');
   const [formInput, setFormInput] = useState<FormControlsProps | undefined>(() =>
     getInitialFormControls(initialFormConfiguration)
@@ -304,7 +304,7 @@ export const ChangePointEsqlInitializer: FC<ChangePointEsqlInitializerProps> = (
 
   const handleChangeInputMode = useCallback(
     (nextModeId: string) => {
-      const nextMode: 'form' | 'esql' = nextModeId === 'esql' ? 'esql' : 'form';
+      const nextMode = nextModeId === 'esql' ? 'esql' : 'form';
       if (nextMode === 'esql' && !directEsql.trim() && generatedEsql) {
         setDirectEsql(generatedEsql);
       }
@@ -383,6 +383,7 @@ export const ChangePointEsqlInitializer: FC<ChangePointEsqlInitializerProps> = (
             onChange={setViewType}
             showTableOption={showTableOption}
             isDisabled={isEditing}
+            fullWidth={false}
           />
 
           {!isQueryMode ? (
