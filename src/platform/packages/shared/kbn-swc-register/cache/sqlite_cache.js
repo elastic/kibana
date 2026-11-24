@@ -21,8 +21,8 @@ const DAY = HOUR * 24;
 const ATIME_REFRESH_INTERVAL = 7 * DAY;
 const ATIME_LIMIT = 30 * DAY;
 const PRUNE_INTERVAL = 7 * DAY;
-// parallel processes (CI, scripts/check) share the db; writers wait for each other instead of failing
-const BUSY_TIMEOUT_MS = 10_000;
+// Cache writes are best-effort; do not block the event loop for long when another process holds the lock.
+const BUSY_TIMEOUT_MS = 100;
 const DB_FILE = 'v3.sqlite';
 
 /** @typedef {import('./types').Cache} CacheInterface */
@@ -110,7 +110,16 @@ class SqliteCache {
    */
   getSourceMap(key) {
     const row = this.#safeGet('map', this.#statements.getMap, key);
-    return row ? JSON.parse(String(row.map)) : undefined;
+    if (!row) {
+      return undefined;
+    }
+
+    try {
+      return JSON.parse(String(row.map));
+    } catch (error) {
+      this.#logError('GET', key, error);
+      return undefined;
+    }
   }
 
   /**

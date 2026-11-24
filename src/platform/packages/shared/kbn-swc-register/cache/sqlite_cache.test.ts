@@ -10,6 +10,8 @@
 import Fs from 'fs';
 import Path from 'path';
 import { Writable } from 'stream';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import { DatabaseSync } from 'node:sqlite';
 
 import del from 'del';
@@ -20,6 +22,7 @@ const DIR = Path.resolve(__dirname, '../__tmp__/cache');
 const DB_FILE = Path.resolve(DIR, 'v3.sqlite');
 const DAY = 1000 * 60 * 60 * 24;
 const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
+const execFileAsync = promisify(execFile);
 
 const makeTestFile = (name: string, source: string) => {
   const path = Path.resolve(DIR, name);
@@ -236,6 +239,53 @@ it('shares entries between instances using the same directory', async () => {
   await writer.update('shared', { code: 'var shared = true' });
 
   expect(reader.getCode('shared')).toBe('var shared = true');
+});
+
+it('shares concurrent writes from separate processes', async () => {
+  const cacheModule = require.resolve('./sqlite_cache');
+  const writeFromProcess = (key: string) =>
+    execFileAsync(process.execPath, [
+      '-e',
+      `const { SqliteCache } = require(${JSON.stringify(cacheModule)});
+       const cache = new SqliteCache({ dir: ${JSON.stringify(DIR)}, prefix: 'prefix' });
+       cache.update(${JSON.stringify(key)}, { code: ${JSON.stringify(
+        key
+      )} }).then(() => cache.close());`,
+    ]);
+
+  await Promise.all([writeFromProcess('first'), writeFromProcess('second')]);
+
+  expect(readRow('first')).toMatchObject({ code: 'first' });
+  expect(readRow('second')).toMatchObject({ code: 'second' });
+});
+
+it('treats malformed source maps as cache misses', () => {
+  const cache = makeCache({ dir: DIR, prefix: 'prefix' });
+  writeRows([['invalid-map', GLOBAL_ATIME, 'code', '{invalid']]);
+  const stderr = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+  try {
+    expect(cache.getSourceMap('invalid-map')).toBe(undefined);
+  } finally {
+    stderr.mockRestore();
+  }
+});
+
+it('does not block for long when another connection holds the write lock', async () => {
+  const cache = makeCache({ dir: DIR, prefix: 'prefix' });
+  const locker = new DatabaseSync(DB_FILE);
+  locker.exec('BEGIN IMMEDIATE');
+  const stderr = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+  try {
+    const start = Date.now();
+    await cache.update('locked', { code: 'code' });
+    expect(Date.now() - start).toBeLessThan(1000);
+  } finally {
+    stderr.mockRestore();
+    locker.exec('ROLLBACK');
+    locker.close();
+  }
 });
 
 it('only refreshes atime for entries older than the refresh interval', async () => {
