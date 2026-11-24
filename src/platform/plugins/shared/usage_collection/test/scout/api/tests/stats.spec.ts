@@ -59,6 +59,7 @@ apiTest.describe('kibana stats api', { tag: ['@local-stateful-classic'] }, () =>
 
     expect(response).toHaveStatusCode(200);
     expect(typeof response.body.cluster_uuid).toBe('string');
+    expect(response.body.usage).toStrictEqual({});
     expect(response.body.kibana.uuid).toHaveLength(UUID_LENGTH);
     expect(() => statsResponseSchema.validate(response.body)).not.toThrow();
   });
@@ -70,7 +71,7 @@ apiTest.describe('kibana stats api', { tag: ['@local-stateful-classic'] }, () =>
 
     expect(response).toHaveStatusCode(200);
     expect(typeof response.body.cluster_uuid).toBe('string');
-    expect(typeof response.body.usage).toBe('object');
+    expect(response.body.usage).toStrictEqual({});
     expect(() => statsResponseSchema.validate(response.body)).not.toThrow();
   });
 
@@ -79,7 +80,7 @@ apiTest.describe('kibana stats api', { tag: ['@local-stateful-classic'] }, () =>
 
     expect(response).toHaveStatusCode(200);
     expect(typeof response.body.cluster_uuid).toBe('string');
-    expect(typeof response.body.usage).toBe('object');
+    expect(response.body.usage).toStrictEqual({});
   });
 
   apiTest(
@@ -91,6 +92,7 @@ apiTest.describe('kibana stats api', { tag: ['@local-stateful-classic'] }, () =>
 
       expect(response).toHaveStatusCode(200);
       expect(typeof response.body.clusterUuid).toBe('string');
+      expect(response.body.usage).toStrictEqual({});
       expect(response.body.kibana.uuid).toHaveLength(UUID_LENGTH);
       expect(() => legacyStatsResponseSchema.validate(response.body)).not.toThrow();
     }

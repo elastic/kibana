@@ -49,8 +49,7 @@ const processSchema = schema.object({
 const baseResponseSchema = schema.object({
   last_updated: schema.string(),
   collection_interval_ms: schema.number(),
-  // The collectors registered on the server decide what `usage` holds, so only its type is checked.
-  usage: schema.object({}, { unknowns: 'allow' }),
+  usage: schema.object({}),
   kibana: schema.object({
     name: schema.string(),
     uuid: schema.string(),
@@ -117,7 +116,12 @@ const baseResponseSchema = schema.object({
   requests: schema.object({
     total: schema.number(),
     disconnects: schema.number(),
-    status_codes: schema.recordOf(schema.string(), schema.number()),
+    status_codes: schema.recordOf(
+      schema.string({
+        validate: (key) => (/^\d+$/.test(key) ? undefined : 'must be a numeric status code'),
+      }),
+      schema.number()
+    ),
   }),
   concurrent_connections: schema.number(),
 });
