@@ -16,8 +16,8 @@
  * `workflow.output` are all real. The fakes only decide what each boundary
  * returns, and the harness records every call so a test can describe the ending.
  *
- * Use the `@kbn/test/jest_integration_node` preset. Under the default
- * `@kbn/test/jest_integration` preset, the engine reads every Kibana response
+ * Use the `@kbn/jest/jest_integration_node` preset. Under the jsdom environment of
+ * the `@kbn/jest/jest_integration` preset, the engine reads every Kibana response
  * body as empty.
  */
 
@@ -113,6 +113,8 @@ export interface ManagedWorkflowRun {
   readonly executedStepIds: readonly string[];
   /** Every step id that ended in a failed status, including steps the workflow continued after. */
   readonly failedStepIds: readonly string[];
+  /** The result of every `if` condition the engine evaluated. A step with `if:` has the id `if_<step>`. */
+  readonly conditionResults: ReadonlyArray<{ readonly stepId: string; readonly result: boolean }>;
 }
 
 const MAX_RESUMES = 25;
@@ -324,13 +326,17 @@ const fakeElasticsearchSteps = (
  * Child workflows (`workflow.execute`). The engine looks the child up in the
  * workflows index, starts it, parks the parent, and reads the child execution
  * back on resume. The lookup and the start are faked, the park and the resume are real.
+ * A child stays running until the parent parks, as a child that waits for an analyst
+ * does. Returns the function that ends the running children.
  */
 const fakeChildWorkflows = (
   engine: WorkflowRunFixture,
   childWorkflows: ManagedWorkflowFakes['childWorkflows'] = {},
   { record }: Recorder
-): void => {
+): (() => void) => {
   const childIds = Object.keys(childWorkflows);
+  const { workflowExecutions } = engine.workflowExecutionRepositoryMock;
+  const runningChildren = new Map<string, EsWorkflowExecution>();
   jest
     .mocked(engine.dependencies.coreStart.elasticsearch.client.asInternalUser.search)
     .mockImplementation((async (params: unknown) => {
@@ -347,7 +353,7 @@ const fakeChildWorkflows = (
     const childExecutionId = `child_execution_${++childCount}`;
     const childInputs = context.inputs ?? {};
     const stepId = context.parentStepId ?? 'unknown';
-    const base = {
+    const base: Partial<EsWorkflowExecution> = {
       id: childExecutionId,
       spaceId: SPACE_ID,
       workflowId: childWorkflow.id,
@@ -368,12 +374,19 @@ const fakeChildWorkflows = (
         error: { type: 'Error', message: (error as Error).message },
       };
     }
-    engine.workflowExecutionRepositoryMock.workflowExecutions.set(
-      childExecutionId,
-      execution as EsWorkflowExecution
-    );
+    // A terminal child makes the engine read the result at once, without a park.
+    workflowExecutions.set(childExecutionId, {
+      ...base,
+      status: ExecutionStatus.RUNNING,
+    } as EsWorkflowExecution);
+    runningChildren.set(childExecutionId, execution as EsWorkflowExecution);
     return { workflowExecutionId: childExecutionId };
   }) as never);
+
+  return () => {
+    runningChildren.forEach((execution, id) => workflowExecutions.set(id, execution));
+    runningChildren.clear();
+  };
 };
 
 const parentExecution = (engine: WorkflowRunFixture): EsWorkflowExecution | undefined =>
@@ -438,6 +451,11 @@ const readRun = (
       ),
     ],
     failedStepIds,
+    // The `exit-if` node stores the evaluated condition as the output of the `if` step.
+    conditionResults: stepExecutions.flatMap(({ stepId, stepType, output }) => {
+      const result = (output as { conditionResult?: unknown } | undefined)?.conditionResult;
+      return stepType === 'if' && typeof result === 'boolean' ? [{ stepId, result }] : [];
+    }),
   };
 };
 
@@ -460,7 +478,7 @@ export const runManagedWorkflow = async ({
   const recorder = createRecorder(failStep);
 
   fakeCustomSteps(engine, fakes.steps, recorder);
-  fakeChildWorkflows(engine, fakes.childWorkflows, recorder);
+  const endChildren = fakeChildWorkflows(engine, fakes.childWorkflows, recorder);
   const removeFakes = [
     fakeKibanaSteps(engine, fakes.kibanaSteps, recorder),
     fakeElasticsearchSteps(fakes.elasticsearchSteps, recorder),
@@ -472,6 +490,7 @@ export const runManagedWorkflow = async ({
       if (resumes >= MAX_RESUMES) {
         throw new Error(`The workflow still waits for a child after ${MAX_RESUMES} resumes.`);
       }
+      endChildren();
       await engine.resumeWorkflow();
     }
   } finally {

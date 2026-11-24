@@ -27,10 +27,12 @@ export interface YamlStep {
   readonly else?: readonly YamlStep[];
   readonly default?: readonly YamlStep[];
   readonly cases?: ReadonlyArray<{ readonly steps?: readonly YamlStep[] }>;
+  readonly branches?: ReadonlyArray<{ readonly steps?: readonly YamlStep[] }>;
   readonly 'on-failure'?: {
     readonly fallback?: readonly YamlStep[];
     readonly continue?: boolean | string;
   };
+  readonly 'iteration-on-failure'?: { readonly fallback?: readonly YamlStep[] };
   readonly with?: Readonly<Record<string, unknown>>;
 }
 
@@ -62,6 +64,7 @@ export interface ParsedWorkflow {
 export interface CoveredRun {
   readonly executedStepIds: readonly string[];
   readonly failedStepIds: readonly string[];
+  readonly conditionResults: ReadonlyArray<{ readonly stepId: string; readonly result: boolean }>;
 }
 
 const flattenSteps = (steps: readonly YamlStep[] = []): YamlStep[] =>
@@ -71,7 +74,9 @@ const flattenSteps = (steps: readonly YamlStep[] = []): YamlStep[] =>
     ...flattenSteps(step.else),
     ...flattenSteps(step.default),
     ...(step.cases ?? []).flatMap(({ steps: caseSteps }) => flattenSteps(caseSteps)),
+    ...(step.branches ?? []).flatMap(({ steps: branchSteps }) => flattenSteps(branchSteps)),
     ...flattenSteps(step['on-failure']?.fallback),
+    ...flattenSteps(step['iteration-on-failure']?.fallback),
   ]);
 
 /** The names of the given steps and of every step nested in them. */
@@ -164,6 +169,12 @@ export const describeBranchCoverage = (
 ): void => {
   const ran = (run: CoveredRun, names: readonly string[]) =>
     names.some((name) => run.executedStepIds.includes(name));
+  const conditionWas = (stepId: string, result: boolean) =>
+    getRuns().some(({ conditionResults }) =>
+      conditionResults.some(
+        (condition) => condition.stepId === stepId && condition.result === result
+      )
+    );
 
   describe('the cases cover every branch of the workflow', () => {
     it('runs every step in at least one case', () => {
@@ -174,35 +185,22 @@ export const describeBranchCoverage = (
     });
 
     it('skips every step that has an `if:` condition in at least one case', () => {
-      // The engine wraps a step that has `if:` in a step named `if_<name>`. The
-      // wrapper runs and the step does not when the condition is false.
+      // The engine wraps a step that has `if:` in an `if` step named `if_<name>`.
       const neverSkipped = workflow.steps
         .filter(({ name, if: condition }) => name && condition)
         .map(({ name }) => name as string)
-        .filter(
-          (name) =>
-            !getRuns().some(
-              (run) =>
-                run.executedStepIds.includes(`if_${name}`) && !run.executedStepIds.includes(name)
-            )
-        );
+        .filter((name) => !conditionWas(`if_${name}`, false));
       expect(neverSkipped).toEqual([]);
     });
 
     it('takes and skips the branch of every `if` step', () => {
       const untested = workflow.steps
         .filter(({ name, type }) => name && type === 'if')
-        .flatMap(({ name, steps }) => {
-          const branch = stepNames(steps);
-          const taken = getRuns().some((run) => ran(run, branch));
-          const skipped = getRuns().some(
-            (run) => run.executedStepIds.includes(name as string) && !ran(run, branch)
-          );
-          return [
-            ...(taken ? [] : [`${name}: branch never taken`]),
-            ...(skipped ? [] : [`${name}: branch never skipped`]),
-          ];
-        });
+        .map(({ name }) => name as string)
+        .flatMap((name) => [
+          ...(conditionWas(name, true) ? [] : [`${name}: branch never taken`]),
+          ...(conditionWas(name, false) ? [] : [`${name}: branch never skipped`]),
+        ]);
       expect(untested).toEqual([]);
     });
 

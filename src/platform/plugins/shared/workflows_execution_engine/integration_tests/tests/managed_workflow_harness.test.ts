@@ -14,6 +14,7 @@ import {
   runManagedWorkflow,
 } from '../managed_workflow_harness';
 import { describeBranchCoverage, parseWorkflow, workflowInputErrors } from '../workflow_coverage';
+import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 const CHILD_WORKFLOW_ID = 'child-workflow';
 
@@ -45,6 +46,8 @@ steps:
     type: workflow.output
     with:
       result: "{{ steps.child.output.result }}"
+      hits: "\${{ steps.read.output.hits.total.value }}"
+      acknowledged: "\${{ steps.notify.output.acknowledged }}"
 `);
 
 const searchResult = (hits: number) => ({
@@ -67,23 +70,24 @@ const CASES: ReadonlyArray<{
   output?: Record<string, unknown>;
 }> = [
   {
+    // `hits` is read before the parent parks on the child, `acknowledged` is the Kibana response.
     name: 'the child runs and its output reaches the next steps',
     hits: 1,
     end: { ends: 'done' },
-    output: { result: 'child-result' },
+    output: { result: 'child-result', hits: 1, acknowledged: true },
   },
   {
     name: 'the condition is false, so the child does not run',
     hits: 0,
     end: { ends: 'done' },
-    output: { result: '' },
+    output: { result: '', hits: 0, acknowledged: true },
   },
   {
     name: 'the child fails, and the run goes on after it',
     hits: 1,
     failStep: 'child',
     end: { ends: 'done', failedSteps: ['child'] },
-    output: { result: '' },
+    output: { result: '', hits: 1, acknowledged: true },
   },
   {
     name: 'a Kibana step fails by its name',
@@ -131,6 +135,26 @@ describe('managed workflow harness', () => {
       path: '/api/notify',
       body: { result: 'child-result' },
     });
+  });
+
+  it('parks the parent on the child, and resumes it when the child ends', async () => {
+    const resume = jest.spyOn(WorkflowRunFixture.prototype, 'resumeWorkflow');
+    try {
+      await runManagedWorkflow({ workflow: WORKFLOW, inputs: {}, fakes: fakes(1) });
+      expect(resume).toHaveBeenCalledTimes(1);
+    } finally {
+      resume.mockRestore();
+    }
+  });
+
+  it('records the result of each `if` condition', () => {
+    const conditionResults = (name: string) => runs.get(name)?.conditionResults;
+    expect(conditionResults('the child runs and its output reaches the next steps')).toEqual([
+      { stepId: 'if_child', result: true },
+    ]);
+    expect(conditionResults('the condition is false, so the child does not run')).toEqual([
+      { stepId: 'if_child', result: false },
+    ]);
   });
 
   it('fails a step that has no fake, and names the missing fake', async () => {
@@ -201,6 +225,34 @@ steps:
   });
 
   describeBranchCoverage(WORKFLOW, () => [...runs.values()]);
+});
+
+describe('parseWorkflow', () => {
+  it('finds the steps in parallel branches and in `iteration-on-failure`', () => {
+    const { stepNames } = parseWorkflow(`
+steps:
+  - name: fan_out
+    type: parallel
+    branches:
+      - name: first
+        steps:
+          - name: in_branch
+            type: console
+  - name: loop
+    type: foreach
+    foreach: "[1]"
+    iteration-on-failure:
+      fallback:
+        - name: in_iteration_fallback
+          type: console
+    steps:
+      - name: in_loop
+        type: console
+`);
+    expect(stepNames).toEqual(
+      new Set(['fan_out', 'in_branch', 'loop', 'in_loop', 'in_iteration_fallback'])
+    );
+  });
 });
 
 describe('workflowInputErrors', () => {
