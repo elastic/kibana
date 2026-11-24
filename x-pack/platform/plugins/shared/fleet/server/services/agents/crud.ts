@@ -35,7 +35,9 @@ import {
   isESClientError,
   AgentNotFoundError,
   FleetUnauthorizedError,
+  AgentRequestInvalidError,
 } from '../../errors';
+import { validateAgentField, validateAgentKueryFields } from '../../routes/utils/filter_utils';
 import { auditLoggingService } from '../audit_logging';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
@@ -75,6 +77,22 @@ function kueryReferencesStatusField(kuery?: string): boolean {
     return referencesStatus(fromKueryExpression(removeSOAttributes(kuery)));
   } catch (error) {
     return kuery.toLowerCase().includes('status:');
+  }
+}
+
+/**
+ * Rejects a sort field or kuery field that is not in `AGENT_QUERYABLE_MAPPINGS`. The kuery is checked
+ * after `removeSOAttributes`, as it is searched, so prefixed fields such as `fleet-agents.<field>`
+ * are validated too. Runs for every caller of {@link getAgentsByKuery}, including those that do not
+ * validate the kuery at the route (e.g. the Osquery fleet wrapper).
+ */
+export function assertAgentFieldsAreMapped(sortField?: string, kuery?: string): void {
+  if (sortField && validateAgentField(sortField)) {
+    throw new AgentRequestInvalidError(`Sorting by '${sortField}' is not supported`);
+  }
+  const kueryError = validateAgentKueryFields(kuery ? removeSOAttributes(kuery) : undefined);
+  if (kueryError) {
+    throw new AgentRequestInvalidError(`Kuery is not supported: ${kueryError}`);
   }
 }
 
@@ -295,6 +313,9 @@ export async function getAgentsByKuery(
     spaceId,
     includeStatusRuntimeField = true,
   } = options;
+
+  assertAgentFieldsAreMapped(sortField, kuery);
+
   const filters = await getSpaceAwarenessFilterForAgents(spaceId);
 
   if (kuery && kuery !== '') {

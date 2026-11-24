@@ -129,3 +129,26 @@ export const getOrcaRubrics = (
   if (found.length < ids.length) return { missing: ids.filter((id) => !rubrics.has(id)) };
   return { rubrics: found };
 };
+
+/**
+ * Throws when a task's ground truth names an event the rubrics lack. Checked before any
+ * investigation runs: such a task would otherwise read as having no ground truth and silently
+ * leave the accuracy denominator.
+ */
+export const assertOrcaRubricsCover = (
+  examples: ReadonlyArray<Pick<InvestigationExample, 'metadata'>>,
+  rubrics: ReadonlyMap<string, OrcaRubric>
+): void => {
+  const uncovered = examples.flatMap(({ metadata }) => {
+    const expected = getOrcaExpected(metadata);
+    if (!expected || expected.events.length === 0) return [];
+    const found = getOrcaRubrics(expected, rubrics);
+    return 'missing' in found ? [`${metadata.case_id}: ${found.missing.join(', ')}`] : [];
+  });
+  if (uncovered.length === 0) return;
+  throw new Error(
+    `${
+      uncovered.length
+    } ORCA tasks name events without a rubric in the pinned release:\n- ${uncovered.join('\n- ')}`
+  );
+};

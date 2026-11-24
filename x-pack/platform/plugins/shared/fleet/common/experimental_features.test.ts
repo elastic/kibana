@@ -130,7 +130,6 @@ describe('allowedExperimentalValues', () => {
     'enableAgentlessPoliciesUI',
     'enableEsqlViewInstall',
     'enableSloTemplates',
-    'newBrowseIntegrationUx',
     'enableVersionSpecificPolicies',
     'enableIntegrationInactivityAlerting',
     'enableSimplifiedAgentlessUX',

@@ -100,6 +100,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   DETECTION_SIGNALS_TABLE: 'nightshiftDetectionSignalsTable',
   DETECTION_DETAILS_FLYOUT: 'nightshiftDetectionDetailsFlyout',
   RULE_FLYOUT: 'nightshiftRuleFlyout',
+  RUN_QUOTA_REACHED_CALLOUT: 'nightshiftRunQuotaReachedCallout',
   ENTITY_FLYOUT: 'nightshiftEntityFlyout',
   EVENT_FLYOUT: 'nightshiftEventFlyout',
   EVENT_FLYOUT_DETECTIONS: 'nightshiftEventFlyoutDetections',
@@ -111,7 +112,6 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   SEVERITY_TILES: 'nightshiftSeverityTiles',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
   START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
-  STATUS_SUMMARY: 'nightshiftStatusSummary',
   TOPOLOGY: 'nightshiftTopology',
 } as const;
 

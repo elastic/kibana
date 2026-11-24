@@ -42,7 +42,7 @@ import { getMockTimelineSearchSubscription } from '../../../../../common/mock/mo
 import * as useTimelineEventsModule from '../../../../containers';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
-import { mockBrowserFields } from '@kbn/timelines-plugin/public/mock/browser_fields';
+import { mockBrowserFields } from '../../../../../common/mock/timeline/browser_fields';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';

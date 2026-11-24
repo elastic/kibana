@@ -14,6 +14,7 @@ import type {
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { WORKFLOW_GRAPH_FOCUS_TRIGGER } from '@kbn/workflows';
+import type { WorkflowsCreateRouteTemplate } from '@kbn/workflows-ui';
 import { loadExecutionThunk } from './thunks/load_execution_thunk';
 import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
@@ -192,6 +193,9 @@ const workflowDetailSlice = createSlice({
     setAiAssisted: (state, action: { payload: boolean }) => {
       state.aiAssisted = action.payload;
     },
+    setRemixTemplate: (state, action: { payload: WorkflowsCreateRouteTemplate | undefined }) => {
+      state.remixTemplate = action.payload;
+    },
 
     // Connector flyout actions
     openCreateConnectorFlyout: (
@@ -332,6 +336,7 @@ export const {
   setActiveTab,
   setHasYamlSchemaValidationErrors,
   setAiAssisted,
+  setRemixTemplate,
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
   closeConnectorFlyout,

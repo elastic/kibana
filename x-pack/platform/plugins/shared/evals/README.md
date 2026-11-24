@@ -325,7 +325,7 @@ The plugin UI is organized into five navigation tabs:
 
 A comparison runs one paired test per evaluator, and each example counts once: its repetitions are combined first, so N is the number of examples. Repetitions of one example share the same input, so they are not independent evidence.
 
-`repetition_policy` sets how the repetitions are combined. The page and the `ai.evals.compareExperiments` workflow step always use the default.
+`repetition_policy` sets how the repetitions are combined. The page takes it from its URL, which the CLI report link sets for `median`. The `ai.evals.compareExperiments` workflow step always uses the default.
 
 - `mean` (default): the average of the example's valid scores.
 - `median`: the median. Only for scores in [0, 1]. Other slices are left out and listed in `pairing.rejectedSlices`, and the request fails with 400 when none is left.
@@ -333,6 +333,8 @@ A comparison runs one paired test per evaluator, and each example counts once: i
 Under `mean`, pass/fail and whole-number scores become decimals when an example's repetitions disagree, so those rows get Wilcoxon signed-rank or the paired t-test instead of McNemar. With 5 or fewer examples, Wilcoxon cannot reach p < 0.05.
 
 Each row also shows, per experiment, how many repetitions were used and how many had a null score, and the stability: the mean standard deviation of each paired example's repetitions, null when no example has two. A row is flagged (`repetitionWarning`, `N*` in the reports) when an example has a different number of valid repetitions in the two experiments, or a null score.
+
+Compare selected picks the baseline for you: the run on `main`, or else the older run. To flip them, use Swap on the Compare page.
 
 #### Score direction
 

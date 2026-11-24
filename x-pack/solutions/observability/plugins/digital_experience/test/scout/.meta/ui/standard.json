@@ -1,5 +1,5 @@
 {
-  "sha1": "5f2bf91b64ff7a308437ce13c09c0d701472f1fa",
+  "sha1": "ba143e0200dcf0d3b80e3162af818dcb3660aa6d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -136,6 +136,20 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/applications_list.spec.ts",
         "line": 20,
         "column": 29
+      }
+    },
+    {
+      "id": "b1c1d174a14ef6b-90fdfb7c74424e0",
+      "title": "Digital Experience mobile applications lists the mobile applications and opens the page of one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/mobile_application.spec.ts",
+        "line": 19,
+        "column": 5
       }
     },
     {
@@ -411,7 +425,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/serverless.spec.ts",
         "line": 21,
-        "column": 47
+        "column": 29
       }
     },
     {
@@ -438,8 +452,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/sessions.spec.ts",
-        "line": 34,
-        "column": 8
+        "line": 35,
+        "column": 9
       }
     },
     {
@@ -452,7 +466,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/sessions.spec.ts",
-        "line": 65,
+        "line": 70,
         "column": 13
       }
     },
@@ -466,7 +480,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/global.teardown.ts",
-        "line": 14,
+        "line": 15,
         "column": 35
       }
     },
@@ -481,8 +495,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/global.teardown.ts",
-        "line": 19,
-        "column": 22
+        "line": 36,
+        "column": 1
       }
     }
   ]
