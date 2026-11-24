@@ -15,7 +15,7 @@ import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants'
 
 import { NewAgentActionSchema } from '../models';
 
-import { validateKuery } from '../../routes/utils/filter_utils';
+import { validateAgentField, validateKuery } from '../../routes/utils/filter_utils';
 
 const validateAgentsKueryField = (value: string) => {
   const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
@@ -57,7 +57,7 @@ export const GetAgentsRequestSchema = {
       withMetrics: schema.boolean({ defaultValue: false }),
       showUpgradeable: schema.boolean({ defaultValue: false }),
       getStatusSummary: schema.boolean({ defaultValue: false }),
-      sortField: schema.maybe(schema.string()),
+      sortField: schema.maybe(schema.string({ validate: validateAgentField })),
       sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     },
     {
