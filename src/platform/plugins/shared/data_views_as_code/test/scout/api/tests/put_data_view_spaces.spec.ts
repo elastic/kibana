@@ -47,9 +47,11 @@ apiTest.describe(
     // Creating the first data view in a space with no default sets `defaultIndex`, so it is
     // restored afterwards to avoid leaving it pointing at a deleted data view.
     let initialDefaultIndex: string | number | boolean | undefined;
+    let capturedDefaultIndex = false;
 
     apiTest.beforeAll(async ({ requestAuth, apiServices, kbnClient }) => {
       initialDefaultIndex = await kbnClient.uiSettings.get('defaultIndex');
+      capturedDefaultIndex = true;
       for (const id of allSpaceIds) {
         await apiServices.spaces.create({ id, name: id });
       }
@@ -70,6 +72,8 @@ apiTest.describe(
           // ignore cleanup errors
         }
       }
+      // Skip restoring when the initial value could not be read, to not clear a pre-existing default.
+      if (!capturedDefaultIndex) return;
       if (initialDefaultIndex === undefined) {
         await kbnClient.uiSettings.unset('defaultIndex');
       } else {
@@ -269,6 +273,8 @@ apiTest.describe(
       'without spaces in the body, creates the data view only in the url space of a non-default space',
       async ({ apiClient }) => {
         const id = `dv-put-named-space-${Date.now()}-${Math.random()}`;
+        // Tracked before asserting, so a regression that saves it in `default` doesn't leak it.
+        createdIds.push(id);
 
         const response = await apiClient.put(`s/${spaceId}${BASE_PATH}/${id}`, {
           headers: {
@@ -299,17 +305,31 @@ apiTest.describe(
       async ({ apiClient }) => {
         const id = await createSharedDataView(apiClient, ['default', spaceId]);
 
+        const updatedPattern = `put-named-space-update-${Date.now()}-*`;
+
         const response = await apiClient.put(`s/${spaceId}${BASE_PATH}/${id}`, {
           headers: {
             ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,
           },
-          body: { index_pattern: `put-named-space-update-${Date.now()}-*` },
+          body: { index_pattern: updatedPattern },
           responseType: 'json',
         });
 
         expect(response).toHaveStatusCode(200);
+        expect(response.body.data.index_pattern).toBe(updatedPattern);
         expect(response.body.meta.spaces).toStrictEqual([spaceId]);
+
+        const retainedSpaceResponse = await apiClient.get(`s/${spaceId}${BASE_PATH}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(retainedSpaceResponse).toHaveStatusCode(200);
+        expect(retainedSpaceResponse.body.data.index_pattern).toBe(updatedPattern);
 
         const defaultSpaceResponse = await apiClient.get(`${BASE_PATH}/${id}`, {
           headers: {

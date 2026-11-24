@@ -431,6 +431,9 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
         responseType: 'json',
       });
 
+      // Tracked before asserting, so a regression that saves it in `default` doesn't leak it.
+      createdIds.push(response.body.id);
+
       expect(response).toHaveStatusCode(201);
       expect(response.body.meta.spaces).toStrictEqual([spaceId]);
 
