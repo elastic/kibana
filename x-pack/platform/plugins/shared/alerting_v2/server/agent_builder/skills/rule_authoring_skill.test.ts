@@ -67,13 +67,17 @@ describe('createRuleAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the rule inline tools to manage and attach rules', async () => {
+  it('exposes only the rule inline tools to manage, attach and link rules', async () => {
     const skill = createRuleAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
-    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageRule, ALERTING_TOOL_IDS.attachRule]);
+    expect(inlineToolIds).toEqual([
+      ALERTING_TOOL_IDS.manageRule,
+      ALERTING_TOOL_IDS.attachRule,
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy,
+    ]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageActionPolicy);
   });
 

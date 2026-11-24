@@ -70,7 +70,7 @@ describe('Authentication Routes', () => {
       customError: jest.fn((params) => params),
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { createStorageService } = require('../lib/create_storage_service');
     createStorageService.mockResolvedValue(mockStorageService);
   });
@@ -182,7 +182,7 @@ describe('Authentication Routes', () => {
       const mockGetStartServices = jest.fn();
       const hasEncryptedSOEnabled = true;
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { createStorageService } = require('../lib/create_storage_service');
       createStorageService.mockResolvedValue(mockStorageService);
 
@@ -287,7 +287,7 @@ describe('Authentication Routes', () => {
     });
 
     it('should authenticate with admin key and generate cluster-scoped key', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getCurrentClusterData } = require('../lib/cluster_info');
 
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({

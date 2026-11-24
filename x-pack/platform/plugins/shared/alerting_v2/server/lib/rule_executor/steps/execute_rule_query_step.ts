@@ -10,8 +10,6 @@ import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { appendLimitToQuery } from '@kbn/esql-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
-import { PluginInitializer } from '@kbn/core-di-server';
-import type { PluginInitializerContext } from '@kbn/core/server';
 import { isEsqlUserError } from '../../errors/esql_user_error';
 import { toQueryResponseSizeExceededError } from '../../errors/query_response_size_exceeded_error';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -21,9 +19,10 @@ import type { QueryServiceContract } from '../../services/query_service/query_se
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import type { EsqlResponseFormatServiceContract } from '../../services/esql_response_format_service/esql_response_format_service';
 import { EsqlResponseFormatServiceToken } from '../../services/esql_response_format_service/tokens';
-import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
+import { guardedExpandStep, tap, withAtLeastOne } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
-import { type PluginConfig, getQueryRowLimit } from '../../../config';
+import { getQueryRowLimit } from '../../../config';
+import { ConfigService } from '../../services/config_service/config_service';
 
 type EsqlRowBatch = Record<string, unknown>[];
 
@@ -31,19 +30,20 @@ type EsqlRowBatch = Record<string, unknown>[];
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
 
-  private readonly pluginConfig: PluginConfig;
   private readonly maxQueryResponseSize: number;
+  private readonly maxAlerts: number;
 
   constructor(
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly queryService: QueryServiceContract,
     @inject(EsqlResponseFormatServiceToken)
     private readonly esqlResponseFormatService: EsqlResponseFormatServiceContract,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(ConfigService) configService: ConfigService
   ) {
-    this.pluginConfig = pluginConfigAccessor.get<PluginConfig>();
-    this.maxQueryResponseSize = this.pluginConfig.rules.run.query.maxResponseSize.getValueInBytes();
+    this.maxQueryResponseSize = configService
+      .get('rules.run.query.maxResponseSize')
+      .getValueInBytes();
+    this.maxAlerts = configService.get('rules.run.alerts.max');
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -66,7 +66,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       // Snapshot once so the LIMIT appended to the query and the transport
       // chosen by QueryService are always derived from the same flag value.
       const format = step.esqlResponseFormatService.get();
-      const queryRowLimit = getQueryRowLimit(step.pluginConfig, format);
+      const queryRowLimit = getQueryRowLimit(step.maxAlerts, format);
       const boundedQuery = appendLimitToQuery(effectiveQuery, queryRowLimit);
 
       logger.debug({
@@ -84,15 +84,24 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           format,
         });
 
+        let hasRealBatch = false;
+        const trackedStream = tap(esqlRowBatchStream, () => {
+          hasRealBatch = true;
+        });
+
         let totalRows = 0;
         let loggedRowsDropped = false;
 
-        for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
+        for await (const batch of withAtLeastOne<EsqlRowBatch>(trackedStream, [])) {
           totalRows += batch.length;
 
           const counters: Partial<Record<RuleExecutionCounter, number>> = {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
           };
+
+          if (hasRealBatch) {
+            counters[RULE_EXECUTION_COUNTERS.queryBatchesProcessed] = 1;
+          }
 
           if (!loggedRowsDropped && totalRows >= queryRowLimit) {
             loggedRowsDropped = true;

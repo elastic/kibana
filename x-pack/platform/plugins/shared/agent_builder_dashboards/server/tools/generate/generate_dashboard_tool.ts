@@ -34,6 +34,7 @@ import {
 import { retrieveLatestVersion } from './attachment_state';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
+import { createEsqlControlColumnTypeResolver } from './resolvers/esql_control_column_type_resolver';
 import { createLayoutArranger } from './layout_arranger';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
@@ -185,6 +186,7 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
           removed,
           failures,
           panelAuthoringNotes,
+          panelHeightHints,
         } = await executeDashboardUpsert({
           dashboardData: latestVersion?.data,
           upsert,
@@ -199,6 +201,9 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
           resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
             esClient: esClient.asCurrentUser,
           }),
+          resolveEsqlControlColumnType: createEsqlControlColumnTypeResolver({
+            esClient: esClient.asCurrentUser,
+          }),
           validator: await getDashboardValidator(),
         });
 
@@ -208,6 +213,7 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
             originalPanels: latestVersion?.data.panels ?? [],
             dashboardData: validatedDashboardData,
             instructions: layout,
+            heightHints: panelHeightHints,
             arrangeLayout: createLayoutArranger({ modelProvider }),
             logger,
           });

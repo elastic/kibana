@@ -10,17 +10,22 @@ import { i18n } from '@kbn/i18n';
 import type { LayerDescriptor } from '../../../../common';
 import { getToasts } from '../../../kibana_services';
 import { INITIAL_LAYERS_KEY } from '../../../../common/constants';
+import { transformLayersOut } from '../../../../common/content_management/transform_layers_out';
+import type { StoredLayer } from '../../../../server';
 
 function isObj(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null;
 }
 
-function parseLayerDescriptors(mapInitLayers: string): LayerDescriptor[] {
+/**
+ * Decodes layers from a rison string.
+ */
+function parseLayerDescriptors(mapInitLayers: string): StoredLayer[] {
   const raw: unknown[] = rison.decodeArray(mapInitLayers);
 
   return raw.flatMap((desc, i) => {
     if (isObj(desc) && typeof desc.id === 'string') {
-      return desc as unknown as LayerDescriptor;
+      return desc as unknown as StoredLayer;
     }
 
     // we shouldn't end up here, but if we do it's likely only in testing or local dev so a console error is suitable
@@ -47,7 +52,8 @@ export function getInitialLayersFromUrlParam(): LayerDescriptor[] {
       mapInitLayers = mapInitLayers.slice(0, -1);
     }
 
-    return parseLayerDescriptors(mapInitLayers);
+    // URL may contain legacy state.
+    return transformLayersOut(parseLayerDescriptors(mapInitLayers));
   } catch (e) {
     getToasts().addWarning({
       title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {

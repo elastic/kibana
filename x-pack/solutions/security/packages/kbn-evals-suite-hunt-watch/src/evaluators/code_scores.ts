@@ -93,9 +93,9 @@ export const resolveTier1Status = (actual: HuntReportArtifacts): HuntTier1Status
   if (fromSse) return fromSse;
 
   const headline = actual.hunt?.headline ?? '';
-  if (/Tier 1 found no matches/i.test(headline)) return 'no_environment_hits';
-  if (/no searchable/i.test(headline)) return 'no_searchable_terms';
-  if (/Tier 1 found (?!no matches)/i.test(headline)) return 'environment_hits_found';
+  if (/(?:IOC Hunt|Tier 1) found no matches/i.test(headline)) return 'no_environment_hits';
+  if (/no searchable|had nothing to search/i.test(headline)) return 'no_searchable_terms';
+  if (/(?:IOC Hunt|Tier 1) found (?!no matches)/i.test(headline)) return 'environment_hits_found';
   return undefined;
 };
 
@@ -258,16 +258,18 @@ export const scoreTier1Status = (expected: HuntExpected, artifacts: HuntArtifact
     expected,
     artifacts,
     (report, actual) => {
-      if (!report.tier1Status) return notApplicable('Tier 1 status not pinned');
+      if (!report.tier1Status) return notApplicable('IOC Hunt status not pinned');
       const status = resolveTier1Status(actual);
       if (!status) {
-        return missing(`could not determine Tier 1 status (headline: "${actual.hunt?.headline}")`);
+        return missing(
+          `could not determine IOC Hunt status (headline: "${actual.hunt?.headline}")`
+        );
       }
       return status === report.tier1Status
         ? pass(`tier1 ${status}`)
         : fail(`tier1 "${status}", report "${report.tier1Status}"`);
     },
-    'no Tier 1 expectations'
+    'no IOC Hunt expectations'
   );
 
 export const scoreTier2Execution = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
@@ -275,14 +277,14 @@ export const scoreTier2Execution = (expected: HuntExpected, artifacts: HuntArtif
     expected,
     artifacts,
     (report, actual) => {
-      if (report.tier2Executed === undefined) return notApplicable('Tier 2 not pinned');
+      if (report.tier2Executed === undefined) return notApplicable('Behavior Hunt not pinned');
       const executed = tier2Executed(actual);
       if (executed === undefined) return missing('hunt step produced no output');
       return executed === report.tier2Executed
         ? pass(`tier2 executed=${executed}`)
         : fail(`tier2 executed=${executed}, report ${report.tier2Executed}`);
     },
-    'no Tier 2 expectations'
+    'no Behavior Hunt expectations'
   );
 
 export const scoreSseAttachment = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
@@ -341,8 +343,10 @@ export const scoreEvidenceHonesty = (expected: HuntExpected, artifacts: HuntArti
       const written = hasHuntStamp(actual.reportDoc);
       // The write rule: a confirmed hit is always stamped, and a run that found nothing is stamped
       // when `completed_successfully` (`complete` or `incomplete_final`), never for
-      // `incomplete_retryable`. The child's own `status` is `partial` for both incomplete kinds, so
-      // it cannot tell a retired-with-incomplete-evidence hunt from one that stamped nothing.
+      // `incomplete_retryable`. The child's own `status` is `partial` both on a hit-bearing
+      // `incomplete_retryable` run, which is stamped, and on one with no hit, which is not, so
+      // `status === 'partial'` alone cannot tell a stamped incomplete hunt from one that stamped
+      // nothing.
       const stampExpected =
         actual.coordinator?.completed_successfully === true ||
         actual.coordinator?.has_confirmed_hit === true;
@@ -444,14 +448,16 @@ export const scoreCanaryTripped = (expected: HuntExpected, artifacts: HuntArtifa
       if (report.tier1Status) {
         const status = resolveTier1Status(actual);
         if (!status) {
-          return missing(`could not determine Tier 1 status (headline: "${actual.hunt.headline}")`);
+          return missing(
+            `could not determine IOC Hunt status (headline: "${actual.hunt.headline}")`
+          );
         }
         if (status !== report.tier1Status) {
           violations.push(`tier1 "${status}", report "${report.tier1Status}"`);
         }
       }
       if (actual.hunt.hit) violations.push('hunt reported a hit');
-      if (tier2Executed(actual)) violations.push('Tier 2 executed behaviors');
+      if (tier2Executed(actual)) violations.push('Behavior Hunt executed behaviors');
       if (actual.proposals.length > 0) violations.push(`${actual.proposals.length} Proposal(s)`);
       if (actual.sseEvents.length > 0) violations.push('SSE attachment written');
       if (/confirmed a hit/i.test(actual.narrative)) violations.push('narrative claims a hit');
@@ -465,9 +471,8 @@ export const scoreCanaryTripped = (expected: HuntExpected, artifacts: HuntArtifa
 /**
  * Actioned Proposals only: recommendations are keyed per Investigation and are expected to
  * duplicate across reports. Target paths match packaging's `holdsSubject` contract, and the
- * criticality level is part of the subject for the same reason packaging's `coversCriticality`
- * makes it one: a finding that wants a higher level than the live Proposal asks for is minted on
- * its own rather than absorbed, so two levels on one target is the product working, not a miss.
+ * criticality level is included so two set-asset-criticality Proposals on one target at different
+ * levels read as distinct: they are separate asks about the same target, not a duplicate subject.
  */
 export const actionedSubjectFingerprint = (proposal: ProposalWithMetadata): string | undefined => {
   if (!proposal.actionWorkflowId) return undefined;

@@ -36,7 +36,7 @@ const baseResult = (
     hits: [],
     affected_assets: {
       hosts: [{ name: 'WIN-ANALYST01', hit_count: 2 }],
-      users: [{ name: 'dev-user@corp.example', hit_count: 1 }],
+      users: [{ name: 'dev-user@corp.example.cloud', hit_count: 1 }],
       services: [],
     },
     per_index: [],
@@ -82,7 +82,7 @@ describe('templateRecommendations', () => {
     expect(lines[0]).toContain('WIN-ANALYST01');
   });
 
-  it('falls back to Tier 1 assets when no behavior confirmed', () => {
+  it('falls back to IOC Hunt assets when no behavior confirmed', () => {
     const result = baseResult({
       tier2: {
         tier: 2,

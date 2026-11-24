@@ -47,6 +47,7 @@ export const agentlessPolicyToTableItem = (
     created_by: agentlessPolicy.created_by,
     updated_at: agentlessPolicy.updated_at,
     updated_by: agentlessPolicy.updated_by,
+    onboarding_deployment_id: agentlessPolicy.onboarding_deployment_id,
   };
 
   const agentPolicies = [

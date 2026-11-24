@@ -15,6 +15,8 @@ describe('workflow validation rules registry', () => {
   it('has a stable set of rule IDs', () => {
     expect(WORKFLOW_VALIDATION_RULE_IDS).toMatchInlineSnapshot(`
       Array [
+        "awaitedStepNotFinished",
+        "awaitedStepStartsNoExecutions",
         "connectorNotFound",
         "deprecatedStepType",
         "duplicateStepName",
@@ -23,6 +25,7 @@ describe('workflow validation rules registry', () => {
         "foreachItemRuntimeType",
         "graphBuildError",
         "ignoredFetcherSetting",
+        "internalStepType",
         "invalidAssignmentOperator",
         "invalidCollectionPath",
         "invalidDefaultValue",
@@ -38,11 +41,15 @@ describe('workflow validation rules registry', () => {
         "invalidVariableReference",
         "invalidWorkflowOutput",
         "liquidSyntaxError",
+        "managedOnlyStepType",
         "missingRequiredInput",
         "parallelFanOutExceedsLimit",
         "schemaViolation",
+        "serviceAccountNotFound",
+        "serviceAccountUnavailable",
         "targetWorkflowNotFound",
         "unboundedParallelFanOut",
+        "unknownAwaitedStep",
         "unknownInputKey",
         "unknownVariableType",
         "variablePathParseError",

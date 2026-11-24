@@ -18,7 +18,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { TimeRange } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import type { FieldPath } from 'react-hook-form';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import type { Serializable } from '@kbn/utility-types';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { CreateSLOForm } from '../../types';
@@ -35,9 +35,9 @@ interface Props {
 
 export function DocumentsTable({ dataView, name, searchBarProps }: Props) {
   const services = useKibana().services;
-  const { setValue, watch } = useFormContext<CreateSLOForm>();
+  const { control, setValue } = useFormContext<CreateSLOForm>();
 
-  const filter = watch(name) as QuerySchema;
+  const filter = useWatch({ control, name }) as QuerySchema;
 
   const [range, setRange] = useState<TimeRange>({ from: 'now-1d', to: 'now' });
   const [sampleSize, setSampleSize] = useState(100);

@@ -179,7 +179,7 @@ export class RemoteClusterList extends Component<Props> {
     return (
       <EuiPageTemplate.EmptyPrompt
         data-test-subj="remoteClusterListEmptyPrompt"
-        iconType="managementApp"
+        iconType="gear"
         title={
           <h2>
             <FormattedMessage

@@ -143,22 +143,22 @@ describe('HmrServer', () => {
     const payload = data.join('');
     expect(payload).toContain('"reload":true');
     expect(payload).toContain('"files":["src/shared.ts"]');
-    expect(payload).toMatch(/"id":"[0-9a-f-]{36}"/);
     res.destroy();
   });
 
-  it('replays a reload with the same id so the client can ignore it', async () => {
+  it('does not replay a reload to clients that connect afterward', async () => {
     server = new HmrServer();
     const port = await server.start();
 
+    server.broadcastErrors(['stale error']);
     server.broadcastReload(['src/shared.ts']);
 
     const { res, data } = await connectClient(port);
     await new Promise((r) => setTimeout(r, 50));
 
     const payload = data.join('');
-    expect(payload).toContain('"replay":true');
-    expect(payload).toMatch(/"reload":true,"id":"[0-9a-f-]{36}"/);
+    expect(payload).not.toContain('"reload":true');
+    expect(payload).not.toContain('"replay":true');
     res.destroy();
   });
 
@@ -202,6 +202,40 @@ describe('HmrServer', () => {
         delete process.env.KBN_HMR_PORT;
       } else {
         process.env.KBN_HMR_PORT = original;
+      }
+    }
+  });
+
+  it('binds loopback by default and KBN_HMR_HOST when set', async () => {
+    const originalHost = process.env.KBN_HMR_HOST;
+    const originalPort = process.env.KBN_HMR_PORT;
+    process.env.KBN_HMR_PORT = '0';
+
+    try {
+      delete process.env.KBN_HMR_HOST;
+      server = new HmrServer();
+      await server.start();
+      expect((server as unknown as { server: http.Server }).server.address()).toMatchObject({
+        address: '127.0.0.1',
+      });
+      await server.close();
+
+      process.env.KBN_HMR_HOST = '0.0.0.0';
+      server = new HmrServer();
+      await server.start();
+      expect((server as unknown as { server: http.Server }).server.address()).toMatchObject({
+        address: '0.0.0.0',
+      });
+    } finally {
+      if (originalHost === undefined) {
+        delete process.env.KBN_HMR_HOST;
+      } else {
+        process.env.KBN_HMR_HOST = originalHost;
+      }
+      if (originalPort === undefined) {
+        delete process.env.KBN_HMR_PORT;
+      } else {
+        process.env.KBN_HMR_PORT = originalPort;
       }
     }
   });

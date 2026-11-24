@@ -15,7 +15,7 @@ import type {
   OptionsListSelection,
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField } from '@kbn/data-source';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { initializeLabelManager } from '../../control_labels';
@@ -35,9 +35,9 @@ export const getOptionsListContextMock = () => {
     { fieldName$ },
     'fieldName'
   );
-  const field$ = new BehaviorSubject<DataViewField | undefined>({
+  const field$ = new BehaviorSubject<FilterableField | undefined>({
     type: 'string',
-  } as DataViewField);
+  } as FilterableField);
   const sort$ = new BehaviorSubject<OptionsListSortingType>(DEFAULT_DSL_OPTIONS_LIST_STATE.sort);
   return {
     componentApi: {
@@ -64,7 +64,7 @@ export const getOptionsListContextMock = () => {
       isInteractive?: boolean;
     },
     testOnlyMethods: {
-      setField: (next: DataViewField | undefined) => {
+      setField: (next: FilterableField | undefined) => {
         field$.next(next);
       },
     },

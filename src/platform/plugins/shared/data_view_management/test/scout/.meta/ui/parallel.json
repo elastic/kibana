@@ -1,5 +1,5 @@
 {
-  "sha1": "370b34ec4e9840a321976f6914f92f47e14d2ebc",
+  "sha1": "2a6f59dd9b50438bf80ce149ecc5e3a92b92fd1b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -74,6 +74,86 @@
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/create_data_view_wizard.spec.ts",
         "line": 51,
         "column": 31
+      }
+    },
+    {
+      "id": "a1d98d1edfc2b66-84d0e2ec2f0fa2c",
+      "title": "Data views management - Accessibility list page and create data view flyout have no violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_a11y.spec.ts",
+        "line": 42,
+        "column": 35
+      }
+    },
+    {
+      "id": "a1d98d1edfc2b66-5065425736a61a8",
+      "title": "Data views management - Accessibility data view detail page has no violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_a11y.spec.ts",
+        "line": 58,
+        "column": 24
+      }
+    },
+    {
+      "id": "a1d98d1edfc2b66-cae4b10d24ca2ee",
+      "title": "Data views management - Accessibility field editor flyout has no violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_a11y.spec.ts",
+        "line": 67,
+        "column": 24
+      }
+    },
+    {
+      "id": "a1d98d1edfc2b66-f6427c18892d637",
+      "title": "Data views management - Accessibility format editor of an existing field has no violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_a11y.spec.ts",
+        "line": 85,
+        "column": 89
       }
     },
     {

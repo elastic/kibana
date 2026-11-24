@@ -8,7 +8,7 @@
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { MapEmbeddableState } from '../../common';
 
@@ -41,7 +41,7 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
     savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
       defaultMessage: 'Map',
     }),
-    getIconForSavedObject: () => APP_ICON,
+    getIconForSavedObject: () => 'map',
   });
 
   embeddableSetup.registerLegacyURLTransform(

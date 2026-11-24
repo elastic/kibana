@@ -39,6 +39,8 @@ import {
   useFitToContent,
   ReBroadcastMouseDownEvents,
   usePersistHoverContentWidget,
+  FullScreenDisplay,
+  globalMonacoStyleOverrides,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -309,10 +311,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       : ReactMonacoEditor;
   }, []);
 
-  const { FullScreenDisplay, FullScreenButton, isFullScreen, setIsFullScreen, onKeyDown } =
-    useFullScreen({
-      allowFullScreen,
-    });
+  const { FullScreenButton, isFullScreen, setIsFullScreen, onKeyDown } = useFullScreen({
+    allowFullScreen,
+  });
 
   const persistHoverContentWidget = usePersistHoverContentWidget();
   const wireHoverContentPersistence = useCallback(
@@ -685,9 +686,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       className="kibanaCodeEditor"
     >
       <Global styles={classNameCss} />
+      <Global styles={globalMonacoStyleOverrides} />
       {scopedStyles !== undefined && <Global styles={scopedStyles} />}
       {accessibilityOverlayEnabled && renderPrompt()}
-      <FullScreenDisplay>
+      <FullScreenDisplay isFullScreen={isFullScreen}>
         {allowFullScreen || isCopyable ? (
           <div
             css={

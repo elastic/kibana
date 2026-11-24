@@ -22,13 +22,12 @@ import {
   type RuleKind,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
-import { Request, PluginInitializer } from '@kbn/core-di-server';
+import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsUtils,
   type KibanaRequest as CoreKibanaRequest,
-  type PluginInitializerContext,
   type SavedObjectReference,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -36,7 +35,6 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import type { EventOriginActor } from '../event_origin/origin_schemas';
 import { toEventOrigin } from '../event_origin/event_origin';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
@@ -52,14 +50,18 @@ import {
   getRuleAlreadyExistsMessage,
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
+  type RuleValidationContext,
 } from '../errors/rule_error_messages';
+import {
+  RuleChangesHistoryClientToken,
+  type RuleChangesHistoryClientContract,
+} from '../rule_changes_history';
 import {
   bulkScheduleRuleExecutorTasks,
   ensureRuleExecutorTaskScheduled,
   getRuleExecutorTaskId,
 } from '../rule_executor/schedule';
 import type { AlertingPublisherContext } from '../events/domain_events';
-import { EventOriginActorToken } from '../event_origin/token';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import {
@@ -78,11 +80,12 @@ import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
+import { ConfigService } from '../services/config_service/config_service';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
-import type { CreateRulesClientOptions } from './types';
+import type { RulesClientEventOrigin } from './types';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
-import { RulesClientOptionsToken } from './tokens';
+import { RulesClientEventOriginToken } from './tokens';
 import type {
   BulkByIdsParams,
   BulkByQueryParams,
@@ -110,10 +113,12 @@ import {
   ruleDisabledError,
   ruleRunningError,
   rotationFailedError,
+  ruleSnapshotFieldsSchema,
   toBulkError,
   bulkErrorCodeForStatus,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
+  toRestoreRuleData,
 } from './utils';
 
 const withApm = withApmDecorator('RulesClient');
@@ -220,7 +225,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 
 @injectable()
 export class RulesClient {
-  private readonly config: PluginConfig;
+  private readonly rulesConfig: PluginConfig['rules'];
   private readonly logger: LoggerServiceContract;
   private readonly eventContext: AlertingPublisherContext;
 
@@ -232,18 +237,21 @@ export class RulesClient {
     private readonly taskManager: TaskManagerStartContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config'],
+    @inject(ConfigService) configService: ConfigService,
     @inject(RulesSavedObjectServiceInternalToken)
     private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(EventOriginActorToken) actor: EventOriginActor,
-    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
+    @inject(RulesClientEventOriginToken) eventOrigin: RulesClientEventOrigin,
+    @inject(RuleChangesHistoryClientToken)
+    private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract
   ) {
-    this.eventContext = { request, origin: toEventOrigin(actor, request, rulesClientOptions) };
-    this.config = pluginConfigAccessor.get<PluginConfig>();
+    this.eventContext = {
+      request,
+      origin: toEventOrigin(eventOrigin.actor, request, eventOrigin.options),
+    };
+    this.rulesConfig = configService.get('rules');
     this.logger = loggerService.forSubsystem('rulesClient');
   }
 
@@ -289,7 +297,7 @@ export class RulesClient {
       return;
     }
 
-    const { maxScheduledPerMinute } = this.config.rules;
+    const { maxScheduledPerMinute } = this.rulesConfig;
     const addedSchedulesPerMinute = limitItems.reduce(
       (sum, rule) => sum + convertEveryToSchedulesPerMinute(rule.updatedEvery),
       0
@@ -335,7 +343,7 @@ export class RulesClient {
    * `xpack.alerting_v2.rules.minimumScheduleInterval`.
    */
   private assertScheduleIntervalAllowed(every: string): void {
-    const { minimumScheduleInterval } = this.config.rules;
+    const { minimumScheduleInterval } = this.rulesConfig;
     const everyMs = parseDurationToMs(every);
     const minimumMs = parseDurationToMs(minimumScheduleInterval);
 
@@ -350,11 +358,7 @@ export class RulesClient {
     }
   }
 
-  private parseRuleData<T>(
-    schema: z.ZodType<T>,
-    data: unknown,
-    context: 'create' | 'update' | 'upsert'
-  ): T {
+  private parseRuleData<T>(schema: z.ZodType<T>, data: unknown, context: RuleValidationContext): T {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(getInvalidRuleDataMessage(context, stringifyZodError(parsed.error)), {
@@ -683,14 +687,14 @@ export class RulesClient {
 
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
-    const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
+    const { id, ...data } = this.parseRuleData(createRuleDataSchema, params.data, 'create');
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const prepared = this.prepareRuleForCreate({
-      data: parsed,
-      id: params.options?.id,
-      enabled: params.options?.enabled ?? true,
+      data,
+      id,
+      enabled: data.enabled ?? true,
       actor,
       nowIso,
       version: this.getNextVersion(),
@@ -747,7 +751,7 @@ export class RulesClient {
         const rule = this.prepareRuleForCreate({
           data,
           id,
-          enabled,
+          enabled: enabled ?? true,
           actor,
           nowIso,
           version: ruleVersion,
@@ -870,6 +874,11 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    const prevRule = this.toRuleApiResponse({
+      id,
+      attrs: existingAttrs,
+      references: existingReferences,
+    });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       {
@@ -877,6 +886,7 @@ export class RulesClient {
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
+        prevRule,
       },
     ]);
 
@@ -1676,11 +1686,17 @@ export class RulesClient {
         attrs: item.attrs,
         references: item.references,
       });
+      const prevRule = this.toRuleApiResponse({
+        id: item.id,
+        attrs: rotatedCandidates[i].attrs,
+        references: item.references,
+      });
       updatedRules.push({
         ruleId: rule.id,
         spaceId,
         rule,
         templateId: item.attrs.metadata.template?.id,
+        prevRule,
       });
     }
 
@@ -1944,11 +1960,34 @@ export class RulesClient {
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      const { enabled, ...createData } = parsed;
-      const rule = await this.createRule({ data: createData, options: { id, enabled } });
+      const rule = await this.createRule({ data: { ...parsed, id } });
       return { rule, created: true };
     }
 
+    const rule = await this.replaceExistingRule({ id, parsed });
+    return { rule, created: false };
+  }
+
+  @withApm
+  public async restoreRule({ changeId }: { changeId: string }): Promise<RuleResponse> {
+    const { ruleId, snapshot } = await this.ruleChangesHistoryClient.getRuleSnapshot({
+      eventId: changeId,
+    });
+
+    this.parseRuleData(ruleSnapshotFieldsSchema, snapshot, 'restore');
+    const parsed = this.parseRuleData(putRuleDataSchema, toRestoreRuleData(snapshot), 'restore');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
+
+    return this.replaceExistingRule({ id: ruleId, parsed });
+  }
+
+  private async replaceExistingRule({
+    id,
+    parsed,
+  }: {
+    id: string;
+    parsed: PutRuleData;
+  }): Promise<RuleResponse> {
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -2001,14 +2040,20 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    const prevRule = this.toRuleApiResponse({
+      id,
+      attrs: existingAttrs,
+      references: existingReferences,
+    });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       {
         ruleId: rule.id,
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
+        prevRule,
       },
     ]);
-    return { rule, created: false };
+    return rule;
   }
 }

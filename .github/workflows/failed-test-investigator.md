@@ -13,6 +13,9 @@ on:
   # listen for new "new failure" comment
   issue_comment:
     types: [created]
+  # the daily flaky test report files and comments with the pipeline's short-lived GitHub App
+  # token, whose bot has no repository role
+  bots: ['elastic-vault-github-plugin-prod[bot]']
 
 permissions:
   contents: read
@@ -21,19 +24,29 @@ permissions:
   actions: read
   checks: read
   models: read
+  # Agent Router token for the agent (see shared/agent-router.md)
+  id-token: write
+  # threat detection runs on Copilot
+  copilot-requests: write
 
 # run for one of three triggers:
 # - manual dispatch with an issue number
 # - a failed-test issue opened, reopened, or first labeled failed-test
-# - kibanamachine's "new failure" comment that brings failcount to 2
+# - a reporter's comment on an open issue whose failcount is 2: the failed test reporter's
+#   "new failure" comment (kibanamachine), or the daily flaky test report's comment
+#   (elastic-vault-github-plugin-prod[bot], its short-lived GitHub token). The reporters reopen
+#   an issue before commenting on a failure, and comment on a closed one when they close a
+#   per-test issue in favor of a suite issue
 if: >-
   ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '')
   || (github.event_name == 'issues' && !github.event.issue.pull_request
   && contains(github.event.issue.labels.*.name, 'failed-test')
   && (github.event.action != 'labeled' || github.event.label.name == 'failed-test'))
   || (github.event_name == 'issue_comment' && !github.event.issue.pull_request
+  && github.event.issue.state == 'open'
   && contains(github.event.issue.labels.*.name, 'failed-test')
-  && github.event.comment.user.login == 'kibanamachine'
+  && (github.event.comment.user.login == 'kibanamachine'
+  || github.event.comment.user.login == 'elastic-vault-github-plugin-prod[bot]')
   && (contains(github.event.issue.body, '"test.failCount":2,')
   || contains(github.event.issue.body, '"test.failCount":2}'))) }}
 
@@ -43,7 +56,7 @@ concurrency:
   # with `cancel-in-progress` they would kill an in-flight investigation and then skip
   # themselves. Give those events their own group suffix:
   # - unrelated `labeled` events (e.g. `Team:*`, `needs-team`) → the label name
-  # - `issue_comment` events other than kibanamachine's failCount-2 "New failure" comment
+  # - `issue_comment` events other than the reporter's failCount-2 "New failure" comment
   #   (team pings, `/skip`, later "New failure" comments) → `comment-<id>`
   group: >-
     failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
@@ -55,7 +68,10 @@ concurrency:
       (
         github.event_name == 'issue_comment' &&
         !(
-          github.event.comment.user.login == 'kibanamachine' &&
+          (
+            github.event.comment.user.login == 'kibanamachine' ||
+            github.event.comment.user.login == 'elastic-vault-github-plugin-prod[bot]'
+          ) &&
           (
             contains(github.event.issue.body, '"test.failCount":2,') ||
             contains(github.event.issue.body, '"test.failCount":2}')
@@ -76,6 +92,7 @@ env:
 imports:
   - .github/workflows/buildkite-cli-setup.md
   - .github/workflows/shared/app-dex-agents-otel.md
+  - .github/workflows/shared/agent-router.md
 
 engine:
   id: claude
@@ -84,17 +101,24 @@ engine:
   max-turns: 120
   env:
     BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
-    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-    ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
+    ANTHROPIC_BASE_URL: https://llm.idea.elastichosting.ai/anthropic
+    # `Bearer <token>`, exported by shared/agent-router.md. The fallback passes the activation job's key check.
+    ANTHROPIC_API_KEY: ${{ env.ANTHROPIC_API_KEY || 'agent-router' }}
+    # the gateway reads only `Authorization: Bearer`
+    AWF_ANTHROPIC_AUTH_HEADER: Authorization
+    ANTHROPIC_DEFAULT_OPUS_MODEL: claude-opus-5
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: claude-haiku-4-5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: claude-sonnet-4-6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
   github:
     toolsets: [default, actions, search]
+    # the default for a public repository; issues by authors with no repository role are hidden
+    # from the agent, so the daily flaky test report's bot has to be trusted for its suite issues
+    min-integrity: approved
+    trusted-users: ['elastic-vault-github-plugin-prod[bot]']
   web-fetch:
   bash: true
 
@@ -107,18 +131,21 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - openrouter.ai
     - elastic.co
 sandbox:
   agent: awf # Migrated from deprecated network setting
 
 safe-outputs:
   threat-detection:
+    # The detection job can't request an OIDC token, so it runs on Copilot. It inherits the
+    # main engine's env: blank the secrets it must not receive.
     engine:
-      id: claude
-      version: '2.1.165'
+      id: copilot
+      model: sonnet
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
+        ANTHROPIC_API_KEY: ${{ '' }}
+        AWF_ANTHROPIC_AUTH_HEADER: ${{ '' }}
   noop:
     report-as-issue: false
   activation-comments: false
@@ -283,7 +310,7 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 
 ### Automatic fix request
 
-Request an automatic fix immediately for a fixable **`application`** failure. For every other classification, only request a fix after the failure has **recurred** — a test that failed at least twice on tracked branches, not a first-time one-off — so we don't spend a fix run on a fluke. Read `test.failCount` from the issue body's `kibanaCiData` metadata (the `<!-- kibanaCiData = ... -->` comment): `test.failCount >= 2` means it recurred. If that metadata is missing, treat the failure as recurring only when the timeline shows it — a "New failure" comment from `kibanamachine`, or a prior reopen.
+Request an automatic fix immediately for a fixable **`application`** failure. For every other classification, only request a fix after the failure has **recurred** — a test that failed at least twice on tracked branches, not a first-time one-off — so we don't spend a fix run on a fluke. Read `test.failCount` from the issue body's `kibanaCiData` metadata (the `<!-- kibanaCiData = ... -->` comment): `test.failCount >= 2` means it recurred. A suite issue, whose `kibanaCiData` has a `flaky-test-suite` key, has always recurred: it is only filed after its tests failed in at least two builds. If that metadata is missing, treat the failure as recurring only when the timeline shows it — a "New failure" comment from `kibanamachine` or `elastic-vault-github-plugin-prod[bot]`, or a prior reopen.
 
 - **`application`, and you added `failure:ai-fixable`:** add `ai:fix-flaky` immediately, regardless of `failCount`.
 - **Any other classification that recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** add `ai:fix-flaky` to request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
@@ -327,7 +354,7 @@ This issue may have been investigated before (for example, it was reopened after
 When the verdict is that no change to this repository is needed, close the issue with the `close-issue` tool. Close only when **all** of the following hold:
 
 - the classification is `ci-environment` and `confidence` is `medium` or `high`: the failure came from a transient, external, or one-off cause with nothing test- or product-related to fix;
-- the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open. **Exception:** pre-fix CI lag (the run's `Build hash` predates the fix — see the `flaky-test-investigator` skill's pipelines reference) is closable **even if it repeats**, because repeated lag is expected until the Cloud image catches up with `main`, not a problem to escalate;
+- the failure is not recurring (a suite issue always is, see "Automatic fix request"): a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open. **Exception:** pre-fix CI lag (the run's `Build hash` predates the fix — see the `flaky-test-investigator` skill's pipelines reference) is closable **even if it repeats**, because repeated lag is expected until the Cloud image catches up with `main`, not a problem to escalate;
 - you did not add `failure:ai-fixable` or `ai:fix-flaky`, and no fix PR referencing this issue is open.
 
 Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it. Instead, make the close visible in the verdict comment with a note block right after (and outside) the `<details>` block:

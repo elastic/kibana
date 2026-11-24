@@ -30,7 +30,7 @@ export interface SourceApiKey {
 }
 
 export interface SourceEndpoint {
-  id: 'default' | 'logs' | 'metrics' | 'traces';
+  id: 'default' | 'logs' | 'metrics' | 'traces' | 'bulk' | 'bulkTarget';
   url: string;
 }
 

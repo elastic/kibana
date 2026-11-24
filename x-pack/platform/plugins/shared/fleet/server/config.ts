@@ -61,8 +61,6 @@ export const config: PluginConfigDescriptor = {
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
       excludeDataStreamTypes: true,
-      privateFleetServerHost: true,
-      privateElasticsearchHost: true,
     },
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,

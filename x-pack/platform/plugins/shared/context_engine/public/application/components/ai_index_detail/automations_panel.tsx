@@ -24,14 +24,16 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import { isDreamingAutomation } from '../../../../common/dreaming';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
 import { useKibana } from '../../hooks/use_kibana';
+import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getAiIndexDetailPath } from '../../paths';
@@ -65,14 +67,33 @@ export const AutomationsPanel = ({
   const {
     services: { application },
   } = useKibana();
-  const { automations, workflowIds, isCreating, isBusy, deleteAutomation, createAndAttach } =
+  const { automations, isCreating, isBusy, deleteAutomation, createAndAttach } =
     useAutomationsEditor({ aiIndex, onSaved });
+  const isMemoryEnabled = useMemoryEnabled();
+  const visibleAutomations = useMemo(
+    () =>
+      isMemoryEnabled
+        ? automations
+        : automations.filter((automation) => !isDreamingAutomation(automation)),
+    [automations, isMemoryEnabled]
+  );
+  const visibleWorkflowIds = useMemo(
+    () =>
+      visibleAutomations
+        .filter((automation) => automation.type === 'workflow')
+        .map((automation) => automation.value),
+    [visibleAutomations]
+  );
   const {
     summaries,
     isLoading: isLoadingSummaries,
     missingReadPrivilege,
-  } = useWorkflowSummaries(workflowIds);
-  const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
+  } = useWorkflowSummaries(visibleWorkflowIds);
+  const { canSuggest, isSuggesting, suggestAutomation } = useSuggestAutomation({
+    aiIndex,
+    isManaged,
+    onSaved,
+  });
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
@@ -97,7 +118,7 @@ export const AutomationsPanel = ({
   };
 
   const canAddMore = automations.length < MAX_AI_INDEX_AUTOMATIONS;
-  const hasAutomations = automations.length > 0;
+  const hasAutomations = visibleAutomations.length > 0;
   const createTooltip = !canCreateWorkflow
     ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.missingCreateWorkflowTooltip', {
         defaultMessage: 'You need the Workflows create privilege to create a workflow.',
@@ -178,7 +199,8 @@ export const AutomationsPanel = ({
           fill={fill}
           iconType="chevronSingleDown"
           iconSide="right"
-          isDisabled={isBusy || aiIndex === undefined}
+          isLoading={isSuggesting}
+          isDisabled={isBusy || isSuggesting || aiIndex === undefined}
           data-test-subj="contextAddAutomationButton"
           onClick={() => setIsAddMenuOpen((open) => !open)}
           {...getEbtProps({
@@ -205,7 +227,7 @@ export const AutomationsPanel = ({
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h2>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
                 defaultMessage: 'Automations',
@@ -241,7 +263,7 @@ export const AutomationsPanel = ({
         <EuiSkeletonText lines={2} data-test-subj="contextAiIndexAutomationsLoading" />
       ) : (
         <>
-          {automations.length === 0 ? (
+          {!hasAutomations ? (
             <>
               <EuiSpacer size="m" />
               <AiIndexDetailPanelEmptyState
@@ -255,7 +277,7 @@ export const AutomationsPanel = ({
               />
             </>
           ) : (
-            automations.map((automation, index) => {
+            visibleAutomations.map((automation, index) => {
               const summary = summaries.get(automation.value);
               return (
                 <React.Fragment key={automation.value}>
@@ -270,7 +292,7 @@ export const AutomationsPanel = ({
                     canRun={canExecuteWorkflow}
                     onDelete={() => deleteAutomation(automation.value)}
                   />
-                  {index < automations.length - 1 && <EuiSpacer size="s" />}
+                  {index < visibleAutomations.length - 1 && <EuiSpacer size="s" />}
                 </React.Fragment>
               );
             })

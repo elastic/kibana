@@ -12,6 +12,7 @@ import {
   ExperimentalDataStreamFeaturesSchema,
 } from '../models/package_policy';
 import { OtelCollectorConfigSchema } from '../models';
+import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION } from '../../../common/constants';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -625,6 +626,22 @@ export const GetOneBulkOperationPackagesResponseSchema = schema.object(
           name: schema.string(),
           success: schema.boolean(),
           error: schema.maybe(schema.object({ message: schema.string() })),
+          skipped_package_policies: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                name: schema.maybe(schema.string()),
+                version_condition: schema.maybe(schema.string()),
+              }),
+              {
+                maxSize: 10000,
+                meta: {
+                  description:
+                    'Package policies not upgraded because some of their active agents do not satisfy the agent version condition of the new package version.',
+                },
+              }
+            )
+          ),
         }),
         { maxSize: 10000 }
       )
@@ -1091,6 +1108,13 @@ export const InstallPackageFromRegistryRequestSchema = {
               'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
           },
         }),
+        acknowledge_breaking_changes: schema.boolean({
+          defaultValue: false,
+          meta: {
+            description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+            availability: { since: '9.5.0', stability: 'stable' },
+          },
+        }),
       },
       { meta: { id: 'install_package_from_registry_request' } }
     )
@@ -1157,6 +1181,13 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
             'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
         },
       }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      }),
     },
     { meta: { id: 'bulk_install_packages_from_registry_request' } }
   ),
@@ -1190,6 +1221,13 @@ export const BulkUpgradePackagesRequestSchema = {
       prerelease: schema.maybe(schema.boolean()),
       force: schema.boolean({ defaultValue: false }),
       upgrade_package_policies: schema.boolean({ defaultValue: false }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      }),
     },
     { meta: { id: 'bulk_upgrade_packages_request' } }
   ),

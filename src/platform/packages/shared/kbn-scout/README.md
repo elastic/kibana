@@ -442,6 +442,10 @@ The `test_run.target.attributes` mapping ships with the code. `scout initialize-
 
 Every Scout test event records why its run was started as `test_run.scope`, read from `SCOUT_TEST_RUN_SCOPE` (`unknown` when unset). On CI, each pipeline that reports test events sets it in its pipeline resource definition (`.buildkite/pipeline-resource-definitions/`), e.g. `pull-request`, `on-merge` or `batch-daily-ipv6`. It is reporting metadata only, used to filter test events after ingestion; it never affects which tests run or how.
 
+#### Elastic Cloud target in test events
+
+Test events from a run against Elastic Cloud record which serverless project or hosted deployment it used under `test_run.target.elastic_cloud`: `project.id`, `deployment.id`, `region` and `environment`, read from `SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID`, `SCOUT_TARGET_ELASTIC_CLOUD_DEPLOYMENT_ID`, `SCOUT_TARGET_ELASTIC_CLOUD_REGION` and `SCOUT_TARGET_ELASTIC_CLOUD_ENVIRONMENT`. The pipeline that creates the project or deployment sets them, so that a failure can be traced to the project's own logs. The field is absent when neither ID is set.
+
 ### Test Types and Directory Structure
 
 Scout supports two distinct types of tests: UI and API, each with their own directory structure and import patterns:

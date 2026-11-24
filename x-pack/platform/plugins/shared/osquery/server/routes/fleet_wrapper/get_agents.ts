@@ -67,11 +67,22 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        })) ?? { items: [] as PackagePolicy[] };
+        // Every osquery package policy, not just the first 1000: agents of the remaining
+        // policies were missing from the picker and from the counts the workflow step's preflight
+        // reads, while `parseAgentSelection` still dispatches to them. Fleet pages with a PIT, so
+        // this also works past the 10k saved-objects window.
+        const packagePolicies: PackagePolicy[] = [];
+        const packagePolicyKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`;
+        if (packagePolicyService) {
+          const pages = await packagePolicyService.fetchAllItems(spaceScopedClient, {
+            kuery: packagePolicyKuery,
+            perPage: 1000,
+          });
+          for await (const page of pages) {
+            packagePolicies.push(...page);
+          }
+        }
+
         const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
           satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
         );
@@ -94,15 +105,27 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const policyScope = buildPolicyIdKuery(agentPolicyIds);
 
         // FIND agents by policy_name
-        const policyNamePattern = /policy_name:([^ ]+)/;
+        // `buildAgentSearchKuery` emits the `policy_name` clause last and escapes its value (`:`
+        // included), while an earlier quoted hostname clause keeps the raw search text. The last
+        // match is therefore the real clause, even when the search text itself contains
+        // ` or policy_name:`.
+        const policyNameClausePattern = /(?:^|\s+or\s+)policy_name:([^ ]+)/g;
         const searchKuery = query.kuery ?? '';
-        const policyName: string | undefined = searchKuery.match(policyNamePattern)?.[1];
+        const policyNameClause = [...searchKuery.matchAll(policyNameClausePattern)].pop();
+        const policyName: string | undefined = policyNameClause?.[1];
 
         const foundPolicyByName = policyName
           ? agentPolicies?.filter((policy) =>
               policy.name.toLowerCase().includes(policyName.toLowerCase())
-            )
+            ) ?? []
           : [];
+
+        // `policy_name` is not an agent field, and Fleet rejects unmapped kuery fields, so the
+        // clause is replaced by the policy ids it resolved to. Its value may contain spaces, so
+        // the clause runs to the end of the kuery.
+        const remainingSearchKuery = policyNameClause
+          ? searchKuery.slice(0, policyNameClause.index).trim()
+          : searchKuery;
 
         // `searchKuery` is free-form text from the wire. Unbalanced input (`a) or (b`) would
         // otherwise rebalance the parentheses below and lift branches out of the policy scope,
@@ -115,22 +138,22 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         let composedKuery: string;
 
         try {
-          if (searchKuery) {
-            fromKueryExpression(searchKuery);
+          if (remainingSearchKuery) {
+            fromKueryExpression(remainingSearchKuery);
           }
 
           const scopeClause = `(${policyScope})`;
 
           let searchClause: string | undefined;
-          if (foundPolicyByName?.length) {
-            // Keep the raw search terms alongside the resolved policy ids so version-suffixed
-            // agents (`<id>#<major.minor>`) still match.
+          if (policyName) {
+            // Keep the other search terms alongside the resolved policy ids so version-suffixed
+            // agents (`<id>#<major.minor>`) still match. No match yields a match-nothing clause.
             const policyNameScope = buildPolicyIdKuery(foundPolicyByName.map((p) => p.id));
-            searchClause = searchKuery
-              ? `((${searchKuery}) or (${policyNameScope}))`
+            searchClause = remainingSearchKuery
+              ? `((${remainingSearchKuery}) or (${policyNameScope}))`
               : `(${policyNameScope})`;
-          } else if (searchKuery) {
-            searchClause = `(${searchKuery})`;
+          } else if (remainingSearchKuery) {
+            searchClause = `(${remainingSearchKuery})`;
           }
 
           composedKuery = searchClause ? `${searchClause} and ${scopeClause}` : scopeClause;
