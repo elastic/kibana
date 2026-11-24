@@ -39,6 +39,8 @@ EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
 # Per-suite step timeout for suites that legitimately need longer than the 120m default.
 EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
+# Per-suite fanout concurrency for suites with more shards than the default 4 lets run at once.
+EVAL_SUITE_FANOUT_CONCURRENCY="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.fanoutConcurrency // empty' 2>/dev/null || true)"
 # The suite's Scout arch/domain, for steps (e.g. the weekly pipeline) that don't pass them. The
 # suite's domain only applies to its own arch, so an EVAL_SCOUT_ARCH override falls back to the
 # run_suite.sh default domain for that arch instead of e.g. `stateful/observability_complete`.
@@ -133,7 +135,7 @@ source .buildkite/scripts/steps/evals/setup_connectors.sh
 # This is the only practical way to run all connector projects within the 1h job timeout.
 EVAL_FANOUT="${EVAL_FANOUT:-}"
 EVAL_PROJECT="${EVAL_PROJECT:-}"
-EVAL_FANOUT_CONCURRENCY="${EVAL_FANOUT_CONCURRENCY:-4}"
+EVAL_FANOUT_CONCURRENCY="${EVAL_FANOUT_CONCURRENCY:-${EVAL_SUITE_FANOUT_CONCURRENCY:-4}}"
 
 # Optional: extend eval connectors with EIS models (Elastic Inference Service).
 # This is intentionally done here (post-bootstrap) so Node scripts can import repo packages if needed.

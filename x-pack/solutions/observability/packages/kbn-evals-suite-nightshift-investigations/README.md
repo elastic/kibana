@@ -410,7 +410,7 @@ is the group of preconfigured connectors one Scout stack starts with:
 | `orcabench` | none                                                                   | `orcabench-es` (`.elasticsearch`), by the eval | `nightshiftOrcaEs.{url,username,password}` |
 
 To add a connector to a set, declare it in the set's YAML and add its id to `CONNECTOR_SETS`. The
-hook selects `orcabench` on the ORCA shard (or `NIGHTSHIFT_DATASETS=orcabench`), and `default`
+hook selects `orcabench` on the ORCA shards (or `NIGHTSHIFT_DATASETS=orcabench`), and `default`
 whenever Elasticsearch credentials are configured. It exports `NIGHTSHIFT_CONNECTOR_SET` and points the
 Scout config set at the set's YAML; the eval then saves every connector in the set on the
 investigator through the Agent Builder agents API (`saveConnectorSetOnInvestigator` in
@@ -1236,17 +1236,18 @@ Every root-cause event of the 755 falls inside the ORCA cluster's data. Its logs
 metrics each cover every hour from 2026-04-19T03:00Z through the 2026-04-24T19:00Z hour, which
 holds ORCA's last snapshot.
 
-The 755 is a periodic baseline, not a CI shard. The `orcabench` shard budgets 240 minutes for 50
-tasks, and release-gate issue elastic/nightshift-program#1893 wants gates under 30 minutes. At
+The 755 is a periodic baseline, not a CI shard. Each `orcabench-<index>-of-5` shard budgets 240
+minutes for its 10 of the sampled 50 tasks, and release-gate issue elastic/nightshift-program#1893 wants gates under 30 minutes. At
 eight investigations at a time the 755 needs tens of hours, so run it in slices. The score API
 returns at most 10,000 scores per experiment, so a run that would write more (the unsliced 755
 writes about 13,600) fails before any investigation starts.
 `NIGHTSHIFT_ORCA_RELEASE=public755` selects the release, and `NIGHTSHIFT_ORCA_SLICE=<index>/<count>`
-runs one contiguous part of it in `case_id` order. Each run validates the whole release before
-slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v2/slice-<index>-of-<count>`,
-because the eval client upserts the dataset it runs, and under the release name a slice would
-remove the other tasks. The eval stores the slice first and runs it with the example ids the
-server gave it, so its scores show up in each example's history in the Evals UI. Keep one `<count>` for a baseline and join the slices on `case_id`.
+runs one contiguous part of it in `case_id` order. Each run validates the whole release, then runs
+only its slice's examples against the release itself, so every slice's scores land on the
+release's examples and show up in their history in the Evals UI. Each slice is its own experiment,
+`Nightshift ORCA investigation traces (slice <index>/<count>)`, so a slice's checks see only its own
+scores, while slices of one build share its execution and so merge into one row of a comparison.
+The slice count can change between runs without breaking that history.
 
 Report the 755 by `orca_difficulty` (Easy, Medium, Hard), so a rate is read against the paper's
 tier of the same name, with `execution_success` and the number of unscored runs next to each
@@ -1273,7 +1274,7 @@ NIGHTSHIFT_DATASETS=orcabench NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags \
 The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) with the ORCA cluster's `url` and the
 `username` and `password` of the eval user above. The Scout hook refuses an ORCA run without them,
-and exports them only to the ORCA shard. The block also holds `apiKey`, the read-only ORCA key that
+and exports them only to the ORCA shards. The block also holds `apiKey`, the read-only ORCA key that
 the [local dev setup](../../plugins/nightshift_investigations/scripts/local_dev/) reads; the evals
 themselves don't use it.
 
@@ -1283,7 +1284,7 @@ themselves don't use it.
 - Each task runs once, at most eight at a time, and Playwright doesn't retry the test.
 - The eval fails when fewer than 80% of investigations complete, or when none returned ORCA
   telemetry. Judge scores are advisory.
-- All three shards draw on one sandbox pool. When it runs out, investigations end without a
+- All shards draw on one sandbox pool. When it runs out, investigations end without a
   conclusion and the eval fails, so leave room for overlapping builds.
 
 Locally, start a fresh Scout server for ORCA:
@@ -1306,13 +1307,13 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** the same four shards on PRs, weekly and daily, each on its own Scout server:
+- **What runs:** the same shards on PRs, weekly and daily, each on its own Scout server. ORCA runs as five slices of the sampled 50, each on its own agent, and `fanoutConcurrency: 8` lets every shard of one model run at once:
 
   | Shard                        | Dataset                                                      | Judge                  |
   | ---------------------------- | ------------------------------------------------------------ | ---------------------- |
   | `customer0-golden`           | `ns-investigation-golden-2710` ([how to change it](#running-a-new-golden-cut-in-ci)) | `eis-openai-gpt-6-sol` |
   | `customer0-connector-probes` | `nightshift/ns-connector-elastic`                            | `eis-openai-gpt-6-sol` |
-  | `orcabench`                  | [ORCA sampled 50](#orca-benchmark)                           | `eis-openai-gpt-5-4`   |
+  | `orcabench-1-of-5` … `orcabench-5-of-5` | One fifth each of [ORCA sampled 50](#orca-benchmark) | `eis-openai-gpt-5-4`   |
   | `reinforcement`              | The committed [reinforcement replays](#reinforcement-micro-eval) | `eis-openai-gpt-6-sol` |
 
   The suite's ci-prod secret,

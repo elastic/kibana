@@ -41,6 +41,8 @@ export interface EvalsSuiteMetadataEntry {
   defaultJudge?: string;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
+  /** How many of the suite's fanout steps run at once, across builds; 4 when unset. */
+  fanoutConcurrency?: number;
   specModelGroups?: EvalsSuiteSpecModelGroup[];
 }
 

@@ -161,6 +161,7 @@
         "eis/openai-gpt-5.6-terra"
       ],
       "stepTimeoutInMinutes": 240,
+      "fanoutConcurrency": 8,
       "shards": [
         {
           "id": "customer0-golden",
@@ -173,7 +174,27 @@
           "specFiles": ["evals/connector_probe/stored.spec.ts"]
         },
         {
-          "id": "orcabench",
+          "id": "orcabench-1-of-5",
+          "judge": "eis-openai-gpt-5-4",
+          "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "orcabench-2-of-5",
+          "judge": "eis-openai-gpt-5-4",
+          "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "orcabench-3-of-5",
+          "judge": "eis-openai-gpt-5-4",
+          "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "orcabench-4-of-5",
+          "judge": "eis-openai-gpt-5-4",
+          "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        },
+        {
+          "id": "orcabench-5-of-5",
           "judge": "eis-openai-gpt-5-4",
           "specFiles": ["evals/investigation/orcabench.spec.ts"]
         },

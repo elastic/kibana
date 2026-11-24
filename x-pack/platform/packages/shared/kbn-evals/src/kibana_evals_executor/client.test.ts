@@ -226,6 +226,44 @@ describe('KibanaEvalsClient', () => {
     expect(all[0].id).toBe(exp.id);
   });
 
+  it('runs only the selected examples, under their index in the stored dataset', async () => {
+    const upsertDataset = jest.fn().mockResolvedValue('stored-dataset-id');
+    const onEvaluationComplete = jest.fn();
+    const client = createClient({ upsertDataset, onEvaluationComplete });
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [0, 1, 2, 3].map((q) => ({ id: `example-${q}`, input: { q } })),
+    };
+    const task = jest.fn(async (_example: EvaluationDataset['examples'][number]) => ({ ok: true }));
+
+    const [exp] = await client.runExperiment(
+      {
+        datasets: [dataset],
+        task,
+        selectExample: (_example, index) => index % 2 === 1,
+      },
+      [
+        {
+          name: 'AlwaysOne',
+          kind: 'CODE',
+          direction: 'maximize',
+          evaluate: async () => ({ score: 1 }),
+        },
+      ]
+    );
+
+    expect(upsertDataset).toHaveBeenCalledWith(
+      expect.objectContaining({ examples: dataset.examples })
+    );
+    expect(task.mock.calls.map(([example]) => example.input)).toEqual([{ q: 1 }, { q: 3 }]);
+    expect(Object.values(exp.runs).map(({ exampleIndex }) => exampleIndex)).toEqual([1, 3]);
+    expect(onEvaluationComplete.mock.calls.map(([event]) => event.exampleId)).toEqual([
+      'example-1',
+      'example-3',
+    ]);
+  });
+
   it('captures and stores trace IDs for tasks and evaluators', async () => {
     const client = createClient();
     const dataset: EvaluationDataset = {

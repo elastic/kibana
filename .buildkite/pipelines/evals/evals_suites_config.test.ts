@@ -27,6 +27,15 @@ const shardedSuites = suites.filter((suite) => (suite.shards?.length ?? 0) > 0);
 // front keeps the id and the key identical, with no transform to reason about.
 const STEP_KEY_SAFE_ID = /^[a-z0-9]+(?:[_-][a-z0-9]+)*$/;
 
+// A shard split across agents, `<base>-<index>-of-<count>`: every slice runs the same spec files
+// and the suite picks its part of the examples from the id.
+const SLICE_SHARD_ID = /^(.+)-(\d+)-of-(\d+)$/;
+
+const isOneShardSliced = (shardIds: string[]): boolean => {
+  const bases = new Set(shardIds.map((id) => SLICE_SHARD_ID.exec(id)?.[1]));
+  return bases.size === 1 && !bases.has(undefined);
+};
+
 describe('evals.suites.json shards', () => {
   it('gives every shard an id that survives step-key slugification, unique within its suite', () => {
     const problems: string[] = [];
@@ -83,7 +92,7 @@ describe('evals.suites.json shards', () => {
     expect(problems).toEqual([]);
   });
 
-  it('never lists the same spec file in two shards of a suite', () => {
+  it('never lists the same spec file in two shards of a suite, except slices of one shard', () => {
     const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) => {
       const owners = new Map<string, string[]>();
 
@@ -94,8 +103,34 @@ describe('evals.suites.json shards', () => {
       }
 
       return [...owners]
-        .filter(([, shardIds]) => shardIds.length > 1)
+        .filter(([, shardIds]) => shardIds.length > 1 && !isOneShardSliced(shardIds))
         .map(([specFile, shardIds]) => `${suiteId}: "${specFile}" is in [${shardIds.join(', ')}]`);
+    });
+
+    expect(problems).toEqual([]);
+  });
+
+  it('numbers the slices of a shard 1 to count, each once', () => {
+    const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) => {
+      const slicesByBase = new Map<string, Array<{ index: number; count: number }>>();
+      for (const { id } of shards) {
+        const match = SLICE_SHARD_ID.exec(id);
+        if (!match) continue;
+        const [, base, index, count] = match;
+        slicesByBase.set(base, [
+          ...(slicesByBase.get(base) ?? []),
+          { index: Number(index), count: Number(count) },
+        ]);
+      }
+      return [...slicesByBase].flatMap(([base, slices]) => {
+        const [{ count }] = slices;
+        const indices = slices.map(({ index }) => index).sort((left, right) => left - right);
+        const expected = Array.from({ length: count }, (_, position) => position + 1);
+        return slices.every((slice) => slice.count === count) &&
+          indices.join(',') === expected.join(',')
+          ? []
+          : [`${suiteId}: slices of "${base}" are not 1-of-${count} through ${count}-of-${count}`];
+      });
     });
 
     expect(problems).toEqual([]);
@@ -174,10 +209,16 @@ describe('Nightshift CI coverage', () => {
     expect(suite?.shards?.map(({ id }) => id)).toEqual([
       'customer0-golden',
       'customer0-connector-probes',
-      'orcabench',
+      'orcabench-1-of-5',
+      'orcabench-2-of-5',
+      'orcabench-3-of-5',
+      'orcabench-4-of-5',
+      'orcabench-5-of-5',
       'reinforcement',
     ]);
-    const files = suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [];
+    // Every shard of one model can run at once.
+    expect(suite?.fanoutConcurrency).toBeGreaterThanOrEqual(suite?.shards?.length ?? 0);
+    const files = [...new Set(suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [])];
     expect(files).toEqual([
       'evals/investigation/stored.spec.ts',
       'evals/connector_probe/stored.spec.ts',

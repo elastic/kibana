@@ -113,6 +113,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       metadata: experimentMetadata,
       concurrency,
       trustUpstreamDataset = false,
+      selectExample,
     }: {
       name?: string;
       datasets: TEvaluationDataset[];
@@ -120,6 +121,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
       trustUpstreamDataset?: boolean;
+      selectExample?: (example: TEvaluationDataset['examples'][number], index: number) => boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<DatasetRunResult[]> {
@@ -137,6 +139,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
             metadata: experimentMetadata,
             concurrency: runConcurrency,
             trustUpstreamDataset,
+            selectExample,
           },
           evaluators
         )
@@ -174,6 +177,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       metadata: experimentMetadata,
       concurrency,
       trustUpstreamDataset = false,
+      selectExample = () => true,
     }: {
       experimentName: string;
       dataset: TEvaluationDataset;
@@ -181,6 +185,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency: number;
       trustUpstreamDataset?: boolean;
+      selectExample?: (example: TEvaluationDataset['examples'][number], index: number) => boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<DatasetRunResult> {
@@ -217,6 +222,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
       for (let rep = 0; rep < repetitions; rep++) {
         resolvedDataset.examples.forEach((example, exampleIndex) => {
+          if (!selectExample(example, exampleIndex)) return;
           runJobs.push(
             limiter(async () => {
               const runKey = `${exampleIndex}-${rep}-${randomUUID()}`;
