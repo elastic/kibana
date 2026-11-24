@@ -33,6 +33,7 @@ import type {
   GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
+import type { RuleScope } from '../../../../common/api/detection_engine/rule_sets';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 export interface CreateRulesProps {
   rule: RuleCreateProps;
@@ -144,7 +145,7 @@ export interface FetchSearchRulesProps {
   gaps_range_start?: string;
   gaps_range_end?: string;
   gap_auto_fill_scheduler_id?: string;
-  rule_set_id?: string;
+  rule_scope?: RuleScope;
   signal?: AbortSignal;
 }
 

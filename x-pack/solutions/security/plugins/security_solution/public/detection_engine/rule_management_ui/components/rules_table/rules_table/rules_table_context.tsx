@@ -271,7 +271,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       ...(shouldApplyGaps ? { gap_fill_statuses: filterOptions.gapFillStatuses } : {}),
       ...(gapRange ? { gaps_range_start: gapRange.start, gaps_range_end: gapRange.end } : {}),
       ...(activeSchedulerId ? { gap_auto_fill_scheduler_id: activeSchedulerId } : {}),
-      ...(filterOptions.ruleSetId ? { rule_set_id: filterOptions.ruleSetId } : {}),
+      ...(filterOptions.ruleSetId ? { rule_scope: { rule_set_id: filterOptions.ruleSetId } } : {}),
     };
   }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
 

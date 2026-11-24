@@ -22,6 +22,7 @@ import {
   GranularRulesSearch,
   FacetCounts,
 } from '../granular_rules/granular_rules_contract.gen';
+import { RuleScope } from '../../rule_sets/rule_set.gen';
 import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
 import { SortOrder } from '../../model/sorting.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
@@ -69,17 +70,7 @@ export const SearchRulesRequestBody = lazySchema(() =>
       filter: GranularRulesFilter.optional().describe(
         'Structured KQL filter applied to detection rules (alert saved objects).'
       ),
-      /**
-      * Return only the rules of this rule set. The server resolves the group, so the
-filter has no length or clause limit for groups with many picked rules.
-
-      */
-      rule_set_id: z
-        .string()
-        .optional()
-        .describe(
-          'Return only the rules of this rule set. The server resolves the group, so the\nfilter has no length or clause limit for groups with many picked rules.\n'
-        ),
+      rule_scope: RuleScope.optional(),
       aggregations: SearchRulesAggregations.optional(),
       search: GranularRulesSearch.optional(),
       sort_field: FindRulesSortField.optional(),

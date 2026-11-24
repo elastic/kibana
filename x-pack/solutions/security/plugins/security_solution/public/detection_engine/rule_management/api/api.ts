@@ -273,7 +273,7 @@ export const fetchSearchRules = async ({
   gaps_range_start,
   gaps_range_end,
   gap_auto_fill_scheduler_id,
-  rule_set_id,
+  rule_scope,
 }: FetchSearchRulesProps): Promise<FetchSearchRulesResponse> => {
   const body = {
     page: pagination.page,
@@ -289,7 +289,7 @@ export const fetchSearchRules = async ({
     ...(gaps_range_start ? { gaps_range_start } : {}),
     ...(gaps_range_end ? { gaps_range_end } : {}),
     ...(gap_auto_fill_scheduler_id ? { gap_auto_fill_scheduler_id } : {}),
-    ...(rule_set_id ? { rule_set_id } : {}),
+    ...(rule_scope ? { rule_scope } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchSearchRulesResponse>(

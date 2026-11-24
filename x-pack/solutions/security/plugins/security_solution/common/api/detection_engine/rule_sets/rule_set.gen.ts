@@ -16,15 +16,23 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { Severity } from '../model/rule_schema/common_attributes.gen';
+
 /**
  * The saved object id of a rule set.
  */
-export const RuleSetId = lazySchema(() => z.string().min(1));
+export const RuleSetId = lazySchema(() => z.string().min(1).max(256));
 export type RuleSetId = z.infer<typeof RuleSetId>;
 
 /**
-  * `space`: every user of the space sees the group.
-`private`: only the user who created the group sees it.
+ * The `rule_id` of a rule. It stays the same through import, upgrade and revert.
+ */
+export const RuleSetRuleId = lazySchema(() => z.string().min(1).max(256));
+export type RuleSetRuleId = z.infer<typeof RuleSetRuleId>;
+
+/**
+  * `space`: every user of the space sees the set.
+`private`: only the user who created the set sees it.
 
   */
 export const RuleSetVisibility = lazySchema(() => z.enum(['space', 'private']));
@@ -32,40 +40,139 @@ export type RuleSetVisibility = z.infer<typeof RuleSetVisibility>;
 export type RuleSetVisibilityEnum = typeof RuleSetVisibility.enum;
 export const RuleSetVisibilityEnum = RuleSetVisibility.enum;
 
+export const RuleSetValue = lazySchema(() => z.string().min(1).max(1024));
+export type RuleSetValue = z.infer<typeof RuleSetValue>;
+
 /**
-  * Rules that match ALL filled conditions are in the group. Inside one condition, ANY value matches.
-New rules that match join the group automatically.
+  * Values of one rule field that can have several values. A rule matches when it has the
+`include` values (all of them with `match: all`, any of them with `match: any`) and none of
+the `exclude` values.
+
+  */
+export const RuleSetValues = lazySchema(() =>
+  z
+    .object({
+      include: z.array(RuleSetValue).max(100).optional(),
+      exclude: z.array(RuleSetValue).max(100).optional(),
+      /**
+       * How the `include` values combine. The server always stores it.
+       */
+      match: z
+        .enum(['all', 'any'])
+        .optional()
+        .describe('How the `include` values combine. The server always stores it.'),
+    })
+    .strict()
+);
+export type RuleSetValues = z.infer<typeof RuleSetValues>;
+
+export const RuleSetRuleType = lazySchema(() =>
+  z.enum([
+    'query',
+    'saved_query',
+    'eql',
+    'esql',
+    'threshold',
+    'threat_match',
+    'machine_learning',
+    'new_terms',
+  ])
+);
+export type RuleSetRuleType = z.infer<typeof RuleSetRuleType>;
+export type RuleSetRuleTypeEnum = typeof RuleSetRuleType.enum;
+export const RuleSetRuleTypeEnum = RuleSetRuleType.enum;
+
+/**
+ * A rule matches when its type is one of `include` and none of `exclude`.
+ */
+export const RuleSetRuleTypes = lazySchema(() =>
+  z
+    .object({
+      include: z.array(RuleSetRuleType).max(8).optional(),
+      exclude: z.array(RuleSetRuleType).max(8).optional(),
+    })
+    .strict()
+);
+export type RuleSetRuleTypes = z.infer<typeof RuleSetRuleTypes>;
+
+/**
+ * A rule matches when its severity is one of `include` and none of `exclude`.
+ */
+export const RuleSetSeverities = lazySchema(() =>
+  z
+    .object({
+      include: z.array(Severity).max(4).optional(),
+      exclude: z.array(Severity).max(4).optional(),
+    })
+    .strict()
+);
+export type RuleSetSeverities = z.infer<typeof RuleSetSeverities>;
+
+/**
+ * `external`: Elastic prebuilt rules. `internal`: rules created in Kibana.
+ */
+export const RuleSetRuleSource = lazySchema(() =>
+  z
+    .object({
+      include: z
+        .array(z.enum(['external', 'internal']))
+        .min(1)
+        .max(1),
+    })
+    .strict()
+);
+export type RuleSetRuleSource = z.infer<typeof RuleSetRuleSource>;
+
+/**
+ * Free-text search. `legacy` is the search of the rules table (rule name, index patterns, MITRE ATT&CK).
+ */
+export const RuleSetSearch = lazySchema(() =>
+  z
+    .object({
+      term: z.string().min(1).max(256),
+      mode: z.literal('legacy'),
+    })
+    .strict()
+);
+export type RuleSetSearch = z.infer<typeof RuleSetSearch>;
+
+/**
+  * Rules that match ALL filled conditions are in the set. New rules that match join the set
+automatically. Field names are the names of the rule API. `related_integrations` takes
+integration package names, for example `endpoint` or `okta`.
 
   */
 export const RuleSetConditions = lazySchema(() =>
   z
     .object({
-      tags: z.array(z.string()).max(100).optional(),
-      /**
-       * Package names of the related integrations, for example `endpoint`.
-       */
-      integrations: z
-        .array(z.string())
-        .max(100)
-        .optional()
-        .describe('Package names of the related integrations, for example `endpoint`.'),
-      rule_types: z.array(z.string()).max(20).optional(),
-      severities: z.array(z.string()).max(4).optional(),
-      source: z.enum(['elastic', 'custom']).optional(),
-      /**
-       * Same as the search field of the rules table (rule name, index patterns, MITRE ATT&CK).
-       */
-      search: z
-        .string()
-        .max(256)
-        .optional()
-        .describe(
-          'Same as the search field of the rules table (rule name, index patterns, MITRE ATT&CK).'
-        ),
+      tags: RuleSetValues.optional(),
+      related_integrations: RuleSetValues.optional(),
+      type: RuleSetRuleTypes.optional(),
+      severity: RuleSetSeverities.optional(),
+      rule_source: RuleSetRuleSource.optional(),
+      search: RuleSetSearch.optional(),
     })
     .strict()
 );
 export type RuleSetConditions = z.infer<typeof RuleSetConditions>;
+
+/**
+  * Limits the rules to a saved rule set (`rule_set_id`), or to a rule set definition that is not
+saved (`conditions`, `included_rule_ids`, `excluded_rule_ids`), for example while the user
+edits a set. Give one or the other, not both.
+
+  */
+export const RuleScope = lazySchema(() =>
+  z
+    .object({
+      rule_set_id: RuleSetId.optional(),
+      conditions: RuleSetConditions.optional(),
+      included_rule_ids: z.array(RuleSetRuleId).max(10000).optional(),
+      excluded_rule_ids: z.array(RuleSetRuleId).max(10000).optional(),
+    })
+    .strict()
+);
+export type RuleScope = z.infer<typeof RuleScope>;
 
 export const RuleSetDefinition = lazySchema(() =>
   z
@@ -75,21 +182,21 @@ export const RuleSetDefinition = lazySchema(() =>
       visibility: RuleSetVisibility,
       conditions: RuleSetConditions,
       /**
-       * `rule_id`s of rules that are in the group even if they do not match the conditions.
+       * `rule_id`s of rules that are in the set even if they do not match the conditions.
        */
       included_rule_ids: z
-        .array(z.string())
+        .array(RuleSetRuleId)
         .max(10000)
         .describe(
-          '`rule_id`s of rules that are in the group even if they do not match the conditions.'
+          '`rule_id`s of rules that are in the set even if they do not match the conditions.'
         ),
       /**
-       * `rule_id`s of rules that match the conditions but are never in the group.
+       * `rule_id`s of rules that match the conditions but are never in the set.
        */
       excluded_rule_ids: z
-        .array(z.string())
+        .array(RuleSetRuleId)
         .max(10000)
-        .describe('`rule_id`s of rules that match the conditions but are never in the group.'),
+        .describe('`rule_id`s of rules that match the conditions but are never in the set.'),
     })
     .strict()
 );
@@ -100,35 +207,35 @@ export const RuleSet = lazySchema(() =>
     z.object({
       id: RuleSetId,
       /**
-       * Profile uid of the user who created the group.
+       * Profile uid of the user who created the set.
        */
-      created_by: z.string().optional().describe('Profile uid of the user who created the group.'),
+      created_by: z.string().optional().describe('Profile uid of the user who created the set.'),
       created_at: z.string().optional(),
       updated_at: z.string().optional(),
       /**
-       * True when the current user created the group.
+       * True when the current user created the set.
        */
-      is_owner: z.boolean().describe('True when the current user created the group.'),
+      is_owner: z.boolean().describe('True when the current user created the set.'),
       /**
        * Saved object version, for optimistic concurrency on update.
        */
       version: z.string().describe('Saved object version, for optimistic concurrency on update.'),
       /**
-       * How many rules are in the group now. Only in the list response.
+       * How many rules are in the set now. Only in the list response.
        */
       rules_count: z
         .number()
         .int()
         .optional()
-        .describe('How many rules are in the group now. Only in the list response.'),
+        .describe('How many rules are in the set now. Only in the list response.'),
       /**
-       * How many rules of the group failed on the last run. Only in the list response.
+       * How many rules of the set failed on the last run. Only in the list response.
        */
       failed_count: z
         .number()
         .int()
         .optional()
-        .describe('How many rules of the group failed on the last run. Only in the list response.'),
+        .describe('How many rules of the set failed on the last run. Only in the list response.'),
     })
   )
 );

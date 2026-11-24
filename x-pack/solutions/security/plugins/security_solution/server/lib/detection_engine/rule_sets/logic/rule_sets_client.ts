@@ -24,6 +24,7 @@ import {
   buildConditionsFilter,
   buildRuleSetFilter,
 } from './build_rule_set_filter';
+import { normalizeRuleSetConditions } from '../../../../../common/detection_engine/rule_sets/rule_set_conditions';
 
 const MAX_GROUPS = 200;
 const COUNT_CONCURRENCY = 5;
@@ -356,17 +357,15 @@ export class RuleSetsClient {
   }
 
   private toAttributes(definition: RuleSetDefinition): RuleSetAttributes {
-    const included = [...new Set(definition.included_rule_ids)];
+    const included = new Set(definition.included_rule_ids);
     // A rule id cannot be picked and left out at the same time; picked wins.
-    const excluded = [...new Set(definition.excluded_rule_ids)].filter(
-      (id) => !included.includes(id)
-    );
+    const excluded = [...new Set(definition.excluded_rule_ids)].filter((id) => !included.has(id));
     return {
       name: definition.name,
       ...(definition.description ? { description: definition.description } : {}),
       visibility: definition.visibility,
-      conditions: definition.conditions,
-      included_rule_ids: included,
+      conditions: normalizeRuleSetConditions(definition.conditions),
+      included_rule_ids: [...included],
       excluded_rule_ids: excluded,
     };
   }

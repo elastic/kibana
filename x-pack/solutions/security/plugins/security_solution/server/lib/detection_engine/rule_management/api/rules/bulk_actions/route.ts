@@ -53,6 +53,7 @@ import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { getRuleSetsClient } from '../../../../rule_sets/api/register_routes';
+import { resolveRuleScope } from '../../../logic/search/rule_scope';
 import { fetchRulesByQueryOrIds, BulkActionRuleNotFoundError } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
@@ -94,7 +95,7 @@ const validateBulkAction = (
 
   if (body?.rule_set_id && body.query === undefined) {
     return {
-      body: `rule_set_id needs query. Send an empty query for all rules of the group.`,
+      body: `rule_set_id needs query. Send an empty query for all rules of the set.`,
       statusCode: 400,
     };
   }
@@ -293,9 +294,10 @@ export const performBulkActionRoute = (
             gapRange: gapParams.gapRange,
             gapFillStatuses: gapParams.gapFillStatuses,
             schedulerId: body.gap_auto_fill_scheduler_id,
-            kueryFilter: body.rule_set_id
-              ? await (await getRuleSetsClient(context)).getFilter(body.rule_set_id)
-              : undefined,
+            kueryFilter: await resolveRuleScope(
+              body.rule_set_id ? { rule_set_id: body.rule_set_id } : undefined,
+              () => getRuleSetsClient(context)
+            ),
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);

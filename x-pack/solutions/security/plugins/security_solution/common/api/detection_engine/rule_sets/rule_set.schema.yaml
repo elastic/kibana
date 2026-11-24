@@ -9,50 +9,165 @@ components:
     RuleSetId:
       type: string
       minLength: 1
+      maxLength: 256
       description: The saved object id of a rule set.
+
+    RuleSetRuleId:
+      type: string
+      minLength: 1
+      maxLength: 256
+      description: The `rule_id` of a rule. It stays the same through import, upgrade and revert.
 
     RuleSetVisibility:
       type: string
       enum: [space, private]
       description: |
-        `space`: every user of the space sees the group.
-        `private`: only the user who created the group sees it.
+        `space`: every user of the space sees the set.
+        `private`: only the user who created the set sees it.
+
+    RuleSetValue:
+      type: string
+      minLength: 1
+      maxLength: 1024
+
+    RuleSetValues:
+      type: object
+      additionalProperties: false
+      description: |
+        Values of one rule field that can have several values. A rule matches when it has the
+        `include` values (all of them with `match: all`, any of them with `match: any`) and none of
+        the `exclude` values.
+      properties:
+        include:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/RuleSetValue'
+        exclude:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/RuleSetValue'
+        match:
+          type: string
+          enum: [all, any]
+          description: How the `include` values combine. The server always stores it.
+
+    RuleSetRuleType:
+      type: string
+      enum:
+        - query
+        - saved_query
+        - eql
+        - esql
+        - threshold
+        - threat_match
+        - machine_learning
+        - new_terms
+
+    RuleSetRuleTypes:
+      type: object
+      additionalProperties: false
+      description: A rule matches when its type is one of `include` and none of `exclude`.
+      properties:
+        include:
+          type: array
+          maxItems: 8
+          items:
+            $ref: '#/components/schemas/RuleSetRuleType'
+        exclude:
+          type: array
+          maxItems: 8
+          items:
+            $ref: '#/components/schemas/RuleSetRuleType'
+
+    RuleSetSeverities:
+      type: object
+      additionalProperties: false
+      description: A rule matches when its severity is one of `include` and none of `exclude`.
+      properties:
+        include:
+          type: array
+          maxItems: 4
+          items:
+            $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/Severity'
+        exclude:
+          type: array
+          maxItems: 4
+          items:
+            $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/Severity'
+
+    RuleSetRuleSource:
+      type: object
+      additionalProperties: false
+      required: [include]
+      description: '`external`: Elastic prebuilt rules. `internal`: rules created in Kibana.'
+      properties:
+        include:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            type: string
+            enum: [external, internal]
+
+    RuleSetSearch:
+      type: object
+      additionalProperties: false
+      required: [term, mode]
+      description: Free-text search. `legacy` is the search of the rules table (rule name, index patterns, MITRE ATT&CK).
+      properties:
+        term:
+          type: string
+          minLength: 1
+          maxLength: 256
+        mode:
+          type: string
+          enum: [legacy]
 
     RuleSetConditions:
       type: object
       additionalProperties: false
       description: |
-        Rules that match ALL filled conditions are in the group. Inside one condition, ANY value matches.
-        New rules that match join the group automatically.
+        Rules that match ALL filled conditions are in the set. New rules that match join the set
+        automatically. Field names are the names of the rule API. `related_integrations` takes
+        integration package names, for example `endpoint` or `okta`.
       properties:
         tags:
-          type: array
-          maxItems: 100
-          items:
-            type: string
-        integrations:
-          type: array
-          maxItems: 100
-          description: Package names of the related integrations, for example `endpoint`.
-          items:
-            type: string
-        rule_types:
-          type: array
-          maxItems: 20
-          items:
-            type: string
-        severities:
-          type: array
-          maxItems: 4
-          items:
-            type: string
-        source:
-          type: string
-          enum: [elastic, custom]
+          $ref: '#/components/schemas/RuleSetValues'
+        related_integrations:
+          $ref: '#/components/schemas/RuleSetValues'
+        type:
+          $ref: '#/components/schemas/RuleSetRuleTypes'
+        severity:
+          $ref: '#/components/schemas/RuleSetSeverities'
+        rule_source:
+          $ref: '#/components/schemas/RuleSetRuleSource'
         search:
-          type: string
-          maxLength: 256
-          description: Same as the search field of the rules table (rule name, index patterns, MITRE ATT&CK).
+          $ref: '#/components/schemas/RuleSetSearch'
+
+    RuleScope:
+      type: object
+      additionalProperties: false
+      description: |
+        Limits the rules to a saved rule set (`rule_set_id`), or to a rule set definition that is not
+        saved (`conditions`, `included_rule_ids`, `excluded_rule_ids`), for example while the user
+        edits a set. Give one or the other, not both.
+      properties:
+        rule_set_id:
+          $ref: '#/components/schemas/RuleSetId'
+        conditions:
+          $ref: '#/components/schemas/RuleSetConditions'
+        included_rule_ids:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
+        excluded_rule_ids:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/RuleSetRuleId'
 
     RuleSetDefinition:
       type: object
@@ -73,15 +188,15 @@ components:
         included_rule_ids:
           type: array
           maxItems: 10000
-          description: '`rule_id`s of rules that are in the group even if they do not match the conditions.'
+          description: '`rule_id`s of rules that are in the set even if they do not match the conditions.'
           items:
-            type: string
+            $ref: '#/components/schemas/RuleSetRuleId'
         excluded_rule_ids:
           type: array
           maxItems: 10000
-          description: '`rule_id`s of rules that match the conditions but are never in the group.'
+          description: '`rule_id`s of rules that match the conditions but are never in the set.'
           items:
-            type: string
+            $ref: '#/components/schemas/RuleSetRuleId'
 
     RuleSet:
       allOf:
@@ -93,20 +208,20 @@ components:
               $ref: '#/components/schemas/RuleSetId'
             created_by:
               type: string
-              description: Profile uid of the user who created the group.
+              description: Profile uid of the user who created the set.
             created_at:
               type: string
             updated_at:
               type: string
             is_owner:
               type: boolean
-              description: True when the current user created the group.
+              description: True when the current user created the set.
             version:
               type: string
               description: Saved object version, for optimistic concurrency on update.
             rules_count:
               type: integer
-              description: How many rules are in the group now. Only in the list response.
+              description: How many rules are in the set now. Only in the list response.
             failed_count:
               type: integer
-              description: How many rules of the group failed on the last run. Only in the list response.
+              description: How many rules of the set failed on the last run. Only in the list response.

@@ -27,7 +27,7 @@ export const getSuggestRuleSetsSkill = (getStartServices: StartServicesAccessor<
     content: `# Suggest rule sets
 
 ## What a rule set is
-A rule set is a saved view of the detection rules page. It selects rules with conditions on rule fields: tags (a rule must have all of them), integrations, rule types, severities, source (Elastic or custom) and a search text. New rules that match the conditions join the set automatically. A rule can be in many sets.
+A rule set is a saved part of the detection rules. It selects rules with conditions on rule fields: \`tags\`, \`related_integrations\` (integration package names), \`type\`, \`severity\`, \`rule_source\` (\`external\` for Elastic prebuilt rules, \`internal\` for the customer's own rules) and \`search\`. Each field has \`include\` and \`exclude\` values; for tags and integrations, \`match: all\` means a rule needs all included values and \`match: any\` means one is enough. Use \`exclude\` for requests like \"not Elastic Defend\". New rules that match the conditions join the set automatically. A rule can be in many sets.
 
 A rule set cannot select rules by alerts (noisy rules) or by run state (failing rules, gaps). Do not suggest such sets: the Rule Monitoring tab shows that state.
 

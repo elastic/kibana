@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { RuleScope } from '../../../../common/api/detection_engine/rule_sets';
 import { fetchSearchRules } from '../../rule_management/api/api';
 import * as i18n from './translations';
 
@@ -40,8 +41,8 @@ export interface PickedRule {
 interface RulePickerModalProps {
   title: string;
   initial: PickedRule[];
-  /** KQL that limits the rules the picker shows, for example the group conditions. */
-  filter?: string;
+  /** Limits the rules the picker shows, for example to the rules that the set conditions match. */
+  scope?: RuleScope;
   onClose: () => void;
   onConfirm: (rules: PickedRule[]) => void;
 }
@@ -50,7 +51,7 @@ interface RulePickerModalProps {
 export const RulePickerModal = ({
   title,
   initial,
-  filter,
+  scope,
   onClose,
   onConfirm,
 }: RulePickerModalProps) => {
@@ -72,7 +73,7 @@ export const RulePickerModal = ({
   );
 
   const searchArgs = {
-    ...(filter ? { filter: { term: filter, mode: 'KQL' as const } } : {}),
+    ...(scope ? { rule_scope: scope } : {}),
     ...(search ? { search: { term: search, mode: 'legacy' as const } } : {}),
     sort_field: 'name' as const,
     sort_order: 'asc' as const,

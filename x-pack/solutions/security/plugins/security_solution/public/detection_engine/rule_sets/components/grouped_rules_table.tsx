@@ -57,7 +57,7 @@ const buildSectionQuery = (filterOptions: FilterOptions, browse?: FilterOptions[
   return {
     ...(structuredKql !== '' ? { filter: { term: structuredKql, mode: 'KQL' as const } } : {}),
     ...(searchTerm ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
-    rule_set_id: filterOptions.ruleSetId,
+    ...(filterOptions.ruleSetId ? { rule_scope: { rule_set_id: filterOptions.ruleSetId } } : {}),
   };
 };
 

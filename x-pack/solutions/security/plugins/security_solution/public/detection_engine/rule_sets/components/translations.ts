@@ -197,6 +197,16 @@ export const SOURCE_ELASTIC = i18n.translate(
 export const SOURCE_CUSTOM = i18n.translate('xpack.securitySolution.ruleSets.editor.sourceCustom', {
   defaultMessage: 'Custom',
 });
+export const NOT_CONDITION = (field: string) =>
+  i18n.translate('xpack.securitySolution.ruleSets.editor.notCondition', {
+    values: { field },
+    defaultMessage: 'Not {field}',
+  });
+
+export const EXCLUDE_HINT = i18n.translate('xpack.securitySolution.ruleSets.editor.excludeHint', {
+  defaultMessage: 'Click a value twice to exclude it.',
+});
+
 export const SEARCH_CONDITION = i18n.translate('xpack.securitySolution.ruleSets.editor.search', {
   defaultMessage: 'Search',
 });

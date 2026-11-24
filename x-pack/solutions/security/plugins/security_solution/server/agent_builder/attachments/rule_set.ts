@@ -9,6 +9,7 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { RuleSetConditions } from '../../../common/api/detection_engine/rule_sets';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 /** A rule set that the agent suggests. The user creates it from the card; the agent never does. */
@@ -16,14 +17,7 @@ export const ruleSetAttachmentDataSchema = lazySchema(() =>
   securityAttachmentDataSchema.extend({
     name: z.string(),
     reason: z.string(),
-    conditions: z.object({
-      tags: z.array(z.string()).optional(),
-      integrations: z.array(z.string()).optional(),
-      rule_types: z.array(z.string()).optional(),
-      severities: z.array(z.string()).optional(),
-      source: z.enum(['elastic', 'custom']).optional(),
-      search: z.string().optional(),
-    }),
+    conditions: RuleSetConditions,
     rules_count: z.number(),
     existing_rule_set: z.object({ id: z.string(), name: z.string() }).optional(),
   })

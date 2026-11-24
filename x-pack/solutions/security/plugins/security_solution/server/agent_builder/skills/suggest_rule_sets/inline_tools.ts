@@ -11,7 +11,11 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
-import type { RuleSetConditions } from '../../../../common/api/detection_engine/rule_sets';
+import { RuleSetConditions } from '../../../../common/api/detection_engine/rule_sets';
+import {
+  hasRuleSetConditions,
+  normalizeRuleSetConditions,
+} from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import type { StartPlugins } from '../../../plugin_contract';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
@@ -45,10 +49,23 @@ interface Bucket {
 
 const termsAgg = (field: string, size = 1000) => ({ terms: { field, size } });
 
-const toCounts = (aggs: Record<string, unknown> | undefined, name: string) =>
-  ((aggs?.[name] as { buckets?: Bucket[] } | undefined)?.buckets ?? []).map(
-    ({ key, doc_count: rules }) => ({ value: String(key), rules })
-  );
+const isBucket = (value: unknown): value is Bucket =>
+  typeof value === 'object' &&
+  value !== null &&
+  'key' in value &&
+  (typeof value.key === 'string' || typeof value.key === 'number') &&
+  'doc_count' in value &&
+  typeof value.doc_count === 'number';
+
+/** Buckets of a terms aggregation; the rules client returns aggregations untyped. */
+const toCounts = (aggs: Record<string, unknown> | undefined, name: string) => {
+  const agg = aggs?.[name];
+  const buckets =
+    typeof agg === 'object' && agg !== null && 'buckets' in agg && Array.isArray(agg.buckets)
+      ? agg.buckets.filter(isBucket)
+      : [];
+  return buckets.map(({ key, doc_count: rules }) => ({ value: String(key), rules }));
+};
 
 const createClient = async (getStartServices: GetStartServices, context: ToolHandlerContext) => {
   const [coreStart, startPlugins] = await getStartServices();
@@ -66,13 +83,11 @@ const errorResult = (message: string) => ({
 });
 
 /** The same conditions in any order are the same set. */
-const normalize = (conditions: RuleSetConditions) =>
-  Object.fromEntries(
-    Object.entries(conditions)
-      .filter(
-        ([, value]) => value != null && value !== '' && !(Array.isArray(value) && !value.length)
-      )
-      .map(([key, value]) => [key, Array.isArray(value) ? [...value].sort() : value])
+const normalize = (conditions: RuleSetConditions): unknown =>
+  JSON.parse(
+    JSON.stringify(normalizeRuleSetConditions(conditions), (_key, value) =>
+      Array.isArray(value) ? [...value].sort() : value
+    )
   );
 
 export const ruleSetsInventoryTool = (
@@ -96,10 +111,10 @@ export const ruleSetsInventoryTool = (
           sortOrder: undefined,
           aggregations: {
             tags: termsAgg(TAGS_FIELD),
-            integrations: termsAgg(INTEGRATION_FIELD),
+            related_integrations: termsAgg(INTEGRATION_FIELD),
             tactics: termsAgg(TACTIC_FIELD),
-            rule_types: termsAgg(PARAMS_TYPE_FIELD),
-            severities: termsAgg(SEVERITY_FIELD),
+            type: termsAgg(PARAMS_TYPE_FIELD),
+            severity: termsAgg(SEVERITY_FIELD),
             source: termsAgg(PARAMS_IMMUTABLE_FIELD),
           },
         }),
@@ -167,11 +182,11 @@ export const ruleSetsInventoryTool = (
                 ...(samples.has(value) && { sample_custom_rule_names: samples.get(value) }),
               })),
               tags_not_shown: Math.max(0, tags.length - MAX_TAGS),
-              integrations: toCounts(all.aggregations, 'integrations'),
+              related_integrations: toCounts(all.aggregations, 'related_integrations'),
               installed_integrations: installed,
               tactics: toCounts(all.aggregations, 'tactics'),
-              rule_types: toCounts(all.aggregations, 'rule_types'),
-              severities: toCounts(all.aggregations, 'severities'),
+              type: toCounts(all.aggregations, 'type'),
+              severity: toCounts(all.aggregations, 'severity'),
               existing_rule_sets: existing.map((set) => ({
                 name: set.name,
                 visibility: set.visibility,
@@ -188,52 +203,6 @@ export const ruleSetsInventoryTool = (
   },
 });
 
-const conditionsSchema = lazySchema(() =>
-  z.object({
-    tags: z
-      .array(z.string())
-      .optional()
-      .describe(
-        'Exact tag values. A rule must have ALL of these tags, same as the rules table tag filter.'
-      ),
-    integrations: z
-      .array(z.string())
-      .optional()
-      .describe(
-        'Integration package names, for example "endpoint" or "aws". A rule matches ANY of them.'
-      ),
-    rule_types: z
-      .array(
-        z.enum([
-          'query',
-          'saved_query',
-          'eql',
-          'esql',
-          'threshold',
-          'threat_match',
-          'machine_learning',
-          'new_terms',
-        ])
-      )
-      .optional()
-      .describe('A rule matches ANY of these rule types.'),
-    severities: z
-      .array(z.enum(['low', 'medium', 'high', 'critical']))
-      .optional()
-      .describe('A rule matches ANY of these severities.'),
-    source: z
-      .enum(['elastic', 'custom'])
-      .optional()
-      .describe('"elastic" for Elastic prebuilt rules, "custom" for rules the customer wrote.'),
-    search: z
-      .string()
-      .optional()
-      .describe(
-        'Free text, the same as the search field of the rules table. Use it only when tags cannot express the set.'
-      ),
-  })
-);
-
 const proposeSchema = lazySchema(() =>
   z.object({
     name: z
@@ -246,8 +215,8 @@ const proposeSchema = lazySchema(() =>
       .min(1)
       .max(300)
       .describe('One sentence for the user: why this set is useful for them.'),
-    conditions: conditionsSchema.describe(
-      'The conditions of the set. All given conditions must match (AND). Use only values from the inventory.'
+    conditions: RuleSetConditions.describe(
+      'The conditions of the set, the same as the rule sets API. All given conditions must match (AND). Inside a field, `include` values combine with `match` ("all" or "any"), and `exclude` removes rules with any of its values. Use only values from the inventory.'
     ),
   })
 );
@@ -260,9 +229,12 @@ export const ruleSetsProposeTool = (
   description: `Proposes one rule set to the user. It counts the rules that match the conditions, checks that the same set does not exist yet, and stores the proposal as an attachment that the user can create with one click. It does not create the rule set. Call it once for each suggestion. Render each returned attachment with <render_attachment id="..." version="...">.`,
   schema: proposeSchema,
   handler: async (args, context) => {
-    const { name, reason, conditions } = args as z.infer<typeof proposeSchema>;
+    const { name, reason, conditions: input } = proposeSchema.parse(args);
+    const conditions = normalizeRuleSetConditions(input);
     try {
-      const filter = buildConditionsFilter(conditions);
+      const filter = hasRuleSetConditions(conditions)
+        ? buildConditionsFilter(conditions)
+        : undefined;
       if (!filter) {
         return errorResult('A rule set needs at least one condition.');
       }

@@ -40,13 +40,17 @@ import type {
   RuleSetDefinition,
 } from '../../../../common/api/detection_engine/rule_sets';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useIntegrations } from '../../common/components/related_integrations/use_integrations';
 import { useFetchRuleManagementFiltersQuery } from '../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import { fetchSearchRules } from '../../rule_management/api/api';
-import { useRuleSetPreviewQuery, useSaveRuleSetMutation } from '../api';
+import { useRuleFacetCountsQuery, useRuleSetPreviewQuery, useSaveRuleSetMutation } from '../api';
 import type { PickedRule } from './rule_picker_modal';
 import { RulePickerModal } from './rule_picker_modal';
 import { RuleConditionsFilterBar } from './rule_conditions_filter_bar';
+import { useIntegrationTitles } from './group_by_fields';
+import {
+  hasRuleSetConditions,
+  normalizeRuleSetConditions,
+} from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import * as i18n from './translations';
 
 const LIST_PREVIEW = 4;
@@ -165,25 +169,6 @@ const Step = ({
   </EuiPanel>
 );
 
-/** KQL for the rule picker of step 3: only rules that the conditions match can be left out. */
-const conditionsToKql = (conditions: RuleSetConditions): string | undefined => {
-  const quote = (value: string) => `"${value.replace(/["\\]/g, '\\$&')}"`;
-  const any = (field: string, values?: string[]) =>
-    values?.length ? `${field}: (${values.map(quote).join(' OR ')})` : undefined;
-  const parts = [
-    conditions.tags?.length
-      ? conditions.tags.map((tag) => `alert.attributes.tags: ${quote(tag)}`).join(' AND ')
-      : undefined,
-    any('alert.attributes.params.relatedIntegrations.package', conditions.integrations),
-    any('alert.attributes.params.type', conditions.rule_types),
-    any('alert.attributes.params.severity', conditions.severities),
-    conditions.source
-      ? `alert.attributes.params.immutable: ${conditions.source === 'elastic'}`
-      : undefined,
-  ].filter(Boolean);
-  return parts.length ? parts.join(' AND ') : undefined;
-};
-
 interface RuleSetEditorFlyoutProps {
   group?: RuleSet;
   initial?: Partial<RuleSetDefinition>;
@@ -248,14 +233,15 @@ export const RuleSetEditorFlyout = ({
   });
 
   const { data: filters } = useFetchRuleManagementFiltersQuery();
-  const { data: integrations } = useIntegrations();
+  // Only the packages that rules use, one option each; Fleet lists one row per policy template.
+  const { data: integrationCounts } = useRuleFacetCountsQuery('integration');
+  const integrationTitles = useIntegrationTitles();
   const integrationOptions = useMemo(
     () =>
-      (integrations ?? []).map((integration) => ({
-        value: integration.package_name,
-        label: integration.package_title,
-      })),
-    [integrations]
+      Object.keys(integrationCounts ?? {})
+        .map((pkg) => ({ value: pkg, label: integrationTitles.get(pkg) ?? pkg }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [integrationCounts, integrationTitles]
   );
 
   const { data: preview, isFetching } = useRuleSetPreviewQuery({
@@ -289,11 +275,7 @@ export const RuleSetEditorFlyout = ({
   };
 
   const setCondition = <K extends keyof RuleSetConditions>(key: K, value: RuleSetConditions[K]) =>
-    setConditions((current) => {
-      const next = { ...current, [key]: value };
-      if (value == null || value === '') delete next[key];
-      return next;
-    });
+    setConditions((current) => normalizeRuleSetConditions({ ...current, [key]: value }));
 
   const rememberNames = (rules: PickedRule[]) =>
     setNames(
@@ -319,7 +301,7 @@ export const RuleSetEditorFlyout = ({
     },
   ];
   const total = preview?.total ?? 0;
-  const conditionsKql = conditionsToKql(conditions);
+  const hasConditions = hasRuleSetConditions(conditions);
 
   return (
     <EuiFlyout
@@ -429,7 +411,7 @@ export const RuleSetEditorFlyout = ({
                   size="s"
                   iconType="minus"
                   onClick={() => setPicker('exclude')}
-                  isDisabled={!conditionsKql}
+                  isDisabled={!hasConditions}
                 >
                   {i18n.PICK_RULES}
                 </EuiButtonEmpty>
@@ -527,7 +509,7 @@ export const RuleSetEditorFlyout = ({
             rule_id: ruleId,
             name: names.get(ruleId) ?? ruleId,
           }))}
-          filter={picker === 'exclude' ? conditionsKql : undefined}
+          scope={picker === 'exclude' ? { conditions } : undefined}
           onClose={() => setPicker(null)}
           onConfirm={(rules) => {
             rememberNames(rules);

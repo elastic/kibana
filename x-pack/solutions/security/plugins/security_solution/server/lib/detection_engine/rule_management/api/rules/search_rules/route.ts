@@ -28,6 +28,7 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { resolveGapPreFilter, transformFindAlerts } from '../../../utils/utils';
 import { translateSearchFieldsToSoFields } from '../../../logic/search/search_rules_field_translation';
 import { getRuleSetsClient } from '../../../../rule_sets/api/register_routes';
+import { resolveRuleScope } from '../../../logic/search/rule_scope';
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
@@ -76,14 +77,12 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
             gaps_range_start: gapsRangeStart,
             gaps_range_end: gapsRangeEnd,
             gap_auto_fill_scheduler_id: schedulerId,
-            rule_set_id: ruleSetId,
+            rule_scope: ruleScope,
           } = request.body;
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = await ctx.alerting.getRulesClient();
-          const ruleSetFilter = ruleSetId
-            ? await (await getRuleSetsClient(context)).getFilter(ruleSetId)
-            : undefined;
+          const ruleSetFilter = await resolveRuleScope(ruleScope, () => getRuleSetsClient(context));
 
           const combinedKql = buildGranularRulesKql({
             filter,

@@ -1234,9 +1234,11 @@ components:
           type: string
         rule_set_id:
           description: |
-            Limit the action to the rules of this rule set. Valid only when query is provided
-            (use an empty query for all rules of the group).
+            Limit the action to the rules of this rule set. Valid only with `query`; send an empty
+            query for all rules of the set. Rule sets are managed with the rule sets API.
           type: string
+          minLength: 1
+          maxLength: 256
 
     BulkDeleteRules:
       allOf:

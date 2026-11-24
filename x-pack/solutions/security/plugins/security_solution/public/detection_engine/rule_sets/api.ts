@@ -24,6 +24,7 @@ import {
   RULE_SETS_URL,
   RULE_SET_RULE_IDS_URL,
 } from '../../../common/api/detection_engine/rule_sets';
+import type { GranularRulesFacetCategory } from '../../../common/api/detection_engine/rule_management';
 import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../common/api/detection_engine/rule_management/urls';
 import { KibanaServices } from '../../common/lib/kibana';
 import { fetchSearchRules } from '../rule_management/api/api';
@@ -216,7 +217,7 @@ export const useRuleSetOutcomesQuery = (ruleSetId: string | undefined) =>
     ['ruleSetOutcomes', ruleSetId],
     async ({ signal }) => {
       const response = await fetchSearchRules({
-        rule_set_id: ruleSetId,
+        rule_scope: { rule_set_id: ruleSetId },
         fields: ['id'],
         pagination: { page: 1, perPage: 1 },
         aggregations: { counts: ['lastRunOutcome', 'enabled'] },
@@ -237,16 +238,32 @@ export const useRuleSetOutcomesQuery = (ruleSetId: string | undefined) =>
     { enabled: Boolean(ruleSetId), refetchOnWindowFocus: false }
   );
 
+/** Rules per value of one facet in the whole space: the values that rules really use. */
+export const useRuleFacetCountsQuery = (category: GranularRulesFacetCategory) =>
+  useQuery(
+    ['ruleFacetCounts', category],
+    async ({ signal }) => {
+      const response = await fetchSearchRules({
+        fields: ['id'],
+        pagination: { page: 1, perPage: 1 },
+        aggregations: { counts: [category] },
+        signal,
+      });
+      return response.counts?.[category] ?? {};
+    },
+    { refetchOnWindowFocus: false, staleTime: 60_000 }
+  );
+
 /**
- * Counts for the table filters inside a group: its tags and its Elastic/custom rules. Without a
- * group the filters show space-wide counts from the rule management filters API.
+ * Counts for the table filters inside a set: its tags and its Elastic/custom rules. Without a
+ * set the filters show space-wide counts from the rule management filters API.
  */
 export const useRuleSetFilterCountsQuery = (ruleSetId: string | undefined) =>
   useQuery(
     ['ruleSetFilterCounts', ruleSetId],
     async ({ signal }) => {
       const response = await fetchSearchRules({
-        rule_set_id: ruleSetId,
+        rule_scope: { rule_set_id: ruleSetId },
         fields: ['id'],
         pagination: { page: 1, perPage: 1 },
         aggregations: { counts: ['tags', 'source'] },

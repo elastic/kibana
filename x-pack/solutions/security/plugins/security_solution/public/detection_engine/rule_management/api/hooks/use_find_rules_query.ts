@@ -19,6 +19,7 @@ import type {
   GranularRulesSearch,
 } from '../../../../../common/api/detection_engine/rule_management';
 import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../common/api/detection_engine/rule_management/urls';
+import type { RuleScope } from '../../../../../common/api/detection_engine/rule_sets';
 import type { PaginationOptions } from '../../logic';
 import { fetchSearchRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
@@ -36,7 +37,7 @@ export interface FindRulesQueryArgs {
   gaps_range_start?: string;
   gaps_range_end?: string;
   gap_auto_fill_scheduler_id?: string;
-  rule_set_id?: string;
+  rule_scope?: RuleScope;
 }
 
 const FIND_RULES_QUERY_KEY = ['POST', RULE_MANAGEMENT_RULES_URL_SEARCH];

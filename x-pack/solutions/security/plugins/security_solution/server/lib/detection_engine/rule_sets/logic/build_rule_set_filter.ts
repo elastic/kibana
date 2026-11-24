@@ -7,18 +7,25 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, nodeBuilder, nodeTypes } from '@kbn/es-query';
-import type { RuleSetConditions } from '../../../../../common/api/detection_engine/rule_sets';
+import type {
+  RuleSetConditions,
+  RuleSetValues,
+} from '../../../../../common/api/detection_engine/rule_sets';
 import {
   PARAMS_IMMUTABLE_FIELD,
   PARAMS_TYPE_FIELD,
   TAGS_FIELD,
 } from '../../../../../common/detection_engine/rule_management/rule_fields';
 import { convertRuleSearchTermToKQL } from '../../../../../common/detection_engine/rule_management/rule_filtering';
+import { normalizeRuleSetConditions } from '../../../../../common/detection_engine/rule_sets/rule_set_conditions';
 
 export const RULE_ID_FIELD = 'alert.attributes.params.ruleId';
 export const RULE_SO_ID_FIELD = 'alert.id';
 const INTEGRATION_PACKAGE_FIELD = 'alert.attributes.params.relatedIntegrations.package';
 const SEVERITY_FIELD = 'alert.attributes.params.severity';
+
+/** A `terms` query is exact match, so every id list is bounded well below `index.max_terms_count`. */
+export const MAX_TERMS_VALUES = 10_000;
 
 interface RuleSetMembership {
   conditions: RuleSetConditions;
@@ -28,45 +35,74 @@ interface RuleSetMembership {
 
 const not = (node: KueryNode): KueryNode => nodeTypes.function.buildNode('not', node);
 
+const terms = (field: string, values: readonly string[]): KueryNode => {
+  if (values.length > MAX_TERMS_VALUES) {
+    throw new Error(`A rule set filter takes at most ${MAX_TERMS_VALUES} values for ${field}`);
+  }
+  return nodeBuilder.terms(field, [...values]);
+};
+
 /** A node that matches no rule. */
-const matchNothing = (): KueryNode => nodeBuilder.terms(RULE_ID_FIELD, []);
+const matchNothing = (): KueryNode => terms(RULE_ID_FIELD, []);
+
+/** `include` with `match: all` is one clause per value; `match: any` and `exclude` are one clause. */
+const includeExclude = (
+  field: string,
+  { include = [], exclude = [], match = 'any' }: Partial<RuleSetValues>
+): KueryNode[] => [
+  ...(include.length
+    ? match === 'all'
+      ? include.map((value) => terms(field, [value]))
+      : [terms(field, include)]
+    : []),
+  ...(exclude.length ? [not(terms(field, exclude))] : []),
+];
 
 /**
- * The group conditions as one KQL node, or `undefined` when no condition is filled.
- * All filled conditions must match. A rule must have all tags; for the other conditions any value
- * matches (one `terms` query).
+ * The set conditions as one KQL node, or `undefined` when no condition is filled.
+ * All filled conditions must match.
  */
 export const buildConditionsFilter = (conditions: RuleSetConditions): KueryNode | undefined => {
-  const { tags, integrations, rule_types: ruleTypes, severities, source, search } = conditions;
-  const nodes: KueryNode[] = [];
-
-  // Tags work like the tags filter of the rules table: a rule must have all of them.
-  tags?.forEach((tag) => nodes.push(nodeBuilder.terms(TAGS_FIELD, [tag])));
-  if (integrations?.length) nodes.push(nodeBuilder.terms(INTEGRATION_PACKAGE_FIELD, integrations));
-  if (ruleTypes?.length) nodes.push(nodeBuilder.terms(PARAMS_TYPE_FIELD, ruleTypes));
-  if (severities?.length) nodes.push(nodeBuilder.terms(SEVERITY_FIELD, severities));
-  if (source)
-    nodes.push(nodeBuilder.is(PARAMS_IMMUTABLE_FIELD, source === 'elastic' ? 'true' : 'false'));
-  const term = search?.trim();
-  if (term) {
-    // Exactly the search of the rules table, so "Save filters as group" keeps the same rules.
-    nodes.push(fromKueryExpression(convertRuleSearchTermToKQL(term)));
-  }
+  const {
+    tags,
+    related_integrations: integrations,
+    type,
+    severity,
+    rule_source: ruleSource,
+    search,
+  } = normalizeRuleSetConditions(conditions);
+  const nodes: KueryNode[] = [
+    ...(tags ? includeExclude(TAGS_FIELD, tags) : []),
+    ...(integrations ? includeExclude(INTEGRATION_PACKAGE_FIELD, integrations) : []),
+    ...(type ? includeExclude(PARAMS_TYPE_FIELD, type) : []),
+    ...(severity ? includeExclude(SEVERITY_FIELD, severity) : []),
+    // Same field as the Elastic / Custom filter of the rules table.
+    ...(ruleSource
+      ? [
+          nodeBuilder.is(
+            PARAMS_IMMUTABLE_FIELD,
+            ruleSource.include[0] === 'external' ? 'true' : 'false'
+          ),
+        ]
+      : []),
+    // Exactly the search of the rules table, so "Save filters as rule set" keeps the same rules.
+    ...(search ? [fromKueryExpression(convertRuleSearchTermToKQL(search.term))] : []),
+  ];
 
   return nodes.length ? nodeBuilder.and(nodes) : undefined;
 };
 
 /**
- * The rule filter of a group:
+ * The rule filter of a set:
  * `(conditions OR rule_id in picked) AND NOT rule_id in left-out`.
  *
- * Picked and left-out lists become `terms` queries, so a group with thousands of picked rules is
+ * Picked and left-out lists become `terms` queries, so a set with thousands of picked rules is
  * still one small Elasticsearch query (no max clause count problem).
  */
-export const buildRuleSetFilter = (group: RuleSetMembership): KueryNode => {
-  const conditions = buildConditionsFilter(group.conditions);
-  const included = group.included_rule_ids.length
-    ? nodeBuilder.terms(RULE_ID_FIELD, group.included_rule_ids)
+export const buildRuleSetFilter = (ruleSet: RuleSetMembership): KueryNode => {
+  const conditions = buildConditionsFilter(ruleSet.conditions);
+  const included = ruleSet.included_rule_ids.length
+    ? terms(RULE_ID_FIELD, ruleSet.included_rule_ids)
     : undefined;
 
   const members = [conditions, included].filter((node): node is KueryNode => node != null);
@@ -75,10 +111,10 @@ export const buildRuleSetFilter = (group: RuleSetMembership): KueryNode => {
   }
 
   const membersNode = nodeBuilder.or(members);
-  // A rule that is picked and left out is in the group: picked wins (same as on save).
-  const picked = new Set(group.included_rule_ids);
-  const excluded = group.excluded_rule_ids.filter((ruleId) => !picked.has(ruleId));
+  // A rule that is picked and left out is in the set: picked wins (same as on save).
+  const picked = new Set(ruleSet.included_rule_ids);
+  const excluded = ruleSet.excluded_rule_ids.filter((ruleId) => !picked.has(ruleId));
   return excluded.length
-    ? nodeBuilder.and([membersNode, not(nodeBuilder.terms(RULE_ID_FIELD, excluded))])
+    ? nodeBuilder.and([membersNode, not(terms(RULE_ID_FIELD, excluded))])
     : membersNode;
 };

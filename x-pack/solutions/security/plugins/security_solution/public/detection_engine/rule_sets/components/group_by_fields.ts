@@ -7,7 +7,15 @@
 
 import { useMemo } from 'react';
 import type { GranularRulesFacetCategory } from '../../../../common/api/detection_engine/rule_management';
-import type { RuleSetConditions } from '../../../../common/api/detection_engine/rule_sets';
+import type {
+  RuleSetConditions,
+  RuleSetRuleType,
+} from '../../../../common/api/detection_engine/rule_sets';
+import { RuleSetRuleTypeEnum } from '../../../../common/api/detection_engine/rule_sets';
+import {
+  DEFAULT_INTEGRATIONS_MATCH,
+  DEFAULT_TAGS_MATCH,
+} from '../../../../common/detection_engine/rule_sets/rule_set_conditions';
 import { useIntegrations } from '../../common/components/related_integrations/use_integrations';
 import type { FilterOptions } from '../../rule_management/logic/types';
 import { FACET_MISSING_VALUE } from '../../../../common/detection_engine/rule_management/rule_filtering';
@@ -54,18 +62,22 @@ export const groupByValueLabel = (
   return value;
 };
 
-/** Group conditions for "New group from this section", when the field is a group condition. */
+const RULE_SET_RULE_TYPES: readonly string[] = Object.values(RuleSetRuleTypeEnum);
+const isRuleSetRuleType = (value: string): value is RuleSetRuleType =>
+  RULE_SET_RULE_TYPES.includes(value);
+
+/** Set conditions for "New rule set from this section", when the field is a set condition. */
 export const toGroupConditions = (
   category: GranularRulesFacetCategory,
   value: string
 ): RuleSetConditions | undefined => {
   switch (category) {
     case 'integration':
-      return { integrations: [value] };
+      return { related_integrations: { include: [value], match: DEFAULT_INTEGRATIONS_MATCH } };
     case 'tags':
-      return { tags: [value] };
+      return { tags: { include: [value], match: DEFAULT_TAGS_MATCH } };
     case 'type':
-      return i18n.RULE_TYPE_LABELS[value] ? { rule_types: [value] } : undefined;
+      return isRuleSetRuleType(value) ? { type: { include: [value] } } : undefined;
     default:
       return undefined;
   }
@@ -86,17 +98,23 @@ export const useIntegrationTitles = (): Map<string, string> => {
 /**
  * The visible table filters that a rule set can store as conditions. Status filters (enabled,
  * last response, gaps) describe the state of a rule, not which rules belong together, so they are
- * not part of a group.
+ * not part of a set.
  */
 export const filtersToGroupConditions = (filterOptions: FilterOptions): RuleSetConditions => {
   const conditions: RuleSetConditions = {};
-  if (filterOptions.tags.length) conditions.tags = filterOptions.tags;
-  if (filterOptions.includeRuleTypes?.length)
-    conditions.rule_types = filterOptions.includeRuleTypes;
-  if (filterOptions.showElasticRules !== filterOptions.showCustomRules) {
-    conditions.source = filterOptions.showElasticRules ? 'elastic' : 'custom';
+  if (filterOptions.tags.length) {
+    conditions.tags = { include: filterOptions.tags, match: DEFAULT_TAGS_MATCH };
   }
-  if (filterOptions.filter.trim()) conditions.search = filterOptions.filter.trim();
+  const ruleTypes = filterOptions.includeRuleTypes?.filter(isRuleSetRuleType);
+  if (ruleTypes?.length) conditions.type = { include: ruleTypes };
+  if (filterOptions.showElasticRules !== filterOptions.showCustomRules) {
+    conditions.rule_source = {
+      include: [filterOptions.showElasticRules ? 'external' : 'internal'],
+    };
+  }
+  if (filterOptions.filter.trim()) {
+    conditions.search = { term: filterOptions.filter.trim(), mode: 'legacy' };
+  }
   if (filterOptions.browse) {
     Object.assign(
       conditions,
