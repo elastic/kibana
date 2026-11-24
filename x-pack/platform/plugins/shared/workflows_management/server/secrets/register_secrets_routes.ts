@@ -7,12 +7,12 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SecretConnectorsResponse, SecretsClient, SecretsListResponse } from '@kbn/secrets';
-import { handleSecretsRouteError } from './handle_secrets_route_error';
 import {
   createSecretBodySchema,
+  handleSecretsRouteError,
   replaceSecretBodySchema,
   secretNameParamsSchema,
-} from './route_schemas';
+} from '@kbn/secrets-plugin/server';
 import { SECRETS_LIST_SECURITY, SECRETS_MANAGE_SECURITY } from './route_security';
 import {
   WORKFLOW_SECRET_CONNECTORS_ROUTE,
