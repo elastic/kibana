@@ -167,6 +167,7 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-user-profile-common'
   - '@kbn/significant-events-plugin'
+  - '@kbn/osquery-plugin'
 tags:
   - test-helper
   - package
