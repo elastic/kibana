@@ -84,17 +84,6 @@ const hasSettlingProposal = (response: ListProposalsResponse | undefined): boole
 const isConflict = (error: unknown): boolean =>
   isHttpFetchError(error) && error.response?.status === 409;
 
-const isEarlierRevisionInChain = (
-  cached: unknown,
-  latest: { id: string; rootProposalId: string }
-): boolean =>
-  typeof cached === 'object' &&
-  cached !== null &&
-  'id' in cached &&
-  'rootProposalId' in cached &&
-  cached.id !== latest.id &&
-  cached.rootProposalId === latest.rootProposalId;
-
 /**
  * A revision supersedes its predecessors without any event reaching their cards, and a pending
  * card does not poll. When a later revision shows up, refetch the earlier ones so they read as
@@ -110,10 +99,14 @@ const useRefreshEarlierRevisions = (proposal: ProposalWithMetadata | undefined):
     if (!isRevision || !id || !rootProposalId) {
       return;
     }
-    void queryClient.invalidateQueries({
+    const cachedDetails = queryClient.getQueriesData<ProposalWithMetadata>({
       queryKey: queryKeys.proposals.details,
-      predicate: ({ state }) => isEarlierRevisionInChain(state.data, { id, rootProposalId }),
     });
+    for (const [queryKey, cached] of cachedDetails) {
+      if (cached?.rootProposalId === rootProposalId && cached.id !== id) {
+        void queryClient.invalidateQueries({ queryKey, exact: true });
+      }
+    }
   }, [queryClient, id, rootProposalId, isRevision]);
 };
 
