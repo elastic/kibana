@@ -156,21 +156,20 @@ describe('evals.suites.json shards', () => {
   });
 
   it('only names concurrency groups the suite defines, each with a positive limit', () => {
-    const problems = shardedSuites.flatMap(
-      ({ id: suiteId, shards = [], concurrencyGroups = {} }) => [
-        ...Object.entries(concurrencyGroups)
-          .filter(([, limit]) => !Number.isInteger(limit) || limit < 1)
-          .map(([group, limit]) => `${suiteId}: concurrency group "${group}" has limit ${limit}`),
-        ...shards
-          .filter(
-            ({ concurrencyGroup }) => concurrencyGroup && !(concurrencyGroup in concurrencyGroups)
-          )
-          .map(
-            ({ id, concurrencyGroup }) =>
-              `${suiteId}: shard "${id}" names undefined concurrency group "${concurrencyGroup}"`
-          ),
-      ]
-    );
+    // Every suite, not only sharded ones: a step that runs the whole suite takes its tightest group.
+    const problems = suites.flatMap(({ id: suiteId, shards = [], concurrencyGroups = {} }) => [
+      ...Object.entries(concurrencyGroups)
+        .filter(([, limit]) => !Number.isInteger(limit) || limit < 1)
+        .map(([group, limit]) => `${suiteId}: concurrency group "${group}" has limit ${limit}`),
+      ...shards
+        .filter(
+          ({ concurrencyGroup }) => concurrencyGroup && !(concurrencyGroup in concurrencyGroups)
+        )
+        .map(
+          ({ id, concurrencyGroup }) =>
+            `${suiteId}: shard "${id}" names undefined concurrency group "${concurrencyGroup}"`
+        ),
+    ]);
 
     expect(problems).toEqual([]);
   });
