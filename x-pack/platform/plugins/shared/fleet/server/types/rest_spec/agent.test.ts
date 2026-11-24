@@ -6,6 +6,10 @@
  */
 
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../constants';
+import {
+  AGENT_FIELDS_TO_EXPORT,
+  INITIAL_AGENT_FIELDS_TO_EXPORT,
+} from '../../../public/applications/fleet/sections/agents/components/agent_export_csv_modal/columns';
 
 import {
   AGENT_ID_MAX_LENGTH,
@@ -13,6 +17,7 @@ import {
   BulkChangeAgentsPrivilegeLevelRequestSchema,
   BulkMigrateAgentsRequestSchema,
   GetAgentsRequestSchema,
+  PostGenerateAgentsReportRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkAgentRestartRequestSchema,
   PostBulkAgentRollbackRequestSchema,
@@ -135,3 +140,4 @@ describe('bulk action request schemas validate the `agents` KQL string', () => {
     ).toThrow(/not allowed/);
   });
 });
+  PostGenerateAgentsReportRequestSchema,
