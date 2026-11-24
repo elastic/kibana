@@ -622,6 +622,44 @@ describe('limitFindings summary', () => {
   });
 });
 
+describe('limitFindings hypothesis card fields', () => {
+  it('keeps the checks and blind spots, capped, and reads a bare blind spot as text', () => {
+    const parsed = findingsOutputSchema.safeParse({
+      summary: 'x',
+      hypotheses: [
+        {
+          candidate: 'c',
+          confidence: 0.9,
+          status: 'confirmed',
+          why: 'One sentence.',
+          checks: Array.from({ length: 9 }, (_, i) => ({
+            expected: `e${i}`,
+            found: `f${i}`,
+            outcome: 'supported',
+            detail: 'ids and windows',
+          })),
+          unknowns: [
+            { text: 'a', effect: 'e', where_to_look: 'w', how_to_close: 'h' },
+            'bare',
+            'c',
+            'd',
+          ],
+        },
+      ],
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    const [hypothesis] = limitFindings(parsed.data).hypotheses;
+    expect(hypothesis.checks).toHaveLength(6);
+    expect(hypothesis.checks?.[0].detail).toBe('ids and windows');
+    expect(hypothesis.unknowns).toEqual([
+      { text: 'a', effect: 'e', where_to_look: 'w', how_to_close: 'h' },
+      'bare',
+      'c',
+    ]);
+  });
+});
+
 describe('limitBulletList', () => {
   it('turns a paragraph into short bullets', () => {
     const text = 'Alert fired. Shipping pod crashed. A deploy changed it. Fourth. Fifth. Sixth.';

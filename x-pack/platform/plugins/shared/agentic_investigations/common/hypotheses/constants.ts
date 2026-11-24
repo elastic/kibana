@@ -21,3 +21,7 @@ export const HYPOTHESIS_STATUSES = ['investigating', 'dismissed', 'confirmed'] a
 
 /** Agent Builder builtin tool that records an investigation's hypotheses. */
 export const SET_HYPOTHESES_TOOL_ID = 'agentic_investigations.set_hypotheses' as const;
+
+/** The most checks and blind spots one hypothesis lists. */
+export const MAX_HYPOTHESIS_CHECKS = 6;
+export const MAX_HYPOTHESIS_UNKNOWNS = 3;

@@ -755,7 +755,7 @@ const EVIDENCE_NONE = i18n.translate('xpack.agenticInvestigations.impactMap.even
 });
 
 /** Where an event's data came from and how it was asked for; closed until a reader wants it. */
-const EventDataSource: React.FC<{ dataSource?: ImpactMapEvent['data_source'] }> = ({
+export const EventDataSource: React.FC<{ dataSource?: ImpactMapEvent['data_source'] }> = ({
   dataSource,
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'impactMapEventEvidence' });
@@ -879,6 +879,34 @@ export const EventGlance: React.FC<{
   ) : event.description ? (
     <EuiMarkdownFormat textSize="s">{event.description}</EuiMarkdownFormat>
   ) : null;
+
+/**
+ * An event's chart and, under it, where its data came from and the query that asked for it: what
+ * a check shows when it opens. Nothing when the event holds neither.
+ */
+export const EventChartAndSource: React.FC<{
+  event: ImpactMapEvent;
+  allEvents?: readonly ImpactMapEvent[];
+}> = ({ event, allEvents }) => (
+  <div data-test-subj="agenticInvestigationsImpactMapEventChartAndSource">
+    {event.evidence?.chart && (
+      <LazyEvidenceView
+        // The chart's own title says what it plots.
+        evidence={{
+          ...withContextAnnotations(event.evidence, event, allEvents),
+          description: undefined,
+        }}
+        referenceTime={event.at}
+      />
+    )}
+    {event.data_source && (
+      <>
+        <EuiSpacer size="m" />
+        <EventDataSource dataSource={event.data_source} />
+      </>
+    )}
+  </div>
+);
 
 export const EventDetail: React.FC<{
   event: ImpactMapEvent;

@@ -104,7 +104,9 @@ describe('toImpactMapResponse', () => {
 
     expect(response.events.map(({ id }) => id)).toEqual(['early', 'late']);
     expect(response.relationships[0].id).toBe('checkout->payment');
-    expect(response.entity_types).toBe(document.entityTypes);
+    expect(response.entity_types.map(({ id }) => id)).toEqual(
+      document.entityTypes.map(({ id }) => id)
+    );
   });
 });
 

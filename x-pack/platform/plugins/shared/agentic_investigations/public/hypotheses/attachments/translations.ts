@@ -27,6 +27,6 @@ export const HYPOTHESIS_STATUS_LABELS: Record<HypothesisStatus, string> = {
 
 export const confidenceLabel = (confidence: number): string =>
   i18n.translate('xpack.agenticInvestigations.hypotheses.confidence', {
-    defaultMessage: '{confidence}% confidence',
+    defaultMessage: '{confidence}% likely the cause',
     values: { confidence: Math.round(confidence * 100) },
   });

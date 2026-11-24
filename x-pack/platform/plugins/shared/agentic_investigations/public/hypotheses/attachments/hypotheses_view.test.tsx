@@ -102,6 +102,99 @@ describe('HypothesesView', () => {
     expect(toggles()[0]).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('leads with the one-line why, then the chart, the checks and the blind spots', () => {
+    renderView({
+      ...document,
+      hypotheses: [
+        {
+          candidate: 'Rollout calls a missing host',
+          confidence: 0.9,
+          status: 'confirmed',
+          why: 'Every call failed right after the new ReplicaSet appeared.',
+          chart_note: 'The last bucket is partial.',
+          checks: [
+            { expected: 'Failures begin with the rollout', found: 'Began 10s after', outcome: 'supported' },
+            { expected: 'Calls recover on rollback', found: 'No rollback yet', outcome: 'not_tested' },
+          ],
+          unknowns: [
+            {
+              text: 'What set the hostname is not visible in the data',
+              effect: 'Caps confidence at moderate.',
+              where_to_look: 'The deployment manifest for shipping.',
+              how_to_close: 'Read the env vars of the new ReplicaSet.',
+            },
+          ],
+          evidence: [{ description: 'calls per 5 minutes' }],
+        },
+      ],
+    });
+
+    fireEvent.click(toggles()[0]);
+
+    const detail = screen.getByTestId('investigationHypothesisReason');
+    const order = ['Why', 'What the data shows', 'How it was tested', 'Blind spots'].map((label) =>
+      detail.textContent?.indexOf(label)
+    );
+    expect(order.every((at) => at !== undefined && at >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => (a ?? 0) - (b ?? 0)));
+    expect(screen.getByTestId('investigationHypothesisWhy')).toHaveTextContent(
+      'Every call failed right after the new ReplicaSet appeared.'
+    );
+    expect(screen.getByTestId('investigationHypothesisChartNote')).toHaveTextContent(
+      'The last bucket is partial.'
+    );
+    expect(screen.getByTestId('investigationHypothesisCheck-supported')).toHaveTextContent(
+      'Failures begin with the rollout'
+    );
+    expect(screen.getByTestId('investigationHypothesisCheck-not_tested')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationHypothesisBlindSpots')).toHaveTextContent(
+      'What set the hostname is not visible in the data'
+    );
+  });
+
+  it('opens a check or a blind spot in a child flyout with its details', () => {
+    renderView({
+      ...document,
+      hypotheses: [
+        {
+          candidate: 'Rollout calls a missing host',
+          confidence: 0.9,
+          status: 'confirmed',
+          why: 'Every call failed.',
+          checks: [
+            {
+              expected: 'Failures begin with the rollout',
+              found: 'Began 10s after',
+              outcome: 'supported',
+              detail: 'ReplicaSet shipping-789 appeared 18:08:29Z.',
+            },
+          ],
+          unknowns: [
+            {
+              text: 'What set the hostname is unknown',
+              effect: 'Caps confidence at moderate.',
+              where_to_look: 'The deployment manifest.',
+              how_to_close: 'Read the env vars.',
+            },
+          ],
+        },
+      ],
+    });
+    fireEvent.click(toggles()[0]);
+    expect(screen.queryByTestId('investigationHypothesisDetailFlyout')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('investigationHypothesisCheck-supported'));
+    const checkFlyout = screen.getByTestId('investigationHypothesisDetailFlyout');
+    expect(checkFlyout).toHaveTextContent('Began 10s after');
+    expect(checkFlyout).toHaveTextContent('ReplicaSet shipping-789 appeared 18:08:29Z.');
+
+    fireEvent.click(screen.getByTestId('investigationHypothesisBlindSpot'));
+    const spotFlyout = screen.getByTestId('investigationHypothesisDetailFlyout');
+    expect(spotFlyout).toHaveTextContent('Caps confidence at moderate.');
+    expect(spotFlyout).toHaveTextContent('The deployment manifest.');
+    expect(spotFlyout).toHaveTextContent('Read the env vars.');
+  });
+
   it('says when a hypothesis has no reasoning yet', () => {
     renderView(document);
 

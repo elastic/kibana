@@ -21,6 +21,37 @@ export const KNOWN_EUI_ICONS = [
   'logoAzure',
   'logoGCP',
   'logoCloud',
+  'logoElasticsearch',
+  'logoElastic',
+  'logoElasticStack',
+  'logoKibana',
+  'logoBeats',
+  'logoLogstash',
+  'logoObservability',
+  'logoSecurity',
+  'logoAerospike',
+  'logoApache',
+  'logoCeph',
+  'logoCouchbase',
+  'logoEtcd',
+  'logoGolang',
+  'logoHAproxy',
+  'logoKafka',
+  'logoMemcached',
+  'logoMongodb',
+  'logoMySQL',
+  'logoNginx',
+  'logoPhp',
+  'logoPostgres',
+  'logoPrometheus',
+  'logoRabbitmq',
+  'logoRedis',
+  'logoGithub',
+  'logoSlack',
+  'logoGmail',
+  'logoWebhook',
+  'logoWindows',
+  'logoOsquery',
   'database',
   'globe',
   'compute',
@@ -56,7 +87,71 @@ export const normalizeEntityType = (type: ImpactMapEntityType): ImpactMapEntityT
   ) {
     next = { ...next, kind: 'infrastructure' };
   }
-  return next;
+  const named = next.icon?.eui_icon;
+  const logo = named && GENERIC_ICONS.has(named) && !next.icon?.agent_name ? logoFor(next) : undefined;
+  if (logo) {
+    next = { ...next, icon: { ...next.icon, eui_icon: logo } };
+  }
+  const drawn = fallbackIcon(next);
+  return drawn ? { ...next, icon: drawn } : next;
+};
+
+/** Product logos a type's id or label can name, tried in order. */
+const LOGO_WORDS: Array<[RegExp, string]> = [
+  [/elasticsearch/i, 'logoElasticsearch'],
+  [/kibana/i, 'logoKibana'],
+  [/logstash/i, 'logoLogstash'],
+  [/beats?\b|filebeat|metricbeat/i, 'logoBeats'],
+  [/kafka/i, 'logoKafka'],
+  [/postgres/i, 'logoPostgres'],
+  [/mysql/i, 'logoMySQL'],
+  [/mongo/i, 'logoMongodb'],
+  [/redis/i, 'logoRedis'],
+  [/rabbitmq/i, 'logoRabbitmq'],
+  [/nginx/i, 'logoNginx'],
+  [/prometheus/i, 'logoPrometheus'],
+  [/kubernetes|k8s/i, 'logoKubernetes'],
+  [/docker/i, 'logoDocker'],
+];
+
+/** Icons that say nothing about what a thing is, so a product logo may replace them. */
+const GENERIC_ICONS = new Set(['compute', 'apps', 'globe', 'package', 'database']);
+
+/** The product logo a type's id or label names, if there is one. */
+const logoFor = (type: ImpactMapEntityType): string | undefined =>
+  LOGO_WORDS.find(([words]) => words.test(`${type.id} ${type.label}`))?.[1];
+
+/** APM agents a service type's id or label can name, tried in order. */
+const AGENT_WORDS: Array<[RegExp, string]> = [
+  [/\bgo(lang)?\b/i, 'go'],
+  [/\bjava\b|\bjvm\b/i, 'java'],
+  [/node(\.?js)?\b/i, 'nodejs'],
+  [/python/i, 'python'],
+  [/\.?net\b|dotnet|csharp/i, 'dotnet'],
+  [/ruby/i, 'ruby'],
+  [/\bphp\b/i, 'php'],
+  [/\brust\b/i, 'rust'],
+];
+
+/**
+ * An icon for a type the agent left without one, so no node is drawn blank: the APM agent a
+ * service's name suggests (else OpenTelemetry), a generic external call for a dependency, a
+ * compute icon for infrastructure. Undefined when the type already has something to draw.
+ */
+const fallbackIcon = (type: ImpactMapEntityType): ImpactMapEntityType['icon'] | undefined => {
+  const { icon } = type;
+  if (icon?.agent_name || icon?.eui_icon || icon?.span_type) {
+    return undefined;
+  }
+  if (type.kind === 'service') {
+    const text = `${type.id} ${type.label}`;
+    const agent = AGENT_WORDS.find(([words]) => words.test(text))?.[1] ?? 'opentelemetry';
+    return { ...icon, agent_name: agent };
+  }
+  if (type.kind === 'dependency') {
+    return { ...icon, span_type: 'external', span_subtype: 'http' };
+  }
+  return { ...icon, eui_icon: logoFor(type) ?? 'compute' };
 };
 
 const labelOf = new Map(STANDARD_METADATA_FIELDS.map(({ key, label }) => [key, label]));
@@ -246,7 +341,7 @@ export const BUILT_IN_ENTITY_TYPES: readonly ImpactMapEntityType[] = [
       field('host.name'),
     ],
   },
-  serviceType('service', 'Service'),
+  serviceType('service', 'Service', 'opentelemetry'),
   serviceType('nodejs_service', 'Node.js service', 'nodejs'),
   serviceType('java_service', 'Java service', 'java'),
   serviceType('go_service', 'Go service', 'go'),

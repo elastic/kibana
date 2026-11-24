@@ -26,6 +26,8 @@ import {
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
+  MAX_HYPOTHESIS_CHECKS,
+  MAX_HYPOTHESIS_UNKNOWNS,
   MAX_IMPACT_MAP_ENTITIES,
   MAX_IMPACT_MAP_ENTITY_METADATA,
   MAX_IMPACT_MAP_EVENTS,
@@ -100,6 +102,31 @@ export const findingsOutputSchema = lazySchema(() => {
     confidence: z.number(),
     status: z.enum(HYPOTHESIS_STATUSES),
     reason: z.string().optional(),
+    why: z.string().optional(),
+    checks: z
+      .array(
+        z.object({
+          expected: z.string().min(1),
+          found: z.string().min(1),
+          outcome: z.enum(['supported', 'contradicted', 'not_tested']),
+          detail: z.string().optional(),
+        })
+      )
+      .optional(),
+    unknowns: z
+      .array(
+        z.union([
+          z.string().min(1),
+          z.object({
+            text: z.string().min(1),
+            effect: z.string().optional(),
+            where_to_look: z.string().optional(),
+            how_to_close: z.string().optional(),
+          }),
+        ])
+      )
+      .optional(),
+    chart_note: z.string().optional(),
     evidence: z.array(evidenceSchema).optional(),
   });
 
@@ -608,6 +635,10 @@ const MAX_EVENT_DESCRIPTION_LENGTH = 1_000;
 const MAX_EVENT_DESCRIPTION_BULLETS = 4;
 /** What's happened: a lead sentence, then at most this many bullets. */
 const MAX_SUMMARY_BULLETS = 3;
+/** The longest one line of a hypothesis card (why, a check, a blind spot, the chart note). */
+const MAX_HYPOTHESIS_LINE = 240;
+/** The longest detail text behind one check. */
+const MAX_CHECK_DETAIL = 1200;
 
 const MAX_EVENT_BULLET_LENGTH = 200;
 
@@ -828,6 +859,44 @@ export const limitFindings = (
         ...(hypothesis.reason !== undefined
           ? { reason: truncate(normalizeEventLinks(hypothesis.reason), MAX_EVIDENCE_TEXT_LENGTH) }
           : {}),
+        ...(hypothesis.why !== undefined
+          ? { why: clipAtWord(normalizeEventLinks(hypothesis.why), MAX_HYPOTHESIS_LINE) }
+          : {}),
+        ...(hypothesis.checks !== undefined
+          ? {
+              checks: hypothesis.checks.slice(0, MAX_HYPOTHESIS_CHECKS).map((check) => {
+                return {
+                  expected: clipAtWord(normalizeEventLinks(check.expected), MAX_HYPOTHESIS_LINE),
+                  found: clipAtWord(normalizeEventLinks(check.found), MAX_HYPOTHESIS_LINE),
+                  outcome: check.outcome,
+                  ...(check.detail !== undefined
+                    ? { detail: truncate(normalizeEventLinks(check.detail), MAX_CHECK_DETAIL) }
+                    : {}),
+                };
+              }),
+            }
+          : {}),
+        ...(hypothesis.unknowns !== undefined
+          ? {
+              unknowns: hypothesis.unknowns.slice(0, MAX_HYPOTHESIS_UNKNOWNS).map((unknown) => {
+                const part = (text?: string) =>
+                  text !== undefined
+                    ? clipAtWord(normalizeEventLinks(text), MAX_HYPOTHESIS_LINE)
+                    : undefined;
+                if (typeof unknown === 'string') return part(unknown) as string;
+                const { effect, where_to_look: where, how_to_close: how } = unknown;
+                return {
+                  text: part(unknown.text) as string,
+                  ...(effect ? { effect: part(effect) } : {}),
+                  ...(where ? { where_to_look: part(where) } : {}),
+                  ...(how ? { how_to_close: part(how) } : {}),
+                };
+              }),
+            }
+          : {}),
+        ...(hypothesis.chart_note !== undefined
+          ? { chart_note: clipAtWord(hypothesis.chart_note, MAX_HYPOTHESIS_LINE) }
+          : {}),
         ...(kept.length ? { evidence: kept } : {}),
       };
     }),
@@ -1014,10 +1083,59 @@ export const FINDINGS_JSON_SCHEMA = {
             description:
               'Two Markdown lines: **Tested:** what was checked, against which signal and window, then **Result:** what the data showed, ending in Confirmed, Dismissed or Unresolved. Under 600 characters.',
           },
+          why: {
+            type: 'string',
+            description:
+              'Where this hypothesis stands and why, in one plain sentence of at most 25 words that an SRE can read in seconds. Say what it means, not the method: Every quote-old call failed right after the new ReplicaSet appeared, and calls are still failing.',
+          },
+          checks: {
+            type: 'array',
+            description: `How it was tested, at most ${MAX_HYPOTHESIS_CHECKS} rows. One row per check: expected is what we would see if this is the cause, found is what the data showed, with the numbers and the window. outcome is supported when the result points to this cause, contradicted when it points away, not_tested when the check could not be run (say why in found).`,
+            items: {
+              type: 'object',
+              properties: {
+                expected: { type: 'string', description: 'One line, at most 15 words.' },
+                found: {
+                  type: 'string',
+                  description:
+                    'One line, at most 25 words. Link the words that make the claim to the event that backs it, as [words](event:id); its chart and the query behind it open with the row.',
+                },
+                outcome: { type: 'string', enum: ['supported', 'contradicted', 'not_tested'] },
+                detail: {
+                  type: 'string',
+                  description:
+                    'Shown when the row opens: the ids, thresholds, counts, time window and signal behind the check, in at most 80 words of Markdown.',
+                },
+              },
+              required: ['expected', 'found', 'outcome'],
+            },
+          },
+          unknowns: {
+            type: 'array',
+            description: `Blind spots, at most ${MAX_HYPOTHESIS_UNKNOWNS}: what the agent could not see that would change its confidence. Empty when nothing material is unknown.`,
+            items: {
+              type: 'object',
+              properties: {
+                text: { type: 'string', description: 'What is unknown, one line.' },
+                effect: {
+                  type: 'string',
+                  description: 'How it limits the confidence in this hypothesis, one line.',
+                },
+                where_to_look: { type: 'string', description: 'Where to look for the answer.' },
+                how_to_close: { type: 'string', description: 'How to close the gap.' },
+              },
+              required: ['text'],
+            },
+          },
+          chart_note: {
+            type: 'string',
+            description:
+              'One line of caveat for the chart, such as a partial last bucket. Omit when there is none.',
+          },
           evidence: {
             type: 'array',
             description:
-              'At most 2, only for the confirmed or leading hypothesis: the observations that decided it.',
+              'At most 2 for each hypothesis you tested, dismissed ones included: a chart that tells the story, so looking at it shows why the hypothesis is likely or not. Put the cause and effect in the chart, with an annotation for the moment that matters.',
             items: EVIDENCE_JSON_SCHEMA,
           },
         },

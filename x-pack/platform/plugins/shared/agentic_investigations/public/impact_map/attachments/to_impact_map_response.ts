@@ -7,6 +7,7 @@
 
 import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
 import type { InvestigationImpactMapResponse } from '../../../common';
+import { normalizeEntityType } from '../../../common/impact_map/built_in_types';
 
 /**
  * The shape the investigation flyout and the map renderer read, from the stored document, so a
@@ -22,7 +23,8 @@ export const toImpactMapResponse = (
     ...relationship,
     id: relationship.id ?? `${relationship.source_id}->${relationship.target_id}`,
   })),
-  entity_types: document.entityTypes,
+  // A type saved without an icon is given one here, so no node is drawn blank.
+  entity_types: document.entityTypes.map(normalizeEntityType),
   relationship_types: document.relationshipTypes,
   events: [...(document.events ?? [])].sort((a, b) => Date.parse(a.at) - Date.parse(b.at)),
   created_at: document.createdAt,

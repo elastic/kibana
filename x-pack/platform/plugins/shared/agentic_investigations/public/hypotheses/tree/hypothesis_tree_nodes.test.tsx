@@ -326,7 +326,7 @@ describe('HypothesisTreeNode', () => {
 
     const node = screen.getByTestId('investigationHypothesisTreeNode-hypothesis');
     expect(node).toHaveTextContent('Confirmed');
-    expect(node).toHaveTextContent('90% confidence');
+    expect(node).toHaveTextContent('90% likely the cause');
     expect(node.querySelector('code')).toHaveTextContent('user_id');
   });
 

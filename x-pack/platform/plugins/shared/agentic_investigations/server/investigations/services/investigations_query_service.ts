@@ -62,6 +62,7 @@ import {
   mergeImpactMapEvents,
 } from '../../../common/impact_map/events';
 import { toEntityName } from '../../../common/impact_map/entity_name';
+import { normalizeEntityType } from '../../../common/impact_map/built_in_types';
 
 /** Bound on the proposals one investigation read returns. */
 const MAX_INVESTIGATION_PROPOSALS = 100;
@@ -799,7 +800,8 @@ const toImpactMapResponse = (
     ...relationship,
     id: relationship.id ?? `${relationship.source_id}->${relationship.target_id}`,
   })),
-  entity_types: entityTypes,
+  // A type saved without an icon is given one here, so no node is drawn blank.
+  entity_types: entityTypes.map(normalizeEntityType),
   relationship_types: relationshipTypes,
   // Alerts the investigation was opened on join the events the agent recorded.
   events: mergeImpactMapEvents(events ?? [], alertEvents),

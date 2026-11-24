@@ -110,12 +110,17 @@ export {
   HYPOTHESES_INDEX_NAME,
   HYPOTHESIS_STATUSES,
   MAX_HYPOTHESES,
+  MAX_HYPOTHESIS_CHECKS,
   MAX_HYPOTHESIS_EVIDENCE,
+  MAX_HYPOTHESIS_UNKNOWNS,
   SET_HYPOTHESES_TOOL_ID,
 } from './hypotheses/constants';
 
 export type {
   Hypothesis,
+  HypothesisCheck,
+  HypothesisCheckOutcome,
+  HypothesisUnknown,
   HypothesisStatus,
   InvestigationHypotheses,
 } from './hypotheses/hypotheses';

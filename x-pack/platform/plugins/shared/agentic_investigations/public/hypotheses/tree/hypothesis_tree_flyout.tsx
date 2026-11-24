@@ -135,7 +135,7 @@ const NodeDetail = ({
         </EuiText>
       );
     case 'hypothesis': {
-      const { status, confidence, reason, evidence } = data.hypothesis;
+      const { status, confidence, candidate: _candidate, ...detail } = data.hypothesis;
       return (
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -149,7 +149,7 @@ const NodeDetail = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <HypothesisDetail reason={reason} evidence={evidence} />
+          <HypothesisDetail {...detail} />
         </>
       );
     }
@@ -417,7 +417,10 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
               data-test-subj="investigationHypothesisTreeDetail"
               css={css`
                 width: ${DETAIL_PANEL_WIDTH}px;
-                max-height: calc(100vh - ${euiTheme.size.xxxxl} * 4);
+                /* The canvas clips what it holds, so the panel is held to the canvas's own height
+                   (not the window's) and scrolls inside its card when its content is longer. */
+                max-height: ${Math.max(canvasHeight - DETAIL_PANEL_MARGIN * 2, 200)}px;
+                overflow-x: hidden;
                 overflow-y: auto;
               `}
             >

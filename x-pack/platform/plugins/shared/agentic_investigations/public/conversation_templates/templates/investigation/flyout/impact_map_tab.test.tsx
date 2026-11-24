@@ -527,7 +527,7 @@ describe('getEntityIcon', () => {
 
   it('keeps an icon EUI has and swaps one it does not for a generic one', () => {
     expect(getEntityIcon(type({ eui_icon: 'logoDocker' }))).toBe('logoDocker');
-    expect(getEntityIcon(type({ eui_icon: 'logoGolang' }))).toBe('apps');
+    expect(getEntityIcon(type({ eui_icon: 'logoMadeUp' }))).toBe('apps');
     expect(getEntityIcon(undefined)).toBe('apps');
   });
 

@@ -38,6 +38,25 @@ describe('built-in types', () => {
 });
 
 describe('normalizeEntityType', () => {
+  it('gives a type with no icon one, so no node is drawn blank', () => {
+    const icon = (id: string, label: string, kind: 'service' | 'dependency' | 'infrastructure') =>
+      normalizeEntityType({ id, label, kind }).icon;
+    expect(icon('go_service', 'Go service', 'service')).toEqual({ agent_name: 'go' });
+    expect(icon('service', 'Service', 'service')).toEqual({ agent_name: 'opentelemetry' });
+    expect(icon('gen_ai.provider', 'Generative AI provider', 'dependency')).toEqual({
+      span_type: 'external',
+      span_subtype: 'http',
+    });
+    expect(icon('host', 'Host', 'infrastructure')).toEqual({ eui_icon: 'compute' });
+  });
+
+  it('keeps an icon the type already has', () => {
+    expect(
+      normalizeEntityType({ id: 'x', label: 'X', kind: 'service', icon: { agent_name: 'java' } })
+        .icon
+    ).toEqual({ agent_name: 'java' });
+  });
+
   it('fixes the case of an icon EUI has and drops one it does not', () => {
     expect(
       normalizeEntityType({
@@ -52,7 +71,7 @@ describe('normalizeEntityType', () => {
         id: 'thing',
         label: 'Thing',
         kind: 'dependency',
-        icon: { eui_icon: 'logoGolang', span_type: 'db' },
+        icon: { eui_icon: 'logoMadeUp', span_type: 'db' },
       }).icon
     ).toEqual({ span_type: 'db' });
   });
