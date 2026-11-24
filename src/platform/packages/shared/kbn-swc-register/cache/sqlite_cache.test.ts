@@ -87,30 +87,57 @@ const makeCache = (...options: ConstructorParameters<typeof SqliteCache>) => {
   return cache;
 };
 
-const waitForReady = (child: ChildProcessWithoutNullStreams): Promise<void> =>
+const withTimeout = <T>(promise: Promise<T>, label: string, timeoutMs = 8_000): Promise<T> =>
   new Promise((resolve, reject) => {
-    const cleanup = () => {
-      child.stdout.off('data', onReady);
-      child.off('error', onError);
-      child.off('exit', onExit);
-    };
-    const onReady = () => {
-      cleanup();
-      resolve();
-    };
-    const onError = (error: Error) => {
-      cleanup();
-      reject(error);
-    };
-    const onExit = (code: number | null) => {
-      cleanup();
-      reject(new Error(`Child exited before becoming ready (code ${code})`));
-    };
-
-    child.stdout.once('data', onReady);
-    child.once('error', onError);
-    child.once('exit', onExit);
+    const timeout = setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs);
+    promise.then(
+      (value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      }
+    );
   });
+
+const stopChild = async (child: ChildProcessWithoutNullStreams) => {
+  if (child.exitCode !== null || child.signalCode !== null) {
+    return;
+  }
+  const exit = withTimeout(once(child, 'exit'), 'child cleanup', 2_000);
+  child.kill('SIGKILL');
+  await exit;
+};
+
+const waitForReady = (child: ChildProcessWithoutNullStreams): Promise<void> =>
+  withTimeout(
+    new Promise((resolve, reject) => {
+      const cleanup = () => {
+        child.stdout.off('data', onReady);
+        child.off('error', onError);
+        child.off('exit', onExit);
+      };
+      const onReady = () => {
+        cleanup();
+        resolve();
+      };
+      const onError = (error: Error) => {
+        cleanup();
+        reject(error);
+      };
+      const onExit = (code: number | null) => {
+        cleanup();
+        reject(new Error(`Child exited before becoming ready (code ${code})`));
+      };
+
+      child.stdout.once('data', onReady);
+      child.once('error', onError);
+      child.once('exit', onExit);
+    }),
+    'child readiness'
+  );
 
 const startWriter = (key: string) => {
   const child = spawn(process.execPath, [
@@ -288,21 +315,20 @@ it('shares a cache between processes that open it at the same time', async () =>
   try {
     await Promise.all([first.ready, second.ready]);
 
-    const firstExit = once(first.child, 'exit');
+    const firstExit = withTimeout(once(first.child, 'exit'), 'first writer exit');
     first.child.stdin.end('write');
     expect((await firstExit)[0]).toBe(0);
 
-    const secondExit = once(second.child, 'exit');
+    const secondExit = withTimeout(once(second.child, 'exit'), 'second writer exit');
     second.child.stdin.end('write');
     expect((await secondExit)[0]).toBe(0);
 
     expect(readRow('first')).toMatchObject({ code: 'first' });
     expect(readRow('second')).toMatchObject({ code: 'second' });
   } finally {
-    first.child.kill();
-    second.child.kill();
+    await Promise.all([stopChild(first.child), stopChild(second.child)]);
   }
-});
+}, 25_000);
 
 it('handles simultaneous writes from separate processes', async () => {
   await makeCache({ dir: DIR, prefix: 'prefix' }).close();
@@ -310,8 +336,8 @@ it('handles simultaneous writes from separate processes', async () => {
   const second = startWriter('second');
   try {
     await Promise.all([first.ready, second.ready]);
-    const firstExit = once(first.child, 'exit');
-    const secondExit = once(second.child, 'exit');
+    const firstExit = withTimeout(once(first.child, 'exit'), 'first writer exit');
+    const secondExit = withTimeout(once(second.child, 'exit'), 'second writer exit');
     first.child.stdin.end('write');
     second.child.stdin.end('write');
 
@@ -319,10 +345,9 @@ it('handles simultaneous writes from separate processes', async () => {
     expect((await secondExit)[0]).toBe(0);
     expect([readRow('first'), readRow('second')].filter(Boolean).length).toBeGreaterThanOrEqual(1);
   } finally {
-    first.child.kill();
-    second.child.kill();
+    await Promise.all([stopChild(first.child), stopChild(second.child)]);
   }
-});
+}, 25_000);
 
 it('treats malformed source maps as cache misses', () => {
   const cache = makeCache({ dir: DIR, prefix: 'prefix' });
@@ -356,13 +381,13 @@ it('does not block for long when another process holds the write lock', async ()
     } finally {
       stderr.mockRestore();
     }
-    const exit = once(locker, 'exit');
+    const exit = withTimeout(once(locker, 'exit'), 'locker exit');
     locker.stdin.end('release');
     expect((await exit)[0]).toBe(0);
   } finally {
-    locker.kill();
+    await stopChild(locker);
   }
-});
+}, 25_000);
 
 it('only refreshes atime for entries older than the refresh interval', async () => {
   const log = makeTestLog();
