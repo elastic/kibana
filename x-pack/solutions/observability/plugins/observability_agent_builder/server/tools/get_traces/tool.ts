@@ -109,12 +109,13 @@ export function createGetTracesTool({
     },
     handler: async (
       { start, end, index, kqlFilter, maxDocsPerTrace, maxTraces, fields },
-      { esClient }
+      { esClient, request }
     ) => {
       try {
         const result = await getToolHandler({
           core,
           plugins,
+          request,
           logger,
           esClient,
           start,
