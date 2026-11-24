@@ -93,7 +93,10 @@ const summarizeMatches = (matches: BoostRuleMatch[], showsHidden: boolean) => {
     } else {
       shownItems.push(item);
       hasShownOutranked ||= Boolean(item.outrankedByRuleName);
-      largestBytes = Math.max(largestBytes, item.storageSizeInBytes ?? 0);
+      // A size that couldn't be loaded has no bar.
+      if (item.storageSizeInBytes !== undefined) {
+        largestBytes = Math.max(largestBytes, item.storageSizeInBytes);
+      }
     }
   }
   return {
