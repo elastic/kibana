@@ -490,6 +490,29 @@ describe('ConversationDetailsFlyoutContent', () => {
     consoleError.mockRestore();
   });
 
+  it('loads the template module again on the next open after a load throws before returning its promise', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const load = jest
+      .fn<Promise<ConversationTemplateDetailsFlyoutModule>, []>()
+      .mockImplementationOnce(() => {
+        throw new Error('loader failed');
+      })
+      .mockResolvedValue({ useDetailsFlyout: () => ({ header: { title: 'Loaded title' } }) });
+    const service = createService({ detailsFlyout: { load } });
+
+    const { unmount } = renderContent(service);
+    await act(async () => {});
+    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+    unmount();
+
+    renderContent(service);
+    await act(async () => {});
+
+    expect(screen.getByRole('heading', { name: 'Loaded title' })).toBeInTheDocument();
+    expect(load).toHaveBeenCalledTimes(2);
+    consoleError.mockRestore();
+  });
+
   it('loads the template module again on the next open when a load rejects after its flyout closed', async () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     let rejectLoad: (error: Error) => void = () => {};

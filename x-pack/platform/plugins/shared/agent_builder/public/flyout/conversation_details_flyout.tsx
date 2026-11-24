@@ -207,10 +207,14 @@ const getLoadedDetails = (load: DetailsLoader): ComponentType<LoadedDetailsProps
     return cached;
   }
   const LoadedDetails: ComponentType<LoadedDetailsProps> = React.lazy(async () => {
-    const { useDetailsFlyout, Provider } = await load().catch((error) => {
+    let loaded: ConversationTemplateDetailsFlyoutModule;
+    try {
+      loaded = await load();
+    } catch (error) {
       rejectedLoadedDetails.add(LoadedDetails);
       throw error;
-    });
+    }
+    const { useDetailsFlyout, Provider } = loaded;
     const Details = ({
       conversation,
       isOpenedFromChat,
