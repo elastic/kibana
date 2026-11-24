@@ -604,7 +604,14 @@ describe('update_agent_tags', () => {
           esClient,
           agentsOfBatch,
           {},
-          { tagsToAdd: ['new'], tagsToRemove: ['old'], total: agentsOfBatch.length, retryCount }
+          {
+            tagsToAdd: ['new'],
+            tagsToRemove: ['old'],
+            total: agentsOfBatch.length,
+            // an action of the runner, which retries a batch that fails
+            actionId: 'action1',
+            retryCount,
+          }
         );
 
       // 2500 agents, in chunks of 1000, 1000 and 500, with something to report in each of them
@@ -678,7 +685,7 @@ describe('update_agent_tags', () => {
         expect(idsOfChunks).toEqual(manyAgents(2500).map(({ id }) => id));
       });
 
-      it('should give up, and record nothing, when a chunk is cancelled as well', async () => {
+      it('should give up, and record what the chunks before it did, when a chunk is cancelled as well', async () => {
         mockChunks(2);
 
         const error = await batch(manyAgents(2500)).catch((e) => e);
@@ -689,8 +696,48 @@ describe('update_agent_tags', () => {
         );
         // the whole batch, and the first two chunks
         expect(sizesOfRuns()).toEqual([2500, 1000, 1000]);
-        expect(esClient.create).not.toHaveBeenCalled();
+        // the 1000 agents of the first chunk, which the retry of the action may not select again
+        expect(esClient.create).toHaveBeenCalledTimes(1);
+        expect((esClient.create.mock.calls[0][0] as any).document.agents).toHaveLength(1000);
+        // the agents of the chunks that were not gone through are not taken for skipped ones
         expect(getErrorResults(esClient)).toEqual([]);
+      });
+
+      it('should record the failures and conflicts of the chunks before the one that was cancelled', async () => {
+        mockChunks(3, chunksWithConflictsAndFailures);
+
+        await expect(batch(manyAgents(2500))).rejects.toBeInstanceOf(FleetVersionConflictError);
+
+        // the first two chunks: 999 + 998 updated and 1 that failed, and 2 conflicts to retry
+        expect((esClient.create.mock.calls[0][0] as any).document.agents).toHaveLength(1998);
+        expect(
+          (getErrorResults(esClient) as any[]).map((result) => [result.agent_id, result.error])
+        ).toEqual([['agent3', 'failed in the first chunk']]);
+      });
+
+      it('should record nothing when the first chunk is cancelled', async () => {
+        mockChunks(1);
+
+        await expect(batch(manyAgents(2500))).rejects.toBeInstanceOf(UpdateByQueryCancelledError);
+
+        expect(sizesOfRuns()).toEqual([2500, 1000]);
+        expect(esClient.create).not.toHaveBeenCalled();
+      });
+
+      it('should record nothing when the agents are given by id, as the request just fails', async () => {
+        mockChunks(2);
+
+        const error = await updateTagsBatch(
+          soClient,
+          esClient,
+          manyAgents(2500),
+          {},
+          // no id of an action, as no action is retried
+          { tagsToAdd: ['new'], tagsToRemove: ['old'] }
+        ).catch((e) => e);
+
+        expect(error).toBeInstanceOf(UpdateByQueryCancelledError);
+        expect(esClient.create).not.toHaveBeenCalled();
       });
 
       it('should go through an agent that is given more than once in one chunk', async () => {

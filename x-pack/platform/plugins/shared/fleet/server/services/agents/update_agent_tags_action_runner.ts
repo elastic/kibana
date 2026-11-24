@@ -196,6 +196,9 @@ export async function updateTagsBatch(
       : `Update by query timed out after updating ${outcome.updated ?? 0} agents`;
 
   let res = await runUpdate(agentIds);
+  // how many of the agents of the batch `res` is the result for, and why it is not for all of them
+  let agentsInResult = new Set(agentIds).size;
+  let stopped: UpdateByQueryCancelledError | undefined;
 
   if (isIncomplete(res)) {
     // What the cancelled update did is not recorded, as which of the agents it updated is not
@@ -219,13 +222,14 @@ export async function updateTagsBatch(
       version_conflicts: 0,
       failures: [],
     };
+    agentsInResult = 0;
     for (let start = 0; start < distinctAgentIds.length; start += UPDATE_BY_QUERY_CHUNK_SIZE) {
-      const chunk = await runUpdate(
-        distinctAgentIds.slice(start, start + UPDATE_BY_QUERY_CHUNK_SIZE)
-      );
+      const idsOfChunk = distinctAgentIds.slice(start, start + UPDATE_BY_QUERY_CHUNK_SIZE);
+      const chunk = await runUpdate(idsOfChunk);
       if (isIncomplete(chunk)) {
-        // Nothing is recorded for the batch: the agents of the chunks that went through are
-        // updated, and no more is known of the ones of this chunk than of the batch before it.
+        // No more is known of the agents of this chunk than of the batch before it, so what is
+        // recorded is what the chunks before it did. That is known exactly, and it would be lost
+        // otherwise, as the retry of the action may not select the agents they updated.
         const failures = chunk.failures ?? [];
         if (failures.length > 0) {
           appContextService
@@ -236,10 +240,12 @@ export async function updateTagsBatch(
               } agents: ${JSON.stringify(failures).slice(0, 1000)}`
             );
         }
-        throw new UpdateByQueryCancelledError(
+        stopped = new UpdateByQueryCancelledError(
           `${describeIncomplete(chunk)}, giving up after running it again in chunks`
         );
+        break;
       }
+      agentsInResult += idsOfChunk.length;
       chunked.took = (chunked.took ?? 0) + (chunk.took ?? 0);
       chunked.total =
         chunked.total === undefined || chunk.total === undefined
@@ -248,6 +254,11 @@ export async function updateTagsBatch(
       chunked.updated = (chunked.updated ?? 0) + (chunk.updated ?? 0);
       chunked.version_conflicts = (chunked.version_conflicts ?? 0) + (chunk.version_conflicts ?? 0);
       chunked.failures = (chunked.failures ?? []).concat(chunk.failures ?? []);
+    }
+    // Agents given by id have no action that is retried, so the request just fails, and with no
+    // chunk through there is nothing to record.
+    if (stopped && (!options.actionId || agentsInResult === 0)) {
+      throw stopped;
     }
     res = chunked;
   }
@@ -264,7 +275,7 @@ export async function updateTagsBatch(
   // was updated. They are recorded under generated ids, like the agents that were updated, as an
   // id of an agent that is in another space now would show its hostname in this one.
   const skippedAgentIds = getUuidArray(
-    res.total !== undefined ? Math.max(0, new Set(agentIds).size - res.total) : 0
+    res.total !== undefined ? Math.max(0, agentsInResult - res.total) : 0
   );
 
   const updatedCount = res.updated ?? 0;
@@ -370,6 +381,13 @@ export async function updateTagsBatch(
         .debug(`action conflict result wrote on ${versionConflictCount} agents`);
     }
     throw new FleetVersionConflictError(`Version conflict of ${versionConflictCount} agents`);
+  }
+
+  if (stopped) {
+    // What the chunks before the one that was cancelled did is recorded above, and the batch is
+    // retried by the action for the rest. As for a version conflict, the retry may go through the
+    // agents that are recorded again, if its kuery does not leave out the agents it updated.
+    throw stopped;
   }
 
   return { actionId, updated: res.updated, took: res.took };
