@@ -39,6 +39,7 @@ import { SettingsTab } from '../components/ai_index_detail/settings';
 import { SetupWizard } from '../components/ai_index_detail/setup_wizard';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
@@ -177,11 +178,16 @@ export const AiIndexDetailPage = () => {
     [automations, isMemoryEnabled]
   );
   const isManaged = aiIndex?.managed === true;
+  // Only the setup wizard reads it here, and the wizard has no dreaming step without memory.
+  const { dreaming, isLoading: isDreamingLoading } = useAiIndexDreaming(aiIndex?.id ?? '', {
+    enabled: aiIndex !== undefined && !isManaged && isMemoryEnabled,
+  });
   const setupWizard = useSetupWizard({
     aiIndex,
+    dreaming,
     memoryCount,
     isMemoryEnabled,
-    isMemoryCountReady: !isMemoryCountLoading,
+    isProgressReady: !isMemoryCountLoading && !isDreamingLoading,
     isActive: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
   });
   // The setup wizard replaces the "AI index created" callout.

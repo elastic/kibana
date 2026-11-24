@@ -60,12 +60,15 @@ export const isDreamingSetUp = (dreaming: AiIndexDreamingConfig | undefined): bo
 /** Which steps are done, read from the AI index's own data. The wizard saves no progress itself. */
 export const getSetupWizardDoneSteps = ({
   aiIndex,
+  dreaming,
   memoryCount,
 }: {
   aiIndex: GetAiIndexResponse;
+  /** The dreaming config. The AI index response leaves it out, so it comes from its own route. */
+  dreaming: AiIndexDreamingConfig | undefined;
   memoryCount: number;
 }): SetupWizardDoneSteps => ({
-  dreaming: isDreamingSetUp(aiIndex.dreaming),
+  dreaming: isDreamingSetUp(dreaming),
   connect: memoryCount > 0,
   sources: aiIndex.sources.length > 0,
   describe: (aiIndex.description ?? '').trim().length > 0,

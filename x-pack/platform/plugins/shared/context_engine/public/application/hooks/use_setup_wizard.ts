@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import type { AiIndexDreamingConfig } from '../../../common/dreaming';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import type {
   SetupWizardDoneSteps,
@@ -23,11 +24,13 @@ import { useKibana } from './use_kibana';
 
 interface UseSetupWizardParams {
   aiIndex: GetAiIndexResponse | undefined;
+  /** The AI index's dreaming config. */
+  dreaming: AiIndexDreamingConfig | undefined;
   /** How many memories the AI index has. */
   memoryCount: number;
   isMemoryEnabled: boolean;
-  /** False while the memory count is still loading. */
-  isMemoryCountReady: boolean;
+  /** False while the memory count or the dreaming config is still loading. */
+  isProgressReady: boolean;
   /** Whether the Overview tab is open. Each visit to it makes a fresh decision. */
   isActive: boolean;
 }
@@ -56,9 +59,10 @@ const noop = () => () => {};
  */
 export const useSetupWizard = ({
   aiIndex,
+  dreaming,
   memoryCount,
   isMemoryEnabled,
-  isMemoryCountReady,
+  isProgressReady,
   isActive,
 }: UseSetupWizardParams): UseSetupWizardResult => {
   const {
@@ -73,8 +77,8 @@ export const useSetupWizard = ({
   );
 
   const done = useMemo(
-    () => (aiIndex ? getSetupWizardDoneSteps({ aiIndex, memoryCount }) : undefined),
-    [aiIndex, memoryCount]
+    () => (aiIndex ? getSetupWizardDoneSteps({ aiIndex, dreaming, memoryCount }) : undefined),
+    [aiIndex, dreaming, memoryCount]
   );
 
   // Per visit: does setup still need the wizard? Data only; the step itself is read from storage.
@@ -85,8 +89,8 @@ export const useSetupWizard = ({
   if (!isActive && visit !== undefined) {
     setVisit(undefined);
   } else if (isActive && aiIndex && done && visit?.aiIndexId !== aiIndex.id) {
-    // A managed or closed AI index never shows the wizard, so it needn't wait for the memory count.
-    if (aiIndex.managed || stored === 'closed' || isMemoryCountReady) {
+    // A managed or closed AI index never shows the wizard, so it needn't wait for its progress data.
+    if (aiIndex.managed || stored === 'closed' || isProgressReady) {
       setVisit({
         aiIndexId: aiIndex.id,
         view: getSetupWizardView({ isManaged: aiIndex.managed, isMemoryEnabled, done, stored }),
@@ -117,10 +121,9 @@ export const useSetupWizard = ({
     return { status: 'hidden' };
   }
 
+  // `stored` can't be 'closed' here: the early return above already handled it.
   const currentStep =
-    stored !== undefined && stored !== 'closed' && view.steps.includes(stored)
-      ? stored
-      : view.initialStep;
+    stored !== undefined && view.steps.includes(stored) ? stored : view.initialStep;
 
   return { status: 'shown', steps: view.steps, currentStep, done, goToStep, close };
 };

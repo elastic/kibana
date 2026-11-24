@@ -34,9 +34,10 @@ type Params = Parameters<typeof useSetupWizard>[0];
 
 const defaultParams: Params = {
   aiIndex,
+  dreaming: undefined,
   memoryCount: 0,
   isMemoryEnabled: true,
-  isMemoryCountReady: true,
+  isProgressReady: true,
   isActive: true,
 };
 
@@ -56,28 +57,28 @@ describe('useSetupWizard', () => {
     window.localStorage.clear();
   });
 
-  it('waits for the memory count before it decides', () => {
-    const { result, rerender } = renderSetupWizard({ isMemoryCountReady: false });
+  it('waits for the memory count and dreaming config before it decides', () => {
+    const { result, rerender } = renderSetupWizard({ isProgressReady: false });
 
     expect(result.current.status).toBe('loading');
 
-    rerender({ ...defaultParams, isMemoryCountReady: true });
+    rerender({ ...defaultParams, isProgressReady: true });
 
     expect(result.current).toMatchObject({ status: 'shown', currentStep: 'dreaming' });
   });
 
-  it('hides the wizard of a closed AI index without waiting for the memory count', () => {
+  it('hides the wizard of a closed AI index without waiting for its progress data', () => {
     writeSetupWizardStoredValue(storageKey, 'closed');
 
-    const { result } = renderSetupWizard({ isMemoryCountReady: false });
+    const { result } = renderSetupWizard({ isProgressReady: false });
 
     expect(result.current.status).toBe('hidden');
   });
 
-  it('hides the wizard of a managed AI index without waiting for the memory count', () => {
+  it('hides the wizard of a managed AI index without waiting for its progress data', () => {
     const { result } = renderSetupWizard({
       aiIndex: { ...aiIndex, managed: true },
-      isMemoryCountReady: false,
+      isProgressReady: false,
     });
 
     expect(result.current.status).toBe('hidden');
@@ -89,15 +90,20 @@ describe('useSetupWizard', () => {
 
     const doneIndex: GetAiIndexResponse = {
       ...aiIndex,
-      dreaming: { enabled: true },
-      sources: [{ type: 'index', value: 'logs-*' }],
+      sources: [{ type: 'esql', value: 'FROM logs-*' }],
       description: 'Answers questions about checkouts.',
     };
-    rerender({ ...defaultParams, aiIndex: doneIndex, memoryCount: 1 });
+    const doneParams: Params = {
+      ...defaultParams,
+      aiIndex: doneIndex,
+      dreaming: { enabled: true },
+      memoryCount: 1,
+    };
+    rerender(doneParams);
     expect(result.current.status).toBe('shown');
 
-    rerender({ ...defaultParams, aiIndex: doneIndex, memoryCount: 1, isActive: false });
-    rerender({ ...defaultParams, aiIndex: doneIndex, memoryCount: 1, isActive: true });
+    rerender({ ...doneParams, isActive: false });
+    rerender({ ...doneParams, isActive: true });
     expect(result.current.status).toBe('hidden');
   });
 

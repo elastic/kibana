@@ -89,15 +89,17 @@ describe('isDreamingSetUp', () => {
 
 describe('getSetupWizardDoneSteps', () => {
   it('reads every step from the AI index data', () => {
-    expect(getSetupWizardDoneSteps({ aiIndex, memoryCount: 0 })).toEqual(noneDone);
+    expect(getSetupWizardDoneSteps({ aiIndex, dreaming: undefined, memoryCount: 0 })).toEqual(
+      noneDone
+    );
     expect(
       getSetupWizardDoneSteps({
         aiIndex: {
           ...aiIndex,
-          dreaming: { enabled: true },
-          sources: [{ type: 'index', value: 'logs-*' }],
+          sources: [{ type: 'esql', value: 'FROM logs-*' }],
           description: 'Answers questions about checkouts.',
         },
+        dreaming: { enabled: true },
         memoryCount: 1,
       })
     ).toEqual(allDone);
@@ -105,8 +107,11 @@ describe('getSetupWizardDoneSteps', () => {
 
   it('does not count a blank description', () => {
     expect(
-      getSetupWizardDoneSteps({ aiIndex: { ...aiIndex, description: '   ' }, memoryCount: 0 })
-        .describe
+      getSetupWizardDoneSteps({
+        aiIndex: { ...aiIndex, description: '   ' },
+        dreaming: undefined,
+        memoryCount: 0,
+      }).describe
     ).toBe(false);
   });
 });
