@@ -43,23 +43,51 @@ const getFullscreenStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
   };
 };
 
+/**
+ * Wraps the editor in a full screen overlay while `isFullScreen` is set.
+ *
+ * This has to be a component with a stable identity. When it was created inside `useFullScreen`
+ * (memoised on the EUI theme), a theme change produced a new component type, so React unmounted
+ * and recreated everything rendered inside it, the Monaco editor included.
+ */
+export const FullScreenDisplay = ({
+  isFullScreen,
+  children,
+}: {
+  isFullScreen: boolean;
+  children: Array<JSX.Element | null> | JSX.Element;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => getFullscreenStyles(euiTheme), [euiTheme]);
+
+  if (!isFullScreen) return <>{children}</>;
+
+  return (
+    <EuiOverlayMask>
+      <EuiFocusTrap clickOutsideDisables={true}>
+        <div css={styles.fullscreenContainer}>{children}</div>
+      </EuiFocusTrap>
+    </EuiOverlayMask>
+  );
+};
+
 export const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const { euiTheme } = useEuiTheme();
-
-  const styles = useMemo(() => getFullscreenStyles(euiTheme), [euiTheme]);
 
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
   };
 
-  const onKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === keys.ESCAPE) {
-      event.preventDefault();
-      event.stopPropagation();
-      setIsFullScreen(false);
-    }
-  }, []);
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (event.key === keys.ESCAPE && isFullScreen) {
+        event.preventDefault();
+        event.stopPropagation();
+        setIsFullScreen(false);
+      }
+    },
+    [isFullScreen]
+  );
 
   const FullScreenButton: React.FC = () => {
     if (!allowFullScreen) return null;
@@ -86,25 +114,8 @@ export const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }
     );
   };
 
-  const FullScreenDisplay = useMemo(
-    () =>
-      ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
-        if (!isFullScreen) return <>{children}</>;
-
-        return (
-          <EuiOverlayMask>
-            <EuiFocusTrap clickOutsideDisables={true}>
-              <div css={styles.fullscreenContainer}>{children}</div>
-            </EuiFocusTrap>
-          </EuiOverlayMask>
-        );
-      },
-    [isFullScreen, styles]
-  );
-
   return {
     FullScreenButton,
-    FullScreenDisplay,
     onKeyDown,
     isFullScreen,
     setIsFullScreen,

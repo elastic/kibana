@@ -8,7 +8,7 @@
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import {
@@ -203,6 +203,8 @@ export interface ProposalGateFixture {
    * nothing in the workflow settles the record.
    */
   cancelGate: () => void;
+  /** Removes every stored proposal, as the cleanup of a deleted conversation does. */
+  deleteProposals: () => void;
   /** Flips what `proposals.checkDecidePrivileges` reports. */
   setCanDecide: (canDecide: boolean) => void;
   /** Sets the user the execution request resolves to, which the decision is attributed from. */
@@ -263,6 +265,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   const attachedProposalIds: string[] = [];
   const service = new ProposalsService({
     storage: client,
+    esClient: elasticsearchServiceMock.createElasticsearchClient(),
     logger: loggerMock.create(),
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     getWorkflowsApi: () => workflowsApi as never,
@@ -282,12 +285,12 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   });
 
   const update = service.update.bind(service);
-  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId) => {
+  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId, caller, options) => {
     if (failingStatus !== undefined && params.status === failingStatus) {
       failingStatus = undefined;
       throw new Error(`Failed to write status ${params.status}`);
     }
-    return update(params, spaceId);
+    return update(params, spaceId, caller, options);
   });
 
   const privileges: ProposalPrivilegesChecker = {
@@ -495,6 +498,9 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       const executions = engine.workflowExecutionRepositoryMock.workflowExecutions;
       const execution = executions.get(FIXTURE_EXECUTION_ID)!;
       executions.set(execution.id, { ...execution, status: ExecutionStatus.CANCELLED });
+    },
+    deleteProposals: () => {
+      documents.clear();
     },
     setCanDecide: (value) => {
       canDecide = value;

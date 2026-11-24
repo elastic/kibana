@@ -60,7 +60,10 @@ export interface ConversationEventBus {
   onConversationUpdated(listener: ConversationUpdatedListener): void;
   emitConversationUpdated(request: KibanaRequest, payload: ConversationUpdatedTriggerEvent): void;
   onConversationDeleted(listener: ConversationDeletedListener): void;
-  emitConversationDeleted(request: KibanaRequest, payload: ConversationDeletedPayload): void;
+  emitConversationDeleted(
+    request: KibanaRequest,
+    payload: ConversationDeletedPayload
+  ): Promise<void>;
 }
 
 /**
@@ -72,7 +75,7 @@ export interface ScopedConversationEventEmitter {
   emitMetadataPatched(payload: ConversationMetadataPatchedPayload): void;
   emitAttachmentEvents(payload: ConversationAttachmentEventsPayload): void;
   emitConversationUpdated(payload: ConversationUpdatedTriggerEvent): void;
-  emitConversationDeleted?(payload: ConversationDeletedPayload): void;
+  emitConversationDeleted?(payload: ConversationDeletedPayload): Promise<void>;
 }
 
 export const createScopedConversationEventEmitter = (
@@ -128,11 +131,13 @@ class ConversationEventBusImpl implements ConversationEventBus {
     this.conversationDeletedListeners.push(listener);
   }
 
-  emitConversationDeleted(request: KibanaRequest, payload: ConversationDeletedPayload): void {
-    for (const listener of this.conversationDeletedListeners) {
-      void Promise.resolve()
-        .then(() => listener(request, payload))
-        .catch(() => {});
-    }
+  /** Waits for every listener, so callers see their effects; a failing listener never rejects. */
+  async emitConversationDeleted(
+    request: KibanaRequest,
+    payload: ConversationDeletedPayload
+  ): Promise<void> {
+    await Promise.allSettled(
+      this.conversationDeletedListeners.map(async (listener) => listener(request, payload))
+    );
   }
 }

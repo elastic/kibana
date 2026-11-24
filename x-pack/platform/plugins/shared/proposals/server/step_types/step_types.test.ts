@@ -11,7 +11,7 @@ import { createProposalStepInputSchema } from '@kbn/proposals-common';
 import { updateProposalStepInputSchema } from '@kbn/proposals-common';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
-import { ProposalForbiddenError } from '../services/errors';
+import { ProposalForbiddenError, ProposalNotFoundError } from '../services/errors';
 import { getCheckDecidePrivilegesStepDefinition } from './check_decide_privileges_step';
 import { getCloneProposalStepDefinition } from './clone_proposal_step';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
@@ -21,7 +21,9 @@ import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 const EXECUTION_ID = 'exec-1';
 const SPACE_ID = 'space-a';
+const WORKFLOW_ID = 'gate-workflow';
 const FAKE_REQUEST = { fake: true } as never;
+const CALLER = { workflowId: WORKFLOW_ID, executionId: EXECUTION_ID, request: FAKE_REQUEST };
 
 /** The step identifies the actor from the execution's own fake request. */
 const resolvedUser = {
@@ -56,7 +58,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     contextManager: {
       getContext: jest.fn().mockReturnValue({
         execution: { id: EXECUTION_ID, executedBy: 'worker-user' },
-        workflow: { spaceId: SPACE_ID },
+        workflow: { id: WORKFLOW_ID, spaceId: SPACE_ID },
       }),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn().mockReturnValue(FAKE_REQUEST),
@@ -572,12 +574,26 @@ describe('proposals.updateProposal step', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-1', status: 'succeeded' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-1',
       status: 'succeeded',
       decision: undefined,
+    });
+  });
+
+  it('should name its own run, so the service can find the action execution it started', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
+
+    await updateDefinition(update).handler(
+      createContext({ proposalId: 'proposal-1', status: 'succeeded' })
+    );
+
+    expect(update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, CALLER, {
+      linkActionExecution: true,
     });
   });
 
@@ -599,7 +615,9 @@ describe('proposals.updateProposal step', () => {
     // the request is the better attribution, and any workflow can pass a name.
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: resolvedUser }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -627,7 +645,9 @@ describe('proposals.updateProposal step', () => {
     });
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: workerUser, decisionMode: 'auto' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -653,7 +673,9 @@ describe('proposals.updateProposal step', () => {
         decidedBy: { username: 'analyst', fullName: null, email: null },
         decisionMode: 'manual',
       }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -676,7 +698,9 @@ describe('proposals.updateProposal step', () => {
       expect.objectContaining({
         decidedBy: { username: 'analyst', fullName: null, email: null },
       }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -689,7 +713,9 @@ describe('proposals.updateProposal step', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: undefined, decisionMode: undefined }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
     expect(resolveUser).not.toHaveBeenCalled();
     expect(resolveWorkerUser).not.toHaveBeenCalled();
@@ -720,7 +746,9 @@ describe('proposals.updateProposal step', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ executionError: 'action exploded' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -966,6 +994,21 @@ describe('proposals.settleIncompleteProposal step', () => {
       getProposalsService: () => service as unknown as ProposalsService,
     });
 
+  it('should settle nothing, and not fail, when the proposal was deleted', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockRejectedValue(new ProposalNotFoundError('proposal-1')),
+      get: jest.fn(),
+      update: jest.fn(),
+    };
+
+    const result = await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', status: 'expired' })
+    );
+
+    expect(service.update).not.toHaveBeenCalled();
+    expect(result.output).toEqual({ proposalId: 'proposal-1', status: 'expired' });
+  });
+
   it('should adopt the live head before writing', async () => {
     const service = {
       getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 }),
@@ -985,7 +1028,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.get).toHaveBeenCalledWith('proposal-2', SPACE_ID, FAKE_REQUEST);
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-2', status: 'expired', executionError: 'timed out' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-2',
@@ -1007,7 +1051,8 @@ describe('proposals.settleIncompleteProposal step', () => {
 
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'expired' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 
@@ -1028,7 +1073,8 @@ describe('proposals.settleIncompleteProposal step', () => {
 
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
     expect(result.output?.status).toBe('failed');
     expect(result.output?.decision).toBe('approved');
@@ -1049,7 +1095,8 @@ describe('proposals.settleIncompleteProposal step', () => {
 
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
-      SPACE_ID
+      SPACE_ID,
+      CALLER
     );
   });
 

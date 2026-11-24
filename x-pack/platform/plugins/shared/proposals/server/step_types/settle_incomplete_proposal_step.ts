@@ -10,6 +10,7 @@ import {
   settleIncompleteProposalStatusSchema,
   settleIncompleteProposalStepCommonDefinition,
 } from '@kbn/proposals-common';
+import { ProposalNotFoundError } from '../services/errors/proposal_not_found_error';
 import type { ProposalsService } from '../services/proposals_service';
 import { parseStepInput } from './parse_step_input';
 import { toStepError } from './to_step_error';
@@ -34,17 +35,34 @@ export const getSettleIncompleteProposalStepDefinition = ({
           settleIncompleteProposalStepCommonDefinition.inputSchema,
           context.input
         );
-        const spaceId = context.contextManager.getContext().workflow.spaceId;
+        const workflowContext = context.contextManager.getContext();
+        const spaceId = workflowContext.workflow.spaceId;
+        const request = context.contextManager.getFakeRequest();
         const service = getProposalsService();
 
         // Same adopt the loop does before every write: a revision appended
         // while the gate was parked would leave the carried id superseded.
-        const latest = await service.getLatestRevision(input.proposalId, spaceId);
-        const proposal = await service.get(
-          latest.proposalId,
-          spaceId,
-          context.contextManager.getFakeRequest()
-        );
+        const found = await service
+          .getLatestRevision(input.proposalId, spaceId)
+          .then(async (latest) => ({
+            latest,
+            proposal: await service.get(latest.proposalId, spaceId, request),
+          }))
+          .catch((error) => {
+            if (error instanceof ProposalNotFoundError) {
+              return undefined;
+            }
+            throw error;
+          });
+
+        // The proposal was deleted with its conversation while the gate was parked: nothing is
+        // left to settle, and failing here would end an expired gate as a failed run.
+        if (found === undefined) {
+          return {
+            output: { proposalId: input.proposalId, status: input.status ?? 'expired' },
+          };
+        }
+        const { latest, proposal } = found;
 
         const status = input.status ?? (proposal.decision !== undefined ? 'failed' : 'expired');
 
@@ -54,7 +72,12 @@ export const getSettleIncompleteProposalStepDefinition = ({
             status,
             executionError: input.executionError,
           },
-          spaceId
+          spaceId,
+          {
+            workflowId: workflowContext.workflow.id,
+            executionId: workflowContext.execution.id,
+            request,
+          }
         );
 
         return {

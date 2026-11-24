@@ -112,3 +112,35 @@ describe('ConversationEventBus attachment events', () => {
     expect(metadataListener).not.toHaveBeenCalled();
   });
 });
+
+describe('ConversationEventBus conversation deleted events', () => {
+  const payload = { conversationId: 'conv-1', spaceId: 'default' };
+
+  it('waits for every listener before resolving', async () => {
+    const bus = createConversationEventBus();
+    const request = httpServerMock.createKibanaRequest();
+    let finished = false;
+    bus.onConversationDeleted(async () => {
+      await Promise.resolve();
+      finished = true;
+    });
+
+    await bus.emitConversationDeleted(request, payload);
+
+    expect(finished).toBe(true);
+  });
+
+  it('keeps notifying the other listeners when one fails, and never rejects', async () => {
+    const bus = createConversationEventBus();
+    const request = httpServerMock.createKibanaRequest();
+    const survivor = jest.fn();
+    bus.onConversationDeleted(() => {
+      throw new Error('boom');
+    });
+    bus.onConversationDeleted(survivor);
+
+    await expect(bus.emitConversationDeleted(request, payload)).resolves.toBeUndefined();
+
+    expect(survivor).toHaveBeenCalledWith(request, payload);
+  });
+});

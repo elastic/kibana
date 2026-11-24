@@ -211,6 +211,24 @@ describe('ProposalsPlugin', () => {
       expect(initializeManagedWorkflows).toHaveBeenCalledTimes(1);
     });
 
+    it('deletes the proposals of a deleted conversation, and swallows a failure', async () => {
+      const { plugin, agentBuilder } = setupPlugin();
+      const { contract } = startPlugin(plugin);
+      const [[listener]] = agentBuilder.conversations.onConversationDeleted.mock.calls;
+      const deleteByConversation = jest
+        .spyOn(contract.getProposalsService(), 'deleteByConversation')
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('boom'));
+
+      await listener({}, { conversationId: 'conversation-1', spaceId: 'default' });
+      await expect(
+        listener({}, { conversationId: 'conversation-2', spaceId: 'default' })
+      ).resolves.toBeUndefined();
+
+      expect(deleteByConversation).toHaveBeenNthCalledWith(1, 'conversation-1', 'default');
+      expect(deleteByConversation).toHaveBeenNthCalledWith(2, 'conversation-2', 'default');
+    });
+
     it('exposes the proposals service for in-process callers', () => {
       const { plugin } = setupPlugin();
 

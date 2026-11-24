@@ -1540,7 +1540,7 @@ class ConversationClientImpl implements ConversationClient {
     try {
       const { result } = await this.storage.getClient().delete({ id: conversationId });
       if (result === 'deleted') {
-        this.eventEmitter?.emitConversationDeleted?.({ conversationId, spaceId: this.space });
+        await this.eventEmitter?.emitConversationDeleted?.({ conversationId, spaceId: this.space });
       }
       return result === 'deleted';
     } catch (err) {

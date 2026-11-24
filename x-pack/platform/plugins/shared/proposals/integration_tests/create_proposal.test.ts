@@ -178,6 +178,17 @@ describe('create-investigation-proposal workflow execution', () => {
     });
   });
 
+  describe('a proposal deleted while the gate is parked', () => {
+    it('should let the gate end cleanly when its deadline passes', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.deleteProposals();
+
+      await fixture.timeOutGate();
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    });
+  });
+
   describe('dismissal', () => {
     it('should settle as dismissed with no action and complete', async () => {
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
