@@ -608,6 +608,55 @@ describe('ServiceAccountFakeRequests', () => {
         expect(mintToken).toHaveBeenCalledTimes(1);
       });
 
+      it('starts the backoff on a refresh whose retry fails again', async () => {
+        const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
+        const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
+        mintToken.mockClear();
+        mintToken.mockRejectedValueOnce(notSentError()).mockRejectedValueOnce(notSentError());
+
+        jest.advanceTimersByTime(MAX_AGE_MS);
+        await expect(
+          fakeRequests.ensureFreshToken(request, MAX_AGE_MS, 'reauthenticate')
+        ).rejects.toMatchObject({ notSent: true });
+        expect(mintToken).toHaveBeenCalledTimes(2);
+
+        await expect(
+          fakeRequests.ensureFreshToken(request, MAX_AGE_MS, 'reauthenticate')
+        ).rejects.toThrow('refusing to retry yet');
+        expect(mintToken).toHaveBeenCalledTimes(2);
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+
+      it('latches as terminal on a refresh whose retry the interceptor refuses', async () => {
+        let refuse = false;
+        const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => {
+          if (refuse) {
+            throw Boom.forbidden('the workload was bound to a different service account');
+          }
+          return await mint();
+        });
+        const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
+        mintToken.mockClear();
+        mintToken.mockImplementationOnce(async () => {
+          refuse = true;
+          throw notSentError();
+        });
+
+        jest.advanceTimersByTime(MAX_AGE_MS);
+        await expect(
+          fakeRequests.ensureFreshToken(request, MAX_AGE_MS, 'reauthenticate')
+        ).rejects.toThrow('the workload was bound to a different service account');
+        expect(mintToken).toHaveBeenCalledTimes(1);
+
+        refuse = false;
+        jest.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
+        await expect(
+          fakeRequests.ensureFreshToken(request, MAX_AGE_MS, 'reauthenticate')
+        ).rejects.toThrow('the workload was bound to a different service account');
+        expect(mintInterceptor).toHaveBeenCalledTimes(3);
+        expect(mintToken).toHaveBeenCalledTimes(1);
+      });
+
       it('is not tried again for a request released while the first try was out', async () => {
         const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => await mint());
         const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
