@@ -172,6 +172,8 @@ describe('Discover documents layout', () => {
       toolkit,
       isEsqlMode: true,
       error: new Error('This query failed'),
+      // the failed query is still the active one
+      query: { esql: 'from *' },
     });
 
     expect(await screen.findByTestId('discoverErrorExplainButton')).toBeInTheDocument();

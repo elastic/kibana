@@ -320,9 +320,13 @@ describe('test fetchAll', () => {
       showChart();
       await fetchPromise;
 
-      // the error still reaches documents$, it is shown in place of the documents
+      // the error and its query still reach documents$, it is shown in place of the documents
       expect(subjects.documents$.getValue()).toEqual(
-        expect.objectContaining({ fetchStatus: FetchStatus.ERROR, error })
+        expect.objectContaining({
+          fetchStatus: FetchStatus.ERROR,
+          error,
+          query: { esql: 'from foo' },
+        })
       );
       expect(subjects.totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
       expect(subjects.main$.getValue()).toEqual({
