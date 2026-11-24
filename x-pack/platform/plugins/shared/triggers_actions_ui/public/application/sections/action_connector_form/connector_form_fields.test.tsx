@@ -19,9 +19,7 @@ jest.mock('@kbn/connector-specs', () => {
   const actual = jest.requireActual('@kbn/connector-specs');
   return {
     ...actual,
-    connectorTypeIsDual: jest.fn(
-      (id: string) => id === '.dual' || actual.connectorTypeIsDual(id)
-    ),
+    connectorTypeIsDual: jest.fn((id: string) => id === '.dual' || actual.connectorTypeIsDual(id)),
     connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
   };
 });

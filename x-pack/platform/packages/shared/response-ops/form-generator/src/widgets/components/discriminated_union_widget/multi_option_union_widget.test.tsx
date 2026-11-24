@@ -710,13 +710,15 @@ describe('MultiOptionUnionWidget', () => {
         .object({ type: z.literal('bearer'), token: z.string().meta({ label: 'Token' }) })
         .meta({ label: 'Bearer Token' });
     const hiddenNone = () =>
-      z.object({ type: z.literal('none') }).meta({ label: 'No authentication', hideInPicker: true });
+      z
+        .object({ type: z.literal('none') })
+        .meta({ label: 'No authentication', hideInPicker: true });
 
     const renderOptions = (
       options: [
         z.ZodObject<z.ZodRawShape>,
         z.ZodObject<z.ZodRawShape>,
-        ...z.ZodObject<z.ZodRawShape>[],
+        ...z.ZodObject<z.ZodRawShape>[]
       ]
     ) => {
       const schema = z.discriminatedUnion('type', options);

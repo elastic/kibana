@@ -36,83 +36,85 @@ apiTest.describe('Dual connectors', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest.describe('Opted into receive-only', () => {
-    apiTest('saves a Datadog connector with no authentication only when every action is off', async ({
-      apiServices,
-    }) => {
-      const created = await apiServices.alerting.connectors.create({
-        name: `scout-datadog-api-receive-only-${Date.now()}`,
-        connectorTypeId: DATADOG_TYPE_ID,
-        config: { site: DATADOG_SITE, authType: 'none', selectedActions: [] },
-        secrets: { authType: 'none' },
-      });
-      createdConnectorIds.push(created.id);
-
-      const saved = await apiServices.alerting.connectors.get(created.id);
-      expect(saved).toMatchObject({
-        connector_type_id: DATADOG_TYPE_ID,
-        config: { authType: 'none', selectedActions: [] },
-      });
-
-      const updated = await rejectionMessage(
-        apiServices.alerting.connectors.update(created.id, {
+    apiTest(
+      'saves a Datadog connector with no authentication only when every action is off',
+      async ({ apiServices }) => {
+        const created = await apiServices.alerting.connectors.create({
           name: `scout-datadog-api-receive-only-${Date.now()}`,
-          config: { site: DATADOG_SITE, authType: 'none', selectedActions: ['listMonitors'] },
-          secrets: { authType: 'none' },
-        })
-      );
-      expect(updated).toContain(RECEIVE_ONLY_REJECTION);
-
-      const withAction = await rejectionMessage(
-        apiServices.alerting.connectors.create({
-          name: `scout-datadog-api-with-action-${Date.now()}`,
           connectorTypeId: DATADOG_TYPE_ID,
-          config: { site: DATADOG_SITE, authType: 'none', selectedActions: ['listMonitors'] },
+          config: { site: DATADOG_SITE, authType: 'none', selectedActions: [] },
           secrets: { authType: 'none' },
-        })
-      );
-      expect(withAction).toContain(RECEIVE_ONLY_REJECTION);
-    });
+        });
+        createdConnectorIds.push(created.id);
+
+        const saved = await apiServices.alerting.connectors.get(created.id);
+        expect(saved).toMatchObject({
+          connector_type_id: DATADOG_TYPE_ID,
+          config: { authType: 'none', selectedActions: [] },
+        });
+
+        const updated = await rejectionMessage(
+          apiServices.alerting.connectors.update(created.id, {
+            name: `scout-datadog-api-receive-only-${Date.now()}`,
+            config: { site: DATADOG_SITE, authType: 'none', selectedActions: ['listMonitors'] },
+            secrets: { authType: 'none' },
+          })
+        );
+        expect(updated).toContain(RECEIVE_ONLY_REJECTION);
+
+        const withAction = await rejectionMessage(
+          apiServices.alerting.connectors.create({
+            name: `scout-datadog-api-with-action-${Date.now()}`,
+            connectorTypeId: DATADOG_TYPE_ID,
+            config: { site: DATADOG_SITE, authType: 'none', selectedActions: ['listMonitors'] },
+            secrets: { authType: 'none' },
+          })
+        );
+        expect(withAction).toContain(RECEIVE_ONLY_REJECTION);
+      }
+    );
   });
 
   apiTest.describe('Not opted into receive-only', () => {
-    apiTest('rejects none and an empty action list for GitHub, and saves bearer credentials', async ({
-      apiServices,
-    }) => {
-      const none = await rejectionMessage(
-        apiServices.alerting.connectors.create({
-          name: `scout-github-api-${Date.now()}`,
-          connectorTypeId: GITHUB_TYPE_ID,
-          config: { serverUrl: GITHUB_SERVER_URL },
-          secrets: { authType: 'none' },
-        })
-      );
-      expect(none).toContain('400');
-      expect(none).not.toContain(RECEIVE_ONLY_REJECTION);
+    apiTest(
+      'rejects none and an empty action list for GitHub, and saves bearer credentials',
+      async ({ apiServices }) => {
+        const none = await rejectionMessage(
+          apiServices.alerting.connectors.create({
+            name: `scout-github-api-${Date.now()}`,
+            connectorTypeId: GITHUB_TYPE_ID,
+            config: { serverUrl: GITHUB_SERVER_URL },
+            secrets: { authType: 'none' },
+          })
+        );
+        expect(none).toContain('400');
+        expect(none).not.toContain(RECEIVE_ONLY_REJECTION);
 
-      const emptyActions = await rejectionMessage(
-        apiServices.alerting.connectors.create({
+        const emptyActions = await rejectionMessage(
+          apiServices.alerting.connectors.create({
+            name: `scout-github-api-${Date.now()}`,
+            connectorTypeId: GITHUB_TYPE_ID,
+            config: { serverUrl: GITHUB_SERVER_URL, selectedActions: [] },
+            secrets: { authType: 'bearer', token: 'ghp_scout_token' },
+          })
+        );
+        expect(emptyActions).toContain(EMPTY_ACTIONS_REJECTION);
+
+        const created = await apiServices.alerting.connectors.create({
           name: `scout-github-api-${Date.now()}`,
           connectorTypeId: GITHUB_TYPE_ID,
-          config: { serverUrl: GITHUB_SERVER_URL, selectedActions: [] },
+          config: { serverUrl: GITHUB_SERVER_URL, authType: 'bearer' },
           secrets: { authType: 'bearer', token: 'ghp_scout_token' },
-        })
-      );
-      expect(emptyActions).toContain(EMPTY_ACTIONS_REJECTION);
+        });
+        createdConnectorIds.push(created.id);
 
-      const created = await apiServices.alerting.connectors.create({
-        name: `scout-github-api-${Date.now()}`,
-        connectorTypeId: GITHUB_TYPE_ID,
-        config: { serverUrl: GITHUB_SERVER_URL, authType: 'bearer' },
-        secrets: { authType: 'bearer', token: 'ghp_scout_token' },
-      });
-      createdConnectorIds.push(created.id);
-
-      const saved = await apiServices.alerting.connectors.get(created.id);
-      expect(saved).toMatchObject({
-        connector_type_id: GITHUB_TYPE_ID,
-        config: { authType: 'bearer' },
-      });
-      expect(saved.config.selectedActions).toBeUndefined();
-    });
+        const saved = await apiServices.alerting.connectors.get(created.id);
+        expect(saved).toMatchObject({
+          connector_type_id: GITHUB_TYPE_ID,
+          config: { authType: 'bearer' },
+        });
+        expect(saved.config.selectedActions).toBeUndefined();
+      }
+    );
   });
 });

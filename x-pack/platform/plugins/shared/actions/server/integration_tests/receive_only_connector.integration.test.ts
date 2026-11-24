@@ -148,11 +148,7 @@ describe('Receive-only dual connector', () => {
     const body = created.body;
     expect(body.connector_type_id).toBe(GITHUB_CONNECTOR_TYPE_ID);
 
-    const getRes = await getSupertest(
-      kibanaServer.root,
-      'get',
-      `/api/actions/connector/${body.id}`
-    )
+    const getRes = await getSupertest(kibanaServer.root, 'get', `/api/actions/connector/${body.id}`)
       .set('kbn-xsrf', 'kibana')
       .expect(200);
 
