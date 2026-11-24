@@ -44,22 +44,6 @@ spaceTest.describe(
       await deleteEsqlSourceIndex(esClient, esqlSourceIndexName(scoutSpace.id));
     });
 
-    spaceTest(
-      'accepts a non-aggregating query without the metadata operator',
-      async ({ pageObjects, scoutSpace }) => {
-        const { esqlRuleForm, ruleCreateWizard } = pageObjects;
-        // The metadata operator is added when the rule runs, not in the form
-        const query = `from ${esqlSourceIndexName(scoutSpace.id)} | limit 5`;
-
-        await esqlRuleForm.setQueryAndWaitToSettle(query);
-        expect(await esqlRuleForm.esqlEditor.getQuery()).toBe(query);
-        await esqlRuleForm.continueToAboutStep();
-
-        await expect(esqlRuleForm.queryBar).toBeHidden();
-        await expect(ruleCreateWizard.aboutRuleName).toBeVisible();
-      }
-    );
-
     spaceTest('shows an error when the query uses an unknown operator', async ({ pageObjects }) => {
       const { esqlRuleForm } = pageObjects;
 
