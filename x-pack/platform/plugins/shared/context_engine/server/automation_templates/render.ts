@@ -53,7 +53,8 @@ export interface UnitProfileTemplateValues {
 
 export interface IndexMetadataSource {
   index: string;
-  categoryField: string;
+  /** A keyword field to ground the profile with a count by; the profile is built without one when missing. */
+  categoryField?: string;
 }
 
 export interface IndexMetadataTemplateValues {
@@ -65,6 +66,10 @@ export interface IndexMetadataTemplateValues {
 }
 
 const yamlString = (value: string): string => JSON.stringify(value);
+
+/** The YAML of a rendered template, installed under the given workflow name. */
+export const setWorkflowName = (yaml: string, name: string): string =>
+  yaml.replace(/^name: .*/m, `name: ${yamlString(name)}`);
 
 /**
  * Index and field names reach ES|QL inside backticks and reach Liquid unescaped, so a backtick or
@@ -147,7 +152,9 @@ export const renderIndexMetadataTemplate = (values: IndexMetadataTemplateValues)
   const seen = new Set<string>();
   for (const { index, categoryField } of values.sources) {
     assertSafeIdentifier('sourceIndex', index);
-    assertSafeIdentifier('categoryField', categoryField);
+    if (categoryField !== undefined) {
+      assertSafeIdentifier('categoryField', categoryField);
+    }
     if (seen.has(index)) {
       throw new Error(
         `Index "${index}" is listed twice. Each source writes the KI "<name>/${index}", so a second entry would overwrite the first.`
@@ -163,7 +170,7 @@ export const renderIndexMetadataTemplate = (values: IndexMetadataTemplateValues)
     __SOURCES__: JSON.stringify(
       values.sources.map(({ index, categoryField }) => ({
         index,
-        category_field: categoryField,
+        category_field: categoryField ?? '',
       }))
     ),
   });
