@@ -36,9 +36,13 @@ const MAX_PRIVILEGE_GROUPS = 100;
 const MAX_PRIVILEGE_NAMES = 50;
 const MAX_PRIVILEGE_LENGTH = 256;
 
+/** A session turn is cited as `session:<session id>/<turn id>`, two ids of up to 256 characters. */
+const MAX_MEMORY_REFERENCE_LENGTH = 1024;
+const memoryReferenceSchema = lazySchema(() => z.string().min(1).max(MAX_MEMORY_REFERENCE_LENGTH));
+
 export const refSchema = lazySchema(() => z.string().min(1).max(MAX_KI_ID_LENGTH));
 export const typeSchema = lazySchema(() => z.string().max(MAX_DREAMING_TYPE_LENGTH));
-const sourceMemoryIdsSchema = lazySchema(() => z.array(refSchema).max(MAX_SOURCE_IDS));
+const sourceMemoryIdsSchema = lazySchema(() => z.array(memoryReferenceSchema).max(MAX_SOURCE_IDS));
 
 export const accessPatternSchema = lazySchema(() =>
   z.object({
@@ -106,7 +110,7 @@ export const dreamingMemoriesSchema = lazySchema(() =>
     .array(
       z
         .object({
-          id: refSchema,
+          id: memoryReferenceSchema,
           updated_at: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
           governance: z
             .object({

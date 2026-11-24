@@ -381,8 +381,8 @@ describe('createSessionEventsService', () => {
           filter: [
             { term: { space: 'default' } },
             { term: { ai_index_id: 'ops-memory' } },
-            { terms: { session_id: ['session-1'] } },
-            { terms: { turn_id: ['turn-1'] } },
+            { term: { session_id: 'session-1' } },
+            { term: { turn_id: 'turn-1' } },
           ],
         },
       });
@@ -444,18 +444,13 @@ describe('createSessionEventsService', () => {
       expect(turns[0].endedAt).toBe('2026-11-16T09:02:00.000Z');
     });
 
-    it('keeps turns of different sessions apart', async () => {
+    it('keeps turns of different sessions apart, reading each by its session and turn', async () => {
       esClient.search
         .mockResolvedValueOnce(
           searchResponseOf([stored('a-1'), stored('b-1', { session_id: 'session-2' })])
         )
-        .mockResolvedValueOnce(
-          searchResponseOf([
-            stored('a-1'),
-            stored('b-1', { session_id: 'session-2' }),
-            stored('x-1', { session_id: 'session-1', turn_id: 'turn-other' }),
-          ])
-        );
+        .mockResolvedValueOnce(searchResponseOf([stored('a-1')]))
+        .mockResolvedValueOnce(searchResponseOf([stored('b-1', { session_id: 'session-2' })]));
 
       const { turns } = await service.readTurns(input);
 
@@ -465,6 +460,47 @@ describe('createSessionEventsService', () => {
           ['session-2', ['b-1']],
         ]
       );
+      expect(esClient.search.mock.calls[2][0]?.query).toEqual({
+        bool: {
+          filter: [
+            { term: { space: 'default' } },
+            { term: { ai_index_id: 'ops-memory' } },
+            { term: { session_id: 'session-2' } },
+            { term: { turn_id: 'turn-1' } },
+          ],
+        },
+      });
+    });
+
+    it('leaves a turn with events saved after the settle time for a later read', async () => {
+      esClient.search
+        .mockResolvedValueOnce(searchResponseOf([stored('e-1')]))
+        .mockResolvedValueOnce(
+          searchResponseOf([
+            stored('e-1'),
+            stored('e-2', { '@timestamp': '2026-11-16T09:58:00.000Z' }),
+          ])
+        );
+
+      const { turns, positions } = await service.readTurns(input);
+
+      expect(turns).toEqual([]);
+      expect(positions).toHaveLength(1);
+    });
+
+    it('orders by seq only when every event has one, else by when the agent created them', async () => {
+      esClient.search
+        .mockResolvedValueOnce(searchResponseOf([stored('a')]))
+        .mockResolvedValueOnce(
+          searchResponseOf([
+            stored('a', { seq: 5, event_at: '2026-11-16T08:00:00.000Z' }),
+            stored('b', { event_at: '2026-11-16T07:00:00.000Z' }),
+          ])
+        );
+
+      const { turns } = await service.readTurns(input);
+
+      expect(turns[0].events.map(({ id }) => id)).toEqual(['b', 'a']);
     });
 
     it('reads nothing more when no events were saved in the window', async () => {

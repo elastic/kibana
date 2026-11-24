@@ -25,7 +25,8 @@ export const READ_SESSION_TRANSCRIPTS_STEP_ID = 'context-engine.readSessionTrans
 export const MAX_SESSION_TRANSCRIPTS_READ_SIZE = 10_000;
 export const DEFAULT_SESSION_TRANSCRIPTS_READ_SIZE = 500;
 const MAX_TIMESTAMP_LENGTH = 64;
-const MAX_CURSOR_LENGTH = 512;
+// The cursor is a JSON pair of a session id and an event id, up to 256 characters each.
+const MAX_CURSOR_LENGTH = 2048;
 
 export const readSessionTranscriptsInputSchema = lazySchema(() =>
   z.object({

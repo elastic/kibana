@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { dreamChangeSetSchema } from '../../common/step_types/apply_dream_changes';
+import { readSessionTranscriptsInputSchema } from '../../common/step_types/read_session_transcripts';
 import type {
   SessionEventInput,
   SessionEventsService,
@@ -115,6 +117,25 @@ describe('buildTurnTranscript', () => {
 });
 
 describe('the read cursor', () => {
+  it('fits a cursor and a turn reference at the largest ids in the step schemas', () => {
+    const id = 'x'.repeat(256);
+    const cursor = encodeAfter({ sessionId: id, eventId: id });
+
+    expect(
+      readSessionTranscriptsInputSchema.safeParse({
+        ai_index_id: 'support',
+        since: '2026-11-16T00:00:00.000Z',
+        after: cursor,
+      }).success
+    ).toBe(true);
+    expect(
+      dreamChangeSetSchema.safeParse({
+        entities: [],
+        facts: [{ ref: 'new:1', source_memory_ids: [`session:${id}/${id}`] }],
+      }).success
+    ).toBe(true);
+  });
+
   it('round-trips an event, and rejects anything else', () => {
     expect(decodeAfter(encodeAfter({ sessionId: 's"1', eventId: 'e|1' }))).toEqual({
       sessionId: 's"1',

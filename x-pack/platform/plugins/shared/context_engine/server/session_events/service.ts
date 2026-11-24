@@ -69,15 +69,20 @@ const toResult = (id: string, item: BulkResponseItem | undefined): SaveEventResu
   return { id, status: 'failed', error: cause ? `${reason}: ${cause}` : reason };
 };
 
-const TURNS_LOAD_BATCH = 50;
-const MAX_TURN_EVENTS_LOADED = 10_000;
+/** How many turns are loaded at once, each by a search of its own. */
+const TURNS_LOAD_CONCURRENCY = 10;
+/** The most events loaded of one turn: a longer turn is read from its first events. */
+const MAX_TURN_EVENTS_LOADED = 1000;
 
 const turnKey = (sessionId: string, turnId: string): string => `${sessionId}\u0000${turnId}`;
 
+/** By `seq` when every event has one, else by when the agent created them: never a mix of both. */
+const sortEvents = (events: StoredSessionEvent[]): StoredSessionEvent[] =>
+  events.every(({ seq }) => seq !== undefined)
+    ? [...events].sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0) || compareEvents(a, b))
+    : [...events].sort(compareEvents);
+
 const compareEvents = (a: StoredSessionEvent, b: StoredSessionEvent): number => {
-  if (a.seq !== undefined && b.seq !== undefined && a.seq !== b.seq) {
-    return a.seq - b.seq;
-  }
   return (
     Date.parse(a.event_at) - Date.parse(b.event_at) ||
     Date.parse(a['@timestamp']) - Date.parse(b['@timestamp'])
@@ -179,50 +184,51 @@ export const createSessionEventsService = (
       turnPairs.set(turnKey(sessionId, turnId), { sessionId, turnId });
     }
     const pairs = [...turnPairs.values()];
-    const loaded = new Map<string, StoredSessionEvent[]>();
-    for (let start = 0; start < pairs.length; start += TURNS_LOAD_BATCH) {
-      const batch = pairs.slice(start, start + TURNS_LOAD_BATCH);
-      const response = await esClient.search<StoredSessionEvent>({
-        index: SESSION_EVENTS_DATA_STREAM,
-        ignore_unavailable: true,
-        allow_partial_search_results: false,
-        size: MAX_TURN_EVENTS_LOADED,
-        sort: [{ '@timestamp': 'asc' }],
-        query: {
-          bool: {
-            filter: [
-              ...ownedFilter,
-              { terms: { session_id: [...new Set(batch.map(({ sessionId }) => sessionId))] } },
-              { terms: { turn_id: [...new Set(batch.map(({ turnId }) => turnId))] } },
-            ],
-          },
-        },
-      });
-      for (const { _source } of response.hits.hits) {
-        const key = _source && turnKey(_source.session_id, _source.turn_id);
-        if (_source && key && turnPairs.has(key)) {
-          loaded.set(key, [...(loaded.get(key) ?? []), _source]);
+    const untilMs = Date.parse(until);
+    const turns: SessionTurn[] = [];
+    for (let start = 0; start < pairs.length; start += TURNS_LOAD_CONCURRENCY) {
+      const loaded = await Promise.all(
+        pairs.slice(start, start + TURNS_LOAD_CONCURRENCY).map(async ({ sessionId, turnId }) => {
+          const response = await esClient.search<StoredSessionEvent>({
+            index: SESSION_EVENTS_DATA_STREAM,
+            ignore_unavailable: true,
+            allow_partial_search_results: false,
+            size: MAX_TURN_EVENTS_LOADED,
+            sort: [{ '@timestamp': 'asc' }],
+            query: {
+              bool: {
+                filter: [
+                  ...ownedFilter,
+                  { term: { session_id: sessionId } },
+                  { term: { turn_id: turnId } },
+                ],
+              },
+            },
+          });
+          return {
+            sessionId,
+            turnId,
+            stored: response.hits.hits.flatMap(({ _source }) => _source ?? []),
+          };
+        })
+      );
+      for (const { sessionId, turnId, stored } of loaded) {
+        // A turn with events saved after `until` may still be running. Those events are found by
+        // the next read, which then reads the whole turn.
+        const settled = stored.every((event) => Date.parse(event['@timestamp']) <= untilMs);
+        if (stored.length > 0 && settled) {
+          turns.push({
+            sessionId,
+            turnId,
+            endedAt: stored.reduce(
+              (latest, event) => (event['@timestamp'] > latest ? event['@timestamp'] : latest),
+              stored[0]['@timestamp']
+            ),
+            events: sortEvents(withoutResent(stored)),
+          });
         }
       }
     }
-
-    const turns = pairs.flatMap(({ sessionId, turnId }): SessionTurn[] => {
-      const stored = loaded.get(turnKey(sessionId, turnId)) ?? [];
-      if (stored.length === 0) {
-        return [];
-      }
-      return [
-        {
-          sessionId,
-          turnId,
-          endedAt: stored.reduce(
-            (latest, event) => (event['@timestamp'] > latest ? event['@timestamp'] : latest),
-            stored[0]['@timestamp']
-          ),
-          events: withoutResent(stored).sort(compareEvents),
-        },
-      ];
-    });
     const result: ReadSessionTurnsResult = { positions, turns, full: positions.length === size };
     return result;
   },
