@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getESQLResults, getIndexPatternFromESQLQuery, prettifyQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, prettifyQuery } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 
@@ -49,13 +49,11 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
         return null;
       }
 
-      return getESQLResults({
-        esqlQuery: tableQuery.right,
-        search: data.search.search,
-        signal,
-        filter: filterQuery,
-        executionContext: PUM_ONBOARDING_DASHBOARD_PANEL_CONTEXT,
-      });
+      const { rawResponse } = await data.search.esql(
+        { query: tableQuery.right, filter: filterQuery },
+        { abortSignal: signal, executionContext: PUM_ONBOARDING_DASHBOARD_PANEL_CONTEXT }
+      );
+      return rawResponse;
     },
     {
       refetchOnWindowFocus: false,
@@ -65,7 +63,7 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
 
   const { deleteQuery, setQuery } = useGlobalTime();
 
-  const response = result?.response;
+  const response = result ?? undefined;
 
   const inspect = useMemo(() => {
     if (isLeft(tableQuery)) {

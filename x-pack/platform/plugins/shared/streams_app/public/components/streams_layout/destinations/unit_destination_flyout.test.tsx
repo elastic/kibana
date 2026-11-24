@@ -22,6 +22,7 @@ const renderFlyout = (destination: RemoteElasticsearchDestinationViewModel) =>
         destination={destination}
         indices={[]}
         indicesStatus="ready"
+        hasConnectedSource={false}
         onShowDestinationDetail={jest.fn()}
         onHideDestinationDetail={jest.fn()}
         onClose={jest.fn()}

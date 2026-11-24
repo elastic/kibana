@@ -143,13 +143,22 @@ export class EdotBrowserClient {
 
   /**
    * The JavaScript engine, which decides how the browser writes stack traces. A browser that isn't
-   * Chromium or Firefox is taken for Safari, the other one that is still around.
+   * Chromium or Firefox is taken for Safari, the other one that is still around. One that EDOT
+   * Browser can't identify still runs an engine, which its user agent tells.
    */
   public get browserEngine(): 'chromium' | 'firefox' | 'webkit' {
     if (this.isChromium) {
       return 'chromium';
     }
-    return this.resourceAttributes['browser.name'] === 'Firefox' ? 'firefox' : 'webkit';
+    const name = this.resourceAttributes['browser.name'];
+    if (name === undefined) {
+      const userAgent = String(this.resourceAttributes['user_agent.original'] ?? '');
+      if (/Firefox\//.test(userAgent)) {
+        return 'firefox';
+      }
+      return /Chrome\/|Edg\//.test(userAgent) ? 'chromium' : 'webkit';
+    }
+    return name === 'Firefox' ? 'firefox' : 'webkit';
   }
 
   public get hasSession(): boolean {
