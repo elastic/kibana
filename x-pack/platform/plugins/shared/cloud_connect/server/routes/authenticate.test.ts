@@ -288,7 +288,6 @@ describe('Authentication Routes', () => {
     });
 
     it('should authenticate with admin key and generate cluster-scoped key', async () => {
-
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
         isClusterScoped: false,
         hasValidScope: true,
