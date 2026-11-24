@@ -534,6 +534,18 @@ export default function (providerContext: FtrProviderContext) {
         expect(await getQueue(id)).to.be(null);
       });
 
+      it('clears a stored queue with null, and keeps it cleared through a later update', async () => {
+        const id = await createOutput(MANAGED_ENDPOINT, undefined);
+        expect((await getQueue(id)).queue_size).to.be(50_000_000);
+
+        await updateQueue(id, MANAGED_ENDPOINT, null).expect(200);
+        expect(await getQueue(id)).to.be(null);
+
+        // an update that leaves the queue out does not bring back the managed defaults
+        await updateQueue(id, MANAGED_ENDPOINT, undefined).expect(200);
+        expect(await getQueue(id)).to.be(null);
+      });
+
       it('returns 400 when creating an output with sizes that the collector rejects', async () => {
         const { body } = await supertest
           .post('/api/fleet/outputs')
