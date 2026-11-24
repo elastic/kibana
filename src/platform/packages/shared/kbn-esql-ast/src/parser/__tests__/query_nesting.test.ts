@@ -80,10 +80,19 @@ describe('query nesting', () => {
     });
   });
 
-  it('rejects a deeply nested query quickly instead of running the parser rule', () => {
-    const start = Date.now();
-    Parser.parse(`FROM a | WHERE ${nest(2000)}`);
+  it('rejects a deeply nested query without running the grammar rule', () => {
+    const parser = Parser.create(`FROM a | WHERE ${nest(2000)}`);
+    const grammarRule = jest.spyOn(parser.parser, 'singleStatement');
 
-    expect(Date.now() - start).toBeLessThan(1000);
+    expectNestingError(parser.parse().errors);
+    expect(grammarRule).not.toHaveBeenCalled();
+  });
+
+  it('does not run the grammar rule when only reporting errors either', () => {
+    const parser = Parser.create(`FROM a | WHERE ${nest(2000)}`);
+    const grammarRule = jest.spyOn(parser.parser, 'singleStatement');
+
+    expectNestingError(parser.parseErrors());
+    expect(grammarRule).not.toHaveBeenCalled();
   });
 });
