@@ -47,7 +47,8 @@ jobs:
       pull-requests: write
       statuses: write
     steps:
-      # Base branch only (the pull_request_target default): never check out or run PR code.
+      # The default branch, where pull_request_target takes the workflow and checkout from: never
+      # check out or run PR code.
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
