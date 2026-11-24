@@ -217,7 +217,7 @@ groups:
           self: ga
         note: |
           :applies_to: stack: ga 9.6.1!
-          Kibana allows fonts from `'self'` and `data:` by default and blocks fonts from any other source. If you set `csp.font_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `data:` in your list, because Kibana loads some of its own fonts from `data:` URLs.
+          Kibana allows fonts from `'self'` and `data:` by default and blocks fonts from any other source. If you set `csp.font_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `data:` in your list, because Kibana loads some of its own fonts from `data:` URLs. If you set `csp.font_src` to an empty list, Kibana does not send a `font-src` directive. Fonts then use the `csp.default_src` sources, or have no restriction when `csp.default_src` is not set.
 
       - setting: csp.frame_src
         description: |
@@ -238,7 +238,7 @@ groups:
           self: ga
         note: |
           :applies_to: stack: ga 9.6.1!
-          Kibana allows images from `'self'`, `data:`, `blob:`, `https:` and `http:` by default. If you set `csp.img_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `data:` and `blob:` in your list if you need them. If you set `csp.default_src` without `csp.img_src`, images use the `csp.default_src` sources instead of these defaults.
+          Kibana allows images from `'self'`, `data:`, `blob:`, `https:` and `http:` by default. If you set `csp.img_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `data:` and `blob:` in your list if you need them. If you set `csp.default_src` without `csp.img_src`, images use the `csp.default_src` sources instead of these defaults. If you set `csp.img_src` to an empty list, Kibana does not send an `img-src` directive. Images then use the `csp.default_src` sources, or have no restriction when `csp.default_src` is not set.
 
       - setting: csp.object_src
         description: |
@@ -259,7 +259,7 @@ groups:
           self: ga
         note: |
           :applies_to: stack: ga 9.6.1!
-          Kibana allows media from `'self'` and `kibana.estccdn.com` by default and blocks media from any other source. If you set `csp.media_src`, those defaults are not applied and only the sources you list are allowed. Include `'self'` and `kibana.estccdn.com` in your list if you need them. On Elastic Cloud Hosted, you can set this from 9.6.1.
+          Kibana allows media from `'self'` and `kibana.estccdn.com` by default and blocks media from any other source. If you set `csp.media_src`, those defaults are not applied and only the sources you list are allowed. Include `'self'` and `kibana.estccdn.com` in your list if you need them. If you set `csp.media_src` to an empty list, Kibana does not send a `media-src` directive. Media then uses the `csp.default_src` sources, or has no restriction when `csp.default_src` is not set. On Elastic Cloud Hosted, you can set this from 9.6.1.
 
       - setting: csp.frame_ancestors
         description: |

@@ -1026,6 +1026,56 @@ describe('HttpConfig', () => {
       expect(csp.header).toContain(`img-src 'self' assets.example.test cdn.example.test`);
     });
 
+    const directive = (header: string, name: string) =>
+      header.split('; ').find((value) => value.startsWith(`${name} `));
+
+    it('uses a configured csp.font_src instead of the font-src defaults', () => {
+      const { csp } = build({ font_src: ['fonts.example.test'] });
+
+      expect(directive(csp.header, 'font-src')).toBe(`font-src 'self' fonts.example.test`);
+      expect(directive(csp.header, 'img-src')).toBe(`img-src 'self' data: blob: https: http:`);
+      expect(directive(csp.header, 'media-src')).toBe(`media-src 'self' kibana.estccdn.com`);
+    });
+
+    it('uses a configured csp.media_src instead of the media-src defaults', () => {
+      const { csp } = build({ media_src: ['media.example.test'] });
+
+      expect(directive(csp.header, 'media-src')).toBe('media-src media.example.test');
+      expect(directive(csp.header, 'font-src')).toBe(`font-src 'self' data:`);
+    });
+
+    it.each(['img_src', 'font_src', 'media_src'])(
+      'does not send the directive when csp.%s is an empty list',
+      (key) => {
+        const { csp } = build({ [key]: [] });
+        const emptied = key.replace('_', '-');
+
+        for (const name of ['img-src', 'font-src', 'media-src']) {
+          if (name === emptied) {
+            expect(directive(csp.header, name)).toBeUndefined();
+          } else {
+            expect(directive(csp.header, name)).toBeDefined();
+          }
+        }
+      }
+    );
+
+    it('lets images fall back to csp.default_src when csp.img_src is an empty list', () => {
+      const { csp } = build({ default_src: ['assets.example.test'], img_src: [] });
+
+      expect(directive(csp.header, 'default-src')).toBe(`default-src 'self' assets.example.test`);
+      expect(directive(csp.header, 'img-src')).toBeUndefined();
+    });
+
+    it('sends only the CDN in img-src when csp.img_src is an empty list and a CDN is configured', () => {
+      const { csp } = build(
+        { default_src: ['assets.example.test'], img_src: [] },
+        { http: { cdn: { url: 'https://cdn.example.test' } } }
+      );
+
+      expect(directive(csp.header, 'img-src')).toBe(`img-src 'self' cdn.example.test`);
+    });
+
     it('does not enforce them on serverless', () => {
       const { csp } = build({}, { serverless: true });
       expect(csp.header).not.toContain('img-src');
