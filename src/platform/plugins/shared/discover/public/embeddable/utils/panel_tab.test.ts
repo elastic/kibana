@@ -11,7 +11,7 @@ import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { FilterStateStore, type Filter, type Query } from '@kbn/es-query';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import { fromDiscoverSessionTab } from './panel_tab';
+import { fromDiscoverSessionTab, toSessionTabAttributes } from './panel_tab';
 
 const INLINE_DATA_VIEW_ID = 'inline-data-view';
 
@@ -114,5 +114,21 @@ describe('fromDiscoverSessionTab', () => {
     expect(() =>
       fromDiscoverSessionTab(createSessionTab({ controlGroupJson: '{not valid JSON' }))
     ).not.toThrow();
+  });
+});
+
+describe('toSessionTabAttributes', () => {
+  it('searches with the stored filters, which the public format cannot always represent', () => {
+    const rangeFilter: Filter = {
+      meta: { type: 'range', key: '@timestamp', params: {} },
+      query: { range: { '@timestamp': { gte: '2026-11-01', time_zone: 'Europe/Rome' } } },
+    };
+    const sessionTab = fromDiscoverSessionTab(
+      createSessionTab({ serializedSearchSource: { index: 'data-view-id', filter: [rangeFilter] } })
+    );
+
+    expect(toSessionTabAttributes(sessionTab)).toMatchObject({
+      serializedSearchSource: { filter: [rangeFilter] },
+    });
   });
 });
