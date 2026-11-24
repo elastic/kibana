@@ -6,11 +6,22 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { PROPOSAL_CATEGORY_TODO, type ActionCatalogEntry } from '@kbn/proposals-common';
-import type { RecorderProposals } from './run_pass';
+import {
+  ProposalConflictError,
+  ProposalNotFoundError,
+  type ProposalsPluginStart,
+} from '@kbn/proposals-plugin/server';
+import {
+  MAX_PROPOSALS_PAGE_SIZE,
+  PROPOSAL_CATEGORY_TODO,
+  proposalConfidenceSchema,
+  proposalImpactSchema,
+  type ActionCatalogEntry,
+  type Proposal,
+} from '@kbn/proposals-common';
+import type { ExistingRecorderProposal, RecorderProposals } from './run_pass';
 
-/** The titles read per conversation. A conversation has a handful of proposals, not hundreds. */
+/** The closed proposals read per conversation, newest first, as history for the recorder. */
 const MAX_LISTED_PROPOSALS = 50;
 /** The action workflows shown to the recorder. Each one costs prompt tokens on every final pass. */
 export const MAX_RECORDER_ACTIONS = 20;
@@ -35,9 +46,35 @@ const shortenDescription = (action: ActionCatalogEntry): ActionCatalogEntry => {
   };
 };
 
+const toExisting = ({
+  id,
+  title,
+  comment,
+  status,
+  decision,
+  impact,
+  confidence,
+  actionWorkflowId,
+  actionInput,
+  expiresAt,
+  gateReleasedAt,
+}: Proposal): ExistingRecorderProposal => ({
+  id,
+  title,
+  comment,
+  status,
+  ...(decision ? { decision } : {}),
+  impact,
+  confidence,
+  ...(actionWorkflowId ? { actionWorkflowId, ...(actionInput ? { actionInput } : {}) } : {}),
+  ...(expiresAt ? { expiresAt } : {}),
+  ...(gateReleasedAt ? { gateReleasedAt } : {}),
+});
+
 /**
- * What the findings recorder needs from the proposals plugin: the titles already proposed in a
- * conversation, the action workflows a proposal can run, and a way to propose.
+ * What the findings recorder needs from the proposals plugin: the proposals already on a
+ * conversation, the action workflows a proposal can run, and a way to propose a new one or revise
+ * an open one in place.
  */
 export const createRecorderProposals = ({
   proposals,
@@ -71,28 +108,38 @@ export const createRecorderProposals = ({
   };
 
   return {
-    listTitles: async ({ request, conversationId }) => {
+    list: async ({ request, conversationId }) => {
       // The list reads as the internal user, so the caller's own privilege decides what they may see.
-      // Without it, a user who can use the investigation but not proposals would have the titles
+      // Without it, a user who can use the investigation but not proposals would have the proposals
       // shown to the recorder's model.
       try {
         await proposals.getProposalPrivileges().assertCanRead(request);
       } catch {
         return [];
       }
-      const { proposals: found } = await proposals.getProposalsService().list(
-        {
-          conversationId,
-          origin: 'nightshift',
-          excludeSuperseded: true,
-          excludeExpired: false,
-          size: MAX_LISTED_PROPOSALS,
-          from: 0,
-        },
-        getSpaceId(request),
-        request
-      );
-      return found.map(({ title }) => title);
+      const spaceId = getSpaceId(request);
+      const service = proposals.getProposalsService();
+      const query = {
+        conversationId,
+        origin: 'nightshift' as const,
+        excludeSuperseded: true,
+        excludeExpired: false,
+        order: 'newest' as const,
+        from: 0,
+      };
+      // Every pending proposal counts against the open limit, so they are read on their own: newer
+      // closed ones could otherwise fill the page and push an older pending one out of it.
+      const [{ proposals: pending }, { proposals: recent }] = await Promise.all([
+        service.list(
+          { ...query, status: 'pending', size: MAX_PROPOSALS_PAGE_SIZE },
+          spaceId,
+          request
+        ),
+        service.list({ ...query, size: MAX_LISTED_PROPOSALS }, spaceId, request),
+      ]);
+      const closed = recent.filter(({ status }) => status !== 'pending');
+      // Newest first from the store; oldest first gives stable P1, P2, ... handles.
+      return [...pending.reverse(), ...closed.reverse()].map(toExisting);
     },
 
     // Only the space's own workflows: managed actions belong to the solution that installed them
@@ -133,6 +180,35 @@ export const createRecorderProposals = ({
           actionInput,
         },
       });
+    },
+
+    // The id is the one the model was shown, never resolved to a later revision: a person who
+    // revised the proposal meanwhile superseded that id, so `revise()` refuses it rather than
+    // writing the model's text, built from the older version, over theirs.
+    revise: async ({ request, proposalId, proposal }) => {
+      await proposals.getProposalPrivileges().assertCanManage(request);
+      const impact = proposalImpactSchema.safeParse(proposal.impact).data;
+      const confidence = proposalConfidenceSchema.safeParse(proposal.confidence).data;
+      try {
+        await proposals.getProposalsService().revise(
+          {
+            id: proposalId,
+            title: proposal.title,
+            comment: proposal.comment,
+            ...(impact !== undefined ? { impact } : {}),
+            ...(confidence !== undefined ? { confidence } : {}),
+            ...(proposal.action_input !== undefined ? { actionInput: proposal.action_input } : {}),
+          },
+          getSpaceId(request),
+          request
+        );
+        return true;
+      } catch (error) {
+        if (error instanceof ProposalConflictError || error instanceof ProposalNotFoundError) {
+          return false;
+        }
+        throw error;
+      }
     },
   };
 };

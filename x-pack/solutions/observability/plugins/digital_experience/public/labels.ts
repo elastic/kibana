@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SESSIONS_LOOKBACK_DAYS } from '../common/sessions';
 import type {
   ApplicationSource,
   ApplicationTabId,
@@ -29,9 +28,7 @@ export const PAGE_LOADS_LABEL = i18n.translate('xpack.digitalExperience.pageLoad
 export const SESSIONS_UNAVAILABLE_LABEL = i18n.translate(
   'xpack.digitalExperience.sessions.unavailable',
   {
-    defaultMessage:
-      'Counted for EDOT Browser applications from their session summaries, for time ranges within the last {days} days.',
-    values: { days: SESSIONS_LOOKBACK_DAYS },
+    defaultMessage: 'Counted for EDOT Browser applications only, from their session summaries.',
   }
 );
 
