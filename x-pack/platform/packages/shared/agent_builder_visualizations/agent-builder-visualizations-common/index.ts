@@ -16,7 +16,14 @@ export type {
   ChartVisualizationAttachmentData,
   VisualizationRenderer,
 } from './visualization_types';
-export { getEffectiveRenderer, isCustomContentVisualization } from './visualization_types';
+export {
+  getEffectiveRenderer,
+  isCustomContentVisualization,
+  readAttachmentQueries,
+  toQueryList,
+} from './visualization_types';
+
+export { getLensConfigLabel, getVisualizationLabel } from './visualization_label';
 
 export {
   buildVegaSavedVis,

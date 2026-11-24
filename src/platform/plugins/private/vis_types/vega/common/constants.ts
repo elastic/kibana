@@ -22,11 +22,3 @@ export const VEGA_SUPPORTED_TRIGGERS = [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU];
 
 /** The most filters a library item or a panel can store. */
 export const VEGA_MAX_FILTERS = 100;
-
-/**
- * Feature flag gating Vega as code: the standalone Vega panel (creation actions, public API schema
- * participation and panel JSON export), the Vega library item CRUD API (`/api/vega`), and library
- * items in the Visualize listing and on dashboards. Off by default. When off, all `/api/vega`
- * routes return 404.
- */
-export const VEGA_AS_CODE_ENABLED_FLAG = 'vega.asCodeEnabled';

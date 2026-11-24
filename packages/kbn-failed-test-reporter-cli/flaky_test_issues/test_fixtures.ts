@@ -58,6 +58,8 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
         timestamp: new Date('2026-09-09T06:04:41.000Z'),
         buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12346',
       },
+      failedDaysAgo: [0, 1, 3, 4, 6],
+      ranDaysAgo: [0, 1, 2, 3, 4, 5, 6],
     },
   ],
   byTarget: [

@@ -6,7 +6,10 @@
  */
 
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
+import type {
+  NightshiftInvestigationsServerSetup,
+  NightshiftInvestigationsServerStart,
+} from '@kbn/nightshift-investigations-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type {
@@ -14,6 +17,7 @@ import type {
   RelayClientContract,
 } from '@kbn/actions-plugin/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgentBuilderSmlPluginSetup,
@@ -27,7 +31,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
 import type {
   FieldsMetadataServerSetup,
   FieldsMetadataServerStart,
@@ -42,6 +46,23 @@ import type {
   NightshiftSourcesServerSetup,
   NightshiftSourcesServerStart,
 } from '@kbn/nightshift-sources-plugin/server';
+import type { KnowledgeIndicatorReader } from './lib/knowledge_indicators/contract/knowledge_indicator_reader';
+import type { SeveritySync } from './lib/significant_events/events/severity';
+
+/**
+ * What other plugins get at start. Read-only knowledge indicator access; nothing else is planned on
+ * this contract.
+ */
+export interface SignificantEventsServerStart {
+  /**
+   * Reads the knowledge indicators of one space as the internal user. It takes a space, not a
+   * request, because no user's privileges are checked: the caller decides which sources it may
+   * read. Brand the space with `asSpaceId` so an empty or wildcard id never reads as a space with
+   * no knowledge indicators. To hear about changes, subscribe a workflow to the
+   * `significant-events.knowledgeIndicatorsChanged` trigger.
+   */
+  getKnowledgeIndicatorReader: (params: { spaceId: SpaceId }) => KnowledgeIndicatorReader;
+}
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -61,6 +82,7 @@ export interface SignificantEventsPluginSetupDependencies {
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   nightshiftSources: NightshiftSourcesServerSetup;
+  nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
 }
 
 export interface SignificantEventsPluginStartDependencies {
@@ -79,6 +101,7 @@ export interface SignificantEventsPluginStartDependencies {
   nightshiftSources: NightshiftSourcesServerStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
+  cps?: CPSServerStart;
 }
 
 export interface SignificantEventsServer {
@@ -102,4 +125,6 @@ export interface SignificantEventsServer {
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
   /** Reads investigations (status of the ones a significant event lists). */
   agenticInvestigations?: AgenticInvestigationsPluginStart;
+  /** Keeps an event's stored severity in step with its investigation. */
+  severitySync: SeveritySync;
 }

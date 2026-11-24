@@ -23,6 +23,7 @@ import type {
   ApplicationOverview,
   ApplicationOverviewResponse,
 } from '../../../../common/types/overview';
+import type { HistogramBuckets } from '../../../../common/types/applications';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { APPLICATION_OVERVIEW_EBT_ELEMENTS, ERRORS_EBT_ELEMENTS } from '../../../ebt_constants';
@@ -42,6 +43,7 @@ import { useApplicationErrors } from '../../errors/hooks/use_application_errors'
 import { AllFiltersFlyout } from './components/all_filters_flyout';
 import { BreakdownsPanel } from './components/breakdowns_panel';
 import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
+import { FrustrationPanel } from './components/frustration_panel';
 import { OverviewFilterPills } from './components/overview_filters';
 import { OverviewKpis } from './components/overview_kpis';
 import { OverviewToolbar } from './components/overview_toolbar';
@@ -49,10 +51,11 @@ import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
 import { usePickerOptions } from './hooks/use_picker_options';
+import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
 
 const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
   defaultMessage:
-    'The page filters apply to page loads only, with their load time, trend, pages and breakdowns: web vitals, JS errors, clicks and HTTP requests carry no page URL yet.',
+    'The page filters apply to page loads, with their load time, trend, pages and breakdowns, and to frustration signals only: web vitals, JS errors, other clicks and HTTP requests carry no page URL yet.',
 });
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
@@ -64,37 +67,19 @@ const USAGE_FETCH_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Could not load the pages, browsers and clicks' }
 );
 
-const EMPTY_USAGE: ApplicationUsageResponse = {
-  topPages: [],
-  breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
-  topClicks: [],
-  totalClicks: 0,
-};
-
 /** The most frequent error groups on the Overview; the Errors tab lists the rest. */
 const TOP_ERRORS_ROWS = 5;
 
 /** The request for the Overview narrowed by `searchParams`; a change of them is a new request. */
 const overviewRequestOf = (
   searchParams: OverviewSearchParams,
-  percentile: OverviewPercentileParam | undefined
+  percentile: OverviewPercentileParam | undefined,
+  timeZone: string
 ): ApplicationRequest<ApplicationOverviewResponse> => {
   return (apiClient, options) => {
     return apiClient.fetch(
       'GET /internal/digital_experience/applications/{serviceName}/overview',
-      withOverviewFilters(options, searchParams, { percentile })
-    );
-  };
-};
-
-/** The request for the pages, breakdowns and clicks narrowed by `searchParams`. */
-const usageRequestOf = (
-  searchParams: OverviewSearchParams
-): ApplicationRequest<ApplicationUsageResponse> => {
-  return (apiClient, options) => {
-    return apiClient.fetch(
-      'GET /internal/digital_experience/applications/{serviceName}/usage',
-      withOverviewFilters(options, searchParams)
+      withOverviewFilters(options, searchParams, { percentile, timeZone })
     );
   };
 };
@@ -103,7 +88,7 @@ const usageRequestOf = (
 const emptyOverview = (
   serviceName: string,
   percentile: OverviewPercentile
-): ApplicationOverview => ({
+): Omit<ApplicationOverview, 'trendHistogram'> => ({
   serviceName,
   percentile,
   pageLoads: { count: 0 },
@@ -117,12 +102,15 @@ const emptyOverview = (
 /** The KPIs, Core Web Vitals and trends of one Overview, empty while it loads. */
 function OverviewPanels({
   overview,
+  trendHistogram,
   percentile,
   onPercentileChange,
   isLoading,
   onTimeRangeSelect,
 }: {
-  overview: ApplicationOverview;
+  overview: Omit<ApplicationOverview, 'trendHistogram'>;
+  /** `undefined` until the first response. */
+  trendHistogram: HistogramBuckets | undefined;
   /** The percentile asked for, which the panels name before its response arrives. */
   percentile: OverviewPercentile;
   onPercentileChange: (percentile: OverviewPercentile) => void;
@@ -140,6 +128,7 @@ function OverviewPanels({
         <EuiFlexItem grow={5}>
           <OverviewTrends
             points={overview.trend}
+            histogram={trendHistogram}
             pageLoads={overview.pageLoads.count}
             loadTimePercentileMs={overview.loadTime.percentileMs}
             percentile={percentile}
@@ -170,7 +159,15 @@ function UsageAndErrorsPanels({
   onSelectFilter: (name: OverviewFilterName, value: string) => void;
 }) {
   const { errorsHref, sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
-  const { topPages, breakdowns, topClicks, totalClicks } = response ?? EMPTY_USAGE;
+  const {
+    topPages,
+    breakdowns,
+    topClicks,
+    totalClicks,
+    frustration,
+    frustratedElements,
+    frustratedPages,
+  } = response ?? EMPTY_USAGE;
 
   return (
     <>
@@ -233,6 +230,22 @@ function UsageAndErrorsPanels({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {!error && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="m" alignItems="stretch">
+            <EuiFlexItem>
+              <FrustrationPanel
+                frustration={frustration}
+                frustratedElements={frustratedElements}
+                frustratedPages={frustratedPages}
+                isLoading={isLoading}
+                sessionsHref={sessionsHref}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 }
@@ -251,8 +264,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   // Separate requests, so the KPIs never wait on the panels below and a failure replaces only its own.
   const overviewRequest = useMemo(
-    () => overviewRequestOf(searchParams, percentileParam),
-    [searchParams, percentileParam]
+    () => overviewRequestOf(searchParams, percentileParam, formatters.timeZone),
+    [searchParams, percentileParam, formatters.timeZone]
   );
   const usageRequest = useMemo(() => usageRequestOf(searchParams), [searchParams]);
   const overview = useApplicationData(serviceName, overviewRequest);
@@ -322,6 +335,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
       ) : (
         <OverviewPanels
           overview={overview.response?.overview ?? emptyOverview(serviceName, percentile)}
+          trendHistogram={overview.response?.overview.trendHistogram}
           percentile={percentile}
           onPercentileChange={setPercentile}
           isLoading={overview.isLoading}

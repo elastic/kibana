@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
+import { AppStatus, type CoreStart } from '@kbn/core/public';
 import { AppChromeLayout } from './app_chrome_layout';
 import { useAppHeadingDocLink } from './app_heading_doc_link';
 import { useAppHeadingTitle } from './app_heading_title';
@@ -23,12 +23,19 @@ import { useAppHeadingTitle } from './app_heading_title';
 const OVERVIEW_DOC_LINK = 'https://www.elastic.co/docs/alertzero';
 const SET_UP_DOC_LINK = 'https://www.elastic.co/docs/alertzero/set-up';
 
+const setBreadcrumbs = jest.fn();
+
 const coreStartStub = {
   docLinks: {
     links: {
       securitySolution: { alertZero: { overview: OVERVIEW_DOC_LINK, setUp: SET_UP_DOC_LINK } },
     },
   },
+  application: {
+    getUrlForApp: (appId: string) => `/app/${appId}`,
+    applications$: of(new Map([['securitySolutionUI', { status: AppStatus.accessible }]])),
+  },
+  chrome: { setBreadcrumbs },
 } as unknown as CoreStart;
 
 const makeChromeWithFeedback = (openFeedback?: () => void) => {
@@ -131,6 +138,56 @@ describe('AppChromeLayout overflow', () => {
     unmount();
     renderAt('/watches');
     expect(screen.queryByTestId('appHeaderTitle')).not.toBeInTheDocument();
+  });
+});
+
+describe('AppChromeLayout breadcrumbs', () => {
+  beforeEach(() => {
+    setBreadcrumbs.mockClear();
+  });
+
+  const renderAt = (pathname: string, services: CoreStart = coreStartStub) =>
+    render(
+      <KibanaContextProvider services={services}>
+        <MockChromeContextProvider chrome={makeChromeWithFeedback(jest.fn())}>
+          <EuiProvider>
+            <Router history={createMemoryHistory({ initialEntries: [pathname] })}>
+              <AppChromeLayout>content</AppChromeLayout>
+            </Router>
+          </EuiProvider>
+        </MockChromeContextProvider>
+      </KibanaContextProvider>
+    );
+
+  it.each([
+    ['absent', new Map()],
+    ['inaccessible', new Map([['securitySolutionUI', { status: AppStatus.inaccessible }]])],
+  ])('should not link the Security breadcrumb when the Security app is %s', (_, applications) => {
+    renderAt('/', {
+      ...coreStartStub,
+      application: { ...coreStartStub.application, applications$: of(applications) },
+    });
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([{ text: 'Security' }, { text: 'AlertZero' }]);
+  });
+
+  it('should set Security > AlertZero when on the landing page', () => {
+    renderAt('/');
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([
+      { text: 'Security', href: '/app/securitySolutionUI' },
+      { text: 'AlertZero' },
+    ]);
+  });
+
+  it.each([
+    ['/escalations', 'Escalations'],
+    ['/watches/system-security-watch-floor', 'Watches'],
+  ])('should link back to AlertZero when on %s', (path, sectionTitle) => {
+    renderAt(path);
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([
+      { text: 'Security', href: '/app/securitySolutionUI' },
+      { text: 'AlertZero', href: '/app/alertzero' },
+      { text: sectionTitle },
+    ]);
   });
 });
 

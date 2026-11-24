@@ -27,7 +27,6 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types'
 import type { Condition } from '@kbn/streamlang';
 import { conditionToESQLAst, conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import { BasicPrettyPrinter, Builder } from '@elastic/esql';
-import { getESQLResults } from '@kbn/esql-utils';
 import { processCondition } from '../../utils';
 import { esqlResultToPlainObjects } from '../../../../../../util/esql_result_to_plain_objects';
 import type { StreamsTelemetryClient } from '../../../../../../telemetry/client';
@@ -475,13 +474,9 @@ function collectDocumentsFromView({
       });
     }
 
-    getESQLResults({
-      esqlQuery,
-      search: data.search.search,
-      signal: abortController.signal,
-      filter: docFilter,
-    })
-      .then(({ response }) => {
+    data.search
+      .esql({ query: esqlQuery, filter: docFilter }, { abortSignal: abortController.signal })
+      .then(({ rawResponse: response }) => {
         const docs = stripOtelAliases(
           mergeSourceIntoDocuments(esqlResultToPlainObjects(response) as SampleDocument[])
         );

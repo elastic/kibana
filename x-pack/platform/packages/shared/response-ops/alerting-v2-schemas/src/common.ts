@@ -57,9 +57,13 @@ const seriesIdSchema = lazySchema(() =>
     .regex(/^[A-Za-z0-9_-]+$/, 'Must contain only letters, digits, underscores, and hyphens.')
 );
 
-/** Semantics every client-addressable id carries; append to its `.describe()`. */
+/** Semantics every rule id carries; append to its `.describe()`. */
 const ENTITY_ID_NOTE =
   'Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.';
+
+/** Semantics every action policy id carries; append to its `.describe()`. */
+const ACTION_POLICY_ID_NOTE =
+  "You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data.";
 
 const durationSchema = lazySchema(() =>
   z
@@ -196,5 +200,6 @@ export {
   queryIntSchema,
   futureIsoDateTime,
   ENTITY_ID_NOTE,
+  ACTION_POLICY_ID_NOTE,
   ESTIMATED_COUNT_NOTE,
 };

@@ -9,6 +9,7 @@
 import { uniqBy } from 'lodash';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstAllCommands, ESQLAstForkCommand } from '@elastic/esql/types';
+import { columnsWithFlattenedKeys } from '../../definitions/utils/columns';
 import { esqlCommandRegistry } from '../../../..';
 import type { ESQLColumnData } from '../types';
 import { UnmappedFieldsStrategy } from '../types';
@@ -32,9 +33,10 @@ export const columnsAfter = async (
     for (const branchCommand of branch.commands) {
       const commandDef = esqlCommandRegistry.getCommandByName(branchCommand.name);
       if (commandDef?.methods?.columnsAfter) {
+        const fields = columnsWithFlattenedKeys(branchCommand, columnsFromBranch);
         columnsFromBranch = await commandDef.methods?.columnsAfter?.(
           branchCommand,
-          columnsFromBranch,
+          fields,
           query,
           additionalFields,
           unmappedFieldsStrategy

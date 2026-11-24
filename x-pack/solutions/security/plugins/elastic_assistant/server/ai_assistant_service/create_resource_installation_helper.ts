@@ -72,6 +72,8 @@ export function createResourceInstallationHelper(
 
   return {
     add: (namespace: string = DEFAULT_NAMESPACE_STRING, timeoutMs?: number) => {
+      // Concurrent first callers for a space must share one install, or each creates defaults.
+      if (initializedResources.has(namespace)) return;
       initializedResources.set(
         `${namespace}`,
 

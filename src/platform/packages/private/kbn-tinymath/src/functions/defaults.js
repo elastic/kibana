@@ -8,15 +8,15 @@
  */
 
 /**
- * Returns the default provided value when the first value if null. If at least one array is passed into the function, the function will be applied index-wise to each element.
- * @param {(any|any[])} a array of any values
- * @param {(any)} b a value to use as fallback.
- * @return {(any|any[])} The `a` value if not null, `b` otherwise. Returns an array where each element is default to `b` when null, or kept the original value if `a` is an array.
+ * Replaces null values with a fallback value. For arrays, the function will be applied index-wise to each element and also replaces undefined elements, such as the value of a row that doesn't have the column.
+ * @param {(any|any[])} a a value or an array of values that can include null
+ * @param {(any)} b the value to use in place of null
+ * @return {(any|any[])} `a` if it isn't null, otherwise `b`. Returns an array with `b` in place of each null or undefined element if `a` is an array.
  *
  * @example
- * defaults(null, 1) // returns 1
- * defaults([3, null, 5], 1) // returns [3, 1, 5]
  * defaults(5, 1) // returns 5
+ * defaults(value, 1) // returns 1 if value is null
+ * defaults(prices, 0) // returns [3, 0, 5] if prices is [3, null, 5]
  */
 
 module.exports = { defaults };
