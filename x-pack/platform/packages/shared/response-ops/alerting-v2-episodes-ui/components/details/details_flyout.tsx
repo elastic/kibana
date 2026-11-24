@@ -243,17 +243,9 @@ export const AlertEpisodeDetailsFlyout = ({
         actions: menuActions,
         episodes,
         viewDetailsHref,
-        onAddToChat: isAddToChatAvailable ? addToChat : undefined,
         onSuccess: invalidateEpisodeQueries,
       }),
-    [
-      menuActions,
-      episodes,
-      viewDetailsHref,
-      isAddToChatAvailable,
-      addToChat,
-      invalidateEpisodeQueries,
-    ]
+    [menuActions, episodes, viewDetailsHref, invalidateEpisodeQueries]
   );
   const [isRunbookOpen, setIsRunbookOpen] = useState(false);
 
