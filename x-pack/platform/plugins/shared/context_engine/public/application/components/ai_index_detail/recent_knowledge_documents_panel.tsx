@@ -15,6 +15,7 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
+  EuiTextTruncate,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -74,7 +75,7 @@ const RecentKnowledgeDocumentRow = ({
               action: CONTEXT_ENGINE_UI_EBT.action.overview.OPEN_RECENT_DOCUMENT,
             })}
           >
-            {getKiDisplayTitle(title)}
+            <EuiTextTruncate text={getKiDisplayTitle(title)} />
           </EuiLink>
         </EuiFlexItem>
         {/* A long type name must not push the title out: the badge cuts its text with "…". */}

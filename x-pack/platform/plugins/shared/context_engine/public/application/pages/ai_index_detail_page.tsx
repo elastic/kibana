@@ -6,7 +6,6 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -56,10 +55,6 @@ import {
   getAiIndexSettingsPath,
 } from '../paths';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
-
-// Flex items don't shrink below their content by default, so a long document title would
-// push the chart off screen. With 0, the title truncates instead.
-const shrinkableFlexItemStyle = css({ minWidth: 0 });
 
 const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
   defaultMessage: 'Managed',
@@ -318,7 +313,7 @@ export const AiIndexDetailPage = () => {
       {hasLoadedKiSummary && (
         <>
           <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem css={shrinkableFlexItemStyle}>
+            <EuiFlexItem>
               <RecentKnowledgeDocumentsPanel
                 aiIndexId={resolvedAiIndexId}
                 isManaged={isManaged}
@@ -326,7 +321,7 @@ export const AiIndexDetailPage = () => {
               />
             </EuiFlexItem>
             {hasKnowledgeIndicators && (
-              <EuiFlexItem css={shrinkableFlexItemStyle}>
+              <EuiFlexItem>
                 <KnowledgeDocumentsChartPanel aiIndexId={resolvedAiIndexId} />
               </EuiFlexItem>
             )}
