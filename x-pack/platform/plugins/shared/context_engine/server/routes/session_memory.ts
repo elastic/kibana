@@ -267,11 +267,11 @@ export const registerSessionMemoryRoutes = ({
       summary: 'Remember a session memory',
       description: [
         'Writes one memory to the session memory store. Pass `id` to revise an existing memory. The revision replaces the memory in full.',
-        'Returns 202 with the memory id and writes the memory in the background, because semantic indexing runs inside the write. The memory becomes searchable after the background write completes.',
+        'Returns 202 with the memory id and writes the memory in the background, because semantic indexing runs inside the write. The memory becomes searchable after the background write completes and Elasticsearch refreshes, so revising a memory immediately after creating it can return 404 until the write is visible.',
         "Requires the `contextEngine:write` privilege. Without `user_id`, the route writes the memory for the caller's user profile, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.",
         'Each AI index in `ai_index_ids` must exist in this space, and the caller requires the Elasticsearch `write` privilege on its backing index. Otherwise, the route rejects the request and writes nothing.',
         'After authorization, validation, and feature-flag checks pass, the route writes one `memory_remember` audit event per request, when the background write finishes or when it rejects the request. The route does not report a failed background write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit event.',
-        'Returns 429 with a `Retry-After` header when this Kibana instance is at its in-flight background write limit or shutting down.',
+        'Returns 429 with a `Retry-After` header when this Kibana instance is at its in-flight background write limit.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), when an AI index in `ai_index_ids` does not exist, or when `id` does not match an active memory of the target user in this space.',
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
@@ -304,7 +304,7 @@ export const registerSessionMemoryRoutes = ({
             429: {
               body: errorResponseSchema,
               description:
-                'Too many background memory writes are already in progress on this Kibana instance, or the instance is shutting down. Retry after the `Retry-After` interval.',
+                'Too many background memory writes are already in progress on this Kibana instance. Retry after the `Retry-After` interval.',
             },
           },
         },

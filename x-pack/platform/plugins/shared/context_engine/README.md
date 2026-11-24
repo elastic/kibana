@@ -460,8 +460,11 @@ map of string hints for dreaming.
 
 The route returns `202` with `{ "id": "..." }` and writes the memory in the background, because
 `semantic_text` inference runs inside the index request. The memory becomes searchable after
-the background write completes. The route does not report a failed write in the response.
-Instead, it logs the error to the Kibana logs and writes a failure audit event.
+the background write completes and Elasticsearch refreshes, so revising a memory immediately
+after creating it can return 404 until the write is visible. The route does not report a failed
+write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit
+event. When this Kibana instance is at its in-flight background write limit, the route returns
+`429` with a `Retry-After` header.
 
 The space comes from the request URL. The route returns 404 while `contextEngine:enabled` or
 the memory setting is off. Each AI index in `ai_index_ids` must exist in the request space, or
