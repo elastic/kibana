@@ -10,6 +10,7 @@ import { securityServiceMock } from '@kbn/core/server/mocks';
 import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { PackagePolicyNotFoundError } from '@kbn/fleet-plugin/server/errors';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import type {
@@ -427,6 +428,45 @@ describe('PUT export provider key route', () => {
       })
     );
   });
+
+  it.each<[string, () => Error]>([
+    [
+      'a saved-objects not-found error',
+      () =>
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          'ingest-package-policies',
+          PACKAGE_POLICY_ID
+        ),
+    ],
+    [
+      "Fleet's PackagePolicyNotFoundError",
+      () =>
+        new PackagePolicyNotFoundError(`Package policy '${PACKAGE_POLICY_ID}' not found`, {
+          packagePolicyId: PACKAGE_POLICY_ID,
+        }),
+    ],
+  ])(
+    'responds with 404 and does not delete the created key when the update throws %s',
+    async (_, buildError) => {
+      fleetServices.packagePolicy.update.mockRejectedValue(buildError());
+
+      await callRoute();
+
+      expect(keyClient.createAccountKey).toHaveBeenCalled();
+      expect(keyClient.deleteKeys).not.toHaveBeenCalled();
+      expect(httpResponseMock.notFound).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          message: `Elastic Defend policy [${PACKAGE_POLICY_ID}] not found`,
+        }),
+      });
+      expect(securityMock.audit.asScoped(httpRequestMock).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining(`key [id=${NEW_KEY_ID}] was created`),
+          event: expect.objectContaining({ outcome: 'failure' }),
+        })
+      );
+    }
+  );
 
   it('passes through a callback error with apiPassThrough and a numeric statusCode', async () => {
     const callbackError = Object.assign(

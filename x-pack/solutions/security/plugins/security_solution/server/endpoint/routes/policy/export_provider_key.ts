@@ -9,6 +9,7 @@ import { capitalize } from 'lodash';
 import type { AuditEvent, RequestHandler } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PackagePolicyNotFoundError } from '@kbn/fleet-plugin/server/errors';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type {
   SetExportProviderKeyRequestBody,
@@ -183,8 +184,9 @@ export const getSetExportProviderKeyHandler = (
       }
 
       try {
-        // Fleet space awareness may be off, in which case the scoped SO client above does not
-        // actually filter by space; this is the check that still rejects a policy outside it.
+        // With Fleet space awareness on, package policies belong to spaces and this rejects one
+        // outside the request's space. With it off, the legacy package policy type is
+        // space-agnostic: there are no per-space policies, so there is nothing to filter.
         await fleetServices.ensureInCurrentSpace({ integrationPolicyIds: [packagePolicyId] });
       } catch (error) {
         if (error instanceof NotFoundError) {
@@ -249,6 +251,13 @@ export const getSetExportProviderKeyHandler = (
       } catch (error) {
         if (SavedObjectsErrorHelpers.isConflictError(error)) {
           throw new CustomHttpRequestError(POLICY_CHANGED_MESSAGE, 409);
+        }
+
+        if (
+          SavedObjectsErrorHelpers.isNotFoundError(error) ||
+          error instanceof PackagePolicyNotFoundError
+        ) {
+          throw createPolicyNotFoundError(packagePolicyId);
         }
 
         if (isApiPassThroughError(error)) {

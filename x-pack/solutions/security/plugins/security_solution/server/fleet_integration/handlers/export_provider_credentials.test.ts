@@ -65,6 +65,55 @@ describe('rejectResponseActionsInOverrides()', () => {
   });
 
   it.each<[string, Pick<NewPackagePolicy, 'overrides'>]>([
+    [
+      'a literal dotted key for the whole "policy.windows.response_actions" path',
+      {
+        overrides: {
+          inputs: {
+            endpoint: {
+              'policy.windows.response_actions': { export_providers: [buildProvider()] },
+            },
+          },
+        },
+      },
+    ],
+    [
+      'a literal dotted key for "windows.response_actions"',
+      {
+        overrides: {
+          inputs: {
+            endpoint: {
+              policy: { 'windows.response_actions': { export_providers: [buildProvider()] } },
+            },
+          },
+        },
+      },
+    ],
+    [
+      'a literal dotted key for "response_actions.export_providers"',
+      {
+        overrides: {
+          inputs: {
+            endpoint: {
+              policy: { windows: { 'response_actions.export_providers': [buildProvider()] } },
+            },
+          },
+        },
+      },
+    ],
+    [
+      'response_actions set to null',
+      { overrides: { inputs: { endpoint: { policy: { windows: { response_actions: null } } } } } },
+    ],
+  ])('rejects %s', (_, packagePolicy) => {
+    const error = getError(() => rejectResponseActionsInOverrides(packagePolicy));
+
+    expect(error).toBeInstanceOf(EndpointIntegrationFleetError);
+    expect(error.statusCode).toBe(400);
+    expect(error.message).toBe(`Package policy overrides can't set response_actions`);
+  });
+
+  it.each<[string, Pick<NewPackagePolicy, 'overrides'>]>([
     ['overrides is null', { overrides: null }],
     ['overrides.inputs is an array', { overrides: { inputs: [] } }],
     ['the input is not an object', { overrides: { inputs: { endpoint: 'not-an-object' } } }],
@@ -83,6 +132,20 @@ describe('rejectResponseActionsInOverrides()', () => {
           inputs: { endpoint: { policy: { windows: { response_actions: undefined } } } },
         },
       },
+    ],
+    [
+      'another policy key is set, nested',
+      {
+        overrides: { inputs: { endpoint: { policy: { windows: { malware: { mode: 'off' } } } } } },
+      },
+    ],
+    [
+      'another policy key is set, as a literal dotted key',
+      { overrides: { inputs: { endpoint: { 'policy.windows.malware.mode': 'off' } } } },
+    ],
+    [
+      'a key that only starts with "response_actions"',
+      { overrides: { inputs: { endpoint: { 'policy.windows.response_actionsX': {} } } } },
     ],
   ])('tolerates a malformed shape: %s', (_, packagePolicy) => {
     expect(() => rejectResponseActionsInOverrides(packagePolicy)).not.toThrow();

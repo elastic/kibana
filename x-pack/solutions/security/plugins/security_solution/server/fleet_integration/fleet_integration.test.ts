@@ -262,29 +262,60 @@ describe('Fleet integrations', () => {
           experimentalFeatures
         );
 
-      it.each<[string, boolean]>([
-        ['with a request', true],
-        ['without a request', false],
-      ])('rejects response_actions in overrides, %s', async (_, withRequest) => {
-        const newPackagePolicy = {
-          ...createNewPackagePolicyMock(),
-          overrides: { inputs: { endpoint: { policy: { windows: { response_actions: {} } } } } },
-        };
+      it.each<[string, boolean, Record<string, unknown>]>([
+        [
+          'the nested form, with a request',
+          true,
+          { policy: { windows: { response_actions: {} } } },
+        ],
+        [
+          'the nested form, without a request',
+          false,
+          { policy: { windows: { response_actions: {} } } },
+        ],
+        [
+          'a literal dotted key for the whole "policy.windows.response_actions" path, with a request',
+          true,
+          { 'policy.windows.response_actions': { export_providers: [provider] } },
+        ],
+        [
+          'a literal dotted key for the whole "policy.windows.response_actions" path, without a request',
+          false,
+          { 'policy.windows.response_actions': { export_providers: [provider] } },
+        ],
+        [
+          'a literal dotted key for "windows.response_actions", with a request',
+          true,
+          { policy: { 'windows.response_actions': { export_providers: [provider] } } },
+        ],
+        [
+          'a literal dotted key for "windows.response_actions", without a request',
+          false,
+          { policy: { 'windows.response_actions': { export_providers: [provider] } } },
+        ],
+      ])(
+        'rejects response_actions in overrides, %s',
+        async (_, withRequest, endpointInputOverride) => {
+          const newPackagePolicy = {
+            ...createNewPackagePolicyMock(),
+            overrides: { inputs: { endpoint: endpointInputOverride } },
+          };
 
-        await expect(
-          buildCallback()(
-            newPackagePolicy,
-            soClient,
-            esClient,
-            withRequest ? requestContextMock.convertContext(ctx) : undefined,
-            withRequest ? req : undefined
-          )
-        ).rejects.toMatchObject({
-          statusCode: 400,
-          apiPassThrough: true,
-          message: `Package policy overrides can't set response_actions`,
-        });
-      });
+          await expect(
+            buildCallback()(
+              newPackagePolicy,
+              soClient,
+              esClient,
+              withRequest ? requestContextMock.convertContext(ctx) : undefined,
+              withRequest ? req : undefined
+            )
+          ).rejects.toMatchObject({
+            statusCode: 400,
+            apiPassThrough: true,
+            message: `Package policy overrides can't set response_actions`,
+          });
+        }
+      );
 
       it.each<[string, boolean]>([
         ['with a request', true],
@@ -2195,7 +2226,17 @@ describe('Fleet integrations', () => {
         });
       });
 
-      it('should reject response_actions in overrides', async () => {
+      it.each<[string, Record<string, unknown>]>([
+        ['the nested form', { policy: { mac: { response_actions: {} } } }],
+        [
+          'a literal dotted key for the whole "policy.windows.response_actions" path',
+          { 'policy.windows.response_actions': { export_providers: [provider] } },
+        ],
+        [
+          'a literal dotted key for "windows.response_actions"',
+          { policy: { 'windows.response_actions': { export_providers: [provider] } } },
+        ],
+      ])('should reject response_actions in overrides, %s', async (_, endpointInputOverride) => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
@@ -2205,7 +2246,7 @@ describe('Fleet integrations', () => {
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = policyFactory();
         policyConfig.overrides = {
-          inputs: { endpoint: { policy: { mac: { response_actions: {} } } } },
+          inputs: { endpoint: endpointInputOverride },
         };
 
         await expect(

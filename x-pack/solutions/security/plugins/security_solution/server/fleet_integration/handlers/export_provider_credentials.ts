@@ -6,6 +6,7 @@
  */
 
 import { isPlainObject } from 'lodash';
+import { getFlattenedObject } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
 import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { EXPORT_PROVIDER_KEY_ROUTE } from '../../../common/endpoint/constants';
@@ -53,11 +54,54 @@ const getOsExportProvidersFrom = (policyValue: unknown, os: PolicyOperatingSyste
   return getOsExportProviders((policyValue as Record<string, unknown>)[os]);
 };
 
+/** Matches `policy.<os>.response_actions`, or anything nested under it, in a flattened path */
+const RESPONSE_ACTIONS_OVERRIDE_PATH = /^policy\.(windows|mac|linux)\.response_actions(\.|$)/;
+
+/**
+ * Recursively replaces every own-enumerable *empty* plain object with a sentinel value.
+ * `getFlattenedObject` emits no leaf for an empty object (its loop over the object's entries
+ * never runs), so a bare `response_actions: {}` override would otherwise flatten to nothing and
+ * slip past the path check below.
+ */
+const markEmptyObjects = (value: unknown): unknown => {
+  if (!isPlainObject(value)) {
+    return value;
+  }
+
+  const entries = Object.entries(value as Record<string, unknown>);
+
+  if (entries.length === 0) {
+    return { __empty__: true };
+  }
+
+  return Object.fromEntries(entries.map(([key, child]) => [key, markEmptyObjects(child)]));
+};
+
+/**
+ * Whether an override `input` sets `response_actions` on any OS, in nested form
+ * (`{ policy: { windows: { response_actions: ... } } }`) or through a literal dotted key, at any
+ * depth (`{ 'policy.windows.response_actions': ... }`, `{ policy: { 'windows.response_actions': ... } }`,
+ * `{ policy: { windows: { 'response_actions.export_providers': ... } } }`, ...): `getFlattenedObject`
+ * joins both forms into the same dot-separated paths, so a single regex catches every case. An
+ * explicit `undefined` leaf is treated the same as "not set" (the pre-existing behaviour).
+ */
+const hasResponseActionsOverride = (input: Record<string, unknown>): boolean => {
+  const flattened = getFlattenedObject(markEmptyObjects(input) as Record<string, unknown>);
+
+  return Object.entries(flattened).some(
+    ([path, value]) => value !== undefined && RESPONSE_ACTIONS_OVERRIDE_PATH.test(path)
+  );
+};
+
 /**
  * Rejects (400) a package policy whose `overrides` set `response_actions` on any OS: `overrides`
- * are merged into the agent policy after every other check, so this is the only place that catches
- * it. `overrides` is loosely typed and may come from an unvalidated API payload, so every level is
- * checked before it is read; its values are never echoed.
+ * are merged into the agent input as is, after every other check
+ * (`x-pack/platform/plugins/shared/fleet/server/services/agent_policies/package_policies_to_agent_inputs.ts`
+ * ~l.185), and Elastic Agent expands any dotted override key into its nested form before applying it
+ * (`x-pack/platform/plugins/shared/fleet/common/services/agent_policy_overrides.ts` ~l.22), so a
+ * literal `'policy.windows.response_actions'` key is exactly as dangerous as the nested one. This
+ * is the only place that catches it. `overrides` is loosely typed and may come from an unvalidated
+ * API payload, so every level is checked before it is read; its values are never echoed.
  */
 export const rejectResponseActionsInOverrides = (
   packagePolicy: Pick<NewPackagePolicy, 'overrides'>
@@ -68,30 +112,11 @@ export const rejectResponseActionsInOverrides = (
     return;
   }
 
-  const hasResponseActionsOverride = Object.values(inputs as Record<string, unknown>).some(
-    (input) => {
-      if (!isPlainObject(input)) {
-        return false;
-      }
-
-      const policy = (input as Record<string, unknown>).policy;
-
-      if (!isPlainObject(policy)) {
-        return false;
-      }
-
-      return POLICY_OPERATING_SYSTEMS.some((os) => {
-        const osConfig = (policy as Record<string, unknown>)[os];
-
-        return (
-          isPlainObject(osConfig) &&
-          (osConfig as Record<string, unknown>).response_actions !== undefined
-        );
-      });
-    }
+  const hasOverride = Object.values(inputs as Record<string, unknown>).some(
+    (input) => isPlainObject(input) && hasResponseActionsOverride(input as Record<string, unknown>)
   );
 
-  if (hasResponseActionsOverride) {
+  if (hasOverride) {
     throw new EndpointIntegrationFleetError(`Package policy overrides can't set response_actions`);
   }
 };

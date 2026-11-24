@@ -1138,6 +1138,8 @@ describe('When rendering the StorageProvidersLayout', () => {
       await userEvent.click(renderResult.getByTestId('storageProviderFlyout-replaceKeyButton'));
       const keyInput = await renderResult.findByTestId('storageProviderFlyout-accountKeyInput');
       expect(keyInput).toHaveValue('');
+      // Browsers must not autofill a saved password into the account key
+      expect(keyInput).toHaveAttribute('autocomplete', 'new-password');
       // Nothing was typed yet
       expect(renderResult.getByTestId('storageProviderFlyout-saveButton')).toBeDisabled();
 
@@ -1160,6 +1162,41 @@ describe('When rendering the StorageProvidersLayout', () => {
         providerId: 'azure-1',
         packagePolicyVersion: 'policy-version-7',
         accountKey: VALID_ACCOUNT_KEY,
+      });
+    });
+
+    it('should rename a provider and replace its key in one save: the Fleet update keeps the reference under the new id, then the key uses the new id and the returned version', async () => {
+      const existing = createProvider('azure-1', {
+        credentials: { type: 'account_key', key_id: 'key-1' },
+      });
+      await render([existing], 'policy-version-20');
+
+      await clickRowAction('azure-1', 'storageProvidersEditAction');
+      await renderResult.findByTestId('storageProviderFlyout');
+      await setFieldValue('storageProviderFlyout-nameInput', 'azure-renamed');
+      await userEvent.click(renderResult.getByTestId('storageProviderFlyout-replaceKeyButton'));
+      await setFieldValue('storageProviderFlyout-accountKeyInput', VALID_ACCOUNT_KEY);
+
+      const renamedProvider = { ...existing, id: 'azure-renamed' };
+      mockPolicyUpdateResponse([renamedProvider], 'policy-version-21');
+      mockKeyRouteResponse([
+        { ...renamedProvider, credentials: { type: 'account_key' as const, key_id: 'key-2' } },
+      ]);
+
+      await userEvent.click(renderResult.getByTestId('storageProviderFlyout-saveButton'));
+      await waitForUpdateRequest();
+      await waitForKeyRequest();
+
+      expect(apiMocks.responseProvider.updateEndpointPolicy).toHaveBeenCalledTimes(1);
+      expect(getSentProviders()).toEqual([renamedProvider]);
+      expect(getSentKeyRequest()).toEqual({
+        packagePolicyId: policy.id,
+        providerId: 'azure-renamed',
+        packagePolicyVersion: 'policy-version-21',
+        accountKey: VALID_ACCOUNT_KEY,
+      });
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('storageProviderFlyout')).not.toBeInTheDocument();
       });
     });
 

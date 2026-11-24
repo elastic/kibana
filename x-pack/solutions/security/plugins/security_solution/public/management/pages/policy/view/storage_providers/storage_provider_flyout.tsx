@@ -463,6 +463,7 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
                   disabled={isSaving}
                   isInvalid={Boolean(visibleKeyError)}
                   fullWidth
+                  autoComplete="new-password"
                   data-test-subj="storageProviderFlyout-accountKeyInput"
                 />
               </EuiFormRow>
