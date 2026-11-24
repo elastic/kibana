@@ -1,5 +1,5 @@
 {
-  "sha1": "51a2ff852deca86d2efde49021ea4c93b4871da1",
+  "sha1": "6d9f33604a7936eca947413ea6e13ef3444c3d2e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/unenroll_agent_with_tamper_protection_enabled.spec.ts",
-        "line": 48,
-        "column": 25
+        "line": 27,
+        "column": 7
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_changing_policy_from_disabled_to_enabled.spec.ts",
-        "line": 47,
-        "column": 25
+        "line": 24,
+        "column": 7
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_changing_policy_from_enabled_to_disabled.spec.ts",
-        "line": 47,
-        "column": 25
+        "line": 24,
+        "column": 7
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_changing_policy_from_enabled_to_enabled.spec.ts",
-        "line": 39,
-        "column": 25
+        "line": 17,
+        "column": 9
       }
     },
     {
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_with_tamper_protection_disabled.spec.ts",
-        "line": 47,
+        "line": 25,
         "column": 7
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/tests/uninstall_agent_with_tamper_protection_enabled.spec.ts",
-        "line": 47,
+        "line": 25,
         "column": 7
       }
     }

@@ -6,7 +6,7 @@
  */
 
 import type { KbnClient, ScoutLogger } from '@kbn/scout-security';
-import { apiTest as baseApiTest } from '@kbn/scout-security';
+import { apiTest as baseApiTest, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import {
   FLEET_AND_HOST_TIMEOUT_MS,
   withEnrolledHost,
@@ -46,6 +46,11 @@ interface TamperProtectionTestFixtures {
 
 interface TamperProtectionWorkerFixtures {
   fleetServer: void;
+  /**
+   * Headers with an API key that can use Fleet and read Endpoint host metadata,
+   * shared by every request the specs make with `apiClient`.
+   */
+  requestHeaders: Record<string, string>;
 }
 
 const createAgentPolicy = (
@@ -67,6 +72,29 @@ export const apiTest = baseApiTest.extend<
       await withFleetServerForEndpoint({ kbnClient, log }, use);
     },
     { scope: 'worker', timeout: FLEET_AND_HOST_TIMEOUT_MS },
+  ],
+
+  requestHeaders: [
+    async ({ requestAuth }, use) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole({
+        elasticsearch: { cluster: [], indices: [] },
+        kibana: [
+          {
+            base: [],
+            // `siemV5: read` grants the `securitySolution` API privilege the host metadata route requires.
+            feature: { fleetv2: ['all'], siemV5: ['read'] },
+            spaces: ['default'],
+          },
+        ],
+      });
+      await use({
+        ...apiKeyHeader,
+        ...PUBLIC_API_HEADERS,
+        'kbn-xsrf': 'scout-edr-real-fleet',
+        'Content-Type': 'application/json',
+      });
+    },
+    { scope: 'worker' },
   ],
 
   agentPolicyOptions: [
