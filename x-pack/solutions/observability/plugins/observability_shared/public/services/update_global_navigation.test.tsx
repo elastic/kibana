@@ -9,7 +9,13 @@ import type { Subject } from 'rxjs';
 import type { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { casesFeatureId } from '../../common';
-import { hasObservabilityCapabilities, updateGlobalNavigation } from './update_global_navigation';
+import {
+  hasClassicAlertsReadCapability,
+  hasClassicRulesReadCapability,
+  hasObservabilityAlertReadCapabilities,
+  hasObservabilityRuleReadCapabilities,
+  updateGlobalNavigation,
+} from './update_global_navigation';
 
 // Used in updater callback
 const app = {} as unknown as App;
@@ -28,49 +34,120 @@ const noObservabilityCapabilities = {
   navLinks: { apm: false, logs: false, metrics: false, uptime: false },
 } as unknown as ApplicationStart['capabilities'];
 
-describe('hasObservabilityCapabilities', () => {
-  it('is true for logs.show, observabilityAlerts.show, and Observability navLinks', () => {
+describe('hasObservabilityRuleReadCapabilities', () => {
+  it('is true for logs.show and Observability navLinks', () => {
     expect(
-      hasObservabilityCapabilities({
+      hasObservabilityRuleReadCapabilities({
         logs: { show: true },
         navLinks: {},
       } as unknown as ApplicationStart['capabilities'])
     ).toBe(true);
     expect(
-      hasObservabilityCapabilities({
-        observabilityAlerts: { show: true },
-        navLinks: {},
-      } as unknown as ApplicationStart['capabilities'])
-    ).toBe(true);
-    expect(
-      hasObservabilityCapabilities({
+      hasObservabilityRuleReadCapabilities({
         navLinks: { apm: true },
       } as unknown as ApplicationStart['capabilities'])
     ).toBe(true);
     expect(
-      hasObservabilityCapabilities({
+      hasObservabilityRuleReadCapabilities({
         navLinks: { metrics: true },
       } as unknown as ApplicationStart['capabilities'])
     ).toBe(true);
     expect(
-      hasObservabilityCapabilities({
+      hasObservabilityRuleReadCapabilities({
         navLinks: { uptime: true },
       } as unknown as ApplicationStart['capabilities'])
     ).toBe(true);
     expect(
-      hasObservabilityCapabilities({
+      hasObservabilityRuleReadCapabilities({
         navLinks: { synthetics: true },
       } as unknown as ApplicationStart['capabilities'])
     ).toBe(true);
     expect(
-      hasObservabilityCapabilities({
+      hasObservabilityRuleReadCapabilities({
         navLinks: { slo: true },
       } as unknown as ApplicationStart['capabilities'])
     ).toBe(true);
   });
 
+  it('is false for observabilityAlerts.show alone', () => {
+    expect(
+      hasObservabilityRuleReadCapabilities({
+        observabilityAlerts: { show: true },
+        navLinks: {},
+      } as unknown as ApplicationStart['capabilities'])
+    ).toBe(false);
+    expect(
+      hasObservabilityAlertReadCapabilities({
+        observabilityAlerts: { show: true },
+        navLinks: {},
+      } as unknown as ApplicationStart['capabilities'])
+    ).toBe(true);
+  });
+
   it('is false without Observability app capabilities', () => {
-    expect(hasObservabilityCapabilities(noObservabilityCapabilities)).toBe(false);
+    expect(hasObservabilityRuleReadCapabilities(noObservabilityCapabilities)).toBe(false);
+    expect(hasObservabilityAlertReadCapabilities(noObservabilityCapabilities)).toBe(false);
+  });
+});
+
+describe('classic rules and alerts read', () => {
+  const capabilities = (features: Record<string, unknown>) =>
+    ({
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      ...features,
+    } as unknown as ApplicationStart['capabilities']);
+
+  it.each([
+    ['an observability nav link', { navLinks: { apm: true } }],
+    ['logs show', { logs: { show: true } }],
+    ['stack rules show', { stackAlerts: { show: true } }],
+    ['the machine learning app privilege', { navLinks: { ml: true } }],
+    ['data set quality show', { dataQuality: { show: true } }],
+  ])('treats %s as rule and alert read', (_label, features) => {
+    expect(hasClassicRulesReadCapability(capabilities(features))).toBe(true);
+    expect(hasClassicAlertsReadCapability(capabilities(features))).toBe(true);
+  });
+
+  it('treats observability alerts and stack alerts only as alert read', () => {
+    expect(
+      hasClassicRulesReadCapability(capabilities({ observabilityAlerts: { show: true } }))
+    ).toBe(false);
+    expect(
+      hasClassicAlertsReadCapability(capabilities({ observabilityAlerts: { show: true } }))
+    ).toBe(true);
+    expect(hasClassicRulesReadCapability(capabilities({ stackAlertsOnly: { show: true } }))).toBe(
+      false
+    );
+    expect(hasClassicAlertsReadCapability(capabilities({ stackAlertsOnly: { show: true } }))).toBe(
+      true
+    );
+  });
+
+  it('returns false for Actions and Connectors, Classic Rules Settings, and Security rules', () => {
+    expect(
+      hasClassicRulesReadCapability(
+        capabilities({
+          actions: { show: true },
+          rulesSettings: { show: true },
+          management: {
+            insightsAndAlerting: {
+              triggersActionsRules: true,
+              triggersActionsConnectors: true,
+            },
+          },
+        })
+      )
+    ).toBe(false);
+    expect(
+      hasClassicAlertsReadCapability(
+        capabilities({
+          securitySolutionRulesV4: { read_rules: true },
+          siem: { show: true },
+        })
+      )
+    ).toBe(false);
   });
 });
 
@@ -287,6 +364,51 @@ describe('updateGlobalNavigation', () => {
             order: 8001,
             path: '/alerts',
             visibleIn: [],
+          },
+        ];
+        const callback = jest.fn();
+        const updater$ = {
+          next: (cb: AppUpdater) => callback(cb(app)),
+        } as unknown as Subject<AppUpdater>;
+
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
+
+        expect(callback).toHaveBeenCalledWith({
+          deepLinks: [
+            {
+              id: 'alerts',
+              title: 'Alerts',
+              order: 8001,
+              path: '/alerts',
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+            },
+          ],
+          status: AppStatus.accessible,
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
+        });
+      });
+
+      it('hides the rules deep link', () => {
+        const capabilities = {
+          logs: { show: false },
+          observabilityAlerts: { show: true },
+          navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+        } as unknown as ApplicationStart['capabilities'];
+
+        const deepLinks: AppDeepLink[] = [
+          {
+            id: 'alerts',
+            title: 'Alerts',
+            order: 8001,
+            path: '/alerts',
+            visibleIn: [],
+          },
+          {
+            id: 'rules',
+            title: 'Rules',
+            order: 8002,
+            path: '/rules',
+            visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
           },
         ];
         const callback = jest.fn();

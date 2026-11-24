@@ -7,7 +7,7 @@
 
 import type { AppDeepLink, AppDeepLinkLocations, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
+import { hasObservabilityAlertReadCapabilities } from '@kbn/observability-shared-plugin/public';
 import {
   getObservabilityRulesTabVisibility,
   hasObservabilityAlertingCapabilities,
@@ -103,7 +103,7 @@ const getAccessibleVisibleIn = (
 
   if (link.id === OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID) {
     const { v2 } = hasObservabilityAlertingCapabilities(capabilities, 'alerts');
-    if (v2 || hasObservabilityCapabilities(capabilities)) {
+    if (v2 || hasObservabilityAlertReadCapabilities(capabilities)) {
       return [...SEARCHABLE_VISIBLE_IN, 'classicSideNav'];
     }
   }

@@ -9,7 +9,7 @@ import type { Capabilities } from '@kbn/core/public';
 import {
   hasClassicAlertsReadCapability,
   hasClassicRulesReadCapability,
-} from '@kbn/rule-data-utils';
+} from '@kbn/observability-shared-plugin/public';
 
 const ALERTING_V2_FEATURE_IDS: Record<string, string> = {
   rules: 'alerting_v2_rules',

@@ -21,8 +21,8 @@ import {
 import {
   hasClassicAlertsReadCapability,
   hasClassicRulesReadCapability,
-} from '@kbn/rule-data-utils';
-import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
+  hasObservabilityAlertReadCapabilities,
+} from '@kbn/observability-shared-plugin/public';
 
 const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
@@ -65,7 +65,7 @@ export const canReadV1Alerts = (core: CoreStart): boolean =>
 
 /** Gate for the observability-overview Alerts table link. */
 export const canListClassicAlertsTable = (core: CoreStart): boolean =>
-  hasObservabilityCapabilities(core.application.capabilities);
+  hasObservabilityAlertReadCapabilities(core.application.capabilities);
 
 /** Gate for the Classic rules link in the Alerting panel. */
 export const canReadV1Rules = (core: CoreStart): boolean =>

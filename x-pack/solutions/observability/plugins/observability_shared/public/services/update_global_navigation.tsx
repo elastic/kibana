@@ -15,18 +15,40 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
-import { OBSERVABILITY_SOLUTION_NAV_LINK_IDS } from '@kbn/rule-data-utils';
+import {
+  hasPlatformAlertReadCapabilities,
+  hasPlatformRuleReadCapabilities,
+} from '@kbn/rule-data-utils';
 import { casesFeatureId } from '../../common';
 
-/** True when the user can open Observability; nav-link ids match classic rule visibility. */
-export function hasObservabilityCapabilities(capabilities: Capabilities): boolean {
-  const { navLinks, logs, observabilityAlerts } = capabilities;
-  const hasSolutionNavLink = OBSERVABILITY_SOLUTION_NAV_LINK_IDS.some(
-    (appId) => navLinks[appId] === true
-  );
+/** Observability features whose privileges grant classic rule read. */
+export function hasObservabilityRuleReadCapabilities(capabilities: Capabilities): boolean {
+  const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
+  /* logs is a special case.
+   * It is not a nav link but still exists as a
+   * Kibana feature privilege with attached rule types */
+  const logs = capabilities.logs?.show;
 
-  return hasSolutionNavLink || logs?.show === true || observabilityAlerts?.show === true;
+  return Object.values({ apm, logs, metrics, uptime, synthetics, slo }).some(Boolean);
 }
+
+/** Observability features whose privileges grant classic alert read. */
+export function hasObservabilityAlertReadCapabilities(capabilities: Capabilities): boolean {
+  return (
+    hasObservabilityRuleReadCapabilities(capabilities) ||
+    capabilities.observabilityAlerts?.show === true
+  );
+}
+
+/** Any privilege that can read rules on the Observability classic Rules page. */
+export const hasClassicRulesReadCapability = (capabilities: Capabilities): boolean =>
+  hasObservabilityRuleReadCapabilities(capabilities) ||
+  hasPlatformRuleReadCapabilities(capabilities);
+
+/** Any privilege that can read classic alerts, including alert-only features. */
+export const hasClassicAlertsReadCapability = (capabilities: Capabilities): boolean =>
+  hasObservabilityAlertReadCapabilities(capabilities) ||
+  hasPlatformAlertReadCapabilities(capabilities);
 
 function hasAccessToCases(capabilities: Capabilities): boolean {
   return Boolean(capabilities[casesFeatureId]?.read_cases);
@@ -46,12 +68,13 @@ export function updateGlobalNavigation({
   showV1Alerts?: boolean;
 }) {
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
-  const hasObsCapabilities = hasObservabilityCapabilities(capabilities);
+  const hasObsAlertCapabilities = hasObservabilityAlertReadCapabilities(capabilities);
+  const hasObsRuleCapabilities = hasObservabilityRuleReadCapabilities(capabilities);
   const hasCasesAccess = hasAccessToCases(capabilities);
   // App access is capability-based only so the security gate applies on all pricing tiers.
-  const isAccessible = hasObsCapabilities || hasCasesAccess;
+  const isAccessible = hasObsAlertCapabilities || hasCasesAccess;
   // Nav visibility keeps the incomplete-overview pricing bypass (nav only, not AppStatus).
-  const someVisible = hasObsCapabilities || !isCompleteOverviewEnabled;
+  const someVisible = hasObsAlertCapabilities || !isCompleteOverviewEnabled;
 
   const updatedDeepLinks = deepLinks
     .map((link) => {
@@ -66,7 +89,7 @@ export function updateGlobalNavigation({
           return null;
         case 'alerts':
           // Observability feature access only — cases-only users do not get alerts/rules nav.
-          if (hasObsCapabilities) {
+          if (hasObsAlertCapabilities) {
             const alertsVisibleIn: AppDeepLinkLocations[] = showV1Alerts
               ? ['classicSideNav', 'projectSideNav', 'globalSearch']
               : [];
@@ -74,7 +97,7 @@ export function updateGlobalNavigation({
           }
           return null;
         case 'rules':
-          if (hasObsCapabilities) {
+          if (hasObsRuleCapabilities) {
             return {
               ...link,
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],

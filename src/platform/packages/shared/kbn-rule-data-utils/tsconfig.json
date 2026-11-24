@@ -14,6 +14,7 @@
     "@kbn/es-query",
     "@kbn/utility-types",
     "@kbn/core-capabilities-common",
+    "@kbn/deeplinks-ml",
   ],
   "exclude": [
     "target/**/*",

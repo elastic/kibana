@@ -10,8 +10,8 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import {
-  hasClassicAlertsReadCapability,
-  hasClassicRulesReadCapability,
+  hasPlatformAlertReadCapabilities,
+  hasPlatformRuleReadCapabilities,
   STACK_ALERTS_SHOW_UI_CAPABILITY,
 } from '@kbn/rule-data-utils';
 import { BUILT_IN_ALERTS_FEATURE, STACK_ALERTS_ONLY_FEATURE } from './feature';
@@ -199,14 +199,14 @@ describe('Stack Alerts Feature Privileges', () => {
       const capabilities = {
         navLinks: {},
         [BUILT_IN_ALERTS_FEATURE.id]: ui,
-      } as Parameters<typeof hasClassicRulesReadCapability>[0];
+      } as Parameters<typeof hasPlatformRuleReadCapabilities>[0];
 
       expect(privilege?.management?.insightsAndAlerting).toContain('triggersActionsRules');
       expect(privilege?.alerting?.rule?.[level === 'all' ? 'all' : 'read']?.length).toBeGreaterThan(
         0
       );
-      expect(hasClassicRulesReadCapability(capabilities)).toBe(true);
-      expect(hasClassicAlertsReadCapability(capabilities)).toBe(true);
+      expect(hasPlatformRuleReadCapabilities(capabilities)).toBe(true);
+      expect(hasPlatformAlertReadCapabilities(capabilities)).toBe(true);
     }
   );
 });
@@ -222,11 +222,11 @@ describe('Stack Alerts Only feature and the classic alerts gate', () => {
       const capabilities = {
         navLinks: {},
         [STACK_ALERTS_ONLY_FEATURE.id]: ui,
-      } as Parameters<typeof hasClassicRulesReadCapability>[0];
+      } as Parameters<typeof hasPlatformRuleReadCapabilities>[0];
 
       expect(privilege?.management?.insightsAndAlerting).not.toContain('triggersActionsRules');
-      expect(hasClassicRulesReadCapability(capabilities)).toBe(false);
-      expect(hasClassicAlertsReadCapability(capabilities)).toBe(true);
+      expect(hasPlatformRuleReadCapabilities(capabilities)).toBe(false);
+      expect(hasPlatformAlertReadCapabilities(capabilities)).toBe(true);
     }
   );
 });

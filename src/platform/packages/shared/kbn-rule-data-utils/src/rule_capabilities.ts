@@ -8,6 +8,7 @@
  */
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import { ML_APP_ID } from '@kbn/deeplinks-ml';
 import {
   STACK_ALERTS_FEATURE_ID,
   STACK_ALERTS_ONLY_FEATURE_ID,
@@ -17,45 +18,20 @@ import {
 /** UI capability for the Stack Management Rules page. */
 export const TRIGGERS_ACTIONS_RULES_CAPABILITY_ID = 'triggersActionsRules' as const;
 
+// Matches PLUGIN_FEATURE_ID in x-pack/platform/plugins/shared/data_quality/common/index.ts.
+const DATA_QUALITY_FEATURE_ID = 'dataQuality';
+
+/** True for the Stack Management Rules capability, including Actions and Connectors and Classic Rules Settings. */
 export const canAccessTriggersActionsRules = (capabilities: Capabilities): boolean =>
   Boolean(capabilities.management?.insightsAndAlerting?.[TRIGGERS_ACTIONS_RULES_CAPABILITY_ID]);
 
-/** Observability app ids granted together with classic rule and alert read. */
-export const OBSERVABILITY_SOLUTION_NAV_LINK_IDS = [
-  'apm',
-  'metrics',
-  'uptime',
-  'synthetics',
-  'slo',
-] as const;
+/** Platform features whose privileges grant classic rule read. Each one also grants `triggersActionsRules`. */
+export const hasPlatformRuleReadCapabilities = (capabilities: Capabilities): boolean =>
+  capabilities[STACK_ALERTS_FEATURE_ID]?.[STACK_ALERTS_SHOW_UI_CAPABILITY] === true ||
+  capabilities.navLinks?.[ML_APP_ID] === true ||
+  capabilities[DATA_QUALITY_FEATURE_ID]?.show === true;
 
-const LOGS_FEATURE_ID = 'logs';
-const DATA_QUALITY_FEATURE_ID = 'dataQuality';
-const OBSERVABILITY_ALERTS_FEATURE_ID = 'observabilityAlerts';
-const FEATURE_UI_SHOW = 'show';
-const ML_APP_ID = 'ml';
-
-const hasFeatureUi = (
-  capabilities: Capabilities,
-  featureId: string,
-  uiCapability: string
-): boolean => capabilities[featureId]?.[uiCapability] === true;
-
-/** True when a Kibana privilege grants read access to a classic rule under the alerts consumer. */
-export const hasClassicRulesReadCapability = (capabilities: Capabilities): boolean => {
-  const { navLinks } = capabilities;
-
-  return (
-    OBSERVABILITY_SOLUTION_NAV_LINK_IDS.some((appId) => navLinks?.[appId] === true) ||
-    hasFeatureUi(capabilities, LOGS_FEATURE_ID, FEATURE_UI_SHOW) ||
-    hasFeatureUi(capabilities, STACK_ALERTS_FEATURE_ID, STACK_ALERTS_SHOW_UI_CAPABILITY) ||
-    navLinks?.[ML_APP_ID] === true ||
-    hasFeatureUi(capabilities, DATA_QUALITY_FEATURE_ID, FEATURE_UI_SHOW)
-  );
-};
-
-/** True when a Kibana privilege grants read access to at least one classic alert. */
-export const hasClassicAlertsReadCapability = (capabilities: Capabilities): boolean =>
-  hasClassicRulesReadCapability(capabilities) ||
-  hasFeatureUi(capabilities, OBSERVABILITY_ALERTS_FEATURE_ID, FEATURE_UI_SHOW) ||
-  hasFeatureUi(capabilities, STACK_ALERTS_ONLY_FEATURE_ID, FEATURE_UI_SHOW);
+/** Platform features whose privileges grant classic alert read, including alert-only Stack Alerts. */
+export const hasPlatformAlertReadCapabilities = (capabilities: Capabilities): boolean =>
+  hasPlatformRuleReadCapabilities(capabilities) ||
+  capabilities[STACK_ALERTS_ONLY_FEATURE_ID]?.show === true;
