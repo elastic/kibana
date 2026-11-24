@@ -189,8 +189,9 @@ export class AgentBuilderPlugin
     // Pinned regression baselines for eval suites; served through the internal
     // `/internal/agent_builder/evals/baselines` routes on the evaluations cluster. Only
     // registered where the evals product runs, so ordinary deployments install no
-    // template for it (the routes are gated the same way).
-    if (setupDeps.evals?.mode === 'full') {
+    // template for it (the routes are gated the same way). The evals setup contract
+    // reports the configured mode even when the plugin is disabled, so check both.
+    if (setupDeps.evals?.enabled && setupDeps.evals.mode === 'full') {
       coreSetup.dataStreams.registerDataStream(pinnedBaselinesDataStreamDefinition);
     }
 

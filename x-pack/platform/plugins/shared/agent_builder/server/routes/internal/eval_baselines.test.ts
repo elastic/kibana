@@ -89,13 +89,18 @@ describe('eval baselines routes', () => {
       },
       getInternalServices: () =>
         ({ evalBaselines: { pin, findLatest, getScores } } as unknown as InternalStartServices),
-      pluginsSetup: { evals: { mode: 'full' } },
+      pluginsSetup: { evals: { enabled: true, mode: 'full' } },
       logger: loggingSystemMock.createLogger(),
     } as unknown as RouteDependencies);
   });
 
-  it('registers nothing unless the evals plugin runs in full mode', () => {
-    for (const pluginsSetup of [{}, { evals: { mode: 'runtime' } }]) {
+  it('registers nothing unless the evals plugin is enabled and runs in full mode', () => {
+    for (const pluginsSetup of [
+      {},
+      { evals: { enabled: true, mode: 'runtime' } },
+      // The setup contract reports the configured mode even when the plugin is disabled.
+      { evals: { enabled: false, mode: 'full' } },
+    ]) {
       const registered: string[] = [];
       const capture = (config: { path: string }) => registered.push(config.path);
 

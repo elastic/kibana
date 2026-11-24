@@ -7,7 +7,7 @@
 
 import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
 import type { MappingsDefinition } from '@kbn/es-mappings';
-import { EvaluationIndices, evaluationScoreMappingProperties } from '@kbn/evals-common';
+import { EvaluationIndices } from '@kbn/evals-common';
 
 /**
  * Holds two document kinds, discriminated by `doc_kind`: one `pointer` per pin (the
@@ -15,13 +15,19 @@ import { EvaluationIndices, evaluationScoreMappingProperties } from '@kbn/evals-
  * score documents (`score`), snapshotted so paired comparisons survive the 90-day
  * retention on the scores data stream: baselines are retained for a year, ample for a
  * monthly re-pin cadence while still bounding growth.
+ *
+ * The mapping deliberately indexes only what this stream is queried on, instead of
+ * mirroring the scores stream's mapping (which would couple two independently versioned
+ * templates): the registry's filter and sort fields, plus the fields the long-term
+ * score dashboards aggregate on (score per evaluator over time, split by task model and
+ * dataset). Everything else in a snapshotted score document stays unindexed in
+ * `_source`, which is all the compare flow reads.
  */
 const pinnedBaselinesMappings = {
   properties: {
-    // The score mapping properties come from the contract package, so snapshotted score
-    // documents are indexed exactly as the evals plugin's scores data stream indexes them.
-    ...evaluationScoreMappingProperties,
+    '@timestamp': { type: 'date' },
     doc_kind: { type: 'keyword' },
+    space_ids: { type: 'keyword' },
     baseline: {
       type: 'object',
       properties: {
@@ -34,6 +40,46 @@ const pinnedBaselinesMappings = {
         reason: { type: 'text', index: false },
         score_count: { type: 'integer' },
         dataset_ids: { type: 'keyword' },
+      },
+    },
+    metadata: {
+      type: 'object',
+      properties: {
+        execution_id: { type: 'keyword' },
+        suite_id: { type: 'keyword' },
+      },
+    },
+    example: {
+      type: 'object',
+      properties: {
+        dataset: {
+          type: 'object',
+          properties: {
+            id: { type: 'keyword' },
+            name: { type: 'keyword' },
+          },
+        },
+      },
+    },
+    task: {
+      type: 'object',
+      properties: {
+        model: {
+          type: 'object',
+          properties: {
+            id: { type: 'keyword' },
+            family: { type: 'keyword' },
+            provider: { type: 'keyword' },
+          },
+        },
+      },
+    },
+    evaluator: {
+      type: 'object',
+      properties: {
+        name: { type: 'keyword' },
+        kind: { type: 'keyword' },
+        score: { type: 'float' },
       },
     },
   },

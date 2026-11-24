@@ -43,7 +43,10 @@ export function registerEvalBaselineRoutes({
   // Registered only where the evals product runs (the evaluations cluster, local eval
   // stacks): the registry is meaningless without it, and the privileges these routes
   // require (`read_evals` / `manage_evals`) only exist once the evals feature registers.
-  if (pluginsSetup.evals?.mode !== 'full') {
+  // The setup contract reports the configured mode even when the plugin is disabled, so
+  // both conditions matter.
+  const { evals } = pluginsSetup;
+  if (!evals?.enabled || evals.mode !== 'full') {
     return;
   }
 
