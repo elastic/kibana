@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 interface DirectiveValidationOptions {
@@ -39,6 +39,45 @@ const getDirectiveValueValidator = ({ allowNone, allowNonce }: DirectiveValidati
   };
 };
 
+const directiveValidator = getDirectiveValidator({ allowNone: false, allowNonce: false });
+
+const directiveSchema = (defaultValue: string[] = []) =>
+  schema.arrayOf(schema.string(), { defaultValue, validate: directiveValidator });
+
+/**
+ * Sources for a directive that only traditional builds enforce by default. Serverless configures
+ * these directives itself, so its default stays empty. Setting the `csp.*` key replaces the
+ * default in both offerings.
+ */
+const traditionalDefault = (defaultValue: string[]) =>
+  offeringBasedSchema({
+    serverless: directiveSchema(),
+    traditional: directiveSchema(defaultValue),
+  });
+
+/**
+ * `img-src` default for traditional builds. Image sources are mostly deployment specific (custom
+ * logos, authentication provider icons, tile servers), so any network origin is allowed rather
+ * than requiring every deployment to configure its own list. `blob:` covers the Maps legend icons.
+ *
+ * When `csp.default_src` is set, its sources are the default instead, so an administrator's
+ * allowlist is never widened. Using them as the `img-src` default rather than leaving the
+ * directive out keeps that true when another config (the CDN) adds an `img-src` of its own, which
+ * would otherwise end the `default-src` fallback.
+ */
+const imgSrcSchema = offeringBasedSchema({
+  serverless: directiveSchema(),
+  traditional: schema.conditional(
+    schema.siblingRef('default_src'),
+    schema.arrayOf(schema.string(), { maxSize: 0 }),
+    directiveSchema(['data:', 'blob:', 'https:', 'http:']),
+    schema.arrayOf(schema.string(), {
+      defaultValue: schema.siblingRef('default_src'),
+      validate: directiveValidator,
+    })
+  ),
+});
+
 const configSchema = schema.object(
   {
     disableUnsafeEval: schema.boolean({ defaultValue: true }),
@@ -62,26 +101,19 @@ const configSchema = schema.object(
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
-    font_src: schema.arrayOf(schema.string(), {
-      defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
-    }),
+    // Kibana ships its own fonts and inlines the small ones as data URIs.
+    font_src: traditionalDefault([`'self'`, 'data:']),
     frame_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
-    img_src: schema.arrayOf(schema.string(), {
-      defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
-    }),
+    img_src: imgSrcSchema,
     object_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
-    media_src: schema.arrayOf(schema.string(), {
-      defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
-    }),
+    // Kibana has no media source other than itself and the Elastic CDN.
+    media_src: traditionalDefault([`'self'`, 'kibana.estccdn.com']),
     form_action: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
@@ -148,7 +180,6 @@ export type CspAdditionalConfig = Pick<
   | 'font_src'
   | 'frame_src'
   | 'img_src'
-  | 'media_src'
   | 'script_src'
   | 'style_src'
   | 'worker_src'

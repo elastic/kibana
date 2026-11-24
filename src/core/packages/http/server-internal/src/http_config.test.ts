@@ -981,43 +981,36 @@ describe('HttpConfig', () => {
   });
 
   describe('csp by build flavor', () => {
-    const build = (buildFlavor?: 'serverless' | 'traditional') =>
+    const build = (
+      csp: Record<string, unknown> = {},
+      {
+        serverless = false,
+        http = {},
+      }: { serverless?: boolean; http?: Record<string, unknown> } = {}
+    ) =>
       new HttpConfig(
-        config.schema.validate({}, {}),
-        cspConfig.schema.validate({}),
+        config.schema.validate(http, { serverless }),
+        cspConfig.schema.validate(csp, { serverless }),
         ExternalUrlConfig.DEFAULT,
-        permissionsPolicyConfig.schema.validate({}),
-        buildFlavor
+        permissionsPolicyConfig.schema.validate({})
       );
 
     it('enforces img-src, font-src and media-src on traditional', () => {
-      const { csp } = build('traditional');
+      const { csp } = build();
       expect(csp.header).toContain(`font-src 'self' data:`);
       expect(csp.header).toContain(`img-src 'self' data: blob: https: http:`);
       expect(csp.header).toContain(`media-src 'self' kibana.estccdn.com`);
     });
 
     it('keeps a configured csp.img_src as the only img-src allowlist on traditional', () => {
-      const { csp } = new HttpConfig(
-        config.schema.validate({}, {}),
-        cspConfig.schema.validate({ img_src: ['logos.example.test'] }),
-        ExternalUrlConfig.DEFAULT,
-        permissionsPolicyConfig.schema.validate({}),
-        'traditional'
-      );
+      const { csp } = build({ img_src: ['logos.example.test'] });
 
       expect(csp.header).toContain(`img-src 'self' logos.example.test;`);
       expect(csp.header).not.toContain('https: http:');
     });
 
     it('uses the csp.default_src sources for img-src on traditional when csp.img_src is not configured', () => {
-      const { csp } = new HttpConfig(
-        config.schema.validate({}, {}),
-        cspConfig.schema.validate({ default_src: ['assets.example.test'] }),
-        ExternalUrlConfig.DEFAULT,
-        permissionsPolicyConfig.schema.validate({}),
-        'traditional'
-      );
+      const { csp } = build({ default_src: ['assets.example.test'] });
 
       expect(csp.header).toContain(`default-src 'self' assets.example.test`);
       expect(csp.header).toContain(`img-src 'self' assets.example.test;`);
@@ -1025,23 +1018,16 @@ describe('HttpConfig', () => {
     });
 
     it('keeps the csp.default_src sources for img-src alongside a configured CDN', () => {
-      const { csp } = new HttpConfig(
-        config.schema.validate({ cdn: { url: 'https://cdn.example.test' } }, {}),
-        cspConfig.schema.validate({ default_src: ['assets.example.test'] }),
-        ExternalUrlConfig.DEFAULT,
-        permissionsPolicyConfig.schema.validate({}),
-        'traditional'
+      const { csp } = build(
+        { default_src: ['assets.example.test'] },
+        { http: { cdn: { url: 'https://cdn.example.test' } } }
       );
 
-      expect(csp.header).toContain(`img-src 'self' cdn.example.test assets.example.test`);
-    });
-
-    it('defaults to the traditional flavor when none is given', () => {
-      expect(build().csp.header).toEqual(build('traditional').csp.header);
+      expect(csp.header).toContain(`img-src 'self' assets.example.test cdn.example.test`);
     });
 
     it('does not enforce them on serverless', () => {
-      const { csp } = build('serverless');
+      const { csp } = build({}, { serverless: true });
       expect(csp.header).not.toContain('img-src');
       expect(csp.header).not.toContain('font-src');
       expect(csp.header).not.toContain('media-src');

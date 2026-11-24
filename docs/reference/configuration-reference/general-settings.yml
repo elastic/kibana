@@ -217,7 +217,7 @@ groups:
           self: ga
         note: |
           :applies_to: stack: ga 9.6.1!
-          Kibana allows fonts from `'self'` and `data:` by default and blocks fonts from any other source. If you load fonts from another host, add it here. The sources you list are added to the defaults.
+          Kibana allows fonts from `'self'` and `data:` by default and blocks fonts from any other source. If you set `csp.font_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `data:` in your list, because Kibana loads some of its own fonts from `data:` URLs.
 
       - setting: csp.frame_src
         description: |
@@ -259,7 +259,7 @@ groups:
           self: ga
         note: |
           :applies_to: stack: ga 9.6.1!
-          Kibana allows media from `'self'` and `kibana.estccdn.com` by default and blocks media from any other source. If you play audio or video from another host, add it here. The sources you list are added to the defaults. On Elastic Cloud Hosted, you can set this from 9.6.1.
+          Kibana allows media from `'self'` and `kibana.estccdn.com` by default and blocks media from any other source. If you set `csp.media_src`, those defaults are not applied and only the sources you list are allowed. Include `'self'` and `kibana.estccdn.com` in your list if you need them. On Elastic Cloud Hosted, you can set this from 9.6.1.
 
       - setting: csp.frame_ancestors
         description: |

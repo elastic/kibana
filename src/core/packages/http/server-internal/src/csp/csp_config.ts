@@ -11,7 +11,6 @@ import type { BuildFlavor } from '@kbn/config';
 import type { ICspConfig } from '@kbn/core-http-server';
 import type { CspAdditionalConfig, CspConfigType } from './config';
 import { cspConfig } from './config';
-import { getBuildFlavorCspConfig } from './build_flavor_config';
 import { CspDirectives } from './csp_directives';
 
 const DEFAULT_CONFIG = Object.freeze(cspConfig.schema.validate({}));
@@ -28,7 +27,9 @@ export class CspConfig implements ICspConfig {
    * @internal
    */
   static forBuildFlavor(buildFlavor: BuildFlavor): CspConfig {
-    return new CspConfig(DEFAULT_CONFIG, getBuildFlavorCspConfig(buildFlavor, DEFAULT_CONFIG));
+    return new CspConfig(
+      cspConfig.schema.validate({}, { serverless: buildFlavor === 'serverless' })
+    );
   }
 
   readonly #directives: CspDirectives;

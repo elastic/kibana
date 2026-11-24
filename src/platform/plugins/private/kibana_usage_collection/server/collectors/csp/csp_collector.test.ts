@@ -18,47 +18,43 @@ import {
 
 const logger = loggingSystemMock.createLogger();
 
-type CspAdditionalConfig = ConstructorParameters<typeof CspConfig>[1];
-
-// What core adds to the traditional build when no `csp.img_src` is configured. The
-// "treats the build flavor defaults as unchanged" test fails if this drifts from core.
-const TRADITIONAL_DEFAULTS: CspAdditionalConfig = {
+// The schema defaults core applies on traditional builds. The "treats the build flavor defaults
+// as unchanged" test fails if this drifts from core.
+const TRADITIONAL_DEFAULTS = {
   font_src: [`'self'`, 'data:'],
   img_src: ['data:', 'blob:', 'https:', 'http:'],
   media_src: [`'self'`, 'kibana.estccdn.com'],
 };
+
+// Serverless has no default for these directives
+const SERVERLESS_DEFAULTS = { font_src: [], img_src: [], media_src: [] };
+
+type DirectiveOverrides = Partial<typeof TRADITIONAL_DEFAULTS>;
 
 describe('csp collector', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
   // changed for consistency with expected implementation
   const mockedFetchContext = createCollectorFetchContextMock();
 
-  // Builds the config the way `HttpConfig` does: the `csp.*` settings plus the build flavor additions
-  function updateCsp(
-    config: Partial<ICspConfig> & { img_src?: string[] },
-    ...moreConfigs: CspAdditionalConfig[]
-  ) {
-    httpMock.csp = new CspConfig(
-      {
-        ...CspConfig.DEFAULT,
-        form_action: [],
-        worker_src: [],
-        script_src: [],
-        style_src: [],
-        connect_src: [],
-        default_src: [],
-        font_src: [],
-        frame_src: [],
-        img_src: [],
-        object_src: [],
-        media_src: [],
-        frame_ancestors: [],
-        report_uri: [],
-        report_to: [],
-        ...config,
-      },
-      ...moreConfigs
-    );
+  // Builds the validated `csp.*` config the way core does on a traditional build, unless the
+  // directive defaults are overridden
+  function updateCsp(config: Partial<ICspConfig> & DirectiveOverrides) {
+    httpMock.csp = new CspConfig({
+      ...CspConfig.DEFAULT,
+      form_action: [],
+      worker_src: [],
+      script_src: [],
+      style_src: [],
+      connect_src: [],
+      default_src: [],
+      frame_src: [],
+      object_src: [],
+      frame_ancestors: [],
+      report_uri: [],
+      report_to: [],
+      ...TRADITIONAL_DEFAULTS,
+      ...config,
+    });
   }
 
   beforeEach(() => {
@@ -89,17 +85,17 @@ describe('csp collector', () => {
 
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
 
-    updateCsp({ disableEmbedding: true }, TRADITIONAL_DEFAULTS);
+    updateCsp({ disableEmbedding: true });
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
 
   test('treats the build flavor defaults as unchanged', async () => {
     const traditional = new Collector(logger, createCspCollector(httpMock, 'traditional'));
-    updateCsp({}, TRADITIONAL_DEFAULTS);
+    updateCsp({});
     expect((await traditional.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
 
     const serverless = new Collector(logger, createCspCollector(httpMock, 'serverless'));
-    updateCsp({});
+    updateCsp(SERVERLESS_DEFAULTS);
     expect((await serverless.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
     expect((await traditional.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
@@ -107,8 +103,7 @@ describe('csp collector', () => {
   test('flags a configured csp.img_src as changed from the default', async () => {
     const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
-    // With `csp.img_src` set, core drops its img-src defaults and keeps the font and media ones
-    updateCsp({ img_src: ['logos.example.test'] }, { ...TRADITIONAL_DEFAULTS, img_src: [] });
+    updateCsp({ img_src: ['logos.example.test'] });
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
 

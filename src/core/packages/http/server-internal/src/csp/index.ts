@@ -10,4 +10,3 @@
 export { CspConfig } from './csp_config';
 export { cspConfig } from './config';
 export type { CspConfigType, CspAdditionalConfig } from './config';
-export { getBuildFlavorCspConfig } from './build_flavor_config';

@@ -413,6 +413,80 @@ describe('config.validate()', () => {
   });
 });
 
+describe('directive defaults by offering', () => {
+  const directives = (config: Record<string, unknown>, serverless = false) => {
+    const { default_src, font_src, img_src, media_src } = cspConfig.schema.validate(config, {
+      serverless,
+    });
+    return { default_src, font_src, img_src, media_src };
+  };
+
+  it('applies the img_src, font_src and media_src defaults on traditional', () => {
+    expect(directives({})).toEqual({
+      default_src: [],
+      font_src: [`'self'`, 'data:'],
+      img_src: ['data:', 'blob:', 'https:', 'http:'],
+      media_src: [`'self'`, 'kibana.estccdn.com'],
+    });
+  });
+
+  it('applies the traditional defaults when no offering is given', () => {
+    const { font_src, img_src, media_src } = cspConfig.schema.validate({});
+    expect({ font_src, img_src, media_src }).toEqual({
+      font_src: [`'self'`, 'data:'],
+      img_src: ['data:', 'blob:', 'https:', 'http:'],
+      media_src: [`'self'`, 'kibana.estccdn.com'],
+    });
+  });
+
+  it('has no defaults on serverless', () => {
+    expect(directives({}, true)).toEqual({
+      default_src: [],
+      font_src: [],
+      img_src: [],
+      media_src: [],
+    });
+    expect(directives({ default_src: ['assets.example.test'] }, true).img_src).toEqual([]);
+  });
+
+  it('replaces a default with the configured sources', () => {
+    expect(
+      directives({
+        font_src: ['fonts.example.test'],
+        img_src: ['logos.example.test'],
+        media_src: ['media.example.test'],
+      })
+    ).toEqual({
+      default_src: [],
+      font_src: ['fonts.example.test'],
+      img_src: ['logos.example.test'],
+      media_src: ['media.example.test'],
+    });
+  });
+
+  it('uses the default_src sources as the img_src default when default_src is configured', () => {
+    expect(directives({ default_src: ['assets.example.test'] })).toEqual({
+      default_src: ['assets.example.test'],
+      font_src: [`'self'`, 'data:'],
+      img_src: ['assets.example.test'],
+      media_src: [`'self'`, 'kibana.estccdn.com'],
+    });
+  });
+
+  it('prefers a configured img_src over default_src', () => {
+    expect(
+      directives({ default_src: ['assets.example.test'], img_src: ['logos.example.test'] }).img_src
+    ).toEqual(['logos.example.test']);
+  });
+
+  it('validates a configured img_src whether or not default_src is configured', () => {
+    expect(() => directives({ img_src: ['none'] })).toThrow();
+    expect(() =>
+      directives({ default_src: ['assets.example.test'], img_src: ['nonce-x'] })
+    ).toThrow();
+  });
+});
+
 describe('config deprecations', () => {
   it('does not report deprecations for default configuration', () => {
     const defaultConfig = { csp: {} };
