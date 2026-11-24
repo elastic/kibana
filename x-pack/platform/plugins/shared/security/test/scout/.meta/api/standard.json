@@ -1,0 +1,22 @@
+{
+  "sha1": "a71a52668d43e760675b0c0a2ac24e7989a601b5",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "34768dcfde18be8-8bca71c8308d16e",
+      "title": "Session IDs creates a URL-safe document ID and keeps the session usable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/session_id.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    }
+  ]
+}
