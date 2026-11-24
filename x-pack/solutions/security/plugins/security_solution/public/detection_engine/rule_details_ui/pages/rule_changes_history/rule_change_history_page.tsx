@@ -34,7 +34,6 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
           height: `calc(var(--kbn-application--content-height) - ${euiTheme.size.l} - ${euiTheme.size.l})`,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',
         }}
       >
         <RuleChangeHistoryAppHeader ruleId={ruleId} rule={rule} />
