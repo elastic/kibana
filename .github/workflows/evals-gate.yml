@@ -17,18 +17,21 @@ on:
       - unlabeled
       - ready_for_review
       - converted_to_draft
+      # Only acted on when the base branch changed, e.g. a PR retargeted to main.
+      - edited
   status:
 
 permissions: {}
 
 # PR and eval status events for one head commit share a group, so the newest run cancels an older
 # one and the last status posted always comes from the freshest read of labels and verdicts.
-# Workflow-level concurrency also applies to runs whose job is skipped, so every unrelated status
-# event gets its own group instead; otherwise it could cancel an in-progress run.
+# Workflow-level concurrency also applies to runs whose job is skipped, so every ignored event (an
+# unrelated status, or an edit that didn't change the base branch) gets its own group instead;
+# otherwise it could cancel an in-progress run.
 concurrency:
   group: >-
     evals-gate-${{
-      github.event.pull_request.head.sha
+      ((github.event.action != 'edited' || github.event.changes.base) && github.event.pull_request.head.sha)
       || ((github.event.context == 'kibana-evals' || startsWith(github.event.context, 'kibana-evals/'))
         && github.event.sha)
       || format('ignored-{0}', github.run_id)
@@ -39,7 +42,8 @@ jobs:
   gate:
     name: Evals gate
     if: >-
-      github.event_name != 'status'
+      (github.event_name == 'pull_request_target'
+        && (github.event.action != 'edited' || github.event.changes.base))
       || github.event.context == 'kibana-evals'
       || startsWith(github.event.context, 'kibana-evals/')
     runs-on: ubuntu-latest

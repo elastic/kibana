@@ -90,6 +90,7 @@ describe('decideSuite', () => {
       kind: 'missing',
       state: 'failure',
       description: 'Evals decision required: add evals:agent or evals:skip',
+      runLabel: 'evals:agent',
     });
   });
 
@@ -192,6 +193,20 @@ describe('combineDecisions', () => {
       state: 'failure',
       description: 'Evals decision required: add evals:a, evals:b or evals:skip',
     });
+  });
+
+  it("names each suite's own run label when several need a decision", () => {
+    const customLabelSuite: EvalsDecisionSuite = {
+      ...DECISION_SUITE,
+      id: 'agent',
+      ciLabels: ['evals:agent-v2'],
+    };
+    expect(
+      combineDecisions([
+        decideSuite({ suite: customLabelSuite, labels: [], verdict: undefined, headSha: HEAD }),
+        decideSuite({ suite: GATED_SUITE, labels: [], verdict: undefined, headSha: HEAD }),
+      ]).description
+    ).toBe('Evals decision required: add evals:agent-v2, evals:gated or evals:skip');
   });
 
   it('reports pending over success', () => {

@@ -137,6 +137,8 @@ export interface SuiteDecision {
   kind: SuiteDecisionKind;
   state: GateState;
   description: string;
+  /** The label that runs the suite (its first `ciLabels` entry), set when a decision is missing. */
+  runLabel?: string;
 }
 
 const STATE_BY_KIND: Record<SuiteDecisionKind, GateState> = {
@@ -207,11 +209,15 @@ export const decideSuite = ({
     return toDecision(id, 'skipped', `Evals skipped: ${id}`);
   }
   if (!isSuiteRunRequested(labels, suite)) {
-    return toDecision(
-      id,
-      'missing',
-      `Evals decision required: add ${getSuiteRunLabels(suite)[0]} or ${EVALS_SKIP_LABEL}`
-    );
+    const [runLabel] = getSuiteRunLabels(suite);
+    return {
+      ...toDecision(
+        id,
+        'missing',
+        `Evals decision required: add ${runLabel} or ${EVALS_SKIP_LABEL}`
+      ),
+      runLabel,
+    };
   }
   if (!suite.regressionGate) {
     return toDecision(id, 'requested', `${id}: evals requested`);
@@ -272,7 +278,7 @@ export const combineDecisions = (
     ...(missing.length > 1
       ? [
           `Evals decision required: add ${missing
-            .map(({ suiteId }) => `evals:${suiteId}`)
+            .map(({ suiteId, runLabel }) => runLabel ?? `evals:${suiteId}`)
             .join(', ')} or ${EVALS_SKIP_LABEL}`,
         ]
       : missing.map(({ description }) => description)),
